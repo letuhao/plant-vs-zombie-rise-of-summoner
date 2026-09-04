@@ -20,13 +20,14 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:36:43Z",
+      "emittedUtc": "2026-09-04T10:53:22Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,7 +45,7 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
@@ -68,12 +69,13 @@
     "threatBand": "nuisance",
     "traits": [
       "submerged-camouflage",
-      "delayed-detonation",
-      "strangulation-burst"
+      "drowning-burst",
+      "low-profile"
     ],
     "variants": [
+      "normal",
       "mutated",
-      "corrupted"
+      "cursed"
     ]
   }
 ]

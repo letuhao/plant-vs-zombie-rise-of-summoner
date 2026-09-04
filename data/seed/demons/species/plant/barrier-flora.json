@@ -1,0 +1,80 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:56:55Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Vigor",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "barrier-flora"
+    ],
+    "gameTypeId": 1258,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a defensive support unit that scales with allies, lacking the offensive or destructive capacity required for a 'tyrant' rating.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "LotusBamboo",
+    "targetPreference": "frontline",
+    "traits": [
+      "self-regenerating",
+      "synergistic-fortification",
+      "frost-immune",
+      "scaling-durability"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  }
+]

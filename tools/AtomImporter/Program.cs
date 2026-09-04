@@ -97,7 +97,7 @@ if (tuningDir is null)
 }
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 
 ImportOutcome outcome;
 RpgStore store;

@@ -30,13 +30,13 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
       "socketMax": 1,
       "iconKey": "icon.base.dense-midrib",
       "flavorKey": "flavor.base.dense-midrib",
-      "flavor": "The vein itself becomes the weapon \u2014 weight concentrated where a leaf channels water.",
+      "flavor": "The vein itself becomes the weapon — weight concentrated where a leaf channels water.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -68,7 +68,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -109,7 +109,7 @@
         "family": "atom.deathblast",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.obdurate-pad",
       "flavorKey": "flavor.base.obdurate-pad",
       "flavor": "Resistant, immovable, and shaped to take a blow before it is given.",
@@ -149,7 +149,7 @@
       "socketMax": 1,
       "iconKey": "icon.base.ancient-cladode",
       "flavorKey": "flavor.base.ancient-cladode",
-      "flavor": "A flattened stem branch that has outlasted three forests \u2014 it falls with the weight of ages.",
+      "flavor": "A flattened stem branch that has outlasted three forests — it falls with the weight of ages.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -181,10 +181,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.oaken-frond",
       "flavorKey": "flavor.base.oaken-frond",
       "flavor": "Oak-hard and deeply veined, it strikes with the grip of old growth.",
@@ -222,10 +222,10 @@
         "family": "atom.deathblast",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.stony-whorl",
       "flavorKey": "flavor.base.stony-whorl",
-      "flavor": "Leaves arranged in a circle, each one hardened like stone \u2014 together they fall in rings.",
+      "flavor": "Leaves arranged in a circle, each one hardened like stone — together they fall in rings.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -259,10 +259,10 @@
         "family": "atom.bloodletting",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.marrowed-sucker",
       "flavorKey": "flavor.base.marrowed-sucker",
-      "flavor": "A shoot meant to climb and feed becomes a draw itself \u2014 soft in name, dense in strike.",
+      "flavor": "A shoot meant to climb and feed becomes a draw itself — soft in name, dense in strike.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -293,10 +293,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.immemorial-lamina",
       "flavorKey": "flavor.base.immemorial-lamina",
       "flavor": "The blade of the leaf itself, flattened and hardened by epochs of sun and wind.",
@@ -337,7 +337,7 @@
       "socketMax": 2,
       "iconKey": "icon.base.unsplit-venation",
       "flavorKey": "flavor.base.unsplit-venation",
-      "flavor": "The vein-map of a leaf becomes a pattern of strikes \u2014 each line reinforces the whole.",
+      "flavor": "The vein-map of a leaf becomes a pattern of strikes — each line reinforces the whole.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -368,13 +368,13 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.inert-rachis",
       "flavorKey": "flavor.base.inert-rachis",
-      "flavor": "The central axis of a compound leaf, rigid and unmoving \u2014 it will not bend before it falls.",
+      "flavor": "The central axis of a compound leaf, rigid and unmoving — it will not bend before it falls.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -406,10 +406,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.timeworn-tendril",
       "flavorKey": "flavor.base.timeworn-tendril",
       "flavor": "Meant to climb and curl, it has hardened into a whip of its former self.",
@@ -446,7 +446,7 @@
         "family": "atom.bloodletting",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.sunken-sprig",
       "flavorKey": "flavor.base.sunken-sprig",
       "flavor": "A small branch sunk into itself with age, dense as heartwood and twice as lethal.",

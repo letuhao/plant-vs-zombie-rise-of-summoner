@@ -22,9 +22,15 @@ public static class SeedScanner
     /// own `OUTPUT_DIR`) — the two halves of this path must name the same folder, or the pipeline can
     /// silently write to a folder nothing sweeps, exactly as it did before this fix. A test
     /// (`SeedScannerTests.cs`) reads that Python file's own `OUTPUT_DIR` line and asserts it names
-    /// this exact entry, mechanically, so the two-halves-disagree failure cannot recur unnoticed.</summary>
+    /// this exact entry, mechanically, so the two-halves-disagree failure cannot recur unnoticed.
+    /// <c>power</c> (E44 criterion 0, spec-power-sweep.md §4.1) is where a `power-coefficient` seed
+    /// file goes — `data/seed/power/coefficients.v1.json` is the canonical path the spec names, but
+    /// the folder is swept whole, the same as every other owned folder here.</summary>
     public static readonly string[] OwnedFolders =
-        { "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools", "effects/affixes" };
+        {
+            "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools",
+            "effects/affixes", "power",
+        };
 
     /// <summary>
     /// The folders to sweep. A root the caller named explicitly is swept whole — that is the escape

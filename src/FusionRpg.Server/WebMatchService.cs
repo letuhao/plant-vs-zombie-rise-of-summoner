@@ -19,6 +19,41 @@ namespace FusionRpg.Server;
 /// </summary>
 public sealed class WebMatchService
 {
+
+    /// <summary>
+    /// B21 — whether this logged match ran under a profile that expects a live human. Read from the
+    /// wave the setup names, not stored on the row: the profile is content's choice and is looked up
+    /// at resolve time, exactly as `WaveDef.Profile`'s own doc requires (a field on `BattleSetup`
+    /// would move all four expedition hashes).
+    ///
+    /// <para>A row whose setup will not parse is NOT treated as interactive — it has its own refusal
+    /// further down, and guessing here would refuse it for the wrong stated reason.</para>
+    /// </summary>
+    static bool IsInteractive(WebMatchLogEntry entry)
+    {
+        BattleSetup? setup;
+        try { setup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson); }
+        catch (JsonException) { return false; }
+
+        return setup is not null && ProfileForWave(setup.WaveId)?.RequiresLiveInput == true;
+    }
+
+    /// <summary>
+    /// B36 — the wave's own mode profile, the last link in "content chooses the profile"
+    /// (battle-timeline-map.md decision 4). <c>WaveDef.Profile</c> is <c>null</c> for every shipped
+    /// wave, so this resolves to <c>classic-round</c> and every battle is byte-identical today; the
+    /// wiring exists so that setting a profile on a wave actually reaches the engine, which it did
+    /// not before — <c>BattleEngine.Resolve</c> had no caller passing one at all.
+    ///
+    /// <para>An unknown wave id keeps the resolver's own loud behaviour rather than being defaulted
+    /// here: "content did not choose" and "content chose wrong" are different failures and only the
+    /// first has a default.</para>
+    /// </summary>
+    static FusionRpg.Core.Battle.Timeline.BattleModeProfile? ProfileForWave(string? waveId) =>
+        FusionRpg.Core.Battle.WaveCatalog.IsKnown(waveId)
+            ? FusionRpg.Core.Battle.WaveCatalog.ProfileFor(waveId!)
+            : null;
+
     readonly RpgStore _store;
     readonly IHubContext<RpgHub> _hub;
 
@@ -66,7 +101,7 @@ public sealed class WebMatchService
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup == null || storedSetup.WaveId != waveId)
                 return (false, "correlation.mismatch", null);
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
+            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport));
         }
 
@@ -108,7 +143,7 @@ public sealed class WebMatchService
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup == null || entry.Seed != seed || entry.MatchKey != matchKey)
                 return (false, "correlation.mismatch", null);
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
+            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport));
         }
 
@@ -149,6 +184,20 @@ public sealed class WebMatchService
             if (entry.EnvironmentStamp != null && entry.EnvironmentStamp != BattleEnvironment.Stamp)
             {
                 var why = $"platform '{entry.EnvironmentStamp}' != '{BattleEnvironment.Stamp}'";
+                Console.Error.WriteLine($"[web-match] sweep refused {entry.MatchKey}: {why}");
+                _store.MarkWebMatchSweepRefused(entry.Id, why);
+                continue;
+            }
+
+            // B21 (spec-interactive-turns.md §4): an INTERACTIVE match is only reproducible from its
+            // decision trace, because with real input `(setup, seed)` stops describing the battle.
+            // A missing or unparseable trace is refused TERMINALLY and never healed — re-resolving it
+            // would substitute AI decisions for a player's and silently overwrite a real result, which
+            // is the exact hole the trace exists to close. Inert today: no shipped profile sets
+            // RequiresLiveInput, so no match reaches this branch.
+            if (IsInteractive(entry) && FusionRpg.Core.Battle.Timeline.DecisionTrace.FromJson(entry.DecisionsJson) is null)
+            {
+                const string why = "interactive match with no decision trace — refused rather than re-resolved with AI decisions";
                 Console.Error.WriteLine($"[web-match] sweep refused {entry.MatchKey}: {why}");
                 _store.MarkWebMatchSweepRefused(entry.Id, why);
                 continue;
@@ -196,8 +245,10 @@ public sealed class WebMatchService
         // never recomputed later — a power or a trait magnitude read back under a different
         // contentHash is a different number, so a recomputed stamp would describe a battle that did
         // not happen. Provenance only: it is excluded from the determinism hash, exactly as the
+
+
         // platform stamp is, or every added row would look like a determinism break.
-        var report = BattleEngine.Resolve(setup, seed, actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)) with
+        var report = BattleEngine.Resolve(setup, seed, profile: ProfileForWave(setup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)) with
         {
             ContentHash = _store.ComputeContentHash().ToCompact(),
         };

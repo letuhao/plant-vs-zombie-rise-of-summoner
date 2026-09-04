@@ -1,5 +1,7 @@
 using HarmonyLib;
 using UnityEngine;
+using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector;
 
@@ -74,18 +76,32 @@ public static class CheatPrefixes
             try
             {
                 if (CheatState.On("D-PROBE-PLANT")) return;
-                var set = CheatState.IVal("D-DMG-SET");
-                if (set >= 0) __instance.Damage = set;
-                var pct = CheatState.FVal("D-DMG-%");
-                if (Math.Abs(pct - 1f) > 0.001f)
-                    __instance.Damage = Math.Max(1, (int)Math.Round(__instance.Damage * pct));
-                var swap = CheatState.IVal("D-TYPE-SWAP");
-                if (swap >= 0)
-                    try { __instance.theBulletType = (BulletType)swap; } catch { }
-                if (CheatState.On("D-HOMING"))
-                {
-                    try { __instance.MoveWay = BulletMoveWay.Track; } catch { }
-                }
+
+                // E37 (spec-projectile-control.md §2b): the ordering rule itself — bullet.modify grants
+                // fold first, D- cheat state applies last and always wins (criterion 6) — lives in
+                // BulletFireResolver.Resolve (FusionRpg.Core), Unity-free and unit-tested there. This
+                // postfix is now a thin shell: read the bullet's current fields in, resolve, write the
+                // result back out. Added alongside the pre-existing cheat reads, never rewriting them
+                // (§3's own "do not rewrite BulletInitCheat" rule) — the resolver's own tail is
+                // byte-identical to what this method used to do inline.
+                IReadOnlyList<BoundBulletModifyAtom> grants;
+                try { grants = GrantedBulletModifyAtoms.For(__instance); }
+                catch { grants = Array.Empty<BoundBulletModifyAtom>(); } // a grant read failing must never block the cheat reads below
+
+                var resolved = BulletFireResolver.Resolve(
+                    new BulletFireState(__instance.Damage, BulletType: null, MoveWay: null),
+                    grants,
+                    cheatDamageSet: CheatState.IVal("D-DMG-SET"),
+                    cheatDamagePercent: CheatState.FVal("D-DMG-%"),
+                    cheatTypeSwap: CheatState.IVal("D-TYPE-SWAP"),
+                    cheatHoming: CheatState.On("D-HOMING"));
+
+                __instance.Damage = resolved.Damage;
+                if (resolved.BulletType is { } bt)
+                    try { __instance.theBulletType = (BulletType)bt; } catch { }
+                if (!string.IsNullOrEmpty(resolved.MoveWay)
+                    && Enum.TryParse<BulletMoveWay>(resolved.MoveWay, ignoreCase: false, out var mw))
+                    try { __instance.MoveWay = mw; } catch { }
             }
             catch { }
         }

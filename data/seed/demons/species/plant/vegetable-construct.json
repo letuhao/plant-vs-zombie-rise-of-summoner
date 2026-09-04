@@ -13,19 +13,20 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 2,
+        "kit-shape": 1,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:42:56Z",
+      "emittedUtc": "2026-09-04T10:28:06Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -41,39 +42,115 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Retribution",
-    "aptitudeSecondary": "Bulwark",
-    "attackTempo": "steady",
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Vegetable-Construct"
+      "vegetable-construct"
     ],
-    "gameTypeId": 1262,
-    "posture": "Bastion",
+    "gameTypeId": 1057,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "grafted",
+    "reach": "short",
+    "reason": "The creature possesses high raw damage (1800) and the ability to transform/replicate via environmental interaction, suggesting a threat level higher than a mere scourge.",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "FireSquash",
+    "targetPreference": "backline",
+    "traits": [
+      "flame-infused",
+      "transformative",
+      "non-fusing"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:52:25Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "vegetable-construct"
+    ],
+    "gameTypeId": 1054,
+    "posture": "Force",
     "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The creature's mechanics describe a reactive defensive mechanism rather than a world-altering threat, making it a tactical obstacle rather than a harbinger.",
+    "reason": "With a high damage output of 1800 and a wide area-of-effect ability that triggers upon landing, this creature functions as a heavy combat unit rather than a mere scourge.",
     "resourceProfile": [
       "hp",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "CabbageNut",
-    "targetPreference": "backline",
+    "speciesId": "JalaSquash",
+    "targetPreference": "frontline",
     "traits": [
-      "Kinetic-Energy-Conversion",
-      "Reactive-Shielding",
-      "Projectile-Counter"
+      "combustive",
+      "impulsive",
+      "impact-reactive"
     ],
     "variants": [
       "normal",
       "mutated",
-      "blessed"
+      "cursed"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

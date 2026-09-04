@@ -26,6 +26,9 @@ public class SurveyFidelityTests
                     ? s with
                     {
                         DevelopmentLevel = 3,
+                        RecruitStock = 340,
+                        ProjectId = "placeholder-project",
+                        ProjectTurnsRemaining = 2,
                         Slots = s.Slots
                             .Select(sl => sl.SlotIndex == 1 ? sl with { State = SlotState.Depleted } : sl)
                             .ToList()
@@ -48,6 +51,19 @@ public class SurveyFidelityTests
 
         Assert.Equal(SectorSight.Full, home.Detail);
         Assert.Equal(3, home.DevelopmentLevel);
+    }
+
+    /// <summary>world-map W45 acceptance: a faction that owns/surveys the sector remembers all three new fields.</summary>
+    [Fact]
+    public void Standing_on_your_own_ground_you_remember_its_recruit_stock_and_project()
+    {
+        var world = Developed();
+        var home = Believed(world, "dave", "homeworld");
+
+        Assert.Equal(SectorSight.Full, home.Detail);
+        Assert.Equal(340, home.RecruitStock);
+        Assert.Equal("placeholder-project", home.ProjectId);
+        Assert.Equal(2, home.ProjectTurnsRemaining);
     }
 
     [Fact]
@@ -82,6 +98,25 @@ public class SurveyFidelityTests
         Assert.Equal(0, glimpsed.DevelopmentLevel);
     }
 
+    /// <summary>world-map W45 acceptance: a faction that only glimpsed a sector remembers no recruit stock.</summary>
+    [Fact]
+    public void A_glimpse_reports_no_recruit_stock_and_no_project()
+    {
+        var world = Developed() with
+        {
+            Entities = Developed().Entities
+                .Select(e => e.EntityId == "e-dave-legion-1" ? e with { AtSectorId = "ash-waste" } : e)
+                .ToList()
+        };
+
+        var glimpsed = Believed(world, "dave", "black-gate");
+
+        Assert.Equal(SectorSight.Glimpse, glimpsed.Detail);
+        Assert.Equal(0, glimpsed.RecruitStock);
+        Assert.Null(glimpsed.ProjectId);
+        Assert.Null(glimpsed.ProjectTurnsRemaining);
+    }
+
     [Fact]
     public void A_survey_carries_every_field_the_snapshot_claims_to_hold()
     {
@@ -94,6 +129,9 @@ public class SurveyFidelityTests
         Assert.Equal(truth.Climate, home.Climate);
         Assert.Equal(truth.DangerBand, home.DangerBand);
         Assert.Equal(truth.DevelopmentLevel, home.DevelopmentLevel);
+        Assert.Equal(truth.RecruitStock, home.RecruitStock);
+        Assert.Equal(truth.ProjectId, home.ProjectId);
+        Assert.Equal(truth.ProjectTurnsRemaining, home.ProjectTurnsRemaining);
         Assert.Equal(
             truth.Slots.Select(s => (s.SlotIndex, s.SlotTypeId, s.Element, s.GuardWaveId, s.GuardState, s.State)),
             home.Slots.Select(s => (s.SlotIndex, s.SlotTypeId, s.Element, s.GuardWaveId, s.GuardState, s.State)));
@@ -106,6 +144,8 @@ public class SurveyFidelityTests
         var seeded = IntelSeed.ForTemplate(world).Single(f => f.FactionId == "dave").Of("homeworld")!;
 
         Assert.Equal(3, seeded.DevelopmentLevel);
+        Assert.Equal(340, seeded.RecruitStock);
+        Assert.Equal("placeholder-project", seeded.ProjectId);
         Assert.Equal(SlotState.Depleted, seeded.Slots.Single(s => s.SlotIndex == 1).State);
     }
 }

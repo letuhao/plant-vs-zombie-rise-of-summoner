@@ -20,13 +20,18 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "high"
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "split",
+        "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:07:23Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:12:17Z",
+      "minorityValues": {
+        "deployMode": "PlantAvatar",
+        "elementPrimary": "earth",
+        "rarity": "sprout"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -41,39 +46,38 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Agility",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
       "undead-aquatic"
     ],
-    "gameTypeId": 316,
-    "posture": "Force",
+    "gameTypeId": 19,
+    "posture": "Finesse",
     "pure": true,
-    "rarity": "heirloom",
-    "reach": "long",
-    "reason": "The creature is a standard Level 2 zombie with projectile attacks and moderate health, which does not justify a world-ending cataclysm rating.",
+    "rarity": "grafted",
+    "reach": "short",
+    "reason": "The creature's high resilience and ability to bypass initial obstacles via a mount suggest a threat level higher than a mere warden.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "hp"
     ],
     "side": "zombie",
-    "speciesId": "Drown_b",
-    "targetPreference": "backline",
+    "speciesId": "Dolphinrider",
+    "targetPreference": "frontline",
     "traits": [
-      "trident-projectile",
-      "delayed-deployment",
-      "high-durability",
-      "anti-umbrella"
+      "mounted-mobility",
+      "plant-leaper",
+      "symbiotic-zombie"
     ],
     "variants": [
-      "ancient",
+      "normal",
       "corrupted"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

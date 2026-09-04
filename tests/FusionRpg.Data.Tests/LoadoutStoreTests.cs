@@ -40,6 +40,7 @@ public class LoadoutStoreTests : IDisposable
             FamilyId = family,
             Variant = "",
             Tier = 1,
+            Name = family,
             ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":1}",
         });
         Assert.True(atomResult.IsOk, atomResult.ToString());

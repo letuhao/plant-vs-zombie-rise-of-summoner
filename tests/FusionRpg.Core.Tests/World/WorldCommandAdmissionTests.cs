@@ -90,4 +90,160 @@ public class WorldCommandAdmissionTests
         var (ok, reason) = WorldCommandAdmission.Admit(World, cmd);
         Assert.True(ok, reason);
     }
+
+    // world-stage W24: `cede` — a faction's own deliberate release, needs no entity.
+
+    static WorldCommand Cede(string commander, string? sectorId) => new()
+    {
+        CommanderId = commander, CommandId = "c-cede", Kind = WorldCommandKinds.Cede, SectorId = sectorId
+    };
+
+    [Fact]
+    public void Cede_is_a_known_kind()
+    {
+        Assert.Contains(WorldCommandKinds.Cede, WorldCommandKinds.All);
+        Assert.True(WorldCommandKinds.IsKnown(WorldCommandKinds.Cede));
+    }
+
+    [Fact]
+    public void Ceding_your_own_sector_is_admitted_with_no_entity_named()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Cede("dave", "homeworld"));
+        Assert.True(ok, reason);
+    }
+
+    [Fact]
+    public void Ceding_a_sector_you_do_not_own_is_refused()
+    {
+        // black-gate is unowned at world creation (first-light) — not dave's to give up.
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Cede("dave", "black-gate"));
+        Assert.False(ok);
+        Assert.Equal("sector.not-yours", reason);
+    }
+
+    [Fact]
+    public void Ceding_with_no_sector_named_is_refused()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Cede("dave", sectorId: null));
+        Assert.False(ok);
+        Assert.Equal("sector.missing", reason);
+    }
+
+    [Fact]
+    public void Ceding_an_unknown_sector_is_refused_by_the_shared_check()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Cede("dave", "nowhere"));
+        Assert.False(ok);
+        Assert.Equal("sector.unknown", reason);
+    }
+
+    [Fact]
+    public void A_cede_order_changes_no_hash_by_merely_existing_in_the_log()
+    {
+        // WorldCanonical never hashes commands (WorldCanonical.cs) — admitting and logging a cede
+        // order, with nothing yet resolving it, must produce the identical state hash as a turn
+        // with no orders at all.
+        var withCede = TurnEngine.Step(World, new[] { Cede("dave", "homeworld") }, seed: 1);
+        var withNothing = TurnEngine.Step(World, Array.Empty<WorldCommand>(), seed: 1);
+        Assert.Equal(withNothing.StateHash, withCede.StateHash);
+    }
+
+    // world-stage W28: `bind-warden` — names a sector, carries the binding id, needs no entity.
+
+    static WorldCommand BindWarden(string commander, string? sectorId, string? wardenId = "demon-1") => new()
+    {
+        CommanderId = commander, CommandId = "c-bind", Kind = WorldCommandKinds.BindWarden,
+        SectorId = sectorId, WardenId = wardenId
+    };
+
+    [Fact]
+    public void BindWarden_is_a_known_kind()
+    {
+        Assert.Contains(WorldCommandKinds.BindWarden, WorldCommandKinds.All);
+        Assert.True(WorldCommandKinds.IsKnown(WorldCommandKinds.BindWarden));
+    }
+
+    [Fact]
+    public void Binding_a_warden_to_your_own_sector_is_admitted_with_no_entity_named()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, BindWarden("dave", "homeworld"));
+        Assert.True(ok, reason);
+    }
+
+    [Fact]
+    public void Binding_a_warden_to_a_sector_you_do_not_own_is_refused()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, BindWarden("dave", "black-gate"));
+        Assert.False(ok);
+        Assert.Equal("sector.not-yours", reason);
+    }
+
+    [Fact]
+    public void Binding_a_warden_with_no_sector_named_is_refused()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, BindWarden("dave", sectorId: null));
+        Assert.False(ok);
+        Assert.Equal("sector.missing", reason);
+    }
+
+    [Fact]
+    public void Binding_a_warden_to_an_unknown_sector_is_refused_by_the_shared_check()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, BindWarden("dave", "nowhere"));
+        Assert.False(ok);
+        Assert.Equal("sector.unknown", reason);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    public void Binding_a_warden_with_no_id_carried_is_refused(string? wardenId)
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, BindWarden("dave", "homeworld", wardenId));
+        Assert.False(ok);
+        Assert.Equal("warden.missing", reason);
+    }
+
+    // world-map W51: `raise` — names a sector, needs no entity. Ownership, a Seat, a hostile entity
+    // and RecruitStock are all resolution-time (RaiseResolver at Snapshot), not admission-time — the
+    // identical discipline `build` already applies, so admission here only checks a sector was named.
+
+    static WorldCommand Raise(string commander, string? sectorId) => new()
+    {
+        CommanderId = commander, CommandId = "c-raise", Kind = WorldCommandKinds.Raise, SectorId = sectorId
+    };
+
+    [Fact]
+    public void Raise_is_a_known_kind()
+    {
+        Assert.Contains(WorldCommandKinds.Raise, WorldCommandKinds.All);
+        Assert.True(WorldCommandKinds.IsKnown(WorldCommandKinds.Raise));
+    }
+
+    [Fact]
+    public void Raising_at_a_named_sector_is_admitted_regardless_of_ownership()
+    {
+        // Deliberately not an ownership check here — "black-gate" is unowned at first-light's world
+        // creation, and admission still passes it through: RaiseResolver is what says "not yours",
+        // at Snapshot, re-validated against the state the turn actually produced.
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Raise("dave", "black-gate"));
+        Assert.True(ok, reason);
+    }
+
+    [Fact]
+    public void Raising_with_no_sector_named_is_refused()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Raise("dave", sectorId: null));
+        Assert.False(ok);
+        Assert.Equal("sector.missing", reason);
+    }
+
+    [Fact]
+    public void Raising_at_an_unknown_sector_is_refused_by_the_shared_check()
+    {
+        var (ok, reason) = WorldCommandAdmission.Admit(World, Raise("dave", "nowhere"));
+        Assert.False(ok);
+        Assert.Equal("sector.unknown", reason);
+    }
 }

@@ -155,7 +155,11 @@ public sealed class RegistrySet
             Bands = Read("bands.v1.json"),
             Tags = Read("tags.v1.json"),
             Themes = Read("themes.v1.json"),
-            Classes = Read("classes.v1.json"),
+            // item-ideal.md, base-types (module 6, D35): v2 re-derives the 32-family global
+            // exclusion list against AtomKindRegistry.cs, lifting 15 stale D6-quarantine entries.
+            // v1 stays on disk (frozen, never edited); v2 is purely additive (minCompatibleVersion
+            // 1), so nothing legal under v1 becomes illegal here.
+            Classes = Read("classes.v2.json"),
             Naming = Read("naming.v1.json"),
             Words = ReadOptional("words.v1.json"),
             RetiredIds = ReadOptional("retired-ids.json"),
@@ -215,7 +219,7 @@ public sealed class RegistrySet
         Version("bands", Bands, "bands.v1.json");
         Version("tags", Tags, "tags.v1.json");
         Version("themes", Themes, "themes.v1.json");
-        Version("classes", Classes, "classes.v1.json");
+        Version("classes", Classes, "classes.v2.json");
         Version("naming", Naming, "naming.v1.json");
         // words.v1.json is optional to load but nameable in _meta: an author who drew from the
         // pools has every reason to record which version they drew from.

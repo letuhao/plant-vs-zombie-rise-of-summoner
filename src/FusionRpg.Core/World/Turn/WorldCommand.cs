@@ -33,8 +33,35 @@ public static class WorldCommandKinds
     /// </summary>
     public const string Build = "build";
 
+    /// <summary>
+    /// Give up a sector this faction holds, on purpose — the player's own deliberate release,
+    /// distinct from `LoamPhases.Pressure`'s automatic pick of the weakest link when upkeep cannot
+    /// be paid (world-stage W24). Needs no entity: a faction cedes ground, not a legion.
+    /// </summary>
+    public const string Cede = "cede";
+
+    /// <summary>
+    /// Bind a warden onto a sector this faction owns, exempting it from `LoamPhases.Pressure`'s fade
+    /// (and recovery) while the binding holds (spec-loam-texture.md's Wardens; world-stage W28). Named
+    /// `bind-warden`, not `ward` — `ward` names the still-unbuilt *lane* action that raises
+    /// `WorldLaneDto.WardLevel`, a different mechanic entirely; the collision was repaired once
+    /// already and must not return through this kind's name. Needs no entity: a faction binds a
+    /// warden to ground, not a legion.
+    /// </summary>
+    public const string BindWarden = "bind-warden";
+
+    /// <summary>
+    /// Found a legion at the sector's Seat, spending its `RecruitStock` (world-map W51,
+    /// spec-sector-development.md §1). Needs no entity — `raise` founds a *new* legion, it does not
+    /// command an existing one. Resolves in `Snapshot`, right after `Build`: ownership is only
+    /// decided once the rest of the turn has run, so every other legality check (whose ground, a
+    /// Seat, no hostile entity standing in it, enough stock) is resolution-time in
+    /// `RaiseResolver`, not admission-time, the same discipline `BuildResolver` already applies.
+    /// </summary>
+    public const string Raise = "raise";
+
     public static readonly IReadOnlyList<string> All =
-        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build };
+        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build, Cede, BindWarden, Raise };
 
     public static bool IsKnown(string? kind) =>
         kind != null && All.Contains(kind, StringComparer.Ordinal);
@@ -77,4 +104,12 @@ public sealed record WorldCommand
 
     /// <summary>Which structure a `build` order names (spec-loam-structures.md).</summary>
     public string? StructureId { get; init; }
+
+    /// <summary>
+    /// The value a `bind-warden` order writes into `WorldSector.WardenBindingId` — the bound demon
+    /// contract's own instance id, unchanged (spec-loam-texture.md, world-stage W28/W29's two-step
+    /// contract-then-order flow). Opaque to Core: nothing here validates it against a demon roster,
+    /// the same way `StructureId` is validated only inside the `build` admission arm, not generically.
+    /// </summary>
+    public string? WardenId { get; init; }
 }

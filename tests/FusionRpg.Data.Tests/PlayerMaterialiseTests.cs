@@ -45,7 +45,7 @@ public class PlayerMaterialiseTests : IDisposable
         Assert.True(_store.UpsertAtom(new AtomRow
         {
             AtomId = atomId, KindId = "stat.modify", FamilyId = $"atom.{speciesId}-vitality", Tier = 1,
-            ParamsJson = $$"""{"channel":"maxHp","op":"flat","amount":{{amount}}}""",
+            Name = $"{speciesId} Vitality", ParamsJson = $$"""{"channel":"maxHp","op":"flat","amount":{{amount}}}""",
         }).IsOk);
 
         Assert.True(_store.UpsertContainer(new ContainerRow
@@ -150,7 +150,7 @@ public class PlayerMaterialiseTests : IDisposable
         {
             AtomId = "atom.conezombie-vitality.t1", KindId = "stat.modify",
             FamilyId = "atom.conezombie-vitality", Tier = 1,
-            ParamsJson = """{"channel":"maxHp","op":"flat","amount":9999}""",
+            Name = "Conezombie Vitality", ParamsJson = """{"channel":"maxHp","op":"flat","amount":9999}""",
         }).IsOk);
 
         var outcome = _store.MaterialisePlayerSpecies(player.Id, PinTheta, Tuning);

@@ -13,23 +13,23 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "unresolved"
+        "rarity": "high",
+        "threatBand": "deterministic-fallback"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:35:06Z",
+      "emittedUtc": "2026-09-04T12:29:33Z",
       "minorityValues": {
-        "aptitudePrimary": "Retribution",
-        "rarity": "grafted"
+        "aptitudePrimary": "Onslaught"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -45,9 +45,9 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Retribution",
-    "attackTempo": "steady",
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
@@ -56,22 +56,22 @@
       "aquatic-capsicum-hybrid"
     ],
     "gameTypeId": 1049,
-    "posture": "Force",
-    "pure": false,
+    "posture": "Bastion",
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The ability to instantly kill through drowning and trigger an explosive secondary effect upon death makes it a high-lethality threat.",
+    "reason": "Its ability to instantly kill via drowning makes it an overwhelming force in combat, despite its plant nature.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "poise"
     ],
     "side": "plant",
     "speciesId": "Jalakelp",
     "targetPreference": "backline",
-    "threatBand": "unresolved",
+    "threatBand": "raider",
     "traits": [
-      "constricting",
       "capsaicin-infused",
+      "constricting",
       "post-mortem-detonation"
     ],
     "variants": [

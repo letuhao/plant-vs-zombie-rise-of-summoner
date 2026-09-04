@@ -21,6 +21,22 @@ public class CiWiringGuardTests
         Assert.Contains("tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj", ci, StringComparison.Ordinal);
     }
 
+    /// <summary>
+    /// E35 (spec-match-modify.md §4): the one deliberate exemption to this guard. This project's whole
+    /// reason to exist is testing <c>CheatState.SetLong</c>/<c>LVal</c> and the scoped match-end
+    /// restore, both of which live in <c>FusionRpg.Injector</c> — a project ci.yml has never compiled
+    /// (CLAUDE.md, "Injector not built by CI": no game directory on the runner, so the BepInEx interop
+    /// DLLs its build needs do not exist there). Adding this csproj's path string to ci.yml without
+    /// actually wiring a working step would be exactly the lie this guard exists to catch — a suite
+    /// that "appears wired" but never truly runs. The honest fix is this named exemption, not a fake
+    /// wire-up; if `FusionRpg.Injector` itself is ever made CI-buildable, this exemption is the first
+    /// place to remove.
+    /// </summary>
+    static readonly string[] ExemptFromCiWiring =
+    {
+        "tests/FusionRpg.Injector.Tests/FusionRpg.Injector.Tests.csproj",
+    };
+
     [Fact]
     public void Every_test_project_under_tests_appears_somewhere_in_ci_yml()
     {
@@ -41,6 +57,7 @@ public class CiWiringGuardTests
                 continue;
 
             var relative = Path.GetRelativePath(repoRoot, csproj).Replace('\\', '/');
+            if (ExemptFromCiWiring.Contains(relative, StringComparer.Ordinal)) continue;
             if (!ci.Contains(relative, StringComparison.Ordinal))
                 missing.Add(relative);
         }

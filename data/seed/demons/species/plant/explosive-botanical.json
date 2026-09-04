@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:34:23Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
+      "emittedUtc": "2026-09-04T10:05:50Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,20 +44,19 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "explosive-botanical",
-      "projectile-flora"
+      "explosive-botanical"
     ],
     "gameTypeId": 1179,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "melee",
+    "reach": "short",
     "reason": "The creature's ability to clear crowds via knockback and deal massive specialized damage against high-tier targets justifies its status as a significant combatant.",
     "resourceProfile": [
       "hp",
@@ -66,16 +64,94 @@
     ],
     "side": "plant",
     "speciesId": "CherryJalapeno",
-    "targetPreference": "elite",
+    "targetPreference": "backline",
     "traits": [
-      "delayed-detonation",
-      "kinetic-knockback",
-      "specialized-anti-mythic"
+      "kinetic-flight",
+      "cherry-blast",
+      "nian-slayer"
     ],
     "variants": [
       "normal",
       "mutated",
       "blessed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:13:55Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-botanical"
+    ],
+    "gameTypeId": 1408,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to create explosive craters and apply status effects through area-of-effect damage justifies a scourge-level threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "DoomMelon",
+    "targetPreference": "swarm",
+    "traits": [
+      "impact-based detonation",
+      "crater-generating",
+      "status-inflicting embers",
+      "environmental-interaction"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
     ],
     "verdict": "agree"
   },
@@ -100,13 +176,16 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:32:19Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:51:52Z",
+      "minorityValues": {
+        "attackTempo": "slow"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -122,7 +201,163 @@
       "Summonable"
     ],
     "aptitudePrimary": "Retribution",
-    "aptitudeSecondary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-botanical"
+    ],
+    "gameTypeId": 1163,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's threat is localized to a single row and relies on a short-duration spawn mechanic, which lacks the widespread devastation required for a 'scourge' rating.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "JalaMine",
+    "targetPreference": "backline",
+    "traits": [
+      "kinetic-seeding",
+      "rapid-maturation",
+      "low-profile"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:03:00Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-botanical",
+      "mutagenic-flora"
+    ],
+    "gameTypeId": 959,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The ability to trigger chain reactions that multiply damage by 12x and create persistent radiation zones makes it a high-tier threat consistent with a tyrant rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "NuclearDoomCherry",
+    "targetPreference": "swarm",
+    "traits": [
+      "fission-based projectile",
+      "radiation-emitting",
+      "chain-reaction potential",
+      "penetrating-shrapnel"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:30:05Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
@@ -131,31 +366,194 @@
     "family": [
       "explosive-botanical"
     ],
-    "gameTypeId": 1413,
-    "posture": "Bastion",
-    "pure": false,
+    "gameTypeId": 1005,
+    "posture": "Force",
+    "pure": true,
     "rarity": "fused",
-    "reach": "melee",
-    "reason": "The creature's mechanics focus on scaling damage through a heat mechanic, but it lacks the innate destructive scale or world-altering properties required for a 'harbinger' rating.",
+    "reach": "short",
+    "reason": "The creature's ability to ignore its own explosive damage while providing massive cooldown reduction for high-damage synergy cards justifies a mid-tier threat level.",
     "resourceProfile": [
       "hp",
-      "poise",
-      "stamina",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "JalaPumpkin",
-    "targetPreference": "backline",
+    "speciesId": "SuperCherryShooter",
+    "targetPreference": "swarm",
     "traits": [
-      "thermal-accumulation",
-      "reactive-damage",
-      "capsaicin-fusion"
+      "cherry-projectile-emission",
+      "explosion-immunity",
+      "splash-damage",
+      "synergy-catalyst"
     ],
     "variants": [
       "normal",
       "mutated",
       "blessed"
     ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:43:40Z",
+      "minorityValues": {
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-botanical",
+      "hybrid-seedlings"
+    ],
+    "gameTypeId": 958,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature's ability to perform full-field tracking, infinite penetration, and massive damage scaling via multipliers makes it a high-tier threat rather than a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateCattail",
+    "targetPreference": "frontline",
+    "traits": [
+      "missile-launching",
+      "thermal-energy-accumulation",
+      "cherry-pepper-fusion",
+      "heat-status-infliction",
+      "energy-burst-emission"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
     "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:46:17Z",
+      "minorityValues": {
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-botanical",
+      "artillery-flora"
+    ],
+    "gameTypeId": 901,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to fire 12 projectiles per 1.5 seconds with massive splash damage and field-wide area-of-effect effects places it far beyond a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateGatling",
+    "targetPreference": "swarm",
+    "traits": [
+      "explosive-projectile-immunity",
+      "area-of-effect-splash",
+      "rapid-fire",
+      "trajectory-manipulation"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-low"
   }
 ]

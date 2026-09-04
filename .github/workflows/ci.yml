@@ -40,6 +40,15 @@ jobs:
           python scripts/audit-magic-numbers.py
           if ($LASTEXITCODE -ne 0) { throw "magic-number audit found an M1/M2 finding — see output above" }
 
+      - name: resource-ownership drift guard (A-R1, spec-resource-ownership.md §5 test 3)
+        shell: pwsh
+        run: |
+          # Regenerates the 166 resource.* aptitude edges from data/tuning/resource-ownership.v1.json
+          # in memory and diffs them against the shipped aptitudes.v{n}.json — catches a hand-edited
+          # resource edge or a table drifted out of sync with the shipped file.
+          python tools/tuning/resource_ownership.py --check
+          if ($LASTEXITCODE -ne 0) { throw "resource_ownership.py --check found drift — see output above" }
+
       - name: species-generator staleness guard (seed-to-concrete T4.5/Checkpoint 4)
         shell: pwsh
         run: |

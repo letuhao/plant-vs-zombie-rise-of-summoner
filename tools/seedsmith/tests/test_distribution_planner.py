@@ -43,6 +43,7 @@ from seedsmith.adapters.actions.distribution_planner.tuning import (  # noqa: E4
 )
 from seedsmith.adapters.actions import generate_distribution_planner as gen_mod  # noqa: E402
 from seedsmith.adapters.actions.kinds import KINDS  # noqa: E402
+from seedsmith.adapters.actions.load import load_committed  # noqa: E402
 from seedsmith.corpus import Corpus  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -81,16 +82,16 @@ class RunTuningLoadTests(unittest.TestCase):
     def test_shipped_defaults(self) -> None:
         t = load_run_tuning()
         self.assertEqual(t.mode, "smoke")
-        self.assertEqual(t.general_count, 5)
-        self.assertEqual(t.per_family_count, 1)
-        self.assertEqual(t.per_species_count, 1)
+        self.assertEqual(t.general_count, 15)
+        self.assertEqual(t.per_family_count, 2)
+        self.assertEqual(t.per_species_count, 2)
         self.assertEqual(t.multiplicative_pairs, (("atom.keen-edge", "atom.cruelty"),))
         self.assertEqual(t.family_motif_max, 6)
-        self.assertEqual(t.version, 1)
+        self.assertEqual(t.version, 2)
 
     def test_meta_states_untuned(self) -> None:
         doc = json.loads(RUN_TUNING_PATH.read_text(encoding="utf-8"))
-        self.assertEqual(doc["_meta"]["default"], "neutral-untuned")
+        self.assertEqual(doc["_meta"]["default"], "expanded-real-smoke-batch")
         self.assertEqual(doc["_meta"]["smokeSubjects"], "four-way-join-8")
         self.assertIn("placeholder", doc["_meta"]["note"])
         self.assertIn("smoke batch", doc["_meta"]["note"])
@@ -153,19 +154,38 @@ class RunTuningPlantedViolationTests(unittest.TestCase):
 
 class DedupKTests(unittest.TestCase):
     """Acceptance #7b: `k` is read from `action-dedup.v1.json` (never from
-    `action-corpus-run.v1.json`), defaults to the fingerprint's own component count plus one, and
-    the file is confirmed missing in this checkout (A-S3 unbuilt)."""
+    `action-corpus-run.v1.json`), and defaults to the fingerprint's own component count plus one
+    wherever that file is absent.
 
-    def test_dedup_file_missing_in_this_checkout(self) -> None:
-        self.assertFalse(DEDUP_TUNING_PATH.is_file(),
-                         "action-dedup.v1.json exists now -- re-check the A-S1 default-k call")
+    **UPDATED 2026-09-04 (A-S3, spec-dedup-select.md): `action-dedup.v1.json` now exists for
+    real** -- A-S3 is the file's actual owner and shipped it with `k: 8`, the same value this
+    loader's own default already produced. The tripwire this class used to carry
+    ("`action-dedup.v1.json` exists now -- re-check the A-S1 default-k call") has fired, exactly as
+    it was written to: it is replaced below with a test of the NEW state (`source == "file"`)
+    rather than left asserting an absence that is no longer true. `test_reads_k_from_file_when_present`
+    is kept unchanged -- it never depended on the shipped file being absent, only on the loader
+    correctly reading a file when one exists, which is still exactly what it tests."""
+
+    def test_dedup_file_now_exists_and_matches_the_default(self) -> None:
+        self.assertTrue(DEDUP_TUNING_PATH.is_file(),
+                        "action-dedup.v1.json is missing again -- A-S3's own file was removed; "
+                        "re-check whether the default-k fallback path needs to come back into play")
+        doc = json.loads(DEDUP_TUNING_PATH.read_text(encoding="utf-8"))
+        self.assertEqual(doc["k"], DEFAULT_AVOID_NEIGHBOUR_K,
+                         "the shipped file's k no longer matches this loader's own derived "
+                         "default -- A-S3 has genuinely re-tuned k; that is fine, but this loader's "
+                         "own default should be re-derived to match or explicitly diverge on purpose")
 
     def test_default_k_equals_component_count_plus_one(self) -> None:
         self.assertEqual(FINGERPRINT_COMPONENT_COUNT, 7)
         self.assertEqual(DEFAULT_AVOID_NEIGHBOUR_K, 8)
+
+    def test_k_is_now_sourced_from_the_real_file_not_the_fallback_default(self) -> None:
         k, source = load_dedup_k()
         self.assertEqual(k, 8)
-        self.assertEqual(source, "default")
+        self.assertEqual(source, "file",
+                         "k is still coming from the fallback default -- action-dedup.v1.json "
+                         "should be readable now that A-S3 has shipped it")
 
     def test_reads_k_from_file_when_present(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -174,6 +194,15 @@ class DedupKTests(unittest.TestCase):
             k, source = load_dedup_k(path)
             self.assertEqual(k, 12)
             self.assertEqual(source, "file")
+
+    def test_default_still_used_when_a_DIFFERENT_missing_path_is_given(self) -> None:
+        """The fallback path (§ tuning.py's own documented default) is still real code, still
+        reachable, and still correct -- it is simply no longer what the SHIPPED path exercises."""
+        with tempfile.TemporaryDirectory() as tmp:
+            missing = Path(tmp) / "does-not-exist.json"
+            k, source = load_dedup_k(missing)
+            self.assertEqual(k, DEFAULT_AVOID_NEIGHBOUR_K)
+            self.assertEqual(source, "default")
 
 
 class FamilyMotifDerivationTests(unittest.TestCase):
@@ -645,14 +674,18 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
     actually key on (`kinds.py`'s `action-brief` KindSpec: `required={"id"}`)."""
 
     def test_written_file_loads_through_corpus_load_and_discovers_edges(self) -> None:
+        """`load_committed`, not a raw `Corpus.load` — see `test_type_weights.py`'s own sibling
+        fix (2026-09-04): real `_rounds/` content (a real smoke batch) now legitimately reuses
+        `_briefs/round-1.json`'s own ids by design (A-S2's assembled P3 briefs), which only the
+        purpose-built `_rounds/`-excluding loader tolerates."""
         if not OUTPUT_PATH.is_file():
             self.skipTest("round-1.json not yet generated in this checkout")
-        corpus = Corpus.load(ACTIONS_ROOT)
-        rows = corpus.by_kind("action-brief")
-        self.assertEqual(len(rows), 108)
+        result = load_committed(ACTIONS_ROOT)
+        rows = result.corpus.by_kind("action-brief")
+        self.assertEqual(len(rows), 221)
         kind_spec = next(k for k in KINDS if k.kind == "action-brief")
-        edges = corpus.discover_edges(kind_spec.id_pattern, skip_fields=frozenset({"name"}))
-        self.assertEqual(len(edges), 108)
+        edges = result.corpus.discover_edges(kind_spec.id_pattern, skip_fields=frozenset({"name"}))
+        self.assertEqual(len(edges), 221)
 
 
 class FullRunRefusalTests(unittest.TestCase):
@@ -725,7 +758,7 @@ class RosterSizeTests(unittest.TestCase):
         general_briefs = [e for e in self.doc["entries"] if e["scope"] == "general"]
         self.assertEqual(len({e["scopeKey"] for e in species_briefs}), 84)
         self.assertEqual(len({e["scopeKey"] for e in family_briefs}), 19)
-        self.assertEqual(len(general_briefs), 5)
+        self.assertEqual(len(general_briefs), 15)
         self.assertNotEqual(len({e["scopeKey"] for e in species_briefs}), 904)
 
     def test_family_assigned_species_count_is_53(self) -> None:
@@ -754,8 +787,8 @@ class QuotaExactnessTests(unittest.TestCase):
                 continue
             briefs = [e for e in self.round_doc["entries"]
                      if e["scope"] == "species" and e["scopeKey"] == scope_key]
-            self.assertEqual(len(briefs), 1)          # perSpeciesCount == 1 at the shipped default
-            expected = dp.largest_remainder_count(row["categoryMilli"], CATEGORIES, 1)
+            self.assertEqual(len(briefs), 2)          # perSpeciesCount == 2 at the shipped default
+            expected = dp.largest_remainder_count(row["categoryMilli"], CATEGORIES, 2)
             actual = {c: 0 for c in CATEGORIES}
             for b in briefs:
                 actual[b["slot"]["category"]] += 1
@@ -796,7 +829,7 @@ class DeterminismTests(unittest.TestCase):
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
         self.assertIn("corpusHash", doc["_meta"])
         self.assertEqual(doc["_meta"]["round"], 1)
-        self.assertEqual(doc["_meta"]["tuningVersion"], 1)
+        self.assertEqual(doc["_meta"]["tuningVersion"], 2)
         for e in doc["entries"]:
             self.assertEqual(e["_provenance"]["corpusHash"], doc["_meta"]["corpusHash"])
             self.assertEqual(e["_provenance"]["round"], 1)

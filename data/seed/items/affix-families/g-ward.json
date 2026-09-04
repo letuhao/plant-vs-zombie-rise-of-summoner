@@ -27,15 +27,63 @@
       "nameKey": "affix.elemental-defense",
       "name": "Elemental Ward",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.defense.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.defense.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Ember", "Frost", "Gale", "Stone", "Radiant", "Umbral"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Ember"
+          },
+          {
+            "variant": "ice",
+            "word": "Frost"
+          },
+          {
+            "variant": "air",
+            "word": "Gale"
+          },
+          {
+            "variant": "earth",
+            "word": "Stone"
+          },
+          {
+            "variant": "light",
+            "word": "Radiant"
+          },
+          {
+            "variant": "dark",
+            "word": "Umbral"
+          }
+        ]
+      },
       "displayTemplate": "+{value} {element} resistance",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.ward existingFamilies). channel/op mirror atom-family-library.md §3.2's own worked row ('+10 fire resist' -> stat.derived/elemental_defense/channel combat.defense.fire) and element-hub-ssot.md's shipped aggregation table (combat.defense.{element} is a flat-sum channel). `nameWords.prefix` reuses the SAME six canonical elemental adjectives the doc itself ties to this exact family (atom-family-library.md §3.2: 'Ember/Frost/Gale/Stone/Radiant/Umbral ...Ward', the mirror image of elemental_power's '...Power'), not an accidental collision with another partition's pool. QUARANTINE: stat.derived is quarantined None/None/None (D6, atom-family-library.md §3.2) -- no runtime executes this channel until E12's BattleStatComposer. Roles are the g.ward column of ssot-affixes.md §4.3's role x group matrix, translated from the stale 12-role table to core.v1.json's 15 ids the same way the g.on-hit sibling did (head-protective->head-guard, sense-utility->sense, core-protective->core-guard, mantle-utility->mantle, manipulator-offense excluded at weight 0, girdle-resource excluded at weight 0, jewel-minor->jewel-minor-a and jewel-minor-b, armament-primary excluded at weight 0). `standard` carries weight 2 in that row (unlike g.on-hit's 0) and is included per naming.v1.json's baseTypes.commanderStandardAddendum, which names 'standard' as a legal affix-lane role and elemental_defense already resolves per-actor (atom-family-library.md §4.1), unlike warding/resilience's match-scoped-only restriction -- flagged here in case a reviewer reads that addendum as g.armour-specific only."
     },
     {
@@ -43,15 +91,59 @@
       "nameKey": "affix.stoicism",
       "name": "Stoicism",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Rootbound", "Leathery", "Deadened", "Weathered", "Unshaken"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Rootbound"
+          },
+          {
+            "variant": "ice",
+            "word": "Leathery"
+          },
+          {
+            "variant": "air",
+            "word": "Deadened"
+          },
+          {
+            "variant": "earth",
+            "word": "Weathered"
+          },
+          {
+            "variant": "light",
+            "word": "Unshaken"
+          }
+        ]
+      },
       "displayTemplate": "+{value} {element} critical hit resistance",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. Channel confirmed element-varying by element-hub-ssot.md's aggregation table (combat.crit.resist.{element}, flat sum) and by atom-family-library.md §3.2 grouping it with the 12 element-generated stat.derived families, not the 4 status-channel ones. No canonical flavour-by-element word set is documented for this family (unlike elemental_power/elemental_defense's shared Ember/Frost/... set), so `nameWords` is minted here -- deliberately non-elemental-adjective vocabulary (weathering, numbness, rootedness) so this file's seven entries don't cluster on one idea. QUARANTINE: stat.derived, D6, same as above."
     },
     {
@@ -59,15 +151,55 @@
       "nameKey": "affix.padding",
       "name": "Padding",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.damage.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.damage.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Husked", "Cushioned", "Insulated", "Thickened"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Husked"
+          },
+          {
+            "variant": "ice",
+            "word": "Cushioned"
+          },
+          {
+            "variant": "air",
+            "word": "Insulated"
+          },
+          {
+            "variant": "earth",
+            "word": "Thickened"
+          }
+        ]
+      },
       "displayTemplate": "{value}% reduced {element} critical damage taken",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. Channel confirmed by element-hub-ssot.md (combat.crit.resist.damage.{element}, flat sum, feeds 'Crit magnitude'), distinct from stoicism's crit-CHANCE-resist channel just above -- this family softens the hit once a crit already lands. `nameWords` minted (husk/cushion/insulation imagery: a padded, absorbing surface rather than a hardened one, to keep this entry distinct from stoicism and from the two new hardening-flavoured families below). QUARANTINE: stat.derived, D6."
     },
     {
@@ -75,14 +207,56 @@
       "nameKey": "affix.stalwart",
       "name": "Stalwart",
       "kindId": "stat.derived",
-      "params": { "channel": "status.resist", "op": "Flat" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "status.resist",
+        "op": "Flat"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Grounded", "Ironroot", "Steadfast", "Unbending"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1",
+            "word": "Grounded"
+          },
+          {
+            "band": "B",
+            "tierRange": "t2",
+            "word": "Ironroot"
+          },
+          {
+            "band": "C",
+            "tierRange": "t3",
+            "word": "Steadfast"
+          },
+          {
+            "band": "D",
+            "tierRange": "t4-t5",
+            "word": "Unbending"
+          }
+        ]
+      },
       "displayTemplate": "+{value} resistance to negative status effects",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. One of atom-family-library.md §3.2's 4 status-channel families ('not element-expanded') -- no `variants` block, matching how the g.on-hit sibling omitted `variants`/`element` for atom.lifesteal. The real shipped channel is the open-ended prefix `status.resist.{id}` against the locked 21-status catalog (atom-catalog-ssot.md), but WHICH status id a rolled atom targets is a generation-time/tier concern this partition has no visibility into (that catalog belongs to the effect-atom program, not item wave-1a) -- `channel` is written at the family level (`status.resist`) rather than guessing a specific status id. Flagging this rather than inventing a status id is the deliberate choice; a reviewer with the status catalog in hand may need to add the `{id}` segment later. QUARANTINE: stat.derived, D6."
     },
     {
@@ -90,14 +264,56 @@
       "nameKey": "affix.immunity",
       "name": "Immunity",
       "kindId": "stat.derived",
-      "params": { "channel": "status.immune", "op": "Flag" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "status.immune",
+        "op": "Flag"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "high",
-      "nameWords": { "prefix": ["Sealed", "Hallowed", "Inviolate", "Ironclad"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1",
+            "word": "Sealed"
+          },
+          {
+            "band": "B",
+            "tierRange": "t2",
+            "word": "Hallowed"
+          },
+          {
+            "band": "C",
+            "tierRange": "t3",
+            "word": "Inviolate"
+          },
+          {
+            "band": "D",
+            "tierRange": "t4-t5",
+            "word": "Ironclad"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to shrug off a status affliction outright",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. Second of the 4 status-channel families; the real shipped channel is the open-ended `status.immune.{tag}` -- same 'family-level channel, tag left to a later generation step' treatment as stalwart just above, for the same reason (the tag catalog is out of this partition's scope). `op: Flag` (not Flat) because a complete block reads as a boolean gate rather than an additive resist number, and derived ops explicitly include Flag alongside Flat/Increased/Replace (atom-family-library.md §2a). `powerBand: high` is the one relative-strength judgement this entry makes: an outright block is a stronger pull than stalwart's partial resist, the same kind of sibling-strength call the exemplar makes between elemental_power and elpw-amplify. QUARANTINE: stat.derived, D6."
     },
     {
@@ -105,15 +321,55 @@
       "nameKey": "affix.ward-harden",
       "name": "Calcified Hide",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.defense.{variant}", "op": "Increased" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.defense.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Calcifying", "Ossifying", "Petrifying", "Fossilizing"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Calcifying"
+          },
+          {
+            "variant": "ice",
+            "word": "Ossifying"
+          },
+          {
+            "variant": "air",
+            "word": "Petrifying"
+          },
+          {
+            "variant": "earth",
+            "word": "Fossilizing"
+          }
+        ]
+      },
       "displayTemplate": "{value}% increased {element} resistance",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `ward` (naming.v1.json idNamespaces.affixFamilies), word `harden` -- short and mechanical. Mints the Increased sibling combat.defense.{variant} does not yet have, the exact same split the exemplar itself demonstrates for combat.power.* (atom.elemental-power Flat + atom.elpw-amplify Increased): Flat adds resolver points, Increased scales them, and they compose differently against everything else on the actor. `powerBand: low` against elemental-defense's `medium` mirrors elpw-amplify's judgement against elemental_power for the identical reason. Decay/bone imagery (calcify, ossify, fossilize) rather than reusing the Ember/Frost/... set, both for variety and because this family is untyped-by-flavour (an Increased multiplier, not a named elemental substance). QUARANTINE: stat.derived, D6, same as its Flat sibling -- authored now, bound nowhere until E12."
     },
     {
@@ -121,15 +377,55 @@
       "nameKey": "affix.ward-brace",
       "name": "Graftplate",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.{variant}", "op": "Flag" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.{variant}",
+        "op": "Flag"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary", "standard"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary",
+        "standard"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Graften", "Ironbark", "Chitinous", "Platebound"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Graften"
+          },
+          {
+            "variant": "ice",
+            "word": "Ironbark"
+          },
+          {
+            "variant": "air",
+            "word": "Chitinous"
+          },
+          {
+            "variant": "earth",
+            "word": "Platebound"
+          }
+        ]
+      },
       "displayTemplate": "cannot be critically struck by {element} damage",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `ward`, word `brace`. Fills the one on-hit-defense combination the shipped roster leaves open on combat.crit.resist.*: stoicism is a Flat numeric resist, this is a Flag -- an outright per-element crit immunity, the same shape distinction immunity (Flag on status.immune) makes against stalwart (Flat on status.resist) two entries above, applied to the crit-resist channel instead of the status channel. `powerBand: low` keeps a binary immunity from outclassing stoicism's partial, always-on resist -- a hard gate is worth less per point of item budget than a number that always applies. Graft/bark/chitin imagery keeps this in the fusion register (plant graft plus a hardened zombie/insect plate) rather than reusing calcify/ossify from ward-harden just above. QUARANTINE: stat.derived, D6."
     }
   ]

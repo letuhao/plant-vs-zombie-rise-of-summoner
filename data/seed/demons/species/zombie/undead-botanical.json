@@ -1,0 +1,246 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:22:07Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "fire",
+    "family": [
+      "undead_botanical",
+      "parasitic_flora"
+    ],
+    "gameTypeId": 73,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The creature acts as a persistent threat that disrupts plant placement, absorbs projectiles, and converts plants into zombies, fitting the disruptive nature of a raider.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "EndoFlameZombie",
+    "targetPreference": "structure",
+    "traits": [
+      "tombstone_mimicry",
+      "bullet_absorption",
+      "zombie_summoning",
+      "fertilizer_transmutation"
+    ],
+    "variants": [
+      "corrupted",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:06:19Z",
+      "minorityValues": {
+        "elementPrimary": "dark"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead-botanical"
+    ],
+    "gameTypeId": 100,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "almanac",
+    "reach": "long",
+    "reason": "The description notes that its long-range capabilities strike fear into plants, suggesting a threat level higher than a mere raider.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "PeaShooterZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "projectile-launching",
+      "ranged-combatant",
+      "unintentional-friendly-fire"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "cursed",
+      "ancient"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:55:57Z",
+      "minorityValues": {
+        "attackTempo": "quick",
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "CaptureOnly"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead-botanical",
+      "reanimated-seedlings"
+    ],
+    "gameTypeId": 89,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The creature functions as a high-mobility projectile that causes damage upon impact, but lacks the scale or overwhelming destructive capacity required for a 'tyrant' rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "ZombieLoonNut",
+    "targetPreference": "structure",
+    "traits": [
+      "kinetic-projectile",
+      "terrain-sensitive",
+      "collision-damage",
+      "status-immune"
+    ],
+    "variants": [
+      "corrupted",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  }
+]

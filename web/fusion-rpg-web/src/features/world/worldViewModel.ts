@@ -1,4 +1,5 @@
 import type { WorldEntityDto, WorldForceDto, WorldSectorDto, WorldStateDto } from "./worldTypes";
+import { sectorLabel } from "./labels";
 
 /**
  * The map fold: a world-state payload in, React Flow nodes and edges out. Pure, so the whole of the
@@ -193,14 +194,6 @@ export type LaneEdge = {
 };
 
 export type WorldGraph = { nodes: SectorNode[]; edges: LaneEdge[] };
-
-/** Turns `ember-hollow` into `Ember Hollow` — the ids are the SSOT, the labels are for people. */
-export function sectorLabel(sectorId: string): string {
-  return sectorId
-    .split("-")
-    .map((part) => (part.length === 0 ? part : part[0].toUpperCase() + part.slice(1)))
-    .join(" ");
-}
 
 export function ownershipOf(factionId: string | null, playerFactionId: string | null): Ownership {
   if (factionId == null) return "neutral";

@@ -62,16 +62,21 @@ public class ChannelExtensionGuardTests
     }
 
     [Fact]
-    public void The_other_extras_keys_were_left_alone()
+    public void The_still_out_of_scope_extras_keys_were_left_alone()
     {
-        // Scope discipline: only these three. The extras surface has ~18 keys and Z-TAKEMULT in
-        // particular is LIVE-inconclusive — promoting anything else on the way past is how a
-        // contained change becomes an incident.
+        // Scope discipline: E16 promoted only these three. This test used to pin P-SHIELD,
+        // Z-TAKEMULT and P-LEVEL staying in the extras path — E38 (spec-entity-fields-12plus.md,
+        // 2026-09-04) is the one module allowed to change that (it names each of the twelve
+        // explicitly; see EntityFields12PlusGuardTests). What genuinely remains out of scope: the
+        // three slow-effect floats (owned by the status runtime, not this module — spec §3) and the
+        // two ModifyHealth/ModifyDamage cheat triggers.
         var text = ReadInjector(Path.Combine("Stats", "EntityStatWriter.cs"));
 
-        Assert.Contains("p.theShieldHealth = CheatState.IVal(\"P-SHIELD\")", text, StringComparison.Ordinal);
-        Assert.Contains("z.takeDmgMultiplier = CheatState.FVal(\"Z-TAKEMULT\")", text, StringComparison.Ordinal);
-        Assert.Contains("p.theLevel = CheatState.IVal(\"P-LEVEL\")", text, StringComparison.Ordinal);
+        Assert.Contains("z.freezeSpeed = CheatState.FVal(\"Z-SLOW-FREEZE\")", text, StringComparison.Ordinal);
+        Assert.Contains("z.coldSpeed = CheatState.FVal(\"Z-SLOW-COLD\")", text, StringComparison.Ordinal);
+        Assert.Contains("z.butterSpeed = CheatState.FVal(\"Z-SLOW-BUTTER\")", text, StringComparison.Ordinal);
+        Assert.Contains("CheatState.On(\"P-MOD-HP\")", text, StringComparison.Ordinal);
+        Assert.Contains("CheatState.On(\"P-MOD-ATK\")", text, StringComparison.Ordinal);
     }
 
     // ---- E17: the three CC branches -------------------------------------------------------------

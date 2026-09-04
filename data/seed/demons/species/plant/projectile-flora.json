@@ -1,0 +1,162 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:17:59Z",
+      "minorityValues": {
+        "attackTempo": "slow",
+        "elementPrimary": "dark"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "projectile-flora"
+    ],
+    "gameTypeId": 1440,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to pierce armor and deal massive multi-hit and area-of-effect damage makes it a significant combat threat rather than a mere pest.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "DoomThreePeater",
+    "targetPreference": "frontline",
+    "traits": [
+      "triple-line volley",
+      "armor-piercing",
+      "periodic heavy-slug",
+      "area-of-effect"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:46:10Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Pierce",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "projectile-flora"
+    ],
+    "gameTypeId": 989,
+    "posture": "Finesse",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The ability to bypass black hole gravity and inflict massive damage/status effects across entire lines makes this a high-tier threat rather than a mere pest.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateGarlicSplit",
+    "targetPreference": "frontline",
+    "traits": [
+      "infinite-penetration",
+      "gravity-defying",
+      "toxin-infusion",
+      "black-hole-interaction"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "too-low"
+  }
+]

@@ -15,29 +15,56 @@ public static class AtomKindRegistry
 {
     // Structural (tunables-ssot.md T2), all three: closed-vocabulary cardinalities, not balance —
     // each must match what this registry actually builds below, not a dial a balance pass turns.
-    public const int AttachPointCount = 5;
+    // E35 (spec-match-modify.md §2.1): 5 -> 6 with AttachPoint.Match. Wave 8 states its combined end
+    // state (7, once Ui lands too) in one place only — that spec's own §2.1 — so this module asserts
+    // only its own +1 delta, never the wave total.
+    public const int AttachPointCount = 6;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
-    public const int KindCount = 12;
+    // E35: 12 -> 13 with match.modify, the first Match-attached kind.
+    // E36 (spec-wave-control.md §2.1): 13 -> 14 with wave.control, the second Match-attached kind.
+    // No AttachPointCount change — E36 adds no attach point, it reuses E35's.
+    // E37 (spec-projectile-control.md §2b): 14 -> 15 with bullet.modify, on the EXISTING Board attach
+    // point (no AttachPointCount change here either — this module adds no attach point, §2b's own
+    // "No new attach point" rule).
+    public const int KindCount = 15;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
-    public const int TriggerCount = 8;
+    // E34 (spec-trigger-vocabulary.md §2.1): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/
+    // OnSunCollect/OnGridPlace. Verified live before editing, per this module's own caution about
+    // stale citations elsewhere in the spec.
+    public const int TriggerCount = 13;
 
     /// <summary>Event triggers plus OnTimer plus OnActivate (A18b) — for
     /// resource.delta/status.apply/shield.grant, the exactly-three kinds this reaches. Board kinds
     /// stay on the narrower <see cref="AtomTriggers.Events"/> deliberately (H3: Battle is
     /// <see cref="RuntimeState.None"/> for all of them regardless of trigger, so widening their
-    /// trigger list would authorize content nothing in battle can execute).</summary>
+    /// trigger list would authorize content nothing in battle can execute). E34 does NOT add its five
+    /// new triggers here — resource.delta/status.apply/shield.grant resolve their target from the
+    /// event, and a match-scoped event has no ptr, so widening these three would make G5's unguarded
+    /// FindObjectsOfType&lt;Zombie&gt;() loop authorable (spec-trigger-vocabulary.md §2.3).</summary>
     static readonly string[] AllTriggers =
         { AtomTriggers.OnSpawn, AtomTriggers.OnDamageDealt, AtomTriggers.OnDamageTaken,
           AtomTriggers.OnDeath, AtomTriggers.OnTimer, AtomTriggers.OnActivate };
 
+    /// <summary>E34 (spec-trigger-vocabulary.md §2.3): the board-attach kinds' own event set, widened
+    /// by the five new match/board-economy triggers. These kinds already act with no entity in hand —
+    /// explicit row/col params for the board kinds, FA9's own match-scoped write for resource.economy
+    /// — the same property <see cref="AtomTriggers.MatchEvents"/>/<see cref="AtomTriggers.BoardEconomyEvents"/>
+    /// require. Exactly the six kinds §2.3 names: spawn.entity, board.action, grid.spawn, grid.clear,
+    /// box.set, resource.economy. status.clear stays on the plain <see cref="AtomTriggers.Events"/> —
+    /// §2.3 does not name it.</summary>
+    static readonly string[] EventsPlusMatchAndEconomy =
+        AtomTriggers.Events.Concat(AtomTriggers.MatchEvents).Concat(AtomTriggers.BoardEconomyEvents).ToArray();
+
     /// <summary>
-    /// The primary stat channels — <b>eleven</b> since E16.
+    /// The primary stat channels — eleven since E16, <b>twenty-three</b> since E38.
     ///
     /// <para>It was eight, and the documented nine were partly fiction: attackInterval,
     /// produceInterval and zombieSpeed were cheat-document keys written straight to the Unity field,
     /// bypassing the modifier bag, so no effect could reach them. E16 promoted all three, which is
-    /// what makes "shoots faster" authorable at all. Read from <see cref="StatChannels.All"/> rather
-    /// than copied, so the two lists cannot drift.</para>
+    /// what makes "shoots faster" authorable at all. E38 (spec-entity-fields-12plus.md) repeated the
+    /// same promotion for twelve more — including takeDmgMultiplier, the "takes +X% damage" knob
+    /// every debuff design wants. Read from <see cref="StatChannels.All"/> rather than copied, so
+    /// the two lists cannot drift.</para>
     /// </summary>
     public static readonly string[] PrimaryChannels = Stats.StatChannels.All;
 
@@ -108,8 +135,80 @@ public static class AtomKindRegistry
     /// Dirt (2).</summary>
     static readonly string[] BoxTypeValues = { "0", "1", "2", "3", "4", "5", "6", "7" };
 
-    /// <summary>3 — the only kinds `ExecSpawnEntity`'s switch has arms for.</summary>
-    static readonly string[] SpawnEntityKinds = { "plant", "zombie", "bullet" };
+    /// <summary>E40 (spec-spawn-non-grid.md §2a): 7 — the closed <c>spawn.entity.kind</c> domain,
+    /// widened from the original three (<c>plant</c>/<c>zombie</c>/<c>bullet</c>, the only kinds
+    /// `ExecSpawnEntity`'s switch had arms for) to add <c>pet</c>/<c>bucket</c>/<c>coin</c>/
+    /// <c>mower</c>. A widening, not a new kind: FA4's opcode, plan-item shape, coefficient row and
+    /// executor switch all already exist, and a parallel kind would need every one of them again for
+    /// no new semantics (§2a's own reasoning). This module adds no <see cref="KindCount"/> and no
+    /// <see cref="AttachPointCount"/> entry.
+    ///
+    /// <para><c>coin</c> IS a member of this array — it passes the generic per-value membership check
+    /// in <see cref="Validate"/> below — but that same method carries a separate, coin-specific block
+    /// that refuses it anyway, by name and reason (§3: <c>CreateItem.SetCoin</c>'s call safety outside
+    /// the game's own drop flow is UNVERIFIED, and this repo cannot run the live lawn session that
+    /// would settle it). Leaving <c>coin</c> OUT of this array instead would refuse it as an
+    /// unrecognised spelling — "not one of the N legal values" — which is the wrong reason and reads
+    /// as a typo, not as a withheld capability pending proof.</para></summary>
+    static readonly string[] SpawnEntityKinds =
+        { "plant", "zombie", "bullet", "pet", "bucket", "coin", "mower" };
+
+    /// <summary>E35 (spec-match-modify.md §2.3): the eleven `Board.config` fields
+    /// `CheatActions.ApplyBoardConfig` writes (`CheatActions.cs:653-664`) — this kind's own value
+    /// check, the same shape as G6's channel check, until E29's registry-backed per-kind check lands.
+    /// Eight are integer per-mille ratios, two are integer ms, and `zombieStartAmmor` is the one true
+    /// `long` magnitude on this kind (§2.3's own unit table).</summary>
+    static readonly string[] MatchModifyFields =
+    {
+        "zombieHealthMultiplier", "zombieDamageMultiplier", "zombieSpeedMultiplier",
+        "zombieCountMultiplier", "zombieStartAmmor", "plantModifyMin", "plantModifyMax",
+        "zombieModifyMin", "zombieModifyMax", "waveInterval", "conveyInterval",
+    };
+
+    /// <summary>E36 (spec-wave-control.md §2.2): 4 — the ops this kind's own executor implements
+    /// (`ExecWaveControl`, InjectorEffectActionSink.cs). Deliberately NOT wired as this ParamDef's
+    /// <c>Vocabulary</c> the way every other string-vocabulary param above is: the generic Vocabulary
+    /// message only echoes a count, and this kind's one real failure mode — naming the floor op
+    /// "freeze" when it does not stop the clock — is exactly the `fx.set_dirt_box` class of defect
+    /// (a name that says one thing while the executor does another), which needs to be named
+    /// explicitly rather than merely refused. See the wave.control-specific block in
+    /// <see cref="Validate"/>.</summary>
+    static readonly string[] WaveControlOps = { "summon", "huge", "setTimer", "hold" };
+
+    /// <summary>E36 (spec-wave-control.md §2.1): <c>Concat(AtomTriggers.Events, AtomTriggers.MatchEvents)</c>
+    /// verbatim — the four board-hit events plus the three match-scoped ones, OnWave chief among them
+    /// (this is the kind E34's OnWave exists to drive). Deliberately narrower than
+    /// <see cref="EventsPlusMatchAndEconomy"/>: wave.control has no board-economy meaning
+    /// (OnSunCollect/OnGridPlace), so widening to that six-member set would authorize content with no
+    /// executor reason to exist.</summary>
+    static readonly string[] EventsPlusMatch =
+        AtomTriggers.Events.Concat(AtomTriggers.MatchEvents).ToArray();
+
+    /// <summary>
+    /// E37 (spec-projectile-control.md §2a, criterion 0): the real, complete <c>BulletMoveWay</c>
+    /// enum — 18 members, swept 2026-09-04 with <c>ilspycmd -t BulletMoveWay</c> against three
+    /// independent sources that agree byte-for-byte (both `study/` reference interop DLLs and the
+    /// live game's own generated interop at
+    /// <c>H:\Games\PVZ-Fusion-3.9_MelonLoader\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</c>).
+    /// Recorded in <c>docs/research/effect-runtime/03-status-and-spawn-surface.md</c>. Supersedes the
+    /// old, never-swept <c>right|left|up|down|track</c> guess this spec's own history names as the
+    /// exact defect it exists to avoid repeating (E17's SetCharm* precedent). Authored as the EXACT
+    /// enum member name, unrenamed — the sink parses it straight through
+    /// <c>Enum.TryParse&lt;BulletMoveWay&gt;(value, ignoreCase: false)</c>, so a spelling this array
+    /// does not carry can never reach an unmatched cast at execute (it is refused at load instead, by
+    /// the generic Vocabulary loop in <see cref="Validate"/>).
+    /// </summary>
+    static readonly string[] BulletMoveWayValues =
+    {
+        "MoveRight", "Puff", "MoveRight_threePeater", "Track", "Fly", "Free", "Left", "Split_left",
+        "Throw", "Cannon", "PeaNut", "Stable", "SmoothTrack", "Sin", "Spin", "Jump", "SuperGatling",
+        "None",
+    };
+
+    /// <summary>E37 (spec-projectile-control.md §2b): the three ops <c>bullet.modify</c>'s own
+    /// resolved-read executor (<c>CheatPrefixes.BulletInitCheat</c>) implements. <c>scale</c> is
+    /// per-mille (amount 1500 = x1.5); <c>set</c>/<c>add</c> are whole damage units.</summary>
+    static readonly string[] BulletModifyOps = { "set", "add", "scale" };
 
     static readonly Dictionary<string, AtomKind> Kinds = Build();
 
@@ -159,6 +258,31 @@ public static class AtomKindRegistry
                     $"{kindId}.{def.Name} '{value}' is not one of the {members.Count} legal values for this param");
         }
 
+        // E40 (spec-spawn-non-grid.md §3, "Do not claim the coin path before proving it"): kind=coin
+        // IS a legal domain member (SpawnEntityKinds above), so a naming mistake reads as this kind's
+        // own BadParamValue-with-a-typo-list, not as this refusal — but CreateItem.SetCoin's call
+        // safety OUTSIDE the game's own drop flow is UNVERIFIED. The only clue in the tree is
+        // GameCaptureHooks.cs's SetCoinHook, a capture-only Postfix ("No consumer outside debug
+        // sessions... ~per-kill rate") that says nothing about call safety either way — silence, not
+        // evidence. This repo cannot run the live lawn session that would settle it (spec's own
+        // instruction), so the arm is refused HERE, at load, by name and reason, rather than shipped
+        // inert — accepted at load, doing nothing or something unproven at execute. Lift this the
+        // moment an owner-run live-lawn proof clears it.
+        if (string.Equals(kindId, "spawn.entity", StringComparison.Ordinal)
+            && pars.TryGetValue("kind", out var spawnKindRaw))
+        {
+            var spawnKindStr = spawnKindRaw is JsonElement spawnKindEl
+                && spawnKindEl.ValueKind == JsonValueKind.String
+                ? spawnKindEl.GetString()
+                : spawnKindRaw?.ToString();
+
+            if (string.Equals(spawnKindStr, "coin", StringComparison.OrdinalIgnoreCase))
+                return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    "spawn.entity.kind 'coin' is refused at load: CreateItem.SetCoin's call safety " +
+                    "outside the game's own drop flow is UNVERIFIED (spec-spawn-non-grid.md §3) — " +
+                    "never shipped inert. Lift once an owner-run live-lawn proof clears it.");
+        }
+
         // A18e (spec-battle-live-stat-modifiers.md §4): "effects cannot emit Override" was a doc
         // comment on this kind's own description with nothing enforcing it -- found while building
         // this module's own bind-time-refusal test. Same shape as G6's channel check, immediately
@@ -173,7 +297,65 @@ public static class AtomKindRegistry
                 "OnRemoved are lifecycle states, not authorable triggers, on this same kind).");
         }
 
+        // E36 (spec-wave-control.md §2.2/§4): wave.control's own op vocabulary plus the two per-op
+        // range checks (`wave` is an ORDINAL, `timerMs` is a non-negative duration) — the same "own
+        // value check" shape as stat.modify's Override refusal immediately above. `op` carries no
+        // Vocabulary declaration on its ParamDef (see WaveControlOps' own doc comment for why); this
+        // is where it is actually enforced, with a message that names the fx.set_dirt_box-class
+        // defect explicitly when the offending value is "freeze".
+        if (string.Equals(kindId, "wave.control", StringComparison.Ordinal))
+        {
+            var opRaw = pars.TryGetValue("op", out var opVal) ? opVal : null;
+            var opStr = opRaw is JsonElement opEl && opEl.ValueKind == JsonValueKind.String
+                ? opEl.GetString()
+                : opRaw?.ToString();
+
+            if (opStr is not null && !WaveControlOps.Contains(opStr, StringComparer.OrdinalIgnoreCase))
+            {
+                var freezeNote = string.Equals(opStr, "freeze", StringComparison.OrdinalIgnoreCase)
+                    ? " The floor op is 'hold': it floors the wave timer at a configured minimum " +
+                      "every tick, it does not stop it (CheatActions.cs's own F-WAVE-FREEZE " +
+                      "handling) — naming it 'freeze' would repeat the fx.set_dirt_box class of " +
+                      "defect, a name that says one thing while the executor does another."
+                    : "";
+                return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    $"wave.control.op '{opStr}' is not one of the four legal ops: summon, huge, " +
+                    $"setTimer, hold.{freezeNote}");
+            }
+
+            if (string.Equals(opStr, "summon", StringComparison.OrdinalIgnoreCase)
+                && pars.TryGetValue("wave", out var waveRaw) && TryInt(waveRaw, out var wave)
+                && wave < 1)
+            {
+                return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    $"wave.control.wave '{wave}' is a wave ORDINAL, not a magnitude — it must be >= 1");
+            }
+
+            if (string.Equals(opStr, "setTimer", StringComparison.OrdinalIgnoreCase)
+                && pars.TryGetValue("timerMs", out var timerRaw) && TryInt(timerRaw, out var timerMs)
+                && timerMs < 0)
+            {
+                return AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    $"wave.control.timerMs '{timerMs}' must be >= 0 (integer ms, divided by 1000 " +
+                    "once, at the Unity boundary)");
+            }
+        }
+
         return AtomRejection.Ok;
+    }
+
+    /// <summary>Read an int out of either a plain boxed number (tests) or a wire `JsonElement`
+    /// (the real load path) — mirrors <c>AtomRowValidator.TryInt</c>, duplicated rather than shared
+    /// because that one is private to a different class with a different constructor shape.</summary>
+    static bool TryInt(object? v, out int result)
+    {
+        switch (v)
+        {
+            case int i: result = i; return true;
+            case long l when l is >= int.MinValue and <= int.MaxValue: result = (int)l; return true;
+            case JsonElement { ValueKind: JsonValueKind.Number } je: return je.TryGetInt32(out result);
+            default: result = 0; return false;
+        }
     }
 
     /// <summary>Validate that a kind may carry a trigger. Unknown or disallowed both reject.</summary>
@@ -314,12 +496,13 @@ public static class AtomKindRegistry
                     // very content it was built for.
                     new ParamDef("capPerMatch", ParamKind.Int)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.Events,
+                EventsPlusMatchAndEconomy,
                 PowerCategory.Economy,
                 "FA9. Currencies are sun|money|points|maxSun|maxMoney — 5, not 3; the injector does " +
                 "not narrow this (E29 §2.1 correction 1). Empire currencies (loam, soul, essence.*, " +
                 "shard.*) share no member with this vocabulary and are not atom-authorable: an atom " +
-                "writes the match-scoped economy, never the empire ledger."),
+                "writes the match-scoped economy, never the empire ledger. E34: also carries the five " +
+                "match/board-economy triggers — FA9 has no target either."),
 
             // ---- Status --------------------------------------------------------------------
             // D7: re-derived from FA2's allowlist and ExecApplyStatus. The previous schema declared
@@ -412,21 +595,42 @@ public static class AtomKindRegistry
                     new ParamDef("count", ParamKind.Int),
                     new ParamDef("row", ParamKind.Int),
                     // G1: the sink forwards a different subset per kind and silently drops the rest.
-                    new ParamDef("col", ParamKind.Int, HonouredOnlyWhen: "kind=plant"),
-                    new ParamDef("x", ParamKind.Value, HonouredOnlyWhen: "kind=zombie|bullet"),
+                    // E40 (spec-spawn-non-grid.md §2a): pet/bucket/coin place at a cell the same way
+                    // plant does — MiniPet.SetPet / ItemManager.SetBucket / CreateItem.SetCoin each
+                    // take a col/row pair (CellCenter for pet/bucket; a raw column/row pair for coin,
+                    // whose arm is refused separately below — declared here anyway so lifting that
+                    // refusal later needs no schema edit).
+                    new ParamDef("col", ParamKind.Int, HonouredOnlyWhen: "kind=plant|pet|bucket|coin"),
+                    // E40: CreateMower.SetMower(MowerType, float x, int row) places by x/row, not
+                    // col — the one widened kind that joins zombie/bullet's existing x reader rather
+                    // than plant/pet/bucket's col reader.
+                    new ParamDef("x", ParamKind.Value, HonouredOnlyWhen: "kind=zombie|bullet|mower"),
                     new ParamDef("hp", ParamKind.Value, HonouredOnlyWhen: "kind=zombie"),
                     new ParamDef("maxHp", ParamKind.Value, HonouredOnlyWhen: "kind=zombie"),
                     new ParamDef("mindControlled", ParamKind.Bool, HonouredOnlyWhen: "kind=zombie"),
                     // E28 fix #5: DebugActions.ApplyAbsoluteProps already has an absolute-atk hook for
                     // plants (P-ATK) and the Z-ATK cheat id already exists for zombies — the sink just
                     // never forwarded `atk` into the payload for either kind, and never gave the zombie
-                    // branch an atk read at all. Bullets have no such hook (they carry `damage` on the
-                    // projectile itself, a different mechanism) — scoped out, not silently dropped.
-                    new ParamDef("atk", ParamKind.Value, HonouredOnlyWhen: "kind=plant|zombie")),
+                    // branch an atk read at all.
+                    // E37 (spec-projectile-control.md §2a): widened to `kind=bullet` too — a spawned
+                    // bullet carries `damage` on the projectile itself (a different Unity target,
+                    // `Bullet.Damage`, not a modifier-bag hook), and the sink now translates
+                    // atk -> damage at the payload boundary (InjectorEffectActionSink's SpawnBulletOnce).
+                    // Was scoped out as "bullets have no such hook" — that was the wiring gap this
+                    // module closes, not a permanent limitation.
+                    new ParamDef("atk", ParamKind.Value, HonouredOnlyWhen: "kind=plant|zombie|bullet"),
+                    // E37 §2a: the three bullet-only spawn params, closed against the real swept
+                    // BulletMoveWay set (BulletMoveWayValues above) — never the old, unswept
+                    // right|left|up|down|track guess.
+                    new ParamDef("y", ParamKind.Value, HonouredOnlyWhen: "kind=bullet"),
+                    new ParamDef("moveWay", ParamKind.String, HonouredOnlyWhen: "kind=bullet",
+                        Vocabulary: () => BulletMoveWayValues),
+                    new ParamDef("fromType", ParamKind.Int, HonouredOnlyWhen: "kind=bullet")),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.Events,
+                EventsPlusMatchAndEconomy,
                 PowerCategory.Offense | PowerCategory.Utility,
-                "FA4."),
+                "FA4. E34: also carries the five match/board-economy triggers — count/row/col are " +
+                "explicit params, so this kind needs no entity in hand."),
 
             new("board.action", AttachPoint.Board, new ParamSchema(
                     // E29: the 4 canonical spellings ExecBoardAction's own normalization maps onto —
@@ -438,9 +642,10 @@ public static class AtomKindRegistry
                     new ParamDef("col", ParamKind.Int),
                     new ParamDef("damage", ParamKind.Value)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.Events,
+                EventsPlusMatchAndEconomy,
                 PowerCategory.Offense | PowerCategory.Control,
-                "FA5. Ops are freeze|doom|fireline|cherry."),
+                "FA5. Ops are freeze|doom|fireline|cherry. E34: also carries the five match/board-" +
+                "economy triggers — row/col are explicit params."),
 
             new("grid.spawn", AttachPoint.Board, new ParamSchema(
                     // E29: the 12-member GridItemType vocabulary (Core's own mirror — see
@@ -453,9 +658,10 @@ public static class AtomKindRegistry
                     // DebugActions.SpawnGrid, which already read and honoured it.
                     new ParamDef("graveType", ParamKind.Int)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.Events,
+                EventsPlusMatchAndEconomy,
                 PowerCategory.Utility,
-                "FA6."),
+                "FA6. E34: also carries the five match/board-economy triggers — row/col are explicit " +
+                "params."),
 
             new("grid.clear", AttachPoint.Board, new ParamSchema(
                     // E29: same 12-member GridItemType vocabulary as grid.spawn.
@@ -469,9 +675,10 @@ public static class AtomKindRegistry
                     new ParamDef("row", ParamKind.Int),
                     new ParamDef("col", ParamKind.Int)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.Events,
+                EventsPlusMatchAndEconomy,
                 PowerCategory.Utility,
-                "FA7."),
+                "FA7. E34: also carries the five match/board-economy triggers — row/col are explicit " +
+                "params."),
 
             new("box.set", AttachPoint.Board, new ParamSchema(
                     // D7: ExecSetBox reads this with JsonOverlay.GetInt. Declared String, an atom authoring
@@ -490,9 +697,70 @@ public static class AtomKindRegistry
                     // the cross-cutting defect this array param exposed while being specced).
                     new ParamDef("cells", ParamKind.Array)),
                 new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.PlanOnly),
-                AtomTriggers.Events,
+                EventsPlusMatchAndEconomy,
                 PowerCategory.Utility,
-                "FA8."),
+                "FA8. E34: also carries the five match/board-economy triggers — row/col/cells are " +
+                "explicit params."),
+
+            // E37 (spec-projectile-control.md §2b): the bullet the GAME fires, not one an atom spawns
+            // — spawn.entity{kind:bullet} above CREATES a bullet; this kind changes an EXISTING one's
+            // damage/type/moveWay. No new attach point: still Board, the same seam spawn.entity uses.
+            //
+            // A permanent modifier (AtomTriggers.None, like stat.derived): the grant's presence is the
+            // effect, read as a resolved grant inside the EXISTING Bullet.InitData postfix
+            // (CheatPrefixes.BulletInitCheat), never rewritten, via GrantedBulletModifyAtomReader — the
+            // same resolved-read shape stat.derived's GrantedDerivedAtomReader uses at
+            // AtomDerivedSubsystem. Cheat state (D-DMG-SET) is applied AFTER this read, so it still
+            // wins (§2b.1's mandatory permanentModifiers amendment in AtomKindRegistryTests.cs covers
+            // the empty-Triggers guard this shape requires).
+            new("bullet.modify", AttachPoint.Board, new ParamSchema(
+                    new ParamDef("op", ParamKind.String, Required: true, Vocabulary: () => BulletModifyOps),
+                    new ParamDef("amount", ParamKind.Value, Required: true),
+                    new ParamDef("bulletType", ParamKind.Int),
+                    new ParamDef("moveWay", ParamKind.String, Vocabulary: () => BulletMoveWayValues)),
+                // Lawn: Full — CheatPrefixes.cs's BulletInitCheat postfix reads it. Battle: pending,
+                // NEVER "never" (E1's living-table rule) — battle has no projectile today, that could
+                // change. Sim: None, same reason as Battle.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.None),
+                AtomTriggers.None,
+                PowerCategory.Offense,
+                "op is set|add|scale. scale is per-mille (amount 1500 = x1.5). Read at Bullet.InitData, " +
+                "keyed by the firing plant's owner key. Cheat state applied last, D-DMG-SET still wins."),
+
+            // ---- Match -----------------------------------------------------------------------
+            new("match.modify", AttachPoint.Match, new ParamSchema(
+                    // E35 (spec-match-modify.md §2.3): the closed 11-field vocabulary, this kind's
+                    // own value check until E29's registry-backed one lands.
+                    new ParamDef("field", ParamKind.String, Required: true,
+                        Vocabulary: () => MatchModifyFields),
+                    new ParamDef("amount", ParamKind.Value, Required: true)),
+                // No `op` param, deliberately (§2.2): ApplyBoardConfig assigns, it never reads live
+                // host state to compute a delta — the overlay rule this kind's own note names.
+                // Battle/Sim are None: neither has a Board.config or a consumer.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.None),
+                AtomTriggers.MatchEvents,
+                PowerCategory.Offense | PowerCategory.Survivability | PowerCategory.Control,
+                "Sets one Board.config field for the match. Set-only: the executor assigns, and a " +
+                "multiply would need to read live host state, which the overlay rule forbids."),
+
+            // E36 (spec-wave-control.md): the second Match-attached kind — lets content shape the
+            // pressure the player is actually fighting (summon a wave, summon a huge wave, set the
+            // wave timer, hold it), all four against existing CheatActions/DebugActions entry points.
+            new("wave.control", AttachPoint.Match, new ParamSchema(
+                    new ParamDef("op", ParamKind.String, Required: true),
+                    new ParamDef("wave", ParamKind.Int, HonouredOnlyWhen: "op=summon"),
+                    new ParamDef("timerMs", ParamKind.Int, HonouredOnlyWhen: "op=setTimer"),
+                    new ParamDef("enabled", ParamKind.Bool, HonouredOnlyWhen: "op=hold")),
+                // Battle/Sim are None: neither has a BoardSpawner, and flipping a cell without an
+                // executor is D6 (the exact quarantine class this registry already applies elsewhere).
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.None, RuntimeState.None),
+                EventsPlusMatch,
+                PowerCategory.Offense | PowerCategory.Control,
+                "Ops are summon|huge|setTimer|hold. 'hold' floors the wave timer, it does not stop " +
+                "it — CheatActions.cs's own F-WAVE-FREEZE handling (the floor value itself now lives " +
+                "in data/tuning/match.v1.json's waveHoldFloorSeconds, not a bare literal). Refused at " +
+                "ChainDepth > 0 — summon/huge cause spawns, which re-emit the events that could " +
+                "re-trigger this same atom, and that loop cannot be diagnosed after the fact."),
         };
 
         var map = new Dictionary<string, AtomKind>(StringComparer.OrdinalIgnoreCase);

@@ -55,7 +55,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-002",
@@ -91,7 +93,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-003",
@@ -126,7 +130,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-004",
@@ -162,7 +168,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-005",
@@ -198,7 +206,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-006",
@@ -234,7 +244,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-007",
@@ -269,7 +281,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-008",
@@ -305,7 +319,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-009",
@@ -340,7 +356,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.plant-root-totem-010",
@@ -376,7 +394,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     }
   ]
 }

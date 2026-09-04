@@ -5,6 +5,28 @@ namespace FusionRpg.Core.Effects;
 
 public static class EffectOwnerKey
 {
+    /// <summary>
+    /// E34 (spec-trigger-vocabulary.md §2.4): the five match/board-economy triggers a type-keyed
+    /// (<c>plant:{tid}</c> / <c>zombie:{tid}</c>) owner grant must always refuse. A type-keyed owner
+    /// means "this entity type"; none of the five is about an entity type — and OnGridPlace's TypeId
+    /// is a GRID ITEM type (§2.2) that happens to share this field with a zombie/plant type. Without
+    /// this explicit arm, the zombie branch below names no trigger at all and its only gate (the side
+    /// check a few lines down) refuses only when ev.Side is PRESENT and not "zombie" — a match-scoped
+    /// event has no Side, so it would wave straight through to `(ev.TypeId ?? ev.TargetTypeId) == tid`,
+    /// and a `zombie:7` grant would fire on every placement of grid item type 7. The plant branch
+    /// already falls through to `false` for anything not in its own explicit list, so this arm is a
+    /// stated refusal there rather than an unnamed one — the zombie branch is where it is load-bearing.
+    /// </summary>
+    static readonly string[] TypeKeyedRefusalTriggers =
+    {
+        EffectTriggers.OnWave, EffectTriggers.OnMatchStart, EffectTriggers.OnMatchEnd,
+        EffectTriggers.OnSunCollect, EffectTriggers.OnGridPlace
+    };
+
+    static bool IsTypeKeyedRefusalTrigger(string? trigger) =>
+        trigger is not null &&
+        Array.Exists(TypeKeyedRefusalTriggers, t => string.Equals(t, trigger, StringComparison.OrdinalIgnoreCase));
+
     public static bool MatchesEvent(EffectGrant grant, EffectEventDto ev)
     {
         var key = grant.OwnerKey ?? "";
@@ -14,6 +36,14 @@ public static class EffectOwnerKey
         if (key.StartsWith("plant:", StringComparison.OrdinalIgnoreCase))
         {
             if (!int.TryParse(key.AsSpan(6), out var tid)) return false;
+
+            // E34 §2.4: explicit refusal for the five match/board-economy triggers. Falling through
+            // to `false` below would already produce the right answer here — stated explicitly to
+            // match the zombie branch's own arm, and so a future trigger added to that branch's
+            // explicit list cannot silently start matching one of these five by accident.
+            if (IsTypeKeyedRefusalTrigger(ev.Trigger))
+                return false;
+
             if (string.Equals(ev.Trigger, EffectTriggers.OnSpawn, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(ev.Trigger, EffectTriggers.OnDeath, StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(ev.Trigger, EffectTriggers.OnDamageTaken, StringComparison.OrdinalIgnoreCase))
@@ -37,6 +67,16 @@ public static class EffectOwnerKey
         if (key.StartsWith("zombie:", StringComparison.OrdinalIgnoreCase))
         {
             if (!int.TryParse(key.AsSpan(7), out var tid)) return false;
+
+            // E34 §2.4: the real fix. Without this explicit arm, none of the checks below name these
+            // five triggers, so a match-scoped event (no Side) waves through the side check further
+            // down (it only refuses a PRESENT wrong side) and lands on
+            // `(ev.TypeId ?? ev.TargetTypeId) == tid` — and OnGridPlace's TypeId IS the grid item type
+            // (§2.2), so a `zombie:7` grant would fire on every placement of grid item type 7. This is
+            // a refusal being ADDED here, not documented — the zombie branch had no narrowing for any
+            // of these five before this module.
+            if (IsTypeKeyedRefusalTrigger(ev.Trigger))
+                return false;
 
             // E33 (spec-activation-edge.md §2.3, point 2 — a NARROWING BEHAVIOUR CHANGE on a branch
             // Battle's live path flows through: BasicAttack.cs raises OnActivate once per resolved

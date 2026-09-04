@@ -1,0 +1,81 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:55:00Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Vigor",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "luminous-nut"
+    ],
+    "gameTypeId": 1309,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a defensive support plant that provides light and minor healing, which does not align with the catastrophic threat level of a 'harbinger'.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "LanternNut",
+    "targetPreference": "frontline",
+    "traits": [
+      "photovoltaic-regeneration",
+      "defensive-barrier",
+      "light-emittance"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  }
+]

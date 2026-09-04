@@ -17,16 +17,19 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:51:30Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:49:20Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -42,37 +45,40 @@
       "Summonable"
     ],
     "aptitudePrimary": "Bulwark",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "ponderous",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Automaton-Undead"
+      "automaton-undead",
+      "bio-mechanical construct"
     ],
-    "gameTypeId": 23,
+    "gameTypeId": 38,
     "posture": "Bastion",
-    "pure": true,
-    "rarity": "heirloom",
+    "pure": false,
+    "rarity": "fused",
     "reach": "melee",
-    "reason": "The description implies a repetitive, defensive mechanic rather than the widespread devastation required for a tyrant-level threat.",
+    "reason": "Its massive size, crushing ability, high resilience, and immunity to most crowd control effects justify its status as a high-threat tyrant.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "zombie",
-    "speciesId": "DollSilver",
+    "speciesId": "IronGargantuar",
     "targetPreference": "frontline",
     "traits": [
-      "Matryoshka-Shell",
-      "Reactive-Debris",
-      "Layered-Defense"
+      "heavy-tread",
+      "mechanical-head",
+      "status-immune",
+      "crushing-force",
+      "non-sentient"
     ],
     "variants": [
       "normal",
-      "shiny"
+      "corrupted"
     ],
-    "verdict": "too-high"
+    "verdict": "agree"
   }
 ]

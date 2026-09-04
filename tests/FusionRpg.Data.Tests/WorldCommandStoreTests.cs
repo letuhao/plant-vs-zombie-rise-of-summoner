@@ -125,4 +125,102 @@ public class WorldCommandStoreTests : IDisposable
         Assert.Equal("entity.not-yours", reason);
         Assert.Empty(_store.ListWorldCommands("w", 0));
     }
+
+    // world-stage W22: `Amount` and `StructureId` through all six round-trip sites — the two fields
+    // `WorldCommandRequest`/`CommandPayload` never carried, so a `sustain`/`build` order came back
+    // amountless (or structure-less) the moment a turn resolved, even though `WorldCommand` and both
+    // resolvers already had them wired.
+
+    [Fact]
+    public void A_sustain_orders_amount_round_trips_through_ListWorldCommands()
+    {
+        var sustain = new WorldCommand
+        {
+            CommanderId = "dave", CommandId = "c-sustain", Kind = WorldCommandKinds.Sustain,
+            EntityId = "e-dave-legion-1", SectorId = "homeworld", Amount = 250
+        };
+        Assert.True(_store.SubmitWorldCommand("w", sustain).Ok);
+
+        var stored = Assert.Single(_store.ListWorldCommands("w", 0));
+        Assert.Equal(250, stored.Amount);
+    }
+
+    [Fact]
+    public void A_build_orders_structure_id_round_trips_through_ListWorldCommands()
+    {
+        var build = new WorldCommand
+        {
+            CommanderId = "dave", CommandId = "c-build", Kind = WorldCommandKinds.Build,
+            EntityId = "e-dave-legion-1", SectorId = "homeworld", SlotIndex = 1, StructureId = "well"
+        };
+        Assert.True(_store.SubmitWorldCommand("w", build).Ok);
+
+        var stored = Assert.Single(_store.ListWorldCommands("w", 0));
+        Assert.Equal("well", stored.StructureId);
+    }
+
+    [Fact]
+    public void Both_fields_also_round_trip_through_ListLoggedWorldCommands()
+    {
+        Assert.True(_store.SubmitWorldCommand("w", new WorldCommand
+        {
+            CommanderId = "dave", CommandId = "c-sustain", Kind = WorldCommandKinds.Sustain,
+            EntityId = "e-dave-legion-1", SectorId = "homeworld", Amount = 250
+        }).Ok);
+
+        var logged = Assert.Single(_store.ListLoggedWorldCommands("w", 0));
+        Assert.Equal(250, logged.Command.Amount);
+    }
+
+    /// <summary>
+    /// `ListWorldCommandsUnlocked` — the silent sixth site, called only from inside
+    /// `CommitWorldTurn` (never directly testable) — is proven by driving a real commit and checking
+    /// the *effect* `SustainResolver` only produces when it actually received the amount: the
+    /// sector's own stock rising by exactly that much. If this field were lost on this path (as it
+    /// was before this task), the command would resolve as `amount.invalid` and never touch stock.
+    /// </summary>
+    [Fact]
+    public void The_amount_reaches_resolution_through_the_engines_own_internal_hydration_path()
+    {
+        Assert.True(_store.SubmitWorldCommand("w", new WorldCommand
+        {
+            CommanderId = "dave", CommandId = "c-sustain", Kind = WorldCommandKinds.Sustain,
+            EntityId = "e-dave-legion-1", SectorId = "homeworld", Amount = 250
+        }).Ok);
+
+        var commit = _store.CommitWorldTurn("w", "dave", 0);
+        Assert.True(commit.Ok, commit.Reason);
+        Assert.True(commit.Advanced);
+
+        // If `Amount` were lost on `ListWorldCommandsUnlocked`'s own internal path (as it was before
+        // this task), `WorldCommandAdmission` would refuse it as `amount.invalid` and the report
+        // would carry that drop instead of a clean `command.accepted`.
+        var report = _store.GetWorldTurnReport("w", 0)!;
+        Assert.DoesNotContain(report.Entries, e => e.Detail == "amount.invalid");
+        Assert.Contains(report.Entries, e => e.Kind == TurnReportKinds.CommandAccepted && e.Subject == "c-sustain");
+    }
+
+    /// <summary>A `payload_json` row committed before this task must still deserialize, with both
+    /// new fields reading null — the same `stance`-shaped regression precedent this file's own
+    /// comment on `CommandPayload` describes.</summary>
+    [Fact]
+    public void An_old_payload_row_with_neither_field_still_deserializes_with_both_null()
+    {
+        using var db = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={_store.HotPath}");
+        db.Open();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = """
+                INSERT INTO rpg_world_commands (world_id, turn, commander_id, command_id, seq, kind, payload_json, submitted_utc)
+                VALUES ('w', 0, 'dave', 'c-old', 0, 'stand-fast', $payload, '2026-01-01T00:00:00Z');
+                """;
+            // The exact pre-W22 shape: no "Amount", no "StructureId" keys at all.
+            cmd.Parameters.AddWithValue("$payload", """{"EntityId":null,"SectorId":null,"SlotIndex":null,"LanePath":[]}""");
+            cmd.ExecuteNonQuery();
+        }
+
+        var stored = Assert.Single(_store.ListWorldCommands("w", 0));
+        Assert.Null(stored.Amount);
+        Assert.Null(stored.StructureId);
+    }
 }

@@ -45,7 +45,7 @@ var inputPath = ArgOrDefault(args, "--input", Path.Combine(tuningDirPath, Latest
 AptitudeTuningHub.Configure(AptitudeTuningLoader.Parse(File.ReadAllText(inputPath)));
 CombatPolicy.Configure(CombatTuningLoader.Parse(Read("combat.v1.json")));
 ShieldPolicy.Configure(ShieldTuningLoader.Parse(Read("shield.v1.json")));
-DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(Read("derived-stats.v1.json")));
+DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(Read("derived-stats.v2.json")));
 PowerTuningHub.Configure(PowerTuningLoader.Parse(Read("power-scale.v2.json")));
 StatusPolicy.Configure(StatusTuningLoader.Parse(Read("status.v1.json")));
 StatsTuningHub.Configure(StatsTuningLoader.Parse(Read("stats.v1.json")));

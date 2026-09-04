@@ -1,0 +1,316 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:18:53Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "quick",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "legume-artillery"
+    ],
+    "gameTypeId": 1030,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "As a basic projectile unit capable of rapid-fire doubling and evolution, it functions as a standard combatant rather than a mere nuisance or low-level raider.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "DoubleShooter",
+    "targetPreference": "frontline",
+    "traits": [
+      "dual-projectile",
+      "pod-splitting",
+      "manual-evolution"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:31:22Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "legume-artillery"
+    ],
+    "gameTypeId": 1385,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's threat is localized to a single lane and relies on a specific status effect, making it a tactical support unit rather than a widespread warden-level threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "GarlicPea",
+    "targetPreference": "swarm",
+    "traits": [
+      "toxin-infusion",
+      "miasma-generation",
+      "synergistic-poisoning"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:35:07Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "legume-artillery"
+    ],
+    "gameTypeId": 1032,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "A unit that fires 80 damage every 1.5 seconds via a four-way fusion is a significant offensive force, far exceeding the capabilities of a mere 'raider'.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "GatlingPea",
+    "targetPreference": "swarm",
+    "traits": [
+      "multi-projectile",
+      "rapid-fire",
+      "synchronized-burst"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:21:59Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught",
+        "attackTempo": "steady"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "Retribution",
+    "attackTempo": "quick",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "legume-artillery"
+    ],
+    "gameTypeId": 1090,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to upgrade into a Gatling Pea via manual interaction and the ability to fire multiple projectiles simultaneously makes it a significant threat rather than a mere raider.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SplitPea",
+    "targetPreference": "frontline",
+    "traits": [
+      "tri-directional-fire",
+      "rebounding-projectiles",
+      "manual-evolution"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  }
+]

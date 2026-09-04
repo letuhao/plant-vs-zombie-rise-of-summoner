@@ -44,10 +44,17 @@ public class AtomCatalogSsotDriftTests
         // Sanity anchors: these ARE today's generated values, not guesses. If one of these Assert.Equal
         // lines fails, code moved and the doc needs updating — that is the point.
         Assert.Equal(267, registry.AllRegistered.Count);
-        Assert.Equal(11, StatChannels.All.Length);
-        Assert.Equal(8, AtomTriggers.All.Length);
-        Assert.Equal(12, AtomKindRegistry.KindCount);
-        Assert.Equal(5, AtomKindRegistry.AttachPointCount);
+        // 11 since E16; E38 (spec-entity-fields-12plus.md) took it to 23.
+        Assert.Equal(23, StatChannels.All.Length);
+        // E34 (spec-trigger-vocabulary.md): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/OnSunCollect/
+        // OnGridPlace. Verified live before editing, as this module's own citation-hygiene rule asks.
+        Assert.Equal(13, AtomTriggers.All.Length);
+        // E35 (spec-match-modify.md): 12 -> 13 kinds, 5 -> 6 attach points, with match.modify / Match.
+        // E36 (spec-wave-control.md): 13 -> 14 kinds, wave.control on the same Match attach point.
+        // E37 (spec-projectile-control.md): 14 -> 15 kinds, bullet.modify on the existing Board point
+        // (no attach-point change).
+        Assert.Equal(15, AtomKindRegistry.KindCount);
+        Assert.Equal(6, AtomKindRegistry.AttachPointCount);
 
         Assert.Contains($"Derived — {registry.AllRegistered.Count} registered", text);
         Assert.Contains($"Primary — {StatChannels.All.Length}, and only these", text);

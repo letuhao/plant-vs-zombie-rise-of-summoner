@@ -1,0 +1,245 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:22:53Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "fungal-symbiote"
+    ],
+    "gameTypeId": 230,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a passive resource producer that lacks offensive capabilities or direct combat utility.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "FireSunshroom_a",
+    "targetPreference": "indiscriminate",
+    "threatBand": "nuisance",
+    "traits": [
+      "growth-stages",
+      "symbiotic-energy-conversion",
+      "dense-planting",
+      "morphing-states"
+    ],
+    "variants": [
+      "shiny",
+      "normal"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:22:53Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "fungal-symbiote"
+    ],
+    "gameTypeId": 231,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions primarily as a resource generator and status applicator rather than a direct combatant, focusing on passive multiplication and minor debuffs.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "FireSunshroom_b",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "low-profile",
+      "dense-planting",
+      "firefly-emanation",
+      "status-inflicting",
+      "resource-generating"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:23:34Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught",
+        "attackTempo": "flurry"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "fungal-symbiote"
+    ],
+    "gameTypeId": 232,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a passive support unit that provides minor status effects and utility rather than direct combat lethality.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "FireSunshroom_c",
+    "targetPreference": "swarm",
+    "threatBand": "nuisance",
+    "traits": [
+      "low-profile",
+      "dense-planting",
+      "firefly-dispenser",
+      "status-infuser"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ]
+  }
+]

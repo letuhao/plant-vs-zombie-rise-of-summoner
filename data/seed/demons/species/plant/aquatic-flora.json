@@ -17,16 +17,94 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:04:29Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Pierce",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "aquatic-flora"
+    ],
+    "gameTypeId": 1237,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's damage output is low and its primary effect is a utility-based status application rather than a lethal threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "CaltropKelp_water",
+    "targetPreference": "backline",
+    "traits": [
+      "aquatic-infusion",
+      "thorns",
+      "vessel-piercing"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:24:10Z",
+      "emittedUtc": "2026-09-04T10:28:39Z",
       "minorityValues": {
         "elementPrimary": "light",
         "threatBand": "nuisance"
@@ -47,34 +125,117 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "aquatic_flora"
+      "aquatic flora"
     ],
     "gameTypeId": 1156,
     "posture": "Force",
     "pure": true,
-    "rarity": "chaff",
+    "rarity": "sprout",
     "reach": "short",
     "reason": "Despite its lethal drowning capability, its low stature, aquatic nature, and inability to fuse suggest it is a localized environmental hazard rather than a widespread threat.",
     "resourceProfile": [
-      "hp",
-      "stamina"
+      "hp"
     ],
     "side": "plant",
     "speciesId": "Firekelp",
     "targetPreference": "backline",
     "threatBand": "pest",
     "traits": [
-      "bioluminescent",
+      "luminescent",
       "constricting",
-      "non-assimilative"
+      "lethal"
     ],
-    "variants": []
+    "variants": [
+      "normal"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:43:37Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "aquatic-flora",
+      "combat-grass"
+    ],
+    "gameTypeId": 1068,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a specialized combat unit with high damage multipliers against specific targets, which exceeds the scope of a mere nuisance but lacks the wide-scale destruction required for a higher threat level.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "IceCattail",
+    "targetPreference": "frontline",
+    "traits": [
+      "cryo-specialist",
+      "aerial-targeting",
+      "cold-affinity",
+      "aquatic"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
   },
   {
     "_derived": [
@@ -97,13 +258,14 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
         "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:36:48Z",
+      "emittedUtc": "2026-09-04T10:53:33Z",
       "minorityValues": {
         "aptitudePrimary": "Onslaught",
         "elementPrimary": "ice",
@@ -125,7 +287,7 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
@@ -150,12 +312,172 @@
     "traits": [
       "explosive",
       "constricting",
-      "submerged"
+      "submerged",
+      "lethal"
     ],
     "variants": [
       "normal",
       "mutated",
       "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:16:50Z",
+      "minorityValues": {
+        "rarity": "grafted"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "aquatic flora"
+    ],
+    "gameTypeId": 19,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature is a low-profile, short-range plant that deals minor damage and serves primarily as a resource-generating utility.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SeaShroom",
+    "targetPreference": "frontline",
+    "traits": [
+      "spore-emitting",
+      "low-profile",
+      "resource-reclaiming"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:35:32Z",
+      "minorityValues": {
+        "elementPrimary": "ice",
+        "threatBand": "pest"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "aquatic flora"
+    ],
+    "gameTypeId": 15,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "sprout",
+    "reach": "short",
+    "reason": "While it provides a lethal instant-kill mechanic, its inability to block movement and its low-profile nature make it a localized environmental hazard rather than a widespread threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "Tanglekelp",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "entangling",
+      "lethal",
+      "non-obstructive"
+    ],
+    "variants": [
+      "normal"
     ]
   }
 ]

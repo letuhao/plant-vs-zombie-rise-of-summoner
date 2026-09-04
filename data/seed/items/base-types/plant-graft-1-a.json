@@ -30,12 +30,12 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.fortitude",
         "powerBand": "trivial"
       },
       "iconKey": "icon.base.dusted-eye",
       "flavorKey": "flavor.base.dusted-eye",
-      "flavor": "A spore's golden gleam, caught as it falls \u2014 ephemeral as the wealth it carries.",
+      "flavor": "A spore's golden gleam, caught as it falls — ephemeral as the wealth it carries.",
       "tags": [
         "light",
         "organic",
@@ -51,7 +51,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-002",
@@ -62,7 +63,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
       "iconKey": "icon.base.released-cutting",
@@ -83,7 +84,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-003",
@@ -115,7 +117,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-004",
@@ -126,7 +129,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.fortitude",
         "powerBand": "trivial"
       },
       "iconKey": "icon.base.ephemeral-inlay",
@@ -147,7 +150,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-005",
@@ -179,7 +183,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-006",
@@ -211,7 +216,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-007",
@@ -222,7 +228,7 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "medium"
       },
       "iconKey": "icon.base.nourished-bridge",
@@ -243,7 +249,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-008",
@@ -254,12 +261,12 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
       "iconKey": "icon.base.potent-callus",
       "flavorKey": "flavor.base.potent-callus",
-      "flavor": "The healed scar tissue where two plants knit \u2014 a seat of quiet abundance.",
+      "flavor": "The healed scar tissue where two plants knit — a seat of quiet abundance.",
       "tags": [
         "medium",
         "organic",
@@ -275,7 +282,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-009",
@@ -291,7 +299,7 @@
       },
       "iconKey": "icon.base.cohered-union",
       "flavorKey": "flavor.base.cohered-union",
-      "flavor": "Two species bonded into one \u2014 the older strength of fusion, the graft taken and held.",
+      "flavor": "Two species bonded into one — the older strength of fusion, the graft taken and held.",
       "tags": [
         "heavy",
         "organic",
@@ -307,7 +315,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-010",
@@ -318,12 +327,12 @@
       "class": "graft",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "iconKey": "icon.base.permanent-ligature",
       "flavorKey": "flavor.base.permanent-ligature",
-      "flavor": "The binding that holds forever \u2014 sinew and fibre twisted into an unbreakable knot.",
+      "flavor": "The binding that holds forever — sinew and fibre twisted into an unbreakable knot.",
       "tags": [
         "heavy",
         "organic",
@@ -339,7 +348,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-011",
@@ -355,7 +365,7 @@
       },
       "iconKey": "icon.base.ingrown-wedge",
       "flavorKey": "flavor.base.ingrown-wedge",
-      "flavor": "A wedge driven deep and sealed by years of growth \u2014 immovable, structural, indispensable.",
+      "flavor": "A wedge driven deep and sealed by years of growth — immovable, structural, indispensable.",
       "tags": [
         "heavy",
         "organic",
@@ -371,7 +381,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     },
     {
       "id": "item.plant-graft-1-a-012",
@@ -387,7 +398,7 @@
       },
       "iconKey": "icon.base.taken-rootstock",
       "flavorKey": "flavor.base.taken-rootstock",
-      "flavor": "The base stock that took the graft \u2014 wild power domesticated through careful joining.",
+      "flavor": "The base stock that took the graft — wild power domesticated through careful joining.",
       "tags": [
         "heavy",
         "organic",
@@ -403,7 +414,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 0
     }
   ]
 }

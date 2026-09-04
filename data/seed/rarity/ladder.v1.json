@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "kind": "rarity",
+  "_meta": {
+    "batch": "rarity-ladder-v1",
+    "partition": "rarity/ladder",
+    "contractVersion": 1,
+    "sourceRef": "ssot-rarity.md §3.3, item-ideal.md rarity-bands (module 7, D7/E3)",
+    "note": "prefixRolls/suffixRolls are the FLOOR of ssot-rarity.md §3.3's published half-ranges -- the schema has no _max column (ask-first under effect-atom E5, not decided). minTier/maxTier are §3.3's authored tier window. sprout and heirloom carry the E3-corrected halves (0-1/1-1 and 1-2/2-2), not the original published-then-found-wrong 0-1/0-1 and 2-2/2-2."
+  },
+  "entries": [
+    { "id": "chaff",      "ordinal": 10,  "prefixRolls": 0, "suffixRolls": 0, "minTier": 1, "maxTier": 1 },
+    { "id": "sprout",     "ordinal": 20,  "prefixRolls": 0, "suffixRolls": 1, "minTier": 1, "maxTier": 1 },
+    { "id": "grafted",    "ordinal": 30,  "prefixRolls": 0, "suffixRolls": 1, "minTier": 1, "maxTier": 3 },
+    { "id": "cultivated", "ordinal": 40,  "prefixRolls": 1, "suffixRolls": 1, "minTier": 1, "maxTier": 3 },
+    { "id": "fused",      "ordinal": 50,  "prefixRolls": 1, "suffixRolls": 1, "minTier": 2, "maxTier": 4 },
+    { "id": "chimeric",   "ordinal": 60,  "prefixRolls": 1, "suffixRolls": 2, "minTier": 2, "maxTier": 4 },
+    { "id": "heirloom",   "ordinal": 70,  "prefixRolls": 1, "suffixRolls": 2, "minTier": 3, "maxTier": 5 },
+    { "id": "firstseed",  "ordinal": 80,  "prefixRolls": 2, "suffixRolls": 2, "minTier": 3, "maxTier": 5 },
+    { "id": "sunwoven",   "ordinal": 90,  "prefixRolls": 2, "suffixRolls": 2, "minTier": 4, "maxTier": 5 },
+    { "id": "almanac",    "ordinal": 100, "prefixRolls": 3, "suffixRolls": 2, "minTier": 4, "maxTier": 5 }
+  ]
+}

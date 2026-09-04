@@ -1,0 +1,84 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:42:46Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus",
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "Focus",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "star-symbiote"
+    ],
+    "gameTypeId": 920,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to store up to 60 projectiles and release them with doubled speed, doubled damage, and homing capabilities makes it a dominant force on the battlefield.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateBlover",
+    "targetPreference": "backline",
+    "threatBand": "tyrant",
+    "traits": [
+      "star-attraction",
+      "kinetic-acceleration",
+      "homing-projectile",
+      "high-capacity-storage"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ]
+  }
+]

@@ -67,7 +67,7 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         MaxActiveAuras: 1);
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
-        SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
+        SchemaVersion: 2, Version: 2, CategoryResistCap: 0.95, TurnDefaultSpeed: 100);
 
     // Minimal, hand-authored -- not the shipped data/tuning/action-rungs.v1.json (tunables-ssot.md's
     // "construct one inline" convention). Every specimen in this assembly's tests holds zero action

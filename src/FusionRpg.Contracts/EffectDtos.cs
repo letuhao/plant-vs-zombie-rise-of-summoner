@@ -22,6 +22,15 @@ public static class EffectTriggers
     /// AtomTriggers.OnActivate (A18b) — the two constants must be byte-identical, because EffectBag
     /// matches by string.</summary>
     public const string OnActivate = "OnActivate";
+
+    // E34 (spec-trigger-vocabulary.md §2.1): five match/board-economy triggers — input only, no kind
+    // or executor of their own (that is E35/E36's job). Mirrors AtomTriggers.OnWave etc. exactly, for
+    // the same byte-identical reason as OnActivate above.
+    public const string OnWave = "OnWave";
+    public const string OnMatchStart = "OnMatchStart";
+    public const string OnMatchEnd = "OnMatchEnd";
+    public const string OnSunCollect = "OnSunCollect";
+    public const string OnGridPlace = "OnGridPlace";
 }
 
 public static class EffectActions
@@ -47,6 +56,36 @@ public static class EffectActions
     /// executor, which is why adding it does not touch `InjectorEffectActionSink` or `BattleEffectSink`.
     /// </summary>
     public const string ModifyDerivedStat = "ModifyDerivedStat";
+
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.5): match.modify's opcode — sets one `Board.config` field for the
+    /// match through `CheatState` + `CheatActions.ApplyBoardConfig`. `/effects/contract`'s `actions`
+    /// array already reflects every public const on this class (`DebugEndpoints.cs`,
+    /// `PublicConstStrings(typeof(EffectActions))`), so this constant publishing itself is the whole
+    /// of this module's own "grow the published list" obligation — no endpoint edit needed.
+    /// </summary>
+    public const string ModifyMatch = "ModifyMatch";
+
+    /// <summary>
+    /// E36 (spec-wave-control.md §2.1): wave.control's opcode — summon|huge|setTimer|hold, all four
+    /// against existing `CheatActions`/`DebugActions` entry points, no new host write. Refused at
+    /// `EffectEventDto.ChainDepth > 0` (§2.3) — `summon`/`huge` cause spawns, which re-emit the events
+    /// that could re-trigger this same atom, and that loop cannot be diagnosed after the fact. Same
+    /// reflection-published obligation as `ModifyMatch` above — declaring this constant is the whole
+    /// of the "grow the published list" requirement.
+    /// </summary>
+    public const string WaveControl = "WaveControl";
+
+    /// <summary>
+    /// E37 (spec-projectile-control.md §2b): <c>bullet.modify</c>'s opcode — changes the damage/type/
+    /// moveWay of a bullet the GAME fires (not one <c>spawn.entity{kind:bullet}</c> creates). Like
+    /// <see cref="ModifyDerivedStat"/> this is DECLARATIVE: a permanent modifier with no trigger, read
+    /// as a resolved grant inside <c>Bullet.InitData</c>'s existing postfix
+    /// (<c>CheatPrefixes.BulletInitCheat</c>) rather than executed by either sink. Same reflection-
+    /// published obligation as <see cref="ModifyMatch"/>/<see cref="WaveControl"/> — declaring this
+    /// constant is the whole of the "grow the published /effects/contract list" requirement.
+    /// </summary>
+    public const string BulletModify = "BulletModify";
 }
 
 public static class EffectTypes
@@ -85,6 +124,9 @@ public sealed class EffectEventDto
     [JsonPropertyName("sourceGrantId")] public string? SourceGrantId { get; set; }
     /// <summary>Merged physical hits this event represents (v2 coalescing); 1 = a single hit.</summary>
     [JsonPropertyName("hitCount")] public int HitCount { get; set; } = 1;
+    /// <summary>E34 (spec-trigger-vocabulary.md §2.2): the wave number for OnWave. Additive nullable —
+    /// breaks no existing shape, so FoundationContractVersion.Current stays at its current value.</summary>
+    [JsonPropertyName("wave")] public int? Wave { get; set; }
 }
 
 public sealed class EffectGrantDto

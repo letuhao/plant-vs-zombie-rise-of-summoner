@@ -1,8 +1,9 @@
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The seam an atom kind hooks into. Five, guarded by ADR — this is the list that keeps the
-/// vocabulary finite and auditable.
+/// The seam an atom kind hooks into. Six as of E35, guarded by the "Atom attach points" row in
+/// decisions.md (that row did not exist before E35 — <c>AtomKindRegistryTests.cs</c> is the guard
+/// test it names) — this is the list that keeps the vocabulary finite and auditable.
 /// </summary>
 public enum AttachPoint
 {
@@ -11,6 +12,13 @@ public enum AttachPoint
     Status,
     Shield,
     Board,
+
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.1): a rule the whole match is played under, naming no cell —
+    /// distinct from <see cref="Board"/>, which acts on a cell or an entity within the running match.
+    /// `match.modify` is the first (and, on this attach point, still only) kind.
+    /// </summary>
+    Match,
 }
 
 /// <summary>
@@ -53,11 +61,13 @@ public enum RuntimeId
 }
 
 /// <summary>
-/// The 8 triggers an atom's <c>when</c> may name. E1 owns this because E4 validates against it at
+/// The 13 triggers an atom's <c>when</c> may name. E1 owns this because E4 validates against it at
 /// load and nothing else did. <c>OnTimer</c> is included even though `effect-system.md` never gave
 /// it an FT number — it is real in code and in `effect-data.md`. <c>OnActivate</c> is the eighth,
 /// added A18b (spec-on-activate-trigger.md) — a cross-program vocabulary change, reviewed via that
-/// spec, not a unilateral addition.
+/// spec, not a unilateral addition. <c>OnWave</c>/<c>OnMatchStart</c>/<c>OnMatchEnd</c>/
+/// <c>OnSunCollect</c>/<c>OnGridPlace</c> are E34's five (spec-trigger-vocabulary.md) — match-scoped
+/// or board-economy input, no kind or executor of their own.
 /// </summary>
 public static class AtomTriggers
 {
@@ -69,9 +79,17 @@ public static class AtomTriggers
     public const string OnRemoved = "OnRemoved";
     public const string OnTimer = "OnTimer";
     public const string OnActivate = "OnActivate";
+    public const string OnWave = "OnWave";
+    public const string OnMatchStart = "OnMatchStart";
+    public const string OnMatchEnd = "OnMatchEnd";
+    public const string OnSunCollect = "OnSunCollect";
+    public const string OnGridPlace = "OnGridPlace";
 
     public static readonly string[] All =
-        { OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath, OnGranted, OnRemoved, OnTimer, OnActivate };
+        {
+            OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath, OnGranted, OnRemoved, OnTimer, OnActivate,
+            OnWave, OnMatchStart, OnMatchEnd, OnSunCollect, OnGridPlace
+        };
 
     /// <summary>The four that fire from a board event.</summary>
     public static readonly string[] Events = { OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath };
@@ -91,6 +109,13 @@ public static class AtomTriggers
     /// already bound, possibly turns ago, at loadout compile — A18a).
     /// </summary>
     public static readonly string[] Actions = { OnActivate };
+
+    /// <summary>E34 (spec-trigger-vocabulary.md §2.1): match-scoped — no actor, no target. A kind
+    /// carrying one of these must be able to act with no entity in hand.</summary>
+    public static readonly string[] MatchEvents = { OnWave, OnMatchStart, OnMatchEnd };
+
+    /// <summary>E34: board-economy events. They carry a ptr sometimes and must never require one.</summary>
+    public static readonly string[] BoardEconomyEvents = { OnSunCollect, OnGridPlace };
 
     /// <summary>A permanent modifier declares no trigger at all — it is not event-driven.</summary>
     public static readonly string[] None = Array.Empty<string>();

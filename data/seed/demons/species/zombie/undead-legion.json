@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:49:08Z",
+      "minorityValues": {
+        "elementPrimary": "earth"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "Bulwark",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead legion",
+      "tactical revenants"
+    ],
+    "gameTypeId": 243,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The ability to bypass instant-kill mechanics, regenerate full health twice, and deploy as a massive, coordinated legion capable of sweeping entire defenses justifies the calamity rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "UltimateLegionZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "pack_tactics",
+      "damage_threshold_immunity",
+      "emergency_regeneration",
+      "coordinated_strike"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  }
+]

@@ -166,7 +166,8 @@ public sealed partial class RpgStore
         ins.Parameters.AddWithValue("$seq", seq);
         ins.Parameters.AddWithValue("$kind", command.Kind);
         ins.Parameters.AddWithValue("$payload", JsonSerializer.Serialize(new CommandPayload(
-            command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance)));
+            command.EntityId, command.SectorId, command.SlotIndex, command.LanePath, command.Stance,
+            command.Amount, command.StructureId, command.WardenId)));
         ins.Parameters.AddWithValue("$now", now);
         // Bounded at the boundary like every other free-text field: an audit string is not worth
         // failing a turn over, and an unbounded one is a row nobody budgeted for.
@@ -441,7 +442,7 @@ public sealed partial class RpgStore
     /// </summary>
     sealed record CommandPayload(
         string? EntityId, string? SectorId, int? SlotIndex, IReadOnlyList<string>? LanePath,
-        string? Stance = null);
+        string? Stance = null, long? Amount = null, string? StructureId = null, string? WardenId = null);
 
     /// <summary>Reports are kept for the most recent turns; older ones are re-derived on demand.</summary>
     public const int ReportHotTail = 50;
@@ -658,7 +659,10 @@ public sealed partial class RpgStore
             SectorId = payload.SectorId,
             SlotIndex = payload.SlotIndex,
             Stance = payload.Stance,
-            LanePath = payload.LanePath ?? Array.Empty<string>()
+            LanePath = payload.LanePath ?? Array.Empty<string>(),
+            Amount = payload.Amount,
+            StructureId = payload.StructureId,
+            WardenId = payload.WardenId
         };
     }
 
@@ -693,21 +697,7 @@ public sealed partial class RpgStore
         var list = new List<WorldCommand>();
         using var r = cmd.ExecuteReader();
         while (r.Read())
-        {
-            var payload = JsonSerializer.Deserialize<CommandPayload>(r.GetString(3))
-                          ?? new CommandPayload(null, null, null, Array.Empty<string>(), null);
-            list.Add(new WorldCommand
-            {
-                CommanderId = r.GetString(0),
-                CommandId = r.GetString(1),
-                Kind = r.GetString(2),
-                EntityId = payload.EntityId,
-                SectorId = payload.SectorId,
-                SlotIndex = payload.SlotIndex,
-                Stance = payload.Stance,
-                LanePath = payload.LanePath ?? Array.Empty<string>()
-            });
-        }
+            list.Add(ReadCommandRow(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3)));
 
         return list;
     }

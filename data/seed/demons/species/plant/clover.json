@@ -1,0 +1,161 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:42:54Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "clover",
+      "support-flora"
+    ],
+    "gameTypeId": 1276,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "Its impact is limited by a very short lifespan and low base damage, serving as a temporary utility buff rather than a direct combat threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IceBlover",
+    "targetPreference": "swarm",
+    "threatBand": "nuisance",
+    "traits": [
+      "frost-emission",
+      "transient-presence",
+      "buff-catalyst"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:24:11Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "clover"
+    ],
+    "gameTypeId": 1348,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to fire a high volume of projectiles is a minor tactical annoyance rather than a catastrophic threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SunBlover",
+    "targetPreference": "swarm",
+    "traits": [
+      "spiral-patterned projectile-firing",
+      "sun-drop generation",
+      "rotating leaves"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
+  }
+]

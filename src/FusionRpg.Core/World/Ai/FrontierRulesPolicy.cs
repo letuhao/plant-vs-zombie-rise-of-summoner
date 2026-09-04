@@ -173,6 +173,9 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
         if (!hasSourceAnywhere) return null;
 
         var handicap = view.Factions.First(f => string.Equals(f.FactionId, view.FactionId, StringComparison.Ordinal)).UpkeepHandicapMilli;
+        // world-map W48/W49: the season is calendar, never fogged — the belief side reads it off
+        // the turn exactly like truth does (`LoamUpkeep.BreakdownFor`), never a second copy.
+        var seasonMilli = World.WorldTuningHub.Tuning.Seasons.UpkeepMilli[TurnCalendar.SeasonOf(view.CurrentTurn)];
 
         long totalProduction = 0, totalUpkeep = 0, totalStock = 0;
         string? weakest = null;
@@ -186,7 +189,7 @@ public sealed class FrontierRulesPolicy : IFactionPolicy
             var garrisonMembers = view.OwnForces
                 .Where(e => string.Equals(e.AtSectorId, id, StringComparison.Ordinal))
                 .Sum(e => e.Members.Count);
-            var upkeep = LoamUpkeep.For(garrisonMembers, b.DevelopmentLevel, b.DangerBand, b.FractureIntensityMilli, handicap);
+            var upkeep = LoamUpkeep.For(garrisonMembers, b.DevelopmentLevel, b.DangerBand, b.FractureIntensityMilli, handicap, seasonMilli);
 
             totalProduction += production;
             totalUpkeep += upkeep;

@@ -96,7 +96,7 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v1.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v1.json")));
+            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
         FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
             FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
         FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
@@ -126,7 +126,7 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
             FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
         FusionRpg.Core.Battle.BattleTuningHub.Configure(
-            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v1.json")));
+            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v2.json")));
 
         // A real IHubContext<RpgHub>, not a hand-rolled fake -- SignalR's own DI wiring, the same
         // production type RunWebMatchAsync's own hub.Clients.Group(...).SendAsync(...) call needs.

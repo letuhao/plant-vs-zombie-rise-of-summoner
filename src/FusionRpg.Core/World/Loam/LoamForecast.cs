@@ -15,8 +15,15 @@ public static class LoamForecast
     /// upkeep still counts above but it can never be the one selected to absorb the shortfall). Null
     /// when the pool covers its own upkeep in full, or when every member is warded — the caller must
     /// treat both the same way: no fade applied this turn.
+    ///
+    /// <paramref name="ceded"/> is the faction's own deliberate choice (world-stage W24/W25's `cede`
+    /// order) — an *input* to this one selection, never a second code path: it wins only when it is
+    /// already a legal candidate (a member of this component, not warded). Ceding warded ground,
+    /// someone else's ground, or a sector in another component is simply not a candidate here, so the
+    /// default worst-balance ordering answers exactly as if no preference had been filed at all.
     /// </summary>
-    public static string? Weakest(WorldState world, IReadOnlyList<string> component, long available, long upkeep)
+    public static string? Weakest(
+        WorldState world, IReadOnlyList<string> component, long available, long upkeep, string? ceded = null)
     {
         if (available >= upkeep) return null;
 
@@ -24,6 +31,9 @@ public static class LoamForecast
             .Where(id => world.Sectors.First(s => s.SectorId == id).WardenBindingId is null)
             .ToList();
         if (candidates.Count == 0) return null;
+
+        if (ceded is not null && candidates.Contains(ceded, StringComparer.Ordinal))
+            return ceded;
 
         return candidates
             .OrderBy(id => LoamBalance.PerSector(world, world.Sectors.First(s => s.SectorId == id)))
@@ -54,12 +64,16 @@ public static class LoamForecast
     /// The sector the engine will actually release (stability to zero, ground lost) next turn if
     /// nothing changes between now and then — not merely fade further, release outright. This is the
     /// marker spec-loam-fe.md's abandonment surface asks for: visible before it happens, not after.
+    ///
+    /// <paramref name="ceded"/> forwards straight to <see cref="Weakest"/> so a caller who already
+    /// knows the faction's pending `cede` order (world-stage W26's `/state` route) predicts the same
+    /// sector the engine will actually release, instead of the two silently disagreeing.
     /// </summary>
-    public static string? WillRelease(WorldState world, IReadOnlyList<string> component)
+    public static string? WillRelease(WorldState world, IReadOnlyList<string> component, string? ceded = null)
     {
         var upkeep = component.Sum(id => LoamUpkeep.For(world, world.Sectors.First(s => s.SectorId == id)));
         var projected = ProjectedStock(component, world);
-        var weakest = Weakest(world, component, projected, upkeep);
+        var weakest = Weakest(world, component, projected, upkeep, ceded);
         if (weakest is null) return null;
 
         var shortfall = upkeep - projected;

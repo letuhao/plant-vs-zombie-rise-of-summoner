@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Status;
@@ -25,6 +26,10 @@ public sealed class StatusInstance
     public double SpreadChance { get; init; }
     public string? SpreadStatusId { get; init; }
     public int SpreadMaxHops { get; init; }
+
+    /// <summary>Wave E1 — the element this instance's pulses carry, copied from
+    /// <see cref="StatusApplyInput.Element"/> at apply time. <c>null</c> = element-neutral.</summary>
+    public ElementTypeId? Element { get; init; }
 
     /// <summary>
     /// Timed stat contributions this instance makes while active (E17). Empty for every status that
@@ -78,13 +83,36 @@ public sealed record StatusApplyInput(
     int SpreadIcdMs = 0,
     TargetSpec? SpreadTarget = null,
     int HopDepth = 0,
-    IReadOnlyList<StatusStatMod>? StatMods = null);
+    IReadOnlyList<StatusStatMod>? StatMods = null,
+    /// <summary>combat-unification Wave E1 (typed DoTs) — the element this status's pulses carry to
+    /// the shield gate. <c>null</c> means element-neutral, which is what BOTH modes did before and is
+    /// therefore byte-identical: an unset element produces an empty component list, exactly as today.
+    /// Set it and the pulse arrives as a full-weight component of that element, so the gate's matchup
+    /// and a typed shield finally see a DoT for what it is.</summary>
+    ElementTypeId? Element = null);
 
 public sealed record StatusApplyOutcome(
     bool Applied,
     StatusResistReason? ResistReason,
     StatusInstance? Instance,
     StatusApplyResult EvalResult);
+
+/// <summary>
+/// combat-unification Wave E1 — the element payload a status pulse carries.
+///
+/// <para>Shared by BOTH pulse sinks on purpose. Battle and overlay DoT parity is a program invariant
+/// ("both modes are element-neutral on DoTs by parity"), and the cheapest way to keep two
+/// implementations agreeing is to give them one function rather than two copies of a rule.</para>
+/// </summary>
+public static class StatusPulsePayload
+{
+    static readonly ElementPayloadComponent[] Neutral = Array.Empty<ElementPayloadComponent>();
+
+    /// <summary>Empty when the status has no element — byte-identical to the pre-E1 behaviour in both
+    /// modes. A typed status pulses as a single full-weight component of its own element.</summary>
+    public static ElementPayloadComponent[] For(StatusInstance instance) =>
+        instance.Element is { } e ? new[] { new ElementPayloadComponent(e, 1.0) } : Neutral;
+}
 
 public interface IStatusPulseSink
 {
@@ -206,6 +234,7 @@ public sealed class StatusRuntime
             StatusId = input.StatusId,
             HostPtr = input.HostPtr,
             AttackerPtr = input.AttackerPtr,
+            Element = input.Element,
             GrantId = input.GrantId,
             EffectId = input.EffectId,
             PluginId = input.PluginId,

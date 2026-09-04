@@ -16,10 +16,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Sequence
 
-__all__ = ["FingerprintComponents", "render_fingerprint", "field_distance", "k_nearest"]
+__all__ = ["FingerprintComponents", "render_fingerprint", "field_distance", "k_nearest",
+          "NONE_AREA_SHAPE"]
 
 COMPONENT_JOIN = "|"
 LIST_JOIN = "+"
+
+# spec-dedup-select.md SS2's own canonical fingerprint definition, quoted verbatim: "areaShape is
+# the literal `none` when targetMode != area -- a missing key is a defect, `none` is a value."
+NONE_AREA_SHAPE = "none"
 
 
 @dataclass(frozen=True)
@@ -34,12 +39,24 @@ class FingerprintComponents:
 
 
 def render_fingerprint(c: FingerprintComponents) -> "tuple[str, ...]":
-    """The seven RENDERED strings, in fixed order -- what `field_distance` actually compares."""
+    """The seven RENDERED strings, in fixed order -- what `field_distance` actually compares.
+
+    **CORRECTED 2026-09-04 (A-S3 build, dedup-select).** A `None` `area_shape` used to render as
+    `""` here. `spec-dedup-select.md` SS2 -- the fingerprint's own canonical definition, which this
+    function exists to be the ONE implementation of -- states the rule explicitly: "`areaShape` is
+    the literal `none` when `targetMode != area` -- a missing key is a defect, `none` is a value."
+    `""` is neither the real areaShape vocabulary nor the stated literal, so it was a second,
+    silently-different reading of the one definition this module's own docstring says it renders.
+    No A-S1 test pinned the old `""` rendering: round 1's own `avoidNeighbours` is always empty
+    (an empty accepted corpus, spec-distribution-planner.md SS7), so the two renderings never
+    diverged in any file `distribution_planner` has actually written -- confirmed by re-running
+    `test_distribution_planner.py` unaffected by this change.
+    """
     return (
         LIST_JOIN.join(sorted(c.atom_families)),
         c.category,
         c.target_mode,
-        c.area_shape or "",
+        c.area_shape if c.area_shape is not None else NONE_AREA_SHAPE,
         c.relation,
         LIST_JOIN.join(sorted(c.structure_axes)),
         c.pairing_role,

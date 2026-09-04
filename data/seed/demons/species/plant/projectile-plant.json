@@ -1,0 +1,82 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:21:18Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "projectile-plant",
+      "cryo-botanical"
+    ],
+    "gameTypeId": 1034,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to deal quadruple damage to frozen targets makes it a high-priority tactical threat rather than a mere raider.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SnowPeaShooter",
+    "targetPreference": "frontline",
+    "traits": [
+      "cryogenic-projectile",
+      "status-inflicting",
+      "synergistic-multiplier"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  }
+]

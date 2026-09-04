@@ -30,7 +30,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.summoner",
+        "family": "atom.cherry-bloom",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -70,7 +70,7 @@
         "family": "atom.gardener",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.floating-bourgeon",
       "flavorKey": "flavor.base.floating-bourgeon",
       "flavor": "A soft emerging growth, still light enough to drift on the breeze.",
@@ -104,7 +104,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.volley",
+        "family": "atom.gravedigging",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -145,7 +145,7 @@
         "family": "atom.cherry-bloom",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.budding-seedling",
       "flavorKey": "flavor.base.budding-seedling",
       "flavor": "A young shoot thick with stored energy, ready to spread.",
@@ -179,7 +179,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.dooming",
+        "family": "atom.gardener",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -216,10 +216,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.firelining",
+        "family": "atom.cherry-bloom",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.stored-ratoon",
       "flavorKey": "flavor.base.stored-ratoon",
       "flavor": "A sprouting stem with packed reserves, chasing growth sideways.",
@@ -256,7 +256,7 @@
         "family": "atom.flash-freeze",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.dusted-offset",
       "flavorKey": "flavor.base.dusted-offset",
       "flavor": "A naturally light growth, fine as dust, ready to scatter.",
@@ -290,7 +290,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.gravemaking",
+        "family": "atom.gravedigging",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -367,7 +367,7 @@
         "family": "atom.terraforming",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.sifted-spawn",
       "flavorKey": "flavor.base.sifted-spawn",
       "flavor": "Filtered and cleared, each grain ready to take root.",
@@ -402,7 +402,7 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.summoner",
+        "family": "atom.cherry-bloom",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -445,7 +445,7 @@
       "socketMax": 1,
       "iconKey": "icon.base.nourished-clone",
       "flavorKey": "flavor.base.nourished-clone",
-      "flavor": "A genetic copy, carefully tended and well-fed\u2014ready to root and claim ground.",
+      "flavor": "A genetic copy, carefully tended and well-fed—ready to root and claim ground.",
       "tags": [
         "light",
         "organic",

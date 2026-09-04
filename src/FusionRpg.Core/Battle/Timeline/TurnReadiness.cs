@@ -2,7 +2,7 @@ namespace FusionRpg.Core.Battle.Timeline;
 
 /// <summary>
 /// B9 (battle-timeline-todo.md, spec-readiness-model.md): the pure readiness function —
-/// <c>nextReadyTick = now + max(1, RoundDiv(remainingWork × BaseSpeed, rate))</c>. A pure function of
+/// <c>nextReadyTick = now + max(1, RoundDiv(remainingWork × SpeedScale, rate))</c>. A pure function of
 /// <c>(work, rate)</c> — never reads a side budget (the spec's own purity rule: "if a budget ever has
 /// to be consulted to compute an arrival time, the abstraction has failed").
 ///
@@ -16,6 +16,25 @@ namespace FusionRpg.Core.Battle.Timeline;
 /// </summary>
 public static class TurnReadiness
 {
+    /// <summary>
+    /// The readiness formula's SCALE UNIT — <b>structural, not a balance dial</b>
+    /// (tunables-ssot.md §1; battle-timeline T14/B28, spec-timeline-tunables.md §1).
+    ///
+    /// <para>This is the half of the old <c>DerivedTurnChannels.BaseSpeed</c> that a balance pass must
+    /// NOT touch. <see cref="TicksFor"/> computes <c>work × SpeedScale / rate</c>, and both the work
+    /// supplied (<see cref="OneTurnWork"/>) and the rate compared against it are expressed in these
+    /// same units — so scaling this constant scales numerator and denominator together and cancels.
+    /// Doubling it does not make anyone faster; it makes a turn take twice as many ticks to describe
+    /// the same thing, i.e. it changes the granularity the timeline is measured at. PS-8 exempt for the
+    /// same reason <see cref="CooldownMath.MinTicksFloor"/> is: a unit, not a ceiling.</para>
+    ///
+    /// <para>The <i>other</i> half — "how fast is a baseline actor", the <c>turn.speed</c> channel's
+    /// default — IS a balance dial and moved to config as
+    /// <see cref="Stats.Derived.DerivedStatPolicy.TurnDefaultSpeed"/>. Both hold 100 today; the split
+    /// exists so the next balance pass can move one without re-scaling the arithmetic.</para>
+    /// </summary>
+    public const long SpeedScale = 100;
+
     /// <summary>Half-away-from-zero rounding — the same idiom <c>ShieldMath.RoundDivSigned</c> and
     /// <c>CooldownMath</c>'s own private copy already use (both intentionally local rather than a
     /// shared utility, per <c>CooldownMath</c>'s own comment: "reused rather than reinvented" the
@@ -32,7 +51,7 @@ public static class TurnReadiness
         if (remainingWork < 0) throw new ArgumentOutOfRangeException(nameof(remainingWork), remainingWork, "work remaining is never negative");
         if (rate <= 0) throw new ArgumentOutOfRangeException(nameof(rate), rate, "rate must be clamped to > 0 before this call (spec: \"speed clamped before division\")");
 
-        return Math.Max(1, RoundDivSigned(checked(remainingWork * DerivedTurnChannels.BaseSpeed), rate));
+        return Math.Max(1, RoundDivSigned(checked(remainingWork * SpeedScale), rate));
     }
 
     public static long NextReadyTick(long nowTick, long remainingWork, long rate) =>
@@ -55,10 +74,10 @@ public static class TurnReadiness
 
     /// <summary>One whole turn's worth of work. The readiness spec pins the FORMULA, not what "one
     /// turn" costs — this module makes that content decision explicitly, self-consistently, from the
-    /// formula's own constant rather than inventing a second one: <see cref="DerivedTurnChannels.BaseSpeed"/>
-    /// itself, so a default-rate actor (<c>rate == BaseSpeed</c>) takes exactly <c>BaseSpeed</c> ticks
-    /// per turn — <c>TicksFor(BaseSpeed, BaseSpeed) == BaseSpeed</c>.</summary>
-    public const long OneTurnWork = DerivedTurnChannels.BaseSpeed;
+    /// formula's own constant rather than inventing a second one: <see cref="SpeedScale"/> itself, so a
+    /// default-rate actor (<c>rate == SpeedScale</c>) takes exactly <c>SpeedScale</c> ticks per turn —
+    /// <c>TicksFor(SpeedScale, SpeedScale) == SpeedScale</c>.</summary>
+    public const long OneTurnWork = SpeedScale;
 
     public static long TicksPerFullTurn(long rate) => TicksFor(OneTurnWork, rate);
 }

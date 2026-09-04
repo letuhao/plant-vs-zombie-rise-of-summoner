@@ -1,0 +1,162 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:04:28Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-symbiote"
+    ],
+    "gameTypeId": 1372,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a passive support item that enhances existing defenses rather than posing an independent threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "CaltropPot",
+    "targetPreference": "backline",
+    "traits": [
+      "defensive-augmentation",
+      "low-profile",
+      "carrier-class",
+      "crush-immunity"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:14:53Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-symbiote"
+    ],
+    "gameTypeId": 1357,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a passive support unit that provides buffs to others and lacks any offensive capabilities or direct combat agency.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "ScaredyPot",
+    "targetPreference": "frontline",
+    "threatBand": "nuisance",
+    "traits": [
+      "opportunistic-booster",
+      "fear-sensitive",
+      "low-profile",
+      "status-dependent"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ]
+  }
+]

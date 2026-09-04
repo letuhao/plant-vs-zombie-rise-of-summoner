@@ -13,12 +13,13 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
-from ..anchor.derive import clamp_variant_count, derive_posture, derive_pure
+from ..anchor.derive import clamp_variant_count, derive_posture, derive_pure, resolve_unresolved_threat_band
 from ..anchor.emit import build_index, entry_for, render_index, write_family_file
 from ..anchor.prompts import PIPELINES, SpeciesLore, threat_audit_spec_for_basis
 from ..anchor.provenance import PROMPT_VERSIONS, AnchorProvenance
@@ -123,15 +124,21 @@ def _lore_for(row: Mapping[str, Any]) -> SpeciesLore:
 
 
 def _load_existing_anchors(anchors_dir: Path) -> "list[dict]":
-    index_path = anchors_dir / "_index.json"
-    if not index_path.exists():
+    """Every real anchor entry on disk — scans the tree directly, never trusts `_index.json`'s own
+    value set to know which files exist (fixed 2026-09-04, demon-corpus-self-heal C2's own real
+    finding, not theorized: the OLD version only read files `_index.json` currently pointed at,
+    so a species whose file the index had drifted away from — the exact class of staleness A1/A2
+    exist to fix — became invisible to every future run, and `_rewrite_index` then rebuilt the
+    index FROM that already-incomplete read, making the loss permanent and self-reinforcing rather
+    than one-off. `_index.json` stays the fast O(1) lookup `run-control`'s own spec wants for
+    `resume`; this function is the ground truth it should never drift from)."""
+    if not anchors_dir.exists():
         return []
-    index = json.loads(index_path.read_text(encoding="utf-8"))
     out: "list[dict]" = []
-    for rel_path in sorted(set(index.values())):
-        path = anchors_dir / rel_path
-        if path.exists():
-            out.extend(json.loads(path.read_text(encoding="utf-8")))
+    for path in sorted(anchors_dir.rglob("*.json"), key=lambda p: str(p)):
+        if path.name.startswith("_"):
+            continue  # _index.json and any future notes/exemplars file, matching AtomImporter's own convention
+        out.extend(json.loads(path.read_text(encoding="utf-8")))
     return out
 
 
@@ -211,6 +218,7 @@ def _write_species_entry(
     families: "dict[str, list[str]]", anchors_dir: Path,
     existing_by_file: "dict[str, list[dict]]",
     votes: "dict[str, Any] | None" = None, pipeline_attempts: "dict[str, int] | None" = None,
+    merge_from: "Mapping[str, Any] | None" = None,
 ) -> str:
     """Writes/updates the one family file this species belongs to, returns the relative path
     written (for the index). Merges into whatever that file already holds — sibling species in
@@ -220,20 +228,71 @@ def _write_species_entry(
     `_pipelineAttempts` — real disagreement/repair signal, not left at the provenance dataclass's
     empty-dict defaults (found live, 2026-09-02: every real anchor written before this had
     `attempts: {}` / `confidence: {}`, silently discarding the exact data `pipeline-health`'s
-    disagreement-rate/repair-rate metrics (T2.12) need to work at all)."""
+    disagreement-rate/repair-rate metrics (T2.12) need to work at all).
+
+    `merge_from` (demon-corpus-self-heal B1, 2026-09-04): the species' EXISTING full entry, passed
+    only for a pipeline-scoped rerun (`_run_loop`'s `pipeline_scope`). `merged_fields` there holds
+    ONLY the reran pipeline's own output — every other field, and every other pipeline's own
+    `attempts`/`confidence`/`minorityValues`/`promptVersions` entry, is carried over from
+    `merge_from` untouched. `None` (the default, every other caller) keeps today's exact
+    full-replace behaviour."""
     species_id = row["speciesId"]
+
+    if merge_from is not None:
+        full_fields = {k: v for k, v in merge_from.items() if not k.startswith("_")}
+        full_fields.update(merged_fields)
+        old_prov = dict(merge_from.get("_provenance") or {})
+        confidence = dict(old_prov.get("confidence") or {})
+        minority = dict(old_prov.get("minorityValues") or {})
+        for field, v in (votes or {}).items():
+            confidence[field] = v["confidence"]
+            if v.get("minority"):
+                minority[field] = v["minority"]
+            else:
+                minority.pop(field, None)
+        attempts = dict(old_prov.get("attempts") or {})
+        attempts.update(dict(pipeline_attempts or {}))
+        prompt_versions = dict(old_prov.get("promptVersions") or {})
+        prompt_versions.update({p: v for p, v in PROMPT_VERSIONS.items() if p in (pipeline_attempts or {})})
+        provenance = AnchorProvenance(
+            dump_hash=dump_hash, prompt_versions=prompt_versions,
+            basis=full_fields.get("basis", old_prov.get("basis", "blocked")),
+            confidence=confidence, minority_values=minority,
+            audit_verdict=old_prov.get("auditVerdict"),
+            attempts=attempts,
+            emitted_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+        merged_fields = full_fields
+    else:
+        votes = votes or {}
+        provenance = AnchorProvenance(
+            dump_hash=dump_hash, prompt_versions=dict(PROMPT_VERSIONS),
+            basis=merged_fields.get("basis", "blocked"),
+            confidence={field: v["confidence"] for field, v in votes.items()},
+            minority_values={field: v["minority"] for field, v in votes.items() if v.get("minority")},
+            attempts=dict(pipeline_attempts or {}),
+            emitted_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+
     family = _family_for(species_id, families, classified_family=merged_fields.get("family"))
     rel_path = f"{row['side']}/{family}.json"
-
-    votes = votes or {}
-    provenance = AnchorProvenance(
-        dump_hash=dump_hash, prompt_versions=dict(PROMPT_VERSIONS),
-        basis=merged_fields.get("basis", "blocked"),
-        confidence={field: v["confidence"] for field, v in votes.items()},
-        minority_values={field: v["minority"] for field, v in votes.items() if v.get("minority")},
-        attempts=dict(pipeline_attempts or {}),
-        emitted_utc=time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     entry = entry_for(species_id, merged_fields, provenance=provenance)
+
+    # A reclassification can move a species into a DIFFERENT family file (family is model-decided,
+    # not stable across runs) — found live at corpus scale, 2026-09-04 (DemonQualityReport: 217 of
+    # 833 species had a stale copy left behind in their OLD file). Every other file this species
+    # might already live in must lose its copy too, not just the one being written now, or the
+    # stale entry sits on disk forever with _index.json correctly pointing past it while
+    # DemonSpeciesGen/AtomImporter-style direct-file readers still see both.
+    for other_path, other_bucket in existing_by_file.items():
+        if other_path == rel_path:
+            continue
+        before = len(other_bucket)
+        other_bucket[:] = [e for e in other_bucket if e.get("speciesId") != species_id]
+        if len(other_bucket) == before:
+            continue
+        if other_bucket:
+            write_family_file(anchors_dir / other_path, other_bucket)
+        else:
+            (anchors_dir / other_path).unlink(missing_ok=True)  # no species left — no orphan file either
 
     bucket = existing_by_file.setdefault(rel_path, [])
     bucket[:] = [e for e in bucket if e.get("speciesId") != species_id]
@@ -391,6 +450,60 @@ def overwrite_all(
                 force_selector_ignores_existing=True, workers=workers)
 
 
+def fix_unresolved(*, paths: RunPaths = RunPaths(), dry_run: bool = False) -> "list[dict[str, Any]]":
+    """demon-corpus-self-heal F1 (2026-09-04) — a deliberate FIX STEP, run on demand after a
+    classification pass, never automatically during `start`/`resume`/`rerun`. A human reads
+    `DemonQualityReport`'s own unresolved-rate finding, then runs this to close what has a real
+    answer: `resolve_unresolved_threat_band`'s own docstring covers exactly why `threatBand` is the
+    ONLY field this touches — `aptitudePrimary`/`rarity`/`elementPrimary` have no equivalent
+    sanctioned fallback anywhere in this repo, and stay `"unresolved"`/reported rather than guessed
+    at here. No model calls, no lock needed (this never runs concurrently with a classification
+    pass in practice, and re-running it is idempotent — a species already resolved is a no-op).
+
+    Every fixed entry's `_provenance.confidence["threatBand"]` is stamped
+    `"deterministic-fallback"` (never `"high"`/`"split"`) so a future reader — or this same tool's
+    own report — can always tell a sanctioned default apart from a real LLM judgment; nothing here
+    pretends a judgment happened. Returns one dict per species actually fixed (or that WOULD be
+    fixed, when `dry_run=True`): `{"speciesId", "before", "after"}`.
+    """
+    threat_tuning = ThreatTuning.load()
+    anchors = _load_existing_anchors(paths.anchors_dir)
+    families = _load_families(paths.family_assignments)
+
+    existing_by_file: "dict[str, list[dict]]" = {}
+    for entry in anchors:
+        family = _family_for(entry.get("speciesId", ""), families, classified_family=entry.get("family"))
+        side = entry.get("side", "unclassified")
+        existing_by_file.setdefault(f"{side}/{family}.json", []).append(entry)
+
+    fixed: "list[dict[str, Any]]" = []
+    for entry in anchors:
+        before = entry.get("threatBand")
+        after, was_deterministic = resolve_unresolved_threat_band(before, tuning=threat_tuning)
+        if not was_deterministic:
+            continue
+        fixed.append({"speciesId": entry.get("speciesId"), "before": before, "after": after})
+        if dry_run:
+            continue
+
+        species_id = entry.get("speciesId", "")
+        row = {"speciesId": species_id, "side": entry.get("side", "unclassified")}
+        # dump_hash is PRESERVED from the entry's own original classification, never re-stamped —
+        # this fix never re-reads the corpus dump, so claiming a fresh dump_hash would overstate
+        # what actually happened here.
+        original_dump_hash = entry.get("_provenance", {}).get("dumpHash", "")
+        _write_species_entry(
+            row, {"threatBand": after}, dump_hash=original_dump_hash, families=families,
+            anchors_dir=paths.anchors_dir, existing_by_file=existing_by_file,
+            votes={"threatBand": {"confidence": "deterministic-fallback", "minority": None}},
+            pipeline_attempts={},  # no pipeline ran — the old attempts record must stay untouched
+            merge_from=entry)
+
+    if not dry_run and fixed:
+        _rewrite_index(paths.anchors_dir, existing_by_file)
+    return fixed
+
+
 def request_pause(*, paths: RunPaths = RunPaths()) -> None:
     """`run pause` — a SEPARATE process signals the running one via a sentinel file, polled only
     between species (never mid-species, spec §2's own warning). Does nothing to a run that is not
@@ -483,7 +596,13 @@ def _run_loop(
     families = _load_families(paths.family_assignments)
     existing_by_file: "dict[str, list[dict]]" = {}
     for entry in _load_existing_anchors(paths.anchors_dir):
-        family = _family_for(entry.get("speciesId", ""), families)
+        # `classified_family=entry.get("family")` (fixed 2026-09-04, demon-corpus-self-heal A1):
+        # without it, this rebuild used ONLY the external family-assignments.json fallback, which
+        # for most species resolves to "unclassified" — a DIFFERENT path than the one the entry
+        # actually lives at on disk (which `_write_species_entry` computes WITH the real
+        # classified family). The stale-duplicate cross-file cleanup below only works if this
+        # dict's keys are the species' REAL on-disk paths, not a phantom re-bucketing of them.
+        family = _family_for(entry.get("speciesId", ""), families, classified_family=entry.get("family"))
         side = entry.get("side", "unclassified")
         existing_by_file.setdefault(f"{side}/{family}.json", []).append(entry)
 
@@ -494,10 +613,40 @@ def _run_loop(
 
     total = len(ids) + len(record.completed)
 
+    # Pipeline-scoped rerun (demon-corpus-self-heal B1, 2026-09-04): `record.selector` carries a
+    # `pipeline` key whenever the caller asked for one — whether the selector's own `kind` IS
+    # "pipeline" (picks every classified species AND scopes to it) or a DIFFERENT kind narrowed
+    # WHICH species while `pipeline` narrows execution for them (`cli.py`'s own
+    # `_selector_from_args` attaches it either way — checked directly here rather than gated on
+    # `kind`, after finding live that gating on kind=="pipeline" silently dropped a combined
+    # `--species X --pipeline Y` request into a full reclassification instead of a scoped one). No
+    # new RunRecord field needed either way — a paused-then-resumed scoped rerun keeps its scope
+    # automatically since the selector is what persists. Redeploying a fixed prompt corpus-wide
+    # used to mean either accepting the stale field forever or paying for a full reclassify (~8x
+    # the calls) — this re-runs ONLY the named pipeline and merges its own fields into the existing
+    # entry, every other pipeline's work untouched.
+    pipeline_scope = record.selector.get("pipeline")
+    existing_entry_by_id: "dict[str, dict]" = {}
+    if pipeline_scope:
+        for bucket in existing_by_file.values():
+            for entry in bucket:
+                sid = entry.get("speciesId")
+                if sid:
+                    existing_entry_by_id[sid] = entry
+
     def _classify_one(species_id: str):
         row = by_species.get(species_id)
         if row is None:
             return species_id, None, None, None, None
+
+        existing_entry = existing_entry_by_id.get(species_id) if pipeline_scope else None
+        if pipeline_scope and existing_entry is None:
+            # Nothing to merge a scoped rerun's own partial output into — a scoped rerun is for
+            # ALREADY-classified species only, never a backdoor first classification.
+            return species_id, row, None, None, ValueError(
+                f"{species_id!r} has no existing anchor entry — a pipeline-scoped rerun cannot "
+                f"merge into content that was never classified; use `start`/`rerun` without "
+                f"--pipeline for a first classification")
 
         seed = seed_by_species.get(row["side"] + ":" + str(row["typeId"]))
         basis = seed.basis if seed else "blocked"
@@ -511,8 +660,14 @@ def _run_loop(
 
         lore = _lore_for(row)
         try:
-            merged = run_one_species(species_id, lore, basis=basis, threat_rung=threat_rung,
-                                     call=call, config=config)
+            if pipeline_scope:
+                initial_context = {k: v for k, v in existing_entry.items() if not k.startswith("_")}
+                merged = run_one_species(
+                    species_id, lore, basis=basis, threat_rung=threat_rung, call=call, config=config,
+                    pipelines=[pipeline_scope], initial_context=initial_context)
+            else:
+                merged = run_one_species(species_id, lore, basis=basis, threat_rung=threat_rung,
+                                         call=call, config=config)
             return species_id, row, basis, merged, None
         except Exception as e:  # noqa: BLE001 — a dead species falls into `failed`, never aborts the run
             return species_id, row, basis, None, e
@@ -523,6 +678,11 @@ def _run_loop(
             write_record(record, paths.current_record_path)
             return
         if err is not None:
+            # A real observability gap found while diagnosing demon-corpus-self-heal C2 (2026-09-04,
+            # 199 real failures with no recorded reason): the RunRecord only ever stored a species
+            # id in `failed`, never WHY. Printed once per failure, matching the pattern the
+            # `_run_parallel` unexpected-exception backstop already established.
+            print(f"seedsmith: {species_id}: {err}", file=sys.stderr)
             record.failed.append(species_id)
             record.calls_made += 1
             write_record(record, paths.current_record_path)
@@ -533,11 +693,12 @@ def _run_loop(
         merged["speciesId"] = species_id
         merged["side"] = row["side"]
         merged["gameTypeId"] = row.get("typeId")
-        merged["basis"] = basis
+        if basis is not None:
+            merged["basis"] = basis
         merged.pop("_pipelineOutcomes", None)
         species_votes = merged.pop("_votes", None)
         species_attempts = merged.pop("_pipelineAttempts", None)
-        species_calls_made = merged.pop("_callsMade", len(PIPELINES))
+        species_calls_made = merged.pop("_callsMade", 1 if pipeline_scope else len(PIPELINES))
 
         # DERIVED fields (spec-classify-pipelines.md §4) — never authored by a model, computed
         # here from what the pipelines DID decide. Nothing else in the codebase calls these
@@ -551,7 +712,8 @@ def _run_loop(
         _write_species_entry(
             row, merged, dump_hash=record.dump_hash, families=families,
             anchors_dir=paths.anchors_dir, existing_by_file=existing_by_file,
-            votes=species_votes, pipeline_attempts=species_attempts)
+            votes=species_votes, pipeline_attempts=species_attempts,
+            merge_from=existing_entry_by_id.get(species_id) if pipeline_scope else None)
         _rewrite_index(paths.anchors_dir, existing_by_file)
 
         record.completed.append(species_id)

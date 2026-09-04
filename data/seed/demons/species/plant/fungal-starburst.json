@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:24:41Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught",
+        "attackTempo": "flurry",
+        "elementPrimary": "air"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Pierce",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "fungal-starburst"
+    ],
+    "gameTypeId": 1356,
+    "posture": "Finesse",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to split into multiple projectiles upon contact provides tactical utility, but its low damage per hit and predictable pattern do not constitute a significant threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "StarFume",
+    "targetPreference": "swarm",
+    "traits": [
+      "projectile-splitting",
+      "piercing-cap",
+      "star-shaped-fragmentation"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  }
+]

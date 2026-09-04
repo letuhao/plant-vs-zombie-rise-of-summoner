@@ -26,15 +26,60 @@
       "nameKey": "affix.precision",
       "name": "Precision",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.accuracy.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.accuracy.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Cinderbead", "Frostbead", "Windbead", "Stonebead", "Sunbead", "Duskbead"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Cinderbead"
+          },
+          {
+            "variant": "ice",
+            "word": "Frostbead"
+          },
+          {
+            "variant": "air",
+            "word": "Windbead"
+          },
+          {
+            "variant": "earth",
+            "word": "Stonebead"
+          },
+          {
+            "variant": "light",
+            "word": "Sunbead"
+          },
+          {
+            "variant": "dark",
+            "word": "Duskbead"
+          }
+        ]
+      },
       "displayTemplate": "+{value} {element} accuracy",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED — id and kindId kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.precision existingFamilies); kebab-case is a no-op here since `precision` has no underscore. `channel: combat.accuracy.{variant}` element-expansion is genuine, not decorative: DerivedStatChannels.cs declares CombatAccuracyOmni/Fire/Ice/Air/Earth/Light/Dark as real per-element channels, so `variants: {generate: elements+omni}` follows the exemplar's stat.derived pattern (the variant lives in the channel string) rather than the resource.delta `params.element` pattern g.on-hit uses — stat.derived's ParamSchema declares only channel/op/amount (AtomKindRegistry.cs:95-97), with no `element` param to hold it. UNITS: this channel is genuinely sigmoid resolver points (AccuracyScale = 100.0), confirmed by atom-layer-handoff.md §1 and CombatPolicies.cs:9-14 — bands.v1.json's `sigmoidDerivedChannel` group, not `flatDerivedChannel`. RUNTIME HONESTY: stat.derived is quarantined None/None/None (D6) until E12's BattleStatComposer; these rows import and bind nowhere today, a known scheduled gap, not a reason to author the family differently. `roles` is the `precis` column of ssot-affixes.md §4.3's role x group matrix (cells with weight > 0 only), translated from the stale 12-role table the way g.on-hit's sibling did: sense-utility->sense, manipulator-offense->manipulator, jewel-major stays, jewel-minor->both jewel-minor-a and jewel-minor-b, head-protective->head-guard, armament-primary stays. armament-secondary, core-protective, mantle-utility, footing and girdle-resource all carry weight 0 for `precis` and are correctly absent; ward-array, infusion and retinue have no cell in the stale matrix at all and are conservatively excluded rather than guessed at. The commander-only `standard` role is excluded on principle — core.v1.json's `commanderOnly` is a separate list from the 15 body roles, bound at `match` scope from its own 100‰ budget — even though `standard`'s own `precis` weight happens to be non-zero; that is a different mechanism, not a body-role appetite."
     },
     {
@@ -42,15 +87,60 @@
       "nameKey": "affix.keen-edge",
       "name": "Keen Edge",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.rate.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.rate.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Scorchthorn", "Rimethorn", "Gustthorn", "Flintthorn", "Glarethorn", "Shadethorn"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Scorchthorn"
+          },
+          {
+            "variant": "ice",
+            "word": "Rimethorn"
+          },
+          {
+            "variant": "air",
+            "word": "Gustthorn"
+          },
+          {
+            "variant": "earth",
+            "word": "Flintthorn"
+          },
+          {
+            "variant": "light",
+            "word": "Glarethorn"
+          },
+          {
+            "variant": "dark",
+            "word": "Shadethorn"
+          }
+        ]
+      },
       "displayTemplate": "+{value} {element} critical rate",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED — id kebab-cased from `keen_edge` per atom-family-library.md's naming note. Same channel-embedded-variant pattern as `precision` above (`combat.crit.rate.{variant}`, CombatCritRateOmni/Fire/Ice/Air/Earth/Light/Dark all real per DerivedStatChannels.cs), same `sigmoidDerivedChannel` unit family, same `roles` list — the role x group matrix has one row per role per GROUP, not per family, so every entry in this file repeats the same seven roles verbatim; that repetition is correct, not copy-paste sloppiness."
     },
     {
@@ -58,15 +148,60 @@
       "nameKey": "affix.cruelty",
       "name": "Cruelty",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.damage.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.damage.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Scaldfang", "Glazefang", "Squallfang", "Cragfang", "Flarefang", "Voidfang"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Scaldfang"
+          },
+          {
+            "variant": "ice",
+            "word": "Glazefang"
+          },
+          {
+            "variant": "air",
+            "word": "Squallfang"
+          },
+          {
+            "variant": "earth",
+            "word": "Cragfang"
+          },
+          {
+            "variant": "light",
+            "word": "Flarefang"
+          },
+          {
+            "variant": "dark",
+            "word": "Voidfang"
+          }
+        ]
+      },
       "displayTemplate": "+{value} {element} critical damage",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED — id kept verbatim, already kebab-case. `combat.crit.damage.{variant}` (CombatCritDamageOmni/Fire/Ice/Air/Earth/Light/Dark, DerivedStatChannels.cs), same group, same seven roles as its two siblings above. This closes the three-channel Flat coverage this group ships today: accuracy (`precision`), crit rate (`keen_edge`), crit damage (`cruelty`)."
     },
     {
@@ -74,15 +209,60 @@
       "nameKey": "affix.prec-fixation",
       "name": "Calibrated Sightline",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.accuracy.{variant}", "op": "Replace" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.accuracy.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Ashcast", "Chillcast", "Draftcast", "Loamcast", "Beamcast", "Gloomcast"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Ashcast"
+          },
+          {
+            "variant": "ice",
+            "word": "Chillcast"
+          },
+          {
+            "variant": "air",
+            "word": "Draftcast"
+          },
+          {
+            "variant": "earth",
+            "word": "Loamcast"
+          },
+          {
+            "variant": "light",
+            "word": "Beamcast"
+          },
+          {
+            "variant": "dark",
+            "word": "Gloomcast"
+          }
+        ]
+      },
       "displayTemplate": "sets {element} accuracy to {value}, ignoring other modifiers",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family minted on this group's reserved `prec` stem (naming.v1.json idNamespaces.affixFamilies), word `fixation` — short and mechanical, not a flavour word. `op: Replace` rather than a second `Flat`: bands.v1.json's `sigmoidDerivedChannel` unit line documents a Flat-shaped magnitude table only for this channel-family group, unlike `flatDerivedChannel`'s explicit op-by-op branching that gives `Increased` a defined per-mille resolution — minting an `Increased` sibling here would invent a scaling formula this registry does not state. A second `Flat` family on the same channel would also just be a duplicate mechanic, since op is the only thing distinguishing two families sharing one channel (the `elemental_power`/`elpw-amplify` precedent). `Replace` sidesteps both problems: AtomKindRegistry's derived-op enum documents Replace/Flag as structural, no-tier-band-magnitude ops wherever they are used, not scoped to one channel-family group, so nothing here is undefined. `powerBand` on this entry therefore drives item-level and rarity tier-gating only, never a scaled magnitude — a calibrated, fixed accuracy reading that overrides whatever the additive/Increased pipeline would otherwise have produced."
     },
     {
@@ -90,15 +270,60 @@
       "nameKey": "affix.prec-verdict",
       "name": "Foregone Verdict",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.rate.{variant}", "op": "Replace" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.rate.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Sparkmarked", "Sleetmarked", "Zephyrmarked", "Granitemarked", "Dawnmarked", "Nightmarked"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Sparkmarked"
+          },
+          {
+            "variant": "ice",
+            "word": "Sleetmarked"
+          },
+          {
+            "variant": "air",
+            "word": "Zephyrmarked"
+          },
+          {
+            "variant": "earth",
+            "word": "Granitemarked"
+          },
+          {
+            "variant": "light",
+            "word": "Dawnmarked"
+          },
+          {
+            "variant": "dark",
+            "word": "Nightmarked"
+          }
+        ]
+      },
       "displayTemplate": "sets {element} critical rate to {value}, ignoring other modifiers",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `prec`, word `verdict`. Same structural `Replace` reasoning as `prec-fixation` above, applied to `combat.crit.rate.{variant}` instead of accuracy — a fixed crit-rate reading, useful either as a floor on an otherwise crit-starved build or a ceiling on a heavily stacked one, either way sitting outside the additive/Increased pipeline entirely rather than adding to it."
     },
     {
@@ -106,15 +331,60 @@
       "nameKey": "affix.prec-reckoning",
       "name": "Harvest Reckoning",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.damage.{variant}", "op": "Replace" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.damage.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Pyreharvest", "Hoarharvest", "Stormharvest", "Brambleharvest", "Gleamharvest", "Murkharvest"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Pyreharvest"
+          },
+          {
+            "variant": "ice",
+            "word": "Hoarharvest"
+          },
+          {
+            "variant": "air",
+            "word": "Stormharvest"
+          },
+          {
+            "variant": "earth",
+            "word": "Brambleharvest"
+          },
+          {
+            "variant": "light",
+            "word": "Gleamharvest"
+          },
+          {
+            "variant": "dark",
+            "word": "Murkharvest"
+          }
+        ]
+      },
       "displayTemplate": "sets {element} critical damage to {value}, ignoring other modifiers",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `prec`, word `reckoning`. Same structural `Replace` reasoning again, on `combat.crit.damage.{variant}` — the third and last channel this group owns, closing out Flat-plus-Replace coverage for all three: accuracy (`precision` / `prec-fixation`), crit rate (`keen_edge` / `prec-verdict`), crit damage (`cruelty` / `prec-reckoning`)."
     },
     {
@@ -122,15 +392,60 @@
       "nameKey": "affix.prec-truesight",
       "name": "Unerring Eye",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.accuracy.{variant}", "op": "Flag" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.accuracy.{variant}",
+        "op": "Flag"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "jewel-major", "manipulator", "head-guard", "sense", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "armament-primary",
+        "jewel-major",
+        "manipulator",
+        "head-guard",
+        "sense",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "high",
-      "nameWords": { "prefix": ["Flame-Eyed", "Frost-Eyed", "Wind-Eyed", "Stone-Eyed", "Sun-Eyed", "Dusk-Eyed"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Flame-Eyed"
+          },
+          {
+            "variant": "ice",
+            "word": "Frost-Eyed"
+          },
+          {
+            "variant": "air",
+            "word": "Wind-Eyed"
+          },
+          {
+            "variant": "earth",
+            "word": "Stone-Eyed"
+          },
+          {
+            "variant": "light",
+            "word": "Sun-Eyed"
+          },
+          {
+            "variant": "dark",
+            "word": "Dusk-Eyed"
+          }
+        ]
+      },
       "displayTemplate": "never misses with {element} strikes",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `prec`, word `truesight`. `op: Flag` on `combat.accuracy.{variant}` — a boolean toggle rather than a graded reading, mechanically distinct from both `precision` (adds resolver points) and `prec-fixation` (sets a fixed point value): this family either applies or it does not, so `displayTemplate` deliberately carries no `{value}` placeholder, the same way `volley`'s spawn.entity sibling in g.on-hit carries no element param when it has nothing to vary. `powerBand: high` reflects a design judgement, not a scaling claim (Flag is structural per `prec-fixation`'s note): a guaranteed-hit effect is strong enough that it should gate to a later item-level tier window rather than show up on an early roll."
     }
   ]

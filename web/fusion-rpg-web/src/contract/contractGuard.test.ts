@@ -83,4 +83,51 @@ describe("scanForRestDtoImports — fixtures", () => {
     expect(() => scanForRestDtoImports(fixtureDir)).not.toThrow();
     expect(scanForRestDtoImports(fixtureDir)).toEqual([]);
   });
+
+  // world-stage W3: the guard must catch a DTO reached through a feature-local re-export, not only
+  // a direct `@/lib/bus` import — that gap is exactly how `stages/world/` could have bound straight
+  // to `worldTypes.ts` before W2 moved the DTOs. This is the module's whole point; without it, the
+  // move-and-widen decision (§8e.2) is prose, not an enforced rule.
+  it("flags a type-only import of a *Dto type from a feature-local module", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "contract-guard-"));
+    mkdirSync(join(fixtureDir, "stages", "world"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "stages", "world", "Rogue.tsx"),
+      'import type { WorldSectorDto } from "@/features/world/worldTypes";\n'
+    );
+    const violations = scanForRestDtoImports(fixtureDir);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.file).toBe("stages/world/Rogue.tsx");
+    expect(violations[0]?.text).toContain("WorldSectorDto");
+  });
+
+  it("flags the same *Dto type imported via a relative path", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "contract-guard-"));
+    mkdirSync(join(fixtureDir, "layers", "world"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "layers", "world", "Rogue.tsx"),
+      'import type { WorldStateDto } from "../../features/world/worldTypes";\n'
+    );
+    expect(scanForRestDtoImports(fixtureDir)).toHaveLength(1);
+  });
+
+  it("does NOT flag a *Dto type imported from src/contract/ itself", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "contract-guard-"));
+    mkdirSync(join(fixtureDir, "ui"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "ui", "Fine.tsx"),
+      'import type { WorldSectorDto } from "@/contract/rawShapes";\n'
+    );
+    expect(scanForRestDtoImports(fixtureDir)).toEqual([]);
+  });
+
+  it("does not flag a view-contract type that does not end in Dto", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "contract-guard-"));
+    mkdirSync(join(fixtureDir, "ui"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "ui", "Fine.tsx"),
+      'import type { SectorView } from "@/contract/types";\n'
+    );
+    expect(scanForRestDtoImports(fixtureDir)).toEqual([]);
+  });
 });

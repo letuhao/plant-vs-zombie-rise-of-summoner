@@ -913,6 +913,59 @@ public static class DebugActions
         }
     }
 
+    /// <summary>
+    /// E39 (spec-plant-side-status.md §2c): plant-side write for the 8 <c>UnityCc</c> statuses,
+    /// swept against the 3.9 interop (`H:\Games\PVZ-Fusion-3.9_MelonLoader\...\Assembly-CSharp.dll`,
+    /// ilspycmd -t Plant, 2026-09-04 — recorded in
+    /// <c>docs/research/effect-runtime/03-status-and-spawn-surface.md</c> under "Plant-side status").
+    ///
+    /// <para><c>butter</c> is the only confirmed, safe write: <c>Plant.butterP</c> is a real IL2CPP
+    /// <c>int</c> field with no competing name anywhere else on the class. Its exact unit (a frame
+    /// count? a stack level? a bare on/off flag?) is UNVERIFIED — IL2CPP compiles the field's real
+    /// consumer to native code the interop assembly never exposes, so no static read can confirm it.
+    /// Writing the atom's own <c>level</c> param (already an int, already meant to carry a status's
+    /// intensity/tier — <c>ApplyStatusToZombie</c>'s own signature) is the one mapping that invents
+    /// no scaling factor; converting <c>duration</c> (float seconds) into whatever unit
+    /// <c>butterP</c> actually counts would be exactly the kind of guess this module exists to
+    /// avoid. Floored at 1 (never 0/negative), the same "count is structural-floored at 1" idiom
+    /// spawn.entity's own count handling uses in the sink (InjectorEffectActionSink.cs, E28 fix
+    /// #5).</para>
+    ///
+    /// <para><c>jala</c>'s own sweep hit, <c>Plant.InfluenceByJalapeno()</c>, is downgraded to
+    /// REFUSED here after this module's own required follow-up read (the sweep result names a
+    /// candidate; verifying it is this module's job before wiring it, same as E17's own
+    /// precedent): the interop dump places it beside <c>UpgradeEvent</c> /
+    /// <c>InfluenceByIceShroom</c> / <c>UseItem(BucketType, Bucket)</c> — an item-use / upgrade-
+    /// reaction group, not a CC-apply group — and, like every IL2CPP method in this assembly, its
+    /// real body is native code the interop wrapper never exposes, so there is no way to confirm
+    /// from static analysis alone that calling it sets the same "on fire" state
+    /// <c>Zombie.SetJalaed()</c> does rather than something else (an upgrade-catalyst reaction, a
+    /// UI hook) entirely. Calling an unverified method here is exactly the E17 failure mode this
+    /// module exists to stop shipping, so it refuses by name instead — the same posture
+    /// <see cref="FusionRpg.Injector.Effects.InjectorEffectActionSink"/>'s own
+    /// <c>UnclearableStatuses</c> already takes for ember/jala/hypno/kelp.</para>
+    ///
+    /// <para>The other six (<c>freeze</c>, <c>cold</c>, <c>poison</c>, <c>hypno</c>, <c>ember</c>,
+    /// <c>kelp</c>) had ZERO hits in the sweep — no field or method on <c>Plant</c> matches any of
+    /// them, nor did a broadened grep for freeze/cold/poison/slow/speed/mindcontrol/charm turn up
+    /// anything beyond unrelated speed-modifier infrastructure and a type-identity bool
+    /// (`tanglekelpPlant`) that is not a kelp-status flag.</para>
+    /// </summary>
+    public static bool ApplyStatusToPlant(Plant p, string status, float duration, int level, out string? reason)
+    {
+        reason = null;
+        if (p == null) { reason = "status-side-unsupported"; return false; }
+
+        if (status == "butter")
+        {
+            try { p.butterP = Math.Max(1, level); return true; }
+            catch { reason = "status-side-unsupported"; return false; }
+        }
+
+        reason = "status-side-unsupported";
+        return false;
+    }
+
     public static void Kill(JsonElement p, bool plants)
     {
         var target = Str(p, "target") ?? "selected";

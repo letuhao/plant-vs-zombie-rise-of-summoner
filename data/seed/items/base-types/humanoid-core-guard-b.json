@@ -33,7 +33,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.soldered-keg",
       "flavorKey": "flavor.base.soldered-keg",
       "flavor": "What looks like solder drips shows where the cracks were stopped.",
@@ -69,7 +69,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.overlapping-harness",
       "flavorKey": "flavor.base.overlapping-harness",
       "flavor": "Layer over layer, stitched and strapped until nothing gets through.",
@@ -105,7 +105,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.beaten-radiator",
       "flavorKey": "flavor.base.beaten-radiator",
       "flavor": "Its fins bent and broken, it has taken worse than it gives.",
@@ -139,10 +139,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.industrial-gridiron",
       "flavorKey": "flavor.base.industrial-gridiron",
       "flavor": "A cooking grid becomes armor when strapped over vital places.",
@@ -178,7 +178,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.galvanised-furnace",
       "flavorKey": "flavor.base.galvanised-furnace",
       "flavor": "The white coating was meant to stop rust. Now it stops other things.",
@@ -212,10 +212,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.ponderous-cage",
       "flavorKey": "flavor.base.ponderous-cage",
       "flavor": "It weighs more than any person, but nothing can penetrate the bars.",
@@ -252,7 +252,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.rigid-crate",
       "flavorKey": "flavor.base.rigid-crate",
       "flavor": "A shipping container made to hold something precious. Now it holds you.",
@@ -285,10 +285,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.leaden-vest",
       "flavorKey": "flavor.base.leaden-vest",
       "flavor": "Weighted to stay in place. Weighted to stop what comes.",
@@ -324,7 +324,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 4,
       "iconKey": "icon.base.encasing-jumpsuit",
       "flavorKey": "flavor.base.encasing-jumpsuit",
       "flavor": "Originally meant to stay dry. Now it keeps other things from getting in.",
@@ -357,10 +357,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 4,
       "iconKey": "icon.base.netted-windbreaker",
       "flavorKey": "flavor.base.netted-windbreaker",
       "flavor": "Wind passes through the mesh. Teeth, claws, and bullets do not.",
@@ -396,7 +396,7 @@
         "family": "atom.vitality",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 4,
       "iconKey": "icon.base.articulated-apron",
       "flavorKey": "flavor.base.articulated-apron",
       "flavor": "Leather strips hung and weighted so each piece moves independently, sealing gaps.",
@@ -429,10 +429,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 4,
       "iconKey": "icon.base.clattering-lifejacket",
       "flavorKey": "flavor.base.clattering-lifejacket",
       "flavor": "Cork blocks and metal fittings. Floats in water, stands firm on land.",

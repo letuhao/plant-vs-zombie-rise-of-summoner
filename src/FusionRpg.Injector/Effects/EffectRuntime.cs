@@ -116,6 +116,9 @@ public static class EffectRuntime
             _status = null;
             DealtIdentity.Clear();
             _dotAccum = 0;
+            // E35: a stale match.modify write set must never survive into the next test/match — it is
+            // per-match state, and TakeAll's own drain-and-clear is exactly what a reset needs too.
+            MatchModifyWrites.TakeAll();
             Ensure();
         }
     }
@@ -131,6 +134,25 @@ public static class EffectRuntime
     {
         Ensure();
         _plugins!.NotifyRemoved(matchKey ?? "");
+
+        // E35 (spec-match-modify.md §2.6): restore ONLY the E-* ids a live match.modify grant wrote
+        // this match, by clearing them — never CheatActions.LoadBoardConfigIntoCheats(), which reads
+        // Board.config back into EVERY E-* id unconditionally and would silently overwrite an
+        // operator's own hand-set cheat values with the level's own shipped values, every match end,
+        // with no log. The two existing callers of ApplyBoardConfig/LoadBoardConfigIntoCheats
+        // (GameHooks.cs's Board.Awake handler, CheatCommandRunner.cs's operator command) are
+        // untouched by this — this is a narrower, additional restore path for this module's own
+        // writes specifically. MatchModifyRestore is the extracted, Unity-free half of this call —
+        // see its own doc comment for why the logic lives there rather than inline here.
+        MatchModifyRestore.Restore(MatchModifyWrites.TakeAll, id => CheatState.ClearField(id, "match-end"));
+
+        // E36 (spec-wave-control.md §2.5): F-WAVE-FREEZE is a plain CheatState toggle, not one of
+        // match.modify's own E-* fields -- MatchModifyWrites/MatchModifyRestore above is that
+        // mechanism's alone. A bound `hold` op sets this toggle and nothing else clears it between
+        // matches, so it gets its own, smaller clear here rather than folding into the machinery
+        // above -- the same reason E35's own scoped restore exists: a toggle surviving past its match
+        // leaks silently and permanently into the next one.
+        CheatState.SetToggle("F-WAVE-FREEZE", false, "match-end");
     }
 
     public static long NextTick() => Interlocked.Increment(ref _tick);

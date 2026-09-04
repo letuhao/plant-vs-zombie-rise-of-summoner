@@ -1,0 +1,79 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:41:09Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous artillery"
+    ],
+    "gameTypeId": 365,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature is a defensive plant that functions as a localized area-denial tool rather than a threat to the environment or player.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "Tower_waterCan",
+    "targetPreference": "swarm",
+    "traits": [
+      "bouncing projectile",
+      "chain-reaction synergy",
+      "self-buffing"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  }
+]

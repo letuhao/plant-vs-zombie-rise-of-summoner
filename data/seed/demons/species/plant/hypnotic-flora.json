@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:02:05Z",
+      "emittedUtc": "2026-09-04T10:41:19Z",
       "minorityValues": {
         "elementPrimary": "dark"
       },
@@ -51,7 +52,7 @@
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Hypnotic Flora"
+      "hypnotic-flora"
     ],
     "gameTypeId": 1205,
     "posture": "Bastion",
@@ -67,9 +68,9 @@
     "speciesId": "HypnoPumpkin",
     "targetPreference": "backline",
     "traits": [
-      "Hypnotic Spores",
-      "Zombie Siphon",
-      "Meat Shielding"
+      "hypnotic-aura",
+      "zombie-shielding",
+      "parasitic-protection"
     ],
     "variants": [
       "normal",

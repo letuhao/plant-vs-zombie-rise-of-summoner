@@ -70,7 +70,7 @@ function LegionMarkerView({
 
   return (
     <g ref={group} data-testid={`legion-marker-${entityId}`}>
-      <circle r={6} fill={color} stroke="#0f172a" strokeWidth={1.5} />
+      <circle r={6} fill={color} stroke="var(--color-ink-dark)" strokeWidth={1.5} />
     </g>
   );
 }

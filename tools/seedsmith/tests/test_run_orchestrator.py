@@ -43,10 +43,12 @@ def always_valid_call(system, user, *, config=None, schema=None):
     return json.dumps(out)
 
 
-def test_run_one_species_calls_every_pipeline_and_votes_the_five_load_bearing_fields():
+def test_run_one_species_calls_every_pipeline_and_votes_the_six_load_bearing_fields():
     """basis='inferred' makes THREAT_AUDIT voted too (Q26: inferred/blocked genuinely choose the
-    rung), so all 5 VOTED_FIELDS pipelines fire 3 samples and the other 3 fire 1 — 5*3 + 3*1 = 18,
-    never a flat 8 (spec-option-permutation.md §6's own budget: 2 EXTRA calls per voted field)."""
+    rung), so all 6 VOTED_FIELDS pipelines fire 3 samples and the other 2 fire 1 — 6*3 + 2*1 = 20,
+    never a flat 8 (spec-option-permutation.md §6's own budget: 2 EXTRA calls per voted field).
+    `attackTempo` (kit-shape) joined the voted 6 on 2026-09-04 (demon-corpus-self-heal C1) — was
+    18 (5*3 + 3*1) before."""
     calls = []
 
     def counting_call(system, user, *, config=None, schema=None):
@@ -54,11 +56,12 @@ def test_run_one_species_calls_every_pipeline_and_votes_the_five_load_bearing_fi
         return always_valid_call(system, user, config=config, schema=schema)
 
     result = run_one_species("a", LORE_A, basis="inferred", call=counting_call)
-    assert len(calls) == 18
+    assert len(calls) == 20
     assert set(result["_pipelineOutcomes"]) == set(PIPELINES)
     assert all(o == "persisted" for o in result["_pipelineOutcomes"].values())
     # every voted field resolved 3-0 (the stub is deterministic per prompt) -> high confidence
-    assert set(result["_votes"]) == {"elementPrimary", "aptitudePrimary", "rarity", "deployMode", "threatBand"}
+    assert set(result["_votes"]) == {
+        "elementPrimary", "aptitudePrimary", "rarity", "deployMode", "threatBand", "attackTempo"}
     assert all(v["confidence"] == "high" for v in result["_votes"].values())
 
 
@@ -101,12 +104,12 @@ def test_pause_resume_makes_no_new_model_call_for_already_completed_species():
     assert first["paused"] is True
     assert first["completed"] == ["a"]
     # should_pause is polled only BETWEEN species, so species "a" always finishes ALL of its
-    # calls (18 for basis='inferred', not a flat 8) before the >=1 threshold is even checked.
-    assert len(calls_first_pass) == 18
+    # calls (20 for basis='inferred' since C1, not a flat 8) before the >=1 threshold is checked.
+    assert len(calls_first_pass) == 20
 
     # "Resume": call again with only the REMAINING species (run-control's own resume contract —
     # already-completed species are never re-passed in).
     remaining = [sid for sid in ["a", "b"] if sid not in first["completed"]]
     second = run_selection(remaining, {"b": LORE_B}, {"b": "inferred"}, call=call_b)
     assert second["completed"] == ["b"]
-    assert len(calls_second_pass) == 18  # only "b"'s own calls — "a" was never re-touched
+    assert len(calls_second_pass) == 20  # only "b"'s own calls — "a" was never re-touched

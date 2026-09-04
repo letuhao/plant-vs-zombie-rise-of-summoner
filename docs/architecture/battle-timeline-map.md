@@ -1,6 +1,91 @@
 # Capability map — battle-timeline (the virtual-time battle kernel)
 
-**Status:** **Map approved 2026-08-21.** T1–T5 specced ([battle/](battle/spec-virtual-time-core.md)); T6–T8 held pending the open questions below. **Phase 1 (Checkpoint A), Phase 2 (Checkpoint B), and Phase 3 / T9 (Checkpoint B2) all built and closed 2026-08-28** — see `tasks/battle-timeline-todo.md` B2–B18. `RulesetVersion` deliberately not bumped (T9's fix has zero measurable delta on today's content — see `decisions.md`'s Battle time model row for the recorded trigger condition). Phase 4 (interactive battles) is next and unbuilt. Ideal: [battle-turn-ideal.md](battle-turn-ideal.md). Grounding: `chaos-backend-service/docs/combat-core/{01,05,08}`.
+**Status:** **Map approved 2026-08-21.** T1–T5 specced ([battle/](battle/spec-virtual-time-core.md)); T6–T8 held pending the open questions below. **Phase 1 (Checkpoint A), Phase 2 (Checkpoint B), and Phase 3 / T9 (Checkpoint B2) all built and closed 2026-08-28** — see `tasks/battle-timeline-todo.md` B2–B18. T9 was not itself a bump (its fix has zero measurable delta on today's content — see `decisions.md`'s Battle time model row for the recorded trigger condition); **the live `RulesetVersion` is nonetheless 4 — see the box below.** Phase 4 (interactive battles) is next and unbuilt. Ideal: [battle-turn-ideal.md](battle-turn-ideal.md). Grounding: `chaos-backend-service/docs/combat-core/{01,05,08}`.
+
+---
+
+## ⛔ Reconciliation pass — 2026-09-04
+
+The kernel was specced 2026-08-21 and built through 2026-08-31. In that window the repo adopted the
+**power ladder** and the **tunables SSOT** (both 2026-08-24) and closed the **action vocabulary**
+(2026-09-02), and two unrelated streams moved this engine's `RulesetVersion`. **The code kept up; the
+documents did not.** This box records what was corrected, so the next session does not rediscover it.
+
+**Audited clean — and explicitly not to be "fixed":** `audit-overflow.py` A1/A2 clean;
+`audit-magic-numbers.py` M1 = 0 repo-wide; `TurnReadiness` and `CooldownMath` are `long` end to end
+with `checked(...)` and throw rather than clamp; `MinTicksFloor`, `MaxPopPerPass`, `MicrosPerTick` and
+`ReactionLane.DepthLimit` all carry the structural-exemption comment the standard requires. The
+kernel meets current numeric standards already.
+
+| # | Corrected | Was | Is |
+|---|---|---|---|
+| **D1** | `RulesetVersion` | Three documents assert **2** — including `spec-kernel-adoption.md:19,107`, where "still 2" is a *success criterion* | **4** (`BattleModels.cs:95`). Two bumps from unrelated committed streams; provenance `action-todo.md:344`, held at 4 by owner choice 2026-08-28 (`action-todo.md:1398`). T5's gate is **not** invalidated — it proved byte-identity at the version current *then*, which is what it was for |
+| **D4** | `turn.*` channels | The ideal §10a says they *"stay unregistered"* | **Registered** (`DerivedStatRegistry.cs:110-112`) — correctly, by that same rule ("this stream registers each one when it gives it a reader"). The rule is right; the state sentence is stale |
+| **D5** | The action layer | The scope table below puts action content in *"the next program"* | **Shipped.** `RpgStore.Actions.cs:321` builds an `ActionEnvelope` per `ActionRow` beside `ActionKind`/`ActionTag`/`ActionCategory` — `decisions.md:97`'s join row, real. T19 wired `ActionCatalog` into battle 2026-08-30 |
+| **D6** | The power ladder | One incidental mention across this map, the ideal and eight specs | Stated in **§ Position on the power ladder** below |
+| **D7** | The ideal's §10 open questions | A flat list mixing answered and open | Triaged in **§ Open questions, triaged** below |
+| **W2** | The kernel's balance surface | Profiles and speed/haste constants in code; `battle.v1.json` has no timeline section | New module **T14 `timeline-tunables`** |
+
+**Not corrected here, deliberately:** the `RulesetVersion` history belongs in `decisions.md` (whose
+row 48 records only the power dial's 2→3) and the "stays 2" success criteria are inside
+`spec-kernel-adoption.md`. Both are edits to files this map does not own; they are named so they are
+not lost.
+
+## Position on the power ladder
+
+Added 2026-09-04 (D6). [ssot-power-scale.md](power/ssot-power-scale.md) is project-wide and predates
+none of the battle code, yet no battle document has ever stated where the kernel sits on it.
+
+**Readiness and initiative are a _contest_, and contests read `Θ` linearly.** `DESIGN-GATE.md`
+invariant 14: *"Contests are decided by **differences**, which is why the contest read must stay
+linear — a geometric curve makes a fixed level gap unboundedly decisive."* Turn order is decided by
+comparing two actors' rates; if speed were shaped by `P(Θ)`, a fixed level gap would eventually mean
+one side never acts at all. `TurnReadiness` is therefore correct as built — pure integer arithmetic
+over `(work, rate)` with **no level curve of its own**, which is also why it is not in §10's
+inventory of power-shaped scales and must not be added to it.
+
+**Battle _magnitudes_ — damage, hp, shields — read `P(Θ)`**, and they already do: battle resolves
+through the overlay SSOT (`combat-unification-map.md` decision 1), which is where the ladder is
+applied. The kernel schedules; it never computes a magnitude, so it never needs the curve.
+
+**The one thing to watch:** if a future profile makes speed itself scale with level, that is a new
+`f(level)` and it needs a reviewed row in §10 before it is written — not after.
+
+## Open questions, triaged
+
+Added 2026-09-04 (D7). The ideal's [§10](battle-turn-ideal.md) lists five and
+[spec-injector-kernel-drive.md](battle/spec-injector-kernel-drive.md) §11 two, undifferentiated.
+Three are answered.
+
+| Question | State |
+|---|---|
+| Which profile does content pick? | ✅ **Answered free** — `WaveCatalog.Get(waveId).Profile`, no serialization change. Recorded in this map's decision 4 note below |
+| Which turn economy for interactive? | ✅ **Architecturally answered** — `ITurnEconomy` ships `PerActor`/`PerSide` and a press-turn outcome enum. The *gameplay* pick stays open, but it is a config choice now, not a design one |
+| Speed real vs `classic-round` byte-identical | ✅ **Answered by construction** — readiness is profile-scoped; `classic-round` ignores speed. Shipped and proven by Checkpoint B |
+| Which profile do expeditions and web matches run? | ✅ **`hybrid-atb`** (2026-09-04) — **W=4**, `FixedIncrement` advance, `EarlyBoundWithFallback`, ActionPoints(2/round); reaction lane and rendezvous off. New module **T15** owns the migration |
+| Is `W` content-configurable? | ✅ **Yes, per wave** (2026-09-04) — `WaveCatalog` owns it. T14's config shape revised accordingly |
+| How live is an interactive battle? | ✅ **True live SignalR sessions** (2026-09-04) — **this makes T10 mandatory**; T6+T10+T11 ship together |
+| Does the kernel clock pause with the game? | ✅ **Fully scaled** (2026-09-04) — stops on pause **and accelerates on fast-forward**, see the box below |
+| One kernel instance per board or per match? | ✅ **Per board**, torn down at `board.end` with the existing `ClearAll` barrier |
+
+**All seven closed 2026-09-04.** Full reasoning and the two consequences that are easy to misread:
+`decisions.md`, **Battle engine open questions (2026-09-04)**.
+
+> ### ⛔ Two clocks, and only one of them scales
+>
+> Recorded because the fully-scaled decision is the kind that gets over-applied by the next session.
+>
+> - **The injector kernel clock scales** — it follows `Time.timeScale`, which `CheatActions.cs:28`
+>   allows up to **10×**. So a DoT on the lawn ticks ten times as often on fast-forward. **This is
+>   chosen, not a bug.** `event-pipeline-v2-ssot.md` records that unscaled was originally picked to
+>   prevent exactly this; the owner was shown that and confirmed the change anyway.
+> - **The battle/expedition clock does not, and cannot.** Core has no `Time.timeScale`, and
+>   `SimulationClock` may not read a wall clock at all — `spec-virtual-time-core.md`'s
+>   non-negotiables. Battle resolution is virtual-time and instantaneous.
+>
+> **They are separate on purpose. A change to one is never automatically a change to the other.**
+
+---
 
 | Module | Spec | State |
 |---|---|---|
@@ -15,7 +100,9 @@
 | T10 `decision-trace` | — | **new (decision 3)**: `(setup, seed, trace)` determinism; trace persisted as the battle progresses; sweep refuses incomplete traces; expeditions barred from interactive profiles by assertion |
 | T11 `live-sessions` | — | **new (decision 3)**: SignalR session lifecycle, reconnect, AFK. Depends on T6 + T10 |
 | T7 `pvz-observer` | — | last: stateless projection, injector hot path, perf budget |
-| T13 `injector-kernel-drive` | [spec](battle/spec-injector-kernel-drive.md) | **specced 2026-08-31 — ⛔ awaiting owner review** (B24's own acceptance is "spec reviewed before any injector edit"). The kernel ticks inside the Unity frame and takes over the injector's ad-hoc timing grids (100 ms shield tick, 100 ms DoT grid) — those grids *are* a primitive scheduler, so this is the program's SSOT argument applied to the injector. **Highest-risk module**, sequenced last, gated by a stress measurement (P2 ✅). The Core-side primitives (`DeltaTickAdvance`, `TimelineDrive`, bounded `PopDue`) are **built and green** — they are not injector edits, so they are not behind the review gate |
+| T13 `injector-kernel-drive` | [spec](battle/spec-injector-kernel-drive.md) | **specced 2026-08-31, ~~⛔ awaiting owner review~~ REVIEWED AND APPROVED 2026-08-31 — B24 is `[x]`, and this row went on saying otherwise until 2026-09-04.** The stale row was then read as the item's state and cost a run real time; **the todo, not the map, is authoritative for item state.** B24's acceptance ("spec reviewed before any injector edit") is met, so B25's injector half, B26 and B27 were never blocked. **Built and green 2026-09-04:** `KernelDriveHost` drives both 100 ms grids as scheduled events from `InjectorLoop`, with `FUSIONRPG_KERNEL_GRIDS=0` reverting to the accumulators. ⛔ The clock is **fully scaled** (2026-09-04 reversal of the spec's original unscaled answer) — it stops on pause and **accelerates to 10× on fast-forward, deliberately**. The kernel ticks inside the Unity frame and takes over the injector's ad-hoc timing grids (100 ms shield tick, 100 ms DoT grid) — those grids *are* a primitive scheduler, so this is the program's SSOT argument applied to the injector. **Highest-risk module**, sequenced last, gated by a stress measurement (P2 ✅). The Core-side primitives (`DeltaTickAdvance`, `TimelineDrive`, bounded `PopDue`) are **built and green** — they are not injector edits, so they are not behind the review gate |
+| T14 `timeline-tunables` | [spec](battle/spec-timeline-tunables.md) | **new 2026-09-04 (reconciliation W2)**: the kernel's balance surface is code, and `battle.v1.json` has no timeline section at all. Triages every number under `Battle/Timeline/` into published-to-config or documented-structural — no third outcome. Four real moves, nine rows already correct or out of scope. **Byte-identical acceptance**: it relocates values, it does not change one, so a moved golden is a defect in the module. Also where the ideal's "is `W` content-configurable" question gets decided, because publishing `W` is what makes it a lever |
+| T15 `profile-migration` | [spec](battle/spec-profile-migration.md) | **new 2026-09-04, from the profile decision.** Move expeditions and web matches from `classic-round` to `hybrid-atb`, making `turn.speed`/`turn.haste` live in production for the first time. **The highest-risk module in the program after T13** — it is the only one that deliberately moves the economy. ~~Carries the win-rate sweep, the expedition tier-hash re-bless, and the shared `RulesetVersion` **4 → 5** bump. **Lands back-to-back with B26's scaled clock under one re-bless**.~~ ⭐ **All of that was retired by measurement on 2026-09-04: it carries none of them.** Three predicted golden-movers turned out to move nothing — B26 (the scaled clock is injector-side; Core has no `Time.timeScale`), B36 (the golden fixtures use `"golden-*"` wave ids absent from `WaveCatalog`, and the expedition tier hash covers the *plan*), and B39 (readiness only reorders when speeds differ, and no content authors `turn.speed` yet). **`RulesetVersion` stays 4** — a bump is earned by a moved golden. **BUILT: B36 flipped 2026-09-04; B39 wired readiness into turn order the same day.** **Two tasks precede the migration itself:** (a) close the `KernelPurityScan` hole — it matches the `float `/`double ` declaration tokens, so `var x = 1.5f;` slips past (planted and verified during B25, left as owner's call, **answered 2026-09-04: fix it**), and determinism is the foundation all of this sits on; (b) **measure `FixedIncrement` expedition resolve and the boot sweep** against the `NextEvent` baseline — `hybrid-atb` is the only profile that steps rather than jumps, and the cost is estimated, never measured. If it is real, `galaxy-sync` for expeditions is the pre-agreed fallback |
 | P1 `kernel-performance` | [spec](battle/spec-kernel-performance.md) | **cross-cuts T1–T13.** The kernel runs per-frame in the injector (owner decision), so it is frame-critical Unity code: zero steady-state allocation, O(log n) operations, bounded resumable drains. Budgets inherited from `perf-probe-plan.md`, not restated |
 
 **Performance is a constraint on type design, not a later pass.** Because the kernel ticks inside the Unity frame, the expensive mistakes are structural — a class where a struct belongs, a string key on a tick path — and they cost a rewrite rather than a tune. Enforced on two surfaces: **deterministic allocation and operation-count assertions in CI** (a wall-clock test in CI measures the build agent's mood), and **`PerfProbe` sections** measured live against the B1–B9 matrix. Standing clarification: the kernel schedules *our* timeline; Unity still owns when the game's own actors act, so PvZ stays observed and T7 stays a stateless projection.
@@ -33,7 +120,7 @@
 
 **Scope honesty:** decisions 1 and 3 together roughly double this program. The build order below is arranged so the existing game is protected early (the gate at T5) and every piece of new machinery lands behind its own checkpoint afterwards.
 
-**Prerequisite before any build:** a `decisions.md` row. AGENTS.md makes architecture changes that lock behavior a hard boundary, and no battle-time-model row exists today. This program locks the virtual-time DES kernel, tick = 1 ms, and the mode-as-data rule.
+~~**Prerequisite before any build:** a `decisions.md` row.~~ ✅ **Satisfied** — the **Battle time model** row exists (`decisions.md:42`) and locks the virtual-time DES kernel, `1 tick = 1 ms`, and the mode-as-data rule, enforced by an architecture test.
 
 ## What this program is
 
@@ -43,7 +130,16 @@ A **virtual-time battle kernel**: a simulation clock, an event scheduler, and a 
 
 ## Scope boundary — read this first
 
-| In scope | Out of scope (the next program) |
+> **⛔ "The next program" is now shipped (D5, 2026-09-04).** This table was written 2026-08-21, when
+> the action layer did not exist. It does: `ActionRow` carries an `ActionEnvelope` alongside
+> `ActionKind` / `ActionTag` / `ActionCategory` (`RpgStore.Actions.cs:321`), T19 wired `ActionCatalog`
+> into `BattleRunState` on 2026-08-30, and `A-E1 eligibility-axis` shipped the "who may hold this"
+> field. **The right-hand column is still the correct scope boundary — read it as "owned by the
+> action program", not as "does not exist yet."** Concretely: targeting, movement and the battle board
+> are `action-map.md`'s (`A7`, `A9`, `A10`), and skill content is
+> [spec-species-skills.md](combat/spec-species-skills.md)'s.
+
+| In scope | Out of scope (owned by the action program) |
 |---|---|
 | Tick, clock, time-advance policies, dilation | Any specific skill, attack, or defence |
 | Event queue, scheduling, cancellation | Damage math (**done** — resolver + pipeline + shields) |
@@ -111,7 +207,7 @@ flowchart TB
 
 [spec-battle-enrichment.md](combat/spec-battle-enrichment.md) is **partly superseded and should be rebased after T5**:
 
-- **E2 skills** — was the wave that most needed this. A cooldown *is* a readiness function; skills become actions on the timeline rather than a bolt-on. Respec after T5.
+- **E2 skills** — was the wave that most needed this. A cooldown *is* a readiness function; skills become actions on the timeline rather than a bolt-on. ~~Respec after T5.~~ ✅ **Done 2026-09-04, and the answer was stronger than "respec":** the wave is **replaced** by [spec-species-skills.md](combat/spec-species-skills.md). Its `SkillDef`/`SkillCatalog` turned out to re-invent five things that had shipped under other names, so the module builds no vocabulary at all — it wires two reads whose implementations already exist with zero callers.
 - **E1 riders** — a DoT pulse is a scheduled event. Rebasing fixes the sub-round `PeriodMs` under-delivery the current round loop cannot express.
 - **E3 hybrid payloads** — genuinely independent (resolver-side, not timeline-side). **Can ship any time**, before or after this program.
 

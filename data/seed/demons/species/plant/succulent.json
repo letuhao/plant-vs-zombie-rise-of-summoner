@@ -1,0 +1,81 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:43:06Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "succulent",
+      "cryo-flora"
+    ],
+    "gameTypeId": 1427,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to deal quadruple damage to frozen units and pierce through aerial targets makes it a significant tactical threat rather than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "IceCactus",
+    "targetPreference": "frontline",
+    "traits": [
+      "ice-spike projection",
+      "frostbite application",
+      "anti-aerial specialization",
+      "thermal-kinetic synergy"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  }
+]

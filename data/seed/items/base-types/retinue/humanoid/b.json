@@ -66,10 +66,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.gardener",
+        "family": "atom.dooming",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.unbreakable-siren",
       "flavorKey": "flavor.base.unbreakable-siren",
       "flavor": "It wails in enduring pitch, and what grows survives any counter.",
@@ -137,10 +137,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.cherry-bloom",
+        "family": "atom.gravemaking",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.official-boombox",
       "flavorKey": "flavor.base.official-boombox",
       "flavor": "Authorized to play only the gravest anthems. Flowers break ground in rhythm with the bass.",
@@ -177,7 +177,7 @@
         "family": "atom.dooming",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.certified-klaxon",
       "flavorKey": "flavor.base.certified-klaxon",
       "flavor": "A sanctioned blare that darkens the field where it sounds.",
@@ -245,10 +245,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.flash-freeze",
+        "family": "atom.dooming",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.endorsed-bell",
       "flavorKey": "flavor.base.endorsed-bell",
       "flavor": "Officially cleared to freeze. The ground locks tight where it rings, approved and binding.",
@@ -318,10 +318,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.gravedigging",
+        "family": "atom.gravemaking",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.polished-horn",
       "flavorKey": "flavor.base.polished-horn",
       "flavor": "Bright and commanding. Deep paths open beneath the ground in response to its call.",
@@ -353,10 +353,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.terraforming",
+        "family": "atom.summoner",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.knurled-buzzer",
       "flavorKey": "flavor.base.knurled-buzzer",
       "flavor": "A textured whine that reshapes the earth. The ground remembers where it vibrated.",
@@ -428,7 +428,7 @@
         "family": "atom.volley",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.worked-chime",
       "flavorKey": "flavor.base.worked-chime",
       "flavor": "Carefully crafted to call in perfect unison. The allies arrive as a single unified force.",

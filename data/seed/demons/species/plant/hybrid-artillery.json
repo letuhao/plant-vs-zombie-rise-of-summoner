@@ -1,0 +1,241 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:30:57Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "hybrid-artillery"
+    ],
+    "gameTypeId": 1388,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to apply stacking poison and generate toxic miasma from multiple hits suggests a threat level significantly higher than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "GarlicGatling",
+    "targetPreference": "swarm",
+    "traits": [
+      "projectile-dispenser",
+      "toxin-infuser",
+      "miasma-generator"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:31:38Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "hybrid-artillery"
+    ],
+    "gameTypeId": 1292,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature possesses high-frequency multi-shot capabilities and a defensive mechanism that grants temporary invulnerability and health regeneration, making it far more dangerous than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SuperHypnoGatling",
+    "targetPreference": "swarm",
+    "traits": [
+      "pea-projectile-burst",
+      "chance-based-invulnerability",
+      "charm-infusion",
+      "rapid-fire"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:46:48Z",
+      "minorityValues": {
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Vigor",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "hybrid-artillery",
+      "metal-flora"
+    ],
+    "gameTypeId": 985,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature possesses massive health (4000), high-frequency burst damage, and a high-probability defensive/offensive ultimate that grants total invulnerability and massive area-of-effect damage.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateHelmetGatling",
+    "targetPreference": "backline",
+    "traits": [
+      "iron-bodied",
+      "ballistic-burst",
+      "kinetic-knockback",
+      "reactive-regeneration"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
+  }
+]

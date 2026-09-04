@@ -42,12 +42,30 @@
       "powerBand": "medium",
       "nameWords": {
         "prefix": [
-          "Ember",
-          "Frost",
-          "Gale",
-          "Stone",
-          "Radiant",
-          "Umbral"
+          {
+            "variant": "fire",
+            "word": "Ember"
+          },
+          {
+            "variant": "ice",
+            "word": "Frost"
+          },
+          {
+            "variant": "air",
+            "word": "Gale"
+          },
+          {
+            "variant": "earth",
+            "word": "Stone"
+          },
+          {
+            "variant": "light",
+            "word": "Radiant"
+          },
+          {
+            "variant": "dark",
+            "word": "Umbral"
+          }
         ]
       },
       "displayTemplate": "+{value} {element} power",
@@ -84,9 +102,21 @@
       "powerBand": "low",
       "nameWords": {
         "prefix": [
-          "Waxing",
-          "Swelling",
-          "Overwhelming"
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Waxing"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Swelling"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Overwhelming"
+          }
         ]
       },
       "displayTemplate": "{value} increased {element} power",

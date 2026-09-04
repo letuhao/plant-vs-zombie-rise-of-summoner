@@ -29,7 +29,7 @@ var tuningDir = new[]
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "data", "tuning")
     }
     .Select(Path.GetFullPath)
-    .FirstOrDefault(d => File.Exists(Path.Combine(d, "derived-stats.v1.json")));
+    .FirstOrDefault(d => File.Exists(Path.Combine(d, "derived-stats.v2.json")));
 if (tuningDir is null)
 {
     Console.Error.WriteLine($"no tuning dir found (looked in {Path.Combine(dataDir, "tuning")} and data/tuning)");
@@ -37,7 +37,7 @@ if (tuningDir is null)
 }
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 // T4.7 step 2 / T4.8 (catalog-runtime) — this tool reads DemonSpeciesCatalog.All directly (line 45),
 // which now throws unless Configure has run. Behaviour-preserving: the same compiled roster it
 // always walked.

@@ -22,10 +22,12 @@ from __future__ import annotations
 from ..adapters.items.acquisition import Acquisition
 from .model import Ctx, Finding, Loop, Metric, Severity
 
-# core.v1.json roles.list, the two rows with hybridEligible: false. Hard-coded rather than read,
-# matching the ported source's own reasoning: this must keep working on synthetic fixtures that
-# ship no registry. Both are stable ids in an append-only registry.
-NON_HYBRID_ROLES = frozenset({"ward-array", "jewel-minor-b"})
+# core.v1.json roles.list, the three rows with hybridEligible: false (D30, registryVersion 2,
+# 2026-09-04 — D3 wins over the prior 13-role/895‰ shape this set used to name; jewel-minor-b is
+# now hybrid-eligible, head-guard and sense are not). Hard-coded rather than read, matching the
+# ported source's own reasoning: this must keep working on synthetic fixtures that ship no
+# registry. All three are stable ids in an append-only registry.
+NON_HYBRID_ROLES = frozenset({"ward-array", "head-guard", "sense"})
 
 # Kinds a player is meant to end up holding. Deliberately excludes affix-family / display-template
 # / curve (machinery, never held), set (completed, not acquired — checked separately),

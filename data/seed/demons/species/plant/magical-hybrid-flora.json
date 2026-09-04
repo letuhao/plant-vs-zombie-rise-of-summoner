@@ -19,14 +19,17 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:54:32Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T11:07:54Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -41,39 +44,38 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "light",
+    "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "magical_hybrid_flora"
+      "magical-hybrid-flora"
     ],
-    "gameTypeId": 993,
-    "posture": "unresolved",
-    "pure": false,
+    "gameTypeId": 973,
+    "posture": "Force",
+    "pure": true,
     "rarity": "fused",
-    "reach": "long",
-    "reason": "The creature's ability to deal high damage (300x2) and provide crowd control via charm effects across the entire field makes it a significant tactical threat rather than a mere marauder.",
+    "reach": "short",
+    "reason": "The creature's ability to chain lightning, reduce armor, and trigger additional floating cannons through kills makes it a high-utility force multiplier rather than a mere marauder.",
     "resourceProfile": [
       "hp",
-      "stamina",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "HypnoCattailGirl",
-    "targetPreference": "frontline",
+    "speciesId": "PinkOnion",
+    "targetPreference": "swarm",
     "traits": [
-      "homing_magic_projectiles",
-      "charm_mechanic",
-      "aquatic_affinity",
-      "manual_targeted_spellcasting"
+      "chain-lightning-discharge",
+      "synergistic-buffing",
+      "orbital-drone-summoning"
     ],
     "variants": [
-      "shiny",
-      "normal"
+      "normal",
+      "mutated",
+      "blessed"
     ],
     "verdict": "too-low"
   }

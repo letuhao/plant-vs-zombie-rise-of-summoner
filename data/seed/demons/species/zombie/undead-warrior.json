@@ -20,15 +20,15 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "split",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:18:19Z",
+      "emittedUtc": "2026-09-04T10:00:00Z",
       "minorityValues": {
-        "deployMode": "HypnoAlly",
-        "rarity": "almanac"
+        "deployMode": "HypnoAlly"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -46,13 +46,13 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "Agility",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "undead_warrior"
+      "undead-warrior"
     ],
     "gameTypeId": 256,
     "posture": "Force",
@@ -68,14 +68,15 @@
     "speciesId": "BlackFlagFootball",
     "targetPreference": "frontline",
     "traits": [
-      "roll_dash",
-      "knockback_resistance",
-      "curse_inflicting",
-      "momentum_scaling"
+      "flag-collector",
+      "roll-dash",
+      "knockback-resistance",
+      "curse-inflicting",
+      "momentum-scaling"
     ],
     "variants": [
-      "corrupted",
-      "normal"
+      "normal",
+      "corrupted"
     ],
     "verdict": "too-high"
   }

@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:12:28Z",
-      "minorityValues": {
-        "rarity": "almanac"
-      },
+      "emittedUtc": "2026-09-04T10:21:56Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,37 +44,37 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
     "elementSecondary": "none",
     "family": [
-      "Solar-Kinetic Flora"
+      "solar-kinetic flora"
     ],
     "gameTypeId": 242,
     "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
+    "rarity": "almanac",
     "reach": "long",
     "reason": "The creature's ability to scale damage exponentially based on field composition and its high-frequency, homing projectile attacks justify a scourge-level threat.",
     "resourceProfile": [
       "hp",
-      "stamina",
-      "spirit"
+      "stamina"
     ],
     "side": "plant",
     "speciesId": "EndoFlameGirl",
     "targetPreference": "swarm",
     "traits": [
-      "Photonic Projectile",
-      "Symbiotic Empowerment",
-      "Ultimate-Synergy"
+      "photonic projectile discharge",
+      "empathic empowerment",
+      "ultimate-synergy scaling"
     ],
     "variants": [
-      "normal",
       "blessed",
-      "shiny"
+      "shiny",
+      "normal",
+      "ancient"
     ],
     "verdict": "agree"
   }

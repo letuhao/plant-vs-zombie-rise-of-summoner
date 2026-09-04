@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "frozen": false,
+  "_meta": {
+    "purpose": "D11 clause 2 (directional stat profile) and clause 3 (one lean per frame, correlated across every hybrid-core role) -- item-ideal.md rarity-bands...base-types module (build order 6), spec-base-types.md 'Where the direction lives'. One block per (classLadder, frame): ten pairs, eight authored, the `standard` pair declared empty per D14 (commander gear out of scope).",
+    "sources": [
+      "docs/architecture/item/spec-base-types.md",
+      "data/seed/derived-stats/catalog.json",
+      "docs/architecture/effect-atom/atom-family-library.md"
+    ],
+    "designNotes": [
+      "Clause 3 is structural, not checked: every `humanoid` block below carries `implicitAxis: burst` and every `plant` block carries `implicitAxis: sustain`. A per-role lean is impossible to author because the lean lives here, per (ladder, frame), never per role -- every role drawing from a ladder inherits its frame's one lean.",
+      "Each ladder's split channel PAIR is the same on both frames; only the weights invert (700/300 vs 300/700). This is deliberate: it guarantees by construction that neither frame's profile is a superset of the other's (each wins on exactly one of the two channels), which is exactly what `channel-split` mode checks.",
+      "Every split channel is bindable on BOTH frames and is not side-restricted -- `maxHp`/`atk` are primary (stat.modify), `combat.dodge.omni` / `combat.crit.damage.omni` / `combat.crit.resist.damage.omni` are stat.derived at the frame-agnostic `omni` variant (never a specific element, which would bias the lean toward whichever element the item happens to carry). `plating`/`carapace` (zombie-only Unity fields) are never eligible here, per spec-base-types.md's own warning.",
+      "Ask first (spec-base-types.md Boundaries): the concrete channels chosen here are a balance surface, a starting table for the owner's first review -- not a locked design. What IS locked by this module is the mechanism: one lean per (ladder, frame), correlated across every hybrid-core role."
+    ]
+  },
+  "leans": {
+    "armour": {
+      "humanoid": {
+        "baseSplitPermille": { "maxHp": 700, "combat.dodge.omni": 300 },
+        "implicitAxis": "burst"
+      },
+      "plant": {
+        "baseSplitPermille": { "maxHp": 300, "combat.dodge.omni": 700 },
+        "implicitAxis": "sustain"
+      }
+    },
+    "weapon": {
+      "humanoid": {
+        "baseSplitPermille": { "atk": 700, "combat.crit.damage.omni": 300 },
+        "implicitAxis": "burst"
+      },
+      "plant": {
+        "baseSplitPermille": { "atk": 300, "combat.crit.damage.omni": 700 },
+        "implicitAxis": "sustain"
+      }
+    },
+    "offhand": {
+      "humanoid": {
+        "baseSplitPermille": { "maxHp": 700, "combat.crit.resist.damage.omni": 300 },
+        "implicitAxis": "burst"
+      },
+      "plant": {
+        "baseSplitPermille": { "maxHp": 300, "combat.crit.resist.damage.omni": 700 },
+        "implicitAxis": "sustain"
+      }
+    },
+    "jewel": {
+      "humanoid": {
+        "baseSplitPermille": { "atk": 700, "maxHp": 300 },
+        "implicitAxis": "burst"
+      },
+      "plant": {
+        "baseSplitPermille": { "atk": 300, "maxHp": 700 },
+        "implicitAxis": "sustain"
+      }
+    },
+    "standard": {
+      "humanoid": null,
+      "plant": null,
+      "note": "Declared, no lean -- D14: commander gear is out of scope for v1. Present so the frame-lean coverage check reports 8/8 real blocks out of 10 declared, never 10/10 (spec-base-types.md's own warning: omitting this pair would hide two absent leans as though they were authored)."
+    }
+  },
+  "globalLean": {
+    "humanoid": "burst",
+    "plant": "sustain"
+  }
+}

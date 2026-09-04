@@ -1,5 +1,6 @@
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.World.Intel;
 
 namespace FusionRpg.Core.World.Movement;
 
@@ -10,7 +11,15 @@ public static class MovementPolicy
     public const string Scout = "scout";
     public const string Hold = "hold";
 
-    public static readonly IReadOnlyList<string> Stances = new[] { March, Scout, Hold };
+    /// <summary>
+    /// Same literal as <see cref="Prospecting.DowserStance"/>, by construction (a const initialized
+    /// from a const) rather than by convention — the two cannot drift apart without a compile error,
+    /// which is the whole defect §8c.4 named: a mismatched pair passes admission and reveals nothing,
+    /// and no test that only checks "was the order accepted" would ever catch it.
+    /// </summary>
+    public const string Dowse = Prospecting.DowserStance;
+
+    public static readonly IReadOnlyList<string> Stances = new[] { March, Scout, Hold, Dowse };
 
     public static bool IsKnownStance(string? stance) =>
         stance != null && Stances.Contains(stance, StringComparer.Ordinal);
@@ -39,6 +48,11 @@ public static class MovementPolicy
     {
         Hold => 0,
         Scout => ScoutPointsPerTurn,
+        // Balance number, not a structural one — data/tuning/world.v4.json, read through
+        // WorldTuningHub the same way LoamPolicy.CarryPerBearer and TurnCalendar.DaysPerWeek already
+        // are (world-stage W30). Never a const here: a dowser seeing four lanes out against a
+        // scout's two is exactly the kind of number a balance pass wants to move.
+        Dowse => WorldTuningHub.Tuning.Movement.DowseBudgetMilli,
         _ => PointsPerTurn
     };
 }

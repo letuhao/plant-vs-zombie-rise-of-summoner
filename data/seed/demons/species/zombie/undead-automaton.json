@@ -19,90 +19,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "split",
-        "deployMode": "high",
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "split",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:29:38Z",
+      "emittedUtc": "2026-09-04T10:19:20Z",
       "minorityValues": {
-        "aptitudePrimary": "Fortitude"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Bulwark",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
-    "elementSecondary": "none",
-    "family": [
-      "undead-automaton"
-    ],
-    "gameTypeId": 13,
-    "posture": "Bastion",
-    "pure": true,
-    "rarity": "chaff",
-    "reach": "short",
-    "reason": "With a total durability of 1370, this creature possesses significantly more survivability than a standard raider-level threat.",
-    "resourceProfile": [
-      "hp",
-      "poise"
-    ],
-    "side": "zombie",
-    "speciesId": "BucketZombieDuck",
-    "targetPreference": "frontline",
-    "traits": [
-      "amphibious",
-      "buoyant",
-      "rust-prone",
-      "mechanical-integration"
-    ],
-    "variants": [],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 2,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "split",
-        "elementPrimary": "high",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:05:09Z",
-      "minorityValues": {
+        "attackTempo": "ponderous",
         "deployMode": "PlantAvatar"
       },
       "promptVersions": {
@@ -132,9 +58,9 @@
     "gameTypeId": 322,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "grafted",
     "reach": "short",
-    "reason": "The creature is a 2nd-level zombie with basic armor and a simple duplication mechanic, which does not align with the world-ending threat of a calamity.",
+    "reason": "The creature is a level 2 zombie with basic armor and a simple replication mechanic, which does not align with the world-ending threat of a calamity.",
     "resourceProfile": [
       "hp",
       "poise"
@@ -143,14 +69,92 @@
     "speciesId": "Driver_b",
     "targetPreference": "frontline",
     "traits": [
-      "armored-plating",
+      "layered-armor",
       "crushing-momentum",
-      "layered-defense",
-      "post-mortem-reproduction"
+      "recursive-reincarnation"
     ],
     "variants": [
       "normal",
-      "mutated"
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:26:09Z",
+      "minorityValues": {
+        "elementPrimary": "air"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead-automaton"
+    ],
+    "gameTypeId": 312,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The description depicts a specialized, fast-moving tactical unit designed for disruption rather than a world-ending threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "Submarine_b2",
+    "targetPreference": "frontline",
+    "traits": [
+      "turbo-propulsion",
+      "ramming-momentum",
+      "tactical-disruption"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
     ],
     "verdict": "too-high"
   }

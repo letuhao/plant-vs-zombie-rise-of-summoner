@@ -320,6 +320,32 @@ no framework, and it fixes the input every later generator consumes.
 
 ---
 
+### 3c-ter. Theme registry — two defects filed by the item program (D34, 2026-09-04)
+
+⛔ **`data/seed/demons/_registry/themes.v1.json` is stale: 84 themes against 386 shipped species**
+(`data/seed/demons/species/` — 292 plant + 94 zombie, counted 2026-09-04). The registry is a snapshot
+of a corpus this pipeline **generates**, and the corpus grows every run. Any downstream consumer that
+reads it as the species population is reading fiction.
+
+> ⭐ **This is the defect that made an item-program question look like a product decision.** [item-ideal.md](item-ideal.md)
+> §2g #9d read *"31 of 84 themes are `basis = name`, that is 37%, module 13 needs a standing answer"* —
+> and 37% of a stale snapshot is not a rate. The owner's correction was the right one: **the number is
+> a defect, not an input.**
+
+| id | Capability | Model? | Depends on |
+|---|---|---|---|
+| `theme-refresh` | Republish `themes.v1.json` over the **whole** species corpus, not a snapshot. Staleness becomes a pipeline check, not something a consumer discovers | no | `adapter-demons` |
+| `theme-enrich` | LLM stage — for any theme at `basis: "name"`, generate the flavour text that raises it to `basis: "text"`. **The same shape `family-extract` and `motif-derive` already are**, with the same honesty contract | **yes** | `theme-refresh`, `pipeline` |
+
+**Why `theme-enrich` and not an "ask first" downstream.** `basis: "name"` is not a property of the
+species — it is a record of what the pipeline had when it ran. **This pipeline generates the missing
+input**, exactly as the species and action generators do. A consumer that designs around name-basis
+themes is designing around absent data instead of asking for it.
+
+**Consumer:** [item-map.md](item-map.md) module 13 (`set-charm-gen`), which drops its per-run gate once
+`theme-enrich` lands. Also unblocks [item-ideal.md](item-ideal.md) §2g #9c's `set` `themeKey`
+requirement, which keys on `speciesId` and therefore needs the full corpus published.
+
 ## 4. Build order
 
 **W1 — measurement (standalone value).** `corpus`, `adapter-items`, `numerics`, `budget`, `metrics`,

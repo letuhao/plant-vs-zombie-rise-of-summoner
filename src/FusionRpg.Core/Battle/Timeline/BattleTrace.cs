@@ -20,6 +20,7 @@ public sealed class BattleTrace
     readonly List<string> _phases = new();
     readonly List<string> _targets = new();
     readonly List<string> _applies = new();
+    readonly List<string> _turns = new();
 
     /// <summary>
     /// Intra-round phase markers in the order they actually ran. A snapshot, not a live view:
@@ -89,6 +90,21 @@ public sealed class BattleTrace
         _applies.Add($"{round} {ownerKey} {signedDelta}");
 
     public IReadOnlyList<string> Applies => _applies.ToArray();
+
+    /// <summary>
+    /// B38 — one per-actor turn-state transition.
+    ///
+    /// <para>Its own list, deliberately kept OUT of <see cref="Digest"/>, for exactly the reason
+    /// <see cref="Target"/> gives: the digest is the fixture the parity ladder compares, so adding
+    /// lines to it would move every trace golden and make an observability addition indistinguishable
+    /// from a behaviour change. The turn cycle is bookkeeping over the same battle — it must be
+    /// visible without being load-bearing.</para>
+    /// </summary>
+    public void Turn(int round, string actorKey, TurnState from, TurnState to) =>
+        _turns.Add($"{round} {actorKey} {from}->{to}");
+
+    /// <summary>Turn transitions in order, for the same reason <see cref="Targets"/> is separate.</summary>
+    public IReadOnlyList<string> Turns => _turns.ToArray();
 
     /// <summary>
     /// Decorates the combat RNG so crit-stream draws are recorded without touching

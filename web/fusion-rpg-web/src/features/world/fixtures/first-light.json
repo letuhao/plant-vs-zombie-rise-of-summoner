@@ -35,6 +35,14 @@
       "habitable": false,
       "loamProduction": 0,
       "loamUpkeep": 0,
+      "upkeepBreakdown": {
+        "base": 0,
+        "garrison": 0,
+        "development": 0,
+        "danger": 0,
+        "intensityMilli": 0,
+        "handicapMilli": 0
+      },
       "loamNet": 0,
       "componentId": null,
       "componentProduction": 0,
@@ -43,6 +51,12 @@
       "loamStock": 0,
       "componentStock": 0,
       "willReleaseNextTurn": false,
+      "wardenBindingId": null,
+      "neglectedTurns": 0,
+      "loamCapacity": 0,
+      "recruitStock": 0,
+      "projectId": null,
+      "projectTurnsRemaining": null,
       "intel": "Scouted",
       "lastSeenTurn": 0,
       "layoutX": 4,
@@ -78,6 +92,14 @@
       "habitable": false,
       "loamProduction": 0,
       "loamUpkeep": 0,
+      "upkeepBreakdown": {
+        "base": 0,
+        "garrison": 0,
+        "development": 0,
+        "danger": 0,
+        "intensityMilli": 0,
+        "handicapMilli": 1000
+      },
       "loamNet": 0,
       "componentId": null,
       "componentProduction": 0,
@@ -86,6 +108,12 @@
       "loamStock": 0,
       "componentStock": 0,
       "willReleaseNextTurn": false,
+      "wardenBindingId": null,
+      "neglectedTurns": 0,
+      "loamCapacity": 0,
+      "recruitStock": 0,
+      "projectId": null,
+      "projectTurnsRemaining": null,
       "intel": "Unknown",
       "lastSeenTurn": 0,
       "layoutX": 6,
@@ -111,6 +139,14 @@
       "habitable": false,
       "loamProduction": 0,
       "loamUpkeep": 0,
+      "upkeepBreakdown": {
+        "base": 0,
+        "garrison": 0,
+        "development": 0,
+        "danger": 0,
+        "intensityMilli": 0,
+        "handicapMilli": 0
+      },
       "loamNet": 0,
       "componentId": null,
       "componentProduction": 0,
@@ -119,6 +155,12 @@
       "loamStock": 0,
       "componentStock": 0,
       "willReleaseNextTurn": false,
+      "wardenBindingId": null,
+      "neglectedTurns": 0,
+      "loamCapacity": 0,
+      "recruitStock": 0,
+      "projectId": null,
+      "projectTurnsRemaining": null,
       "intel": "Watched",
       "lastSeenTurn": 0,
       "layoutX": 2,
@@ -133,7 +175,8 @@
           "ownerFactionId": null,
           "guardWaveId": null,
           "guardState": "Cleared",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         },
         {
           "slotIndex": 1,
@@ -143,7 +186,8 @@
           "ownerFactionId": null,
           "guardWaveId": null,
           "guardState": "Cleared",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         },
         {
           "slotIndex": 2,
@@ -153,7 +197,8 @@
           "ownerFactionId": null,
           "guardWaveId": "guard-light",
           "guardState": "Intact",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         },
         {
           "slotIndex": 3,
@@ -163,7 +208,8 @@
           "ownerFactionId": null,
           "guardWaveId": "guard-light",
           "guardState": "Intact",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         }
       ],
       "forces": [],
@@ -185,6 +231,14 @@
       "habitable": false,
       "loamProduction": 0,
       "loamUpkeep": 0,
+      "upkeepBreakdown": {
+        "base": 0,
+        "garrison": 0,
+        "development": 0,
+        "danger": 0,
+        "intensityMilli": 0,
+        "handicapMilli": 0
+      },
       "loamNet": 0,
       "componentId": null,
       "componentProduction": 0,
@@ -193,6 +247,12 @@
       "loamStock": 0,
       "componentStock": 0,
       "willReleaseNextTurn": false,
+      "wardenBindingId": null,
+      "neglectedTurns": 0,
+      "loamCapacity": 0,
+      "recruitStock": 0,
+      "projectId": null,
+      "projectTurnsRemaining": null,
       "intel": "Watched",
       "lastSeenTurn": 0,
       "layoutX": 2,
@@ -218,6 +278,14 @@
       "habitable": true,
       "loamProduction": 50,
       "loamUpkeep": 16,
+      "upkeepBreakdown": {
+        "base": 10,
+        "garrison": 6,
+        "development": 0,
+        "danger": 0,
+        "intensityMilli": 1000,
+        "handicapMilli": 1000
+      },
       "loamNet": 34,
       "componentId": "homeworld",
       "componentProduction": 50,
@@ -226,6 +294,12 @@
       "loamStock": 500,
       "componentStock": 500,
       "willReleaseNextTurn": false,
+      "wardenBindingId": null,
+      "neglectedTurns": 0,
+      "loamCapacity": 300,
+      "recruitStock": 0,
+      "projectId": null,
+      "projectTurnsRemaining": null,
       "intel": "Watched",
       "lastSeenTurn": 0,
       "layoutX": 0,
@@ -237,40 +311,44 @@
           "slotTypeId": "seat",
           "element": null,
           "state": "Claimed",
-          "ownerFactionId": null,
+          "ownerFactionId": "dave",
           "guardWaveId": null,
           "guardState": "Cleared",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         },
         {
           "slotIndex": 1,
           "slotTypeId": "wildland",
           "element": null,
           "state": "Claimed",
-          "ownerFactionId": null,
+          "ownerFactionId": "dave",
           "guardWaveId": null,
           "guardState": "Cleared",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         },
         {
           "slotIndex": 2,
           "slotTypeId": "market",
           "element": null,
           "state": "Claimed",
-          "ownerFactionId": null,
+          "ownerFactionId": "dave",
           "guardWaveId": null,
           "guardState": "Cleared",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         },
         {
           "slotIndex": 3,
           "slotTypeId": "rootbed",
           "element": null,
           "state": "Claimed",
-          "ownerFactionId": null,
+          "ownerFactionId": "dave",
           "guardWaveId": null,
           "guardState": "Cleared",
-          "structureId": null
+          "structureId": null,
+          "constructionTurnsRemaining": null
         }
       ],
       "forces": [
@@ -302,6 +380,14 @@
       "habitable": false,
       "loamProduction": 0,
       "loamUpkeep": 0,
+      "upkeepBreakdown": {
+        "base": 0,
+        "garrison": 0,
+        "development": 0,
+        "danger": 0,
+        "intensityMilli": 0,
+        "handicapMilli": 1000
+      },
       "loamNet": 0,
       "componentId": null,
       "componentProduction": 0,
@@ -310,6 +396,12 @@
       "loamStock": 0,
       "componentStock": 0,
       "willReleaseNextTurn": false,
+      "wardenBindingId": null,
+      "neglectedTurns": 0,
+      "loamCapacity": 0,
+      "recruitStock": 0,
+      "projectId": null,
+      "projectTurnsRemaining": null,
       "intel": "Unknown",
       "lastSeenTurn": 0,
       "layoutX": 6,
@@ -331,6 +423,7 @@
       "width": 800,
       "hazardMilli": 100,
       "wardLevel": 0,
+      "gateKeyId": null,
       "state": "Open"
     },
     {
@@ -342,6 +435,7 @@
       "width": 1000,
       "hazardMilli": 0,
       "wardLevel": 0,
+      "gateKeyId": null,
       "state": "Open"
     },
     {
@@ -353,6 +447,7 @@
       "width": 600,
       "hazardMilli": 0,
       "wardLevel": 0,
+      "gateKeyId": null,
       "state": "Open"
     },
     {
@@ -364,6 +459,7 @@
       "width": 1000,
       "hazardMilli": 0,
       "wardLevel": 0,
+      "gateKeyId": null,
       "state": "Open"
     },
     {
@@ -375,6 +471,7 @@
       "width": 1000,
       "hazardMilli": 0,
       "wardLevel": 0,
+      "gateKeyId": null,
       "state": "Open"
     },
     {
@@ -386,6 +483,7 @@
       "width": 1000,
       "hazardMilli": 0,
       "wardLevel": 0,
+      "gateKeyId": null,
       "state": "Open"
     }
   ],
@@ -407,23 +505,42 @@
           "speciesId": "peashooterzombie",
           "level": 1,
           "hp": 110,
-          "wounds": 0
+          "wounds": 0,
+          "role": "Fighter"
         },
         {
           "instanceId": null,
           "speciesId": "conezombie",
           "level": 1,
           "hp": 110,
-          "wounds": 0
+          "wounds": 0,
+          "role": "Fighter"
         },
         {
           "instanceId": null,
           "speciesId": "paperzombie",
           "level": 1,
           "hp": 110,
-          "wounds": 0
+          "wounds": 0,
+          "role": "Bearer"
         }
-      ]
+      ],
+      "displayName": "Legion I",
+      "carriedLoam": 500,
+      "capacity": 200,
+      "burn": 30,
+      "runway": 16
     }
-  ]
+  ],
+  "marchCosts": {},
+  "calendar": {
+    "daysPerWeek": 7,
+    "weeksPerMonth": 4,
+    "weekBoundary": false,
+    "monthBoundary": false,
+    "specialWeek": false,
+    "specialMonth": false,
+    "plague": false
+  },
+  "prospectedSectorIds": []
 }

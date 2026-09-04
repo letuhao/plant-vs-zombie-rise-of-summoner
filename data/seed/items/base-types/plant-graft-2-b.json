@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "docs/architecture/item/ssot-equip-slots.md\u00a72.5"
+    "sourceRef": "docs/architecture/item/ssot-equip-slots.md§2.5"
   },
   "entries": [
     {
@@ -30,10 +30,10 @@
       "class": "spore",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.scarred-wart",
       "flavorKey": "flavor.base.scarred-wart",
       "flavor": "A small lesion that became a small strength.",
@@ -95,7 +95,7 @@
       "class": "spore",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 1,
@@ -128,10 +128,10 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.burled-notch",
       "flavorKey": "flavor.base.burled-notch",
       "flavor": "Growth closed over a wound and sealed it with value.",
@@ -226,10 +226,10 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.welded-peg",
       "flavorKey": "flavor.base.welded-peg",
       "flavor": "Fused by heat and pressure into one unbreakable whole.",
@@ -259,7 +259,7 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -294,7 +294,7 @@
         "family": "atom.fortitude",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.permanent-outgrowth",
       "flavorKey": "flavor.base.permanent-outgrowth",
       "flavor": "Once attached by desperate grafting, now indistinguishable from the whole.",
@@ -357,10 +357,10 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.lifesteal",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.meshed-protuberance",
       "flavorKey": "flavor.base.meshed-protuberance",
       "flavor": "Woven so deeply into the host that no one can say where one ends and the other begins.",
@@ -393,7 +393,7 @@
         "family": "atom.ferocity",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.bounden-binding",
       "flavorKey": "flavor.base.bounden-binding",
       "flavor": "The second graft took. The scar is the strength.",

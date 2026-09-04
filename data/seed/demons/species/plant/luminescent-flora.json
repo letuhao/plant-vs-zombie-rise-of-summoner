@@ -19,17 +19,19 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "unresolved",
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "split",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:58:14Z",
+      "emittedUtc": "2026-09-04T10:14:28Z",
       "minorityValues": {
-        "elementPrimary": "light",
-        "rarity": "grafted"
+        "aptitudePrimary": "Precision",
+        "attackTempo": "steady",
+        "elementPrimary": "light"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -45,9 +47,9 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "unresolved",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
@@ -56,26 +58,25 @@
       "Luminescent Flora"
     ],
     "gameTypeId": 1341,
-    "posture": "unresolved",
-    "pure": false,
+    "posture": "Force",
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The creature acts primarily as a passive support unit that provides energy and minor environmental interaction rather than direct combat aggression.",
+    "reason": "The creature functions primarily as a passive utility support that enhances existing environmental mechanics rather than posing a direct combat threat.",
     "resourceProfile": [
       "hp",
-      "spirit"
+      "stamina"
     ],
     "side": "plant",
     "speciesId": "DoomPlantern",
-    "targetPreference": "backline",
+    "targetPreference": "structure",
     "threatBand": "nuisance",
     "traits": [
-      "Laser-Inducing",
-      "Ember-Catalyzing",
-      "Explosive-Resonance"
+      "Laser-induced detonation",
+      "Ember rekindling",
+      "Chromatic energy shifting"
     ],
     "variants": [
-      "normal",
       "mutated",
       "corrupted"
     ]
@@ -101,14 +102,19 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved",
-        "threatBand": "high"
+        "rarity": "split",
+        "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:44:24Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:37:19Z",
+      "minorityValues": {
+        "attackTempo": "ponderous",
+        "rarity": "fused",
+        "threatBand": "tyrant"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -132,14 +138,14 @@
     "elementSecondary": "none",
     "family": [
       "Luminescent Flora",
-      "Economic-Symbiotic Organism"
+      "Economic-Symbiote"
     ],
     "gameTypeId": 982,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "cultivated",
     "reach": "short",
-    "reason": "Its ability to scale damage exponentially through light levels and act as a massive energy battery for other units makes it a high-priority strategic threat.",
+    "reason": "Its ability to scale damage exponentially through light levels and act as a massive energy battery for other units makes it a high-tier strategic powerhouse.",
     "resourceProfile": [
       "hp",
       "stamina",
@@ -147,18 +153,16 @@
     ],
     "side": "plant",
     "speciesId": "GoldThreePlantern",
-    "targetPreference": "backline",
+    "targetPreference": "frontline",
     "threatBand": "harbinger",
     "traits": [
-      "Tri-beam laser projection",
-      "Currency-generating photosynthesis",
-      "Energy-storage capacitor",
-      "Light-intensity scaling"
+      "Tri-beam refraction",
+      "Currency generation",
+      "Energy storage/conduit",
+      "Light-scaling"
     ],
     "variants": [
       "normal",
-      "ancient",
-      "mutated",
       "blessed"
     ]
   },
@@ -183,16 +187,16 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:13:03Z",
+      "emittedUtc": "2026-09-04T10:45:42Z",
       "minorityValues": {
-        "aptitudePrimary": "Precision",
-        "rarity": "grafted"
+        "aptitudePrimary": "Precision"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -216,7 +220,7 @@
     "elementPrimary": "ice",
     "elementSecondary": "light",
     "family": [
-      "Luminescent Flora"
+      "luminescent flora"
     ],
     "gameTypeId": 1338,
     "posture": "Finesse",
@@ -233,14 +237,245 @@
     "targetPreference": "swarm",
     "threatBand": "nuisance",
     "traits": [
-      "Cryogenic Emission",
-      "Laser-Interaction Catalyst",
-      "Frost-Prolonging"
+      "cryogenic emission",
+      "laser-reactive",
+      "frost-extension"
     ],
     "variants": [
       "normal",
       "mutated",
       "blessed"
     ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:55:21Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "luminescent flora"
+    ],
+    "gameTypeId": 1087,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a passive utility plant focused on light provision and self-healing, which does not align with the destructive potential of a 'harbinger'.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "LanternPumpkin",
+    "targetPreference": "backline",
+    "traits": [
+      "phototropic healing",
+      "protective radiance",
+      "solar-energy absorption"
+    ],
+    "variants": [
+      "normal",
+      "blessed",
+      "corrupted"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:08:04Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "Luminescent Flora"
+    ],
+    "gameTypeId": 20,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "sprout",
+    "reach": "short",
+    "reason": "The creature is a utility-based plant that provides light and dispels fog, lacking any offensive or destructive capabilities required for a raider rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "Plantern",
+    "targetPreference": "frontline",
+    "traits": [
+      "Fog-dispelling",
+      "Area-of-effect illumination",
+      "Lumos-infused"
+    ],
+    "variants": [
+      "normal"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:36:59Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "steady",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "luminescent_flora"
+    ],
+    "gameTypeId": 1379,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to split existing lasers into three beams significantly increases area denial and damage output, making it more of a tactical threat than a mere warden-level entity.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "ThreePlantern",
+    "targetPreference": "backline",
+    "traits": [
+      "tri-beam_refraction",
+      "light_amplification",
+      "laser_splitting"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
   }
 ]

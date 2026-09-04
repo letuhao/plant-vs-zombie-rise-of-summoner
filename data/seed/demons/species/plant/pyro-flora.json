@@ -13,22 +13,101 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "unresolved"
+        "rarity": "high",
+        "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:53:33Z",
+      "emittedUtc": "2026-09-04T10:52:49Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "pyro-flora"
+    ],
+    "gameTypeId": 1053,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions primarily as a specialized support unit that modifies projectile properties and provides a localized death effect rather than posing a direct combat threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "JalaTorch",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "combustive-aura",
+      "projectile-transmutation",
+      "explosive-death-trigger"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:38:34Z",
       "minorityValues": {
-        "rarity": "fused"
+        "aptitudePrimary": "Pierce"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -45,38 +124,38 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Retribution",
+    "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "inferred",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
       "pyro-flora"
     ],
-    "gameTypeId": 1275,
+    "gameTypeId": 1061,
     "posture": "Force",
-    "pure": false,
-    "rarity": "chimeric",
-    "reach": "long",
-    "reason": "Its ability to deal massive, scaling area-of-effect damage to all enemies simultaneously makes it a high-priority threat that can rapidly wipe a battlefield.",
+    "pure": true,
+    "rarity": "grafted",
+    "reach": "short",
+    "reason": "The creature provides utility and minor damage rather than widespread destruction, fitting the profile of a localized nuisance.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "DoomBlover",
-    "targetPreference": "swarm",
-    "threatBand": "unresolved",
+    "speciesId": "TorchSpike",
+    "targetPreference": "backline",
     "traits": [
-      "volatile",
-      "ashen-emission",
-      "time-limited",
-      "embers-reactive"
+      "combustive",
+      "projectile-reactive",
+      "spawning-catalyst",
+      "low-profile"
     ],
     "variants": [
-      "mutated",
-      "cursed"
-    ]
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
   }
 ]

@@ -53,6 +53,17 @@ public class ActivationEdgeTests
         Assert.Contains(EffectActions.ModifyDerivedStat, actions);
     }
 
+    // E37 (spec-projectile-control.md §2b.2, criterion 4): /effects/contract's `actions` array is
+    // `PublicConstStrings(typeof(EffectActions))` (DebugEndpoints.cs), so declaring the constant here
+    // IS the whole of the "grow the published list" obligation — this pins the source has it, the same
+    // shape the GrantShield/ModifyDerivedStat test above pins for E33.
+    [Fact]
+    public void EffectActions_declares_BulletModify()
+    {
+        Assert.Contains(EffectActions.BulletModify, PublicConstStrings(typeof(EffectActions)));
+        Assert.Equal("BulletModify", EffectActions.BulletModify);
+    }
+
     // ---- the capture kind ---------------------------------------------------------------------------
 
     [Fact]

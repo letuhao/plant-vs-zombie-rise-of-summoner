@@ -1,0 +1,164 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:40:08Z",
+      "minorityValues": {
+        "attackTempo": "slow",
+        "deployMode": "PlantAvatar",
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "undead-botanical hybrid"
+    ],
+    "gameTypeId": 74,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The creature's ability to cause mass disappearance of other zombies and deal massive burst damage (1800) suggests a threat level higher than a mere warden.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "HypnoJalapenoZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "explosive combustion",
+      "selective pyrotechnics",
+      "charismatic"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:35:27Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude",
+        "attackTempo": "slow",
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "undead-botanical hybrid"
+    ],
+    "gameTypeId": 109,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "melee",
+    "reason": "The creature's massive durability (4670 total health) and specialized armor make it a significant tactical threat rather than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "TallNutFootballZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "armor-plated",
+      "magnet-sensitive",
+      "hat-dropping"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  }
+]

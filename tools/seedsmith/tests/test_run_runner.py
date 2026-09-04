@@ -23,9 +23,11 @@ from test_run_orchestrator import always_valid_call  # noqa: E402
 
 # Every SPECIES row below has statsObserved=True -> basis="observed" -> threat-audit is NOT one of
 # the voted pipelines (Q26: only inferred/blocked genuinely choose a rung — observed/stated AUDIT
-# a deterministic computed one). So 4 of the 8 pipelines vote (3 samples each) and 4 don't (1 each):
-# 4*3 + 4*1 = 16, never a flat `len(PIPELINES)` (spec-option-permutation.md §6's own budget).
-CALLS_PER_OBSERVED_SPECIES = 16
+# a deterministic computed one). So 5 of the 8 pipelines vote (3 samples each) and 3 don't (1 each):
+# 5*3 + 3*1 = 18, never a flat `len(PIPELINES)` (spec-option-permutation.md §6's own budget).
+# `attackTempo` (kit-shape) joined the voted 5 on 2026-09-04 (demon-corpus-self-heal C1) — was 16
+# (4*3 + 4*1) before kit-shape was wired into voting/permutation at all.
+CALLS_PER_OBSERVED_SPECIES = 18
 
 
 def make_dump(tmp_path: Path, species: "list[dict]") -> Path:
@@ -235,6 +237,92 @@ def test_rerun_reclassifies_even_an_already_emitted_species(tmp_path):
     assert calls["n"] == CALLS_PER_OBSERVED_SPECIES  # re-classified despite already being emitted
 
 
+# ---- pipeline-scoped rerun (2026-09-04, demon-corpus-self-heal B1) -----------------------------
+#
+# Redeploying a fixed prompt used to mean either living with the stale field forever or paying for
+# a full 8-pipeline reclassification of species that already have 7 perfectly good judgments.
+# `{"kind": "pipeline", "pipeline": <id>}` re-executes ONLY that pipeline and merges its own
+# output into the existing entry — everything else must stay byte-identical.
+
+def test_a_pipeline_scoped_rerun_makes_one_call_per_species_not_eight(tmp_path):
+    paths = make_paths(tmp_path)  # alpha, beta
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+
+    calls = {"n": 0}
+
+    def counting_call(system, user, *, config=None, schema=None):
+        calls["n"] += 1
+        return always_valid_call(system, user, config=config, schema=schema)
+
+    record = runner.rerun({"kind": "pipeline", "pipeline": "kit-shape"}, paths=paths, call=counting_call)
+
+    assert record.state == "completed"
+    assert sorted(record.completed) == ["alpha", "beta"]
+    # kit-shape's own attackTempo is voted (3 samples) since C1 (2026-09-04) -> 3 calls/species,
+    # still far short of the full 8-pipeline reclassify's 18.
+    assert calls["n"] == 6
+    assert record.calls_made == 6
+
+
+def test_a_pipeline_scoped_rerun_leaves_every_other_field_byte_identical(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    rel = index["alpha"]
+    before = json.loads((paths.anchors_dir / rel).read_text(encoding="utf-8"))[0]
+
+    def different_kit_shape_call(system, user, *, config=None, schema=None):
+        base = json.loads(always_valid_call(system, user, config=config, schema=schema))
+        if "attackTempo" in base:
+            base["attackTempo"] = "flurry"  # deliberately different from the stub's usual answer
+        return json.dumps(base)
+
+    runner.rerun({"kind": "pipeline", "pipeline": "kit-shape"}, paths=paths, call=different_kit_shape_call)
+
+    index_after = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    after = json.loads((paths.anchors_dir / index_after["alpha"]).read_text(encoding="utf-8"))[0]
+
+    assert after["attackTempo"] == "flurry"  # the reran pipeline's own field DID change
+    # every field NOT owned by kit-shape (attackTempo/reach/targetPreference/resourceProfile) is
+    # untouched, proven field by field rather than trusting a partial spot check.
+    kit_shape_fields = {"attackTempo", "reach", "targetPreference", "resourceProfile"}
+    for key in before:
+        if key in kit_shape_fields or key == "_provenance":
+            continue
+        assert after[key] == before[key], f"field {key!r} changed on a kit-shape-only rerun"
+
+
+def test_a_pipeline_scoped_rerun_updates_only_the_reran_pipelines_own_provenance(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    before = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    other_pipeline_attempts_before = {
+        k: v for k, v in before["_provenance"]["attempts"].items() if k != "kit-shape"
+    }
+    assert "kit-shape" in before["_provenance"]["attempts"]  # sanity: the first run did record it
+
+    runner.rerun({"kind": "pipeline", "pipeline": "kit-shape"}, paths=paths, call=always_valid_call)
+
+    index_after = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    after = json.loads((paths.anchors_dir / index_after["alpha"]).read_text(encoding="utf-8"))[0]
+    other_pipeline_attempts_after = {
+        k: v for k, v in after["_provenance"]["attempts"].items() if k != "kit-shape"
+    }
+    assert other_pipeline_attempts_after == other_pipeline_attempts_before  # untouched
+    assert after["_provenance"]["attempts"]["kit-shape"] == 1  # the reran one still recorded
+
+
+def test_a_pipeline_scoped_rerun_on_a_never_classified_species_refuses_that_species(tmp_path):
+    paths = make_paths(tmp_path)  # alpha, beta — neither classified yet
+    record = runner.rerun({"kind": "pipeline", "pipeline": "kit-shape"}, paths=paths, call=always_valid_call)
+
+    # A scoped rerun cannot invent the 7 fields it never ran — the species lands in `failed` with
+    # a named reason, never a silent first-classification-via-the-back-door.
+    assert sorted(record.failed) == ["alpha", "beta"]
+    assert record.completed == []
+
+
 def test_status_reports_state_and_progress(tmp_path):
     paths = make_paths(tmp_path)
     assert runner.status(paths=paths)["state"] == "idle"
@@ -284,6 +372,110 @@ def test_slugify_family_matches_the_repos_own_kebab_case_grammar():
     assert runner._slugify_family("Apex Predator Flora") == "apex-predator-flora"
     assert runner._slugify_family("Ice & Frost!!") == "ice-frost"
     assert runner._slugify_family("  already-kebab  ") == "already-kebab"
+
+
+# ---- stale-duplicate write bug (2026-09-04, demon-corpus-self-heal A1) --------------------------
+#
+# Real bug found via DemonQualityReport at corpus scale: a reclassification that changes a
+# species' own `family` moves its entry to a NEW bucket file but never removed it from the OLD
+# one — 217 of 833 real species had a stale copy left behind. `_write_species_entry` now scans
+# every OTHER file already loaded into `existing_by_file` and removes this species from it too.
+
+# ---- _load_existing_anchors scans disk, never trusts a possibly-stale index (2026-09-04) -------
+#
+# Real bug found live during C2 (the corpus-wide kit-shape redeploy), not theorized: the OLD
+# `_load_existing_anchors` only read files `_index.json`'s OWN value set currently pointed at. A
+# species whose real file the index had drifted away from (the exact class of staleness A1/A2
+# exist to fix) became invisible to every future run — and since `_rewrite_index` rebuilds the
+# index FROM whatever this function returned, the loss was permanent and self-reinforcing, not
+# one-off: `CherryBomb`'s real, intact `plant/cherry.json` entry was silently dropped this way.
+
+def test_load_existing_anchors_finds_a_species_even_when_the_index_does_not_point_at_it(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+
+    # Corrupt the index exactly the way the real bug did: point it at a file that does not exist,
+    # leaving alpha's REAL file on disk completely unreferenced by the index's own value set.
+    (paths.anchors_dir / "_index.json").write_text(
+        json.dumps({"alpha": "plant/nonexistent.json"}), encoding="utf-8")
+
+    anchors = runner._load_existing_anchors(paths.anchors_dir)
+    assert any(a.get("speciesId") == "alpha" for a in anchors), (
+        "a species' real file must be found by scanning disk, even when the index no longer "
+        "points at it — trusting the index here is exactly the bug that caused CherryBomb's "
+        "real, intact entry to go silently unreachable")
+
+
+def _call_with_family(attempt: "dict[str, int]", family_by_attempt: "dict[int, str]"):
+    """Wraps `always_valid_call` so every field still validates normally — only `family` (the
+    `identity` pipeline's own array field) is overridden, by whichever attempt number the test has
+    currently set. `identity`'s `rarity` is voted (3 samples), but `family` is read from sample 0
+    only, so returning the SAME family across all samples within one `run_one_species` call (and a
+    DIFFERENT one only when the test bumps `attempt`) matches how a real model would behave."""
+    def call(system, user, *, config=None, schema=None):
+        base = json.loads(always_valid_call(system, user, config=config, schema=schema))
+        if "family" in base:
+            base["family"] = [family_by_attempt[attempt["n"]]]
+        return json.dumps(base)
+    return call
+
+
+def test_a_reclassify_that_changes_family_removes_the_stale_entry_from_the_old_file(tmp_path):
+    species = [species_row("alpha", "plant", 1)]
+    paths = make_paths(tmp_path, species=species)
+    attempt = {"n": 1}
+    call = _call_with_family(attempt, {1: "First Family", 2: "Second Family"})
+
+    started = runner.start({"kind": "all"}, paths=paths, call=call)
+    assert started.state == "completed"
+    index_after_first = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    old_rel_path = index_after_first["alpha"]
+    assert old_rel_path == "plant/first-family.json"
+    assert (paths.anchors_dir / old_rel_path).exists()
+
+    attempt["n"] = 2
+    rerun = runner.rerun({"kind": "species", "species": ["alpha"]}, paths=paths, call=call)
+    assert rerun.state == "completed"
+
+    index_after_second = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    new_rel_path = index_after_second["alpha"]
+    assert new_rel_path == "plant/second-family.json"
+
+    # The OLD file must be gone entirely (it held only this one species) — not merely absent from
+    # the index while still sitting on disk with a stale copy inside it.
+    assert not (paths.anchors_dir / old_rel_path).exists(), \
+        f"stale file {old_rel_path} was left behind after alpha moved to {new_rel_path}"
+    new_entries = json.loads((paths.anchors_dir / new_rel_path).read_text(encoding="utf-8"))
+    assert [e["speciesId"] for e in new_entries] == ["alpha"]
+
+
+def test_a_reclassify_that_changes_family_does_not_touch_a_sibling_species_in_the_old_file(tmp_path):
+    # The old file holding MORE than one species must keep its other residents — only the one
+    # species that actually moved gets removed from it.
+    species = [species_row("alpha", "plant", 1), species_row("beta", "plant", 2)]
+    paths = make_paths(tmp_path, species=species)
+    attempt = {"n": 1}
+
+    def call(system, user, *, config=None, schema=None):
+        base = json.loads(always_valid_call(system, user, config=config, schema=schema))
+        if "family" in base:
+            base["family"] = ["Shared Family"]
+        return json.dumps(base)
+
+    runner.start({"kind": "all"}, paths=paths, call=call)
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    shared_path = index["alpha"]
+    assert shared_path == index["beta"] == "plant/shared-family.json"
+
+    moved_call = _call_with_family(attempt, {1: "Shared Family", 2: "Alpha Only Family"})
+    attempt["n"] = 2
+    runner.rerun({"kind": "species", "species": ["alpha"]}, paths=paths, call=moved_call)
+
+    remaining = json.loads((paths.anchors_dir / shared_path).read_text(encoding="utf-8"))
+    assert [e["speciesId"] for e in remaining] == ["beta"]  # beta stayed, alpha left cleanly
+    index_after = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    assert index_after["alpha"] == "plant/alpha-only-family.json"
+    assert index_after["beta"] == shared_path
 
 
 # ---- start/resume mutual exclusion (2026-09-02) ------------------------------------------------
@@ -512,3 +704,96 @@ def test_resume_with_more_workers_than_the_original_start_only_finishes_what_rem
     assert resumed.state == "completed"
     assert sorted(resumed.completed) == sorted(s["typeName"] for s in species)
     assert resumed.calls_made == len(species) * CALLS_PER_OBSERVED_SPECIES
+
+
+# ---- fix_unresolved (2026-09-04, demon-corpus-self-heal F1) ------------------------------------
+#
+# The deliberate fix step: only threatBand has a real, already-sanctioned deterministic default
+# anywhere in this repo (demon-threat.v1.json's own inferredDefaultRung) — a human runs this ON
+# DEMAND after reading DemonQualityReport's own unresolved-rate finding, never automatically
+# during classification.
+
+def _mark_threat_band_unresolved(paths, species_id: str) -> None:
+    """Test-only corruption matching what a genuine 1-1-1 vote split looks like on disk."""
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    rel = index[species_id]
+    path = paths.anchors_dir / rel
+    entries = json.loads(path.read_text(encoding="utf-8"))
+    for e in entries:
+        if e["speciesId"] == species_id:
+            e["threatBand"] = "unresolved"
+    path.write_text(json.dumps(entries), encoding="utf-8")
+
+
+def test_fix_unresolved_resolves_threat_band_to_the_real_sanctioned_default(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")
+
+    fixed = runner.fix_unresolved(paths=paths)
+
+    assert len(fixed) == 1
+    assert fixed[0]["speciesId"] == "alpha"
+    assert fixed[0]["before"] == "unresolved"
+    tuning = runner.ThreatTuning.load()
+    assert fixed[0]["after"] == tuning.threshold_for_rung(tuning.inferred_default_rung).id
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entries = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))
+    entry = next(e for e in entries if e["speciesId"] == "alpha")
+    assert entry["threatBand"] == fixed[0]["after"]
+    # Honest provenance: this must never look like a real LLM judgment.
+    assert entry["_provenance"]["confidence"]["threatBand"] == "deterministic-fallback"
+
+
+def test_fix_unresolved_never_touches_aptitude_rarity_or_element(tmp_path):
+    # The investigated, deliberate scope boundary: no real sanctioned fallback exists for these
+    # three anywhere in this repo, so forcing one would be inventing a rule, not deriving it.
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")
+
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    before = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+
+    runner.fix_unresolved(paths=paths)
+
+    after = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))[0]
+    for field in ("aptitudePrimary", "aptitudeSecondary", "rarity", "elementPrimary"):
+        assert after[field] == before[field], f"{field} changed — out of this fix's scope"
+
+
+def test_fix_unresolved_leaves_an_already_resolved_species_untouched(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    # threatBand was never marked unresolved — nothing to fix.
+
+    fixed = runner.fix_unresolved(paths=paths)
+
+    assert fixed == []
+
+
+def test_fix_unresolved_dry_run_reports_without_writing(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")
+
+    fixed = runner.fix_unresolved(paths=paths, dry_run=True)
+
+    assert len(fixed) == 1
+    index = json.loads((paths.anchors_dir / "_index.json").read_text(encoding="utf-8"))
+    entries = json.loads((paths.anchors_dir / index["alpha"]).read_text(encoding="utf-8"))
+    entry = next(e for e in entries if e["speciesId"] == "alpha")
+    assert entry["threatBand"] == "unresolved"  # untouched — dry run never writes
+
+
+def test_fix_unresolved_is_idempotent(tmp_path):
+    paths = make_paths(tmp_path, species=[species_row("alpha", "plant", 1)])
+    runner.start({"kind": "all"}, paths=paths, call=always_valid_call)
+    _mark_threat_band_unresolved(paths, "alpha")
+
+    first = runner.fix_unresolved(paths=paths)
+    second = runner.fix_unresolved(paths=paths)
+
+    assert len(first) == 1
+    assert second == []  # already fixed — nothing left to do, not re-applied

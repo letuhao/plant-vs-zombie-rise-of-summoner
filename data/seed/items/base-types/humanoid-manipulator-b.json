@@ -66,10 +66,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.studded-knuckle",
       "flavorKey": "flavor.base.studded-knuckle",
       "flavor": "Reinforced at the striking edge. It remembers what it broke.",
@@ -138,7 +138,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -210,10 +210,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.hardened-grip",
       "flavorKey": "flavor.base.hardened-grip",
       "flavor": "Plate fitted to the hand. It does not bend, and neither will your strike.",
@@ -246,7 +246,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -285,7 +285,7 @@
         "family": "atom.searing-strike",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.riveted-fist",
       "flavorKey": "flavor.base.riveted-fist",
       "flavor": "Steel gauntlet, riveted and rigid. Your hand becomes a hammer.",
@@ -318,7 +318,7 @@
       "class": "cloth",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
       "socketMax": 2,
@@ -357,7 +357,7 @@
         "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.segmented-hand",
       "flavorKey": "flavor.base.segmented-hand",
       "flavor": "Scales overlapped like fingers. The hand learns to bend where it must.",
@@ -390,10 +390,10 @@
       "class": "cloth",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.corded-wrist",
       "flavorKey": "flavor.base.corded-wrist",
       "flavor": "Cord wrapped in patterns. It ties the arm to the strike.",
@@ -426,10 +426,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.plated-grasp",
       "flavorKey": "flavor.base.plated-grasp",
       "flavor": "Plating on every face. The hand becomes an iron vice.",

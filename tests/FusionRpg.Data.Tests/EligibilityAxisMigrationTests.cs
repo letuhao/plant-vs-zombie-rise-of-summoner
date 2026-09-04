@@ -43,6 +43,7 @@ public class EligibilityAxisMigrationTests : IDisposable
             FamilyId = "atom.eligibility-test",
             Variant = "",
             Tier = 1,
+            Name = "Eligibility Test",
             ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":1}",
         });
         Assert.True(atomResult.IsOk, atomResult.ToString());

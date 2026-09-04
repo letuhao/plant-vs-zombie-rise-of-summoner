@@ -69,7 +69,7 @@
         "family": "atom.chilling",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.linen-canteen",
       "flavorKey": "flavor.base.linen-canteen",
       "flavor": "Tightly woven, it holds the chill without cracking.",
@@ -137,10 +137,10 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.sparking",
+        "family": "atom.mesmerizing",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.studded-sprayer",
       "flavorKey": "flavor.base.studded-sprayer",
       "flavor": "Metal studs catch the spark and fling it farther than intended.",
@@ -177,7 +177,7 @@
         "family": "atom.buttering",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.overlapping-canister",
       "flavorKey": "flavor.base.overlapping-canister",
       "flavor": "Pressure builds behind each scale, waiting for release.",
@@ -213,7 +213,7 @@
         "family": "atom.freezing",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.articulated-jug",
       "flavorKey": "flavor.base.articulated-jug",
       "flavor": "Hinges let it bend without losing its seal, preserving the frost inside.",
@@ -246,10 +246,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.marking",
+        "family": "atom.buttering",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.interlocked-holster",
       "flavorKey": "flavor.base.interlocked-holster",
       "flavor": "The pattern catches the eye and holds it. Nothing gets past unseen.",
@@ -318,10 +318,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.rotting",
+        "family": "atom.chilling",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.rigid-jerrycan",
       "flavorKey": "flavor.base.rigid-jerrycan",
       "flavor": "The metal does not give. Whatever is inside eats through it anyway.",
@@ -354,10 +354,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.blighting",
+        "family": "atom.venomous",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.ponderous-tank",
       "flavorKey": "flavor.base.ponderous-tank",
       "flavor": "It moves like it carries the weight of death. Perhaps it does.",
@@ -393,7 +393,7 @@
         "family": "atom.bonding",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.galvanised-cartridge",
       "flavorKey": "flavor.base.galvanised-cartridge",
       "flavor": "The metal coating holds the charge until impact forces release.",
@@ -427,10 +427,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.bloodletting",
+        "family": "atom.withering",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.leaden-cooler",
       "flavorKey": "flavor.base.leaden-cooler",
       "flavor": "So heavy it slows you down. So cold it makes you bleed.",

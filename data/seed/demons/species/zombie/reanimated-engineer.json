@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:54:29Z",
+      "minorityValues": {
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "reanimated_engineer",
+      "zombie_specialist"
+    ],
+    "gameTypeId": 239,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature's mechanics focus on a single-use explosive death triggered by contact, which lacks the sustained environmental devastation required for a cataclysm rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "WaterJackboxJumpZombie",
+    "targetPreference": "frontline",
+    "traits": [
+      "pogo_mobility",
+      "explosive_payload",
+      "fragile_momentum",
+      "scientific_madness"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  }
+]

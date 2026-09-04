@@ -14,6 +14,11 @@ public sealed record CompiledActionCost(string ResourceId, ValueSpec ScaledAmoun
 /// (<see cref="ActionCompiler.Compile"/>) and cached (<see cref="ActionCatalog"/>) — "the battle path
 /// meets no JSON, no dictionary, and no string comparison" (§ Success criteria).
 /// </summary>
+/// <param name="Category">A-M1 (spec-movement-payload.md §2, "⛔ CORRECTED 2026-09-03"): threaded
+/// straight from <see cref="ActionRow.Category"/> — trailing, defaulted, purely additive, matching
+/// <see cref="ActionCostRow.AllowLethal"/>'s own precedent for widening this record without moving its
+/// existing 16 positional call sites. <c>null</c> for an action the corpus has not categorized, same
+/// meaning as on the row.</param>
 public sealed record CompiledAction(
     string ActionId,
     ActionKind Kind,
@@ -32,4 +37,5 @@ public sealed record CompiledAction(
     bool RequiresLineOfSight,
     ICompiledPredicate Condition,
     IReadOnlyList<CompiledActionCost> Costs,
-    IReadOnlyList<ActionScopeRow> Scopes);
+    IReadOnlyList<ActionScopeRow> Scopes,
+    ActionCategory? Category = null);

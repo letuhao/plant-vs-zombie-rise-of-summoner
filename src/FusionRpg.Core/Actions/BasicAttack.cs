@@ -3,6 +3,7 @@ using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Status;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Battle;
 
@@ -24,6 +25,12 @@ public static partial class BattleEngine
     {
         ActionId = "act.attack",
         Commitment = Commitment.LateBound,
+        // S2/S3 (species-skills): the basic attack opts BOTH readers in, so the two channels are live
+        // in every battle rather than sitting behind content that does not exist yet. Byte-identical
+        // today because both channels register with a default of 0, which is neutral for each: 0%
+        // cooldown reduction, and a x1.0 effectiveness multiplier.
+        CooldownChannel = DerivedStatChannels.SkillCooldown(DerivedStatChannels.ActionCategoryAttack),
+        EffectivenessChannel = DerivedStatChannels.SkillEffectiveness(DerivedStatChannels.ActionCategoryAttack),
     };
 
     /// <summary>
@@ -65,13 +72,18 @@ public static partial class BattleEngine
     /// </summary>
     static AttackStep RunBasicAttackStep(
         ActorState attacker, BattleRunState state, DateTimeOffset now, long nowTick,
-        OverlayCombatCalculator calculator, ICombatRng critRng, BattleTrace? trace, int round)
+        OverlayCombatCalculator calculator, ICombatRng critRng, BattleTrace? trace, int round,
+        IIntentSource? intentSource = null)
     {
         if (!attacker.Active) return new AttackStep(AttackStepOutcome.Continue, null, 0);
         if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return new AttackStep(AttackStepOutcome.Continue, null, 0);
 
         var view = BloodthirstyViewFor(state, attacker);
-        var source = new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
+        // T6/B20: an injected source is how an interactive battle occupies the `Ready` dwell, and how a
+        // replay reads its decision trace instead of re-deciding. `null` keeps the shipped AI policy,
+        // which is every battle today — so this is byte-identical until a caller passes one.
+        var source = intentSource
+            ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
         var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
         if (intent.IsNone) return new AttackStep(AttackStepOutcome.Break, null, 0); // hazard 3: round breaks
 
@@ -105,6 +117,12 @@ public static partial class BattleEngine
             Components = attacker.AttackComponents,
             Attacker = new CombatActorSnapshot(attacker.Derived, attacker.ElementTypes),
             Defender = new CombatActorSnapshot(target.Derived, target.ElementTypes),
+            // S3 (species-skills): the attacker's own `skill.effectiveness.{category}` scales the
+            // payload, applied INSIDE the resolver (never as a second multiplier afterwards, which
+            // would put combat math outside the SSOT and trip the parity tests by design). 0 is
+            // neutral and yields exactly 1.0, so an envelope that names no channel is byte-identical.
+            EffectivenessMultiplier =
+                OverlayCombatRequest.MultiplierFromPerMille(SkillEffectivenessPm(attacker, intent.Envelope)),
             Profile = CombatProfile.BattleSim
         }, critRng);
 
@@ -127,9 +145,30 @@ public static partial class BattleEngine
         });
         state.Host.Flush();
 
-        state.Cooldowns.Start(attacker.Setup.Key, intent.Envelope, nowTick); // T38: inert for Class.None
+        // S2 (species-skills): the cooldown is reduced by the attacker's own
+        // `skill.cooldown.{category}` — the channel the envelope itself names — resolved HERE, at the
+        // arming site, because CooldownLedger stores an absolute tick. An envelope with no
+        // CooldownChannel reads nothing and arms at base ticks; that is the neutral path and it stays
+        // allocation-free. Inert for Class.None, as before.
+        state.Cooldowns.Start(attacker.Setup.Key, intent.Envelope, nowTick,
+            SkillCooldownReductionPm(attacker, intent.Envelope));
         return new AttackStep(AttackStepOutcome.Proceed, target, signedDelta);
     }
+
+    /// <summary>
+    /// The acting actor's cooldown reduction for this action, per-mille — 0 when the envelope names
+    /// no channel, which is every action that does not opt in. Reads the actor's already-composed
+    /// derived snapshot, so this adds no resolve.
+    /// </summary>
+    static long SkillCooldownReductionPm(ActorState actor, ActionEnvelope envelope) =>
+        envelope.CooldownChannel is { } channel ? (long)actor.Derived.Get(channel) : 0;
+
+    /// <summary>The acting actor's effectiveness bonus for this action, per-mille — 0 when the
+    /// envelope names no channel. Returns a <c>long</c> on purpose: the per-mille to multiplier
+    /// conversion is double arithmetic and belongs in <c>Combat/</c>, because this directory bans
+    /// floating point.</summary>
+    static long SkillEffectivenessPm(ActorState actor, ActionEnvelope envelope) =>
+        envelope.EffectivenessChannel is { } channel ? (long)actor.Derived.Get(channel) : 0;
 
     /// <summary>
     /// spec-action-selection-adoption.md §5: `bloodthirsty` stays engine-side, reimplemented as a

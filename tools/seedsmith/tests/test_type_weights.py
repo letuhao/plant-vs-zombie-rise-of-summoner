@@ -33,6 +33,7 @@ from seedsmith.adapters.actions.type_weights.tuning import (  # noqa: E402
 )
 from seedsmith.adapters.actions import generate_type_weights as gen_mod  # noqa: E402
 from seedsmith.adapters.actions.kinds import KINDS  # noqa: E402
+from seedsmith.adapters.actions.load import load_committed  # noqa: E402
 from seedsmith.corpus import Corpus  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -772,10 +773,18 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
     `action-type-weights` KindSpec's own pattern."""
 
     def test_written_file_loads_through_corpus_load(self) -> None:
+        """Uses `load_committed`, not a raw `Corpus.load(ACTIONS_ROOT)` — real content has since
+        landed under `_rounds/` (a real smoke batch, 2026-09-04), which deliberately reuses
+        `_briefs/round-1.json`'s own ids (A-S2's `p3-briefs.json` shares A-S1's `briefId`s by
+        design, `spec-brief-assembly.md` §3.2). A raw whole-tree load collides on that overlap; the
+        purpose-built `load_committed` already excludes `_rounds/` for exactly this reason
+        (`spec-corpus-loader.md` §3 step 2b, review F14) — this test was never about `_rounds/` at
+        all, it only ever asked "does my own output load," so the fix is the loader this repo
+        already built for that question, not a synthetic-fixture workaround."""
         if not OUTPUT_PATH.is_file():
             self.skipTest("type-weights.json not yet generated in this checkout")
-        corpus = Corpus.load(ACTIONS_ROOT)
-        rows = corpus.by_kind("action-type-weights")
+        result = load_committed(ACTIONS_ROOT)
+        rows = result.corpus.by_kind("action-type-weights")
         self.assertEqual(len(rows), 103)
 
 

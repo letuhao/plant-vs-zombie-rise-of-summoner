@@ -178,6 +178,26 @@ public sealed record WorldSector
     /// that state; a later module resets it the moment the sector is reclaimed or grows a source.
     /// </summary>
     public int NeglectedTurns { get; init; }
+
+    /// <summary>
+    /// world-map W44 (spec-sector-development.md §1): what this sector has accrued toward founding a
+    /// legion — a **stock, not a rate**, for the same reason <see cref="LoamStock"/>'s own comment
+    /// gives: per-mille means rate or fraction, and a stockpile is neither. `long`, not `int`, for the
+    /// same overflow reason `LoamStock` already documents. No hard cap — a throttle, if one is ever
+    /// needed, is a configurable soft cap in tuning (ssot-power-scale.md §11), never a silent clamp.
+    /// </summary>
+    public long RecruitStock { get; init; }
+
+    /// <summary>
+    /// A sector-wide project in progress (spec-sector-development.md §3) — raises the whole sector
+    /// (development, defense, capacity), never one slot's output, which is what a `WorldSlot.StructureId`
+    /// is for. Null means no project. Mirrors `WorldSlot.StructureId`/`ConstructionTurnsRemaining`'s
+    /// own shape exactly, one level up.
+    /// </summary>
+    public string? ProjectId { get; init; }
+
+    /// <summary>Null means either no project or a finished one; must not be set without <see cref="ProjectId"/>.</summary>
+    public int? ProjectTurnsRemaining { get; init; }
 }
 
 public sealed record WorldLane

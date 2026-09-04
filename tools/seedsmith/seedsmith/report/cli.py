@@ -603,22 +603,36 @@ def _selector_from_args(args: argparse.Namespace) -> "dict":
     flag the caller actually passed. `--all` and the `start`/`rerun` defaults both resolve to
     `{"kind": "all"}` when nothing more specific is given — `start` already skips
     already-emitted species on its own, so "all" is the right default rather than a refusal.
+
+    `--pipeline` is two DIFFERENT things depending on what else is set (demon-corpus-self-heal B1,
+    2026-09-04, found live: `rerun --pipeline kit-shape --species Peashooter,...` silently did a
+    FULL 8-pipeline reclassification instead of the intended kit-shape-only smoke test, because
+    `--species` won the if-elif chain and `--pipeline`'s own value was discarded entirely). When no
+    OTHER selecting flag is given, `--pipeline` picks WHICH species (every classified one). When a
+    species-selecting flag IS also given, `--pipeline` instead narrows EXECUTION scope for those
+    selected species — attached as an extra `pipeline` key `_run_loop` reads regardless of `kind`,
+    never silently dropped.
     """
     if args.species:
-        return {"kind": "species", "species": [s.strip() for s in args.species.split(",") if s.strip()]}
-    if args.side:
-        return {"kind": "side", "side": args.side}
-    if args.family:
-        return {"kind": "family", "family": args.family}
+        selector = {"kind": "species", "species": [s.strip() for s in args.species.split(",") if s.strip()]}
+    elif args.side:
+        selector = {"kind": "side", "side": args.side}
+    elif args.family:
+        selector = {"kind": "family", "family": args.family}
+    elif args.pipeline:
+        return {"kind": "pipeline", "pipeline": args.pipeline}  # --pipeline alone: selects AND scopes
+    elif args.basis:
+        selector = {"kind": "basis", "basis": args.basis}
+    elif args.unresolved:
+        selector = {"kind": "unresolved"}
+    elif args.stale:
+        selector = {"kind": "stale"}
+    else:
+        selector = {"kind": "all"}
+
     if args.pipeline:
-        return {"kind": "pipeline", "pipeline": args.pipeline}
-    if args.basis:
-        return {"kind": "basis", "basis": args.basis}
-    if args.unresolved:
-        return {"kind": "unresolved"}
-    if args.stale:
-        return {"kind": "stale"}
-    return {"kind": "all"}
+        selector["pipeline"] = args.pipeline
+    return selector
 
 
 def _cmd_demons_run(args: argparse.Namespace) -> int:
@@ -662,6 +676,18 @@ def _cmd_demons_run(args: argparse.Namespace) -> int:
                 return EXIT_CANNOT_RUN
             record = run_module.overwrite_all(args.confirm, paths=paths, progress=progress,
                                               workers=workers)
+        elif args.run_verb == "fix-unresolved":
+            fixed = run_module.fix_unresolved(paths=paths, dry_run=args.dry_run)
+            verb = "would fix" if args.dry_run else "fixed"
+            if args.json:
+                print(json.dumps({"dryRun": args.dry_run, "fixed": fixed}, indent=2))
+            else:
+                print(f"{len(fixed)} species {verb} (threatBand only — the one field with a real, "
+                      f"already-sanctioned deterministic default; aptitude/rarity/element have "
+                      f"none and stay unresolved)")
+                for f in fixed:
+                    print(f"  {f['speciesId']:24} {f['before']:12} -> {f['after']}")
+            return EXIT_CLEAN
         elif args.run_verb == "status":
             s = run_module.status(paths=paths)
             print(json.dumps(s, indent=2) if args.json else
@@ -868,7 +894,8 @@ def build_parser() -> argparse.ArgumentParser:
     difflegacy.add_argument("--anchors", default="", help="anchor tree root (default data/seed/demons/species)")
     run = demon_sub.add_parser(
         "run", help="run-control: pause/resume/cancel/rerun/overwrite-all over the anchor classification run")
-    run.add_argument("run_verb", choices=("start", "pause", "resume", "cancel", "rerun", "status", "overwrite-all"))
+    run.add_argument("run_verb", choices=("start", "pause", "resume", "cancel", "rerun", "status",
+                                          "overwrite-all", "fix-unresolved"))
     run.add_argument("--all", action="store_true", help="selector: every species in the dump")
     run.add_argument("--side", default="", help="selector: plant | zombie")
     run.add_argument("--family", default="", help="selector: one family id")
@@ -884,6 +911,8 @@ def build_parser() -> argparse.ArgumentParser:
     run.add_argument("--workers", type=int, default=4,
                      help="parallel model-call workers for start/resume/rerun/overwrite-all "
                           "(default 4; 1 = sequential, today's original behaviour)")
+    run.add_argument("--dry-run", action="store_true",
+                     help="fix-unresolved: report what would change without writing anything")
     demons.set_defaults(func=cmd_demons)
 
     effects = sub.add_parser("effects", help="effect-pipeline generation entrypoints")

@@ -1,7 +1,8 @@
 # Spec: `enhance-reroll`
 
 **Module id:** `enhance-reroll` · **Program:** [item](../item-map.md) · **Build order:** 15 of 21
-**Depends on:** `power-reads` (module 9), `salvage-craft` (module 14)
+**Depends on:** `item-power-reads` (module 9 — **one read, R3; see §10**), `salvage-craft` (module 14),
+`rarity-bands` (module 7 — seeds the `enhance_cap` asymptote this module consumes, §4a)
 **Lanes:** [ssot-enhancement.md](ssot-enhancement.md) (I6) · [ssot-reroll.md](ssot-reroll.md) (I7) ·
 [decision-d2-mutation-contract.md](decision-d2-mutation-contract.md)
 **Rulings:** **D7**, D9, D23, **D26**, D29
@@ -134,7 +135,7 @@ enhancement cost curve facing an unbounded content ladder is exactly that shape.
 | The risk curve (falling success) | **configurable soft cap** — same shape, same file | same |
 | `mutation_seq ≤ 4096` | **structural**, and the comment says so: a retry loop, not a design ceiling | `const` in code |
 | `ilvl_cap(ilvl) = max(4, 4 + ilvl/4)` | **floor only, no ceiling** — ilvl 128 → +36, ilvl 500 → +129 | tuning |
-| ⛔ `rarity_cap` per rung, topping out at +20 | **REMOVED.** I6 §7.3 already reconciled this once; the ten-rung ladder and D29's unbounded content ladder finish the job | — |
+| ⛔ `rarity_cap` per rung, topping out at +20 | **REMOVED as a level ceiling.** I6 §7.3 already reconciled it once; the ten-rung ladder and D29's unbounded content ladder finish the job. ⚠ **But `enhance_cap` returns as a *gain asymptote*** — §4a | `data/tuning/item-rarity.v1.json` |
 
 D29: **tier saturates at t5 and that is correct** — growth past it is carried by `contentScale`, which is
 built (`InstanceProducer.cs:47`, `ContentScale.Milli`). An ilvl-500 t5 affix is the same tier as an
@@ -143,6 +144,132 @@ that has none.**
 
 ⛔ **D26 applies here too:** the enhancement cost curve reads the **target's** rarity ordinal, item level
 and current `+n`. It never reads the player's `Θ`, power index, item count or any per-day counter.
+
+### 4a. ⛔ `enhance_cap` — the conflict with module 7, resolved as a **shrinking soft cap** (§2g #0c)
+
+**This is a live blocker, not a difference of emphasis.** Module 7 seeds `enhance_cap` and registers
+`enhance_cap_gain_never_exceeds_one_rung_step_at_any_rung` as **HARD**; this spec removes the mechanism
+and asserts `no_enhancement_cap_is_a_hard_stop`. ⭐ **And module 7's SC7 rule makes a `rarity_budget`
+key whose consumer has not shipped *reject*** — so if this module deletes the consumer, module 7's
+**seed load fails**. Whichever ships second turns the other red.
+
+**Both halves are right, and one curve satisfies both:**
+
+| Half | Claim | Standing |
+|---|---|---|
+| This module | a hard `+X` ceiling is forbidden — AGENTS.md, D7 (*"cost, never luck"*), D29 | ✅ kept |
+| Module 7 | at the top of the measured ladder a `2×`-at-cap gain is **3.46 rung steps** (`ln 2 / ln 1.222`), so a maxed `firstseed` clears a natural `almanac` — the ladder inverts | ✅ kept |
+
+> **The resolution: enhancement gain *asymptotes below* one rung step instead of stopping at one.**
+>
+> ```text
+> gainMilli(n, rung) = enhance_cap(rung) × n / (n + K)
+> ```
+>
+> It approaches `enhance_cap(rung)` and never reaches it, so **no level is ever refused** — the curve
+> is a soft cap in AGENTS.md's exact sense, and `+1` at any `n` still buys something. And because the
+> asymptote sits below the local rung step, **the ladder cannot invert at any `n`**.
+
+**`enhance_cap` is re-specified, not deleted.** It is no longer a maximum `+X`; it is the **per-mille
+asymptote of total enhancement gain**, seeded per rung by module 7 from the measured `step(rung)` table
+and consumed *here*. SC7 is satisfied because the key has a live reader.
+
+| Rung | `enhance_cap` ‰ | | Rung | `enhance_cap` ‰ |
+|---|--:|---|---|--:|
+| `chaff` · `sprout` | 860 | | `heirloom` | 260 |
+| `grafted` | 762 | | `firstseed` | 232 |
+| `cultivated` | 627 | | `sunwoven` | 200 |
+| `fused` | 619 | | `almanac` | 200 |
+| `chimeric` | 552 | | | |
+
+**Module 7 owns the column; this module owns `K`**, which lives in `data/tuning/enhancement.v1.json`
+and is the only number here a balance pass touches. The derivation, the two-rung smoothing and the two
+non-derived rows are recorded once, in
+[spec-rarity-bands.md](spec-rarity-bands.md) §*Resolution — a shrinking soft cap*.
+
+⚠ **It binds at v1's reach, so it is not a future-content guard.** `ilvl_cap(32) = 12`, and I6's linear
++20‰-per-level scalar reaches **240‰** at +12 — already past `firstseed`'s 232‰ and both 200‰ rows. The
+asymptotic curve at the same `+12` with `K = 8` yields 120‰ on an `almanac`, which is the behaviour
+change, and it is a change to the *shape* rather than a ceiling.
+
+**The two tests are rewritten against the one curve:**
+
+| Test | Owner | Asserts |
+|---|---|---|
+| `no_enhancement_gain_is_a_hard_stop` | **here** — replaces `no_enhancement_cap_is_a_hard_stop` | for every rung and every `n`, `gain(n+1) > gain(n)`; no level is refused; `ilvl_cap` still has a floor and no ceiling |
+| `enhance_cap_asymptotes_below_one_rung_step_at_every_rung` | **module 7** — replaces `enhance_cap_gain_never_exceeds_one_rung_step_at_any_rung` | `lim gain < step(rung) − 1` on all ten, from the same seeded column |
+
+**Cross-checked both ways:** the pair above is recorded identically in `spec-rarity-bands.md`. If either
+moves, the other is wrong — which is the property the previous arrangement lacked.
+
+### 4b. ⛔ The sinks have an expiry date, and it is **inside D26's scope** (§2h.3)
+
+**Every spec in this program pushed this out as content pacing. It is not.** D26 draws the line at
+*"the item system balances items against each other; it does not balance the game"* — and *"is a
+crafted item still worth more than a fresh drop"* is an **item-versus-item** comparison. It is
+squarely ours, and it decides whether §4's risk bands and §5's pity counter are apparatus for a
+decision players will actually make.
+
+**Computed against `PowerLadder`, not estimated.** Every input is a shipped constant:
+
+| Input | Value | Source |
+|---|---|---|
+| `P(Θ) = c + A·Θ + B·Θ(Θ−1)/2` (milli) | `c = 80,000` · `B = 400` · `A = 26,200` (re-derived at load so `P(20) = 680`) | `data/tuning/power-scale.v2.json`; `Power/PowerLadder.cs:33-53` |
+| `contentScale(Θc) = P(Θc) / pinValue` | `pinValue = 680` | `Power/ContentScale.cs:17-20` |
+| **one realm = 25 Θ** | `WfMilli = WaMilli = 25,000`, and equality is enforced | `PowerIndexComposer.cs:46-51`, `power-scale.v2.json` |
+| `ilvl_cap(ilvl) = max(4, 4 + ilvl/4)` | +12 at ilvl 32; +129 at ilvl 500 | `ssot-enhancement.md:437-438` |
+| enhancement scalar | **+20‰ per level, never compounded** | I6 §3.3, §6 below |
+
+#### The expiry, reproduced
+
+At v1's shipped reach (`Θc = 20`, ilvl 32 per D4) a **perfected `almanac`** is
+`770 × (1 + 0.020 × 12) = ` **954.8** hp-equivalent on [`ssot-rarity.md`](ssot-rarity.md) §7.3's measured ceiling-5 ladder (`almanac` = 770, `sprout` = 17). A **freshly dropped,
+unenhanced `sprout`** at `Θc = 500` is `17 × contentScale(500) = 17 × 92.76 = ` **1,577**.
+
+**The crossing is at `Θc = 376`** — solved, not bracketed: it is the Θc where
+`contentScale = 954.8 / 17 = 56.16`, i.e. `P(Θc) = 38,192`. That lands inside §2h.3's stated 350–450
+band and confirms it.
+
+#### *"A crafting investment is worth N realms"*
+
+`N(Θc) = (Θc′ − Θc) / 25`, where `P(Θc′) = gain(Θc) × P(Θc)` and `gain` is the full enhancement track
+at that depth.
+
+| Θc | `ilvl_cap` | crafting gain | Θc′ | ΔΘ | **N realms** |
+|--:|--:|--:|--:|--:|--:|
+| **20 — v1's shipped reach** (ilvl 32) | +12 | ×1.24 | 24.67 | 4.67 | **0.19** |
+| 20 (ilvl = Θc) | +9 | ×1.18 | 23.53 | 3.53 | **0.14** |
+| 50 | +16 | ×1.32 | 62.41 | 12.41 | 0.50 |
+| 100 | +29 | ×1.58 | 136.98 | 36.98 | 1.48 |
+| **123** | +34 | ×1.68 | 173.28 | 50.28 | **2.01** ← first depth where N reaches 2 |
+| 200 | +54 | ×2.08 | 311.75 | 111.75 | 4.47 |
+| 500 | +129 | ×3.58 | 999.40 | 499.40 | 19.98 |
+
+> ⛔ **N ≈ 0.19 at everything the game currently ships.** A full crafting investment is worth about
+> **one fifth of one realm**. §2h.3's threshold is 2, and N does not reach it until `Θc ≈ 123` — five
+> realms deep into a content ladder that stops at level 10 today (**X5**).
+
+**And §4a's soft cap makes it smaller, deliberately.** On an `almanac`, `enhance_cap = 200‰`, so the
+gain **asymptotes at ×1.20 — N ≤ 0.16 at any `n`** — and at v1's reachable `+12` with `K = 8` it is
+×1.12, **N = 0.09**. That is the correct direction; the alternative is a gain that inverts the rarity
+ladder. But it means the honest statement is: **at v1 depth crafting is not competing with content
+progression and cannot be made to.**
+
+#### What follows, and what does not
+
+| Consequence | Standing |
+|---|---|
+| ⛔ **Do not size §4's risk bands or §5's pity threshold as if they were a progression choice at v1 depth.** They are not; the player advances a realm instead | **decided here** |
+| ⭐ **I6 §7.4 transfer stops being a nicety and becomes the mechanism that makes crafting survivable** — it is the only way an investment follows the player past a content step. **§6a below builds it** | **decided here** |
+| **The investment is unrecoverable when the item is replaced**, which is what turns a small N into a *skipped* system rather than a merely weak one. ⚠ §2h.3 attributes this to *"R2's strict-loss rule"*; item-ideal's **R2 is the catalog-revision-equality defect** (§2e, closed by D9) and says nothing about loss on replacement. **Verified independently instead:** the only recovery path in I6 or I9 is **transfer at 700‰** (§6a) — salvage returns materials, never levels | recorded; the attribution is corrected, the finding stands |
+| Raising N by making the enhancement track steeper | ⛔ **refused** — it re-inverts the ladder, which §4a exists to prevent |
+| Raising N by flattening `contentScale` | **not ours.** That is the power ladder's `bMilli` dial (**PS-7**, `ssot-power-scale.md`), and D26 keeps content pacing out of this program |
+| **Reporting N** | ⭐ **ours, and it ships.** `CraftingHorizonReport` computes the table above from the loaded `PowerTuning` and the seeded `enhance_cap` column, so the figure moves when the dials move instead of being a number in a doc |
+
+⚠ **The comparison unit is module 9's, not a second one.** N is a ratio of two `P(Θ)` values, which
+needs no pricer — but the *item-versus-item* half (a perfected item against a fresh drop of another
+rung) is a cross-family comparison and reads **R3**, `PowerScalar` with its ±25% band
+(`spec-item-power-reads.md` §R3). See §10.
 
 ### 5. ⛔ Bad-luck protection — and a genuine cross-document conflict, resolved
 
@@ -206,6 +333,7 @@ one-line scope edit (*"drop pity may key on rung only"*), which is module 7's to
 | **Temper** | the **value** of one affix, in its own range | exactly one drawn `seq` | `reroll-value` |
 | **Reforge** | **identity, tier and value** of a chosen subset | `T ≥ 1` drawn `seq` values, per budget | `reroll-affix` |
 | **Imprint** | nothing — **places** a chosen group deterministically | one drawn `seq` | `reroll-affix` |
+| **Transfer** | nothing — **moves** `enhance_level` from a donor to a recipient, lossily | one donor + one recipient | `enhance-transfer-out` + `enhance-transfer-in` |
 | **Restore** | administrative rollback to a recorded `op_seq` | — | `restore` |
 
 The `op_kind` namespace is **this module's** (`ssot-enhancement.md` §5.3) and modules 14 and 16 draw
@@ -220,6 +348,46 @@ from it. Module 16 needs three that do not exist yet:
 value and never compounded, and **milestone atoms** at +4/+8/+12/+16/+20 drawn from a reserved family
 space no affix pool may draw from. Implicits are never scaled. At its cap the whole ladder is worth
 roughly **one rarity rung** — enough that a maxed lower rung overlaps the next, never enough to clear it.
+
+### 6a. Transfer — I6's release valve, and §4b is why it ships in v1
+
+**It was missing.** `Restore` was covered; transfer was not, and it is a full I6 mechanism with two
+`op_kind`s already reserved (`ssot-enhancement.md:253`), a reason code
+(`TransferRoleMismatch`, `:346`) and a worked example (`:464-482`). Adopted, not redesigned:
+
+| Rule | Value | Source |
+|---|---|---|
+| Recipient gains | `floor(donor_level × TransferRatioMilli / 1000)`, then clamped to its own cap | I6 §7.4, ratio **700‰** |
+| Gate | recipient `role` **==** donor `role` (module 3's stable role id, never a display name) **and** item levels within **±8** | I6 §7.4 |
+| Donor | drops to `+0`; its milestone rows are **suppressed** (D2 clause 9, never deleted); its scalar recomputes from origin | I6 §7.4 + D2 |
+| Cost | one dedicated module-14 material | I6 §7.4 |
+| Refusal | `ContentRuleViolated{enhance.transfer-role-mismatch}` — I6's `TransferRoleMismatch` is **not** a member of the closed 33-code list (`AtomRejection.cs`, verified 2026-09-04), so it lands as a namespaced rule id per §2b.1 | this spec |
+
+**Why it is lossy, in I6's own words:** *"a lossless transfer turns `+X` into a portable currency, the
+item becomes a disposable carrier, and the decision disappears."* And why it exists: *"without it,
+enhancement punishes finding better loot — you keep the worse item because it is the one you paid
+for."*
+
+⭐ **§4b raises transfer from a nicety to the module's answer to its own worst number.** With N ≈ 0.19
+realms, an investment locked to one item is an investment the player abandons at the next content step.
+Transfer at 700‰ is the only mechanism here that lets it follow them — so **the 700‰ ratio is now a
+load-bearing tunable**, not the *"pure feel number with no reasoning behind it beyond 'lossy but not punitive'"* I6 §10 Q4 admits it was, and it
+lives in `data/tuning/enhancement.v1.json` beside `K`.
+
+**Three things it inherits from this module rather than re-deriving:**
+
+- **One transaction, two ops.** `enhance-transfer-out` on the donor and `enhance-transfer-in` on the
+  recipient share one `correlation_id` and commit together. A half-applied transfer duplicates levels.
+- **Replay is per instance, and both instances replay.** D2 clause 3 holds on each side independently:
+  the donor's transcript ends at `+0`, the recipient's records the granted delta as a **result**, never
+  as *"whatever the donor had"*. Recording the recipe would make a later ratio change rewrite an old
+  transfer.
+- **The ±8 window reads item level, never the player.** D26, same guard as the cost curve.
+
+⚠ **Gated on module 3.** Transfer keys on role equality and I6 §9 #7 names the dependency: hybrid role
+ids must be the same ids the pure frames use (OD3), *"or transfer across a hybrid is undefined."*
+Module 3 `slot-roles` settles that; until it lands, a transfer whose donor or recipient is on a
+`hybrid` frame is refused by name rather than guessed.
 
 ### 7. What can never be rerolled
 
@@ -261,6 +429,28 @@ module is the one that dies on them:
 | **Unequipping deletes the item.** `CollectOrphanInstancesUnlocked` deletes every `effect_instance` with no `effect_binding` row, and runs after every withdraw | `src/FusionRpg.Data/Sqlite/RpgStore.AtomInstances.cs:611-622`, called at `:565` and `:583` | The natural workbench flow — take it off, improve it, put it back on — **destroys the item**. No reroll operation can ship first |
 | **A content import refuses every instance.** `if (instance.CatalogRevision != current) … StaleInstance` | `RpgStore.AtomInstances.cs:437-441` | D9 removes it. ⚠ **D9's premise was corrected (§2f.2): the bind path never reads the frozen values** — `ResolveBindings` uses `instance.Atoms` as an id list and populates from the **live** catalog. **Sequencing: make frozen values authoritative at bind time FIRST, then drop the revision check** |
 
+### 10. The one read this module takes from module 9
+
+**The dependency on `item-power-reads` was declared in the header and never used in the body.** Named
+rather than dropped, because §4b needs exactly one thing from it and inventing a second pricer here is
+the failure `spec-item-power-reads.md` was written to prevent.
+
+| Read | Used for | Not used |
+|---|---|---|
+| **R3 — `PowerScalar` with its ±25% band** (`spec-item-power-reads.md` §R3, `Power/PowerReads.cs:30`) | ⭐ the **before/after** figure on every mutation preview, and the item-versus-item half of §4b's `CraftingHorizonReport` — a perfected item of one rung against a fresh drop of another is a **cross-family** comparison, and E9's vector is the only unit that can express it | — |
+| R1 implicit share · R2 granted-action price · R4 aptitude price | — | **not read here.** R1 and R4 are content lints; R2 is module 19's |
+
+Three rules ride along with the read, all module 9's and none re-litigated here:
+
+- **`unpriced` is never `0`** (`CoefficientTable.cs:71-74`). A mutation preview that cannot price the
+  result says so; it does not show a `0` delta.
+- **Two significant figures with the band** — `≈ 1,300 (±25%)`, never `1,284`. Rule P.
+- ⛔ **Never a gate.** A power read may not refuse a mutation, price one, or decide an outcome. It is
+  display and reporting only, which is `ContentValidation`'s own standing (`ContentValidation.cs:57-59`).
+
+⚠ **`showPowerOnCard = false` must suppress the preview figure too**, or G3 §10 Q7's reversal is only
+half a reversal. One tunable, two surfaces.
+
 ## Commands
 
 ```powershell
@@ -283,9 +473,13 @@ src/FusionRpg.Core/Items/MutationReplay.cs             new - transcript replay +
 src/FusionRpg.Core/Items/EnhancePolicy.cs              new - scalar, bands, odds, caps. Pure
 src/FusionRpg.Core/Items/RerollPolicy.cs               new - temper/reforge/imprint, per-budget anchors
 src/FusionRpg.Core/Items/CraftPityCounter.cs           new - the guaranteed-tier counter (section 5)
+src/FusionRpg.Core/Items/TransferPolicy.cs             new - I6 section 7.4, role gate + 700 permille (6a)
+src/FusionRpg.Core/Items/CraftingHorizonReport.cs      new - "N realms" from PowerTuning + enhance_cap (4b)
 src/FusionRpg.Data/Sqlite/RpgStore.InstanceOps.cs      new - effect_instance_op DDL + append (guard-dal)
 data/tuning/enhancement.v1.json                        new - scalar, odds, pity threshold, cost curve,
-                                                        escalation cap. THE soft cap lives here
+                                                        escalation cap, the asymptote's K (4a), and
+                                                        TransferRatioMilli (6a). THE soft cap lives here
+data/tuning/item-rarity.v1.json                        MODULE 7's - enhance_cap per rung, read here
 tests/FusionRpg.Core.Tests/Items/MutationReplayTests.cs   new
 tests/FusionRpg.Core.Tests/Items/EnhancePolicyTests.cs    new
 tests/FusionRpg.Core.Tests/Items/RerollPolicyTests.cs     new
@@ -339,7 +533,16 @@ static int TierFor(RerollContext ctx, AtomRandom rng, EnhancementTuning t) =>
 | **`craft_pity_shifts_no_draw_weight`** | §5's resolution — the guarantee **replaces** the draw, it does not bias it, so §3.5's measurement stands |
 | `pity_resets_on_a_guaranteed_draw_and_persists_across_sessions` | the `rpg_summon_pity` shape, reused |
 | `there_is_no_destroy_outcome_in_the_enum_or_the_reason_codes` | asserted directly — a code nothing emits is a lie in a table |
-| `no_enhancement_cap_is_a_hard_stop` | `rarity_cap` is gone; `ilvl_cap` has a floor and no ceiling |
+| **`no_enhancement_gain_is_a_hard_stop`** | ⭐ replaces `no_enhancement_cap_is_a_hard_stop`. For every rung and every `n`, `gain(n+1) > gain(n)` — the asymptote is never reached, so no level is refused; `ilvl_cap` still has a floor and no ceiling |
+| `enhancement_gain_stays_below_its_rungs_asymptote_at_every_n` | §4a — the ladder cannot invert, from module 7's seeded `enhance_cap` column, not from a local constant |
+| `the_crafting_horizon_is_computed_from_power_tuning_not_authored` | §4b — `CraftingHorizonReport` reproduces N = 0.19 at v1's reach and 2.01 at `Θc = 123`, and moves when `bMilli` or `enhance_cap` move |
+| `a_transfer_is_one_transaction_with_one_correlation_id` | §6a — a forced failure mid-transfer leaves the donor at its original level and the recipient unchanged |
+| `a_transfer_records_the_granted_delta_not_the_donors_level` | D2 clause 4 through §6a — a later `TransferRatioMilli` change rewrites no completed transfer |
+| `a_transfer_across_unequal_roles_or_outside_the_ilvl_window_is_refused_by_name` | `ContentRuleViolated{enhance.transfer-role-mismatch}`; no new member of the closed code list |
+| `a_donor_drops_to_plus_zero_with_milestones_suppressed_never_deleted` | D2 clause 9 holds on the donor side too |
+| `a_transfer_touching_a_hybrid_frame_is_refused_until_module_3_lands` | I6 §9.7's undefined case, decided rather than discovered |
+| `the_mutation_preview_reads_module_9_R3_and_nothing_else` | §10 — no pricer, no vector and no cost function is declared under `Items/` |
+| `an_unpriced_preview_shows_unpriced_not_zero` | §10, `CoefficientTable.cs:71-74` |
 | `the_cost_and_odds_curves_are_read_from_data_tuning` | AGENTS.md's balance-surface rule, mechanically |
 | `no_cost_or_odds_input_reads_a_player_property` | **D26**, same guard shape as module 14's |
 | `mutation_seq_is_capped_at_4096_and_the_comment_says_it_is_structural` | the one legal ceiling, and why |
@@ -354,11 +557,17 @@ derive randomness via `SeededRng.DeriveStream(op_seed, "item.{op_kind}")`
 commit op row, material debit and head rewrite in one transaction; keep every odds, scalar and cost number
 in `data/tuning/enhancement.v1.json`.
 
-**Ask first:** ⛔ **scoping `ssot-rarity.md` §3.8's pity rule to drop pity** (§5 — recommended, **decider:
-the owner**); adding an `op_kind`; a player-facing un-enhance; whether enhancement extends to charms and
-inserts (scoped here to equipment).
+**Ask first:** ✅ ~~scoping §3.8's pity rule to drop pity~~ — **RULED as D31, and it lands *before* D7**;
+module 7 owns the edit as **E1**. Adding an `op_kind`; a player-facing
+un-enhance; whether enhancement extends to charms and inserts (scoped here to equipment); **the
+transfer ratio (700‰)** — §4b makes it load-bearing rather than a feel number; **whether N ≈ 0.19 is
+acceptable at v1 depth**, given that this module cannot raise it without inverting the ladder (§4b).
 
-**Never:** re-simulate replay — a nerf must not un-succeed a paid attempt. Never add
+**Never:** delete `enhance_cap`'s consumer — module 7's SC7 rule makes an unconsumed key reject, and
+this module is the reader (§4a). Never make the enhancement track steeper to raise N — it re-inverts
+the rarity ladder (§4b). Never price a mutation, gate one, or show a `0` where module 9 returns
+`unpriced` (§10). Never record a transfer's *recipe* — the granted delta is the result (§6a). Never
+re-simulate replay — a nerf must not un-succeed a paid attempt. Never add
 `effect_instance_atom.overrides_json` (D2 refused it, and the premise it rested on is refuted by a passing
 test). Never a destroy outcome. Never a hard cap on `+X` — the risk and cost curves are the cap and they
 live in tuning. Never a cost or odds term reading the player's `Θ`, level or a per-day counter (**D26**).
@@ -377,5 +586,15 @@ clauses 3 and 4. Never renumber `seq`. Never delete an op row.
 - [ ] `ssot-rarity.md` §3.8 carries the drop-pity scope edit, or the owner has ruled otherwise.
 - [ ] No hard cap on `+X`; the cost and risk curves live in `data/tuning/enhancement.v1.json` and
       `audit-magic-numbers.py` reports no M1 target in `EnhancePolicy` or `RerollPolicy`.
+- [ ] ⛔ **`enhance_cap` has a live consumer here** and is read as a **‰ gain asymptote**, matching
+      `spec-rarity-bands.md` row for row; the two previously-incompatible tests are replaced by the pair
+      named in §4a, and neither spec can move without the other going red.
+- [ ] **N is computed, not asserted**: `CraftingHorizonReport` reads `PowerTuning` and the seeded
+      `enhance_cap` column and reproduces **N ≈ 0.19 at v1's shipped reach**, with `Θc ≈ 123` as the
+      first depth reaching 2. The figure is in the report, not only in this document.
+- [ ] **Transfer ships** — both `op_kind`s, one transaction, one `correlation_id`, the role + ±8 gate,
+      the donor's milestones suppressed rather than deleted, and `TransferRatioMilli` in tuning.
+- [ ] The module-9 dependency is **used**: exactly one read (R3), named in §10, with no pricer, vector
+      or cost function declared anywhere under `Items/`.
 - [ ] `socket-imbue` exists in the `op_kind` namespace before module 16 needs it.
 - [ ] Module 1's two defects (orphan sweep, revision-equality) are closed before the first operation ships.

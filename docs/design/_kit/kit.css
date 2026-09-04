@@ -398,7 +398,10 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
 .hud .cluster { display: flex; align-items: center; gap: var(--sp-3); }
 .hud .spacer { flex: 1; }
 
-.scrim { position: absolute; inset: 0; background: var(--scrim); z-index: var(--band-panel); }
+/* GG-5 amendment (2026-09-04, owner-authorised, world-stage W55): a Panel's dimming scrim covers
+   the Stage only — it sits at its own tier strictly between Stage and HUD, never at the Panel
+   content's own z-index, so the HUD stays fully legible and interactive above it. */
+.scrim { position: absolute; inset: 0; background: var(--scrim); z-index: var(--band-scrim); }
 
 /* GG-61: the shell is bounded, so .body's overflow:auto can actually trigger. Without a height
    here, a dense entity (a full derived-stat sheet, an item card with every block populated) grows

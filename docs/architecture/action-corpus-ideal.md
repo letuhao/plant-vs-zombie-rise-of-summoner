@@ -996,33 +996,40 @@ Ordered. **Every item is model-free.**
 | **0.1** | Add the six-coverage rule to `resource-hub-ssot.md` | doc | — **✅ done 2026-09-02** |
 | **0.2** | Correct `spec-distribution-reconcile.md` and `spec-unit-class-close.md`, which read the defect as acceptable | doc | — **✅ done 2026-09-02** |
 | **0.3** | Decide efficiency density and confirm ownership | owner decision | **✅ done 2026-09-02** — sparse efficiency, ownership as proposed |
-| **0.4** ⛔ | Author `resource-ownership.v1.json` + the generator that emits edges from it | data + code | **NOT DONE — see 30.1** |
+| **0.4** ✅ | Author `resource-ownership.v1.json` + the generator that emits edges from it | data + code | **Done 2026-09-04 — see 30.1** |
 | **0.5** ✅ | Regenerate the shipped aptitude edges (**`aptitudes.v5.json`**, not v2 — the version literal here was stale in the same way §37 fixes); re-bless `_baseline-residual` / `_baseline-dominance` / `_baseline-goldens`; re-run `prove-aptitude.ps1` | data | 0.6, and closes **P7.2** |
 | **0.6** ✅ | `DominanceGuard.ReservedFamilies` loops `ResourceIds`; re-bless the coverage block | code | — |
 | **0.7** ✅ | Fix the stale `UnitClassNote` in `DerivedStatRegistry.cs:207-209` (*"No shipped reader"* — `ExhaustionPolicy` and `Predictor` both read it) | code | — |
 | **0.8** | Generalise `combat.heal.power` → `resource.restore.{resource}` | owner decision | **✅ done 2026-09-02** — §33 |
 
-### 30.1 ⛔ Task 0.4 was marked done and is not — corrected 2026-09-03
+### 30.1 ✅ Task 0.4 closed 2026-09-04 (module A-R1, `spec-resource-ownership.md`)
 
-`resource-ownership.v1.json` **does not exist.** Verified: `find . -name "*resource-ownership*"` returns
-nothing, and a repo-wide grep for `resource-ownership` / `ResourceOwnership` across `*.cs`, `*.json`,
-`*.py` and `*.ps1` returns zero hits.
+Corrected 2026-09-03 (below, kept as the audit record), then **built** 2026-09-04:
+`data/tuning/resource-ownership.v1.json` (a declarative table) and `tools/tuning/resource_ownership.py`
+(the generator, `--check` and `--emit` modes) both now exist and are wired into CI
+(`.github/workflows/ci.yml`, "resource-ownership drift guard"). `resource_ownership.py --check`
+regenerates all 166 `resource.*` edges from the table and reproduces `aptitudes.v5.json`'s resource
+edges **byte-for-byte** (verified, both as a standalone CLI run and in `tools/tuning/
+test_resource_ownership.py`'s 13 tests, all passing).
 
-**What actually happened:** the 92 missing edges were added **by hand**, through the `--add-edge` and
-`--rename-key` support that was built into `tools/tuning/publish.py` for exactly that purpose (§33.1).
-The symptom was fixed. **The root cause §29 named was not** — and §29 is emphatic about the difference:
+**Two of §29's own numbers did not survive contact with the real data, and both are corrected in the
+table's own `_meta.note`:**
 
-> *"The root cause is that 486 edges are hand-maintained… So the fix is not 'add 92 rows by hand' —
-> **that reproduces the defect at a larger size.**"*
+- **"18 rows → 216 edges" was never re-derived after task 0.3** (which decided `efficiency` is sparse,
+  not dense) **or after §33/task 0.8** (which added a 4th family, `resource.restore`, sparse too). The
+  real shape is **24 (family, resource) rows across 4 families** (2 dense — `max`, `regen`; 2 sparse —
+  `efficiency`, `restore`), generating **166 edges**, not 216 — measured directly against the shipped
+  526-edge file (166 start with `resource.`).
+- **"36 edges for a seventh resource" assumed 3 dense families.** With the real 2 dense families, a
+  seventh resource id yields **24** new edges (2 × 12 aptitudes), proven mechanically by
+  `test_resource_ownership.py`'s `test_2_seventh_resource_emits_24_new_edges_with_no_generator_change`
+  — a fixture resource id added to the table with **no generator code change**, exactly §29's promised
+  property, now true.
 
-So §29's promised property — *"a seventh resource is covered by construction: add it to `ResourceIds`
-and the generator emits its 36 edges"* — **does not hold today.** Adding a seventh resource still means
-36 hand-published edges.
-
-**This is a real, open, unowned task**, and marking it ✅ is how it would have been lost. It is not a
-blocker for the action corpus (the coverage the corpus needs is present in `aptitudes.v5.json`, and the
-`EveryResourceIsFedInEveryResourceFamily` drift guard holds it there), but it is the difference between
-a fixed defect and a fixed instance of a defect.
+**What actually happened, kept for history:** the original 92 missing edges (Phase 0, 2026-09-02) were
+added by hand through `publish.py`'s `--add-edge`/`--rename-key`. That fixed the *instance*; this module
+fixes the *cause* — a seventh resource id (or an eighth aptitude) is now covered by construction, not by
+36 more hand-published edges.
 
 **0.8 is the one that touches this program directly.** Until it is answered, a generated support action
 that restores qi has no channel scaling it, while one that restores hp does — so the corpus would encode
@@ -1449,7 +1456,7 @@ change. **This is the single most important thing for the plan to absorb.**
 | 1 | **§21** | *"required, non-negotiable"* guardrail on C1 | **Rewritten.** No per-rung power budget exists; E9 has no family concept; the only budget checker is rarity-keyed with zero production callers; the monotonicity test reads no atoms. See §21.1–21.3 |
 | 2 | **§36.1** | *"3 is the only value… a derivation, not a preference"* | **False.** 2 also lands in band, with more headroom. Restated as a reasoned preference |
 | 3 | **§36.2** | tier gaps cost *"disproportionately more, by a ratio the table already ships"* (1.40×) | **1.40× is an 8-rung span.** The tier gaps are **1.135×** and **1.289×** — right direction, ~30% weaker |
-| 4 | **§30 task 0.4** | ✅ done | **Not done.** `resource-ownership.v1.json` does not exist; the edges were hand-published. §29's declared root cause is still open — see §30.1 |
+| 4 | **§30 task 0.4** | ✅ done | **Was not done as of 2026-09-03** — `resource-ownership.v1.json` did not exist; the edges were hand-published. **Closed 2026-09-04** by module A-R1: the table and generator now exist, `--check` reproduces `aptitudes.v5.json`'s resource edges byte-for-byte — see §30.1 |
 | 5 | **Part I §7** | corpus ~1,000; *"the gap closes through the roll"* | **Superseded by §17/§18/§36.1.** Banner added at the top of the document |
 | 6 | **§34.1** | *"the innate **climbs** with earn history"*, filed under *"verified in code and spec"* | **Unbuilt.** `action-ideal.md:137` says *"Recommended, **not yet ratified**"*; the innate's rung is the authored `ActionRow.Rung` column, and `UnlockLadder.Rung` is reachable only through a held unlock, which an innate never is. **The S6 conclusion survives on the free-sixth-slot half alone** — which is independently verified — but the argument as written overclaimed |
 | 7 | **§7** | *"5 categories × 4 target shapes bounds it at 20"* | **Wrong enum.** `ActionTargetMode` has **6** members; the 4 area shapes apply only under `Area`. 5 × 6 = 30, and the *"~20–40"* range had no derivation |
@@ -1528,7 +1535,8 @@ questions and false of tasks.** The distinction matters because a seal makes uno
    (needs D2), and a budget check with a production caller. **C1's family-access widening is gated on
    these**; structure-gating is the safe default meanwhile.
 2. **The 904 → 84 roster reconciliation** (§39) — re-run §36.1's derivation against the real roster.
-3. **§30 task 0.4** — `resource-ownership.v1.json` and its generator (§30.1).
+3. ~~**§30 task 0.4** — `resource-ownership.v1.json` and its generator (§30.1).~~ **Closed 2026-09-04**
+   (module A-R1).
 4. **§5's `minRung` floor** — drop it or price it (§40.1).
 5. **`reaction` / `restriction` detection** in `StructureBudgetGuard`, without which the family/signature
    structural split is unenforceable (§40.1).

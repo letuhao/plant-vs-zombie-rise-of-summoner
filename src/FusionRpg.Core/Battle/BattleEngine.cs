@@ -36,9 +36,9 @@ public static partial class BattleEngine
             ElementTypes = ActorElementTypes.Create(
                 setup.ElementPrimary,
                 setup.ElementSecondary == setup.ElementPrimary ? null : setup.ElementSecondary);
-            AttackComponents = setup.ElementPrimary is { } elem
-                ? new[] { new ElementPayloadComponent(elem, 1.0) }
-                : Array.Empty<ElementPayloadComponent>();
+            // Wave E3: HybridPayload.Build is inert at the shipped weight of 0.
+            AttackComponents = HybridPayload.Build(
+                setup.ElementPrimary, ElementTypes.Secondary, BattleRuleset.HybridSecondaryWeightMilli);
             foreach (var traitId in setup.TraitIds)
                 _traits.Add(TraitBattleCatalog.Get(traitId).TraitId);
             ImmortalCharges = Has("immortal") ? TraitBattleCatalog.Get("immortal").DeathRefusalCharges : 0;
@@ -111,15 +111,18 @@ public static partial class BattleEngine
     /// </summary>
     sealed class BattlePulseSink : IStatusPulseSink
     {
-        readonly Func<string, long, string, DamageApplyResult> _apply;
-        public BattlePulseSink(Func<string, long, string, DamageApplyResult> apply) => _apply = apply;
+        readonly Func<string, long, string, Combat.Element.ElementPayloadComponent[], DamageApplyResult> _apply;
+        public BattlePulseSink(Func<string, long, string, Combat.Element.ElementPayloadComponent[], DamageApplyResult> apply) => _apply = apply;
 
         // Math.Round, NOT a truncating cast — StatusEffectBridge (the overlay sink) rounds, and
         // EffectiveMagnitude is fractional whenever a status power/resist channel is non-zero.
         // Truncating cost battle 1 HP per pulse against the overlay, and turned a −0.6 pulse
         // into 0 — which fails the pipeline's `amount < 0` test and skips the shield gate.
+        // Wave E1: the pulse carries the status's own element to the shield gate. Empty for an
+        // untyped status, which is every status shipped today -- byte-identical to the pre-E1 call.
         public void PulseHp(StatusInstance instance, double amount) =>
-            _apply(instance.HostPtr, (long)Math.Round(amount), "battle.status." + instance.StatusId);
+            _apply(instance.HostPtr, (long)Math.Round(amount), "battle.status." + instance.StatusId,
+                   Status.StatusPulsePayload.For(instance));
     }
 
     /// <param name="trace">
@@ -168,7 +171,8 @@ public static partial class BattleEngine
     /// </param>
     public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null,
         Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null,
-        ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null)
+        ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null,
+        Timeline.IIntentSource? intentSource = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -211,6 +215,14 @@ public static partial class BattleEngine
         // OTHER half); status delivery is fully event-driven. Exactly one event of EACH kind is ever
         // pending at a time, recomputed and rescheduled after it fires — the same "does the queue
         // still hold a scheduled X" pattern B14 already established for rounds, now applied twice.
+        // B37: the profile is now READ. `null` means "content did not choose" and resolves to
+        // classic-round, mirroring WaveDef.Profile's own resolution.
+        var activeProfile = profile ?? Timeline.BattleModeProfileCatalog.ClassicRound;
+        // One economy per BATTLE, never the profile's own — profiles are cached singletons and an
+        // economy holds mutable per-key budget state, so sharing one across concurrent battles
+        // starves actors of turns. See BattleModeProfile.NewEconomy for the reproduction.
+        var battleEconomy = activeProfile.NewEconomy();
+
         var roundQueue = new Timeline.EventQueue(expectedEvents: 4);
         var roundClock = new Timeline.SimulationClock();
         var roundAdvance = new Timeline.NextEventAdvance();
@@ -293,31 +305,141 @@ public static partial class BattleEngine
                 // 2) Initiative-ordered attacks: stable order, per-round jitter from the initiative
                 //    stream; swift subtracts a full band so it always acts before non-swift kin.
                 trace?.Phase(rounds, "initiative");
-                var order = state.Actors
-                    .Where(a => a.Active)
-                    .OrderBy(a =>
-                    {
-                        // Key selectors run once per element in SOURCE order, so the draw sequence
-                        // is "actors list order, filtered to Active" — T5 hazard 1, and note that
-                        // CC-locked actors are Active and therefore DO draw (hazard 4).
-                        var roll = state.InitiativeRng.NextInt(1000);
-                        trace?.Draw("initiative", roll);
-                        return roll - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0);
-                    })
+                // The initiative draw is hoisted out of the sort key so that BOTH orderings consume
+                // the RNG identically: one draw per Active actor, in source order — T5 hazard 1, and
+                // note that CC-locked actors are Active and therefore DO draw (hazard 4). That is not
+                // tidying. If the speed-ordered path drew a different number of values, or drew them
+                // in a different sequence, every downstream roll in the battle would shift and the
+                // delta would no longer be attributable to turn ORDER alone.
+                var jittered = new List<(ActorState Actor, int Jitter)>();
+                foreach (var a in state.Actors)
+                {
+                    if (!a.Active) continue;
+                    var roll = state.InitiativeRng.NextInt(1000);
+                    trace?.Draw("initiative", roll);
+                    jittered.Add((a, roll - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0)));
+                }
+
+                // B39 — turn order by readiness, when the PROFILE's own declared row says so
+                // (`OrdersBySpeed`, never a branch on AdvancePolicyKind: adding a mode adds a row).
+                //
+                // `classic-round` takes the `else` and is byte-identical by construction, not by
+                // luck: same draws, same key, same comparer as before this change. That is what keeps
+                // every existing golden blessed.
+                //
+                // Fewer ticks-to-ready acts first. The initiative jitter stays as the TIE-BREAK rather
+                // than being discarded — actors of equal speed are the common case, and dropping the
+                // jitter there would replace a fair random order with setup-list order.
+                var order = (activeProfile.OrdersBySpeed
+                        ? jittered.OrderBy(x => (ReadyTicks(x.Actor), x.Jitter))
+                        : jittered.OrderBy(x => (0L, x.Jitter)))
+                    .Select(x => x.Actor)
                     .ToList();
 
-                foreach (var attacker in order)
-                {
-                    // action-todo.md T13 (spec-basic-attack-adoption.md §1): the first four steps —
-                    // active check, CC-lock, target, calculator.Compute — are the declared action
-                    // `act.attack` (BasicAttack.cs). Everything below this call is EngineBehavior
-                    // trait tail (E12), extracted to BattleRunState.DispatchHit (B13) but otherwise
-                    // unchanged.
-                    var step = RunBasicAttackStep(attacker, state, now, roundClock.Now, state.Calculator, state.CritRng, trace, rounds);
-                    if (step.Outcome == AttackStepOutcome.Continue) continue;
-                    if (step.Outcome == AttackStepOutcome.Break) break;
+                // B37 (spec-fsm-routing.md): the action phase is gated by the PROFILE's own turn
+                // economy and action slots, so `Economy` and `W` stop being inert fields.
+                //
+                // `classic-round` is byte-identical BY CONSTRUCTION, not by luck:
+                // OneActionPerTurnEconomy.TryAcquire is `_spent.Add(key)`, so every actor succeeds
+                // exactly once on pass 1 and every actor fails on pass 2 — one action each, in
+                // initiative order, which is precisely the loop this replaced. W=1/Global acquires and
+                // releases around each sequential action and can never refuse, because with atomic
+                // resolution a battle is already serialised regardless of W (ActionSlots' own doc).
+                var economy = battleEconomy;
+                var slots = new Timeline.ActionSlots(activeProfile.W, activeProfile.WScope);
+                string EconomyKey(ActorState a) =>
+                    economy.Scope == Timeline.TurnEconomyScope.PerSide ? "side:" + a.Setup.Side : a.Setup.Key;
 
-                    state.DispatchHit(attacker, step.Target!, step.SignedDelta, rounds);
+                foreach (var a in order) economy.ResetForNewTurn(EconomyKey(a), roundClock.Now);
+
+
+                var phaseBroken = false;
+                bool anyActed;
+                do
+                {
+                    anyActed = false;
+
+                    // B38: readiness is offered at the START OF EVERY PASS, not once per round. That
+                    // is what keeps the ECONOMY the thing deciding how many actions an actor gets: a
+                    // one-action economy refuses the second acquire, while a points economy grants it
+                    // and the actor is Ready to take it. Offering readiness only once would have
+                    // silently capped every economy at one action — which it did, and the staged
+                    // sweep caught it immediately.
+                    // `classic-round` pins readiness to a constant (battle-turn-ideal.md §10), so all
+                    // actors arrive together at the round tick rather than at staggered speed times.
+                    foreach (var a in order)
+                    {
+                        var m = state.MachineFor(a.Setup.Key);
+                        if (m.State != Timeline.TurnState.Charging) continue;
+                        m.TransitionTo(Timeline.TurnState.Ready);
+                        trace?.Turn(rounds, a.Setup.Key, Timeline.TurnState.Charging, Timeline.TurnState.Ready);
+                    }
+
+                    foreach (var attacker in order)
+                    {
+                        if (!attacker.Active) continue;
+                        // B38: the turn-state gate comes FIRST, before any resource is taken. Checking
+                        // it after `slots.TryAcquire` leaked a slot on every rejection — with W=1 that
+                        // starves every later actor, which is a real bug this ordering removes rather
+                        // than a style preference.
+                        var machine = state.MachineFor(attacker.Setup.Key);
+                        if (machine.State != Timeline.TurnState.Ready) continue;
+
+                        if (!economy.TryAcquire(EconomyKey(attacker), 1, roundClock.Now)) continue;
+                        if (!slots.TryAcquire(attacker.Setup.Key, attacker.Setup.Side)) continue;
+
+                        // Ready -> Committed, the transition an interactive dwell would gate on.
+                        machine.TransitionTo(Timeline.TurnState.Committed);
+                        trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Ready, Timeline.TurnState.Committed);
+                        machine.TransitionTo(Timeline.TurnState.Resolving);
+                        trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Committed, Timeline.TurnState.Resolving);
+
+                        AttackStep step;
+                        try
+                        {
+                            // action-todo.md T13 (spec-basic-attack-adoption.md §1): the first four steps —
+                            // active check, CC-lock, target, calculator.Compute — are the declared action
+                            // `act.attack` (BasicAttack.cs). Everything below this call is EngineBehavior
+                            // trait tail (E12), extracted to BattleRunState.DispatchHit (B13) but otherwise
+                            // unchanged.
+                            step = RunBasicAttackStep(attacker, state, now, roundClock.Now, state.Calculator, state.CritRng, trace, rounds, intentSource);
+                        }
+                        finally
+                        {
+                            // Always released: atomic resolution holds no slot across time, and a leaked
+                            // slot would deadlock the first profile that ever gains wind-up.
+                            slots.Release(attacker.Setup.Key);
+                        }
+
+                        // B38: the action is over either way — the cycle closes back to Charging so the
+                        // actor is eligible again next round. Zero recovery ticks under classic-round,
+                        // so Recovering is instantaneous rather than absent.
+                        machine.TransitionTo(Timeline.TurnState.Recovering);
+                        trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Resolving, Timeline.TurnState.Recovering);
+                        machine.TransitionTo(Timeline.TurnState.Charging);
+                        trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Recovering, Timeline.TurnState.Charging);
+
+                        if (step.Outcome == AttackStepOutcome.Continue) continue;
+                        // `Break` ends the whole action phase (hazard 3), exactly as before — it must
+                        // escape BOTH loops, or a round that should end early would keep going.
+                        if (step.Outcome == AttackStepOutcome.Break) { phaseBroken = true; break; }
+
+                        state.DispatchHit(attacker, step.Target!, step.SignedDelta, rounds);
+                        economy.OnActionResolved(EconomyKey(attacker), Timeline.ActionResolutionOutcome.Normal);
+                        anyActed = true;
+                    }
+                }
+                while (anyActed && !phaseBroken);
+
+                // B38: anyone still Ready never got a turn this round (no budget, no slot, or the phase
+                // broke). `Ready -> Charging` is the kernel's own "passed turn" edge — it must be taken
+                // rather than left dangling, or the actor would be stuck Ready and skipped forever.
+                foreach (var a in order)
+                {
+                    var machine = state.MachineFor(a.Setup.Key);
+                    if (machine.State != Timeline.TurnState.Ready) continue;
+                    machine.TransitionTo(Timeline.TurnState.Charging);
+                    trace?.Turn(rounds, a.Setup.Key, Timeline.TurnState.Ready, Timeline.TurnState.Charging);
                 }
 
                 // 3) Death cleanup happens inline (Hp gate); 4) shield upkeep AFTER dispatch —
@@ -404,6 +526,36 @@ public static partial class BattleEngine
 
     static bool AnyActive(List<ActorState> actors, string side) =>
         actors.Any(a => a.Active && a.Setup.Side == side);
+
+    /// <summary>
+    /// **B39** — how many ticks this actor needs to be ready for one turn: the readiness kernel's own
+    /// math, `TicksFor(OneTurnWork, EffectiveRate(speed, haste))`. Lower acts sooner.
+    ///
+    /// <para><b>Both channels are clamped here, and the clamp is required rather than defensive.</b>
+    /// <c>EffectiveRate</c> throws on a non-positive speed or haste — the readiness spec's "speed
+    /// clamped before division" rule — and an actor with no authored <c>turn.speed</c> reads 0 from the
+    /// snapshot, which is every actor today. So an unclamped call would throw on the first ordinary
+    /// battle. The fallbacks are the declared defaults, not invented numbers:
+    /// <see cref="Stats.Derived.DerivedStatPolicy.TurnDefaultSpeed"/> (config) and
+    /// <see cref="Timeline.DerivedTurnChannels.NominalHasteMilli"/> (structural, 1000 = unity).</para>
+    ///
+    /// <para><b>`long`, and rounded rather than truncated.</b> `turn.speed` is a magnitude the power
+    /// ladder can drive, so it follows the repo's magnitude rule (`AGENTS.md`: `long`, never `float`);
+    /// the snapshot stores doubles, so the narrowing happens once, here, at the boundary — and
+    /// truncation would round a speed of 99.9 down to 99, making a faster actor read as slower.</para>
+    /// </summary>
+    static long ReadyTicks(ActorState a)
+    {
+        var speed = (long)Math.Round(a.Derived.Get(Timeline.DerivedTurnChannels.Speed));
+        if (speed <= 0) speed = Stats.Derived.DerivedStatPolicy.TurnDefaultSpeed;
+
+        var haste = (long)Math.Round(a.Derived.Get(Timeline.DerivedTurnChannels.Haste));
+        if (haste <= 0) haste = Timeline.DerivedTurnChannels.NominalHasteMilli;
+
+        return Timeline.TurnReadiness.TicksFor(
+            Timeline.TurnReadiness.OneTurnWork,
+            Timeline.TurnReadiness.EffectiveRate(speed, haste));
+    }
 
     /// <summary>First active same-side setup-order neighbor (index ±1) carrying the trait.</summary>
     static ActorState? FindAdjacentWithTrait(List<ActorState> actors, ActorState around, string traitId)

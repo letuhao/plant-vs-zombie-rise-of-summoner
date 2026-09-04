@@ -66,10 +66,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.grooved-bed",
       "flavorKey": "flavor.base.grooved-bed",
       "flavor": "Furrowed by countless seasons of root and rain. The grooves still channel nutrients.",
@@ -102,10 +102,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.gnarled-planter",
       "flavorKey": "flavor.base.gnarled-planter",
       "flavor": "Twisted wood and clay, knotted from generations of root growth.",
@@ -174,10 +174,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.mossy-mound",
       "flavorKey": "flavor.base.mossy-mound",
       "flavor": "A heap of soil crowned with moss, soft to touch but rooted deep.",
@@ -210,7 +210,7 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -249,7 +249,7 @@
         "family": "atom.regeneration",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.hoary-ridge",
       "flavorKey": "flavor.base.hoary-ridge",
       "flavor": "A raised line of aged, hardened earth where two beds once divided.",
@@ -282,10 +282,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.timeworn-trench",
       "flavorKey": "flavor.base.timeworn-trench",
       "flavor": "A furrow scored by seasons of water-flow, now a permanent feature.",
@@ -318,10 +318,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.regeneration",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.coarse-substrate",
       "flavorKey": "flavor.base.coarse-substrate",
       "flavor": "Rock-laden earth that demands strong roots to break and anchor.",
@@ -390,10 +390,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.sunbloom",
+        "family": "atom.regeneration",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.lichened-furrow",
       "flavorKey": "flavor.base.lichened-furrow",
       "flavor": "An old planting line, now colonized by lichen and symbiotic growth.",
@@ -429,7 +429,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.seasoned-tilth",
       "flavorKey": "flavor.base.seasoned-tilth",
       "flavor": "Worked earth conditioned over many seasons, responsive and rich.",

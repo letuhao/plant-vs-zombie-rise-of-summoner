@@ -13,22 +13,181 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:54:26Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "cybernetic-undead",
+      "bionic-remnant"
+    ],
+    "gameTypeId": 211,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a stationary, low-health summon with a dependency on its generator, making it a minor obstacle rather than a significant threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "LandSubmarine",
+    "targetPreference": "backline",
+    "traits": [
+      "amphibious-mimicry",
+      "mechanical-parasitism",
+      "armor-plated",
+      "summoner-link"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
         "kit-shape": 1,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:22:58Z",
+      "emittedUtc": "2026-09-04T11:32:12Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "CaptureOnly"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "Precision",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "cybernetic-undead",
+      "techno-organic"
+    ],
+    "gameTypeId": 236,
+    "posture": "Finesse",
+    "pure": false,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "While the creature has high health and area-of-effect damage, its mechanics are limited to a single tile or a small 3x3 area, making it a significant threat but not a world-altering ",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "zombie",
+    "speciesId": "SuperLevatation",
+    "targetPreference": "structure",
+    "traits": [
+      "anti-gravity flight",
+      "laser-targeting",
+      "energy-beam projection",
+      "autonomous-pilot"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:33:54Z",
       "minorityValues": {
-        "aptitudePrimary": "Bulwark",
-        "rarity": "chimeric"
+        "aptitudePrimary": "Fortitude",
+        "elementPrimary": "earth"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,38 +203,37 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Fortitude",
-    "aptitudeSecondary": "Might",
-    "attackTempo": "steady",
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
+    "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "Cybernetic Undead"
+      "cybernetic-undead"
     ],
-    "gameTypeId": 39,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "heirloom",
-    "reach": "melee",
-    "reason": "The description identifies it as a reinforced version of an existing unit with high durability, but lacks the world-altering scale required for a cataclysm rating.",
+    "gameTypeId": 200,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The description identifies it as a surface-level weapon with high speed and armor, but lacks the world-altering scale required for a 'tyrant' rating.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "poise"
     ],
     "side": "zombie",
-    "speciesId": "IronRedGargantuar",
-    "targetPreference": "frontline",
+    "speciesId": "SuperSubmarine",
+    "targetPreference": "backline",
     "traits": [
-      "Alloy-armored",
-      "Mechanical-cranium",
-      "Crushing-weight",
-      "LED-visuals"
+      "high-speed-ramming",
+      "composite-armor",
+      "hydrodynamic-propulsion"
     ],
     "variants": [
       "normal",
-      "mutated"
+      "corrupted"
     ],
     "verdict": "too-high"
   }

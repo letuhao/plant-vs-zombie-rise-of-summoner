@@ -19,6 +19,29 @@ public sealed class EntityBaseline
     public double AttackInterval { get; init; }
     public double ProduceInterval { get; init; }
     public double ZombieSpeed { get; init; }
+
+    /// <summary>
+    /// E38's twelve (spec-entity-fields-12plus.md), as the game reports them. Unlike E16's three
+    /// above, every one of these is captured from a genuine live field on ITS OWN side
+    /// (`EntityApply.cs` — a plant baseline always reads all eight plant fields, a zombie baseline
+    /// always reads all four zombie fields), so a zero here is an ordinary value — "no shield yet",
+    /// "no attack-speed adder applied" — never an absent stat. <see cref="StatComposer"/>'s
+    /// <c>RealAlways</c>/<c>IntervalAlways</c> helpers compose these unconditionally for exactly
+    /// that reason, deliberately not reusing <c>Real</c>/<c>Interval</c>'s "zero baseline is absent"
+    /// early return.
+    /// </summary>
+    public long PlantShield { get; init; }
+    public double AttackCountdown { get; init; }
+    public double AttackSpeedAdder { get; init; }
+    public double ProduceCountdown { get; init; }
+    public double PlantSpeed { get; init; }
+    public double PlantMoveSpeed { get; init; }
+    public long PlantLevel { get; init; }
+    public long ShootingLevel { get; init; }
+    public double ArmorFlat { get; init; }
+    public double TakeDmgMultiplier { get; init; }
+    public double ZombieSpeedCurrent { get; init; }
+    public double ZombieOriginSpeed { get; init; }
 }
 
 /// <summary>Resolved final Y — write-only to the game/sim.</summary>
@@ -43,6 +66,27 @@ public sealed class EntityFinal
     public double AttackInterval { get; init; }
     public double ProduceInterval { get; init; }
     public double ZombieSpeed { get; init; }
+
+    /// <summary>
+    /// E38's twelve — see <see cref="EntityBaseline"/>'s own fields of the same names for why these
+    /// compose unconditionally rather than through E16's "zero baseline is absent" path.
+    /// <c>PlantShield</c>, <c>PlantLevel</c> and <c>ShootingLevel</c> are magnitudes (<c>long</c>,
+    /// clamped to <c>int</c> only at the Unity write boundary); the rest are ratios/timers
+    /// (<c>double</c>). <c>AttackCountdown</c>/<c>ProduceCountdown</c> get the same structural floor
+    /// as <c>AttackInterval</c>/<c>ProduceInterval</c> — never zero or negative.
+    /// </summary>
+    public long PlantShield { get; init; }
+    public double AttackCountdown { get; init; }
+    public double AttackSpeedAdder { get; init; }
+    public double ProduceCountdown { get; init; }
+    public double PlantSpeed { get; init; }
+    public double PlantMoveSpeed { get; init; }
+    public long PlantLevel { get; init; }
+    public long ShootingLevel { get; init; }
+    public double ArmorFlat { get; init; }
+    public double TakeDmgMultiplier { get; init; }
+    public double ZombieSpeedCurrent { get; init; }
+    public double ZombieOriginSpeed { get; init; }
 
     public IReadOnlyList<StatModifier> Contributions { get; init; } = Array.Empty<StatModifier>();
 
@@ -80,6 +124,22 @@ public sealed class EntityFinal
                || AttackInterval != y0.AttackInterval
                || ProduceInterval != y0.ProduceInterval
                || ZombieSpeed != y0.ZombieSpeed
+               // E38: without these twelve here, a resolve where ONLY e.g. plantShield changed would
+               // report "no change" and EntityWriteGate.ShouldWrite would never call the writer —
+               // composing correctly and then silently dropping it on the floor, the exact class of
+               // bug DiffersFrom itself exists to prevent (see this class's own header comment).
+               || PlantShield != y0.PlantShield
+               || AttackCountdown != y0.AttackCountdown
+               || AttackSpeedAdder != y0.AttackSpeedAdder
+               || ProduceCountdown != y0.ProduceCountdown
+               || PlantSpeed != y0.PlantSpeed
+               || PlantMoveSpeed != y0.PlantMoveSpeed
+               || PlantLevel != y0.PlantLevel
+               || ShootingLevel != y0.ShootingLevel
+               || ArmorFlat != y0.ArmorFlat
+               || TakeDmgMultiplier != y0.TakeDmgMultiplier
+               || ZombieSpeedCurrent != y0.ZombieSpeedCurrent
+               || ZombieOriginSpeed != y0.ZombieOriginSpeed
                // Baseline carries no defense fields: vanilla is the identity view (×1, +0).
                || DefensePercent != 1f
                || DefenseFlat != 0;

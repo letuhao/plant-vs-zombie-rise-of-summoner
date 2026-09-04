@@ -1,0 +1,82 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "unresolved",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:50:37Z",
+      "minorityValues": {
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "unresolved",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-jester",
+      "zombie-variant"
+    ],
+    "gameTypeId": 209,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The creature's mechanics focus on chain-reaction explosions and rapid transformation rather than large-scale environmental destruction or overwhelming force characteristic of a Warden.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "JackboxJumpZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "spring-loaded-detonation",
+      "chain-reaction-propagation",
+      "water-path-mutation"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  }
+]

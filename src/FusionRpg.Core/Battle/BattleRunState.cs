@@ -75,6 +75,12 @@ public static partial class BattleEngine
         public readonly SeededRng InitiativeRng;
         public readonly ICombatRng CritRng;
         public readonly SeededRng EssenceRng;
+        public readonly SeededRng RidersRng;
+
+        /// <summary>Wave E1: riders decide their own chance on <see cref="RidersRng"/>, so the
+        /// evaluator gets a scripted 0.0 rather than a second roll. Same object and same reasoning as
+        /// the scripted setup-status path.</summary>
+        static readonly FixedStatusRng RiderApplyRng = new(0.0);
         public readonly BattleStatusRng StatusRng;
         public readonly DateTimeOffset T0;
         public readonly List<BattleEventRec> Events = new();
@@ -85,6 +91,25 @@ public static partial class BattleEngine
         /// all-zero basic-attack envelope (`Class.None`), so A19's real cooldowns need no further
         /// wiring here when they arrive.</summary>
         public readonly Timeline.CooldownLedger Cooldowns = new();
+
+        /// <summary>
+        /// B38 — one <see cref="Timeline.ActorTurnMachine"/> per actor, for the whole battle.
+        ///
+        /// <para>Before this the per-actor FSM existed and was fully tested but was never driven by a
+        /// real battle: `ActorTurnMachine` appeared nowhere in the engine. An interactive dwell needs a
+        /// `Ready` state to occupy, so B20/B21/B22 had nothing to attach to. These machines are what
+        /// give them one.</para>
+        ///
+        /// <para><b>Pure bookkeeping under `classic-round`</b>: with zero wind-up and zero recovery the
+        /// cycle collapses to Charging → Ready → Committed → Resolving → Recovering → Charging around
+        /// the same attack, in the same order, drawing the same RNG. Byte-identical by construction.</para>
+        /// </summary>
+        public readonly Dictionary<string, Timeline.ActorTurnMachine> TurnMachines = new(StringComparer.Ordinal);
+
+        public Timeline.ActorTurnMachine MachineFor(string actorKey) =>
+            TurnMachines.TryGetValue(actorKey, out var m)
+                ? m
+                : TurnMachines[actorKey] = new Timeline.ActorTurnMachine(actorKey);
 
         /// <summary>A18e (spec-battle-live-stat-modifiers.md §1): one instance per battle, same
         /// lifetime as Cooldowns/Shields above.</summary>
@@ -125,6 +150,11 @@ public static partial class BattleEngine
             if (trace != null) critRng = trace.WrapCombat("crit", critRng);
             CritRng = critRng;
             EssenceRng = SeededRng.DeriveStream(seed, "essence");
+            // Wave E1: riders draw from their OWN stream, never from "status". The status stream is
+            // already the contagion-spread stream, and sharing it would make every rider content
+            // change a full-battle butterfly -- the audit fix this wave's spec names explicitly, and
+            // the same one-system-one-stream rule `essence` above already follows.
+            RidersRng = SeededRng.DeriveStream(seed, "riders");
             StatusRng = new BattleStatusRng(seed, trace);
             Calculator = new OverlayCombatCalculator();
 
@@ -187,9 +217,9 @@ public static partial class BattleEngine
             Host.ResolveStatTarget = key => ByKey.TryGetValue(key, out var a) ? a : null;
             onEffectHostReady?.Invoke(Host);
 
-            PulseSink = new BattlePulseSink((hostPtr, amount, effectId) =>
+            PulseSink = new BattlePulseSink((hostPtr, amount, effectId, components) =>
                 ByKey.TryGetValue(hostPtr, out var owner)
-                    ? ApplyHp(owner, amount, effectId)
+                    ? ApplyHp(owner, amount, effectId, components)
                     : new DamageApplyResult(DamageApplyOutcome.SinkRefused, 0, 0));
 
             foreach (var a in Actors)
@@ -474,6 +504,53 @@ public static partial class BattleEngine
         }
 
         /// <summary>Immortal death refusal: a queued +1 through the pipeline turns the death into survive-at-1.</summary>
+        /// <summary>
+        /// Wave E1 — the attacker's on-hit riders, applied to the actor it just LANDED a hit on.
+        ///
+        /// <para><b>Byte-identical when nobody has riders</b>, and structurally rather than luckily:
+        /// the method returns before touching any RNG for an empty list, so the `riders` stream is
+        /// never drawn from and no other stream is perturbed. That is the wave's zero-rider invariant.</para>
+        ///
+        /// <para>Riders carry the ATTACKER, unlike the t0 initial statuses which land attacker-less —
+        /// so resist and potency evaluate against real attacker context, which is the point of applying
+        /// a status on a hit rather than at setup. The chance roll is the rider's own
+        /// `GrantChanceMilli`, drawn from the dedicated stream; the L2b evaluator still independently
+        /// blocks on immunity and the potency floor, exactly as it does for scripted statuses.</para>
+        /// </summary>
+        void ApplyOnHitRiders(ActorState attacker, ActorState target)
+        {
+            foreach (var traitId in attacker.Setup.TraitIds)
+            foreach (var spec in TraitBattleCatalog.Get(traitId).OnHitRiders)
+            {
+                var roll = RidersRng.NextPerMille();
+                Trace?.Draw("riders", roll);
+                if (roll >= spec.GrantChanceMilli) continue;
+
+                Status.Apply(new StatusApplyInput(
+                    spec.StatusId,
+                    HostPtr: target.Setup.Key,
+                    AttackerPtr: attacker.Setup.Key,
+                    GrantId: "battle:rider:" + attacker.Setup.Key + ":" + spec.StatusId,
+                    BaseMagnitude: spec.MagnitudePerPulse,
+                    BaseDuration: spec.DurationMs,
+                    PeriodMs: spec.PeriodMs,
+                    DurationMs: spec.DurationMs,
+                    // Already rolled on the riders stream above; the evaluator must not roll a SECOND
+                    // time on the status stream, which would both double-gate the rider and consume a
+                    // draw that belongs to contagion.
+                    GrantChance: 1.0,
+                    EffectId: "battle.rider." + spec.StatusId,
+                    PluginId: "battle",
+                    // Attacker-ful, unlike the t0 initial statuses: the whole point of a rider is that
+                    // the attacker's potency meets the defender's resist.
+                    AttackerLess: false),
+                    // The chance was already decided above on the riders stream, so the evaluator is
+                    // handed a scripted 0.0 -- the same FixedStatusRng the scripted setup path uses,
+                    // and for the same reason: one roll per decision, on the stream that owns it.
+                    RiderApplyRng, Host.Clock.UtcNow);
+            }
+        }
+
         public void ReviveImmortals()
         {
             var queued = false;
@@ -561,6 +638,8 @@ public static partial class BattleEngine
                 ApplyHp(guardian!, -share, "battle.trait.guardian", attacker.AttackComponents, attacker);
                 Trace?.Apply(round, guardian!.Setup.Key, -share);
             }
+
+            ApplyOnHitRiders(attacker, target);
 
             Host.Flush();
             attacker.DamageDealt += damage + rider;   // resolver output, pre-absorb (spec)

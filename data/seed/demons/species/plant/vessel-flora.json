@@ -17,15 +17,17 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "high"
+        "rarity": "high",
+        "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:46:42Z",
+      "emittedUtc": "2026-09-04T10:02:40Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -43,37 +45,37 @@
     ],
     "aptitudePrimary": "Focus",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "attackTempo": "flurry",
+    "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
       "vessel-flora"
     ],
-    "gameTypeId": 1114,
+    "gameTypeId": 1112,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "cultivated",
+    "rarity": "fused",
     "reach": "short",
-    "reason": "The creature is a passive support item that provides a statistical buff to other plants rather than posing a direct threat.",
+    "reason": "The creature is a passive support item that provides buffs to other plants rather than engaging in direct combat itself.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "CornPot",
+    "speciesId": "CabbagePot",
     "targetPreference": "backline",
+    "threatBand": "nuisance",
     "traits": [
-      "low-profile",
-      "substrate-based",
-      "catalytic-growth"
+      "symbiotic-growth",
+      "speed-catalyst",
+      "low-profile"
     ],
     "variants": [
       "normal",
-      "ancient"
-    ],
-    "verdict": "too-high"
+      "mutated"
+    ]
   },
   {
     "_derived": [
@@ -95,16 +97,17 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:42:37Z",
+      "emittedUtc": "2026-09-04T10:06:20Z",
       "minorityValues": {
-        "rarity": "grafted"
+        "aptitudePrimary": "Vigor"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -120,7 +123,7 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Focus",
+    "aptitudePrimary": "Fortitude",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "inferred",
@@ -130,26 +133,25 @@
     "family": [
       "vessel-flora"
     ],
-    "gameTypeId": 1137,
-    "posture": "Finesse",
+    "gameTypeId": 1243,
+    "posture": "Force",
     "pure": true,
-    "rarity": "cultivated",
+    "rarity": "fused",
     "reach": "short",
-    "reason": "The creature functions primarily as a passive economic utility and support carrier rather than a direct combatant.",
+    "reason": "The creature functions as a passive support utility that enhances allies rather than posing a direct offensive threat to opponents.",
     "resourceProfile": [
       "hp",
-      "poise",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "GoldPot",
+    "speciesId": "CherryPot",
     "targetPreference": "frontline",
     "threatBand": "nuisance",
     "traits": [
-      "money-generating",
-      "synergistic-catalyst",
+      "explosion-reactive",
+      "buff-catalyst",
       "low-profile",
-      "carrier-type"
+      "cherry-affinity"
     ],
     "variants": [
       "normal",
@@ -177,13 +179,498 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:13:08Z",
+      "emittedUtc": "2026-09-04T10:36:46Z",
+      "minorityValues": {
+        "attackTempo": "steady"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-flora"
+    ],
+    "gameTypeId": 1137,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature functions primarily as a passive economic utility and support carrier rather than a direct combatant.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "GoldPot",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "money-generating",
+      "skill-chaining",
+      "buff-carrier",
+      "low-profile"
+    ],
+    "variants": [
+      "normal",
+      "shiny"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:45:52Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-flora"
+    ],
+    "gameTypeId": 1287,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its primary function is a utility transformation of existing entities rather than direct combat aggression or large-scale destruction.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IcePot",
+    "targetPreference": "structure",
+    "threatBand": "nuisance",
+    "traits": [
+      "condensing",
+      "materializing",
+      "transmutative",
+      "low-profile"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:55:21Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-flora"
+    ],
+    "gameTypeId": 1195,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a stationary, non-combative utility item used solely for providing low-level illumination.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "LanternPot",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "luminescent",
+      "low-profile",
+      "substrate-capable"
+    ],
+    "variants": [
+      "normal",
+      "shiny"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:09:37Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude",
+        "attackTempo": "steady",
+        "rarity": "sprout"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-flora"
+    ],
+    "gameTypeId": 27,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chaff",
+    "reach": "short",
+    "reason": "The creature functions as a passive, low-priority utility base with defensive immunity and resource generation, lacking the offensive capability required for a 'raider' classification.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "Pot",
+    "targetPreference": "structure",
+    "traits": [
+      "low-profile",
+      "substrate-provider",
+      "solar-restitution",
+      "collision-immunity"
+    ],
+    "variants": [],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:18:43Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus",
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-flora"
+    ],
+    "gameTypeId": 1136,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "As a low-profile resource generator that functions as a passive economic tool rather than a combatant, it poses no direct threat to an opponent.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SilverPot",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "currency-generating",
+      "low-profile",
+      "upgradable",
+      "exponential-scaling"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:25:53Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude",
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "vessel-flora"
+    ],
+    "gameTypeId": 1184,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a passive, low-output utility item used for resource production rather than combat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SunPot",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "low-profile",
+      "sun-producing",
+      "substrate-based"
+    ],
+    "variants": [
+      "normal",
+      "ancient"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:55:14Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -204,33 +691,33 @@
     "attackTempo": "steady",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "ice",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Vessel-Flora"
+      "vessel-flora"
     ],
-    "gameTypeId": 1287,
+    "gameTypeId": 226,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "cultivated",
     "reach": "short",
-    "reason": "The creature acts as a passive utility tool that resets plant states rather than an active combatant.",
+    "reason": "It functions as a passive support unit that provides a minor tactical buff rather than posing a direct threat to the player.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "IcePot",
+    "speciesId": "XXSPot",
     "targetPreference": "frontline",
     "threatBand": "nuisance",
     "traits": [
-      "Condensation-Catalyst",
-      "Thermal-Stabilizer",
-      "Base-Form Reverter"
+      "buffing",
+      "low-profile",
+      "parasitic-growth"
     ],
     "variants": [
-      "normal",
-      "blessed"
+      "corrupted",
+      "cursed"
     ]
   }
 ]

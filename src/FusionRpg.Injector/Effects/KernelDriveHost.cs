@@ -18,10 +18,19 @@ namespace FusionRpg.Injector.Effects;
 /// cheap default rather than a researched conclusion — and it means a stale queue can never survive
 /// into the next match.</para>
 ///
-/// <para><b>The clock is unscaled</b> (owner decision, 2026-08-31) — it runs through the pause menu,
-/// which is byte-identical to the two 100 ms grids this replaces: both accumulate
-/// <c>unscaledDeltaTime</c> today, and DoTs deliberately use unscaled time so game speed does not
-/// accelerate them.</para>
+/// <para><b>The clock is FULLY SCALED</b> (owner decision, 2026-09-04, reversing 2026-08-31) — it
+/// follows <c>Time.timeScale</c>, so it stops on pause <b>and accelerates on fast-forward</b>.
+/// ⛔ <b>The acceleration is chosen, not overlooked.</b> <c>CheatActions.cs:28</c> allows up to
+/// <b>10×</b>, and <c>event-pipeline-v2-ssot.md</c> records that unscaled was originally picked
+/// precisely so game speed could not multiply DoTs. The owner was shown that consequence and
+/// confirmed it. <b>Do not "fix" a 10× DoT as a bug</b> — see <c>decisions.md</c>, <i>Battle engine
+/// open questions (2026-09-04)</i>, item (4). This is why the substitution is <i>not</i>
+/// byte-identical to the two grids it replaces, and why B26 is the program's one golden-mover.</para>
+///
+/// <para><b>Scope of that decision is this host only</b> (item (5)). Core has no
+/// <c>Time.timeScale</c> and <see cref="SimulationClock"/> cannot read a wall clock at all, so battle
+/// and expedition resolution stay virtual-time and instantaneous. The two clocks are separate on
+/// purpose.</para>
 ///
 /// <para>B25 builds the drive; <b>B26</b> moves the shield and DoT grids onto it. Until then the queue
 /// is empty and a tick costs a clock advance and a <c>PeekDueTick</c> — which is the point of landing
@@ -115,6 +124,14 @@ public static class KernelDriveHost
     /// <summary>
     /// One frame of kernel. Called from <c>InjectorLoop.Tick</c>.
     ///
+    /// <para><b>Two deltas, and the split is the point.</b> <paramref name="scaledDeltaTime"/> is how
+    /// much <i>simulated</i> time this frame bought — <c>unscaledDeltaTime × Time.timeScale</c>, so it
+    /// is 0 while paused and 10× at maximum fast-forward. <paramref name="realFrameSeconds"/> is how
+    /// long the frame actually took, and the drain budget is derived from <b>that</b>: the budget
+    /// bounds wall-clock work on the main thread, so scaling it would hand a slow-motion frame a
+    /// smaller budget than the real time it has, for no reason. Simulation follows the game's clock;
+    /// the budget follows the machine's.</para>
+    ///
     /// <para><b>The float→integer conversion happens here and only here.</b> Unity hands us a
     /// <c>float</c>; Core's clock states that no floating-point value reaches it, and the kernel
     /// purity scan enforces that with no file exempt. Rounding rather than truncating matters: a
@@ -124,18 +141,23 @@ public static class KernelDriveHost
     /// <para><b>A huge delta is deliberately not clamped.</b> After a level load the frame delta can
     /// be seconds; clamping it would silently lose simulated time. Offering it whole makes a large
     /// backlog due at once, which the bounded drain then spreads across frames in unchanged order —
-    /// the designed behaviour, not an edge case to defend against.</para>
+    /// the designed behaviour, not an edge case to defend against. This is also why the caller
+    /// multiplies by <c>Time.timeScale</c> rather than passing <c>Time.deltaTime</c>, which Unity
+    /// clamps at <c>Time.maximumDeltaTime</c> and would silently drop simulated time after a hitch.</para>
     /// </summary>
-    public static void Tick(float unscaledDeltaTime)
+    public static void Tick(float scaledDeltaTime, float realFrameSeconds)
     {
         TimelineDrive? drive;
         lock (Gate) drive = _drive;
         if (drive == null) return;                       // off-board: nothing to advance
-        if (!(unscaledDeltaTime > 0f)) return;            // also rejects NaN, which `<= 0` would not
+
+        // Paused (timeScale 0) lands here and advances nothing — which is the whole of "it stops on
+        // pause". `!(x > 0)` rather than `x <= 0` so a NaN scale is refused too.
+        if (!(scaledDeltaTime > 0f)) return;
 
         using var _perf = PerfProbe.Measure(PerfSection.KernelTick);
-        var micros = (long)Math.Round((double)unscaledDeltaTime * 1_000_000.0);
-        drive.Tick(micros, BudgetTicks(unscaledDeltaTime));
+        var micros = (long)Math.Round((double)scaledDeltaTime * 1_000_000.0);
+        drive.Tick(micros, BudgetTicks(realFrameSeconds));
     }
 
     static long BudgetTicks(float frameSeconds)

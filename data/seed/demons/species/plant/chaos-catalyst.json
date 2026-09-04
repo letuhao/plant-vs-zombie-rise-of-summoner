@@ -19,17 +19,19 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
-        "rarity": "unresolved",
-        "threatBand": "high"
+        "rarity": "split",
+        "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:50:09Z",
+      "emittedUtc": "2026-09-04T10:11:44Z",
       "minorityValues": {
-        "aptitudePrimary": "Onslaught",
-        "elementPrimary": "light"
+        "elementPrimary": "fire",
+        "rarity": "chimeric",
+        "threatBand": "cataclysm"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -47,38 +49,38 @@
     ],
     "aptitudePrimary": "Focus",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementPrimary": "light",
+    "elementSecondary": "fire",
     "family": [
-      "Chaos-Catalyst"
+      "chaos-catalyst"
     ],
     "gameTypeId": 227,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "almanac",
     "reach": "short",
-    "reason": "Its ability to spawn high-tier entities or trigger massive area-of-effect damage (4000 damage or fire trails) makes it a chaotic, unpredictable force capable of devastating both sides of the battlefield.",
+    "reason": "The creature's ability to trigger high-damage area-of-effect events (4000 damage) or spawn high-tier bosses and Odyssey-class entities makes it an unpredictable force capable of devastating both sides of the battlefield.",
     "resourceProfile": [
       "hp",
-      "stamina",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
     "speciesId": "DiamondImitater",
     "targetPreference": "structure",
     "threatBand": "calamity",
     "traits": [
-      "Stochastic Manifestation",
-      "Temporal Delay",
-      "Multi-Entity Summoning",
-      "Environmental Volatility"
+      "stochastic-manifestation",
+      "event-triggering",
+      "unpredictable-outcome"
     ],
     "variants": [
       "mutated",
-      "cursed"
+      "cursed",
+      "normal",
+      "ancient"
     ]
   }
 ]

@@ -312,7 +312,11 @@ Illustrative. Note that **no example below contains a magnitude** — that is th
   "side": "both",
   "roles": ["armament-primary", "jewel-major", "manipulator"],
   "powerBand": "medium",
-  "nameWords": { "prefix": ["Ember", "Frost", "Gale", "Stone", "Radiant", "Umbral"] },
+  "nameWords": { "prefix": [
+    { "variant": "fire", "word": "Ember" }, { "variant": "ice", "word": "Frost" },
+    { "variant": "air", "word": "Gale" }, { "variant": "earth", "word": "Stone" },
+    { "variant": "light", "word": "Radiant" }, { "variant": "dark", "word": "Umbral" }
+  ] },
   "displayTemplate": "+{value} {element} power",
   "tags": ["offense", "elemental"]
 }
@@ -320,6 +324,17 @@ Illustrative. Note that **no example below contains a magnitude** — that is th
 
 No `affixClass` — derived from `kindId`, and rejected if present. No tier magnitudes — generated from
 `powerBand` and the channel family.
+
+⭐ **`nameWords` re-keyed 2026-09-04** (item-ideal.md, `affix-legality` module 8, additive — no id
+changes, no word deletions): each row is `{ band: "A"|"B"|"C", word, wordPlant? }` for the 75 families
+whose list is one word per power band (`band A = t1-t2, B = t3, C = t4-t5`, the fixed split — not an
+even one, since band C is deliberately the top two tiers), or `{ variant: "fire"|"ice"|"air"|"earth"|
+"light"|"dark", word, wordPlant? }` for the 23 families whose list is one word per element variant
+instead (the six-flavour families like `elemental_power` above, plus the 4/5-word shield/ward/stoicism
+families that supply a word for fewer than all six elements — `omni` and any unlisted variant fall back
+to the list's first word). `wordPlant`, sparse, overrides the word on a plant-frame item; absent means
+use `word` on both frames. The old flat `["Ember", "Frost", ...]` shape is gone — a bare string in
+`nameWords` is rejected by `NameWordCheck` (`tools/ItemSeedValidator/Checks/NameWordCheck.cs`).
 
 ### Base type
 

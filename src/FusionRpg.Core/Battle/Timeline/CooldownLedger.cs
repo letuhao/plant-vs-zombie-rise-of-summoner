@@ -44,11 +44,22 @@ public sealed class CooldownLedger
     /// — see <see cref="CooldownStart"/> — because commit, resolve, and recovery-end are three
     /// different games' answers and the envelope declares which one it means.
     /// </summary>
-    public void Start(string actorKey, ActionEnvelope envelope, long atTick)
+    /// <param name="reductionPm">
+    /// combat-unification `species-skills` S2 — the acting actor's <c>skill.cooldown.{category}</c>
+    /// value, per-mille. <b>0 is neutral</b> (the channel's registered default), and at 0
+    /// <see cref="CooldownMath.ApplyReduction"/> returns the base ticks unchanged, so every existing
+    /// caller that omits it behaves exactly as before.
+    ///
+    /// <para><b>Applied here, at the ARMING site, and deliberately not at the read site.</b> This
+    /// ledger stores an absolute tick — see this type's own summary: "An absolute tick has nothing to
+    /// go stale." Reducing at read time would let a mid-battle change retroactively shorten a cooldown
+    /// that is already running.</para>
+    /// </param>
+    public void Start(string actorKey, ActionEnvelope envelope, long atTick, long reductionPm = 0)
     {
         if (!TrySlot(actorKey, envelope, out var slot)) return;
         if (envelope.CooldownTicks <= 0) return;
-        _readyAt[slot] = atTick + envelope.CooldownTicks;
+        _readyAt[slot] = atTick + CooldownMath.ApplyReduction(envelope.CooldownTicks, reductionPm);
     }
 
     /// <summary>The tick the action comes off cooldown; 0 when it is not on one.</summary>

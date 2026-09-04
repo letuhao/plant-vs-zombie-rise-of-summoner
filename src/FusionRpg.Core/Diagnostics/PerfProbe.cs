@@ -33,7 +33,11 @@ public enum PerfSection
     // visible next to everything else rather than in its own report (spec-kernel-performance.md §7).
     KernelTick = 21,
     KernelDrain = 22,
-    KernelSchedule = 23
+    KernelSchedule = 23,
+    // A-M2 lawn-reposition — MoveDrainHost.Tick's own share of the frame, so AC10's live
+    // "measured with PerfProbe before the feature is enabled by default" has somewhere to read
+    // from once a producer exists (spec-lawn-reposition.md §5 AC10).
+    LawnMoveDrain = 24
 }
 
 /// <summary>
@@ -44,7 +48,7 @@ public enum PerfSection
 public static class PerfProbe
 {
     // Structural (tunables-ssot.md T2) — must match PerfSection's member count above, not balance.
-    const int SectionCount = 24;
+    const int SectionCount = 25;
 
     static readonly string[] SectionNames =
     {
@@ -71,7 +75,8 @@ public static class PerfProbe
         "shield.absorb",
         "kernel.tick",
         "kernel.drain",
-        "kernel.schedule"
+        "kernel.schedule",
+        "lawn.moveDrain"
     };
 
     static readonly long[] Counts = new long[SectionCount];

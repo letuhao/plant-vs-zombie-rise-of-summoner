@@ -69,6 +69,14 @@ public sealed record ActionEnvelope
     /// </summary>
     public string? CooldownChannel { get; init; }
 
+    /// <summary>
+    /// Which <c>skill.effectiveness.{category}</c> channel this action's output reads, mirroring
+    /// <see cref="CooldownChannel"/> exactly (combat-unification `species-skills` S3). <c>null</c>
+    /// means the action does not opt in and its damage is unscaled — the neutral path, and the
+    /// default.
+    /// </summary>
+    public string? EffectivenessChannel { get; init; }
+
     public long WindupTicks { get; init; }
 
     /// <summary>

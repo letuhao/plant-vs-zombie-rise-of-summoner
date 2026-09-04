@@ -20,13 +20,173 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high",
-        "threatBand": "unresolved"
+        "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:55:01Z",
+      "emittedUtc": "2026-09-04T10:05:22Z",
+      "minorityValues": {
+        "threatBand": "scourge"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Retribution",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous-hybrid"
+    ],
+    "gameTypeId": 1016,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its ability to instantly execute enemies and trigger high-damage area-of-effect explosions makes it a dominant force on the battlefield.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "CherryChomper",
+    "targetPreference": "frontline",
+    "threatBand": "tyrant",
+    "traits": [
+      "explosive-digestion",
+      "cherry-bomb-detonation",
+      "zombie-consumption"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:11:43Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous-hybrid",
+      "explosive-flora"
+    ],
+    "gameTypeId": 983,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The creature's ability to trigger massive area-of-effect destruction and generate powerful voodoo illusions makes it a significant tactical threat consistent with a scourge rating.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "DeathMine",
+    "targetPreference": "swarm",
+    "traits": [
+      "delayed-emergence",
+      "voodoo-projection",
+      "reincarnation-burst",
+      "card-drop-catalyst"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "deterministic-fallback"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T12:29:33Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,20 +204,20 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "Carnivorous Hybrid"
+      "carnivorous-hybrid"
     ],
     "gameTypeId": 1192,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "Its ability to trigger a Doom-shroom explosion—a high-tier explosive effect—upon every single bite makes it a devastating force capable of clearing entire waves.",
+    "reason": "Its ability to trigger a Doom-shroom explosion—a high-tier area-of-effect annihilation event—with every single bite makes it a devastating force on the battlefield.",
     "resourceProfile": [
       "hp",
       "stamina"
@@ -65,15 +225,96 @@
     "side": "plant",
     "speciesId": "DoomChomper",
     "targetPreference": "swarm",
-    "threatBand": "unresolved",
+    "threatBand": "raider",
     "traits": [
-      "Explosive Digestion",
-      "Delayed Detonation",
-      "Crater-Inducing"
+      "explosive-digestion",
+      "doom-shroom-trigger",
+      "crater-forming"
     ],
     "variants": [
-      "mutated",
-      "corrupted"
+      "normal",
+      "mutated"
     ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:16:14Z",
+      "minorityValues": {
+        "attackTempo": "slow"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous hybrid",
+      "combat-botanical"
+    ],
+    "gameTypeId": 1345,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to destroy all plants on its landing tile and replicate the power of a Doom-shroom makes it a high-impact threat far exceeding a mere scourge.",
+    "resourceProfile": [
+      "hp",
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "DoomSquash",
+    "targetPreference": "backline",
+    "traits": [
+      "impulsive",
+      "destructive",
+      "collateral-damage-prone",
+      "crater-forming"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "too-low"
   }
 ]

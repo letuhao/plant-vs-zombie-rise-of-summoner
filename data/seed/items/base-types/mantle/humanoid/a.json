@@ -66,10 +66,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.spun-towel",
       "flavorKey": "flavor.base.spun-towel",
       "flavor": "Absorbent and cheap. Dries quickly and can soak through anything.",
@@ -105,7 +105,7 @@
         "family": "atom.cleansing",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.woven-poncho",
       "flavorKey": "flavor.base.woven-poncho",
       "flavor": "A single piece with a hole for the head. The shedding loose threads catch on things.",
@@ -139,7 +139,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.elemental-defense",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -174,13 +174,13 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.fringed-shawl",
       "flavorKey": "flavor.base.fringed-shawl",
-      "flavor": "Decorated and light \u2014 the fringe swings when you move, giving away position.",
+      "flavor": "Decorated and light — the fringe swings when you move, giving away position.",
       "tags": [
         "light",
         "organic",
@@ -213,7 +213,7 @@
         "family": "atom.cleansing",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.supple-blanket",
       "flavorKey": "flavor.base.supple-blanket",
       "flavor": "Heavy enough to drape, light enough to move in.",
@@ -246,7 +246,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.elemental-defense",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -283,10 +283,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.reinforced-satchel",
       "flavorKey": "flavor.base.reinforced-satchel",
       "flavor": "Carries its weight. The straps hold even when nothing else does.",
@@ -322,7 +322,7 @@
         "family": "atom.cleansing",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.knotted-trashbag",
       "flavorKey": "flavor.base.knotted-trashbag",
       "flavor": "Sealed at the top with a knot. Whatever is inside stays sealed until it is not.",
@@ -355,7 +355,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.elemental-defense",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -391,7 +391,7 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -431,7 +431,7 @@
         "family": "atom.cleansing",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.stout-cylinder",
       "flavorKey": "flavor.base.stout-cylinder",
       "flavor": "Overlapped scales tubed around the back. Harder to hit than to carry.",

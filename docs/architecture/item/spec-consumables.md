@@ -262,8 +262,38 @@ dispatch inside the stock-decrement transaction; validate every core atom agains
 `use_context` names, at catalog load; keep the run-start snapshot shared with charms (`source` is the
 only difference).
 
+### ⭐ D37 — the carry limit is a belt, not a constant
+
+> **Owner, 2026-09-04:** *"add bag feature like diablo belt."*
+
+§10.1 proposed **`N = 2`** and called it *"the single most consequential number here."* **It is not a
+number — it is an item property**, and the slot to hang it on already ships.
+
+| | |
+|---|---|
+| The slot | ⭐ **`girdle`** — role 7 of the fifteen, budget **60‰** (`spec-slot-roles.md:53`). **No sixteenth role is needed** |
+| The property | a `girdle` base type carries `consumableSlots`; a better girdle carries more |
+| Where it lives | the **base type** (module 6), so it is content, rolled and dropped like everything else — not a tunable |
+| What replaces `N` | nothing. There is no global carry limit; **the equipped belt is the limit** |
+
+**Why this is the better answer, in this program's own terms.** Everywhere else the rule is *a number a
+balance pass would change belongs in `data/tuning/`*. A carry limit is different in kind: it is
+something the **player should be able to improve by playing**, which makes it a content axis, not a
+config row. A belt turns *"how many potions may I hold"* from a designer's constant into a drop worth
+finding — which is D26's loop (find gear → play deeper → find better gear) applied to the one number the
+lane was most worried about.
+
+⚠ **Consequences to carry through:**
+
+- Module 6 authors `girdle` base types with a `consumableSlots` value on the directional-profile pass
+- ⛔ **`consumableSlots` is a magnitude a player grows — so it takes no hard ceiling** (`AGENTS.md`).
+  A structural upper bound may exist for UI layout; if so it says so in a comment and **throws**
+- With no belt equipped the count is **0**, not a default — an unequipped slot grants nothing, exactly
+  as every other role behaves
+- Module 20 renders the belt as its own strip, not as a row of the armoury list
+
 **Ask first:** ⛔ **`ContainerKind.Consumable`** — a fifth value D27 does not cover; batch it with D27's
-four. **`N`, the carry limit** (§10.1) — proposed 2, and it is the single most consequential number
+four. ~~**`N`, the carry limit** (§10.1) — proposed 2, and it is the single most consequential number
 here. Whether consumables ever exist in PvZ mode (§10.2 — the lane recommends yes, later, via the intent
 road, never the action queue). Per-squad vs per-specimen draughts (§10.4). A status whose payload is a
 container of atoms — **ask it jointly with the Resource model**, which needs the identical mechanism.

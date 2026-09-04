@@ -361,7 +361,9 @@ public class LoamTextureTests
         var result = LoamPhases.Pressure(world, report, "pressure");
 
         Assert.Equal(1000, result.Sectors.Single(s => s.SectorId == "warded").StabilityMilli);
-        Assert.Contains(report.Entries, e => e.Detail.StartsWith("loam.shortfall.unresolved:"));
+        var unresolved = Assert.Single(report.Entries, e => e.Detail.StartsWith("loam.shortfall.unresolved:"));
+        // world-stage W12 (fog defect A): faction-scoped, names no ground.
+        Assert.Equal("dave", unresolved.Audience);
         Assert.DoesNotContain(report.Entries, e => e.Detail.StartsWith("loam.shortfall:") && e.SectorId == "warded");
     }
 

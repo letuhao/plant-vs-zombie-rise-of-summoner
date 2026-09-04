@@ -6,7 +6,20 @@ public sealed record TraitMagnitudes(
     int BerserkRampHalfMilli = 0, int BerserkRampQuarterMilli = 0, int RegenPerRoundMilli = 0,
     int OnKillHealMilli = 0, int GuardShareMilli = 0, int InitiativeBonusMilli = 0,
     int DeathRefusalCharges = 0, int RetreatBelowMilli = 0, int SoulLootBonusMilli = 0,
-    int SpecimenXpBonusMilli = 0, int EssenceProcMilli = 0, int EssenceRiderMilli = 0);
+    int SpecimenXpBonusMilli = 0, int EssenceProcMilli = 0, int EssenceRiderMilli = 0,
+    IReadOnlyList<BattleStatusSpec>? OnHitRiders = null);
+
+/// <summary>The MAGNITUDES of one battle-mode profile (battle-timeline T14/B29,
+/// spec-timeline-tunables.md §2). Deliberately only the numbers: <c>AdvancePolicy</c>,
+/// <c>WScope</c>, <c>DefaultCommitment</c>, the economy TYPE and the profile ids all stay in
+/// <see cref="Timeline.BattleModeProfileCatalog"/> because they are *which mechanism runs*, not how
+/// much of it — the map's "adding a mode adds a row, never a branch" acceptance is about that row's
+/// shape, and a row of structure in code is still a row.
+///
+/// <para><paramref name="MaxPoints"/> is null for profiles whose economy has no budget
+/// (<c>OneActionPerTurnEconomy</c>); supplying it for one of those is refused at load rather than
+/// silently ignored.</para></summary>
+public sealed record TimelineProfileTuning(int W, int WReact, long PassQuantum, long? MaxPoints);
 
 /// <summary>Battle balance surface (tunables-ssot.md T1) — round/affinity constants plus every
 /// trait's magnitudes. Trait ids/mechanisms stay in <see cref="TraitBattleCatalog"/> (schema).</summary>
@@ -14,10 +27,19 @@ public sealed record BattleTuning(
     int SchemaVersion, int Version,
     int RoundDurationMs, int MaxRounds,
     int PrimaryAffinityDivisor, int SecondaryAffinityDivisor,
-    IReadOnlyDictionary<string, TraitMagnitudes> Traits)
+    IReadOnlyDictionary<string, TraitMagnitudes> Traits,
+    IReadOnlyDictionary<string, TimelineProfileTuning> TimelineProfiles,
+    int HybridSecondaryWeightMilli)
 {
     public TraitMagnitudes TraitOf(string traitId) =>
         Traits.TryGetValue(traitId, out var m) ? m : new TraitMagnitudes();
+
+    /// <summary>Refuses rather than defaults: a profile the catalog knows about but config forgot is
+    /// a missing balance row, not a request for a built-in fallback.</summary>
+    public TimelineProfileTuning ProfileOf(string profileId) =>
+        TimelineProfiles.TryGetValue(profileId, out var p) ? p : throw new BattleTuningRejection(
+            $"battle tuning: no timeline.profiles entry for '{profileId}'. Every profile the catalog " +
+            "ships must carry its magnitudes in config — there is no built-in default to fall back to.");
 }
 
 public sealed class BattleTuningRejection : Exception
@@ -60,7 +82,29 @@ public static class BattleTuningLoader
                     SoulLootBonusMilli: IntOr(t, "soulLootBonusMilli"),
                     SpecimenXpBonusMilli: IntOr(t, "specimenXpBonusMilli"),
                     EssenceProcMilli: IntOr(t, "essenceProcMilli"),
-                    EssenceRiderMilli: IntOr(t, "essenceRiderMilli"));
+                    EssenceRiderMilli: IntOr(t, "essenceRiderMilli"),
+                    OnHitRiders: Riders(t, prop.Name));
+            }
+
+            var timelineEl = Obj(root, "timeline");
+            var profilesEl = Obj(timelineEl, "profiles");
+            var profiles = new Dictionary<string, TimelineProfileTuning>(StringComparer.Ordinal);
+            foreach (var prop in profilesEl.EnumerateObject())
+            {
+                var v = prop.Value;
+                if (v.ValueKind != JsonValueKind.Object)
+                    throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name} is not an object");
+                profiles[prop.Name] = new TimelineProfileTuning(
+                    W: Int(v, "w"),
+                    WReact: Int(v, "wReact"),
+                    PassQuantum: Int(v, "passQuantum"),
+                    MaxPoints: v.TryGetProperty("maxPoints", out var mp) && mp.ValueKind == JsonValueKind.Number
+                        ? mp.GetInt64()
+                        : null);
+                if (profiles[prop.Name].W <= 0)
+                    throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name}.w must be > 0 (it is a slot count); got {profiles[prop.Name].W}");
+                if (profiles[prop.Name].PassQuantum <= 0)
+                    throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name}.passQuantum must be > 0 (a zero quantum reschedules at `now` forever); got {profiles[prop.Name].PassQuantum}");
             }
 
             return new BattleTuning(
@@ -70,8 +114,65 @@ public static class BattleTuningLoader
                 MaxRounds: Int(ruleset, "maxRounds"),
                 PrimaryAffinityDivisor: Int(composer, "primaryAffinityDivisor"),
                 SecondaryAffinityDivisor: Int(composer, "secondaryAffinityDivisor"),
-                Traits: traits);
+                Traits: traits,
+                TimelineProfiles: profiles,
+                HybridSecondaryWeightMilli: HybridWeight(root));
         }
+    }
+
+    /// <summary>Wave E3 — the secondary element's share of the payload, per-mille. Bounded 0..1000 by
+    /// nature (it is a share of one payload, and the primary carries the remainder), so the bound is a
+    /// structural refusal rather than a progression cap: a share above 1000 would give the primary a
+    /// negative weight, which is not a balance outcome but a nonsense payload.</summary>
+    static int HybridWeight(JsonElement root)
+    {
+        var hybrid = Obj(root, "hybrid");
+        var w = Int(hybrid, "secondaryWeightMilli");
+        if (w < 0 || w > 1000)
+            throw new BattleTuningRejection(
+                $"battle tuning: hybrid.secondaryWeightMilli must be within 0..1000 (it is a share of one payload); got {w}");
+        return w;
+    }
+
+    /// <summary>
+    /// Wave E1 — a trait's authored on-hit riders. Absent means none, which is every shipped trait.
+    /// Reuses <see cref="BattleStatusSpec"/>'s own field names and its defaults (`periodMs` 1000,
+    /// `grantChanceMilli` 1000), so a rider is authored the same way an initial status already is.
+    /// </summary>
+    static IReadOnlyList<BattleStatusSpec>? Riders(JsonElement trait, string traitId)
+    {
+        if (!trait.TryGetProperty("onHitRiders", out var arr)) return null;
+        if (arr.ValueKind != JsonValueKind.Array)
+            throw new BattleTuningRejection($"battle tuning: traits.{traitId}.onHitRiders is not an array");
+
+        var list = new List<BattleStatusSpec>();
+        foreach (var r in arr.EnumerateArray())
+        {
+            if (r.ValueKind != JsonValueKind.Object)
+                throw new BattleTuningRejection($"battle tuning: traits.{traitId}.onHitRiders has a non-object entry");
+            if (!r.TryGetProperty("statusId", out var idEl) || idEl.ValueKind != JsonValueKind.String)
+                throw new BattleTuningRejection($"battle tuning: traits.{traitId}.onHitRiders entry has no 'statusId'");
+
+            var chance = r.TryGetProperty("grantChanceMilli", out var c) && c.ValueKind == JsonValueKind.Number
+                ? c.GetInt32() : 1000;
+            if (chance < 0 || chance > 1000)
+                throw new BattleTuningRejection(
+                    $"battle tuning: traits.{traitId}.onHitRiders grantChanceMilli must be within 0..1000; got {chance}");
+
+            var period = r.TryGetProperty("periodMs", out var p) && p.ValueKind == JsonValueKind.Number ? p.GetInt32() : 1000;
+            if (period <= 0)
+                throw new BattleTuningRejection(
+                    $"battle tuning: traits.{traitId}.onHitRiders periodMs must be > 0 (a zero period pulses forever); got {period}");
+
+            list.Add(new BattleStatusSpec(
+                idEl.GetString()!,
+                MagnitudePerPulse: r.TryGetProperty("magnitudePerPulse", out var mg) && mg.ValueKind == JsonValueKind.Number ? mg.GetInt64() : 0,
+                DurationMs: r.TryGetProperty("durationMs", out var d) && d.ValueKind == JsonValueKind.Number ? d.GetInt32() : 0,
+                PeriodMs: period,
+                GrantChanceMilli: chance));
+        }
+
+        return list;
     }
 
     static JsonElement Obj(JsonElement parent, string key)
@@ -103,5 +204,6 @@ public static class BattleTuningHub
         TraitBattleCatalog.Configure(tuning);
         BattleRuleset.Configure(tuning);
         BattleStatComposer.Configure(tuning);
+        Timeline.BattleModeProfileCatalog.Configure(tuning);
     }
 }

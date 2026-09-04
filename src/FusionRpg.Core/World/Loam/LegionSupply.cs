@@ -95,7 +95,22 @@ public static class LegionSupply
 
                 LoamPhases.DrawProportionally(component, stockById, drawn, available);
                 DistributeToLegions(toppingUp, carriedById, drawn, totalDemand);
-                report.Add(phase, TurnReportKinds.Event, faction.FactionId, "legion.topup:" + drawn);
+                report.Add(phase, TurnReportKinds.Event, faction.FactionId, "legion.topup:" + drawn, audience: faction.FactionId);
+
+                // world-stage W11 (re-homed from `world-playback` and ideal §2.3): the counterpart
+                // to `supply.cut:` — nothing reported the reverse before this. Per legion, not per
+                // component, because a player asks "is *my* legion okay now", not "did this pool
+                // move any loam". Fires only on the turn a legion's own deficit is fully erased
+                // (`Capacity - carried == 0` after distribution), never on a turn that only
+                // partially refills it — the signal that survives being checked every turn without
+                // repeating: once a legion is whole, `Demand` is 0 and it drops out of `toppingUp`
+                // entirely, so it cannot fire again until it is genuinely cut and refilled a second
+                // time. `CarriedLoam` alone (not a new persisted flag) is what makes this
+                // derivable without adding a hashed field.
+                foreach (var (entity, _) in toppingUp)
+                    if (carriedById[entity.EntityId] == Capacity(entity))
+                        report.Add(phase, TurnReportKinds.Event, entity.EntityId, "supply.restored",
+                            sectorId: entity.AtSectorId, audience: entity.OwnerFactionId);
             }
         }
 

@@ -248,10 +248,13 @@ The owner's own backend design already solved several of these, and we should in
 
 **Classified `Race` (reconcile pass, F7, 2026-08-25).** All seven names above are `StatClass.Race`
 ([spec-stat-taxonomy.md](derived-stats/spec-stat-taxonomy.md) §2.1) — none of them ever needed a
-counterpart, which used to be an unexamined absence and is now a stated rule. They stay
-**unregistered**: this battle stream registers each one when it gives it a reader, not the derived-
-stats program (spec-unbuilt-reconcile.md §3's own ban — registering `turn.*` here is out of that
-module's scope).
+counterpart, which used to be an unexamined absence and is now a stated rule. ~~They stay
+**unregistered**~~ — **the rule stands; the state sentence is stale (corrected 2026-09-04).** This
+battle stream registers each one when it gives it a reader, not the derived-stats program
+(spec-unbuilt-reconcile.md §3's own ban — registering `turn.*` there is out of that module's scope).
+**`turn.speed` and `turn.haste` now have readers and are therefore registered**
+(`DerivedStatRegistry.cs:110-112`, base `BaseSpeed` / `NominalHasteMilli`) — registered *by this rule*,
+not against it. `turn.moveSpeed` still has none and stays out, correctly.
 
 **Initiative formula (08).** `initiative = speed × 1.0 + haste × 0.5 + seeded_tiebreaker`. Note it already carries a **seeded** tiebreaker — the same determinism discipline we enforce, arrived at independently.
 
@@ -272,6 +275,20 @@ module's scope).
 **Settled** by the owner picks above: interactivity (both), mode scope (all four), Speed (a real stat), and migration (byte-identical `classic-round`).
 
 **One tension those answers create, and how I propose to resolve it.** "Speed is a real stat" and "`classic-round` is byte-identical" cannot both hold if `classic-round` consumes Speed — a varying Speed changes turn order, which changes every golden. Proposed resolution: **Speed is real at the stat layer, but readiness is profile-scoped.** `classic-round` pins its readiness function to the current constant and ignores Speed entirely, so it reproduces today exactly; `galaxy-sync` and `hybrid-atb` are speed-driven from birth. Speed then costs nothing until a battle opts into a profile that reads it. **This needs confirming — it is my reading, not your instruction.**
+
+> ### ✅ All five closed 2026-09-04 — the list below is the reasoning trail, not open work
+>
+> Answers, in the order they appear: **1.** `hybrid-atb` for both expeditions and web matches — new
+> module **T15** owns the migration and its win-rate sweep. **2.** The economy question is
+> architecturally moot (`ITurnEconomy` ships pluggable, and `hybrid-atb` carries ActionPoints(2));
+> the gameplay pick rides with T15. **3.** `W` is **content-configurable per wave** — the difficulty
+> lever is real, and the wider test matrix is accepted as its price. **4.** **True live SignalR
+> sessions**, not pre-declared playback — which makes T10 `decision-trace` **mandatory**, exactly as
+> this section predicted. **5.** The world turn lock and the battle layer stay independent, as read.
+>
+> Full record with consequences: `decisions.md`, **Battle engine open questions (2026-09-04)**.
+> The Speed/byte-identical tension noted above resolved as proposed — readiness is profile-scoped,
+> proven by Checkpoint B — and T15 is what finally makes Speed matter in production.
 
 **Genuinely still open:**
 

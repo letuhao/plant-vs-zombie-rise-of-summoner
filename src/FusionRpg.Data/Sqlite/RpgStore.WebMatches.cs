@@ -8,7 +8,11 @@ public sealed record WebMatchLogEntry(
     long Id, long PlayerId, string CorrelationId, string MatchKey,
     string SetupJson, ulong Seed, int EngineVersion, int RulesetVersion, int RngAlgoVersion,
     long? RunId, string T, string? EnvironmentStamp = null, string? SweepRefused = null,
-    string? ContentHash = null);
+    string? ContentHash = null,
+    /// <summary>B21 — the decision trace for an interactive match. NULL means "not interactive", which
+    /// is every match today. An interactive match with a NULL or partial trace is REFUSED by the boot
+    /// sweep, never re-resolved: re-resolving would substitute AI decisions for a player's.</summary>
+    string? DecisionsJson = null);
 
 public sealed partial class RpgStore
 {
@@ -173,7 +177,7 @@ public sealed partial class RpgStore
     const string SelectLog = """
         SELECT id, player_id, correlation_id, match_key, setup_json, seed,
                engine_version, ruleset_version, rng_algo_version, run_id, t, environment_stamp,
-               sweep_refused, content_hash
+               sweep_refused, content_hash, decisions_json
         FROM rpg_web_match_log
         """;
 
@@ -194,7 +198,8 @@ public sealed partial class RpgStore
         r.IsDBNull(9) ? null : r.GetInt64(9), r.GetString(10),
         r.IsDBNull(11) ? null : r.GetString(11),
         r.IsDBNull(12) ? null : r.GetString(12),
-        r.IsDBNull(13) ? null : r.GetString(13));
+        r.IsDBNull(13) ? null : r.GetString(13),
+        r.IsDBNull(14) ? null : r.GetString(14));
 
     /// <summary>Defensive: a hand-edited/foreign row must not take down boot (the sweep lists
     /// rows before its per-entry catch). Unparseable seeds map to 0 — deterministic garbage the

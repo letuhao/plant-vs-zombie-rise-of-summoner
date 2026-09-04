@@ -33,9 +33,10 @@ FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
 FusionRpg.Core.World.Loam.LoamPolicy.Configure(
     FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "loam.v1.json"))));
-FusionRpg.Core.World.WorldTuningHub.Configure(
-    FusionRpg.Core.World.WorldTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "world.v1.json"))));
+var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "world.v4.json")));
+FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
+FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
 FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
     FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "souls.v1.json"))));
@@ -56,7 +57,7 @@ FusionRpg.Core.Status.StatusPolicy.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "status.v1.json"))));
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 // T4.7 step 2 / T4.8 (catalog-runtime): behaviour-preserving today — the SAME compiled roster
 // DemonSpeciesCatalog.All always read, now routed through Configure. NOT the store-backed flip
 // (SpeciesSnapshot.cs's own doc comment says why).
@@ -78,7 +79,7 @@ FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "progression.v1.json"))));
 FusionRpg.Core.Battle.BattleTuningHub.Configure(
     FusionRpg.Core.Battle.BattleTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "battle.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "battle.v2.json"))));
 FusionRpg.Core.Demons.SummoningTuningHub.Configure(
     FusionRpg.Core.Demons.SummoningTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "summoning.v1.json"))));
@@ -106,6 +107,29 @@ FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
     FusionRpg.Core.Actions.Rungs.RungTableLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "action-rungs.v1.json"))));
+// item-ideal.md, rarity-bands (module 7): no Hub needed today -- SeedRarityLadder consumes this
+// parse once, at boot, to populate rarity_budget rows. A future consumer (drop-volume/enhance-reroll)
+// reads those rows back through RpgStore.GetRarityBudget, not this parsed value directly.
+var itemRarityTuning = FusionRpg.Core.Items.ItemRarityTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "item-rarity.v1.json")));
+// item-ideal.md, item-power-reads (module 9): no Hub needed either -- parsed and validated at boot
+// (the powerDisplayBandPercent == DriftTolerancePercent check fails fast here rather than at first
+// use), consumed by module 10 item-card once it exists as the real production caller.
+var itemPowerTuning = FusionRpg.Core.Items.Power.ItemPowerTuningLoader.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "item-power.v1.json")));
+_ = itemPowerTuning;
+// item-ideal.md, drop-volume (module 11): D18's volume curve, D38's kill rate and Correction 5's
+// re-solved pity thresholds. Parsed and validated at boot so a self-inconsistent balance edit fails
+// here rather than at the first drop; ImportLootCorpus below consumes it.
+var dropVolumeTuning = FusionRpg.Core.Items.Drops.DropVolumeTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "item-drop-volume.v1.json")));
+// item-ideal.md, threshold-grants (module 12): D3's frame-mix recovery curve. Parsed and validated at
+// boot for the same reason as the two above — a knot list that is flat over any interval reinstates
+// the step function the curve exists to prevent, and that failure must land here rather than at the
+// first hybrid body priced against it.
+var frameMixTuning = FusionRpg.Core.Items.Thresholds.FrameMixTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "item-frame-mix.v1.json")));
+_ = frameMixTuning;
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -141,6 +165,68 @@ if (SimFlags.Enabled)
 var app = builder.Build();
 var store = app.Services.GetRequiredService<RpgStore>();
 store.Init();
+store.SeedRarityLadder(itemRarityTuning);
+// item-ideal.md, item-card (module 10): N1's item_display_template, seeded from the already-shipped
+// data/seed/items/display-templates/*.json (98 rows, one per affix family) -- never re-authored here.
+{
+    var displayTemplatesDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "display-templates");
+    if (Directory.Exists(displayTemplatesDir))
+    {
+        var rows = Directory.EnumerateFiles(displayTemplatesDir, "*.json")
+            .SelectMany(f => FusionRpg.Core.Items.Display.DisplayTemplates.Parse(File.ReadAllText(f)))
+            .ToList();
+        store.SeedItemDisplayTemplates(rows);
+    }
+}
+
+// item-ideal.md, drop-volume (module 11): the runtime drop-table corpus (data/seed/loot/tables*.json).
+// Validated whole and imported in one transaction — E14's all-or-nothing policy. Never fatal: a
+// broken loot corpus must not take the server down, the same rule the content boot below follows.
+{
+    var lootDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "loot");
+    if (Directory.Exists(lootDir))
+    {
+        try
+        {
+            var corpus = FusionRpg.Core.Items.Drops.LootCorpusReader.Merge(
+                Directory.EnumerateFiles(lootDir, "tables*.json")
+                    .Select(f => FusionRpg.Core.Items.Drops.LootCorpusReader.Parse(File.ReadAllText(f))));
+            store.ImportLootCorpus(corpus, dropVolumeTuning, new FusionRpg.Core.Items.Drops.DropContentLookups(
+                CurrencyExists: id => string.Equals(id, "souls", StringComparison.Ordinal),
+                RarityIdExists: FusionRpg.Core.Items.RarityLadder.RungIds.Contains));
+            Console.WriteLine($"[loot] imported {corpus.Tables.Count} drop tables, {corpus.Sources.Count} loot sources");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[loot] drop-table import failed — no loot tables loaded: {ex.Message}");
+        }
+    }
+}
+
+// item-ideal.md, threshold-grants (module 12): the authored set catalog
+// (data/seed/items/sets/*.json) into ssot-sets.md §4.2's three tables. Never fatal, same rule as the
+// loot corpus above. ⛔ The tier CONTAINERS these ids name cannot be bound yet — ContainerKind ships
+// six values and D27's `set` is not one of them (X7, effect-atom's own ask) — so this populates the
+// breakpoint table the evaluator reads and stops there. A wiring gap, named, not a silent drop.
+{
+    var setsDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "sets");
+    if (Directory.Exists(setsDir))
+    {
+        try
+        {
+            var sets = Directory.EnumerateFiles(setsDir, "*.json")
+                .SelectMany(f => FusionRpg.Core.Items.Thresholds.SetCorpus.Parse(File.ReadAllText(f)))
+                .ToList();
+            store.ImportSetCorpus(sets);
+            Console.WriteLine($"[sets] imported {sets.Count} item sets, "
+                              + $"{sets.Sum(s => s.Members.Count)} members, {sets.Sum(s => s.Tiers.Count)} tiers");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[sets] set corpus import failed — no sets loaded: {ex.Message}");
+        }
+    }
+}
 
 // E46 (player-content-boot): AtomImporter was only ever invoked from a dev script
 // (scripts/deploy-play.ps1), never from a player's own install — so a real player's content tables
@@ -207,6 +293,7 @@ app.MapPatron();
 app.MapCommanders();
 app.MapContracts();
 app.MapWorld();
+app.MapWorldWarden();
 app.MapAptitudes();
 app.MapLoadout();
 app.MapAuraDerived();

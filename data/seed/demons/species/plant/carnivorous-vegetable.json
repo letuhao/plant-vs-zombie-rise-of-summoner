@@ -20,14 +20,93 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:42:49Z",
+      "emittedUtc": "2026-09-04T10:12:47Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous_vegetable",
+      "projectile_flora"
+    ],
+    "gameTypeId": 1399,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to trigger area-of-effect explosions upon hitting ember-status targets provides significant crowd control and high burst damage that exceeds a mere scourge level.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "DoomCabbage",
+    "targetPreference": "backline",
+    "traits": [
+      "explosive_impact",
+      "ember_reactive",
+      "splash_damage"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:41:52Z",
       "minorityValues": {
-        "rarity": "chimeric"
+        "elementPrimary": "dark"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -45,32 +124,31 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "elementPrimary": "light",
     "elementSecondary": "none",
     "family": [
       "carnivorous_vegetable"
     ],
-    "gameTypeId": 1390,
+    "gameTypeId": 1229,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "melee",
-    "reason": "With 1800 damage and the ability to consume units to respawn, this creature functions as a high-threat combatant rather than a mere scourge.",
+    "reach": "short",
+    "reason": "The ability to both deal high damage and convert enemies via hypnotism makes it a high-tier crowd control unit rather than a mere scourge.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "ChomperSquash",
-    "targetPreference": "swarm",
+    "speciesId": "HypnoSquash",
+    "targetPreference": "frontline",
     "traits": [
-      "gluttonous",
-      "consumption_mechanic",
-      "respawning",
-      "crushing_damage"
+      "hypnotic_crush",
+      "charm_aura",
+      "high_impact"
     ],
     "variants": [
       "normal",

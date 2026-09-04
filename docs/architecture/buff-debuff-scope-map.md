@@ -44,6 +44,31 @@ cross-type case** (ideal §2.3/§4.1) needs the hypnotize-toggle event to exist.
 blocker — matching `action-plan.md`'s own P0.x pattern of prerequisites "three of five" of which had
 "seams that let the dependent slice ship without them."
 
+## ⛔ Filed defect — no atom-level apply scope (item program, D33(b), 2026-09-04)
+
+**Two scope systems ship, and the one on the stat-delivery path has no atom dimension.**
+
+`ScopeCompatibility` keys on `(AtomKindId, WhereScope, WhoKind, ScopeHost, Channel)` and refuses an
+unlisted combination. `StatApplyScope` (`src/FusionRpg.Core/Stats/StatApplyScope.cs`) is a **string
+grammar** — `match` | `plant:N` | `zombie:N` | `entity:HEX` | `player:{id}` — with **no field in which
+an atom kind could appear**. So an effect delivered through it never consults this program's model.
+
+**The owner's rule is that every effect applies through the atom effect runtime.** This path does not,
+by construction.
+
+**Symptom that made it visible:** `player:` is accepted by the grammar and inexpressible by the
+resolver, so `Matches` returns `true` unconditionally (`:82`) and `IsMatchWide` folds it into
+match-wide (`:92`). The method is side-aware for `plant:`/`zombie:` and **not** for `player:` — so a
+player-scoped buff reaches the zombies. Anything routed this way inherits the hole.
+
+⚠ **`WhoKind` cannot express it either** — `{ Target, Type, UniqueDemon, Relation }`
+(`WhoSelector.cs:10-16`). So this is not "call `ScopeCompatibility` from `StatApplyScope`"; the target
+model needs the concept first. **That design call is this program's.**
+
+**Not blocking the item program.** D33(a) binds charms at actor scope, which the atom model already
+supports (`stat.derived` · `Relation` · both hosts · `PerEntityGrant`). Filed so the defect has an
+owner, not to request a schedule.
+
 ## Deliberately deferred (not in any module here)
 
 Aura skill content and magnitude math; the commander concept itself (Zomboss/Crazy Dave as playable/AI

@@ -34,7 +34,9 @@ class Severity(Enum):
     NOT_MEASURED = "not_measured"
 
 
-VALID_NEEDS = frozenset({"corpus", "adapter", "budget", "numerics", "demon_dump", "demon_anchors"})
+VALID_NEEDS = frozenset({
+    "corpus", "adapter", "budget", "numerics", "demon_dump", "demon_anchors", "action_coverage",
+})
 
 
 @dataclass(frozen=True)
@@ -73,6 +75,7 @@ class Ctx:
     numerics: object = None
     demon_dump: object = None      # seedsmith.adapters.demons.dump_ctx.DemonDumpCtx — T1.10
     demon_anchors: object = None   # list[dict] of classified anchor entries — T2.10
+    action_coverage: object = None  # seedsmith.adapters.actions.coverage_report.ctx.ActionCoverageCtx — A-S5
 
     def has(self, need: str) -> bool:
         return getattr(self, need, None) is not None

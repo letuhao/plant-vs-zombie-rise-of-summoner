@@ -19,13 +19,94 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:13:53Z",
+      "emittedUtc": "2026-09-04T10:43:52Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "Precision",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-botanical"
+    ],
+    "gameTypeId": 1376,
+    "posture": "Finesse",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a crowd-control support unit with low base damage, fitting the profile of a minor nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IceCorn",
+    "targetPreference": "frontline",
+    "traits": [
+      "frost-projection",
+      "cryo-stasis application",
+      "lethal-freeze synergy"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:46:11Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -43,32 +124,32 @@
     ],
     "aptitudePrimary": "Focus",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Botanical"
+      "cryo-botanical",
+      "storage-flora"
     ],
     "gameTypeId": 1436,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "fused",
     "reach": "melee",
-    "reason": "The creature functions as a resource-storing utility plant rather than a world-altering threat.",
+    "reason": "The creature's mechanics focus on energy management and status application rather than large-scale destruction or existential threat.",
     "resourceProfile": [
       "hp",
-      "stamina",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
     "speciesId": "IcePumpkin",
     "targetPreference": "backline",
     "traits": [
-      "Thermal Sequestration",
-      "Frost-Infused",
-      "Energy-Regulated"
+      "frost-retention",
+      "energy-gating",
+      "reactive-release"
     ],
     "variants": [
       "normal",
@@ -95,17 +176,95 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "stated",
+      "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "split",
+        "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:15:59Z",
+      "emittedUtc": "2026-09-04T11:21:19Z",
       "minorityValues": {
-        "rarity": "chimeric"
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-botanical"
+    ],
+    "gameTypeId": 233,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "chaff",
+    "reach": "short",
+    "reason": "The creature is a decorative gift box that merely spawns basic plants, posing no direct combat threat to an observer.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SnowPresent",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "encapsulated",
+      "seasonal-promotional",
+      "randomized-seed"
+    ],
+    "variants": []
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:55:06Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -129,29 +288,30 @@
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Botanical"
+      "cryo-botanical"
     ],
-    "gameTypeId": 1228,
+    "gameTypeId": 1116,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The ability to deal massive area-of-effect damage and freeze multiple enemies simultaneously makes it a high-tier tactical threat rather than a mere scourge.",
+    "reason": "The creature's ability to deal massive x4 damage to frozen targets and apply crowd-control status effects makes it a significant tactical threat rather than a mere marauder.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "IceSquash",
-    "targetPreference": "swarm",
+    "speciesId": "WinterMelon",
+    "targetPreference": "frontline",
     "traits": [
-      "Frost-Infusion",
-      "Area-of-Effect Impact",
-      "Shatter-Burst"
+      "cryo-infusion",
+      "splash-frost",
+      "zombie-shatter"
     ],
     "variants": [
+      "normal",
       "mutated",
-      "blessed"
+      "corrupted"
     ],
     "verdict": "too-low"
   }

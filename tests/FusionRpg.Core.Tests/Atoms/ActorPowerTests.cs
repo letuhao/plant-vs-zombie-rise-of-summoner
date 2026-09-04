@@ -178,6 +178,46 @@ public class ActorPowerTests
         Assert.True(priced.Power.Total > 0, "a plant spawn with atk must not price at zero");
     }
 
+    // E37 (spec-projectile-control.md §2c, criterion 1/2): the same fix, for the third and last spawn
+    // kind. Before this module, "kind=plant|zombie" left bullets with neither hp nor atk honoured, so
+    // CostFunction.SpawnBody's `hp == 0 && atk == 0` guard priced every bullet spawn at exactly zero —
+    // the module's own stated "spawn-prices-at-zero defect" for the kind it names in its objective.
+    [Fact]
+    public void A_bullet_spawn_with_atk_prices_non_zero()
+    {
+        var priced = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"bullet","typeId":0,"atk":{"min":500,"max":500}}""", "atom.bullet-spawn",
+            """{"trigger":"OnDeath"}"""));
+
+        Assert.True(priced.Ok, priced.Verdict.Reason);
+        Assert.True(priced.Power.Total > 0, "a bullet spawn with atk must not price at zero");
+    }
+
+    // The other half of criterion 2, verified against the REAL formula rather than assumed: a spawn.
+    // entity atom always carries a small base kind-price (CostFunction.MeanMagnitude's own documented
+    // "no magnitude at all -- one reference unit, so it prices as 'one of whatever this kind does'"
+    // fallback, since count/typeId/row/col are Int-kind, not Value-kind), so an empty-body bullet spawn
+    // does NOT price at a literal zero total -- confirmed here, not merely asserted. What SpawnBody's
+    // `hp == 0 && atk == 0` guard actually zeroes is its OWN contribution, which is what makes a body
+    // (§2c: "priced from its own hp/atk") worth substantially more than an empty one. This is a stale-
+    // citation correction against this spec's own criterion-2 prose ("still prices zero") — found
+    // running this test, not assumed from the spec text.
+    [Fact]
+    public void A_bullet_spawn_with_neither_hp_nor_atk_prices_far_below_one_that_carries_a_body()
+    {
+        var empty = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"bullet","typeId":0}""", "atom.bullet-empty",
+            """{"trigger":"OnDeath"}"""));
+        var withBody = CostFunction.Price(Atom("spawn.entity",
+            """{"kind":"bullet","typeId":0,"atk":{"min":500,"max":500}}""", "atom.bullet-body",
+            """{"trigger":"OnDeath"}"""));
+
+        Assert.True(empty.Ok, empty.Verdict.Reason);
+        Assert.True(withBody.Ok, withBody.Verdict.Reason);
+        Assert.True(empty.Power.Total < withBody.Power.Total,
+            $"empty-body ({empty.Power.Total}) must price well below a real body ({withBody.Power.Total})");
+    }
+
     [Fact]
     public void Two_bodies_are_worth_twice_one()
     {

@@ -2,6 +2,7 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Intel;
 using FusionRpg.Core.World.Loam;
+using FusionRpg.Core.World.Movement;
 using FusionRpg.Core.World.Topology;
 using FusionRpg.Core.World.Turn;
 using FusionRpg.Data;
@@ -33,7 +34,7 @@ public static class WorldEndpoints
         // Takes a viewer and refuses an unknown one rather than quietly falling back to omniscience.
         // Not the *only* place fog reaches the wire — the turn report projects its entries and its
         // commands the same way — but this is the one a map view polls.
-        g.MapGet("/{worldId}/state", (string worldId, string? asFaction, bool? lifelines, RpgStore store) =>
+        g.MapGet("/{worldId}/state", (string worldId, string? asFaction, bool? lifelines, string? forLegion, RpgStore store) =>
         {
             var world = store.LoadWorldState(worldId);
             if (world is null) return Results.NotFound();
@@ -50,7 +51,42 @@ public static class WorldEndpoints
             // at the size world-generator will produce, on an endpoint a map view polls.
             var topology = lifelines == true ? Lifelines(world, viewer) : NoLifelines;
 
-            return Results.Ok(Project(world, new BelievedWorldView(world, viewer), topology));
+            var believedView = new BelievedWorldView(world, viewer);
+
+            // world-stage W26: a new read, not the `ListLoggedWorldCommands` call `/turn/{turn}`
+            // already makes — that one answers "what happened", this route answers "what will
+            // happen", and it needs this viewer's own pending order for the open turn to predict the
+            // same release `LoamPhases.Pressure` (W25) will actually pick.
+            var pendingCede = store.ListWorldCommands(worldId, world.CurrentTurn)
+                .Where(c => c.Kind == WorldCommandKinds.Cede && c.SectorId != null
+                    && string.Equals(c.CommanderId, viewer, StringComparison.Ordinal))
+                .Select(c => c.SectorId)
+                .LastOrDefault();
+
+            var state = Project(world, believedView, topology, pendingCede);
+
+            // world-stage W9 (re-homed from `world-targeting`): the route preview needs a lane's
+            // march cost for the legion the player is planning with, and `LaneCost.For` needs the
+            // legion's banner element plus a climate lookup neither TypeScript nor a plain field can
+            // supply. Opt-in like `lifelines` above — empty when no legion is named or it is not
+            // this viewer's own (§0.13 forbids deriving a curve client-side, but there is nothing to
+            // derive for a legion nobody selected).
+            if (!string.IsNullOrWhiteSpace(forLegion))
+            {
+                var legion = believedView.OwnForces
+                    .FirstOrDefault(e => string.Equals(e.EntityId, forLegion, StringComparison.Ordinal));
+                if (legion is not null)
+                {
+                    var banner = BannerElement.Of(legion);
+                    var costs = believedView.Lanes.ToDictionary(
+                        l => l.LaneId,
+                        l => LaneCost.For(l, banner, sectorId => believedView.Believed(sectorId)?.Climate),
+                        StringComparer.Ordinal);
+                    state = state with { MarchCosts = costs };
+                }
+            }
+
+            return Results.Ok(state);
         });
 
         g.MapPost("/{worldId}/commands", (string worldId, SubmitWorldCommandsRequest body, RpgStore store) =>
@@ -78,7 +114,9 @@ public static class WorldEndpoints
                 SectorId = c.SectorId,
                 SlotIndex = c.SlotIndex,
                 Stance = c.Stance,
-                LanePath = c.LanePath ?? new List<string>()
+                LanePath = c.LanePath ?? new List<string>(),
+                Amount = c.Amount,
+                StructureId = c.StructureId
             }).ToList();
 
             // One pass over the batch — the store reads the world once and owns which turn is open.
@@ -142,6 +180,13 @@ public static class WorldEndpoints
         // `?asFaction=` already hands any caller any faction's view, and this is a single-player
         // game with a trusted client — it is a *rendering* rule: by default you are shown your own
         // war, and auditing somebody else's is a thing you ask for on purpose.
+        //
+        // Fog on an old turn's report is filtered by W-F1 (spec-world-wire.md §2, `VisibleTo` below)
+        // — but `believed` here is built from the world's *current* state (`BelievedWorldView`
+        // reads live intel, not a snapshot pinned to `turn`), so a sector scouted only after this
+        // turn was played can retroactively surface a battle line from before that scouting
+        // happened. Stated rather than hidden: this errs toward showing a viewer more than they knew
+        // at the time, never less — the direction W-F1 itself already prefers when it must be wrong.
         g.MapGet("/{worldId}/turn/{turn:int}", (string worldId, int turn, string? asFaction, RpgStore store) =>
         {
             var log = store.GetWorldTurnLog(worldId, turn);
@@ -172,7 +217,7 @@ public static class WorldEndpoints
                 // filtering is on the structured `SectorId` rather than on the prose — matching a
                 // sector name out of a sentence works until somebody writes a different sentence.
                 Entries = report?.Entries
-                    .Where(e => VisibleTo(e.SectorId, believed))
+                    .Where(e => VisibleTo(e, viewer, believed))
                     .Select(e => new WorldTurnEntryDto
                     {
                         Phase = e.Phase, Kind = e.Kind, Subject = e.Subject,
@@ -182,6 +227,13 @@ public static class WorldEndpoints
 
                 // Read from the command log rather than the report, so a trimmed turn still says
                 // what everyone was trying to do — and why, where an AI was the one trying.
+                // world-stage W18 (arbitration §C, §8.3): `Reason` for another commander's own
+                // order is one of the two channels §8c.3 wants closed alongside the fog fix — an
+                // ordinary client never gets it; `FUSIONRPG_SIM=1` (`SimFlags.Enabled`) is the same
+                // developer gate `/api/test/*` already uses. Owner decision on granularity was left
+                // to this task with a stated fallback ("drop Reason, keep the entry" — the cheaper
+                // reading) for when no answer comes in time; no answer came, so that is what shipped.
+                // The viewer's own commands always keep their own Reason, gate or no gate.
                 Commands = store.ListLoggedWorldCommands(worldId, turn)
                     .Where(l => VisibleTo(l.Command, viewer, believed))
                     .Select(l => new WorldTurnCommandDto
@@ -191,11 +243,60 @@ public static class WorldEndpoints
                         Kind = l.Command.Kind,
                         EntityId = l.Command.EntityId,
                         SectorId = l.Command.SectorId,
-                        Reason = l.Reason
+                        Reason = SimFlags.Enabled || string.Equals(l.Command.CommanderId, viewer, StringComparison.Ordinal)
+                            ? l.Reason
+                            : null
                     })
                     .ToList()
             });
         });
+
+        // world-stage W17: rules, not state — no world id, no viewer, no fog. `StructureCatalog`,
+        // `SlotTypeCatalog`, `StrengthBandCatalog` and `LaneTypeCatalog` are all public Core catalogs
+        // with no HTTP caller today, so a UI cannot learn what is buildable, what a slot letter
+        // means, or what a strength band is worth.
+        g.MapGet("/catalog", () => Results.Ok(new WorldCatalogDto
+        {
+            Structures = StructureCatalog.All.Select(s => new WorldStructureDto
+            {
+                StructureId = s.StructureId,
+                Name = s.Name,
+                Kind = s.Kind.ToString(),
+                RequiredSlotKind = s.RequiredSlotKind.ToString(),
+                Cost = s.CostMilli,
+                YieldMultiplierMilli = s.YieldMultiplierMilli,
+                BuildTurns = s.BuildTurns,
+                CapacityBonus = s.CapacityBonus
+            }).ToList(),
+            SlotTypes = SlotTypeCatalog.All.Select(s => new WorldSlotTypeDto
+            {
+                SlotTypeId = s.SlotTypeId,
+                Name = s.Name,
+                Kind = s.Kind.ToString(),
+                Buildable = s.Buildable,
+                Yields = s.Yields
+            }).ToList(),
+            StrengthBands = StrengthBandCatalog.All.Select(b => new WorldStrengthBandDto
+            {
+                Index = b.Index,
+                Name = b.Name,
+                Floor = b.Floor,
+                Ceiling = b.Ceiling,
+                Midpoint = b.Midpoint
+            }).ToList(),
+            LaneTypes = LaneTypeCatalog.All.Select(l => new WorldLaneTypeDto
+            {
+                LaneTypeId = l.LaneTypeId,
+                Name = l.Name,
+                CostMultiplierMilli = l.CostMultiplierMilli,
+                CarriesSupply = l.CarriesSupply,
+                CarriesPressure = l.CarriesPressure,
+                OneWay = l.OneWay,
+                Gated = l.Gated,
+                Ley = l.Ley
+            }).ToList(),
+            WaystationRangeHops = LoamPolicy.WaystationRangeHops
+        }));
     }
 
     /// <summary>
@@ -207,16 +308,46 @@ public static class WorldEndpoints
     ///
     /// </summary>
     /// <summary>
-    /// Whether one report line belongs in this viewer's account of the turn.
+    /// Whether one report line belongs in this viewer's account of the turn — W-F1
+    /// (spec-world-wire.md §2, world-stage W14, fog defect C), read as three named rules rather than
+    /// one boolean expression, because the decision behind each is the thing a future reader needs
+    /// to find:
     ///
-    /// A line about nowhere in particular — a calendar tick, a command refused before it named any
-    /// ground — is shown to everyone, because it reveals nothing about the map.
+    /// 1. Audience. A faction-scoped economy line has no sector and never did; it belongs to its
+    ///    owner, not to everyone.
+    /// 2. Live sight, for a dynamic fact. Battles, marches, halts, arrivals — only shown while this
+    ///    viewer is actually watching the ground right now (`StateOf(sectorId) == Watched`).
+    /// 3. Remembered sight, for a static fact. A claim, ownership changing — shown on any ground
+    ///    this viewer has ever seen (`Believed(sectorId) is not null`), Civ VI's own rule.
+    ///
+    /// A line with no `Audience` and no `SectorId` reaches nobody through this rule — the same lines
+    /// W12 stopped emitting that way in the first place (a calendar tick, or a command refused
+    /// before it named ground, take the entirely separate "shown to everyone" path their own
+    /// projection already gives them; this filter is reached only by entries that carry ground or an
+    /// audience to begin with).
     /// </summary>
-    static bool VisibleTo(string? sectorId, BelievedWorldView? believed)
+    static bool VisibleTo(TurnReportEntry e, string? viewer, BelievedWorldView? believed)
     {
-        if (believed is null || sectorId is null) return true;
-        return believed.Believed(sectorId) is not null;
+        if (believed is null || viewer is null) return true; // SIM / no viewer
+        if (e.Audience is { } audience) return string.Equals(audience, viewer, StringComparison.Ordinal);
+        if (e.SectorId is not { } sectorId) return false; // W-F1: no audience, no ground
+        return IsStaticFact(e.Kind, e.Detail)
+            ? believed.Believed(sectorId) is not null
+            : believed.StateOf(sectorId) == IntelState.Watched;
     }
+
+    /// <summary>
+    /// The closed, named list W-F1 requires — never a prefix guess on free text beyond this. Add a
+    /// detail token here only when it names a fact that stays true once you look away: a claim, or a
+    /// sector's ownership/phase actually changing. Everything else defaults to dynamic — the safer
+    /// direction to be wrong in, since a dynamic fact treated as static would leak stale information
+    /// as if it were still happening.
+    /// </summary>
+    static readonly string[] StaticFactDetailPrefixes = { "claim.", "loam.lost:" };
+
+    static bool IsStaticFact(string kind, string detail) =>
+        kind == TurnReportKinds.Event
+        && StaticFactDetailPrefixes.Any(prefix => detail.StartsWith(prefix, StringComparison.Ordinal));
 
     static bool VisibleTo(WorldCommand command, string? viewer, BelievedWorldView? believed)
     {
@@ -282,6 +413,7 @@ public static class WorldEndpoints
         // per-field ownership check that could be forgotten on the next field added here.
         var production = loam.ProductionBySector.TryGetValue(sector.SectorId, out var p) ? p : 0;
         var upkeep = loam.UpkeepBySector.TryGetValue(sector.SectorId, out var u) ? u : 0;
+        var upkeepBreakdown = loam.UpkeepBreakdownBySector.TryGetValue(sector.SectorId, out var ub) ? ub : default;
         var stock = loam.StockBySector.TryGetValue(sector.SectorId, out var st) ? st : 0;
         var componentId = loam.ComponentIdBySector.TryGetValue(sector.SectorId, out var cid) ? cid : null;
         var componentTotals = componentId is not null && loam.ComponentTotals.TryGetValue(componentId, out var totals)
@@ -301,14 +433,40 @@ public static class WorldEndpoints
             Phase = believed.Phase.ToString(),
             OwnerFactionId = believed.OwnerFactionId,
 
-            // Pressure and depletion stay zero: nobody glances at a sector and reads its depletion
-            // off, and until something models observing them there is nothing honest to send.
-            // Stability is owner-only (spec-loam-fe.md) and read from truth directly, the same
-            // pattern `LifelineCost` already uses for an owner-only number computed over the
-            // viewer's own holdings.
+            // Stability, pressure, the warden binding, neglect and effective capacity are all
+            // owner-only and read from truth directly — the same pattern `LifelineCost` already
+            // uses for an owner-only number computed over the viewer's own holdings.
+            //
+            // world-stage W6: `PressureMilli` used to stay zero on the reasoning that "nobody
+            // glances at a sector and reads its depletion off" — written before fade contagion
+            // existed. It is now real, live state written every turn by `LoamPhases.NextPressure`
+            // (`LoamPhases.cs:266-283`), so the old comment contradicted the code beneath it.
+            // `DepletionMilli` stays zero — nothing in Core writes it; it remains a real gap, not a
+            // wiring one, and is left alone here rather than invented.
             StabilityMilli = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
                 ? sector.StabilityMilli
                 : 0,
+            PressureMilli = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.PressureMilli
+                : 0,
+            WardenBindingId = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.WardenBindingId
+                : null,
+            NeglectedTurns = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.NeglectedTurns
+                : 0,
+            LoamCapacity = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? LoamPhases.EffectiveCapacity(sector)
+                : 0,
+            RecruitStock = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.RecruitStock
+                : 0,
+            ProjectId = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.ProjectId
+                : null,
+            ProjectTurnsRemaining = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                ? sector.ProjectTurnsRemaining
+                : null,
             Intel = state.ToString(),
             IntelAge = view.AgeOf(sector.SectorId),
             LastSeenTurn = believed.LastSeenTurn,
@@ -321,9 +479,17 @@ public static class WorldEndpoints
                 SlotTypeId = sl.SlotTypeId,
                 Element = sl.Element?.ToString(),
                 State = sl.State.ToString(),
+                // Truth-gated, not belief-gated (spec-world-wire.md §1's "cheap resolution"):
+                // `RememberedSlot` has no `OwnerFactionId` of its own, so this reads the live
+                // `WorldSlot` for the same index and gates it exactly like `StabilityMilli`
+                // (world-stage W7) — present only on ground this viewer owns.
+                OwnerFactionId = string.Equals(sector.OwnerFactionId, view.FactionId, StringComparison.Ordinal)
+                    ? sector.Slots.FirstOrDefault(truthSlot => truthSlot.SlotIndex == sl.SlotIndex)?.OwnerFactionId
+                    : null,
                 GuardWaveId = sl.GuardWaveId,
                 GuardState = sl.GuardState.ToString(),
-                StructureId = sl.StructureId
+                StructureId = sl.StructureId,
+                ConstructionTurnsRemaining = sl.ConstructionTurnsRemaining
             }).ToList(),
 
             LifelineCost = lifelines.Cost.TryGetValue(sector.SectorId, out var cost) ? cost : 0,
@@ -331,6 +497,15 @@ public static class WorldEndpoints
 
             LoamProduction = production,
             LoamUpkeep = upkeep,
+            UpkeepBreakdown = new LoamUpkeepBreakdownDto
+            {
+                Base = upkeepBreakdown.Base,
+                Garrison = upkeepBreakdown.Garrison,
+                Development = upkeepBreakdown.Development,
+                Danger = upkeepBreakdown.Danger,
+                IntensityMilli = upkeepBreakdown.IntensityMilli,
+                HandicapMilli = upkeepBreakdown.HandicapMilli
+            },
             LoamNet = production - upkeep,
             ComponentId = componentId,
             ComponentProduction = componentTotals.Production,
@@ -405,6 +580,7 @@ public static class WorldEndpoints
         IReadOnlyDictionary<string, string> ComponentIdBySector,
         IReadOnlyDictionary<string, long> ProductionBySector,
         IReadOnlyDictionary<string, long> UpkeepBySector,
+        IReadOnlyDictionary<string, LoamUpkeepBreakdown> UpkeepBreakdownBySector,
         IReadOnlyDictionary<string, long> StockBySector,
         IReadOnlyDictionary<string, (long Production, long Upkeep, long Stock)> ComponentTotals,
         IReadOnlySet<string> ReleaseCandidates);
@@ -413,15 +589,17 @@ public static class WorldEndpoints
         new Dictionary<string, string>(StringComparer.Ordinal),
         new Dictionary<string, long>(StringComparer.Ordinal),
         new Dictionary<string, long>(StringComparer.Ordinal),
+        new Dictionary<string, LoamUpkeepBreakdown>(StringComparer.Ordinal),
         new Dictionary<string, long>(StringComparer.Ordinal),
         new Dictionary<string, (long, long, long)>(StringComparer.Ordinal),
         new HashSet<string>(StringComparer.Ordinal));
 
-    static LoamReading ComputeLoamReading(WorldState world, string factionId)
+    static LoamReading ComputeLoamReading(WorldState world, string factionId, string? ceded = null)
     {
         var componentIdBySector = new Dictionary<string, string>(StringComparer.Ordinal);
         var productionBySector = new Dictionary<string, long>(StringComparer.Ordinal);
         var upkeepBySector = new Dictionary<string, long>(StringComparer.Ordinal);
+        var upkeepBreakdownBySector = new Dictionary<string, LoamUpkeepBreakdown>(StringComparer.Ordinal);
         var stockBySector = new Dictionary<string, long>(StringComparer.Ordinal);
         var componentTotals = new Dictionary<string, (long, long, long)>(StringComparer.Ordinal);
         var releaseCandidates = new HashSet<string>(StringComparer.Ordinal);
@@ -435,11 +613,13 @@ public static class WorldEndpoints
             {
                 var sector = world.Sectors.First(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal));
                 var production = LoamProduction.For(sector);
-                var upkeep = LoamUpkeep.For(world, sector);
+                var upkeepBreakdown = LoamUpkeep.BreakdownFor(world, sector);
+                var upkeep = upkeepBreakdown.Total;
 
                 componentIdBySector[sectorId] = componentId;
                 productionBySector[sectorId] = production;
                 upkeepBySector[sectorId] = upkeep;
+                upkeepBreakdownBySector[sectorId] = upkeepBreakdown;
                 stockBySector[sectorId] = sector.LoamStock;
                 totalProduction += production;
                 totalUpkeep += upkeep;
@@ -452,25 +632,40 @@ public static class WorldEndpoints
             // static the engine's own Pressure phase uses to pick who takes the fade — reusing it
             // rather than re-deriving the selection is what keeps this from silently disagreeing
             // with what actually happens next turn.
-            var willRelease = LoamForecast.WillRelease(world, component);
+            var willRelease = LoamForecast.WillRelease(world, component, ceded);
             if (willRelease is not null)
                 releaseCandidates.Add(willRelease);
         }
 
-        return new LoamReading(componentIdBySector, productionBySector, upkeepBySector, stockBySector, componentTotals, releaseCandidates);
+        return new LoamReading(componentIdBySector, productionBySector, upkeepBySector, upkeepBreakdownBySector, stockBySector, componentTotals, releaseCandidates);
     }
 
     static WorldStateDto Project(
         WorldState w, IWorldView view,
-        (IReadOnlyDictionary<string, long> Cost, IReadOnlySet<string> Critical) lifelines)
+        (IReadOnlyDictionary<string, long> Cost, IReadOnlySet<string> Critical) lifelines,
+        string? ceded = null)
     {
-        var loam = ComputeLoamReading(w, view.FactionId);
+        var loam = ComputeLoamReading(w, view.FactionId, ceded);
+        // world-stage W15: the current turn's roll only — never the seed, never a future roll.
+        var calendar = TurnCalendar.Roll(w.CurrentTurn, w.Seed);
 
         return new WorldStateDto
         {
             WorldId = w.WorldId,
             TemplateId = w.TemplateId,
             CurrentTurn = w.CurrentTurn,
+            Calendar = new WorldCalendarDto
+            {
+                DaysPerWeek = TurnCalendar.DaysPerWeek,
+                WeeksPerMonth = TurnCalendar.WeeksPerMonth,
+                WeekBoundary = calendar.WeekBoundary,
+                MonthBoundary = calendar.MonthBoundary,
+                SpecialWeek = calendar.SpecialWeek,
+                SpecialMonth = calendar.SpecialMonth,
+                Plague = calendar.Plague
+            },
+            // world-stage W16: separate from `Sectors[].Intel` on purpose — never merged in.
+            ProspectedSectorIds = Prospecting.Reveal(w, view.FactionId).OrderBy(id => id, StringComparer.Ordinal).ToList(),
             Factions = w.Factions.Select(f => new WorldFactionDto
             {
                 FactionId = f.FactionId,
@@ -488,6 +683,7 @@ public static class WorldEndpoints
             Width = l.Width,
             HazardMilli = l.HazardMilli,
             WardLevel = l.WardLevel,
+            GateKeyId = l.GateKeyId,
             State = l.State.ToString()
         }).ToList(),
         Entities = view.OwnForces.Select(e => new WorldEntityDto
@@ -508,8 +704,14 @@ public static class WorldEndpoints
                 SpeciesId = m.SpeciesId,
                 Level = m.Level,
                 Hp = m.Hp,
-                Wounds = m.Wounds
-            }).ToList()
+                Wounds = m.Wounds,
+                Role = m.Role.ToString()
+            }).ToList(),
+            DisplayName = EntityNaming.DisplayName(w, e),
+            CarriedLoam = e.CarriedLoam,
+            Capacity = LegionSupply.Capacity(e),
+            Burn = LegionSupply.Burn(e),
+            Runway = LegionSupply.TurnsUntilExhausted(e)
         }).ToList()
         };
     }

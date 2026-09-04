@@ -93,11 +93,16 @@ def test_a_number_nested_inside_an_array_of_objects_is_still_found():
 
 def test_an_enum_of_numbers_is_allowed_because_choosing_is_not_inventing():
     """A closed set of legal values is a vocabulary. The rule is against derivation, not against
-    every appearance of a digit — over-refusing would push authors to encode numbers as strings."""
+    every appearance of a digit — over-refusing would push authors to encode numbers as strings.
+
+    Property named `grade`, not `tier` — 2026-09-04, `validate-heal` (A-S4) added a property-NAME
+    deny-list to `audit_schema` that fires on `tier` regardless of type/enum (spec-validate-heal.md
+    SS2 Stage 0), which is a real, separate rule from the one this test proves. `tier` was only ever
+    an incidental choice here; renaming it keeps this test proving what it says it proves."""
     defects = audit_schema({
         "type": "object",
         "properties": {
-            "tier": {"type": "integer", "enum": [1, 2, 3]},
+            "grade": {"type": "integer", "enum": [1, 2, 3]},
             BLOCKED_FIELD: {"type": "boolean"},
         },
     })

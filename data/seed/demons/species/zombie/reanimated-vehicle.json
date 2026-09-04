@@ -1,0 +1,78 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:30:26Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Agility",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "reanimated_vehicle"
+    ],
+    "gameTypeId": 18,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "grafted",
+    "reach": "short",
+    "reason": "The creature is a slow-moving vehicle with a single environmental dependency and no offensive capabilities described, making it a nuisance rather than a tyrant.",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "zombie",
+    "speciesId": "SuperDriver",
+    "targetPreference": "backline",
+    "traits": [
+      "cold_immunity",
+      "crushing_impact",
+      "ice_affinity"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "too-low"
+  }
+]

@@ -55,6 +55,31 @@ public static class EntityStatWriter
             if (y.AttackInterval > 0) p.thePlantAttackInterval = (float)y.AttackInterval;
             if (y.ProduceInterval > 0) p.thePlantProduceInterval = (float)y.ProduceInterval;
 
+            // E38 (spec-entity-fields-12plus.md): eight more plant fields, composed. Long
+            // magnitudes clamp to int only at this boundary, exactly like MaxHp/Hp above; none of
+            // these use the "zero baseline is absent" skip the two intervals above use — every one
+            // is captured from a genuine live field on the plant's own side (EntityApply.cs), so a
+            // composed zero is an ordinary value ("no shield right now"), never a missing stat, and
+            // is written unconditionally, the same as Hp/Atk.
+            p.theShieldHealth = ZombieCombatFields.ClampToInt32(y.PlantShield);
+            // attackCountdown/produceCountdown share the interval floor's structural reason (driven
+            // to zero or below is the same divide-by-zero / infinite-fire-rate risk) but compose
+            // unconditionally — see StatComposer.IntervalAlways's own doc comment.
+            p.thePlantAttackCountDown = (float)y.AttackCountdown;
+            p.thePlantProduceCountDown = (float)y.ProduceCountdown;
+            // Unguarded by design (§2b, decided 2026-09-03): an adder is a signed delta, so a
+            // negative value here is ordinary content, not a mistake. Never clamp this at write —
+            // see CheatState.BuildPlantAbsoluteReal's own note and
+            // EntityFields12PlusGuardTests.P_ATK_ADD_stays_unguarded_by_a_value_check.
+            p.attackSpeedAdder = (float)y.AttackSpeedAdder;
+            // plantSpeed/moveSpeed mirror zombieSpeed's own shape: most plants never move, so a
+            // zero composed result genuinely means "this plant has no such stat" and the field is
+            // left alone, exactly like the two intervals above.
+            if (y.PlantSpeed > 0) p.thePlantSpeed = (float)y.PlantSpeed;
+            if (y.PlantMoveSpeed > 0) p.moveSpeed = (float)y.PlantMoveSpeed;
+            p.theLevel = ZombieCombatFields.ClampToInt32(y.PlantLevel);
+            p.shootingLevel = ZombieCombatFields.ClampToInt32(y.ShootingLevel);
+
             try { p.UpdateText(); } catch { }
 
             Remember(p.Pointer, p.thePlantHealth, p.thePlantMaxHealth, p.attackDamage, source);
@@ -84,6 +109,16 @@ public static class EntityStatWriter
             if (y.Arm2 > 0) z.theSecondArmorHealth = ZombieCombatFields.ClampToInt32(y.Arm2);
             z.theAttackDamage = ZombieCombatFields.ClampToInt32(Math.Max(1L, y.Atk));
             if (y.ZombieSpeed > 0) z.uniqueSpeed = (float)y.ZombieSpeed;
+
+            // E38 (spec-entity-fields-12plus.md): four more zombie fields, composed — same
+            // unconditional-write rule as the plant half above (every one captured from a genuine
+            // live field on the zombie's own side, so a composed zero is ordinary, not absent).
+            z.theArmor = (float)y.ArmorFlat;
+            z.takeDmgMultiplier = (float)y.TakeDmgMultiplier;
+            // theSpeed/theOriginSpeed mirror uniqueSpeed's own shape immediately above.
+            if (y.ZombieSpeedCurrent > 0) z.theSpeed = (float)y.ZombieSpeedCurrent;
+            if (y.ZombieOriginSpeed > 0) z.theOriginSpeed = (float)y.ZombieOriginSpeed;
+
             try { z.UpdateHealthText(); } catch { }
 
             Remember(z.Pointer, ZombieCombatFields.GetHp(z), ZombieCombatFields.GetMaxHp(z), z.theAttackDamage, source);
@@ -99,29 +134,15 @@ public static class EntityStatWriter
         if (p == null) return;
         try
         {
-            if (CheatState.IsUserSet("P-SHIELD") && CheatState.IVal("P-SHIELD") >= 0)
-                p.theShieldHealth = CheatState.IVal("P-SHIELD");
-            // The two interval keys moved to the composed path (E16) and are deliberately absent
-            // here. Writing them in both places would fight the composer, last-write-wins and
-            // spawn-order dependent, so the same board could settle differently twice. They arrive
-            // as Override modifiers now — see CheatState.BuildPlantAbsoluteReal.
+            // E16's two interval keys AND E38's eight plant keys (spec-entity-fields-12plus.md) all
+            // moved to the composed path and are deliberately absent here. Writing them in both
+            // places would fight the composer, last-write-wins and spawn-order dependent, so the
+            // same board could settle differently twice. They arrive as Override modifiers now —
+            // see CheatState.BuildPlantAbsoluteReal. P-SHIELD, P-ATK-CD, P-ATK-ADD, P-PROD-CD,
+            // P-SPEED, P-MOVE, P-LEVEL and P-SHOOTLVL used to be written here directly.
             //
-            // The guard that keeps them gone reads THIS FILE as text, so do not write the field
-            // assignment in a comment either; it cannot tell one from code.
-            if (CheatState.IsUserSet("P-ATK-CD") && CheatState.FVal("P-ATK-CD") >= 0)
-                p.thePlantAttackCountDown = CheatState.FVal("P-ATK-CD");
-            if (CheatState.IsUserSet("P-ATK-ADD"))
-                p.attackSpeedAdder = CheatState.FVal("P-ATK-ADD");
-            if (CheatState.IsUserSet("P-PROD-CD") && CheatState.FVal("P-PROD-CD") >= 0)
-                p.thePlantProduceCountDown = CheatState.FVal("P-PROD-CD");
-            if (CheatState.IsUserSet("P-SPEED") && CheatState.FVal("P-SPEED") > 0)
-                p.thePlantSpeed = CheatState.FVal("P-SPEED");
-            if (CheatState.IsUserSet("P-MOVE") && CheatState.FVal("P-MOVE") > 0)
-                p.moveSpeed = CheatState.FVal("P-MOVE");
-            if (CheatState.IsUserSet("P-LEVEL") && CheatState.IVal("P-LEVEL") >= 0)
-                p.theLevel = CheatState.IVal("P-LEVEL");
-            if (CheatState.IsUserSet("P-SHOOTLVL") && CheatState.IVal("P-SHOOTLVL") >= 0)
-                p.shootingLevel = CheatState.IVal("P-SHOOTLVL");
+            // The guard that keeps them gone reads THIS FILE as text, so do not write any of their
+            // field assignments in a comment either; it cannot tell one from code.
             if (CheatState.On("P-MOD-HP"))
                 try { p.ModifyHealth(0, p.thePlantMaxHealth); } catch { }
             if (CheatState.On("P-MOD-ATK"))
@@ -136,16 +157,9 @@ public static class EntityStatWriter
         if (z == null) return;
         try
         {
-            if (CheatState.IsUserSet("Z-ARMOR-F") && CheatState.FVal("Z-ARMOR-F") >= 0)
-                z.theArmor = CheatState.FVal("Z-ARMOR-F");
-            if (CheatState.IsUserSet("Z-TAKEMULT") && CheatState.FVal("Z-TAKEMULT") >= 0)
-                z.takeDmgMultiplier = CheatState.FVal("Z-TAKEMULT");
-            // The unique-speed key moved to the composed path (E16) — see the note in
-            // WritePlantExtras, including why it is not quoted here.
-            if (CheatState.IsUserSet("Z-SPD") && CheatState.FVal("Z-SPD") > 0)
-                z.theSpeed = CheatState.FVal("Z-SPD");
-            if (CheatState.IsUserSet("Z-SPD-O") && CheatState.FVal("Z-SPD-O") > 0)
-                z.theOriginSpeed = CheatState.FVal("Z-SPD-O");
+            // The unique-speed key (E16) AND E38's four zombie keys (Z-ARMOR-F, Z-TAKEMULT, Z-SPD,
+            // Z-SPD-O — spec-entity-fields-12plus.md) all moved to the composed path — see the note
+            // in WritePlantExtras, including why they are not quoted here either.
             if (CheatState.IsUserSet("Z-SLOW-FREEZE") && CheatState.FVal("Z-SLOW-FREEZE") >= 0)
                 try { z.freezeSpeed = CheatState.FVal("Z-SLOW-FREEZE"); } catch { }
             if (CheatState.IsUserSet("Z-SLOW-COLD") && CheatState.FVal("Z-SLOW-COLD") >= 0)

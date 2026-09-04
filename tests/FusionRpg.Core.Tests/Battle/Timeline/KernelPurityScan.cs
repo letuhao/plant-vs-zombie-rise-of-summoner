@@ -132,6 +132,16 @@ static class KernelPurityScan
                     if (code.Contains(token, StringComparison.Ordinal))
                         offences.Add($"{name}:{i + 1} → {token}");
 
+                // B31 — the hole this scan had until 2026-09-04. Every token above catches a
+                // DECLARATION ("float ", "double "), a CAST ("(float)") or a TYPE ARGUMENT
+                // ("<double>"). None of them catches a floating-point LITERAL, so `var x = 1.5f;`
+                // introduced a non-deterministic value into the kernel while the guard stayed green
+                // — verified by planting exactly that line and watching the scan say nothing about
+                // it while it flagged a `Stopwatch` on the next line. `var` is not exotic; it is the
+                // default way this codebase declares locals.
+                if (HasFloatLiteral(code))
+                    offences.Add($"{name}:{i + 1} → floating-point literal");
+
                 if (tickPathExempt) continue;
                 foreach (var token in BannedOnTickPath)
                     if (ContainsRealCall(code, token))
@@ -204,6 +214,62 @@ static class KernelPurityScan
         }
 
         return false;
+    }
+
+    /// <summary>
+    /// Matches a floating-point LITERAL: `1.5`, `1.5f`, `.5f`, `1e5`, `100m`, `0.016f`.
+    ///
+    /// <para>Deliberately does NOT match a plain integer (`5` is fine), a range operator
+    /// (`arr[1..5]` — the second dot defeats `\d+\.\d+`, and the lookbehind stops `.5` matching
+    /// there), a hex literal (`0x1F` — `1F` is preceded by a word character), or a `long` suffix
+    /// (`1_000L`). The trailing lookahead stops `1.5` inside an identifier or a member chain.</para>
+    /// </summary>
+    /// <summary>
+    /// <b>Scope, and why it is this and not "any float literal anywhere".</b> The hole B25 recorded
+    /// is precise: the ban list catches a DECLARATION (<c>"float "</c>, <c>"double "</c>), a CAST and a
+    /// type argument, and <c>var</c> defeats all three — <c>var x = 1.5f;</c> stored a floating-point
+    /// value with the guard green. So this matches a literal that is **directly assigned**: `=`
+    /// followed by optional sign and the literal.
+    ///
+    /// <para>It deliberately does NOT match a literal in ARGUMENT position (<c>new FixedStatusRng(0.0)</c>,
+    /// <c>BaseMagnitude: 1.0</c>). That is not an oversight and not a softening: the original token set
+    /// always permitted those, because the action and status layers interoperate with APIs whose
+    /// parameters are <c>double</c> and there is no way to call them otherwise. Widening the rule there
+    /// would be a policy change for two other programs, made silently by a guard fix — see the finding
+    /// recorded against `Actions/Cost/ExhaustionPolicy.cs` and `Actions/Defence/StanceRuntime.cs`.</para>
+    ///
+    /// <para><c>==</c>, <c>!=</c>, <c>&lt;=</c>, <c>&gt;=</c> and <c>=&gt;</c> are excluded so a
+    /// comparison or a lambda is not mistaken for an assignment.</para>
+    /// </summary>
+    const string FloatLiteralCore =
+        @"(?:\d+\.\d+(?:[eE][+-]?\d+)?[fFdDmM]?|\d+[eE][+-]?\d+[fFdDmM]?|\d+[fFdDmM])";
+
+    static readonly System.Text.RegularExpressions.Regex FloatLiteral = new(
+        @"(?<![=!<>])=\s*(?!>)-?\s*(?<![\w.])" + FloatLiteralCore + @"(?![\w.])",
+        System.Text.RegularExpressions.RegexOptions.Compiled);
+
+    /// <summary>
+    /// String CONTENTS are blanked before the literal check, and only for that check.
+    ///
+    /// <para><see cref="StripComment"/> deliberately keeps string literals, because a banned call
+    /// can hide behind one. But a numeric literal inside a string is data, not arithmetic — an
+    /// exception message reading "expected 1.5" is not a determinism hazard, and flagging it is
+    /// exactly the cry-wolf failure <see cref="SafeReceivers"/> already exists to avoid. Every other
+    /// rule keeps seeing the original line, so this changes nothing they detect.</para>
+    /// </summary>
+    static bool HasFloatLiteral(string code)
+    {
+        var sb = new System.Text.StringBuilder(code.Length);
+        var inString = false;
+        for (var i = 0; i < code.Length; i++)
+        {
+            var c = code[i];
+            if (inString && c == '\\') { i++; continue; }
+            if (c == '"') { inString = !inString; sb.Append(' '); continue; }
+            sb.Append(inString ? ' ' : c);
+        }
+
+        return FloatLiteral.IsMatch(sb.ToString());
     }
 
     /// <summary>

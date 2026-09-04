@@ -16,7 +16,7 @@ public class LoamUpkeepTests
     public void Baseline_intensity_and_handicap_cost_exactly_the_unmultiplied_sum()
     {
         var sum = UnmultipliedSum(garrisonMembers: 4, developmentLevel: 2, dangerBand: 1);
-        Assert.Equal(sum, LoamUpkeep.For(4, 2, 1, intensityMilli: 1000, handicapMilli: 1000));
+        Assert.Equal(sum, LoamUpkeep.For(4, 2, 1, intensityMilli: 1000, handicapMilli: 1000, seasonMilli: 1000));
     }
 
     [Fact]
@@ -24,15 +24,24 @@ public class LoamUpkeepTests
     {
         var sum = UnmultipliedSum(garrisonMembers: 4, developmentLevel: 2, dangerBand: 1);
 
-        Assert.Equal(sum / 2, LoamUpkeep.For(4, 2, 1, intensityMilli: 500, handicapMilli: 1000));
-        Assert.Equal(sum * 2, LoamUpkeep.For(4, 2, 1, intensityMilli: 2000, handicapMilli: 1000));
+        Assert.Equal(sum / 2, LoamUpkeep.For(4, 2, 1, intensityMilli: 500, handicapMilli: 1000, seasonMilli: 1000));
+        Assert.Equal(sum * 2, LoamUpkeep.For(4, 2, 1, intensityMilli: 2000, handicapMilli: 1000, seasonMilli: 1000));
     }
 
     [Fact]
     public void The_handicap_scales_the_same_way_intensity_does()
     {
         var sum = UnmultipliedSum(garrisonMembers: 0, developmentLevel: 0, dangerBand: 0);
-        Assert.Equal(sum / 2, LoamUpkeep.For(0, 0, 0, intensityMilli: 1000, handicapMilli: 500));
+        Assert.Equal(sum / 2, LoamUpkeep.For(0, 0, 0, intensityMilli: 1000, handicapMilli: 500, seasonMilli: 1000));
+    }
+
+    /// <summary>world-map W48: the season term scales the same way intensity/handicap do, at identity elsewhere.</summary>
+    [Fact]
+    public void The_season_scales_the_same_way_intensity_and_handicap_do()
+    {
+        var sum = UnmultipliedSum(garrisonMembers: 0, developmentLevel: 0, dangerBand: 0);
+        Assert.Equal(sum / 2, LoamUpkeep.For(0, 0, 0, intensityMilli: 1000, handicapMilli: 1000, seasonMilli: 500));
+        Assert.Equal(sum * 2, LoamUpkeep.For(0, 0, 0, intensityMilli: 1000, handicapMilli: 1000, seasonMilli: 2000));
     }
 
     [Fact]
@@ -41,29 +50,48 @@ public class LoamUpkeepTests
         // Round inputs (500/1000/2000/3000, handicap 1000) cannot tell "multiply everything, divide
         // once" apart from "divide by each multiplier's 1000 separately" — the intermediate
         // truncation happens to land on the same floor either way. Deliberately ugly numbers make
-        // the two shapes diverge: 16×333×777 ÷ 1,000,000 = 4, but ÷1000 then ×777÷1000 = 3.
+        // the two shapes diverge: 3×333×777×444 ÷ 1e9 = 0 (integer floor), but dividing per-factor
+        // along the way would round the intermediate steps up to a nonzero total.
         var sum = UnmultipliedSum(garrisonMembers: 3, developmentLevel: 0, dangerBand: 0);
-        var singleDivision = sum * 333 * 777 / 1_000_000;
+        var singleDivision = sum * 333 * 777 * 444 / 1_000_000_000;
 
-        Assert.Equal(singleDivision, LoamUpkeep.For(3, 0, 0, intensityMilli: 333, handicapMilli: 777));
+        Assert.Equal(singleDivision, LoamUpkeep.For(3, 0, 0, intensityMilli: 333, handicapMilli: 777, seasonMilli: 444));
     }
 
     [Fact]
     public void No_overflow_at_the_largest_legal_intensity_and_handicap()
     {
-        // A sum large enough that, as an `int` multiplied by the two ceilings before any division,
+        // A sum large enough that, as an `int` multiplied by the three ceilings before any division,
         // would already have wrapped past int.MaxValue (~2.147e9) — the bug this module's `long`
-        // quantities exist to remove as a class rather than patch as an instance.
+        // quantities exist to remove as a class rather than patch as an instance. Season's own
+        // ceiling is not a `WorldValidation` rule (no rule bounds it, unlike intensity/handicap),
+        // so a generous but plausible balance-pass value (3000, matching `MaxIntensityMilli`'s own
+        // ceiling reasoning) stands in for "the top of its legal range" here.
         const int hugeSum = 1_000_000;
+        const int seasonCeiling = 3000;
         var upkeep = LoamUpkeep.For(
             garrisonMembers: hugeSum, developmentLevel: 0, dangerBand: 0,
-            intensityMilli: WorldValidation.MaxIntensityMilli, handicapMilli: WorldValidation.MaxHandicapMilli);
+            intensityMilli: WorldValidation.MaxIntensityMilli, handicapMilli: WorldValidation.MaxHandicapMilli,
+            seasonMilli: seasonCeiling);
 
         var expectedSum = UnmultipliedSum(hugeSum, 0, 0);
-        var expected = expectedSum * WorldValidation.MaxIntensityMilli * WorldValidation.MaxHandicapMilli / 1_000_000;
+        var expected = expectedSum * WorldValidation.MaxIntensityMilli * WorldValidation.MaxHandicapMilli * seasonCeiling / 1_000_000_000;
 
         Assert.True(upkeep > 0, "upkeep silently wrapped negative at the legal maximum");
         Assert.Equal(expected, upkeep);
+    }
+
+    [Fact]
+    public void A_forced_overflow_throws_rather_than_wrapping()
+    {
+        // Pushes the four-factor product itself past long.MaxValue (~9.22e18) — not merely the
+        // pre-division numerator of the previous test, which stays comfortably inside range. This is
+        // the `checked` block's own reason to exist: AGENTS.md's overflow rule says silently
+        // wrapping into a negative or truncated upkeep is worse than crashing loudly.
+        Assert.Throws<OverflowException>(() => LoamUpkeep.For(
+            garrisonMembers: int.MaxValue, developmentLevel: int.MaxValue, dangerBand: int.MaxValue,
+            intensityMilli: WorldValidation.MaxIntensityMilli, handicapMilli: WorldValidation.MaxHandicapMilli,
+            seasonMilli: 3000));
     }
 
     [Fact]
@@ -140,7 +168,7 @@ public class LoamUpkeepTests
         };
 
         var withGarrison = LoamUpkeep.For(world, garrisoned);
-        var withoutGarrison = LoamUpkeep.For(0, garrisoned.DevelopmentLevel, garrisoned.DangerBand, garrisoned.FractureIntensityMilli, 1000);
+        var withoutGarrison = LoamUpkeep.For(0, garrisoned.DevelopmentLevel, garrisoned.DangerBand, garrisoned.FractureIntensityMilli, 1000, 1000);
 
         Assert.Equal(withoutGarrison + 2 * LoamPolicy.GarrisonUpkeepPerMember, withGarrison);
     }
@@ -152,5 +180,79 @@ public class LoamUpkeepTests
         var world = WorldWith(only, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" });
 
         Assert.Equal(0, LoamUpkeep.For(world, only));
+    }
+
+    // world-stage W10 (re-homed from `world-numbers`): the breakdown must recombine to exactly the
+    // same total `For` already returns — the whole point of a decomposition is that it never drifts
+    // from the number it decomposes.
+
+    [Theory]
+    [InlineData(4, 2, 1, 1000, 1000, 1000)]
+    [InlineData(4, 2, 1, 500, 1000, 1000)]
+    [InlineData(4, 2, 1, 2000, 1000, 1000)]
+    [InlineData(0, 0, 0, 1000, 500, 1000)]
+    [InlineData(3, 0, 0, 333, 777, 444)]
+    public void The_row_breakdowns_operands_recombine_to_exactly_the_same_total_as_For(
+        int garrisonMembers, int developmentLevel, int dangerBand, int intensityMilli, int handicapMilli, int seasonMilli)
+    {
+        var breakdown = LoamUpkeep.Breakdown(garrisonMembers, developmentLevel, dangerBand, intensityMilli, handicapMilli, seasonMilli);
+        var expected = LoamUpkeep.For(garrisonMembers, developmentLevel, dangerBand, intensityMilli, handicapMilli, seasonMilli);
+
+        Assert.Equal(
+            LoamPolicy.BaseUpkeepPerSector
+            + (long)garrisonMembers * LoamPolicy.GarrisonUpkeepPerMember
+            + LoamPolicy.DevelopmentAndDangerUpkeep(developmentLevel, dangerBand),
+            breakdown.Sum);
+        Assert.Equal(expected, breakdown.Total);
+    }
+
+    [Fact]
+    public void The_truth_overloads_breakdown_recombines_to_exactly_the_same_total_as_For()
+    {
+        var withSource = new WorldSector { SectorId = "s-source", OwnerFactionId = "f1", Slots = new[] { Rootbed(0) } };
+        var sector = new WorldSector { SectorId = "s-target", OwnerFactionId = "f1", DevelopmentLevel = 3, DangerBand = 2 };
+        var world = WorldWith(sector, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" }, withSource);
+
+        var breakdown = LoamUpkeep.BreakdownFor(world, sector);
+        Assert.Equal(LoamUpkeep.For(world, sector), breakdown.Total);
+        Assert.True(breakdown.Total > 0, "a developed, dangerous, owned sector with a loam source must cost something");
+    }
+
+    /// <summary>
+    /// world-map W48: `BreakdownFor` reads the real season off `world.CurrentTurn` — every one of
+    /// the four authored seasons must index cleanly into `Seasons.UpkeepMilli` (catching an
+    /// off-by-one in the tuning array itself), at whatever turn actually lands in each.
+    /// </summary>
+    [Theory]
+    [InlineData(0)] // season 0
+    [InlineData(84)] // season 1 (a season is 7*4*3 = 84 days at world.v4.json's shipped tuning)
+    [InlineData(84 * 2)] // season 2
+    [InlineData(84 * 3)] // season 3
+    [InlineData(84 * 4)] // wraps back to season 0
+    public void The_truth_overload_reads_the_real_season_for_every_authored_season_index(int turn)
+    {
+        var withSource = new WorldSector { SectorId = "s-source", OwnerFactionId = "f1", Slots = new[] { Rootbed(0) } };
+        var sector = new WorldSector { SectorId = "s-target", OwnerFactionId = "f1" };
+        var world = WorldWith(sector, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" }, withSource) with
+        {
+            CurrentTurn = turn
+        };
+
+        var breakdown = LoamUpkeep.BreakdownFor(world, sector);
+        Assert.Equal(1000, breakdown.SeasonMilli); // identity everywhere until a later publish turns growth/seasons on
+    }
+
+    [Fact]
+    public void An_unowned_sectors_breakdown_is_every_field_zero_not_just_a_zero_total()
+    {
+        var sector = new WorldSector { SectorId = "s", OwnerFactionId = null, DevelopmentLevel = 5, DangerBand = 5 };
+        var world = WorldWith(sector, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" });
+
+        var breakdown = LoamUpkeep.BreakdownFor(world, sector);
+        Assert.Equal(0, breakdown.Base);
+        Assert.Equal(0, breakdown.Garrison);
+        Assert.Equal(0, breakdown.Development);
+        Assert.Equal(0, breakdown.Danger);
+        Assert.Equal(0, breakdown.Total);
     }
 }

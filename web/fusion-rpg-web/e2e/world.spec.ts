@@ -18,6 +18,14 @@ const fixture = JSON.parse(
   }[];
 };
 
+// world-stage W20: the turn-report counterpart to the state fixture above — a real six-turn opening
+// (turns 0-5), byte-pinned by `WorldTurnFixtureTests.cs`. Indexed by its own `turn` field so the mock
+// below can answer `/turn/{n}` for whichever turn a test asks about, the same way the live server does.
+const turnFixture = JSON.parse(
+  readFileSync(fileURLToPath(new URL("../src/features/world/fixtures/first-light-turn.json", import.meta.url)), "utf8")
+) as { turn: number }[];
+const turnReportsByTurn = new Map(turnFixture.map((report) => [report.turn, report]));
+
 /**
  * `#/world` in a real browser.
  *
@@ -88,7 +96,15 @@ async function mockWorld(page: Page, options?: { staleAge?: number }) {
   await page.route("**/api/players/current", (route) => fulfillJson(route, { ok: true }));
   await page.route("**/api/sim", (route) => fulfillJson(route, null, 404));
   await page.route("**/api/world/1", (route) => fulfillJson(route, header));
-  await page.route("**/api/world/first-light/turn/**", (route) => fulfillJson(route, null, 404));
+  // world-stage W20: answers from the real, byte-pinned turn-report fixture for turns 0-5 — the
+  // same 404 the live server gives for any turn outside what was actually played.
+  await page.route("**/api/world/first-light/turn/**", (route) => {
+    const match = /\/turn\/(\d+)/.exec(route.request().url());
+    const turn = match ? Number(match[1]) : NaN;
+    const report = turnReportsByTurn.get(turn);
+    if (report) fulfillJson(route, report);
+    else fulfillJson(route, null, 404);
+  });
 
   // The lifeline sweep is only asked for while the overlay shows, so the mock answers accordingly.
   await page.route("**/api/world/first-light/state**", (route) =>

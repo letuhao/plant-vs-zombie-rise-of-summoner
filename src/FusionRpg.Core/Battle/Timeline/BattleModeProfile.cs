@@ -39,13 +39,81 @@ public sealed record BattleModeProfile
 {
     public string ProfileId { get; init; } = "";
     public AdvancePolicyKind AdvancePolicy { get; init; } = AdvancePolicyKind.NextEvent;
+    /// <summary>Not a balance dial in its own right — <b>every shipped profile overwrites this from
+    /// `timeline.profiles.&lt;id&gt;.w`</b> (T14/B29). The literal is the record's inert default, kept
+    /// so a hand-constructed profile in a test rig is strictly serial unless it asks not to be:
+    /// `W = 1` is the most conservative possible scheduling choice, not a tuned one.</summary>
     public int W { get; init; } = 1;
     public WScope WScope { get; init; } = WScope.Global;
     public Commitment DefaultCommitment { get; init; } = Commitment.LateBound;
+    /// <summary>Same status as <see cref="W"/>: overwritten from config for every shipped profile.
+    /// The literal is one tick — the smallest advance that still advances, which is the only
+    /// structurally safe default (0 would reschedule a passing actor at `now` forever).</summary>
     public long PassQuantum { get; init; } = 1;
     public int WReact { get; init; }
     public bool RendezvousEnabled { get; init; }
-    public ITurnEconomy Economy { get; init; } = new OneActionPerTurnEconomy();
+    /// <summary>
+    /// Makes a FRESH economy for one battle. A factory, not an instance — and that distinction is a
+    /// real defect this record used to have, found by B37 and reproduced before it was fixed.
+    ///
+    /// <para><b>Why an instance was unsafe.</b> Profiles are cached singletons
+    /// (<see cref="BattleModeProfileCatalog"/>), and every economy holds mutable per-key budget state
+    /// (<c>OneActionPerTurnEconomy._spent</c>, <c>ActionPointsEconomy._points</c>). Battle actor keys
+    /// repeat across battles — <c>"squad:0"</c> is <c>"squad:0"</c> in every one — so two battles
+    /// running at once shared a single budget and silently starved each other's actors of turns.
+    /// Reproduced exactly that way: the trace goldens passed when run alone and failed inside the
+    /// parallel suite, with actors 2..n never acting.</para>
+    ///
+    /// <para>A factory makes the hazard unrepresentable: an engine cannot accidentally share a budget,
+    /// because it is handed a way to make its own.</para>
+    /// </summary>
+    public Func<ITurnEconomy> NewEconomy { get; init; } = static () => new OneActionPerTurnEconomy();
+
+    /// <summary>
+    /// T8 — how far a turn-order forecast can be trusted under this profile
+    /// (spec-turn-order-forecast.md §2).
+    ///
+    /// <para><b>A declared field, not a computed branch, and that was a correction.</b> The obvious
+    /// implementation is <c>AdvancePolicy == NextEvent ? Exact : SoftBounded</c> — and
+    /// <c>ModeProfileArchitectureTests</c> rejects it in EVERY file, including this one: its
+    /// profile-id exemption covers id literals only, never a branch on
+    /// <see cref="AdvancePolicyKind"/>. The rule is absolute because the map's acceptance is
+    /// structural — "adding a mode adds a row, never a branch in the kernel" — and a computed
+    /// property is a branch wearing a row's clothes. So each row states its own exactness, and a
+    /// fourth mode states its own too.</para>
+    /// </summary>
+    public ForecastExactness ForecastExactness { get; init; } = ForecastExactness.Exact;
+
+    /// <summary>
+    /// **B39 — whether turn order within a round is decided by readiness or by the initiative roll.**
+    ///
+    /// <para><b>Declared per row, never computed.</b> The obvious implementation is
+    /// "`AdvancePolicy == FixedIncrement` means speed-ordered", and it is the wrong one: it is exactly
+    /// the branch <c>ModeProfileArchitectureTests</c> bans, and it silently decides the question for
+    /// every future mode that happens to share an advance policy. Adding a mode adds a row, never a
+    /// branch — the same correction <see cref="ForecastExactness"/> already carries.</para>
+    ///
+    /// <para><b>False for <c>classic-round</c> and load-bearing.</b> That profile pins readiness to a
+    /// constant by design (`battle-turn-ideal.md` §10) so every actor arrives together at the round
+    /// tick; its initiative ordering is what every existing battle and expedition golden was blessed
+    /// against. <c>galaxy-sync</c> is false for a different reason — no shipped surface selects it, and
+    /// turning on a behaviour nobody can observe is a claim rather than a feature.</para>
+    /// </summary>
+    public bool OrdersBySpeed { get; init; }
+
+    /// <summary>
+    /// T6/B21 — whether this profile's `Ready` dwell expects a live human.
+    ///
+    /// <para>Declared per row, like <see cref="ForecastExactness"/>, and for the same architectural
+    /// reason: `ModeProfileArchitectureTests` forbids branching on <see cref="AdvancePolicyKind"/> in
+    /// every file, so "which modes are interactive" is data rather than a computed rule.</para>
+    ///
+    /// <para><b>False for all three shipped profiles.</b> It exists so an expedition can be barred from
+    /// selecting an interactive one BY ASSERTION rather than by convention — an expedition resolves
+    /// server-side with nobody watching, so an interactive profile there could only ever time out every
+    /// turn, which is a slow way to produce a worse auto-resolve.</para>
+    /// </summary>
+    public bool RequiresLiveInput { get; init; }
 }
 
 /// <summary>
@@ -62,43 +130,86 @@ public static class BattleModeProfileCatalog
     public const string GalaxySyncId = "galaxy-sync";
     public const string HybridAtbId = "hybrid-atb";
 
+    // T14/B29 — the STRUCTURE of each row is here; its MAGNITUDES (W, WReact, PassQuantum, and
+    // hybrid-atb's maxPoints) come from data/tuning/battle.v{n}.json's timeline.profiles.
+    //
+    // Lazy + cached, not `static readonly ... = new(){...}`, for the reason WaveCatalog already
+    // records for itself (catalog-runtime §3a): a static field initializer runs at class-load, which
+    // is before any host or test bootstrap calls Configure, so it could only ever have baked in a
+    // hardcoded value. Caching also keeps each profile a SINGLE instance, which existing tests rely
+    // on directly (`Assert.Same(BattleModeProfileCatalog.ClassicRound, ...)`).
+
+    static BattleTuning? _tuning;
+    static BattleModeProfile? _classicRound, _galaxySync, _hybridAtb;
+
+    /// <summary>Called by <see cref="BattleTuningHub.Configure"/>, never directly by game code.
+    /// Resets the cached rows so a reconfigure (CombatSim's `compare`, a scoped test) is honoured
+    /// rather than serving a stale profile.</summary>
+    public static void Configure(BattleTuning tuning)
+    {
+        _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+        _classicRound = _galaxySync = _hybridAtb = null;
+    }
+
+    static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
+        "BattleModeProfileCatalog.Configure(...) has not run. Every profile magnitude reads " +
+        "data/tuning/battle.v{n}.json's timeline.profiles (tunables-ssot.md T5) — there is no " +
+        "built-in default to fall back to.");
+
     /// <summary>Today's engine, described as data: one actor mid-action at a time, one action per
     /// turn — the profile every existing battle and expedition golden implicitly runs under.</summary>
-    public static readonly BattleModeProfile ClassicRound = new()
-    {
-        ProfileId = ClassicRoundId,
-        AdvancePolicy = AdvancePolicyKind.NextEvent,
-        W = 1,
-        WScope = WScope.Global,
-        DefaultCommitment = Commitment.LateBound,
-        Economy = new OneActionPerTurnEconomy()
-    };
+    public static BattleModeProfile ClassicRound => _classicRound ??= Build(
+        ClassicRoundId, AdvancePolicyKind.NextEvent, WScope.Global, Commitment.LateBound, points: false,
+        forecast: ForecastExactness.Exact);
 
     /// <summary>Turn-based but concurrent — two actors per side may be mid-action at once. This IS
     /// the contrast case B12's own acceptance line names: `W=2` here provably overlaps where
     /// `classic-round`'s `W=1` provably cannot, in the same test file.</summary>
-    public static readonly BattleModeProfile GalaxySync = new()
-    {
-        ProfileId = GalaxySyncId,
-        AdvancePolicy = AdvancePolicyKind.NextEvent,
-        W = 2,
-        WScope = WScope.PerSide,
-        DefaultCommitment = Commitment.LateBound,
-        Economy = new OneActionPerTurnEconomy()
-    };
+    public static BattleModeProfile GalaxySync => _galaxySync ??= Build(
+        GalaxySyncId, AdvancePolicyKind.NextEvent, WScope.PerSide, Commitment.LateBound, points: false,
+        forecast: ForecastExactness.Exact);
 
     /// <summary>Real-time-flavored: fixed-increment advance, a wider concurrency width, and an
     /// Action-Points economy rather than one-action-per-turn — genuinely exercises the OTHER half
     /// of <see cref="ITurnEconomy"/> this map names, not just a third copy of the first two.</summary>
-    public static readonly BattleModeProfile HybridAtb = new()
+    public static BattleModeProfile HybridAtb => _hybridAtb ??= Build(
+        HybridAtbId, AdvancePolicyKind.FixedIncrement, WScope.Global, Commitment.EarlyBoundWithFallback, points: true,
+        // Fixed-increment advance with W > 1: an action resolving inside the window can schedule an
+        // event ahead of a forecast entry, so the projection is the queue's current truth but not a promise.
+        forecast: ForecastExactness.SoftBounded,
+        // B39: the profile whose turn order `turn.speed`/`turn.haste` actually decide. An
+        // Active-Time-Battle mode that ignored speed would be one in name only.
+        ordersBySpeed: true);
+
+    static BattleModeProfile Build(
+        string id, AdvancePolicyKind advance, WScope wScope, Commitment commitment, bool points,
+        ForecastExactness forecast, bool ordersBySpeed = false)
     {
-        ProfileId = HybridAtbId,
-        AdvancePolicy = AdvancePolicyKind.FixedIncrement,
-        W = 4,
-        WScope = WScope.Global,
-        DefaultCommitment = Commitment.EarlyBoundWithFallback,
-        Economy = new ActionPointsEconomy(maxPoints: 2)
-    };
+        var t = Tuning.ProfileOf(id);
+        if (points && t.MaxPoints is null)
+            throw new BattleTuningRejection(
+                $"battle tuning: timeline.profiles.{id} runs an ActionPoints economy but carries no 'maxPoints'.");
+        if (!points && t.MaxPoints is not null)
+            throw new BattleTuningRejection(
+                $"battle tuning: timeline.profiles.{id} carries 'maxPoints' but its economy has no budget — " +
+                "a value that can never be read is a balance row lying about what it controls.");
+
+        return new BattleModeProfile
+        {
+            ProfileId = id,
+            AdvancePolicy = advance,
+            W = t.W,
+            WScope = wScope,
+            DefaultCommitment = commitment,
+            PassQuantum = t.PassQuantum,
+            WReact = t.WReact,
+            NewEconomy = points
+                ? () => new ActionPointsEconomy(t.MaxPoints!.Value)
+                : static () => new OneActionPerTurnEconomy(),
+            ForecastExactness = forecast,
+            OrdersBySpeed = ordersBySpeed
+        };
+    }
 
     /// <summary>
     /// <c>WaveCatalog.Get(waveId).Profile ?? classic-round</c>, made concrete: <c>null</c> resolves

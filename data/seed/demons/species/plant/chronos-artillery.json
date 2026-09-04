@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:51:02Z",
+      "minorityValues": {
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "chronos-artillery"
+    ],
+    "gameTypeId": 986,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "almanac",
+    "reach": "long",
+    "reason": "The ability to deal 1,000,000 damage via headshots and trigger rapid-fire combos makes this a calamity-level threat rather than a mere warden.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "UltimatePortalSniper",
+    "targetPreference": "elite",
+    "traits": [
+      "spatial-stasis",
+      "synergistic-volley",
+      "critical-singularity"
+    ],
+    "variants": [
+      "mutated",
+      "blessed",
+      "normal",
+      "ancient"
+    ],
+    "verdict": "too-high"
+  }
+]

@@ -17,16 +17,20 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:41:28Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T09:58:41Z",
+      "minorityValues": {
+        "aptitudePrimary": "Pierce",
+        "attackTempo": "slow"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -42,38 +46,114 @@
       "Summonable"
     ],
     "aptitudePrimary": "Precision",
-    "aptitudeSecondary": "none",
+    "aptitudeSecondary": "Pierce",
     "attackTempo": "steady",
-    "basis": "observed",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Botanical Artillery"
+      "botanical-artillery"
     ],
-    "gameTypeId": 1001,
+    "gameTypeId": 1260,
     "posture": "Bastion",
-    "pure": true,
+    "pure": false,
     "rarity": "fused",
     "reach": "long",
-    "reason": "The creature is a basic fusion unit with standard damage output, which does not align with the high-threat level of a 'warden'.",
+    "reason": "The creature's mechanics focus on single-target execution and moderate damage rather than the widespread devastation or environmental destruction required for a 'tyrant' classification.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "Cherryshooter",
-    "targetPreference": "frontline",
+    "speciesId": "BambooSpruce",
+    "targetPreference": "backline",
     "traits": [
-      "Projectile-launching",
-      "Cherry-based ammunition",
-      "Fusion-derived"
+      "penetrating-projectile",
+      "executioner-mechanic",
+      "health-scaling-damage"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
     ],
     "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:39:15Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "botanical-artillery"
+    ],
+    "gameTypeId": 352,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature is a standard defensive unit with predictable, localized area-of-effect damage that poses no existential threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "Tower_cherryShooter",
+    "targetPreference": "swarm",
+    "traits": [
+      "explosive-projectile",
+      "area-of-effect",
+      "rotational-tracking"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
   }
 ]

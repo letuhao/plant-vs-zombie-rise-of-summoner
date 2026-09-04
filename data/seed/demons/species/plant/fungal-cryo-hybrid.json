@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:14:34Z",
+      "emittedUtc": "2026-09-04T10:46:11Z",
       "minorityValues": {
         "aptitudePrimary": "Focus"
       },
@@ -51,7 +52,7 @@
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Fungal-Cryo Hybrid"
+      "fungal-cryo-hybrid"
     ],
     "gameTypeId": 1038,
     "posture": "Bastion",
@@ -67,11 +68,12 @@
     "speciesId": "IceScaredyShroom",
     "targetPreference": "swarm",
     "traits": [
-      "Spore-based Cryostasis",
-      "Fear-Induced Area-of-Effect Freeze",
-      "Thermal-Kinetic Damage Multiplier"
+      "spore-emission",
+      "fear-triggered-cryostasis",
+      "thermal-damage-multiplier"
     ],
     "variants": [
+      "normal",
       "mutated",
       "blessed"
     ],

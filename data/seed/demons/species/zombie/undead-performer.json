@@ -17,17 +17,18 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:48:03Z",
+      "emittedUtc": "2026-09-04T11:13:07Z",
       "minorityValues": {
-        "elementPrimary": "air"
+        "elementPrimary": "dark"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -43,419 +44,41 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Agility",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "undead-performer"
+      "undead performer"
     ],
-    "gameTypeId": 6,
-    "posture": "Force",
+    "gameTypeId": 207,
+    "posture": "Finesse",
     "pure": true,
-    "rarity": "cultivated",
-    "reach": "long",
-    "reason": "The creature's mechanics focus on simple movement and summoning rather than widespread destruction, making it a significant threat but not a scourge.",
+    "rarity": "almanac",
+    "reach": "short",
+    "reason": "The creature's ability to bypass all defenses via 'Ghostly Moonwalk' and summon multiple high-tier minions makes it a significant tactical threat beyond a mere tyrant.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "zombie",
-    "speciesId": "DancePolZombie",
+    "speciesId": "QuickJacksonZombie",
     "targetPreference": "frontline",
     "traits": [
-      "pole-vaulting",
-      "rhythmic-summoning",
-      "obstacle-leaping"
-    ],
-    "variants": [
-      "normal",
-      "shiny"
-    ],
-    "verdict": "too-high"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:48:40Z",
-      "minorityValues": {
-        "rarity": "cultivated"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Agility",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
-    "elementSecondary": "none",
-    "family": [
-      "Undead Performer"
-    ],
-    "gameTypeId": 7,
-    "posture": "Finesse",
-    "pure": true,
-    "rarity": "chaff",
-    "reach": "long",
-    "reason": "The description identifies them as bullies who actively terrorize others in a school setting, suggesting a level of organized aggression higher than a mere raider.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "DancePolZombie2",
-    "targetPreference": "backline",
-    "traits": [
-      "Pole-vaulting",
-      "Rhythmic movement",
-      "Cooperative choreography"
-    ],
-    "variants": [],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "high"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:27:37Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
-    "elementSecondary": "none",
-    "family": [
-      "undead_performer"
-    ],
-    "gameTypeId": 10,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "heirloom",
-    "reach": "short",
-    "reason": "The creature's ability to continuously replenish its squad of four subordinates through movement makes it a persistent threat that exceeds a mere warden level.",
-    "resourceProfile": [
-      "hp",
-      "poise"
-    ],
-    "side": "zombie",
-    "speciesId": "JacksonZombie",
-    "targetPreference": "swarm",
-    "traits": [
-      "moonwalk_summoning",
-      "rhythmic_reanimation",
-      "ensemble_synchronization"
-    ],
-    "variants": [
-      "normal",
-      "shiny"
-    ],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:28:39Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Agility",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "dark",
-    "elementSecondary": "none",
-    "family": [
-      "undead_performer"
-    ],
-    "gameTypeId": 307,
-    "posture": "Finesse",
-    "pure": true,
-    "rarity": "unresolved",
-    "reach": "short",
-    "reason": "The creature is explicitly classified as a 'Level 1 Zombie' and functions as a performer with high mobility rather than a world-threatening force.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "Jackson_a",
-    "targetPreference": "swarm",
-    "traits": [
-      "moonwalking_entry",
-      "pole_dance_summoning",
-      "celebrity_aura"
-    ],
-    "variants": [
-      "normal",
-      "shiny"
-    ],
-    "verdict": "too-high"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:28:56Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Agility",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "dark",
-    "elementSecondary": "none",
-    "family": [
-      "undead_performer"
-    ],
-    "gameTypeId": 308,
-    "posture": "Finesse",
-    "pure": true,
-    "rarity": "unresolved",
-    "reach": "short",
-    "reason": "The creature is a standard level-2 zombie that summons minor minions and possesses moderate health, which does not align with a world-ending cataclysmic threat.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "Jackson_b",
-    "targetPreference": "frontline",
-    "traits": [
-      "moonwalking_mobility",
-      "pole_dance_summoning",
-      "choreographed_entry"
-    ],
-    "variants": [
-      "normal",
-      "corrupted"
-    ],
-    "verdict": "too-high"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:29:09Z",
-      "minorityValues": {
-        "rarity": "chaff"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "light",
-    "elementSecondary": "none",
-    "family": [
-      "undead_performer"
-    ],
-    "gameTypeId": 309,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "heirloom",
-    "reach": "short",
-    "reason": "The creature is a standard level 3 zombie with a specific movement pattern and summoning mechanic, lacking the world-ending scale required for a calamity rating.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "Jackson_c",
-    "targetPreference": "swarm",
-    "traits": [
-      "glamour_mobility",
+      "high-speed sliding",
+      "damage reduction",
       "summoner",
-      "stage_presence"
+      "obstacle bypass"
     ],
     "variants": [
       "normal",
-      "shiny"
+      "shiny",
+      "ancient",
+      "mutated"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

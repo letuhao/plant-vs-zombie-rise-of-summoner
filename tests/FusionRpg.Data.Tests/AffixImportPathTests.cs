@@ -35,7 +35,7 @@ public class AffixImportPathTests : IDisposable
         var r = _store.UpsertAtom(new AtomRow
         {
             AtomId = atomId, KindId = "stat.modify", FamilyId = family, Variant = variant, Tier = tier,
-            ParamsJson = """{"channel":"atk","op":"flat","amount":10}""",
+            Name = family, ParamsJson = """{"channel":"atk","op":"flat","amount":10}""",
         });
         Assert.True(r.IsOk, r.ToString());
     }
@@ -267,7 +267,7 @@ public class AffixImportPathTests : IDisposable
               "schemaVersion": 1,
               "kind": "atom",
               "entries": [
-                { "family": "atom.ember-bolt", "tier": 1, "kind": "stat.modify",
+                { "family": "atom.ember-bolt", "tier": 1, "kind": "stat.modify", "name": "Ember Bolt",
                   "params": { "channel": "atk", "op": "flat", "amount": 10 } }
               ]
             }

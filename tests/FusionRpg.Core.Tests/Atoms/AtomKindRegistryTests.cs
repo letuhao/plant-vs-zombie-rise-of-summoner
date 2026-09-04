@@ -17,21 +17,33 @@ public class AtomKindRegistryTests
     }
 
     [Fact]
-    public void Vocabulary_is_closed_at_twelve_kinds_and_five_attach_points()
+    public void Vocabulary_is_closed_at_fifteen_kinds_and_six_attach_points()
     {
+        // E35 (spec-match-modify.md §2.1), E36 (spec-wave-control.md §2.1), then E37
+        // (spec-projectile-control.md §2b): each states only its own +1 delta over the state before it
+        // (12 kinds/5 attach points, then 13/6, then 14/6, then 15/6 — E37 adds no attach point, its
+        // bullet.modify reuses the existing Board) — the guard itself is a self-consistency check
+        // (Const == BuiltCount), never a copied literal, so a sibling Wave 8 module landing its own
+        // kind/attach point moves these two consts again without this test needing to guess the wave's
+        // combined end state.
         Assert.Equal(AtomKindRegistry.KindCount, AtomKindRegistry.All.Count);
         Assert.Equal(AtomKindRegistry.AttachPointCount, Enum.GetValues<AttachPoint>().Length);
     }
 
     [Fact]
-    public void Rejection_reasons_are_the_closed_list_of_thirty_three()
+    public void Rejection_reasons_are_the_closed_list_of_thirty_three_plus_the_namespaced_catch_all()
     {
-        // definitions.md §10 fixes the list at 33 (plus None). It is the operator-facing error
-        // surface: a code added without review is a code no runbook explains.
+        // definitions.md §10 fixes the list at 33 (plus None). item-ideal.md §2b.1 adds exactly one
+        // more, permanently: ContentRuleViolated, the single namespaced catch-all every later lane
+        // raises instead of minting its own code (ContentRuleNamespaces.Register). 33 + None +
+        // ContentRuleViolated = 35. It is the operator-facing error surface: a code added without
+        // review is a code no runbook explains, and ContentRuleViolated's own point is that nothing
+        // after it may add a 36th.
         var reasons = Enum.GetValues<AtomRejectionReason>();
 
-        Assert.Equal(34, reasons.Length);
+        Assert.Equal(35, reasons.Length);
         Assert.Contains(AtomRejectionReason.None, reasons);
+        Assert.Contains(AtomRejectionReason.ContentRuleViolated, reasons);
     }
 
     [Fact]
@@ -50,7 +62,14 @@ public class AtomKindRegistryTests
         // stat.modify moved out of this set 2026-08-28 (A18e) -- it is no longer PURELY permanent, it
         // may ALSO be triggered (contributing from first fire onward); TriggerOptional (AtomKind.cs)
         // is what keeps its OWN no-trigger case still legal despite Triggers now being non-empty.
-        var permanentModifiers = new[] { "stat.derived" };
+        //
+        // E37 (spec-projectile-control.md §2b.1): "bullet.modify" added deliberately, named here per
+        // that spec's own MANDATORY instruction -- a bullet.modify grant's PRESENCE is the effect, read
+        // at Bullet.InitData (CheatPrefixes.BulletInitCheat via GrantedBulletModifyAtomReader), the
+        // same resolved-read shape stat.derived uses. It has no event to fire on, so giving it a
+        // trigger just to keep this test green would be the status.expose.* defect this same spec
+        // names -- a declared trigger nothing ever raises.
+        var permanentModifiers = new[] { "stat.derived", "bullet.modify" };
 
         foreach (var kind in AtomKindRegistry.All)
         {
@@ -92,8 +111,11 @@ public class AtomKindRegistryTests
     [Fact]
     public void Unknown_trigger_and_disallowed_trigger_reject_differently()
     {
+        // E34 (spec-trigger-vocabulary.md) made "OnWave" a real, known trigger -- this placeholder
+        // moved to a string that stays unknown so this test keeps testing UnknownTrigger rather than
+        // silently starting to test TriggerNotAllowed instead.
         Assert.Equal(AtomRejectionReason.UnknownTrigger,
-            AtomKindRegistry.ValidateTrigger("stat.modify", "OnWave").Reason);
+            AtomKindRegistry.ValidateTrigger("stat.modify", "OnNope").Reason);
 
         // stat.derived is STILL a pure permanent modifier (A18e only widened stat.modify): it carries
         // no trigger at all. Not OnDamageDealt...
@@ -194,15 +216,16 @@ public class AtomKindRegistryTests
 
     // E28 fix #5 (spec-param-parity.md §3 row 5): atk now reaches the spawned body for plant/zombie
     // — DebugActions.ApplyAbsoluteProps already had the plant hook (P-ATK) and the zombie cheat id
-    // (Z-ATK) already existed, both just never read from the payload. Bullets carry damage on the
-    // projectile itself, a different mechanism with no absolute-atk hook, so atk stays unhonoured
-    // there — declaring it anyway would be the exact "declared, accepted, ignored" defect this
-    // module exists to remove.
+    // (Z-ATK) already existed, both just never read from the payload.
+    // E37 (spec-projectile-control.md §2a): widened to bullets too — a spawned bullet carries damage
+    // on the projectile itself (Bullet.Damage, not a modifier-bag hook), and the sink's SpawnBulletOnce
+    // now translates atk -> damage at the payload boundary. "Bullets have no such hook" was the wiring
+    // gap this module closes, not a permanent limitation — atk is honoured for all three kinds now.
     [Theory]
     [InlineData("zombie", true)]
     [InlineData("plant", true)]
-    [InlineData("bullet", false)]
-    public void Spawn_atk_is_honoured_for_plant_and_zombie_not_bullet(string kind, bool shouldPass)
+    [InlineData("bullet", true)]
+    public void Spawn_atk_is_honoured_for_every_kind(string kind, bool shouldPass)
     {
         var r = AtomKindRegistry.Validate("spawn.entity",
             P(("kind", kind), ("typeId", 0), ("atk", 500)));
@@ -352,18 +375,31 @@ public class AtomKindRegistryTests
 
     // The documented channel enum listed four keys effects cannot reach. Pin the real eight.
     [Fact]
-    public void Primary_channels_are_the_real_eleven_since_E16()
+    public void Primary_channels_are_the_real_twentythree_since_E38()
     {
         // It was eight, and this test asserted the three intervals were ABSENT — correctly, because
         // they were cheat-document keys written straight to the Unity field, bypassing the modifier
         // bag. The documented enum listed them anyway, which is how the gap survived. E16 promoted
-        // them into real composed channels, so the absent-assertions became wrong.
-        Assert.Equal(11, AtomKindRegistry.PrimaryChannels.Length);
+        // them into real composed channels (8 -> 11), so the absent-assertions became wrong. E38
+        // (spec-entity-fields-12plus.md) repeated the same promotion for twelve more (11 -> 23).
+        Assert.Equal(23, AtomKindRegistry.PrimaryChannels.Length);
         Assert.Contains("defense", AtomKindRegistry.PrimaryChannels);
         Assert.Contains("arm1Max", AtomKindRegistry.PrimaryChannels);
         Assert.Contains("attackInterval", AtomKindRegistry.PrimaryChannels);
         Assert.Contains("produceInterval", AtomKindRegistry.PrimaryChannels);
         Assert.Contains("zombieSpeed", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("plantShield", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("attackCountdown", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("attackSpeedAdder", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("produceCountdown", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("plantSpeed", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("plantMoveSpeed", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("plantLevel", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("shootingLevel", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("armorFlat", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("takeDmgMultiplier", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("zombieSpeedCurrent", AtomKindRegistry.PrimaryChannels);
+        Assert.Contains("zombieOriginSpeed", AtomKindRegistry.PrimaryChannels);
     }
 
     [Fact]
@@ -394,5 +430,404 @@ public class AtomKindRegistryTests
                 AtomKindRegistry.Validate("stat.modify",
                     P(("channel", channel), ("op", "flat"), ("amount", 10))).IsOk,
                 channel);
+    }
+
+    // ---- E35 (spec-match-modify.md) — match.modify's own field vocabulary and closed schema -------
+
+    [Theory]
+    [InlineData("zombieHealthMultiplier")]
+    [InlineData("zombieDamageMultiplier")]
+    [InlineData("zombieSpeedMultiplier")]
+    [InlineData("zombieCountMultiplier")]
+    [InlineData("zombieStartAmmor")]
+    [InlineData("plantModifyMin")]
+    [InlineData("plantModifyMax")]
+    [InlineData("zombieModifyMin")]
+    [InlineData("zombieModifyMax")]
+    [InlineData("waveInterval")]
+    [InlineData("conveyInterval")]
+    public void MatchModify_accepts_every_one_of_the_eleven_legal_fields(string field)
+    {
+        Assert.True(
+            AtomKindRegistry.Validate("match.modify", P(("field", field), ("amount", 1500))).IsOk,
+            field);
+    }
+
+    [Fact]
+    public void MatchModify_field_count_is_exactly_eleven()
+    {
+        Assert.Equal(11, AtomKindRegistry.Get("match.modify")!.Params.Defs
+            .First(d => d.Name == "field").Vocabulary!().Count);
+    }
+
+    // §4: "a typo... BadParamValue, naming the field and the eleven legal values" — this is the real
+    // guardrail per E29's own not-yet-landed registry check, not the schema shape.
+    [Fact]
+    public void MatchModify_typo_field_rejects_with_BadParamValue()
+    {
+        var r = AtomKindRegistry.Validate("match.modify",
+            P(("field", "zombieHelthMultiplier"), ("amount", 1500)));
+
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+        Assert.Contains("zombieHelthMultiplier", r.Detail);
+    }
+
+    // PLANTED VIOLATION (§4): if MatchModifyFields's own Vocabulary check were ever dropped (accepting
+    // any string), this typo would validate, compile, reach the sink, match no CheatIdFor case and do
+    // nothing forever — the exact E29-class defect this test exists to catch before it ships.
+    [Fact]
+    public void PLANTED_VIOLATION_dropping_the_field_vocabulary_check_would_let_a_typo_validate()
+    {
+        Assert.Equal(AtomRejectionReason.BadParamValue,
+            AtomKindRegistry.Validate("match.modify",
+                P(("field", "zombieHelthMultiplier"), ("amount", 1500))).Reason);
+    }
+
+    [Fact]
+    public void MatchModify_missing_field_rejects_with_MissingParam()
+    {
+        var r = AtomKindRegistry.Validate("match.modify", P(("amount", 1500)));
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Reason);
+    }
+
+    // §3/§4: no `op` — the executor assigns, and a multiply would need live host state.
+    [Fact]
+    public void MatchModify_op_is_UnknownParam()
+    {
+        var r = AtomKindRegistry.Validate("match.modify",
+            P(("field", "zombieHealthMultiplier"), ("amount", 1500), ("op", "mul")));
+        Assert.Equal(AtomRejectionReason.UnknownParam, r.Reason);
+    }
+
+    // §3: no row/col/cells — anything needing a cell is Board, not Match.
+    [Theory]
+    [InlineData("row")]
+    [InlineData("col")]
+    [InlineData("cells")]
+    public void MatchModify_cell_params_are_UnknownParam(string key)
+    {
+        var pairs = new List<(string, object?)>
+        {
+            ("field", "zombieHealthMultiplier"), ("amount", 1500), (key, key == "cells" ? new[] { 1 } : 2)
+        };
+        var r = AtomKindRegistry.Validate("match.modify", P(pairs.ToArray()));
+        Assert.Equal(AtomRejectionReason.UnknownParam, r.Reason);
+    }
+
+    // §2.2: MatchEvents only (OnWave/OnMatchStart/OnMatchEnd) — a board event is TriggerNotAllowed.
+    [Fact]
+    public void MatchModify_carries_MatchEvents_only()
+    {
+        Assert.True(AtomKindRegistry.ValidateTrigger("match.modify", AtomTriggers.OnWave).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("match.modify", AtomTriggers.OnMatchStart).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("match.modify", AtomTriggers.OnMatchEnd).IsOk);
+
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("match.modify", AtomTriggers.OnDamageDealt).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("match.modify", AtomTriggers.OnSunCollect).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("match.modify", AtomTriggers.OnGridPlace).Reason);
+    }
+
+    // §2.2: Battle and Sim are None — neither has a Board.config or a consumer.
+    [Fact]
+    public void MatchModify_runtime_support_is_lawn_only()
+    {
+        var kind = AtomKindRegistry.Get("match.modify")!;
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Battle));
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Sim));
+    }
+
+    // §2: no attach point beyond Match. E36 (spec-wave-control.md §2.1) makes wave.control the
+    // second kind on it — this test used to assert match.modify was the ONLY one; updated rather
+    // than left stale the moment a sibling module landed the second, exactly as its own doc predicted.
+    [Fact]
+    public void Match_carries_exactly_match_modify_and_wave_control()
+    {
+        var onMatch = AtomKindRegistry.All.Where(k => k.Attach == AttachPoint.Match)
+            .Select(k => k.KindId).OrderBy(id => id, StringComparer.Ordinal).ToList();
+        Assert.Equal(new[] { "match.modify", "wave.control" }, onMatch);
+    }
+
+    // ---- E36 (spec-wave-control.md) — wave.control's own op vocabulary and closed schema ----------
+
+    [Theory]
+    [InlineData("summon")]
+    [InlineData("huge")]
+    [InlineData("setTimer")]
+    [InlineData("hold")]
+    public void WaveControl_accepts_every_one_of_the_four_legal_ops(string op)
+    {
+        var pairs = op switch
+        {
+            "summon" => new[] { ("op", (object?)op), ("wave", 3) },
+            "setTimer" => new[] { ("op", (object?)op), ("timerMs", 5000) },
+            "hold" => new[] { ("op", (object?)op), ("enabled", true) },
+            _ => new[] { ("op", (object?)op) },
+        };
+        Assert.True(AtomKindRegistry.Validate("wave.control", P(pairs)).IsOk, op);
+    }
+
+    [Fact]
+    public void WaveControl_summon_with_wave_is_ok()
+    {
+        Assert.True(AtomKindRegistry.Validate("wave.control", P(("op", "summon"), ("wave", 3))).IsOk);
+    }
+
+    // §4: "op: summon, timerMs: 5000 -> ParamNotHonoured (wrong op for that param)."
+    [Fact]
+    public void WaveControl_timerMs_is_only_honoured_under_setTimer()
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P(("op", "summon"), ("timerMs", 5000)));
+        Assert.Equal(AtomRejectionReason.ParamNotHonoured, r.Reason);
+    }
+
+    // §4: "op: freeze -> BadParamValue, naming the four legal ops. The op is hold, and the message
+    // says the floor is a floor." This is also the vocabulary half of PLANTED VIOLATION #2 below.
+    [Fact]
+    public void WaveControl_freeze_rejects_by_name_not_just_by_membership()
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P(("op", "freeze")));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+        Assert.Contains("summon", r.Detail);
+        Assert.Contains("huge", r.Detail);
+        Assert.Contains("setTimer", r.Detail);
+        Assert.Contains("hold", r.Detail);
+        Assert.Contains("floors", r.Detail, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("does not stop", r.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void WaveControl_no_op_is_MissingParam()
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P());
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Reason);
+    }
+
+    // §4: "op: setTimer, timerMs: -1 -> BadParamValue."
+    [Fact]
+    public void WaveControl_negative_timerMs_rejects()
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P(("op", "setTimer"), ("timerMs", -1)));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    // §2.2: wave is a wave ORDINAL, not a magnitude -- zero and negative both refuse.
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void WaveControl_wave_below_one_rejects(int wave)
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P(("op", "summon"), ("wave", wave)));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    // §2.2: `enabled` only honoured under `hold`.
+    [Fact]
+    public void WaveControl_enabled_is_only_honoured_under_hold()
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P(("op", "summon"), ("enabled", true)));
+        Assert.Equal(AtomRejectionReason.ParamNotHonoured, r.Reason);
+    }
+
+    // §2.5: same match/player-only scope rule as match.modify.
+    [Fact]
+    public void WaveControl_carries_the_events_plus_match_trigger_set()
+    {
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnSpawn).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnDamageDealt).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnDamageTaken).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnDeath).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnWave).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnMatchStart).IsOk);
+        Assert.True(AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnMatchEnd).IsOk);
+
+        // Board-economy events are deliberately NOT part of this kind's set (EventsPlusMatch, not
+        // EventsPlusMatchAndEconomy) -- wave.control has no board-economy meaning.
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnSunCollect).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("wave.control", AtomTriggers.OnGridPlace).Reason);
+    }
+
+    [Fact]
+    public void WaveControl_runtime_support_is_lawn_only()
+    {
+        var kind = AtomKindRegistry.Get("wave.control")!;
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Battle));
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Sim));
+    }
+
+    // PLANTED VIOLATION (§4, vocabulary half): if wave.control's own op-vocabulary check were ever
+    // dropped, "freeze" would need to be re-validated some other way -- pinning BadParamValue here
+    // directly against the live registry means removing the check (or reverting the op's name back
+    // to "freeze" in the kind's own vocabulary) fails this test, naming CheatActions.cs's F-WAVE-
+    // FREEZE floor behaviour in the same assertion as the vocabulary membership check above.
+    [Fact]
+    public void PLANTED_VIOLATION_naming_the_op_freeze_would_repeat_the_fx_set_dirt_box_defect()
+    {
+        var r = AtomKindRegistry.Validate("wave.control", P(("op", "freeze")));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    // ---- E37 (spec-projectile-control.md) — the swept BulletMoveWay set, spawn.entity's bullet arm,
+    // and bullet.modify's own closed schema -------------------------------------------------------
+
+    // Criterion 0: the real, complete, 18-member set the assembly sweep found (ilspycmd against three
+    // independent sources — see docs/research/effect-runtime/03-status-and-spawn-surface.md), never
+    // the old unswept right|left|up|down|track guess.
+    static readonly string[] RealBulletMoveWayMembers =
+    {
+        "MoveRight", "Puff", "MoveRight_threePeater", "Track", "Fly", "Free", "Left", "Split_left",
+        "Throw", "Cannon", "PeaNut", "Stable", "SmoothTrack", "Sin", "Spin", "Jump", "SuperGatling",
+        "None",
+    };
+
+    [Fact]
+    public void SpawnEntity_moveWay_vocabulary_is_exactly_the_eighteen_swept_members()
+    {
+        var vocabulary = AtomKindRegistry.Get("spawn.entity")!.Params.Defs
+            .First(d => d.Name == "moveWay").Vocabulary!();
+
+        Assert.Equal(18, vocabulary.Count);
+        Assert.Equal(
+            RealBulletMoveWayMembers.OrderBy(x => x, StringComparer.Ordinal),
+            vocabulary.OrderBy(x => x, StringComparer.Ordinal));
+    }
+
+    [Theory]
+    [InlineData("MoveRight")] [InlineData("Puff")] [InlineData("MoveRight_threePeater")]
+    [InlineData("Track")] [InlineData("Fly")] [InlineData("Free")] [InlineData("Left")]
+    [InlineData("Split_left")] [InlineData("Throw")] [InlineData("Cannon")] [InlineData("PeaNut")]
+    [InlineData("Stable")] [InlineData("SmoothTrack")] [InlineData("Sin")] [InlineData("Spin")]
+    [InlineData("Jump")] [InlineData("SuperGatling")] [InlineData("None")]
+    public void Every_swept_moveWay_member_is_accepted_on_spawn_entity(string member)
+    {
+        Assert.True(AtomKindRegistry.Validate("spawn.entity",
+            P(("kind", "bullet"), ("typeId", 0), ("moveWay", member))).IsOk, member);
+    }
+
+    // A member the sweep did NOT find (the old guess's own spelling) is a load-time BadParamValue,
+    // never an unmatched cast at execute (§4's own test-table row).
+    [Theory]
+    [InlineData("spiral")]
+    [InlineData("right")]   // the old, never-swept guess's spelling — real member is "MoveRight"
+    [InlineData("up")]
+    [InlineData("down")]
+    public void An_unswept_moveWay_value_is_BadParamValue_at_load(string bogus)
+    {
+        var r = AtomKindRegistry.Validate("spawn.entity",
+            P(("kind", "bullet"), ("typeId", 0), ("moveWay", bogus)));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    [Theory]
+    [InlineData("y")]
+    [InlineData("moveWay")]
+    [InlineData("fromType")]
+    public void Bullet_only_spawn_params_are_honoured_for_bullet_and_dropped_for_plant_and_zombie(string key)
+    {
+        object value = key == "moveWay" ? "Track" : 3;
+
+        Assert.True(AtomKindRegistry.Validate("spawn.entity",
+            P(("kind", "bullet"), ("typeId", 0), (key, value))).IsOk, key);
+
+        Assert.Equal(AtomRejectionReason.ParamNotHonoured, AtomKindRegistry.Validate("spawn.entity",
+            P(("kind", "plant"), ("typeId", 0), (key, value))).Reason);
+        Assert.Equal(AtomRejectionReason.ParamNotHonoured, AtomKindRegistry.Validate("spawn.entity",
+            P(("kind", "zombie"), ("typeId", 0), (key, value))).Reason);
+    }
+
+    // ---- bullet.modify's own closed schema ---------------------------------------------------------
+
+    [Theory]
+    [InlineData("set")]
+    [InlineData("add")]
+    [InlineData("scale")]
+    public void BulletModify_accepts_every_one_of_the_three_legal_ops(string op)
+    {
+        Assert.True(AtomKindRegistry.Validate("bullet.modify",
+            P(("op", op), ("amount", 1500))).IsOk, op);
+    }
+
+    [Fact]
+    public void BulletModify_bad_op_rejects_with_BadParamValue()
+    {
+        var r = AtomKindRegistry.Validate("bullet.modify", P(("op", "multiply"), ("amount", 1500)));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    [Fact]
+    public void BulletModify_missing_op_is_MissingParam()
+    {
+        var r = AtomKindRegistry.Validate("bullet.modify", P(("amount", 1500)));
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Reason);
+    }
+
+    [Fact]
+    public void BulletModify_missing_amount_is_MissingParam()
+    {
+        var r = AtomKindRegistry.Validate("bullet.modify", P(("op", "set")));
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Reason);
+    }
+
+    [Fact]
+    public void BulletModify_accepts_optional_bulletType_and_moveWay()
+    {
+        Assert.True(AtomKindRegistry.Validate("bullet.modify",
+            P(("op", "set"), ("amount", 200), ("bulletType", 3), ("moveWay", "Track"))).IsOk);
+    }
+
+    [Fact]
+    public void BulletModify_bad_moveWay_is_BadParamValue()
+    {
+        var r = AtomKindRegistry.Validate("bullet.modify",
+            P(("op", "set"), ("amount", 200), ("moveWay", "spiral")));
+        Assert.Equal(AtomRejectionReason.BadParamValue, r.Reason);
+    }
+
+    // §2b.1: a permanent modifier — no trigger may bind to it, on either the known or unknown side.
+    [Fact]
+    public void BulletModify_carrying_any_trigger_is_TriggerNotAllowed()
+    {
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("bullet.modify", AtomTriggers.OnDamageDealt).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("bullet.modify", AtomTriggers.OnSpawn).Reason);
+        Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
+            AtomKindRegistry.ValidateTrigger("bullet.modify", AtomTriggers.OnActivate).Reason);
+    }
+
+    // §2b: Lawn only today — Battle/Sim have no projectile consumer (E1's living-table "pending, never
+    // never" rule — RuntimeState.None here records a real gap, not a permanent "never").
+    [Fact]
+    public void BulletModify_runtime_support_is_lawn_only()
+    {
+        var kind = AtomKindRegistry.Get("bullet.modify")!;
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Battle));
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Sim));
+    }
+
+    // §2b: no new attach point — bullet.modify reuses the existing Board seam spawn.entity/board.action
+    // etc already use, distinct from match.modify/wave.control's own Match attach point.
+    [Fact]
+    public void BulletModify_attaches_to_the_existing_Board_point()
+    {
+        Assert.Equal(AttachPoint.Board, AtomKindRegistry.Get("bullet.modify")!.Attach);
+    }
+
+    // §4's "re-add NotImplementedNote to atk -> load test must fail with ParamNotImplemented" planted
+    // violation, load-time half (the sink-forwarding half needs a live host — see spec §4's own note
+    // that this repo's CI never builds the injector). Same shape as
+    // Economy_capPerMatch_validates_now_that_the_runner_owns_it's own NotImplementedNote assertion.
+    [Fact]
+    public void SpawnEntity_atk_carries_no_NotImplementedNote()
+    {
+        Assert.Null(AtomKindRegistry.Get("spawn.entity")!.Params.Defs
+            .First(d => d.Name == "atk").NotImplementedNote);
     }
 }

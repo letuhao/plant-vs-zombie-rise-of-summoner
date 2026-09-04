@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:11:39Z",
-      "minorityValues": {
-        "rarity": "fused"
-      },
+      "emittedUtc": "2026-09-04T10:21:32Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,19 +44,19 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "Bulwark",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
       "defensive-ballistics",
-      "umbrella-flora"
+      "umbrella-hybrids"
     ],
     "gameTypeId": 916,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "chimeric",
+    "rarity": "fused",
     "reach": "short",
     "reason": "The creature is a defensive support plant designed to augment projectiles and manage economy, lacking the destructive or world-altering scale required for a 'harbinger' rating.",
     "resourceProfile": [
@@ -70,17 +69,17 @@
     ],
     "side": "plant",
     "speciesId": "EmeraldUmbrella",
-    "targetPreference": "backline",
+    "targetPreference": "frontline",
     "traits": [
       "projectile-deflection",
       "kinetic-amplification",
       "economic-catalyst",
-      "positional-disruption"
+      "statue-resilience"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "shiny",
+      "mutated"
     ],
     "verdict": "too-high"
   }

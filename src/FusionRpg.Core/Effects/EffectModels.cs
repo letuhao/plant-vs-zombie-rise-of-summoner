@@ -243,6 +243,19 @@ public static class JsonOverlay
         return Convert.ToInt32(v, CultureInfo.InvariantCulture);
     }
 
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long`-preserving sibling of <see cref="GetInt"/> and
+    /// <see cref="GetDouble"/> — needed because `GetDouble`'s `Convert.ToDouble` stops being
+    /// integer-exact above 2^53 (CLAUDE.md's own overflow table), silently corrupting a magnitude
+    /// like <c>zombieStartAmmor</c> that this repo's overflow rule says must stay `long` end to end.
+    /// Only this kind's one true `long` magnitude needs it today.
+    /// </summary>
+    public static long GetLong(Dictionary<string, object?> map, string key, long fallback = 0)
+    {
+        if (!map.TryGetValue(key, out var v) || v == null) return fallback;
+        return Convert.ToInt64(v, CultureInfo.InvariantCulture);
+    }
+
     /// <summary>Null, not a fallback value, when absent — for a param whose absence is itself
     /// meaningful (E28: an unset grid.clear row/col must stay "no constraint", never collide with a
     /// real 0).</summary>

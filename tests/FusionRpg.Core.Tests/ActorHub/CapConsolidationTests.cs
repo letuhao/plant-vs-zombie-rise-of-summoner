@@ -14,7 +14,7 @@ public class CapConsolidationTests
     [Fact]
     public void RaisingTheCapActuallyRaisesIt()
     {
-        using var _ = DerivedStatPolicy.UseScoped(new DerivedStatTuning(SchemaVersion: 1, Version: 1, CategoryResistCap: 0.99));
+        using var _ = DerivedStatPolicy.UseScoped(new DerivedStatTuning(SchemaVersion: 1, Version: 1, CategoryResistCap: 0.99, TurnDefaultSpeed: 100));
 
         var composer = new DerivedComposer();
         var snap = composer.Compose(new[]
@@ -29,7 +29,7 @@ public class CapConsolidationTests
     [Fact]
     public void LoweringStillLowers()
     {
-        using var _ = DerivedStatPolicy.UseScoped(new DerivedStatTuning(SchemaVersion: 1, Version: 1, CategoryResistCap: 0.50));
+        using var _ = DerivedStatPolicy.UseScoped(new DerivedStatTuning(SchemaVersion: 1, Version: 1, CategoryResistCap: 0.50, TurnDefaultSpeed: 100));
 
         var composer = new DerivedComposer();
         var snap = composer.Compose(new[]

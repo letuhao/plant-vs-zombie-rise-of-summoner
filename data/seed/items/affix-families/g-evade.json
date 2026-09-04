@@ -26,15 +26,62 @@
       "nameKey": "affix.evasion",
       "name": "Evasion",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.dodge.{variant}", "op": "Flat" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.dodge.{variant}",
+        "op": "Flat"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "medium",
-      "nameWords": { "prefix": ["Scalded", "Numbed", "Startled", "Jarred", "Dazzled", "Spooked"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Scalded"
+          },
+          {
+            "variant": "ice",
+            "word": "Numbed"
+          },
+          {
+            "variant": "air",
+            "word": "Startled"
+          },
+          {
+            "variant": "earth",
+            "word": "Jarred"
+          },
+          {
+            "variant": "light",
+            "word": "Dazzled"
+          },
+          {
+            "variant": "dark",
+            "word": "Spooked"
+          }
+        ]
+      },
       "displayTemplate": "{value} dodge against {element} attacks",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED — id, kind and element-variant expansion kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.evade's sole existingFamilies entry). `roles` is the evade column of ssot-affixes.md §4.3's role x group matrix, translated from the stale 12-role table to core.v1.json's 15 ids: head-protective->head-guard, sense-utility->sense, core-protective->core-guard, mantle-utility->mantle, footing/jewel-major stay, jewel-minor->jewel-minor-a and jewel-minor-b, armament-secondary stays. manipulator-offense, girdle-resource, armament-primary and the commander-only `standard` row all carry weight 0 for evade and are correctly absent — no offense-hand slot dodges better for wearing this. `variants: elements+omni` matches the per-element channels DerivedStatChannels.cs already ships (CombatDodgeFire/Ice/Air/Earth/Light/Dark alongside CombatDodgeOmni, both read by CombatDerivedReader.Dodge), the same shape as elemental_power. `nameWords.prefix` is authored fresh for this wave: ssot-affixes.md §4.12's illustrative word table names only one confirmed word pair for this family ('Shifting' humanoid / 'Deep-rooted' plant override, band B) and does not enumerate a per-element breakdown, so these six extend that gap the way the on-hit partition minted words for atom.retribution where no table existed at all — a plant swaying a stray hit aside, not a nimble step, per entry-shapes.md's own plant-override template for this exact family ('chance to sway aside'). `powerBand: medium` is the baseline the six new Increased/Replace siblings below are judged against. RUNTIME: `stat.derived` is quarantined None/None/None (D6) until E12's BattleStatComposer; this row imports and binds nowhere today, a known and scheduled gap, not a reason to author it differently."
     },
     {
@@ -42,15 +89,62 @@
       "nameKey": "affix.startle-reflex",
       "name": "Startle Reflex",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.dodge.{variant}", "op": "Increased" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.dodge.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Banked", "Anchored", "Grounded", "Rooted", "Steadfast", "Unshaken"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Banked"
+          },
+          {
+            "variant": "ice",
+            "word": "Anchored"
+          },
+          {
+            "variant": "air",
+            "word": "Grounded"
+          },
+          {
+            "variant": "earth",
+            "word": "Rooted"
+          },
+          {
+            "variant": "light",
+            "word": "Steadfast"
+          },
+          {
+            "variant": "dark",
+            "word": "Unshaken"
+          }
+        ]
+      },
       "displayTemplate": "{value} increased dodge against {element} attacks",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family minted on this group's reserved `evd` stem (naming.v1.json idNamespaces.affixFamilies), word `flinch` — short and mechanical, the reflex a body makes right before a blow lands, whether it startles upright or a leaf curls shut. Increased against evasion's Flat is the same split `ferocity` makes against `might` and `elpw-amplify` against `elemental_power`: Flat adds resolver points, Increased scales them, and the two compose differently against everything else on the actor. Same group, so `roles` is identical to evasion's row above — that repetition is the matrix, not copy-paste. `powerBand: low` against evasion's `medium` is the same relative-pull judgement the elpw-amplify exemplar makes for its own sibling. RUNTIME: quarantined None/None/None (D6) with evasion, same gap, same schedule."
     },
     {
@@ -58,15 +152,62 @@
       "nameKey": "affix.braced-footing",
       "name": "Braced Footing",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.dodge.{variant}", "op": "Replace" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.dodge.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Cauterized", "Chapped", "Windburned", "Gnarled", "Sunbleached", "Timeworn"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Cauterized"
+          },
+          {
+            "variant": "ice",
+            "word": "Chapped"
+          },
+          {
+            "variant": "air",
+            "word": "Windburned"
+          },
+          {
+            "variant": "earth",
+            "word": "Gnarled"
+          },
+          {
+            "variant": "light",
+            "word": "Sunbleached"
+          },
+          {
+            "variant": "dark",
+            "word": "Timeworn"
+          }
+        ]
+      },
       "displayTemplate": "dodge against {element} attacks never falls below {value}",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `evd`, word `brace`. Fills the op the Flat/Increased pair above leaves untouched: a floor rather than an addition — dodge against the named element never drops below this atom's resolved value, regardless of what else is or is not on the actor, the literal reading of `Replace` being one of the derived side's own four ops (Flat|Increased|Replace|Flag, no More — atom-catalog-ssot.md). No shipped `stat.derived` family demonstrates Replace's exact compose order today (does it override every other contributor outright, or only ones it would otherwise beat?), so this is a considered judgement call about what the affix MEANS, not a confirmed runtime mechanic — flagged here rather than guessed silently, the same spirit as the exemplar README's own two open gaps. `powerBand: low`, deliberately conservative so a guaranteed floor reads as a safety net rather than a build-around. RUNTIME: quarantined None/None/None (D6), same as every entry in this file."
     },
     {
@@ -74,15 +215,62 @@
       "nameKey": "affix.tempered-hide",
       "name": "Tempered Hide",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.{variant}", "op": "Increased" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Charred", "Rimed", "Weathered", "Petrified", "Glazed", "Calloused"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Charred"
+          },
+          {
+            "variant": "ice",
+            "word": "Rimed"
+          },
+          {
+            "variant": "air",
+            "word": "Weathered"
+          },
+          {
+            "variant": "earth",
+            "word": "Petrified"
+          },
+          {
+            "variant": "light",
+            "word": "Glazed"
+          },
+          {
+            "variant": "dark",
+            "word": "Calloused"
+          }
+        ]
+      },
       "displayTemplate": "{value} increased resistance to {element} critical hits",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `evd`, word `harden` — a surface toughened by exposure, bark or skin alike. `combat.crit.resist.*` already carries one Flat family, `stoicism`, but its id sits in naming.v1.json's `g.ward` stem, not `g.evade` — this partition owns only the Increased sibling, minted here on its own stem, the same Flat/Increased split evasion and evd-flinch make above. Same `roles` row as every other entry in this file (one row per role per GROUP, not per family). `powerBand: low`, the scaling companion to a Flat baseline this partition does not itself author. RUNTIME: quarantined None/None/None (D6)."
     },
     {
@@ -90,15 +278,62 @@
       "nameKey": "affix.old-growth",
       "name": "Old Growth",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.{variant}", "op": "Replace" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Waxen", "Frosted", "Bound", "Clotted", "Warded", "Veiled"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Waxen"
+          },
+          {
+            "variant": "ice",
+            "word": "Frosted"
+          },
+          {
+            "variant": "air",
+            "word": "Bound"
+          },
+          {
+            "variant": "earth",
+            "word": "Clotted"
+          },
+          {
+            "variant": "light",
+            "word": "Warded"
+          },
+          {
+            "variant": "dark",
+            "word": "Veiled"
+          }
+        ]
+      },
       "displayTemplate": "resistance to {element} critical hits never falls below {value}",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `evd`, word `scar` — something old enough to have taken its worst hit already, a gnarled trunk or a veteran's old wound, and rarely finds a new one that bad. The floor sibling for `combat.crit.resist.*`, same Replace judgement call as evd-brace above (the compose order Replace resolves against is a generator-time question, not an authoring one). `powerBand: low`, same conservative reasoning as every Replace family in this file. RUNTIME: quarantined None/None/None (D6)."
     },
     {
@@ -106,15 +341,62 @@
       "nameKey": "affix.sealing-sap",
       "name": "Sealing Sap",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.damage.{variant}", "op": "Increased" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.damage.{variant}",
+        "op": "Increased"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Baked", "Crusted", "Husked", "Shelled", "Lacquered", "Rinded"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Baked"
+          },
+          {
+            "variant": "ice",
+            "word": "Crusted"
+          },
+          {
+            "variant": "air",
+            "word": "Husked"
+          },
+          {
+            "variant": "earth",
+            "word": "Shelled"
+          },
+          {
+            "variant": "light",
+            "word": "Lacquered"
+          },
+          {
+            "variant": "dark",
+            "word": "Rinded"
+          }
+        ]
+      },
       "displayTemplate": "{value} increased reduction of bonus damage from {element} critical hits",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `evd`, word `seal` — sap closing over a wound before it can widen, so the blow that lands does not land as hard. `combat.crit.resist.damage.*` already carries one Flat family, `padding`, id-owned by `g.ward`'s stem — this partition mints only the Increased sibling. `powerBand: low`. RUNTIME: quarantined None/None/None (D6). Note the reused nameWords list below (evd-husk) is deliberately a different physical idea — shell rather than sap — so the two families on the same channel-pair don't read as one idea said twice; see this file's own quality note about adjectives clustering."
     },
     {
@@ -122,15 +404,62 @@
       "nameKey": "affix.hardened-husk",
       "name": "Hardened Husk",
       "kindId": "stat.derived",
-      "params": { "channel": "combat.crit.resist.damage.{variant}", "op": "Replace" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "channel": "combat.crit.resist.damage.{variant}",
+        "op": "Replace"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["head-guard", "sense", "core-guard", "mantle", "footing", "jewel-major", "jewel-minor-a", "jewel-minor-b", "armament-secondary"],
+      "roles": [
+        "head-guard",
+        "sense",
+        "core-guard",
+        "mantle",
+        "footing",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "armament-secondary"
+      ],
       "powerBand": "low",
-      "nameWords": { "prefix": ["Smoldered", "Iced", "Windworn", "Loamcaked", "Sunhardened", "Nightcured"] },
+      "nameWords": {
+        "prefix": [
+          {
+            "variant": "fire",
+            "word": "Smoldered"
+          },
+          {
+            "variant": "ice",
+            "word": "Iced"
+          },
+          {
+            "variant": "air",
+            "word": "Windworn"
+          },
+          {
+            "variant": "earth",
+            "word": "Loamcaked"
+          },
+          {
+            "variant": "light",
+            "word": "Sunhardened"
+          },
+          {
+            "variant": "dark",
+            "word": "Nightcured"
+          }
+        ]
+      },
       "displayTemplate": "resistance to bonus damage from {element} critical hits never falls below {value}",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family, stem `evd`, word `husk` — an outer shell that takes the worst of a blow so the body inside does not have to. The floor sibling for `combat.crit.resist.damage.*`, same Replace judgement call as evd-brace and evd-scar above. `powerBand: low`. RUNTIME: quarantined None/None/None (D6) — the seventh and last entry in this partition, closing out the Flat(evasion)/Increased/Replace grid across all three channels this group's fiction covers: dodge, crit resistance, and mitigation of a critical hit that still lands."
     }
   ]

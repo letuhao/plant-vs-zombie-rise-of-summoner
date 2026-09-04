@@ -16,7 +16,7 @@ This module adds no features. Its entire value is proving that the kernel can ca
 |---|---|
 | Report bytes | All four battle goldens identical, hashes untouched |
 | Expedition plans | All four expedition goldens identical |
-| Ruleset | `RulesetVersion` stays **2**; the SSOT ban test stays armed and green |
+| Ruleset | `RulesetVersion` stays **2** — ⛔ **historical, corrected 2026-09-04.** True when T5 ran, and T5's gate is untouched by the correction: it proved byte-identity *at the version current then*, which is what it was for. **The live value is 4** (`BattleModels.cs:95`), moved afterwards by the power dial (2→3) and the action-layer adoption (3→4). See `decisions.md`'s **`RulesetVersion` history (battle)** row. The SSOT ban test stays armed and green |
 | RNG | Every stream's draw **count and order** unchanged |
 | Events | `report.Events` identical in content *and* sequence |
 | Apply path | Every HP delta still resolver → `DamageApplyPipeline` → shield gate; funnel guard green |
@@ -104,4 +104,4 @@ Plus two fixtures that must exist *before* adoption because nothing covers them 
 
 ## Success criteria
 
-1. All eight goldens unchanged; `RulesetVersion` still 2. 2. Every suite and guard green with no test edits. 3. The parity ladder localizes any drift to a stream, a phase, or a round — never just "the hash moved." 4. `BattleEngine` no longer owns a loop, and the round skeleton is a declared, tested sequence.
+1. All eight goldens unchanged; `RulesetVersion` unmoved **by this module** (it was 2 when T5 ran; two later streams moved it to 4 — `decisions.md`, `RulesetVersion` history row). 2. Every suite and guard green with no test edits. 3. The parity ladder localizes any drift to a stream, a phase, or a round — never just "the hash moved." 4. `BattleEngine` no longer owns a loop, and the round skeleton is a declared, tested sequence.

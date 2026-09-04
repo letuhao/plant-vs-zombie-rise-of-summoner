@@ -57,6 +57,33 @@ public static class WorldCommandAdmission
             if (namedSector is null) return (false, "sector.missing");
         }
 
+        if (command.Kind == WorldCommandKinds.Cede)
+        {
+            // No entity — a faction cedes ground, not a legion.
+            if (namedSector is null) return (false, "sector.missing");
+            if (!string.Equals(namedSector.OwnerFactionId, command.CommanderId, StringComparison.Ordinal))
+                return (false, "sector.not-yours");
+        }
+
+        if (command.Kind == WorldCommandKinds.BindWarden)
+        {
+            // No entity — a faction binds a warden to ground, not a legion.
+            if (namedSector is null) return (false, "sector.missing");
+            if (!string.Equals(namedSector.OwnerFactionId, command.CommanderId, StringComparison.Ordinal))
+                return (false, "sector.not-yours");
+            if (string.IsNullOrWhiteSpace(command.WardenId)) return (false, "warden.missing");
+        }
+
+        if (command.Kind == WorldCommandKinds.Raise)
+        {
+            // No entity — raise founds a *new* legion, so there is nothing yet to anchor an
+            // ownership check on at submission time. Every other legality check (whose ground, a
+            // Seat, a hostile entity standing in it, enough RecruitStock) is resolution-time, in
+            // RaiseResolver at Snapshot — "not yours at Snapshot", per this kind's own acceptance,
+            // the identical discipline BuildResolver already applies for `build`.
+            if (namedSector is null) return (false, "sector.missing");
+        }
+
         if (command.Kind == WorldCommandKinds.Sustain)
         {
             if (command.EntityId is null) return (false, "entity.missing");

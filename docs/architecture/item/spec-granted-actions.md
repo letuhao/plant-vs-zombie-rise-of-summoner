@@ -4,6 +4,13 @@
 **Depends on:** `equip-assign` (4), `base-types` (6) · ⛔ **`X3`**
 **Rulings:** D14, D16, D26 · lane [G4 `ssot-granted-actions.md`](ssot-granted-actions.md)
 
+⚠ **Dependency reconciled 2026-09-04 — the map understates this row.** [item-map.md](../item-map.md)
+§4 lists module 19 as *"4, **X3**"*. **Module 6 is real and load-bearing:** `item_granted_action`'s
+`container_id` is an FK to `item_base_type(container_id)` (§(a) below), and **gate GA2 is blocked by
+module 6** in this spec's own gate table. The map's 2026-09-04 reconciliation note lists five
+understated rows and does not include this one. **Ask: add `6` to item-map.md §4 row 19** — the same
+kind of one-line map edit already recorded for modules 8, 12, 13, 16 and 21.
+
 ## Objective
 
 G4 is **one seam and nothing else**: an item declares `(action_id, grant_role)`, and equipping it writes
@@ -30,7 +37,7 @@ and `RpgStore.Actions.cs` creates five tables. Verified item by item:
 | 4 | An action-set assembly entry point | ✅ **shipped** | `ActionSetAssembler.Assemble(basics, liveGrants, isDefaultAttackEligible)` — `Grants/ActionSetAssembler.cs:42`; `default-attack` replacement at `:80-85` |
 | 5 | **A grant table that is not `effect_binding`** | ✅ **shipped — option (a), verbatim** | `rpg_action_grant` — `RpgStore.Actions.cs:82-91`. Its DDL comment cites this lane by name: *"No `instance_id` column: a granted action has no instance and no rolls (spec-action-model.md §5 — **the correction from item/ssot-granted-actions.md §5.5 item 5**)"* |
 | 6 | A named snapshot moment | ✅ **shipped** | `FrozenActionSet.FreezeAtRunStart` — `Grants/FrozenActionSet.cs:27-28` |
-| 7 | Written removal semantics per FSM state | ⚠ **partial** | `FrozenActionSet.cs:11` records the shape — *"the underlying `rpg_action_grant` row can be marked withdrawn at any moment"* — but the per-state table §3.5 proposes is not written down anywhere the kernel can be held to |
+| 7 | Written removal semantics per FSM state | ⚠ **partial → ✅ claimed by this module**, below | `FrozenActionSet.cs:11` records the shape — *"the underlying `rpg_action_grant` row can be marked withdrawn at any moment"* — but the per-state table §3.5 proposes is not written down anywhere the kernel can be held to. **It was assigned to nobody; this spec claims it** |
 | 8 | **A cap policy and its number** | ⛔ **open** | `ActionSetAssembler.cs:30` — *"Pure — no cap enforcement (item 8 / T24's own job)"*. Nothing enforces one |
 | 9 | A written refusal of per-grant overrides | ⛔ **not recorded** | Nothing in `decisions.md`. §5.6's *"one thing that can be done today"* was never done |
 
@@ -40,7 +47,7 @@ and `RpgStore.Actions.cs` creates five tables. Verified item by item:
 |---|---|
 | 1. *"`rpg_action` does not exist. No table, no `src/FusionRpg.Core/Actions/` directory, no rows."* | ⛔ **False.** Both exist |
 | 2. *"`item_base_type` does not exist either"* | ✅ **Still true.** Module 6 `base-types` owns it; this module keys on it |
-| 3. *"Eleven of twelve kinds are `Battle = None`; one is `Partial`"* | ⛔ **False, and the §3.6 table is stale end to end.** **Five kinds are `Battle = Full` today:** `stat.modify` (`AtomKindRegistry.cs:217`), `stat.derived` (`:255`), `resource.delta` (`:290`), `status.apply` (`:344`), `shield.grant` (`:396`). No kind is `Partial`. The six board kinds and `resource.economy` / `status.clear` remain `Battle = None` |
+| 3. *"Eleven of twelve kinds are `Battle = None`; one is `Partial`"* | ⛔ **False, and the §3.6 table is stale end to end.** **Five kinds are `Battle = Full` today:** `stat.modify` (`AtomKindRegistry.cs:217`), `stat.derived` (`:255`), `resource.delta` (`:290`), `status.apply` (`:344`), `shield.grant` (`:396`). No kind is `Partial`. The remaining **seven** stay `Battle = None`: the **five** `AttachPoint.Board` kinds — `spawn.entity` (`:403`), `board.action` (`:431`), `grid.spawn` (`:445`), `grid.clear` (`:460`), `box.set` (`:476`) — plus `resource.economy` (`:296`) and `status.clear` (`:358`). ⚠ **Corrected 2026-09-04: this row previously said "six board kinds", which would make thirteen.** Five Board + five Full + `resource.economy` + `status.clear` = the twelve registered kinds |
 | 4. *"There are no real weapons"* | ✅ **Still true.** Three stubs (`UniqueEquipmentCatalog.cs:23-25`) and four relics (`RelicCatalog.cs`) |
 
 ⭐ **And §3.6's headline conclusion inverts.** The lane wrote: *"the weapon fantasy is currently split
@@ -49,6 +56,81 @@ halves now execute in battle.** A weapon's `stat.modify` and `stat.derived` atom
 (`BattleStatModifierLedger` per A18e, `BattleStatComposer` per E12), and an action resolves there. The
 lawn gap is unchanged and option **(b)** — *battle-frame content, honestly tagged* — still stands, but
 the case for it is now "the lawn has no queue", not "no runtime executes both halves".
+
+### ⭐ Handshake item 7 — per-FSM-state removal semantics. **Claimed here.**
+
+§5.5 item 7 was marked *partial* and assigned to nobody: `ssot-granted-actions.md` §3.5 *proposes* the
+per-state table, and the audit's own words are *"not written down anywhere the kernel can be held
+to."* **This module claims it**, on the lane's own reasoning — *"written now because it is free now
+and expensive after someone builds mid-match equip."*
+
+**Why it is ours and not the timeline program's:** the rule says what a *grant removal* means, and
+grants are this module's whole product. The kernel supplies the states; it owes no opinion on an item
+leaving. The one thing the kernel must do — **never accept an inventory event as an `InterruptCause`**
+— is a refusal this module *requests* (§9.10), not a behaviour it adds.
+
+**It is unreachable today, which is exactly what makes it cheap.** Equipment cannot change mid-run:
+`UniqueActorService.PutEquipment` refuses unless the actor's phase is `Roster`, returning
+`phase.not_roster` (`src/FusionRpg.Server/UniqueActorService.cs:43-44`), and `ClearEquipment` routes
+through the same method (`:62-64`). So the shipping rule is unchanged:
+
+> **The actor's granted-action set is assembled at run start and is immutable for the run.**
+
+**The table below is the contract for the day that stops being true.** Verified against the shipped
+FSM — `TurnState` is eight values (`Battle/Timeline/TurnState.cs:14-24`) and `TurnTransitions.Legal`
+declares every edge in the same file:
+
+| Actor state at removal | Rule | Why |
+|---|---|---|
+| `Charging`, `Ready` | the action leaves the selectable set **immediately** | nothing has been paid — the intent source simply stops offering it (`IntentSource.cs`) |
+| `Committed`, `Resolving` | **the run completes**: costs stay paid, resolve handles fire, cooldown starts | *"Committing is what costs, not landing"* — cancelling here needs a refund path that rule forbids |
+| `Recovering` | applies at the `Recovering → Charging` transition | the only edge out of it |
+| `Downed`, `Dead`, `Withdrawn` | **recorded**, applied if the actor returns | `Downed → Charging` is legal, so a revive must not resurrect a removed grant |
+
+**Three invariants — this is the part a kernel can be held to:**
+
+| # | Invariant | Evidence / refusal |
+|---|---|---|
+| 1 | Removal applies at the **next quiescent point**, never mid-commitment | the two-row split above |
+| 2 | Removal **never cancels a committed action** | no refund path exists, by rule |
+| 3 | ⛔ An inventory event **never becomes an `InterruptCause`** | the enum is `CrowdControl` and `Damage` (`Battle/Timeline/ActionRunner.cs:41-45`); a third cause puts an item concern inside the kernel's slot accounting — the one place with a zero-allocation contract and a byte-identical gate in front of it |
+
+⚠ **Nothing needs reverting.** A granted action creates no binding, so the apply/revert lifecycle
+`stat.modify` and `stat.derived` carry does not apply here. **And cooldown survives removal for
+free:** `CooldownLedger` keys on `CooldownSlot(ActorKey, Slot)` (`CooldownLedger.cs:8`), not on the
+item, so unequip-then-re-equip does not reset it. That closes the classic swap exploit and nobody
+should "fix" it.
+
+**Ships as:** this table, the four tests below, and a `decisions.md` request — the same shape as
+handshake item 9. There is no enforcement code because there is nothing to enforce until mid-match
+equip exists; **`ItemGrantLandedFlags.MidRunEquipLanded = false`** carries that, so the FSM tests skip
+**against a flag** rather than being silently absent.
+
+### ⭐ R2 — the granted-action power budget. **Claimed, as an import-time validation.**
+
+**Module 9 built the read and handed the consumer here; this module never picked it up**, so the read
+had no consumer and module 9 was carrying a requirement nobody would use.
+`spec-item-power-reads.md`'s R2: *"`grantedActionPrice(actionId) := Reference.ScaleMilli(rungOf(actionId).QPowerMilli)`,
+the same path, reported against the item's rarity ceiling as a **share with a band**"* — and *"this
+read is reportable today and **gating only when module 19 `granted-actions` lands**."*
+
+**Picked up. It is one call at import:**
+
+| | Rule |
+|---|---|
+| **When** | at import of an `item_granted_action` row — the same moment `ActionNotGrantable` and `ActionNotDefaultAttackEligible` are checked. Never at drop, never at bind |
+| **What** | the R2 price against the base type's rarity ceiling, as a **share with a band**, never a threshold — an action's price and an affix bundle's price come from different shapes, so the error does not cancel (module 9's own cross-shape note) |
+| **Refusal** | over the ceiling → `GrantedActionOverBudget`, naming the offender and the band, exactly as an over-budget implicit is reported |
+| ⛔ **No resolvable rung** | `unpriced` → **refused**, never read as `0`. G4's stated fear is *"pricing it at zero would make every action-granting item strictly dominant"*; module 9 answers it by never pricing at zero, and **this is the enforcement half of that answer** |
+| **Never** | a generation input. It fails a lint; it does not silently shrink an item at drop time |
+
+⚠ **Inert in the same way GA3 is, and for the same reason.** With **X3** unresolved nothing produces
+actions, so there are no rungs to price. **The validation ships with GA2** — DDL, validator, reason
+codes, zero content rows — and its first real exercise is GA3's one weapon. That is why module 9's
+read is *reportable* before it is *gating*.
+
+**So module 9 keeps R2**, and its sensitivity note is now true in both directions rather than pointing
+at a module that declined to look.
 
 ### What is actually missing — three things, and one of them is not ours
 
@@ -95,10 +177,13 @@ and two seedsmith comments. No production path turns a seed into a concrete acti
 pointing at a table nothing fills — SC7's *"a row no code consumes is not content; it is a lie in a
 table"*, arriving from the other direction.
 
-> ⚠ **X3 is an UNACCEPTED dependency. State it plainly, because it is the reason this module cannot
-> land, and nobody currently owns it.**
+> ⚠ **X3 is an external dependency this module waits on.** `action-corpus` owns it and is building.
+> **We do not track their progress from their documents, and we do not propose work inside their
+> program** (D36).
 
-`item-map.md` §3 names `action-corpus` as X3's owner. **`action-corpus-map.md` does not acknowledge it:**
+~~The table below inspected `action-corpus-map.md` to argue the dependency was unowned. That inspection
+was the boundary violation D36 corrects; it is kept struck rather than deleted so the reasoning error
+stays visible.~~
 
 | Where it would be | What is there |
 |---|---|
@@ -106,18 +191,32 @@ table"*, arriving from the other direction.
 | §8 *What stays out* | *"**The action runtime.** Shipped. This program authors content for it."* — the runtime, including the seeder's call site, is explicitly out of scope |
 | §2 *What already exists* | `ActionSeeder.Generate → Instantiator.Draw` is listed **"built"** with no inertness note, while `Instantiator.TryInstantiate` on the next row *is* flagged *"built, inert — zero production callers"*. **So the seeder's inertness is invisible from that side too** |
 
-**Neither map owns it. The decider is the owner**, and the decision is one of three:
+✅ **RESOLVED 2026-09-04 — D36. Out of scope, and the earlier framing was a boundary violation.**
 
-1. `action-corpus` accepts it and adds the row (its §8 exclusion would need amending — a call site is
-   arguably runtime, which is exactly why it fell through).
-2. The item program builds the call site — which is a program-boundary crossing of the kind
-   `spec-demon-themes.md` §2.1 refused, and would need the same explicit authorization
-   `CrossProgramLandedFlags` records for P0.2/P0.4/P0.5.
-3. It is formally declined and this module ships **DDL + validator + zero content rows** (gate GA2
-   below), which is honest and useful and does not pretend the seam is live.
+> **Owner:** *"action corpus is take care by other agent and building, it is not item scope, fix your
+> boundary, avoid to touch other agent work."*
 
-⚠ **`action-corpus-map.md` is itself unapproved** — *"Not approved. No module spec may be written until
-it is"* — so option 1 cannot be actioned by anyone but the owner today.
+⛔ **This spec previously listed three options, two of which proposed changes inside `action-corpus`**
+— amending its §8 exclusion, or having the item program build a call site in its runtime. **Neither was
+ours to propose.** `action-corpus` is actively under construction by another owner; the observations
+above about its map being silent on the seeder's inertness are **struck**, because they were written to
+justify reaching across a boundary.
+
+**The correct posture, and the only one:**
+
+| | |
+|---|---|
+| What we do | **consume `ActionSeeder.Generate` when action-corpus ships a production caller.** Nothing more |
+| What we do not do | build a caller, amend their map, file a row in their program, or infer their schedule from their docs |
+| If it never lands | this module ships **DDL + validator + zero content rows** (gate GA2 below) — honest, useful, and not pretending the seam is live |
+
+**X3 therefore has no owner-decision attached and never needed one.** It is an ordinary external
+dependency: we wait, and the module's build order accommodates the wait.
+
+⛔ **We do not read `action-corpus-map.md`'s approval state, module list or schedule to reason about
+our own work.** That program is under active construction by another owner; its documents are theirs to
+change, and inspecting them to infer whether our dependency will land is the same boundary violation in
+a quieter form (D36).
 
 ### Gates — what ships in what order, unchanged from §5.6 and now checkable
 
@@ -170,12 +269,19 @@ rg -n "ActionSeeder\.Generate" src\
 
 ```text
 src/FusionRpg.Core/Items/Grants/ItemGrantedActionRow.cs   new — the six columns
-src/FusionRpg.Core/Items/Grants/ItemGrantValidator.cs     new — the content + cross-row checks
+src/FusionRpg.Core/Items/Grants/ItemGrantValidator.cs     new — the content + cross-row checks, plus
+                                                             R2's import-time budget call into
+                                                             ItemPowerReads (module 9)
 src/FusionRpg.Core/Items/Grants/EquippedGrantProjection.cs new — assign/unassign -> UpsertGrant /
                                                              delete-by-source. THE WIRING GAP (b)
 src/FusionRpg.Data/Sqlite/RpgStore.ItemGrants.cs          new — item_granted_action DDL
 src/FusionRpg.Core/Items/Grants/ItemGrantLandedFlags.cs   new — const bool ActionCorpusProducerLanded
-                                                             = false, mirroring CrossProgramLandedFlags
+                                                             = false (X3) and MidRunEquipLanded = false
+                                                             (handshake item 7), mirroring
+                                                             CrossProgramLandedFlags
+src/FusionRpg.Core/Items/Grants/GrantRemovalPolicy.cs     new — the per-TurnState table, item 7. Pure,
+                                                             no kernel edit, unreachable until mid-run
+                                                             equip exists
 tests/FusionRpg.Core.Tests/Items/ItemGrantedActionTests.cs new
 ```
 
@@ -215,7 +321,14 @@ static ActionGrantRow GrantFor(ItemAssignmentRow a, ItemGrantedActionRow g) =>
 | `display_order_is_role_ordinal_then_seq_then_action_id` | ordinal comparison, never a generated id |
 | `an_inventory_event_never_becomes_an_InterruptCause` | the kernel refusal, as a guard on `ActionRunner`'s enum |
 | `cooldown_survives_unequip_and_re_equip` | `CooldownLedger` keys on `(ActorKey, Slot)`, not on the item — the swap exploit is closed for free |
+| `removal_in_charging_or_ready_drops_the_action_from_the_selectable_set` | ⭐ item 7, rows 1–2 |
+| `removal_in_committed_or_resolving_lets_the_action_complete` | ⭐ item 7 — *"committing is what costs, not landing"*; no refund path |
+| `removal_in_recovering_applies_at_the_transition_to_charging` | the only edge out |
+| `removal_while_downed_is_recorded_and_survives_a_revive` | `Downed → Charging` is legal — a revive must not resurrect a removed grant |
+| `a_granted_action_over_its_rarity_ceiling_is_refused_at_import` | ⭐ R2 — `GrantedActionOverBudget`, with the band |
+| `an_action_with_no_resolvable_rung_is_refused_as_unpriced_never_zero` | R2's dominance answer, enforced rather than reported |
 | `X3_is_unresolved_and_the_flag_says_so` | `ItemGrantLandedFlags.ActionCorpusProducerLanded == false`, and GA3's tests are skipped **against that flag**, never silently absent |
+| `mid_run_equip_is_unlanded_and_the_FSM_tests_skip_against_the_flag` | item 7's contract is written and inert — skipped by flag, never quietly missing |
 
 ## Boundaries
 
@@ -225,9 +338,8 @@ shipped `ActionSetAssembler`. Freeze the set at run start. Reject rather than tr
 `battle-only` presentation tag so module 20 can render it (an item whose headline property silently does
 nothing in the mode the player is standing in is `status.expose.*` moved to the UI).
 
-**Ask first:** ⛔ **X3 — who owns a production caller for `ActionSeeder.Generate`.** The three options
-are listed above; the decider is the owner, and `action-corpus-map.md` is unapproved so nobody else can
-act. **The granted cap and its number** (handshake item 8). **Recording in `decisions.md` that the item
+**Ask first:** **Adding `6` to [item-map.md](../item-map.md) §4 row 19** (a one-line map edit; this
+module reads `item_base_type`). **The granted cap and its number** (handshake item 8). **Recording in `decisions.md` that the item
 side of a grant is a reference and a role, never a definition** (handshake item 9) — a doc change with
 no code that stops `A1` negotiating the seam mid-build. Amending I2's *"legal on both armament roles"*
 (§9.3, R4's).
@@ -249,10 +361,16 @@ become an `InterruptCause`. Never implement the action-set merge here.
       implements no merge of its own.
 - [ ] `default-attack` is refused on every role but `armament-primary`, and at most one per container.
 - [ ] A grant naming a non-grantable or default-attack-ineligible action is refused **at import**.
-- [ ] ⛔ **X3 is recorded as an unaccepted cross-program dependency** — in this spec, in `item-map.md`
-      §3, and as a request against `action-corpus-map.md` §7 — with a named decider and three stated
-      options. GA3 and GA4 do not ship until it is answered.
+- [ ] **X3 is recorded as an ordinary external dependency** — in this spec and in `item-map.md` §3.
+      **No request is filed against `action-corpus`** (D36). GA3 and GA4 wait for a production caller to
+      exist; they do not wait for an answer, because no question was asked.
 - [ ] GA2 ships standalone: DDL, validator, tests, **zero content rows**, and the module says so rather
       than authoring rows that point at an empty table.
 - [ ] `ssot-granted-actions.md` §3.6's runtime matrix and §5.6's reasons 1 and 3 are corrected in the
-      lane, with `AtomKindRegistry.cs:217/255/290/344/396` and `RpgStore.Actions.cs:22` cited.
+      lane, with `AtomKindRegistry.cs:217/255/290/344/396` and `RpgStore.Actions.cs:22` cited — and the
+      board-kind count stated as **five**, not six.
+- [ ] ⭐ **Handshake item 7 has an owner and a written table**: per-`TurnState` removal semantics, the
+      three invariants, four tests skipped against `MidRunEquipLanded`, and a `decisions.md` request.
+- [ ] ⭐ **R2 is enforced at import**, not merely reported: over-ceiling refuses with
+      `GrantedActionOverBudget`, and an action with no rung refuses as `unpriced` — never priced at zero.
+- [ ] Module 19's dependency on module 6 is reconciled with [item-map.md](../item-map.md) §4 row 19.

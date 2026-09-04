@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "candidateSetHash": "d6be44b884819c25a8002c60ebbb74114c7bf487fa186f26d875840496b34df3",
+    "corpusHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "partition": "rounds",
+    "round": 2,
+    "tuningVersion": 1
+  },
+  "entries": [],
+  "kind": "action-reject",
+  "schemaVersion": 1
+}

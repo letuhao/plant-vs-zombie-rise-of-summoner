@@ -1,5 +1,6 @@
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Power;
 
 namespace FusionRpg.Data;
 
@@ -9,6 +10,9 @@ namespace FusionRpg.Data;
 /// How many writes actually altered a row. Zero on a repeat import of unchanged files, which is what
 /// makes the content hash stand still and the catalog revision hold.
 /// </param>
+/// <param name="Coefficients">E44 criterion 0 (spec-power-sweep.md §4.1): how many
+/// <c>power-coefficient</c> rows this import carried — what it was GIVEN, matching every other count
+/// on this record, not how many actually changed a row.</param>
 public sealed record ImportOutcome(
     bool Committed,
     IReadOnlyList<SeedError> Errors,
@@ -21,7 +25,8 @@ public sealed record ImportOutcome(
     int RowsChanged,
     long CatalogRevision,
     ContentHashStamp? ContentHash,
-    int Affixes = 0)
+    int Affixes = 0,
+    int Coefficients = 0)
 {
     public bool IsOk => Errors.Count == 0;
 }
@@ -103,12 +108,23 @@ public sealed partial class RpgStore
 
             // Containers whose stored copy is byte-identical are skipped, not rewritten: `revision`
             // is a hashed column and an identical rewrite would move the content hash.
-            var containersToWrite = ValidateContainers(content, atomsById, LookupAffixForImport, errors);
+            // item-ideal.md, rarity-bands (module 7): a container may name a rarity already stored OR
+            // one newly seeded in this same batch (content.Rarities) -- same "overlay" rule ValidateAtoms
+            // already applies for atoms, so a container and its rarity can land in one import.
+            var rarityIds = ordinalOwner.Values.ToHashSet(StringComparer.Ordinal);
+            foreach (var r in content.Rarities) rarityIds.Add(r.RarityId);
+
+            var containersToWrite = ValidateContainers(content, atomsById, LookupAffixForImport, rarityIds.Contains, errors);
             var elementTable = ValidateElements(content, errors);
             var rosterToWrite = elementTable is not null && !SameRoster(GetElementTable(), elementTable)
                 ? elementTable
                 : null;
             var policyRows = ValidateChannelPolicyContent(content, errors);
+
+            // E44 criterion 0 (spec-power-sweep.md §4.1): the seed reader was the only missing link
+            // in an already-shipped table/writer/reader/fallback/hash chain — validated the same
+            // "check everything before the first write" way as every other content kind here.
+            var coefficientsToWrite = ValidateCoefficients(content, errors);
 
             if (errors.Count > 0)
                 return new ImportOutcome(false, errors, 0, 0, 0, 0, 0, 0, 0, GetCatalogRevision(), null);
@@ -163,6 +179,12 @@ public sealed partial class RpgStore
                 foreach (var row in policyRows)
                     changed += UpsertChannelPolicyRowUnlocked(db, tx, row);
 
+                // E44 criterion 0: absent means "leave the coefficient table alone", the same rule
+                // the roster write just above already follows — the folders are swept independently
+                // and a run that touched only atoms must not wipe out every authored coefficient.
+                if (coefficientsToWrite.Count > 0)
+                    changed += WriteCoefficientsUnlocked(db, tx, coefficientsToWrite);
+
                 if (changed > 0)
                     ExecIn(db, tx,
                         "UPDATE content_meta SET catalog_revision = catalog_revision + 1 WHERE id = 1;");
@@ -180,7 +202,7 @@ public sealed partial class RpgStore
                 !dryRun, errors,
                 content.Atoms.Count, content.Containers.Count, content.Curves.Count, content.Rarities.Count,
                 content.Elements.Count, content.ChannelPolicies.Count, changed,
-                GetCatalogRevision(), ComputeContentHash(), content.Affixes.Count);
+                GetCatalogRevision(), ComputeContentHash(), content.Affixes.Count, content.Coefficients.Count);
         }
     }
 
@@ -254,7 +276,7 @@ public sealed partial class RpgStore
 
     List<ContainerRow> ValidateContainers(
         SeedContent content, Dictionary<string, AtomRow> atomsById,
-        Func<string, AffixRow?> lookupAffix, List<SeedError> errors)
+        Func<string, AffixRow?> lookupAffix, Func<string, bool> rarityExists, List<SeedError> errors)
     {
         var write = new List<ContainerRow>();
 
@@ -265,7 +287,7 @@ public sealed partial class RpgStore
             // wrappers (§3.3) — never only an affix already committed to the store, which is what
             // made the whole affix pipeline unreachable before this fix.
             var check = ContainerValidator.Validate(
-                c, id => atomsById.TryGetValue(id, out var a) ? a : null, lookupAffix);
+                c, id => atomsById.TryGetValue(id, out var a) ? a : null, lookupAffix, rarityExists);
             if (!check.IsOk)
             {
                 errors.Add(Error(content, c.ContainerId, check));
@@ -378,6 +400,33 @@ public sealed partial class RpgStore
         var reason = ValidateChannelPolicyRows(rows);
         if (reason is not null)
             errors.Add(Error(content, "(channel-policy)", AtomRejection.Fail(AtomRejectionReason.BadParamValue, reason)));
+
+        return rows;
+    }
+
+    /// <summary>
+    /// E44 criterion 0 (spec-power-sweep.md §4.1): the coefficient rows an import carries, checked
+    /// against the one semantic rule <c>RpgStore.UpsertPowerTables</c> already enforces outside an
+    /// import — a reference scale of zero or less would divide by it during pricing and price every
+    /// magnitude alike, the units trap that column exists to close. Reused rather than duplicated so
+    /// the two write paths can never silently disagree about what a valid coefficient is.
+    /// </summary>
+    static List<PowerCoefficientRow> ValidateCoefficients(SeedContent content, List<SeedError> errors)
+    {
+        var rows = new List<PowerCoefficientRow>();
+        foreach (var c in content.Coefficients)
+        {
+            var key = $"{c.KindId}/{(c.Channel.Length == 0 ? "*" : c.Channel)}";
+            if (c.ReferenceScale <= 0)
+            {
+                errors.Add(Error(content, key, AtomRejection.Fail(AtomRejectionReason.BadParamValue,
+                    $"reference scale {c.ReferenceScale} — normalisation divides by it, and a zero " +
+                    "scale prices every magnitude alike, which is the units trap this column exists to close")));
+                continue;
+            }
+
+            rows.Add(c);
+        }
 
         return rows;
     }

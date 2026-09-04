@@ -84,9 +84,22 @@ public static class BattleStatComposer
 
     public static void ResetTraits() => Traits = TraitAtomSource.Shipped();
 
-    public static ActorDerivedSnapshot Compose(BattleActorSetup setup) => Compose(setup, Traits);
+    /// <summary>Where equipped-item channel mods are read from (item-ideal.md, `equip-runtime`).
+    /// Defaults to <see cref="EquipAtomSource.None"/> — every existing caller, including the hundreds
+    /// of tests that never configure this, is unaffected until something wires a real resolver in.</summary>
+    public static EquipAtomSource Equipment { get; private set; } = EquipAtomSource.None;
 
-    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits)
+    public static void UseEquipment(EquipAtomSource source) =>
+        Equipment = source ?? throw new ArgumentNullException(nameof(source));
+
+    public static void ResetEquipment() => Equipment = EquipAtomSource.None;
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup) => Compose(setup, Traits, Equipment);
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits) =>
+        Compose(setup, traits, Equipment);
+
+    public static ActorDerivedSnapshot Compose(BattleActorSetup setup, TraitAtomSource traits, EquipAtomSource equipment)
     {
         // battle-rates (T2.2) / content-authoring (T2.3): setup.Index is Theta — an alias for Level,
         // not a new source (no real power-index composition is wired through BattleActorSetup yet;
@@ -124,6 +137,16 @@ public static class BattleStatComposer
             foreach (var mod in traits.ModsFor(traitId))
                 snap.Set(mod.ChannelId, snap.Get(mod.ChannelId) + mod.Amount);
         }
+
+        // item-ideal.md, equip-runtime (module 5): equipped items' stat.derived channel mods, merged
+        // the same way trait mods just did — the same producer shape, a different atom source. No
+        // double-counting risk with setup.ChannelMods below: that field is the caller's own generic
+        // additive list (trait stat mods historically, "equipment later" per its own doc comment) and
+        // this is the ONE place equipment enters when SpecimenId resolves it, so a caller populating
+        // both would be double-supplying, not this composer double-applying.
+        if (setup.SpecimenId is { } specimenId)
+            foreach (var mod in equipment.ModsFor(specimenId))
+                snap.Set(mod.ChannelId, snap.Get(mod.ChannelId) + mod.Amount);
 
         foreach (var mod in setup.ChannelMods)
         {

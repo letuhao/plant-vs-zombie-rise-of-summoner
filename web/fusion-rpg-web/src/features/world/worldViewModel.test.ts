@@ -6,7 +6,6 @@ import {
   GRID_X,
   GRID_Y,
   ownershipOf,
-  sectorLabel,
   summarizeLoam,
   toGraph,
   type SectorNodeData
@@ -223,12 +222,6 @@ describe("worldViewModel", () => {
 });
 
 describe("helpers", () => {
-  it("titles a sector id without touching the id itself", () => {
-    expect(sectorLabel("ember-hollow")).toBe("Ember Hollow");
-    expect(sectorLabel("homeworld")).toBe("Homeworld");
-    expect(sectorLabel("")).toBe("");
-  });
-
   it("treats an unowned thing as neutral, not as the enemy's", () => {
     expect(ownershipOf(null, "dave")).toBe("neutral");
     expect(ownershipOf("dave", "dave")).toBe("mine");

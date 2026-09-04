@@ -26,15 +26,51 @@
       "nameKey": "affix.searing-strike",
       "name": "Searing Strike",
       "kindId": "resource.delta",
-      "params": { "element": "{variant}", "when": "OnDamageDealt" },
-      "variants": { "generate": "elements+omni" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "element": "{variant}",
+        "when": "OnDamageDealt"
+      },
+      "variants": {
+        "generate": "elements+omni"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Sparks", "of Cinders", "of Embers"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Sparks"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Cinders"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Embers"
+          }
+        ]
+      },
       "displayTemplate": "{value} {element} damage on hit",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED — id, kind and element-variant expansion kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.on-hit existingFamilies). `roles` is the on-hit column of ssot-affixes.md §4.3's role x group matrix, translated from the stale 12-role table to core.v1.json's 15 ids: sense-utility->sense, manipulator-offense->manipulator, jewel-major stays, jewel-minor->jewel-minor-a and jewel-minor-b, armament-primary/-secondary stay. The commander-only `standard` row carries weight 0 for on-hit and is correctly absent. Every entry in this file shares this identical roles list — the matrix has one row per role per GROUP, not per family. `nameWords.suffix` reuses the fire-variant words ssot-affixes.md §4.12 already shows as shipped (\"of Sparks\"/\"of Cinders\"/\"of Embers\"), applied across all seven element slots the same way elemental_power reuses one word set across variants (atom-family-library.md §3.2)."
     },
     {
@@ -42,14 +78,47 @@
       "nameKey": "affix.lifesteal",
       "name": "Lifesteal",
       "kindId": "resource.delta",
-      "params": { "when": "OnDamageDealt" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageDealt"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Sipping", "of Draining", "of the Leech"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Sipping"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Draining"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Leech"
+          }
+        ]
+      },
       "displayTemplate": "heal {value}% of damage dealt on hit",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. No `element` param and no `variants` — ssot-affixes.md's own citations (`atom.lifesteal.t3`) show no variant segment. `nameWords.suffix` reuses the shipped words shown in ssot-affixes.md §4.12."
     },
     {
@@ -57,14 +126,47 @@
       "nameKey": "affix.retribution",
       "name": "Retribution",
       "kindId": "resource.delta",
-      "params": { "when": "OnDamageTaken" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageTaken"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Spite", "of Reprisal", "of the Reckoning"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Spite"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Reprisal"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Reckoning"
+          }
+        ]
+      },
       "displayTemplate": "reflect {value}% of damage taken back at the attacker",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. The only OnDamageTaken family in this group — it still belongs to g.on-hit per naming.v1.json and ssot-affixes.md §4.1, since the group is about the wearer's hit exchange, not exclusively the wearer's own swing. No shipped word table exists for it in ssot-affixes.md's illustrative sample, so `nameWords` is minted here, following the same suffix `of-construct` grammar as the shown examples."
     },
     {
@@ -72,14 +174,48 @@
       "nameKey": "affix.volley",
       "name": "Volley",
       "kindId": "spawn.entity",
-      "params": { "kind": "bullet", "when": "OnDamageDealt" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "kind": "bullet",
+        "when": "OnDamageDealt"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Ricochet", "of Barrage", "of the Fusillade"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Ricochet"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Barrage"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Fusillade"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to fire an additional bullet on hit",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "SHIPPED, id kept verbatim. `kindId: spawn.entity` with `params.kind: \"bullet\"` matches AtomKindRegistry's spawn.entity schema, whose `x`/`hp`/`maxHp` params are honoured only for `kind=bullet|zombie` — this family supplies none of those since the spawned bullet inherits the wearer's own attack, per atom-family-library.md §3.5's sketch (\"on-hit extra bullet\"). `powerBand: low` keeps a multiplicative extra-attack rider modest relative to the additive riders above it, the same relative-pull judgement the exemplar makes between sibling families."
     },
     {
@@ -87,14 +223,47 @@
       "nameKey": "affix.hit-mend",
       "name": "Vengeful Mending",
       "kindId": "resource.delta",
-      "params": { "when": "OnDamageTaken" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageTaken"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Solace", "of Recovery", "of the Unbroken"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Solace"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Recovery"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Unbroken"
+          }
+        ]
+      },
       "displayTemplate": "heal {value}% of damage taken on hit",
-      "tags": ["defensive"],
+      "tags": [
+        "defensive"
+      ],
       "notes": "NEW family minted on this group's reserved `hit` stem (naming.v1.json idNamespaces.affixFamilies), word `mend` — short and mechanical, not a flavour word. Fills the one on-hit combination the four shipped families leave open: `resource.delta` + `OnDamageTaken` + heal, the defensive mirror of `lifesteal` (which heals on the trigger the wearer causes, not the trigger the wearer suffers) and distinct from `retribution` (which reflects damage on the same trigger rather than healing)."
     },
     {
@@ -102,14 +271,48 @@
       "nameKey": "affix.hit-retort",
       "name": "Retaliatory Shot",
       "kindId": "spawn.entity",
-      "params": { "kind": "bullet", "when": "OnDamageTaken" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "kind": "bullet",
+        "when": "OnDamageTaken"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Backlash", "of Rebuke", "of the Counterstrike"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Backlash"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Rebuke"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Counterstrike"
+          }
+        ]
+      },
       "displayTemplate": "{value}% chance to fire a bullet back at the attacker when hit",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `hit`, word `retort` (a sharp reply — mechanical, not a theme adjective). `volley` fires its extra bullet on the wearer's own hit; this fires the same shaped bullet on the OPPOSITE trigger, when the wearer is struck — a genuinely different combination from every shipped family in the group."
     },
     {
@@ -117,14 +320,47 @@
       "nameKey": "affix.hit-followthrough",
       "name": "Follow-Through Strike",
       "kindId": "resource.delta",
-      "params": { "when": "OnDamageDealt" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageDealt"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["armament-primary", "armament-secondary", "manipulator", "jewel-major", "jewel-minor-a", "jewel-minor-b", "sense"],
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Momentum", "of Persistence", "of the Onslaught"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Momentum"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Persistence"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Onslaught"
+          }
+        ]
+      },
       "displayTemplate": "{value} bonus damage on hit",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "notes": "NEW family, stem `hit`, word `followthrough`. A plain, non-elemental bonus-damage rider on the same trigger as `searing_strike`, deliberately carrying no `element` param and no `variants` block so it is a single-row family rather than a seven-slot one — the un-typed sibling next to the elemental family, the way `might` (flat) sits next to `elemental_power` (typed) in the prefix side. `powerBand: low` keeps it from outclassing the elemental rider it sits beside."
     }
   ]

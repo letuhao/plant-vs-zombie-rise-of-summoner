@@ -1,0 +1,86 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:43:37Z",
+      "minorityValues": {
+        "attackTempo": "slow",
+        "threatBand": "harbinger"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "confectionary-construct"
+    ],
+    "gameTypeId": 1212,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its ability to convert massive amounts of energy into explosive area-of-effect cards and its death-trigger freeze makes it a high-impact tactical asset.",
+    "resourceProfile": [
+      "hp",
+      "poise",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IceCherry",
+    "targetPreference": "swarm",
+    "threatBand": "warden",
+    "traits": [
+      "seed-absorption",
+      "energy-conversion",
+      "delayed-detonation",
+      "cryo-burst"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ]
+  }
+]

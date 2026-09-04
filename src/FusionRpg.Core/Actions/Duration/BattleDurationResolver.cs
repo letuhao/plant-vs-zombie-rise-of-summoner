@@ -35,7 +35,7 @@ public sealed class BattleDurationResolver : IDurationResolver
         // BattleStatComposerTests.ATurnDotChannelModThroughTheComposePathDoesNotThrow). The reader
         // supplying the real default is the same established pattern this codebase already uses for
         // other channels the composer does not universally seed.
-        var speed = rawSpeed > 0 ? rawSpeed : DerivedTurnChannels.BaseSpeed;
+        var speed = rawSpeed > 0 ? rawSpeed : DerivedStatPolicy.TurnDefaultSpeed;
         var haste = rawHaste > 0 ? rawHaste : DerivedTurnChannels.NominalHasteMilli;
 
         var rate = TurnReadiness.EffectiveRate(speed, haste);

@@ -30,7 +30,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -67,10 +67,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.fortitude",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-pith",
       "flavorKey": "flavor.base.downy-pith",
       "flavor": "Soft to the touch, soft to the blow. Grows back faster than it wears away.",
@@ -107,7 +107,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.wispy-bine",
       "flavorKey": "flavor.base.wispy-bine",
       "flavor": "Every strand remembers what it was before it was struck. It returns to itself.",
@@ -145,7 +145,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.pliant-cambium",
       "flavorKey": "flavor.base.pliant-cambium",
       "flavor": "The skin just under the bark, where all new growth starts. Bends before it breaks.",
@@ -179,10 +179,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.feathered-phloem",
       "flavorKey": "flavor.base.feathered-phloem",
       "flavor": "The veins that carry life through a plant, delicate as feathers, strong as chains.",
@@ -216,10 +216,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.nodding-culm",
       "flavorKey": "flavor.base.nodding-culm",
       "flavor": "Hollow jointed, like bamboo's own architecture. Carries the weight of recovery.",
@@ -257,7 +257,7 @@
         "family": "atom.regeneration",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.flossy-haulm",
       "flavorKey": "flavor.base.flossy-haulm",
       "flavor": "Fibrous stubble, left standing in the field. Returns each season, broken but not beaten.",
@@ -329,10 +329,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.regeneration",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.papery-stalk",
       "flavorKey": "flavor.base.papery-stalk",
       "flavor": "Thin as parchment, fragile as old promises. Survives the winter by remembering how.",
@@ -367,7 +367,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -407,7 +407,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.layered-phloem",
       "flavorKey": "flavor.base.layered-phloem",
       "flavor": "Rings within rings, year upon year of growth compressed into resilience.",
@@ -445,7 +445,7 @@
         "family": "atom.fortitude",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.tender-culm",
       "flavorKey": "flavor.base.tender-culm",
       "flavor": "Young growth, not yet hardened. Bends with grace because it has not learned to break.",

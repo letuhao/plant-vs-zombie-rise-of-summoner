@@ -30,10 +30,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-shuck",
       "flavorKey": "flavor.base.downy-shuck",
       "flavor": "Soft filaments catch and scatter the first blow. It gives readily, and that is its point.",
@@ -70,7 +70,7 @@
         "family": "atom.mending",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.papery-peel",
       "flavorKey": "flavor.base.papery-peel",
       "flavor": "Thin as paper and just as crackly, it shields more through rustling noise than any real strength.",
@@ -104,7 +104,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -144,10 +144,10 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.desiccated-epidermis",
       "flavorKey": "flavor.base.desiccated-epidermis",
-      "flavor": "Dried to a shell, it guards through emptiness \u2014 there is nothing left to harm inside.",
+      "flavor": "Dried to a shell, it guards through emptiness — there is nothing left to harm inside.",
       "tags": [
         "medium-light",
         "organic",
@@ -178,10 +178,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.voided-pod",
       "flavorKey": "flavor.base.voided-pod",
       "flavor": "Once full of seeds, now just a hollow chamber waiting to be filled with something new.",
@@ -218,7 +218,7 @@
         "family": "atom.mending",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.flaking-capsule",
       "flavorKey": "flavor.base.flaking-capsule",
       "flavor": "Shedding itself in layers, it erodes even as it shields, paying its own substance for every moment of protection.",
@@ -253,7 +253,7 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -294,7 +294,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.hoary-hull",
       "flavorKey": "flavor.base.hoary-hull",
       "flavor": "Frosted white and lichen-patched, it shows every season it has lived through, worn but unbroken.",
@@ -328,13 +328,13 @@
       "class": "bark",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.warped-casing",
       "flavorKey": "flavor.base.warped-casing",
-      "flavor": "Bent out of true by decades of wind and frost, its irregularity is its strength \u2014 no two impacts land the same.",
+      "flavor": "Bent out of true by decades of wind and frost, its irregularity is its strength — no two impacts land the same.",
       "tags": [
         "medium-heavy",
         "organic",
@@ -403,7 +403,7 @@
       "class": "heartwood",
       "band": "a",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -443,7 +443,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.sunken-periderm",
       "flavorKey": "flavor.base.sunken-periderm",
       "flavor": "Compressed and settled with age, what remains is denser and stronger for having given up the hollow parts.",

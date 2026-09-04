@@ -66,10 +66,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.spun-goggle",
       "flavorKey": "flavor.base.spun-goggle",
       "flavor": "Woven fibre lens cups that catch and hold the light just so. Clumsy-looking, but whoever made it saw what they were doing.",
@@ -105,7 +105,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.threadbare-visor",
       "flavorKey": "flavor.base.threadbare-visor",
       "flavor": "Faded from weather, frayed at the edges where it has started to fray, but the bill still casts a clean shadow.",
@@ -139,10 +139,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-spectacle",
       "flavorKey": "flavor.base.secondhand-spectacle",
       "flavor": "Someone else wore this before you, and you can see their habits in the wear marks. But what they lost, you might gain.",
@@ -211,10 +211,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.woven-eyepiece",
       "flavorKey": "flavor.base.woven-eyepiece",
       "flavor": "A single lens of tight-woven cloth, so fine it almost looks solid. The weaver must have had steady hands.",
@@ -250,7 +250,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.frayed-brow",
       "flavorKey": "flavor.base.frayed-brow",
       "flavor": "A headband of cloth so well-used that its edges have split and curled. The unravelling almost makes it larger.",
@@ -284,10 +284,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.hemmed-mouthguard",
       "flavorKey": "flavor.base.hemmed-mouthguard",
       "flavor": "Carefully stitched edges, like someone took real care in making it wearable. The work shows.",
@@ -357,10 +357,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.faded-lens",
       "flavorKey": "flavor.base.faded-lens",
       "flavor": "The cloth was once dyed deep, but the sun and time have bleached it to almost nothing. You can see through it clearly now.",
@@ -396,7 +396,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.linen-snorkel",
       "flavorKey": "flavor.base.linen-snorkel",
       "flavor": "A tube of fine linen meant to let you see while breathing through the narrowest gap, angling sight down and forward.",
@@ -429,10 +429,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.unlined-earplug",
       "flavorKey": "flavor.base.unlined-earplug",
       "flavor": "A single thickness of tight cloth wrapped and tied, sitting light in place. Simple, almost forgotten looking, but effective.",

@@ -60,7 +60,13 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
             Channel = "hp",
             ChainDepth = _eventTemplate.ChainDepth + 1,
             Target = new TargetSpec { Mode = TargetModes.Single, Ptr = instance.HostPtr },
-            Delivery = new DeliverySpec { Mode = DeliveryModes.Instant }
+            Delivery = new DeliverySpec { Mode = DeliveryModes.Instant },
+            // Wave E1: the same StatusPulsePayload rule the battle sink uses -- one function, so the
+            // two modes cannot drift on a parity invariant the program states explicitly. Null for an
+            // untyped status, which is byte-identical to the pre-E1 packet.
+            ElementPayload = instance.Element is { } el
+                ? new List<ElementPayloadComponentDto> { new() { Element = el.ToElementId(), Weight = 1.0 } }
+                : null
         };
 
         var ev = new EffectEventDto

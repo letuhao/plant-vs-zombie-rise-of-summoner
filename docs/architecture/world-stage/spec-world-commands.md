@@ -158,10 +158,10 @@ budgeting past:
 > `WorldCanonical`'s own non-default-row shape rather than re-bless — **zero goldens moved in the
 > shipped version.**
 
-The three additions in this module (`cede`, `ward`, `dowse`) land under **one** version bump, per
-`decisions.md:98`: *"`RulesetVersion` advances **once** for the combined move."*
+The three additions in this module (`cede`, `bind-warden`, `dowse`) land under **one** version bump,
+per `decisions.md:98`: *"`RulesetVersion` advances **once** for the combined move."*
 
-### 3. The `ward` command
+### 3. The `bind-warden` command
 
 `WorldSector.WardenBindingId` (`WorldState.cs:173`) is read by `LoamForecast.cs:24` (a warded sector
 is never the fade target) and `LoamPhases.cs:162` (a warded sector neither rises nor falls), hashed at
@@ -169,10 +169,12 @@ is never the fade target) and `LoamPhases.cs:162` (a warded sector neither rises
 `ClaimResolver.cs:85`. **It is set non-null nowhere in production** — the only writers are
 `LoamTextureTests.cs:355, 378, 413, 430`.
 
-**`WorldCommandKinds.Ward = "ward"`.** Names a sector the commander owns and carries the binding id.
-A `WardResolver` in `Movement/`, resolving in `Snapshot` beside `Claim` and `Build` for the same
-reason those two do (`TurnEngine.cs:274-280`): ownership is only settled once the turn has run, and a
-ward on ground you lost this turn must not stick.
+**`WorldCommandKinds.BindWarden = "bind-warden"`.** Names a sector the commander owns and carries the
+binding id. The kind is `bind-warden`, not `ward` — `ward` names a *lane* action
+(`WorldLaneDto.WardLevel`) that stays unbuilt, and the collision was already repaired once; it must
+not return through a spec's own text. A `WardenResolver` in `Movement/`, resolving in `Snapshot`
+beside `Claim` and `Build` for the same reason those two do (`TurnEngine.cs:274-280`): ownership is
+only settled once the turn has run, and a warden bound to ground you lost this turn must not stick.
 
 #### The Core/Data boundary makes this two steps, and there is no rollback
 
@@ -182,9 +184,9 @@ substring-scans the file for the data project's name. The orchestration therefor
 layer, which references both:
 
 ```
-POST /api/world/{worldId}/ward   { sectorId, instanceId }
-  1. store.BindAsWarden(playerId, instanceId)      → RpgStore.Contracts.cs:283
-  2. store.SubmitWorldCommands(worldId, [ward…])   → the ordinary command path
+POST /api/world/{worldId}/bind-warden   { sectorId, instanceId }
+  1. store.BindAsWarden(playerId, instanceId)            → RpgStore.Contracts.cs:283
+  2. store.SubmitWorldCommands(worldId, [bind-warden…])   → the ordinary command path
 ```
 
 > **Accepted risk, stated rather than engineered around: if step 2 fails, step 1 is not rolled back.**
@@ -200,9 +202,9 @@ POST /api/world/{worldId}/ward   { sectorId, instanceId }
 
 **Making warden state live means it starts participating in the hash.** `WorldCanonical.cs:37`
 already emits `s.WardenBindingId` in the sector row — today always the null placeholder, in every
-world, in every golden. The moment a ward can be ordered, that cell carries a real id and every
+world, in every golden. The moment a warden can be bound, that cell carries a real id and every
 subsequent hash in that world differs from the one it would have had. **No existing golden moves** (no
-shipped scenario wards anything), but this is the first production path that can change a hash without
+shipped scenario binds a warden), but this is the first production path that can change a hash without
 changing a number, and it should be named before it surprises someone.
 
 The economics are already built and are **not** re-litigated here: capacity, the soul fee and the
@@ -251,7 +253,7 @@ passes admission and reveals nothing. A test asserts `MovementPolicy.Dowse == Pr
   `Reveal` phase, reported as a dropped command at `TurnEngine.cs:137`. Re-admission is not weakened.
 
 **No `decisions.md` lock is contradicted.** The phase order is untouched — `cede` reads inside
-`Pressure`, `ward` resolves inside `Snapshot`, and neither adds nor moves a phase.
+`Pressure`, `bind-warden` resolves inside `Snapshot`, and neither adds nor moves a phase.
 
 ## What stays out
 
@@ -292,15 +294,15 @@ src/FusionRpg.Contracts/
   WorldDtos.cs                 → WorldCommandRequest gains Amount + StructureId
 src/FusionRpg.Server/
   WorldEndpoints.cs            → :72-82 sets both; ComputeLoamReading takes the cede preference
-  WorldWardEndpoint.cs         → new: POST /api/world/{worldId}/ward, the two-step orchestration
+  WorldWardenEndpoint.cs       → new: POST /api/world/{worldId}/bind-warden, the two-step orchestration
 src/FusionRpg.Core/World/
-  Turn/WorldCommand.cs         → Cede + Ward kinds, added to All (:36-37)
-  Turn/WorldCommandAdmission.cs→ arms for cede and ward
-  Turn/TurnEngine.cs           → RulesetVersion 5 → 6; Pressure builds the cede map; Snapshot runs WardResolver
+  Turn/WorldCommand.cs         → Cede + BindWarden kinds, added to All (:36-37)
+  Turn/WorldCommandAdmission.cs→ arms for cede and bind-warden
+  Turn/TurnEngine.cs           → RulesetVersion 5 → 6; Pressure builds the cede map; Snapshot runs WardenResolver
   Loam/LoamForecast.cs         → Weakest gains `ceded`; WillRelease passes it through
   Loam/LoamPhases.cs           → Pressure takes the cede map and passes it to Weakest (:138)
   Movement/LaneCost.cs         → MovementPolicy.Dowse; BudgetFor gains its arm
-  Movement/WardResolver.cs     → new: sets WorldSector.WardenBindingId
+  Movement/WardenResolver.cs   → new: sets WorldSector.WardenBindingId
 src/FusionRpg.Data/
   Sqlite/RpgStore.WorldTurns.cs→ CommandPayload + the two hydration sites; ListWorldCommandsUnlocked
                                  calls ReadCommandRow
@@ -347,7 +349,7 @@ xUnit, in the project owning the boundary. Six levels, and level 2 is the one th
    filed — asserted, not assumed, and a failure here is triaged as a defect before any re-bless. A
    `payload_json` row written without the new members deserializes and re-admits identically. A cede
    order changes no hash by *existing*, only by being *acted on*.
-5. **Ward (Server.Tests / Data.Tests).** The two-step endpoint binds then files; a retry after a
+5. **Bind-warden (Server.Tests / Data.Tests).** The two-step endpoint binds then files; a retry after a
    simulated step-2 failure hits `BindAsWarden`'s `"replay"` path (`RpgStore.Contracts.cs:301-305`)
    and lands the order; a warded sector is excluded from `Weakest` (`LoamForecast.cs:24`) and neither
    fades nor recovers (`LoamPhases.cs:162`); capture clears the binding (`ClaimResolver.cs:85`).
@@ -387,7 +389,7 @@ in the Server layer is a boundary a guard enforces rather than a preference.
    act name the same sector with a cede filed.
 4. `TurnEngine.RulesetVersion` is 6, and `GoldenFinalHash` is **unchanged** — verified before any
    re-bless is even considered.
-5. `ward` is a command kind, `RpgStore.BindAsWarden` has its first production caller, and
+5. `bind-warden` is a command kind, `RpgStore.BindAsWarden` has its first production caller, and
    `WorldSector.WardenBindingId` is set by production code for the first time. The two-step failure
    mode is documented at the endpoint and covered by a retry test.
 6. `dowse` is in `MovementPolicy.Stances`, **has its own `BudgetFor` arm**, that arm reads
@@ -398,7 +400,7 @@ in the Server layer is a boundary a guard enforces rather than a preference.
 ## Open questions
 
 **None.** §8d.2 decided the cede order and the constraint on how it is implemented; §8c.4 corrected
-the prospecting count from one change to four; the ward's Core/Data boundary has one legal shape and
+the prospecting count from one change to four; the bind-warden's Core/Data boundary has one legal shape and
 its failure mode is an **accepted risk with a stated mitigation**, not a question. The two genuine
 forks this module contained are decided in the text: the sixth round-trip site is closed by making
 `ListWorldCommandsUnlocked` share `ReadCommandRow` (§1), and the version bump's golden exposure is

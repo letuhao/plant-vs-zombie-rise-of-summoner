@@ -5,6 +5,7 @@ import { toGraph } from "./worldViewModel";
 import {
   initialWorldUi,
   orderId,
+  reachableFromLegion,
   routeBetween,
   routeForLegion,
   toRequests,
@@ -31,6 +32,26 @@ describe("worldUiReducer", () => {
     expect(state.selectedSectorId).toBe("ash-waste");
     expect(state.selectedEntityId).toBe("e-dave-legion-1");
     expect(state.pending).toHaveLength(0);
+  });
+
+  it("clicking the already-selected sector again deselects it (world-stage W65)", () => {
+    let state = worldUiReducer(initialWorldUi, { type: "select-sector", sectorId: "ash-waste" });
+    expect(state.selectedSectorId).toBe("ash-waste");
+
+    state = worldUiReducer(state, { type: "select-sector", sectorId: "ash-waste" });
+    expect(state.selectedSectorId).toBeNull();
+  });
+
+  it("selecting a different sector while one is already selected simply switches, no toggling", () => {
+    let state = worldUiReducer(initialWorldUi, { type: "select-sector", sectorId: "ash-waste" });
+    state = worldUiReducer(state, { type: "select-sector", sectorId: "ember-hollow" });
+    expect(state.selectedSectorId).toBe("ember-hollow");
+  });
+
+  it("an explicit null (Esc/right-click/✕) always deselects outright, same as before", () => {
+    let state = worldUiReducer(initialWorldUi, { type: "select-sector", sectorId: "ash-waste" });
+    state = worldUiReducer(state, { type: "select-sector", sectorId: null });
+    expect(state.selectedSectorId).toBeNull();
   });
 
   it("queues an order", () => {
@@ -108,9 +129,73 @@ describe("toRequests", () => {
         entityId: "e-dave-legion-1",
         sectorId: null,
         slotIndex: null,
-        lanePath: ["l-home-ember"]
+        lanePath: ["l-home-ember"],
+        stance: null,
+        amount: null,
+        structureId: null
       }
     ]);
+  });
+
+  // world-stage W66: each of the five newly-widened kinds carries the one field the engine reads
+  // for it, and toRequests must not drop it — the exact failure mode that lost `stance` once already.
+  it("stance survives the wire shape", () => {
+    const order: PendingOrder = {
+      commandId: orderId(0, "stance", "e-dave-legion-1"),
+      kind: "stance",
+      entityId: "e-dave-legion-1",
+      stance: "scout",
+      label: "scout"
+    };
+    expect(toRequests([order])[0]?.stance).toBe("scout");
+  });
+
+  it("sustain's amount survives the wire shape as a whole-loam number, not a fraction of one", () => {
+    const order: PendingOrder = {
+      commandId: orderId(0, "sustain", "e-dave-legion-1"),
+      kind: "sustain",
+      entityId: "e-dave-legion-1",
+      amount: 120,
+      label: "sustain 120"
+    };
+    expect(toRequests([order])[0]?.amount).toBe(120);
+  });
+
+  it("build's structureId and slotIndex both survive the wire shape", () => {
+    const order: PendingOrder = {
+      commandId: orderId(0, "build", "e-dave-legion-1"),
+      kind: "build",
+      entityId: "e-dave-legion-1",
+      structureId: "well",
+      slotIndex: 2,
+      label: "build well"
+    };
+    const req = toRequests([order])[0];
+    expect(req?.structureId).toBe("well");
+    expect(req?.slotIndex).toBe(2);
+  });
+
+  it("stand-fast needs no extra field and still round-trips cleanly", () => {
+    const order: PendingOrder = {
+      commandId: orderId(0, "stand-fast", "e-dave-legion-1"),
+      kind: "stand-fast",
+      entityId: "e-dave-legion-1",
+      label: "stand fast"
+    };
+    expect(toRequests([order])[0]).toMatchObject({ kind: "stand-fast", entityId: "e-dave-legion-1" });
+  });
+
+  it("ward's laneId has nowhere to go on the wire yet — it never gets smuggled onto sectorId", () => {
+    const order: PendingOrder = {
+      commandId: orderId(0, "ward", "e-dave-legion-1"),
+      kind: "ward",
+      entityId: "e-dave-legion-1",
+      laneId: "l-home-ember",
+      label: "ward the road"
+    };
+    const req = toRequests([order])[0];
+    expect(req?.kind).toBe("ward");
+    expect(req?.sectorId).toBeNull();
   });
 });
 
@@ -205,5 +290,43 @@ describe("routeForLegion", () => {
   it("gives up rather than inventing a route to nowhere", () => {
     const isolated = { ...graph, edges: [] };
     expect(routeForLegion(isolated, standing, "ash-waste")).toBeNull();
+  });
+});
+
+describe("reachableFromLegion", () => {
+  const standing = (fixture as WorldStateDto).entities.find((e) => e.entityId === "e-dave-legion-1")!;
+
+  it("maps every other sector to its real hop count, and never lists the legion's own sector", () => {
+    const distances = reachableFromLegion(graph, standing);
+
+    expect(distances.has("homeworld")).toBe(false);
+    expect(distances.get("ember-hollow")).toBe(1);
+    expect(distances.get("frost-mire")).toBe(1);
+    expect(distances.get("ash-waste")).toBe(2);
+    expect(distances.get("black-gate")).toBe(3);
+    expect(distances.get("verdant-shelf")).toBe(4);
+    expect(distances.size).toBe(5);
+  });
+
+  it("a mid-march legion resumes distance-counting from its current lane, matching routeForLegion exactly", () => {
+    const marching: WorldEntityDto = {
+      ...standing,
+      atSectorId: null,
+      onLaneId: "l-home-ember",
+      onLaneTowardSectorId: "ember-hollow",
+      laneProgressMilli: 400
+    };
+    const distances = reachableFromLegion(graph, marching);
+
+    // Just the current lane — the same "is just the current lane when the destination is where it
+    // was already heading" fact `routeForLegion`'s own tests already prove.
+    expect(distances.get("ember-hollow")).toBe(1);
+    // One more lane onward from the end it is walking toward.
+    expect(distances.get("ash-waste")).toBe(2);
+  });
+
+  it("an isolated legion (no edges at all) reaches nothing — an empty map, not a thrown error", () => {
+    const isolated = { ...graph, edges: [] };
+    expect(reachableFromLegion(isolated, standing).size).toBe(0);
   });
 });

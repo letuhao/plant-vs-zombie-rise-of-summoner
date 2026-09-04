@@ -154,6 +154,13 @@ public sealed partial class RpgStore
         EnsureColumn(db, "rpg_world_entities", "carried_loam", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_world_entity_members", "role", "TEXT NOT NULL DEFAULT 'Fighter'");
 
+        // world-map W45 (spec-sector-development.md §1/§3): an existing saved world reads every one
+        // of these back at its shipped default — no recruits banked, no project — exactly the world
+        // before sector-development existed.
+        EnsureColumn(db, "rpg_world_sectors", "recruit_stock", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_world_sectors", "project_id", "TEXT");
+        EnsureColumn(db, "rpg_world_sectors", "project_turns_remaining", "INTEGER");
+
         EnsureWorldTurnSchemaUnlocked(db);
     }
 
@@ -221,9 +228,11 @@ public sealed partial class RpgStore
                     INSERT INTO rpg_world_sectors (world_id, sector_id, type_id, climate, danger_band,
                         phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
                         development_level, intel, last_seen_turn, layout_x, layout_y,
-                        loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns, revision)
+                        loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
+                        recruit_stock, project_id, project_turns_remaining, revision)
                     VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
-                            $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected, 0);
+                            $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected,
+                            $recruit, $project, $projTurns, 0);
                     """,
                     ("$w", world.WorldId), ("$s", s.SectorId), ("$type", s.TypeId),
                     ("$climate", (object?)s.Climate?.ToString()), ("$danger", s.DangerBand),
@@ -232,7 +241,9 @@ public sealed partial class RpgStore
                     ("$dev", s.DevelopmentLevel), ("$intel", s.AuthoredIntel.ToString()),
                     ("$seen", s.LastSeenTurn), ("$x", s.LayoutX), ("$y", s.LayoutY),
                     ("$loam", s.LoamStock), ("$intensity", s.FractureIntensityMilli),
-                    ("$warden", (object?)s.WardenBindingId), ("$neglected", s.NeglectedTurns));
+                    ("$warden", (object?)s.WardenBindingId), ("$neglected", s.NeglectedTurns),
+                    ("$recruit", s.RecruitStock), ("$project", (object?)s.ProjectId),
+                    ("$projTurns", (object?)s.ProjectTurnsRemaining));
 
                 foreach (var sl in s.Slots)
                     Insert(db, tx, """
@@ -412,7 +423,8 @@ public sealed partial class RpgStore
                     SELECT sector_id, type_id, climate, danger_band, phase, owner_faction_id,
                            stability_milli, pressure_milli, depletion_milli, development_level,
                            intel, last_seen_turn, layout_x, layout_y,
-                           loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns
+                           loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
+                           recruit_stock, project_id, project_turns_remaining
                     FROM rpg_world_sectors WHERE world_id = $w ORDER BY sector_id;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -440,6 +452,9 @@ public sealed partial class RpgStore
                         FractureIntensityMilli = r.GetInt32(15),
                         WardenBindingId = r.IsDBNull(16) ? null : r.GetString(16),
                         NeglectedTurns = r.GetInt32(17),
+                        RecruitStock = r.GetInt64(18),
+                        ProjectId = r.IsDBNull(19) ? null : r.GetString(19),
+                        ProjectTurnsRemaining = r.IsDBNull(20) ? null : r.GetInt32(20),
                         Slots = slotsBySector.TryGetValue(sectorId, out var slots)
                             ? slots
                             : new List<WorldSlot>()

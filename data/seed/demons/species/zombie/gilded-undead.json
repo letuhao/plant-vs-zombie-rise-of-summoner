@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:45:36Z",
+      "emittedUtc": "2026-09-04T10:37:29Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -39,11 +40,11 @@
       }
     },
     "acquisition": [
-      "Summonable"
+      "EventOnly"
     ],
     "aptitudePrimary": "Bulwark",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
@@ -54,27 +55,25 @@
     "gameTypeId": 42,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "unresolved",
-    "reach": "melee",
-    "reason": "The creature possesses high durability (300 toughness), immunity to damage-based status effects, and a massive gold drop, making it a significant threat rather than a mere raider.",
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature possesses high durability (300 resilience), immunity to damage-based status effects, and a massive gold drop, making it a high-value target rather than a mere raider.",
     "resourceProfile": [
       "hp",
-      "poise",
       "poise"
     ],
     "side": "zombie",
     "speciesId": "GoldZombie",
-    "targetPreference": "backline",
+    "targetPreference": "structure",
     "traits": [
       "immobile",
       "damage_immune",
       "knockback_resistant",
       "timed_decay",
-      "high_value_drop"
+      "high_value_loot"
     ],
     "variants": [
-      "normal",
-      "shiny"
+      "normal"
     ],
     "verdict": "too-low"
   }

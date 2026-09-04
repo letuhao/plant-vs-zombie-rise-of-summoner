@@ -17,96 +17,16 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "inferred",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:40:18Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Retribution",
-    "attackTempo": "steady",
-    "basis": "inferred",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
-    "family": [
-      "Pyrotechnic Flora"
-    ],
-    "gameTypeId": 1178,
-    "posture": "Force",
-    "pure": false,
-    "rarity": "fused",
-    "reach": "long",
-    "reason": "Its ability to convert incoming projectiles into homing, high-damage explosive cherries creates an escalating, unstoppable chain reaction that can overwhelm an entire battlefield.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "plant",
-    "speciesId": "CherryTorch",
-    "targetPreference": "backline",
-    "threatBand": "unresolved",
-    "traits": [
-      "Projectile Conversion",
-      "Homing Capability",
-      "Explosive Detonation",
-      "Bullet Accumulation"
-    ],
-    "variants": [
-      "normal",
-      "mutated",
-      "blessed"
-    ]
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:20:20Z",
+      "emittedUtc": "2026-09-04T10:28:39Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -124,98 +44,19 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Pyrotechnic Flora"
-    ],
-    "gameTypeId": 1149,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "fused",
-    "reach": "long",
-    "reason": "The combination of high periodic damage and area-of-effect status application justifies a mid-tier threat level.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "plant",
-    "speciesId": "FireMelon",
-    "targetPreference": "swarm",
-    "traits": [
-      "Combustive projectile",
-      "Thermal status application",
-      "Splash damage"
-    ],
-    "variants": [
-      "normal",
-      "mutated",
-      "cursed"
-    ],
-    "verdict": "agree"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:23:42Z",
-      "minorityValues": {
-        "rarity": "cultivated"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
-    "family": [
-      "Pyrotechnic Flora"
+      "pyrotechnic-flora"
     ],
     "gameTypeId": 222,
     "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
-    "reach": "melee",
+    "rarity": "cultivated",
+    "reach": "short",
     "reason": "The creature's ability to cause area-of-effect explosions and deal massive multiplier damage to specific targets justifies its status as a significant combatant.",
     "resourceProfile": [
       "hp",
@@ -223,97 +64,16 @@
     ],
     "side": "plant",
     "speciesId": "Firecracker",
-    "targetPreference": "elite",
+    "targetPreference": "swarm",
     "traits": [
-      "Kinetic Projectile",
-      "Shockwave Burst",
-      "Anti-Mythic Specialist"
+      "explosive-propulsion",
+      "anti-demon-efficacy",
+      "cherry-burst"
     ],
     "variants": [
       "normal",
-      "blessed",
-      "corrupted"
+      "blessed"
     ],
     "verdict": "agree"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "observed",
-      "confidence": {
-        "aptitudePrimary": "split",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "high"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:34:32Z",
-      "minorityValues": {
-        "aptitudePrimary": "Retribution"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
-    "family": [
-      "Pyrotechnic Flora"
-    ],
-    "gameTypeId": 1198,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "fused",
-    "reach": "short",
-    "reason": "The creature's mechanics describe a short-lived explosive unit rather than a persistent threat capable of tyranny.",
-    "resourceProfile": [
-      "hp",
-      "spirit"
-    ],
-    "side": "plant",
-    "speciesId": "JalaStar",
-    "targetPreference": "backline",
-    "traits": [
-      "Combustible",
-      "Self-Destructing",
-      "Star-Projecting",
-      "Fusion-Stabilized"
-    ],
-    "variants": [
-      "normal",
-      "mutated",
-      "cursed"
-    ],
-    "verdict": "too-high"
   }
 ]

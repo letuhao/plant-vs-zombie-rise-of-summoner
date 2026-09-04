@@ -64,8 +64,16 @@ class LegalCombinationsTests(unittest.TestCase):
     def test_ward_array_excluded_from_hybrid_frame(self) -> None:
         self.assertFalse(self.legal("role", "ward-array", "frame", "hybrid"))
 
-    def test_jewel_minor_b_excluded_from_hybrid_frame(self) -> None:
-        self.assertFalse(self.legal("frame", "hybrid", "role", "jewel-minor-b"))
+    def test_jewel_minor_b_is_legal_with_hybrid_frame(self) -> None:
+        # D30 (registryVersion 2, 2026-09-04): D3 wins over the prior 13-role/895‰ shape this test
+        # used to assert — jewel-minor-b is hybrid-eligible; head-guard and sense are not.
+        self.assertTrue(self.legal("frame", "hybrid", "role", "jewel-minor-b"))
+
+    def test_head_guard_excluded_from_hybrid_frame(self) -> None:
+        self.assertFalse(self.legal("frame", "hybrid", "role", "head-guard"))
+
+    def test_sense_excluded_from_hybrid_frame(self) -> None:
+        self.assertFalse(self.legal("frame", "hybrid", "role", "sense"))
 
     def test_commander_standard_excluded_from_hybrid_frame(self) -> None:
         self.assertFalse(self.legal("role", "standard", "frame", "hybrid"))

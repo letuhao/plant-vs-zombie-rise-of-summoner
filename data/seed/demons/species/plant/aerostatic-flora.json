@@ -20,16 +20,16 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:26:53Z",
+      "emittedUtc": "2026-09-04T10:00:21Z",
       "minorityValues": {
-        "aptitudePrimary": "Precision",
-        "rarity": "sprout"
+        "aptitudePrimary": "Precision"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -53,12 +53,12 @@
     "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "Aerostatic Flora"
+      "aerostatic flora"
     ],
     "gameTypeId": 22,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "cultivated",
+    "rarity": "sprout",
     "reach": "long",
     "reason": "The creature provides utility and crowd control through fog dispersal and displacement rather than direct offensive lethality.",
     "resourceProfile": [
@@ -67,17 +67,97 @@
     ],
     "side": "plant",
     "speciesId": "Blover",
-    "targetPreference": "elite",
+    "targetPreference": "backline",
     "threatBand": "nuisance",
     "traits": [
-      "Fog-dispersing",
-      "Wind-generating",
-      "Anti-balloon",
-      "Zomppelin-repelling"
+      "fog-dispersing",
+      "wind-generating",
+      "balloon-repelling"
+    ],
+    "variants": [
+      "normal"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:31:14Z",
+      "minorityValues": {
+        "aptitudePrimary": "Bulwark",
+        "threatBand": "raider"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "aerostatic-flora"
+    ],
+    "gameTypeId": 998,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its primary function is crowd control and defensive mitigation, specifically designed to disrupt and weaken aerial threats rather than direct destruction.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SuperHurricaneBlover",
+    "targetPreference": "frontline",
+    "threatBand": "warden",
+    "traits": [
+      "cyclonic-displacement",
+      "clover-proliferation",
+      "vulnerability-amplification",
+      "kinetic-debuffing"
     ],
     "variants": [
       "normal",
-      "ancient"
+      "mutated"
     ]
   }
 ]

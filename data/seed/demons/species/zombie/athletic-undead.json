@@ -19,16 +19,15 @@
       "auditVerdict": null,
       "basis": "observed",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:26:48Z",
-      "minorityValues": {
-        "aptitudePrimary": "Might"
-      },
+      "emittedUtc": "2026-09-04T10:29:39Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -48,17 +47,17 @@
     "attackTempo": "steady",
     "basis": "observed",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "Athletic Undead"
+      "athletic-undead"
     ],
     "gameTypeId": 9,
     "posture": "Force",
     "pure": false,
-    "rarity": "chaff",
+    "rarity": "cultivated",
     "reach": "melee",
-    "reason": "With high durability (1670 total HP) and increased movement speed, this unit functions as a heavy-duty tank rather than a mere raider.",
+    "reason": "Its increased speed and high durability compared to standard zombies justify a mid-tier threat level like a raider.",
     "resourceProfile": [
       "hp"
     ],
@@ -66,11 +65,14 @@
     "speciesId": "FootballZombie",
     "targetPreference": "frontline",
     "traits": [
-      "High Durability",
-      "High Mobility",
-      "Equipment-Dependent Weakness"
+      "high-durability",
+      "high-mobility",
+      "magnetic-weakness"
     ],
-    "variants": [],
-    "verdict": "too-low"
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
   }
 ]

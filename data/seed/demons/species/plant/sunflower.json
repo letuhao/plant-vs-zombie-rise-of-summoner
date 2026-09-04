@@ -17,16 +17,103 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "high"
+        "rarity": "high",
+        "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-02T05:00:56Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T13:23:34Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus",
+        "threatBand": "harbinger"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "sunflower",
+      "solar-producer"
+    ],
+    "gameTypeId": 1188,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "long",
+    "reason": "The ability to instantly release massive amounts of stored energy across the entire field with zero cooldown allows for total battlefield control and overwhelming offensive pressure.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "GoldSunflower",
+    "targetPreference": "swarm",
+    "threatBand": "tyrant",
+    "traits": [
+      "rapid-production",
+      "sunlight-storage",
+      "bank-mechanism",
+      "burst-release"
+    ],
+    "variants": [
+      "normal",
+      "shiny"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:19:57Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -44,34 +131,37 @@
     "aptitudePrimary": "Focus",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "observed",
+    "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "light",
-    "elementSecondary": "none",
+    "elementSecondary": "fire",
     "family": [
-      "Solar-Producer"
+      "sunflower",
+      "solar-converters"
     ],
-    "gameTypeId": 1,
+    "gameTypeId": 1304,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "cultivated",
-    "reach": "melee",
-    "reason": "The creature is a basic resource-producing plant with no offensive or destructive capabilities.",
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a passive resource generator rather than a combatant, posing no direct threat to an opponent.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "SunFlower",
+    "speciesId": "TorchSunflower",
     "targetPreference": "backline",
+    "threatBand": "nuisance",
     "traits": [
-      "Delayed-Activation",
-      "Resource-Generating"
+      "bullet-melting",
+      "resource-transmutation",
+      "radius-based-conversion"
     ],
     "variants": [
       "normal",
-      "ancient"
-    ],
-    "verdict": "too-high"
+      "mutated",
+      "blessed"
+    ]
   }
 ]

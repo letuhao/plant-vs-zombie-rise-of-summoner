@@ -13,6 +13,87 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "unresolved",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:39:00Z",
+      "minorityValues": {
+        "attackTempo": "flurry"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "unresolved",
+    "aptitudeSecondary": "Focus",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "hybrid-botanical",
+      "magical-fauna-mimic"
+    ],
+    "gameTypeId": 993,
+    "posture": "unresolved",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The creature's ability to fire full-screen tracking projectiles and charm enemies with high-damage, defense-ignoring magic makes it a high-tier threat far exceeding a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "HypnoCattailGirl",
+    "targetPreference": "frontline",
+    "traits": [
+      "homing-magic-projectiles",
+      "charm-aura",
+      "aquatic-affinity",
+      "synergistic-fusion"
+    ],
+    "variants": [
+      "shiny",
+      "blessed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
         "kit-shape": 2,
         "threat-audit": 1
       },
@@ -20,14 +101,15 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:59:22Z",
+      "emittedUtc": "2026-09-04T11:01:34Z",
       "minorityValues": {
-        "elementPrimary": "dark"
+        "deployMode": "HypnoAlly"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -48,36 +130,35 @@
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "light",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Hybrid-Botanical",
-      "Fusion-Construct"
+      "hybrid-botanical"
     ],
-    "gameTypeId": 1286,
+    "gameTypeId": 1352,
     "posture": "Bastion",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
-    "reason": "The ability to hypnotize entire crowds of zombies and turn attackers into allies provides significant crowd control that justifies a marauder-level threat.",
+    "reach": "short",
+    "reason": "The creature is a passive support unit that provides extra projectiles rather than a threat capable of causing widespread destruction.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "HypnoMelon",
-    "targetPreference": "swarm",
+    "speciesId": "MelonPumpkin",
+    "targetPreference": "backline",
     "traits": [
-      "Hypnotic-Projectile",
-      "Retaliatory-Conversion",
-      "Splash-Infusion"
+      "shell-armored",
+      "synergistic-projectile",
+      "watermelon-seed-dispenser"
     ],
     "variants": [
       "normal",
       "mutated",
       "blessed"
     ],
-    "verdict": "agree"
+    "verdict": "too-high"
   },
   {
     "_derived": [
@@ -100,15 +181,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "split",
+        "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:03:53Z",
-      "minorityValues": {
-        "elementPrimary": "dark"
-      },
+      "emittedUtc": "2026-09-04T11:47:40Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -125,38 +205,38 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "light",
+    "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Hybrid-Botanical",
-      "Fusion-Construct"
+      "hybrid-botanical",
+      "spatial-manipulator"
     ],
-    "gameTypeId": 1229,
+    "gameTypeId": 981,
     "posture": "Force",
     "pure": true,
-    "rarity": "fused",
+    "rarity": "chimeric",
     "reach": "short",
-    "reason": "The ability to both deal high damage and convert enemies via hypnotism makes it a high-tier crowd control unit rather than a mere scourge.",
+    "reason": "The creature's ability to manipulate time, freeze waves, and create multiple portals with high-frequency damage makes it a battlefield-altering entity that exceeds the scope of a mere 'tyrant'.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "HypnoSquash",
-    "targetPreference": "frontline",
+    "speciesId": "UltimateIceDoom",
+    "targetPreference": "swarm",
     "traits": [
-      "Hypnotic-Crush",
-      "Area-of-Effect",
-      "Status-Imparting"
+      "chronostatic-flow",
+      "spatial-teleportation",
+      "energy-scaling",
+      "asynchronous-detonation"
     ],
     "variants": [
-      "normal",
       "mutated",
       "blessed"
     ],
-    "verdict": "too-low"
+    "verdict": "too-high"
   }
 ]

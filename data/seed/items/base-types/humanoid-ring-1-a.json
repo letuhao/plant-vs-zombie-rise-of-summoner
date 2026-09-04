@@ -64,7 +64,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.bent-hoop",
       "flavorKey": "flavor.base.bent-hoop",
       "flavor": "Stress marks cross its face, each one a story it refuses to abandon. It holds on.",
@@ -93,10 +93,10 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.understated-token",
       "flavorKey": "flavor.base.understated-token",
       "flavor": "No ornament, no ceremony. Just a marker that you were here, that you belonged to something.",
@@ -125,10 +125,10 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.polished-washer",
       "flavorKey": "flavor.base.polished-washer",
       "flavor": "A flat disc that holds things together by its own weight and shine. Pressure with grace.",
@@ -190,10 +190,10 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.knurled-signet",
       "flavorKey": "flavor.base.knurled-signet",
       "flavor": "Ridged on the outside for grip. Whatever it marks belongs to someone with work-worn hands.",
@@ -226,10 +226,10 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.dinged-clip",
       "flavorKey": "flavor.base.dinged-clip",
-      "flavor": "It was dropped once, gripped, twisted, and kept working. Damage is not a defect \u2014 it is a commitment.",
+      "flavor": "It was dropped once, gripped, twisted, and kept working. Damage is not a defect — it is a commitment.",
       "tags": [
         "light",
         "metal",
@@ -258,7 +258,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.spiralled-bead",
       "flavorKey": "flavor.base.spiralled-bead",
       "flavor": "A sphere carved with grooves that draw the eye inward, always turning. Hypnotic with purpose.",
@@ -287,7 +287,7 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -320,10 +320,10 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.engraved-loop",
       "flavorKey": "flavor.base.engraved-loop",
       "flavor": "Lines cut into the curve. Someone took the time. It was important that these marks be there.",
@@ -355,7 +355,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.plain-grommet",
       "flavorKey": "flavor.base.plain-grommet",
       "flavor": "A hole ringed with metal, the simplest possible joint. It does not need to be more.",
@@ -384,10 +384,10 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.substantial-shank",
       "flavorKey": "flavor.base.substantial-shank",
       "flavor": "The base of something larger, cut down and made into its own thing. A piece that wants to support.",

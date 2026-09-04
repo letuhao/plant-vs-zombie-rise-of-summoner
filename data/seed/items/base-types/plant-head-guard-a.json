@@ -30,10 +30,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-petal",
       "flavorKey": "flavor.base.downy-petal",
       "flavor": "Covered in fine hair, soft as skin. It offers warmth without weight.",
@@ -104,10 +104,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.wispy-tuft",
       "flavorKey": "flavor.base.wispy-tuft",
       "flavor": "So light it floats. The wind shapes what the will does not.",
@@ -143,7 +143,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.feathered-bud",
       "flavorKey": "flavor.base.feathered-bud",
       "flavor": "Still tight, but the fringe at its edges is already open. It promises more.",
@@ -177,10 +177,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.papery-bud",
       "flavorKey": "flavor.base.papery-bud",
       "flavor": "Thin as parchment, wrapped tight. A single hard blow leaves it creased forever.",
@@ -250,10 +250,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.layered-tuft",
       "flavorKey": "flavor.base.layered-tuft",
       "flavor": "Each ring a season of growth. Together they overlap like shields.",
@@ -325,7 +325,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -399,7 +399,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -439,7 +439,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.flossy-bud",
       "flavorKey": "flavor.base.flossy-bud",
       "flavor": "Soft fuzz surrounds the core. Touch it and some comes away on your fingers.",

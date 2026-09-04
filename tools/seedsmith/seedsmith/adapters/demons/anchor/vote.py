@@ -7,10 +7,13 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Sequence
 
-#: Q25 — five load-bearing fields, three-way voted. Adding or removing one is an "ask first"
-#: boundary (moves the call budget by ~1,800 calls) — pinned here as a frozenset so a sixth field
-#: needs a deliberate code change, not a silent list edit.
-VOTED_FIELDS = frozenset({"elementPrimary", "aptitudePrimary", "rarity", "threatBand", "deployMode"})
+#: Q25 — three-way voted, load-bearing fields. Adding or removing one is an "ask first" boundary
+#: (moves the call budget) — pinned here as a frozenset so a change needs deliberate code, not a
+#: silent list edit. `attackTempo` joined 2026-09-04 (demon-corpus-self-heal C1, owner-approved as
+#: part of the full self-heal plan): the real 833-species audit found it collapsed to a single
+#: value (entropy 0.00) — the one pipeline (`kit-shape`) that had never been wired into voting or
+#: permutation at all, unlike every other classified field.
+VOTED_FIELDS = frozenset({"elementPrimary", "aptitudePrimary", "rarity", "threatBand", "deployMode", "attackTempo"})
 
 
 @dataclass(frozen=True)

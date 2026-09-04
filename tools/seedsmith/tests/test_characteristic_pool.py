@@ -41,6 +41,7 @@ from seedsmith.adapters.actions.characteristic_pool.derive import (  # noqa: E40
     family_floor_order, load_weights, rank_categories,
 )
 from seedsmith.adapters.actions import generate_characteristic_pool as gen_mod  # noqa: E402
+from seedsmith.adapters.actions.load import load_committed  # noqa: E402
 from seedsmith.corpus import Corpus  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -369,16 +370,29 @@ class AttackTempoExclusionTests(unittest.TestCase):
         self.assertEqual(compute_scores(with_tempo, weights), compute_scores(without_tempo, weights))
 
     def test_live_anchor_tree_attack_tempo_is_constant(self) -> None:
-        """The measured fact the exclusion is grounded in: every observed `attackTempo` today is
-        `"steady"`. A single distinct value cannot discriminate between species even if it WERE
-        scored (it would add the same constant to the same category for every anchored species),
-        which is the actual reason re-adding it is provably inert — not just "it happens to be
-        excluded"."""
-        tree = anchors_mod.load_anchor_tree()
-        observed = {r.attack_tempo for r in tree.by_lower_id.values() if r.attack_tempo}
-        if not observed:
-            self.skipTest("no anchor rows carry attackTempo in this checkout")
-        self.assertEqual(observed, {"steady"})
+        """The measured fact this exclusion USED TO be grounded in: every observed `attackTempo`
+        was `"steady"` — a single distinct value cannot discriminate between species even if it
+        WERE scored, which was the reason re-adding it was provably inert.
+
+        **That premise is no longer true as of 2026-09-04** (demon-corpus-self-heal C1/C2, a
+        SEPARATE, approved program): `kit-shape` — the pipeline that decides `attackTempo` — had
+        never been wired into `option-permutation`'s voting/permutation at all, unlike every other
+        classified field, and a real 833-species audit found it had collapsed to `"steady"` 100%
+        of the time as a direct result. That gap is now fixed and redeployed corpus-wide, and the
+        live tree genuinely carries multiple `attackTempo` values.
+
+        This test can no longer assert the OLD constant-value fact without asserting something
+        false. It does not follow that re-including `attackTempo` in `compute_scores` is now
+        correct — that is this module's own call (its `spec §3 step 4` names the exclusion
+        deliberately, not just descriptively), not something a fix to the UPSTREAM classification
+        pipeline should silently decide. Left as a flagged, skipped test rather than either a false
+        assertion or a silent deletion, so the real question — should `attackTempo` score now that
+        it discriminates? — stays visible to whoever owns this module next."""
+        self.skipTest(
+            "premise invalidated 2026-09-04 by demon-corpus-self-heal C1/C2: attackTempo is no "
+            "longer constant in the live tree (kit-shape was fixed and redeployed) — whether "
+            "compute_scores should now read it is a real, undecided design question for this "
+            "module, not something to silently assert either way here")
 
 
 class OverflowTests(unittest.TestCase):
@@ -601,11 +615,15 @@ class CorpusLoadRoundTripTests(unittest.TestCase):
     KindSpec patterns (never `action-seed`'s) — the whole point of writing through the envelope."""
 
     def test_written_files_load_through_corpus_load(self) -> None:
+        """`load_committed`, not a raw `Corpus.load` — see `test_type_weights.py`'s own sibling
+        fix (2026-09-04) for the full reasoning: real `_rounds/` content now legitimately reuses
+        `_briefs/round-1.json`'s ids by design, which only the purpose-built `_rounds/`-excluding
+        loader this repo already ships correctly tolerates."""
         if not (ACTIONS_ROOT / "_generated" / "role-lean.json").is_file():
             self.skipTest("outputs not yet generated in this checkout")
-        corpus = Corpus.load(ACTIONS_ROOT)
-        self.assertEqual(len(corpus.by_kind("action-role-lean")), 84)
-        self.assertEqual(len(corpus.by_kind("action-characteristic-pool")), 6)
+        result = load_committed(ACTIONS_ROOT)
+        self.assertEqual(len(result.corpus.by_kind("action-role-lean")), 84)
+        self.assertEqual(len(result.corpus.by_kind("action-characteristic-pool")), 6)
 
 
 if __name__ == "__main__":

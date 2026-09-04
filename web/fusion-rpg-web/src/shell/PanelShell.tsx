@@ -57,8 +57,13 @@ export function PanelShell({
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
+        {/* GG-5 amendment (world-stage W55, owner-authorised 2026-09-04): the dimming scrim is not
+            the panel's own content stacking. A band-2 (Panel) scrim sits at its own tier strictly
+            between Stage and HUD (`--band-scrim`) so it covers only the Stage — the HUD (band 1)
+            stays fully legible and interactive above it. `band === "system"` is unaffected: the
+            amendment only ever named the Panel band's scrim. */}
         <Dialog.Overlay
-          className={cn(band === "system" ? "band-system" : "band-panel", "fixed inset-0 bg-black/50")}
+          className={cn(band === "system" ? "band-system" : "band-scrim", "fixed inset-0 bg-black/50")}
           data-testid={`${testId}-overlay`}
         />
         <Dialog.Content

@@ -153,8 +153,9 @@ A view is a plain type; the adapter is a pure function; the unit family rides on
 is documented once at the type, not at each use.
 
 ```ts
-/** Whole loam units (`long` on the wire) — never per-mille. See spec §3. */
-export type LoamUnits = number & { readonly __brand: "loam" };
+// Corrected 2026-09-04 (W4) — this block used to show the branded `LoamUnits` type §3 above
+// rejects. There is no brand. A loam magnitude is a `Magnitude` carrying an existing `UnitClass`,
+// `gameUnits` as the deferred fallback until `loamUnits` is owner-authorised (§3's own open item).
 
 export type SectorView = {
   sectorId: string;
@@ -163,9 +164,12 @@ export type SectorView = {
   intel: "Unknown" | "Rumored" | "Scouted" | "Watched";
   /** Turns since last seen. A count, not a per-mille. */
   intelAge: number;
-  loamNet: LoamUnits;
+  loam: {
+    net: Magnitude; // unit: "gameUnits" today — becomes "loamUnits" the day that class is authorised
+    // …production / upkeep / stock, same family
+  };
   /** Pending until `world-wire` projects it — the reason is player-facing copy. */
-  neglectedTurns: Pending<number>;
+  neglectedTurns: Pending<Magnitude>; // unit: "count"
 };
 ```
 

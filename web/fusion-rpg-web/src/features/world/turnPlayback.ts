@@ -37,7 +37,7 @@ function classify(entry: WorldTurnEntryDto): KeyframeKind {
   if (entry.detail.startsWith("arrival:")) return "march";
   if (entry.detail.startsWith("halt:") || entry.detail.startsWith("zoc:")) return "halt";
   if (entry.detail.startsWith("claim.")) return "claim";
-  if (entry.detail.startsWith("supply.cut:") || entry.detail.startsWith("attrition:")) return "supply";
+  if (entry.detail.startsWith("supply.cut:")) return "supply";
   return "note";
 }
 
@@ -84,9 +84,7 @@ function describe(entry: WorldTurnEntryDto, kind: KeyframeKind): string {
         ? `${target} changes hands`
         : `claim refused — ${entry.detail}`;
     case "supply":
-      return entry.detail.startsWith("supply.cut")
-        ? `${target} is cut off`
-        : `${entry.subject} takes attrition`;
+      return `${target} is cut off`;
     case "order":
       return `${entry.subject} dropped — ${entry.detail}`;
     case "calendar":

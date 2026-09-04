@@ -214,6 +214,7 @@ def call_with_self_heal(
     max_heal: int | None = None,
     build_heal_user: BuildHealUserFn | None = None,
     default_for: DefaultForFn | None = None,
+    schema: "dict | None" = None,
 ) -> tuple[dict, dict]:
     """Call the model, verify the parsed output, and self-heal on named defects.
 
@@ -232,6 +233,14 @@ def call_with_self_heal(
 
     Never raises on a model or parse failure — a dead attempt re-prompts for valid JSON and is
     caught uniformly by the next round's `verify_fn`, exactly like any other named defect.
+
+    `schema` (optional, default `None` — every existing caller is byte-for-byte unaffected)
+    passes straight through to every `call_model` attempt this loop makes, including heal
+    re-prompts: `call_model`'s own constrained-decoding contract (measured 2026-09-01 against
+    `google/gemma-4-26b-a4b-qat`) makes a schema-violating token unsampleable, which is strictly
+    stronger than a post-hoc `verify_fn` re-prompt and is why a caller with a real JSON Schema for
+    its draft shape should supply one here rather than relying on the heal loop alone to talk the
+    model into a required key it keeps omitting.
     """
     heal_budget = config.max_heal if max_heal is None else max_heal
     build_heal_user = build_heal_user or _default_heal_user
@@ -241,7 +250,7 @@ def call_with_self_heal(
     out: dict = {}
     for _ in range(heal_budget + 1):
         try:
-            out = extract_json(call_model(system, user, config=config))
+            out = extract_json(call_model(system, user, config=config, schema=schema))
         except (ValueError, json.JSONDecodeError, RuntimeError) as e:
             user = (f"Your previous output could not be parsed as valid JSON ({e}). "
                     f"Re-emit ONLY a strictly-valid JSON object for:\n"

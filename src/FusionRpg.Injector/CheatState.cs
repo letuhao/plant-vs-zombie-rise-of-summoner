@@ -288,6 +288,15 @@ public static class CheatState
         return (int)Math.Round(v);
     }
 
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long` channel this class had none of — <see cref="FVal"/>
+    /// stores through `SetFloat` -&gt; `double` -&gt; read back as `float`, and `float` stops being
+    /// integer-exact at 16,777,216 (CLAUDE.md's own overflow table, row 1), well inside what a cursed
+    /// <c>zombieStartAmmor</c> can reach. <see cref="LVal"/> reads <see cref="CheatEntry.LongValue"/>
+    /// directly — no float hop anywhere on this path. Used by <c>E-ZARM</c> only.
+    /// </summary>
+    public static long LVal(string id) => Get(id).LongValue;
+
     public static bool IsUserSet(string id)
     {
         lock (Gate) return Entries.TryGetValue(id, out var e) && e.IsSet;
@@ -321,6 +330,25 @@ public static class CheatState
         if (emitInject) EmitInject(source, "set-float", id, value: v);
         if (id.StartsWith("A-", StringComparison.Ordinal) || id.StartsWith("P-", StringComparison.Ordinal) || id.StartsWith("Z-", StringComparison.Ordinal))
             Stats.Invalidate();
+        MaybeSave();
+    }
+
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long`-preserving sibling of <see cref="SetFloat"/> — used
+    /// by <c>E-ZARM</c> (<c>zombieStartAmmor</c>) only, this kind's one true `long` magnitude. Mirrors
+    /// <see cref="SetFloat"/>'s own shape (board-config lock, inject, save) but never touches
+    /// <see cref="CheatEntry.FloatValue"/>, so nothing here can round-trip through a `float`.
+    /// </summary>
+    public static void SetLong(string id, long v, string source = "web", bool emitInject = true)
+    {
+        var e = Get(id);
+        e.LongValue = v;
+        e.Enabled = true;
+        e.IsSet = true;
+        if (id.StartsWith("E-", StringComparison.Ordinal)) BoardConfigLocked = true;
+        // Telemetry only — the stored value stays the exact long in CheatEntry.LongValue regardless
+        // of what this cast can represent in the injected debug payload.
+        if (emitInject) EmitInject(source, "set-long", id, value: v);
         MaybeSave();
     }
 
@@ -389,6 +417,17 @@ public static class CheatState
     {
         var e = Get(id);
         e.FloatValue = v;
+        e.Enabled = true;
+        e.IsSet = true;
+    }
+
+    /// <summary>The `long`-preserving sibling of <see cref="SetFloatQuiet"/> — E35's
+    /// <c>LoadBoardConfigIntoCheats</c> round-trips <c>E-ZARM</c> through this, not `SetFloatQuiet`,
+    /// so the read-back-from-Unity direction never passes through a `float` either.</summary>
+    public static void SetLongQuiet(string id, long v)
+    {
+        var e = Get(id);
+        e.LongValue = v;
         e.Enabled = true;
         e.IsSet = true;
     }
@@ -559,27 +598,65 @@ public static class CheatState
     }
 
     /// <summary>
-    /// The real-valued absolutes (E16): fire rate, sun rate, creep speed.
+    /// The real-valued absolutes (E16): fire rate, sun rate, creep speed. E38 (spec-entity-fields-
+    /// 12plus.md) adds eight more plant keys the same way — "E16 run a second time".
     ///
-    /// <para>These three used to be written straight to the Unity field from the extras path,
-    /// bypassing the modifier bag — which is why no effect could ever reach them, and why "shoots
-    /// faster" was unauthorable. They are Overrides now, the same shape <c>P-HP</c> and <c>P-ATK</c>
-    /// have always had, so the operator surface is unchanged and there is one path to the field.</para>
+    /// <para>These used to be written straight to the Unity field from the extras path, bypassing
+    /// the modifier bag — which is why no effect could ever reach them, and why "shoots faster" (and
+    /// then "takes +X% damage", E38's own headline case on the zombie side) was unauthorable. They
+    /// are Overrides now, the same shape <c>P-HP</c> and <c>P-ATK</c> have always had, so the
+    /// operator surface is unchanged and there is one path to the field.</para>
     ///
     /// <para>Separate from <see cref="BuildPlantAbsolute"/> because these are fractions and that map
     /// is <c>int</c>: an attack interval of 1.5 seconds would truncate to 1.</para>
+    ///
+    /// <para><b>E38's three guard shapes (§2b), each preserved exactly:</b> P-SHIELD/P-ATK-CD/
+    /// P-PROD-CD/P-LEVEL/P-SHOOTLVL accept a legal zero (<c>&gt;= 0</c> — the same class of key
+    /// <see cref="BuildPlantAbsolute"/>'s own <c>&gt; 0</c> filter would have silently broken, per
+    /// that method's own warning); P-SPEED/P-MOVE keep refusing one (<c>&gt; 0</c> — a zero speed
+    /// freezes the plant, a structural floor, not a balance choice); P-ATK-ADD carries no value
+    /// guard at all (an attack-speed adder is a signed delta by construction, so a negative value is
+    /// ordinary content — <see cref="Stats.Plugins.CheatAbsoluteStatPlugin"/> no longer re-filters
+    /// this map by sign for exactly this reason).</para>
     /// </summary>
     public static Dictionary<string, double> BuildPlantAbsoluteReal()
     {
         var d = new Dictionary<string, double>(StringComparer.Ordinal);
+
+        // >0: a zero interval/speed is refused today and the promotion must not start accepting it.
         void Put(string channel, string id)
         {
             if (!IsUserSet(id)) return;
             var v = FVal(id);
             if (v > 0) d[channel] = v;
         }
+
+        // >=0: a zero is legal and must survive (P-SHIELD "no shield", P-ATK-CD "ready now",
+        // Z-TAKEMULT "immune", …) — the exact shape BuildPlantAbsolute's own int map would drop.
+        void PutGe0(string channel, string id, Func<string, double> read)
+        {
+            if (!IsUserSet(id)) return;
+            var v = read(id);
+            if (v >= 0) d[channel] = v;
+        }
+
         Put(StatChannels.AttackInterval, "P-ATK-INT");
         Put(StatChannels.ProduceInterval, "P-PROD-INT");
+
+        PutGe0(StatChannels.PlantShield, "P-SHIELD", id => IVal(id));
+        PutGe0(StatChannels.AttackCountdown, "P-ATK-CD", id => FVal(id));
+        PutGe0(StatChannels.ProduceCountdown, "P-PROD-CD", id => FVal(id));
+        PutGe0(StatChannels.PlantLevel, "P-LEVEL", id => IVal(id));
+        PutGe0(StatChannels.ShootingLevel, "P-SHOOTLVL", id => IVal(id));
+
+        Put(StatChannels.PlantSpeed, "P-SPEED");
+        Put(StatChannels.PlantMoveSpeed, "P-MOVE");
+
+        // No guard at all (⛔ DECIDED 2026-09-03) — see this method's own doc comment. Do not add
+        // one; EntityFields12PlusGuardTests.P_ATK_ADD_stays_unguarded pins the absence.
+        if (IsUserSet("P-ATK-ADD"))
+            d[StatChannels.AttackSpeedAdder] = FVal("P-ATK-ADD");
+
         return d;
     }
 
@@ -588,6 +665,18 @@ public static class CheatState
         var d = new Dictionary<string, double>(StringComparer.Ordinal);
         if (IsUserSet("Z-SPD-U") && FVal("Z-SPD-U") > 0)
             d[StatChannels.ZombieSpeed] = FVal("Z-SPD-U");
+
+        // E38: same two guard shapes as BuildPlantAbsoluteReal's own note — Z-ARMOR-F/Z-TAKEMULT
+        // accept a legal zero, Z-SPD/Z-SPD-O keep refusing one (a zero speed freezes the zombie).
+        if (IsUserSet("Z-ARMOR-F") && FVal("Z-ARMOR-F") >= 0)
+            d[StatChannels.ArmorFlat] = FVal("Z-ARMOR-F");
+        if (IsUserSet("Z-TAKEMULT") && FVal("Z-TAKEMULT") >= 0)
+            d[StatChannels.TakeDmgMultiplier] = FVal("Z-TAKEMULT");
+        if (IsUserSet("Z-SPD") && FVal("Z-SPD") > 0)
+            d[StatChannels.ZombieSpeedCurrent] = FVal("Z-SPD");
+        if (IsUserSet("Z-SPD-O") && FVal("Z-SPD-O") > 0)
+            d[StatChannels.ZombieOriginSpeed] = FVal("Z-SPD-O");
+
         return d;
     }
 
@@ -868,6 +957,11 @@ public sealed class CheatEntry
     public string Kind { get; set; } = "toggle";
     public bool Enabled { get; set; }
     public double FloatValue { get; set; }
+    /// <summary>
+    /// E35 (spec-match-modify.md §2.3): the `long` channel — separate from <see cref="FloatValue"/> on
+    /// purpose, so a value stored here never passes through a `float`. Used by <c>E-ZARM</c> only.
+    /// </summary>
+    public long LongValue { get; set; }
     /// <summary>False = unset (absent for apply). True = user/web explicitly set.</summary>
     public bool IsSet { get; set; }
 }

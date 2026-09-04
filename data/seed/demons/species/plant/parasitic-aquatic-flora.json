@@ -20,16 +20,16 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:56:51Z",
+      "emittedUtc": "2026-09-04T10:13:55Z",
       "minorityValues": {
         "aptitudePrimary": "Retribution",
-        "rarity": "fused",
         "threatBand": "tyrant"
       },
       "promptVersions": {
@@ -48,7 +48,7 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "dark",
@@ -59,7 +59,7 @@
     "gameTypeId": 1414,
     "posture": "Force",
     "pure": true,
-    "rarity": "chimeric",
+    "rarity": "fused",
     "reach": "short",
     "reason": "The ability to instantly kill via drowning and trigger a secondary explosive effect upon death makes it a high-lethality combatant capable of dominating an encounter.",
     "resourceProfile": [
@@ -71,9 +71,9 @@
     "targetPreference": "backline",
     "threatBand": "cataclysm",
     "traits": [
-      "entangling",
       "lethal drowning",
-      "spore-releasing"
+      "spore-based deathburst",
+      "symbiotic destruction"
     ],
     "variants": [
       "corrupted",

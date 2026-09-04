@@ -44,6 +44,32 @@ def derive_pure(aptitude_primary: str, aptitude_secondary: str) -> bool:
     return APTITUDE_POSTURE[aptitude_primary] == APTITUDE_POSTURE[aptitude_secondary]
 
 
+def resolve_unresolved_threat_band(threat_band: str, *, tuning) -> "tuple[str, bool]":
+    """demon-corpus-self-heal F1 (2026-09-04): the ONE field this codebase already has a real,
+    owner-sanctioned deterministic default for. `demon-threat.v1.json`'s own `inferredDefaultRung`
+    exists precisely for "no reliable signal, use the sanctioned default" (its own doc comment:
+    "the sanctioned fallback for exactly this case, not an invented default") — previously wired
+    for the "no computable score at all" case (`inferred`/`blocked` basis with nothing to score),
+    but a genuine 3-way vote split (`threat_band == "unresolved"`) is the SAME semantic category:
+    no reliable signal exists either way. This is the first real caller of that value for THIS
+    specific case, not a second, invented default.
+
+    Investigated and explicitly NOT extended to `aptitudePrimary`/`rarity`/`elementPrimary`: none
+    of those three has an equivalent real, already-sanctioned fallback anywhere in this repo —
+    `aptitudes.v2.json` has no stat-to-aptitude mapping, `rarity`'s own field description
+    explicitly forbids deriving it from threatBand/danger, and `elementPrimary` is purely thematic
+    with no numeric anchor at all. Forcing a rule for those three would be inventing one, not
+    deriving it — they stay "unresolved" and reported.
+
+    Returns `(value, was_deterministic)` — the second element lets a caller record HONEST
+    provenance (this was never a real judgment, an LLM never decided it) rather than silently
+    looking identical to a real classification.
+    """
+    if threat_band != "unresolved":
+        return threat_band, False
+    return tuning.threshold_for_rung(tuning.inferred_default_rung).id, True
+
+
 def _load_variant_count_bands(version: "int | str" = 1) -> dict:
     path = VARIANT_COUNT_TUNING_DIR / f"demon-variant-count.v{int(version)}.json"
     return json.loads(path.read_text(encoding="utf-8"))["countByRarity"]

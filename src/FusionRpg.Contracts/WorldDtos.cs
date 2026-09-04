@@ -15,6 +15,23 @@ public sealed record WorldHeaderDto
     public long Revision { get; init; }
 }
 
+/// <summary>
+/// The current turn's calendar roll only (`TurnCalendar.Roll`, pure in `(turn, seed)`) — never the
+/// seed itself, and never a future roll, both of which would let a client enumerate the campaign's
+/// plague months ahead of time (world-stage W15). Blank (every flag false) on any turn that is not
+/// a week boundary — `TurnCalendar.Roll` itself returns `default` there, not "no roll happened".
+/// </summary>
+public sealed record WorldCalendarDto
+{
+    public int DaysPerWeek { get; init; }
+    public int WeeksPerMonth { get; init; }
+    public bool WeekBoundary { get; init; }
+    public bool MonthBoundary { get; init; }
+    public bool SpecialWeek { get; init; }
+    public bool SpecialMonth { get; init; }
+    public bool Plague { get; init; }
+}
+
 public sealed record WorldFactionDto
 {
     public string FactionId { get; init; } = "";
@@ -28,7 +45,16 @@ public sealed record WorldSlotDto
     public string SlotTypeId { get; init; } = "";
     public string? Element { get; init; }
     public string State { get; init; } = "";
+
+    /// <summary>
+    /// Owner-gated on the `StabilityMilli` pattern (`WorldEndpoints.cs:309-311`) — present only for
+    /// the viewer who owns this ground, null otherwise (spec-world-wire.md §1's "cheap resolution").
+    /// Projected straight from truth (`WorldSlot.OwnerFactionId`), never from belief:
+    /// `RememberedSlot` deliberately does not carry it, since adding it there would move every world
+    /// golden (belief is hashed) for a value nothing yet reads.
+    /// </summary>
     public string? OwnerFactionId { get; init; }
+
     public string? GuardWaveId { get; init; }
     public string GuardState { get; init; } = "";
 
@@ -37,6 +63,13 @@ public sealed record WorldSlotDto
     /// slot's own existing fog treatment.
     /// </summary>
     public string? StructureId { get; init; }
+
+    /// <summary>
+    /// Null means either no structure or a finished one; a positive count means a structure was just
+    /// built and is not yet active (spec-loam-structures.md). As visible as the slot itself — not
+    /// owner-gated, the same terms as <see cref="StructureId"/> (world-stage W7).
+    /// </summary>
+    public int? ConstructionTurnsRemaining { get; init; }
 }
 
 /// <summary>
@@ -58,6 +91,22 @@ public sealed record WorldForceDto
 
     /// <summary>What to plan against when being wrong would be fatal.</summary>
     public long BandCeiling { get; init; }
+}
+
+/// <summary>
+/// The additive operands behind one sector's upkeep — `LoamUpkeep.cs`'s own breakdown, mirrored
+/// field-for-field. <c>Base + Garrison + Development + Danger</c>, then scaled by
+/// <c>IntensityMilli</c> and <c>HandicapMilli</c>, recombines to <see cref="WorldSectorDto.LoamUpkeep"/>
+/// exactly (world-stage W10).
+/// </summary>
+public sealed record LoamUpkeepBreakdownDto
+{
+    public long Base { get; init; }
+    public long Garrison { get; init; }
+    public long Development { get; init; }
+    public long Danger { get; init; }
+    public int IntensityMilli { get; init; }
+    public int HandicapMilli { get; init; } = 1000;
 }
 
 public sealed record WorldSectorDto
@@ -91,6 +140,14 @@ public sealed record WorldSectorDto
     /// <summary>What this sector costs this turn, after intensity and handicap — owner-only.</summary>
     public long LoamUpkeep { get; init; }
 
+    /// <summary>
+    /// The operands behind <see cref="LoamUpkeep"/>, in the order the engine applies them
+    /// (`LoamUpkeep.cs`) — owner-only, structurally zero-filled for a sector this faction does not
+    /// own (same gate as <see cref="LoamUpkeep"/> itself). A ledger showing only the total cannot
+    /// decompose what it was never sent (world-stage W10, re-homed from `world-numbers`).
+    /// </summary>
+    public LoamUpkeepBreakdownDto UpkeepBreakdown { get; init; } = new();
+
     /// <summary>The number the abandonment decision is actually about — owner-only.</summary>
     public long LoamNet { get; init; }
 
@@ -123,6 +180,42 @@ public sealed record WorldSectorDto
     /// the fade with, so the warning and the eventual turn cannot silently disagree.
     /// </summary>
     public bool WillReleaseNextTurn { get; init; }
+
+    /// <summary>
+    /// Set only by a warden bind (spec-loam-texture.md); a sector with a binding is exempt from
+    /// <c>FadePolicy</c> entirely while it holds. Owner-only, following <see cref="StabilityMilli"/>'s
+    /// own gate: it is read straight from truth, not belief, so the viewer sees it exactly when they
+    /// own the ground, never a turn stale (world-stage W6).
+    /// </summary>
+    public string? WardenBindingId { get; init; }
+
+    /// <summary>
+    /// How many consecutive turns this sector has sat lost and barren — the Unmade's spawn clock
+    /// (spec-loam-texture.md). Owner-only, same gate as <see cref="WardenBindingId"/>; zero on any
+    /// sector not currently in that state (world-stage W6).
+    /// </summary>
+    public int NeglectedTurns { get; init; }
+
+    /// <summary>
+    /// The denominator <see cref="LoamStock"/> is measured against — <c>LoamPhases.EffectiveCapacity</c>,
+    /// which is the base capacity plus any active granary's bonus. Owner-only, like the stock it
+    /// denominates: without it a client showing "stock: 120" has no way to say against what
+    /// (world-stage W6).
+    /// </summary>
+    public long LoamCapacity { get; init; }
+
+    /// <summary>
+    /// world-map W44/W46 (spec-sector-development.md §1): what this sector has accrued toward
+    /// founding a legion. Owner-only, same gate as <see cref="StabilityMilli"/> — read straight from
+    /// truth, not belief, so the viewer sees it exactly when they own the ground.
+    /// </summary>
+    public long RecruitStock { get; init; }
+
+    /// <summary>A sector-wide project in progress (spec-sector-development.md §3). Owner-only, same gate as <see cref="RecruitStock"/>. Null means no project.</summary>
+    public string? ProjectId { get; init; }
+
+    /// <summary>Null means either no project or a finished one; owner-only, same gate as <see cref="ProjectId"/>.</summary>
+    public int? ProjectTurnsRemaining { get; init; }
 
     public string Intel { get; init; } = "";
     public int LastSeenTurn { get; init; }
@@ -158,6 +251,14 @@ public sealed record WorldLaneDto
     public int Width { get; init; }
     public int HazardMilli { get; init; }
     public int WardLevel { get; init; }
+
+    /// <summary>
+    /// Which key opens this lane, if it is gated. As visible as the lane itself — no owner-gating;
+    /// hashed at truth level already (`WorldCanonical.cs:47`), just never reached a client before
+    /// (world-stage W7).
+    /// </summary>
+    public string? GateKeyId { get; init; }
+
     public string State { get; init; } = "";
 }
 
@@ -168,6 +269,10 @@ public sealed record WorldEntityMemberDto
     public int Level { get; init; }
     public long Hp { get; init; }
     public int Wounds { get; init; }
+
+    /// <summary>Whether this member fights or carries (spec-loam-legions.md). Not owner-gated — a
+    /// viewer only ever sees their own forces' members here (world-stage W8).</summary>
+    public string Role { get; init; } = "";
 }
 
 public sealed record WorldEntityDto
@@ -183,6 +288,28 @@ public sealed record WorldEntityDto
     public int MovementRemaining { get; init; }
     public bool Routed { get; init; }
     public IReadOnlyList<WorldEntityMemberDto> Members { get; init; } = Array.Empty<WorldEntityMemberDto>();
+
+    /// <summary>
+    /// Not derivable from <see cref="EntityId"/> client-side (spec-world-playback.md §4) — computed
+    /// server-side by <c>EntityNaming.DisplayName</c> from stable state, once, here (world-stage W8).
+    /// </summary>
+    public string DisplayName { get; init; } = "";
+
+    /// <summary>Entity-level pool (spec-loam-legions.md) — a viewer only ever sees their own forces here.</summary>
+    public long CarriedLoam { get; init; }
+
+    /// <summary>Bearer count × <c>LoamPolicy.CarryPerBearer</c> (<c>LegionSupply.Capacity</c>) — a server tunable, not derivable client-side.</summary>
+    public long Capacity { get; init; }
+
+    /// <summary>Headcount × <c>LoamPolicy.BurnPerMember</c> (<c>LegionSupply.Burn</c>) — a server tunable, not derivable client-side.</summary>
+    public long Burn { get; init; }
+
+    /// <summary>
+    /// Turns of runway left in what this legion is actually carrying right now
+    /// (<c>LegionSupply.TurnsUntilExhausted</c>) — the number a player can plan against, not the
+    /// full-tank ceiling. Null for an empty legion, which has nothing to burn.
+    /// </summary>
+    public int? Runway { get; init; }
 }
 
 /// <summary>
@@ -199,6 +326,106 @@ public sealed record WorldStateDto
     public IReadOnlyList<WorldSectorDto> Sectors { get; init; } = Array.Empty<WorldSectorDto>();
     public IReadOnlyList<WorldLaneDto> Lanes { get; init; } = Array.Empty<WorldLaneDto>();
     public IReadOnlyList<WorldEntityDto> Entities { get; init; } = Array.Empty<WorldEntityDto>();
+
+    /// <summary>
+    /// One lane's march cost (`LaneCost.For`), for whichever legion the `?forLegion=` query asked
+    /// about — keyed by <see cref="WorldLaneDto.LaneId"/>. Empty when no legion was named, or the
+    /// named id is not one of this viewer's own forces (world-stage W9, re-homed from
+    /// `world-targeting`) — never a guessed or client-derived number, per §0.13 of the map ideal.
+    /// Fog-honest: computed against this viewer's *believed* climate, so a ley discount the viewer
+    /// has not scouted does not apply and the march reads over-priced, exactly as planning with
+    /// incomplete information should.
+    /// </summary>
+    public IReadOnlyDictionary<string, int> MarchCosts { get; init; } = new Dictionary<string, int>();
+
+    public WorldCalendarDto Calendar { get; init; } = new();
+
+    /// <summary>
+    /// Every sector this viewer's dowsers have confirmed holds a loam source this turn
+    /// (`Prospecting.Reveal`) — deliberately **separate** from `Sectors[].Intel`, never merged into
+    /// it: a dowser answers one narrow question (is there a source here) and leaks no owner, no
+    /// danger band, no forces, so folding this into `intel` would silently promote an unknown
+    /// sector to scouted (world-stage W16). Empty whenever no dowser is currently out — inert, not
+    /// broken, until `world-commands` makes the `dowse` stance orderable.
+    /// </summary>
+    public IReadOnlyList<string> ProspectedSectorIds { get; init; } = Array.Empty<string>();
+}
+
+/// <summary>
+/// One buildable structure (`StructureCatalog`) — rules, not state: no world id, no viewer, no fog
+/// (world-stage W17, `GET /api/world/catalog`).
+/// </summary>
+public sealed record WorldStructureDto
+{
+    public string StructureId { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Kind { get; init; } = "";
+    public string RequiredSlotKind { get; init; } = "";
+
+    /// <summary>
+    /// Whole loam units, despite `StructureDef.CostMilli`'s name — the model compares it directly
+    /// against a legion's `CarriedLoam` (`BuildResolver.cs:101`). Named `Cost` here on purpose:
+    /// a renderer trusting `Milli` is wrong by 1000×.
+    /// </summary>
+    public long Cost { get; init; }
+
+    public int YieldMultiplierMilli { get; init; }
+    public int BuildTurns { get; init; }
+    public long CapacityBonus { get; init; }
+}
+
+/// <summary>One slot type (`SlotTypeCatalog`) — what a slot letter means.</summary>
+public sealed record WorldSlotTypeDto
+{
+    public string SlotTypeId { get; init; } = "";
+    public string Name { get; init; } = "";
+    public string Kind { get; init; } = "";
+    public bool Buildable { get; init; }
+    public bool Yields { get; init; }
+}
+
+/// <summary>One force-strength tier (`StrengthBandCatalog`) — what a band name is worth.</summary>
+public sealed record WorldStrengthBandDto
+{
+    public int Index { get; init; }
+    public string Name { get; init; } = "";
+    public long Floor { get; init; }
+    public long Ceiling { get; init; }
+    public long Midpoint { get; init; }
+}
+
+/// <summary>One lane type (`LaneTypeCatalog`) — what a road's own rules are, apart from any one lane.</summary>
+public sealed record WorldLaneTypeDto
+{
+    public string LaneTypeId { get; init; } = "";
+    public string Name { get; init; } = "";
+    public int CostMultiplierMilli { get; init; }
+    public bool CarriesSupply { get; init; }
+    public bool CarriesPressure { get; init; }
+    public bool OneWay { get; init; }
+    public bool Gated { get; init; }
+    public bool Ley { get; init; }
+}
+
+/// <summary>
+/// Rules, not state — one route, no world id, no viewer, no fog (world-stage W17). Everything a UI
+/// needs to describe what is buildable, what a slot letter means, and what a strength band is worth,
+/// without loading a specific world.
+/// </summary>
+public sealed record WorldCatalogDto
+{
+    public IReadOnlyList<WorldStructureDto> Structures { get; init; } = Array.Empty<WorldStructureDto>();
+    public IReadOnlyList<WorldSlotTypeDto> SlotTypes { get; init; } = Array.Empty<WorldSlotTypeDto>();
+    public IReadOnlyList<WorldStrengthBandDto> StrengthBands { get; init; } = Array.Empty<WorldStrengthBandDto>();
+    public IReadOnlyList<WorldLaneTypeDto> LaneTypes { get; init; } = Array.Empty<WorldLaneTypeDto>();
+
+    /// <summary>
+    /// `LoamPolicy.WaystationRangeHops` (world-stage W69) — a waystation's build range in plain road
+    /// hops, read from the tuning row rather than hard-coded a second time in the FE. Rules, not
+    /// state, exactly like every other field on this DTO: the number itself, never a per-world or
+    /// per-viewer computation.
+    /// </summary>
+    public int WaystationRangeHops { get; init; }
 }
 
 /// <summary>One order on the wire. Mirrors the Core command shape, kept flat for the FE.</summary>
@@ -214,6 +441,13 @@ public sealed class WorldCommandRequest
     public string? Stance { get; set; }
 
     public List<string>? LanePath { get; set; }
+
+    /// <summary>How much carried loam a `sustain` order spends (spec-loam-legions.md) — whole
+    /// units, `long` end to end, never `int` (world-stage W22).</summary>
+    public long? Amount { get; set; }
+
+    /// <summary>Which structure a `build` order names (spec-loam-structures.md, world-stage W22).</summary>
+    public string? StructureId { get; set; }
 }
 
 /// <summary>
@@ -304,4 +538,30 @@ public sealed class CreateWorldRequest
 
     /// <summary>Sent as a string: a ulong seed does not survive JavaScript's number type.</summary>
     public string? Seed { get; set; }
+}
+
+/// <summary>
+/// `POST /api/world/{worldId}/bind-warden` (world-stage W29): bind a demon contract as a
+/// non-releasable warden, then file the ordinary `bind-warden` order in one call.
+/// </summary>
+public sealed class BindWardenRequest
+{
+    public long? PlayerId { get; set; }
+    public string? CommanderId { get; set; }
+    public string? SectorId { get; set; }
+    public string? InstanceId { get; set; }
+}
+
+/// <summary>
+/// The two-step orchestration's outcome. `CommandReplayed` is true when the world order was already
+/// on file — the correct client response to any earlier failure was to retry the whole call, and
+/// this is how the client can tell that retry was the one that actually filed the order.
+/// </summary>
+public sealed record BindWardenResultDto
+{
+    public bool Ok { get; init; }
+    public string? Reason { get; init; }
+    public string InstanceId { get; init; } = "";
+    public string SectorId { get; init; } = "";
+    public bool CommandReplayed { get; init; }
 }

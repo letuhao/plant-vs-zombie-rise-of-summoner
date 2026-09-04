@@ -1,16 +1,17 @@
 {
   "schemaVersion": 1,
-  "version": 1,
+  "version": 2,
   "_meta": {
     "owner": "docs/architecture/action-corpus/spec-distribution-planner.md (A-S1) §3 step 1",
-    "default": "neutral-untuned",
+    "default": "expanded-real-smoke-batch",
     "smokeSubjects": "four-way-join-8",
-    "note": "NEUTRAL, not tuned. The smallest batch that exercises every stage end to end and still produces evidence a quality gate can read. Every count is a placeholder the FIRST smoke batch replaces; re-tuning is a config change, never a rebuild. `mode: \"smoke\"` is the default and it is not a preference -- constraint 2 (map SS3) makes a full run an owner decision on the smoke batch's evidence, and a config file defaulting to `full` would make that decision by omission."
+    "note": "NEUTRAL, not tuned. The smallest batch that exercises every stage end to end and still produces evidence a quality gate can read. Every count is a placeholder the FIRST smoke batch replaces; re-tuning is a config change, never a rebuild. `mode: \"smoke\"` is the default and it is not a preference -- constraint 2 (map SS3) makes a full run an owner decision on the smoke batch's evidence, and a config file defaulting to `full` would make that decision by omission.",
+    "v2Note": "Expanded real smoke batch (2026-09-04): the first real batch (v1: generalCount 5, perFamilyCount 1, perSpeciesCount 1 -> 5 general + 19 family briefs, 12 of which actually ran through A-P2) measured a 76% unresolved rate on n=3 votes -- real small-sample variance, not a defect. This bump (generalCount 5->15, perFamilyCount 1->2, perSpeciesCount 1->2) is roughly 3x the previously RUN candidate count (17 -> ~53 general+family briefs, all 19 families run this time instead of a 12-family subset) to get a statistically meaningful unresolved-rate measurement against Gate G5 criterion 2, per this file's own note above. perSpeciesCount remains unconsumed by any real pipeline today (A-P1 reads only scope:\"general\", A-P2 reads only scope:\"family\"; A-P3's briefs come from A-S2 brief_assembly over accepted A-P2 rows, never from A-S1's scope:\"species\" entries directly) -- bumped anyway for consistency with the other two counts, not because it changes this run's real candidate volume."
   },
   "mode": "smoke",
-  "generalCount": 5,
-  "perFamilyCount": 1,
-  "perSpeciesCount": 1,
+  "generalCount": 15,
+  "perFamilyCount": 2,
+  "perSpeciesCount": 2,
   "multiplicativePairs": [["atom.keen-edge", "atom.cruelty"]],
   "familyMotifMax": 6,
   "avoidNeighbourK": 3

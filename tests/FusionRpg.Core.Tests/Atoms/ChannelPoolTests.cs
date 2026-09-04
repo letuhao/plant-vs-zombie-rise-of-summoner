@@ -164,7 +164,7 @@ public class ChannelPoolTests
         var atom = new AtomRow
         {
             AtomId = "atom.overcount-ok.t1", KindId = "stat.derived", FamilyId = "atom.overcount-ok", Variant = "", Tier = 1,
-            ParamsJson = """{"channel":{"pool":"pool.element-power","count":7,"allowRepeat":true},"op":"flat","amount":100}""",
+            Name = "Overcount OK", ParamsJson = """{"channel":{"pool":"pool.element-power","count":7,"allowRepeat":true},"op":"flat","amount":100}""",
         };
         var pools = ShippedPools().ToDictionary(p => p.PoolId, StringComparer.Ordinal);
 
@@ -215,7 +215,7 @@ public class ChannelPoolTests
         var atom = new AtomRow
         {
             AtomId = "atom.concrete-unchanged.t1", KindId = "stat.derived", FamilyId = "atom.concrete-unchanged", Variant = "", Tier = 1,
-            ParamsJson = """{"channel":"combat.power.fire","op":"flat","amount":100}""",
+            Name = "Concrete Unchanged", ParamsJson = """{"channel":"combat.power.fire","op":"flat","amount":100}""",
         };
         var pools = ShippedPools().ToDictionary(p => p.PoolId, StringComparer.Ordinal);
 

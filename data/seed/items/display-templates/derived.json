@@ -99,7 +99,7 @@
       "name": "+{value} status potency",
       "runtimeFamily": "atom.stalwart",
       "groupId": "g.ward",
-      "status": "pending",
+      "status": "live",
       "tags": []
     },
     {

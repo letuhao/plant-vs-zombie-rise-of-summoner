@@ -20,16 +20,15 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:16:14Z",
-      "minorityValues": {
-        "rarity": "fused"
-      },
+      "emittedUtc": "2026-09-04T10:47:20Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -57,25 +56,25 @@
     "gameTypeId": 1182,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "grafted",
+    "rarity": "fused",
     "reach": "short",
     "reason": "The creature acts as a passive environmental modifier that alters projectile properties rather than engaging in direct combat.",
     "resourceProfile": [
-      "hp",
-      "stamina"
+      "hp"
     ],
     "side": "plant",
     "speciesId": "IceTorch",
     "targetPreference": "backline",
     "threatBand": "nuisance",
     "traits": [
-      "elemental transmutation",
-      "bullet-affinity modification",
-      "thermal negation"
+      "elemental conversion",
+      "thermal negation",
+      "projectile augmentation"
     ],
     "variants": [
-      "ancient",
-      "mutated"
+      "normal",
+      "mutated",
+      "cursed"
     ]
   }
 ]

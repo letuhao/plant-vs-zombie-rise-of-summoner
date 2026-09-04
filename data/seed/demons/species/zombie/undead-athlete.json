@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:24:39Z",
-      "minorityValues": {
-        "rarity": "chaff"
-      },
+      "emittedUtc": "2026-09-04T10:28:39Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,13 +44,13 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Undead Athlete"
+      "undead athlete"
     ],
     "gameTypeId": 66,
     "posture": "Force",
@@ -67,9 +66,9 @@
     "speciesId": "FlagFootball",
     "targetPreference": "frontline",
     "traits": [
-      "Tackle-Roll",
-      "Flag-Bearing",
-      "High-Momentum"
+      "tackle-roll",
+      "momentum-based movement",
+      "flag-bearing"
     ],
     "variants": [
       "normal",
@@ -98,13 +97,17 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
-        "deployMode": "high",
+        "attackTempo": "split",
+        "deployMode": "split",
         "elementPrimary": "high",
-        "rarity": "unresolved"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:26:02Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T11:08:25Z",
+      "minorityValues": {
+        "attackTempo": "ponderous",
+        "deployMode": "PlantAvatar"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -120,112 +123,35 @@
       "Summonable"
     ],
     "aptitudePrimary": "Agility",
-    "aptitudeSecondary": "Fortitude",
-    "attackTempo": "steady",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
     "basis": "stated",
-    "deployMode": "PlantAvatar",
+    "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "undead-athlete"
+      "undead athlete"
     ],
-    "gameTypeId": 61,
+    "gameTypeId": 91,
     "posture": "Finesse",
-    "pure": false,
-    "rarity": "unresolved",
-    "reach": "short",
-    "reason": "The creature's ability to ignore obstacles and instantly heal/reposition upon reaching the edge makes it a persistent, high-pressure threat that exceeds a mere warden level.",
+    "pure": true,
+    "rarity": "sprout",
+    "reach": "long",
+    "reason": "A zombie with high resilience and the ability to bypass initial defenses via pole-vaulting represents a significant tactical threat rather than a mere warden-level obstacle.",
     "resourceProfile": [
       "hp"
     ],
     "side": "zombie",
-    "speciesId": "FootballDolphin",
+    "speciesId": "PolFootballZombie",
     "targetPreference": "frontline",
     "traits": [
-      "helmet-phasing",
-      "directional-reversal",
-      "health-replenishment"
+      "pole-vaulting",
+      "obstacle-clearing",
+      "momentum-based"
     ],
     "variants": [
-      "normal",
-      "mutated"
+      "normal"
     ],
     "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "unresolved",
-        "rarity": "unresolved"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:35:55Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "HypnoAlly",
-    "elementPrimary": "unresolved",
-    "elementSecondary": "none",
-    "family": [
-      "undead-athlete"
-    ],
-    "gameTypeId": 118,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "unresolved",
-    "reach": "long",
-    "reason": "With a fire rate of 10 peas per second and high durability, this unit functions as a heavy siege engine rather than a mere raider.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "GatlingFootballZombie",
-    "targetPreference": "frontline",
-    "traits": [
-      "rapid-fire projectile",
-      "high-stamina",
-      "metabolic-exhaustion"
-    ],
-    "variants": [
-      "normal",
-      "mutated"
-    ],
-    "verdict": "too-high"
   }
 ]

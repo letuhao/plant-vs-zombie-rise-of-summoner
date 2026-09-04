@@ -1,0 +1,81 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "split",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:54:58Z",
+      "minorityValues": {
+        "deployMode": "PlantAvatar"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "sports-themed undead",
+      "tactical zombies"
+    ],
+    "gameTypeId": 78,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature's ability to adapt its form to bypass obstacles and its high resilience through multiple evolutionary stages justify a mid-tier threat level.",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "zombie",
+    "speciesId": "WhiteFootball",
+    "targetPreference": "frontline",
+    "traits": [
+      "adaptive color-shifting",
+      "form-shifting",
+      "momentum-based evolution",
+      "defensive cap-reliance"
+    ],
+    "variants": [
+      "normal"
+    ],
+    "verdict": "agree"
+  }
+]

@@ -134,6 +134,65 @@ public class UpkeepSubstitutionTests
     }
 
     /// <summary>
+    /// ⛔ <b>The scaled clock, and its deliberate 10× consequence.</b> `decisions.md` (*Battle engine
+    /// open questions (2026-09-04)*, item 4) makes the injector kernel clock follow
+    /// <c>Time.timeScale</c>: it stops on pause and <b>accelerates on fast-forward</b>, up to the 10×
+    /// <c>CheatActions.cs:28</c> allows.
+    ///
+    /// <para>This test exists to stop a future reader "fixing" that. <c>event-pipeline-v2-ssot.md</c>
+    /// records that unscaled was originally chosen precisely so game speed could not multiply DoTs, so
+    /// a 10× DoT rate looks exactly like a bug to anyone who reads that document and not this one. The
+    /// owner was shown the consequence and confirmed it. <b>If this test fails, the decision was
+    /// reverted — go and change the decision, do not change the number.</b></para>
+    ///
+    /// <para>The scaling itself happens in <c>InjectorLoop</c> (<c>unscaledDeltaTime × Time.timeScale</c>),
+    /// which CI never builds; what is provable here is the property that matters — the same wall-clock
+    /// frames buy proportionally more simulated upkeep — so the multiply is modelled at the call site
+    /// exactly as the loop performs it.</para>
+    /// </summary>
+    [Theory]
+    [InlineData(0.0f, 0)]      // paused: the clock does not advance at all
+    [InlineData(0.5f, 5)]      // slow motion: half the pulses over the same real second
+    [InlineData(1.0f, 10)]     // normal: the ten pulses the 100 ms grids produced
+    [InlineData(10.0f, 100)]   // CheatActions' maximum — chosen, not overlooked
+    public void The_kernel_clock_follows_time_scale(float timeScale, int expectedPulsesPerKind)
+    {
+        var h = new Harness();
+        for (var i = 0; i < 60; i++)
+        {
+            // Exactly InjectorLoop's arithmetic: scale, then round to whole microseconds.
+            var micros = (long)Math.Round(16_667.0 * timeScale);
+            h.Drive.Tick(micros, budgetTicks: long.MaxValue);
+        }
+
+        Assert.Equal(expectedPulsesPerKind, h.Count(KindDot));
+        Assert.Equal(expectedPulsesPerKind, h.Count(KindShield));
+    }
+
+    /// <summary>
+    /// A pause must <b>hold</b> simulated time, not merely skip a frame: the clock reads the same
+    /// before and after, and the pulse that was one frame away is still one frame away when play
+    /// resumes. Without this, "stops on pause" could be satisfied by a clock that quietly jumped.
+    /// </summary>
+    [Fact]
+    public void Pausing_holds_the_clock_and_resumes_where_it_stopped()
+    {
+        var h = new Harness();
+        for (var i = 0; i < 5; i++) h.Drive.Tick(16_667, budgetTicks: long.MaxValue);
+        var atPause = h.Clock.Now;
+        var firedAtPause = h.Fired.Count;
+
+        for (var i = 0; i < 600; i++) h.Drive.Tick(0, budgetTicks: long.MaxValue);   // ten paused seconds
+
+        Assert.Equal(atPause, h.Clock.Now);
+        Assert.Equal(firedAtPause, h.Fired.Count);
+
+        for (var i = 0; i < 55; i++) h.Drive.Tick(16_667, budgetTicks: long.MaxValue);
+        Assert.Equal(1000, h.Clock.Now);            // the same 60 playing frames as the 1x case
+        Assert.Equal(10, h.Count(KindDot));
+    }
+
+    /// <summary>
     /// The carry, at the granularity that matters: 100 ms of upkeep must arrive after 100 ms of real
     /// time however the frames are chopped up. Irregular frames that never align to the period are
     /// the case an accumulator that zeroes its overshoot gets wrong — the real defect found in

@@ -38,8 +38,15 @@ public static class TurnEngine
     /// attrition and wires `LegionSupply.Resolve` in its place — a legion beyond supply now burns
     /// carried loam and is destroyed outright rather than bled slowly, a real change to what the
     /// same command log produces, not a field-only addition.
+    ///
+    /// Bumped to 6 on 2026-09-04 (world-stage W24-W30, decisions.md:98 — one bump for the whole
+    /// `cede`/`bind-warden`/`dowse` wave, not three): `LoamPhases.Pressure`'s shortfall selection
+    /// (`LoamForecast.Weakest`, W25) now reads a filed `cede` order as an input to which sector
+    /// absorbs the shortfall. A world that files no `cede` order resolves identically to version 5
+    /// — this bump exists only for the case a real order changes the outcome, and covers `bind-warden`
+    /// (W28) and `dowse` (W30) landing after it without a second bump, per the same decision.
     /// </summary>
-    public const int RulesetVersion = 5;
+    public const int RulesetVersion = 6;
 
     public static class Phases
     {
@@ -95,7 +102,7 @@ public static class TurnEngine
         var next = movement.World;
         next = Sieges(next, revealed, report, turn, battles, seed);
         next = Production(next, report);
-        next = Growth(next, report);
+        next = Growth(next, report, turn, seed);
         next = Pressure(next, revealed, report, turn, seed);
         next = Events(next, report, turn, seed);
 
@@ -193,10 +200,14 @@ public static class TurnEngine
         return LoamPhases.Production(world, report, Phases.Production);
     }
 
-    static WorldState Growth(WorldState world, TurnReport report)
+    static WorldState Growth(WorldState world, TurnReport report, int turn, ulong seed)
     {
         report.BeginPhase(Phases.Growth);
-        return world;
+        return FusionRpg.Core.World.Growth.GrowthPhases.Growth(
+            world, report, Phases.Growth, turn, seed,
+            FusionRpg.Core.World.Growth.RecruitPolicy.SeatPulsePerWeek,
+            FusionRpg.Core.World.Growth.RecruitPolicy.LairMultiplierMilli,
+            FusionRpg.Core.World.Growth.RecruitPolicy.SpecialWeekMultiplierMilli);
     }
 
     /// <summary>
@@ -213,7 +224,15 @@ public static class TurnEngine
         report.BeginPhase(Phases.Pressure);
         var afterSustain = SustainResolver.Run(world, commands, report, Phases.Pressure);
         var afterSupply = SupplyGraph.Run(afterSustain, report, Phases.Pressure);
-        var afterPressure = LoamPhases.Pressure(afterSupply, report, Phases.Pressure, turn, seed);
+
+        // Built the same way `Snapshot` derives `postures` from `stance` orders (:285-288): a plain
+        // faction id → sector id map, last order per faction wins, never a service or a lookup.
+        var ceded = commands
+            .Where(c => c.Kind == WorldCommandKinds.Cede && c.SectorId != null)
+            .GroupBy(c => c.CommanderId, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Last().SectorId!, StringComparer.Ordinal);
+
+        var afterPressure = LoamPhases.Pressure(afterSupply, report, Phases.Pressure, turn, seed, ceded);
         return LegionSupply.Resolve(afterPressure, report, Phases.Pressure);
     }
 
@@ -278,6 +297,15 @@ public static class TurnEngine
         // Build resolves right after — the same reason, and so it sees this same turn's claim if
         // one just landed on the same sector (spec-loam-structures.md).
         world = BuildResolver.Run(world, commands, report, Phases.Snapshot);
+
+        // Raise resolves right after Build, the same reason and the same order (world-map W51,
+        // spec-sector-development.md §1) — a claim and a raise may land on the same sector in the
+        // same turn.
+        world = FusionRpg.Core.World.Growth.RaiseResolver.Run(world, commands, report, Phases.Snapshot, turn);
+
+        // Warden binding resolves right after Build, the same reason and the same order — a claim
+        // and a bind-warden may land in the same turn (spec-loam-texture.md, world-stage W28).
+        world = WardenResolver.Run(world, commands, report, Phases.Snapshot);
 
         // Posture changes land here, then the refill reads them — so a legion keeps the budget it
         // started the turn with and only pays for its new posture from the next turn. Digging in

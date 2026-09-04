@@ -70,7 +70,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.creeping-rootlet",
       "flavorKey": "flavor.base.creeping-rootlet",
       "flavor": "It spreads wide and shallow, always reaching for more.",
@@ -107,7 +107,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.tender-stolon",
       "flavorKey": "flavor.base.tender-stolon",
       "flavor": "A runner still soft, its nodes not yet hardened.",
@@ -144,7 +144,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.viable-mycelium",
       "flavorKey": "flavor.base.viable-mycelium",
       "flavor": "A living network that feeds as much as it anchors.",
@@ -181,7 +181,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.sprawling-haustorium",
       "flavorKey": "flavor.base.sprawling-haustorium",
       "flavor": "A feeder root that drinks from anything it touches.",
@@ -255,7 +255,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.dormant-root",
       "flavorKey": "flavor.base.dormant-root",
       "flavor": "Deep and patient. It will wait years for the signal to wake.",
@@ -292,7 +292,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.coarse-rhizome",
       "flavorKey": "flavor.base.coarse-rhizome",
       "flavor": "A thick stem that doubles as a root, carrying both storage and command.",
@@ -440,7 +440,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.living-clutch",
       "flavorKey": "flavor.base.living-clutch",
       "flavor": "A grip of roots that holds together, each strand reinforcing all the others.",

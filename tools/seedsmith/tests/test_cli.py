@@ -144,3 +144,37 @@ def test_importing_the_cli_does_not_require_langgraph():
     assert top_level == [], f"cli.py imports langgraph at module level: {top_level}"
     assert "generate_commander_effects" not in source.split("def cmd_demons")[0], (
         "the generator must be imported inside cmd_demons, not at module scope")
+
+
+# ---- --pipeline as an execution-scope flag (2026-09-04, demon-corpus-self-heal B1) --------------
+#
+# Real bug found live: `rerun --pipeline kit-shape --species Peashooter,SunFlower,WallNut` silently
+# did a FULL 8-pipeline reclassification of all 3 (49 calls, not the expected 3) — `--species` won
+# the old if-elif chain and `--pipeline`'s own value was discarded entirely rather than narrowing
+# execution for the selected species.
+
+def _selector_args(**overrides):
+    import argparse
+    ns = argparse.Namespace(species="", side="", family="", pipeline="", basis="",
+                            unresolved=False, stale=False)
+    for k, v in overrides.items():
+        setattr(ns, k, v)
+    return ns
+
+
+def test_pipeline_alone_selects_and_scopes():
+    from seedsmith.report.cli import _selector_from_args
+    assert _selector_from_args(_selector_args(pipeline="kit-shape")) == {
+        "kind": "pipeline", "pipeline": "kit-shape"}
+
+
+def test_species_plus_pipeline_selects_those_species_and_scopes_execution():
+    from seedsmith.report.cli import _selector_from_args
+    selector = _selector_from_args(_selector_args(species="Peashooter,SunFlower", pipeline="kit-shape"))
+    assert selector == {"kind": "species", "species": ["Peashooter", "SunFlower"], "pipeline": "kit-shape"}
+
+
+def test_species_alone_never_carries_a_pipeline_key():
+    from seedsmith.report.cli import _selector_from_args
+    selector = _selector_from_args(_selector_args(species="Peashooter"))
+    assert "pipeline" not in selector

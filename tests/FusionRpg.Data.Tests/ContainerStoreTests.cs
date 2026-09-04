@@ -44,6 +44,7 @@ public class ContainerStoreTests : IDisposable
                 FamilyId = family,
                 Variant = variant,
                 Tier = tier,
+                Name = family,
                 ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
             });
             Assert.True(r.IsOk, r.ToString());

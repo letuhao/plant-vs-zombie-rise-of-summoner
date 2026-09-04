@@ -17,15 +17,16 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:31:18Z",
+      "emittedUtc": "2026-09-04T11:19:12Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -44,34 +45,35 @@
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "observed",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Spore-Caster"
+      "spore-caster",
+      "fungal-projectile"
     ],
-    "gameTypeId": 1319,
+    "gameTypeId": 6,
     "posture": "Force",
     "pure": true,
-    "rarity": "fused",
-    "reach": "long",
-    "reason": "The ability to trigger a damage-boosting transformation through a status effect makes it a significant tactical threat rather than a mere warden-level obstacle.",
+    "rarity": "sprout",
+    "reach": "short",
+    "reason": "The ability to rapidly multiply through fusion and exponential spreading makes it a significant threat to territory rather than a mere nuisance.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "JalaPeashooter",
-    "targetPreference": "frontline",
+    "speciesId": "SmallPuff",
+    "targetPreference": "swarm",
     "traits": [
-      "Pyrogenic-Projectile",
-      "Reactive-Transformation",
-      "Thermal-Status-Infliction"
+      "low-profile",
+      "high-density-planting",
+      "spore-stacking",
+      "exponential-proliferation"
     ],
     "variants": [
-      "mutated",
-      "cursed"
+      "normal"
     ],
     "verdict": "too-low"
   }

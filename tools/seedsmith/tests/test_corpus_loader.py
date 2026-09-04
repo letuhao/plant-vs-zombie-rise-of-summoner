@@ -392,9 +392,24 @@ class OfflineGuaranteeTests(unittest.TestCase):
     socket, same technique `test_offline_guarantee.py` uses for the whole suite."""
 
     def test_no_source_file_under_the_actions_adapter_references_the_llm_transport(self) -> None:
+        """Scoped to THIS module's own files, not every top-level file under `adapters/actions/`
+        (2026-09-04, `validate-heal`/A-S4): the class docstring above always said "this module makes
+        no model call", but the original glob (`*.py` over the whole `adapters/actions/` directory)
+        was written back when A-C1 was the only thing living there, so it silently asserted a much
+        broader claim than it stated — that NO module in this whole adapter family would ever call a
+        model. That stopped being true the moment A-S4 (`validate-heal`) was built: it is the
+        action-corpus program's own designated "mixed model calls" module (a bounded self-heal is a
+        genuinely new generation, spec-validate-heal.md's own opening line), and its entrypoint
+        `generate_validate_heal.py` legitimately imports `pipeline.llm_caller`. A-S4 owns its own
+        offline guarantee instead (`test_validate_heal.py`: every gate/vote/round test runs against a
+        stubbed transport that raises, per binding constraint 8 — only its own heal-path tests call a
+        transport at all, and that one is a loopback `MockModelServer`, never a real endpoint)."""
         package_dir = REPO_ROOT / "tools" / "seedsmith" / "seedsmith" / "adapters" / "actions"
         forbidden = ("llm_caller", "langchain", "langgraph", "requests", "urllib.request", "httpx")
+        corpus_loader_files = {"kinds.py", "vocab.py", "load.py", "__init__.py"}
         for path in sorted(package_dir.glob("*.py")):
+            if path.name not in corpus_loader_files:
+                continue
             text = path.read_text(encoding="utf-8")
             for token in forbidden:
                 self.assertNotIn(token, text, f"{path.name} references {token!r}")

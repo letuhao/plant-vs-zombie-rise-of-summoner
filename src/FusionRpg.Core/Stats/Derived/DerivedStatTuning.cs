@@ -9,7 +9,20 @@ namespace FusionRpg.Core.Stats.Derived;
 /// one cap this module moves to a single home. Per-channel caps for the 157 channels
 /// <c>catalog-extension</c> registers are T7's job — extracted with values unchanged, tuned
 /// separately — not invented here ahead of their channels.</para></summary>
-public sealed record DerivedStatTuning(int SchemaVersion, int Version, double CategoryResistCap);
+/// <param name="TurnDefaultSpeed">battle-timeline T14 (spec-timeline-tunables.md §1) — the base value
+/// of the <c>turn.speed</c> channel: "how fast is a baseline actor", which is the first number a
+/// balance pass reaches for. It lives here rather than in <c>battle.v{n}.json</c> for a reason found in
+/// the code, not chosen by taste: <see cref="DerivedStatRegistry"/> reads it at registration, exactly
+/// as it reads <see cref="CategoryResistCap"/> — and while every registry consumer already calls
+/// <see cref="DerivedStatPolicy.Configure"/>, several tools deliberately do not configure
+/// <c>BattleTuningHub</c> (<c>tools/ProveAptitude/Program.cs</c> says so in as many words), so sourcing
+/// it from battle tuning would break them.
+///
+/// <para><b>Not to be confused with <see cref="Battle.Timeline.TurnReadiness.SpeedScale"/></b>, which is
+/// the readiness formula's structural unit. The two held one value (100) before T14 split them, and
+/// they still do — the split exists so a balance pass can move this one without re-scaling the
+/// arithmetic.</para></param>
+public sealed record DerivedStatTuning(int SchemaVersion, int Version, double CategoryResistCap, long TurnDefaultSpeed);
 
 public sealed class DerivedStatTuningRejection : Exception
 {
@@ -34,7 +47,8 @@ public static class DerivedStatTuningLoader
             return new DerivedStatTuning(
                 SchemaVersion: Int(root, "schemaVersion"),
                 Version: Int(root, "version"),
-                CategoryResistCap: Dbl(root, "categoryResistCap"));
+                CategoryResistCap: Dbl(root, "categoryResistCap"),
+                TurnDefaultSpeed: Lng(root, "turnDefaultSpeed"));
         }
     }
 
@@ -42,6 +56,17 @@ public static class DerivedStatTuningLoader
     {
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt32(out var v))
             throw new DerivedStatTuningRejection($"derived-stat tuning: missing or non-integer '$.{key}'");
+        return v;
+    }
+
+    /// <summary>`long`, not `int` — AGENTS.md invariant 13: every magnitude the power ladder can touch
+    /// is `long`. A speed is a magnitude.</summary>
+    static long Lng(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt64(out var v))
+            throw new DerivedStatTuningRejection($"derived-stat tuning: missing or non-integer '$.{key}'");
+        if (v <= 0)
+            throw new DerivedStatTuningRejection($"derived-stat tuning: '$.{key}' must be > 0 (it is a divisor and a rate); got {v}");
         return v;
     }
 
@@ -90,6 +115,11 @@ public static class DerivedStatPolicy
         "derived-stats.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
 
     public static double CategoryResistCap => Tuning.CategoryResistCap;
+
+    /// <summary>battle-timeline T14 — the `turn.speed` channel's base value. Reaching this without
+    /// having called <see cref="Configure"/> throws, by the same gateway rule as every other key here:
+    /// there is deliberately no built-in default to silently fall back to.</summary>
+    public static long TurnDefaultSpeed => Tuning.TurnDefaultSpeed;
 
     /// <summary>
     /// spec-actor-channels.md §2.2 — <c>resource.efficiency.{id}</c> is a cost-reduction ratio; 100% is

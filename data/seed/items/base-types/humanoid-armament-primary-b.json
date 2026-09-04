@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "seed-contract.md \u00a72-6, \u00a79; words.v1.json v4 scavenged/domestic/industrial vocabulary; classes.v1.json implicit slates; band B emphasizes medium-heavy and heavy nouns with heavy mass-class tags"
+    "sourceRef": "seed-contract.md §2-6, §9; words.v1.json v4 scavenged/domestic/industrial vocabulary; classes.v1.json implicit slates; band B emphasizes medium-heavy and heavy nouns with heavy mass-class tags"
   },
   "entries": [
     {
@@ -30,10 +30,10 @@
       "class": "blade",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.serrated-cleaver",
       "flavorKey": "flavor.base.serrated-cleaver",
       "flavor": "The edge is kitchen-sharp and butcher-heavy. It remembers what it was built for.",
@@ -70,7 +70,7 @@
         "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.massive-pitchfork",
       "flavorKey": "flavor.base.massive-pitchfork",
       "flavor": "Forged for hay bales, never meant for living things. The weight says otherwise now.",
@@ -107,7 +107,7 @@
         "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.lumbering-sledge",
       "flavorKey": "flavor.base.lumbering-sledge",
       "flavor": "Slow enough that you see it coming. Heavy enough that it does not matter.",
@@ -146,7 +146,7 @@
         "family": "atom.searing-strike",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.primed-jackhammer",
       "flavorKey": "flavor.base.primed-jackhammer",
       "flavor": "The motor still works. The percussion is loud, terrible, and perfect.",
@@ -182,10 +182,10 @@
       "class": "blade",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.searing-strike",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.razored-chainsaw",
       "flavorKey": "flavor.base.razored-chainsaw",
       "flavor": "The chain is sharp. The noise is sharper. Everything it touches stops.",
@@ -222,7 +222,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.blunted-hoe",
       "flavorKey": "flavor.base.blunted-hoe",
       "flavor": "Worn through years of work. The wear has made it meaner, not duller.",
@@ -259,7 +259,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.squat-spade",
       "flavorKey": "flavor.base.squat-spade",
       "flavor": "Short-hafted and broad. Made for digging graves, now it will dig others.",
@@ -294,10 +294,10 @@
       "class": "blunt",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.bruising-mallet",
       "flavorKey": "flavor.base.bruising-mallet",
       "flavor": "The head is solid oak. Each blow prints a flower of damage on whatever it hits.",
@@ -335,7 +335,7 @@
         "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 4,
       "iconKey": "icon.base.sighted-hose",
       "flavorKey": "flavor.base.sighted-hose",
       "flavor": "Nozzle end is precise. Whatever stream it throws lands where you aim it.",
@@ -372,7 +372,7 @@
         "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 4,
       "iconKey": "icon.base.recoiling-wrench",
       "flavorKey": "flavor.base.recoiling-wrench",
       "flavor": "Heavy enough to snap bones when thrown. The impact always surprises the user too.",
@@ -407,10 +407,10 @@
       "class": "blade",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 4,
       "iconKey": "icon.base.needling-machete",
       "flavorKey": "flavor.base.needling-machete",
       "flavor": "The blade comes to a point. Meant to slice. Now it pierces everything.",
@@ -443,10 +443,10 @@
       "class": "launcher",
       "band": "b",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 4,
       "iconKey": "icon.base.ranging-crowbar",
       "flavorKey": "flavor.base.ranging-crowbar",
       "flavor": "The fulcrum point is worn smooth. From opening doors to opening things that were never meant to open.",

@@ -18,7 +18,13 @@ public enum InstanceOrigin
 /// <b>left unresolved</b> — they belong to the hit, not to the item.
 /// </param>
 /// <param name="PowerJson">Nullable — E9 owns power, lands later, and backfills.</param>
-public sealed record InstanceAtomRow(int Seq, string AtomId, string ValuesJson, string? PowerJson = null);
+/// <param name="IdentityDigestHex">
+/// <see cref="AtomIdentityDigest.Of"/> of the atom row this seq drew, frozen at roll time (item
+/// module 1, R2). Null on a row saved before this migration — an absent digest is treated as
+/// compatible rather than retroactively invalidating every already-circulating item.
+/// </param>
+public sealed record InstanceAtomRow(
+    int Seq, string AtomId, string ValuesJson, string? PowerJson = null, string? IdentityDigestHex = null);
 
 /// <summary>A container template turned into a specific owned thing.</summary>
 public sealed record InstanceRow
@@ -119,7 +125,8 @@ public static class Instantiator
             var freeze = Freeze(atom, entry.OverridesJson, rollSeed, entry.Seq, contentScaleMilli, out var valuesJson);
             if (!freeze.IsOk) return freeze;
 
-            rows.Add(new InstanceAtomRow(entry.Seq, entry.AtomId, valuesJson));
+            rows.Add(new InstanceAtomRow(entry.Seq, entry.AtomId, valuesJson,
+                IdentityDigestHex: AtomIdentityDigest.Of(atom)));
         }
 
         var drawn = Draw(container, lookupAtom, lookupAffix, rollSeed);
@@ -131,7 +138,8 @@ public static class Instantiator
             var freeze = Freeze(atom, null, rollSeed, nextSeq, contentScaleMilli, out var valuesJson);
             if (!freeze.IsOk) return freeze;
 
-            rows.Add(new InstanceAtomRow(nextSeq, atomId, valuesJson));
+            rows.Add(new InstanceAtomRow(nextSeq, atomId, valuesJson,
+                IdentityDigestHex: AtomIdentityDigest.Of(atom)));
             nextSeq++;
         }
 

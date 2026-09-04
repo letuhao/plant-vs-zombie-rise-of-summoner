@@ -1,7 +1,7 @@
 # Spec: `item-card`
 
 **Module id:** `item-card` · **Program:** [item](../item-map.md) · **Build order:** 10 of 21
-**Depends on:** `affix-legality` (module 8), `power-reads` (module 9)
+**Depends on:** `affix-legality` (module 8), `item-power-reads` (module 9)
 **Consumed by:** **module 20 `item-surfaces`** — the renderer. This module renders nothing.
 
 ## Objective

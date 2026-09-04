@@ -46,7 +46,7 @@ public class InstanceProducerStoreTests : IDisposable
         Assert.True(_store.UpsertAtom(new AtomRow
         {
             AtomId = "atom.vitality.t1", KindId = "stat.modify", FamilyId = "atom.vitality", Tier = 1,
-            ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
+            Name = "Vitality", ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
         }).IsOk);
 
         Assert.True(_store.UpsertContainer(new ContainerRow

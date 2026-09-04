@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "split",
         "elementPrimary": "split",
-        "rarity": "high"
+        "rarity": "unresolved"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:39:57Z",
+      "emittedUtc": "2026-09-04T10:35:50Z",
       "minorityValues": {
         "aptitudePrimary": "Focus",
         "deployMode": "PlantAvatar",
@@ -53,33 +54,31 @@
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "metallic-flora"
+      "metallic-flora",
+      "alchemical-vegetation"
     ],
     "gameTypeId": 1146,
     "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
+    "rarity": "unresolved",
     "reach": "melee",
     "reason": "The creature's abilities are tactical and utility-based rather than destructive, making it a strategic support rather than a widespread scourge.",
     "resourceProfile": [
       "hp",
       "poise",
-      "poise",
-      "poise",
-      "poise",
       "poise"
     ],
     "side": "plant",
     "speciesId": "GoldGarlic",
-    "targetPreference": "swarm",
+    "targetPreference": "backline",
     "traits": [
       "high-durability",
-      "low-profile",
+      "transmutation-trigger",
       "economic-catalyst"
     ],
     "variants": [
       "shiny",
-      "normal"
+      "blessed"
     ],
     "verdict": "too-high"
   },
@@ -103,15 +102,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:42:19Z",
+      "emittedUtc": "2026-09-04T11:18:14Z",
       "minorityValues": {
-        "rarity": "cultivated"
+        "aptitudePrimary": "Retribution"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -137,30 +137,28 @@
     "family": [
       "metallic-flora"
     ],
-    "gameTypeId": 1285,
+    "gameTypeId": 1145,
     "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
-    "reach": "melee",
-    "reason": "The creature is a defensive support unit with high survivability, but it lacks the offensive output or scale required to be classified as a cataclysm.",
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "A plant that forces zombies to change lanes and possesses high durability (600 toughness) provides significant tactical utility and defense, exceeding the threat level of a mere warden.",
     "resourceProfile": [
-      "hp",
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "GoldNut",
+    "speciesId": "SilverGarlic",
     "targetPreference": "backline",
     "traits": [
-      "high-durability",
-      "kinetic-absorption",
-      "resource-conversion"
+      "silver-plated",
+      "resilient",
+      "lane-disrupting"
     ],
     "variants": [
-      "normal",
-      "blessed",
-      "shiny"
+      "shiny",
+      "normal"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

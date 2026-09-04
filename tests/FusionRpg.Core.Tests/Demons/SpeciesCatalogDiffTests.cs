@@ -43,8 +43,18 @@ public class SpeciesCatalogDiffTests
     static readonly DemonThreatTuning RealThreat = DemonThreatTuningLoader.Parse(ReadTuning("data", "tuning", "demon-threat.v1.json"));
     static readonly PowerTuning RealPower = PowerTuningLoader.Parse(ReadTuning("data", "tuning", "power-scale.v2.json"));
 
-    static AnchorRow RealAnchor(string sideDir, string file) =>
-        AnchorRowReader.ReadAll(ReadTuning("data", "seed", "demons", "species", sideDir, file)).Single();
+    /// <summary>Resolves a species' CURRENT real anchor file via `_index.json` rather than a
+    /// hardcoded path — found broken live, 2026-09-04 (demon-corpus-self-heal): a species' family
+    /// bucket is model-decided and moves across reclassifications, so a test hardcoding
+    /// `"pea.json"` breaks the moment the pipeline it exercises does its own job correctly.</summary>
+    static AnchorRow RealAnchor(string speciesId)
+    {
+        var indexPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "species", "_index.json");
+        var index = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!;
+        var relPath = index[speciesId];
+        return AnchorRowReader.ReadAll(ReadTuning("data", "seed", "demons", "species", relPath.Replace('/', Path.DirectorySeparatorChar)))
+            .Single(a => a.SpeciesId == speciesId);
+    }
 
     /// <summary>A real temp store with the two real classified anchors on disk imported through the
     /// full, real `SpeciesExpander` -> `RpgStore.ImportSpecies` pipeline — not a hand-built fixture.</summary>
@@ -59,8 +69,8 @@ public class SpeciesCatalogDiffTests
 
             var species = new[]
             {
-                SpeciesExpander.Expand(RealAnchor("plant", "pea.json"), RealAptitudes, RealPower, RealShape, RealThreat),
-                SpeciesExpander.Expand(RealAnchor("plant", "sunflower.json"), RealAptitudes, RealPower, RealShape, RealThreat),
+                SpeciesExpander.Expand(RealAnchor("Peashooter"), RealAptitudes, RealPower, RealShape, RealThreat),
+                SpeciesExpander.Expand(RealAnchor("SunFlower"), RealAptitudes, RealPower, RealShape, RealThreat),
             };
             var outcome = store.ImportSpecies(species);
             Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));

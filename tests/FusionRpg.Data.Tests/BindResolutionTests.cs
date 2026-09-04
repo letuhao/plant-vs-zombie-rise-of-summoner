@@ -51,7 +51,7 @@ public class BindResolutionTests : IDisposable
             {
                 AtomId = AtomRow.DeriveId(family, "", 1),
                 KindId = kind, FamilyId = family, Variant = "", Tier = 1,
-                ParamsJson = paramsJson, WhenJson = whenJson,
+                Name = family, ParamsJson = paramsJson, WhenJson = whenJson,
             }).IsOk, family);
 
         void Container(string id, string atomId) =>
@@ -182,18 +182,21 @@ public class BindResolutionTests : IDisposable
     }
 
     [Fact]
-    public void A_binding_rolled_against_an_older_catalog_is_refused_as_stale()
+    public void A_content_import_leaves_untouched_items_bindable()
     {
-        // Reproducibility is claimed over (container, catalog_revision, roll_seed). Without the
-        // revision on the instance there is nothing to compare, and a content edit silently changes
-        // what an owned item means.
+        // R2 (item-ideal.md D9's corrected sequencing, D32): compatibility is judged per atom, not by
+        // one whole-instance catalog_revision equality. Bumping the revision with NO atom actually
+        // changed used to refuse every circulating item regardless of whether it used the edited atom
+        // -- that was the "one content import silently disables every rolled item" defect this test
+        // used to assert as correct. It is the opposite: a global catalog edit that touches nothing
+        // this instance uses must leave it bindable.
         BindOf("trait.stalwart", OwnerKind.Match, "");
         _store.BumpCatalogRevision();
 
         var resolved = _store.ResolveBindings(OwnerScope.Match, new BindContext(RuntimeId.Lawn));
 
-        Assert.Empty(resolved.Bindings);
-        Assert.Equal(AtomRejectionReason.StaleInstance, resolved.Refused[0].Reason);
+        Assert.Single(resolved.Bindings);
+        Assert.Empty(resolved.Refused);
     }
 
     [Fact]
@@ -202,6 +205,59 @@ public class BindResolutionTests : IDisposable
         BindOf("trait.stalwart", OwnerKind.Match, "");
 
         Assert.Single(_store.ResolveBindings(OwnerScope.Match, new BindContext(RuntimeId.Lawn)).Bindings);
+    }
+
+    [Fact]
+    public void An_atom_whose_kind_changed_since_rolling_is_refused_and_only_it()
+    {
+        // D32: a params_json/when_json retune is a balance edit and must reach circulating gear --
+        // only a kind_id change makes a frozen row unsafe to reuse, because it decides which executor
+        // interprets the row at all. Two different items: one rolls the atom that gets re-kinded, one
+        // does not -- only the first must be refused. trait.groundskeeper (board.action), not
+        // trait.warded (stat.modify/defense, ScopeUnsupported outside match scope — G8), is the
+        // control here so the "untouched" binding is not refused for an unrelated reason.
+        var changed = BindOf("trait.stalwart", OwnerKind.Player, "9", "changed");
+        BindOf("trait.groundskeeper", OwnerKind.Player, "9", "untouched");
+
+        // Re-kind atom.vitality (stat.modify) into the exact shape atom.cherry already validates as
+        // (board.action, {"op":"cherry"}, OnDeath) -- same atom_id, structurally different mechanism.
+        Assert.True(_store.UpsertAtom(new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.vitality", "", 1),
+            KindId = "board.action", FamilyId = "atom.vitality", Variant = "", Tier = 1,
+            Name = "Vitality", ParamsJson = "{\"op\":\"cherry\"}", WhenJson = "{\"trigger\":\"OnDeath\"}",
+        }).IsOk);
+
+        var resolved = _store.ResolveBindings(new OwnerScope(OwnerKind.Player, "9"),
+            new BindContext(RuntimeId.Lawn));
+
+        Assert.Equal(new[] { "untouched" }, resolved.Bindings.Select(b => b.Source));
+        Assert.Single(resolved.Refused);
+        Assert.Equal(changed, resolved.Refused[0].BindingId);
+        Assert.Equal(AtomRejectionReason.StaleInstance, resolved.Refused[0].Reason);
+        Assert.Contains("changed kind", resolved.Refused[0].Detail);
+    }
+
+    [Fact]
+    public void A_disabled_atom_refuses_only_the_instances_carrying_it()
+    {
+        // Was already true of BindGate.Check (it refuses a disabled atom per binding) -- it was
+        // simply unreachable while the blunt whole-instance catalog_revision check refused every
+        // binding before BindGate ever ran. R2 removing that check is what makes this observable.
+        var disabled = BindOf("trait.stalwart", OwnerKind.Player, "11", "disabled");
+        BindOf("trait.groundskeeper", OwnerKind.Player, "11", "fine");
+
+        var atom = _store.ListAtoms().Single(a => a.AtomId == AtomRow.DeriveId("atom.vitality", "", 1));
+        Assert.True(_store.UpsertAtom(atom with { Enabled = false }).IsOk);
+
+        var resolved = _store.ResolveBindings(new OwnerScope(OwnerKind.Player, "11"),
+            new BindContext(RuntimeId.Lawn));
+
+        Assert.Equal(new[] { "fine" }, resolved.Bindings.Select(b => b.Source));
+        Assert.Single(resolved.Refused);
+        Assert.Equal(disabled, resolved.Refused[0].BindingId);
+        Assert.Equal(AtomRejectionReason.StaleInstance, resolved.Refused[0].Reason);
+        Assert.Contains("is disabled", resolved.Refused[0].Detail);
     }
 
     // ---- orphan instances ---------------------------------------------------------------------

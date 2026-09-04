@@ -20,14 +20,15 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:07:29Z",
+      "emittedUtc": "2026-09-04T10:20:06Z",
       "minorityValues": {
-        "rarity": "heirloom"
+        "attackTempo": "slow"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -45,7 +46,7 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "Pierce",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
@@ -56,7 +57,7 @@
     "gameTypeId": 317,
     "posture": "Force",
     "pure": false,
-    "rarity": "chimeric",
+    "rarity": "cultivated",
     "reach": "long",
     "reason": "The creature is a standard 3-level zombie with a projectile attack, which does not possess the world-ending scale required for a calamity rating.",
     "resourceProfile": [
@@ -67,9 +68,9 @@
     "speciesId": "Drown_c",
     "targetPreference": "swarm",
     "traits": [
-      "trident_volley",
-      "projectile_splitting",
-      "heavy_armor"
+      "cluster_projectile_specialist",
+      "trident_fragmentation",
+      "high_resilience"
     ],
     "variants": [
       "normal",

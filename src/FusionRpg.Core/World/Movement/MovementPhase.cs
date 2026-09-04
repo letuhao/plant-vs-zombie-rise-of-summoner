@@ -101,8 +101,11 @@ public static class MovementPhase
             // "at your current burn rate, here is your ceiling," the same honesty LeashTurns already
             // gives a legion that never leaves supply at all.
             if (LegionSupply.TurnsUntilExhausted(entity) is { } turnsLeft)
+                // world-stage W13 (fog defect B): `outcome.OnLaneId` is a lane id, never a sector —
+                // null here (not the lane) when the legion ends its march mid-lane. A dynamic fact
+                // about the viewer's own force, so it carries its own audience.
                 report.Add(phase, TurnReportKinds.Event, entity.EntityId,
-                    "legion.runway:" + (turn + turnsLeft), outcome.AtSectorId ?? outcome.OnLaneId);
+                    "legion.runway:" + (turn + turnsLeft), sectorId: outcome.AtSectorId, audience: entity.OwnerFactionId);
 
             if (outcome.VisitedSectorIds.Count > 0)
             {
@@ -191,8 +194,17 @@ public static class MovementPhase
                 continue;
             }
 
-            // `Detail` is where a march ended up, which is exactly the ground this line is about.
-            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail, evt.Detail);
+            // world-stage W13 (fog defect B): `evt.Detail` is free text — an `Arrival` mid-lane
+            // carries a lane id there, and a `Halt`'s is `"zoc:" + sectorId`, never a bare sector id
+            // either way. Neither belongs in the structured sector slot (`Believed` on either
+            // returns null, so the line vanished for everybody). Only `Arrival`/`Halt` ever reach
+            // here (`Contact`/`Crossing` are handled above), and both are scheduled only after
+            // `moved[entity.EntityId]` is set, so the entity's own post-march position is the real
+            // answer: a sector when it is standing in one, null when it is not. A dynamic fact about
+            // a specific legion, so it carries that legion's own audience.
+            var mover = moved.TryGetValue(evt.EntityId, out var m) ? m : null;
+            report.Add(phase, TurnReportKinds.Event, evt.EntityId, evt.Kind + ":" + evt.Detail,
+                sectorId: mover?.AtSectorId, audience: mover?.OwnerFactionId);
         }
 
         return new MovementResult(

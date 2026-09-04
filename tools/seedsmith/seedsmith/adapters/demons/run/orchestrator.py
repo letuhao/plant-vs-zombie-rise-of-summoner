@@ -14,11 +14,11 @@ now that caller.
 """
 from __future__ import annotations
 
-from typing import Any, Callable, Mapping
+from typing import Any, Callable, Mapping, Sequence
 
 from ..anchor.prompts import PIPELINES, SpeciesLore
 from ..anchor.permute import order_for
-from ..anchor.schema import APTITUDES, DEPLOY_MODE, ELEMENTS, RARITY, THREAT_BAND
+from ..anchor.schema import APTITUDES, ATTACK_TEMPO, DEPLOY_MODE, ELEMENTS, RARITY, THREAT_BAND
 from ..anchor.vote import VOTED_FIELDS, resolve_vote
 from ....pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig
 from ....workflow.graphs.demon_anchor import build_pipeline_graph, state_for_pipeline
@@ -34,6 +34,13 @@ _PERMUTABLE_FIELD: "dict[str, tuple[str, tuple[str, ...]]]" = {
     "aptitude-secondary": ("aptitudeSecondary", APTITUDES),
     "identity": ("rarity", RARITY),
     "deployment": ("deployMode", DEPLOY_MODE),
+    # demon-corpus-self-heal C1 (2026-09-04): kit-shape decides FOUR attributes
+    # (attackTempo/reach/targetPreference/resourceProfile) but only attackTempo gets voted here —
+    # the one the real 833-species audit actually found collapsed (entropy 0.00, 1/5 values used).
+    # reach/targetPreference/resourceProfile stay sample-0-only, same as identity's own
+    # traits/variants/family — a deliberate, named scope call (plan's own risk table), not a
+    # silent omission.
+    "kit-shape": ("attackTempo", ATTACK_TEMPO),
 }
 
 
@@ -63,6 +70,8 @@ def run_one_species(
     threat_rung: "tuple[str, int] | None" = None,
     call: "Callable[..., str] | None" = None,
     config: LlmCallerConfig = DEFAULT_CONFIG,
+    pipelines: "Sequence[str] | None" = None,
+    initial_context: "dict[str, Any] | None" = None,
 ) -> "dict[str, Any]":
     """Runs all eight pipelines for one species, sequentially — each pipeline's decided fields
     feed forward into the next's `context` (posture-resource/element-distinct need the
@@ -82,8 +91,18 @@ def run_one_species(
     `basis` is `observed`/`stated` (the `threat-audit` pipeline shows a rung name, never a
     number, per spec-classify-pipelines.md §3) and irrelevant when `basis` is `inferred`/
     `blocked` (that variant chooses the rung from lore instead and needs no computed input).
+
+    `pipelines` (demon-corpus-self-heal B1, 2026-09-04): when given, runs only THIS subset instead
+    of all eight — the mechanism a fixed prompt redeploys through without paying for a full
+    8-pipeline reclassification of species that already have 7 perfectly good judgments.
+    `initial_context` MUST be supplied whenever `pipelines` narrows the set below "everything from
+    the start" — a validator downstream of an omitted pipeline still needs its real decided value
+    (e.g. `kit-shape`'s own `posture_resource` validator reads `context["aptitudePrimary"]`, which
+    only a full run's own earlier `aptitude-primary` pipeline would otherwise have set). Seeding it
+    from the species' EXISTING anchor is the caller's job (`runner.py`), not this function's — this
+    module has no notion of "existing anchor," only of what one classification pass computes.
     """
-    context: "dict[str, Any]" = {}
+    context: "dict[str, Any]" = dict(initial_context or {})
     if basis in ("observed", "stated"):
         if threat_rung is None:
             raise ValueError(
@@ -96,7 +115,7 @@ def run_one_species(
     votes: "dict[str, Any]" = {}
     pipeline_attempts: "dict[str, int]" = {}
     calls_made = 0
-    for pipeline_id in PIPELINES:
+    for pipeline_id in (pipelines if pipelines is not None else PIPELINES):
         perm = _permutable_field(pipeline_id, basis)
         voted_field = perm[0] if perm and perm[0] in VOTED_FIELDS else None
 

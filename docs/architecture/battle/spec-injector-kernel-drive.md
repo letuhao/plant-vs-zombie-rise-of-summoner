@@ -342,7 +342,39 @@ dotnet build src\FusionRpg.Injector
 
 ---
 
-## 11. Open questions (owner)
+## 11. Open questions (owner) — ✅ **both answered 2026-09-04**
+
+> **1. Does the kernel clock pause when the game pauses? → YES, and it accelerates too.**
+> The clock is **fully scaled**: it follows `Time.timeScale`, stopping at 0 on pause and running up
+> to **10×** on fast-forward (`CheatActions.cs:28`). ⛔ **The acceleration half is chosen, not
+> overlooked** — the owner was shown that unscaled had been picked precisely to stop game speed
+> multiplying DoTs, and confirmed the change. A 10× DoT under fast-forward is correct behaviour here.
+>
+> **This spec's assumption below is therefore superseded**, and so is its acceptance wording: B26 no
+> longer inherits byte-identity from the grids it replaces.
+>
+> ⭐ **But it moves no golden, and that was measured rather than predicted (2026-09-04).** This spec
+> and the plan both predicted a re-bless — `RulesetVersion` **4 → 5**, shared with T15's profile
+> migration. **Wrong, for the reason item (5) above already states:** the scaled clock is the
+> *injector's*, and every golden is resolved in Core, which has no `Time.timeScale` and whose
+> `SimulationClock` cannot read a wall clock at all. Core cannot observe this change. Verified with
+> the scaled clock in place: the battle, pre-adoption and expedition-tier goldens run **48/48**, and
+> the Timeline suite **346/346**.
+>
+> Combined with **B35's** measurement that T15's own flip moves nothing either (the golden fixtures
+> use `"golden-*"` wave ids absent from `WaveCatalog`, and the expedition tier hash covers the
+> expedition *plan*), **the joint 4 → 5 re-bless has no remaining cause.** `RulesetVersion` stays
+> **4**. Do not bump it to satisfy a prediction that measurement has retired.
+>
+> **Scope, stated because it is the thing most likely to be over-applied:** this decision governs the
+> **injector** kernel only. `SimulationClock` may not read a wall clock at all (§ non-negotiables,
+> `spec-virtual-time-core.md`) and Core has no `Time.timeScale` — battle and expedition resolution
+> stay virtual-time and instantaneous.
+>
+> **2. Per board or per match? → Per board**, as this spec assumed, torn down at `board.end`
+> alongside the existing `ClearAll` lifecycle barrier.
+
+The original wording is kept below for the reasoning trail.
 
 1. **Does the kernel's clock pause when the game pauses?** The grids read `unscaledDeltaTime`, so they
    run through the pause menu today — and DoTs deliberately use unscaled time so game speed does not

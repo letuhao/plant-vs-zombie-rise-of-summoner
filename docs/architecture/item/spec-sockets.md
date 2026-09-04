@@ -251,7 +251,7 @@ citation is also wrong — §8.6 is *inserts counting toward set completion*, wh
 satisfied. Minting a reason code for a bonus that did not fire would be a code no operator can act on.
 
 ⚠ **Still open and not this module's to close:** socket-combo budget versus set budget on one item
-(§2g's surviving half of D21). **Module 9 `power-reads`** owns it — it is a budget question, and it cannot
+(§2g's surviving half of D21). **Module 9 `item-power-reads`** owns it — it is a budget question, and it cannot
 be answered before the power reads run.
 
 ### 10. Removal
@@ -316,6 +316,22 @@ is held. Authoring them earlier produces a row no code consumes, which is a lie 
 No socket count is capped by player power. No combination is gated on `Θ`, account age, or how many items
 the player owns. `socket_max` is a **legibility** limit on one item; the cost of `socket-add` scales with
 the **target's** rarity, never with the player's. Content pacing is the world map's.
+
+### ✅ D41 — recipes are unordered
+
+> **Owner, 2026-09-04:** *"unordered — we only need collect enough type of socket and put it to the
+> item, if the item match condition, it will got bonus, no need order."*
+
+**A recipe is a multiset match**, which is exactly the shape module 13's gate already uses:
+`(capability, threshold-family multiset)`. Three consequences, all simplifying:
+
+| | |
+|---|---|
+| The 102 combinations | stay **102**. Ordered would multiply each by its permutations |
+| Module 20's swap-distance | sized against unordered — `distance` counts *missing kinds*, never positions |
+| `bind_ordinal` on `effect_binding` | still requested by §5.4, but **for stable display order only** — never as recipe semantics. ⛔ A matcher that reads `bind_ordinal` is a bug |
+
+**Test:** the same inserts in any arrangement resolve to the same combination.
 
 ## Commands
 

@@ -17,17 +17,19 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
+        "elementPrimary": "split",
+        "rarity": "high",
+        "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:02:40Z",
+      "emittedUtc": "2026-09-04T10:05:49Z",
       "minorityValues": {
-        "rarity": "chaff"
+        "elementPrimary": "dark"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -41,40 +43,284 @@
       }
     },
     "acquisition": [
-      "CaptureOnly"
+      "Summonable"
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "observed",
+    "basis": "inferred",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
+    "elementPrimary": "light",
     "elementSecondary": "none",
     "family": [
-      "Parasitic Fungi"
+      "parasitic fungi"
     ],
-    "gameTypeId": 8,
+    "gameTypeId": 1333,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "cultivated",
+    "rarity": "fused",
     "reach": "melee",
-    "reason": "The ability to convert enemies into allies upon contact makes it a tactical force multiplier rather than a mere nuisance.",
+    "reason": "The creature is a reactive support unit that disappears upon contact, serving as a tactical transformation tool rather than a direct combatant.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "HypnoShroom",
+    "speciesId": "CherryHypno",
     "targetPreference": "backline",
+    "threatBand": "nuisance",
     "traits": [
-      "Neurotoxic Spores",
-      "Zombie-Mind Alteration",
-      "Self-Destructing"
+      "charm-inducing",
+      "transmutative",
+      "reactive"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:39:36Z",
+      "minorityValues": {
+        "threatBand": "cataclysm"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Retribution",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "parasitic fungi"
+    ],
+    "gameTypeId": 900,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to summon high-tier elite units like Gargantuars and Ultimate Zombies, combined with defensive immunity and area-of-effect death triggers, places it as a dominant battlefield commander.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "HypnoEmperor",
+    "targetPreference": "backline",
+    "threatBand": "tyrant",
+    "traits": [
+      "charm-induction",
+      "reactive-immunity",
+      "summoning-catalyst",
+      "environmental-adaptation"
     ],
     "variants": [
       "normal",
-      "mutated"
+      "mutated",
+      "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
     ],
-    "verdict": "too-low"
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "deterministic-fallback"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T12:29:33Z",
+      "minorityValues": {
+        "attackTempo": "steady",
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "Bulwark",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "parasitic fungi"
+    ],
+    "gameTypeId": 917,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature acts as a high-tier summoner that manipulates enemy units and scales its threat through area-of-effect death triggers and specialized unit spawning.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "HypnoQueen",
+    "targetPreference": "backline",
+    "threatBand": "raider",
+    "traits": [
+      "zombie-summoning",
+      "damage-reflection",
+      "reactive-spawning",
+      "environmental-morphing"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:24:41Z",
+      "minorityValues": {
+        "threatBand": "nuisance"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "flurry",
+    "basis": "inferred",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "parasitic fungi"
+    ],
+    "gameTypeId": 1365,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The creature is a single-use defensive plant that provides a burst of projectiles before disappearing, making it a tactical tool rather than a sustained combat threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "StarHypno",
+    "targetPreference": "backline",
+    "threatBand": "scourge",
+    "traits": [
+      "charm-triggering",
+      "star-projectile emission",
+      "post-consumption transformation"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ]
   }
 ]

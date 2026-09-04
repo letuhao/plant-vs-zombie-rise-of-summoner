@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:52:10Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-fungal-hybrid"
+    ],
+    "gameTypeId": 940,
+    "posture": "Finesse",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "While extremely powerful, its high charge time and reliance on specific elemental reactions prevent it from reaching the world-altering scale of a 'harbinger'.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateSpring",
+    "targetPreference": "backline",
+    "traits": [
+      "armor-piercing",
+      "area-denial",
+      "charge-up-scaling",
+      "cloning-reproduction",
+      "elemental-catalyst"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  }
+]

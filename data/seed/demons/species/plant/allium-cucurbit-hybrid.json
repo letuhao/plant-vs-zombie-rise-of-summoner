@@ -13,20 +13,23 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:30:41Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:31:33Z",
+      "minorityValues": {
+        "attackTempo": "steady"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -41,40 +44,38 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Allium-Cucurbit Hybrid"
+      "allium-cucurbit hybrid"
     ],
-    "gameTypeId": 1119,
-    "posture": "Force",
+    "gameTypeId": 1323,
+    "posture": "Bastion",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
-    "reason": "The creature scales its damage exponentially based on a stacking debuff, making it a significant threat that can quickly escalate in lethality.",
+    "reach": "melee",
+    "reason": "The creature's effects are limited to a single status ailment and a minor resource gain, which does not align with the world-altering threat of a harbinger.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "poise"
     ],
     "side": "plant",
-    "speciesId": "GarlicMelon",
+    "speciesId": "GarlicPumpkin",
     "targetPreference": "backline",
     "traits": [
-      "Garlic-infused projectiles",
-      "Staggering splash damage",
-      "Value-scaling potency",
-      "Aromatic residue"
+      "toxic-defensive",
+      "garlic-infusion",
+      "line-breaking"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
     ],
-    "verdict": "agree"
+    "verdict": "too-high"
   }
 ]

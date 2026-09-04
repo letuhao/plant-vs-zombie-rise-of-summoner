@@ -20,15 +20,16 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "split",
-        "elementPrimary": "high",
-        "rarity": "split"
+        "elementPrimary": "split",
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:41:47Z",
+      "emittedUtc": "2026-09-04T11:20:16Z",
       "minorityValues": {
-        "deployMode": "HypnoAlly",
-        "rarity": "cultivated"
+        "deployMode": "PlantAvatar",
+        "elementPrimary": "air"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -46,110 +47,35 @@
     ],
     "aptitudePrimary": "Agility",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Undead Cavalry"
+      "undead_cavalry"
     ],
-    "gameTypeId": 68,
+    "gameTypeId": 27,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "chaff",
+    "rarity": "cultivated",
     "reach": "short",
-    "reason": "The lore's warnings and the mechanic of spawning a new zombie upon the mount's death suggest a threat level far exceeding a mere warden.",
+    "reason": "The creature's behavior is purely evasive and lacks any offensive capability or threat to the player's survival.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "hp"
     ],
     "side": "zombie",
-    "speciesId": "ChickenImp",
-    "targetPreference": "structure",
+    "speciesId": "SnowDolphinrider",
+    "targetPreference": "backline",
     "traits": [
-      "High-speed Pecking",
-      "Nested Reanimation",
-      "Tactical Poultry"
-    ],
-    "variants": [],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "high"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:52:08Z",
-      "minorityValues": {},
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Agility",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
-    "family": [
-      "undead-cavalry",
-      "living-siege-engine"
-    ],
-    "gameTypeId": 214,
-    "posture": "Force",
-    "pure": false,
-    "rarity": "chimeric",
-    "reach": "long",
-    "reason": "While highly destructive, the creature's danger is localized to a single combat encounter and lacks the world-altering scale required for a 'tyrant' rating.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "zombie",
-    "speciesId": "DolphinGatlingZombie",
-    "targetPreference": "frontline",
-    "traits": [
-      "mounted-combatant",
-      "explosive-projectile-spammer",
-      "berserker-phase",
-      "high-mobility-shift"
+      "uncontrolled_mount",
+      "high_mobility_burst",
+      "retrograde_movement"
     ],
     "variants": [
-      "corrupted",
-      "mutated"
+      "normal",
+      "corrupted"
     ],
     "verdict": "too-high"
   },
@@ -174,12 +100,93 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:52:51Z",
+      "emittedUtc": "2026-09-04T11:21:06Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "undead-cavalry"
+    ],
+    "gameTypeId": 238,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "The description depicts a tactical unit capable of repositioning plants and jumping, which constitutes a significant threat but does not reach the world-ending scale of a 'calamity'.",
+    "resourceProfile": [
+      "hp",
+      "hp"
+    ],
+    "side": "zombie",
+    "speciesId": "SnowMonsterRider",
+    "targetPreference": "frontline",
+    "traits": [
+      "frost-immune",
+      "snow-beast-mimicry",
+      "displacement-push",
+      "spatial-leap"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:26:45Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -196,37 +203,120 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Agility",
-    "attackTempo": "steady",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "quick",
     "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "Undead Cavalry"
+      "undead_cavalry"
     ],
-    "gameTypeId": 113,
+    "gameTypeId": 232,
     "posture": "Force",
     "pure": false,
-    "rarity": "unresolved",
-    "reach": "long",
-    "reason": "With high resilience, extreme mobility, and continuous projectile attacks, this unit functions as a high-pressure siege engine rather than a mere scourge.",
+    "rarity": "heirloom",
+    "reach": "short",
+    "reason": "While powerful, its ability to bypass defenses and kill specific units does not reach the world-ending scale required for a calamity rating.",
     "resourceProfile": [
-      "hp",
-      "stamina"
+      "hp"
     ],
     "side": "zombie",
-    "speciesId": "DolphinPeaZombie",
+    "speciesId": "SummonedHorse",
     "targetPreference": "frontline",
     "traits": [
-      "Mounted",
-      "Projectile-Spitting",
-      "High-Mobility",
-      "Symbiotic"
+      "phantom_dash",
+      "immunity_to_crowd_control",
+      "charm_negation",
+      "non_lethal_penetration"
     ],
     "variants": [
       "normal",
-      "mutated"
+      "ancient",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:29:43Z",
+      "minorityValues": {
+        "elementPrimary": "earth",
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead_cavalry",
+      "armored_zombie"
+    ],
+    "gameTypeId": 252,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "With massive combined health pools, immunity to knockback, a high-frequency projectile attack, and a mechanic that spawns additional units upon death, this creature functions as a boss-level tank rather than a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "SuperBlackHorse",
+    "targetPreference": "frontline",
+    "traits": [
+      "heavy_armor",
+      "machine_gun_fire",
+      "curse_infliction",
+      "resurrection_mechanic",
+      "trample"
+    ],
+    "variants": [
+      "cursed",
+      "normal"
     ],
     "verdict": "too-low"
   },
@@ -250,16 +340,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "split",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "unresolved"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:53:06Z",
+      "emittedUtc": "2026-09-04T11:31:13Z",
       "minorityValues": {
-        "deployMode": "PlantAvatar",
-        "rarity": "grafted"
+        "aptitudePrimary": "Bulwark"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -277,33 +367,118 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
-    "deployMode": "HypnoAlly",
+    "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "undead_cavalry"
+      "undead cavalry",
+      "sports-themed monstrosity"
     ],
-    "gameTypeId": 69,
+    "gameTypeId": 70,
     "posture": "Force",
     "pure": true,
-    "rarity": "chaff",
+    "rarity": "unresolved",
     "reach": "short",
-    "reason": "The creature possesses extreme speed, immunity to knockback, and a high resilience rating, making it a significant tactical threat rather than a mere warden.",
+    "reason": "The creature's high health pool, immunity to knockback, and ability to summon reinforced cavalry units justify a mid-tier threat level.",
+    "resourceProfile": [
+      "hp",
+      "hp"
+    ],
+    "side": "zombie",
+    "speciesId": "SuperHorse",
+    "targetPreference": "backline",
+    "traits": [
+      "heavy armor",
+      "projectile-launching",
+      "summoner",
+      "form-shifting",
+      "momentum-based"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:46:58Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead cavalry",
+      "cursed commanders"
+    ],
+    "gameTypeId": 229,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "The creature's ability to bypass defenses, inflict exponential death-scaling curses, and gain permanent damage increases through its ",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "zombie",
-    "speciesId": "HorseZombie",
+    "speciesId": "UltimateHorse",
     "targetPreference": "frontline",
     "traits": [
-      "high_momentum",
-      "knockback_immunity",
-      "recharge_stagger"
+      "curse-casting",
+      "momentum-based charging",
+      "adaptive evolution",
+      "post-mortem transformation"
     ],
-    "variants": [],
-    "verdict": "too-low"
+    "variants": [
+      "corrupted",
+      "cursed"
+    ],
+    "verdict": "agree"
   }
 ]

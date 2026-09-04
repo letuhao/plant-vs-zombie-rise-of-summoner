@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:16:16Z",
-      "minorityValues": {
-        "rarity": "almanac"
-      },
+      "emittedUtc": "2026-09-04T10:23:27Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,7 +44,7 @@
     ],
     "aptitudePrimary": "Fortitude",
     "aptitudeSecondary": "Retribution",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "HypnoAlly",
     "elementPrimary": "dark",
@@ -58,19 +57,19 @@
     "posture": "Force",
     "pure": false,
     "rarity": "heirloom",
-    "reach": "melee",
+    "reach": "short",
     "reason": "The description of a corpse that explodes with enough force to damage vegetation and possesses high resilience suggests a threat level far exceeding a mere 'harbinger'.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "spirit"
     ],
     "side": "zombie",
     "speciesId": "EternalZombie_a",
     "targetPreference": "backline",
     "traits": [
-      "Spiritual-Density",
-      "Post-Mortem Explosion",
-      "Yin-Energy Emission"
+      "Explosive Death-Burst",
+      "Yin-Energy Accumulation",
+      "Vegetation-Wither"
     ],
     "variants": [
       "ancient",

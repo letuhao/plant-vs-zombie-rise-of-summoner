@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:38:36Z",
-      "minorityValues": {
-        "rarity": "almanac"
-      },
+      "emittedUtc": "2026-09-04T10:54:06Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -51,28 +50,29 @@
     "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "Aerial Siege Construct"
+      "aerial siege-construct"
     ],
     "gameTypeId": 327,
     "posture": "Force",
     "pure": true,
-    "rarity": "chaff",
+    "rarity": "cultivated",
     "reach": "long",
     "reason": "A level 1 zombie that can be downed by 20 hits and provides only localized tactical bombing does not meet the scale of a harbinger.",
     "resourceProfile": [
-      "hp",
-      "stamina"
+      "hp"
     ],
     "side": "zombie",
     "speciesId": "Kirov_a",
-    "targetPreference": "swarm",
+    "targetPreference": "structure",
     "traits": [
-      "Bombardment",
-      "High Resilience",
-      "Flight",
-      "Mechanical"
+      "bombardment",
+      "high-durability",
+      "aerial-mobility"
     ],
-    "variants": [],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
     "verdict": "too-high"
   }
 ]

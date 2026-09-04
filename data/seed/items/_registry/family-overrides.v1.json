@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "_meta": {
+    "purpose": "The only per-(role,family) granularity item_role_family actually needs (item-ideal.md, affix-legality module 8, section 'The one override'). Everything else is derived from the 98 families' own roles/frames/side.",
+    "sources": ["ssot-equip-slots.md §2.5", "classes.v1.json _meta.designNotes (the More-operator implicit-slate ban, independent corroborating evidence)"]
+  },
+  "roleCaps": [
+    {
+      "role": "jewel-minor-a",
+      "maxTier": 3,
+      "reason": "ssot-equip-slots.md §2.5: item_role_family.max_tier = 3 for every family on both minor jewels, against 5 on jewel-major."
+    },
+    {
+      "role": "jewel-minor-b",
+      "maxTier": 3,
+      "reason": "identical twin of jewel-minor-a, same cap."
+    }
+  ],
+  "removedFamilies": [
+    {
+      "role": "jewel-minor-a",
+      "familyId": "atom.bulwark",
+      "reason": "§2.5's third pricing mechanism, resolved: removed rather than amending §2.5 -- classes.v1.json independently bars this family from every implicit slate because it uses the More operator (tier-equality), which is corroborating evidence for removal, not amendment."
+    },
+    {
+      "role": "jewel-minor-a",
+      "familyId": "atom.savagery",
+      "reason": "same resolution, same reason -- the atk-More sibling of atom.bulwark."
+    },
+    {
+      "role": "jewel-minor-b",
+      "familyId": "atom.bulwark",
+      "reason": "identical twin of jewel-minor-a, same removal."
+    },
+    {
+      "role": "jewel-minor-b",
+      "familyId": "atom.savagery",
+      "reason": "identical twin of jewel-minor-a, same removal."
+    }
+  ]
+}

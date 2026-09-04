@@ -1,0 +1,460 @@
+{
+  "_meta": {
+    "corpusHash": "11e86961a582d4a547a035f43fbc3b146e4e18947577477cded9bd82401d60c6",
+    "partition": "round-1",
+    "round": 1
+  },
+  "entries": [
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.sporing",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.family.cactus.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "仙人掌",
+        "发射"
+      ],
+      "name": "Spined Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "cactus",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.cherry-bloom",
+        "atom.death-harvest"
+      ],
+      "category": "support",
+      "id": "action.family.cherry.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "樱桃"
+      ],
+      "name": "The Crimson Reanimation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "cherry",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-harvest",
+        "atom.lifesteal"
+      ],
+      "category": "attack",
+      "id": "action.family.chomper.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "吞食",
+        "僵尸"
+      ],
+      "name": "Grave-Gorge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "chomper",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.elpw-pierce"
+      ],
+      "category": "attack",
+      "id": "action.family.corn.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "子弹",
+        "制成"
+      ],
+      "name": "Internal Ballistic Forging",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "corn",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.volley"
+      ],
+      "category": "attack",
+      "id": "action.family.double.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "发射",
+        "子弹"
+      ],
+      "name": "Kinetic Discharge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "double",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-harden",
+        "atom.shld-surge"
+      ],
+      "category": "defense",
+      "id": "action.family.fruit.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "发射",
+        "方向"
+      ],
+      "name": "Directional Kinetic Discharge",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "fruit",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.venomous",
+        "atom.withering"
+      ],
+      "category": "attack",
+      "id": "action.family.garlic.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "中毒",
+        "体内"
+      ],
+      "name": "Internal Saturation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "garlic",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.venomous"
+      ],
+      "category": "support",
+      "id": "action.family.garlic.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "体内",
+        "中毒"
+      ],
+      "name": "Internal Saturation",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "garlic",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-harvest",
+        "atom.mesmerizing"
+      ],
+      "category": "attack",
+      "id": "action.family.hypno.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "变心"
+      ],
+      "name": "The Fickle Rot",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "hypno",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-harden",
+        "atom.sust-husk"
+      ],
+      "category": "defense",
+      "id": "action.family.hypno.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "变心"
+      ],
+      "name": "Fickle Rigor Mortis",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "hypno",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.carapace",
+        "atom.elpw-pierce"
+      ],
+      "category": "attack",
+      "id": "action.family.nut.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "穿透",
+        "坚果"
+      ],
+      "name": "Hardened Penetration",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "nut",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.sporing"
+      ],
+      "category": "attack",
+      "id": "action.family.pea.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "发射"
+      ],
+      "name": "Undead Volley",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "pea",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-salvo",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "id": "action.family.pea.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "僵尸",
+        "发射"
+      ],
+      "name": "Relentless Surge of the Unliving",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "pea",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.death-harvest",
+        "atom.sunbloom"
+      ],
+      "category": "attack",
+      "id": "action.family.sunflower.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "嘴花",
+        "完成"
+      ],
+      "name": "Radiant Completion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        7
+      ],
+      "scope": "family",
+      "scopeKey": "sunflower",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evd-brace",
+        "atom.sust-grit"
+      ],
+      "category": "defense",
+      "id": "action.general.0001",
+      "name": "Brace",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.tempo-surge",
+        "atom.vitality"
+      ],
+      "category": "support",
+      "id": "action.general.0003",
+      "name": "Shared Pulse",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "ally",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "multi"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.swiftness",
+        "atom.tempo-surge"
+      ],
+      "category": "movement",
+      "id": "action.general.0004",
+      "name": "Shift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "rolledTarget"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.evasion",
+        "atom.swiftness"
+      ],
+      "category": "movement",
+      "id": "action.general.0005",
+      "name": "Shift",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "all"
+    },
+    {
+      "areaShape": "row",
+      "atomFamilies": [
+        "atom.dooming",
+        "atom.withering"
+      ],
+      "category": "status",
+      "id": "action.general.0006",
+      "name": "Lingering Tremor",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        4
+      ],
+      "scope": "general",
+      "scopeKey": null,
+      "targetMode": "area"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

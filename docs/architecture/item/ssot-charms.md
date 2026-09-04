@@ -131,6 +131,15 @@ notice.
 
 ### 3.1 THE CRUX — whose bonus is a charm?
 
+> ✅ **SETTLED 2026-09-04 by owner ruling D33(a) — the answer is B, not C.** Charm resonance binds per
+> deployed actor at `unique-actor:{specimenId}`. Option C's `player:{id}` is **withdrawn**: it is a
+> scope the grammar accepts and the resolver cannot express, so `StatApplyScope.Matches` returns `true`
+> unconditionally (`:82`) and a `player:`-scoped `+atk` charm buffs the zombies. The underlying
+> architecture defect — `StatApplyScope` has no atom dimension at all, so effects on that path never
+> reach the atom scope model — is filed against `buff-debuff-scope`
+> ([buff-debuff-scope-map.md](../buff-debuff-scope-map.md)). **The lane text below is kept as the
+> reasoning that produced the four options; read the banner for the answer.**
+
 Equipment binds to an actor; inventory belongs to the player. Four answers, four different games.
 
 | # | Answer | Owner scope | What the game becomes |

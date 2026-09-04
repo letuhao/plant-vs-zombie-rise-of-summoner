@@ -16,7 +16,7 @@ string tuningDir = Path.Combine(repoRoot, "data", "tuning");
 
 var aptitudeTuning = AptitudeTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v2.json")));
 var powerTuning = PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json")));
-DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 
 var ladder = new PowerLadder(powerTuning);
 var registry = DerivedStatRegistry.CreateDefault();

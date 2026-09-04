@@ -33,7 +33,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.dense-taproot",
       "flavorKey": "flavor.base.dense-taproot",
       "flavor": "A shaft of ancient wood driven deep, tight-grained and immovable.",
@@ -144,7 +144,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.immemorial-pneumatophore",
       "flavorKey": "flavor.base.immemorial-pneumatophore",
       "flavor": "An elder breathing root, woody and complex, as old as the marsh it has crossed.",
@@ -218,7 +218,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.sunken-rhizome",
       "flavorKey": "flavor.base.sunken-rhizome",
       "flavor": "A horizontal root buried deep, holding fast by staying low and hidden.",
@@ -255,7 +255,7 @@
         "family": "atom.vitality",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.abundant-tuber",
       "flavorKey": "flavor.base.abundant-tuber",
       "flavor": "A swollen root-bulge, full and heavy with reserves that feed endurance.",
@@ -292,7 +292,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.steadfast-prop",
       "flavorKey": "flavor.base.steadfast-prop",
       "flavor": "A support root that stands firm, unwavering through every storm.",
@@ -366,7 +366,7 @@
         "family": "atom.regeneration",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.gnarled-stolon",
       "flavorKey": "flavor.base.gnarled-stolon",
       "flavor": "A hardened runner, twisted and thick, spreading across stone as if it owns it.",
@@ -403,7 +403,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.inert-mycelium",
       "flavorKey": "flavor.base.inert-mycelium",
       "flavor": "A vast fungal network, quiet and still, locked in the earth for ages.",
@@ -440,7 +440,7 @@
         "family": "atom.regeneration",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.petrified-clutch",
       "flavorKey": "flavor.base.petrified-clutch",
       "flavor": "Roots that grip like stone, fossilized by time into an anchor that will not yield.",

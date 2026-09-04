@@ -30,10 +30,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.downy-leaf",
       "flavorKey": "flavor.base.downy-leaf",
       "flavor": "Soft with fine hairs, it seems too delicate to harm. It is not.",
@@ -107,7 +107,7 @@
         "family": "atom.deathblast",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.feathered-frond",
       "flavorKey": "flavor.base.feathered-frond",
       "flavor": "Delicate as a feather, sharp as a saw. The paradox makes it deadly.",
@@ -141,10 +141,10 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.pliant-petiole",
       "flavorKey": "flavor.base.pliant-petiole",
       "flavor": "Flexible stalk that bends with the plant, strikes with it too.",
@@ -181,7 +181,7 @@
         "family": "atom.bloodletting",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.slender-blade",
       "flavorKey": "flavor.base.slender-blade",
       "flavor": "The leaf itself, sharpened by age and desiccation. It cuts deeper than its width suggests.",
@@ -218,7 +218,7 @@
         "family": "atom.deathblast",
         "powerBand": "trivial"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.tender-tendril",
       "flavorKey": "flavor.base.tender-tendril",
       "flavor": "Young and pliable, it coils and strikes before hardening. Rate over weight.",
@@ -252,10 +252,10 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.bloodletting",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.nodding-shoot",
       "flavorKey": "flavor.base.nodding-shoot",
       "flavor": "A fresh stem that still bows to the wind, but strikes with the force of spring tension.",
@@ -329,7 +329,7 @@
         "family": "atom.deathblast",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.flossy-lamina",
       "flavorKey": "flavor.base.flossy-lamina",
       "flavor": "The leafy part, dried and stringy. What looks fragile explodes on contact.",
@@ -363,7 +363,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.searing-strike",
+        "family": "atom.deathblast",
         "powerBand": "high"
       },
       "socketMax": 1,
@@ -441,7 +441,7 @@
         "family": "atom.deathblast",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.filamentous-rachis",
       "flavorKey": "flavor.base.filamentous-rachis",
       "flavor": "The primary axis of a compound leaf, split into fine threads. Strikes in a thousand places at once.",

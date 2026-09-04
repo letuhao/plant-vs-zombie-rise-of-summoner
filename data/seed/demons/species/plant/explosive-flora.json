@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:32:36Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
+      "emittedUtc": "2026-09-04T10:04:56Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,13 +44,14 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "explosive-flora"
+      "explosive-flora",
+      "aerial-pome"
     ],
     "gameTypeId": 1244,
     "posture": "Force",
@@ -67,9 +67,9 @@
     "speciesId": "CherryBlover",
     "targetPreference": "swarm",
     "traits": [
-      "aerial-collision",
-      "cherry-burst",
-      "clover-hybrid"
+      "aerial-mobility",
+      "impact-detonation",
+      "clover-hybridization"
     ],
     "variants": [
       "normal",
@@ -98,12 +98,13 @@
       "basis": "observed",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:32:51Z",
+      "emittedUtc": "2026-09-04T10:05:22Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -121,20 +122,20 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "observed",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Explosive Flora"
+      "explosive flora"
     ],
     "gameTypeId": 2,
     "posture": "Force",
     "pure": true,
-    "rarity": "cultivated",
+    "rarity": "sprout",
     "reach": "short",
-    "reason": "A 3x3 area-of-effect explosion dealing 1800 damage is a high-tier tactical threat that exceeds the capabilities of a standard 'tyrant' classification.",
+    "reason": "A 3x3 area-of-effect explosion dealing 1800 damage is a high-tier offensive capability that exceeds the scope of a mere 'tyrant' classification.",
     "resourceProfile": [
       "hp",
       "stamina"
@@ -143,13 +144,12 @@
     "speciesId": "CherryBomb",
     "targetPreference": "swarm",
     "traits": [
-      "High-yield combustion",
-      "Area-of-effect detonation",
-      "Ash-damage conversion"
+      "detonating",
+      "area-of-effect",
+      "zombie-clearing"
     ],
     "variants": [
-      "normal",
-      "mutated"
+      "normal"
     ],
     "verdict": "too-low"
   },
@@ -174,15 +174,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:35:44Z",
-      "minorityValues": {
-        "rarity": "fused"
-      },
+      "emittedUtc": "2026-09-04T10:05:50Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -199,18 +198,18 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Explosive Flora"
+      "explosive-flora"
     ],
     "gameTypeId": 1162,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "chimeric",
+    "rarity": "fused",
     "reach": "short",
     "reason": "The ability to chain explosions and spawn multiple timed mines in a 3x3 area creates significant area denial and high burst potential.",
     "resourceProfile": [
@@ -221,14 +220,13 @@
     "speciesId": "CherryMine",
     "targetPreference": "swarm",
     "traits": [
-      "Post-mortem detonation",
-      "Rapid-growth seeding",
-      "Low-profile"
+      "post-mortem-seeding",
+      "rapid-maturation",
+      "low-profile"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
     ],
     "verdict": "agree"
   },
@@ -253,14 +251,254 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:56:13Z",
+      "emittedUtc": "2026-09-04T10:12:48Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 1332,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to scale its damage exponentially through multiple explosions and zombie-triggered buffs justifies its status as a high-threat scourge.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "DoomCherry",
+    "targetPreference": "swarm",
+    "traits": [
+      "chain-reaction",
+      "dust-catalyst",
+      "scaling-damage"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:13:19Z",
       "minorityValues": {
-        "rarity": "chimeric"
+        "rarity": "grafted",
+        "threatBand": "scourge"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 1355,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "melee",
+    "reason": "While it possesses high explosive potential, its low stature and role as a basic fusion plant suggest it is a localized hazard rather than a widespread threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "DoomGarlic",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "low-profile",
+      "post-mortem-detonation",
+      "toxic-residue",
+      "status-inflicting"
+    ],
+    "variants": [
+      "normal",
+      "corrupted",
+      "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:13:56Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora",
+      "catalyst-vegetation"
+    ],
+    "gameTypeId": 1317,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to trigger chain explosions that consume all plants in a row and transform them into cards makes it a high-threat tactical threat consistent with a scourge.",
+    "resourceProfile": [
+      "hp",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "DoomJalapeno",
+    "targetPreference": "swarm",
+    "traits": [
+      "dormant-detonation",
+      "chain-reaction",
+      "cellular-conversion",
+      "combustive-spore"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:45:19Z",
+      "minorityValues": {
+        "attackTempo": "slow"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -278,39 +516,38 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
       "explosive-flora"
     ],
-    "gameTypeId": 1317,
+    "gameTypeId": 1401,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
-    "reason": "The ability to trigger chain explosions that consume all plants in a row and transform them into cards makes it a high-threat tactical threat consistent with a scourge.",
+    "reach": "short",
+    "reason": "The creature's ability to trigger chain reactions through secondary explosions makes it a high-threat area-denial tool rather than a mere scourge.",
     "resourceProfile": [
       "hp",
-      "poise",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "DoomJalapeno",
+    "speciesId": "IceMine",
     "targetPreference": "swarm",
     "traits": [
-      "dormant-detonation",
-      "chain-reaction",
-      "ash-conversion",
-      "resource-recycling"
+      "cryogenic-detonation",
+      "chain-reaction-frost",
+      "expansion-burst"
     ],
     "variants": [
+      "normal",
       "mutated",
       "cursed"
     ],
-    "verdict": "agree"
+    "verdict": "too-low"
   },
   {
     "_derived": [
@@ -333,15 +570,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:30:33Z",
-      "minorityValues": {
-        "rarity": "grafted"
-      },
+      "emittedUtc": "2026-09-04T11:10:07Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -358,35 +594,270 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
+    "elementPrimary": "earth",
+    "elementSecondary": "fire",
     "family": [
-      "Explosive Flora"
+      "explosive-flora"
     ],
-    "gameTypeId": 1163,
+    "gameTypeId": 4,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "fused",
+    "rarity": "sprout",
     "reach": "short",
-    "reason": "The creature's threat is localized to a single row and relies on a short-duration spawn mechanic, which lacks the widespread devastation required for a 'scourge' rating.",
+    "reason": "A single explosion dealing 1800 damage with a radius of 0.74 blocks is a high-impact tactical threat that exceeds the scope of a mere 'scourge'.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "JalaMine",
-    "targetPreference": "swarm",
+    "speciesId": "PotatoMine",
+    "targetPreference": "backline",
     "traits": [
-      "Post-mortem detonation",
-      "Rapid-growth seeding",
-      "Low-profile"
+      "delayed-detonation",
+      "grounded-detonation",
+      "low-profile"
+    ],
+    "variants": [
+      "normal"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:16:20Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 1339,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "A high-damage explosive that scales in both power and area of effect over time functions as a significant tactical threat rather than a mere warden-level obstacle.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SeaMine_land",
+    "targetPreference": "backline",
+    "traits": [
+      "growth-stages",
+      "delayed-detonation",
+      "low-profile"
     ],
     "variants": [
       "mutated",
       "cursed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T13:25:15Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "light",
+    "family": [
+      "explosive-flora",
+      "pyro-botanicals"
+    ],
+    "gameTypeId": 1308,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to consume all allies in a row to gain massive damage scaling and resource generation makes it a high-risk, high-reward tactical threat consistent with a scourge.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SunJalapeno",
+    "targetPreference": "backline",
+    "traits": [
+      "cannibalistic-growth",
+      "sunlight-conversion",
+      "collateral-combustion"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:36:40Z",
+      "minorityValues": {
+        "attackTempo": "quick"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 1240,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature deals massive burst damage (5400) and possesses rapid-fire capabilities, making it a significant combat threat rather than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "ThreeMine",
+    "targetPreference": "frontline",
+    "traits": [
+      "tri-line projectile",
+      "proximity-based rapid-fire",
+      "post-detonation dormancy",
+      "anti-vehicle stability"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
     ],
     "verdict": "too-high"
   },
@@ -408,16 +879,19 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "high"
+        "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:35:21Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T11:38:15Z",
+      "minorityValues": {
+        "rarity": "cultivated"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -435,35 +909,113 @@
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "observed",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Explosive Flora"
+      "explosive-flora"
     ],
-    "gameTypeId": 16,
+    "gameTypeId": 1421,
     "posture": "Force",
     "pure": true,
-    "rarity": "cultivated",
-    "reach": "long",
-    "reason": "The ability to instantly eliminate high-health Zombonis and clear an entire lane with massive damage justifies a higher threat rating than a mere tyrant.",
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to multiply projectiles into high-damage explosive units and its massive 1800 base damage suggest a threat level far exceeding a mere scourge.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "Jalapeno",
-    "targetPreference": "structure",
+    "speciesId": "TorchMine",
+    "targetPreference": "backline",
     "traits": [
-      "Combustive",
-      "Linear-Area-of-Effect",
-      "Thermal-Impact"
+      "combustive-catalyst",
+      "projectile-modifier",
+      "delayed-detonation"
     ],
     "variants": [
       "normal",
       "mutated"
     ],
     "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:49:55Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "explosive-flora"
+    ],
+    "gameTypeId": 301,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The high-frequency burst damage (1800 damage per second) combined with area-of-effect splash makes it a significant tactical threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateMinigun",
+    "targetPreference": "swarm",
+    "traits": [
+      "cherry-projectile",
+      "splash-damage",
+      "self-immunity",
+      "pre-fire-warmup"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
   }
 ]

@@ -55,9 +55,9 @@ And one schema-level error that would have shipped into the atom spec:
 
 ---
 
-## 2. The closed kind list — 12
+## 2. The closed kind list — 15
 
-Twelve kinds cover everything that has a working consumer today. Eleven map to a shipped opcode; `stat.derived` is the one addition, and it exists because four separate magnitude sites (patron, stars, injuries, contracts) already write derived channels with no opcode at all.
+Fifteen kinds cover everything that has a working consumer today. Eleven map to a shipped FA opcode; `stat.derived` is a direct channel write with no opcode (four magnitude sites — patron, stars, injuries, contracts — already wrote derived channels with none); `match.modify` (E35, 2026-09-04) is the first kind on the `Match` attach point, mapping to `ModifyMatch` and writing one `Board.config` field for the match through `CheatState` + `CheatActions.ApplyBoardConfig` rather than an entity's own stats; `wave.control` (E36, 2026-09-04) is the second, mapping to `WaveControl` and driving `CheatActions.SummonWave`/`HugeWave`/`SetWaveTimer` plus `DebugActions.WaveFreeze` — the content path for the four wave-pressure writes that were cheat-only before; `bullet.modify` (E37, 2026-09-04) adds no new attach point — it reuses `board` — and is a second declarative permanent modifier alongside `stat.derived`: the grant's presence is read as a resolved value inside the existing `Bullet.InitData` postfix, never fired by an event.
 
 | # | Kind | Attach point | Maps to | Runtime support |
 |---|---|---|---|---|
@@ -73,10 +73,15 @@ Twelve kinds cover everything that has a working consumer today. Eleven map to a
 | 10 | `grid.spawn` | board | FA6 `SpawnGridItem` | lawn ✅ · battle ✖ · sim plan-only |
 | 11 | `grid.clear` | board | FA7 `ClearGridItem` | lawn ✅ · battle ✖ · sim plan-only |
 | 12 | `box.set` | board | FA8 `SetBoxType` | lawn ✅ · battle ✖ · sim plan-only |
+| 13 | `match.modify` | match | `ModifyMatch` | lawn ✅ · battle ✖ (no `Board.config`, no consumer) · sim ✖ (same) |
+| 14 | `wave.control` | match | `WaveControl` | lawn ✅ · battle ✖ (no `BoardSpawner`, no consumer) · sim ✖ (same) |
+| 15 | `bullet.modify` | board | `BulletModify` *(declarative — no sink arm)* | lawn ✅ (`Bullet.InitData` resolved read) · battle ✖ (no projectile, pending) · sim ✖ (same) |
 
-**Five attach points:** stat · resource · status · shield · board. That list is the thing an ADR guards.
+**Six attach points:** stat · resource · status · shield · board · match. `decisions.md`'s "Atom attach points" row is the thing that guards this list now — it did not exist before E35, which wrote it the same day it added `match`.
 
-**`stat.modify` and `stat.derived` carry no trigger.** They are permanent modifiers; apply and revert are runtime lifecycle, not content — `OnGranted`/`OnRemoved` stay in the 7-trigger enum as runtime states no atom may author ([definitions.md](definitions.md) §14.2).
+`match` differs from `board` on purpose: a `board` kind acts on a cell or an entity within the running match (`spawn.entity`, `board.action`, `grid.spawn`, `grid.clear`, `box.set` — each takes `row`/`col`); a `match` kind changes a rule the whole match is played under and names no cell.
+
+**`stat.derived` and `bullet.modify` carry no trigger at all** (`stat.modify` may optionally carry one since A18e, but does not require it). They are permanent modifiers; apply and revert are runtime lifecycle, not content — `OnGranted`/`OnRemoved` stay in the 13-trigger enum as runtime states no atom may author ([definitions.md](definitions.md) §14.2). `AtomKindRegistryTests.cs`'s own `permanentModifiers` set names both `stat.derived` and `bullet.modify` for exactly this reason.
 
 ### Not kinds, on purpose
 
@@ -91,7 +96,7 @@ Twelve kinds cover everything that has a working consumer today. Eleven map to a
 
 ---
 
-## 3. Trigger vocabulary — 8
+## 3. Trigger vocabulary — 13
 
 | Trigger | LIVE signal | Note |
 |---|---|---|
@@ -102,25 +107,34 @@ Twelve kinds cover everything that has a working consumer today. Eleven map to a
 | `OnGranted` / `OnRemoved` | grant lifecycle | **Not authorable** — runtime lifecycle only (§14.2). The bag injects the revert itself |
 | `OnTimer` | injector hot-loop ms scheduler | **Exists in code and `effect-data.md`, absent from the trigger table in `effect-system.md`** — no FT number ever assigned |
 | `OnActivate` | the actor's own decision to act | **Added by A18b** (`spec-on-activate-trigger.md`) — a reviewed cross-program vocabulary change, not a unilateral addition. Neither a board event (nothing has necessarily been damaged, spawned or killed) nor a lifecycle transition (the grant was bound earlier, possibly turns ago) |
+| `OnWave` | `wave.change` (canonical) / `wave.spawn` / `wave.huge` (deduped to one edge per wave) | **Added by E34** (`spec-trigger-vocabulary.md`) — match-scoped, no `ActorPtr`/`Side` |
+| `OnMatchStart` | `board.start` | **Added by E34** — match-scoped |
+| `OnMatchEnd` | `board.end` / `match.win` / `match.lose` | **Added by E34** — match-scoped |
+| `OnSunCollect` | `sun.gain` | **Added by E34** — board-economy; the collected count carries no field (a predicate, out of E34's scope) |
+| `OnGridPlace` | `grid.place` | **Added by E34** — board-economy; `TypeId` is the grid item type, `ActorPtr` set when the payload carries `ptr` |
 
-`OnWave`, `OnMindControl`, and `OnHitLand` are **probed but not shipped** (§6).
+`OnMindControl` and `OnHitLand` are **probed but not shipped** (§6).
 
-> **Corrected 2026-09-02:** this section said **7** and omitted `OnActivate`. SSOT is `AtomTriggers.All`
-> (`src/FusionRpg.Core/Effects/Atoms/AtomKind.cs`), whose length `AtomKindRegistry.TriggerCount = 8`
-> mirrors as a structural constant. Note the section header counts **authorable + lifecycle** together:
+> **Corrected 2026-09-04 (E34, spec-trigger-vocabulary.md):** this section said **8**. SSOT is
+> `AtomTriggers.All` (`src/FusionRpg.Core/Effects/Atoms/AtomKind.cs`), whose length
+> `AtomKindRegistry.TriggerCount = 13` mirrors as a structural constant. E34 adds five — `OnWave`,
+> `OnMatchStart`, `OnMatchEnd`, `OnSunCollect`, `OnGridPlace` — as input only: no new kind, attach
+> point, or executor. Note the section header counts **authorable + lifecycle** together:
 > `OnGranted`/`OnRemoved` are in `All` but are runtime lifecycle states no kind may carry.
 
 ---
 
 ## 4. Channel vocabulary
 
-### 4.1 Primary — 11, and only these
+### 4.1 Primary — 23, and only these
 
-`hp` · `maxHp` · `atk` · `defense` · `arm1` · `arm1Max` · `arm2` · `arm2Max` · `attackInterval` · `produceInterval` · `zombieSpeed`
+`hp` · `maxHp` · `atk` · `defense` · `arm1` · `arm1Max` · `arm2` · `arm2Max` · `attackInterval` · `produceInterval` · `zombieSpeed` · `plantShield` · `attackCountdown` · `attackSpeedAdder` · `produceCountdown` · `plantSpeed` · `plantMoveSpeed` · `plantLevel` · `shootingLevel` · `armorFlat` · `takeDmgMultiplier` · `zombieSpeedCurrent` · `zombieOriginSpeed`
 
 **SSOT is `StatChannels.All`** (`src/FusionRpg.Core/Stats/ModifierOp.cs:26`) — never this list. `AtomKindRegistry.PrimaryChannels` reads it rather than copying it, and rule **G6** refuses any `stat.modify` whose `channel` is not in it.
 
-> **Corrected 2026-09-02.** This section said *"8, and only these"* with the last three marked *"growing to 11 … own spec, after the atom layer lands."* **That growth shipped (E16)** — all eleven are real composed channels today, which is what makes fire rate, sun rate and creep speed authorable at all. Measured in `docs/research/atom-effect-pool-audit-2026-09-02.md` §3.2.
+> **Corrected 2026-09-02.** This section said *"8, and only these"* with the last three marked *"growing to 11 … own spec, after the atom layer lands."* **That growth shipped (E16)** — all eleven were real composed channels, which is what makes fire rate, sun rate and creep speed authorable at all. Measured in `docs/research/atom-effect-pool-audit-2026-09-02.md` §3.2.
+>
+> **Grown again 2026-09-04 (E38, `spec-entity-fields-12plus.md`).** Twelve more Unity fields — `theShieldHealth`, `thePlantAttackCountDown`, `attackSpeedAdder`, `thePlantProduceCountDown`, `thePlantSpeed`, `moveSpeed`, `theLevel`, `shootingLevel`, `theArmor`, `takeDmgMultiplier`, `theSpeed`, `theOriginSpeed` — were written straight from cheat keys, past the modifier bag, same shape as E16's three. All twelve are real composed channels now, 11 → 23. `takeDmgMultiplier` is **not** the authoring surface for "enemies take more damage" — under the bearer frame (§2c of the spec) a raise on your own `takeDmgMultiplier` prices as a penalty, correctly; that debuff is a `status.apply` payload, priced as a status.
 
 Armor channels are zombie-only — that is a fact about which Unity fields exist, **not** about mitigation: elemental defense and the whole shield stack serve both sides.
 
@@ -220,7 +234,7 @@ These must be in the SSOT so nobody re-probes them.
 | `Board.roadType` tile paint | **failed** | 12-element array, not a lawn map |
 | `Bullet.HitZombie` / `HitPlant` Harmony | **off** | unsafe; on-hit uses TakeDamage + `AttackPlant` |
 | `combat.hitland` | **not shipped** | ~134 overrides, no LIVE events |
-| `OnWave`, `OnMindControl`, summon-wave | **probed, no LIVE row** | may be promoted with evidence |
+| `OnMindControl`, summon-wave | **probed, no LIVE row** | may be promoted with evidence |
 
 ---
 
@@ -293,9 +307,9 @@ Not free, and worth naming: the enum **ordinal is load-bearing**, a test asserts
 
 | Thing | Count | Growth policy |
 |---|---|---|
-| **Attach points** | **5** | ADR |
-| **Kinds** | **12** | reviewed code change |
-| **Triggers** | **8** | reviewed code change — `OnActivate` added by A18b (was 7 here until 2026-09-02) |
+| **Attach points** | **6** | reviewed change to `decisions.md`'s "Atom attach points" row |
+| **Kinds** | **14** | reviewed code change |
+| **Triggers** | **13** | reviewed code change — `OnWave`/`OnMatchStart`/`OnMatchEnd`/`OnSunCollect`/`OnGridPlace` added by E34 (was 8 here until 2026-09-04) |
 | **Predicate leaves** | **~8** | reviewed code change |
 | Owner-key scopes | **7 total**, including `sector:{id}` and `slot:{id}` | reviewed change |
 | Primary channels | **11** | shipped (E16); SSOT `StatChannels.All` |
@@ -307,4 +321,4 @@ Not free, and worth naming: the enum **ordinal is load-bearing**, a test asserts
 | Tiers per family | **unbounded** | data |
 | Atoms | **unbounded** | data |
 
-Twelve kinds and five attach points is the whole machine. Everything a player will ever see is families and tiers on top of it.
+Fourteen kinds and six attach points is the whole machine. Everything a player will ever see is families and tiers on top of it.

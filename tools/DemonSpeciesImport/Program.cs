@@ -114,7 +114,7 @@ if (stale.Count > 0)
 // real 2026-08-30; every test project bootstraps this globally, so no in-process test catches it).
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 
 // ---- import, one transaction, via RpgStore — never raw SQL in this tool ---------------------------
 var store = new RpgStore(dataDir);

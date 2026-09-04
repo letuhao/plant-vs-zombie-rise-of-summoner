@@ -595,6 +595,12 @@ public sealed partial class RpgStore : IRpgDb
         // E8: the content stamp a resolve ran against, so the boot sweep can refuse to
         // re-resolve across edited effect content instead of silently producing a different report.
         EnsureColumn(db, "rpg_web_match_log", "content_hash", "TEXT");
+        // B21 (spec-interactive-turns.md §3): the decision trace — the fourth member of the
+        // determinism tuple beside setup_json, seed and the version stamps, so it belongs on this
+        // table rather than in one of its own. NULL means "not an interactive match", which is every
+        // match today; an interactive match with a NULL or partial trace is REFUSED by the sweep
+        // rather than re-resolved, because re-resolving substitutes AI decisions for a player's.
+        EnsureColumn(db, "rpg_web_match_log", "decisions_json", "TEXT");
         // World map (spec-world-model.md) — its DDL lives beside its store partial.
         EnsureWorldSchemaUnlocked(db);
         // Atom effect curves (spec-value-spec-and-curve.md, E2) — Core cannot hold SQL, so the
@@ -606,6 +612,17 @@ public sealed partial class RpgStore : IRpgDb
         EnsureContainerSchemaUnlocked(db);
         // effect_instance / effect_instance_atom / effect_binding (spec-instance-and-binding.md, E6).
         EnsureAtomInstanceSchemaUnlocked(db);
+        // rpg_item — the second reachability root beside effect_binding (item-ideal.md, durable-ownership).
+        EnsureRpgItemSchemaUnlocked(db);
+        // rarity_budget — item-ideal.md, rarity-bands (module 7).
+        EnsureRarityBudgetSchemaUnlocked(db);
+        // item_display_template — item-ideal.md, item-card (module 10).
+        EnsureItemDisplaySchemaUnlocked(db);
+        // loot_source / drop_table[_group|_entry] / item_drop_log / item_generation /
+        // item_loot_pity / item_first_clear — item-ideal.md, drop-volume (module 11).
+        EnsureLootSchemaUnlocked(db);
+        // item_set / item_set_member / item_set_tier — ssot-sets.md §4.2, threshold-grants (module 12).
+        EnsureItemSetSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
@@ -702,6 +719,17 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM rpg_aptitude_allocation;",
                              "DELETE FROM archive_catalog;",
+                             // world-stage W21: found missing here while building an E2E fixture
+                             // test — a world created in one test class outlived every later
+                             // `/api/test/reset`, so any subsequent test reusing the same world id
+                             // (a natural choice, e.g. "first-light") hit `world.exists` against an
+                             // orphaned row whose owning player this same reset had already deleted.
+                             "DELETE FROM rpg_world_turn_log;", "DELETE FROM rpg_world_turn_commits;",
+                             "DELETE FROM rpg_world_commands;", "DELETE FROM rpg_world_entity_members;",
+                             "DELETE FROM rpg_world_faction_intel;", "DELETE FROM rpg_world_entities;",
+                             "DELETE FROM rpg_world_lanes;", "DELETE FROM rpg_world_slots;",
+                             "DELETE FROM rpg_world_sectors;", "DELETE FROM rpg_world_factions;",
+                             "DELETE FROM rpg_worlds;",
                              "DELETE FROM players;"
                          })
                 {

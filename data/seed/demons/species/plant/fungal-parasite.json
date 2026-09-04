@@ -17,19 +17,18 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "inferred",
+      "basis": "observed",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "split"
+        "elementPrimary": "split",
+        "rarity": "unresolved"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:01:14Z",
+      "emittedUtc": "2026-09-04T10:41:51Z",
       "minorityValues": {
-        "rarity": "chaff",
-        "threatBand": "nuisance"
+        "elementPrimary": "earth"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -43,41 +42,40 @@
       }
     },
     "acquisition": [
-      "Summonable"
+      "CaptureOnly"
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
-    "basis": "inferred",
+    "basis": "observed",
     "deployMode": "HypnoAlly",
-    "elementPrimary": "earth",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "Fungal Parasite"
+      "fungal-parasite"
     ],
-    "gameTypeId": 1022,
+    "gameTypeId": 8,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "sprout",
+    "rarity": "unresolved",
     "reach": "melee",
-    "reason": "Its primary function is a minor debuff that diminishes a single enemy's strength before self-destructing, making it a nuisance rather than a direct combat threat.",
+    "reason": "The creature's ability to turn enemies into allies through charm effects makes it a strategic threat capable of shifting the tide of battle, elevating it beyond a mere raider.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "HypnoPuff",
+    "speciesId": "HypnoShroom",
     "targetPreference": "backline",
-    "threatBand": "pest",
     "traits": [
-      "Size-altering",
-      "Charm-inducing",
-      "Self-sacrificing",
-      "Dense-growth"
+      "mind-altering spores",
+      "self-destructing"
     ],
     "variants": [
-      "normal"
-    ]
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "too-low"
   },
   {
     "_derived": [
@@ -100,14 +98,17 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:11:05Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:44:51Z",
+      "minorityValues": {
+        "attackTempo": "steady"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -124,13 +125,13 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "inferred",
     "deployMode": "HypnoAlly",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Fungal-Parasite"
+      "fungal-parasite"
     ],
     "gameTypeId": 1041,
     "posture": "Bastion",
@@ -147,14 +148,97 @@
     "targetPreference": "backline",
     "threatBand": "nuisance",
     "traits": [
-      "Charming Spores",
-      "Cryogenic Transformation",
-      "Reactive Disappearance"
+      "charm-inducing",
+      "cryo-catalyst",
+      "transmutative-spore"
     ],
     "variants": [
-      "normal",
       "mutated",
       "cursed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:31:28Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught",
+        "attackTempo": "slow",
+        "threatBand": "calamity"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "ponderous",
+    "basis": "inferred",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "fungal-parasite",
+      "mimic-spore"
+    ],
+    "gameTypeId": 928,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature triggers a chain reaction of massive explosions through charmed zombies and summons multiple high-tier combat units, capable of overwhelming entire battlefield layouts.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SuperHypnoDoom",
+    "targetPreference": "swarm",
+    "threatBand": "cataclysm",
+    "traits": [
+      "zombie-catalyst",
+      "non-destructive-detonation",
+      "fusion-hybridization",
+      "summoning-burst"
+    ],
+    "variants": [
+      "mutated",
+      "corrupted"
     ]
   }
 ]

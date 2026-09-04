@@ -63,15 +63,16 @@ kept):
 |---|---|---|
 | `core.v1.json` `roles.list[].hybridEligible` | drops `ward-array` + `jewel-minor-b` → 13 roles, 895‰ | **stale**, and the file is `"frozen": true` |
 | `tools/seedsmith/seedsmith/adapters/items/registries.py:111` `HYBRID_FRAME_EXCLUDED_ROLES` | same two | stale; its `HYBRID_FRAME_CITATION` (`:105`) is asserted substring-present by `tools/seedsmith/tests/test_items_adapter.py:85` |
-| `tools/seedsmith/seedsmith/metrics/linkage.py:28` `NON_HYBRID_ROLES` | same two, and **`gates = True`** (`:60`) | stale — the gate cannot currently see the defect |
+| `tools/seedsmith/seedsmith/metrics/linkage.py:28` `NON_HYBRID_ROLES` | same two, feeding `SetCompletability` whose **`gates = True`** (`:61`, not `:60`) | stale — the gate cannot currently see the defect |
 
 **Measured consequence, run 2026-09-03:** `python -m seedsmith check data/seed/items --adapter items
 --metric Linkage/SetCompletability` reports **no findings** today. Corrected to D3's three drops,
 **18 of the 30 shipped sets go red on a gating metric** — every set using `head-guard` (10) or `sense`
 (11). That is not a generator bug; it is the legacy corpus meeting a newer ruling.
 
-> **Decider: the owner, at plan time.** Regenerate the 30 legacy sets under the twelve-role cap, or
-> grandfather them with a recorded exception. Both are cheap; silently leaving the gate blind is not.
+> ✅ **RULED 2026-09-04 — D30: regenerate.** The 18 go under the twelve-role cap; grandfathering is
+> declined. ⭐ **It costs no extra pass** — this module already regenerates the ~904, so the legacy sets
+> ride along. Silently leaving the gate blind was never an option.
 > ⚠ The registry edit is `registryVersion 2` plus *"an explicit decision on which partitions re-run"* —
 > `core.v1.json`'s own `frozenNote`. **Module 3 (`slot-roles`) owns issuing it**; this module consumes it.
 
@@ -134,9 +135,63 @@ scale.** Two mitigations, both cheap, and neither invented here:
    minors), so a set's member roles already narrow the legal capability pool. That is a constraint, and it
    is also what stops the picker collapsing onto the three or four most flattering capabilities.
 
-⛔ **If the generated corpus shows fewer than ~40 of the 60 capabilities used, the sets are reskins** and
-the run is a finding, not a delivery. `Distribution/Evenness` and `Distribution/Inequality`
-(`tools/seedsmith/seedsmith/metrics/distribution.py:100,147`) already measure exactly this.
+### ⛔ The acceptance bar measured the wrong axis — the gate is the **cell**, not the capability
+
+**This spec previously read: *"if fewer than ~40 of the 60 capabilities are used, the sets are
+reskins."*** That is not a bar. At ~904 species sets, **passing it means 904 / 40 = 22.6 sets per
+capability** — worse than the 15-to-1 this same section already flags as the honest problem. A gate
+whose pass condition is worse than the concern that motivated it is measuring the wrong axis.
+
+**The repo's own research settles it, and it was in the tree before this spec was written**
+([docs/research/game-design/03-roster-scale.md](../../research/game-design/03-roster-scale.md) §2):
+
+| Measured | Result |
+|---|---|
+| Pokémon keyed on **type combination alone** | 154 cells · **median 3** · max 75 |
+| Pokémon keyed on **type + ability set** | **730 cells · median 1 · max 7 · 68% singletons** |
+| A 900-unit roster's ability requirement (D&D 5e / PF2e) | **1,500–3,500 named ability instances** |
+| This spec's capability vocabulary | **60** |
+
+> *"Adding abilities alone takes the median cell from 3 species to 1. **Type is the coarse axis and was
+> never doing the distinctness work.**"*
+
+**The capability *is* the type here** — the coarse axis — and 60 of it against ~904 sets was never
+going to carry distinctness. That is what mitigation #1 above already says and does not measure:
+*"33 `stat.derived` + 23 `stat.modify` families over 2–3 threshold rows is a far larger space than 60."*
+**Counted 2026-09-04, the same way the capability vocabulary was counted:**
+
+```text
+capability picks : 39 element-free  +  3 x 7 variant                        =  60
+stat picks       :  2 element-free  + 31 x 7 variant  + 23 stat.modify      = 242
+```
+
+**So the gate becomes the cell, and the cell is what a player can actually tell apart:**
+
+> ⭐ **Cell key = `(capability, sorted multiset of the stat families granted at every threshold above
+> the lowest)`.** Over the generated species-set population the **median cell occupancy must be ≤ 2**;
+> the singleton share and the max are reported beside it.
+
+| Band | Roster | Units/cell | Median |
+|---|---:|---:|---:|
+| Summoners War | 832 | 1.02 | **1** |
+| Honkai: Star Rail | ~95 | 1.7–1.8 | **2** |
+| Arknights | 425 | 1.97 | **2** |
+| ⛔ Fire Emblem Heroes — *"the worst documented in the genre"* | 1,410 | 15.3 | 7 (max **129**) |
+
+**Median ≤ 2 is the band every well-regarded roster in the measurement sits in** (03-roster-scale.md
+§1), and it is reachable by construction rather than by luck: two higher thresholds drawing one family
+each from 242 is already `C(242,2) + 242 = 29,403` multisets per capability. The `roles` constraint on
+each family narrows that, which is the point — it narrows a space that is orders of magnitude too
+large, not one that is too small.
+
+**Capability usage stays measured and reported** — it is the diagnostic that shows the picker
+collapsing onto the three or four most flattering capabilities — but **it is no longer the gate**,
+because passing it proves nothing about distinctness.
+
+⚠ **`Distribution/CellOccupancy` over this dimension does not exist.** It is a module-13 build item,
+not an existing check pointed at a new column. `Distribution/Evenness` and `Distribution/Inequality`
+(`tools/seedsmith/seedsmith/metrics/distribution.py:100,147`) measure spread over *one* dimension's
+cells and are the right shape to extend, not the right metric to reuse unchanged.
 
 ### The theme bridge — one-way, and 31 of 84 need an owner decision
 
@@ -147,15 +202,27 @@ a demon (`spec-demon-themes.md` §2.2).
 
 | Fact | Measured |
 |---|---|
-| Published themes | **84**, all `retired: false`, all with ≥1 motif |
+| Published themes | **84**, all `retired: false`, all with ≥1 motif — ⛔ **stale: `data/seed/demons/species/` holds 386** (292 plant + 94 zombie, counted 2026-09-04) |
 | `basis` split | **53 `text` · 31 `name`** |
 | `rarity` split | 42 common · 21 rare · 14 epic · 7 legendary |
 | Motif language | **Chinese** — `displayName` and `motifs` are the species' own zh tokens (`"分配"`, `"火力"`), while set names in the corpus are English (`"Stillmarch"`) |
 
-⛔ **`spec-demon-themes.md` §7 makes *"using a `basis = 'name'` theme for generation"* an **Ask first**.**
-That is **31 of 84 species — 37%** — and at the full roster the ratio is unknown. **Generation may not
-silently proceed on them.** Options, for the owner: generate and mark provenance so `lore-enrich` can
-trigger a regeneration; or hold them and ship 53 species sets in wave 1.
+✅ **RESOLVED 2026-09-04 — D34, and the question was malformed.** The owner: *"84 number is a defect
+… why don't you use pipeline to make LLM generate the name? other feature like demon species
+generator, action generator do that."*
+
+**`basis = "name"` is not a property of a species — it is a record of what the pipeline had when it
+ran, and this pipeline generates the missing input.** So there is no Ask-first to answer and no
+53-species wave-1 compromise to make: seedsmith's new **`theme-enrich`** stage raises name-basis themes
+to text-basis before this module runs ([seedsmith-map.md](../seedsmith-map.md) §3c-ter), and
+**`theme-refresh`** republishes the registry over the whole 386-species corpus first.
+
+> ⚠ **Both numbers in the paragraph this replaces were wrong in the same way.** *"31 of 84 — 37%"* is a
+> proportion of a **stale snapshot of a generated corpus**; the corpus is 386 and grows every run. The
+> rate was never an input to a decision. **Filed as a seedsmith defect, not designed around.**
+
+**Dependency added:** this module now waits on `theme-refresh` + `theme-enrich` rather than on an owner
+flag per run.
 
 ⚠ **`rarity` on a theme is a snapshot, not an attribute** (§2.4a): `RarityForRank` is proportional in
 `count`, so a species moves tier as the roster grows *without moving rank*. **Nothing this generator emits
@@ -172,7 +239,8 @@ sees the drift instead of inheriting it.
 > collision-free against `theme.*` (legacy, 5 in use) and `demon.*` by construction, exactly the namespace
 > split §2.2a already established. **Alternative:** make `themeKey` optional on `set` — rejected, because
 > `spec-demon-themes.md` §7 lists making it *required* on `unique` as the intended direction, and
-> loosening it here reverses that. **Decider: the owner**, one line either way.
+> loosening it here reverses that. ✅ **RULED 2026-09-04: the third `build.` namespace.** `themeKey`
+> stays required on `set`.
 
 **2. A demon `themeKey` cannot go into a set id.**
 `naming.v1.json` (registryVersion **4**, `"frozen": true`) gives sets
@@ -203,18 +271,101 @@ identity:
 | Charms: `max_tier` at most **one band below** an equip container of the same rarity | ssot-charms §3.4 |
 | A family may not appear on both a `jewel-minor` base type and a charm | ssot-charms §3.6 — *at all*, not at a different tier |
 | Magnitudes resolve through `numerics`, never the model | P1 |
+| ⛔ **Total set value ≤ 1.5 AE per member piece** — a 4-piece set caps at 6.0 AE | ssot-sets §3.5 rule 3 — **handed here by module 12**; the distributor prices what it emits |
+| ⛔ **No set owns both weapons** — at most one of `armament-primary` / `armament-secondary`; refusal `SetRoleForbidden` | ssot-sets §3.5 rule 4 — **handed here by module 12**. *"Weapons are where build identity lives; a set that owns both owns the build"* |
+| A set piece rolls **2 fixed atoms + `pool_rolls = 2`** over a 2-tier window | ssot-sets §3.9 — see below |
 
-⚠ **The charm population is additive to what ships.** `data/seed/items/charms/` already holds **70**
-entries — 60 authored charms (31 minor / 32 standard / 7 signet; `ap_cost` 1×31, 2×21, 3×11, 5×7) plus
-**10 resonance containers** (5 axes × counts 2 and 3). The ~904 species charms join them; they do not
-replace them. Axis balance today is `economy` 22 against 12 each for the other four — a pre-existing skew
-this generator must not deepen.
+### ⭐ I5 §3.9 — how a set piece rolls, and why a rare stays worth picking up
+
+**Uncovered until now**, and it is a generator input: the distributor fixes a member piece's rolled
+half at the same moment it fixes its identity half.
+
+| Piece property | Value | Column |
+|---|---|---|
+| Fixed identity atoms | **2**, at a fixed tier | `effect_container_atom` |
+| Rolled affixes | **2** | `pool_rolls = 2` |
+| Tier window | **2 tiers wide**, from a set-specific pool | `min_tier` / `max_tier` |
+| A rare of the same rung, for comparison | **4** rolled affixes, general pool, wider window | — |
+
+**The deficit is flexibility, not raw power.** A set piece carries about as many modifier lines as a
+rare, but two are fixed, so on any given build roughly 40% of the piece is off-plan. **Expected cost ≈
+1.0–1.5 AE per piece** — exactly what the 1.5-AE-per-member budget above is sized to buy back.
+
+**Both alternatives lose, and avoiding them is this generator's job, not the runtime's:**
+
+| Alternative | Failure |
+|---|---|
+| **Fixed like a unique** (`pool_rolls = 0`) | once you own the set, every drop in those roles is dead — the loop stops for a quarter of the body |
+| **Rolled like a rare** (`pool_rolls = 4`, general pool) | a set piece becomes a rare *plus* a set bonus — strictly better in isolation. **That is set jail arriving through the item layer**, where none of §3.5's five rules can reach it |
+
+⭐ **This is what keeps rares relevant under D15** (rarity lives on the pieces): the two rolled affixes
+vary, so there is a real chase for a good copy with a bounded tail, and *"a well-rolled rare beats a
+badly-rolled set piece as an item, and the set bonus pays the difference back."*
+
+⚠ **`pool_rolls` does not exist as a field** ([item-ideal.md](../item-ideal.md) §2g #12) — `Instantiator.Draw`
+runs `DrawBudget` twice over `PrefixRolls` / `SuffixRolls`. Emit the two rolls as that pair; do not
+author a column that is not there.
+
+⚠ **`set_eligible` is settled, and not by this module.** It was deferred here twice; **module 7
+resolved it by dropping it** — D15 makes the key vacuous (a set has no rarity and completes from
+pieces of any rung), and module 7's **SC7** makes a registered key with no shipped consumer *reject at
+seed load*, so a deferral would have shipped a seed file that fails. **This module's only obligation
+is not to ask for it back**: re-adding `set_eligible` (or `charm_potency`, dropped for the same
+reason) is an SC7 violation unless it arrives together with the code that reads it.
+
+⚠ **The charm population is additive to what ships**, and the previous numbers here mixed two
+populations. `data/seed/items/charms/` holds **70** entries: **60 authored charms** plus **10 resonance
+containers** (5 axes × counts 2 and 3). The sentence separated them and then quoted the 70-row totals.
+**Re-counted 2026-09-04:**
+
+| | 60 authored | all 70 rows |
+|---|---|---|
+| Class split | **21 minor / 32 standard / 7 signet** | 31 / 32 / 7 |
+| `ap_cost` | **1×21 · 2×21 · 3×11 · 5×7** | 1×31 · 2×21 · 3×11 · 5×7 |
+| Axis skew (`economy` : each other) | **20 : 10** | 22 : 12 |
+
+The ten resonance rows are all class `minor` at `ap_cost` 1, which is the entire difference. **The
+authored-only figures are the ones this generator is measured against** — the resonance containers are
+not charms a player carries.
+
+⚠ **The axis skew is 2.0×, not 1.83×**, and *"this generator must not deepen it"* now has a number:
+the authored population's axis Gini is **0.133**, and that is the ceiling in the verification table
+below.
 
 ⭐ **X4 / L0 is a two-way dependency, not a consumer relationship.** [item-map.md](../item-map.md) §3 X4:
 sets and charms **supply** the `set` and `charm` channels to effect-pipeline's pool composition, which is
 *"what makes a set bonus worth collecting"*. L0 is **unspecced and unbuilt**. Generation can proceed —
 channels are a weighting layer over an already-legal pool — but **the run's value is not provable until L0
 lands**, and that should be said before tokens are spent.
+
+### ⭐ Verification — every metric gets a threshold, and an unevaluated partition is `NOT_MEASURED`
+
+**`SemanticDedup`, `Distribution/Evenness` and `Distribution/Inequality` appeared in *Commands* below
+with no test row and no threshold.** A command with no threshold is something you run and then argue
+about: nothing distinguished a **good** run from a merely **complete** one. All three ship
+`gates = False` today and say so in their own output — *"measure-only — no gating threshold set yet"*
+(`distribution.py:125,173`).
+
+| Metric | Dimension | Threshold | Derived from |
+|---|---|---|---|
+| ⭐ **`Distribution/CellOccupancy`** — new | `(capability, higher-threshold family multiset)` | **median ≤ 2**; max and singleton share reported | Arknights 1.97 · HSR 1.7–1.8 · Summoners War 1.02, medians 2/2/1 (03-roster-scale.md §1) |
+| `SemanticDedup/NearDuplicate` | generated names | **zero** `ExactDuplicateName` (already `GAP` severity); lexical near-duplicate pairs **≤ 0.5%** of the population | 0.5% is Pokémon's measured true near-duplicate rate — 18 pairs of 1,025, *every one a deliberate designed twin* (§2) |
+| `Distribution/Inequality` | charm `axis` | **Gini ≤ 0.133** | the authored corpus's own axis skew (`economy` 20 : 10 × 4). *"A skew this generator must not deepen"* is now a number it cannot exceed |
+| `Distribution/Inequality` | set `capability` | ⚠ **report only in wave 1**, promoted to a gate against the first run's baseline | no prior exists — `distribution.py:173` says so itself, and inventing one is the mistake the metric discipline names |
+| `Distribution/Evenness` | set `capability` | ⚠ **report Pielou J + richness**, same disposition | *"nobody can name a correct Pielou value in advance"* (`distribution.py:95-98`) |
+| `Linkage/SetCompletability` | generated sets | **zero findings** | already `gates = True` (`linkage.py:61`) |
+
+⛔ **A partition that did not run reports `NOT_MEASURED`, never a pass.** `Severity.NOT_MEASURED`
+already exists (`tools/seedsmith/seedsmith/metrics/model.py:34`) and the tool states the discipline:
+*"a metric whose needs are unmet reports NOT_MEASURED, never a pass, and never a false GAP"*
+(`adapters/actions/coverage_report/derive.py:292-293`). **The run verdict is `pass` only when every
+gating metric both ran and cleared** — an empty species partition, an absent `budget` context, or a
+held `basis = "name"` population each make the verdict `not_measured`, which is the honest answer and
+the one this module must not launder into a green run.
+
+⚠ **The two report-only rows are the honest half of this table.** They are not gates, and saying so is
+cheaper than defending a threshold nobody can derive — but they must still appear in the run report. A
+metric that runs and is never read is the same as one that never ran.
 
 ## Commands
 
@@ -232,7 +383,13 @@ python -m seedsmith check ..\..\data\seed\items --adapter items --gate
 python -m seedsmith check ..\..\data\seed\items --adapter items --metric Linkage/SetCompletability
 python -m seedsmith check ..\..\data\seed\items --adapter items --metric SemanticDedup/NearDuplicate
 python -m seedsmith check ..\..\data\seed\items --adapter items --metric Distribution/Evenness
+python -m seedsmith check ..\..\data\seed\items --adapter items --metric Distribution/Inequality
+python -m seedsmith check ..\..\data\seed\items --adapter items --metric Distribution/CellOccupancy
 ```
+
+⚠ **Read a clean report only after checking the metric ran.** `SetCompletability` returns zero
+findings today *because the gate is blind to D3*, and `Evenness` / `Inequality` return `NOTE` rows
+that are not a verdict. The thresholds above are what turn these commands into a decision.
 
 ⚠ **No `items` subcommand exists today.** `build_parser` (`tools/seedsmith/seedsmith/report/cli.py:776-901`)
 registers `check`, `report`, `metrics`, `demons`, `effects` and nothing else. The `demons run
@@ -290,13 +447,27 @@ THRESHOLD_PIECES = {"type": "integer", "enum": [2, 3, 4, 6]}
 | `exactly_one_capability_atom_and_it_sits_at_the_lowest_threshold` | ssot-sets §3.2's inversion |
 | `no_set_tier_carries_a_More_op_modifier` | §3.5 rule 2 |
 | `every_set_has_a_threshold_at_two` | §3.4, no exceptions |
-| `the_capability_vocabulary_is_60_picks_and_the_run_uses_at_least_40` | ⭐ the reskin bar, as a number |
+| `the_capability_vocabulary_is_60_picks_and_the_stat_vocabulary_is_242` | both counted from the corpus, not transcribed |
+| `the_median_cell_occupancy_over_capability_plus_higher_thresholds_is_at_most_two` | ⭐ **the reskin bar, on the axis that carries distinctness** — replaces the old ≥40-of-60 gate, which passed at 22.6 sets per capability |
+| `capability_usage_is_reported_and_does_not_gate` | the diagnostic stays; it is no longer the bar |
+| `no_two_generated_entries_share_an_exact_name` | `SemanticDedup` `ExactDuplicateName`, zero tolerance |
+| `the_lexical_near_duplicate_rate_is_at_most_half_a_percent` | Pokémon's measured true-twin rate as the ceiling |
+| `the_charm_axis_gini_does_not_exceed_the_authored_corpus_value` | 0.133 — *"must not deepen"*, as a number |
+| `an_unevaluated_partition_reports_NOT_MEASURED_and_the_run_verdict_is_not_pass` | ⭐ an unrun check may never read as a green run |
+| `every_gating_metric_named_in_this_spec_has_a_threshold` | the meta-test: a command without a threshold is not verification |
+| `a_set_piece_emits_two_fixed_atoms_and_two_rolls_over_a_two_tier_window` | I5 §3.9, the rolling rule |
+| `no_set_piece_is_fixed_like_a_unique_or_rolled_like_a_rare` | both named failure modes, refused by construction |
+| `no_set_claims_both_armament_roles` | ssot-sets §3.5 rule 4 — `SetRoleForbidden` |
+| `a_sets_total_tier_value_never_exceeds_one_and_a_half_AE_per_member` | ssot-sets §3.5 rule 3 — the piece budget |
+| `the_authored_charm_split_is_21_32_7_excluding_the_ten_resonance_rows` | the corrected counts, as a fixture over the shipped corpus |
+| `set_eligible_is_never_requested_back_into_the_rarity_budget_registry` | module 7 dropped it under SC7; re-adding it without a consumer fails seed load |
 | `no_charm_carries_Increased_or_More` | ssot-charms §3.4 |
 | `no_family_appears_on_both_a_jewel_minor_base_and_a_charm` | ssot-charms §3.6 |
 | `a_species_set_id_uses_speciesId_never_themeKey` | ⭐ `set.demon.allpeater-001` is ungrammatical |
 | `a_tier_container_id_composes_to_one_dot_and_a_zero_padded_suffix` | `set.allpeater-001-04` |
 | `no_generated_id_collides_with_a_legacy_theme_partition` | the five in-use `theme.*` ids |
-| `a_basis_name_theme_is_not_generated_from_without_the_flag` | ⛔ 31 of 84, an Ask-first boundary |
+| `no_theme_reaches_generation_at_basis_name` | ⭐ **D34** — `theme-enrich` ran; the population is empty, so the old flag test is replaced by an emptiness assertion |
+| `the_theme_registry_covers_every_shipped_species` | ⛔ **D34** — 84-vs-386 staleness cannot recur silently |
 | `nothing_generated_keys_on_theme_rarity` | §2.4a — rarity is a roster snapshot |
 | `a_build_set_has_a_legal_themeKey` | the `build.*` population, or the approved alternative |
 | `nothing_in_the_generator_writes_the_demons_corpus` | the one-way bridge, asserted structurally |
@@ -309,12 +480,19 @@ THRESHOLD_PIECES = {"type": "integer", "enum": [2, 3, 4, 6]}
 `expression.item` into the brief inline; resolve every magnitude through `numerics`; mark provenance
 (`themeKey`, `basis`, the theme's published `rarity`) on every generated entry; id from `speciesId`.
 
-**Ask first:** generating from a `basis = "name"` theme (31 of 84 today —
-`spec-demon-themes.md` §7); the `build.*` theme population vs. loosening `themeKey`; the disposition of
-the 18 legacy sets that fail the corrected hybrid-core gate; any `registryVersion` bump on a frozen
-registry.
+**Ask first:** the `build.*` theme population vs. loosening `themeKey`; any `registryVersion` bump on a
+frozen registry.
 
-**Never:** let the model emit a weight, rate, duration or magnitude — `audit_schema` rejects a numeric
+~~generating from a `basis = "name"` theme~~ — **closed by D34**: `theme-enrich` removes the population.
+~~the disposition of the 18 legacy sets~~ — **closed by D30**: re-authored under the twelve-role cap, in
+the same generation run this module already performs for the ~904.
+
+**Always (verification):** record a threshold beside every metric this spec runs, and treat
+`NOT_MEASURED` as a non-pass.
+
+**Never:** read a clean report from a metric that did not run — or from one that is blind to the
+ruling it is meant to enforce — as evidence of anything. Never let the model emit a weight, rate,
+duration or magnitude — `audit_schema` rejects a numeric
 field mechanically, and **that check is the enforcement, not review**. Never write into the demons corpus
 or read a demon row from the items adapter. Never key generated content on a theme's `rarity`. Never
 generate into `standard` (D14). Never put a set's member role outside the twelve. Never emit an id built
@@ -322,14 +500,20 @@ from a `themeKey`.
 
 ## Success criteria
 
-- [ ] 36 build set families + one set and one charm per **eligible** species, with the `basis = "name"`
+- [ ] 36 build set families + one set and one charm per species — **no `basis = "name"` remains** (D34); the old `basis = "name"`
       population explicitly included or explicitly held by owner decision.
 - [ ] Every generated member role is in the twelve-role hybrid core, **enforced before generation**, and
       `Linkage/SetCompletability` reports zero findings over the generated corpus.
 - [ ] Exactly one capability atom per set, at the lowest threshold; no `More` op on any tier; no
       `Increased`/`More` on any charm.
-- [ ] The capability vocabulary is enumerated at **60 picks** and the run uses at least 40 of them —
-      a narrower spread is a reported finding, not a delivery.
+- [ ] ⭐ **The distinctness gate is the cell, not the capability**: median occupancy of
+      `(capability, sorted higher-threshold family multiset)` is **≤ 2** over the generated species
+      sets, with singleton share and max reported. Capability usage is reported and does not gate.
+- [ ] Every metric this spec runs has a **threshold** recorded beside it, and a partition that did not
+      run reports **`NOT_MEASURED`** — the run verdict is `pass` only when every gating metric both ran
+      and cleared.
+- [ ] Set pieces roll to I5 §3.9 (2 fixed + 2 rolled over a 2-tier window), no set claims both armament
+      roles, and no set exceeds 1.5 AE per member piece.
 - [ ] Every magnitude comes from `numerics`; a numeric field in any schema fails `Pipeline` construction,
       proven by test.
 - [ ] Ids derive from `speciesId`, compose to a legal `container_id` with its tier suffix, and collide

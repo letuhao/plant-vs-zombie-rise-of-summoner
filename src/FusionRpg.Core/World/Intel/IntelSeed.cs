@@ -79,6 +79,9 @@ public static class IntelSeed
         Climate = sector.Climate,
         DangerBand = sector.DangerBand,
         DevelopmentLevel = detail == SectorSight.Full ? sector.DevelopmentLevel : 0,
+        RecruitStock = detail == SectorSight.Full ? sector.RecruitStock : 0,
+        ProjectId = detail == SectorSight.Full ? sector.ProjectId : null,
+        ProjectTurnsRemaining = detail == SectorSight.Full ? sector.ProjectTurnsRemaining : null,
         Slots = detail == SectorSight.Full
             ? sector.Slots
                 .OrderBy(sl => sl.SlotIndex)
@@ -89,7 +92,13 @@ public static class IntelSeed
                     Element = sl.Element,
                     GuardWaveId = sl.GuardWaveId,
                     State = sl.State,
-                    GuardState = sl.GuardState
+                    GuardState = sl.GuardState,
+                    // world-stage W7: found missing here while proving `ConstructionTurnsRemaining`
+                    // reaches a client — `IntelRecorder.Observe`'s equivalent builder
+                    // (`IntelRecorder.cs:107-117`) already carries both; this turn-zero bootstrap
+                    // path had silently dropped them since `StructureId` was introduced.
+                    StructureId = sl.StructureId,
+                    ConstructionTurnsRemaining = sl.ConstructionTurnsRemaining
                 })
                 .ToList()
             : Array.Empty<RememberedSlot>(),

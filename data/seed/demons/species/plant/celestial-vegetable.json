@@ -1,0 +1,85 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:49:17Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude",
+        "rarity": "almanac"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Vigor",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "light",
+    "elementSecondary": "none",
+    "family": [
+      "celestial_vegetable",
+      "lunar_hybrid"
+    ],
+    "gameTypeId": 955,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "The creature's ability to provide massive, scaling area-of-effect healing and its potential for infinite-duration, high-frequency multiplicative damage makes it a strategic powerhouse far exceeding a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina",
+      "spirit"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateLunarCabbage",
+    "targetPreference": "backline",
+    "traits": [
+      "lunar_summoning",
+      "area_of_effect_healing",
+      "scaling_light_damage",
+      "synergistic_star_linkage"
+    ],
+    "variants": [
+      "blessed",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  }
+]

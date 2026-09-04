@@ -13,6 +13,82 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:49:20Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Might",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "armored-flora"
+    ],
+    "gameTypeId": 1315,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a specialized heavy attacker with high durability, but lacks the scale or world-altering destruction required for a 'tyrant' rating.",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "IronMelon",
+    "targetPreference": "backline",
+    "traits": [
+      "iron-clad",
+      "armor-piercing",
+      "heavy-projectile"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
         "kit-shape": 2,
         "threat-audit": 1
       },
@@ -20,12 +96,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:12:39Z",
+      "emittedUtc": "2026-09-04T10:49:39Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -49,31 +126,189 @@
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Armored Flora"
+      "armored-flora"
     ],
-    "gameTypeId": 1169,
+    "gameTypeId": 1020,
     "posture": "Bastion",
     "pure": true,
     "rarity": "fused",
-    "reach": "melee",
-    "reason": "The creature is a defensive support plant designed to protect others rather than an entity capable of widespread destruction.",
+    "reach": "short",
+    "reason": "The creature's ability to deal percentage-based damage to armor and its high survivability through resource-based healing makes it a significant threat beyond a mere tyrant.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "BigPumpkin",
+    "speciesId": "IronPea",
     "targetPreference": "backline",
     "traits": [
-      "Magnetic-Composite",
-      "Colossal",
-      "Explosive-Resistant",
-      "Regenerative"
+      "knockback-infliction",
+      "armor-penetration",
+      "metallic-regeneration",
+      "explosion-resistance"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:35:18Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "armored flora"
+    ],
+    "gameTypeId": 1028,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The description only identifies the creature as a steel-hard nut with high durability, which does not justify a world-ending calamity rating.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "TallNutFootball",
+    "targetPreference": "frontline",
+    "traits": [
+      "steel-hardened",
+      "towering",
+      "metallic-fiber"
+    ],
+    "variants": [
+      "normal",
+      "ancient",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:53:57Z",
+      "minorityValues": {
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "armored-flora"
+    ],
+    "gameTypeId": 3,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "grafted",
+    "reach": "short",
+    "reason": "The description only describes a defensive shell for protection, which does not justify a harbinger-level threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "WallNut",
+    "targetPreference": "backline",
+    "traits": [
+      "explosive-resistance",
+      "protective-shell",
+      "splash-mitigation"
+    ],
+    "variants": [
+      "normal",
+      "ancient"
     ],
     "verdict": "too-high"
   }

@@ -577,9 +577,18 @@ public static class DebugEndpoints
     {
         var max = store.GetMaxEventId();
         if (max <= 0) return null;
-        const int window = 2000;
-        var after = Math.Max(0, max - window);
-        var items = store.ListEvents(window, after);
+        // How far back to scan the event log for a `board.start`. **Structural, not a balance dial**
+        // (tunables-ssot.md §1): it is the page size handed to `ListEvents`, so it bounds a query
+        // rather than tuning anything a balance pass would touch.
+        //
+        // Named `windowCapacity` rather than `window` deliberately (2026-09-04): the magic-number
+        // audit recognises structural intent from the NAME, and `window` alone reads as a tunable.
+        // Renaming it is better than adding `window` to the audit's exempt list, which would silently
+        // excuse every future `window` constant in the repo — precision over coverage, the rule that
+        // file's own comments already state.
+        const int windowCapacity = 2000;
+        var after = Math.Max(0, max - windowCapacity);
+        var items = store.ListEvents(windowCapacity, after);
         var starts = items.Where(e => e.Kind == "board.start").ToList();
         if (starts.Count == 0) return null;
         var latestStart = starts[^1];

@@ -2,7 +2,7 @@
 
 **Module id:** `durable-ownership` · **Program:** [item](../item-map.md) · **Build order:** 1 of 21
 **Depends on:** nothing
-**Rulings:** D5, D9 · corrections [item-ideal.md](../item-ideal.md) §2e (C3, S2), §2f.2 (D9's premise)
+**Rulings:** D5, D9, **D32** · corrections [item-ideal.md](../item-ideal.md) §2e (C3, S2), §2f.2 (D9's premise)
 
 ## Objective
 
@@ -71,7 +71,9 @@ catalog** (`:446-449`); `InstanceAtomRow.ValuesJson` is read at exactly one plac
 ⚠ **Deliberate consequence, recorded rather than discovered** ([item-ideal.md](../item-ideal.md)
 §2f.2): until step 1 lands, **a content patch retunes items players already own.** That is the
 current shipped behaviour and this module does not change it silently. Whether it *should* change is
-§2g's one open product call.
+✅ **§2g #1 is now closed by D32 (2026-09-04): yes, a content patch retunes owned items, deliberately.**
+The runtime keeps reading the live catalog; step 1 below stays scoped to what R2 needs and does **not**
+make `ValuesJson` authoritative at bind. A balance change is meant to reach circulating gear.
 
 ### S2 and C3
 

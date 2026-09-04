@@ -71,6 +71,11 @@ public class WorldLoamWireTests : IAsyncLifetime
                 Assert.Equal(0, sector.GetProperty("loamStock").GetInt64());
                 Assert.Equal(0, sector.GetProperty("componentStock").GetInt64());
                 Assert.False(sector.GetProperty("willReleaseNextTurn").GetBoolean());
+                // world-map W46: recruit stock and project progress are owner-only economy numbers,
+                // the same gate as everything else in this test.
+                Assert.Equal(0, sector.GetProperty("recruitStock").GetInt64());
+                Assert.Equal(JsonValueKind.Null, sector.GetProperty("projectId").ValueKind);
+                Assert.Equal(JsonValueKind.Null, sector.GetProperty("projectTurnsRemaining").ValueKind);
                 _ = id; // named for the assertion message context if any of the above ever fails
             }
         }

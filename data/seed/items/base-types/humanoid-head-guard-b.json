@@ -33,7 +33,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.tiled-crest",
       "flavorKey": "flavor.base.tiled-crest",
       "flavor": "Overlapping shingles lap one over another, each catching and deflecting what would pierce.",
@@ -65,7 +65,7 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.padding",
         "powerBand": "low"
       },
       "socketMax": 2,
@@ -103,7 +103,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.corrugated-pot",
       "flavorKey": "flavor.base.corrugated-pot",
       "flavor": "The ridges that held its shape for boiling now hold their own against blows.",
@@ -138,7 +138,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.galvanised-colander",
       "flavorKey": "flavor.base.galvanised-colander",
       "flavor": "Zinc-bright and industrial. Its holes were meant to strain; now they are vents for a warrior's breath.",
@@ -170,10 +170,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.padding",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.jointed-bucket",
       "flavorKey": "flavor.base.jointed-bucket",
       "flavor": "Staves bound at the seams, moving freely until impact binds them into rigidity.",
@@ -241,10 +241,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.splinted-pylon",
       "flavorKey": "flavor.base.splinted-pylon",
       "flavor": "Bound with cord at each joint, it flexes to absorb and redirect rather than stop cold.",
@@ -279,7 +279,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.immovable-kettle",
       "flavorKey": "flavor.base.immovable-kettle",
       "flavor": "Hammered into one solid form, there is nothing in it that will yield or sing under impact.",
@@ -314,7 +314,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.oiled-washtub",
       "flavorKey": "flavor.base.oiled-washtub",
       "flavor": "Oil keeps the leather supple and repels the worst of the rain and blood alike.",
@@ -346,10 +346,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.stoicism",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.articulated-hopper",
       "flavorKey": "flavor.base.articulated-hopper",
       "flavor": "Each panel moves independently until the impact that locks them in place. Then it is one thing and unbreakable.",
@@ -381,13 +381,13 @@
       "class": "leather",
       "band": "b",
       "implicit": {
-        "family": "atom.mending",
+        "family": "atom.padding",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.stained-crest",
       "flavorKey": "flavor.base.stained-crest",
-      "flavor": "Every mark tells a story \u2014 rust, rust-water, blood that never quite came clean. All proof of survival.",
+      "flavor": "Every mark tells a story — rust, rust-water, blood that never quite came clean. All proof of survival.",
       "tags": [
         "heavy",
         "utility"
@@ -419,7 +419,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.rigid-hardhat",
       "flavorKey": "flavor.base.rigid-hardhat",
       "flavor": "Stamped metal, tested on a factory floor before being tested in battle. It has passed both.",

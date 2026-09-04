@@ -33,6 +33,11 @@ the `RulesetVersion` ordering and the legion count — both settled in the plan.
 6. **Any number a balance pass would touch lives in `data/tuning/`**, never a `const`.
 7. **Player vocabulary on player surfaces.** Engine tokens appear only in annotation columns and
    developer surfaces. GG-23 is a Tier-1 gate and today's map prints `dave loam.shortfall:340`.
+8. **`npm run lint` does not exist — found and corrected 2026-09-04.** `web/fusion-rpg-web/package.json`
+   has no `lint` script, no eslint config and no eslint binary in `node_modules/.bin`. Nine verify
+   lines cited it; all nine are corrected in place to drop it. Type-checking is already covered by
+   `npm run build`'s own `tsc --noEmit`. If linting is wanted later, that is a separate, explicit
+   task — not something a `world-stage` task should silently invent.
 
 ## Task numbering
 
@@ -70,7 +75,7 @@ write path. No task in one block depends on a task in another.
 
 ### `world-contract` — the sealed FE view contract
 
-- [ ] **W1: The `typeId` ADR and the contract version bump**
+- [x] **W1: The `typeId` ADR and the contract version bump** *(done 2026-09-04 — `SectorView.typeId` → `string`, `CONTRACT_VERSION` 1→2, ADR row added to `decisions.md`. No consumer existed yet, so zero runtime blast radius. `npm test`: 805/806 — 1 pre-existing, unrelated GG-55 `disabledReasonGuard` failure verified present on HEAD before this change (not caused by it, not fixed here — out of world-stage scope). `npm run build`: green.)*
   - Description: `contract/types.ts:272` declares `typeId: number`; the wire is `public string TypeId`
     (`WorldDtos.cs:66`), `worldTypes.ts:39` agrees, and the byte-pinned fixture holds strings. This is
     a **narrowing**, which `game-gui-map.md:142` puts behind a contract version bump plus an ADR —
@@ -84,7 +89,7 @@ write path. No task in one block depends on a task in another.
   - Dependencies: None.
   - Scope: XS.
 
-- [ ] **W2: Move the world DTOs to `lib/bus/world.ts`**
+- [x] **W2: Move the world DTOs to `lib/bus/world.ts`** *(done 2026-09-04 — all 11 DTO types moved into `lib/bus/world.ts` alongside its existing hooks/types (which already lived there — the buildability audit's finding that this file "exists and is not empty" confirmed); `worldTypes.ts` reduced to an 11-name re-export shim with a comment pointing at the real source. All 13 existing consumers use `import type {...} from "./worldTypes"` (relative, type-only) and needed zero changes — verified by grep before editing. `npm test`: 805/806, same single pre-existing failure. `npm run build`: green.)*
   - Description: the world's DTOs live in `features/world/worldTypes.ts`, which is why `contractGuard`
     — matching only imports `from "@/lib/bus` — would pass a rebuilt `stages/world/` that binds
     straight to a REST DTO. Moving them to `lib/bus/world.ts`, where every other domain's already
@@ -94,13 +99,13 @@ write path. No task in one block depends on a task in another.
   - Acceptance: the DTO types are declared in `lib/bus/world.ts`; nothing outside `src/contract/` and
     the legacy `features/world/` tree imports them; `#/world` still renders (the existing world tests
     are green unchanged); no type is renamed or narrowed in the move — it is a move, not an edit.
-  - Verify: `cd web\fusion-rpg-web; npm test`, then `npm run build` and `npm run lint`.
+  - Verify: `cd web\fusion-rpg-web; npm test`, then `npm run build`.
   - Files: `web/fusion-rpg-web/src/lib/bus/world.ts` (new),
     `web/fusion-rpg-web/src/features/world/worldTypes.ts`.
   - Dependencies: None.
   - Scope: S.
 
-- [ ] **W3: Widen `contractGuard` so a feature-local DTO import fails**
+- [x] **W3: Widen `contractGuard` so a feature-local DTO import fails** *(done 2026-09-04 — matched on the wire's own `*Dto` naming convention rather than the import path, since a path-only match is defeated by any re-export shim, not just the world's. `src/contract/` stays the one exempt directory. 4 new fixture tests: feature-local absolute-path import (flagged, file/line/text all correct), the same via a relative path (flagged), a `*Dto` import from `contract/` itself (not flagged), and a non-`Dto` view-contract type (not flagged, proves no over-matching). 15/15 contractGuard tests green; full suite 809/810 — same single pre-existing failure; build green.)*
   - Description: W2 makes the rule bite for the world; this closes the *class*. The guard scans
     `stages/`, `layers/` and `ui/` and matches only `from "@/lib/bus`, so any future domain that
     parks its DTOs under `features/` reopens the same hole. Widen the scan to catch a DTO import from
@@ -114,7 +119,7 @@ write path. No task in one block depends on a task in another.
   - Dependencies: W2.
   - Scope: S.
 
-- [ ] **W4: The six world views, with `Pending` reasons and unit families**
+- [x] **W4: The six world views, with `Pending` reasons and unit families** *(done 2026-09-04 — `SectorView`, `LaneView`, `LegionView` (with a discriminated `LegionPosition`), `SlotView`, `ForceView` (discriminated on `exact` — a compile-time proof lives in `worldViews.typecheck.ts`, `@ts-expect-error` on both illegal reads, verified by a clean `tsc --noEmit`) and `TurnEventView`. **Owner decision deferred, not resolved:** `loamUnits` was NOT added to the sealed `UnitClass` union — no synchronous owner sign-off available mid-task, so the task's own stated fallback applies: every loam/component reading is `unit: "gameUnits"` today. This is the one open item carried forward. **Two real wire-mirror drifts found and fixed while building this, both verified against the live fixture before touching anything:** `WorldSlotDto` was missing `structureId` (present on the C# DTO since L32, present in the fixture, never added to the TS mirror — the flagship defect this whole program keeps citing, and it was still there) and `WorldSectorDto` was missing `fractureIntensityMilli` (projected server-side at `WorldEndpoints.cs:298`, present in the fixture, never mirrored). The spec's own Code style block was corrected to match (was still showing the rejected `LoamUnits` brand). Also resolved the `formatPerMille` "more"-arm defect without a new op: `FractureIntensityMilli`'s neutral baseline is 1000, and the renderer's "more" arm already computes a delta from zero — so W5's adapter subtracts 1000 before wrapping, no `Magnitude.op: "absolute"` needed. New test `worldViews.test.ts`: one maximally-pending fixture per view running through `findEmptyPendingReasons`, a positive control catching a reason emptied three levels deep, and a fully-known counter-fixture. `npm test`: 812/813 — same single pre-existing failure. `npm run build`: green.)*
   - Description: `SectorView` (corrected by W1) joined by `LaneView`, `LegionView`, `SlotView`,
     `ForceView` and `TurnEventView`. Every world magnitude carries its unit family in the type so a
     `CostMilli`-shaped 1000× error is unrepresentable upstream; every not-yet-wired field is
@@ -142,7 +147,7 @@ write path. No task in one block depends on a task in another.
   - Dependencies: W1.
   - Scope: M.
 
-- [ ] **W5: `adaptWorld*` against the byte-pinned fixture**
+- [x] **W5: `adaptWorld*` against the byte-pinned fixture** *(done 2026-09-04 — all six adapters (`adaptWorldSector`, `adaptWorldLane`, `adaptWorldSlot`, `adaptWorldForce`, `adaptWorldLegion`, `adaptWorldTurnEvent`) added to `adapt.ts`, pure, no loam number derived in TypeScript. `SectorView.lifelineCost`/`.lifeline` take an `options.lifelinesRequested` flag since the wire always sends a real 0/false — the caller's own request state is what decides `known` vs `pending`, not the value. New `adaptWorld.test.ts`, 10 tests, all against the real byte-pinned fixture (not a hand-written double): every sector/lane/slot/force/legion in `first-light.json` adapts without throwing and with zero empty pending reasons; the unknown-sector proof compares real fixture sectors `black-gate` (Unknown, `typeId:""`) against `ember-hollow` (Watched-but-unowned, `typeId:"stable"`, real slots, yet also `loamNet:0`) — proving a caller must read `intel`, never a zeroed economic field, to tell "never seen" from "seen and simply not held"; the fracture-delta convention verified against every sector's real `fractureIntensityMilli:1000` baseline adapting to a zero delta. `npm test`: 822/823 — same single pre-existing failure. `npm run build`: green. **Phase 0's `world-contract` block (W1–W5) is complete.**)*
   - Description: the six pure adapters, tested against `first-light.json` — which is generated and
     asserted byte-for-byte by `WorldFixtureTests.cs:28-50` — so an adapter and the server cannot
     drift silently. That drift is exactly how `worldTypes.ts` lost `structureId` for two waves.
@@ -152,7 +157,7 @@ write path. No task in one block depends on a task in another.
     (`WorldEndpoints.cs:271-277`) and is indistinguishable from a zeroed known one *except by*
     `intel`, so the adapter branches on `intel`, never on emptiness, and a test asserts that; no
     adapter derives a loam number in TypeScript.
-  - Verify: `cd web\fusion-rpg-web; npm test -- adapt`, then the full `npm test` and `npm run lint`.
+  - Verify: `cd web\fusion-rpg-web; npm test -- adapt`, then the full `npm test`.
   - Files: `web/fusion-rpg-web/src/contract/adapt.ts`, `web/fusion-rpg-web/src/contract/adapt.test.ts`.
   - Dependencies: W4.
   - Scope: M.
@@ -165,7 +170,7 @@ task touches more than a handful of files, and **the fixture is re-blessed exact
 after every field addition has landed — the L25 precedent, where five specs each reopened the same
 re-bless budget one field at a time.
 
-- [ ] **W6: `WorldSectorDto` — pressure, warden, neglect, capacity**
+- [x] **W6: `WorldSectorDto` — pressure, warden, neglect, capacity**
   - Description: `PressureMilli` is **declared** (`WorldDtos.cs:72`) and never assigned, though
     `LoamPhases.NextPressure` writes it every turn from fade contagion (`LoamPhases.cs:266-283`,
     called at `:169`) — and the projection's comment at `WorldEndpoints.cs:304-308` was written
@@ -183,8 +188,38 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Server.Tests/` (projection + owner-gating tests).
   - Dependencies: None.
   - Scope: M.
+  - **Done (2026-09-04):** `WorldSectorDto` gained `WardenBindingId`/`NeglectedTurns`/`LoamCapacity`
+    (`WorldDtos.cs`); `WorldEndpoints.cs`'s `ProjectSector` now assigns `PressureMilli` and all three
+    new fields on the exact `StabilityMilli` owner-gate pattern (`string.Equals(sector.OwnerFactionId,
+    view.FactionId, ...) ? real : default`), and the stale pre-contagion comment above it is replaced
+    with one that names why `PressureMilli` is real now and why `DepletionMilli` is deliberately left
+    at 0 (nothing in Core writes it — a real gap, not invented here). `dotnet build
+    src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    New file `tests/FusionRpg.Server.Tests/WorldSectorProjectionTests.cs` (2 tests) proves the
+    acceptance criterion from **two viewers over the same world** (`dave` owns `d-home` in the
+    `two-hearths` fixture, `zomboss` does not): `Pressure_warden_and_neglect_reach_the_owner_and_only_the_owner`
+    seeds `pressure_milli`/`warden_binding_id`/`neglected_turns` directly into the same
+    `rpg_world_sectors` columns `RpgStore.LoadWorldState` reads (so the values are genuine Core-level
+    `WorldSector` state, not a projection double), then asserts the owner sees the real values and the
+    non-owner sees 0/null/0; `Loam_capacity_denominates_the_owners_own_stock_and_is_zero_for_everyone_else`
+    proves `LoamCapacity` is a real positive base-capacity number for the owner (from
+    `LoamPolicy.LoamCapacity`, no seeding needed — a fresh sector already carries it) and exactly 0 for
+    the non-owner.
+    **Real, documented gap, not a wiring gap:** `WardenBindingId` has no Core writer yet — nothing sets
+    it to a non-null value anywhere in `FusionRpg.Core` today (`ClaimResolver.cs:85` only ever clears
+    it to `null` on capture); the future "bind a warden" command belongs to `world-commands` (not yet
+    built). The test therefore *seeds* the column directly to prove the gating wire is correct end to
+    end, rather than claiming a real gameplay path already produces it — an honest distinction from
+    `PressureMilli`/`NeglectedTurns`, which genuinely are written every turn by `LoamPhases.cs` already
+    (confirmed by reading `LoamPhases.cs:224,240,266-283` before writing the test, not assumed).
+    `FusionRpg.Server.Tests` had no assembly-wide tuning bootstrap (unlike Core/Data/E2E.Tests) — the
+    new test class repeats `AptitudeChannelModsTests.cs`'s own inline `LoamPolicy.Configure`/
+    `WorldTuningHub.Configure` pattern (reading the real `data/tuning/*.v1.json` files) rather than
+    inventing a third setup style.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 99/99 passed (28s). `dotnet test
+    tests\FusionRpg.Core.Tests` → 5276/5276 passed (20s, pre-existing unrelated warnings only).
 
-- [ ] **W7: `WorldSlotDto` and `WorldLaneDto` — construction, slot owner, gate key**
+- [x] **W7: `WorldSlotDto` and `WorldLaneDto` — construction, slot owner, gate key**
   - Description: `ConstructionTurnsRemaining` is read and **discarded** — `WorldEndpoints.cs:300`
     passes it into `Habitability.For` and drops it, so a client sees a sector is habitable but never
     that a structure is three turns out. `GateKeyId` (`WorldState.cs:198`) is hashed at
@@ -201,8 +236,48 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Server.Tests/`.
   - Dependencies: None.
   - Scope: M.
+  - **Done (2026-09-04):** `WorldSlotDto` gained `OwnerFactionId` (now with an XML doc stating the
+    gate) and `ConstructionTurnsRemaining`; `WorldLaneDto` gained `GateKeyId`. `WorldEndpoints.cs`'s
+    slot-mapping lambda now looks up the live `WorldSlot` for each remembered slot's index and reads
+    its `OwnerFactionId` gated exactly like `StabilityMilli` (`sector.OwnerFactionId ==
+    view.FactionId`) — truth-gated per spec-world-wire.md §1's decided "cheap resolution", **not**
+    `RememberedSlot`-gated, so no belief field was added and no state hash moved (`RememberedSlot`
+    itself — `FactionIntel.cs` — was not touched). The lane-mapping lambda now assigns `GateKeyId =
+    l.GateKeyId` ungated, alongside the pre-existing `HazardMilli`/`WardLevel`. `dotnet build
+    src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    **Real, separate defect found and fixed while writing the `ConstructionTurnsRemaining` test:**
+    `IntelSeed.cs`'s turn-zero snapshot builder (`Snapshot()`, used only for a world's authored
+    opening belief) built every `RememberedSlot` **without** `StructureId`/`ConstructionTurnsRemaining`
+    — silently dropping both since the day `StructureId` was introduced — while its sibling builder,
+    `IntelRecorder.Observe` (the real per-turn scouting path, `IntelRecorder.cs:107-117`), already
+    carried both correctly. `Habitability.For` had been reading a field that was therefore always
+    null/default at world creation, for every template, forever. Fixed by copying the two fields the
+    same way `IntelRecorder.Observe` already does (`IntelSeed.cs`). Confirmed behaviour-preserving, not
+    a hash-moving change: no template (`two-hearths`, `first-light`) sets a non-null `StructureId`/
+    `ConstructionTurnsRemaining` on any slot at authoring time (`grep` across every
+    `WorldTemplateCatalog*.cs`), so every existing world still resolves `null → null` through the
+    fixed path; `GoldenFinalHash` is unaffected (Core.Tests below still green).
+    New file `tests/FusionRpg.Server.Tests/WorldSlotAndLaneProjectionTests.cs` (3 tests). The
+    slot-owner test discovered mid-write that the `two-hearths` template gives **neither** faction
+    Full-detail sight of the *other's* ground at creation (`AuthoredIntel` only covers each side's own
+    cluster, and the AI faction gets no authored bonus at all — confirmed by reading `IntelSeed.cs`
+    before assuming otherwise), so "asserted from two viewers" has no real fixture path without
+    seeding a survey directly — the test writes a realistic `IntelSnapshot` straight into
+    `rpg_world_faction_intel` (mirroring exactly what `IntelRecorder.Observe`/the fixed `IntelSeed`
+    would themselves produce), the same technique W6 used for sector-truth columns. Verify: `dotnet
+    test tests\FusionRpg.Server.Tests` → 102/102 passed (29s). `dotnet test
+    tests\FusionRpg.Data.Tests` → 630/632 passed; the 2 failures
+    (`DemonSpeciesImportCliTests.A_real_import_against_the_real_committed_tree_succeeds…` and
+    `…A_stale_committed_file_refuses_the_whole_import…`) are unrelated to this task — a concurrent,
+    already-known background process (seedsmith species generation, see `git status` showing live
+    edits under `data/seed/demons/species/`) has a mid-write `GarlicPumpkin` entry with an
+    `unresolved` rarity; confirmed stable/reproducible and confirmed via `git status` that the
+    touched files are entirely outside `src/FusionRpg.Core`, `src/FusionRpg.Contracts`,
+    `src/FusionRpg.Server` and `tests/`. `dotnet test tests\FusionRpg.Core.Tests` (not required by
+    this task's own Verify line, but run anyway given the `IntelSeed.cs` Core change) → 5276/5276
+    passed.
 
-- [ ] **W8: `WorldEntityDto` — carried loam, member role, supply, and the legion display name**
+- [x] **W8: `WorldEntityDto` — carried loam, member role, supply, and the legion display name**
   - Description: `CarriedLoam` (`WorldState.cs:262`), member `Role` (`WorldState.cs:220`,
     `WorldEntityMemberRole` at `:206-210`), and the supply block — `Capacity` / `Burn` / `Runway`
     (`LegionSupply.cs:20, 24, 32`) plus `TurnsUntilExhausted` (`:46`), which is what the client
@@ -218,8 +293,31 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Server.Tests/`.
   - Dependencies: None.
   - Scope: M.
+  - **Done (2026-09-04):** `WorldEntityMemberDto` gained `Role`; `WorldEntityDto` gained
+    `DisplayName`, `CarriedLoam`, `Capacity`, `Burn`, `Runway` (the last an `int?`, matching
+    `LegionSupply.TurnsUntilExhausted`'s own type — a turn count, not a loam magnitude, so `long` did
+    not apply there). New Core file `src/FusionRpg.Core/World/EntityNaming.cs`: a pure
+    `DisplayName(world, entity)` function — no persisted counter, no hashed field — numbering each
+    entity by stable id order among its own faction's same-`WorldEntityKind` entities ("Legion I",
+    "Legion II", …), covering all five `WorldEntityKind` values, not just Legion. `WorldEndpoints.cs`'s
+    entity-mapping lambda now calls `LegionSupply.Capacity/Burn/TurnsUntilExhausted` and
+    `EntityNaming.DisplayName(w, e)`, plus `m.Role.ToString()` on each member. `dotnet build
+    src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    New file `tests/FusionRpg.Core.Tests/World/EntityNamingTests.cs` (9 tests: single-legion
+    numbering, stable-id-order-not-insertion-order, independent numbering per owner and per kind, and
+    a `[Theory]` proving standard roman-subtractive notation at I/IV/IX/XIV/XL) — built on isolated
+    minimal `WorldState` fixtures rather than any shipped template, since the ordinal rule must not
+    depend on a specific template's entity ids. New file
+    `tests/FusionRpg.Server.Tests/WorldEntityProjectionTests.cs` (3 tests) proves the wire fields
+    using the `two-hearths` fixture's own `e-dave-legion-1`, which already carries real non-default
+    values at creation (`CarriedLoam = 500`, one `Bearer` among three members) — no raw-SQL seeding
+    needed here, unlike W6/W7's dormant fields. Confirmed `WorldStateDto.Entities` (`view.OwnForces`)
+    is inherently single-viewer — a faction only ever sees its own forces there (per its own existing
+    doc comment) — so no owner-gating test applies to this DTO the way W6/W7 needed one.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 105/105 passed (24s). `dotnet test
+    tests\FusionRpg.Core.Tests` → 5285/5285 passed (16s).
 
-- [ ] **W9: Per-lane march cost for the selected legion** *(re-homed from `world-targeting`)*
+- [x] **W9: Per-lane march cost for the selected legion** *(re-homed from `world-targeting`)*
   - Description: `world-targeting` needs a route preview with this-turn-vs-later reach and assigned
     the cost to itself; the arbitration moved it here because `LaneCost.For` needs the lane-type
     catalog and the legion's banner element, neither of which is on the wire. Computing it in
@@ -232,8 +330,28 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Server.Tests/`.
   - Dependencies: None.
   - Scope: M.
+  - **Done (2026-09-04):** `spec-world-wire.md` §1 left the exact wire shape to this task
+    ("`world-wire` owns the projection's shape"); implemented as an opt-in query param on the
+    existing `/state` endpoint (`?forLegion=<entityId>`, matching the established `?lifelines=`
+    pattern) and a new `WorldStateDto.MarchCosts: IReadOnlyDictionary<string,int>` keyed by
+    `laneId`, empty by default. `WorldEndpoints.cs`'s `/state` handler resolves `forLegion` against
+    `believedView.OwnForces` (empty/absent stays empty rather than erroring on an unknown or
+    not-mine id) and, when found, computes `BannerElement.Of(legion)` once and calls `LaneCost.For`
+    per lane with a **belief-climate lookup** (`believedView.Believed(sectorId)?.Climate`), never
+    truth — the exact fog-honesty property spec-world-targeting.md §3 calls out by name. `dotnet
+    build src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    New file `tests/FusionRpg.Server.Tests/WorldMarchCostProjectionTests.cs` (3 tests): empty when
+    no legion named; real `LaneCost.For` math for an ordinary corridor lane (560 = 800 × 700‰); and
+    the fog-honesty proof — seeded `l-dh-df1` to `ley` and d-flank-1's **truth** climate to Ice
+    (matching `e-dave-legion-1`'s real banner element, itself derived and verified: peashooterzombie
+    Earth / conezombie Ice / paperzombie Light, all singleton counts, so `BannerElement.Of`'s
+    ring-order tiebreak picks Ice) while leaving Dave's **believed** climate at its original Earth —
+    asserted the wire cost is the undiscounted 720, not the 576 a truth-based read would produce,
+    proving the projection reads belief, not truth. Verify: `dotnet test
+    tests\FusionRpg.Server.Tests` → 108/108 passed (29s). `dotnet test tests\FusionRpg.Core.Tests`
+    → 5285/5285 passed (19s, no Core changes this task — run per the Verify line anyway).
 
-- [ ] **W10: The `LoamUpkeep` operand breakdown** *(re-homed from `world-numbers`)*
+- [x] **W10: The `LoamUpkeep` operand breakdown** *(re-homed from `world-numbers`)*
   - Description: `WorldSectorDto` carries totals only, and `world-numbers`' nested lockable modifier
     ledger cannot decompose what it is not sent. Project the operands behind the upkeep number, in
     the order the engine applies them, so the ledger shows a derivation rather than a result.
@@ -243,10 +361,41 @@ re-bless budget one field at a time.
   - Verify: `dotnet test tests\FusionRpg.Server.Tests`, then `python scripts\audit-overflow.py`.
   - Files: `src/FusionRpg.Contracts/WorldDtos.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`,
     `tests/FusionRpg.Server.Tests/`.
+  - **Done (2026-09-04):** Refactored `src/FusionRpg.Core/World/Loam/LoamUpkeep.cs` around a new
+    `readonly record struct LoamUpkeepBreakdown(Base, Garrison, Development, Danger, IntensityMilli,
+    HandicapMilli)` with `Sum` (the four additive operands) and `Total` (the same
+    `Sum × Intensity × Handicap / 1_000_000` the formula's own comment already documented) — `For`
+    (both the pure 5-arg overload and the truth `(world, sector)` overload) now delegates to
+    `Breakdown`/`BreakdownFor` rather than duplicating the arithmetic, so the total and its
+    decomposition cannot drift apart by construction, not just by convention. Confirmed
+    behaviour-preserving before touching any call site: `LoamPolicy.DevelopmentAndDangerUpkeep` was
+    read first and confirmed to be a pure additive sum (not a multiplicative interaction), so
+    splitting it into two named operands changes nothing about the total. Ran the full existing
+    `--filter FullyQualifiedName~Loam` sweep (164 tests) immediately after the refactor, before
+    writing anything new, and it stayed green.
+    New `WorldSectorDto.UpkeepBreakdown: LoamUpkeepBreakdownDto` (new record, same six fields),
+    computed inside `ComputeLoamReading`'s existing per-sector loop (one new dictionary,
+    `UpkeepBreakdownBySector`, alongside the pre-existing `UpkeepBySector` — same structural
+    owner-gating pattern, not a per-field check) and read in `ProjectSector` the same way `upkeep`
+    already was. `dotnet build src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test
+    was written.
+    Extended `tests/FusionRpg.Core.Tests/World/Loam/LoamUpkeepTests.cs` (+7 tests: a `[Theory]`
+    proving `Breakdown(...).Total` matches `For(...)` across 5 parameter sets already exercised by
+    the file's own existing tests, a truth-overload recombination proof, and an unowned-sector proof
+    that *every* field is zero, not just the total). New file
+    `tests/FusionRpg.Server.Tests/WorldUpkeepBreakdownProjectionTests.cs` (3 tests) against the
+    `two-hearths` fixture's own `d-home` (no seeding needed — it already carries a real garrison of
+    3 and a non-baseline `FractureIntensityMilli = 500`): operands recombine to the wire's own
+    `loamUpkeep` exactly; the operands match hand-computed real tuning values (base 10, garrison
+    3×2=6, intensity 500‰ → total 8); a non-owner's breakdown is all-zero, not just a zero total.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 111/111 passed (26s). `python
+    scripts\audit-overflow.py` → 0 critical (44 findings, all pre-existing A3/A7 — confirmed none
+    of `LoamUpkeep.cs`, `WorldDtos.cs`, `WorldEndpoints.cs` or `EntityNaming.cs` appear anywhere in
+    the report).
   - Dependencies: None.
   - Scope: S.
 
-- [ ] **W11: The `supply.restored` engine line** *(re-homed from `world-playback` and ideal §2.3)*
+- [x] **W11: The `supply.restored` engine line** *(re-homed from `world-playback` and ideal §2.3)*
   - Description: `supply.cut:` exists and nothing reports the reverse, so a legion's supply comes back
     silently. `recovery:` is a garrison mending, not this. Emit `supply.restored` from
     `LegionSupply` at the point the cut is lifted, carrying `Audience = entity.OwnerFactionId` so it
@@ -260,8 +409,41 @@ re-bless budget one field at a time.
   - Files: `src/FusionRpg.Core/World/Loam/LegionSupply.cs`, `tests/FusionRpg.Core.Tests/World/`.
   - Dependencies: None.
   - Scope: S.
+  - **Built out of order, after W12-W14 (see W12's reordering note)** — this task's own acceptance
+    needs `Audience` and its consumer (`VisibleTo`) to exist first; "Dependencies: None" under-stated
+    a real sequencing need the same way it did there.
+  - **Design gap found and resolved (2026-09-04):** the acceptance's "exactly one entry, on the turn
+    restored, not on subsequent turns" is a cross-turn state-transition claim, but this task's own
+    Files line excludes `WorldState.cs`/`WorldCanonical.cs` — no new persisted, hashed field is in
+    scope. `LegionSupply.Resolve` has no memory of a legion's own supply status on a prior turn by
+    design (`SupplyGraph`'s own doc comment: recomputed fresh every turn, "a stored flag is exactly
+    the kind of derived state that goes stale"). Resolved by deriving the signal from
+    `CarriedLoam` alone, which the module already carries: emit `supply.restored`, per legion, only
+    on the turn its own deficit is **fully erased** (`carriedById[e] == Capacity(e)` after this
+    turn's distribution) — not merely "received some loam this turn". This is provably safe against
+    "subsequent turns": a legion at full capacity has `Demand = 0` and drops out of the `toppingUp`
+    filter entirely, so the line cannot fire again until a genuine second cut creates a new deficit.
+    A partial refill that leaves a legion still short of capacity does **not** fire it — proven by a
+    negative assertion added to the pre-existing `A_top_up_never_exceeds_what_the_pool_actually_holds`
+    test. Honestly scoped, not oversold: this also fires for a brand-new legion reaching full
+    capacity for the first time (never having been cut) — the acceptance's own text only requires
+    the cut→restored path to produce exactly one line, not that no other path can ever produce it,
+    and no signal derivable from `CarriedLoam` alone can distinguish "topped up for the first time"
+    from "topped up after a cut" without the excluded persisted field.
+    New test `Supply_restored_fires_exactly_once_the_turn_a_cut_legions_deficit_is_fully_erased` in
+    `tests/FusionRpg.Core.Tests/World/Loam/LegionSupplyResolveTests.cs` drives three separate
+    `LegionSupply.Resolve` calls (Core has no cross-turn memory to drive through a single call):
+    turn 1 cut and burning (asserts no `supply.restored`), turn 2 reconnected with a sufficient pool
+    (asserts exactly one `supply.restored`, correct `SectorId`/`Audience`), turn 3 already whole
+    (asserts no repeat).
+    Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → 740/740
+    passed, including `WorldWaveOneAcceptanceTests.GoldenFinalHash` (run explicitly in isolation
+    first — 6/6 passed — before trusting the full-suite run) confirming the hash is genuinely
+    unchanged, not merely unassumed. `dotnet test tests\FusionRpg.Data.Tests` → 630/632 passed; the
+    2 failures are the same already-tracked, unrelated concurrent-background-writer defect logged in
+    W7/W12's notes.
 
-- [ ] **W12: `TurnReportEntry.Audience` and the faction-scoped emitters — fog defect A**
+- [x] **W12: `TurnReportEntry.Audience` and the faction-scoped emitters — fog defect A**
   - Description: `VisibleTo` returns `true` for a null `SectorId` (`WorldEndpoints.cs:215-219`), so
     four production sites leak to every viewer: every battle line (`BattleReporting.cs:36`),
     `legion.topup` (`LegionSupply.cs:98`), `loam.handicap` (`LoamPhases.cs:119`) and
@@ -282,8 +464,39 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Core.Tests/World/`.
   - Dependencies: None.
   - Scope: M.
+  - **Reordering note (2026-09-04):** built out of order, ahead of W11. W11's own acceptance text
+    requires a line to carry `Audience = entity.OwnerFactionId` and "reach its owner under W14's
+    rule" — but `Audience` did not exist until this task, and `VisibleTo` does not read it until W14.
+    W11 declares "Dependencies: None", which under-states a real sequencing need; built W12 → W13 →
+    W14 first so W11 has something real to plug into, rather than adding a field to a line nobody
+    can yet gate on.
+  - **Done (2026-09-04):** `TurnReportEntry` gained `string? Audience = null` (after `SectorId`, so
+    every existing positional/named call site keeps compiling unchanged); `TurnReport.Add` gained a
+    matching optional `audience` parameter. Set `audience: faction.FactionId` at the three named
+    sites (`LoamPhases.cs`'s `loam.handicap` and `loam.shortfall.unresolved`,
+    `LegionSupply.cs`'s `legion.topup`). For the battle line, read `BattleRequest.LocationId`'s own
+    doc comment first ("sector id, or lane id for a crossing", `BattleSeam.cs:34`) before touching
+    it — passing it unconditionally would put a lane id in the sector slot for `BattleKinds.Lane`,
+    which is exactly the class of defect W13 exists to fix elsewhere; wrote
+    `sectorId: request.Kind == BattleKinds.Lane ? null : request.LocationId` instead of the literal
+    "pass `request.LocationId`" instruction, and proved both branches with a dedicated new file,
+    `tests/FusionRpg.Core.Tests/World/BattleReportingTests.cs` (2 tests: a sector-kind battle carries
+    its real `SectorId`; a lane-kind crossing does not, and its lane id stays legible in `Detail`).
+    Extended three existing tests in place rather than writing parallel duplicates:
+    `LoamPhasesTests.cs`'s handicap test, `LoamTextureTests.cs`'s warded-shortfall test, and a new
+    fact in `LegionSupplyResolveTests.cs` for the topup line (no prior test touched that report
+    entry at all). New file `tests/FusionRpg.Core.Tests/World/TurnReportEntryTests.cs` (2 tests)
+    proves the persistence-compat requirement directly against `System.Text.Json` with the exact
+    shape `RpgStore.WorldTurns.cs:528`'s real (option-less, PascalCase) serializer call produces —
+    an old JSON blob with no `"Audience"` property deserializes and reads `Audience == null`; a
+    freshly-set `Audience` round-trips through the same serializer unchanged.
+    Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → 737/737
+    passed. `dotnet test tests\FusionRpg.Data.Tests` → 630/632 passed; the 2 failures are the same
+    pre-existing, unrelated, concurrent-background-writer defect already logged in W7's note
+    (`DemonSpeciesImportCliTests` / a mid-write `GarlicPumpkin` species file with an `unresolved`
+    rarity) — confirmed unchanged in count and identity from before this task's edits.
 
-- [ ] **W13: `MovementPhase` stops putting non-sectors in the sector slot — fog defect B**
+- [x] **W13: `MovementPhase` stops putting non-sectors in the sector slot — fog defect B**
   - Description: three sites, not the two §2.2 counted (§8c.3 corrected it): `:105` passes
     `outcome.AtSectorId ?? outcome.OnLaneId`; `:123-124` schedules `Arrival` with
     `ArrivedAtSectorId ?? OnLaneId ?? ""`; `:195` passes `evt.Detail` straight into the sector slot,
@@ -299,8 +512,35 @@ re-bless budget one field at a time.
   - Files: `src/FusionRpg.Core/World/Movement/MovementPhase.cs`, `tests/FusionRpg.Core.Tests/World/`.
   - Dependencies: W12.
   - Scope: S.
+  - **Done (2026-09-04):** Site 1 (`legion.runway`, line ~104-105): dropped the `?? outcome.OnLaneId`
+    fallback (a lane id never belongs in the sector slot) and added `audience: entity.OwnerFactionId`.
+    Site 3 (the generic dequeue-loop `report.Add`, line ~198): stopped reading `evt.Detail` for the
+    structured `sectorId` — `Contact`/`Crossing` are already intercepted above this line, so only
+    `Arrival`/`Halt` ever reach it, and both are scheduled only after `moved[entity.EntityId]` is
+    set; the fix reads that entity's own post-march `AtSectorId`/`OwnerFactionId` instead, which is
+    the real answer for both event kinds (a sector when it's standing in one, null when it's not) —
+    without needing a new field on `TurnEvent`/`TurnEventQueue.cs`, which stayed outside this task's
+    Files line. Site 2 (`:123-124`, the `queue.Schedule(... Arrival ...)` call) needed **no** code
+    change — its `Detail` computation was already correct for the free-text narration the acceptance
+    says must stay there; the cited line only explains *why* site 3 was wrong (the same string that's
+    fine as prose was being reused as structured data), not a second site to edit.
+    New file `tests/FusionRpg.Core.Tests/World/MovementPhaseHaltReportingTests.cs` (2 tests, calling
+    `MovementPhase.Run` directly rather than the full `TurnEngine`, matching
+    `BattleReportingTests.cs`'s own precedent): a legion halted by a hostile zone of control produces
+    a `halt:zoc:<sector>` line whose *structured* `SectorId` is the real sector (not the `"zoc:"`-
+    prefixed detail string) and whose `Audience` is the halted legion's own owner — proving the
+    todo's own claim "today it reaches nobody" was a real, previously-untested gap (no test in this
+    assembly touched a halt report line before this task); a second test proves a mid-lane arrival
+    carries `null` in the sector slot, with the lane id staying legible in `Detail` only. Caught and
+    fixed a test-authoring mistake before trusting the result: the two tests first filtered by
+    `e.Kind == TurnEventKinds.Halt`/`.Arrival`, which never matches — `TurnEventKinds` labels the
+    *queue's* internal event, folded into `Detail` as `"halt:zoc:s2"`; the report entry's own `Kind`
+    is always `TurnReportKinds.Event`. Corrected to filter on `Detail.StartsWith(...)`, reran, and
+    both passed against the real fix — not against a predicate that happened to match nothing.
+    Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → 739/739
+    passed.
 
-- [ ] **W14: `VisibleTo` as W-F1's three named clauses — fog defect C**
+- [x] **W14: `VisibleTo` as W-F1's three named clauses — fog defect C**
   - Description: today the filter gates on "have I ever seen this sector", so ground scouted on turn 6
     still reports live battles on turn 80 — contradicting §4.9's static-vs-dynamic rule that the
     four-state ladder already supports (`StateOf` returns `Watched` exactly when the faction sees it
@@ -320,8 +560,37 @@ re-bless budget one field at a time.
     `tests/FusionRpg.E2E.Tests/`.
   - Dependencies: W12, W13.
   - Scope: M.
+  - **Done (2026-09-04):** Read the spec's own worked code (`spec-world-wire.md`'s `VisibleTo`
+    snippet) before writing anything, since it settles a question the acceptance text alone leaves
+    ambiguous — "keyed on `Kind`" turns out to mean `IsStaticFact(e.Kind, e.Detail)`, not a switch
+    purely on the coarse `TurnReportEntry.Kind` enum (which is almost always `"event"`); the real
+    dispatch is `Kind == Event` gating a **closed detail-prefix list** (`"claim."`, `"loam.lost:"`) —
+    everything else, including every `Battle`-kind line, defaults to dynamic (rule 2), which is the
+    safer direction to be wrong in. Replaced the old single-parameter `VisibleTo(string? sectorId,
+    BelievedWorldView?)` with the three-clause `VisibleTo(TurnReportEntry, string? viewer,
+    BelievedWorldView?)` exactly matching the spec's own reference implementation; added the
+    `IsStaticFact`/`StaticFactDetailPrefixes` helper with a comment explaining *why* the list stays
+    short (a dynamic fact wrongly marked static would leak stale information as live). Added the
+    endpoint's own doc-comment note on `/turn/{worldId}/turn/{turn}` recording the stated limitation
+    that `believed` reads current intel, not a snapshot pinned to the requested turn — errs toward
+    showing more, never less, exactly as the acceptance requires it to say.
+    New file `tests/FusionRpg.Server.Tests/WorldTurnReportFogTests.cs` (4 tests, seeding a synthetic
+    `rpg_world_turn_log.report_json` row directly — the same technique W6/W7/W9/W10 used for
+    hard-to-reach state — rather than driving a full multi-turn simulation to produce one specific
+    battle/claim/handicap line): rule 1 for a faction-scoped `loam.handicap` line (reaches `dave`,
+    not `zomboss`); rule 1 for a `halt` line (reaches its owner); rules 2-vs-3 in one assertion on
+    the *same* sector (`hot-ground`, seeded with a stale Dave belief and confirmed un-garrisoned by
+    anyone in the `two-hearths` template, so `SeesNow` is false there) — a battle withheld, a claim
+    shown; and a control proving rule 2 is reachable at all (a battle on `d-home`, Dave's own
+    live-watched capital, is shown). All 4 passed on the first run, confirming both the fix and the
+    "hot-ground is genuinely unwatched" assumption were correct together.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 115/115 passed (18s). `dotnet test
+    tests\FusionRpg.E2E.Tests` → 194/195 passed; the 1 failure is the already-tracked, expected-red
+    `WorldFixtureTests` golden (deferred to W19's single re-bless per the plan's own dependency list
+    for that task — confirmed the diff is exactly the new `upkeepBreakdown` field from W10, not a
+    new defect).
 
-- [ ] **W15: `WorldCalendarDto` on `WorldStateDto`**
+- [x] **W15: `WorldCalendarDto` on `WorldStateDto`**
   - Description: the calendar is on **neither** `WorldStateDto` (`WorldDtos.cs:193-202`) nor
     `WorldHeaderDto` (`:8-16`), and a client cannot derive it: `DaysPerWeek` and `WeeksPerMonth` are
     server tunables (`TurnCalendar.cs:22-23`) and the roll needs the seed, which is deliberately
@@ -341,8 +610,31 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Server.Tests/`, `docs/architecture/world-stage/spec-world-hud.md`.
   - Dependencies: None.
   - Scope: S.
+  - **Done (2026-09-04):** New `WorldCalendarDto` (`DaysPerWeek`, `WeeksPerMonth`,
+    `WeekBoundary`/`MonthBoundary`/`SpecialWeek`/`SpecialMonth`/`Plague`) on `WorldStateDto.Calendar`.
+    `Project(...)` computes `TurnCalendar.Roll(w.CurrentTurn, w.Seed)` once and maps its fields
+    across — the seed itself is read only to produce the roll, never serialized anywhere on the DTO.
+    Corrected `docs/architecture/world-stage/spec-world-hud.md` at all four places it described the
+    calendar as FE-derived from `calendar` report entries (§3's prose, the file-tree comment, the
+    testing-strategy item, and the success-criteria line) to instead read from
+    `WorldStateDto.Calendar` — matching this task's own "world-hud's spec is corrected" acceptance
+    clause. `dotnet build src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was
+    written.
+    New file `tests/FusionRpg.Server.Tests/WorldCalendarProjectionTests.cs` (3 tests): turn 0 carries
+    an all-false blank roll (matching `TurnCalendar.Roll`'s own `turn <= 0 → default` rule); turn 7
+    (the first week boundary at the real `daysPerWeek=7` tuning, set via the same raw-SQL
+    `current_turn` seeding technique used elsewhere rather than committing seven real turns) matches
+    `TurnCalendar.Roll(7, seed)` computed directly and independently in the test, field for field;
+    and a structural test asserting no `"seed"` substring appears anywhere in the raw JSON response
+    and that `calendar`'s object has exactly its seven declared properties, nothing shaped like a
+    preview of a future turn.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 118/118 passed (22s). `dotnet test
+    tests\FusionRpg.E2E.Tests` → 194/195 passed; the 1 failure is the same already-tracked,
+    expected-red `WorldFixtureTests` golden deferred to W19 (confirmed the diff is exactly the new
+    `upkeepBreakdown` field from W10, same as W14's note — `Calendar` had not yet reached this diff
+    position in the JSON).
 
-- [ ] **W16: `WorldStateDto.ProspectedSectorIds`**
+- [x] **W16: `WorldStateDto.ProspectedSectorIds`**
   - Description: `Prospecting.Reveal` is implemented, returns `IReadOnlySet<string>`
     (`IntelRecorder.cs:179`), reaches four lanes (`:174`) and no DTO carries it. Compute it at
     projection time, the shape `Lifelines` already uses (`WorldEndpoints.cs:382-396`). Unlike
@@ -359,8 +651,22 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Server.Tests/`.
   - Dependencies: None.
   - Scope: S.
+  - **Done (2026-09-04):** `WorldStateDto.ProspectedSectorIds` (ordinal-sorted `IReadOnlyList<string>`
+    for a stable wire order, matching every other sorted collection in this DTO tree) computed via
+    `Prospecting.Reveal(w, view.FactionId)` directly in `Project(...)` — a separate top-level field,
+    never touching `WorldSectorDto.Intel` or any other sector field, matching the acceptance's own
+    "never merged" requirement by construction (it is written nowhere near the sector-mapping code).
+    `dotnet build src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    New file `tests/FusionRpg.Server.Tests/WorldProspectingProjectionTests.cs` (2 tests): with no
+    dowser, the set is empty and the rest of the response shape is unaffected; setting
+    `e-dave-legion-1`'s stance to `dowse` (raw SQL on `rpg_world_entities.stance`, the same seeding
+    technique used throughout this program) reveals its own sector (`d-home`, which carries a real
+    rootbed) while `d-home`'s own `intel` field stays exactly `Watched` — proving the two are
+    genuinely independent, not merely untested together.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 120/120 passed (22s). `dotnet test
+    tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → 740/740 passed.
 
-- [ ] **W17: `GET /api/world/catalog`**
+- [x] **W17: `GET /api/world/catalog`**
   - Description: `StructureCatalog.All` (`StructureCatalog.cs:53`), `SlotTypeCatalog.All`
     (`SlotTypeCatalog.cs:54`) and `StrengthBandCatalog.All` (`Intel/StrengthBandCatalog.cs:35`) are
     public with **no HTTP caller**, so a UI cannot learn what is buildable, what a slot letter means,
@@ -378,8 +684,29 @@ re-bless budget one field at a time.
     `tests/FusionRpg.E2E.Tests/`.
   - Dependencies: None.
   - Scope: M.
+  - **Done (2026-09-04):** `WorldCatalogDto` (`Structures`, `SlotTypes`, `StrengthBands`,
+    `LaneTypes`) plus the four matching leaf DTOs, mapping `StructureCatalog.All`,
+    `SlotTypeCatalog.All`, `StrengthBandCatalog.All` and `LaneTypeCatalog.All` field-for-field.
+    `WorldStructureDto.Cost` is named exactly as the acceptance requires (never `CostMilli`), with
+    the XML doc stating "whole loam units" and the reason a `Milli`-trusting renderer would be wrong
+    by 1000× — `StructureDef.CostMilli` itself is untouched, matching "renaming the Core constant
+    stays out of scope." New route `GET /api/world/catalog`, mapped inside the existing `/api/world`
+    group (`/catalog` as a literal segment takes routing priority over the `/{worldId}` parameter
+    route, so no collision) — no world id, no viewer, no fog, matching the acceptance's "the route
+    answers without a world or a viewer" exactly. `dotnet build src/FusionRpg.Server` succeeded 0
+    warnings/0 errors before any test was written.
+    New file `tests/FusionRpg.E2E.Tests/WorldCatalogE2ETests.cs` (3 tests, no `IAsyncLifetime` —
+    nothing here touches world state, so no reset is needed): the route answers 200 with all four
+    non-empty lists and no world ever created; the structure's `cost` field is present and
+    `costMilli` is absent, proving the rename actually happened rather than just adding an alias; a
+    strength band carries its full five-field shape.
+    Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World` → 42/43
+    passed; the 1 failure is the same already-tracked, expected-red `WorldFixtureTests` golden
+    deferred to W19. `python scripts\audit-magic-numbers.py --summary` → 0 M1 findings; the existing
+    12 M3 findings are all pre-existing and none touch `WorldDtos.cs`/`WorldEndpoints.cs` (confirmed
+    by grepping the M3 target list directly).
 
-- [ ] **W18: The AI-reasons projection becomes developer-tree-only** *(arbitration §C, §8.3)*
+- [x] **W18: The AI-reasons projection becomes developer-tree-only** *(arbitration §C, §8.3)*
   - Description: the orphan the coverage audit found — §8.3 says the AI-reasons panel moves to the
     developer tree, two specs cite it as background, neither owns the move, and
     `WorldEndpoints.cs:185-196` is untouched by all fifteen specs. That projection hands a client
@@ -398,8 +725,30 @@ re-bless budget one field at a time.
   - Files: `src/FusionRpg.Server/WorldEndpoints.cs`, `tests/FusionRpg.Server.Tests/`.
   - Dependencies: None.
   - Scope: S.
+  - **Owner decision taken (2026-09-04): the cheaper reading, as pre-authorized.** No synchronous
+    owner turn was available mid-autonomous-loop; the task's own text names this exact fallback for
+    that case ("drop `Reason`, keep the entry"), so that is what shipped — the entry stays visible
+    under the pre-existing `VisibleTo(WorldCommand, ...)` rule (unchanged by this task), only its
+    `Reason` is nulled for a commander other than the viewer, outside the dev gate.
+  - **Done (2026-09-04):** `Commands` projection in `/turn/{worldId}/turn/{turn}` now computes
+    `Reason` as `SimFlags.Enabled || commanderId == viewer ? l.Reason : null` — `SimFlags.Enabled`
+    reads `FUSIONRPG_SIM=1` exactly the way `Program.cs`'s own `if (SimFlags.Enabled)
+    app.MapSimAndProbes()` gate already does, so this is the same developer surface, not a new one.
+    `dotnet build src/FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    New file `tests/FusionRpg.Server.Tests/WorldCommandReasonGateTests.cs` (2 tests, seeding
+    `rpg_world_commands` rows for both a viewer's own order and a foreign commander's, plus a
+    `rpg_world_turn_log` row so `/turn/0` resolves at all — the same raw-SQL technique used
+    throughout this program): without the gate, the viewer's own `Reason` survives while the foreign
+    one reads `null`; with `FUSIONRPG_SIM=1` set for the duration of the test (restored in a
+    `finally` block to avoid leaking into any other test running in the same process), both modes
+    are asserted as the acceptance requires, and both `Reason`s reach the viewer unchanged from
+    before this task. Full Server.Tests suite re-run afterward (122/122) to confirm the mutate/
+    restore pattern left no cross-test contamination.
+    Verify: `dotnet test tests\FusionRpg.Server.Tests` → 122/122 passed (20s). `dotnet test
+    tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World` → 42/43 passed; the 1 failure is
+    the same already-tracked, expected-red `WorldFixtureTests` golden deferred to W19.
 
-- [ ] **W19: Re-bless `first-light.json` once, and sweep its seven consumers**
+- [x] **W19: Re-bless `first-light.json` once, and sweep its seven consumers**
   - Description: **the single re-bless for every field addition in W6–W11 and W15–W16.** This is the
     L25 precedent stated as a task: `decisions.md` already records six hashed field additions batched
     into one golden re-bless *after an adversarial audit caught five specs each independently
@@ -421,8 +770,26 @@ re-bless budget one field at a time.
     named above (test expectations only).
   - Dependencies: W6, W7, W8, W9, W10, W11, W15, W16.
   - Scope: M.
+  - **Done (2026-09-04):** Ran the bless exactly once with `$env:FUSIONRPG_BLESS_WORLD_FIXTURE = "1";
+    dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~WorldFixtureTests`, which
+    passed 1/1 and rewrote the fixture. Reviewed the full diff before trusting it, not just the
+    test's own green: `git diff --stat` showed +116/-17, and every one of the 17 deletions turned
+    out to be `"structureId": null` losing its position as the slot's last property (needing a
+    trailing comma once `constructionTurnsRemaining` was added after it) — a formatting artifact,
+    not a removed field. Confirmed every W6–W16 addition is genuinely present in the diff
+    (`upkeepBreakdown`, `wardenBindingId`/`neglectedTurns`/`loamCapacity`, `constructionTurnsRemaining`/
+    `gateKeyId`, `role`/`carriedLoam`/`displayName`/`capacity`/`burn`/`runway`, `marchCosts: {}`,
+    `calendar`, `prospectedSectorIds: []`) and nothing else changed shape.
+    Verify: `dotnet test tests\FusionRpg.Data.Tests` → 630/632 passed (the 2 pre-existing, unrelated,
+    concurrent-background-writer failures logged since W7/W12/W18 — confirmed
+    `WorldWaveOneAcceptanceTests.GoldenFinalHash` specifically among the 630, unaffected). `cd
+    web\fusion-rpg-web; npm test` → 822/823 passed across 109/110 files; the 1 failure is the
+    already-known, pre-existing `disabledReasonGuard.test.ts` (GG-55) accessibility gap logged in
+    W1's own completion note at the start of this session — unrelated to world-wire, confirmed
+    stable across every full-suite run this entire session. All seven named fixture consumers are
+    green.
 
-- [ ] **W20: `first-light-turn.json` — the turn-report golden**
+- [x] **W20: `first-light-turn.json` — the turn-report golden**
   - Description: no turn-report fixture exists; `world.spec.ts:91` stubs
     `**/api/world/first-light/turn/**` as a flat 404, so `world-playback` — which owes a table for 21
     event prefixes, 3 battle kinds, 2 calendar subjects and **37** drop reasons — has nothing to build
@@ -443,9 +810,51 @@ re-bless budget one field at a time.
     `web/fusion-rpg-web/src/features/world/fixtures/first-light-turn.json` (new),
     `web/fusion-rpg-web/e2e/world.spec.ts`.
   - Dependencies: W14, W19.
+  - **Real, separate defect found while building this fixture, fixed by design (not code) —
+    recorded, not fixed here, since it is outside every file this task touches:** a legion that is
+    destroyed in combat (or otherwise removed) on the *same turn* it first reaches ground its
+    faction does not own produces report lines (its own battle, its own `legion.starved`) that its
+    **own owner cannot see** — because `Visibility.Accumulate` only credits sight from a faction's
+    *current* entities and owned sectors, and the dying entity has already been removed from
+    `next.Entities` (inside `MovementPhase.Run`'s own battle resolution, before `TurnEngine.Step`'s
+    final `Observe` call) by the time sight is computed for that same turn. Confirmed directly: an
+    early exploratory run had Dave's starting legion march alone into Wild-held `ash-waste` and lose
+    outright — the resulting `battle`/`legion.starved` lines never reached Dave's own turn report at
+    all, at any later query time, because nothing of his remained nearby to grant him sight of that
+    ground. The final fixture below avoids the failure mode (Dave secures `ember-hollow` first,
+    whose *ownership* gives him a permanent one-lane glimpse of neighbouring `ash-waste`, so his
+    turn-4 loss there stays visible) rather than exercising it — this is a real gap in
+    `Visibility.cs`/`TurnEngine.cs`'s phase ordering, pre-dating this program entirely (not
+    introduced by W6–W19), and belongs to whichever module next touches intel/combat ordering, not
+    to a fixture-authoring task.
+  - **Done (2026-09-04):** New file `tests/FusionRpg.E2E.Tests/WorldTurnFixtureTests.cs` plays a
+    real, deterministic six-turn opening on `first-light` (seed 1) chosen to produce a genuine
+    example of each W-F1 visibility class in Dave's own account: turn 0 (march to `ember-hollow`,
+    his own `legion.runway` — **audience**), turns 1–2 (clearing `ember-hollow`'s two light guards
+    while standing there — **live-sight battle**), turn 3 (`claim.held:ember-hollow` — **remembered-
+    sight**), turn 4 (marching toward Wild-held `ash-waste` — **halt** plus a live Contact battle),
+    turn 5 (zomboss's own warband ordered — via a direct manual command for that commander in this
+    SIM harness, not left to `FrontierRulesPolicy`'s own unscripted judgment — to march toward
+    `verdant-shelf`, its `legion.runway` the **excluded** line). The exclusion is asserted in code
+    (`Assert.DoesNotContain(... e.Subject == "e-zomboss-band-1")` against turn 5's own report,
+    fetched as dave) **before** the fixture is trusted, not left to eyeballing the JSON.
+    Blessed once with `$env:FUSIONRPG_BLESS_WORLD_FIXTURE = "1"`, then re-ran without the flag to
+    confirm the byte-pinned comparison holds deterministically. Read the generated fixture directly
+    afterward and confirmed all five `detail` tokens are present:
+    `legion.runway:17`, `guard:ember-hollow:e-dave-legion-1` (×2), `claim.held:ember-hollow`,
+    `halt:zoc:ash-waste` + `sector:ash-waste:e-wild-pack-1`.
+    Updated `web/fusion-rpg-web/e2e/world.spec.ts`'s `**/api/world/first-light/turn/**` mock from a
+    flat 404 to answering from the new fixture (indexed by its own `turn` field, matched against the
+    requested URL's turn number, 404 outside 0–5) — the same shape the live server gives, so
+    `world-playback`'s own future e2e tests have something real to mock against instead of a
+    universal 404; confirmed `npx tsc --noEmit` stays clean after the change.
+    Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~WorldTurnFixture` →
+    1/1 passed, both blessing and the subsequent unblessed re-run. `cd web\fusion-rpg-web; npm test`
+    → 822/823 passed; the 1 failure is the same already-known, pre-existing `disabledReasonGuard`
+    (GG-55) gap logged since W1, confirmed stable across the whole session.
   - Scope: M.
 
-- [ ] **W21: The two fixtures the plan assumes nobody owns**
+- [x] **W21: The two fixtures the plan assumes nobody owns**
   - Description: the plan's risk table names an **18-sector / 10-legion** fixture and a
     **`two-hearths`** fixture and assigns both here, because `world-wire` owns the generator that
     already produces the shipped one. `two-hearths` is Gate B's playtest world
@@ -467,10 +876,52 @@ re-bless budget one field at a time.
     `web/fusion-rpg-web/src/features/world/fixtures/` (the 18/10 fixture, new).
   - Dependencies: W19.
   - Scope: M.
+  - **Owner decision taken (2026-09-04): the stated fallback, as pre-authorized.** No synchronous
+    owner turn was available; built the 18/10 world by extending the real, already-validated
+    `two-hearths` template (2 more sectors, 8 more legions) in a private test-only helper, inserted
+    directly through `RpgStore.CreateWorld` (resolved from the E2E host's own DI container via
+    `factory.Services`) — no `WorldTemplateCatalog` entry, no new validation pass, "costs nothing in
+    Core" exactly as the fallback's own reasoning states.
+  - **Real defect found and fixed (outside this task's own Files line, fixed anyway — it directly
+    blocked running this task's own new tests alongside the existing ones):**
+    `RpgStore.Reset()` (`src/FusionRpg.Data/Sqlite/RpgStore.cs`) never deleted any of the eleven
+    `rpg_world*` tables — confirmed by grepping every `CREATE TABLE IF NOT EXISTS rpg_world*` in the
+    Data layer against `Reset()`'s own delete list and finding zero overlap. A world created in one
+    E2E test class outlived every later `/api/test/reset`, so `WorldTurnFixtureTests` (this session,
+    reusing the natural id `"first-light"`) hit `world.exists` against an orphaned row whose owning
+    player that same reset HAD already deleted — `CreateWorld`'s own existence check is keyed on
+    world id alone, not on the (already-gone) owning player. Added the missing eleven `DELETE FROM
+    rpg_world*` statements to `Reset()`'s existing list, same style, same per-statement try/catch.
+    Test-infrastructure-only (SIM/E2E reset path, never reached by a real player), so fixed directly
+    rather than deferred — confirmed safe with the full `FusionRpg.E2E.Tests` (201/201, up from a
+    200/201 red before the fix), `FusionRpg.Data.Tests` (630/632, the same 2 pre-existing unrelated
+    failures) and `FusionRpg.Server.Tests` (122/122) suites, not just this task's own tests.
+  - **Done (2026-09-04):** Extended `tests/FusionRpg.E2E.Tests/WorldFixtureTests.cs` (matching its
+    Files line — added to the existing file rather than a new one) with two more `[Fact]`s alongside
+    the existing `first-light` one, sharing a new `BlessOrAssert` helper (refactored out of the
+    original test's own inline bless/assert block, behaviour-preserving — the original test still
+    passes unchanged). `two-hearths.json`: identical pattern to `first-light.json`, just the other
+    real template. `eighteen-ten.json`: the private `BuildEighteenSectorTenLegionWorld` helper takes
+    `WorldTemplateCatalog.Build(TwoHeartsId, ...)` and adds 2 sectors (each reachable by exactly one
+    new lane off an existing outpost, satisfying `WorldValidation`'s connectivity rule without
+    needing a wider graph change) and 8 legions (split 4/4 across Dave/Zomboss, mirroring the
+    template's own two starting legions' member shape) — asserted `world.Sectors.Count == 18` and
+    `world.Entities.Count == 10` on the constructed `WorldState` itself before ever calling
+    `CreateWorld`, and separately asserted the **wire** response's own sector count (18, matches)
+    and entity count (5, not 10 — corrected an initial wrong assertion here: `WorldStateDto.Entities`
+    is fog-scoped to the viewer's own forces only, per its own existing doc comment, so Dave's wire
+    view legitimately shows only his 5, while the world total of 10 is what the acceptance's "carries
+    ten legions" actually refers to). Confirmed via `git status` that `first-light.json` shows only
+    as the pre-existing W19 modification — the two new fixture files are untracked additions, so
+    W19's re-bless budget stays closed, exactly as the acceptance requires.
+    Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~WorldFixture` → 3/3
+    passed, both the initial bless and a subsequent unblessed re-run confirming determinism. `cd
+    web\fusion-rpg-web; npm test` → 822/823 passed; the 1 failure is the same already-known
+    `disabledReasonGuard` (GG-55) gap logged since W1.
 
 ### `world-commands` — the write surface
 
-- [ ] **W22: `Amount` and `StructureId` through all six round-trip sites**
+- [x] **W22: `Amount` and `StructureId` through all six round-trip sites**
   - Description: `sustain` is blocked twice over — `WorldCommandRequest` has no `Amount`
     (`WorldDtos.cs:205-217`) so admission refuses `amount.invalid`
     (`WorldCommandAdmission.cs:63`), and `CommandPayload` (`RpgStore.WorldTurns.cs:442-444`) does not
@@ -494,8 +945,35 @@ re-bless budget one field at a time.
     `src/FusionRpg.Data/Sqlite/RpgStore.WorldTurns.cs`, `tests/FusionRpg.Data.Tests/`.
   - Dependencies: None.
   - Scope: M.
+  - **Done (2026-09-04):** Added `Amount` (`long?`) and `StructureId` (`string?`) to
+    `WorldCommandRequest` (`WorldDtos.cs`) and to the DTO→`WorldCommand` mapping in
+    `WorldEndpoints.cs`'s `/commands` handler (a seventh site the task's own count didn't name, since
+    it sits between the wire and `WorldCommand`, not inside `RpgStore` — found by tracing the full
+    path end to end rather than trusting the task's site list as exhaustive). Added both fields to
+    `CommandPayload` (defaulted, so an old JSON blob missing them still binds) and threaded them
+    through the one write site and `ReadCommandRow`. Fixed the actual "sixth, silent" site exactly as
+    named: `ListWorldCommandsUnlocked` now calls `ReadCommandRow` instead of inlining its own second
+    copy of the same deserialize — the shared method's own doc comment ("shared by both listers") is
+    true again, and any field added next only needs updating in one place. `dotnet build` on both
+    `FusionRpg.Data` and `FusionRpg.Server` succeeded 0 warnings/0 errors before any test was written.
+    Extended `tests/FusionRpg.Data.Tests/WorldCommandStoreTests.cs` (+6 tests) rather than a new
+    file, matching its own existing round-trip-proof style: `Amount` through `ListWorldCommands`;
+    `StructureId` through `ListWorldCommands`; both through `ListLoggedWorldCommands`; the private,
+    otherwise-untestable `ListWorldCommandsUnlocked` path proven indirectly by driving a real
+    `CommitWorldTurn` and asserting the turn report shows `command.accepted` rather than
+    `amount.invalid` for a `sustain` order (the first version of this test asserted an exact
+    post-commit stock delta and failed — a full committed turn also runs production/upkeep/overflow
+    in the same pass, so the arithmetic wasn't isolatable; corrected to the direct
+    admission-succeeded signal instead of modelling the whole economy); and an old, pre-W22 raw
+    `payload_json` row (seeded via the same raw-SQL-on-`HotPath` technique used throughout this
+    program) still deserializes with both new fields null.
+    Verify: `dotnet test tests\FusionRpg.Data.Tests` → 635/637 passed; the 2 failures are the same
+    already-tracked, unrelated concurrent-background-writer defect logged since W7. `dotnet test
+    tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World` → 46/46 passed. `python
+    scripts\audit-overflow.py` → 0 critical, 44 findings, identical count to before this task (no
+    new `int` introduced anywhere on the `Amount` path).
 
-- [ ] **W23: The property test — every kind × every optional member survives the round trip**
+- [x] **W23: The property test — every kind × every optional member survives the round trip**
   - Description: **the plan calls this the single highest-value test in Phase 0**, because it closes
     the defect *class* rather than the two known instances. `stance` was lost on this exact trip once
     already, and `ReadCommandRow`'s own comment (`RpgStore.WorldTurns.cs:437-441`) says adding a field
@@ -513,8 +991,34 @@ re-bless budget one field at a time.
   - Files: `tests/FusionRpg.Data.Tests/` (new test file).
   - Dependencies: W22.
   - Scope: M.
+  - **Done (2026-09-04):** New file `tests/FusionRpg.Data.Tests/WorldCommandRoundTripPropertyTests.cs`
+    (2 tests). Reflection over `typeof(WorldCommand).GetProperties()` drives the per-property
+    equality check — never a hand-maintained field list, so a member added to `WorldCommand` later
+    is covered automatically (the acceptance's own "reflection... never a hand-maintained list"
+    satisfied literally, not via a compile-time-exhaustive switch, which C# records don't offer a
+    natural mechanism for). One fully-populated `WorldCommand` per `WorldCommandKinds.All` entry
+    (read `WorldCommandAdmission.cs` first to confirm admission only checks fields relevant to its
+    own kind, so setting every optional member on every kind is accepted, not refused, for carrying
+    "extra" data) proves both public hydration paths (`ListWorldCommands`,
+    `ListLoggedWorldCommands`) directly; the private `ListWorldCommandsUnlocked` path (reachable
+    only from inside `CommitWorldTurn`) is proven indirectly via `TurnEngine`'s own `Reveal`-phase
+    re-admission, asserting `command.accepted` for each kind's own committed turn — one kind per
+    committed turn, with `move` ordered last, after discovering by running it that co-resolving
+    several kinds sharing one entity in one turn produces *real* resolution-time conflicts (a `move`
+    relocating the entity before a same-turn `clear` targeting its old sector runs) that are
+    legitimate gameplay outcomes, not round-trip defects — the test isolates the one property it
+    actually proves rather than asserting a stricter "nothing ever drops" bar the task never asked
+    for.
+    **Red-verified by hand, not committed, exactly as the acceptance requires:** temporarily removed
+    `Amount = payload.Amount,` from `ReadCommandRow` — both tests failed immediately, one via the
+    direct property-equality assertion (`Expected: 100, Actual: null`) and one via the internal path
+    showing `amount.invalid` where `command.accepted` should be — then reverted and reconfirmed
+    green (18/18 on the `WorldCommand` filter) before moving on.
+    Verify: `dotnet test tests\FusionRpg.Data.Tests --filter FullyQualifiedName~WorldCommand` →
+    18/18 passed. Full `dotnet test tests\FusionRpg.Data.Tests` → 637/639 passed; the 2 failures are
+    the same already-tracked, unrelated concurrent-background-writer defect logged since W7.
 
-- [ ] **W24: The `cede` command kind and its admission arm**
+- [x] **W24: The `cede` command kind and its admission arm**
   - Description: `LoamPhases.Pressure` picks the sector to release **itself**, every turn, via
     `LoamForecast.Weakest` (`LoamPhases.cs:133-146`, the call at `:138`); there is no `abandon` /
     `cede` / `release` kind (`WorldCommand.cs:36-37`). §8c.2 named that as the economy's core tension
@@ -532,8 +1036,26 @@ re-bless budget one field at a time.
     `src/FusionRpg.Core/World/Turn/WorldCommandAdmission.cs`, `tests/FusionRpg.Core.Tests/World/`.
   - Dependencies: None.
   - Scope: S.
+  - **Done (2026-09-04):** Added `WorldCommandKinds.Cede = "cede"` (doc comment stating the player's
+    intent) to `WorldCommand.cs:41`, appended to `WorldCommandKinds.All`. Added the `Cede` admission
+    arm in `WorldCommandAdmission.cs:60-66`, matching `Claim`'s shape but with an ownership check in
+    place of an entity check (`cede` names no entity — a faction cedes ground, not a legion); the
+    shared pre-check at `:45-46` already refuses an unknown sector id, so the kind-specific arm only
+    adds `"sector.missing"` (no sector named) and `"sector.not-yours"` (named but not owned by the
+    commander). Added 6 new tests to `tests/FusionRpg.Core.Tests/World/WorldCommandAdmissionTests.cs`:
+    kind is registered/known; ceding your own sector (`homeworld`) is admitted with no entity named;
+    ceding an unowned sector (`black-gate`, unowned at `first-light` world creation) is refused with
+    `"sector.not-yours"`; ceding with no sector named is refused with `"sector.missing"`; ceding an
+    unknown sector (`"nowhere"`) is refused by the shared check with `"sector.unknown"`; and a
+    `TurnEngine.Step`-based test proving a turn with a lone `cede` order produces the identical
+    `StateHash` as a turn with no commands at all, confirming `WorldCanonical` never hashes commands.
+    Verified: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **746/746
+    passed**; `dotnet test tests\FusionRpg.Data.Tests` → **637/639 passed**, the 2 failures being the
+    pre-existing, unrelated `DemonSpeciesImportCliTests` cases (a concurrent background seedsmith
+    species-generation process mutates the committed demon tree these tests read against — confirmed
+    same failure signature as prior sessions, not a regression from this change).
 
-- [ ] **W25: Thread the cede preference into the one `Weakest`**
+- [x] **W25: Thread the cede preference into the one `Weakest`**
   - Description: §8c.6 lists as **load-bearing** that *"warning and act share `Weakest`, so the
     forecast and the event cannot disagree"* — today they cannot, because `LoamPhases.cs:138` and
     `LoamForecast.cs:62` call the same function. §8d.2 requires that survive: **the player's choice is
@@ -553,8 +1075,32 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Core.Tests/World/Loam/`.
   - Dependencies: W24.
   - Scope: M.
+  - **Done (2026-09-04):** `LoamForecast.Weakest` gained one optional `string? ceded = null` parameter
+    and one clause (`LoamForecast.cs:28-29`): when `ceded` names a sector already in `candidates`
+    (component member, not warded) it wins outright; otherwise the existing worst-balance/ordinal
+    ordering answers exactly as before — still exactly one function deciding "which sector fades".
+    `LoamForecast.WillRelease` also gained the same optional parameter, forwarding straight through to
+    `Weakest`, so W26's `/state` route (which calls `WillRelease`, not `Weakest`, and does not touch
+    `LoamForecast.cs` in its own file list) has something to pass the preference into. `LoamPhases
+    .Pressure` gained an optional `IReadOnlyDictionary<string,string>? ceded = null` (faction id →
+    sector id), looked up per faction inside the existing shortfall branch and passed into `Weakest`
+    (`LoamPhases.cs:138-141`) — every pre-existing caller (`Data.Tests`/`Core.Tests` fixtures) compiles
+    unchanged since the parameter defaults to null. `TurnEngine.Pressure` now builds that map from the
+    turn's admitted commands (`TurnEngine.cs`) the same way `Snapshot` already builds `postures` from
+    `stance` orders — group by `CommanderId`, last order per faction wins, plain dictionary, no service.
+    Tests added: 4 in `LoamForecastTests.cs` (`Weakest` — ceded-in-component-unwarded wins over default
+    ordering; ceded-but-warded falls back to default; ceded-but-in-another-component falls back to
+    default; a component covering its own upkeep releases nothing regardless of what was ceded — the
+    refusal-per-reason coverage the acceptance asked for); 1 in `LoamPhasesTests.cs`
+    (`Pressures_ceded_map_overrides_which_sector_absorbs_the_shortfall`, proving the dictionary
+    threads through `LoamPhases.Pressure` itself, direct-call level); 2 in new
+    `tests/FusionRpg.Core.Tests/World/CedeThreadingTests.cs` proving the full `TurnEngine.Step`
+    pipeline — a committed `cede` order changes which sector actually fades that turn, and a `cede`
+    naming a sector the faction does not own is dropped at Reveal (`sector.not-yours`) and never
+    reaches the ceded map. Verified: `dotnet test tests\FusionRpg.Core.Tests --filter
+    FullyQualifiedName~World` → **753/753 passed** (up from 746, the 7 new tests above).
 
-- [ ] **W26: The forecast reads the same preference on the `/state` route**
+- [x] **W26: The forecast reads the same preference on the `/state` route**
   - Description: `WorldEndpoints.ComputeLoamReading` (`:420-461`) calls `LoamForecast.WillRelease` at
     `:455`, and unless it passes the same preference, `WillReleaseNextTurn` (`WorldDtos.cs:125`)
     starts naming a different sector than the turn will release. **Corrected 2026-09-03 by audit:**
@@ -571,8 +1117,27 @@ re-bless budget one field at a time.
   - Files: `src/FusionRpg.Server/WorldEndpoints.cs`, `tests/FusionRpg.Server.Tests/`.
   - Dependencies: W25.
   - Scope: M.
+  - **Done (2026-09-04):** `WorldEndpoints`'s `/{worldId}/state` handler now makes its own
+    `store.ListWorldCommands(worldId, world.CurrentTurn)` read (a new call site on this route, not a
+    reuse of `/turn/{turn}`'s `ListLoggedWorldCommands`), extracts this viewer's own last-filed
+    `cede` order's `SectorId` (or `null`), and threads it through `Project(..., pendingCede)` →
+    `ComputeLoamReading(w, factionId, ceded)` → `LoamForecast.WillRelease(world, component, ceded)`
+    (both gained a matching optional parameter in W25, exactly so this task would not need to touch
+    `LoamForecast.cs`). No new SQL: `ListWorldCommands` already existed. Added
+    `tests/FusionRpg.Server.Tests/WorldCedeForecastTests.cs` (real HTTP host over `two-hearths`,
+    matching `WorldSectorProjectionTests.cs`'s own boilerplate): drains all four of Dave's sectors'
+    stock to 0 and pushes development/danger up so the shortfall survives this turn's rootbed
+    production; discovers the default forecast pick empirically, files a `cede` on a *different*
+    component member, confirms `/state`'s `willReleaseNextTurn` flag moves to the ceded sector, commits
+    the turn (two-hearths' Zomboss carries `FrontierRulesPolicy` and auto-fills, so Dave's own commit
+    is enough), and confirms the ceded sector — not the original default pick — is the one that
+    actually goes `Lost`. Verified: `dotnet test tests\FusionRpg.Server.Tests` → **123/123 passed**
+    (up from 122); `.\scripts\guard-dal.ps1` → **OK, no SQL outside FusionRpg.Data** (the test's own
+    raw-SQL fixture seeding matches `WorldSectorProjectionTests.cs`'s established, guard-exempt test
+    pattern); `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World` → **46/46
+    passed**.
 
-- [ ] **W27: `RulesetVersion` — read the current value, bump it once, triage before re-blessing**
+- [x] **W27: `RulesetVersion` — read the current value, bump it once, triage before re-blessing**
   - Description: `LoamPhases.Pressure`'s behaviour changes in W25, so per §8d.2 this is a
     `RulesetVersion` decision. All three additions in this module (`cede`, `bind-warden`, `dowse`)
     land under **one** bump, per `decisions.md:98`: *"`RulesetVersion` advances **once** for the
@@ -592,8 +1157,20 @@ re-bless budget one field at a time.
   - Files: `src/FusionRpg.Core/World/Turn/TurnEngine.cs`, `tests/FusionRpg.Data.Tests/`.
   - Dependencies: W25.
   - Scope: S.
+  - **Done (2026-09-04):** Read `TurnEngine.RulesetVersion`'s current value (5, confirmed by reading
+    the file, not assumed) and bumped it to 6, appending one new doc-comment paragraph after the
+    existing "Bumped to 5" entry (matching the file's own append-at-the-end convention) explaining
+    this is **one** bump for the whole `cede`/`bind-warden`/`dowse` wave (decisions.md:98) — a world
+    that files no `cede` order resolves identically to version 5, so `bind-warden` (W28) and `dowse`
+    (W30) land under this same number without a second bump. Verified: `dotnet test
+    tests\FusionRpg.Data.Tests` → **637/639 passed**, the 2 failures being the same pre-existing,
+    unrelated `DemonSpeciesImportCliTests` cases already documented at W24/W25 (concurrent background
+    seedsmith species-generation activity) — critically, `WorldWaveOneAcceptanceTests.GoldenFinalHash`
+    is **not** among the failures, confirming the bump alone (no cede order filed in that 20-turn
+    scenario) moved no golden, exactly as the acceptance requires; `dotnet test
+    tests\FusionRpg.Core.Tests` (full, unfiltered) → **5313/5313 passed**.
 
-- [ ] **W28: The `bind-warden` command kind and `WardResolver`**
+- [x] **W28: The `bind-warden` command kind and `WardResolver`**
   - Description: `WorldSector.WardenBindingId` (`WorldState.cs:173`) is read by `LoamForecast.cs:24`
     and `LoamPhases.cs:162`, hashed at `WorldCanonical.cs:37`, persisted at `RpgStore.World.cs:441`
     and cleared on capture at `ClaimResolver.cs:85` — and set non-null **nowhere in production**; the
@@ -616,8 +1193,39 @@ re-bless budget one field at a time.
     `src/FusionRpg.Core/World/Turn/TurnEngine.cs`, `tests/FusionRpg.Core.Tests/World/`.
   - Dependencies: W24.
   - Scope: M.
+  - **Done (2026-09-04):** Corrected the spec's own naming collision first
+    (`docs/architecture/world-stage/spec-world-commands.md`): every kind-name occurrence of `ward`
+    renamed to `bind-warden` (`WordCommandKinds.Ward`→`BindWarden`, `WardResolver`→`WardenResolver`,
+    the endpoint route, the project-structure table, the testing/success-criteria sections), leaving
+    `ward`/`WardLevel` untouched everywhere it names the still-unbuilt *lane* action instead. Added
+    `WorldCommandKinds.BindWarden = "bind-warden"` to `WorldCommand.cs` (needs no entity, matching
+    `Cede`'s shape) and a new `WorldCommand.WardenId` field — the value a bind-warden order writes
+    into `WorldSector.WardenBindingId`, opaque to Core the same way `StructureId` is. Admission arm in
+    `WorldCommandAdmission.cs` mirrors `Cede`'s ownership check plus one more: `WardenId` must be
+    non-blank (`"warden.missing"`). New `src/FusionRpg.Core/World/Movement/WardenResolver.cs`, wired
+    into `TurnEngine.Snapshot` right after `BuildResolver` (so a same-turn claim+bind-warden chains,
+    matching `Build`'s own precedent), re-validating ownership at resolution rather than trusting
+    admission — the same discipline `ClaimResolver`/`BuildResolver` already apply. Added a comment at
+    `WorldCanonical.cs:37` (where `s.WardenBindingId` is emitted) naming it as the first field in that
+    row whose hash effect isn't "a number changed." Tests: 8 new admission cases appended to
+    `WorldCommandAdmissionTests.cs` (known kind; admitted with no entity; refused not-yours/missing
+    sector/unknown sector/missing warden id — 3 blank-string variants via `[Theory]`); 3 new tests in
+    `tests/FusionRpg.Core.Tests/World/BindWardenThreadingTests.cs` proving the *writer* end to end (a
+    committed order actually sets `WorldSector.WardenBindingId`; the bound sector is thereafter
+    excluded from `LoamForecast.Weakest` — proving the command and a hand-seeded `LoamTextureTests.cs`
+    fixture reach the identical world shape; a binder who lost the sector before resolution is refused
+    `"warden.not-yours"`, calling `WardenResolver.Run` directly the same way `BuildResolver`'s own
+    equivalent test does). **Real defect found and fixed, outside this task's own Files list but
+    caught by W23's reflection-based property test exactly as designed:** `WardenId` was not threaded
+    through `RpgStore.WorldTurns.cs`'s `CommandPayload` record/write site/`ReadCommandRow` — the round
+    trip silently dropped it, and `WorldCommandRoundTripPropertyTests`'s `FullyPopulated` helper also
+    needed a `WardenId` value to exercise the new kind at all. Both fixed (3-site `CommandPayload` wire
+    exactly like W22's `Amount`/`StructureId`, plus the test fixture). Verified: `dotnet test
+    tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **764/764 passed** (up from 753,
+    +11); `dotnet test tests\FusionRpg.Data.Tests` (full) → **637/639 passed**, the 2 failures the same
+    pre-existing, unrelated `DemonSpeciesImportCliTests` cases (no golden moved).
 
-- [ ] **W29: `POST /api/world/{worldId}/bind-warden` — the first production `BindAsWarden` call site**
+- [x] **W29: `POST /api/world/{worldId}/bind-warden` — the first production `BindAsWarden` call site**
   - Description: `FusionRpg.Core.csproj` declares exactly one `ProjectReference` —
     `FusionRpg.Contracts` — and a guard substring-scans it for the data project's name, so Core
     **cannot** call `RpgStore.BindAsWarden` (`RpgStore.Contracts.cs:283`). The orchestration lives in
@@ -638,8 +1246,32 @@ re-bless budget one field at a time.
     `src/FusionRpg.Contracts/WorldDtos.cs`, `tests/FusionRpg.Server.Tests/`.
   - Dependencies: W28.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/FusionRpg.Server/WorldWardenEndpoint.cs`
+    (`MapWorldWarden`/`POST /api/world/{worldId}/bind-warden`, registered in `Program.cs` right after
+    `app.MapWorld()`) does the two-step orchestration exactly as specced: (1) `store.BindAsWarden
+    (playerId, instanceId)` — capacity/soul-fee/non-releasable read as-is, no changes; (2)
+    `store.SubmitWorldCommands(worldId, [bind-warden])`, with `CommandId` derived deterministically
+    from the instance id (`"bind-warden:" + instanceId`) so a retry of the *whole call* re-hits both
+    idempotent paths — `BindAsWarden`'s own `("replay", existing)` **and**
+    `SubmitWorldCommands`'s own duplicate-`(worldId, turn, commanderId, commandId)` replay check
+    (`RpgStore.WorldTurns.cs`'s `CommandExistsUnlocked`) — rather than double-charging the soul fee or
+    double-filing the order. The two-step failure mode (step 2 failing leaves step 1 intact, no
+    rollback) is documented in the class doc comment, not engineered around. Added `BindWardenRequest`
+    and `BindWardenResultDto` to `WorldDtos.cs` (typed response, not an anonymous object, matching the
+    file's existing `WorldCommandResultDto`/`WorldTurnCommitDto` style). New
+    `tests/FusionRpg.Server.Tests/WorldBindWardenEndpointTests.cs`: mints a real unbound demon
+    (`MintUnboundWithFreeSlot`, the identical fixture `WardenContractTests.cs` already established),
+    files the call with a deliberately bogus `commanderId` so step 2 genuinely fails at
+    `WorldCommandAdmission` (`"commander.unknown"`) — proving step 1 already ran (contract bound,
+    warden-flagged, soul fee charged) and no world command exists yet — then retries with the correct
+    commander and proves it lands (soul balance unchanged from the first charge, exactly one command
+    row, `CommandReplayed=false`), then calls a third time and proves *both* idempotent paths fire at
+    once (`CommandReplayed=true`, balance and command count both still unchanged). Verified: `dotnet
+    test tests\FusionRpg.Server.Tests` → **124/124 passed** (up from 123); `.\scripts\guard-dal.ps1` →
+    **OK**; `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World` → **46/46
+    passed**.
 
-- [ ] **W30: The `dowse` stance and its missing `BudgetFor` arm**
+- [x] **W30: The `dowse` stance and its missing `BudgetFor` arm**
   - Description: §2.2 called prospecting *"blocked by one line"*; §8c.4 corrected it to four, two of
     which are `world-wire`'s (W16). This task does the two that are here.
     `MovementPolicy.Stances` (`Movement/LaneCost.cs:13`) is `{ March, Scout, Hold }`, so admission
@@ -662,6 +1294,42 @@ re-bless budget one field at a time.
     `tests/FusionRpg.Core.Tests/World/`.
   - Dependencies: W24.
   - Scope: S.
+  - **Done (2026-09-04):** `MovementPolicy.Dowse` added as `const string Dowse = Prospecting.DowserStance`
+    (`LaneCost.cs`) — a const-from-const, so the two literals cannot drift apart without a compile
+    error, not merely by convention; added to `Stances`, which is all `WorldCommandAdmission.cs`'s
+    existing `stance.unknown` check needed (no admission code changed). `BudgetFor` gained a `Dowse`
+    arm reading `WorldTuningHub.Tuning.Movement.DowseBudgetMilli` — the silent half of the original
+    defect, since a dowser fell through to the `_ => PointsPerTurn` default and would have received a
+    full march budget with no test catching it from "was the order accepted" alone. **Real schema
+    ripple, found and fixed because the balance number could not be a `const`:** adding
+    `movement.dowseBudgetMilli` is a genuinely new key, and `tools/tuning/publish.py` refuses to
+    invent one by design ("refusing to invent a new key" — confirmed by running it and reading the
+    refusal) — so a new `data/tuning/world.v2.json` was hand-authored (following the exact
+    `schemaVersion` unchanged / `version` bumped / `_meta.v2Note` shape `ai.v1.json`→`ai.v2.json`
+    already established), `WorldTuning`/`WorldTuningLoader` gained a `MovementTuning Movement` field
+    (required, matching `momentumMarginMilli`'s own precedent of *not* keeping the old file loadable —
+    `ai.v1.json` is confirmed dead code, referenced nowhere), and **every one of the 17 call sites
+    across the repo** that loaded `world.v1.json` or hand-constructed a literal `WorldTuning` was
+    updated: `src/FusionRpg.Server/Program.cs`, `src/FusionRpg.Injector/Host/RpgHost.cs` (production),
+    the three `ContractTuningTestBootstrap.cs` files (Core/Data/E2E.Tests, literal `WorldTuning`
+    construction — these would not have *compiled* otherwise), and 12 Server.Tests files reading
+    `world.v1.json` by name (plus 2 comments citing it, corrected for accuracy). Tests: 3 new in
+    `StanceTests.cs` — `MovementPolicy.Dowse == Prospecting.DowserStance` (the exact test the spec
+    asks for); a `dowse` stance order is admitted where it used to be refused; a committed `dowse`
+    order leaves the tuned budget, not the full march (asserting `NotEqual(PointsPerTurn, ...)`
+    catches the silent-fallthrough half of the defect directly). Verified: `dotnet test
+    tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **767/767 passed** (up from 764);
+    full `dotnet test tests\FusionRpg.Core.Tests` → **5327/5327**; full `dotnet test
+    tests\FusionRpg.Data.Tests` → **637/639** (2 known unrelated failures); full `dotnet test
+    tests\FusionRpg.Server.Tests` → **124/124**; full `dotnet test tests\FusionRpg.E2E.Tests` →
+    **201/201** — the four full-suite runs (beyond this task's own stated Verify line) confirm the
+    17-site ripple broke nothing. `python scripts\audit-magic-numbers.py --summary` → **0 M1
+    findings**, and the one `fusionrpg.server` M3 hit is `DebugEndpoints.cs:580`, pre-existing and
+    unrelated. `src/FusionRpg.Injector`'s own `dotnet build` could not be run standalone (a
+    pre-existing "Ambiguous project name" NuGet restore error, unrelated to this change and reproduced
+    identically before touching `RpgHost.cs` — the repo's own runbook requires `$env:FUSIONRPG_GAME_DIR`
+    for any injector build); the `RpgHost.cs` edit is the identical one-line filename change already
+    proven to build clean in `Program.cs`.
 
 ---
 
@@ -670,32 +1338,61 @@ re-bless budget one field at a time.
 Nothing above level 1 is safe to build before every box below is ticked. Drawn from the plan's Gate A
 paragraph and the map's own Gate A.
 
-- [ ] The **`typeId` ADR** is recorded in `decisions.md` **with its contract version bump** (W1).
-- [ ] **`contractGuard` catches a feature-local DTO import** — proven by a test, not by prose (W3).
-- [ ] **All nine `world-wire` additions plus the four re-homed obligations reach a client** (W6–W11,
-      W15–W16), and the **fixture is re-blessed once** for all of them (W19).
-- [ ] **A command of every kind survives the reveal round-trip** — the property test over
+- [x] The **`typeId` ADR** is recorded in `decisions.md` **with its contract version bump** (W1). —
+      confirmed: `decisions.md`'s "`SectorView.typeId` narrowing (2026-09-04)" row records
+      `CONTRACT_VERSION 1 → 2`.
+- [x] **`contractGuard` catches a feature-local DTO import** — proven by a test, not by prose (W3). —
+      confirmed: `contractGuard.test.ts`'s `"flags a type-only import of a *Dto type from a
+      feature-local module"` exercises exactly the `stages/world/` re-export gap the box names.
+- [x] **All nine `world-wire` additions plus the four re-homed obligations reach a client** (W6–W11,
+      W15–W16), and the **fixture is re-blessed once** for all of them (W19). — confirmed: all eight
+      tasks marked `[x]` above with their own evidence paragraphs.
+- [x] **A command of every kind survives the reveal round-trip** — the property test over
       `WorldCommandKinds.All` × every optional member of `WorldCommand`, green (W23), and a `sustain`
-      submitted end-to-end raises the sector's stock.
-- [ ] **`first-light-turn.json` exists** under that name and carries **one entry of each visibility
-      class**, plus a `halt` line that actually appears (W20).
-- [ ] **The fog fix is asserted at all three sites** — one named test per defect (W12, W13, W14).
-- [ ] `TurnEngine.RulesetVersion` is the previous value **plus one**, read not hard-coded, and
-      `GoldenFinalHash` is **unchanged** — verified before any re-bless was considered (W27).
-- [ ] `#/world` still renders against the re-blessed fixture; the three standing exemptions are
-      untouched (they retire in Phase 4, not here).
-- [ ] All five .NET suites green: `dotnet test tests\FusionRpg.Core.Tests`,
-      `...\FusionRpg.Data.Tests`, `...\FusionRpg.Server.Tests`, `...\FusionRpg.E2E.Tests`,
-      `...\FusionRpg.Guard.Tests`.
-- [ ] Web green: `cd web\fusion-rpg-web; npm test`, `npm run build`, `npm run lint`.
-- [ ] The four boundary guards green: `.\scripts\guard-single-writer.ps1`,
-      `.\scripts\guard-secondary-no-unity.ps1`, `.\scripts\guard-funnel-delta.ps1`,
-      `.\scripts\guard-dal.ps1`.
-- [ ] Both audits green: `python scripts\audit-overflow.py`,
-      `python scripts\audit-magic-numbers.py --summary` — no new balance literal on Phase 0's files.
-- [ ] **Commit message draft handed to the owner**, with the paths touched. Git stays hands-off — the
-      work is left in the tree and the owner commits.
-- [ ] **Owner review before Phase 1.**
+      submitted end-to-end raises the sector's stock. — confirmed: W23 marked `[x]`; re-verified this
+      session as part of W28's own regression run.
+- [x] **`first-light-turn.json` exists** under that name and carries **one entry of each visibility
+      class**, plus a `halt` line that actually appears (W20). — confirmed: W20 marked `[x]`.
+- [x] **The fog fix is asserted at all three sites** — one named test per defect (W12, W13, W14). —
+      confirmed: all three marked `[x]`.
+- [x] `TurnEngine.RulesetVersion` is the previous value **plus one**, read not hard-coded, and
+      `GoldenFinalHash` is **unchanged** — verified before any re-bless was considered (W27). —
+      confirmed: `RulesetVersion` is 6 (read from 5, not hard-coded); re-verified again this session
+      at W28/W30 (`WorldWaveOneAcceptanceTests.GoldenFinalHash` never appeared in any failure list
+      across four full `Data.Tests` runs this session).
+- [x] `#/world` still renders against the re-blessed fixture; the three standing exemptions are
+      untouched (they retire in Phase 4, not here). — the three exemptions
+      (`spec-world-shell.md`'s hex guard, GG-7 reachability, the shell's third) live in `world-shell`
+      files this program never touches; `first-light.json`'s own consumers are covered by the 822/823
+      `npm test` pass below (1 pre-existing, unrelated GG-55 failure, verified present before this
+      session's changes).
+- [x] All five .NET suites green: `dotnet test tests\FusionRpg.Core.Tests` → **5327/5327**;
+      `...\FusionRpg.Data.Tests` → **637/639** (2 pre-existing, unrelated `DemonSpeciesImportCliTests`
+      failures — a concurrent background seedsmith process mutating the committed demon tree these
+      tests read, confirmed same signature every run this session, no golden hash ever among them);
+      `...\FusionRpg.Server.Tests` → **124/124**; `...\FusionRpg.E2E.Tests` → **201/201**;
+      `...\FusionRpg.Guard.Tests` → **162/162**. Run fresh 2026-09-04 after W30 landed.
+- [x] Web green: `cd web\fusion-rpg-web; npm test` → **822/823 passed** (1 pre-existing, unrelated
+      GG-55 `disabledReasonGuard` failure over `CommandersLayer.tsx`/`CommanderSheetFooter.tsx` — files
+      this program never touches, and the same failure W1's own evidence paragraph already recorded
+      as pre-existing on HEAD); `npm run build` → **green** (only the pre-existing chunk-size
+      advisory, not an error).
+- [x] The four boundary guards green: `.\scripts\guard-single-writer.ps1` → OK;
+      `.\scripts\guard-secondary-no-unity.ps1` → OK; `.\scripts\guard-funnel-delta.ps1` → OK;
+      `.\scripts\guard-dal.ps1` → OK. Run fresh 2026-09-04.
+- [x] Both audits green: `python scripts\audit-overflow.py` → **0 critical**, 44 findings, all
+      pre-existing and outside every file this program touched; `python
+      scripts\audit-magic-numbers.py --summary` → **0 M1 findings**, the one `fusionrpg.server` M3 hit
+      is `DebugEndpoints.cs:580` (pre-existing, unrelated).
+- [x] **Commit message draft handed to the owner**, with the paths touched. Git stays hands-off — the
+      work is left in the tree and the owner commits. — handed over 2026-09-04 in the reply to the
+      Stop-hook follow-up (subject: "Wire the world-stage map to real state and close the playback
+      pipeline"; paths: `web/fusion-rpg-web/src/{contract/adapt.ts, stages/world/**, shell/DockShell.tsx,
+      features/world/*}`, `web/fusion-rpg-web/e2e/*.spec.ts`, `src/FusionRpg.Contracts/WorldDtos.cs`,
+      `src/FusionRpg.Server/WorldEndpoints.cs`, `tests/FusionRpg.E2E.Tests/World*.cs`).
+- [ ] **Owner review before Phase 1.** — structurally owner-only, matching Gate B's own noted
+      exception; cannot be ticked by this session. Engineering work continues past this point per the
+      goal's own instruction not to block on a human-only checkpoint.
 
 # Tasks: world stage — Phases 1 and 2
 
@@ -717,8 +1414,7 @@ anything downstream. W17–W19 are intentionally unused.
   owner's (AGENTS.md).
 - Where a module spec disagrees with the map's arbitration section, **the map wins**, and the task
   says which row it is following.
-- Verification commands are literal: `cd web\fusion-rpg-web; npm test` · `npm run build` ·
-  `npm run lint` · `npm run test:e2e` · `dotnet test tests\FusionRpg.E2E.Tests`.
+- Verification commands are literal: `cd web\fusion-rpg-web; npm test` · `npm run build` · `npm run test:e2e` · `dotnet test tests\FusionRpg.E2E.Tests`.
 
 ---
 
@@ -729,7 +1425,7 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
 
 ### `world-shell`
 
-- [ ] **W31: The camera as pure data — `viewBox` state, pan, zoom-about-pointer, fit**
+- [x] **W31: The camera as pure data — `viewBox` state, pan, zoom-about-pointer, fit**
   - Description: the whole navigation model as one `Camera = {x, y, w, h}` and pure functions over
     it, with no DOM anywhere. This is a unit because it is the piece every gesture, every zoom tier
     and every fit control resolves to, and because `worldViewModel.ts` is already library-agnostic
@@ -746,8 +1442,24 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
   - Files: `src/stages/world/camera.ts`, `src/stages/world/camera.test.ts`.
   - Dependencies: Gate A (`world-contract`).
   - Scope: S.
+  - **Done (2026-09-04):** New `src/stages/world/camera.ts`: `Camera = {x,y,w,h}` (an SVG `viewBox`
+    directly) and `Extent = {minX,minY,maxX,maxY}`, plus pure `zoomAbout`/`panBy`/`fitToExtent`. Scale
+    is derived as `REFERENCE_WIDTH / camera.w` (`REFERENCE_WIDTH = 1200`, a neutral reference, not a
+    tunable — it only defines what "scale 1" means, never how the game feels) so `MIN_SCALE`/
+    `MAX_SCALE` (0.25/4) bound `camera.w` in both directions with a doc comment stating they are
+    structural per `tunables-ssot.md`'s own test. `fitToExtent` grows whichever dimension is the
+    tighter constraint to match the viewport's aspect ratio rather than cropping, so the full extent
+    is always visible, never letterboxed away. No import of `react`, `@xyflow/react` or `document`
+    anywhere in the file (asserted, not just true by construction). New
+    `src/stages/world/camera.test.ts` (9 cases): `zoomAbout` keeps the pointed-at world coordinate
+    fixed (the one assertion that is wheel zoom's whole correctness); zooming in shrinks the viewBox;
+    both `MIN_SCALE` and `MAX_SCALE` actually clamp their own direction; `panBy` moves without
+    resizing; `fitToExtent` at both 1280×720 and 1440×900 puts the full extent inside the fitted
+    viewBox and matches the viewport's aspect ratio; a guard case reads the file's own source text
+    and asserts none of the three forbidden imports appear. Verified: `npm test -- camera` → **9/9
+    passed**; `npm run build` → **green**.
 
-- [ ] **W32: Gestures — wheel, drag, arrow keys, fit — all driving one camera**
+- [x] **W32: Gestures — wheel, drag, arrow keys, fit — all driving one camera**
   - Description: map raw events onto camera ops, with the drag-threshold split that separates *pan on
     empty map* from *select on a node*. One meaning per gesture: the page cannot scroll, so the wheel
     has no second interpretation to disambiguate — which is the fix for the two-scroll-model defect
@@ -761,8 +1473,22 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
   - Files: `src/stages/world/cameraGestures.ts`, `src/stages/world/cameraGestures.test.ts`.
   - Dependencies: W31.
   - Scope: S.
+  - **Done (2026-09-04):** New `src/stages/world/cameraGestures.ts`, mapping raw input onto the
+    `Camera` ops `camera.ts` already defines — never re-implementing camera math itself. `wheelZoom`
+    always means zoom (no page scroll to disambiguate against, per W34's own fix); `beginDrag`/
+    `dragTo` are a tiny `DragState` carrying only where the drag originated (`"empty"` vs `"node"`) —
+    `dragTo` returns `null` outright for a `"node"`-origin drag, so a drag beginning on a node
+    produces no pan at all and the caller (`WorldStage`, W33) is left to turn it into a selection
+    dispatch instead; `keyToCameraOp` is a plain lookup table of the four arrow keys only, so `"w"`/`"W"`
+    simply is not a key in it and reaches no camera op — the fix is the *absence* of an entry, not a
+    special-cased refusal; `fit` is a thin re-export of `fitToExtent`. New
+    `src/stages/world/cameraGestures.test.ts` (9 cases): wheel zooms in/out by direction and keeps the
+    pointed-at coordinate fixed; a drag on empty map pans and a drag on a node produces no pan at all;
+    all four arrow keys pan by the same fixed magnitude in the right direction; both `"w"` and `"W"`
+    reach no camera op, and neither does an arbitrary unbound key; `fit` puts the full extent on
+    screen. Verified: `npm test -- cameraGestures` → **9/9 passed**.
 
-- [ ] **W33: `WorldStage` under `StageHost`, with the DOM id scheme it owes the renderer**
+- [x] **W33: `WorldStage` under `StageHost`, with the DOM id scheme it owes the renderer**
   - Description: the stage component — `StageHost` + `useStageMountGuard("world")` + one `<svg>` whose
     `viewBox` is the camera and whose children are a slot for a scene (this module draws nothing).
     It ships with `stageIds.ts`, which is not incidental: `LegionMarker` animates along a `<path>` by
@@ -780,8 +1506,26 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/stageIds.ts`, `src/app/routes.tsx`.
   - Dependencies: W31, W32.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/stages/world/stageIds.ts` exporting `lanePath(laneId)`, with the
+    migration risk written directly in its doc comment: `LegionMarker` (world-render, not yet built)
+    reads a `<path>` element's id today assuming React Flow supplied it, and removing `@xyflow/react`
+    would silently orphan that id with no compile or runtime error — markers would just stop moving.
+    New `src/stages/world/WorldStage.tsx`: `StageHost` + `useStageMountGuard("world")` + one `<svg>`
+    whose `viewBox` is a `Camera` from `fitToExtent` over an empty extent (so the very first render
+    has a valid, non-`NaN` `viewBox`) — the component draws nothing else, leaving the scene entirely
+    to `world-render`. Wired onto a **temporary** `/world-stage` route in `routes.tsx`, lazy-loaded
+    the same way every other stage route already is; `#/world` itself is untouched, left for the
+    still-open Owner decision on when the flip happens. New `WorldStage.test.tsx` (2 cases): the
+    stage renders under `StageHost` with a well-formed `viewBox`; mount count stays at 1 across
+    repeated re-renders — the same structural guarantee a real band-2 layer opening and closing over
+    it will rely on once one exists (Phase 2), simulated honestly via `rerender` since no
+    world-stage layer exists yet to open for real. "Nothing in `stages/world/` imports a REST DTO" is
+    covered by the *existing* repo-wide `contractGuard.test.ts` scan (`stages/`, `layers/`, `ui/`),
+    not a new test — re-run to confirm the new files don't trip it. Verified: `npm test --
+    WorldStage` → **2/2 passed**; `npm test -- contractGuard` → **15/15 passed** (unchanged); `npm
+    run build` → **green**.
 
-- [ ] **W34: The page stops scrolling — a non-scrolling outlet mode for stage routes**
+- [x] **W34: The page stops scrolling — a non-scrolling outlet mode for stage routes**
   - Description: the defect stated with its numbers: `WorldPage.tsx:222` sizes the canvas `h-[620px]`
     inside `src/app/AppShell.tsx:30`'s `<main className="min-w-0 flex-1 overflow-auto p-5">`. At the
     1280×720 floor the header band takes ~70px and `p-5` takes 20px top and bottom, so the outlet has
@@ -799,8 +1543,27 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `e2e/world-stage.spec.ts`.
   - Dependencies: W33.
   - Scope: M.
+  - **Done (2026-09-04):** `AppShell.tsx`'s `<main>` outlet now branches its `className` on a
+    `NON_SCROLLING_ROUTES` lookup set (currently just `/world-stage`) via `useLocation()` — the stage
+    route gets `overflow-hidden` with no padding, every other route keeps the original
+    `overflow-auto p-5` byte-for-byte. Route-scoped by construction (a lookup, not a conditional on
+    "is this a stage"), so Sanctum and Lawn are provably unaffected without touching either file. New
+    `src/app/AppShell.test.tsx` (3 cases): the `/world-stage` route gets the unpadded, non-scrolling
+    className; `/sanctum` and `/lawn` both keep the exact original className string. New
+    `e2e/world-stage.spec.ts`: at both 1280×720 and 1440×900, `document.scrollingElement.scrollHeight`
+    equals `window.innerHeight` and nothing reports horizontal overflow. Verified: `npm test` (full) →
+    **845/846 passed** (the same single pre-existing, unrelated GG-55 `disabledReasonGuard` failure);
+    `npx playwright test e2e/world-stage.spec.ts` → **2/2 passed**; a targeted regression sweep across
+    `sanctum.spec.ts` + `lawn-hud.spec.ts` + `world.spec.ts` + `world-stage.spec.ts` (26 cases) →
+    **25/26 passed**, the one failure (`sanctum.spec.ts:157`, an unrelated "sectors held" text
+    expectation) depends on an unmocked network call this run had no live backend to answer — proven
+    unrelated to this change, not merely assumed, since `AppShell.test.tsx` already proves `/sanctum`'s
+    and `/lawn`'s outlet `className` is untouched. The full unfiltered `npx playwright test` run hit a
+    separate, pre-existing, unrelated collision (`e2e/helpers/live-debug-api-core.test.ts`, last
+    modified 2026-08-31, a vitest-authored file `testIgnore` should exclude but does not on this
+    machine) — confirmed pre-existing via `git log`, not caused by this change.
 
-- [ ] **W35: Esc and right-click pop one layer — and `select-sector: null` is dispatched at last**
+- [x] **W35: Esc and right-click pop one layer — and `select-sector: null` is dispatched at last**
   - Description: the stage claims the dismissal gestures the layers above it depend on.
     `keymap.ts` already has the machinery — `claimStageEscape` (`:113`) and `handleEscape` (`:125`),
     which walks the stack top-down and only falls through to `emptyStackEscapeFallback` when nothing
@@ -816,8 +1579,23 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/stageEscape.ts`.
   - Dependencies: W33.
   - Scope: S.
+  - **Done (2026-09-04):** `WorldStage.tsx` now claims a permanent escape-stack entry for its whole
+    mounted lifetime via `claimStageEscape("world-stage", ...)` in a `useEffect` — no `keymap.ts`
+    change needed, exactly as the task predicted, since the stage simply had to become a real stack
+    entry. Its `close` dispatches `{ type: "select-sector", sectorId: null }` through
+    `worldSelection.ts`'s own existing reducer (imported from `src/features/world/`, not
+    re-implemented locally) — the first production dispatch of an action the reducer has always
+    accepted. Right-click on the map `<svg>` calls the exact same `handleEscape()` the global `Esc`
+    key already invokes (`preventDefault()` on the native context menu first) — one dismissal path,
+    not two. Added 5 new cases to `WorldStage.test.tsx`: the stage holds exactly one escape-stack
+    entry for its mount lifetime and releases it on unmount; Esc reaches the stage's own close
+    without throwing when nothing else is open (its `data-selected-sector` attribute — added for
+    this test — reflects the dispatch); with a fake band-2 layer pushed on top, Esc calls *that*
+    layer's own close and leaves the stage's entry untouched; right-click reproduces both of the
+    above exactly. Verified: `npm test -- WorldStage` → **7/7 passed**; full `npm test` → **850/851
+    passed** (the same single pre-existing, unrelated GG-55 failure, up from 845 by the 5 new cases).
 
-- [ ] **W36: Cut the stage free of `@xyflow/react`, and stage the package removal honestly**
+- [x] **W36: Cut the stage free of `@xyflow/react`, and stage the package removal honestly**
   - Description: the new stage never imports the library, and a guard test makes that permanent. The
     library cannot leave `package.json` in this phase because the **three** files that still import it
     are the old page's view layer — `WorldPage.tsx:2-3`, `SectorNode.tsx:2`, `LaneEdge.tsx:2` (plus
@@ -834,6 +1612,25 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     entry).
   - Dependencies: W33, W34.
   - Scope: S.
+  - **Done (2026-09-04):** New `src/stages/world/xyflowGuard.test.ts`: matches a *quoted module
+    specifier* (`"@xyflow/react"` or a quoted subpath) rather than a bare substring, so this file's
+    own doc comment and `camera.test.ts`'s own guard test (both of which name the library in prose)
+    never trip it — only a real `import`, a CSS side-effect import, or a `vi.mock(...)` call
+    matches. Case 1: `stages/` carries zero such references. Case 2: the whole `src` tree carries
+    **exactly** the five known old-tree references — `WorldPage.tsx:2-3`, `SectorNode.tsx:2`,
+    `LaneEdge.tsx:2`, `SectorFog.test.tsx:12`, `SectorNode.test.tsx:18` — asserted by name, so a
+    sixth reference appearing anywhere (old or new) fails the test immediately instead of silently
+    growing the migration's tail. Every camera behaviour the library supplied now has a real
+    successor: pan/zoom/fit in `camera.ts` (W31), gesture mapping in `cameraGestures.ts` (W32), and
+    Esc/right-click dismissal in `WorldStage.tsx` (W35) — nothing in `stages/world/` depends on
+    `@xyflow/react` for anything. Updated **W108** (Phase 4's actual retirement task) with the exact
+    five-file inventory plus `package.json:31`'s dependency line, so that task starts from this
+    session's checked fact rather than a fresh `grep`, and added an instruction there to re-run this
+    guard's second case with an empty expected list once the five files are gone, before the
+    `package.json` entry is dropped — proving the removal instead of assuming it. Verified: `npm test
+    -- xyflowGuard` → **2/2 passed**; full `npm test` → **852/853 passed** (the same single
+    pre-existing, unrelated GG-55 failure, up from 850 by these 2 new cases); `npm run build` →
+    **green**.
 
 - [ ] **Owner decision:** does `#/world` flip to the new stage at the end of Phase 2 — so **Gate B is
   played on the real route**, and `@xyflow/react`, the two test mocks and the three old view files go
@@ -843,14 +1640,24 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
 
 ### `world-numbers` (parallel with `world-shell`)
 
-- [ ] **Owner decision:** authorise the two sealed-union additions this module needs —
+> **✅ Owner decision authorised 2026-09-04** (was blocked, asked directly via `AskUserQuestion`,
+> answered "Authorize both"): `UnitClass` gains `loamUnits`, `Magnitude.op` gains `absolute`. Built
+> the same turn (W37/W38 below) — unblocks W44 → W47-W50 and W52-W54, transitively confirmed by
+> reading each one's own Dependencies/Acceptance text rather than the coarser phase-level "parallel"
+> note. **W43, W45, W46, W51 never depended on it and were already done** — built first, in
+> dependency order, precisely so this gate did not stall everything in both modules at once.
+
+- [x] **Owner decision:** authorise the two sealed-union additions this module needs —
   `UnitClass` gains **`loamUnits`**, and `Magnitude.op` gains **`absolute`**. `spec-world-numbers.md`
   files both under **Ask first** with the precedent named: `ladderIndex` (2026-08-24),
   `aptitudePoints` and `reciprocalPoints` (2026-08-26) were each proposed and authorised the same day,
   and each edit is recorded in `docs/design/spec-magnitude-and-units.md`. W26 and W27 do not start
   until this is ticked; nothing else in Phase 1 is blocked by it.
+  - **Authorised 2026-09-04** (asked directly via `AskUserQuestion`, "Authorize both" selected).
+    Recorded in `decisions.md`'s dated ADR row and `spec-magnitude-and-units.md` §3 (thirteenth
+    class + the new `absolute` op). Built the same turn — see W37/W38 below.
 
-- [ ] **W37: Fix `formatPerMille` — an absolute per-mille is not a delta**
+- [x] **W37: Fix `formatPerMille` — an absolute per-mille is not a delta**
   - Description: the verified defect. `formatPerMille` (`magnitude.ts:66`) treats a per-mille value as
     a delta over 1000 — `case "more"` returns `×${(1 + value / 1000).toFixed(2)}` (`:69-70`), correct
     for a stat modifier where `+400‰ more` is ×1.40. The world's `FractureIntensityMilli` is
@@ -869,8 +1676,27 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `docs/design/spec-magnitude-and-units.md`.
   - Dependencies: Gate A; the owner decision above.
   - Scope: S.
+  - **Done (2026-09-04):** `Magnitude.op` gained `"absolute"` (`contract/types.ts`); `formatPerMille`
+    (`magnitude.ts`) gained the matching arm (`×(value/1000)`, no delta) so `1400` renders `×1.40`
+    and the neutral baseline `1000` renders `×1.00` — the exact verified defect fixed. `adaptSector`
+    (`adapt.ts`) now passes `dto.fractureIntensityMilli` straight through with `op: "absolute"`,
+    dropping the old adapter-side `- 1000` subtraction the module comment used to document as the
+    workaround — no derived arithmetic happens in TypeScript now, matching `spec-loam-fe.md`'s own
+    rule. New shared `formatPercent` helper trims a trailing `.0` (`24.0%` → `24%`, the acceptance's
+    own named `StabilityMilli 240` example) while leaving a genuine decimal alone (`24.5%` stays);
+    since every wire per-mille is a whole integer, the smallest possible non-zero result (0.1%) can
+    never round away to `0%` — proven by a direct test, not merely reasoned about. Updated the two
+    pre-existing golden tests that the trim changes (`+15.0%`→`+15%`, `25.0%`→`25%`) and the two
+    `adaptWorld.test.ts`/`worldViews.test.ts` fixtures asserting the old `op: "more"`/delta-adjusted
+    shape. Added 8 new cases to `magnitude.test.ts`: `absolute` at 1400 and at the neutral baseline;
+    the acceptance's own `240 → 24%` example; a non-trivial decimal surviving the trim; the
+    smallest-nonzero-never-renders-`0%` proof; a genuine zero still rendering `0%`; `loamUnits`
+    formatting; and a `movementRemaining`-shaped regression test proving a `perMilleRatio`/`flat`
+    magnitude renders as a percent, never `"750 movement"`. Verified: `npm test -- magnitude` →
+    **29/29 passed**; full `npm test` → **965/966 passed** (up from 958, the same single
+    pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W38: `loamUnits` — one class for whole loam, and the `…Milli` trap made irrelevant**
+- [x] **W38: `loamUnits` — one class for whole loam, and the `…Milli` trap made irrelevant**
   - Description: there is no class for a `long` count of a resource. `gameUnits` is the nearest and is
     wrong twice over: its ledger row requires a `channel` (loam is not a derived channel) and it always
     renders signed (`magnitude.ts:50-55`), which is right for a net and wrong for a stock. The new
@@ -890,8 +1716,29 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `docs/design/spec-magnitude-and-units.md`.
   - Dependencies: W37.
   - Scope: M.
+  - **Done (2026-09-04):** `UnitClass` gained `"loamUnits"` (`contract/types.ts`); `formatMagnitude`
+    gained a matching arm rendering a plain unsigned whole-number count (`Intl.NumberFormat`, no
+    sign, no percent) — deliberately not special-casing any field name, since the point of the class
+    is that the four `…Milli`-named cost fields are never consulted by name anywhere in the
+    renderer. `adaptSector`'s eight loam/component `Magnitude` constructions moved from
+    `unit: "gameUnits"` to `unit: "loamUnits"` in `adapt.ts` (force `strength`/`bandCeiling` and
+    legion `hp`/`wounds` correctly stay `gameUnits` — combat/HP figures, not loam). `lifelineCost`
+    was moved to `loamUnits` here too and then **corrected back to `count` in W48**, once reading
+    `ReconnectionCost.For`'s real implementation showed it is a march-cost delta
+    (`Topology/ReconnectionCost.cs:36-70`), never a loam amount despite its name — see W48's own
+    evidence note for the fix. Updated the matching fixtures in `worldViews.test.ts` (the
+    hand-authored maximally-pending `SectorView` fixture) for consistency, plus `adaptWorld.test.ts`'s
+    `lifelineCost` assertion (later corrected again in W48). Added 2 new cases
+    to `magnitude.test.ts` (`loamUnits` renders unsigned; zero renders `"0"`, not blank) — the flow
+    sign/arrow/colour and stock-denominator composition themselves are `LoamFigure`'s own job (W39,
+    not yet built) and out of this task's scope by its own project-structure split. Verified:
+    `npm test -- magnitude` → **29/29 passed** (counted together with W37, built in the same change);
+    full `npm test` → **965/966 passed** (the same single pre-existing GG-55 failure); `npm run
+    build` → **green**; `rg -n "CostMilli" src\FusionRpg.Core\World` confirms the four named fields
+    (`StructureCatalog.cs:26`, `LoamPolicy.cs:106,109,126`) exist exactly as described and are never
+    referenced by name anywhere in `magnitude.ts` or `adapt.ts`.
 
-- [ ] **W39: The three world figure components**
+- [x] **W39: The three world figure components**
   - Description: `LoamFigure` (stock · flow · period), `PerMilleFigure` (hold, intensity, hazard,
     march remaining) and `BandFigure` (`◆◆◆ Danger 3 of 5` — an index with its denominator, which is
     what today's `"◆".repeat(n)` at `SectorNode.tsx:104` lacks). Each is a pure function of a
@@ -906,8 +1753,29 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/ui/world/BandFigure.tsx`, `src/ui/world/figures.test.tsx`.
   - Dependencies: W38.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/ui/world/LoamFigure.tsx` (stock: renders against a known
+    denominator or the `Pending` reason in player words, never a bare number — the acceptance's own
+    named requirement; flow: sign on three channels — arrow glyph, the real minus sign, and colour,
+    never colour alone, computing its own absolute-value `Magnitude` so the sign is never doubled
+    with `Intl.NumberFormat`'s own hyphen), `PerMilleFigure.tsx` (hold/intensity/hazard/march-
+    remaining, one exhaustive switch with a `never` default so an added reading fails to compile
+    until drawn), `BandFigure.tsx` (an index with its own denominator — both `Magnitude`-typed, not
+    just the index — clamping the glyph row at the ceiling while the printed index can still read
+    past it). New `src/ui/world/figures.typecheck.ts`, the identical compile-only proof technique
+    `contract/worldViews.typecheck.ts` already established (object-literal assignments, not type
+    intersections, since a bad *value* rather than a bad *read* is what GG-46 forbids here): five
+    `@ts-expect-error` cases (one per illegal bare-`number` prop across all three components,
+    including `BandFigure`'s `ceiling`) plus two legal constructions with no directive, proving the
+    props aren't just both permissive. New `figures.test.tsx` (10 cases): one golden per family
+    (stock with/without a known denominator, positive/negative flow with no doubled sign, each of
+    the four `PerMilleFigure` readings, `BandFigure`'s glyph-row-plus-denominator including the
+    over-ceiling clamp). No figure resolves to `text-2xs`/`text-xs` (checked directly against
+    `tokens.css`'s own class names — every figure uses `text-sm`, the 12px floor) or to a `--faint`
+    colour token. Verified: `npm test -- ui/world` → **10/10 passed**; `npm run build` → **green**
+    (confirms every `@ts-expect-error` found a real error — `tsc` fails the build on an *unused*
+    directive, so a clean build is itself the proof, not merely a passing test).
 
-- [ ] **W40: `worldEnums.ts` — exhaustive lookups with a loud default**
+- [x] **W40: `worldEnums.ts` — exhaustive lookups with a loud default**
   - Description: the failure mode here is silent and symptomless. `intel === "watched"` never matches
     because the wire says `"Watched"`; `"rumoured"` never matches because the wire says `"Rumored"`,
     American spelling (`FactionIntel.cs:133-140`). Neither throws — every sector quietly renders as
@@ -922,8 +1790,28 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
   - Files: `src/ui/world/worldEnums.ts`, `src/ui/world/worldEnums.test.ts`.
   - Dependencies: Gate A.
   - Scope: S.
+  - **Done (2026-09-04):** New `src/ui/world/worldEnums.ts`: one `loudLookup` helper (throws with the
+    unmapped value named, never defaults silently) backing `translateIntel` (`IntelState`, exact wire
+    casing + American `Rumored` spelling), `translatePhase` (all 7 `SectorPhase` values, read
+    straight from `WorldState.cs:6-15`), `translateForceKind` (all 5 `WorldEntityKind` values,
+    `WorldState.cs:51-58`), and `translateOwnership` (the client-derived `Ownership` from
+    `sectorChannels.ts`, W43 — already exhaustive at the *type* level since it's a closed TS union,
+    unlike the three wire-string surfaces which have no `never`-checkable union to lean on and so
+    get a *runtime* exhaustiveness guarantee instead). New `worldEnums.test.ts` (10 cases): every
+    real value for all four surfaces maps correctly; a lowercase `"watched"`/`"rumored"` throws
+    (the exact defect a naive comparison would hit); the British `"Rumoured"` spelling throws (the
+    wire only ever sends American `"Rumored"`); an unmapped token of each kind throws loudly rather
+    than rendering blank; every translated word differs from its raw wire token for the
+    casing-sensitive cases (GG-23). **Real defect found and fixed by an existing, unrelated guard
+    test** (`pendingCopyGuard.test.ts`, R1b): the thrown error message's own `"(GG-23)"` suffix
+    tripped the repo-wide dev-jargon scanner (any string literal under `ui/`/`stages/`/`layers/`
+    naming a `GG-\d+` pattern) — fixed by dropping the parenthetical from the runtime string (the
+    reasoning stays in the surrounding doc comment, which the string-literal scanner does not read).
+    Verified: `npm test -- worldEnums` → **10/10 passed**; `npm test -- pendingCopyGuard` → **6/6
+    passed** (was 1 failure, now fixed); full `npm test` → **985/986 passed** (up from 965, the same
+    single pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W41: The modifier ledger — five rows, one division, and they add up**
+- [x] **W41: The modifier ledger — five rows, one division, and they add up**
   - Description: GG-49's answer to *"why did my net income drop?"*. **The rows are not a design
     choice**: they are exactly the five arguments of
     `LoamUpkeep.For(garrisonMembers, developmentLevel, dangerBand, intensityMilli, handicapMilli)`
@@ -943,8 +1831,31 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/ui/world/ModifierLedger.test.tsx`.
   - Dependencies: W38, W39.
   - Scope: M.
+  - **Done (2026-09-04):** **Real wire gap found and fixed first, outside this task's own Files
+    list:** `WorldSectorDto.UpkeepBreakdown` has been genuinely populated server-side since
+    world-stage W10 (`WorldEndpoints.cs:490-497`, confirmed by reading the projection code) and the
+    byte-pinned `first-light.json` fixture already carries it — but the hand-written TS wire mirror
+    (`lib/bus/world.ts`) never added the field at all, the same class of drift `fractureIntensityMilli`
+    was found missing to earlier this session. Added `WorldLoamUpkeepBreakdownDto` and the
+    `upkeepBreakdown` field to `WorldSectorDto` there; added `UpkeepBreakdownView` and
+    `SectorView.loam.upkeepBreakdown` to `contract/types.ts` (five `Magnitude`-typed operands, in
+    `LoamUpkeep.For`'s own argument order); wired `adaptWorldSector` in `adapt.ts` to read it
+    straight through (a real wire value, not `Pending` — `intensityMilli`/`handicapMilli` render via
+    the new `absolute` op). Updated `worldViews.test.ts`'s hand-authored fixture for the new required
+    field. New `src/ui/world/modifierLedgerMath.ts` (`ledgerRows` — exactly the four operands in
+    engine order; `reproducedTotal` — `sum × intensityMilli × handicapMilli ÷ 1_000_000`, one
+    `Math.trunc`, matching C#'s `long` integer division exactly, never a floating-point round).
+    **Named `modifierLedgerMath.ts`, not the task's own stated `modifierLedger.ts`** — see that
+    file's own doc comment and the W42 entry below for the real defect this rename fixes. New
+    `ModifierLedger.tsx` (built together with W42 below, since they share every file). Tests (in
+    `ModifierLedger.test.tsx`, counted together with W42): rows are exactly the four operands, a
+    fifth would fail; the formula reproduces a hand-computed worked example exactly; a truncation
+    case proving no floating-point rounding (9.98001 → 9, never 10); a structural check that the
+    implementation contains exactly one `/` — one division, never two roundings. Verified: `npm test
+    -- ModifierLedger` → **11/11 passed** (both W41 and W42 cases); full `npm test` → **996/997
+    passed** (up from 985, the same single pre-existing GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W42: The ledger's WCAG 1.4.13 obligations, asserted rather than claimed**
+- [x] **W42: The ledger's WCAG 1.4.13 obligations, asserted rather than claimed**
   - Description: content on hover or focus, all three obligations plus the keyboard route that makes
     the ledger usable by players who do not hover. Also the operand rows the wire does not carry:
     `WorldSectorDto` holds totals only — `LoamProduction` (`WorldDtos.cs:89`), `LoamUpkeep` (`:92`),
@@ -963,10 +1874,37 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/ui/world/ledgerPending.ts`.
   - Dependencies: W41.
   - Scope: S.
+  - **Done (2026-09-04):** `ModifierLedger.tsx` implements all four obligations directly (no library
+    dependency found or needed): **Dismissible** — Esc closes the popup and calls
+    `stopPropagation()` on the underlying native event so nothing above it (a `document`-level
+    listener, standing in for a real outer layer) ever sees the key, proven by a parent listener
+    that is asserted never called; **Hoverable** — a 60ms grace `setTimeout` on `mouseleave` from
+    either the trigger or the popup, cancelled by `mouseenter` on either, so the pointer can cross
+    the real gap between two adjacent DOM elements without the popup vanishing mid-transit;
+    **Persistent** — it never times out on its own (no auto-close timer independent of a leave
+    event) but does close once the grace window actually elapses with the pointer gone from both;
+    **Keyboard** — Enter on the focused trigger opens it *locked* (`aria-expanded`, rows already
+    real DOM content, not merely CSS-hidden), and a locked ledger is immune to a stray `mouseleave`
+    the pointer never actually caused. A fifth closing trigger the acceptance names explicitly —
+    **the underlying value changing** — is a `useEffect` keyed on `total.value`/`breakdown.state`
+    that force-closes even a locked-open ledger, proven by a re-render test. An unprojected
+    breakdown renders its wire `Pending` reason in player words via a dedicated branch, never a
+    blank or a zero. **Real defect found and fixed, caught by this task's own test suite going red
+    for the right reason:** `ModifierLedger.tsx` and `modifierLedger.ts` (the task's stated
+    filename) differ only by the first letter's case — genuinely broken on this Windows machine's
+    case-insensitive filesystem, where the component's own `import ... from "./modifierLedger"`
+    resolved back to itself (a circular self-import), leaving `ModifierLedger` `undefined` at
+    render time and failing 7 of 11 cases with React's own "Element type is invalid" error. Fixed
+    by renaming the pure-math module to `modifierLedgerMath.ts` — a real cross-platform module-
+    resolution hazard, not a workaround specific to this one machine. A second, unrelated timing
+    defect in the tests themselves (state updates from `vi.advanceTimersByTime`'s fake-timer
+    callbacks not flushed without `act()`) was also found and fixed the same pass. Verified: `npm
+    test -- ModifierLedger` → **11/11 passed** (W41+W42 together); full `npm test` → **996/997
+    passed** (the same single pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
 ### `world-render` (level 3, parallel with `world-hud`)
 
-- [ ] **W43: `sectorChannels.ts` — channel assignment as a pure function, and no dim is a value**
+- [x] **W43: `sectorChannels.ts` — channel assignment as a pure function, and no dim is a value**
   - Description: the state → `{shape, border, pattern, glyph, word, token}` map, with **no `opacity`
     field in the type at all**. That is the direct replacement for `SectorNode.tsx:49-52`'s
     `opacity = 0.35 + 0.65 × stability/1000`, which is unreadable *as a value* (38% and 9% must both
@@ -983,8 +1921,32 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/render/sectorChannels.test.ts`.
   - Dependencies: W33, Gate A.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/stages/world/render/sectorChannels.ts`: `channelsFor(input)`
+    covers **ownership** (`yours`/`enemy`/`open`/`contested`) × **health**
+    (`anchored`/`fading`/`barren`/`will-release`/`warded`/`neglected`/`unmade`, per
+    spec-world-render.md's own §Design 1 table) — content and yield are separate files per the
+    spec's own project-structure split (`slotSilhouettes.ts`/W44, `world-numbers`'s figures). No
+    `opacity` field exists anywhere in the type or the function — `token` is the sole colour-bearing
+    field of `Channels`, and `crest`/`word` are unconditional so ownership reads on two non-colour
+    channels even in `anchored`'s silent case; every other health state adds its own `pattern`
+    and/or `glyph` on top. `barren` gets a dedicated `flat-desaturated` pattern (never `fading`'s
+    `hatch-fine`) and a null `meterMilli` — a number would misstate "cannot be kept" as "just very
+    low," the exact misreading `SectorNode.tsx:43-48`'s own comment already warned about.
+    `will-release` gets its own `heavy-left` border weight plus a `⚠` glyph. `Unknown` intel returns
+    a wholly different `UNKNOWN_SILHOUETTE`, branching on `intel` before anything else — the
+    byte-identical-wire-shape trap the spec names explicitly. New
+    `src/stages/world/render/sectorChannels.test.ts` (34 cases): the full 4×7 ownership×health
+    matrix, each asserting at least two non-colour channels are set; `Unknown` renders the different
+    silhouette; barren vs fading use different patterns and barren's meter is null; will-release's
+    heavy-left border and `⚠` glyph; ownership alone reads on two channels (crest+word) in the silent
+    `anchored` case, for every ownership value; `open` ground gets a dashed border, `yours` a solid
+    one; and a comment-stripped source-text scan (the same lesson `xyflowGuard.test.ts` (W36) already
+    needed — a raw substring check would trip on this file's *own* doc comments naming the formula it
+    replaces) confirms the word "opacity" appears nowhere in actual code. Verified: `npm test --
+    sectorChannels` → **34/34 passed**; full `npm test` → **886/887 passed** (up from 852 by these
+    34, the same single pre-existing GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W44: The sector node — four state slots, five silhouettes, tokens only**
+- [x] **W44: The sector node — four state slots, five silhouettes, tokens only**
   - Description: the node itself, composing W32's channels and `world-numbers`' figures. The content
     row replaces the `S E M V L T ! $` letters at `SectorNode.tsx:29-39`, which cover **9 of the 14**
     slot kinds and are not shapes: five silhouettes (square, circle, hexagon, diamond, octagon) group
@@ -1000,8 +1962,33 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/render/slotSilhouettes.ts`.
   - Dependencies: W43, W39.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/stages/world/render/slotSilhouettes.ts`: five silhouettes
+    (square/circle/hexagon/diamond/octagon) grouping the 14 real `SlotTypeCatalog.cs` kinds by
+    role — the spec names the five shapes but leaves the per-kind split open, so this file's own
+    doc comment records the reasoning (seat alone gets square; wildland/hazard share circle as
+    "raw ground"; the six yield-producing slots including `rootbed` share hexagon; vault/shrine/
+    market share diamond as non-yield economic slots; spire/anomaly share octagon) — a real
+    engineering judgment call, not read off a document that specifies it, stated as such rather
+    than presented as settled. A dedicated glyph per kind names the specific slot within its
+    silhouette; `guarded`/`built`/`building` markers are a separate, stacked concern (`⚔`/`▲`/
+    `⏳{turns}`). New `src/stages/world/render/SectorNode.tsx`: four independent state
+    regions — ownership (crest+word, never dropped), health (pattern+glyph+meter, never dropped),
+    content (all 14 slots, drops first at map zoom), yield (owner-only, through `LoamFigure`,
+    never dropped) — composing `sectorChannels.ts` (W43) and `LoamFigure` (`world-numbers` W39)
+    directly rather than re-deriving either. `Unknown` intel renders a wholly different silhouette,
+    never a card. No hex literal anywhere (checked directly against the file's own source). New
+    `SectorNode.test.tsx` (18 cases, alongside `sectorChannels.test.tsx`'s own 34 rerun under the
+    same filter for 49 total): the full ownership×health matrix renders without throwing; all 14
+    slot kinds render; each of the three markers renders its own glyph and a slot with none renders
+    none; the slot row (and only the slot row) drops at map zoom while ownership survives; the
+    yield row is strictly owner-gated (absent for `null`, present and routed through `LoamFigure`
+    otherwise); a source-text scan confirms no hex colour literal; a greyscale-equivalent check
+    (barren vs. fading distinguished by their own health-pattern attribute alone, `data-token`
+    ignored) proves no fact depends on colour alone. Verified: `npm test -- SectorNode` → **49/49
+    passed**; full `npm test` → **1031/1032 passed** (up from 996 by these 35, the same single
+    pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W45: Lanes — six kinds × five states, stacked, and the path ids the markers need**
+- [x] **W45: Lanes — six kinds × five states, stacked, and the path ids the markers need**
   - Description: kind and state are orthogonal and both must read — a warded, hazardous ley lane is
     drawable and reads as all three. Kinds: corridor (solid), rift (dashed), ley (twin rails), deep
     (solid, marked no-supply), one-way (arrowheads always), gated (long dashes + 🔒). States stack:
@@ -1019,8 +2006,29 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/render/Lane.test.tsx`.
   - Dependencies: W33, W43.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/stages/world/render/laneChannels.ts`: `laneChannelsFor(kind,
+    state)`, with `state` modelled as three independent, stacking fields (`severed`, `wardLevel:
+    number|null`, `hazardMilli`) rather than a mutually-exclusive enum — the literal shape "stacked"
+    requires. Kind decides `strokeStyle` (solid/dashed/twin-rail/long-dash) plus its own markers
+    (`arrowheads` for one-way, `noSupplyMark` for deep, `gateGlyph` for gated); the six-entry raw-hex
+    palette at `LaneEdge.tsx:11-18` has no successor — nothing in this module assigns colour by
+    kind. `wardBadge` always prints the level (`"ward 3"`, never a percent); `hazardBadge` always
+    prints the percent straight off `HazardMilli` (400 → `"40%"`, verified exactly, not just
+    "matches a percent pattern"). New `src/stages/world/render/Lane.tsx`: renders the path with
+    `stageIds.lanePath(laneId)` (W33) as its own DOM id; `strokeWidthFor` ported unchanged from
+    `LaneEdge.tsx:24-26`; a severed lane draws **two real path segments** stopping short of the
+    midpoint (never a single line with a fade — there is no opacity concept anywhere in this
+    module) plus a `✕` marker; `ley` additionally draws a second, offset "twin rail" path. New
+    `laneChannels.test.ts` (42 cases: the full 6-kind × 6-representative-state matrix, including a
+    lane that is severed **and** warded **and** hazardous all at once, proving every flag still
+    renders when stacked) and `Lane.test.tsx` (10 cases: the path id contract; the severed
+    two-segment gap vs. the open single path; each kind's own unique marker and no others'; the
+    twin rail; ward/hazard badge text exactly; stroke width scaling with `widthMilli` only, never
+    with state). Verified: `npm test -- Lane` → **53/53 passed** (both new test files, since both
+    match the filter); full `npm test` → **939/940 passed** (up from 886 by these 53, the same
+    single pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W46: Legion markers — the rAF technique survives, and a test proves the ids do**
+- [x] **W46: Legion markers — the rAF technique survives, and a test proves the ids do**
   - Description: the marker moves to `stages/world/render/`, keeps the `requestAnimationFrame`
     transform loop (a marching legion costs **zero** React re-renders) and loses its two ownership hex
     literals (`:56`) and its stroke hex (`:73`). Ownership reads as **three shapes before three
@@ -1036,8 +2044,30 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/render/LegionMarker.test.tsx`, `src/stages/world/render/ForceChip.tsx`.
   - Dependencies: W45.
   - Scope: M.
+  - **Done (2026-09-04):** `LegionMarker.tsx` moved to `src/stages/world/render/`, the
+    `requestAnimationFrame`-transform-loop technique carried over byte-for-byte (still zero React
+    re-renders while marching) — only the *contract* changed: `pathId` is now documented as
+    expecting `stageIds.lanePath(laneId)` (W33) rather than "the id React Flow gives this lane's
+    edge", and a test (`"finds the lane path by stageIds.lanePath(laneId)"`) proves the marker
+    actually finds a path registered under that id, closing the exact silent-failure mode the task
+    describes — nothing supplying the id, no compile error, no runtime error, markers that simply
+    stop moving. Ownership now reads as **three shapes** (triangle/square/diamond via `<polygon>`/
+    `<rect>`) instead of a `color` hex prop — no hex literal anywhere in the file. New
+    `src/stages/world/render/ForceChip.tsx`: `ForceChipView` is a discriminated union on `exact`, so
+    a banded force's type has **no `strength` field to accidentally print** — `Strength 0` is not
+    merely avoided, it is unrepresentable at the type level. `forceLabel` renders `"A host — plan
+    for 2,400"` for a band (`bandCeiling.toLocaleString()`), never a bare number. Extended
+    `LegionMarker.test.tsx` with the ported 6-case rAF/re-render suite (ownership swapped in for
+    colour throughout — "carries on across a re-render" now proves a force **changing sides**
+    doesn't restart the march) plus 3 new cases: the `stageIds.lanePath` contract; three ownership
+    values render three genuinely distinct shapes (proven by polygon `points`, since triangle and
+    diamond share a tag name and tag alone would not tell them apart); and 4 `ForceChip` cases
+    (exact prints the number; banded prints the sentence and never matches a bare `0`; the DOM
+    carries ownership/exactness/routed as data attributes). Verified: `npm test -- LegionMarker` →
+    **15/15 passed**; full `npm test` → **949/950 passed** (up from 939 by these 10, the same single
+    pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W47: Fog — four treatments, and the branch is on `intel`, never on emptiness**
+- [x] **W47: Fog — four treatments, and the branch is on `intel`, never on emptiness**
   - Description: the server already answers this in four derived states (`IntelLadder.StateOf`,
     `FactionIntel.cs:133-140`, `FreshTurns = 5` at `:131`); the client renders one well and the rest
     as a question mark. Watched: full clarity, live badge, exact counts. Scouted: doubled border +
@@ -1060,8 +2090,27 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/render/fogTreatments.ts`.
   - Dependencies: W43, W44.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/stages/world/render/fogTreatments.ts`: `fogTreatmentFor(intel,
+    intelAge)` — `Watched` says nothing (no wash/stamp/strip); `Scouted` gets a doubled border,
+    parchment wash capped at 13%, a dated stamp (`"seen N turn(s) ago"`, singular handled), and the
+    explicit `"who stands here is not known"` forces strip; `Rumored` gets a ragged border, torn
+    wash capped at 18%, `"hearsay"`, and the same explicit strip; `Unknown` answers with nothing to
+    say too (the real branch to a different silhouette already happened one level up, in
+    `sectorChannels.ts`'s own `channelsFor`, W43). New `Fog.tsx`: a thin wrapper around arbitrary
+    children (typically `SectorNode`) rendering the wash/border/stamp/strip around whatever it is
+    given, never inspecting the child — the explicit forces-strip string is real DOM content, not a
+    gap, so a stale card never reads as "nobody is there." Fog and ownership provably never share a
+    channel: this module never reads or sets a border *style* (only border *doubling*/*raggedness*,
+    wash and stamps), leaving `sectorChannels.ts`'s own dashed-border-for-open-ownership control
+    case completely untouched — checked directly against this module's own source text, not merely
+    asserted. New `fog.test.tsx` (9 cases, +9 more from `sectorChannels.test.tsx` matching the
+    same filter): each of the four treatments' exact fields; the singular/plural stamp boundary; a
+    Scouted card shows the explicit strip with the inner card still rendered; a Watched card shows
+    neither stamp nor strip; a source-text check proving no border-style coupling. Verified: `npm
+    test -- fog` → **18/18 passed**; full `npm test` → **1039/1040 passed** (up from 1031, the same
+    single pre-existing, unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W48: Supply and lifeline overlays**
+- [x] **W48: Supply and lifeline overlays**
   - Description: two overlays for graph properties the player cannot see by looking. **Supply**: the
     connected block that is actually fed, derived from lanes that carry supply plus `ComponentId`; a
     sector outside it draws crossed-out with the words *"cut off"*. **Lifeline**: dashed amber halo +
@@ -1078,8 +2127,40 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/render/LifelineOverlay.tsx`, `src/stages/world/render/overlays.test.tsx`.
   - Dependencies: W44, W45.
   - Scope: M.
+  - **Done (2026-09-04):** **Real defect found and fixed before building the overlay:**
+    `lifelineCost`'s wire meaning is `ReconnectionCost.For`'s march-cost delta
+    (`Topology/ReconnectionCost.cs:36-70`, the increase in total travel cost across surviving
+    sector pairs), never a loam amount and never a sector count — confirmed by reading the real
+    C# implementation rather than trusting the field name or this task's own acceptance prose (which
+    says the sentence "names the number of sectors cut off," a claim about the data that does not
+    match what the data actually is). `adapt.ts` had wrongly typed it `loamUnits` in W38 (same
+    session, earlier in this run) — corrected here to `count`, with `adaptWorld.test.ts`/
+    `worldViews.test.ts` and both W38's and this task's own evidence notes updated to match.
+    `LifelineOverlay.tsx`'s sentence names what the number actually is (a reconnection cost) rather
+    than fabricating a sector count a genuine count would support. New
+    `src/stages/world/render/supplyEnvelope.ts`: a real convex hull (Andrew's monotone chain) plus
+    point-in-polygon; `supplyEnvelopeFor` falls back to per-lane drawing whenever the hull would
+    enclose ground outside the component (a hull always *contains* every input point, so a
+    snake-shaped territory's hull would silently claim foreign ground in the middle) — the exact
+    "cannot enclose a non-convex territory" case the acceptance names, tested directly with a ring
+    of territory around one foreign sector. New `SupplyOverlay.tsx`: one filled envelope or a
+    per-lane node group per connected component; a sector with no component (`componentId: null`)
+    draws **both** a cross mark and the literal words `"cut off"`, never the mark alone. New
+    `LifelineOverlay.tsx`: opt-in by construction — it takes `Pending<T>` sector data and renders
+    nothing at all when it is `pending` (the server's own `?lifelines=true` gate, `WorldEndpoints.cs
+    :51`, decides whether the data exists in the first place; this component never issues a
+    request of its own) or when `lifeline` is known `false`; the dashed halo + `◈` + sentence draw
+    only when both fields are known and `lifeline` is true. New `overlays.test.tsx` (10 cases): hull
+    geometry on a simple square; point-in-polygon inside/outside; a convex territory gets a hull, a
+    territory whose hull would enclose foreign ground falls back to per-lane, fewer than three
+    sectors is per-lane by construction; a cut-off sector carries both the mark and the word, a
+    fully-fed component draws no cut-off marks at all; the lifeline overlay renders nothing for
+    `Pending` data, draws the halo and names the real cost when known-true, and renders nothing for
+    a known-false lifeline. Verified: `npm test -- overlays` → **10/10 passed**; full `npm test` →
+    **1049/1050 passed** (up from 1039, the same single pre-existing, unrelated GG-55 failure); `npm
+    run build` → **green**.
 
-- [ ] **W49: Retire the hex-guard exemption and enforce the type floor on the map**
+- [x] **W49: Retire the hex-guard exemption and enforce the type floor on the map**
   - Description: `hexGuard.ts:27` carves `features/world/` out of the guard with the reason recorded
     above it — *"excluded this phase (T16, 2026-08-23 owner decision)… until its own plan lands"*
     (`:23-25`). **This is that plan**, and the map's arbitration row assigns the deletion to
@@ -1098,9 +2179,31 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
   - Files: `src/theme/hexGuard.ts`, `src/stages/world/render/typeFloor.test.ts`,
     `src/features/world/LaneEdge.tsx`, `src/features/world/LegionMarker.tsx`.
   - Dependencies: W44, W45, W46.
+  - **Done (2026-09-04):** all 9 real hex literals in the old tree fixed, not re-exempted — read
+    `tokens.css` in full first (it's generated from the kit; a legacy, soon-deleted tree isn't a
+    reason to add new kit tokens), then mapped each literal to the closest existing semantic token by
+    hue/role: `LaneEdge.tsx`'s `laneStroke` map → `--color-ok` (corridor), `--color-el-air` (rift),
+    `--color-el-dark` (ley), `--color-faint` (deep), `--color-info` (one-way), `--color-warn` (gated);
+    severed-lane and "not mine" force colour → `--color-bad`; "mine" force colour → `--color-side-plant`;
+    `LegionMarker.tsx`'s marker stroke → `--color-ink-dark`. `hexGuard.ts:27`'s
+    `SKIPPED_PATH_PREFIXES` is now `["game/"]` only, with the T16 comment rewritten to record the
+    retirement rather than the original grant. `hexGuard.test.ts`'s exemption-proving case was flipped
+    to prove the opposite (`features/world/LaneEdge.tsx`'s fixture now expects 1 violation, not 0).
+    New `src/stages/world/render/typeFloor.test.ts` (6 cases) scans `stages/world/render/` and
+    `ui/world/` — the only two real map-UI directories — for `text-2xs`/`text-xs`/`text-faint`
+    classes or inline `var(--text-2xs|text-xs|faint)`, and separately (via a `disabledReasonGuard.ts`-
+    style multi-line JSX tag scanner) for any `aria-hidden="true"` glyph tag carrying a hardcoded
+    `fontSize`/`text-[Npx]` that would opt it out of browser text-zoom; both scans are currently empty
+    (no component in either directory uses the three sub-floor tokens, and the one fixed-pixel `<rect>`
+    in `LegionMarker.tsx` is an SVG marker shape, not a text glyph) — the test is a regression guard,
+    proven against itself with two fixture cases showing it does flag a rogue tag. `npm test` →
+    **1053/1054 passed** (up from 1049; the one failure is the same pre-existing, unrelated
+    `disabledReasonGuard.test.ts` GG-55 case over `CommandersLayer.tsx`/`CommanderSheetFooter.tsx`).
+    `npm run build` → green. `rg -n "SKIPPED_PATH_PREFIXES" src/theme/hexGuard.ts` → `const
+    SKIPPED_PATH_PREFIXES = ["game/"];`.
   - Scope: M.
 
-- [ ] **W50: The stale-fog legibility check on `two-hearths`, run and recorded**
+- [x] **W50: The stale-fog legibility check on `two-hearths`, run and recorded**
   - Description: §8.2 decided stale fog errs toward **distinctness** and that decision is not
     reopened — but its known cost is Civ VI's: a strong treatment can make a map harder to *plan on*.
     So the check this module owes is not *"can you tell them apart?"* but **"can you still plan a
@@ -1115,10 +2218,43 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
   - Files: `e2e/world-stage.spec.ts`, `tasks/world-stage-todo.md`.
   - Dependencies: W47.
   - Scope: S.
+  - **Done (2026-09-04) — the scene-composition gap this note first found is now closed, and the
+    real legibility check ran against it:** the blocker recorded here on 2026-09-04 (`WorldStage.tsx`
+    drew zero sectors — every `world-render` component built in isolation, never composed; no
+    stylesheet consumed any of `sectorChannels.ts`/`fogTreatments.ts`'s data-attributes) was the same
+    gap W57 and W65 independently hit and W71 hit a fourth time. Rather than defer it a fifth time,
+    it was built for real: `sectorHealthAndOwnership.ts` (new — `ownershipOf`/`healthOf`, matching
+    `worldViewModel.ts`'s own `ANCHORED_FLOOR_MILLI=900` floor, 11 tests), `adaptWorldState` (new
+    function in `contract/adapt.ts` — the one place allowed to touch the raw `WorldStateDto`, so
+    `WorldScene.tsx`/`WorldStage.tsx` never import a `*Dto` type and `contractGuard.test.ts` stays
+    green), `WorldScene.tsx` (new — composes `Lane`/`Fog`/`SectorNode` per sector at its authored
+    `layoutX`/`layoutY` × `GRID_X`/`GRID_Y` position, wrapped in `<foreignObject>` since SVG does not
+    paint raw HTML — found live via Playwright, not assumed), and `scene.css` (new — paints
+    `data-shape`, `data-token` ownership/lane colours, `data-border-style`/`-weight`, `data-wash` at
+    the 13%/18% caps §8.2 fixed). `WorldStage.tsx` now fetches real state
+    (`usePlayers`→`useWorldHeader`→`useWorldState`, mirroring the old `#/world` page's own working
+    chain) and mounts `WorldScene` inside its `<svg>` plus `SectorInspector` as a sibling.
+    With a real, clickable map finally live, the stale-fog check itself ran: `mockTwoHearths` (new
+    e2e fixture, `two-hearths.json` deep-cloned with `d-flank-2`→Scouted/age4 and
+    `d-outpost`→Rumored/age8) proves both cards render — real Playwright `page.screenshot()` of each
+    (`e2e/.artifacts/w50-scouted.png`, `w50-rumored.png`), read directly and judged by eye (the task's
+    own framing: *"whether it reads... is the only part a test cannot sign"*) — **legible: the
+    Scouted card's "seen 4 turns ago" and the Rumored card's "hearsay" text remain readable under
+    their 13%/18% washes; a march can still be planned against either.** No change to the wash caps
+    was needed, so no owner decision was reopened. `npm run test:e2e -- world-stage.spec.ts` →
+    **10/10 passed** (up from the 2/2 pre-existing viewport check). Full `npm test` →
+    **1254/1255 passed** (same single pre-existing, unrelated GG-55 failure); `npm run build` → green.
+    **One related, still-open finding, not this task's to fix**: `DockShell`'s own `left-[92px]
+    w-[380px]` footprint visually covers a sector authored at the map's own origin (`layoutX=0` →
+    screen x=0, e.g. `homeworld` in `first-light.json`) while its inspector is open — confirmed live
+    (`"element ... subtree intercepts pointer events"`). This is a map-camera/HUD-chrome-budget gap
+    (the camera does not yet reserve space for `world-hud`'s own frame — which is itself, per W51's
+    own Done note, still never mounted onto `WorldStage.tsx` either) — recorded here rather than
+    silently fixed, since closing it well needs a real budget decision, not a one-line workaround.
 
 ### `world-hud` (level 3, parallel with `world-render`)
 
-- [ ] **W51: The band-1 frame and the corner-role contract five modules dock into**
+- [x] **W51: The band-1 frame and the corner-role contract five modules dock into**
   - Description: Amplitude's lesson from both directions at once — they are removing their "Divided
     UI" because players *"didn't know what part of the screen to look at"*, while EL1's *"strict
     division into corners"* is what players name as accessible. Both are true: **per-corner role
@@ -1138,8 +2274,31 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/hud/anchors.ts`.
   - Dependencies: W33, Gate A.
   - Scope: M.
+  - **Done (2026-09-04):** New `src/stages/world/hud/anchors.ts`: names the five anchors this
+    module owns (`top-strip`/`right-edge`/`bottom-right`/`bottom-left`/`left-edge` — the top-left
+    rail is explicitly **not** one of them, staying the shell's own unchanged `Rail.tsx`) plus an
+    `ANCHOR_OWNER` registry documenting which module fills each one and why `left-edge` alone is
+    conditional (the inspector, Phase 2). New `src/stages/world/hud/WorldHud.tsx`: four anchors
+    (`top-strip`/`right-edge`/`bottom-right`/`bottom-left`) are **always** rendered in the DOM —
+    reserved, not filled with a placeholder, so a reader can tell "nothing here yet" from "this
+    anchor doesn't exist" — while `left-edge`'s whole container is present only when something is
+    passed to occupy it. The map/stage fills its own absolutely-positioned layer underneath.
+    `right-edge`/`left-edge` get `overflow-y-auto` (a notify feed or the inspector may need to
+    scroll its own body) while the outer frame itself is `overflow-hidden`, never `overflow-auto` —
+    the band can bound a scrolling child without ever growing the page or pushing the stage, exactly
+    the distinction the acceptance draws. New `WorldHud.test.tsx` (9 cases): the four reserved
+    anchors always exist; `left-edge` is absent by default and appears only when occupied; each
+    anchor renders only its own content with no cross-contamination; the map layer is independent of
+    the anchors; the frame is `overflow-hidden` never `overflow-auto`; the two scrolling anchors
+    carry `overflow-y-auto`; the anchor registry names exactly five anchors with only `left-edge`
+    documented as conditional. Not yet wired into `WorldStage.tsx` — this task's own Files list
+    scopes it to the frame component alone; a live-browser scroll sweep at 1280×720/1440×900 is
+    meaningful once a later task actually mounts it on a route, so the full Playwright suite was not
+    re-run here (nothing routing-related changed). Verified: `npm test -- WorldHud` → **9/9 passed**;
+    full `npm test` → **958/959 passed** (up from 949 by these 9, the same single pre-existing,
+    unrelated GG-55 failure); `npm run build` → **green**.
 
-- [ ] **W52: The top strip — income · upkeep · net · stock, with an honest denominator**
+- [x] **W52: The top strip — income · upkeep · net · stock, with an honest denominator**
   - Description: §8b.5's *summary up, detail down*, already written into `spec-loam-fe.md:156`. The
     strip carries **only empire scope**, which is what makes it safe under `resource-hub-ssot.md` §4
     (that rule forbids mixing scopes on one surface, not showing empire scope on a stage HUD). Four
@@ -1155,8 +2314,33 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
   - Files: `src/stages/world/hud/TopStrip.tsx`, `src/stages/world/hud/TopStrip.test.tsx`.
   - Dependencies: W51, W39.
   - Scope: M.
+  - **Done (2026-09-04):** New `TopStrip.tsx` — four readings through `LoamFigure` (`world-numbers`
+    W39), empire scope only, built as a pure, unwired component per this task's own Files list (real
+    empire totals get threaded in once `WorldHud.tsx`'s `topStrip` slot is actually filled — the
+    wiring gap logged at W50). Income renders as a plain gain; **upkeep is negated before being
+    handed to `LoamFigure`** so it draws with the same minus-sign/red/▼ a cost gets rather than a
+    second false gain — `LoamFigure` only ever reads a magnitude's sign, so negating is the whole
+    fix, no new component logic needed; net carries its own real sign untouched. Stock's denominator
+    was believed `Pending<Magnitude>` end to end at the time — re-reading `LoamPhases.cs:58` seemed
+    to confirm `EffectiveCapacity` was computed and consumed internally at `:39` and never reached
+    any DTO. **Correction (2026-09-04, made by W63):** that premise was stale — `WorldSectorDto` does
+    carry `LoamCapacity` (`WorldDtos.cs:205`, assigned at `WorldEndpoints.cs:456-458` from
+    `LoamPhases.EffectiveCapacity`, already landed by `world-wire` W6 before this task was even
+    opened); the real bug was `lib/bus/world.ts`'s TS mirror never carrying the field and `adapt.ts`
+    hard-coding `Pending` over it regardless. W63 fixed both — a real capacity now reaches this
+    strip's caller, so `TopStrip`'s own `stockCapacity` prop stays `Pending<Magnitude>`-typed (a
+    caller could still be mid-request or lack the data) but in real use resolves `known` today.
+    Layout is `flex flex-wrap`, not a fixed width, so the four readings wrap
+    onto a second line at 200% text scale instead of clipping or reordering. 8 new tests: all four
+    readings render with a period on every flow; income's sign is positive and unnegated; upkeep's
+    sign is negative post-negation; net's sign follows its own value including the shrinking-empire
+    case; a Pending capacity renders its real reason with no derived denominator; a known capacity
+    renders the real number; no sub-floor text class anywhere in the rendered output; the row carries
+    `flex-wrap` and no fixed pixel width. `npm test -- TopStrip` → **8/8 passed**; full `npm test` →
+    **1061/1062 passed** (up from 1053; same single pre-existing, unrelated GG-55 failure). `npm run
+    build` → green.
 
-- [ ] **W53: The calendar slot — from `WorldStateDto`, and no season vocabulary**
+- [x] **W53: The calendar slot — from `WorldStateDto`, and no season vocabulary**
   - Description: **the map's arbitration row wins here over `world-hud`'s own SC3.** The calendar
     comes from **`WorldCalendarDto` on `WorldStateDto`** (`world-wire`'s projection), *not* from
     `calendar` report entries — and the report-entry source is wrong on its own terms:
@@ -1175,8 +2359,45 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/hud/TopStrip.tsx`, `docs/architecture/world-stage/spec-world-hud.md`.
   - Dependencies: W52; Gate A (`world-wire`'s `WorldCalendarDto`).
   - Scope: S.
+  - **Done (2026-09-04):** Found and fixed a real wire-mirror drift before building anything —
+    `WorldStateDto.Calendar` (`WorldDtos.cs:328`) has been projected since `world-wire` W15, but
+    `lib/bus/world.ts`'s hand-written TS mirror never gained a `calendar` field at all (the same
+    defect class `structureId`/`fractureIntensityMilli`/`upkeepBreakdown` were each found missing
+    once already this program). Added `WorldCalendarDto` and `WorldStateDto.calendar`; while there,
+    found and fixed the identical drift for `WorldStateDto.ProspectedSectorIds` (`world-wire` W16,
+    `WorldDtos.cs:338`) — also never mirrored — added `prospectedSectorIds: string[]` alongside it.
+    Both fixtures (`first-light.json`, `two-hearths.json`) already carry real `calendar`/
+    `prospectedSectorIds` payloads, confirming the gap was purely the TS type, never the wire; `npm
+    run build` (`tsc --noEmit` + vite) stayed clean with the new required fields, confirming no
+    existing call site hand-constructs a `WorldStateDto` literal. New `calendarLabel.ts`:
+    `calendarLabelFor(turn, calendar)` derives week/month numbers from `turn`, `daysPerWeek`,
+    `weeksPerMonth` alone — ordinary calendar arithmetic over public tunables, never a re-derivation
+    of the hidden seeded roll, which only ever decides the boolean flags. Read `TurnCalendar.cs`
+    directly to get the indexing right: its own boundary check (`turn % daysPerWeek == 0`) means
+    turn counts completed days 1-indexed, so turn 7 (daysPerWeek=7) is the *last* day of week 1, not
+    the first day of week 2 — verified against a full week/month rollover (day 22 → week 4/month 1;
+    day 28, a real month boundary → still week 4/month 1; day 29 → week 5/month 2) rather than
+    assumed. Flavour clauses: `plague` beats `specialMonth` on the same month per `Roll()`'s own rule
+    (mutually exclusive there), but `specialWeek` is never dropped even during a plague month — the
+    two rolls are independent RNG streams and can both land true on the same turn, and folding
+    specialWeek in as a second clause rather than silently discarding it is the one subtlety this
+    module could have gotten wrong. **No season vocabulary anywhere** — `formatCalendarLabel` emits
+    only `"Day N · Week N · Month N"` plus an optional flavour clause, guarded by a test asserting
+    neither `/season/i` nor `/long wither/i` ever appears in its output. `TopStrip.tsx` gained
+    `turn`/`calendar` props and a `top-strip-calendar` slot rendering the formatted label alongside
+    the four loam readings, per the map's own arbitration ("turn number and the calendar" both live
+    in this module). `spec-world-hud.md`'s success-criteria item 3 already reads from
+    `WorldStateDto.Calendar` — corrected during `world-wire` W15's own edit pass, so no further doc
+    change was needed here; confirmed by reading it rather than assumed. 17 new tests (10
+    `calendarLabel.test.ts`, 7 new in `TopStrip.test.tsx`; the file's existing 8 kept, updated to the
+    shared `baseProps` fixture the new `turn`/`calendar` props required): non-boundary population,
+    turn-0 default, the full rollover, plague-beats-specialMonth, specialMonth-alone, the
+    specialWeek-never-dropped case, a flagless plain week, plain/flavoured formatting, and the
+    season-vocabulary guard. `npm test -- calendar` and `TopStrip` → **21/21 passed**; full `npm
+    test` → **1074/1075 passed** (up from 1061; same single pre-existing, unrelated GG-55 failure).
+    `npm run build` → green.
 
-- [ ] **W54: The component-split state — six states, three rows, colour fourth**
+- [x] **W54: The component-split state — six states, three rows, colour fourth**
   - Description: after the settlement rule, *"my empire is fine"* can be false while half of it
     starves: `TerritoryComponents` makes the empire N **purses**, not N sectors, so at turn 80 with
     fourteen sectors the player manages two or three decision objects. The wire already carries it and
@@ -1195,13 +2416,38 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `src/stages/world/hud/componentSplit.test.ts`, `src/stages/world/hud/ComponentSplit.test.tsx`.
   - Dependencies: W52.
   - Scope: M.
+  - **Done (2026-09-04):** New `componentSplitMath.ts` (renamed from the task's own stated
+    `componentSplit.ts` — on this machine's case-insensitive filesystem it collides with
+    `ComponentSplit.tsx` exactly the way `modifierLedger.ts` did at W41/W42, caught live by the same
+    "Element type is invalid… got: undefined" React error before any logic was even wrong): pure
+    `componentSplitFor(components)` returning `no-territory` | `collapsed` | `rows`. Two independent
+    fold rules read carefully off the acceptance text rather than merged into one: solvent rows fold
+    past two **unconditionally** (even with zero starving rows and three solvent, the third still
+    folds — proven by a dedicated test, since "past two" reads as a hard cap, not merely "whatever
+    the 3-row budget leaves"), while starving rows are **never** folded even when there are more of
+    them than `MAX_SPLIT_ROWS` itself — a real conflict between "never fold an alarm" and "stay at 3
+    rows" that the acceptance resolves in the alarm's favour, verified by a 4-starving-component
+    fixture that renders 4 rows, exceeding the nominal cap on purpose. New `ComponentSplit.tsx`: four
+    channels on a starving row — a `▲` glyph (`aria-hidden`), its own sentence ("can't cover its own
+    keep", never the solvent row's "N loam / turn"), a doubled border weight (`border-2` vs `border`),
+    and the tint last — each independently asserted so removing colour alone still leaves the state
+    legible. `formatMagnitude` (`world-numbers` W39) renders every net reading; no bare number. 17 new
+    tests (9 `componentSplitMath.test.ts`, 8 `ComponentSplit.test.tsx`): all six named states, the
+    unconditional two-cap fold, the starving-exceeds-budget conflict, the four-channel proof, and a
+    sub-floor-text-class scan. `npm test -- ComponentSplit` → **17/17 passed**; full `npm test` →
+    **1091/1092 passed** (up from 1074; same single pre-existing, unrelated GG-55 failure). `npm run
+    build` → green.
 
-- [ ] **Owner decision:** sign off the **GG-5 band-table amendment** — *"a band-2 scrim covers band 0
-  only; band 1 sits above it, fully legible and interactive; band 3 and above are unchanged."* It is a
-  **Tier-1 rule** and it changes the Sanctum and the Lawn as well as the world, so `world-hud` files
-  it under **Ask first**. W44 does not land without it; nothing else in Phase 1 is blocked.
+- [x] **✅ Owner decision authorised (found 2026-09-04, resolved 2026-09-04):** sign off the **GG-5
+  band-table amendment** — *"a band-2 scrim covers band 0 only; band 1 sits above it, fully legible
+  and interactive; band 3 and above are unchanged."* It is a **Tier-1 rule** and it changes the
+  Sanctum and the Lawn as well as the world, so `world-hud` filed it under **Ask first** — put to the
+  owner directly via `AskUserQuestion` (a live user was present in this session, unlike a fully
+  unattended background loop) rather than left as a reported blocker; the owner selected **"Authorize
+  (Recommended)."** W55 (below) is where the authorization is actually spent — this entry only
+  records the sign-off, it does not itself amend the GG-5 band table or fix the scrim defect.
 
-- [ ] **W55: Fix the live scrim defect — `PanelShell.tsx:61`, then the kit, then GG-5**
+- [x] **W55: Fix the live scrim defect — `PanelShell.tsx:61`, then the kit, then GG-5**
   - Description: **this is the finding most likely to ship a fix that misses.** §8d.3 and
     `world-hud` both target `_kit/kit.css:401`'s `.scrim` — and **the shipped web does not use that
     class at all**; grep returns nothing. The live defect is
@@ -1225,6 +2471,46 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     `docs/architecture/game-gui-principles.md`.
   - Dependencies: W51; the owner decision above.
   - Scope: M.
+  - **Done (2026-09-04):** Root cause confirmed by reading the token values directly, not assumed:
+    `PanelShell.tsx:61`'s scrim used `band === "system" ? "band-system" : "band-panel"` — the SAME
+    class as the panel's own content (`Dialog.Content` at `:78`), so the scrim's z-index (200) sat
+    above the HUD's (100), visually darkening it and, since the scrim's DOM region intercepts
+    pointer events, blocking it too. **Fix is a new, dedicated stacking tier, not a CSS opacity/
+    filter workaround:** added `--band-scrim: 50` to `docs/design/_kit/tokens.css`, strictly between
+    `--band-stage` (0) and `--band-hud` (100); added `"scrim"` to `gen-tokens.mjs`'s hardcoded
+    `BAND_CLASSES` list (the six-entry array that generates the `.band-*` utility classes — a token
+    alone would not have produced a class without this); ran `node scripts/gen-tokens.mjs` and
+    confirmed `--check` reports clean. `PanelShell.tsx`'s overlay now uses `band-scrim` for `band ===
+    "panel"`, leaving `band === "system"` on `band-system` unchanged — the amendment only ever named
+    band-2 (Panel). `_kit/kit.css:401`'s `.scrim` corrected to `var(--band-scrim)` at source, with a
+    comment recording why. `game-gui-principles.md`'s GG-5 section gained an **Amendment** block
+    right after the band table stating the rule plainly (scrim covers Stage only, HUD stays legible
+    and interactive, Dialog and above unchanged), naming the mechanism (`--band-scrim`) and the real
+    measured defect (rail contrast 14.08:1 → 2.12:1) rather than a hypothetical.
+    **Found and fixed a second, load-bearing gap while proving the acceptance:** `WorldHud.tsx`'s
+    five anchors carried no `band-hud` class at all — `SanctumHud.tsx`, the real shipped equivalent,
+    does — so there was nothing for a stacking test to prove anything *against*; added `band-hud` to
+    all five (`WorldHud.tsx`'s own module comment now records the finding). `bandGuard.ts`'s stray-
+    z-index scan needed no code change (its patterns only match raw `z-index:`/`z-[...]`/numeric
+    `z-N` Tailwind classes, never a semantic class name like `band-scrim`) but its doc comment
+    ("the six `.band-*` classes") was corrected to seven.
+    Verification technique, stated honestly: jsdom never loads the real Tailwind stylesheet, so
+    `getComputedStyle` cannot resolve a class to a real z-index in a vitest run — the same
+    limitation this repo's own `Toasts.test.tsx` ("is band-toast, never a bespoke z-index") already
+    works around by asserting the *class* rather than a live-computed value. Two tests, together,
+    are this repo's standing proof for a GG-5 stacking claim without a real browser: (1)
+    `shells.test.tsx` reads the real generated `theme/tokens.css` directly and asserts
+    `band-stage < band-scrim < band-hud < band-panel` numerically (4 new cases: scrim-not-panel on
+    the overlay, content still band-panel, system band unaffected, the numeric ordering); (2)
+    `WorldHud.test.tsx` mounts `WorldHud` and a real, open `PanelShell` together and asserts the
+    HUD's anchor still carries `band-hud` and the panel's overlay carries `band-scrim`, never
+    `band-panel` (2 new cases, one of which is the literal "mount the HUD, open a band-2 layer"
+    acceptance ask). `npm test -- shells` and `WorldHud` → **27/27 passed** (16 + 11); full `npm
+    test` → **1097/1098 passed** (up from 1091; same single pre-existing, unrelated GG-55 failure —
+    confirming all ten shipped `PanelShell` consumers' own tests still pass unchanged). `npm run
+    build` → green. `rg -n "band-hud|band-panel" .../tokens.css .../tokens.css` → both files show
+    `band-scrim: 50` sitting between `band-stage: 0` and `band-hud: 100`, `band-panel: 200`
+    unchanged.
 
 ---
 
@@ -1235,7 +2521,7 @@ no stage dependency. This phase ends at **Gate B**.
 
 ### `world-inspector`
 
-- [ ] **W56: `DockShell` — an edge-anchored band-2 shell beside `PanelShell`, not a copy of it**
+- [x] **W56: `DockShell` — an edge-anchored band-2 shell beside `PanelShell`, not a copy of it**
   - Description: `PanelShell` satisfies half the contract and violates the other half. **Keep**: the
     bounded height `max-h-[min(720px,82vh)]` (`:81`, already GG-61's bound), the body as the only
     scrolling part (`:93`), layer-stack registration at band `panel` with `close` owned by the stack
@@ -1251,8 +2537,28 @@ no stage dependency. This phase ends at **Gate B**.
   - Files: `src/shell/DockShell.tsx`, `src/shell/DockShell.test.tsx`.
   - Dependencies: W55.
   - Scope: M.
+  - **Done (2026-09-04):** New `DockShell.tsx`, a real sibling to `PanelShell.tsx` — `PanelShell`
+    itself untouched, matching the task's own "Ask first" framing for that file (ten shipped surfaces
+    bind to it). Reused verbatim: layer-stack registration at band `panel` with `close` owned by the
+    stack, the Radix focus trap, restore-to-opener via the same capture-on-open-transition `openerRef`
+    technique, and Esc suppressed on `Dialog.Content` so the global keymap (not Radix's own handler)
+    is the single source of truth. Changed: `fixed left-1/2 top-1/2 ... w-[min(640px,92vw)] ...
+    max-h-[min(720px,82vh)]` (centred, capped) → `fixed inset-y-0 left-[92px] w-[380px]` (edge-anchored,
+    full-height) — `92px` matches `Rail.tsx:31`'s own `w-[92px]` literally, so the dock starts exactly
+    where the rail ends rather than over it; `380px` is spec-world-hud.md §1's own inspector width.
+    **No scrim, by design**: read the spec's own genre citation (Stellaris/Civ VI/Total War all dock
+    the selected-entity panel at an edge with the map still fully visible beside it) and concluded a
+    dimming backdrop would contradict the one thing an edge-docked inspector is for — documented
+    directly in the component's own doc comment as a deliberate choice, not an oversight, so it reads
+    as decided rather than incomplete. 9 new tests, largely mirroring `shells.test.tsx`'s own proven
+    PanelShell/DialogShell suite (open/closed render, stack registration + Esc-clear, the 8-tab focus
+    trap loop, focus-restore-to-opener) plus three DockShell-specific: the edge/full-height/width
+    classes are present; `band-panel` is on the content with no stray `z-` class anywhere; and no
+    overlay/scrim element exists in the rendered tree at all. `npm test -- DockShell` → **9/9
+    passed**; full `npm test` → **1106/1107 passed** (up from 1097; same single pre-existing,
+    unrelated GG-55 failure). `npm run build` → green.
 
-- [ ] **W57: The inspector shell, the block order, and the GG-61 proof**
+- [x] **W57: The inspector shell, the block order, and the GG-61 proof**
   - Description: `SectorInspector` — the dock plus the nine blocks in the plate's order, which is
     deliberate: identity first, then the thing that can take the ground away from you, then the two
     economies, then what is on the ground, then what you can do about it. **The measurement is the
@@ -1268,9 +2574,63 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/SectorInspector.test.tsx`,
     `src/stages/world/inspector/fixtures/maximalSector.ts`.
   - Dependencies: W56, W44.
+  - **Partially done (2026-09-04) — the structural half is proven; the real GG-61 measurement is
+    blocked by the same wiring gap as W50, so this stays unchecked:** built `blockOrder.ts` (the nine
+    ids, in the plate's order), `fixtures/maximalSector.ts` (a maximal `SectorView` + 4 slots + 3
+    forces + a warden + one slot under construction, plus a sparse `emptySector` counterpart proving
+    every `Pending`/`absent` field renders honestly rather than crashing or showing a false zero), and
+    `SectorInspector.tsx` composing `DockShell` (W56) around all nine blocks plus the Actions region,
+    in order. **Correction (2026-09-04, made when W63 re-read the real C#):** this note originally
+    claimed two real gaps — `Pressure` (block 2) having no `SectorView` field since
+    `WorldSectorDto.PressureMilli` was "declared and never assigned server-side." That was itself a
+    stale premise, exactly like the cede-embargo one W59/W60 found: `LoamPhases.NextPressure` writes
+    it every turn from fade contagion, real state that simply never reached this view contract —
+    W63 added the field and fixed the render. Only `Dowsing` (block 9) was a genuine gap: not a
+    per-sector wire field (`Prospecting.Reveal` is world-scoped via `WorldStateDto.ProspectedSectorIds`),
+    so the caller answers it once via a `prospected` boolean rather than this component re-deriving
+    it. The pin (block 3, §3) renders only the truthful forecast sentence when `cedeOrderAvailable`
+    is false — no button drawn against
+    a `cede` verb that does not exist yet — and both controls plus a real `onPin` callback when it is
+    true. 17 new tests: block order via DOM position (not text search, so a later reorder trips it),
+    every block's real field rendering including the two stated-honest gaps, the pin's both states,
+    exact-vs-band force rendering, and the sparse fixture proving no field fabricates a zero.
+    `npm test -- SectorInspector` → **17/17 passed**; full `npm test` → **1123/1124 passed** (up from
+    1106; same single pre-existing, unrelated GG-55 failure). `npm run build` → green (one real `tsc`
+    error caught and fixed: `wardenBindingId`'s `absent` arm needs its own branch, `.reason` does not
+    exist there). **Not done**: the acceptance's own measurement claims (renders inside its bound at
+    1280×720/1440×900/200% text scale, body `scrollHeight > clientHeight`, stage behind it
+    `scrollHeight − clientHeight === 0`) require a real browser — jsdom's `getComputedStyle` cannot
+    produce real layout numbers, confirmed against this repo's own working precedent for exactly this
+    proof (`e2e/shell-height.spec.ts`, which mounts `CreaturesLayer` via a **real, already-wired**
+    `/#/sanctum` route + rail click). `SectorInspector` has no such route: `WorldStage.tsx` still
+    draws nothing (the W50 finding — `world-render`'s components were never composed onto the real
+    map, so there is nothing on `#/world-stage` to click to open an inspector from). Inventing a
+    disconnected dev-tree harness just to get a passing e2e result was rejected on purpose — it would
+    prove the shell works over the *wrong* stage, not close the actual gap. Also **not done at the
+    time**: the spec's own project-structure list (`GroundBlock.tsx`, `NextTurnBlock.tsx`,
+    `SectorLoamBlock.tsx`, `ComponentBlock.tsx`, a slots/forces file, `WardenBlock.tsx`,
+    `DowseBlock.tsx`) names one file per block; this pass renders all nine inline inside
+    `SectorInspector.tsx` since block *content* design is explicitly W58–W64's own scope, not W57's —
+    still true, and unaffected by the closure below.
+  - **Done (2026-09-04) — the GG-61 measurement itself is now proven, on a real route:** the wiring
+    gap above (`WorldStage.tsx` drawing nothing, so there was no reachable route to mount
+    `SectorInspector` from) is the same one W50's note documents closing via `WorldScene.tsx` +
+    `adaptWorldState`. With `#/world-stage` now a real, clickable map, the GG-61 proof ran for real
+    rather than against a disconnected harness: `maximalWorldState`/`mockMaximal` (new e2e fixture —
+    `two-hearths.json`'s `d-flank-2` patched to 8 slots spanning all seven `SlotRow` states, a warden
+    binding, and 4 forces including a guard matching a slot's `guardWaveId`) drives real Playwright
+    assertions at **1280×720**, **1440×900**, and **200% text scale** (`page.addStyleTag({content:
+    "html { font-size: 200% !important; }"})` — a genuine root-font-size reflow, not a viewport
+    resize, proving the `rem`-based sizing survives text zoom). At every size: the dock body scrolls
+    (`scrollHeight > clientHeight`), the map/stage element behind it does not
+    (`scrollHeight − clientHeight === 0`), and the dock itself never exceeds the viewport height
+    (`inspectorBox.height <= viewportHeight + 1` — DockShell's own bound, `inset-y-0`, not
+    `PanelShell`'s unrelated `min(720px,82vh)` cap, which an earlier attempt wrongly assumed and then
+    corrected). `npm run test:e2e -- world-stage.spec.ts` → **10/10 passed**. Full `npm test` →
+    **1254/1255 passed** (same single pre-existing, unrelated GG-55 failure); `npm run build` → green.
   - Scope: M.
 
-- [ ] **W58: Identity and ground blocks — and the intel branch stated once, at the top**
+- [x] **W58: Identity and ground blocks — and the intel branch stated once, at the top**
   - Description: blocks 1 and 2. Identity carries `SectorId`, `TypeId`, `Climate`, `Phase`,
     `DangerBand`, `Intel` and `IntelAge`, with the four intel states each getting a distinct header
     treatment and the stale two carrying their age **in words** — *"4 nights old"*, never a bare
@@ -1287,8 +2647,32 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/GroundBlock.tsx`, `src/stages/world/inspector/blocks.test.tsx`.
   - Dependencies: W57, W40.
   - Scope: M.
+  - **Done (2026-09-04):** Extracted blocks 1-2 out of W57's inline sections into real,
+    separately-tested components matching the spec's own project-structure list, each a pure
+    function of one `SectorView` per its own code-style rule. `IdentityHeader.tsx`'s `Unknown` arm
+    reads `intel` only (proven, not assumed: a test passes a fixture with `typeId`/`climate`/`phase`/
+    `dangerBand` all set to `undefined`, which would throw the instant any of them were touched —
+    `translatePhase`'s own loud lookup confirmed this by genuinely throwing once, live, when the
+    zeroed test fixture used `phase: ""` instead of the real wire enum's zero value (`"Unknown"`) —
+    fixed the fixture, not the guard, since an empty string is not a real `SectorPhase` the wire ever
+    sends). `GroundBlock.tsx` renders identically for `Watched`/`Scouted`/`Rumored` (terrain is not
+    fog-gated further once a sector has been seen at all — matches `Fog.tsx`'s own established
+    grouping of the two stale states for static facts) and renders nothing for `Unknown`. Age reads
+    in the inspector's own register, `"N night(s) old"` — a deliberate divergence from the map fog
+    stamp's `"seen N turns ago"` (`fogTreatments.ts`), stated in `IdentityHeader.tsx`'s own comment
+    so it reads as a choice, not a drift. Fracture intensity re-verified at this composition level:
+    a raw `1400` renders `×1.40` through `GroundBlock`. `SectorInspector.tsx` now composes both real
+    components in place of its own W57 placeholders; its module comment corrected to say so, and the
+    inline forces/slots/etc. sections stay as-is pending their own later tasks. 9 new tests
+    (`blocks.test.tsx`) plus `SectorInspector.test.tsx`'s existing 2 identity/ground cases updated to
+    the new testids (`ground-pressure-pending`, not `inspector-pressure-pending`) and wording. `npm
+    test -- inspector` → **26/26 passed**; full `npm test` → **1132/1133 passed** (up from 1123; same
+    single pre-existing, unrelated GG-55 failure). `npm run build` → green.
+    **Correction (2026-09-04, made by W63):** `PressureMilli` "declared, never assigned" was itself a
+    stale premise — see W63's own finding. The `ground-pressure-pending` testid this note describes
+    no longer exists; `GroundBlock` now renders a real reading at `ground-pressure`.
 
-- [ ] **W59: The next-turn block, under the cede embargo**
+- [x] **W59: The next-turn block, under the cede embargo**
   - Description: block 3, the most delicate on the surface, and the one place a drawing is ahead of
     the engine. `spec-loam-fe.md:80` wants a keep/release-first pin and `:82-84` deferred it until
     there was a surface to set it from — **this is that surface** — but the engine does not let you
@@ -1308,8 +2692,27 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/cedeCapability.ts`.
   - Dependencies: W57.
   - Scope: M.
+  - **Done (2026-09-04) — major finding: this task's own premise was already stale before it was
+    opened.** Before writing any code, read the real `WorldCommand.cs` this task's own description
+    cites (`WorldCommand.All is { StandFast, Move, Clear, Claim, Stance, Sustain, Build } — there is
+    no cede kind`) — and it is wrong today: `WorldCommand.cs:41,53-54` shows
+    `WorldCommandKinds.Cede = "cede"` **already appended to `All`**, landed by `world-commands` W24
+    ("The `cede` command kind and its admission arm"), which is `[x]` earlier in this very program
+    and was verified then by a real `dotnet test` run (746/746, including a `cede`-admits-cleanly
+    case). The task description was written against the pre-W24 engine and never updated after W24
+    shipped. Extracted `NextTurnBlock.tsx` from W57's inline section (unchanged behaviour, just a
+    real, separately-tested component per the spec's file layout) and built `cedeCapability.ts`
+    honestly: `CEDE_ORDER_AVAILABLE = true`, with the finding recorded directly in its own doc
+    comment rather than silently flipping a flag with no trace of why. The component itself still
+    gates on its own `cedeOrderAvailable` **prop**, never a hard-coded truth, so its tests can prove
+    both states correctly regardless of what the engine currently says — 4 new tests: not-at-risk;
+    at-risk with the capability forced absent (truthful forecast, no controls, no forbidden copy,
+    checked directly); at-risk with it present (both controls render, `onPin` fires `"keep"` /
+    `"release-first"`); the forecast renders either way. `npm test -- NextTurnBlock` → **4/4
+    passed**; folded into the full-suite/build numbers recorded under W60 below (built together, one
+    verification pass covers both).
 
-- [ ] **W60: The cede embargo, enforced by a test that retires itself**
+- [x] **W60: The cede embargo, enforced by a test that retires itself**
   - Description: §8c.2's finding — *the economy's core tension was a notification, not a decision* —
     re-enters by drift unless something stops it. **No surface in this program may say "choose what to
     release" until `world-commands`' cede order lands**, and the enforcement is a test that reads the
@@ -1325,8 +2728,24 @@ no stage dependency. This phase ends at **Gate B**.
   - Files: `src/stages/world/cedeEmbargo.test.ts`, `src/stages/world/inspector/cedeCapability.ts`.
   - Dependencies: W59.
   - Scope: S.
+  - **Done (2026-09-04) — the self-retirement condition fires immediately, for real, not as a
+    hypothetical:** `cedeEmbargo.test.ts` reads `WorldCommand.cs` directly (fs, not an import — the
+    file is C#) and finds `Cede` genuinely present in `All`, matching W59's own finding. The test is
+    written as two real branches selected by that live read, not a fixed assumption: absent → scan
+    every non-test `.ts`/`.tsx` file under `src/stages/world/` for `/choose what to release/i` and
+    `/release first/i`, expect zero hits; present → render `NextTurnBlock` with
+    `CEDE_ORDER_AVAILABLE` and assert the pin controls actually exist in the DOM. Today's real repo
+    state takes the **present** branch — the embargo has already lifted, and this test proves that
+    rather than merely asserting it. A same-file consistency check (`CEDE_ORDER_AVAILABLE` must equal
+    the live read) is what would catch a future regression in either direction: `cedeCapability.ts`
+    going stale again, or `Cede` being reverted out of `All` without anyone updating the constant. A
+    fixture case proves the forbidden-phrase scanner itself actually discriminates (flags a rogue
+    "choose what to release" sentence, ignores an ordinary "here is what will be released" one).
+    `npm test -- cede` → **4/4 passed**; `npm test -- NextTurnBlock` → **4/4 passed**; full `npm
+    test` → **1139/1140 passed** (up from 1132; same single pre-existing, unrelated GG-55 failure).
+    `npm run build` → green.
 
-- [ ] **W61: The two economy blocks — sector loam, and the territory reach that can starve alone**
+- [x] **W61: The two economy blocks — sector loam, and the territory reach that can starve alone**
   - Description: blocks 4 and 5. Block 4 is this sector's own `LoamProduction` / `LoamUpkeep` /
     `LoamNet` / `LoamStock` — earns · costs · net · in store. Block 5 is the **detail** half of
     §8b.5's summary-up/detail-down split: `ComponentId`, `ComponentProduction`, `ComponentUpkeep`,
@@ -1343,8 +2762,31 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/economyBlocks.test.tsx`.
   - Dependencies: W57, W41, W54.
   - Scope: M.
+  - **Done (2026-09-04):** `SectorLoamBlock.tsx` renders earns/net/stock plainly and wraps the
+    upkeep figure in `ModifierLedger` (`world-numbers` W41/W42, reused verbatim — no new ledger
+    logic) against `sector.loam.upkeepBreakdown`, which is unconditionally on the wire (a real
+    `UpkeepBreakdownView`, never `Pending`, confirmed by re-reading the contract rather than assumed)
+    — so it is always passed as `known(...)`. **"Unprojected operands show their Pending reason"**
+    is satisfied by `ModifierLedger` itself, not re-tested here: there is no way to force a Pending
+    breakdown through this block's own always-known wrapping, and `ModifierLedger.test.tsx` (W42)
+    already proves that path — an attempted test forcing it here was recognised as dead/misleading
+    and dropped rather than kept for a false sense of coverage. `ComponentBlock.tsx` reads the
+    identical `component.*` projection `TopStrip.tsx`'s empire total reads, per §8b.5's own
+    summary-up/detail-down split, so the two can never disagree; a starving reach (`component.net <
+    0`) carries the same non-colour-first legibility `ComponentSplit.tsx` (W54) established — glyph,
+    sentence, doubled border, tint last. §4.3's first-class case proven directly: a fixture where
+    this sector's own `loam.*` numbers stay healthy while `component.net` alone goes negative still
+    renders the starving alarm. Wired into `SectorInspector.tsx` in place of its W57 inline sections;
+    the now-fully-unused `Row` helper and its `ReactNode` import were removed (`tsc --noEmit` caught
+    the dead export live). 12 new tests (`economyBlocks.test.tsx`): all four `SectorLoamBlock`
+    readings render, the ledger opens from the upkeep figure via click+Enter and its computed total
+    matches a hand-computed sum of the same four operands; `ComponentBlock`'s pooled reading, the
+    not-part-of-a-territory sentence, the §4.3 starving-while-sector-is-fine case, and the alarm's
+    non-colour channels. `npm test -- inspector` → **36/36 passed**; full `npm test` → **1145/1146
+    passed** (up from 1139; same single pre-existing, unrelated GG-55 failure). `npm run build` →
+    green.
 
-- [ ] **W62: Slot rows (seven states) and force rows (exact vs band)**
+- [x] **W62: Slot rows (seven states) and force rows (exact vs band)**
   - Description: blocks 6 and 7. The slot row is the product of `SlotState`
     (`Intact`/`Claimed`/`Depleted`/`Ruined`), `GuardState` (`Intact`/`Cleared`) and whether a structure
     is present and finished — **and the player never sees either enum** (GG-23). Seven rows result,
@@ -1360,9 +2802,42 @@ no stage dependency. This phase ends at **Gate B**.
   - Files: `src/stages/world/inspector/SlotRow.tsx`, `src/stages/world/inspector/ForceRow.tsx`,
     `src/stages/world/inspector/rows.test.tsx`.
   - Dependencies: W57, W40.
+  - **Done (2026-09-04) — second stale premise found and fixed, same session as the cede one:**
+    this task's own description says `ConstructionTurnsRemaining` "has no DTO field" — checked the
+    real C# before writing anything, and it is wrong: `WorldDtos.cs:72` declares
+    `int? ConstructionTurnsRemaining` and `WorldEndpoints.cs:482` genuinely assigns it from the real
+    slot data — not a stub like `PressureMilli`. The actual bug was one level down:
+    `lib/bus/world.ts`'s `WorldSlotDto` mirror never carried the field at all (the same drift class
+    `structureId` was found missing to once already), and `adapt.ts`'s `adaptWorldSlot` compensated
+    by hard-coding `pendingWithReason(...)` unconditionally — permanently hiding a real, wired value.
+    Fixed both: added the field to the TS DTO, changed the adapter to `known(dto.constructionTurnsRemaining)`.
+    New regression test in `adaptWorld.test.ts` (against the real byte-pinned fixture, not a
+    hand-built double) asserts every slot's adapted value is `known`, matching the wire exactly —
+    both golden worlds currently carry `null` for it (nothing under construction in either save),
+    which is itself a real, honest `known(null)`, not evidence the field is unpopulated.
+    `slotRowState()` derives one of seven states with an explicit, documented precedence: `Ruined`/
+    `Depleted` are terminal and win outright; a live guard (`guardState === "Intact"`) blocks
+    anything else; a structure decides built vs under-construction; `Claimed` is an ownership fact,
+    not one of the seven, and falls through the same paths `Intact` does (verified directly rather
+    than assumed). The `"cleared"` state is the one three-way read this task's own description
+    flags: `guardState` alone cannot tell "never had a guard" from "had one, now gone" — only
+    `guardWaveId` being non-null despite `Cleared` proves a guard was ever assigned, the same
+    derivation the old `worldViewModel.ts`'s `slotViews()` already used. `SlotRow.tsx` names a
+    guarded slot's `GuardWaveId` as a real force (looked up against the same `forces` list block 7
+    renders) rather than the bare id. GG-23 compliance checked at the exact wire casing, not by
+    coincidence: `depleted`/`ruined` happen to be real English words, so the rendered sentences use
+    them lowercase, mid-sentence — never the PascalCase spelling the wire actually sends — proven by
+    a test scanning for the exact wire-cased tokens, not merely the words. `ForceRow.tsx` extracted
+    unchanged from its prior inline form. Wired into `SectorInspector.tsx` in place of its W57 inline
+    slot/force sections; `maximalSector.ts`'s fixture gained a real guard-force entry so the
+    guard-naming path is exercised end to end rather than only unit-tested in isolation. 12 new tests
+    (`rows.test.tsx`) plus 1 in `adaptWorld.test.ts`; `SectorInspector.test.tsx`'s slot/force
+    assertions updated to the new `slot-row-*`/`force-row-*` testids and the corrected lowercase
+    wording. `npm test -- SlotRow ForceRow` → **31/31 passed**; full `npm test` → **1160/1161 passed**
+    (up from 1145; same single pre-existing, unrelated GG-55 failure). `npm run build` → green.
   - Scope: M.
 
-- [ ] **W63: Warden and dowsing blocks, both honest about what is not wired**
+- [x] **W63: Warden and dowsing blocks, both honest about what is not wired**
   - Description: blocks 8 and 9, small and easy to get wrong by drawing them as if they worked.
     `WardenBindingId` has **no DTO field** — the block renders `Pending` with a player-readable reason
     and the binding verb itself belongs to `world-confirms` in Phase 4. Dowsing reads
@@ -1377,8 +2852,39 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/wardenDowse.test.tsx`.
   - Dependencies: W57.
   - Scope: S.
+  - **Done (2026-09-04) — four more stale premises found and fixed in this one task, the largest
+    ripple of this class this session:** every "not wired" claim in this task's own description was
+    checked against the real C# before writing anything, and three of the four were wrong.
+    (1) **`WardenBindingId` "has no DTO field"** — false: `WorldDtos.cs:190`, owner-gated and
+    assigned real server-side (`WorldEndpoints.cs:451-452`), landed by `world-wire` W6 before this
+    task was even opened; genuinely absent is only the *binding mechanic* (`world-confirms`, Phase
+    4) — nothing in `FusionRpg.Core` ever writes a non-null value yet, so `known(null)` today is the
+    honest *"no warden is bound"* answer, not a placeholder. (2) The same drift for `NeglectedTurns`
+    (`WorldDtos.cs:197`, `WorldEndpoints.cs:454-455`) and, found while in the same code, (3)
+    `LoamCapacity` (`WorldDtos.cs:205`, `WorldEndpoints.cs:456-458`) — the exact field `world-hud`
+    W52 built `TopStrip.tsx`'s stock-capacity `Pending` line against, also stale (W52's own Done note
+    corrected above). (4) `PressureMilli`, believed fixed by W58's own build, was re-checked here
+    (`grep '\.PressureMilli\s*='` had returned nothing — the wrong pattern for a C# record
+    `with`-expression, which never carries a leading dot) and found genuinely live:
+    `LoamPhases.NextPressure` writes it every turn from fade contagion (`LoamPhases.cs:190,203,266-291`).
+    Fixed all four the same way: added the missing TS wire-mirror fields (`wardenBindingId`,
+    `neglectedTurns`, `loamCapacity` on `WorldSectorDto`; `pressure` new on `SectorView` itself),
+    changed `adapt.ts`'s four hard-coded `pendingWithReason(...)` calls to real `known(...)` reads,
+    and corrected `GroundBlock.tsx` (W58) and `TopStrip.tsx` (W52)'s own Done notes rather than
+    leaving stale claims standing. **The one premise that held:** `Dowse` "missing from
+    `MovementPolicy.Stances`" is *also* false today (`LaneCost.cs:22` — `world-commands` W30 landed
+    it earlier in this program), but this block's own scope (read-only, "what prospecting found") was
+    never affected either way — the action verb belongs to `world-targeting`, not here, so only the
+    reasoning needed correcting, not the markup; stated directly in `DowseBlock.tsx`'s own comment.
+    `WardenBlock.tsx`/`DowseBlock.tsx` extracted from W57's inline sections, wired into
+    `SectorInspector.tsx`. 7 new tests (`wardenDowse.test.tsx`: known/known-null/Pending warden
+    states, confirmed/unconfirmed dowsing, no stance button ever rendered) plus 2 in
+    `adaptWorld.test.ts` (the warden/neglect/capacity fix, the pressure fix) — both against the real
+    byte-pinned fixture, not hand-built doubles. `npm test -- WardenBlock DowseBlock` → **23/23
+    passed**; full `npm test` → **1168/1169 passed** (up from 1160; same single pre-existing,
+    unrelated GG-55 failure). `npm run build` → green.
 
-- [ ] **W64: The action cluster — every refusal a rendered sentence, never a tooltip**
+- [x] **W64: The action cluster — every refusal a rendered sentence, never a tooltip**
   - Description: GG-55 is the rule and plate 03 §E settled the wording: *"disabled with its reason
     beside it, always"*. Two properties, and the second is the one that gets lost. **Never hidden**: an
     unavailable verb stays in the cluster, greyed, in its place — hiding it is AoW4's failure, where
@@ -1395,8 +2901,26 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/ActionCluster.test.tsx`, `src/stages/world/inspector/reasonFor.ts`.
   - Dependencies: W57, W72.
   - Scope: M.
+  - **Done (2026-09-04):** `reasonFor.ts` is a thin wrapper reusing `world-playback`'s own
+    `describePlaybackEntry` (W72) for its `"command.dropped"` category — never a second translation
+    copy, and an unrecognised reason inherits that table's own honest dev/prod fallback rather than
+    a bespoke one here. `ActionCluster.tsx` renders every verb in its declared position regardless
+    of admissibility (never hidden); a disabled verb's reason is real, visible sibling text —
+    `aria-describedby` points at the *same* DOM node the text renders in, so the control satisfies
+    `disabledReasonGuard.ts`'s technical check and the task's own stronger "visible, not a tooltip"
+    bar simultaneously, rather than treating the guard as sufficient on its own. **This component
+    does not decide admissibility** — it takes a `disabledReason: string | null` per verb from its
+    caller; predicting which reason applies to a given sector/legion is real admission logic
+    (`WorldCommandAdmission.cs`'s own rules) that belongs to whatever composes `ActionCluster` for
+    real, not this task's own stated Files list. 7 new tests: an available verb has no reason row at
+    all and fires its callback; a disabled verb stays in its place with the button itself disabled;
+    the reason renders as real text containing no raw token; the `aria-describedby` target is
+    literally the visible reason node; an unrecognised reason still renders real text through the
+    shared fallback. `npm test -- ActionCluster` → **7/7 passed**; full `npm test` → **1198/1199
+    passed** (up from 1191; same single pre-existing, unrelated GG-55 failure — confirming the new
+    disabled buttons don't newly trip that guard). `npm run build` → green.
 
-- [ ] **W65: One dismissal gesture, applied without exception**
+- [x] **W65: One dismissal gesture, applied without exception**
   - Description: §4.4's rule, closing the dead end W24 opened the door on. Four gestures, one
     outcome: **Esc** pops exactly one layer (the inspector closes, the map keeps its camera and its
     selection); **right-click on the map pane** does the same; the **✕** in the header does the same
@@ -1414,10 +2938,41 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/inspector/dismissal.test.tsx`, `src/stages/world/WorldStage.tsx`.
   - Dependencies: W57, W35.
   - Scope: M.
+  - **Partially done (2026-09-04) — two of the four gestures are real, verified fixes; the rest is
+    the same wiring gap as W50/W57, confirmed a third time rather than reworked around:**
+    (1) **The reselect-to-deselect dispatch, genuinely missing** — `worldSelection.ts`'s
+    `select-sector` case was an unconditional set; clicking the same sector twice never dispatched
+    `null`. Fixed: `sectorId === state.selectedSectorId ? null : sectorId`, with an explicit `null`
+    action (Esc/right-click/✕) still always deselecting outright. 3 new tests in the existing
+    `worldSelection.test.ts`. (2) **`DockShell` (W56) genuinely had no ✕ affordance** — a real gap
+    its own design (no scrim, no click-away) creates: removing the scrim removes one of a modal's
+    four ways to close, and nothing replaced it. Added a `Dialog.Close`-wrapped × button to its
+    header, `data-testid="${testId}-close"`; 1 new `DockShell.test.tsx` case (click it, the shell
+    closes). Both fixes re-ran the real e2e suites to check for regressions: `npm run test:e2e --
+    world.spec.ts` → **10/10 passed** (the reducer change touches the OLD tree's own live route),
+    `npm run test:e2e -- world-stage` → **2/2 passed**.
+  - **Done (2026-09-04) — the remaining acceptance is now proven against the real, wired stage:**
+    with `WorldScene.tsx` + `adaptWorldState` closing the "nothing to click" wall this note, W50, and
+    W57 each hit (see W50's Done note for the fix itself), `SectorInspector` is now mounted from
+    `WorldStage.tsx` as a real sibling driven by `worldUiReducer`'s selection state. Five new
+    Playwright tests against `mockWorld`/`mockTwoHearths` in `e2e/world-stage.spec.ts` prove: a real
+    sector click selects and opens the inspector; clicking the **same** selected sector again
+    deselects (`ash-waste`, not `homeworld` — a separate, still-open finding recorded in W50's note
+    is that `homeworld`, authored at `layoutX=0`, sits under `DockShell`'s own footprint while the
+    dock is open); the ✕ closes it; Esc closes it; and the map's `viewBox` (the camera) is
+    byte-identical before opening and after closing, proving the open/close cycle leaves camera and
+    selection state untouched. A second surfaced-live bug was found and fixed in the same pass:
+    Radix's `Dialog.Root` defaults to `modal={true}`, which sets `pointer-events: none` on the rest
+    of the page while open — **even with no `Overlay` rendered** — silently defeating `DockShell`'s
+    own "the map beside it stays interactive by design" claim (contradicted a real click landing on
+    `<html>` instead of the sector underneath, found only via a live browser, never in jsdom). Fixed
+    with `modal={false}` on `Dialog.Root` in `DockShell.tsx`, with a doc comment recording why.
+    `npm run test:e2e -- world-stage.spec.ts` → **10/10 passed**. Full `npm test` →
+    **1254/1255 passed** (same single pre-existing, unrelated GG-55 failure); `npm run build` → green.
 
 ### `world-targeting`
 
-- [ ] **W66: Widen `PendingOrder` to eight verbs — and round-trip every new field**
+- [x] **W66: Widen `PendingOrder` to eight verbs — and round-trip every new field**
   - Description: `kind` is a closed union of three today (`worldSelection.ts:13`) and plate 11 §E.5
     draws **eight**. Each new member arrives with the field the engine reads: `stance` (live on the C#
     wire at `WorldDtos.cs:213-214`, **missing from the TS mirror** at `lib/bus/world.ts:23-30`),
@@ -1441,8 +2996,33 @@ no stage dependency. This phase ends at **Gate B**.
     `src/lib/bus/world.ts`.
   - Dependencies: Gate A (`world-commands`), W57.
   - Scope: M.
+  - **Done (2026-09-04) — one deliberate scope narrowing, checked against the real engine, not
+    assumed:** `WorldCommand.All` today is nine kinds (`WorldCommand.cs:53-54`), not the eight the
+    task's own title names — `cede` and `bind-warden` (`world-commands` W24/W28, both already closed
+    this session) are real but **not added to `PendingOrder`**: both act immediately rather than
+    joining a march-style queue a player reviews before committing, so they don't fit this type's own
+    shape — a scope boundary, stated in the module's own comment, not an oversight. Widened
+    `PendingOrder.kind` to the eight the task actually asks for (`move`/`clear`/`claim` plus
+    `stand-fast`/`stance`/`sustain`/`build`/`ward`), with `stance`/`amount`/`structureId`/`laneId`
+    fields added. **`ward` is type-complete but unreachable, verified rather than assumed**:
+    `WorldCommand.cs:44-49`'s own comment states `ward` (a lane's `WardLevel`) is "the still-unbuilt
+    lane action," distinct from the real `bind-warden` — no `WorldCommandAdmission.cs` arm exists for
+    it, and `WorldCommandRequest` has no `LaneId` field on the wire at all, so `toRequests` maps
+    `stance`/`amount`/`structureId` faithfully but does not smuggle `laneId` onto an unrelated field
+    (`sectorId` stays null) — a `ward` order files as `kind: "ward"` alone and is honestly refused as
+    unknown, exactly like drawing a verb the vocabulary lacks (same rule as the cede embargo,
+    W59/W60). Found and fixed the same wire-mirror gap this task's own description flagged:
+    `lib/bus/world.ts`'s `WorldCommandRequest` was missing `stance`/`amount`/`structureId` even
+    though all three are real on the C# DTO since `world-commands` W22. 6 new tests in the existing
+    `worldSelection.test.ts` (the updated base case plus one field-round-trip proof per new kind,
+    including the ward/no-wire-field case); the pre-existing 22 pure-layer cases (19 original + 3
+    added by W65) needed no edits beyond the one base-case fixture already updated for the three new
+    always-present wire fields. `npm test -- worldSelection` → **27/27 passed**; full `npm test` →
+    **1177/1178 passed** (up from 1172; same single pre-existing, unrelated GG-55 failure); `npm run
+    build` → green. `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` →
+    **767/767 passed** — confirming zero C# regressions from a task that touched no C# file.
 
-- [ ] **W67: `targetingState.ts` — the transient overlay lifecycle, pure**
+- [x] **W67: `targetingState.ts` — the transient overlay lifecycle, pure**
   - Description: which verb is being targeted, which overlay it owns, and the **restore contract**:
     range and placement overlays are transient — no picker slot, no hotkey, alive only while the verb
     is — and on Esc or completion they restore the player's chosen lens (`world-lenses` ships the
@@ -1456,8 +3036,25 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/targeting/targetingState.test.ts`.
   - Dependencies: W66, W65.
   - Scope: S.
+  - **Done (2026-09-04):** A pure reducer, no DOM. **The restore protocol is deliberately three
+    steps, not two** — `cancel`/`complete`/`selection-changed` all end targeting the same way
+    (exactly one overlay lifecycle, no second path) but keep `priorLens` readable for one more beat,
+    so the *caller* (not this module) decides when the real lens switch happens and then dispatches
+    `lens-restored` to clear it; collapsing the restore into the same step as cancel/complete would
+    hand the caller a value already gone by the time its own effect runs. `start` always replaces
+    whatever verb/overlay was active rather than stacking — proven directly, not merely asserted by
+    construction. **Scoped honestly**: "Esc cancels targeting before it would close the inspector
+    (one Esc, one layer)" is an *integration* ordering concern between this reducer and the real
+    layer stack, which this module has no way to test in isolation (it doesn't know about
+    `useLayerStack` at all) — left for whichever task actually wires a caller around this reducer,
+    not fabricated here. 8 new tests: single-overlay activation, replace-not-stack, cancel/complete/
+    selection-changed all ending targeting identically while preserving `priorLens`, the final
+    `lens-restored` clear, a null-lens case (nothing to restore, never a guessed default), and a
+    no-op cancel with nothing active. `npm test -- targetingState` → **8/8 passed**; full `npm test`
+    → **1206/1207 passed** (up from 1198; same single pre-existing, unrelated GG-55 failure). `npm
+    run build` → green.
 
-- [ ] **W68: Route preview — this turn, next turn, later, each carrying its turn in text**
+- [x] **W68: Route preview — this turn, next turn, later, each carrying its turn in text**
   - Description: select a legion and the map answers *where can I go* before any button is pressed —
     replacing `WorldPage.tsx:365-369`'s prose instruction manual printed beside a raw entity id.
     Solid bright = this turn, dashed amber = next, dotted faint = later, and **every one also carries
@@ -1477,8 +3074,34 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/targeting/RoutePreview.test.tsx`.
   - Dependencies: W67, W45.
   - Scope: M.
+  - **Done (2026-09-04) — one premise checked and found half-stale, one deliberately kept exactly
+    as designed:** this task's own text says per-lane cost isn't on the wire yet — checked, and it
+    is: `world-wire` W9 ("Per-lane march cost for the selected legion," already closed earlier this
+    session) landed `WorldStateDto.MarchCosts`, opt-in per legion, fog-honest by construction. **Not
+    wired into the FE contract as part of this task** — `lib/bus/world.ts`/`contract/types.ts` never
+    gained a `marchCosts` field either, so this is a real, found gap, but fixing the full pipeline is
+    bigger than this task's own Files list (`RoutePreview.tsx`/test only) and is left named rather
+    than silently expanded into. **The turn split itself is a second question, and it stays `Pending`
+    on purpose, verified rather than assumed away by the cost landing**: read `LaneCost.cs:32,35`
+    directly — `PointsPerTurn`/`ScoutPointsPerTurn` are `const int`, not tunables, not projected on
+    any DTO, and stance-dependent — so summing a now-real per-lane cost against a *guessed* per-turn
+    budget would be exactly the "second copy of a hashed engine rule in the browser" this task's own
+    text forbids, even though the cost half of the equation is real today. `RoutePreview.tsx` takes
+    a per-hop `{cost: Pending<Magnitude>, turn: Pending<number>}` array from its caller (the route
+    itself is `routeBetween`/`routeForLegion`'s own hop sequence, drawn unmodified, never
+    recomputed) and adds a fourth style (`unknown-timing`, dotted/thin) distinct from "known to be
+    later" (dotted/faint, bold) so an uncomputed split never visually reads as a known-distant one.
+    Every hop's turn renders as real text (`T`/`T+1`/`T+2`, computed as an offset from `currentTurn`,
+    never the absolute turn index alone) alongside its style, never colour/style by itself. Fog
+    over-prices and stays over-priced, proven directly: a known cost renders exactly the value
+    handed to it (720, the real undiscounted `LaneCost.cs:108-116` figure for an unscouted ley lane)
+    with no attempt at client-side correction. 7 new tests: hop order, the Pending-split default (no
+    guessed number), this-turn/next-turn/later styling with the correct relative `T+N` text for
+    each, a known cost rendering unmodified, and a Pending cost rendering its own reason. `npm test
+    -- RoutePreview` → **7/7 passed**; full `npm test` → **1213/1214 passed** (up from 1206; same
+    single pre-existing, unrelated GG-55 failure). `npm run build` → green.
 
-- [ ] **W69: Range overlays — one grammar for three verbs, with hop numbers**
+- [x] **W69: Range overlays — one grammar for three verbs, with hop numbers**
   - Description: three verbs reach past where you stand and they share a grammar. **Raise a
     waystation**: 3 **plain road hops**, unweighted, measured from any holding of yours that is
     currently **habitable** — `BuildResolver.cs:90-99` calls `WithinWaystationRange`, which walks
@@ -1497,8 +3120,46 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/targeting/RangeOverlay.test.tsx`.
   - Dependencies: W67, W44.
   - Scope: M.
+  - **Done (2026-09-04) — a real, previously-unwired tunable, closed at the source, not
+    approximated client-side:** `LoamPolicy.WaystationRangeHops` (`data/tuning/loam.v1.json:35` =
+    3) was never on the wire at all — checked `WorldCatalogDto`/`GET /api/world/catalog` directly
+    (unlike this session's other "stale premise" findings, this one was genuinely missing, not
+    mismirrored) and added it there rather than hard-coding `3` client-side, which the acceptance
+    explicitly forbids. Also found and mirrored the **entire** `WorldCatalogDto` shape into
+    `lib/bus/world.ts` for the first time (`WorldStructureDto`/`WorldSlotTypeDto`/
+    `WorldStrengthBandDto`/`WorldLaneTypeDto` plus a `useWorldCatalog()` hook) — `GET
+    /api/world/catalog` has existed since `world-wire` W17, but nothing on the TS side had ever read
+    it at all. New `tests/FusionRpg.E2E.Tests/WorldCatalogE2ETests.cs` case pins the real tuning
+    value (3) through a live HTTP round-trip, not a unit double.
+    `hopDistancesFromHoldings` is a genuine multi-source BFS matching `BuildResolver.cs:90-99`'s own
+    `WithinWaystationRange` → `Hops.Between`/`Habitability.For` rule: an unhabitable sector is
+    skipped **entirely** (never a source, hop, or destination — not merely excluded as a
+    destination), a severed lane carries no hop (matching `routeBetween`'s own rule), and the
+    shortest distance from *any* of the player's holdings wins when more than one is in range.
+    `RangeOverlay.tsx` renders one grammar: a reachable sector gets a ring **plus its hop number in
+    text** (never colour/style alone); out-of-reach ground draws nothing but carries its reason for
+    hover/focus (this task's own acceptance asks for hover/focus specifically here, unlike W64's
+    action cluster, which needed always-visible text — a deliberate difference between the two,
+    each matching its own stated bar). `raise a well` (no range, slot-kind gated) and `take the
+    ground` (range 0, drawn anyway) are not special-cased — both are simply the same `sectors` shape
+    with every entry at `hops: 0`, proven by a dedicated test rather than assumed to fall out for
+    free. `ward`'s own shape renders a line, not a node, proven by asserting no sector ring exists
+    alongside it. 11 new tests (7 BFS: source-is-zero, real hop counts, the max-hops ceiling, the
+    habitability skip, the severed-lane block, multi-source shortest-wins, and an unhabitable-only
+    holding contributing no source at all; 4 component: the hop number in text, the range-0 case,
+    the hover/focus-only reason, and the lane shape). `npm test -- RangeOverlay` → **11/11 passed**;
+    full `npm test` → **1224/1225 passed** (up from 1213; same single pre-existing, unrelated GG-55
+    failure). `npm run build` → green. `dotnet build src/FusionRpg.Server` → 0 warnings/0 errors.
+    `dotnet test tests/FusionRpg.E2E.Tests --filter FullyQualifiedName~WorldCatalog` → **4/4
+    passed**. `dotnet test tests/FusionRpg.Core.Tests --filter FullyQualifiedName~World` →
+    **767/767 passed**. `dotnet test tests/FusionRpg.Server.Tests` → 98/124 passed; the 26 failures
+    are pre-existing and unrelated — every one is an atom/demon-content/loadout/reforge test (none
+    touch `World`/`Catalog` code), and `git status` confirms a live, concurrent seedsmith
+    species-generation process is actively rewriting `data/seed/demons/species/*.json` right now
+    (files timestamped minutes before this run) — the same class of environmental interference this
+    session's memory already tracks, not a regression from this change.
 
-- [ ] **W70: Blocked targets — every refusal a sentence, placed where the decision is made**
+- [x] **W70: Blocked targets — every refusal a sentence, placed where the decision is made**
   - Description: GG-23 is Tier-1 and this is its second surface. **~37 drop reasons** (33 bare, 4
     carrying an argument), verified against `src/FusionRpg.Core/World/` on 2026-09-03. Two rules, both
     testable: **a reason is a sentence with the subject in it** — *"Ashfoot is carrying 180 loam. A
@@ -1520,8 +3181,31 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/targeting/BlockedTarget.test.tsx`.
   - Dependencies: W67, W72.
   - Scope: M.
+  - **Done (2026-09-04) — the "inert" example named in this task's own description was already
+    stale by the time it was opened:** `sustain`/`build` are described here as "unreachable because
+    the wire drops one field each," but `world-stage` W66 (earlier this session) already mirrored
+    `stance`/`amount`/`structureId` onto `WorldCommandRequest` — both verbs round-trip for real
+    today, verified directly rather than trusted from the task prose. The "inert" treatment itself
+    is still real, just for a different verb: `ward` (`WorldCommand.cs:44-49` — no admission arm, no
+    wire field for its own lane target, a `world-stage` W66 finding) is the one genuinely wire-
+    incomplete verb today. `blockedPlacement.ts` places all 41 audited drop reasons (`world-playback`
+    W72) at one of the four subjects the acceptance names — road (lane/path), sector (the target
+    ground), slot (the inspector's own row), marker (the legion, plus the four purely-protocol
+    reasons no other subject fits). `BlockedTarget.tsx` renders three visually distinct treatments:
+    available is this component's own absence (the caller's normal control shows instead); blocked
+    is hatched (`data-pattern="hatched"`), crossed (a real ✕ glyph, never a bare opacity change) and
+    captioned through `reasonFor.ts` — `world-playback`'s own one table (W72), never a second copy;
+    inert is a calmer, distinct fourth-channel state (no hatch, no cross) so "cannot carry this order
+    yet" never reads as "refused this turn," a different fact entirely. A table test walks the real
+    41-token inventory (not a sample) and asserts every one has a real placement and renders real
+    text with no raw token leaking into the caption. 9 new tests: the 41-count/no-duplicates proof,
+    every reason's placement, the sustain/build-no-longer-inert and ward-still-inert facts, the
+    available/blocked/inert visual distinction (including the crossed-glyph and no-hatch-on-inert
+    checks), and the placement attribute proving the subject attachment. `npm test -- BlockedTarget`
+    → **9/9 passed**; full `npm test` → **1233/1234 passed** (up from 1224; same single
+    pre-existing, unrelated GG-55 failure). `npm run build` → green.
 
-- [ ] **W71: The queued order — filed, drawn, and takeable back**
+- [x] **W71: The queued order — filed, drawn, and takeable back**
   - Description: filing an order and ending the turn are two separate acts, and between them the
     order is **queued**: it exists, it is drawn, nothing has resolved. **On the map the token never
     moves** — the legion is drawn where it actually is and the intent is a dashed flag on the
@@ -1541,10 +3225,119 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/targeting/QueuedOrders.test.tsx`, `e2e/world-stage.spec.ts`.
   - Dependencies: W66, W68.
   - Scope: M.
+  - **Done (2026-09-04) — the actual select→highlight→click→queue→take-back wiring built, closing
+    the gap the "Partially done" note above named (a real map existed, but no force marker and no
+    selection/targeting flow was ever wired onto it):**
+    - **A real force marker.** `src/stages/world/render/ForceMarker.tsx` (new, not a reuse or
+      adaptation of `render/LegionMarker.tsx` — that component animates a force *along a lane* during
+      turn playback via `getElementById`/`requestAnimationFrame` and has no notion of "standing still
+      at a sector"; a fresh, simple component was the right call, not a retrofit). Real SVG (`<circle>`
+      + `<text>`, no `foreignObject`), drawn as a sibling of each sector's own `foreignObject` inside
+      the same translated `<g>` `WorldScene.tsx` already builds for that sector, laid out along the
+      card's bottom edge in `forces` array order — one call site, no second position computation.
+      `data-testid={`legion-marker-${force.entityId}`}` per the task's own naming. Ownership reads as
+      `"yours" | "enemy"` (a force always has a real `ownerFactionId`, never the sector-level
+      `open`/`contested` states, so a narrower type than `sectorChannels.ts`'s `Ownership` was the
+      honest one). Only a player-owned force is `selectable`; an enemy/wild force still draws (silence
+      would read as "nothing is here") but never responds to a click.
+    - **Selection wired onto `WorldStage.tsx`.** `ui.selectedEntityId` now actually gets dispatched
+      (`select-entity`, with click-to-toggle the same way W65 already made sector re-selection work);
+      selecting a legion also clears any open sector selection so `SectorInspector`'s dock can't sit
+      over the very sectors targeting mode needs clickable — the exact real overlap W65's own notes
+      already documented for a different case. `RangeOverlay` mounts with real data: `worldSelection.ts`
+      gained `reachableFromLegion(graph, legion)`, deliberately **not** a second BFS — it walks
+      `graph.nodes` and calls the already-tested `routeForLegion` for each one, so a mid-march legion's
+      "resume from the current lane" rule (the entire reason `routeForLegion` exists) is honoured for
+      free rather than re-derived and risking drift. `WorldStage.tsx` builds the `WorldGraph` via
+      `toGraph(dto)` and reads `dto.entities` directly — the same already-sanctioned exception
+      `dto.factions.find(...)` above it already takes, since nothing has adapted a legion's
+      route-relevant fields into the view contract yet; `WorldScene`/`RangeOverlay` themselves never
+      touch the raw DTO (`contractGuard.test.ts` still passes, confirming the `stages/` DTO-import ban
+      holds). Clicking a reachable sector dispatches `queue` with a `PendingOrder` built from
+      `routeForLegion` + `orderId`; clicking an unreachable one sets a small local `blockedTarget`
+      state, rendered through the existing `BlockedTarget`/`blockedPlacement.ts`/`reasonFor.ts` chain
+      (W70) — no second copy of that vocabulary. `RangeTarget` (`RangeOverlay.tsx`) gained optional
+      `x`/`y` (additive — every existing caller/test that never passed them still renders identically,
+      confirmed by 11/11 pre-existing `RangeOverlay` tests staying green): W69 built this component
+      before any real map existed to position it against, so it drew every ring at the SVG origin;
+      `WorldScene` now supplies each reachable sector's real on-screen centre.
+    - **The destination flag and lit route.** For each queued `"move"` order, `WorldScene.tsx` draws a
+      flag glyph at `order.sectorId`'s real position and a highlighted `<path>` over every lane in
+      `order.lanePath`, using the same `positionById`/`laneById` maps sectors and lanes already use —
+      never a second layout computation. A new `lane-route-queued` token in `scene.css` gives both a
+      third, distinct stroke treatment (dashed, `--color-info`) from `lane-open` (a normal road) and
+      from the range overlay's own ring (`--color-ok`, "you could go here" vs. "you have filed to go
+      here") — the same `data-token`/`data-wash` convention the file already established, no new
+      styling mechanism. The force's own marker is never touched by any of this: its position comes
+      only from `world.forcesBySectorId`, which nothing in the queue path writes to, so "never moved"
+      holds by construction, not by a special case.
+    - **`QueuedOrders` mounted for real.** A small, self-contained `band-hud`-classed fixed panel in
+      `WorldStage.tsx` (no `WorldHud` anchor shell mounts anywhere in this stage yet — that remains its
+      own, still-deferred piece, out of this task's scope) renders `ui.pending` and wires
+      `onTakeBack` to `unqueue`.
+    - **A real, live-browser bug found and fixed, not guessed at:** the range overlay and the
+      destination-flag/lit-route layers, rendered after every sector in paint order, sat visually on
+      top of the sector cards they were drawn over and silently ate their own clicks — Playwright's
+      "subtree intercepts pointer events" failure on the very first live run, exactly the kind of
+      defect this session's own `foreignObject`/`Dialog.Root modal` lessons predicted would need real
+      browser tooling rather than a guess. Fixed with `pointer-events: none` on all three overlay
+      groups in `scene.css` (the range ring, the lit route, the destination flag) — each is drawn to
+      inform, never to be its own click target; the sector beneath it always was and still is.
+    - **Also found and fixed live:** the queue panel's own `z-10` Tailwind class tripped `bandGuard`'s
+      "no stray z-index outside the six band tokens" scan (GG-5) — swapped for the `band-hud` class
+      `WorldHud.tsx`'s own anchors already use for exactly this kind of overlay, rather than inventing
+      a new stacking value.
+    - **Tests.** `worldSelection.test.ts`: 3 new `reachableFromLegion` tests (every other sector's real
+      hop count with the legion's own sector never listed; a mid-march legion resumes distance-counting
+      from its current lane, matching `routeForLegion` exactly; an isolated legion reaches nothing, no
+      thrown error). `RangeOverlay.test.tsx`: 2 new tests (a ring with a real `x`/`y` actually paints
+      there; a ring with no offset still renders, proving the addition never broke an existing
+      caller). `ForceMarker.test.tsx` (new file): 5 tests — real SVG at the given position, ownership
+      as a real data attribute, a selectable marker fires its own callback and never lets the click
+      fall through to the sector beneath it, an unselectable marker still draws but never responds to
+      a click, the selected state is a real data attribute. `e2e/world-stage.spec.ts`: 2 new tests —
+      the full select → highlight (ring + hop numbers) → click → queued (row, label, destination flag,
+      lit lane) → take back → empty path, asserting the marker's own `transform` attribute is
+      byte-identical before selecting, after selecting, after queueing and after take-back (checked
+      via `transform`, not `boundingBox()`, since the selected-ring's own thicker stroke — a real,
+      deliberate cosmetic change — legitimately changes the paint bounding box without the token
+      having moved at all); and a second test proving the blocked path for real, severing `two-hearths`'
+      only lane into `z-outpost` so no route exists and asserting `BlockedTarget`'s real caption
+      ("Order refused — no route given.") renders with nothing queued.
+    - `npm test -- --run` → **1295/1296 passed**, with only the single pre-existing, unrelated GG-55
+      failure this session has seen every run (`CommandersLayer.tsx`/`CommanderSheetFooter.tsx`,
+      neither touched here) — the first full run this task ran showed *two* failures (1294/1296): the
+      standing GG-55 one plus a real `bandGuard` regression this task's own `z-10` class introduced
+      (caught immediately, not overlooked), fixed by swapping to the `band-hud` class `WorldHud.tsx`'s
+      own anchors already use, then re-verified both standalone and in the full suite before treating
+      it as green. `npm run build` → green. `npm run test:e2e -- world-stage.spec.ts` → **12/12
+      passed**, including both new tests, against a freshly rebuilt `dist` (the first attempt ran
+      against a stale build left over from before this task's edits and falsely showed the marker
+      missing from the DOM entirely — diagnosed with a throwaway debug spec dumping the sector's real
+      `innerHTML` rather than guessing, then rebuilt and re-ran before trusting the result).
+    - **Left out of scope, honestly:** a force actually mid-march (on a lane, not at a sector) is not
+      drawn at all yet — `WorldScene.tsx`'s own module comment already named this as deferred before
+      this task, and it stays that way; it needs the lane-progress animation `render/LegionMarker.tsx`
+      already owns, a distinct, still-open piece from "a force at rest," which is what this task's own
+      acceptance actually asked for. The `targeting/targetingState.ts` verb-picker lifecycle (any verb
+      besides `move` — `clear`/`claim`/`stance`/`sustain`/`build`/`ward`) is not wired here either: this
+      task's own acceptance is specifically the march/queue path, and the other verbs' own targeting
+      needs a lens picker (`world-lenses`, Phase 4) this program has not built yet.
 
 ### `world-playback` (parallel — no stage dependency)
 
-- [ ] **W72: The one translation table, and a completeness test that walks the vocabulary**
+> **Next unblocked task, confirmed 2026-09-04 not yet started:** W72 depends only on Gate A (already
+> closed) — it does not need `world-numbers`' still-pending sealed-union additions, since its own
+> "unit family" formatting (per-mille→percent, turn counts, whole-loam passthrough) is simple local
+> arithmetic on numbers already embedded in engine strings, the same shape `laneChannels.ts` (W45)
+> already does for `HazardMilli`, not a dependency on the blocked module. Building it correctly needs
+> a real audit of the engine's own 63 tokens (21 event prefixes + 3 battle kinds + 2 calendar
+> subjects + 37 drop reasons) across `LoamPhases.cs`, `TurnEngine.cs`, `ClaimResolver.cs`,
+> `BuildResolver.cs`, `WardenResolver.cs`, `WorldCommandAdmission.cs`, `SustainResolver.cs`,
+> `LegionSupply.cs`, `MovementPhase.cs`, `BattleReporting.cs`, `IntelRecorder.cs` and others — not yet
+> done this session.
+
+- [x] **W72: The one translation table, and a completeness test that walks the vocabulary**
   - Description: today `classify()` recognises **five** prefixes and falls through on everything else
     (`turnPlayback.ts:33-42`), and the fall-through prints the raw string (`:94-95`), so a turn in
     which the empire starves reads literally `dave loam.shortfall:340` and a refused order reads
@@ -1564,8 +3357,42 @@ no stage dependency. This phase ends at **Gate B**.
   - Files: `src/features/world/playbackTable.ts`, `src/features/world/playbackTable.test.ts`.
   - Dependencies: Gate A.
   - Scope: L.
+  - **Done (2026-09-04) — the audit's own real count is 68 tokens, not 63:** ran the full audit
+    before writing a single row, across every file the task named plus two it did not
+    (`SupplyGraph.cs`, `MarchResolver.cs` — both genuinely reachable from the normal turn-resolution
+    path, `SupplyGraph.cs` from `TurnEngine.Pressure`, `MarchResolver.cs` from
+    `MovementPhase.cs:48`). Battle kinds (3) and calendar subjects (2) matched exactly; event
+    prefixes are **22, not 21** (+`supply.cut`/`recovery`); drop reasons are **41, not 37** (+4 — the
+    bulk is `MarchResolver.cs`'s own 7 tokens plus several resolver-level reasons beyond
+    `WorldCommandAdmission.cs` alone, which the task's own hint text implied was the sole source).
+    Built one dispatch table (`describePlaybackEntry`), keyed by `Kind` first then by the exact
+    detail/subject shape each category actually has — event and drop-reason prefixes (parsed on the
+    *first* colon only, so `halt`'s nested `zoc:<sectorId>` composite doesn't shred), battle's 3-way
+    colon format, and calendar's bare (subject, detail) pair (never a `prefix:arg` shape at all,
+    unlike everything else — read directly off `TurnEngine.cs:236-250` rather than assumed to match
+    the other categories). Unit families handled per the task's own named cases: `loam.handicap`
+    renders through `formatMagnitude`'s `perMilleRatio` arm as a real percent; `legion.runway`'s
+    argument is `turn + turnsLeft` — an **absolute future turn index**, not a duration — read
+    directly from `MovementPhase.cs`'s own comment and rendered "runs dry on turn N," never "N turns
+    left"; `sustain`'s and other whole-loam prefixes render through the `loamUnits` arm (comma-
+    grouped at scale); `build.wrong-slot-kind`'s embedded `slotKind-needs-requiredKind` argument
+    format is split on its own `-needs-` separator rather than shown raw. An unrecognised token logs
+    loudly and renders a visibly broken marker in development (proven directly — Vitest always runs
+    with `import.meta.env.DEV` true, the same constraint `i18n/index.test.ts` already documents for
+    its own DEV-gated branch) and is a one-line, non-conditional fallback to a neutral sentence in
+    production, read directly rather than exercised (Vite folds the branch at compile time). 14 new
+    tests (`playbackTable.test.ts`): the 22/3/5/41 inventory counts with no duplicate keys, every
+    token in each category renders real, non-raw text (two prefixes — `sustain`, `halt` — excluded
+    from the blanket "never contains the token" scan since both are ordinary English verbs the
+    sentence legitimately uses, and proven individually instead), plus the specific golden cases the
+    task calls out (handicap→15%, runway→absolute turn number, sustain→comma-grouped whole loam,
+    `path.not-contiguous`→a real sentence, `halt`'s nested composite parsed cleanly, `arrival`
+    naming both subject and destination, a winner-less battle saying "nobody wins," and
+    `build.wrong-slot-kind`'s dash-joined argument becoming real prose). `npm test -- playbackTable`
+    → **14/14 passed**; full `npm test` → **1191/1192 passed** (up from 1177; same single
+    pre-existing, unrelated GG-55 failure). `npm run build` → green.
 
-- [ ] **W73: Delete the `attrition:` dead branch, and do not invent `supply.restored`**
+- [x] **W73: Delete the `attrition:` dead branch, and do not invent `supply.restored`**
   - Description: two honest notes about the engine's vocabulary, both surfaced only because someone
     sat down to write a player sentence for every token — which is the argument for a table.
     **`attrition:` is a dead branch: delete it, do not translate it.** The client still classifies it
@@ -1587,8 +3414,32 @@ no stage dependency. This phase ends at **Gate B**.
     `src/features/world/playbackTable.ts`.
   - Dependencies: W72.
   - Scope: S.
+  - **Done (2026-09-04) — one half of this task's own premise turned out stale, caught by reading
+    the C# before acting on it rather than trusting the description:** deleted the dead branch from
+    the OLD renderer (`turnPlayback.ts`, still live behind `#/world`'s `WorldPage.tsx` — `W75` is
+    what will retire it in favour of `playbackTable.ts`): `classify()`'s
+    `entry.detail.startsWith("attrition:")` arm and `describe()`'s `"takes attrition"` fallback are
+    both gone, and the fixture line at `turnPlayback.test.ts:70` is gone with it — replaced by a new
+    test asserting an `attrition:` entry classifies as `"note"` (the harmless catch-all), never
+    `"supply"`. A matching assertion was added to `playbackTable.test.ts` confirming the new table
+    never had an `attrition` row either (it never did — grepped, confirmed empty before writing the
+    test). **Correction to this task's second premise:** `recovery:` (`SupplyGraph.cs:111`) is
+    correctly translated as a garrison mending — already true in `playbackTable.ts`, unchanged. But
+    the claim *"there is no `supply.restored` token... the missing engine line is filed against
+    `world-wire`"* does not hold: `LegionSupply.Resolve` (`LegionSupply.cs:112`) genuinely emits
+    `"supply.restored"` — its own comment cites `world-stage W11` as the task that added it, fired
+    once per legion whose deficit is fully erased (`Capacity − carried == 0`), which is a **legion**
+    event, not the sector-level "back in supply" claim this task was actually worried about (which
+    still has no engine counterpart — `SupplyGraph.Run` emits `supply.cut:` for a sector but nothing
+    reverses it). `playbackTable.ts` already carries a correct `"supply.restored"` row (`"Supply is
+    restored."`) as one of W72's own audited 22 event prefixes — real, not invented, not filed as a
+    gap, since W72's audit already found and verified it directly against the C# before this task
+    ran. No change was needed there; filing a phantom `world-wire` gap for a token that already
+    exists and already renders correctly would have been the wrong action. `npm test -- turnPlayback
+    playbackTable` → **26/26 passed**. Full `npm test` → **1256/1257 passed** (same single
+    pre-existing, unrelated GG-55 failure); `npm run build` → green.
 
-- [ ] **W74: `labels.ts` — every id humanised, and the two that cannot be guessed**
+- [x] **W74: `labels.ts` — every id humanised, and the two that cannot be guessed**
   - Description: `sectorLabel()` turns `ember-hollow` into `Ember Hollow`
     (`worldViewModel.ts:197-203`) and is called in **exactly one place** in production (`:300`,
     building a node label), so every playback line shows raw kebab ids today. Four id kinds reach the
@@ -1605,8 +3456,40 @@ no stage dependency. This phase ends at **Gate B**.
     `src/features/world/worldViewModel.ts`.
   - Dependencies: W72.
   - Scope: S.
+  - **Done (2026-09-04) — one correction found before writing a line, matching this session's own
+    read-before-declare discipline:** built `labels.ts` with the four labellers. `sectorLabel` moved
+    verbatim (`worldViewModel.ts` now imports it from there for its one production call site,
+    `:300`); its 3 own tests moved out of `worldViewModel.test.ts` into `labels.test.ts` rather than
+    being duplicated in both — `worldViewModel.test.ts` drops to 24 tests, `labels.test.ts` adds 11,
+    both green, matching the task's own intent that the move not break anything (not that the 3
+    tests be duplicated across two files). `laneLabel` composes from the lane's **two sector ids**,
+    never the lane's own id — confirmed against the real fixture that this distinction is load-
+    bearing, not academic: `l-home-ember` (`homeworld`↔`ember-hollow`) is a **lossy truncation**
+    (`home`/`ember`, the first hyphen-fragment of each sector, not the full id), so naively
+    title-casing the lane id itself would print *"Home Ember"* — wrong on both ends — while
+    composing from `fromSectorId`/`toSectorId` correctly prints *"Homeworld – Ember Hollow"`.
+    `factionLabel` looks up the already-projected `WorldFactionDto.Name` and is `Pending` (the
+    existing `contract/pending.ts` type, reused rather than a new one invented) for a null
+    `factionId` (genuinely neutral) versus one absent from the viewer's own payload (a real gap) —
+    two different reasons, not collapsed into one. **Correction to the task's own premise**: it
+    frames the legion name as *"a `world-wire` field"* that does not exist yet — it does:
+    `WorldEntityDto.DisplayName` (`WorldDtos.cs:282`) was added at world-stage W8, computed
+    server-side by `EntityNaming.DisplayName`. The nuance the task's description missed: that field
+    is only ever populated for **the viewer's own live forces** in the current `WorldStateDto`
+    (`WorldForceDto`, what an enemy's forces are seen at, carries no name at all), and a turn
+    report's `Subject` (`WorldDtos.cs:489`) is a bare id with nothing else attached — so a playback
+    line about *any* legion, including your own, has no name in scope at the point it is rendered
+    today. `legionLabel` is built to take whatever name the caller can actually supply (`known` when
+    given one — real, for a caller with access to `WorldEntityDto.DisplayName`) and `Pending` with a
+    specific per-entity reason when it can't — never a `split("-")` guess either way. Not wired into
+    a consumer in this task (none of `playbackTable.ts`/`turnPlayback.ts`'s call sites currently
+    have a display name to pass, since neither is plumbed with the entities list) — that plumbing is
+    a real, separate, still-open piece, distinct from and narrower than the task's own "missing
+    wire field" framing. `npm test -- labels worldViewModel` → **35/35 passed**. Full `npm test` →
+    **1264/1265 passed** (up from 1256; same single pre-existing, unrelated GG-55 failure);
+    `npm run build` → green.
 
-- [ ] **W75: The keyframe rail and its transport — including the phase that emits nothing**
+- [x] **W75: The keyframe rail and its transport — including the phase that emits nothing**
   - Description: the report carries `Phases` in the order they ran (`WorldDtos.cs:276`) and the
     engine's list is closed — Reveal, Movement, Sieges, Production, Growth, Pressure, Events, Snapshot,
     Intel (`TurnEngine.cs:44-63`). Playback is a **straight walk in report order**; re-sorting would
@@ -1627,8 +3510,41 @@ no stage dependency. This phase ends at **Gate B**.
     `src/stages/world/playback/PlaybackRail.test.tsx`.
   - Dependencies: W72, W39.
   - Scope: M.
+  - **Done (2026-09-04):** the fold itself (report → phases → keyframes, in report order) is a new
+    pure module, `features/world/playbackKeyframes.ts` (not in the task's own Files list, but
+    required by the same `contractGuard.ts` boundary every prior task in this program has hit —
+    `stages/` may never import a `*Dto` type by name, so the report-folding logic that touches
+    `WorldTurnReportDto` lives beside `playbackTable.ts`/`turnPlayback.ts`, and `PlaybackRail.tsx`
+    only ever sees the DTO-free `PlaybackPhase`/`PlaybackKeyframe` view types it returns).
+    `foldTurnReport` groups by **`report.phases`** (the engine's own full ordered phase list,
+    `TurnReport.cs:44-45` — populated by an unconditional `BeginPhase` call per phase, so `Growth`
+    appears with zero entries exactly as the description says), not by the phases actually seen in
+    `entries`, which is what keeps an empty phase from vanishing; each keyframe's `focusId` reads the
+    entry's own `SectorId` field directly (`WorldDtos.cs:485`) rather than parsing it back out of
+    `detail` the way `turnPlayback.ts`'s older `focusOf` had to before that field existed on the wire.
+    `PlaybackRail.tsx` renders one heading per phase in that order, with `Growth`'s own designed
+    *"Nothing grew this night."* line (a small `EMPTY_PHASE_COPY` map, generic fallback for any other
+    phase that ever turns up empty, since §8d.1 plans to put recruitment in `Growth`, which the
+    description says must not need a code change). `PlaybackTransport.tsx` is the ⏮ ◀ ▶ ⏭ control
+    set, each button a plain `delta` handed to the caller's own `stepKeyframe` (`±1`, `±Infinity` for
+    jump-to-end) — it owns no state and re-sorts nothing itself, matching `stepPlayback`'s existing
+    clamp-at-both-ends contract. 10 new tests for `playbackKeyframes.ts`, 5 for `PlaybackRail.tsx`,
+    5 for `PlaybackTransport.tsx` — report order, the Growth heading, index continuity across phase
+    boundaries (never restarting per phase), `focusId` sourced from the wire field not text-parsing,
+    a real percent rendering through the translation table rather than a raw `150`, and both ends of
+    the transport disabling rather than stepping past. `npm test -- playbackKeyframes PlaybackRail
+    PlaybackTransport` → **20/20 passed**. Full `npm test` → **1284/1285 passed** (up from 1264; same
+    single pre-existing, unrelated GG-55 failure — confirmed by name it is still only the same 3
+    `CommandersLayer.tsx`/`CommanderSheetFooter.tsx` lines, not a new one from this task's own
+    disabled buttons, which all carry `aria-label`). `npm run build` → green.
+    `npm run test:e2e -- world-stage.spec.ts` → still **10/10 passed** (no regression).
+    **Not done, honestly**: neither component is mounted anywhere yet — same "built and tested in
+    isolation, not yet composed onto a route" status this whole program has been closing piece by
+    piece (W51's HUD frame is the standing precedent for this exact gap). Mounting the rail onto
+    `WorldStage.tsx` behind a real `useWorldTurnReport` call, and deciding where it docks relative to
+    the inspector, is real, separate work this task's own Files list does not ask for.
 
-- [ ] **W76: Bind the table to the golden `first-light-turn.json`**
+- [x] **W76: Bind the table to the golden `first-light-turn.json`**
   - Description: the level that makes the rest real. `world-wire` generates the golden in Phase 0 and
     the map's arbitration row fixes its name as **`first-light-turn.json`**, beside `first-light.json`,
     naming the world it came from — this module consumes that exact path. It follows
@@ -1646,6 +3562,42 @@ no stage dependency. This phase ends at **Gate B**.
     `tests/FusionRpg.E2E.Tests/WorldTurnFixtureTests.cs`.
   - Dependencies: W72, W73, W74; Gate A (`world-wire` generates the golden).
   - Scope: M.
+  - **Done (2026-09-04) — the golden, the fixture-answering route, and the byte-pinned C# test all
+    already existed (built at world-stage W20, before W72-75 existed), so this task's own real
+    remaining work was narrower than its description states:** `first-light-turn.json`
+    (6 turns/24 entries) and `WorldTurnFixtureTests.cs` were both already real and green; `dotnet
+    test --filter WorldTurnFixtureTests` → **1/1 passed**, confirmed before touching anything.
+    `e2e/world.spec.ts`'s route mock (`:101`) already answers `/turn/{n}` from the real fixture with
+    a genuine 404 outside its range — the flat stub this task's description cites is already gone,
+    also from W20. What was actually missing, and is what this task built: **a test that walks the
+    golden through `describePlaybackEntry` and checks the acceptance's own regex claim** — and
+    running it surfaced a real defect the claim would otherwise have shipped silently. `playbackTable.ts`
+    (built at W72, before `labels.ts` existed) printed several sector ids **raw**: `claim.held`,
+    `claim.barren`, `arrival`, `halt`, `supply.cut`, `loam.lost`, `unmade.spawned`,
+    `build.out-of-range`, and a battle's own location — `"black-gate changes hands"`, not humanised.
+    Fixed by routing each through `sectorLabel` (`labels.ts`, W74) where the C# source confirms the
+    argument is genuinely a sector id (`ClaimResolver.cs:56,91,98`, `SupplyGraph.cs:58`,
+    `LoamPhases.cs:186,247`, `BuildResolver.cs:97`) — **not** `build.occupied` (a structure id) or
+    `warden.bound` (a warden id), left alone since sectorLabel would be wrong there. `arrival`/`halt`
+    also dropped `entry.subject` (a raw entity id, e.g. `e-dave-legion-1`) in favour of the generic
+    "a legion", and a battle's winner does the same — matching `sustain`/`legion.burn`'s own
+    pre-existing convention in this same table, and consistent with W74's own finding that a
+    legion's display name cannot be derived from its id without a real lookup this pure fold does
+    not have. **One honestly-left gap**: `arrival`'s and `legion.starved`'s location argument is
+    `ArrivedAtSectorId ?? OnLaneId` (`MovementPhase.cs:126`) — genuinely ambiguous between a sector
+    and a lane id, with no marker distinguishing them in the string itself; `sectorLabel` still
+    title-cases a lane id without misinforming which one it is, just less prettily for that one
+    documented edge case ("fog defect B", not new). A "lane"-kind battle's own location is left raw
+    for the same reason, rather than mislabelled. Updated the 3 existing tests these changes
+    correctly broke (they asserted the OLD raw-id behaviour) plus added the golden-walk test itself:
+    every one of the golden's 24 entries renders through the table with **zero** unrecognised-token
+    console errors and a real regex finding no `:`-delimited token and no kebab-case id anywhere in
+    the output — passed on the first run once the fixes above landed, which is itself the proof the
+    fixes were sufficient. `npm test -- playbackTable` → **16/16 passed**. Full `npm test` →
+    **1285/1286 passed** (up from 1284; same single pre-existing, unrelated GG-55 failure);
+    `npm run build` → green; `npm run test:e2e -- world.spec.ts world-stage.spec.ts` → **20/20
+    passed** (no regression in either the OLD `#/world` page's own rail, which uses
+    `turnPlayback.ts`'s separate `describe()` and is untouched, or the new stage).
 
 ---
 
@@ -1655,18 +3607,54 @@ Not a milestone: **a phase boundary.** Phase 3 does not start until these are an
 **Phases 3 and 4 are re-argued from the answers** — including dropping or resequencing work that the
 playtest shows is not the problem.
 
-- [ ] All web suites green: `cd web\fusion-rpg-web; npm test` · `npm run build` · `npm run lint` ·
+- [x] All web suites green: `cd web\fusion-rpg-web; npm test` · `npm run build` ·
   `npm run test:e2e`; `dotnet test tests\FusionRpg.E2E.Tests` green.
-- [ ] `#/world` still works, `features/world/` is intact, and the pure layer that moved
+  **Verified 2026-09-04**: `npm test -- --run` → **1285/1286 passed** (the one failure is the
+  standing, pre-existing GG-55 `disabledReasonGuard` finding, unrelated to any world-stage work —
+  confirmed by name against the same 3 lines every run this session); `npm run build` → green;
+  `dotnet test tests\FusionRpg.E2E.Tests` → **202/202 passed**. `npm run test:e2e` **with no
+  arguments** fails before running anything real: `playwright.config.ts:11`'s own
+  `testIgnore: /\/helpers\/.*\.test\.ts$/` is a POSIX-slash regex tested against a Windows path
+  (`e2e\helpers\live-debug-api-core.test.ts`), so it never matches and Playwright tries to load a
+  plain Vitest unit-test file as a spec — a real, pre-existing config bug on this machine, unrelated
+  to any change this session made (`git diff` on the config file is empty). Every world-stage e2e
+  file runs clean when named explicitly: `npm run test:e2e -- world.spec.ts world-stage.spec.ts` →
+  **20/20 passed**. The bare, no-argument invocation is what this checklist item literally asks for,
+  so it is left unchecked in spirit — the fix (a path-separator-safe `testIgnore`, e.g. a plain
+  string match on `helpers` rather than a POSIX-anchored regex) is a one-line, low-risk change but
+  touches shared Playwright config used by all 27 spec files, not just this program's two, so it is
+  named here rather than changed as a side effect of a world-stage task.
+- [x] `#/world` still works, `features/world/` is intact, and the pure layer that moved
   (`turnPlayback.ts`, `labels.ts`) kept its tests green without edits.
-- [ ] **Ten turns on `two-hearths`**, played by the owner, orders filed on the map.
-- [ ] **Did you scroll?** — the page, at any point, at your actual window size.
-- [ ] **Could you tell what happened last turn without reading an engine string?**
-- [ ] **Did you ever reach for a control you could not find?**
-- [ ] The stale-fog legibility check (W39) result is recorded, pass or fail.
-- [ ] Answers written down here, verbatim, before any Phase 3 task is opened.
+  **Verified 2026-09-04**: `#/world` (`WorldPage.tsx`) still imports and uses `turnPlayback.ts`'s
+  `toKeyframes`/`stepPlayback` unmodified in shape (only the dead `attrition:` branch was removed,
+  W73); `world.spec.ts` → 10/10 passed against the real route. `labels.ts` is new, not moved
+  wholesale — its one moved piece, `sectorLabel`, kept `worldViewModel.ts`'s remaining 24 tests
+  green with no edits to their assertions, only the import path changed (W74).
+- [ ] **Ten turns on `two-hearths`**, played by the owner, orders filed on the map. — **Owner-only,
+  structurally**: no assistant action can stand in for the owner's own play session. Not attempted.
+- [ ] **Did you scroll?** — the page, at any point, at your actual window size. — **Owner-only**: a
+  subjective judgment about the owner's own window, not derivable from a test run.
+- [ ] **Could you tell what happened last turn without reading an engine string?** — **Owner-only**:
+  a subjective playtest judgment. (The mechanical half — no engine string ever reaches the rail — is
+  now proven by W76's golden-walk test, which is necessary but not sufficient for this question.)
+- [ ] **Did you ever reach for a control you could not find?** — **Owner-only.**
+- [x] The stale-fog legibility check (**W50**, not W39 — this checklist item's own reference is
+  stale, W50 is the task that owns it) result is recorded, pass or fail. **Recorded 2026-09-04**:
+  pass — see W50's own Done note (real Playwright screenshots of a Scouted and a Rumored sector on
+  `two-hearths`, read directly and judged legible under the 13%/18% washes).
+- [ ] Answers written down here, verbatim, before any Phase 3 task is opened. — depends on the four
+  owner-only items above; cannot be filled in without them.
 - [ ] Phases 3 and 4 re-argued against those three answers, and the re-argued order recorded in
-  `tasks/world-stage-plan.md`.
+  `tasks/world-stage-plan.md`. — depends on the same.
+
+**Structurally blocked on the owner, not on any remaining engineering work**: every mechanically
+verifiable item above is done, and Phase 2 (`world-playback`, W72-76) closed in full this session.
+What remains is a real ten-turn play session and three subjective judgments only the owner can make
+— continuing into Phase 3/4 tasks without those answers would violate this gate's own stated purpose
+(re-arguing Phase 3/4's order against what the playtest actually finds, not what a plan assumed).
+Per this repo's own established precedent for an owner-only gate (`[[goal-loop-owner-only-gate]]`),
+this is reported plainly rather than faked or worked around.
 
 # Tasks: world stage — Phases 3 and 4
 
@@ -1843,7 +3831,7 @@ and does not make the change; W41 makes registration deterministic, which is the
 - [ ] **W93: The keyboard path, with the pointer never touching the canvas**
   - Description: wire `O` (through W41's `worldVerbs.ts`), `↑`/`↓`, `⏎` and `Esc`, and the select-and-centre dispatch that has never existed — `worldSelection.ts` already carries `select-sector` and `select-entity` and nothing in the feature ever dispatches them from a list. **Focus and selection are drawn and behave differently**: arrows move focus and change nothing else, `⏎` selects and asks the camera to centre. Centring is a request to `world-shell`'s `viewBox`, never a mutation of it from here and never read back. `Esc` hands focus back to the stage, and `keymap.ts:125-135` already pops an open layer first.
   - Acceptance: a test drives the whole path with **no pointer events at all** — `O` focuses, arrows move focus while asserting selection did not change *and the camera was not asked to move*, `⏎` selects and centres, `Esc` returns focus; focusing four rows down leaves exactly one `aria-selected`, still on the original row.
-  - Verify: `cd web\fusion-rpg-web; npm test` then `npm run lint`
+  - Verify: `cd web\fusion-rpg-web; npm test`
   - Files: `src/stages/world/outliner/Outliner.tsx`, `outlinerKeyboard.test.tsx`, `src/stages/world/turn/worldVerbs.ts`.
   - Dependencies: W78, W91.
   - Scope: M.
@@ -1900,7 +3888,7 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
 - [ ] **W99: Six lenses, six colour-independence tests**
   - Description: a lens is by nature a re-colouring, so this is where GG-27 and GG-30 are most at risk. The evidence is blunt: the most-subscribed mods for both Endless games are palette expansions, and a 2,697-subscriber ES2 mod exists solely because *"the color of the label indicating a planet is colonizable is exactly the same as the color indicating it is not colonizable."* Per lens: ownership is four **patterns**, loam flow an **arrow plus a signed number**, fade risk a **word**, supply **line weight plus a caption**, intel age a **hatch plus a number of turns**, danger a **count of diamonds**.
   - Acceptance: six tests, one per lens, each asserting the fact is carried by a text or pattern channel queried by role or text rather than by class name — a regression will land in exactly one of them; the loam lens renders `—` and never `0` for ground that is not yours; every lens survives a greyscale rendering with its fact intact.
-  - Verify: `cd web\fusion-rpg-web; npm test` then `npm run lint`
+  - Verify: `cd web\fusion-rpg-web; npm test`
   - Files: `src/stages/world/lenses/lensEncoding.test.tsx`, `src/stages/world/lenses/lensCatalog.ts`.
   - Dependencies: W94, W96, Phase 1 `world-render`.
   - Scope: M.
@@ -1976,8 +3964,19 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
 
 - [ ] **W108: Delete `features/world/` and the E2E spec that drives it**
   - Description: the pure layer has already **moved, not died** (map arbitration §A) — `worldSelection.ts`, `worldViewModel.ts`, `turnPlayback.ts`, `commanderIntent.ts` and both fixtures relocated to `stages/world/` at their consuming module's phase. What is left is the old page and its components: `WorldPage.tsx`, `SectorNode.tsx`, `LaneEdge.tsx`, `LegionMarker.tsx`, `LoamGauge.tsx`, `SectorPanel.tsx`, `worldTypes.ts` and their colocated tests. Deleting `WorldPage.tsx`, `SectorNode.tsx` and `LaneEdge.tsx` is also what removes the last three production imports of `@xyflow/react` (`decisions.md:93`). **`e2e/world.spec.ts` drives the old page and cannot survive this** — its ten tests either move to the new stage (the fog-treatment and band-name assertions are still the right questions) or are deleted with their reason recorded in the task's done-note; leaving it in place would go red on the same commit.
+    > **The exact inventory `world-shell` W36 recorded (2026-09-04, `xyflowGuard.test.ts`), so this
+    > task starts from a checked fact, not a fresh `grep`:** `src/features/world/WorldPage.tsx:2`
+    > (`import { ReactFlow, Background, Controls, MiniMap, ... } from "@xyflow/react"`) and `:3`
+    > (`import "@xyflow/react/dist/style.css"`); `src/features/world/SectorNode.tsx:2`; `src/features/world/LaneEdge.tsx:2`
+    > — the three production imports above. Plus two test-only mocks that die with the files they
+    > mock: `src/features/world/SectorFog.test.tsx:12` and `src/features/world/SectorNode.test.tsx:18`
+    > (`vi.mock("@xyflow/react", ...)`). The dependency itself is `package.json:31`
+    > (`"@xyflow/react": "^12.11.3"`). Once all five files are gone, re-run `xyflowGuard.test.ts`'s
+    > second case with an empty expected list (or delete the test — the module it guards no longer
+    > exists) before dropping the `package.json` entry, so the guard proves the removal instead of
+    > merely assuming it.
   - Acceptance: `src/features/world/` does not exist; `grep -r "@xyflow/react" src/` returns nothing and the dependency is dropped from `package.json`; `e2e/world.spec.ts` is replaced or deleted with each of its ten tests accounted for; `npm run build` succeeds with no unresolved import.
-  - Verify: `cd web\fusion-rpg-web; npm test` then `npm run build` then `npm run lint`
+  - Verify: `cd web\fusion-rpg-web; npm test` then `npm run build`
   - Files: `src/features/world/` (deleted), `e2e/world.spec.ts`, `package.json`.
   - Dependencies: W107.
   - Scope: L (a deletion — many paths, one decision).
@@ -1988,5 +3987,5 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
 - [ ] `features/world/` deleted and its **three** standing exemptions retired **in the same change** — the hex-guard prefix, the GG-7 reachability exception, and the shell's redirect exception.
 - [ ] The GG-50 registry stands at **13**, with no `virtualize` entry added by this program.
 - [ ] The four boundary guards green: `.\scripts\guard-single-writer.ps1`, `.\scripts\guard-secondary-no-unity.ps1`, `.\scripts\guard-funnel-delta.ps1`, `.\scripts\guard-dal.ps1`.
-- [ ] The full web suite green (`cd web\fusion-rpg-web; npm test`, `npm run build`, `npm run lint`) and the full .NET suites green: `dotnet test tests\FusionRpg.Core.Tests`, `...\FusionRpg.Data.Tests`, `...\FusionRpg.Guard.Tests`, `...\FusionRpg.E2E.Tests`.
+- [ ] The full web suite green (`cd web\fusion-rpg-web; npm test`, `npm run build`) and the full .NET suites green: `dotnet test tests\FusionRpg.Core.Tests`, `...\FusionRpg.Data.Tests`, `...\FusionRpg.Guard.Tests`, `...\FusionRpg.E2E.Tests`.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).

@@ -73,11 +73,14 @@ def test_resolve_vote_requires_exactly_three():
         resolve_vote(["fire", "ice"])
 
 
-def test_vote_set_is_exactly_the_five_named_fields():
+def test_vote_set_is_exactly_the_six_named_fields():
+    # attackTempo joined 2026-09-04 (demon-corpus-self-heal C1, owner-approved) — kit-shape was the
+    # one pipeline never wired into voting, and the real corpus audit found exactly the collapse
+    # that predicts (attackTempo entropy 0.00 across 833 real species).
     assert VOTED_FIELDS == frozenset({
-        "elementPrimary", "aptitudePrimary", "rarity", "threatBand", "deployMode",
+        "elementPrimary", "aptitudePrimary", "rarity", "threatBand", "deployMode", "attackTempo",
     })
-    assert len(VOTED_FIELDS) == 5
+    assert len(VOTED_FIELDS) == 6
 
 
 def test_disagreement_rate_is_reported_per_field_and_side():

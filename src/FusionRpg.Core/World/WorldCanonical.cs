@@ -31,10 +31,19 @@ public static class WorldCanonical
 
         foreach (var s in w.Sectors)
         {
+            // `s.WardenBindingId` has always been in this row, but every world before world-stage
+            // W28 held it null — no production path ever set it. It is the first field here whose
+            // hash effect isn't "a number changed": once `bind-warden` (W28) is ordered, this cell
+            // carries a real id and the world's hash differs with no numeric magnitude having moved.
+            // world-map W44: RecruitStock/ProjectId/ProjectTurnsRemaining land together in one
+            // batched re-bless (decisions.md's L25 precedent) — every world before this task held
+            // all three at their zero/null default, so this cell's hash effect is the field batch
+            // itself, not a number that moved.
             Row(sb, "sector", s.SectorId, s.TypeId, s.Climate, s.DangerBand, s.Phase, s.OwnerFactionId,
                 s.StabilityMilli, s.PressureMilli, s.DepletionMilli, s.DevelopmentLevel,
                 s.AuthoredIntel, s.LastSeenTurn, s.LayoutX, s.LayoutY,
-                s.LoamStock, s.FractureIntensityMilli, s.WardenBindingId, s.NeglectedTurns);
+                s.LoamStock, s.FractureIntensityMilli, s.WardenBindingId, s.NeglectedTurns,
+                s.RecruitStock, s.ProjectId, s.ProjectTurnsRemaining);
 
             foreach (var sl in s.Slots)
                 Row(sb, "slot", s.SectorId, sl.SlotIndex, sl.SlotTypeId, sl.Element, sl.State,

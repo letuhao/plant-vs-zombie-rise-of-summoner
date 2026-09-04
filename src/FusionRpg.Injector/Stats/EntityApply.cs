@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using FusionRpg.Core.Lawn;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Injector.Bridges;
+using FusionRpg.Injector.Lawn;
 using FusionRpg.Injector.Stats;
 
 using FusionRpg.Injector.Host;
@@ -46,7 +48,18 @@ public static class EntityApply
                 // captured as a baseline like every other channel. Captured ONCE, on first sight —
                 // capturing later would bake an already-modified value in as if it were the original.
                 AttackInterval = p.thePlantAttackInterval,
-                ProduceInterval = p.thePlantProduceInterval
+                ProduceInterval = p.thePlantProduceInterval,
+                // E38 (spec-entity-fields-12plus.md): eight more plant fields, captured the same way
+                // and for the same reason — a live field on the plant's own side, so a baseline of
+                // exactly zero here is an ordinary value, never "this plant lacks the stat".
+                PlantShield = p.theShieldHealth,
+                AttackCountdown = p.thePlantAttackCountDown,
+                AttackSpeedAdder = p.attackSpeedAdder,
+                ProduceCountdown = p.thePlantProduceCountDown,
+                PlantSpeed = p.thePlantSpeed,
+                PlantMoveSpeed = p.moveSpeed,
+                PlantLevel = p.theLevel,
+                ShootingLevel = p.shootingLevel
             });
 
             if (!GameHooks.Applied.Add(ptr)) return;
@@ -158,7 +171,13 @@ public static class EntityApply
                 Arm1Max = z.theFirstArmorMaxHealth,
                 Arm2 = z.theSecondArmorHealth,
                 Arm2Max = z.theSecondArmorMaxHealth,
-                ZombieSpeed = z.uniqueSpeed
+                ZombieSpeed = z.uniqueSpeed,
+                // E38 (spec-entity-fields-12plus.md): four more zombie fields, captured the same way
+                // as ZombieSpeed immediately above.
+                ArmorFlat = z.theArmor,
+                TakeDmgMultiplier = z.takeDmgMultiplier,
+                ZombieSpeedCurrent = z.theSpeed,
+                ZombieOriginSpeed = z.theOriginSpeed
             });
 
             if (!GameHooks.Applied.Add(ptr))
@@ -251,6 +270,69 @@ public static class EntityApply
     {
         CheatState.TagProbe(payload);
         return payload;
+    }
+
+    /// <summary>
+    /// A-M2 lawn-reposition — the ONLY public way to move an actor (spec-lawn-reposition.md §2).
+    /// Called only from <c>MoveDrainHost.Tick</c>'s drain, never from a hook directly — that is
+    /// the entire point of record-then-drain, so by the time this method runs, being on
+    /// <c>InjectorLoop.Tick</c>'s own call stack IS the proof that no write happens inside a
+    /// Harmony hook (spec AC5).
+    ///
+    /// Deltas-not-absolutes does NOT apply here — restated so a later session does not "fix" it
+    /// in: a cell is a destination, not a magnitude, so <see cref="EntityWriteGate.ShouldWrite"/>
+    /// (a VALUE comparison over combat fields) is never consulted for a move.
+    /// <see cref="MoveDecisionPolicy.Decide"/> is this method's own, cell-shaped equivalent —
+    /// Core-side and pure, unlike this method, for the exact reason
+    /// <see cref="EntityWriteGate"/>'s own header gives: this assembly needs a real PVZ Fusion
+    /// install to build and never runs under CI, so the part that actually needs a regression
+    /// test has to live somewhere a test CAN reach.
+    /// </summary>
+    public static void MoveToCell(Plant? p, int col, int row, string source)
+    {
+        if (p == null) return;
+        try
+        {
+            var alive = p.thePlantHealth > 0;
+            var spawned = GameHooks.Applied.Contains(p.Pointer);
+            var decision = MoveDecisionPolicy.Decide(
+                alive, spawned,
+                p.thePlantColumn, p.thePlantRow,
+                col, row,
+                LawnCoords.LastCol, LawnCoords.LastRow);
+
+            if (decision.Outcome != MoveOutcome.Apply) return;
+            EntityPositionWriter.WritePlantPosition(p, decision.Col, decision.Row, source);
+        }
+        catch (Exception ex) { CheatState.Error("EntityApply.moveToCell.plant: " + ex.Message); }
+    }
+
+    /// <summary>Zombie overload of <see cref="MoveToCell(Plant, int, int, string)"/> — see that
+    /// overload's doc for the shared contract.</summary>
+    public static void MoveToCell(Zombie? z, int col, int row, string source)
+    {
+        if (z == null) return;
+        try
+        {
+            var alive = ZombieCombatFields.GetHp(z) > 0;
+            var spawned = GameHooks.Applied.Contains(z.Pointer);
+            // Zombies have no discrete column field (they walk continuously) — LawnCoords.ColFromX
+            // is the same read-only lane-math helper FX/HUD callers already use for the inverse
+            // problem. A -1 on a missing Mouse never spuriously matches a clamped 0..LastCol
+            // request, so the worst case here is a same-cell skip that fails to fire — it is
+            // EntityPositionWriter's own Mouse.Instance guard (spec §2) that actually protects the
+            // write, not this comparison.
+            var currentCol = LawnCoords.ColFromX(z.transform.position.x);
+            var decision = MoveDecisionPolicy.Decide(
+                alive, spawned,
+                currentCol, z.theZombieRow,
+                col, row,
+                LawnCoords.LastCol, LawnCoords.LastRow);
+
+            if (decision.Outcome != MoveOutcome.Apply) return;
+            EntityPositionWriter.WriteZombiePosition(z, decision.Col, decision.Row, source);
+        }
+        catch (Exception ex) { CheatState.Error("EntityApply.moveToCell.zombie: " + ex.Message); }
     }
 
     /// <summary>Diagnostic kept permanently (aura-skill Checkpoint 2/5, 2026-08-30): this is what

@@ -1,3 +1,4 @@
+using System.Reflection;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Atoms;
@@ -439,5 +440,81 @@ public class AtomCompilerTests
         // `default` is NOT absent under this encoding — it is cap 0, charges 0. Pinned so nobody
         // "simplifies" None back to new() and turns every unlimited atom into a dead one.
         Assert.NotEqual(default, RunnerLimits.None);
+    }
+
+    // ---- E35 (spec-match-modify.md §2.5): match.modify's opcode -----------------------------------
+
+    [Fact]
+    public void MatchModify_compiles_and_carries_the_ModifyMatch_opcode_with_field_and_amount()
+    {
+        var atom = Atom("atom.curse-swarm", "match.modify",
+            "{\"field\":\"zombieCountMultiplier\",\"amount\":1500}",
+            When(EffectTriggers.OnMatchStart));
+
+        Assert.Equal(AtomPath.Compiled, PathOf(atom));
+
+        var catalog = Compile(atom);
+        var def = Assert.Single(catalog.Defs);
+        var action = Assert.Single(def.Actions);
+
+        Assert.Equal(EffectActions.ModifyMatch, action.Action);
+        Assert.Equal("zombieCountMultiplier", action.Params["field"]);
+        Assert.Equal(1500, action.Params["amount"]);
+        Assert.Contains(EffectTriggers.OnMatchStart, def.Triggers);
+    }
+
+    // §2.5: no per-hit key-mismatch guard applies to this kind — field/amount travel through the
+    // runner path unrewritten too, matching the compiled shape exactly (unlike stat.modify/
+    // stat.derived/board.action's op-as-key rewrite).
+    [Fact]
+    public void MatchModify_with_an_onApply_range_goes_to_the_runner_with_field_and_amount_intact()
+    {
+        var atom = Atom("atom.curse-swarm-range", "match.modify",
+            "{\"field\":\"zombieCountMultiplier\",\"amount\":{\"min\":1200,\"max\":2000,\"roll\":\"onApply\"}}",
+            When(EffectTriggers.OnMatchStart));
+
+        Assert.Equal(AtomPath.Runner, PathOf(atom));
+
+        var entry = Assert.Single(Compile(atom).Runtime);
+        Assert.Equal("zombieCountMultiplier", entry.Params["field"]);
+        Assert.True(entry.Values.ContainsKey("amount"));
+
+        var (defs, rejected) = AtomCompiler.EmitRunnerDefs(new[] { entry });
+        Assert.Empty(rejected);
+        var def = Assert.Single(defs);
+        Assert.Equal(EffectActions.ModifyMatch, def.Actions[0].Action);
+    }
+
+    // §2.5 / criterion 2: "/effects/contract's actions array contains ModifyMatch, asserted by
+    // count." DebugEndpoints.cs's `/effects/contract` publishes exactly
+    // `PublicConstStrings(typeof(EffectActions))` verbatim (`actions = PublicConstStrings(typeof
+    // (EffectActions))`), so pinning that reflection here is the same assertion the wire array makes
+    // by construction -- matching TriggerVocabularyTests.cs's own established Core-side style for this
+    // exact endpoint, not a Server.Tests HTTP call.
+    //
+    // This module's own obligation was narrower than it first looked: E33 (spec-activation-edge.md
+    // §2.1a) already replaced the endpoint's hand-copied array with this same reflection call, so
+    // /effects/contract cannot under-publish a new EffectActions constant again by construction --
+    // there is no separate endpoint edit for E35 (or E36 below) to make. Declaring the constant IS
+    // growing the published list.
+    //
+    // E36 (spec-wave-control.md §2.1) grows this by one more, to 14, with WaveControl -- the SAME
+    // reflection mechanism, re-verified rather than assumed (the spec's own §2.1 citation calling this
+    // "a hand-maintained list currently missing two constants" was stale even before this module
+    // shipped; E35 had already found and fixed that).
+    // E37 (spec-projectile-control.md §2b.2) grows this by one more again, to 15, with BulletModify.
+    [Fact]
+    public void EffectActions_publishes_fifteen_constants_including_ModifyMatch_WaveControl_and_BulletModify()
+    {
+        var consts = typeof(EffectActions)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+            .Select(f => (string)f.GetRawConstantValue()!)
+            .ToArray();
+
+        Assert.Equal(15, consts.Length);
+        Assert.Contains(EffectActions.ModifyMatch, consts);
+        Assert.Contains(EffectActions.WaveControl, consts);
+        Assert.Contains(EffectActions.BulletModify, consts);
     }
 }

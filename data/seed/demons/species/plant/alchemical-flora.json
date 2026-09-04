@@ -19,17 +19,18 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "high"
+        "elementPrimary": "split",
+        "rarity": "high",
+        "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:51:43Z",
+      "emittedUtc": "2026-09-04T10:32:12Z",
       "minorityValues": {
-        "aptitudePrimary": "Precision",
-        "rarity": "grafted"
+        "elementPrimary": "dark",
+        "threatBand": "pest"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -46,42 +47,38 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Pierce",
+    "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "light",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Alchemical Flora"
+      "alchemical-flora"
     ],
-    "gameTypeId": 932,
+    "gameTypeId": 1391,
     "posture": "Force",
-    "pure": false,
+    "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The creature functions as a passive economic modifier that alters projectile properties rather than acting as an active combatant.",
+    "reason": "The creature functions as a passive environmental modifier that enhances specific projectiles rather than acting as a direct combatant.",
     "resourceProfile": [
-      "hp",
-      "hp",
-      "hp",
-      "hp",
       "hp",
       "hp"
     ],
     "side": "plant",
-    "speciesId": "GoldThreeTorch",
+    "speciesId": "GarlicTorch",
     "targetPreference": "backline",
     "threatBand": "nuisance",
     "traits": [
-      "Transmutative Projectiles",
-      "Currency Conversion",
-      "Multi-lane Trajectory",
-      "Wealth-Scaling"
+      "toxic-infusion",
+      "projectile-mutation",
+      "area-denial-spore"
     ],
     "variants": [
-      "blessed",
-      "mutated"
+      "normal",
+      "mutated",
+      "cursed"
     ]
   }
 ]

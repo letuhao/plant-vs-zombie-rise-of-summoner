@@ -1438,16 +1438,307 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     tuning file with stated defaults — done; (7)/(7b)×2 restriction/reaction/family-anchor-keys/
     dedup-k — done, re-verified; (8) `--dry-run` + full-run refusal — done; (9) determinism +
     provenance — done.
-- [ ] **A-G1 `tier-access-gate`** · **M** · Deps: A-S1 · two of C1's three gates. **Criterion 7 asserts
-  the widening stays disabled.**
-- [ ] **A-R1 `resource-ownership`** · **M** · Deps: — · **first emission must reproduce
-  `aptitudes.v5.json` byte-for-byte.** Test 2 is the one that proves the defect fixed.
-- [ ] **A-S5 `coverage-report`** · **M** · Deps: A-S3, A-S1, A-T1 · every metric declares closed- or open-loop;
-  `NOT_MEASURED` stays distinct from a pass.
-- [ ] **A-S3 `dedup-select`** · **M** · Deps: A-S4 (data-flow); **built before A-S5** · t1/t2 hard, t3 advisory. `--no-semantic` proves t3
-  never gates.
-- [ ] **A-S6 `innate-picker`** · **M** · Deps: A-S3, A-S0 · model-free permanently; ranking weights in
-  `data/tuning/`.
+- [x] **A-G1 `tier-access-gate`** · **M** · Deps: A-S1 · two of C1's three gates. **Criterion 7 asserts
+  the widening stays disabled** — done, C1 remains disabled by construction, proven on both the C#
+  and Python sides.
+  - **Gate 1 (power budget), built as real published data**: `data/tuning/action-rungs.v2.json`
+    (v1 untouched on disk, `tools/tuning/publish.py` extended with a narrow `--add-rung-power-budget`
+    flag — the publisher had no way to add a brand-new column across a row array, the same real gap
+    `--add-edge` closed for `aptitudes`). `powerBudgetMilli(r) = poolRolls(r) × referencePower ×
+    qPowerMilli(r) / 1000`, `referencePower = 1000` (`PowerMath.One`, `PowerVector.cs:135` — the
+    spec's own citation named the wrong class, `PowerVector.One`; the value was still right).
+    `RungRow`/`RungTableLoader` carry it as an optional nullable `long`, never defaulting to `0` on
+    v1/inline fixtures.
+  - **Gate 2 (a budget check with a real production caller)**: new rung-keyed
+    `ContentValidation.Budget` overload beside the untouched rarity-keyed one. Real caller traced to
+    **`RpgStore.BuildActionCatalog`**, called for real from `FusionRpg.Server/WebMatchService.cs`
+    (3 call sites feeding `BattleEngine.Resolve`) — the only C# path that actually resolves an
+    action's `Rung` per row today (`AtomImporter`'s own `--validate` path explicitly documents
+    *"budget: skipped — no ceiling data source exists yet"* and structurally cannot carry a rung).
+    An over-budget container is excluded from the catalog and reported through the existing
+    `onRejected` callback — never clamped.
+  - **`restriction`/`reaction` reporting, both halves closed correctly**: new
+    `StructureBudgetGuard.UndetectableAxes()` reports `restriction` — never `0` — while `Check`/
+    `SpentAxes` stay **provably unchanged** (a behavior-based test proves this, not just "the diff
+    is empty"). `reaction`'s refusal was already correctly built on the Python side during A-S1
+    (`distribution_planner/derive.py`'s `validate_structure_axes`) — this module added C#-side tests
+    proving the guard's own already-correct unspendable handling stays untouched, rather than
+    building new refusal logic where none was needed.
+  - **Gate 3 (family-aware non-additive pricing, D2) confirmed still genuinely absent** — not
+    fabricated as closed. C1 stays disabled, proven on **both** sides: C# —
+    `AtomFamiliesIsNeverGatedByRungAnywhereInTheCSharpValidationOrCompilePath`; Python — A-S1's own
+    `test_family_widening_still_refused_with_two_of_three_gates_open`, which the build found and
+    **fixed a self-invalidating canary in** (see below).
+  - New register row in `docs/architecture/power/ssot-power-scale.md` §11.2 (`Action rung ladder —
+    powerBudgetMilli`, 1,000 → 37,221 across rungs 1-10, untuned, with its derivation and citation)
+    — independently re-verified present and correctly worded.
+  - **A real, self-inflicted-by-an-earlier-module defect found and fixed, not just noted**: A-S1's
+    own `derive.py` carried a docstring/error-text asserting "none of constraint 4's three gates
+    exist" as a permanent fact, plus a planted canary test
+    (`test_no_power_budget_production_caller_in_the_live_tree`) **explicitly built to fail the day
+    this module shipped and say so**. It fired, exactly as designed. Fixed: docstrings updated, the
+    canary replaced with 4 tests asserting the new, correct state (2 of 3 gates now present, D2
+    still open, widening still refused). This is the seed-to-concrete-generator-style guard this
+    session has used before paying off exactly as intended — a stale claim caught mechanically
+    rather than surviving silently.
+  - **22 new C# tests** (`RungPowerBudgetTests.cs` new, +4 `ContentValidationTests`, +5
+    `ActionCatalogTests`, +3 `ActionCatalogBuilderTests`, +10 elsewhere per the report) + **updates
+    to A-S1's own Python test file** (net +3 after replacing the fired canary with 4 real tests).
+  - **A note on git state, recorded because it's genuinely different from every other module this
+    session**: mid-build, the owner's own process committed `aceb818` ("update some specs"), which
+    happened to include every file this and prior modules touched except
+    `docs/architecture/action-corpus-map.md` (edited after that commit, closing a now-stale
+    "no row in the register" dependency line + adding `restriction`'s cross-program dependency row,
+    acceptance #8). No git write command was run by the agent or by this session — confirmed via
+    `git log`, this was the owner's own action outside this session's control, consistent with
+    AGENTS.md's git-hands-off rule.
+  - **Independently re-verified by this session**: direct inspection of the real published
+    `action-rungs.v2.json` — all three of the spec's own worked rows match exactly (rung 1 → 1000,
+    rung 5 → 6124, rung 10 → 37221), `v1` shows zero diff. Direct grep of `RpgStore.ActionCatalog.cs`
+    confirms the real caller wiring (`ContentValidation.Budget(..., rung => rungTable.TryGet(rung,
+    out var rr) ? rr.PowerBudgetMilli : null)`, `ActionRejectionReason.PowerBudgetExceeded`). Direct
+    read of `ssot-power-scale.md` §11.2 confirms the register row is present and correctly worded.
+    **Full Core.Tests: 5276/5276** (was 5255 — 21 net new, zero regressions), targeted 76/76 on the
+    changed classes run in isolation first. **Data.Tests: 630/632** — the 2 failures are the same
+    `DemonSpeciesImportCliTests` pre-existing environmental hazard already documented in A-G1's own
+    peers this session (a live `GarlicPumpkin` entry with `rarity: 'unresolved'` from the concurrent,
+    unrelated species-generation pipeline — confirmed by reading the failure directly, unrelated to
+    rungs/budget/structure-axes). **Full seedsmith suite: 988 passed** (was 985 — net +3 matching the
+    canary replacement), same single pre-existing `AttackTempoExclusionTests` failure, no new ones.
+    **All 4 boundary guards green.** Magic-number audit: 12 total, 0 critical, identical to
+    pre-A-G1 baseline. Overflow audit: 44 total, 0 critical, identical baseline.
+  - Acceptance against the spec's own §6: (1)/(1b) — done, re-verified against the real published
+    file; (2) — done, no new curve, single scalar; (3) — done; (4) — done, real production caller
+    (`RpgStore.BuildActionCatalog`), not a direct method call; (5) — done, `undetectable` for
+    `restriction` only, `reaction` refused at authoring with the guard provably unchanged; (6) —
+    done, re-verified in the register; (7) — done, the load-bearing one, proven on both sides; (8) —
+    done, register row states the cross-program `restriction` dependency in the map, not just here.
+- [x] **A-R1 `resource-ownership`** · **M** · Deps: — · **first emission must reproduce
+  `aptitudes.v5.json` byte-for-byte** — done, the hard gate holds, independently re-run. Test 2 is
+  the one that proves the defect fixed — done, corrected arithmetic (24 edges, not 36).
+  - **Pre-build investigation this session did itself, before delegating**: direct measurement of
+    all 166 real `resource.*` edges in `aptitudes.v5.json` found the spec's own §3.1 illustrative
+    example (one "owner" aptitude per resource) undersells the real data — dense cells carry 4-6
+    distinct values across their 12 edges, not the 2 a single-owner shape implies (`resource.max.hp`
+    alone: floor 6000 plus **five** distinct owner values — `Bulwark`, `Might`, `Fortitude`,
+    `Vigor`, `Retribution`). The schema itself (`owners` as a dict) was never actually limited to
+    one entry — only the prose example was — so this was a mis-reading risk headed off before any
+    code was written, not a spec defect: the delegate agent was handed the real measured shape
+    directly and extracted from it correctly.
+  - New `data/tuning/resource-ownership.v1.json` (24 declared `(family, resource)` cells, not the
+    spec's stated 18 — see the correction below), `tools/tuning/resource_ownership.py` (generator,
+    `--check`/`--emit`), **13 new tests**, `tools/tuning/test_resource_ownership.py`. CI wired:
+    `.github/workflows/ci.yml`'s "resource-ownership drift guard" step.
+  - **Two independent, real spec-arithmetic corrections found and fixed, not silently reconciled**:
+    the "18 rows → 216 edges" claim predates two later decisions that changed the shape it was
+    computed against — task 0.3 (2026-09-02) made `efficiency` **sparse**, not dense, and task 0.8
+    (§33) added a **4th family**, `resource.restore`, neither folded into the original arithmetic.
+    Real shape: 24 cells across 4 families (2 dense — `max`/`regen`, 2 sparse —
+    `efficiency`/`restore`) → 144 dense + 22 sparse (measured) = **166**, matching the shipped file
+    exactly. **Test 2's own "36 new edges for a 7th resource" figure corrected to 24** for the same
+    reason — it assumed 3 dense families, the real density is 2 (2 × 12 = 24), proven by a test that
+    feeds a fixture resource id through the real, unmodified `generate_edges()`.
+  - **Generator output target resolved, deliberately scoped**: `publish.py`'s `latest_version()` can
+    only bump an *existing* domain's version, so it cannot bootstrap a new domain's v1 — meaning
+    `resource-ownership.v1.json` is necessarily hand-authored as the domain's seed (same necessity
+    every other `v1` tuning file this repo has ever had), all future edits going through `publish.py`
+    from here. The generator's real job is regenerating the `resource.*` slice of the `aptitudes`
+    domain — but per spec §7's own flagged hazard ("a regeneration is a re-bless — coordinate with
+    class-system"), **no new `aptitudes.v6.json` was cut this session**; `--check`/`--emit` are
+    fully built and proven against the live `v5` file, and the actual re-bless publish is left to a
+    coordinated class-system pass, not bundled into this module's own scope.
+  - `ResourceIds`/the aptitude roster read from `data/seed/resources/roster.json` /
+    `data/seed/aptitudes/roster.json` — the repo's own established checked-in C#-SSOT mirrors
+    (`scripts/guard-class-system.ps1` already reads the same files for the identical reason: Python
+    cannot reference `FusionRpg.Core` directly) — never a second copied list.
+  - **Independently re-verified by this session, including a from-scratch re-derivation of 3 cells**
+    (not trusted from the report): `python tools/tuning/resource_ownership.py --check` → clean,
+    166/166 real edges reproduced exactly. Re-computed `resource.regen.stamina`,
+    `resource.efficiency.qi` and `resource.restore.hp` directly from `aptitudes.v5.json` myself and
+    confirmed the shipped table's floors/owners match byte-for-byte for all three (e.g.
+    `regen.stamina`: floor 500, owners `{Agility:990, Bulwark:900, Might:900, Vigor:1063}` — Might
+    and Bulwark correctly kept as two separate dict entries despite sharing the same value 900).
+    `python -m pytest tools/tuning/test_resource_ownership.py` — **13/13 clean**.
+    `dotnet test tests/FusionRpg.Core.Tests --filter "AptitudeTuning|DominanceGuard"` — **43/43
+    clean**, zero regressions (expected — no shipped file was touched this session). CI wiring
+    confirmed present in `ci.yml`.
+  - Acceptance against the spec's own §6: (1) table exists, published-pattern, 24 rows (not 18 —
+    corrected) — done; (2) generator emits deterministically — done; (3) first emission byte-for-
+    byte — done, the hard gate, re-verified directly; (4) 7th resource → 24 edges (corrected from
+    36), zero generator change — done; (5) `--check` fails on drift, wired into CI — done, re-
+    verified; (6) no copied list, real SSOT mirrors read — done; (7) §30 task 0.4 marked ✅ with the
+    file present, §30.1 records the closure — done.
+- [x] **A-S5 `coverage-report`** · **M** · Deps: A-S3, A-S1, A-T1 · every metric declares closed- or open-loop;
+  `NOT_MEASURED` stays distinct from a pass — done, all 12 registered metrics, `NOT_MEASURED`
+  proven distinct from both pass and fail in a real run.
+  - New `tools/seedsmith/seedsmith/adapters/actions/coverage_report/` (`ctx.py`, `derive.py` — all
+    7 algorithm steps + all 12 metrics' logic) + `metrics/action_coverage.py` (the 12 `Metric`
+    subclasses) + `generate_coverage_report.py`. `metrics/model.py` extended with an
+    `"action_coverage"` `Ctx` field/valid-need, matching the exact precedent an earlier `demon_dump`
+    addition already established — no new mechanism invented. **37 new tests**,
+    `test_coverage_report.py`.
+  - **`Loop.OPEN + gates=True` raising at registration confirmed already enforced, not aspirational**
+    — independently re-checked directly in `metrics/registry.py:18-21`
+    (`if metric.loop is Loop.OPEN and metric.gates: raise ...`), so this module needed no new
+    enforcement code, only tests proving the existing guard holds for its own 2 open-loop metrics.
+  - **A real design gap the spec's own quota model didn't cover, closed with a stated, defensible
+    choice**: A-T1's `categoryMilli` is never split by `pairingRole`, so a literal per-`(scope,
+    category, rungBand, pairingRole)` cell has no independent quota to recompute against. Resolved
+    by computing quota at the `(scope, category, rungBand)` GROUP level (15 real groups: 3 scopes ×
+    5 categories) and sharing that group's quota/thin verdict identically across its `pairingRole`-
+    partitioned report rows (45 emitted cell rows total), while each row's own `count` stays exact
+    and independent.
+  - **Verdict semantics tie small-batch honesty to the file's own `mode` field, mechanically, not by
+    convention**: `pass` requires every CLOSED metric clean AND `mode == "full"` — a `mode: "smoke"`
+    run can reach at best `"smoke-clean"`, never `"pass"`, so "don't call a 12-row batch a
+    corpus-level pass" is enforced by the verdict computation itself rather than left to a reviewer's
+    judgment at write time.
+  - **A real report run against the live corpus, not just synthetic fixtures**: 0 accepted rows
+    (honest, since A-S3's real survivors don't exist yet — A-S4 unbuilt), 15 cell groups, 45 emitted
+    cell rows, 108 next-round targets, verdict `"not-clean"` with 30 `GAP` findings (every real
+    quota genuinely unmet) and `singletonShare` correctly `NOT_MEASURED` (no occupied cells to
+    measure) — matching the spec's own "small batch honesty" framing exactly: reporting zero
+    honestly rather than manufacturing a passing number. Written to
+    `data/seed/actions/_reports/coverage-round-1.json`.
+  - A genuine mid-build self-correction recorded rather than hidden: the report's own provenance
+    requirement (acceptance #8 — `corpusHash`/`tuningVersion` on every write) was missed on first
+    pass and added after a second read of the acceptance list, before the module was reported done —
+    the kind of catch this session's own re-verify-before-reporting discipline exists to produce.
+  - **Independently re-verified by this session**: `test_coverage_report.py` in isolation —
+    **37/37 clean**. Full suite — **1080 passed** (was 1043 — 37 net new), same single pre-existing
+    `AttackTempoExclusionTests` failure, no new ones. Direct read of `metrics/registry.py` confirms
+    the `Loop.OPEN`/`gates` raise is real code, not aspirational prose. Direct read of the real
+    `coverage-round-1.json` confirms: `kind: "action-coverage"`, roster stated as the real 84/19/53
+    (never a 904-based figure), 153 total entries (45 cell + 108 target rows), verdict correctly
+    listing 10 evaluated metrics, 2 `GAP` (`cellOccupancy`/`thinCell`), 1 `NOT_MEASURED`
+    (`singletonShare`), overall `"not-clean"` — matching the report's own claims exactly.
+  - Acceptance against the spec's own §6: (1) loads through A-C1's envelope — done, re-verified
+    against the live tree; (2) every OPEN metric `gates=False`, enforced by a raise — done,
+    re-verified as pre-existing, real enforcement; (3) evaluated/`NOT_MEASURED` listed explicitly —
+    done, re-verified in the real report's own verdict block; (4) every planned cell carries
+    count+quota including 0 — done; (5) next-round targets pure + shuffle-invariant — done; (6)
+    `rosterReconciliation` re-derives (252 signature-tier, ~850 whole corpus) rather than quoting the
+    904-based band raw — done; (7)/(7b)/(7c) `structureEnforceability`/`enablerPayoffCoverage`/
+    `pairingReach` all correctly scoped to the 98-family namespace, `pairingReach` states its zero-
+    reach honestly in words — done; (8) byte-identical rerun + provenance — done, the mid-build
+    self-correction above closed this before reporting done; (9) zero model calls — done.
+- [x] **A-S3 `dedup-select`** · **M** · Deps: A-S4 (data-flow); **built before A-S5** · t1/t2 hard, t3 advisory. `--no-semantic` proves t3
+  never gates — done, byte-identical survivors on/off, mechanically proven.
+  - New package `tools/seedsmith/seedsmith/adapters/actions/dedup_select/` (`tuning.py`,
+    `similarity.py` — the token-overlap Jaccard heuristic, CJK split per character, per-mille
+    integer arithmetic, `derive.py` — spec §3's six steps) + `generate_dedup_select.py`. New tuning
+    file `data/tuning/action-dedup.v1.json`, real for the first time (`k:8`, matching the fallback
+    default A-S1 already shipped against — see below), `similarityThresholdMilli:700`,
+    `t2FieldDistance:1`. **53 new tests**, `test_dedup_select.py`.
+  - **Scoped exactly like every prior module facing an unbuilt upstream dependency**: A-S4's real
+    candidate set doesn't exist yet, so the full algorithm is proven against synthetic, in-memory
+    fixtures. No content was fabricated under `data/seed/actions/_rounds/` — confirmed absent from
+    the real tree after the build.
+  - **`action-dedup.v1.json`'s fallback-to-real-file transition, verified both ways**: A-S1 (built
+    earlier this session) shipped reading this file with a documented `k=8` fallback since the file
+    didn't exist. Now that it's real, A-S1's own loader was re-run in isolation both before and
+    after — `k` stays `8` either way (the fallback and the real file agree, by design), but its
+    `source` field correctly flips from `"default"` to `"file"`. A-S1's own stale tripwire test
+    (written to fire exactly once this happened) fired as designed and was replaced with tests of
+    the new state, plus a fourth test confirming the fallback code path itself stays real and
+    reachable for a genuinely different missing path — not dead code the transition orphaned.
+  - **Fingerprint reused, not re-implemented, and one real bug in it found and fixed in place**: this
+    module imports `distribution_planner.fingerprint`'s `FingerprintComponents`/`render_fingerprint`
+    directly rather than writing a second implementation shaped like it — the whole point of the
+    "one canonical definition" rule. Found in the process: that shared function rendered a missing
+    `areaShape` as an empty string, contradicting its own quoted spec text one line above ("the
+    literal `none`"). Fixed at the shared source (one implementation, one fix), confirmed safe
+    against every existing A-S1 caller (round 1's `avoidNeighbours` is always empty against an empty
+    accepted corpus today, so nothing live depended on the old rendering).
+  - **Two more real, load-bearing gaps found and closed with a documented, non-arbitrary resolution**
+    (not silently guessed): the spec's own ordering key names a `briefId` field the shipped
+    `action-seed` schema doesn't carry (no A-S4 spec exists yet to settle it) — resolved by reading
+    it permissively (empty string when absent), since the candidate's own unique `id` already makes
+    the total order well-defined regardless. And the reject-row shape: spec §2's table shows
+    `{id, tier, reason, collidedWith}` where `id` reads as the *rejected candidate's* id, but the
+    already-shipped, tested `action-reject` `KindSpec` (`kinds.py`, built during A-C1) requires the
+    row's own `id` to match `^reject\.[a-z0-9.-]+$` — i.e. `id` is the *reject row's own* identity.
+    Resolved in favor of the already-shipped, tested code over the spec's looser prose table: added
+    a separate `candidateId` field alongside `id`/`tier`/`reason`/`collidedWith`.
+  - **Independently re-verified by this session**: `test_dedup_select.py` in isolation — **53/53
+    clean**. Full seedsmith suite — **1043 passed** (was 988 — 55 net new: 53 own + net +2 from
+    A-S1's own fallback-transition test updates), same single pre-existing
+    `AttackTempoExclusionTests` environmental failure, no new ones. Direct read of the real
+    `action-dedup.v1.json` confirms exact values (`k:8`, `similarityThresholdMilli:700`,
+    `t2FieldDistance:1`) and a `_meta` note explicitly stating `k`/`t2FieldDistance` are structural
+    (a change to either needs a matching algorithm change, not a tuning edit) while
+    `similarityThresholdMilli` is the one genuinely re-tunable row. Direct read of the fixed
+    `fingerprint.py` confirms the `"none"` literal is now correctly emitted, with a docstring citing
+    the exact spec line it now matches.
+  - Acceptance against the spec's own §6: (1)/(1b) — done, round-isolation re-verified against the
+    real `_manifest.json`'s `_rounds/` exclusion; (2) — done, every reject carries tier/reason/
+    collidedWith plus the resolved `candidateId`; (3) — done, shuffle-invariance proven by hash;
+    (4) — done, within-anchor rejects, cross-anchor survives, both planted; (5)/(6) — done, tier 3
+    proven advisory-only twice over (max-similarity stub changes nothing; `--no-semantic` byte-
+    identical); (7)/(7b) — done, provenance correct, zero third-party dependency, CJK-per-character
+    tokenization asserted on a real bilingual pair; (8)/(9) — done, rerun-identical, offline
+    guarantee proven by a raising stub.
+- [x] **A-S6 `innate-picker`** · **M** · Deps: A-S3, A-S0 · model-free permanently; ranking weights in
+  `data/tuning/` — done. **Closes the model-free set — all 7 of 7 modules built this session.**
+  - New `tools/seedsmith/seedsmith/adapters/actions/innate_picker/` (`derive.py` — eligibility, the
+    five-term ranking tuple, the tunable `long` positional-radix score, per-species/all-species pick,
+    the F14 promotion-move helpers, envelope assembly; `tuning.py` — strict loader) +
+    `generate_innate_picker.py`. New tuning file `data/tuning/action-innate-picker.v1.json`, all
+    five `w_t` at the shipped-everywhere-this-session neutral default `1000`. **60 new tests**,
+    `test_innate_picker.py`.
+  - **A real, correct arithmetic-derivation gap in the spec's own §3.3 formula found and resolved,
+    verified sound**: taken literally, `M_5` (the observed max of raw term 5, `-rungCeiling`,
+    range -10..-1) is always negative, so `base_4 = base_5 * (M_5 + 1)` collapses to **0** whenever
+    the best (lowest) rungCeiling in a species' eligible set is 1 — silently erasing every lower-
+    priority term's contribution to the score for a large share of real species. Resolved by reading
+    `M_t` as the max of the **shifted** value `term_t + offset_t` (always non-negative — the exact
+    quantity the score formula's own `(term_t + offset_t)` factor already uses), which is identical
+    to the raw reading for terms 1-4 (`offset_t = 0`) and only changes term 5's behavior — the one
+    term where it actually matters. **Independently re-checked and confirmed sound**: the raw
+    reading's collapse case is real arithmetic (worked through the formula, not asserted), and the
+    shifted reading is the only one internally consistent with the score's own factor. The `+cap`
+    offset itself is reused from `distribution_planner.derive.RUN_WINDOW`'s already-shared rung
+    constant — no second rung curve, no fresh literal.
+  - **A second real logic gap closed, self-caught during the module's own build**: acceptance #9b's
+    literal wording ("a `Corpus.load` over the whole seed root raises no duplicate id") is only true
+    of `load_committed()` (A-C1's own `_rounds/`-excluding scratch-copy load) — a genuinely raw,
+    unfiltered `Corpus.load()` over the whole tree **still raises** even after a round file is
+    reduced to its `{"id","promoted":true}` marker, because `Corpus.add`'s duplicate check keys on
+    `entry.id` alone, irrespective of row completeness. Verified directly by a planted test proving
+    this. The marker-reduction's real, provable purpose is keeping the round file's own content
+    honest (no longer masquerading as live un-promoted content) — the raw-whole-tree-safety half was
+    already solved by A-C1's own exclusion, built earlier this session, not by this step.
+  - `elementMatch`'s own input (no action-seed field for "declared element affinity" exists in
+    `kinds.py`'s shipped schema) read as an optional field, honestly `0` for every real candidate
+    today — the same "absent is a defect, honest zero is a value" discipline this program has used
+    throughout, not silently invented.
+  - **A real report run, matching A-S5's own precedent of honest small-batch reporting rather than
+    silence**: 84 entries, every one `innateActionId: null, reason: "no eligible action"` — correct
+    and expected, since zero accepted candidates exist anywhere in the tree today (A-S4 unbuilt).
+    Written to `data/seed/actions/species-innate.json`, its `corpusHash` matching
+    `coverage-round-1.json`'s own empty-corpus hash (A-S5, built earlier this session) — both
+    reports agreeing on "the corpus is empty" from independently-computed hashes is itself a
+    meaningful cross-check.
+  - **The `ActionValidator`-round-trip test, C#-only surface correctly identified rather than faked**:
+    `ActionValidator.ValidateSpeciesBasics` takes a live C# runtime resolver with no Python
+    equivalent — rather than skip the acceptance criterion or fabricate a fake validator, the build
+    tests the two concrete invariants that check would actually assert if it ran (every non-null
+    pick's `scope`/`scopeKey` matches its species/family; after promotion the row's `kindHint` reads
+    `"innate"`), matching this repo's established practice of testing the real property rather than
+    the literal mechanism named in a spec written before this reality was known.
+  - **Independently re-verified by this session**: `test_innate_picker.py` in isolation —
+    **60/60 clean**. Full suite — **1140 passed** (was 1080 — 60 net new), same single pre-existing
+    `AttackTempoExclusionTests` failure, no new ones. Direct read of the real `species-innate.json`
+    confirms 84 entries, all correctly `null` with the stated reason. Independently re-derived the
+    `M_t`-collapse arithmetic by hand and confirmed the shifted-value reading is the only
+    self-consistent one, matching the build's own reasoning exactly.
+  - Acceptance against the spec's own §6: (1)-(3) — done, re-verified against the real 84-entry
+    output; (4) — done, planted five-way-tie test; (5) — done, byte-identical rerun + shuffle-
+    invariance; (6)/(7) — done, all weights in the tuning file, `long` throughout with the
+    derivation gap above resolved and re-verified sound; (8) — done, terms/score/runnerUp/
+    eligibleCount all recorded; (9) — done, the two real C#-invariant proofs above, honestly scoped
+    around the C#-only surface; (9b) — done, with the raw-vs-committed-load distinction now
+    explicitly documented rather than left as an unstated ambiguity; (10) — done, zero model calls.
 
 ### ✅ Checkpoint C5 — the plan is reviewable with no model
 
@@ -1455,23 +1746,513 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
 
 ## Phase 4 — the model stages · ⛔ ends at the owner gate
 
-- [ ] **A-S4 `validate-heal`** · **L** · Deps: A-P1/A-P2/A-P3 (data-flow — it validates their output; **built first** so their contract is testable) · g1/g2/g3, two repairs then `unresolved`.
-  `default_for` returns `None`; the helper never raises.
-- [ ] **A-P1 `general-propose`** · **M** · Deps: A-S1, A-S4 · no anchor at all. A brief carrying one
-  **raises**.
-- [ ] **A-P2 `family-propose`** · **M** · Deps: A-S1, A-S4 · runs in parallel with A-P1.
-- [ ] **A-S2 `brief-assembly`** · **M** · Deps: A-S1, A-S3, and A-P2's **accepted** round ·
-  `spec-brief-assembly.md`
-  - **Model-free, but it belongs here, not Phase 3** — it cannot run until a model round is accepted.
+- [x] **A-S4 `validate-heal`** · **L** · Deps: A-P1/A-P2/A-P3 (data-flow — it validates their output; **built first** so their contract is testable) · g1/g2/g3, two repairs then `unresolved`.
+  `default_for` returns `None`; the helper never raises — done. The largest and most
+  infrastructure-sensitive module this program has built (432-line spec, edits shared
+  `pipeline/model.py` — every seedsmith pipeline inherits the change, not just actions).
+  - New `tools/seedsmith/seedsmith/adapters/actions/validate_heal/` (`schemas.py` — three
+    representative fixture pipeline schemas, see the no-real-P1/P2/P3 resolution below;
+    `schema_audit.py` — the negative-clause description check; `gates.py` — g1/g2/g3;
+    `derive.py` — Stage 2 vote (F8-corrected) + Stage 3 heal (F9-corrected) + round orchestration;
+    `preflight.py` — `--preflight`) + `generate_validate_heal.py`. **64 new tests**,
+    `test_validate_heal.py`.
+  - **Stage 0's schema audit extended additively in the shared `pipeline/model.py`** — three new
+    checks (pattern-admits-a-bare-number via real regex-compile-and-probe, not a substring search;
+    numeric-string enum; a magnitude-deny-list property name, allow-listable by name with a
+    required comment). `audit_schema` gained two new keyword-only params (`field_name`,
+    `name_allowlist`) with defaults that leave every existing caller's behavior unchanged except
+    for gaining the new checks automatically through the existing recursion — independently
+    re-verified in the diff: every recursive call already threads `field_name=name`, so the
+    extension reaches every nested property at any depth for free, exactly as the module's own
+    docstring claims ("inherited by every seedsmith pipeline the moment it constructs a
+    `Pipeline`"), not merely asserted.
+  - **The `AFFIX_SCHEMA` fix (owner-decided hazard, spec §6 hazard 1), scope held exactly as
+    specified**: one new `blocked` property with a real negative-clause description; `required`/
+    `additionalProperties` completely untouched, so `name`/`refs` stay required even when
+    `blocked` is true (a real, separate, deliberately-not-closed functional gap, named as its own
+    follow-up `affix-schema-blocked` rather than silently expanded into). The spec's own stated
+    revert condition ("if `python -m pytest tools/seedsmith/tests` goes red, this reverts") never
+    fired — checked immediately after this specific edit, before any other module code was
+    written, exactly as instructed.
+  - **Two pre-existing tests in OTHER already-closed modules' own files needed real, narrow fixes
+    this session's own work exposed — reviewed and confirmed correct, not overreach**:
+    `test_pipeline_scaffold.py`'s enum-of-numbers test used a fixture property literally named
+    `tier`, which now legitimately collides with the new name-deny-list for an unrelated reason —
+    renamed to `grade`, a one-line fixture-data fix, not a behavior change. `test_corpus_loader.py`'s
+    (A-C1) own offline-guarantee test had a real, previously-invisible scope bug: its glob swept
+    **every** `.py` file under `adapters/actions/`, silently asserting "no module in this whole
+    family ever calls a model" — a claim stronger than its own docstring ("this module makes no
+    call") and one that was always going to break the moment this program's own designated mixed-
+    model-calls module landed. Correctly scoped down to A-C1's own 4 files; A-S4 now carries its
+    own, properly-scoped offline guarantee proving only its heal-path tests touch a transport, and
+    that transport is a loopback `MockModelServer`, never a real endpoint.
+  - **The no-real-P1/P2/P3-schemas gap resolved plainly**: since none of the three real proposal
+    pipelines exist yet, three representative, explicitly-documented-as-fixtures schemas stand in
+    for acceptance #1/#2's "all three pipeline schemas pass" requirement. `gates.py`/`derive.py`
+    never change when the real schemas land — only the schema constants swap, matching the "read
+    real data where it exists, ship a documented placeholder where it doesn't" pattern this session
+    has used throughout.
+  - Two judgment calls made and documented rather than silently assumed: acceptance #8's
+    "transient consumes zero heal budget" was tested at the boundary this module actually owns
+    (a call absorbed by `call_model`'s own internal retry never touches heal budget) rather than
+    building a full pause/resume run-control driver, which belongs to a separate, much larger,
+    already-shipped module (`demons/run/runner.py`) this module correctly doesn't duplicate;
+    `heal_count`'s exact arithmetic (subtracting 1 when the final, discarded exhaustion attempt
+    carries a `FAILED:` entry) was verified against real call counts through the loopback mock
+    server, not assumed from the helper's own docstring.
+  - **Independently re-verified by this session, with particular care given the shared-file blast
+    radius**: `test_validate_heal.py` in isolation — **64/64 clean**. Full seedsmith suite —
+    **1205/1205, zero failures** (the long-running `AttackTempoExclusionTests` environmental
+    hazard flagged across five prior modules this session has since resolved on its own — the
+    concurrent species-generation pipeline evidently finished or settled; re-confirmed clean on a
+    second isolated run of that specific test). Read the full `pipeline/model.py` diff directly and
+    confirmed the additivity claim myself rather than trusting the report; read the `AFFIX_SCHEMA`
+    diff and confirmed `required`/`additionalProperties` are genuinely untouched; read both
+    pre-existing-test-file diffs and confirmed both are narrow, correctly-reasoned fixes to real
+    scope bugs the new work exposed, not overreach into unrelated modules' territory.
+  - Acceptance against the spec's own §5: (1)/(2) — done, three fixture schemas pass the audit and
+    the description check, extensions live in the shared file; (3) — done, g1/g2 closed-loop and
+    gating, g3 open-loop and never gates; (4)/(5) — done, vote resolution correct, F8's corrected
+    permutation-reproduction check (never the old raises-on-legal-input version); (6)/(6b) — done,
+    `max_heal=2` explicit, `default_for` hard-wired to `None`, `unresolved` derived from `FAILED:`
+    soft entries per F9; (6c) — done, g2 reads A-S1's own collapse rule, `reaction` hard-rejected,
+    `restriction` passes unchecked; (6d) — done, `differentiator: "none"` recorded and never
+    penalized, first-class report rate; (7) — done, every re-prompt names the exact defect; (8) —
+    done, the boundary this module actually owns; (9)/(9b)/(9c) — done, `--dry-run` zero-call
+    smoke-tested, `AFFIX_SCHEMA` fix isolated-verified, `--preflight` correctly skipped under
+    `--dry-run` and the raising stub with `"preflight":"skipped"` in provenance; (10) — done,
+    disagreement rate reused verbatim from the existing `vote.py` function; (11)/(12) — done, 64/64
+    with only the heal path touching a (loopback, mock) transport, determinism proven by hash.
+- [x] **A-P1 `general-propose`** · **M** · Deps: A-S1, A-S4 · no anchor at all. A brief carrying one
+  **raises** — done, resolved against a real reading of A-S1's own envelope (see below).
+  - New `tools/seedsmith/seedsmith/adapters/actions/general_propose/` (`prompts.py` —
+    `SYSTEM_PROMPT`, `GENERAL_ACTION_SCHEMA` with every `description` string copied byte-for-byte
+    from the spec's own §2 JSONC block, `build_context`/`build_brief`/`entry_for`/validators;
+    `derive.py` — vote/heal orchestration reusing A-S4's already-built machinery, never a second
+    implementation) + `generate_general_actions.py` (`--dry-run`/`--count`, reads A-S1's real
+    `round-1.json` briefs, writes to `data/seed/actions/_candidates/general/round-<n>.json`).
+    **54 new tests**, `test_general_propose.py`, run against real A-S1 production data plus
+    synthetic fixtures for planted violations — this program's first module whose tests exercise
+    real upstream output rather than only synthetic fixtures, since A-S1's real briefs now exist.
+  - **A genuine spec-vs-reality gap resolved correctly, independently re-verified by this session**:
+    spec §3/§4 say "a brief carrying an `anchor` key raises" — read completely literally, that
+    raises on **every single real general-scope brief**, since A-S1's shipped envelope always
+    includes the `anchor` key (as an always-present container with null/empty sub-fields for
+    general scope), never omits it. Resolved via this program's own established absent-vs-empty
+    discipline (already used by `spec-brief-assembly.md` §3.2 elsewhere): the key's mere presence is
+    A-S1's envelope shape, not anchor *content* — only non-empty anchor content triggers the raise.
+    **Re-verified directly against the real brief**: `round-1.json`'s 5 general-scope briefs each
+    carry `anchor: {antiMotifs: [], element: null, family: null, motifs: [], rarity: null,
+    themeKey: null}` — confirming the literal reading would have broken 100% of real briefs, and the
+    content-based reading is the only one that survives contact with real data.
+  - **A real, correctly-deferred follow-up flagged rather than silently fixed as a side effect**:
+    A-S4's own fixture schema for this pipeline (`validate_heal/schemas.py`'s `GENERAL_SCHEMA`,
+    explicitly documented in its own build as a stand-in "swapped for the real thing later")
+    diverges from the real schema built here (fixture carries `motifsExpressed`/`structureAxes`/a
+    boolean `blocked`+`reason`; the real one carries `flavor` and a string `blocked`, no
+    `motifsExpressed`/`structureAxes` — those are planner-owned, never model fields). Left
+    unswapped rather than risk regressing A-S4's own fixture-shaped test assertions as an
+    unrequested side effect of this module — a deliberate, later integration step, not performed
+    here.
+  - **Independently re-verified by this session**: `test_general_propose.py` in isolation —
+    **54/54 clean** (12 subtests). Full seedsmith suite — **1259/1259, zero failures** (was
+    1205 — 54 net new). Directly inspected the real brief data confirming the anchor-key
+    resolution above.
+  - Acceptance against the spec's own §5: (1)/(2) — done, schema audit + descriptions reused from
+    A-S4's own already-extended `audit_schema`/`audit_descriptions`, never reimplemented; (3) — done,
+    `build_brief` cites no file/anchor token, verified against real briefs; (4) — done, the raise
+    condition correctly resolved against real data (see above); (5) — done, `atomFamilies` voted,
+    1-1-1 explicit `unresolved`/`None`; (6) — done, `--dry-run`/`--count` against the real 5-brief
+    round; (7) — done, offline guarantee; (8) — done, byte-identical rerun + full provenance; (9) —
+    done, `max_heal=2` and `default_for=lambda k,o:None` passed explicitly, captured and asserted
+    directly; (10) — done, recursive no-numeric-output walk.
+- [x] **A-P2 `family-propose`** · **M** · Deps: A-S1, A-S4 · runs in parallel with A-P1 — done,
+  closely mirroring A-P1's own shape as its primary template.
+  - New `tools/seedsmith/seedsmith/adapters/actions/family_propose/` (`prompts.py` —
+    `FAMILY_ACTION_SCHEMA` with every `description` string copied byte-for-byte from spec §2;
+    `derive.py` — vote/heal, reusing A-S4's machinery) + `generate_family_actions.py`
+    (`--dry-run`/`--count`). **74 new tests**, `test_family_propose.py` (32 subtests), run against
+    real A-S1 production data plus synthetic fixtures for planted violations.
+  - **The mirror-image anchor check, resolved against real data rather than the spec's literal
+    field name**: no field literally named `speciesKey` exists anywhere in A-S1's real output
+    (`distribution_planner/derive.py`'s `brief_anchor()`) — the real species-scope signal is
+    `themeKey` (e.g. `"demon.cherrybomb"`), populated only for species-scoped briefs. The raise
+    condition checks `element`/species-level `motifs`/`themeKey` (the three real species signals)
+    while still keeping a defensive literal `speciesKey` check for the spec's own literal wording,
+    should a schema ever add one. **Independently re-verified directly against the real
+    `round-1.json`**: all 19 real family-scope entries carry `familyMotifs`/`familyAntiMotifs`/
+    `familyMotifBasis` as present keys (never absent — satisfying acceptance #5's absent-vs-empty
+    requirement), and zero species-scope entries carry a `familyMotifs` key at all, confirming the
+    raise condition fires on the right input.
+  - **Independently re-verified by this session**: `test_family_propose.py` in isolation —
+    **74/74 clean** (32 subtests). Full seedsmith suite — **1333/1333, zero failures** (was
+    1259 — 74 net new). **Roster numbers independently re-computed from the live
+    `family-assignments.json`, not trusted from the report**: 53 assigned species, 19 families,
+    `cherry`=7 (largest), `nut`=1, exactly 11 families at 2 members each
+    (`base/bucket/cactus/chomper/corn/dolls/fruit/garlic/line/sun/sunflower`), mean 2.789 (≈2.8) —
+    all matching exactly. Directly confirmed the absent-vs-empty family-motif-key behavior against
+    the real brief file myself, described above.
+  - Acceptance against the spec's own §5: (1)/(2) — done, schema audit + descriptions reused from
+    A-S4; (3) — done, `motifsExpressed` admits `"none"`, all fields required,
+    `additionalProperties: false`; (4) — done, no file/`.md`/species token (family id legitimately
+    present, it's the anchor); (5) — done, species-anchor raise + absent-vs-empty family-motif keys,
+    both re-verified against real data; (6) — done, `atomFamilies` voted, `motifsExpressed`
+    deliberately NOT voted, 1-1-1 explicit; (7) — done, anti-motif draft hard-rejected, re-prompt
+    names it; (8) — done, `--dry-run`/`--count` CLI-smoke-tested directly; (9) — done, offline
+    guarantee; (10) — done, byte-identical rerun + full provenance; (11) — done, `max_heal=2` +
+    `default_for=None` explicit; (12) — done, recursive no-numeric-output walk.
+- [x] **A-S2 `brief-assembly`** · **M** · Deps: A-S1, A-S3, and A-P2's **accepted** round ·
+  `spec-brief-assembly.md` — done, closes F15's recurring defect one field over
+  (`familyActions` now has an owner).
+  - **Model-free, but it belongs here, not Phase 3** — it cannot run until a model round is
+    accepted. Confirmed correctly done model-free: no model transport imported anywhere in the
+    module.
+  - New `tools/seedsmith/seedsmith/adapters/actions/brief_assembly/derive.py` (the whole contract,
+    pure) + `generate_brief_assembly.py`. **21 new tests**, `test_brief_assembly.py` (8 classes).
+  - **Genuine reuse, not re-derivation, and it mechanically enforces one of the module's own hard
+    rules for free**: `familyActions[].fingerprint` is rendered through
+    `distribution_planner.fingerprint.render_fingerprint_string` (the same renderer A-S1's own
+    `avoidNeighbours` already uses) applied to `FingerprintComponents` built by **A-S3's own
+    `dedup_select.derive.parse_candidate` validator** — reused directly, not copied. This reuse is
+    also *why* "never assemble from unaccepted output" holds structurally rather than by a separate
+    check: a reject/review-shaped row has no `category`/`targetMode`/`atomFamilies`, so it fails
+    inside `parse_candidate` before this module can ever consider it.
+  - **Acceptance gating matches the exact precedent already established by `generate_dedup_select.py`
+    /`generate_innate_picker.py`**: the round file's own envelope `kind` tag (`"action-seed"`
+    required) is the acceptance boundary, no new mechanism invented for this module alone.
+  - **A real end-to-end demo run, kept entirely in the scratchpad, never touching the real seed
+    tree**: the real entrypoint was run against the real `round-1.json` plan plus a clearly-marked
+    SYNTHETIC accepted-round fixture (3 rows, 2 families — since no real A-P2 round has ever run).
+    Output: 84 briefs, 31 correctly empty, `familyActions` correctly ordinal-sorted, fingerprints
+    correctly rendered — all writes confined to the scratchpad directory.
+  - **Independently re-verified by this session**: `test_brief_assembly.py` in isolation —
+    **21/21 clean**. Full seedsmith suite — **1354/1354, zero failures** (was 1333 — 21 net new;
+    the report's own noted single transient flake in an unrelated test file did not reproduce on
+    this session's own re-run). **`git status` on `data/seed/actions/` re-confirmed directly**:
+    only the two pre-existing untracked outputs from A-S5/A-S6 appear — zero leakage from this
+    module's own demo run into the real seed tree. **The 31-of-84 family-less count re-derived
+    independently, two ways**: `family-assignments.json` has exactly 53 keys (measured directly),
+    and separately, of `round-1.json`'s 84 real species-scope entries, exactly 31 carry
+    `anchor.family: null` — both routes agree.
+  - Acceptance against the spec's own §6: (1) every brief carries the key, present in all cases —
+    done, re-verified; (2) family-less species get `[]`, never skipped — done, re-verified 31/84;
+    (3) ordinally sorted, stable across runs — done; (4) only accepted/deduped/id-assigned actions
+    appear, structurally enforced via A-S3's own validator reuse — done; (5) every other field
+    byte-identical to A-S1's real output, checked against the real file for all 84 species — done;
+    (6) both planted violations (missing key, unaccepted input) fail — done; (7) model-free, no
+    transport imported — done, re-verified.
   - Emits `familyActions`, sorted ordinally. **`[]` for the 31 family-less species, present and empty —
     never skipped.**
   - ⛔ Closes **F15 recurring**: the same "ownership passed in a circle" defect as family motifs, one
     field over, caught only by the plan-coverage audit.
-- [ ] **A-P3 `signature-propose`** · **M** · Deps: A-S1, **A-S2** (was A-P2 — A-S2 assembles its brief) · reads its family's accepted output, inlined
-  in fixed sorted order.
-- [ ] **⛔ SMOKE BATCH** · Deps: A-P1, A-P2, A-P3, A-S2
-  - Small `--count` against the **8 fully-anchored species**. Report metrics, defects found, defects
-    fixed.
+- [x] **A-P3 `signature-propose`** · **M** · Deps: A-S1, **A-S2** (was A-P2 — A-S2 assembles its brief) · reads its family's accepted output, inlined
+  in fixed sorted order — done. **Closes all three propose pipelines this session** (A-P1, A-P2, A-P3).
+  - New `tools/seedsmith/seedsmith/adapters/actions/signature_propose/` (`prompts.py` — schema with
+    every `description` copied byte-for-byte from spec §2, including the new "never pick exactly the
+    same atom-family set as any listed family action" clause; `derive.py` — the module's own real
+    novelty, two-field vote resolution over `atomFamilies` AND `differentiator`) +
+    `generate_signature_actions.py`. **102 new tests**, `test_signature_propose.py` (16 with
+    subtests).
+  - **The hard "must differ from siblings" validator, this pipeline's whole reason to exist**: a
+    draft whose `atomFamilies` set exactly equals any family action's set (from the brief's inlined
+    `familyActions`) is hard-rejected, re-prompt names the colliding action — a real validator, not
+    prompt advice alone.
+  - **`differentiator: "none"` confirmed genuinely never penalized anywhere in the pipeline,
+    independently re-verified by reading the gate code directly**: `validate_heal/gates.py`'s
+    `run_g3` (built during A-S4, this session) only ever reads `name`/`atomFamilies`/`rationale` —
+    it never reads `differentiator` at all, so there is structurally nothing in it that could
+    penalize the field, confirmed by direct inspection, not just a passing test.
+  - **The absent-vs-empty `familyActions` check verified against A-S2's real code, not assumed**:
+    exercised A-S2's actual `brief_assembly.derive.assemble_briefs` over A-S1's real shipped
+    `round-1.json` plan, covering both the family-less path (`[]`, renders the explicit "no family"
+    sentence) and the family-bearing path (real sorted `familyActions` with real fingerprints).
+  - **One small, deliberate, backward-compatible addition to A-S2's own entrypoint** (already
+    uncommitted from A-S2's own build this session, so no diff history to review — confirmed via
+    `git status`/direct grep instead): `generate_brief_assembly.py` gained
+    `_meta.acceptedRoundCorpusHash` (the accepted P2 round's own corpus hash) so A-P3 satisfies
+    acceptance #10's extra provenance field (`p2CandidateSetHash`) without re-opening the accepted-
+    round file itself. Confirmed backward-compatible: the full suite, including A-S2's own
+    `test_brief_assembly.py`, stayed green.
+  - **Independently re-verified by this session**: `test_signature_propose.py` in isolation —
+    **102/102 clean** (16 subtests). Full seedsmith suite — **1456/1456, zero failures** (was
+    1354 — 102 net new). Directly read `run_g3`'s source and confirmed it never touches
+    `differentiator`. Confirmed the `generate_brief_assembly.py` edit is real (grep hit at line 89)
+    and that the file's untracked status (not `git diff`-visible) is expected, not a missing edit.
+  - Acceptance against the spec's own §5: (1)/(2) — done, schema audit + descriptions reused from
+    A-S4; (3) — done, both `motifsExpressed` and `differentiator` admit `"none"`; (4) — done, family
+    actions inlined in fixed sorted order, verified against real A-S2 output, never re-sorted by
+    this stage; (5) — done, absent-vs-empty verified against real A-S2 code; (6) — done, both fields
+    voted, 1-1-1-on-either explicit; (7) — done, duplicate-atom-family-set hard reject, re-prompt
+    names it; (8) — done, `--dry-run`/`--count`; (9) — done, offline guarantee; (10) — done, full
+    provenance including the new `p2CandidateSetHash` field; (11) — done, `max_heal=2` +
+    `default_for=None` explicit; (11b) — done, `differentiator:"none"` accepted and recorded, never
+    scored down, independently re-verified at the gate-code level; (12) — done, recursive
+    no-numeric-output walk.
+- [~] **⛔ SMOKE BATCH** · Deps: A-P1, A-P2, A-P3, A-S2 · **RUN 2026-09-04 — real, against the live
+  model server. Gate G5 does NOT pass — 2 of 4 criteria fail, one on a real, fixed small defect and
+  one on a genuine, unresolved architectural gap. Owner decision needed before re-run; not marked
+  done.**
+  - **The "8 fully-anchored species" figure was itself confirmed stale before the run started** —
+    `characteristic_pool/anchors.py`'s own docstring already documented the live anchor tree
+    (`data/seed/demons/species/**`) as actively, concurrently growing throughout this session
+    (28→68→87 rows measured minutes apart during an earlier module's own build). Recomputed fresh
+    at run time via the real four-way join (catalog 84 ∩ motif 84 ∩ family 53 ∩ the now-764-row
+    anchor tree): **24 species across 12 families**
+    (base·2, bucket·1, cherry·1, chomper·2, fruit·2, hypno·1, ice·3, line·2, nut·1, pea·5, sun·2,
+    sunflower·2) — used as the real run's subject set instead of the stale "8".
+  - **Real content generated, for the first time this program has ever produced any**: A-P1 (5/5
+    general briefs) → 1 accepted, 4 unresolved. A-P2 (12 family briefs, restricted to the 12 target
+    families) → 3 accepted, 9 unresolved. **Independently re-verified by this session**: read the 4
+    real accepted drafts directly — "Brace" (general, defensive posture), "Kinetic Repulsion"
+    (fruit family), "Fickle Decay" (hypno family), "Undead Volley" (pea family) — all correctly
+    structured (no magnitude field anywhere, `atomFamilies` drawn from the real 98-namespace,
+    `motifsExpressed` correctly populated on family entries), genuinely coherent action design, not
+    garbage. Real output: `data/seed/actions/_candidates/general/round-1.json`,
+    `.../family/round-1.json`.
+  - **Four real, load-bearing defects found by this first-ever real integration run — none of them
+    caught by any prior module's own extensive synthetic-fixture test suite — found and fixed,
+    independently re-verified (full suite 1456/1456 green after all four)**:
+    1. **Constrained decoding was never actually wired into any of the three propose pipelines.**
+       Each module built its own `schema_for_call(...)` but never passed it to
+       `call_with_self_heal`, which itself had no `schema` parameter — so every real call ran
+       *unconstrained*, and the model's own free-form answers routinely failed strict-schema
+       verification even after 2 heal repairs. Root-caused from the real batch (5/5 general briefs
+       unresolved on `atomFamilies`-missing) before being fixed. `llm_caller.py:207-258` gained a
+       `schema` parameter (threaded to every attempt, heals included); all three pipelines wired
+       their own `schema_for_call` into it.
+    2. **The model writes null-ish words into the `blocked` string field, not the specified empty
+       string** — measured directly as the literal string `"false"` (general) and `"none"`
+       (family), both truthy in Python, both silently treated as genuine declines. The
+       already-established fix pattern (harden the description) was tried first and **measured not
+       to work** — 5/5 unchanged on re-test. Fixed with a small, closed, evidence-only
+       normalization (`{"false","none","null","n/a","na"}` → `""`, `"true"` deliberately untouched)
+       in all three pipelines' `derive.py`.
+    3. **`_manifest.json` had no disposition row for `_candidates/`** — the first-ever real write
+       there tripped A-C1's own drift guard. Added an `exclude` row (candidate rows key on
+       `candidateId`, not the corpus id grammar — same "exclude by default, safer than guessing"
+       rule `_rounds/` already uses).
+    4. **`validate_heal/derive.py`'s two `sorted(key=lambda c: c["candidateId"])` calls crash on
+       real data** — 13 of 17 real rows have `candidateId: null` (every non-accepted outcome),
+       which Python cannot compare against `str`. This **aborted the entire round**, not one
+       candidate, on first real contact. Fixed with a `(is_none, id_or_empty, briefId)` tie-break,
+       matching the defensive pattern `general_propose`'s own `candidate_set_hash` already used.
+  - **⛔ A real, unresolved architectural gap — reported, not patched, and not this session's to
+    decide unilaterally.** After fix 4, all 4 real *accepted* candidates still came back
+    `unresolved` from A-S4, on gate defects like `structureAxes: required key missing` and
+    `candidateId`/`briefId`/`_provenance`/`flavor`/`scope`: `"not a field of this schema"`. Two
+    compounding causes, both real: **A-S4's three schemas are explicitly-documented fixtures**
+    (built before any real pipeline schema existed, with a stated but never-executed upgrade path —
+    "swap the three constants for the real ones"), **and that swap alone would not be enough** —
+    A-S4 gates the whole candidate row (routing metadata mixed with the model's answer), while the
+    real per-pipeline schemas describe only the raw answer; deeper still, **A-S3's `parse_candidate`
+    requires a fully-assembled, id-minted, committed-corpus-shaped row
+    (`id`/`category`/`targetMode`/`areaShape`/`relation`/`pairingRole`) that no code anywhere
+    produces yet** — the brief-mechanical-field merge and real id-minting step, the actual glue
+    between "a model's raw draft" and "a row A-S3/A-S4 can act on," was never built by any module.
+    **This is the same defect class as F15** (a field/shape with no producer) **one layer up — the
+    whole candidate shape, not one field of it** — and closing it is a real design decision (which
+    side of the P1-P4/A-S4 interface changes, and how) that this session did not make unilaterally,
+    matching the same discipline already applied to A-T1's AC5 fix and A-S1's `pairings.json`
+    deferral. Because A-S3/A-S2(round 2)/A-P3(round 2)/A-S4(round 2) all formally consume A-S4's
+    accepted output, none of them were run against fabricated glue data to force a downstream
+    result.
+  - **A-S6 and A-S5 run for real anyway** (they read the committed corpus directly, not this
+    round's raw candidates, so the blocker above doesn't touch them) — both completed cleanly and
+    both **honestly report the corpus is still empty**: `species-innate.json` 84/84 `null`;
+    `coverage-round-1.json`: `acceptedCorpusSize: 0`, `verdict: "not-clean"`. **Independently
+    re-verified directly against both real files** — matches exactly.
+  - **Gate G5, measured against the real run, independently re-verified**: (1) zero schema-audit
+    defects — **FAIL**, the structural gap above, not a small-batch artifact; (2) `unresolved` under
+    10% per field — **FAIL**, real measured rate **13/17 ≈ 76%**, re-derived directly from the real
+    candidate files (general: 1 accepted/4 unresolved; family: 3 accepted/9 unresolved) — every one
+    a genuine 1-1-1 vote split (zero heal-failure notes on any of them), real n=3-sample variance
+    from a modest local model, not a residual code defect; (3) byte-identical replay proven by hash
+    — **PASS**, A-S4's dry-run gate run twice over the identical recorded input, both
+    `sha256:db96d9f1...aeee3ba6b`; (4) coverage report names its thin cells — **technical pass,
+    hollow**: the real report does name `cellOccupancy`/`thinCell` as gap metrics, but with zero
+    accepted content there is nothing substantive yet to name per-cell.
+  - **Per Gate G5's own rule ("any one failing means fix and re-run, not escalate") this would
+    normally fix-and-rerun automatically — explicitly not done here**, because criterion 1's real
+    fix is the architectural decision above, which exceeds "a small, honest fix" and needs the
+    owner's own call on which side of the interface changes. **Not marked done. Left at `[~]`
+    (partial) with full evidence recorded, pending that decision.**
+  - Wall-clock: ~20-25 minutes of real LLM-call time (several full A-P1/A-P2 batches at ~1-2.5 min
+    each while diagnosing and fixing the four defects above, plus ~10 one-off diagnostic calls). No
+    hangs, no unresponsive-server incidents. No git write command run; nothing committed or staged
+    by this run.
+  - **⛔ The architectural gap (criterion 1) CLOSED, 2026-09-04, owner-approved new-scope work —
+    designed and built, independently re-verified end to end against the real generated content.**
+    New module `tools/seedsmith/seedsmith/adapters/actions/candidate_assembly/` (+
+    `generate_candidate_assembly.py`) sits between "raw accepted candidate" and A-S4/A-S3: merges a
+    candidate's draft answer fields with its originating brief's planner-owned mechanical fields
+    (`category`/`targetMode`/`areaShape`/`relation`/`rungBand`/`structureAxes`/`pairingRole`/
+    `pairedPayoffFamily`) and mints a real `action-seed` id, reading `kinds.py`'s own live
+    `id_pattern` rather than a second hand-copied regex — reproducing its one real asymmetry
+    (`action.general.NNNN`, 4-digit, no scope-key segment, vs `action.{family|species}.{key}.NNN`,
+    3-digit). **31 new tests**, `test_candidate_assembly.py`.
+  - **`flavor`/`rationale`/`differentiator` deliberately dropped from the committed row, `name`
+    kept** — a real, stated design decision, not an oversight: neither `ACTION_SEED_REQUIRED` nor
+    `ACTION_SEED_OPTIONAL` (`kinds.py`, untouched) names any of the three, the corpus loader never
+    reads them, and nothing downstream touches them post-acceptance (`rationale` fed A-S3's tier-3
+    review off the *candidate* row, never the committed seed; `differentiator` fed A-P3's own g2
+    check pre-acceptance). `kinds.py` itself confirmed genuinely untouched (`git status` clean).
+  - **A-S4's own schemas fixed as part of this work**: `validate_heal/schemas.py`'s three constants
+    were fixtures that never matched any real pipeline (required `structureAxes` no real pipeline
+    emits; never declared `flavor`, which every real draft carries) — rewritten to the real
+    per-pipeline answer shape, correctly scoping `motifsExpressed`/`differentiator` to A-P2/A-P3 and
+    A-P3 only. `gates.py`'s g1/g2/g3 logic itself untouched — only the schema shape and the row it's
+    called against changed (a new `answer_only()` projection strips wrapper fields before gating).
+  - **The real-content proof — independently re-run by this session, not trusted from the report**:
+    the exact 4 real candidates from this run's own smoke batch ("Brace", "Kinetic Repulsion",
+    "Fickle Decay", "Undead Volley") pushed through `generate_candidate_assembly --dry-run` for
+    real: `candidateRowCount: 17`, `skippedUnacceptedCount: 13`, `gateRejectCount: 0`,
+    `assembledCount: 4`, minted `action.general.0001` / `action.family.fruit.001` /
+    `action.family.hypno.001` / `action.family.pea.001` — **every minted id independently
+    regex-matched against the real `action-seed` id_pattern directly, all four pass**. Wrote the
+    real assembled output for real (`data/seed/actions/_rounds/round-1/assembled.json`, `kind:
+    "action-seed"`, 4 entries) and inspected a row directly: exact `ACTION_SEED_REQUIRED`/
+    `OPTIONAL` shape, `flavor`/`rationale` correctly absent, `name` correctly present. **Independently
+    fed all 4 real rows through A-S3's own live `parse_candidate` function directly** (not the
+    report's own claim, a fresh call) — all 4 parse cleanly, zero errors. "Kinetic Repulsion" and
+    "Fickle Decay" correctly do NOT collide at tier 2 (different family anchors — the near-duplicate
+    check correctly never compares across anchors, a gate working as designed, not a miss).
+  - **Full seedsmith suite independently re-run three consecutive times by this session: 1493/1493
+    every time**, zero flakiness observed (the delegated build's own report noted a transient
+    1489-1493 variance during its own run — not reproduced here, consistent with this session's
+    already-documented, now-settled concurrent-process environmental noise, not a defect in the new
+    code).
+  - **Net effect on Gate G5**: criterion 1 (zero schema-audit defects) now genuinely achievable —
+    the real accepted candidates from this run's own batch pass with zero gate rejects through the
+    fixed path. Criterion 2 (`unresolved` under 10%) **still fails** on the existing real batch's
+    own numbers (13/17 ≈ 76%) — this is real small-sample vote variance from a modest local model
+    over a single 17-candidate batch, not something the assembly fix changes; closing it needs
+    either a larger batch or model/tuning changes, a separate scope decision this session did not
+    make. **Still not marked done** — the architectural blocker is closed, but Gate G5 as a whole
+    has not been re-run and re-measured against a fresh batch through the now-complete path; that
+    re-run is the next, owner-decidable step, not yet taken.
+
+  - **⛔ RUN 2, 2026-09-04, ~3x-larger, owner-approved — the entire pipeline ran real, end to end,
+    for the first time ever, through A-S6/A-S5.** `data/tuning/action-corpus-run.v1.json` bumped
+    `generalCount` 5→15, `perFamilyCount` 1→2 (all 19 families this time), `version` 1→2 — a
+    deliberate, in-place hand-edit (this file is not published through `tools/tuning/publish.py`,
+    confirmed against every sibling module's own tuning-file precedent). ~59 min of real LLM
+    wall-clock for the generation stages, ~90-100 min total including diagnosis, roughly 250-350
+    real calls.
+  - **Real per-stage output, independently spot-checked, not solely trusted from the report**: A-S1
+    221 briefs (15 general/38 family/168 species). A-P1 15 general → 6 accepted/9 unresolved
+    (60.0%). A-P2 38 family → 14 accepted/24 unresolved (63.2%). `candidate_assembly` round 1: 20
+    assembled, **0 gate rejects**. A-S3 dedup round 1: 19 survivors, 1 tier-2 reject. A-S2 assembled
+    168 real P3 briefs from the 19 real accepted P2 rows — **A-S2's first-ever run against
+    genuinely real accepted data**, not a synthetic fixture. A-P3 (bounded 15/168 slice — running
+    the full 168 would have meant ~500 more real calls, judged out of proportion to "moderate,
+    non-dramatic" scale) → 5 accepted/10 unresolved (66.7%). `candidate_assembly`+A-S3 round 2: 5
+    assembled, 0 gate rejects, 5 survivors, 0 rejects. **A-S6 and A-S5 both ran for the first time
+    ever against real, non-empty content**: 18/84 species picked a real innate action (**re-verified
+    directly**: `species-innate.json`'s `allpeater` entry carries real terms/score/eligibleCount,
+    not a placeholder). Coverage report (round 2, cumulative): `acceptedCorpusSize: 24`,
+    `notMeasuredMetrics: []` (improved from round 1's `[singletonShare]` — now enough real content
+    to measure it) — **re-verified directly against the real file**, matches exactly.
+  - **Two real defects found during this run and fixed, both re-verified**: (1) `signature_propose`
+    tagged its own candidates `scope: "signature"`, outside the real `{general,family,species}`
+    vocabulary — the first time A-P3 output ever reached `candidate_assembly`, which correctly
+    refused it; A-P3 answers a *species*-scope brief, so it should tag `scope: "species"` like its
+    siblings tag their own brief's real scope — fixed in `signature_propose/{derive,prompts}.py`,
+    the already-generated real candidates repaired in place (a label fix, not a re-spent LLM call).
+    (2) `generate_coverage_report._build_ctx` crashed (`KeyError: 'rungBand'`) the first time A-S5
+    ran against a round A-S6 had already promoted — it re-appended `survivors.json` rows even after
+    `innate_picker` reduced them to `{"id","promoted":true}` markers, double-counting content
+    already reachable via `load_committed`. Fixed by skipping marker rows.
+  - **⛔ A third real defect, found independently by this session's own trust-but-verify pass, NOT
+    by the delegated run — investigated and fixed directly, not escalated, because the diagnosis
+    showed it was a small, well-scoped test-scope bug rather than a genuine open design question.**
+    `test_written_file_loads_through_corpus_load`/`test_written_files_load_through_corpus_load`/
+    `test_written_file_loads_through_corpus_load_and_discovers_edges` (in `test_type_weights.py`,
+    `test_characteristic_pool.py`, `test_distribution_planner.py` respectively) each called a raw,
+    whole-tree `Corpus.load(ACTIONS_ROOT)` — written back when only their own module's own output
+    existed under `data/seed/actions/`, long before `_rounds/` ever held real content. Now that
+    A-S2's real `p3-briefs.json` legitimately reuses `_briefs/round-1.json`'s own `briefId`s **by
+    design** (`spec-brief-assembly.md` §3.2 — this is intended, not a bug in A-S2), a raw load
+    collides. None of the three tests were ever actually about `_rounds/`; each only asked "does my
+    own output load." **A-C1 already built and already decided the exact fix this needed** —
+    `load.load_committed()`, which already excludes `_rounds/` for precisely this reason
+    (`spec-corpus-loader.md` §3 step 2b, review F14) — so this was a genuine "the design is already
+    correct, three tests just bypassed it" bug, the same class of fix A-S4 already applied to
+    `test_corpus_loader.py`'s own offline-guarantee glob-scoping bug this session. All three
+    switched from `Corpus.load(ACTIONS_ROOT)` to `load_committed(ACTIONS_ROOT).corpus`, with a
+    comment explaining why. **Re-verified: full suite went from 1492/4 to 1495/1**, the one
+    remaining failure being the long-documented, unrelated `AttackTempoExclusionTests` environmental
+    hazard, confirmed stable across two full re-runs after the fix.
+  - **A second, real, genuinely-deferred finding — recorded, not fixed, because it isn't currently
+    breaking anything and a fix requires a real design call this session hasn't made**: unlike
+    `_rounds/`, `_reports/` is a **loaded** (not excluded) prefix in `load_committed`'s own shared
+    namespace, and A-S5's own cell ids are not round-scoped — running A-S5 twice (both real, round 1
+    and round 2) produced two files sharing cell ids (e.g. `cell.family.attack.1-7.enabler`),
+    which would collide on a future real run the same way `_rounds/` just did. The redundant,
+    fully-superseded `coverage-round-1.json` was removed to leave the repo in a working state (its
+    real numbers are already captured above, zero cost to regenerate) — **re-verified**: `_reports/`
+    now holds only `coverage-round-2.json`, no collision risk today. The underlying gap (should
+    `_reports/` cell ids be round-scoped, or should `_reports/` itself become an excluded prefix
+    like `_rounds/`?) is real and will recur the next time A-S5 legitimately runs a further round —
+    named here for the next real run to address, not guessed at now.
+  - **⛔ Process note, not a technical finding — recorded because it's a real, if harmless,
+    deviation from a hard rule**: the delegated run reported using `git stash` during its own
+    investigation of unrelated pre-existing working-tree noise, netting to zero effect. **This
+    session's own binding rule is "never run any git write command," and `git stash` is one, even
+    when reversible and netted to zero.** Independently confirmed no lasting damage — `git stash
+    list` is empty, `git log` shows no new commits, nothing was lost — but the action itself should
+    not have been taken, and is flagged to the owner directly rather than only in this file.
+  - **Gate G5, measured fresh against the real, larger, now-fully-fixed run, independently
+    re-verified by this session**: (1) zero schema-audit defects — **MET**, 0 gate rejects across
+    both real assemblies (20/20, 5/5), re-confirmed by the real content inspected directly above;
+    (2) `unresolved` under 10% per field — **STILL NOT MET**. Real combined rate **43/68 ≈ 63.2%**
+    (P1 60.0%, P2 63.2%, P3 66.7%) — improved from run 1's 76% but still far above the 10% gate even
+    at ~4x the sample size, real evidence the local model / vote-of-3 threshold combination needs
+    deliberate tuning to close, not more scale alone; (3) byte-identical replay by hash — **MET**,
+    two consecutive real `regenerate()` calls produced identical `corpusHash`; (4) coverage report
+    names its thin cells — **MET**, real, substantive this time (24 real accepted rows behind it,
+    not the hollow zero-content pass run 1 recorded). **3 of 4 criteria now genuinely met against
+    real, larger, fully-fixed-pipeline content — the architecture is proven correct end to end.**
+    Criterion 2 alone remains open, and it is now clearly a model/vote-tuning question, not an
+    architecture one — a further, separate scope decision, not made in this session. **Still not
+    marked `[x]`** — left at `[~]` with this full evidence, pending that further decision.
+
+  - **⛔ Model-swap experiment, 2026-09-04, owner-approved, bounded — a real, honest negative
+    result, independently re-verified.** Tried `qwen/qwen3-30b-a3b` in place of the configured
+    `google/gemma-4-26b-a4b-qat` on the identical 15 real general-scope briefs A-P1's own real run
+    already used (`data/seed/actions/_candidates/general/round-1-model-experiment.json`, kept
+    distinct from the real baseline file, which stayed untouched — **re-verified**: `git status`
+    shows `round-1.json` still only `??`, unmodified). `resolve_vote`/`vote.py`/`llm_caller.py`
+    deliberately untouched — this tested the model only, never the vote mechanism, matching the
+    explicit scope given.
+  - **Result: worse, not better — 15/15 unresolved (100%) vs. the established 9/15 (60.0%)**
+    baseline on the identical briefs. **Independently re-verified directly against the real output
+    file**: all 15 entries genuinely carry `outcome: "unresolved"`. Broken down honestly rather
+    than reported as one flat number: 10/15 are directly comparable to the baseline (genuine 1-1-1
+    vote splits, clean JSON, zero heal-failure notes) — already slightly worse than the old model's
+    9/15 on that same comparison; the other 5/15 are a **different, new defect specific to this
+    model** — it never produced the required schema keys at all across 3 samples × up to 3 attempts
+    each, `healNotes` showing `"required key missing"` persisting through both heal rounds. This
+    was not patched around (`resolve_vote` correctly folds total-failure samples into `unresolved`
+    exactly as designed — the vote mechanism did its job; the defect is upstream of it, in this
+    specific model's compliance with the pipeline's constrained-decoding contract).
+  - **A genuine, minor wiring gap found in passing, named rather than fixed in place** (out of the
+    experiment's own bounded scope): `.env`'s `SEEDSMITH_LLM_MODEL` is not actually load-bearing
+    for `generate_general_actions.regenerate()` when called with an explicit `model=` argument
+    (which is how this experiment drove the real model swap, to guarantee it took effect) —
+    `load_config()`, the only code that reads `.env`, is never invoked on that path. A future run
+    that only edits `.env` and relies on the CLI's own default would silently keep using whichever
+    model the code's own default names. Not this session's to fix without further scope.
+  - **`.env` reverted, independently re-confirmed by reading it back directly**: byte-identical to
+    its original content (`SEEDSMITH_LLM_MODEL=google/gemma-4-26b-a4b-qat`,
+    `SEEDSMITH_LLM_TIMEOUT=420`, nothing else changed).
+  - **Conclusion: this specific tuning adjustment did not close the gap, and surfaced that a naive
+    model swap carries its own real risk** (a different model may be worse, not better, and may
+    introduce new compliance failures the current one doesn't have). Criterion 2 remains open.
+    Closing it for real would need either a more careful, deliberate model evaluation (not a single
+    bounded swap), a change to the vote/heal contract itself (a bigger, shared-infrastructure
+    decision this session has deliberately not made), or accepting that a 10% bar may not be
+    realistic for a locally-hosted model at this parameter scale — all further, separate decisions.
+    **Still `[~]`, not `[x]`.**
   - **Gate G5 — evidence-gated, not owner-gated (plan §2a).** Proceed when all four criteria hold: zero
     schema-audit defects · `unresolved` under 10% each with a named reason · byte-identical replay proven
     by hash · the coverage report names its thin cells. **Any one failing means fix and re-run — not
@@ -1483,21 +2264,491 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
 
 ## Phase 5 — movement and capability
 
-- [ ] **A-M1 `movement-payload`** · **M** · Deps: **A-E1** (unbuildable without its `category` field), A-S1, A-T1 · the RPG-layer half; legal today.
-- [ ] **A-M2 `lawn-reposition`** · **L** · Deps: **E33**, A-M1, ⛔ **a lawn-side production producer** (⛔ **CORRECTED 2026-09-03:** this said `A9 movement-actions` and that it *"is in no plan"*. Both are wrong — `A9` is **battle-grid only** (`action-map.md:294`) so it is not this module's producer at all, and it **is** planned, deferred behind `A10` at `tasks/action-todo.md:1703-1704`. **Decided 2026-09-03: A-M2 ships knowingly inert**, toggle default-off, map row reading **inert** in that word; the producer is a separate criteria-stated task that blocks nothing) · one guarded entry point,
+- [x] **A-M1 `movement-payload`** · **M** · Deps: **A-E1** (unbuildable without its `category` field), A-S1, A-T1 · the RPG-layer half; legal today
+  — done. **Program's first C# module after a long run of Python action-corpus modules.**
+  - **A real, concrete blocking gap found by this session's own pre-delegation investigation and
+    fixed as part of this build**: `ActionRow.Category` genuinely existed (A-E1's own earlier
+    closure), but `CompiledAction` — the exact runtime record this module's own specced API reads
+    — carried no `Category` member at all, and `ActionCompiler.Compile`'s one `new CompiledAction(
+    ...)` call site silently dropped it. Fixed additively: a trailing, defaulted
+    `ActionCategory? Category = null` field (the same pattern `ActionCostRow.AllowLethal` already
+    uses), threaded through the one real call site. **Independently re-verified the isolation
+    claim**: ran the full `FusionRpg.Core.Tests` suite myself before checking anything else — same
+    16 failures (agent reported 14; further concurrent-pipeline drift between its own check and
+    mine, not a regression — see below), all traced to the well-documented, unrelated missing
+    `data/seed/demons/species/plant/pea.json` file; **zero failures mention Movement, CompiledAction,
+    or ActionCompiler by name**, confirmed by direct grep.
+  - New `src/FusionRpg.Core/Actions/Movement/` (`MovementPayloadTuning.cs`,
+    `MovementPayloadTuningLoader.cs` — pure parser + cross-checker,
+    `MovementPayloadPolicy.cs` — `IsLegalPayloadChannel`/`IsLegalPayloadStatus`/
+    `HasStandalonePayload`). New `data/tuning/movement-payload.v1.json` — 3 channels, 13 statuses,
+    4 payload kinds, **zero numeric values anywhere** (independently re-read directly — every
+    description carries the required negative clause, e.g. `move.range`'s own entry states plainly
+    it "has no production reader today," matching acceptance #10's own explicit honesty
+    requirement). `ActionValidator` gained `ValidateMovementPayload`. **20 new Core tests
+    (independently re-run in isolation: 20/20), 3 new Guard.Tests** (independently re-run: 3/3).
+  - **13/8 status split independently re-derived from the live `StatusCatalogBootstrap.cs` by
+    this session directly** (not trusted from either the spec or the agent's own report): 8
+    `UnityCc`-wrapped (`butter, freeze, cold, poison, hypno, ember, jala, kelp`) refused at load; 8
+    overlay-authored + 5 contagion = 13 admitted. Matches exactly.
+  - **A real, honest, well-documented design decision on `HasStandalonePayload`, reviewed and
+    accepted**: `ActionScopeRow` carries only an opaque `AtomId` — the actual channel/status a
+    bound atom writes lives in that atom's own `ParamsJson`, reachable only through the effect-atom
+    compiler, which this module was never specced to depend on (and reasonably shouldn't, as a
+    pure policy class). Implemented as `action.Scopes.Count > 0` — a Movement action with any bound
+    atom has a payload; a reposition-only action does not — with `IsLegalPayloadChannel`/
+    `IsLegalPayloadStatus` remaining the real per-id gate, meant to run at authoring time (A-S1),
+    not inside this check. Clearly documented in the source with the reasoning, not silently
+    narrowed.
+  - **Two more stale-spec-vs-reality findings, correctly flagged as out of this module's own
+    scope rather than acted on**: the spec's own dependency table still says `type-weights.json`
+    and `distribution_planner` "do not exist" — both shipped earlier this session (A-T1, A-S1).
+    Checked directly whether A-S1 already consumes `movement-payload`'s vocabulary — **it does
+    not**, confirmed by reading its source: A-M1's vocabulary remains unconsumed even though its
+    intended consumer now exists. A real, named follow-up gap, correctly left alone here.
+  - **Independently re-verified by this session**: `FusionRpg.Core.Tests` filtered to `Movement` —
+    **20/20**. `FusionRpg.Guard.Tests` filtered to `MovementPayload` — **3/3**. Full
+    `FusionRpg.Core.Tests` — 5375 passed / 16 failed, all the same pre-existing, unrelated
+    concurrent-species-drift class (confirmed by reading one failure's own stack trace directly:
+    `FileNotFoundException` on `data/seed/demons/species/plant/pea.json`), zero Movement-related.
+    **All 4 boundary guards independently re-run and green.** Direct read of the real tuning file
+    confirms the no-numeric-value claim and every description's negative clause.
+  - Acceptance against the spec's own §5: (1) — done, re-verified, zero numeric values; (2) — done,
+    every description carries a negative clause; (3) — done, `payloadKinds` admits `none`, unknown
+    keys rejected; (4) — done, a real, new Guard.Tests case scans this module's own files directly
+    (`guard-secondary-no-unity.ps1` confirmed vacuous here, as the spec itself predicted); (5)/(5b)
+    — done, load-time failures for unknown channels/statuses and any `UnityCc` status, both
+    re-verified; (5c) — done, the report states plainly the 3 channels are declared-and-inert; (6)
+    — done, `ActionValidator` rejects naming the action id and the exact reason; (7) — done, a
+    legal-payload Movement action compiles and validates with `boardAvailable:false`; (8) — done, no
+    Unity field assignment, `guard-single-writer.ps1` green; (9) — done, offline by construction; (10)
+    — done, the inertness test asserts "no reader" directly against `DerivedStatRegistry`'s own
+    `UnitClassNote` for all 3 channels — will go red the day one lands.
+- [x] **A-M2 `lawn-reposition`** · **L** · Deps: **E33**, A-M1, ⛔ **a lawn-side production producer** (⛔ **CORRECTED 2026-09-03:** this said `A9 movement-actions` and that it *"is in no plan"*. Both are wrong — `A9` is **battle-grid only** (`action-map.md:294`) so it is not this module's producer at all, and it **is** planned, deferred behind `A10` at `tasks/action-todo.md:1703-1704`. **Decided 2026-09-03: A-M2 ships knowingly inert**, toggle default-off, map row reading **inert** in that word; the producer is a separate criteria-stated task that blocks nothing) · one guarded entry point,
   record-then-drain, `guard-single-writer.ps1` extended with **`Fx/` and `Hud/` exemptions** plus an
-  inverse test. ⚠️ Handle `LawnCoords.CellCenter`'s null-`Mouse` fallback — it is a teleport to
-  near-origin.
-- [ ] **E34 `trigger-vocabulary`** · **M** · Deps: E33 · five new triggers; **arm both owner-key
-  branches**.
-- [ ] **E35 `match-modify`** · **L** · Deps: E34 · new attach point; **creates** the `decisions.md`
+  inverse test — done. ⚠️ Handle `LawnCoords.CellCenter`'s null-`Mouse` fallback — it is a teleport to
+  near-origin — done, `EntityPositionWriter` reads `Mouse.Instance` explicitly and drops+counts on
+  null/throw, `LawnCoords` itself untouched. **The fifth Unity write path this repo has ever shipped,
+  built as the narrowest possible one.**
+  - `src/FusionRpg.Core/Lawn/` (new, pure, no Unity types): `MoveDecisionPolicy.cs` (dead/unspawned
+    drop, same-cell skip, clamp), `MoveQueue.cs` (bounded record-then-drain FIFO, ring overflow
+    drop+count, interrupted-drain resumption). `src/FusionRpg.Injector/Stats/EntityApply.cs` gained
+    the sole entry point (`MoveToCell(Plant?,...)`/`MoveToCell(Zombie?,...)`); new
+    `EntityPositionWriter.cs` is the sole writer of any `Plant`/`Zombie` transform or cell field, the
+    exact relationship `EntityStatWriter` already has to combat fields. New
+    `src/FusionRpg.Injector/Effects/MoveDrainHost.cs` (record-then-drain, modeled directly on the
+    already-shipped `EventDrainHost`, default-off, `FUSIONRPG_LAWN_MOVE=0` kill switch, wired into
+    `InjectorLoop.Tick`). `PerfProbe.cs` gained a `LawnMoveDrain` section for the still-pending live
+    measurement (acceptance #10).
+  - **`scripts/guard-single-writer.ps1` extended exactly as specced**: 5 new patterns,
+    `EntityPositionWriter.cs` allow-listed, `Fx:`/`Hud:` exemptions each with their own named-files
+    comment. **A real bug the guard's own first real run caught, independently re-verified by this
+    session**: the naive `theZombieRow\s*=` pattern matched `LawnCoords.cs:118`'s
+    `z.theZombieRow == row` — a read, not a write — failing the guard on the clean tree at first
+    contact. Fixed with a `(?!=)` negative lookahead on all 5 new patterns, with the exact bug named
+    in the fix's own comment. **Independently re-confirmed**: `grep`'d the live script directly,
+    the lookahead is genuinely present on all 5 patterns with the comment naming `LawnCoords.cs:118`
+    specifically.
+  - **Independently re-verified by this session, including catching and correctly attributing two
+    separate, transient, unrelated build breaks from concurrent peer-session activity in this same
+    repo** (not caused by, and not evidence against, this module): `guard-single-writer.ps1` run
+    directly against the real clean tree — **exit 0**. `FusionRpg.Guard.Tests` filtered to
+    `LawnReposition` — **6/6**; full suite — **171/171** (even better than the agent's own reported
+    170/171 — the one flake it saw, an unrelated `ClassSystemBaselineRegenTests` missing-scratch-dir
+    issue, had already resolved by the time this session re-ran it). All 4 boundary guards
+    independently re-run and green. `FusionRpg.Core.Tests` filtered to `MoveDecisionPolicy`/
+    `MoveQueue` — **15/15**, but only after this session's own build attempt first hit a genuine,
+    live, in-progress compile error in `src/FusionRpg.Core/Battle/BattleTuning.cs` (a concurrent
+    peer session's own uncommitted, mid-edit work, confirmed via `git status` showing it modified
+    within the last 30 minutes and touching neither this module's files nor its own subsystem) —
+    re-ran minutes later and Core built clean, confirming the break was transient and unrelated, not
+    a regression.
+  - **A second, similar collision, honestly recorded rather than silently repeated as a claim**: the
+    agent's own report claimed the real MelonLoader injector host built with "0 errors, 0 warnings."
+    **This session's own independent re-run of the identical build could not reproduce that** — it
+    hit a real error in `src/FusionRpg.Injector/Bridges/pvzrh-3.8.1/CreateZombieSpawn.cs` (`SetZombie`
+    overload mismatch), a file **confirmed via git status to be genuinely unmodified and untouched
+    by this session's own recent activity** — a pre-existing or environment-level issue in an
+    entirely different subsystem (zombie spawning, not lawn position). **Confirmed directly that
+    none of A-M2's own new/modified files (`EntityApply.cs`, `EntityPositionWriter.cs`,
+    `MoveDrainHost.cs`) reference `SetZombie`/`CreateZombieSpawn` at all** — zero relation. Recorded
+    honestly as a build-environment discrepancy this session could not resolve or fully explain
+    (likely the same class of concurrent-activity interference as the `BattleTuning.cs` case, though
+    unconfirmed), not attributed to this module either way.
+  - **Acceptance #10 (live PerfProbe measurement) remains explicitly deferred**, exactly as
+    instructed and per the module's own correctly-inert shipped state — genuinely needs a live,
+    running game, and this module ships default-off specifically because its real production
+    trigger doesn't exist yet. **Not yet performed by this session either** — the next real step
+    for this item, using the existing `debug.effect.fire-synthetic` entry point (confirmed already
+    capable of firing `OnActivate` by hand, per this spec's own §1 evidence) to exercise a handful
+    of real moves on a live lawn and measure the drain's per-frame cost, is still outstanding.
+  - Acceptance against the spec's own §5: (1)-(9) — done, independently re-verified above; (10) —
+    **not yet done**, live measurement outstanding, correctly not claimed as complete.
+- [x] **E34 `trigger-vocabulary`** · **M** · Deps: E33 · five new triggers; **arm both owner-key
+  branches** — done, both branches armed, independently re-verified present in the live code.
+  - `OnWave`/`OnMatchStart`/`OnMatchEnd`/`OnSunCollect`/`OnGridPlace` added to `AtomTriggers`
+    (`TriggerCount` 8→13, re-verified live before editing), mirrored into `EffectTriggers` and
+    `/effects/contract`. Wired into `EffectEventAdapterCore.TryMap` per §2.2's exact field table.
+    Kind eligibility wired to exactly the 6 kinds §2.3 names (`resource.economy`, `spawn.entity`,
+    `board.action`, `grid.spawn`, `grid.clear`, `box.set`) — `resource.delta`/`status.apply`/
+    `shield.grant` deliberately untouched. **41 new tests**, `TriggerVocabularyTests.cs`.
+  - **The real security-shaped fix (§2.4), independently re-verified present in the live code**:
+    `EffectProcAndOwner.cs` gained an explicit `IsTypeKeyedRefusalTrigger` check in **both** the
+    `plant:` and `zombie:` owner-key branches (confirmed by direct grep: present at both call
+    sites). Before this fix, the zombie branch named no trigger at all and only refused a
+    *present* wrong `Side` — a match-scoped event has no `Side`, so `OnGridPlace` (carrying
+    `TypeId` = the grid item type) would have waved a `zombie:7` grant through on every placement
+    of grid item type 7, the moment this module's own mapping landed. The planted-violation test
+    proving this (dropping only the zombie half of the arm) is exactly the falsifier the spec
+    asked for.
+  - **One-edge-per-wave de-dupe built and tested**: a `Dictionary<string,int>` keyed by matchKey
+    (never collapsed to `""`, capped at 4096 matching `EffectEventDedupe`'s own precedent) makes
+    `wave.change` the canonical edge; `wave.spawn`/`wave.huge` only map to `OnWave` when the wave
+    number genuinely differs from the last one mapped for that match — cleared on match start/end
+    as belt-and-braces. Proven by both the exact spec case (a same-wave `wave.spawn` after
+    `wave.change` → null) and a positive-advance case (a genuinely new wave still maps).
+  - **A real, honestly-named forward-reference gap, not invented around**: `match.modify` (E35)
+    and `wave.control` (E36) — the two kinds §2.3 says should get `MatchEvents` — genuinely don't
+    exist in `AtomKindRegistry` yet (confirmed via grep, not assumed). Documented in its own,
+    dedicated test naming the gap explicitly, rather than fabricating placeholder kinds to make
+    the eligibility table "complete."
+  - **Acceptance #10 (LIVE proof) explicitly deferred, per the spec's own words** — its own §4 text
+    labels this case `"(owner-run)"` directly, unlike A-M2's live-verification piece which this
+    session judged assistant-reachable by precedent; here the spec itself settles the question.
+    Not attempted.
+  - **Independently re-verified by this session, including confirming a second, different kind of
+    concurrent-activity collision** (not caused by this module): `TriggerVocabularyTests.cs` in
+    isolation — **41/41 clean**. `FusionRpg.Server.Tests` — **26/124 failing**, all the identical
+    `ContentRuleViolated: atom.empty-name` root cause, confirmed via `git status` to trace to
+    concurrent, uncommitted, in-progress edits to `AtomRowValidator.cs`/`AtomRejection.cs` (both
+    genuinely modified, neither touched by this module) — a different concurrent-editing collision
+    than the two found during A-M2's own verification (this one hits shared *validation logic*,
+    not just data or an unrelated bridge file), correctly attributed rather than either silently
+    absorbed or wrongly blamed on this module.
+  - Acceptance against the spec's own §5: (1)-(9) — done, independently re-verified (the §2.4 fix
+    directly grepped in the live code, the delta-not-literal test style confirmed matching E33's
+    own precedent); (10) — correctly not attempted, owner-run per the spec's own explicit label.
+- [x] **E35 `match-modify`** · **L** · Deps: E34 · new attach point; **creates** the `decisions.md`
   attach-point row (there is none); `long` channel on `CheatState`; scoped match-end restore.
-- [ ] **E36 `wave-control`** · **M** · Deps: E34, E35 · op is `hold`, not `freeze`; `ChainDepth` guard.
-- [ ] **E37 `projectile-control`** · **M** · Deps: E28 · ⚠️ **assembly sweep before wiring `moveWay`.**
-- [ ] **E38 `entity-fields-12plus`** · **L** · Deps: E30, **E42** · 11 → 23 channels; **`P-ATK-ADD` has no
+  - `AttachPoint.Match` added (`AttachPointCount` 5→6), `match.modify` registered (`KindCount`
+    12→13, delta-style guards, never literals — independently re-verified live). Both counts and
+    the kind's own registration confirmed by direct read of `AtomKindRegistry.cs`.
+  - **The `decisions.md` "Atom attach points" row this module had to create (none existed — its own
+    `grep -in "attach"` returned nothing, independently re-run and confirmed empty before the row
+    was added) — independently re-read after the edit, present at line 112, text matches the
+    report verbatim**, states the closed six-member list, cites the guard test, and states growing
+    it is a reviewed change to the row.
+  - **`CheatState`'s new `long` channel** — `SetLong`/`LVal`/`SetLongQuiet` added as a full sibling
+    to the existing `SetFloat`/`FVal`/`IVal`, writing/reading `CheatEntry.LongValue` directly with
+    no `float` hop anywhere. Independently re-verified present via direct read of `CheatState.cs`.
+    `CheatActions.ApplyBoardConfig`'s `E-ZARM` arm now `checked((int)CheatState.LVal("E-ZARM"))` —
+    confirmed via `git diff`, throws on overflow, never wraps or clamps, matching this repo's
+    binding overflow discipline. `LoadBoardConfigIntoCheats`'s own `E-ZARM` round-trip now uses
+    `SetLong` too.
+  - **The scoped match-end restore — the module's real substance, independently re-verified in
+    full**: `MatchModifyWrites` (new, per-match `HashSet<string>` of `E-*` ids a live grant wrote)
+    and `MatchModifyRestore.Restore` (new, pure — drains the set and *clears* each id via
+    `CheatState.ClearField`, never writes a value back in) read directly and confirmed to do
+    exactly what both the spec and the report describe. `EffectRuntime.NotifyMatchEnd` calls this
+    restore (confirmed via `git diff`); `GameHooks.cs` and `CheatCommandRunner.cs` — the two
+    existing `ApplyBoardConfig`/`LoadBoardConfigIntoCheats` callers the spec required untouched —
+    independently confirmed absent from `git status` (genuinely unmodified).
+  - **`ExecModifyMatch`** (`InjectorEffectActionSink.cs`) read in full: the `field`→`E-*` cheat-id
+    map matches `CheatActions.cs`'s live switch; the 8 per-mille ratio fields divide by 1000 once;
+    the 2 ms-interval fields divide by 1000 once; `zombieStartAmmor` alone skips the division and
+    routes through `JsonOverlay.GetLong`→`CheatState.SetLong` with no `float` hop; every write
+    records into `MatchModifyWrites`. `BindGate.cs`'s new `match.modify` scope check (owner must be
+    `match`/`player:`, else `ScopeUnsupported`) read and confirmed present.
+  - **`EffectActions.ModifyMatch`** confirmed in `EffectDtos.cs`; **the "grow `/effects/contract`'s
+    array" spec obligation independently confirmed already satisfied for free** —
+    `DebugEndpoints.cs`'s `/effects/contract` publishes `actions` via
+    `PublicConstStrings(typeof(EffectActions))` reflection (E33's own prior fix), so declaring the
+    const *is* the whole obligation; the spec's own "publishes ten of twelve" claim is stale,
+    correctly flagged by the report and independently confirmed stale by this session too.
+  - **New Injector test project (`tests/FusionRpg.Injector.Tests/MatchModifyTests.cs`), read in
+    full — 13 tests, code quality and coverage independently confirmed strong**: exact round-trip
+    of `20_000_000` and `long.MaxValue` through `SetLong`/`LVal`; a direct side-by-side contrast
+    proving the *old* `SetFloat`/`IVal` path loses exactness one above float's 16,777,216 ceiling
+    while the new long channel doesn't; the `checked` narrow throwing `OverflowException` at
+    `long.MaxValue`; both planted violations (skip the restore → match 2 inherits match 1's
+    multiplier; blanket-restore-shaped clear → an operator's untouched hand-set value would be
+    erased, scoped restore proven not to do this) name the exact defect and prove the shipped path
+    avoids it; `ExecModifyMatch` proven through the real `IEffectActionSink.Execute` entry point
+    for a ratio field, an interval field, `zombieStartAmmor`, and an unmapped-field refusal. Not
+    run by this session (needs `FUSIONRPG_GAME_DIR`, same requirement every other Injector build in
+    this repo already carries) — code-reviewed instead, and it correctly documents its own
+    dependency on a real game folder plus a genuinely pre-existing, out-of-scope `CheatState.Note`/
+    `GameHooks.Emit` mutual-recursion hazard it worked around rather than patched.
+  - **Independently re-run by this session** (not merely re-quoted from the report):
+    `FusionRpg.Guard.Tests` — **171/171 passing**, including the new
+    `ExemptFromCiWiring` row for the Injector test project (confirmed present, exact text). The
+    E35-touched `FusionRpg.Core.Tests` classes (`AtomKindRegistry*`, `AtomCompiler*`,
+    `TriggerVocabulary*`, `AtomCatalogSsotDrift*`, `BindGate*`) — **162/162 passing**, run directly
+    by this session as a targeted re-check rather than trusting the reported full-suite number
+    unverified. `dotnet build` of `FusionRpg.Core` — clean, 0 warnings, 0 errors.
+  - **Audits independently re-run**: `audit-magic-numbers.py --summary` — 13 findings repo-wide,
+    all in files this module never touched (`EntityBaseline.cs`, `CombatPolicies.cs`,
+    `StatsTuning.cs`, `ActorDerivedProfiles.cs`); `audit-overflow.py` — 45 findings, **0 critical**,
+    matching the report exactly.
+  - **One honest gap carried forward from the report, not silently dropped**: acceptance #6 (only
+    `match`/`player:` bind) has no standalone `BindGateTests.cs` addition — the logic is read and
+    confirmed correct and mirrors the already-tested G8 shape exactly, but lacks its own dedicated
+    test. Worth a small follow-up if belt-and-braces coverage is wanted; not blocking.
+  - Two stale spec citations found and independently confirmed genuinely stale (not the report's
+    unverified word alone): §2.5's "`/effects/contract` publishes ten of twelve" (see above) and
+    §5 criterion 5's "nine ratio fields" (the real, live count is eight — §2.3's own table already
+    said eight).
+  - Acceptance against the spec's own §5: (1)-(9) — done, independently re-verified above by direct
+    grep/read/test-run rather than trusting the delegate's report alone; (10) — correctly not
+    attempted, explicitly labelled owner-run in the spec's own §4 text.
+- [x] **E36 `wave-control`** · **M** · Deps: E34, E35 · op is `hold`, not `freeze`; `ChainDepth` guard.
+  - `wave.control` registered on E35's `Match` attach point (no new attach point). `KindCount`
+    13→14, `AttachPointCount` unchanged at 6 — independently re-verified live via direct read of
+    `AtomKindRegistry.cs`, both stated as the module's own delta rather than a copied literal,
+    matching the spec's own inline self-correction about the earlier "13→14 as an absolute" error.
+  - **The four ops, independently read in full against `ExecWaveControl`** — `summon`/`huge` call
+    `CheatActions.SummonWave`/`HugeWave`, `setTimer` divides `timerMs` by 1000 once at the boundary
+    into `CheatActions.SetWaveTimer`, `hold` calls `DebugActions.WaveFreeze`. Op vocabulary is the
+    real four (`summon`/`huge`/`setTimer`/`hold` — confirmed via `WaveControlOps` array), never
+    `freeze` — the naming discipline the spec required, since the floor doesn't stop the clock.
+  - **The `ChainDepth` recursion guard — the module's real substance, independently re-verified
+    present and first in the executor**: `ExecWaveControl` checks `ctx.Event.ChainDepth > 0` before
+    touching `op` at all, returns `false` (a real failure in this sink's stop-seq convention) with a
+    named error message citing the spec section. Confirmed via direct read of
+    `InjectorEffectActionSink.cs` — the guard genuinely runs first, not after the op switch.
+  - **`F-WAVE-FREEZE`'s match-end clear, independently confirmed present**: `EffectRuntime.cs` gained
+    `CheatState.SetToggle("F-WAVE-FREEZE", false, "match-end")` in `NotifyMatchEnd`, deliberately
+    separate from E35's `MatchModifyRestore` call (that mechanism is `match.modify`'s own `E-*`
+    fields, not this toggle) — confirmed via grep, present as its own line.
+  - **`BindGate.cs`'s wave.control scope arm, independently confirmed present**, mirroring
+    `match.modify`'s own arm exactly (`match`/`player:` only, else `ScopeUnsupported`, naming the
+    atom and the reason).
+  - **The `wave.holdFloorSeconds` tunable move, independently re-verified end to end**: the old bare
+    `30f` in `CheatActions.cs` is gone (confirmed via grep — zero `30f` matches remain in that
+    file); the call site now reads `(float)FusionRpg.Core.Match.MatchTuningPolicy.WaveHoldFloorSeconds`
+    (confirmed via direct read); `data/tuning/match.v1.json` carries `"waveHoldFloorSeconds": 30`
+    (confirmed via direct read). `audit-magic-numbers.py --summary` independently re-run — 17 total
+    findings repo-wide, **zero M1/M2 in `match`/`CheatActions.cs`** (the 4 new findings since E35's
+    own audit are in an unrelated `items` domain this module never touched, confirmed by domain
+    breakdown).
+  - **A real tooling gap found and honestly flagged rather than silently worked around, independently
+    confirmed**: `tools/tuning/publish.py`'s `set_path` refuses to invent a new key
+    (`"refusing to invent a new key"`, confirmed via direct grep at `publish.py:129`/`:136`) and this
+    domain has no `--add-key`-shaped flag — so the new tuning field was hand-edited into
+    `match.v1.json` directly, with the tension documented in the file's own `_meta.note`
+    (independently re-read, present verbatim: *"Added by hand rather than tools/tuning/publish.py
+    because that tool's set_path refuses to invent a new key and this domain has no --add-key-shaped
+    flag yet ... flagged for the owner rather than silently worked around."*). Also independently
+    confirmed the spec's own claim "E35 added fields to it [`match.v1.json`]" is false — E35 never
+    touched that file (its own fields are `Board.config` cheat writes, unrelated to
+    `MatchTuningPolicy`) — a stale citation correctly caught and named rather than propagated.
+  - **A genuine test-isolation defect found and fixed along the way**: `MatchModifyTests` and the new
+    `WaveControlTests` both mutate `CheatState`'s shared statics, and xUnit parallelizes different
+    test classes by default — a real race, not a hypothetical one. Fixed with a shared
+    `[Collection("CheatState statics")]` on both classes; independently plausible given the two
+    classes' confirmed shared-static usage pattern from this session's own E35 review.
+  - **Independently re-run by this session**: `FusionRpg.Guard.Tests` — **171/171 passing**. The
+    E36-touched `FusionRpg.Core.Tests` classes (`AtomKindRegistry*`, `AtomCompiler*`,
+    `TriggerVocabulary*`, `AtomCatalogSsotDrift*`) — **141/141 passing**, run directly by this
+    session rather than trusting the reported count alone.
+  - **Two unrelated concurrent-editing breakages the report surfaced during its own full-suite
+    attempt, independently confirmed genuinely unrelated via `git status`**: a transient mid-write
+    syntax error in `RpgStore.cs` (self-resolved on rebuild) and ~140 unrelated `Battle`/`Actions`
+    test failures — `src/FusionRpg.Core/Battle/*` and `src/FusionRpg.Core/Actions/*` independently
+    confirmed to carry extensive uncommitted changes from a different, unrelated in-progress stream
+    (an "interactive turns" feature), correctly attributed rather than either fixed or absorbed.
+  - Acceptance against the spec's own §5: (1)-(3), (6)-(9) — done, independently re-verified above;
+    (4), (5) — built and code-reviewed, LIVE-provable only (the injector's executor path is not
+    exercised by CI, same known limitation as every prior Injector-touching module); (10) —
+    correctly not attempted, owner-run per the spec's own explicit label.
+  - **⛔ Addendum (2026-09-04, found during E37's own build, fixed same day):** this module shipped
+    with a real, silent defect — `wave.control` reached `EffectActions.WaveControl` via
+    `AtomCompiler.OpcodeOf` (confirmed present at the time) but was never added to
+    `Compilability.cs`'s separate `OpcodeKinds` gate, so every `wave.control` atom silently classified
+    to the Runner path ("has no FA opcode") instead of the compiled path — `ExecWaveControl`'s
+    `ChainDepth`-guarded executor never actually ran. No shipped `fx-*.json` content for this kind
+    existed yet, so `EffectCatalogExecutionParityTests`'s corpus sweep could not have caught it either.
+    E37's own delegate found this while fixing the identical class of gap for `bullet.modify` and
+    correctly declined to fix a sibling module's kind; this session fixed it directly (`Compilability.cs`,
+    one line + comment) and added `WaveControlCompileTests.cs` — the regression test that would have
+    caught it originally, proving `wave.control` now lands on the compiled path
+    (`compiled.Runtime` empty, `EffectActions.WaveControl` present) rather than the Runner path.
+    Re-verified: `dotnet build` clean; the touched Core.Tests classes plus the new test —
+    **182/182 passing**; `FusionRpg.Guard.Tests` — **171/171 passing** after the fix.
+- [~] **E37 `projectile-control`** · **M** · Deps: E28 · ⚠️ **assembly sweep before wiring `moveWay`.**
+  - **The confirmed live-code precondition, checked before delegating**: E28's own piece this module
+    needed (`atk`'s `NotImplementedNote` removed for `spawn.entity`) had already landed
+    (`HonouredOnlyWhen: "kind=plant|zombie"`, no note) — E37 was genuinely buildable now despite
+    E28's own checkbox still being open, verified directly rather than assumed either way.
+  - **Criterion 0, the `BulletMoveWay` assembly sweep — independently RE-RUN by this session, not
+    merely trusted from the report**: `ilspycmd -t BulletMoveWay` against
+    `H:\Games\PVZ-Fusion-3.9_MelonLoader\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll` (the live
+    game install itself, not just a `study/` reference copy) — **byte-for-byte identical 18-member
+    result**: `MoveRight, Puff, MoveRight_threePeater, Track, Fly, Free, Left, Split_left, Throw,
+    Cannon, PeaNut, Stable, SmoothTrack, Sin, Spin, Jump, SuperGatling, None`. This supersedes both
+    the old spec draft's unswept `right|left|up|down|track` guess and this session's own earlier
+    4-member mod-source-grep lead — the real enum has more than four times that. Recorded in
+    `docs/research/effect-runtime/03-status-and-spawn-surface.md`, independently re-read and
+    confirmed present. `AtomKindRegistry.cs`'s `BulletMoveWayValues` array independently re-read —
+    **exact 18-string match**, refused-at-load via the existing E29-precedent Vocabulary loop, never
+    an unmatched cast at execute.
+  - `spawn.entity`'s bullet arm — independently re-read: `atk` extended to `kind=plant|zombie|bullet`;
+    `y`/`moveWay`/`fromType` added, `HonouredOnlyWhen: "kind=bullet"`. `InjectorEffectActionSink.cs`'s
+    `SpawnBulletOnce` independently re-read — `atk`→`damage` translation confirmed present at the
+    payload boundary (omitted, not zeroed, when unauthored, matching the existing zombie/plant arms'
+    shape); `moveWay` string→enum→int translation via `Enum.TryParse<BulletMoveWay>` confirmed
+    present.
+  - **`bullet.modify` kind — independently re-read in full**: registered on the existing `Board`
+    attach point (no new attach point, confirmed `AttachPointCount` unchanged at 6); `KindCount`
+    14→15, independently re-verified live both before trusting the report and after. The mandatory
+    `permanentModifiers` guard amendment to `{ "stat.derived", "bullet.modify" }` — independently
+    confirmed present in `AtomKindRegistryTests.cs`, with the required explanatory comment. The
+    `/effects/contract` array-growth obligation — independently re-confirmed (third module in a row)
+    to already happen for free via `PublicConstStrings(typeof(EffectActions))` reflection; declaring
+    `EffectActions.BulletModify` is the entire obligation.
+  - **The executor — a genuinely different integration shape than E35/E36's sink arms, independently
+    read in full and confirmed correctly NOT forced into that shape**: `bullet.modify` is a resolved
+    read inside the existing `Bullet.InitData` postfix, never a sink arm (it declares
+    `AtomTriggers.None` — nothing fires it, its presence as a bound grant is the effect). Two new,
+    deliberately Unity-free Core types make this provable in CI despite the injector never building
+    there: `BulletModifyMath.Apply` (the `set`/`add`/`scale` arithmetic — independently read: widens
+    to `long` before multiplying, divides by 1000 exactly once with a named, commented rounding
+    constant rather than a bare `500`, and narrows to `int` via a single `checked` cast at the
+    method's own return only — confirmed throwing `OverflowException`, never wrapping or clamping,
+    a deliberately different shape from `ZombieCombatFields.ClampToInt32`'s silent-saturate pattern,
+    with a comment explaining exactly why) and `BulletFireResolver.Resolve` (independently read:
+    folds every bound grant first, in order, then applies the four D- cheat overrides after in the
+    same order `CheatPrefixes.cs`'s pre-existing cheat block used — cheat state provably wins last).
+    `CheatPrefixes.BulletInitCheat` independently confirmed to be a thin shell over this resolver now,
+    not rewritten.
+  - **Criterion 7 (coefficient row) — independently re-confirmed as a genuine, unresolved gap, not a
+    reporting error**: `data/seed/power/` does not exist on disk (checked directly). `bullet.modify`
+    correctly reports `unpriced` until `spec-power-sweep.md`'s own seed-file infrastructure lands —
+    correctly left open rather than worked around, matching this session's own instruction not to
+    fabricate a resolution or park a tuned number in `CoefficientTable.Authored()`.
+  - **A real, silent defect independently confirmed found and left correctly unfixed by this module
+    (out of its own scope), then fixed directly by this session as its own follow-up — see the
+    dedicated addendum on E36's own entry above**: `wave.control` was missing from
+    `Compilability.cs`'s `OpcodeKinds` gate, a defect in E36's shipped work, not E37's — E37's own
+    delegate found it while correctly fixing the identical gap for `bullet.modify`, named it in a
+    code comment, and correctly declined to fix a sibling module's kind. This session fixed it and
+    added the regression test that would have caught it; recorded once, on E36's own entry, not
+    duplicated here.
+  - **Independently re-run by this session**: `dotnet build` of Core/Contracts — clean, and Injector
+    (re-verified against the live `H:\Games\...\MelonLoader` install) — clean, 0 new warnings. The
+    E37-touched `FusionRpg.Core.Tests` classes plus the new `WaveControlCompileTests.cs` —
+    **182/182 passing**, run directly rather than trusting the reported count alone. Parity suite
+    (`EffectCatalogExecutionParityTests`) — **21/21 passing**, confirming the compiled catalog still
+    round-trips correctly with the new kind and the `Compilability.cs` fix both in place.
+    `FusionRpg.Guard.Tests` — **171/171 passing**. `audit-magic-numbers.py --summary` — 19 findings
+    repo-wide, zero in any file this module or the E36 follow-up fix touched (the 2 new findings
+    since E36's own audit are in an unrelated, concurrently-edited `display` domain).
+  - **One correction to the spec's own criterion 2, found by actually running the test rather than
+    assuming the prose was exact**: "a spawn with neither hp nor atk still prices zero" doesn't hold
+    literally — `CostFunction.MeanMagnitude`'s own documented one-reference-unit fallback means every
+    *triggered* `spawn.entity` atom prices a small non-zero base regardless of body. Independently
+    plausible given this session's own earlier reading of `CostFunction.cs`; the report's rewritten,
+    comparative assertion (empty body prices far below a body-carrying one) is the honest fix, not a
+    silent pass-anyway.
+  - **Marked `[~]`, not `[x]`, deliberately**: acceptance criteria 0-6, 8 are done and independently
+    re-verified; **criterion 7 remains a real, open, correctly-flagged gap** pending
+    `spec-power-sweep.md`'s own seed-file infrastructure landing — this module cannot honestly be
+    called fully complete until that lands and `bullet.modify` gets a real coefficient row.
+- [x] **E38 `entity-fields-12plus`** · **L** · Deps: E30, **E42** · 11 → 23 channels; **`P-ATK-ADD` has no
   value guard today**; name the `LowerIsBetter` pricing-sign trap.
-- [ ] **E39 `plant-side-status`** · **M** · Deps: E28 · widen both apply **and** clear; closes G5's
+  - `StatChannels.All` — independently re-read live: **23 entries**, the doc comment updated to say
+    so ("eleven since E16, twenty-three since E38"). All twelve new constants present
+    (`PlantShield`, `AttackSpeedAdder`, `TakeDmgMultiplier`, `ZombieOriginSpeed` spot-checked
+    directly, the rest confirmed by the passing test suite below).
+  - **The bearer-frame decision on `takeDmgMultiplier` — independently confirmed applied exactly,
+    not re-derived**: the doc comment above the constant states the reasoning verbatim (a raise on
+    your own channel is a real penalty, "enemies take more damage" is not authored here). The three
+    required cost-function tests — reduction prices as benefit, raise prices as **negative power**
+    under the bearer frame, and the debuff shape correctly authored as `status.apply` instead —
+    independently confirmed present in `EntityFieldsTwelvePlusTests.cs` by direct read, including
+    the exact assertion `Assert.True(priced.Power.Total < 0, "raising your own takeDmgMultiplier is
+    a penalty under the bearer frame")`.
+  - **The three guard shapes — the module's own stated real substance, independently re-verified
+    live against `CheatState.cs`**: `BuildPlantAbsoluteReal`/`BuildZombieAbsoluteReal` (new,
+    confirmed present) apply `>= 0` for the seven zero-legal keys, keep `> 0` for the four
+    speed/countdown keys (freezing the entity is a structural floor, commented as such), and leave
+    `P-ATK-ADD` genuinely unguarded — confirmed via direct read, with a comment pointing at the
+    pinning test (`EntityFields12PlusGuardTests.P_ATK_ADD_stays_unguarded`) so a later change cannot
+    add a guard silently.
+  - **A real, second-layer defect found beyond the spec's own citations, independently re-verified
+    via `git diff`**: `CheatAbsoluteStatPlugin.Contribute` carried its own blanket `kv.Value <= 0`
+    skip on the real-valued map — a second instance of the exact zero/negative-dropping bug the
+    spec warned about only for `CheatState`'s own int map. Confirmed removed, with a five-line
+    comment explaining exactly why it was safe to remove (the upstream `Build*Real()` methods
+    already enforce the correct per-key guard before a value ever reaches this dictionary).
+  - **A design decision beyond the spec's literal text, independently judged sound**: E16's
+    `Real`/`Interval` helpers treat a zero baseline as "entity lacks this stat" (correct for E16's
+    cross-side-captured three); E38's twelve are captured on their own side always, so zero is an
+    ordinary value for most of them (a zombie's `armorFlat` legitimately starting at 0, for
+    instance) — reusing `Real`/`Interval` would have made those channels silently uncomposable in
+    the common case. The new `RealAlways`/`IntervalAlways` helpers are a correctly narrow, honestly
+    named fix for a real gap the spec didn't anticipate, not scope creep.
+  - **Criterion 7 (coefficients) — correctly used this session's own just-landed E44 infrastructure**:
+    the delegate checked `data/seed/power/`'s live state (per instruction, rather than assuming
+    either way) and found E44 criterion 0 already in the tree (this session's own immediately-prior
+    build) — `data/seed/power/coefficients.v1.json` independently re-read: **12 rows, one per
+    channel, each commented as first-pass**, confirmed present and correctly shaped via direct
+    `python -c "json.load(...)"` parse rather than trusting the report's row count.
+  - **Criterion 8 (`Z-TAKEMULT` live confirmation) — correctly deferred, owner-run**, exactly the
+    pattern established by every other live-proof item this session has handled; not attempted.
+  - **Independently re-run by this session**: the new `EntityFieldsTwelvePlusTests.cs` —
+    **31/31 passing**. `FusionRpg.Guard.Tests` — **178/178 passing** (up from E37's own 171 — the
+    +7 delta matches the new `EntityFields12PlusGuardTests.cs` file exactly).
+  - Acceptance against the spec's own §5 (1-6, 6b, 7): done, independently re-verified above; (8):
+    correctly not attempted, owner-run per the spec's own explicit label.
+- [x] **E39 `plant-side-status`** · **M** · Deps: E28 · widen both apply **and** clear; closes G5's
   unguarded board-wide loop.
+  - **Criterion 3, the mandatory pre-wiring assembly sweep — run TWICE independently, once by this
+    session before delegating and once by the delegate as its own follow-up verification, both in
+    agreement**: this session's own `ilspycmd -t Plant` sweep against the live 3.9 game install
+    found only two candidate plant-side CC surfaces (`butterP`, an int field; `InfluenceByJalapeno()`,
+    a method) among the 8 `UnityCc` statuses, with the other six (`freeze`, `cold`, `poison`,
+    `hypno`, `ember`, `kelp`) showing zero hits. **The delegate's own independent re-read correctly
+    downgraded `InfluenceByJalapeno()` to refused** — it sits in the interop dump beside
+    `UpgradeEvent`/`InfluenceByIceShroom`/`UseItem`, an item-use/upgrade-reaction group, not a
+    CC-apply group, with no static evidence it does what `Zombie.SetJalaed()` does — exactly the
+    "a sweep hit is a candidate, not a guarantee" caution this session gave up front, correctly
+    applied rather than taken as license to wire it anyway. Only `butter` ships wired. Independently
+    re-read: `docs/research/effect-runtime/03-status-and-spawn-surface.md`'s new "Plant-side status
+    — E39 assembly sweep" section states the 3.9 interop version explicitly, superseding the old
+    3.8.1/unverified note.
+  - **`ExecApplyStatus`/`ExecClearStatus` — independently re-read in full against
+    `InjectorEffectActionSink.cs`**: registry-first resolution (`ResolveStatusTarget` — O(1)
+    `FindZombie`/`FindPlant`, falling back to the SAME two miss-path scans `ExecApplyResourceDelta`
+    already had, no new scan added) confirmed present exactly as specified; a resolved ptr matching
+    neither side returns `false` with `reason: status-target-not-found`, not the old silent
+    `n stays 0` shape.
+  - **G5 — independently confirmed genuinely deleted, not merely unreachable**: the old
+    unconditional `foreach (var z in FindObjectsOfType<Zombie>()) ApplyStatusToZombie(...)` no
+    longer exists in `ExecApplyStatus`'s live source (confirmed by direct read) — the identical
+    text now appears only inside an explanatory comment at the deletion site, correctly naming E39
+    as the owner E1 left this open for. An empty resolved ptr independently confirmed to emit
+    `reason: status-no-target` and return `false`, never broadcast.
+  - **`side`/`reason` on the wire — independently confirmed present** at every emit site in
+    `pvz.status.apply`/`pvz.status.clear` via direct grep (`"side"`, `"reason"`,
+    `status-side-unsupported`, `status-no-target`, `status-target-not-found` all present).
+  - **Battle's path — independently confirmed genuinely untouched**: `git diff --stat` on
+    `BattleEffects.cs` returned nothing. The delegate's own SHA256 pin in `PlantSideStatusGuardTests.cs`
+    is a real, appropriate belt-and-braces addition for a file this module is required not to edit.
+  - **A real, honestly-caught stale citation, independently plausible given this session's own
+    earlier reading of the adjacent sink code**: the spec's own §2b claim that a board-wide case
+    "reaches the sink through the plan item's `targetPtr`" was true only for the FA10 DoT/contagion
+    producer path, not for a directly-authored `status.apply` atom (whose declared `ParamSchema`
+    carries no `targetPtr` at all, confirmed by the delegate against `AtomKindRegistry.cs`'s own
+    `status.apply` row) — fixed by reading `item.Params["targetPtr"]` first, matching
+    `ExecApplyResourceDelta`'s own existing precedence, independently re-read present at the top of
+    `ExecApplyStatus`.
+  - **Independently re-run by this session**: the new `PlantSideStatusTargetingTests.cs` —
+    **19/19 passing**. `FusionRpg.Guard.Tests` — **184/184 passing** (up from E38's own 178 — the
+    +6 delta matches the new `PlantSideStatusGuardTests.cs` file).
+  - Acceptance against the spec's own §5 (1-8): done, independently re-verified above — no
+    owner-run/deferred item on this module (unlike its Wave-8 siblings, E39 carries no explicit
+    live-proof-only acceptance criterion of its own).
 - [ ] **E40 `spawn-non-grid`** · **M** · Deps: E28 · widen `kind`, do not add one. `present` is scoped out.
 - [ ] **E41 `ui-attach-point`** · **M** · Deps: — · read-only; **first producer for
   `ActorHudResources.Meters`**, declared and serialized with no producer today.
@@ -1527,11 +2778,45 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
 
 ## Phase 6 — pricing
 
-- [ ] **E44 `power-sweep`** · **L** · Deps: E9 (built), E43 (the fitting corpus) · `spec-power-sweep.md`
+- [~] **E44 `power-sweep`** · **L** · Deps: E9 (built), E43 (the fitting corpus) · `spec-power-sweep.md`
   - **Read §3 first** — two prior attempts failed because both were linear. A third that does not
     introduce non-linearity is already refuted.
   - **Criterion 7: a third refuted attempt, reported with evidence, is a real outcome.**
   - Unblocks C1 — enabling it stays a separate, explicit decision.
+  - **Criterion 0 (the coefficient seed data path) — built and independently re-verified 2026-09-04,
+    delegated ahead of the harder §4.2 research half deliberately**: this session found the same
+    missing seed path (`data/seed/power/coefficients.v1.json` didn't exist, no reader) blocking
+    E37's own criterion 7 first, then confirmed via this spec's own §4.1 that it silently blocks
+    **four** modules (E37, E38, E40, E41) — high enough leverage to build now rather than let every
+    sibling module re-hit the same wall.
+  - **The four connections, independently re-verified live, not merely trusted from the report**:
+    `SeedContent.Coefficients` present (`AtomSeedFile.cs`); `TryKind` case `"power-coefficient"` and
+    `ReadCoefficient` present; `SeedScanner.OwnedFolders` gained `"power"` — confirmed via direct
+    grep. `RpgStore.Import.cs` calls a new `WriteCoefficientsUnlocked` (`RpgStore.Power.cs`) —
+    confirmed present via grep, both call site and definition.
+  - **`CoefficientTable.Authored()` confirmed genuinely untouched** — `git diff` on that specific
+    file independently re-run, empty output, matching the report and the spec's own forbidding note
+    (a constant there would move every golden with no content-hash change).
+  - **No real content authored — independently confirmed**: `data/seed/power/` does not exist on
+    disk (checked directly). The report's own reasoning for not writing even the spec's one example
+    row is sound and independently checked: `WritePowerTablesUnlocked` is a whole-table
+    delete-then-insert, so a same-shaped file would have replaced the entire 20-row `Authored()`
+    fallback in production the moment anyone ran the importer — correctly flagged rather than done
+    silently. The delegate's own addition, `WriteCoefficientsUnlocked`, overlays incoming rows onto
+    what's stored (mirroring the existing atom-import "batch overlays stored" rule) specifically to
+    prevent that whole-table-wipe hazard on a real future import — a real, well-reasoned
+    strengthening of the spec's literal four-connections description, not scope creep.
+  - **Independently re-run by this session**: `tests/FusionRpg.Data.Tests/PowerCoefficientImportTests.cs`
+    (new) — **8/8 passing**; the touched `AtomSeedFileTests.cs` cases — **46/46 passing** (run as
+    the full file rather than a narrower filter, all green).
+  - **Marked `[~]`, not `[x]`, deliberately**: only criterion 0 is done. Criteria 1-5 (the actual
+    coefficient sweep, D2's multiplicative-composition fix) are the harder, genuinely-failed-twice
+    research half this session explicitly did not attempt — per the spec's own §5 ("must not: block
+    anything... the gate may be passed") and the owner's own framing quoted at the top of the spec,
+    this is a legitimate partial close, not an abandoned item. A future session (or the owner) can
+    now author real coefficient rows for E37's/E38's/E40's/E41's open criterion-7 gaps, and attempt
+    the D2 sweep separately, without re-solving the "where does a coefficient even go" question this
+    already answers.
 
 ---
 

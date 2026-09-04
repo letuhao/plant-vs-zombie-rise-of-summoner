@@ -17,16 +17,19 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
+        "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:03:35Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:32:12Z",
+      "minorityValues": {
+        "elementPrimary": "dark"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -43,37 +46,37 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "attackTempo": "flurry",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Legume-based Projectile",
-      "Seed-Sower"
+      "legume-based projectile",
+      "hybrid-botanical"
     ],
-    "gameTypeId": 1030,
+    "gameTypeId": 1387,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
-    "reason": "As a basic projectile unit capable of rapid-fire doubling and evolution, it functions as a standard combatant rather than a mere nuisance or low-level raider.",
+    "reach": "short",
+    "reason": "The ability to trigger poison miasma and evolve into a machine gun shooter suggests a combat threat significantly higher than a mere nuisance.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "DoubleShooter",
-    "targetPreference": "frontline",
+    "speciesId": "GarlicSplit",
+    "targetPreference": "swarm",
     "traits": [
-      "Dual-projectile",
-      "Rapid-fire",
-      "Evolutionary-morphing"
+      "pod-splitting",
+      "toxin-delivery",
+      "status-synergy",
+      "evolutionary-growth"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
     ],
     "verdict": "too-low"
   },
@@ -98,12 +101,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:32:15Z",
+      "emittedUtc": "2026-09-04T10:52:25Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -121,39 +125,38 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Legume-based Projectile",
-      "Allium-Hybrid"
+      "legume-based projectile",
+      "seed-pod artillery"
     ],
-    "gameTypeId": 1386,
+    "gameTypeId": 1321,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
-    "reason": "The creature functions as a basic projectile unit with a simple status effect and a single evolution mechanic, fitting the profile of a low-level nuisance.",
+    "reach": "short",
+    "reason": "The ability to apply a status effect and evolve into a machine gun variant suggests a combat threat significantly higher than a mere nuisance.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "GarlicRepeater",
+    "speciesId": "JalaSplit",
     "targetPreference": "swarm",
     "traits": [
-      "Dual-projectile discharge",
-      "Garlic-value infusion",
-      "Toxic miasma generation",
-      "Metamorphic pod growth"
+      "rapid-fire",
+      "heat-inducing",
+      "evolutionary-trigger"
     ],
     "variants": [
       "normal",
       "mutated",
-      "cursed"
+      "blessed"
     ],
-    "verdict": "agree"
+    "verdict": "too-low"
   }
 ]

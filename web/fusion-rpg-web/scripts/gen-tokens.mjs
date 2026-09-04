@@ -73,7 +73,7 @@ function renderBareBlock(entries) {
   return lines.join("\n");
 }
 
-const BAND_CLASSES = ["stage", "hud", "panel", "dialog", "toast", "system"]
+const BAND_CLASSES = ["stage", "scrim", "hud", "panel", "dialog", "toast", "system"]
   .map((b) => `.band-${b} { z-index: var(--band-${b}); }`)
   .join("\n");
 

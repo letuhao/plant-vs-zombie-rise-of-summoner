@@ -1,0 +1,84 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:19:38Z",
+      "minorityValues": {
+        "threatBand": "raider"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "Retribution",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "ballistic-botanicals"
+    ],
+    "gameTypeId": 1405,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "As a specialized combat base designed to augment a sniper's firepower through recoil mechanics, it functions as a tactical force multiplier rather than a world-ending threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SniperPot",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "recoil-driven",
+      "low-profile",
+      "stationary-platform",
+      "momentum-burst"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ]
+  }
+]

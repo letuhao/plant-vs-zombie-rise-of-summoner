@@ -40,6 +40,12 @@
       "type": "prefix",
       "disposition": "load",
       "reason": "cell.*/target.* only, and a coverage cell naming its subject is the other cross-kind edge the per-kind id_pattern table exists for."
+    },
+    {
+      "id": "_candidates/",
+      "type": "prefix",
+      "disposition": "exclude",
+      "reason": "A-P1/A-P2/A-P3's own pre-acceptance scratch rows (spec: 'Never write into data/seed/actions/ -- acceptance is A-S3's; persistence is A-S6's'). Rows key on candidateId, not this corpus's own id grammar, and carry no cross-reference another committed entry resolves against -- the same 'safer to exclude than to guess' default `_load_committed_corpus` already states for any undeclared prefix, made explicit here now that a real run has populated this directory for the first time."
     }
   ]
 }

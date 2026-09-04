@@ -55,7 +55,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-002",
@@ -91,7 +93,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-003",
@@ -127,7 +131,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-004",
@@ -144,7 +150,7 @@
       "socketMax": 0,
       "iconKey": "icon.base.fringed-scarecrow",
       "flavorKey": "flavor.base.fringed-scarecrow",
-      "flavor": "A straw-stuffed guardian, dressed in fringed silks \u2014 a scarecrow that terrifies with grace.",
+      "flavor": "A straw-stuffed guardian, dressed in fringed silks — a scarecrow that terrifies with grace.",
       "tags": [
         "medium-light",
         "organic",
@@ -163,7 +169,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-005",
@@ -199,7 +207,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-006",
@@ -235,7 +245,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-007",
@@ -270,7 +282,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-008",
@@ -306,7 +320,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-009",
@@ -342,7 +358,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     },
     {
       "id": "item.humanoid-banner-010",
@@ -378,7 +396,9 @@
           "atLevel": 20,
           "family": "atom.enhance-aegis"
         }
-      ]
+      ],
+      "enabled": false,
+      "retiredReason": "D14 (item-ideal.md, 2026-09-04): the commander is another unique demon, not a 16th equip slot. 'standard' stays declared for the shape; the generator emits nothing into it. This entry pre-dates the ruling by twelve days and is retired, not deleted, per seed-contract.md §7.2 -- the id is never reused."
     }
   ]
 }

@@ -39,8 +39,19 @@ public class SpeciesExpanderTests
         1, 1, PowerTuning.FixedCMilli, 0, PowerTuning.FixedPinIndex, PowerTuning.FixedPinValue,
         1000, 25000, 250, 1000, 5000, 5000, 25000);
 
-    static AnchorRow RealAnchor(string sideDir, string file) =>
-        AnchorRowReader.ReadAll(ReadTuning("data", "seed", "demons", "species", sideDir, file)).Single();
+    /// <summary>Resolves a species' CURRENT real anchor file via `_index.json` rather than a
+    /// hardcoded path — found broken live, 2026-09-04 (demon-corpus-self-heal): a species' family
+    /// bucket is model-decided and moves across reclassifications, so a test hardcoding
+    /// `"pea.json"` breaks the moment the pipeline it exercises does its own job correctly. The
+    /// index is exactly the lookup `run-control` itself uses for the same reason.</summary>
+    static AnchorRow RealAnchor(string speciesId)
+    {
+        var indexPath = Path.Combine(RepoRoot(), "data", "seed", "demons", "species", "_index.json");
+        var index = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(indexPath))!;
+        var relPath = index[speciesId];
+        return AnchorRowReader.ReadAll(ReadTuning("data", "seed", "demons", "species", relPath.Replace('/', Path.DirectorySeparatorChar)))
+            .Single(a => a.SpeciesId == speciesId);
+    }
 
     static ConcreteSpecies Expand(AnchorRow anchor, long? statedIntervalMs = null) =>
         SpeciesExpander.Expand(anchor, RealAptitudes, Tuning, RealShape, RealThreat, statedIntervalMs);
@@ -61,7 +72,7 @@ public class SpeciesExpanderTests
     [Fact]
     public void Peashooter_expands_without_throwing_and_carries_its_own_theta()
     {
-        var anchor = RealAnchor("plant", "pea.json");
+        var anchor = RealAnchor("Peashooter");
         Assert.Equal("Peashooter", anchor.SpeciesId);
         Assert.Null(anchor.ThreatBand); // real gap in the real data — the fallback path is exercised
 
@@ -79,7 +90,7 @@ public class SpeciesExpanderTests
         // T4.8's own real precondition (found 2026-09-02, not assumed): `DemonSpeciesDef`'s
         // production fields have a real source after all — the anchor itself — this proves the
         // pass-through against pea.json's own literal, on-disk values, not a synthetic fixture.
-        var species = Expand(RealAnchor("plant", "pea.json"));
+        var species = Expand(RealAnchor("Peashooter"));
 
         Assert.Equal("plant", species.Side);
         Assert.Equal(0, species.GameTypeId);
@@ -88,7 +99,10 @@ public class SpeciesExpanderTests
         Assert.Equal(DemonDeployMode.PlantAvatar, species.DeployMode);
         Assert.Equal(DemonAcquisition.Summonable, species.Acquisition);
         Assert.Equal(new[] { "normal", "mutated" }, species.Variants);
-        Assert.Equal(new[] { "Projectile-launching", "Defensive", "Rapid-fire" }, species.TraitPool);
+        // Traits are open-vocabulary, LLM-proposed content (identity pipeline) — re-classified
+        // during demon-corpus-self-heal's own C3 unresolved-field healing pass, 2026-09-04
+        // ("Rapid-fire" -> "Rhythmic-attack"), a legitimate outcome, not a defect.
+        Assert.Equal(new[] { "Projectile-launching", "Defensive", "Rhythmic-attack" }, species.TraitPool);
         Assert.Null(species.Name); // never resolved here — species-import's own job (T4.6)
     }
 
@@ -194,7 +208,7 @@ public class SpeciesExpanderTests
     [Fact]
     public void Sunflower_is_pure_focus_and_every_magnitude_traces_to_that_one_family()
     {
-        var anchor = RealAnchor("plant", "sunflower.json");
+        var anchor = RealAnchor("SunFlower");
         Assert.True(anchor.Pure);
         Assert.Equal("Focus", anchor.AptitudePrimary);
 
@@ -215,7 +229,7 @@ public class SpeciesExpanderTests
         // Q21: no channel gets a second growth rate. Directly re-derive one magnitude by hand from
         // the species' own recorded PTheta and compare — proves the SAME pTheta fed every channel,
         // not a per-channel recomputation.
-        var anchor = RealAnchor("plant", "sunflower.json");
+        var anchor = RealAnchor("SunFlower");
         var species = Expand(anchor);
 
         var edge = RealAptitudes.Edges.First(e =>
@@ -289,7 +303,7 @@ public class SpeciesExpanderTests
     [Fact]
     public void Stated_interval_beats_classified_tempo()
     {
-        var anchor = RealAnchor("plant", "pea.json"); // attackTempo: "steady"
+        var anchor = RealAnchor("Peashooter"); // attackTempo: "steady"
         var classifiedOnly = Expand(anchor);
         var withStated = Expand(anchor, statedIntervalMs: 777);
 
@@ -307,10 +321,10 @@ public class SpeciesExpanderTests
     {
         // Proven against the real shipped ladder (ssot-rarity.md §3.3's own numbers), not invented:
         // cultivated's combined count band is 2-3.
-        var pea = Expand(RealAnchor("plant", "pea.json"));
+        var pea = Expand(RealAnchor("Peashooter"));
         Assert.InRange(pea.VariantCount, 2, 3);
 
-        var sunflower = Expand(RealAnchor("plant", "sunflower.json"));
+        var sunflower = Expand(RealAnchor("SunFlower"));
         Assert.InRange(sunflower.VariantCount, 2, 3);
     }
 
@@ -342,7 +356,7 @@ public class SpeciesExpanderTests
     [Fact]
     public void Regenerating_the_same_anchor_is_byte_identical()
     {
-        var anchor = RealAnchor("plant", "sunflower.json");
+        var anchor = RealAnchor("SunFlower");
 
         var first = Expand(anchor);
         var second = Expand(anchor);

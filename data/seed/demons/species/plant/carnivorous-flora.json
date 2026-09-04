@@ -17,17 +17,19 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
+        "elementPrimary": "split",
+        "rarity": "high",
+        "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:41:47Z",
+      "emittedUtc": "2026-09-04T09:59:09Z",
       "minorityValues": {
-        "rarity": "chaff"
+        "elementPrimary": "dark"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -45,35 +47,110 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "attackTempo": "ponderous",
+    "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Carnivorous Flora"
+      "carnivorous flora"
     ],
-    "gameTypeId": 5,
+    "gameTypeId": 1174,
     "posture": "Force",
     "pure": true,
-    "rarity": "cultivated",
-    "reach": "melee",
-    "reason": "The ability to instantly kill a target makes it a significant threat, but its fragility and limited utility keep it at a raider level.",
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its ability to consume entire hordes and even giant-class entities with a guaranteed kill mechanic establishes it as a dominant force capable of controlling the battlefield.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "Chomper",
-    "targetPreference": "elite",
+    "speciesId": "BigChomper",
+    "targetPreference": "swarm",
+    "threatBand": "tyrant",
     "traits": [
-      "Devouring",
-      "Fragile Mastication",
-      "High-Impact Digestion"
+      "voracious",
+      "size-shifting",
+      "digestive-latency"
     ],
     "variants": [
       "normal",
       "mutated"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "observed",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:08:32Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "observed",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous flora"
+    ],
+    "gameTypeId": 5,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "sprout",
+    "reach": "short",
+    "reason": "The ability to instantly kill a target makes it a significant threat, but its fragility and limited utility keep it at a raider level.",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "Chomper",
+    "targetPreference": "backline",
+    "traits": [
+      "devouring",
+      "fragile mastication",
+      "high-impact digestion"
+    ],
+    "variants": [
+      "normal"
     ],
     "verdict": "agree"
   },
@@ -97,15 +174,16 @@
       "auditVerdict": null,
       "basis": "observed",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:57:38Z",
+      "emittedUtc": "2026-09-04T11:03:21Z",
       "minorityValues": {
-        "aptitudePrimary": "Focus"
+        "attackTempo": "ponderous"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -121,33 +199,32 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
+    "aptitudePrimary": "Vigor",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "observed",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "carnivorous-flora"
+      "carnivorous flora"
     ],
-    "gameTypeId": 1336,
+    "gameTypeId": 1012,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "short",
-    "reason": "The creature's ability to deal high damage and charm zombies is a strong tactical tool, but it lacks the scale or destructive capacity required for a 'tyrant' rating.",
+    "reach": "melee",
+    "reason": "The creature is a defensive utility plant that requires a specific enemy type to function and lacks the scale or destructive capability to be classified as a harbinger.",
     "resourceProfile": [
-      "hp",
-      "stamina"
+      "hp"
     ],
     "side": "plant",
-    "speciesId": "HypnoJalapeno",
-    "targetPreference": "elite",
+    "speciesId": "NutChomper",
+    "targetPreference": "swarm",
     "traits": [
-      "charm-inducing",
-      "ashen-damage",
-      "conditional-conversion"
+      "predatory",
+      "digestive-regeneration",
+      "high-durability"
     ],
     "variants": [
       "normal",
@@ -174,17 +251,18 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "stated",
+      "basis": "observed",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:25:42Z",
+      "emittedUtc": "2026-09-04T11:05:20Z",
       "minorityValues": {
-        "rarity": "fused"
+        "attackTempo": "quick"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -201,38 +279,281 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Vigor",
-    "attackTempo": "steady",
-    "basis": "stated",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "slow",
+    "basis": "observed",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "dark",
     "elementSecondary": "none",
     "family": [
-      "Carnivorous Flora"
+      "carnivorous flora"
     ],
-    "gameTypeId": 1094,
+    "gameTypeId": 1011,
     "posture": "Force",
-    "pure": true,
-    "rarity": "chimeric",
+    "pure": false,
+    "rarity": "fused",
     "reach": "short",
-    "reason": "The creature's low damage output and single-line splash pattern represent a minor nuisance rather than a significant threat.",
+    "reason": "The ability to fire infinite-penetration projectiles that deal high damage makes it a significant tactical threat rather than a mere warden.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "JackboxStar",
+    "speciesId": "PeaChomper",
     "targetPreference": "swarm",
     "traits": [
-      "Explosive Projectiles",
-      "Iron-Consuming",
-      "Clownish Mimicry"
+      "projectile-vomiting",
+      "corpse-ejection",
+      "piercing-digestive-waste"
     ],
     "variants": [
       "normal",
       "mutated",
-      "cursed"
+      "corrupted"
     ],
-    "verdict": "agree"
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:09:48Z",
+      "minorityValues": {
+        "threatBand": "pest"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous flora"
+    ],
+    "gameTypeId": 1015,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "While capable of a one-shot kill, its low stature, passive 'waiting' behavior, and long digestion time make it a predictable, low-level threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "PotatoChomper",
+    "targetPreference": "backline",
+    "threatBand": "nuisance",
+    "traits": [
+      "explosive digestion",
+      "sunlight reclamation",
+      "ambush predator"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:30:28Z",
+      "minorityValues": {
+        "aptitudePrimary": "Fortitude"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous flora",
+      "siege-botany"
+    ],
+    "gameTypeId": 1013,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "While it possesses high survivability and a massive burst damage potential, its 40-second cooldown on the million-damage attack and its reliance on specific conditions prevent it from reaching a world-ending cataclysmic scale.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "SuperChomper",
+    "targetPreference": "backline",
+    "traits": [
+      "high-resilience",
+      "lifesteal-bite",
+      "projectile-vomit",
+      "executioner-surge",
+      "digestive-cooldown"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:39:05Z",
+      "minorityValues": {
+        "threatBand": "tyrant"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Retribution",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "carnivorous flora"
+    ],
+    "gameTypeId": 356,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "Its ability to instantly execute enemies and trigger high-damage area-of-effect explosions makes it a powerful defensive anchor.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "Tower_cherryChomper",
+    "targetPreference": "backline",
+    "threatBand": "warden",
+    "traits": [
+      "explosive digestion",
+      "directional projectile",
+      "high-latency execution"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ]
   }
 ]

@@ -14,6 +14,11 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// </summary>
 public static class ContainerValidator
 {
+    // item-ideal.md §2b.1: rarity-bands (module 7) raises ContentRuleViolated{rarity.*} rather than
+    // growing the closed 33-code list a third time (RarityLadderMutated/UnknownRarity/RarityBandViolated
+    // all fold into this one namespace).
+    static ContainerValidator() => ContentRuleNamespaces.Register("rarity");
+
     static readonly Regex ContainerIdRe =
         new(@"^(item|trait|skill|species-passive|patron|world-buff)\.[a-z0-9-]+$", RegexOptions.Compiled);
 
@@ -22,8 +27,15 @@ public static class ContainerValidator
     /// supplied by the store, so this stays free of I/O. <paramref name="lookupAffix"/> resolves a
     /// pool row's affix id (T3.1 — the pool references affixes, never bare atoms).
     /// </summary>
+    /// <param name="rarityExists">
+    /// item-ideal.md, `rarity-bands` — the FK `effect_container.rarity` never had. Opt-in: omitting it
+    /// registers no check at all, matching every other optional delegate in this file, so the hundreds
+    /// of existing callers with no rarity ladder loaded are unaffected. Pass it once module 7 seeds
+    /// the ladder.
+    /// </param>
     public static AtomRejection Validate(
-        ContainerRow c, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix)
+        ContainerRow c, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix,
+        Func<string, bool>? rarityExists = null)
     {
         if (c is null) return AtomRejection.Fail(AtomRejectionReason.BadParamValue, "null container");
 
@@ -159,6 +171,10 @@ public static class ContainerValidator
             return Fail(AtomRejectionReason.PoolRollsExceedGroups,
                 $"suffix_rolls {c.SuffixRolls} exceeds {drawableSuffixGroups} drawable suffix group(s) — " +
                 "one atom per group per draw cannot be satisfied");
+
+        if (!string.IsNullOrEmpty(c.Rarity) && rarityExists is not null && !rarityExists(c.Rarity))
+            return AtomRejection.ContentRule("rarity.unknown",
+                $"{c.ContainerId}: rarity '{c.Rarity}' is not in the seeded ladder");
 
         return AtomRejection.Ok;
 

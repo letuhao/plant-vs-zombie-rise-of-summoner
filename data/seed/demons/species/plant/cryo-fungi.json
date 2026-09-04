@@ -17,15 +17,96 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:47:52Z",
+      "minorityValues": {
+        "rarity": "fused"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-fungi"
+    ],
+    "gameTypeId": 992,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature's ability to stack infinite damage/speed buffs and trigger massive AOE chain reactions makes it a high-tier threat far exceeding a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateIceShroom",
+    "targetPreference": "swarm",
+    "traits": [
+      "glacier-stacking",
+      "frost-spike-projection",
+      "ashen-burst",
+      "extreme-accumulation"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:15:15Z",
+      "emittedUtc": "2026-09-04T11:48:01Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -41,37 +122,38 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Focus",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Precision",
+    "attackTempo": "flurry",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Fungi"
+      "cryo-fungi"
     ],
-    "gameTypeId": 10,
-    "posture": "Finesse",
-    "pure": true,
-    "rarity": "cultivated",
-    "reach": "long",
-    "reason": "The ability to freeze all enemies on screen and apply a lingering debuff provides massive crowd control that exceeds the scope of a mere raider.",
+    "gameTypeId": 995,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to trigger high-frequency area-of-effect explosions and apply status effects through synergy suggests a much higher threat level than a mere marauder.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "IceShroom",
+    "speciesId": "UltimateIceShroom2",
     "targetPreference": "swarm",
     "traits": [
-      "Area-of-Effect Freezing",
-      "Frostbite Infliction",
-      "Anti-Ground Wave"
+      "high-frequency frost bursts",
+      "area-of-effect resonance",
+      "cold-status application",
+      "scaling frost-power synergy"
     ],
     "variants": [
-      "normal",
-      "ancient"
+      "mutated",
+      "corrupted"
     ],
     "verdict": "too-low"
   }

@@ -100,6 +100,57 @@ public class LoamForecastTests
         Assert.Equal(LoamPolicy.LoamCapacity, LoamForecast.ProjectedStock(component, world));
     }
 
+    // ---- W25: the `cede` preference is an input to Weakest, never a second code path ----------
+
+    [Fact]
+    public void A_ceded_sector_in_this_component_and_unwarded_wins_over_the_default_ordering()
+    {
+        // Default ordering would pick "harsh" (worse balance) — filing a cede on "mild" instead must
+        // override that, proving the preference is read, not merely accepted and ignored.
+        var mild = Sector("mild", stock: 0, stability: 50, development: 1, danger: 0);
+        var harsh = Sector("harsh", stock: 0, stability: 50, development: 5, danger: 4);
+        var world = World(
+            new[] { mild, harsh, Elsewhere() },
+            new[] { new WorldLane { LaneId = "l", FromSectorId = "mild", ToSectorId = "harsh", TypeId = LaneTypeCatalog.RiftLaneTypeId } });
+        var component = ComponentOf(world, "mild");
+
+        Assert.Equal("harsh", LoamForecast.Weakest(world, component, available: 0, upkeep: 10));
+        Assert.Equal("mild", LoamForecast.Weakest(world, component, available: 0, upkeep: 10, ceded: "mild"));
+    }
+
+    [Fact]
+    public void Ceding_a_warded_sector_is_not_a_candidate_and_the_default_ordering_answers()
+    {
+        var mild = Sector("mild", stock: 0, stability: 50, development: 1, danger: 0) with { WardenBindingId = "w" };
+        var harsh = Sector("harsh", stock: 0, stability: 50, development: 5, danger: 4);
+        var world = World(
+            new[] { mild, harsh, Elsewhere() },
+            new[] { new WorldLane { LaneId = "l", FromSectorId = "mild", ToSectorId = "harsh", TypeId = LaneTypeCatalog.RiftLaneTypeId } });
+        var component = ComponentOf(world, "mild");
+
+        Assert.Equal("harsh", LoamForecast.Weakest(world, component, available: 0, upkeep: 10, ceded: "mild"));
+    }
+
+    [Fact]
+    public void Ceding_a_sector_outside_this_component_is_not_a_candidate_and_the_default_ordering_answers()
+    {
+        // "elsewhere" is a real sector in the world, just not a member of the component under test —
+        // a stale or foreign order must not reach across components.
+        var world = World(new[] { Sector("s", stock: 0, stability: 50, development: 10, danger: 4), Elsewhere() });
+        var component = ComponentOf(world, "s");
+
+        Assert.Equal("s", LoamForecast.Weakest(world, component, available: 0, upkeep: 10, ceded: "elsewhere"));
+    }
+
+    [Fact]
+    public void A_component_that_covers_its_own_upkeep_releases_nothing_no_matter_what_was_ceded()
+    {
+        var world = World(new[] { Sector("s", slots: new[] { Rootbed(0) }) });
+        var component = ComponentOf(world, "s");
+
+        Assert.Null(LoamForecast.Weakest(world, component, available: 100, upkeep: 50, ceded: "s"));
+    }
+
     [Fact]
     public void The_forecast_agrees_with_what_pressure_actually_does_this_turn()
     {

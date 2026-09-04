@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "unresolved",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:38:51Z",
+      "emittedUtc": "2026-09-04T10:06:49Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -49,14 +50,14 @@
     "elementPrimary": "unresolved",
     "elementSecondary": "none",
     "family": [
-      "Plant-Headed Undead"
+      "plant-headed undead"
     ],
     "gameTypeId": 101,
     "posture": "Bastion",
     "pure": true,
     "rarity": "heirloom",
-    "reach": "long",
-    "reason": "With high durability (500 toughness) and a continuous projectile attack, this unit functions as a significant mid-tier threat rather than a mere warden.",
+    "reach": "short",
+    "reason": "With 500 toughness and the ability to fire projectiles every 1.5 seconds, this unit possesses significant durability and sustained DPS that exceeds a mere 'warden' level threat.",
     "resourceProfile": [
       "hp",
       "poise"
@@ -65,9 +66,9 @@
     "speciesId": "CherryShooterZombie",
     "targetPreference": "structure",
     "traits": [
-      "Cherry-Projectile Volley",
-      "High Resilience",
-      "Aristocratic Lineage"
+      "cherry projectile emission",
+      "high resilience",
+      "noble lineage"
     ],
     "variants": [
       "normal",

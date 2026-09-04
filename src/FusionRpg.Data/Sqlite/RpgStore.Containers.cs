@@ -148,7 +148,20 @@ public sealed partial class RpgStore
             check.Parameters.AddWithValue("$o", r.Ordinal);
             check.Parameters.AddWithValue("$id", r.RarityId);
             if (check.ExecuteScalar() is string taken)
-                return (false, $"ordinal {r.Ordinal} already belongs to '{taken}' — ordinals are append-only");
+                return (false, $"rarity.ladder-mutated: ordinal {r.Ordinal} already belongs to '{taken}' — ordinals are append-only");
+        }
+
+        // item-ideal.md, rarity-bands: the check above catches "give my ordinal to someone else" but
+        // not "move MY OWN row to an ordinal nobody else holds" -- ordinals are load-bearing for
+        // sorting and the budget lookup, so an id's own ordinal is exactly as frozen as anyone else's.
+        using (var selfCheck = db.CreateCommand())
+        {
+            if (tx is not null) selfCheck.Transaction = tx;
+            selfCheck.CommandText = "SELECT ordinal FROM rarity WHERE rarity_id = $id;";
+            selfCheck.Parameters.AddWithValue("$id", r.RarityId);
+            if (selfCheck.ExecuteScalar() is long existingOrdinal && existingOrdinal != r.Ordinal)
+                return (false, $"rarity.ladder-mutated: '{r.RarityId}' is already ordinal {existingOrdinal} — " +
+                    "ordinals are append-only, never renumbered, even onto an unused slot");
         }
 
         using var cmd = db.CreateCommand();
@@ -204,9 +217,10 @@ public sealed partial class RpgStore
     {
         var loaded = ListAtoms();
         var byId = loaded.ToDictionary(a => a.AtomId, StringComparer.Ordinal);
+        var rarityIds = ListRarities().Select(r => r.RarityId).ToHashSet(StringComparer.Ordinal);
 
         var check = ContainerValidator.Validate(
-            c, id => byId.TryGetValue(id, out var a) ? a : null, GetAffix);
+            c, id => byId.TryGetValue(id, out var a) ? a : null, GetAffix, rarityIds.Contains);
         if (!check.IsOk) return check;
 
         // An identical write is a no-op, revision included. `revision` is a hashed column, so

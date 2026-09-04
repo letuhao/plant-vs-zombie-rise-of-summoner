@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "sourceRef": "spec-sockets.md §3 (module 16, `sockets`) -- forward-seeded here by `base-types` (module 6, build order 6) because module 6 needs `socketCeiling(role)` to validate the shipped corpus and module 16 has not built yet. Ownership stays module 16's per spec-base-types.md's own resolution ('module 16 owns the ceiling, this module owns the value and validates against it'); this file is the numbers module 16's spec already wrote, seeded early the same way `power_ceiling` was seeded provisionally ahead of its own consumer.",
+  "note": "The maximum is 4, and it is structural, not a progression ceiling -- a legibility limit (a four-ingredient recipe is memorable, a six-ingredient one is a wiki lookup), never raised by content growth. socketCeiling is a ROLE property, fixed per role; a base type may vary its OWN socketMax anywhere from 0 up to its role's ceiling (that variation is ordinary base-type variety, not a violation -- module 16 must restate its old 'never varies by base type' invariant as 'never exceeds its role's ceiling').",
+  "socketCeiling": {
+    "armament-primary": 4,
+    "core-guard": 4,
+    "ward-array": 3,
+    "armament-secondary": 3,
+    "jewel-major": 1,
+    "manipulator": 2,
+    "mantle": 3,
+    "head-guard": 3,
+    "girdle": 2,
+    "sense": 1,
+    "footing": 2,
+    "infusion": 2,
+    "retinue": 2,
+    "jewel-minor-a": 1,
+    "jewel-minor-b": 1
+  }
+}

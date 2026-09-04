@@ -19,6 +19,9 @@ const ActorMenuScopePickerDemoPage = lazy(() =>
 );
 const StoragePage = lazy(() => import("@/features/storage/StoragePage").then((m) => ({ default: m.StoragePage })));
 const WorldPage = lazy(() => import("@/features/world/WorldPage").then((m) => ({ default: m.WorldPage })));
+// world-stage W33: the new stage is reachable here without touching `#/world` — whether it flips
+// to become `#/world` is the Owner decision noted at the end of `world-shell`'s task list.
+const WorldStage = lazy(() => import("@/stages/world/WorldStage").then((m) => ({ default: m.WorldStage })));
 
 /** T12: these nine now live in the developer tree, reached via `` ` `` or `?dev=<id>` — never a route of their own. */
 const DEV_ROUTE_REDIRECTS: Record<string, string> = {
@@ -91,6 +94,14 @@ export function AppRoutes() {
           element={
             <Suspense fallback={<ChunkFallback testId="chunk-fallback-world" />}>
               <WorldPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="world-stage"
+          element={
+            <Suspense fallback={<ChunkFallback testId="chunk-fallback-world-stage" />}>
+              <WorldStage />
             </Suspense>
           }
         />

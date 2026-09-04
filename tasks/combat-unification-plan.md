@@ -5,11 +5,31 @@ Named pair per repo convention — `tasks/plan.md`/`todo.md` hold perf-v3; shiel
 
 ## Overview
 
-One combat SSOT everywhere: harden the overlay resolver (adapter, omni fallback, min-chip), extract the apply tail (shield gate) into a host-mountable pipeline, adopt both in BattleEngine (retiring its parallel math, landing shields in battle at RulesetVersion 2 with a rate-tested re-tune) and SimEngine (server-side shield probe, no game), then enrich battle in three versioned waves (riders v3, skills v4, hybrid v5).
+One combat SSOT everywhere: harden the overlay resolver (adapter, omni fallback, min-chip), extract the apply tail (shield gate) into a host-mountable pipeline, adopt both in BattleEngine (retiring its parallel math, landing shields in battle with a rate-tested re-tune) and SimEngine (server-side shield probe, no game), then enrich battle.
 
-## Standing gate
+⛔ **"Three versioned waves (riders v3, skills v4, hybrid v5)" is retired as of 2026-09-04**, and the
+correction matters in two ways. **The waves are two, not three:** Wave E2 (skills) was not rebased but
+**replaced** by `species-skills`, because its `SkillDef` and `SkillCatalog` each re-invented something
+that had since shipped (`ActionRow`, `ActionEnvelope` on absolute ticks, `ActionKind`,
+`ActionTargetSpec`, `ActionCatalog`) — building it as drafted would have created a fifth content system.
+**And none of them is versioned:** every one shipped its mechanism **inert** — no trait carries a rider,
+`hybrid.secondaryWeightMilli` is 0, skill channels sit at neutral — so `RulesetVersion` stayed at **4**
+and no golden was re-blessed. The version ladder the overview promised was never needed.
 
-**U9 onward edits `Core/Battle` — blocked until the owner confirms the battle stream's session is finished** (owner decision 4). Phases 1–2 touch only `Core/Combat`/`Core/Effects` seams and can build immediately on approval. The decisions.md row (U1) is the program unlock, mirroring the shield program.
+## Standing gate — ✅ **LIFTED 2026-09-04**
+
+~~**U9 onward edits `Core/Battle` — blocked until the owner confirms the battle stream's session is finished** (owner decision 4).~~
+
+**The condition passed 2026-08-28** — the battle stream closed T5 (`kernel-adoption`) and T9
+(`subsystems-on-timeline`). The gate's shape was also wrong: owner ruling 2026-09-03,
+*"i don't want to join the gate — if the gate needs them, remove them."* Restated as dependencies:
+Wave H depends on nothing here, Wave R depends on T9 (closed), `species-skills` depends on T5 + T19
+(both closed). **Nothing is held.** U1–U16 are built; Phases 5–6 are what remains.
+
+⛔ **`RulesetVersion` is 4, not 2, and the "versions 2–5 up front" ladder is retired.** Two unrelated
+committed streams moved it (`decisions.md`, *`RulesetVersion` history (battle)*). Each remaining wave
+bumps from wherever the number actually is, **and only if it moves a golden** — `species-skills` is
+designed to move none.
 
 ## Architecture decisions (from the audited specs — locked)
 
@@ -41,7 +61,11 @@ U12 pipeline routing + shields in battle
 U13 innate/report/stamp
 U14 golden re-baseline + win-rate sweep
       │
-E1 riders (v3) → E2 skills (v4) → E3 hybrid (v5)   Phase 5 (each wave elaborated at its build start)
+E1 riders → E3 hybrid          Phase 5 (independent of each other; neither bumps if no golden moves)
+      │
+S1 neutral invariant → S2 cooldown read → S3 effectiveness read → S4 receipt   Phase 6 (species-skills)
+                                                                        │
+                                                          S5 species eligibility (⏸ waits on demon corpus)
 ```
 
 ## Risks and mitigations
@@ -60,7 +84,30 @@ E1 riders (v3) → E2 skills (v4) → E3 hybrid (v5)   Phase 5 (each wave elabor
 
 Vanilla PVZ behavior; overlay balance changes (curve, chip enablement — ask-first); variance reintroduction; guardian shield-share; skill resource costs (own spec later); `NoteOverlayDamage` for battle/sim.
 
+## Phase 6 — species-skills (replaces Wave E2)
+
+Spec: [../docs/architecture/combat/spec-species-skills.md](../docs/architecture/combat/spec-species-skills.md).
+
+**Wave E2 was going to build a fifth content system.** Its `SkillDef` (id, cooldown in *rounds*,
+action kind, targeting policy) and code-first `SkillCatalog` each re-invent something that has since
+shipped — `ActionRow`, `ActionEnvelope` (absolute **ticks**), `ActionKind`, `ActionTargetSpec`, and
+`ActionCatalog`, wired into battle by T19 on 2026-08-30. So the wave is **replaced, not rebased**:
+this phase builds no catalog and no vocabulary. It wires **two reads** whose implementations already
+exist with zero callers, which `DerivedStatRegistry.cs:179` names in as many words.
+
+**The invariant that makes it safe:** neutral is `0‰` reduction and `1000‰` effectiveness, so a battle
+where no actor carries a non-neutral `skill.*` value is **byte-identical**. Same shape as Wave R's
+zero-rider invariant. `RulesetVersion` stays 4; no golden is re-blessed.
+
+**Split by dependency, not by convenience:** the two reads depend on nothing and start immediately;
+the species→action eligibility *content* waits on `demon-corpus-self-heal`'s four open items, because
+the species ids are mid-regeneration and authoring against them means authoring twice.
+
 ## Open items
 
-- The build gate above (owner confirmation on the battle stream).
-- E1–E3 get their own detailed todos at wave start (progressive elaboration) — the todo lists wave-level acceptance only.
+- ~~The build gate above~~ — lifted 2026-09-04.
+- E1 and E3 get their own detailed todos at wave start (progressive elaboration) — the todo lists
+  wave-level acceptance only. Phase 6 is elaborated in full because it is the one unblocking another
+  program (`class-system`'s readiness gate).
+- **S5 has no date, only a condition**: `demon-corpus-self-heal` closing C2/C3/D1. Nothing else in
+  this program waits on it.

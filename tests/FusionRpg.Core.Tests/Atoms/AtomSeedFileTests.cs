@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Power;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.Atoms;
@@ -494,5 +495,117 @@ public class AtomSeedFileTests
         Assert.True(r.IsOk, string.Join("; ", r.Errors));
         Assert.Single(r.Content.Affixes);
         Assert.Equal(5, r.Content.Count);
+    }
+
+    // ---- power-coefficient (E44 criterion 0, spec-power-sweep.md §4.1) ----------------------------
+
+    [Fact]
+    public void A_coefficient_row_parses()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire",
+                  "coeffMilli": 1000, "referenceScale": 1 } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        var row = Assert.Single(r.Content.Coefficients);
+        Assert.Equal("stat.derived", row.KindId);
+        Assert.Equal("combat.dodge.fire", row.Channel);
+        Assert.Equal(1000, row.CoeffMilli);
+        Assert.Equal(1, row.ReferenceScale);
+        Assert.Equal("p.json", r.Content.SourceOf["stat.derived/combat.dodge.fire"]);
+    }
+
+    [Fact]
+    public void An_absent_channel_defaults_to_empty_meaning_priced_the_same_regardless()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "shield.grant", "coeffMilli": 1000, "referenceScale": 10 } ] }
+            """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Equal("", r.Content.Coefficients[0].Channel);
+        Assert.Equal("shield.grant/*", r.Content.SourceOf.Keys.Single());
+    }
+
+    [Fact]
+    public void A_coefficient_with_no_kindId_is_refused()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "channel": "combat.dodge.fire", "coeffMilli": 1000, "referenceScale": 1 } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Errors[0].Reason);
+        Assert.Empty(r.Content.Coefficients);
+    }
+
+    [Fact]
+    public void A_coefficient_with_no_coeffMilli_is_refused_rather_than_defaulted()
+    {
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire", "referenceScale": 1 } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Errors[0].Reason);
+        Assert.Contains("coeffMilli", r.Errors[0].Detail);
+    }
+
+    [Fact]
+    public void A_coefficient_with_no_referenceScale_is_refused_rather_than_defaulted()
+    {
+        // A silently-defaulted reference scale would be the same units trap RpgStore.UpsertPowerTables
+        // already refuses at the semantic layer — this is the structural half of that same guard.
+        var r = Collect(("p.json", """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire", "coeffMilli": 1000 } ] }
+            """));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.MissingParam, r.Errors[0].Reason);
+        Assert.Contains("referenceScale", r.Errors[0].Detail);
+    }
+
+    [Fact]
+    public void The_same_kind_and_channel_pair_in_two_files_is_refused_as_a_duplicate()
+    {
+        const string row = """
+            { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                { "kindId": "stat.derived", "channel": "combat.dodge.fire",
+                  "coeffMilli": 1000, "referenceScale": 1 } ] }
+            """;
+        var r = Collect(("first.json", row), ("second.json", row));
+
+        Assert.False(r.IsOk);
+        Assert.Equal(AtomRejectionReason.DuplicateKey, r.Errors[0].Reason);
+        Assert.Single(r.Content.Coefficients);
+    }
+
+    [Fact]
+    public void A_coefficient_key_does_not_collide_with_a_channel_policy_row_naming_the_same_channel()
+    {
+        // The reason the claim key is "kindId/channel", not the bare channel ReadChannelPolicy claims
+        // with: a coefficient's real identity is the (kind, channel) pair the table's own primary key
+        // names, and two authors are free to write a channel-policy row and a coefficient row for the
+        // same channel string without one refusing the other as a false duplicate.
+        var r = Collect(
+            ("cp.json", """
+                { "schemaVersion": 1, "kind": "channel-policy", "entries": [
+                    { "channel": "combat.dodge.fire", "direction": 0 } ] }
+                """),
+            ("pc.json", """
+                { "schemaVersion": 1, "kind": "power-coefficient", "entries": [
+                    { "kindId": "stat.derived", "channel": "combat.dodge.fire",
+                      "coeffMilli": 1000, "referenceScale": 1 } ] }
+                """));
+
+        Assert.True(r.IsOk, string.Join("; ", r.Errors));
+        Assert.Single(r.Content.ChannelPolicies);
+        Assert.Single(r.Content.Coefficients);
     }
 }

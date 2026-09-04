@@ -67,7 +67,6 @@ describe("toKeyframes", () => {
         entry("Movement", "event", "a", "halt:zoc:ash-waste"),
         entry("Sieges", "battle", "b1", "guard:ember-hollow:a"),
         entry("Pressure", "event", "dave", "supply.cut:ash-waste"),
-        entry("Pressure", "event", "a", "attrition:ash-waste"),
         entry("Events", "calendar", "week", "ordinary"),
         entry("Snapshot", "event", "k1", "claim.held:ember-hollow")
       )
@@ -79,10 +78,18 @@ describe("toKeyframes", () => {
       "halt",
       "battle",
       "supply",
-      "supply",
       "calendar",
       "claim"
     ]);
+  });
+
+  it("never classifies `attrition:` — the engine dropped it (LegionSupply.Resolve replaced wound attrition, SupplyGraph.cs:42-45), and re-adding a row for it is a deliberate act", () => {
+    const frames = toKeyframes(
+      report(entry("Pressure", "event", "a", "attrition:ash-waste"))
+    );
+
+    expect(frames[0].kind).not.toBe("supply");
+    expect(frames[0].kind).toBe("note");
   });
 
   it("names the sector a claim changed hands in", () => {

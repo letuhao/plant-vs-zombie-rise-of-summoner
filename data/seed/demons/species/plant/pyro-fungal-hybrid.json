@@ -20,15 +20,17 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "unresolved",
+        "rarity": "high",
         "threatBand": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:01:56Z",
+      "emittedUtc": "2026-09-04T10:17:58Z",
       "minorityValues": {
-        "threatBand": "calamity"
+        "attackTempo": "flurry",
+        "threatBand": "tyrant"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -57,9 +59,9 @@
     "gameTypeId": 1199,
     "posture": "Force",
     "pure": true,
-    "rarity": "unresolved",
+    "rarity": "fused",
     "reach": "short",
-    "reason": "Its ability to exponentially scale damage through massive energy reserves and high-velocity projectile amplification makes it a battlefield-altering force.",
+    "reason": "Its ability to exponentially multiply projectile damage and trigger massive energy regeneration loops through area-of-effect status effects makes it a high-scale destructive force.",
     "resourceProfile": [
       "hp",
       "stamina"
@@ -67,16 +69,16 @@
     "side": "plant",
     "speciesId": "DoomTorch",
     "targetPreference": "swarm",
-    "threatBand": "tyrant",
+    "threatBand": "calamity",
     "traits": [
-      "combustion-reactive",
-      "energy-cycling",
-      "ember-infusion",
-      "projectile-enhancer"
+      "combustive energy storage",
+      "ember-status infliction",
+      "projectile amplification",
+      "energy-to-damage conversion"
     ],
     "variants": [
       "mutated",
-      "corrupted"
+      "cursed"
     ]
   }
 ]

@@ -18,6 +18,10 @@ public static class ActorHudPool
     // Structural pool cap — at capacity CreateSlot returns null and HUD is omitted (no eviction).
     const int Cap = 96;
     const int MaxShieldSegments = 4;
+    /// <summary>How many status tokens one actor's HUD row can show at once. **Structural, not a
+    /// balance dial** (tunables-ssot.md §1 exempts buffers, and requires saying so): it is the length
+    /// of the <see cref="Pooled.StatusTokens"/> array, so it sizes an allocation rather than tuning a
+    /// number a balance pass would reach for.</summary>
     const int MaxStatusTokens = 3;
 
     static readonly HashSet<string> SeenThisTick = new(StringComparer.Ordinal);

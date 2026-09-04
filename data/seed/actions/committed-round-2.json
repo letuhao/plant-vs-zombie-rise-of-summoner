@@ -1,0 +1,133 @@
+{
+  "_meta": {
+    "corpusHash": "06c8c8a0f3f1c5560d203917b63e878c9e87811cc91f9e5a8c8de09aa9ddac76",
+    "partition": "round-2",
+    "round": 2
+  },
+  "entries": [
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.elpw-overflow",
+        "atom.searing-strike"
+      ],
+      "category": "attack",
+      "id": "action.species.allpeater.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "攻击"
+      ],
+      "name": "Ignition Singularity",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "allpeater",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-riveting",
+        "atom.deathblast"
+      ],
+      "category": "attack",
+      "id": "action.species.bucketnutzombie.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "铁头功"
+      ],
+      "name": "Iron-Skull Resonance",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "bucketnutzombie",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.terraforming"
+      ],
+      "category": "attack",
+      "id": "action.species.cabbagepult.001",
+      "motifsUsed": [
+        "攻击",
+        "卷心菜",
+        "投手"
+      ],
+      "name": "Rooted Retribution",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "enemy",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cabbagepult",
+      "targetMode": "self"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.fortitude",
+        "atom.terraforming"
+      ],
+      "category": "defense",
+      "id": "action.species.cabbagepult.002",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "卷心菜"
+      ],
+      "name": "Rooted Bastion",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cabbagepult",
+      "targetMode": "single"
+    },
+    {
+      "areaShape": null,
+      "atomFamilies": [
+        "atom.arm-hardening",
+        "atom.retribution"
+      ],
+      "category": "defense",
+      "id": "action.species.cactusblover.001",
+      "kindHint": "innate",
+      "motifsUsed": [
+        "仙人掌",
+        "发射"
+      ],
+      "name": "Thorned Retribution",
+      "pairedPayoffFamily": null,
+      "pairingRole": "none",
+      "relation": "self",
+      "rungBand": [
+        1,
+        10
+      ],
+      "scope": "species",
+      "scopeKey": "cactusblover",
+      "targetMode": "single"
+    }
+  ],
+  "kind": "action-seed",
+  "schemaVersion": 1
+}

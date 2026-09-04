@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:36:27Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
+      "emittedUtc": "2026-09-04T10:53:22Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,13 +44,13 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "aquatic-fungal hybrid"
+      "aquatic-fungal-hybrid"
     ],
     "gameTypeId": 1395,
     "posture": "Force",
@@ -67,15 +66,14 @@
     "speciesId": "KelpFume",
     "targetPreference": "frontline",
     "traits": [
-      "tentacle-whip",
-      "resource-generator",
+      "tentacle-lashing",
+      "resource-generating",
       "scaling-damage",
       "knockback"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
     ],
     "verdict": "too-low"
   }

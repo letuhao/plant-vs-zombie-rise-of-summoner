@@ -30,7 +30,8 @@ describe("formatMagnitude — one golden case per unit class (spec-magnitude-and
   });
 
   it("perMilleRatio increased: +15% (per-mille divided by 10, SC4 display posture)", () => {
-    expect(formatMagnitude(mag("perMilleRatio", 150, { op: "increased" }))).toBe("+15.0%");
+    // world-numbers W37: a trailing ".0" is trimmed — 15.0% reads as 15%.
+    expect(formatMagnitude(mag("perMilleRatio", 150, { op: "increased" }))).toBe("+15%");
   });
 
   it("perMilleRatio more: ×1.15 — a multiplier, not a percentage (Guard #5: increased/more differ)", () => {
@@ -44,7 +45,44 @@ describe("formatMagnitude — one golden case per unit class (spec-magnitude-and
   });
 
   it("perMilleRatio flat: a plain percentage (chance/share)", () => {
-    expect(formatMagnitude(mag("perMilleRatio", 250, { op: "flat" }))).toBe("25.0%");
+    // world-numbers W37: a trailing ".0" is trimmed — 25.0% reads as 25%.
+    expect(formatMagnitude(mag("perMilleRatio", 250, { op: "flat" }))).toBe("25%");
+  });
+
+  it("perMilleRatio absolute: ×1.40 from the raw 1400 — no delta-from-1000 arithmetic (world-numbers W37, the verified defect's fix)", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 1400, { op: "absolute" }))).toBe("×1.40");
+    // The neutral baseline itself renders neutral.
+    expect(formatMagnitude(mag("perMilleRatio", 1000, { op: "absolute" }))).toBe("×1.00");
+  });
+
+  it("perMilleRatio flat: StabilityMilli 240 renders 24%, not 24.0% — the acceptance's own named example", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 240, { op: "flat" }))).toBe("24%");
+  });
+
+  it("perMilleRatio: a non-trivial decimal is not trimmed away", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 245, { op: "flat" }))).toBe("24.5%");
+  });
+
+  it("perMilleRatio: a small non-zero value never renders as 0% — the smallest per-mille integer already clears one decimal", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 1, { op: "flat" }))).toBe("0.1%");
+    expect(formatMagnitude(mag("perMilleRatio", 1, { op: "flat" }))).not.toBe("0%");
+  });
+
+  it("perMilleRatio: a genuine zero still renders 0%, not merely trimmed away to nothing", () => {
+    expect(formatMagnitude(mag("perMilleRatio", 0, { op: "flat" }))).toBe("0%");
+  });
+
+  it("loamUnits: a whole, unsigned count — the class the four …Milli loam-cost fields actually are", () => {
+    expect(formatMagnitude(mag("loamUnits", 200))).toBe("200");
+    expect(formatMagnitude(mag("loamUnits", 0))).toBe("0");
+  });
+
+  it("movementRemaining (perMilleRatio, op flat) renders as a fraction of the march budget, never a bare count", () => {
+    // 750‰ of one turn's march budget — never "750 movement".
+    const rendered = formatMagnitude(mag("perMilleRatio", 750, { op: "flat" }));
+    expect(rendered).toBe("75%");
+    expect(rendered).not.toContain("movement");
+    expect(rendered).not.toBe("750");
   });
 
   it("milliseconds under one second render as ms", () => {

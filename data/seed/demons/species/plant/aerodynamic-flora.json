@@ -20,13 +20,14 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:54:32Z",
+      "emittedUtc": "2026-09-04T10:38:35Z",
       "minorityValues": {
         "aptitudePrimary": "Bulwark"
       },
@@ -46,13 +47,13 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "Aerodynamic Flora"
+      "aerodynamic flora"
     ],
     "gameTypeId": 1420,
     "posture": "Bastion",
@@ -69,9 +70,9 @@
     "targetPreference": "structure",
     "threatBand": "nuisance",
     "traits": [
-      "Kinetic Repulsion",
-      "Momentum-Sensitive Displacement",
-      "Aerial-Specialized Gust"
+      "kinetic repulsion",
+      "momentum-sensitive",
+      "aerial-specialized"
     ],
     "variants": [
       "normal",

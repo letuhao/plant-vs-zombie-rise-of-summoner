@@ -44,9 +44,10 @@ function scanLines(
 }
 
 /**
- * GG-5's guard: nothing outside the token definitions and the six `.band-*`
- * utility classes may set `z-index` or use a Tailwind `z-*` class. Any hit
- * means a surface picked its own stacking tier instead of one of the six.
+ * GG-5's guard: nothing outside the token definitions and the seven `.band-*`
+ * utility classes (`stage`/`scrim`/`hud`/`panel`/`dialog`/`toast`/`system` — `scrim` added
+ * 2026-09-04, world-stage W55's GG-5 amendment) may set `z-index` or use a Tailwind `z-*` class.
+ * Any hit means a surface picked its own stacking tier instead of one of the seven.
  */
 const STRAY_Z_INDEX_PATTERNS = [
   /z-index\s*:/,

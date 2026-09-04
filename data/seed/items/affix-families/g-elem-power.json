@@ -34,14 +34,35 @@
       "variants": {
         "generate": "elements+omni"
       },
-      "frames": ["humanoid", "plant"],
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
       "powerBand": "medium",
       "nameWords": {
-        "prefix": ["Thorned", "Barbed", "Needling"]
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Thorned"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Barbed"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Needling"
+          }
+        ]
       },
       "displayTemplate": "+{value} {element} penetration",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "roles": [
         "armament-primary",
         "armament-secondary",
@@ -64,14 +85,35 @@
       "variants": {
         "generate": "elements+omni"
       },
-      "frames": ["humanoid", "plant"],
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
       "powerBand": "low",
       "nameWords": {
-        "prefix": ["Honing", "Whetted", "Grinding"]
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Honing"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Whetted"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Grinding"
+          }
+        ]
       },
       "displayTemplate": "{value} increased {element} penetration",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "roles": [
         "armament-primary",
         "armament-secondary",
@@ -94,14 +136,35 @@
       "variants": {
         "generate": "elements+omni"
       },
-      "frames": ["humanoid", "plant"],
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
       "powerBand": "high",
       "nameWords": {
-        "prefix": ["Usurping", "Overgrown", "Engulfing"]
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Usurping"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Overgrown"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Engulfing"
+          }
+        ]
       },
       "displayTemplate": "{element} power becomes {value}, overriding weaker sources",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "roles": [
         "armament-primary",
         "armament-secondary",
@@ -124,14 +187,35 @@
       "variants": {
         "generate": "elements+omni"
       },
-      "frames": ["humanoid", "plant"],
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
       "powerBand": "trivial",
       "nameWords": {
-        "prefix": ["Awakened", "Rooted", "Bonded"]
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Awakened"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Rooted"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Bonded"
+          }
+        ]
       },
       "displayTemplate": "attunes {element} power, enabling it to take effect",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "roles": [
         "armament-primary",
         "armament-secondary",
@@ -154,14 +238,35 @@
       "variants": {
         "generate": "elements+omni"
       },
-      "frames": ["humanoid", "plant"],
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
       "powerBand": "low",
       "nameWords": {
-        "prefix": ["Overripe", "Brimming", "Gorged"]
+        "prefix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "Overripe"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Brimming"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "Gorged"
+          }
+        ]
       },
       "displayTemplate": "+{value} bonus {element} power",
-      "tags": ["offensive"],
+      "tags": [
+        "offensive"
+      ],
       "roles": [
         "armament-primary",
         "armament-secondary",

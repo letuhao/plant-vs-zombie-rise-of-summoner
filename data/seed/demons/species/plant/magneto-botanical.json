@@ -13,23 +13,21 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "inferred",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "split",
-        "rarity": "high",
-        "threatBand": "high"
+        "elementPrimary": "high",
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:48:11Z",
-      "minorityValues": {
-        "elementPrimary": "light"
-      },
+      "emittedUtc": "2026-09-04T10:50:05Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -44,42 +42,41 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Retribution",
+    "aptitudePrimary": "Bulwark",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "inferred",
+    "attackTempo": "ponderous",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Magneto-Botanical"
+      "magneto-botanical"
     ],
-    "gameTypeId": 1150,
+    "gameTypeId": 1097,
     "posture": "Bastion",
     "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "The creature is a passive economic utility that manipulates existing projectiles rather than dealing direct damage or posing a threat to the player.",
+    "reason": "The creature's description only specifies high durability and specific elemental resistances, which does not equate to the world-altering destruction implied by a cataclysm rating.",
     "resourceProfile": [
       "hp",
-      "stamina",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "GoldMagnet",
+    "speciesId": "IronPumpkin",
     "targetPreference": "backline",
-    "threatBand": "nuisance",
     "traits": [
-      "Projectile Redirection",
-      "Economic Stimulation",
-      "Inter-lane Influence",
-      "Cyclical Activation"
+      "ferrous-shell",
+      "magnetic-absorption",
+      "explosive-resilience",
+      "metallic-consumption"
     ],
     "variants": [
       "normal",
       "mutated",
       "blessed"
-    ]
+    ],
+    "verdict": "too-high"
   },
   {
     "_derived": [
@@ -102,12 +99,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:24:45Z",
+      "emittedUtc": "2026-09-04T10:50:48Z",
       "minorityValues": {
         "aptitudePrimary": "Fortitude"
       },
@@ -133,13 +131,13 @@
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Magneto-Botanical"
+      "magneto-botanical"
     ],
     "gameTypeId": 1098,
     "posture": "Bastion",
     "pure": true,
     "rarity": "fused",
-    "reach": "melee",
+    "reach": "short",
     "reason": "The creature is a defensive utility plant that absorbs specific damage and heals, lacking the destructive scale required for a 'harbinger' rating.",
     "resourceProfile": [
       "hp",
@@ -149,9 +147,322 @@
     "speciesId": "JackboxPumpkin",
     "targetPreference": "backline",
     "traits": [
-      "Explosion-Resistant",
-      "Ferrous-Absorption",
-      "Magnetic-Shielding"
+      "explosion-immunity",
+      "ferrous-absorption",
+      "magnetic-defense"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:59:29Z",
+      "minorityValues": {
+        "aptitudePrimary": "Focus"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "magneto-botanical"
+    ],
+    "gameTypeId": 1209,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a specialized support/crowd-control unit with moderate damage, fitting the profile of a manageable pest rather than a major threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "MagnetCorn",
+    "targetPreference": "backline",
+    "traits": [
+      "ferrous-fusion",
+      "magnetic-projectile",
+      "butter-stasis"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:59:58Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "Might",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "magneto-botanical"
+    ],
+    "gameTypeId": 1314,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to bypass and double damage against specific armor makes it a significant tactical threat rather than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "MagnetMelon",
+    "targetPreference": "backline",
+    "traits": [
+      "ferrous-fusion",
+      "armor-piercing",
+      "metallic-impact"
+    ],
+    "variants": [
+      "mutated",
+      "cursed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:00:18Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "magneto-botanical"
+    ],
+    "gameTypeId": 1092,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to scale damage based on the number of linked plants and target speed, combined with the ability to absorb defensive properties from iron objects, suggests a potential for exponential growth and high-tier threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "MagnetPumpkin",
+    "targetPreference": "backline",
+    "traits": [
+      "ferrous-fusion",
+      "kinetic-linkage",
+      "metallic-absorption"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:06:55Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "Vigor",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "magneto-botanical"
+    ],
+    "gameTypeId": 1099,
+    "posture": "Bastion",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a defensive utility plant designed to block specific enemy types rather than a world-altering threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "PickaxePumpkin",
+    "targetPreference": "backline",
+    "traits": [
+      "magnetic-repulsion",
+      "mineral-consumption",
+      "iron-absorption"
     ],
     "variants": [
       "normal",

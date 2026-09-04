@@ -17,19 +17,17 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "inferred",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "high"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:01:03Z",
-      "minorityValues": {
-        "rarity": "fused"
-      },
+      "emittedUtc": "2026-09-04T09:57:48Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -46,35 +44,117 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "inferred",
+    "attackTempo": "flurry",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
+    "elementPrimary": "air",
     "elementSecondary": "none",
     "family": [
-      "Celestial Flora"
+      "celestial-flora"
     ],
-    "gameTypeId": 1277,
+    "gameTypeId": 300,
     "posture": "Force",
     "pure": true,
     "rarity": "chimeric",
     "reach": "long",
-    "reason": "The ability to transform into a meteor that deals massive area-of-effect damage and fragments into 180 additional projectiles represents a high-scale destructive event.",
+    "reason": "The combination of rapid-fire multi-hit rotation and ten homing area-of-effect swords makes this a high-tier threat far exceeding a mere scourge.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "DoomStar",
+    "speciesId": "AbyssSwordStar",
     "targetPreference": "swarm",
-    "threatBand": "calamity",
     "traits": [
-      "Meteoritic Self-Destruction",
-      "Fragmenting Impact",
-      "Short-lived"
+      "orbital-blade-rotation",
+      "meteor-strike-summoning",
+      "area-of-effect-cleave",
+      "homing-projectile"
     ],
     "variants": [
-      "corrupted",
+      "blessed",
+      "cursed",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "deterministic-fallback"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T12:29:33Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "EventOnly"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "flurry",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "celestial-flora"
+    ],
+    "gameTypeId": 249,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "almanac",
+    "reach": "short",
+    "reason": "The ability to deal massive area-of-effect damage to multiple targets simultaneously while utilizing infinite-penetration projectiles makes it a high-priority combat threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SwordStar",
+    "targetPreference": "swarm",
+    "threatBand": "raider",
+    "traits": [
+      "sword-summoning",
+      "piercing-projectile",
+      "aoe-cleave"
+    ],
+    "variants": [
+      "blessed",
+      "ancient",
+      "normal",
       "mutated"
     ]
   }

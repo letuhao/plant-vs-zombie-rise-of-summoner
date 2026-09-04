@@ -21,6 +21,21 @@ public sealed class OverlayCombatRequest
     /// </summary>
     public double EffectivenessMultiplier { get; init; } = 1.0;
 
+    /// <summary>
+    /// Converts a <c>skill.effectiveness.{category}</c> channel value (per-mille, <b>0 = neutral</b>
+    /// because that is the channel's registered default) into the multiplier above:
+    /// <c>1.0 + pm / 1000</c>. So 0 gives exactly 1.0 and the call site is byte-identical, 250 gives
+    /// +25%, and -250 gives -25%.
+    ///
+    /// <para><b>Why this conversion lives in Combat/ and not at the call site.</b> The caller is
+    /// <c>Actions/BasicAttack.cs</c>, and the action layer bans floating point outright
+    /// (<c>ActionsPurityGuardTests</c>: "no wall clock, no ambient RNG, no floating point") — writing
+    /// <c>1.0 + pm / 1000.0</c> there would be a purity violation, and as of B31's tightened literal
+    /// rule the guard actually catches it. The resolver is where double arithmetic is legitimate, so
+    /// the seam is a `long` per-mille in and a `double` multiplier out.</para>
+    /// </summary>
+    public static double MultiplierFromPerMille(long perMille) => 1.0 + perMille / 1000.0;
+
     /// <summary>Debug/test: when set, overrides the hit roll.</summary>
     public bool? ForceHit { get; init; }
 

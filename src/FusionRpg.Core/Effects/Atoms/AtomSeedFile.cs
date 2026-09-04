@@ -1,4 +1,5 @@
 using FusionRpg.Core.Combat.Element;
+using FusionRpg.Core.Effects.Atoms.Power;
 using System.Text.Json;
 
 namespace FusionRpg.Core.Effects.Atoms;
@@ -15,6 +16,10 @@ public enum SeedEntryKind
     ChannelPolicy,
     Affix,
     ChannelPool,
+
+    /// <summary>E44 criterion 0 (spec-power-sweep.md §4.1): one <c>power_coefficient</c> row —
+    /// the seed kind that gives a fitted (or hand-authored) coefficient somewhere real to land.</summary>
+    Coefficient,
 }
 
 /// <summary>
@@ -72,12 +77,17 @@ public sealed class SeedContent
     /// <c>params.channel</c> may reference instead of one concrete channel.</summary>
     public List<ChannelPoolRow> ChannelPools { get; } = new();
 
+    /// <summary>E44 criterion 0 (spec-power-sweep.md §4.1): authored <c>power_coefficient</c> rows —
+    /// the coefficient data path a fitted (or hand-authored) number now has to travel through.</summary>
+    public List<PowerCoefficientRow> Coefficients { get; } = new();
+
     /// <summary>Entry id to the file that authored it — the other half of a duplicate report.</summary>
     public Dictionary<string, string> SourceOf { get; } = new(StringComparer.Ordinal);
 
     public int Count =>
         Atoms.Count + Containers.Count + Affixes.Count + Curves.Count + Rarities.Count
-        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count + ChannelPools.Count;
+        + Elements.Count + ElementMatrix.Count + ChannelPolicies.Count + ChannelPools.Count
+        + Coefficients.Count;
 }
 
 /// <summary>What a collection pass produced, and everything wrong with it.</summary>
@@ -159,7 +169,7 @@ public static class AtomSeedFile
             {
                 errors.Add(new SeedError(path, "", AtomRejectionReason.UnknownKind,
                     $"kind '{Str(root, "kind")}' — one of "
-                + "atom | container | affix | curve | rarity | element | element-matrix"));
+                + "atom | container | affix | curve | rarity | element | element-matrix | power-coefficient"));
                 return;
             }
 
@@ -188,6 +198,7 @@ public static class AtomSeedFile
                     case SeedEntryKind.ElementMatrix: ReadMatrixCell(path, entry, into, errors); break;
                     case SeedEntryKind.ChannelPolicy: ReadChannelPolicy(path, entry, into, errors); break;
                     case SeedEntryKind.ChannelPool: ReadChannelPool(path, entry, into, errors); break;
+                    case SeedEntryKind.Coefficient: ReadCoefficient(path, entry, into, errors); break;
                     default: ReadRarity(path, entry, into, errors); break;
                 }
             }
@@ -443,6 +454,56 @@ public static class AtomSeedFile
     }
 
     /// <summary>
+    /// One priced coefficient row (E44 criterion 0, spec-power-sweep.md §4.1) — the closest existing
+    /// sibling is <see cref="ReadChannelPolicy"/>, also a flat row type, and this mirrors its shape:
+    /// structural checks only (a required field must be explicit), the semantic check (reference scale
+    /// must be positive — normalisation divides by it) stays where it already lives,
+    /// <c>RpgStore.UpsertPowerTables</c>'s own, reused unchanged by the import path so this needs no
+    /// new validation logic either.
+    ///
+    /// <para><c>channel</c> is optional and defaults to <c>""</c>, mirroring
+    /// <see cref="PowerCoefficientRow.Channel"/>'s own "empty means priced the same regardless of
+    /// channel" shape. The claim key is <c>kindId/channel</c> (or <c>kindId/*</c> when channel is
+    /// absent) — the same compound identity <c>RpgStore.UpsertPowerTables</c>'s own error strings
+    /// already format a coefficient by — rather than the bare <c>channel</c> <see cref="ReadChannelPolicy"/>
+    /// claims, because a coefficient's real key is the (kind, channel) pair the table's own primary key
+    /// names, and a bare channel would collide with an unrelated channel-policy row naming the same
+    /// channel string.</para>
+    /// </summary>
+    static void ReadCoefficient(string path, JsonElement e, SeedContent into, List<SeedError> errors)
+    {
+        var kindId = Str(e, "kindId");
+        var channel = Str(e, "channel");
+        var coeffId = $"{kindId}/{(channel.Length == 0 ? "*" : channel)}";
+
+        if (kindId.Length == 0)
+        {
+            errors.Add(new SeedError(path, coeffId, AtomRejectionReason.MissingParam,
+                "a coefficient needs an explicit kindId"));
+            return;
+        }
+
+        if (!Claim(path, coeffId, into, errors)) return;
+
+        if (IntOrNull(e, "coeffMilli") is not { } coeffMilli)
+        {
+            errors.Add(new SeedError(path, coeffId, AtomRejectionReason.MissingParam,
+                "a coefficient needs an explicit coeffMilli — points per reference unit, per-mille"));
+            return;
+        }
+
+        if (IntOrNull(e, "referenceScale") is not { } referenceScale)
+        {
+            errors.Add(new SeedError(path, coeffId, AtomRejectionReason.MissingParam,
+                "a coefficient needs an explicit referenceScale — what \"one unit\" means for this " +
+                "channel; normalisation divides by it, so it cannot be defaulted"));
+            return;
+        }
+
+        into.Coefficients.Add(new PowerCoefficientRow(kindId, channel, coeffMilli, referenceScale));
+    }
+
+    /// <summary>
     /// One matchup cell. <c>matrix</c> chooses <c>combat</c> or <c>shield</c> — required, because a
     /// cell that guessed its matrix would silently rebalance the other one.
     /// </summary>
@@ -520,6 +581,7 @@ public static class AtomSeedFile
             case "element-matrix": kind = SeedEntryKind.ElementMatrix; return true;
             case "channel-policy": kind = SeedEntryKind.ChannelPolicy; return true;
             case "channel-pool": kind = SeedEntryKind.ChannelPool; return true;
+            case "power-coefficient": kind = SeedEntryKind.Coefficient; return true;
             default: kind = SeedEntryKind.Atom; return false;
         }
     }

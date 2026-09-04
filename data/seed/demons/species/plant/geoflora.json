@@ -20,13 +20,16 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "high"
+        "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:18:11Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:24:13Z",
+      "minorityValues": {
+        "rarity": "sprout"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -49,7 +52,7 @@
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Geoflora"
+      "geoflora"
     ],
     "gameTypeId": 1155,
     "posture": "Finesse",
@@ -64,8 +67,9 @@
     "speciesId": "FireCaltrop",
     "targetPreference": "backline",
     "traits": [
-      "Low-profile",
-      "Non-assimilative"
+      "low-profile",
+      "non-fusible",
+      "luminescent"
     ],
     "variants": [],
     "verdict": "agree"

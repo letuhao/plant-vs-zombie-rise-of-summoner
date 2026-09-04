@@ -115,9 +115,9 @@ concrete elements are 6 (`src/FusionRpg.Core/Stats/Derived/ActorElementTypes.cs:
 ingredient gem's own element** matching its socket's affinity — exactly §4.2's existing per-insert
 attunement test. The Strain's *aptitude* never has to become an element.
 
-> **Decider: the owner.** If the bonus is meant to key on the Strain's **aptitude** rather than its
-> ingredients' elements, a 12 → 6 mapping is required, it is a new reviewed vocabulary, and it is not this
-> module's to declare. **This spec does not invent one.**
+> ✅ **RULED 2026-09-04: the bonus keys on each ingredient gem's own element** — §4.2's existing
+> per-insert attunement test, exactly as recommended. ⛔ **No 12 → 6 mapping is created**, and a Strain's
+> aptitude never becomes an element.
 
 ### ⛔ Learnability: 127 combinations, against a bar of ~45
 
@@ -173,9 +173,11 @@ produce a migration that does not fit it.
 > hybrid — regenerate its host too. **Alternative:** keep 25 legacy words alongside 102, taking the
 > catalogue to 152. Rejected: it deepens exactly the learnability failure §4.4 named.
 >
-> **Decider: the owner** on rename-vs-retain, because it moves a `gates = True` metric and the `KINDS`
-> assertion. Either way `Registration/IngredientUnsatisfiable` must follow the kind, or a gating check
-> quietly stops gating.
+> ✅ **RULED 2026-09-04: regenerate, do not retain.** The 25 legacy socket-words go; keeping them
+> alongside the 102 takes the catalogue to 152 and deepens the learnability failure §4.4 named.
+> ⚠ **`Registration/IngredientUnsatisfiable` must follow the kind**, or a `gates = True` check quietly
+> stops gating. The one entry hosted on `ward-array` is outside the twelve-role hybrid core and can
+> never be worn by a hybrid — **regenerate its host too**.
 
 ### Container kind, ids, and the per-actor cap
 

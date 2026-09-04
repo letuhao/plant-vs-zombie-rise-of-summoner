@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:56:03Z",
+      "minorityValues": {
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "undead-specialist",
+      "shadow-stalker"
+    ],
+    "gameTypeId": 246,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "heirloom",
+    "reach": "long",
+    "reason": "While a high-damage sniper is a threat, its slow movement and predictable linear attack pattern do not reach the world-altering scale required for a 'harbinger' rating.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "LegionSniperZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "long-range-sniper",
+      "immunity-to-crowd-control",
+      "executioner-mechanic",
+      "stealth-ambush"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ],
+    "verdict": "too-high"
+  }
+]

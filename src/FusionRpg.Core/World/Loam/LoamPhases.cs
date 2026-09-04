@@ -96,8 +96,16 @@ public static class LoamPhases
     /// One sector absorbs one turn's fade; if it is lost, the component recomputes next turn with
     /// one fewer member and a new weakest takes over. That is the countdown the design calls for,
     /// not a same-turn cascade across every member at once.
+    ///
+    /// <paramref name="ceded"/> is a faction id → sector id map built by <see cref="Turn.TurnEngine"/>
+    /// from this turn's `cede` orders (world-stage W25), the same way it already derives `postures`
+    /// from `stance` orders — a plain map, never a service or a lookup, passed straight into the one
+    /// <see cref="LoamForecast.Weakest"/> selection so a filed order is an input to that choice, not
+    /// a second rule that could disagree with it.
     /// </summary>
-    public static WorldState Pressure(WorldState world, TurnReport report, string phase, int turn = 0, ulong seed = 0)
+    public static WorldState Pressure(
+        WorldState world, TurnReport report, string phase, int turn = 0, ulong seed = 0,
+        IReadOnlyDictionary<string, string>? ceded = null)
     {
         var stockById = world.Sectors.ToDictionary(s => s.SectorId, s => s.LoamStock, StringComparer.Ordinal);
         var stabilityById = world.Sectors.ToDictionary(s => s.SectorId, s => s.StabilityMilli, StringComparer.Ordinal);
@@ -117,7 +125,7 @@ public static class LoamPhases
             // sectors that faction's upkeep touches this turn.
             if (faction.UpkeepHandicapMilli != 1000)
                 report.Add(phase, TurnReportKinds.Event, faction.FactionId,
-                    "loam.handicap:" + faction.UpkeepHandicapMilli);
+                    "loam.handicap:" + faction.UpkeepHandicapMilli, audience: faction.FactionId);
 
             foreach (var component in TerritoryComponents.For(world, faction.FactionId))
             {
@@ -135,10 +143,13 @@ public static class LoamPhases
                     // Null here means every member is warded (spec-loam-texture.md's Wardens): there
                     // is no eligible fade target, so the shortfall is named and otherwise goes
                     // unapplied this turn, rather than throwing on an empty candidate list.
-                    var weakest = LoamForecast.Weakest(world, component, available, upkeep);
+                    var factionCeded = ceded != null && ceded.TryGetValue(faction.FactionId, out var cededSector)
+                        ? cededSector
+                        : null;
+                    var weakest = LoamForecast.Weakest(world, component, available, upkeep, factionCeded);
                     if (weakest is null)
                     {
-                        report.Add(phase, TurnReportKinds.Event, faction.FactionId, "loam.shortfall.unresolved:" + shortfall);
+                        report.Add(phase, TurnReportKinds.Event, faction.FactionId, "loam.shortfall.unresolved:" + shortfall, audience: faction.FactionId);
                         continue;
                     }
 

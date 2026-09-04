@@ -26,6 +26,19 @@ public sealed record BattleActorSetup
     public ElementTypeId? ElementPrimary { get; init; }
     public ElementTypeId? ElementSecondary { get; init; }
     public IReadOnlyList<string> TraitIds { get; init; } = Array.Empty<string>();
+
+    /// <summary>The `rpg_unique_actor` this setup represents — its own stable `instance_id` string,
+    /// matching `OwnerScope.UniqueActor`'s key exactly (never a numeric id) — for module 5's equipment
+    /// lookup (`EquipAtomSource.ModsFor`). Null for a setup with no durable specimen behind it (a wave
+    /// demon, an expedition roster entry, a test fixture); equipment resolves to nothing.
+    /// <see cref="JsonIgnoreAttribute"/> for the identical reason <see cref="Index"/> already carries
+    /// one: expedition tier resolution serializes this record as part of its own golden hash, and a
+    /// specimen id — always null there, since expeditions build setups from wave/species data, never a
+    /// real owned demon — is not semantically part of what that hash locks. Found the same way
+    /// <see cref="Index"/>'s comment describes: a first draft without this moved
+    /// `ExpeditionResolverTests.Tier_goldens_are_locked`'s hash.</summary>
+    [JsonIgnore]
+    public string? SpecimenId { get; init; }
     public long MaxHp { get; init; }
     public long Atk { get; init; }
     public long Defense { get; init; }
@@ -35,6 +48,7 @@ public sealed record BattleActorSetup
 
     /// <summary>Statuses applied attacker-less at battle start (test seams now, trait/attack riders later).</summary>
     public IReadOnlyList<BattleStatusSpec> InitialStatuses { get; init; } = Array.Empty<BattleStatusSpec>();
+
 
     /// <summary>Innate shield content row (battle-adoption) — applied at setup, no expiry unless set.</summary>
     public BattleInnateShield? InnateShield { get; init; }
@@ -106,6 +120,11 @@ public static class BattleRuleset
     /// <summary>Synthetic clock per round — every reused subsystem is millisecond-based.</summary>
     public static int RoundDurationMs => Tuning.RoundDurationMs;
     public static int MaxRounds => Tuning.MaxRounds;
+
+    /// <summary>Wave E3 — the secondary element's per-mille share of an attack payload. 0 (the
+    /// shipped default) means the primary carries the whole payload, which is byte-identical to the
+    /// behaviour before hybrid payloads existed.</summary>
+    public static int HybridSecondaryWeightMilli => Tuning.HybridSecondaryWeightMilli;
 
     // battle-magnitude (T2.1, spec-battle-magnitude.md): delegate to the Θ ladder. Lazy (`??=`), not
     // an eager static field initializer — FusionRpg.Core.Power.PowerTuningHub.Configure runs during

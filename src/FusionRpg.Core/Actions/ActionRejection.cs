@@ -87,6 +87,12 @@ public enum ActionRejectionReason
     /// the overage, the same "reject, never coerce" law every other reason on this list already
     /// follows.</summary>
     PowerBudgetExceeded,
+
+    /// <summary>A-M1 (spec-movement-payload.md §2, §4): a `category = Movement` action whose compiled
+    /// container carries no bound effect atom — `MovementPayloadPolicy.HasStandalonePayload` is false.
+    /// Invariant 9 (standalone-first) cuts the OTHER way: the reposition itself is never required, but
+    /// the RPG-layer payload is — "a movement action must do something with the game closed."</summary>
+    MovementActionHasNoStandalonePayload,
 }
 
 /// <summary>One refusal: the rule that fired, plus enough detail to fix the row.</summary>

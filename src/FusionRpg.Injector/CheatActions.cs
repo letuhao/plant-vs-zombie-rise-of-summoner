@@ -32,7 +32,16 @@ public static class CheatActions
             var board = GameHooks.Board;
             if (board != null && CheatState.On("F-WAVE-FREEZE"))
             {
-                try { board.timeUntilNextWave = Mathf.Max(board.timeUntilNextWave, 30f); } catch { }
+                // E36 (spec-wave-control.md §2.2): the floor value itself is data/tuning/match.v1.json's
+                // waveHoldFloorSeconds, not a bare literal (tunables-ssot.md T1 -- a balance pass would
+                // tune this). This still FLOORS the timer every tick, it does not stop it -- the
+                // "hold, not freeze" naming distinction wave.control's own op vocabulary enforces.
+                try
+                {
+                    board.timeUntilNextWave = Mathf.Max(
+                        board.timeUntilNextWave, (float)FusionRpg.Core.Match.MatchTuningPolicy.WaveHoldFloorSeconds);
+                }
+                catch { }
             }
             if (board != null)
             {
@@ -654,7 +663,12 @@ public static class CheatActions
             if (CheatState.IsUserSet("E-ZD")) c.zombieDamageMultiplier = CheatState.FVal("E-ZD");
             if (CheatState.IsUserSet("E-ZS")) c.zombieSpeedMultiplier = CheatState.FVal("E-ZS");
             if (CheatState.IsUserSet("E-ZC")) c.zombieCountMultiplier = CheatState.FVal("E-ZC");
-            if (CheatState.IsUserSet("E-ZARM")) c.zombieStartAmmor = CheatState.IVal("E-ZARM");
+            // E35 (spec-match-modify.md §2.3): the one `long` channel on this kind. `checked` so an
+            // authored value above int.MaxValue THROWS at this boundary rather than wrapping or
+            // silently clamping — the same overflow discipline CLAUDE.md requires everywhere else. No
+            // `float` hop: this reads CheatState.LVal (long), never FVal/IVal (which round through a
+            // float that stops being integer-exact at 16,777,216, well under a cursed armour value).
+            if (CheatState.IsUserSet("E-ZARM")) c.zombieStartAmmor = checked((int)CheatState.LVal("E-ZARM"));
             if (CheatState.IsUserSet("E-PMIN")) c.plantModifyMin = CheatState.FVal("E-PMIN");
             if (CheatState.IsUserSet("E-PMAX")) c.plantModifyMax = CheatState.FVal("E-PMAX");
             if (CheatState.IsUserSet("E-ZMIN")) c.zombieModifyMin = CheatState.FVal("E-ZMIN");

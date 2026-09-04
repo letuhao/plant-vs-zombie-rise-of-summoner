@@ -13,19 +13,20 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 2,
+        "kit-shape": 1,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:06:52Z",
+      "emittedUtc": "2026-09-04T11:54:03Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -41,38 +42,39 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Precision",
-    "aptitudeSecondary": "Pierce",
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Succulent"
+      "cryo-succulent",
+      "carnivorous flora"
     ],
-    "gameTypeId": 1427,
-    "posture": "Bastion",
-    "pure": false,
-    "rarity": "fused",
+    "gameTypeId": 38,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
     "reach": "long",
-    "reason": "The ability to deal quadruple damage to frozen units and pierce through aerial targets makes it a significant tactical threat rather than a mere nuisance.",
+    "reason": "The creature possesses high damage multipliers and specific mechanics to exploit frozen enemies, making it a significant combat threat rather than a mere nuisance.",
     "resourceProfile": [
       "hp",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "IceCactus",
+    "speciesId": "WaterAloes",
     "targetPreference": "frontline",
     "traits": [
-      "Frost-Spike Projection",
-      "Thermal-Kinetic Piercing",
-      "Cryo-Synergy"
+      "thermal-reactive",
+      "cryo-accumulator",
+      "frost-immune",
+      "projectile-launcher"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "ancient"
     ],
     "verdict": "too-low"
   }

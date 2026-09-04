@@ -19,18 +19,16 @@
       "auditVerdict": null,
       "basis": "inferred",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "unresolved",
+        "attackTempo": "unresolved",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:37:23Z",
-      "minorityValues": {
-        "aptitudePrimary": "Vigor",
-        "rarity": "cultivated"
-      },
+      "emittedUtc": "2026-09-04T10:00:47Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -45,40 +43,40 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Fortitude",
+    "aptitudePrimary": "unresolved",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "unresolved",
     "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Symbiotic Vessel"
+      "symbiotic-vessel"
     ],
-    "gameTypeId": 1243,
-    "posture": "Force",
-    "pure": true,
+    "gameTypeId": 1437,
+    "posture": "unresolved",
+    "pure": false,
     "rarity": "fused",
-    "reach": "melee",
-    "reason": "The creature functions as a passive support utility that enhances allies rather than posing a direct offensive threat to opponents.",
+    "reach": "short",
+    "reason": "The creature functions as a passive support unit that sacrifices itself to buff allies, posing no direct threat to an opponent.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "CherryPot",
+    "speciesId": "BloverPot",
     "targetPreference": "frontline",
     "threatBand": "nuisance",
     "traits": [
-      "Explosion-Resistant",
-      "Life-Giving Catalyst",
-      "Low-Profile",
-      "Supportive Substrate"
+      "sacrificial-nurturer",
+      "low-profile",
+      "soil-reclamation",
+      "buff-provider"
     ],
     "variants": [
       "normal",
       "blessed",
-      "mutated"
+      "corrupted"
     ]
   },
   {
@@ -102,15 +100,16 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split",
+        "elementPrimary": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:32:21Z",
+      "emittedUtc": "2026-09-04T10:40:53Z",
       "minorityValues": {
-        "rarity": "fused"
+        "elementPrimary": "dark"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -130,34 +129,113 @@
     "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "inferred",
-    "deployMode": "PlantAvatar",
+    "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Symbiotic Vessel"
+      "symbiotic-vessel"
     ],
-    "gameTypeId": 1130,
+    "gameTypeId": 1380,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "cultivated",
+    "rarity": "fused",
     "reach": "short",
-    "reason": "The creature is a passive support item that provides defensive utility and minor positional manipulation rather than direct offensive capability.",
+    "reason": "While it provides significant support to zombies, its low profile and tendency to revert to a harmless state upon being attacked make it a minor tactical obstacle rather than a direct combat threat.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "GarlicPot",
+    "speciesId": "HypnoPot",
     "targetPreference": "backline",
     "threatBand": "nuisance",
     "traits": [
-      "Damage Mitigation",
-      "Pathing Disruption",
-      "Low Profile"
+      "hypnotic-reversion",
+      "regenerative-aura",
+      "low-profile"
+    ],
+    "variants": [
+      "normal",
+      "corrupted"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:23:56Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "symbiotic-vessel",
+      "botanical-incubator"
+    ],
+    "gameTypeId": 1202,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature functions as a passive support unit that spawns minor projectiles and lacks the destructive scale required for a 'harbinger' rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SquashPumpkin",
+    "targetPreference": "frontline",
+    "traits": [
+      "nested-spawning",
+      "delayed-aggression",
+      "variant-mimicry",
+      "territorial-nurturing"
     ],
     "variants": [
       "normal",
       "mutated"
-    ]
+    ],
+    "verdict": "too-high"
   }
 ]

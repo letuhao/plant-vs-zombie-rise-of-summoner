@@ -1,0 +1,299 @@
+{
+  "disptpl.affix.arm-hardening": {
+    "template": "{value}% more defense for the whole army"
+  },
+  "disptpl.affix.arm-riveting": {
+    "template": "{value}% increased armor plating"
+  },
+  "disptpl.affix.arm-welding": {
+    "template": "{value}% increased carapace"
+  },
+  "disptpl.affix.bloodletting": {
+    "template": "{value}% chance to inflict bloodletting on hit"
+  },
+  "disptpl.affix.bulwark": {
+    "template": "{value} more max health"
+  },
+  "disptpl.affix.carapace": {
+    "template": "+{value} carapace"
+  },
+  "disptpl.affix.cherry-bloom": {
+    "template": "{value}% chance to burst cherry bloom on hit"
+  },
+  "disptpl.affix.cleansing": {
+    "template": "{value}% chance to cleanse harmful status when struck"
+  },
+  "disptpl.affix.cruelty": {
+    "template": "+{value} {element} critical damage"
+  },
+  "disptpl.affix.death-glean": {
+    "template": "{value}% chance to fire bullet when you land killing blow"
+  },
+  "disptpl.affix.death-harvest": {
+    "template": "heal {value}% of max health when you land killing blow"
+  },
+  "disptpl.affix.death-salvo": {
+    "template": "{value}% chance to fire bullet when this dies"
+  },
+  "disptpl.affix.deathblast": {
+    "template": "{value} {element} damage burst on death"
+  },
+  "disptpl.affix.dooming": {
+    "template": "{value}% chance to detonate board on death"
+  },
+  "disptpl.affix.econ-bounty": {
+    "template": "+{value} bounty points per kill"
+  },
+  "disptpl.affix.econ-endure": {
+    "template": "+{value} sun per hit taken"
+  },
+  "disptpl.affix.econ-graze": {
+    "template": "+{value} sun per hit landed"
+  },
+  "disptpl.affix.econ-muster": {
+    "template": "+{value} points on deployment"
+  },
+  "disptpl.affix.econ-toll": {
+    "template": "+{value} money per hit taken"
+  },
+  "disptpl.affix.elemental-defense": {
+    "template": "+{value} {element} resistance"
+  },
+  "disptpl.affix.elpw-attune": {
+    "template": "attunes {element} power, enabling it to take effect"
+  },
+  "disptpl.affix.elpw-focus": {
+    "template": "{value} increased {element} penetration"
+  },
+  "disptpl.affix.elpw-overflow": {
+    "template": "+{value} bonus {element} power"
+  },
+  "disptpl.affix.elpw-override": {
+    "template": "{element} power becomes {value}, overriding weaker sources"
+  },
+  "disptpl.affix.elpw-pierce": {
+    "template": "+{value} {element} penetration"
+  },
+  "disptpl.affix.entangling": {
+    "template": "{value}% chance to entangle target on hit"
+  },
+  "disptpl.affix.evasion": {
+    "template": "{value} dodge against {element} attacks"
+  },
+  "disptpl.affix.evd-brace": {
+    "template": "dodge against {element} attacks never falls below {value}"
+  },
+  "disptpl.affix.evd-flinch": {
+    "template": "{value} increased dodge against {element} attacks"
+  },
+  "disptpl.affix.evd-harden": {
+    "template": "{value} increased resistance to {element} critical hits"
+  },
+  "disptpl.affix.evd-husk": {
+    "template": "resistance to bonus damage from {element} critical hits never falls below {value}"
+  },
+  "disptpl.affix.evd-scar": {
+    "template": "resistance to {element} critical hits never falls below {value}"
+  },
+  "disptpl.affix.evd-seal": {
+    "template": "{value} increased reduction of bonus damage from {element} critical hits"
+  },
+  "disptpl.affix.ferocity": {
+    "template": "{value} increased attack"
+  },
+  "disptpl.affix.firelining": {
+    "template": "{value}% chance to lay line of fire on hit"
+  },
+  "disptpl.affix.flash-freeze": {
+    "template": "{value}% chance to flash-freeze attacker when struck"
+  },
+  "disptpl.affix.flourishing": {
+    "template": "{value}ms faster sun production"
+  },
+  "disptpl.affix.fortitude": {
+    "template": "{value} increased max health"
+  },
+  "disptpl.affix.freezing": {
+    "template": "{value}% chance to freeze target on hit"
+  },
+  "disptpl.affix.gardener": {
+    "template": "{value}% chance to spawn plant where this fell"
+  },
+  "disptpl.affix.gravedigging": {
+    "template": "{value}% chance to clear nearby grave when struck"
+  },
+  "disptpl.affix.gravemaking": {
+    "template": "{value}% chance to raise grave where target falls"
+  },
+  "disptpl.affix.hit-followthrough": {
+    "template": "{value} bonus damage on hit"
+  },
+  "disptpl.affix.hit-mend": {
+    "template": "heal {value}% of damage taken on hit"
+  },
+  "disptpl.affix.hit-retort": {
+    "template": "{value}% chance to fire bullet back at attacker when hit"
+  },
+  "disptpl.affix.immunity": {
+    "template": "{value} chance to shrug off a status affliction outright"
+  },
+  "disptpl.affix.keen-edge": {
+    "template": "+{value} {element} critical rate"
+  },
+  "disptpl.affix.life-graft": {
+    "template": "{value} increased health restored on grant"
+  },
+  "disptpl.affix.life-surge": {
+    "template": "{value} more health restored on grant"
+  },
+  "disptpl.affix.lifesteal": {
+    "template": "heal {value}% of damage dealt on hit"
+  },
+  "disptpl.affix.martyrdom": {
+    "template": "heal allies {value}% of max health when this dies"
+  },
+  "disptpl.affix.mending": {
+    "template": "+{value} health restored on grant"
+  },
+  "disptpl.affix.mesmerizing": {
+    "template": "{value}% chance to mesmerize target on hit"
+  },
+  "disptpl.affix.midas": {
+    "template": "+{value} money per kill"
+  },
+  "disptpl.affix.might": {
+    "template": "+{value} attack"
+  },
+  "disptpl.affix.padding": {
+    "template": "{value} reduced {element} critical damage taken"
+  },
+  "disptpl.affix.plating": {
+    "template": "+{value} armor plating"
+  },
+  "disptpl.affix.prec-fixation": {
+    "template": "sets {element} accuracy to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.prec-reckoning": {
+    "template": "sets {element} critical damage to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.prec-truesight": {
+    "template": "never misses with {element} strikes"
+  },
+  "disptpl.affix.prec-verdict": {
+    "template": "sets {element} critical rate to {value}, ignoring other modifiers"
+  },
+  "disptpl.affix.precision": {
+    "template": "+{value} {element} accuracy"
+  },
+  "disptpl.affix.quickening": {
+    "template": "{value}ms faster between shots"
+  },
+  "disptpl.affix.regeneration": {
+    "template": "heal {value} hp per tick"
+  },
+  "disptpl.affix.resilience": {
+    "template": "{value}% increased defense for the whole army"
+  },
+  "disptpl.affix.retribution": {
+    "template": "reflect {value}% of damage taken back at attacker"
+  },
+  "disptpl.affix.savagery": {
+    "template": "×{value} attack"
+  },
+  "disptpl.affix.searing-strike": {
+    "template": "{value} {element} damage on hit"
+  },
+  "disptpl.affix.shield-capacity": {
+    "template": "+{value} {element} shield capacity"
+  },
+  "disptpl.affix.shield-pen": {
+    "template": "hits deal +{value} damage to {element} shields"
+  },
+  "disptpl.affix.shield-regen": {
+    "template": "+{value} {element} shield regeneration per second"
+  },
+  "disptpl.affix.shield-toughness": {
+    "template": "{element} shields take {value} less damage per hit"
+  },
+  "disptpl.affix.shld-breach": {
+    "template": "{value} increased damage dealt to {element} shields"
+  },
+  "disptpl.affix.shld-cycle": {
+    "template": "{value} increased {element} shield regeneration"
+  },
+  "disptpl.affix.shld-surge": {
+    "template": "{value} increased {element} shield capacity"
+  },
+  "disptpl.affix.sporing": {
+    "template": "{value}% chance to infest target with spores on hit"
+  },
+  "disptpl.affix.stalwart": {
+    "template": "+{value} status potency"
+  },
+  "disptpl.affix.stoicism": {
+    "template": "+{value} {element} critical hit resistance"
+  },
+  "disptpl.affix.summoner": {
+    "template": "{value}% chance to spawn zombie where this fell"
+  },
+  "disptpl.affix.sunbloom": {
+    "template": "+{value} sun per kill"
+  },
+  "disptpl.affix.sust-callus": {
+    "template": "gain {value} shield when struck"
+  },
+  "disptpl.affix.sust-freshgraft": {
+    "template": "cleanse all harmful statuses on spawn"
+  },
+  "disptpl.affix.sust-grit": {
+    "template": "{value}% chance to cleanse harmful status when you land hit"
+  },
+  "disptpl.affix.sust-husk": {
+    "template": "gain {value} shield every tick"
+  },
+  "disptpl.affix.swiftness": {
+    "template": "{value} faster zombie advance"
+  },
+  "disptpl.affix.tempo-haste": {
+    "template": "{value}% faster attack rate"
+  },
+  "disptpl.affix.tempo-stampede": {
+    "template": "{value}% more zombie advance"
+  },
+  "disptpl.affix.tempo-surge": {
+    "template": "{value}% increased zombie advance"
+  },
+  "disptpl.affix.tempo-yield": {
+    "template": "{value}% faster sun production"
+  },
+  "disptpl.affix.terraforming": {
+    "template": "{value}% chance to scorch ground to lava on hit"
+  },
+  "disptpl.affix.venomous": {
+    "template": "{value}% chance to poison target on hit"
+  },
+  "disptpl.affix.vitality": {
+    "template": "+{value} max health"
+  },
+  "disptpl.affix.volley": {
+    "template": "{value}% chance to fire extra bullet on hit"
+  },
+  "disptpl.affix.ward-brace": {
+    "template": "cannot be critically struck by {element} damage"
+  },
+  "disptpl.affix.ward-harden": {
+    "template": "{value} increased {element} resistance"
+  },
+  "disptpl.affix.warded": {
+    "template": "{value} {element} shield on spawn"
+  },
+  "disptpl.affix.warding": {
+    "template": "+{value} defense for the whole army"
+  },
+  "disptpl.affix.withering": {
+    "template": "{value}% chance to wither target on hit"
+  },
+  "tpl.affix.evasion.plant": {
+    "template": "{value} chance to sway aside from {element} attacks"
+  }
+}

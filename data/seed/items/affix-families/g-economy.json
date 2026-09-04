@@ -26,14 +26,47 @@
       "nameKey": "affix.sunbloom",
       "name": "Sunbloom",
       "kindId": "resource.economy",
-      "params": { "when": "OnDeath", "currency": "sun", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDeath",
+        "currency": "sun",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Gleaning", "of Harvest", "of Abundance"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Gleaning"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Harvest"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Abundance",
+            "wordPlant": "of Photosynthesis"
+          }
+        ]
+      },
       "displayTemplate": "+{value} sun per kill",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "SHIPPED — id, kind and `roles` kept verbatim per naming.v1.json idNamespaces.affixFamilies (g.economy existingFamilies: sunbloom, midas). `roles` is the econ column of ssot-affixes.md §4.3's role x group matrix (girdle-resource 5, jewel-major 2, jewel-minor 1, standard 4), translated to core.v1.json's 15-role ids the same way g-on-hit's file translated its own column: girdle-resource -> girdle, jewel-minor -> jewel-minor-a and jewel-minor-b. `standard` carries the highest econ weight of any row (4) but is excluded on purpose, matching the elem-pw exemplar's own precedent: `standard` is commander-only and outside the 15 body roles this field enumerates, regardless of its weight. `nameWords.suffix` is copied verbatim from ssot-affixes.md's shipped word table (§4.12): 'of Gleaning' / 'of Harvest' / 'of Abundance', with a documented plant-frame override to 'of Photosynthesis' at band C that this entry shape has no field for (the same gap the exemplars' own README records under 'two gaps' — `word_plant` is a downstream DB column, not an authored key here). displayTemplate mirrors the exact wording ssot-item-categories.md uses for this family ('+3 sun per kill', '+1 sun per kill') with the number replaced by the generator's `{value}`. CAP FINDING (load-bearing for every entry in this file, stated once here): the brief this partition was authored against, and atom-catalog-ssot.md's own G4 gap-table row, both say capPerMatch is unimplemented. Verified against code before authoring: it is not. AtomKindRegistry.cs's resource.economy schema (`new ParamDef(\"capPerMatch\", ParamKind.Int)`) carries a comment dated the same day this batch was authored — 'E15 shipped the counter 2026-08-22 (AtomRunner + RunnerState)' — and tests/FusionRpg.Core.Tests/Atoms/CapPerMatchTests.cs exercises the full behaviour: the cap fires post-proc so a suppressed dispatch still stamps the ICD and still advances the RNG stream, and it resets per match via `BeginMatch`. atom-family-library.md §3.5 already reads correctly ('capPerMatch is implemented in the runner') where atom-catalog-ssot.md's G4 row is the stale copy. ssot-charms.md and ssot-sets.md both already cite `atom.sunbloom.t2` with a capPerMatch figure ('capPerMatch honoured in the runner'), which is consistent with the runtime finding, not evidence against it. What is still genuinely missing is the AUTHORING side, not the runtime side: bands.v1.json defines a channelFamilyGroup and a share-to-magnitude curve for every other axis an author writes (powerBand, dropBand, costBand, variance) but has no group at all for capPerMatch, and seed-contract.md §3 forbids typing a raw integer into any field that is not a structural count. capPerMatch is not a structural count like `socketMax` — it is exactly the 'quantity' §3 exists to keep out of authored content, because a hand-picked cap is a fresh, ungoverned balance number for every one of ~125 agents to invent differently. So this file authors every family that wants a cap the same way the original brief asked: by recording the *want* in `notes`, never by writing a `capPerMatch` key into `params`. The corrected reason is narrower than 'the runner doesn't exist' — the runner exists and is tested; the missing piece is a bands.v1.json capPerMatch curve (or an explicit decision that it is a structural count after all) for whoever owns that registry next. `sunbloom` itself, on a per-kill trigger, wants a cap the least urgently of the seven — kills are already rate-limited by the wave, not by the player's own action rate — but ssot-sets.md's own worked example still shows it capped, so the want is real even here."
     },
     {
@@ -41,14 +74,46 @@
       "nameKey": "affix.midas",
       "name": "Midas",
       "kindId": "resource.economy",
-      "params": { "when": "OnDeath", "currency": "money", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDeath",
+        "currency": "money",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of Coin", "of the Vault", "of Riches"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Coin"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Vault"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Riches"
+          }
+        ]
+      },
       "displayTemplate": "+{value} money per kill",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "SHIPPED, id and kind kept verbatim. `roles` identical to `sunbloom` above — one row per role per GROUP, not per family, the same repetition-is-correct rule g-on-hit's file already documents. No shipped word table exists for `midas` in any doc read this session (ssot-affixes.md's §4.12 sample table shows `sunbloom` but not its sibling), so `nameWords.suffix` is minted here following the same 'of <noun>' suffix grammar the shipped table already uses, themed to coin/wealth rather than harvest/bloom to keep the two on-kill siblings from reading as the same idea in different words. `op: \"add\"` mirrors the only value the injector's `ExecEconomy` actually branches on (`InjectorEffectActionSink.cs`: `add = op is \"add\" or \"+\"`) — a hypothetical `op: \"set\"` would overwrite the player's current money outright, which is a debug/cheat shape (`CheatActions.SetEconomy`), never a loot-affix shape, so no entry in this file uses anything but `add`. Also wants a capPerMatch, for the identical reason as `sunbloom` — see that entry's note for the full finding rather than repeating it seven times."
     },
     {
@@ -56,14 +121,46 @@
       "nameKey": "affix.econ-bounty",
       "name": "Rot Bounty",
       "kindId": "resource.economy",
-      "params": { "when": "OnDeath", "currency": "points", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDeath",
+        "currency": "points",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of the Bounty", "of the Tally", "of the Ledger"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Bounty"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Tally"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Ledger"
+          }
+        ]
+      },
       "displayTemplate": "+{value} bounty points per kill",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "NEW family, stem `econ` (naming.v1.json idNamespaces.affixFamilies), word `bounty`. Same trigger as `sunbloom`/`midas` (on-kill) but the third FA9 currency neither shipped family uses: `currency: \"points\"`, writing `board.thePoints` (CheatActions.cs `SetEconomy`, case \"points\"). AtomKindRegistry.cs's own comment names all three as valid ('Currencies are sun|money|points') without saying what reads `thePoints` outside the opcode itself — RUNTIME HONESTY, stated plainly rather than hidden: this family is authored against a real, tested write path with no confirmed downstream consumer for the value it writes, the same category of gap the exemplar's `stat.derived` note calls out for a different family. It is authored anyway because the write path itself is real (Full/None/PlanOnly, lawn-only, same as its siblings) and because a rot/decay-flavoured kill-count ledger is exactly the kind of judgement §8 says a formula can never recover later. Fiction: a tally kept on every kill that neither sun's plant-growth accounting nor money's zombie-loot accounting tracks — a third ledger for whichever system eventually wants a bare kill-count currency. Wants a capPerMatch for the same reason as its on-kill siblings; see `sunbloom`'s note."
     },
     {
@@ -71,14 +168,46 @@
       "nameKey": "affix.econ-graze",
       "name": "Pollen Skim",
       "kindId": "resource.economy",
-      "params": { "when": "OnDamageDealt", "currency": "sun", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageDealt",
+        "currency": "sun",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Skimming", "of the Take", "of the Trickle"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Skimming"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Take"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Trickle"
+          }
+        ]
+      },
       "displayTemplate": "+{value} sun per hit landed",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "NEW family, word `graze`. Moves the trigger off the kill event entirely — `OnDamageDealt` is one of `resource.economy`'s four legal triggers (AtomKindRegistry.cs: `AtomTriggers.Events = { OnSpawn, OnDamageDealt, OnDamageTaken, OnDeath }`; `OnTimer` is not in that set, so no economy family in this group can ever be a pure time-based faucet — the kind schema enforces the brief's own 'bounded by an event, not by time' preference by construction). A hit lands far more often than a kill, so this is the family in the group with the strongest, least deferrable want for a capPerMatch — `powerBand: \"low\"` keeps the per-hit trickle small on its own, but a small number times an uncapped combat log is still the infinite faucet the brief warns about. Fiction: kinetic pollen shaken loose with every landed strike — the offensive mirror of `econ-endure`'s defensive version below, the same split `searing_strike`/`retribution` make across dealt/taken in g.on-hit."
     },
     {
@@ -86,14 +215,46 @@
       "nameKey": "affix.econ-toll",
       "name": "Carrion Toll",
       "kindId": "resource.economy",
-      "params": { "when": "OnDamageTaken", "currency": "money", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageTaken",
+        "currency": "money",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of the Toll", "of the Levy", "of Extraction"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Toll"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Levy"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Extraction"
+          }
+        ]
+      },
       "displayTemplate": "+{value} money per hit taken",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "NEW family, word `toll`. `OnDamageTaken` + `money` — the defensive-trigger, zombie-flavoured half of the `econ-graze`/`econ-endure` pair that this partition adds for the taken side, the same way `lifesteal` and `hit-mend` split OnDamageDealt/OnDamageTaken in g.on-hit for the same currency-neutral idea. Fiction: carrion collectors extract payment for every blow the wearer absorbs, rather than for the blow it lands — decay/harvest flavour on the money side rather than the sun side. `powerBand: \"low\"` and a strong capPerMatch want, for the same per-hit-frequency reason as `econ-graze`; see that entry and `sunbloom`'s note."
     },
     {
@@ -101,14 +262,46 @@
       "nameKey": "affix.econ-endure",
       "name": "Enduring Bloom",
       "kindId": "resource.economy",
-      "params": { "when": "OnDamageTaken", "currency": "sun", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnDamageTaken",
+        "currency": "sun",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "low",
-      "nameWords": { "suffix": ["of Enduring", "of the Steadfast Root", "of Withstanding"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Enduring"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Steadfast Root"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of Withstanding"
+          }
+        ]
+      },
       "displayTemplate": "+{value} sun per hit taken",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "NEW family, word `endure`. `OnDamageTaken` + `sun` — a rooted body keeps photosynthesizing through the blow rather than losing its harvest to it; the sun-side twin of `econ-toll`, and the taken-side twin of `econ-graze`. Deliberately not named with `glean`, `harvest` or `bloom` as its mechanical word-stem even though those fit the fiction, because `sunbloom`'s own shipped suffix table already uses 'of Gleaning' and 'of Harvest' — reusing either canonical word here risks the exact same-idea-four-ways collision seed-contract.md §5's normalizer exists to catch, once a generated name draws from both families' pools. `powerBand: \"low\"`, strong capPerMatch want — see `econ-graze`."
     },
     {
@@ -116,14 +309,46 @@
       "nameKey": "affix.econ-muster",
       "name": "Graft Tally",
       "kindId": "resource.economy",
-      "params": { "when": "OnSpawn", "currency": "points", "op": "add" },
-      "frames": ["humanoid", "plant"],
+      "params": {
+        "when": "OnSpawn",
+        "currency": "points",
+        "op": "add"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
       "side": "both",
-      "roles": ["girdle", "jewel-major", "jewel-minor-a", "jewel-minor-b"],
+      "roles": [
+        "girdle",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b"
+      ],
       "powerBand": "medium",
-      "nameWords": { "suffix": ["of the Muster", "of the Windfall", "of First Root"] },
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Muster"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Windfall"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of First Root"
+          }
+        ]
+      },
       "displayTemplate": "+{value} points on deployment",
-      "tags": ["utility"],
+      "tags": [
+        "utility"
+      ],
       "notes": "NEW family, word `muster`. The only family in this group on `OnSpawn` — a lump grant the moment the wearer's graft takes hold, rather than a per-action trickle. This is the closest thing in the group to a self-bounding trigger (one grant per placement, not per combat action), which is why `powerBand` is set back to `medium` rather than `low` — but it is NOT claimed to be cap-free: a body that can be replanted or re-summoned mid-match fires this again each time, so it still wants a capPerMatch, just less urgently than the four dealt/taken families above. Uses `points` rather than `sun`, deliberately: a `sun`-flavoured lump on every plant placed would double-count against the game's own planting-cost economy (you already spend sun to place a plant; refunding sun on the same event reads as a discount, not a reward), so this family's ledger is the same points-flavoured, currently-consumerless channel as `econ-bounty` rather than a second sun mechanism. Fiction: the first count taken the moment a graft roots — a founding tally, not a harvest."
     }
   ]

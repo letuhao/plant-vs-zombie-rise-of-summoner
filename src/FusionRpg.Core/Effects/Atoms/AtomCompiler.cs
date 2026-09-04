@@ -288,6 +288,12 @@ public static class AtomCompiler
         "grid.spawn" => EffectActions.SpawnGridItem,
         "grid.clear" => EffectActions.ClearGridItem,
         "box.set" => EffectActions.SetBoxType,
+        // E35 (spec-match-modify.md §2.5).
+        "match.modify" => EffectActions.ModifyMatch,
+        // E36 (spec-wave-control.md §2.1).
+        "wave.control" => EffectActions.WaveControl,
+        // E37 (spec-projectile-control.md §2b).
+        "bullet.modify" => EffectActions.BulletModify,
         _ => null,
     };
 

@@ -52,6 +52,31 @@ public static class Compilability
         // atom is a permanent modifier declaring no trigger, so the bag never fires it -- the grant's
         // presence is the effect, folded at resolve time. Hence no sink arm in either runtime.
         "stat.derived",
+
+        // E35 (spec-match-modify.md §2.5): match.modify -> EffectActions.ModifyMatch. Params stay
+        // {field, amount} on both the compiled and runner paths (ToOpcodeShape only rewrites
+        // stat.modify/stat.derived), so this kind has no key-mismatch to guard against either.
+        "match.modify",
+
+        // E37 (spec-projectile-control.md §2b): bullet.modify -> EffectActions.BulletModify. Same
+        // DECLARATIVE shape as stat.derived immediately below in the historical ordering of this set —
+        // a permanent modifier (AtomTriggers.None) whose grant is read by a resolved-read reader
+        // (GrantedBulletModifyAtomReader -> CheatPrefixes.BulletInitCheat), never fired by the bag.
+        // Without this entry Classify would route every bullet.modify atom to the Runner path ("has no
+        // FA opcode") even though OpcodeOf above resolves one — Classify's OpcodeKinds membership is a
+        // SEPARATE gate from OpcodeOf, exactly the gap stat.derived's own comment documents. Params
+        // stay {op, amount, bulletType, moveWay} on both paths — ToOpcodeShape only rewrites
+        // stat.modify/stat.derived — so, like match.modify, there is no key-mismatch to guard here.
+        "bullet.modify",
+
+        // E36 (spec-wave-control.md §2.1) shipped wave.control -> EffectActions.WaveControl in
+        // OpcodeOf but never added this entry — found while re-verifying E37's own bullet.modify fix
+        // to this same set (this list and OpcodeOf are two SEPARATE gates, exactly the trap
+        // stat.derived's comment above already documents). Without it every wave.control atom
+        // silently routes to the Runner path ("has no FA opcode") and is never read there — the
+        // ChainDepth-guarded, ExecWaveControl-shaped opcode E36 built never actually runs. Params
+        // stay {op, wave, timerMs, enabled} on both paths — no key-mismatch to guard.
+        "wave.control",
     };
 
     /// <summary>The only leaves a legacy grant overlay can express.</summary>

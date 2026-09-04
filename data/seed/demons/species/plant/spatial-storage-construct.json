@@ -13,20 +13,23 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:11:53Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T10:21:44Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -59,17 +62,16 @@
     "reason": "The creature is a utility-based storage item with high durability, but it lacks offensive capabilities or world-altering destructive power required for a Calamity rating.",
     "resourceProfile": [
       "hp",
-      "stamina",
       "poise"
     ],
     "side": "plant",
     "speciesId": "EndPumpiner",
-    "targetPreference": "frontline",
+    "targetPreference": "elite",
     "traits": [
-      "autonomous-card-collection",
+      "automated-card-collection",
       "interconnected-void-storage",
-      "shield-buffing-mechanism",
-      "resource-conversion"
+      "shield-generation",
+      "material-conversion"
     ],
     "variants": [
       "normal",

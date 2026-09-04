@@ -1,0 +1,320 @@
+[
+  {
+    "turn": 0,
+    "stateHash": "14c4458de618e91a3c8b64bf962b2542a03f5cdd211864b76c9a1ba4d6552a8c",
+    "phases": [
+      "Reveal",
+      "Movement",
+      "Sieges",
+      "Production",
+      "Pressure"
+    ],
+    "entries": [
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Movement",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.runway:17"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Movement",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "arrival:ember-hollow"
+      },
+      {
+        "sectorId": "homeworld",
+        "phase": "Production",
+        "kind": "event",
+        "subject": "homeworld",
+        "detail": "loam.overflow:50"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Pressure",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.burn:30"
+      }
+    ],
+    "commands": [
+      {
+        "commanderId": "dave",
+        "commandId": "c0",
+        "kind": "move",
+        "entityId": "e-dave-legion-1",
+        "sectorId": null,
+        "reason": null
+      },
+      {
+        "commanderId": "zomboss",
+        "commandId": "ai-0-e-zomboss-band-1",
+        "kind": "clear",
+        "entityId": "e-zomboss-band-1",
+        "sectorId": "black-gate",
+        "reason": "clear slot 0 of black-gate"
+      }
+    ]
+  },
+  {
+    "turn": 1,
+    "stateHash": "e01d212489c42c750c44ce586a038f465eb9da818fdc03dc33c640ed921a6097",
+    "phases": [
+      "Reveal",
+      "Sieges",
+      "Production",
+      "Pressure"
+    ],
+    "entries": [
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Sieges",
+        "kind": "battle",
+        "subject": "t2:guard:ember-hollow#2:e-dave-legion-1",
+        "detail": "guard:ember-hollow:e-dave-legion-1"
+      },
+      {
+        "sectorId": "homeworld",
+        "phase": "Production",
+        "kind": "event",
+        "subject": "homeworld",
+        "detail": "loam.overflow:50"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Pressure",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.burn:30"
+      }
+    ],
+    "commands": [
+      {
+        "commanderId": "dave",
+        "commandId": "c1",
+        "kind": "clear",
+        "entityId": "e-dave-legion-1",
+        "sectorId": "ember-hollow",
+        "reason": null
+      },
+      {
+        "commanderId": "zomboss",
+        "commandId": "ai-1-e-zomboss-band-1",
+        "kind": "clear",
+        "entityId": "e-zomboss-band-1",
+        "sectorId": "black-gate",
+        "reason": "clear slot 2 of black-gate"
+      }
+    ]
+  },
+  {
+    "turn": 2,
+    "stateHash": "892060c4e72aaa0865b5d2c5c51b7c1dac87b26dfed55911f2f23a5402918eea",
+    "phases": [
+      "Reveal",
+      "Sieges",
+      "Production",
+      "Pressure",
+      "Snapshot"
+    ],
+    "entries": [
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Sieges",
+        "kind": "battle",
+        "subject": "t3:guard:ember-hollow#3:e-dave-legion-1",
+        "detail": "guard:ember-hollow:e-dave-legion-1"
+      },
+      {
+        "sectorId": "homeworld",
+        "phase": "Production",
+        "kind": "event",
+        "subject": "homeworld",
+        "detail": "loam.overflow:50"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Pressure",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.burn:30"
+      },
+      {
+        "sectorId": "black-gate",
+        "phase": "Snapshot",
+        "kind": "event",
+        "subject": "ai-2-e-zomboss-band-1",
+        "detail": "claim.held:black-gate"
+      },
+      {
+        "sectorId": "black-gate",
+        "phase": "Snapshot",
+        "kind": "event",
+        "subject": "ai-2-e-zomboss-band-1",
+        "detail": "claim.barren:black-gate"
+      }
+    ],
+    "commands": [
+      {
+        "commanderId": "dave",
+        "commandId": "c2",
+        "kind": "clear",
+        "entityId": "e-dave-legion-1",
+        "sectorId": "ember-hollow",
+        "reason": null
+      },
+      {
+        "commanderId": "zomboss",
+        "commandId": "ai-2-e-zomboss-band-1",
+        "kind": "claim",
+        "entityId": "e-zomboss-band-1",
+        "sectorId": "black-gate",
+        "reason": "claim black-gate"
+      }
+    ]
+  },
+  {
+    "turn": 3,
+    "stateHash": "b5802ebd42ac2dbecdbbf242f09fbad86b47a2c4d1aabb073e3714e1a7607a6e",
+    "phases": [
+      "Reveal",
+      "Production",
+      "Pressure",
+      "Snapshot",
+      "Intel"
+    ],
+    "entries": [
+      {
+        "sectorId": "homeworld",
+        "phase": "Production",
+        "kind": "event",
+        "subject": "homeworld",
+        "detail": "loam.overflow:50"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Pressure",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.burn:30"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Snapshot",
+        "kind": "event",
+        "subject": "c3",
+        "detail": "claim.held:ember-hollow"
+      },
+      {
+        "sectorId": "ember-hollow",
+        "phase": "Snapshot",
+        "kind": "event",
+        "subject": "c3",
+        "detail": "claim.barren:ember-hollow"
+      }
+    ],
+    "commands": [
+      {
+        "commanderId": "dave",
+        "commandId": "c3",
+        "kind": "claim",
+        "entityId": "e-dave-legion-1",
+        "sectorId": "ember-hollow",
+        "reason": null
+      }
+    ]
+  },
+  {
+    "turn": 4,
+    "stateHash": "a4011b033a86805ee1ed0b47baea745bd64829e5ce619d46957f01940d04630c",
+    "phases": [
+      "Reveal",
+      "Movement",
+      "Production",
+      "Pressure",
+      "Intel"
+    ],
+    "entries": [
+      {
+        "sectorId": "ash-waste",
+        "phase": "Movement",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.runway:17"
+      },
+      {
+        "sectorId": "ash-waste",
+        "phase": "Movement",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "arrival:ash-waste"
+      },
+      {
+        "sectorId": "ash-waste",
+        "phase": "Movement",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "halt:zoc:ash-waste"
+      },
+      {
+        "sectorId": "ash-waste",
+        "phase": "Movement",
+        "kind": "battle",
+        "subject": "t5:sector:ash-waste:e-dave-legion-1|e-wild-pack-1",
+        "detail": "sector:ash-waste:e-wild-pack-1"
+      },
+      {
+        "sectorId": "homeworld",
+        "phase": "Production",
+        "kind": "event",
+        "subject": "homeworld",
+        "detail": "loam.overflow:50"
+      },
+      {
+        "sectorId": "ash-waste",
+        "phase": "Pressure",
+        "kind": "event",
+        "subject": "e-dave-legion-1",
+        "detail": "legion.burn:30"
+      }
+    ],
+    "commands": [
+      {
+        "commanderId": "dave",
+        "commandId": "c4",
+        "kind": "move",
+        "entityId": "e-dave-legion-1",
+        "sectorId": null,
+        "reason": null
+      }
+    ]
+  },
+  {
+    "turn": 5,
+    "stateHash": "ba56420a62b2150e709673c78eee56dee4b7c05ee8fc0d3f4c7d6c14071d40f6",
+    "phases": [
+      "Reveal",
+      "Movement",
+      "Production"
+    ],
+    "entries": [
+      {
+        "sectorId": "ash-waste",
+        "phase": "Movement",
+        "kind": "battle",
+        "subject": "t6:sector:ash-waste:e-dave-legion-1|e-wild-pack-1",
+        "detail": "sector:ash-waste:e-wild-pack-1"
+      },
+      {
+        "sectorId": "homeworld",
+        "phase": "Production",
+        "kind": "event",
+        "subject": "homeworld",
+        "detail": "loam.overflow:50"
+      }
+    ],
+    "commands": []
+  }
+]

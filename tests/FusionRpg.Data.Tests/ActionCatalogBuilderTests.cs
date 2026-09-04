@@ -44,6 +44,7 @@ public class ActionCatalogBuilderTests : IDisposable
             FamilyId = "atom." + actionId.Replace('.', '-'),
             Variant = "",
             Tier = 1,
+            Name = actionId,
             ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":1}",
         });
         Assert.True(atomResult.IsOk, atomResult.ToString());
@@ -121,6 +122,7 @@ public class ActionCatalogBuilderTests : IDisposable
             FamilyId = "atom." + actionId.Replace('.', '-'),
             Variant = "",
             Tier = 1,
+            Name = actionId,
             ParamsJson = $$"""{"channel":"maxHp","op":"flat","amount":{{amount}}}""",
         });
         Assert.True(atomResult.IsOk, atomResult.ToString());

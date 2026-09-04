@@ -89,9 +89,23 @@ STRUCTURAL_WORD = re.compile(
 # an explicit decision"), it never edits this constant directly. Matched via BALANCE_WORD's
 # "tier"/"level"/"band" — real per-family balance data (`sharePermille`) lives in
 # `tier-bands.v1.json`, read at runtime by the same module, not as a `const` here.
+# `TurnReadiness.SpeedScale` (battle-timeline T14/B28, 2026-09-04) is the readiness formula's UNIT OF
+# MEASURE, and it matches BALANCE_WORD purely on the substring "scale" — the same accidental-substring
+# class the two entries above are here for. "Scale" in BALANCE_WORD means a multiplier a balance pass
+# turns up; here it means the scale numbers are *expressed in*. TicksFor computes
+# `work × SpeedScale / rate` where the work supplied and the rate compared are in these same units, so
+# changing it scales numerator and denominator together and cancels: nobody gets faster, the timeline is
+# merely described at a different granularity. The half of that constant that IS a balance dial was
+# split out in the same change and moved to config as derived-stats' `turnDefaultSpeed` — so exempting
+# this name hides nothing, because the tunable half is no longer in code at all.
 EXEMPT_NAMES = {
     "KindShieldUpkeep", "UpkeepPeriodTicks", "MaxTier", "MinTier",
     "TierCount", "ReferenceLevel", "BandFloorPermille", "BandCeilingPermille",
+    "SpeedScale",
+    # 2026-09-04: an ARRAY LENGTH — `new MeshRenderer?[MaxStatusTokens]` in ActorHudPool. §1 exempts
+    # buffers by name; STRUCTURAL_WORD just does not happen to carry "token". Changing it does not
+    # change how the game feels, it changes how many renderers the pool allocates.
+    "MaxStatusTokens",
 }
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}

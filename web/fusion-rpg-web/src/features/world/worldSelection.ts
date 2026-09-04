@@ -8,13 +8,40 @@ import type { WorldGraph } from "./worldViewModel";
  * canvas, and it is the same rule the engine applies, so a refusal is never a surprise.
  */
 
+/**
+ * `world-stage` W66: widened from three kinds to eight, matching `WorldCommand.All`'s own live
+ * vocabulary (`WorldCommand.cs:53-54`) at the time this task was built — `stand-fast`, `stance`
+ * (with its `stance` posture field), `sustain` (with `amount`), `build` (with `structureId` and
+ * `slotIndex`), alongside the original `move`/`clear`/`claim`. **`ward` is the one member that is
+ * type-complete but unreachable today**: the task this widening was planned against names it as a
+ * lane-scoped order, but `WorldCommand.cs:44-49`'s own comment is explicit that `ward` — raising a
+ * lane's `WardLevel` — "names the still-unbuilt lane action" and is deliberately distinct from the
+ * real, already-shipped `bind-warden` (a sector order). No `WorldCommandAdmission.cs` case exists
+ * for it, so a `ward`-kind order would always be refused as an unknown kind if actually filed —
+ * the type accepts it (and `toRequests` maps its `laneId` faithfully) so the queue's own shape is
+ * ready the day the engine catches up, but nothing in this program's UI produces one yet, matching
+ * the same "never draw a verb the vocabulary lacks" rule the cede embargo (W59/W60) established.
+ * `cede` and `bind-warden` (also real commands today, `world-commands` W24/W28) are deliberately
+ * **not** added here: both act immediately rather than joining a march-style queue a player reviews
+ * before committing, so they don't fit `PendingOrder`'s own shape — a scope boundary, not an
+ * oversight.
+ */
 export type PendingOrder = {
   commandId: string;
-  kind: "move" | "clear" | "claim";
+  kind: "move" | "clear" | "claim" | "stand-fast" | "stance" | "sustain" | "build" | "ward";
   entityId: string;
   sectorId?: string;
   slotIndex?: number;
   lanePath?: string[];
+  /** `stance`'s posture — march, scout, hold, or dowse (`world-commands` W30). */
+  stance?: string;
+  /** `sustain`'s whole-loam spend — `long` end to end per W22, never a narrower type. */
+  amount?: number;
+  /** `build`'s structure choice. */
+  structureId?: string;
+  /** `ward`'s target — a lane, not a sector (see the module comment on why this kind is unreachable
+   * today even though the field round-trips). */
+  laneId?: string;
   /** What the order does, in one line, for the queue list. */
   label: string;
 };
@@ -41,7 +68,13 @@ export const initialWorldUi: WorldUiState = {
 export function worldUiReducer(state: WorldUiState, action: WorldUiAction): WorldUiState {
   switch (action.type) {
     case "select-sector":
-      return { ...state, selectedSectorId: action.sectorId };
+      // world-stage W65: clicking the already-selected sector again deselects it — a real dispatch
+      // of `select-sector: null` this reducer never had, not merely the caller passing `null`
+      // explicitly (Esc/right-click/✕ do that already). A `null` action always deselects outright.
+      return {
+        ...state,
+        selectedSectorId: action.sectorId != null && action.sectorId === state.selectedSectorId ? null : action.sectorId
+      };
     case "select-entity":
       return { ...state, selectedEntityId: action.entityId };
     case "queue": {
@@ -61,7 +94,16 @@ export function worldUiReducer(state: WorldUiState, action: WorldUiAction): Worl
   }
 }
 
-/** Wire shape for the whole queue — the exact payload `POST /commands` expects. */
+/**
+ * Wire shape for the whole queue — the exact payload `POST /commands` expects. Every field the
+ * engine actually reads for one of the eight kinds round-trips (`stance`/`amount`/`structureId`,
+ * `world-stage` W66) — a field the queue carries and the wire drops is lost silently, which is
+ * exactly how `stance` was found missing the first time. `laneId` (`ward`'s own target) has no
+ * wire counterpart at all yet — `WorldCommandRequest` carries no `LaneId` field, matching `ward`
+ * having no admission arm either — so it is deliberately not mapped here; a `ward` order files as
+ * `kind: "ward"` alone and is refused as an unknown kind, honestly, rather than smuggled onto a
+ * field (like `sectorId`) that means something else.
+ */
 export function toRequests(pending: PendingOrder[]): WorldCommandRequest[] {
   return pending.map((order) => ({
     commandId: order.commandId,
@@ -69,7 +111,10 @@ export function toRequests(pending: PendingOrder[]): WorldCommandRequest[] {
     entityId: order.entityId,
     sectorId: order.sectorId ?? null,
     slotIndex: order.slotIndex ?? null,
-    lanePath: order.lanePath ?? []
+    lanePath: order.lanePath ?? [],
+    stance: order.stance ?? null,
+    amount: order.amount ?? null,
+    structureId: order.structureId ?? null
   }));
 }
 
@@ -155,4 +200,26 @@ export function routeForLegion(
 /** A stable, readable id for an order — unique per commander per turn, which is what the store keys on. */
 export function orderId(turn: number, kind: string, entityId: string): string {
   return `t${turn}-${kind}-${entityId}`;
+}
+
+/**
+ * Every sector a legion could actually file a march toward, keyed to the real route length in lane
+ * hops (`world-stage` W71) — the input `RangeOverlay` (W69) needs to draw a legion's own reachable
+ * set, the same "solid ring plus its hop number" grammar the build verbs already use, just fed a
+ * different source.
+ *
+ * Deliberately **not** a second BFS: it walks `graph.nodes` and calls `routeForLegion` for each one,
+ * so the "resume from the current lane" rule for a mid-march legion — the entire reason
+ * `routeForLegion` exists rather than a plain `routeBetween` — is honoured for free instead of
+ * re-derived and risking the two falling out of sync. The legion's own sector (or, mid-march, no
+ * sector is "its own" at all) never appears in the map, because `routeForLegion` already refuses a
+ * route to where the legion stands — which is exactly right: standing still is not a march order.
+ */
+export function reachableFromLegion(graph: WorldGraph, legion: WorldEntityDto): Map<string, number> {
+  const distances = new Map<string, number>();
+  for (const node of graph.nodes) {
+    const path = routeForLegion(graph, legion, node.id);
+    if (path) distances.set(node.id, path.length);
+  }
+  return distances;
 }

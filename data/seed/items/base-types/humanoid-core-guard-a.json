@@ -36,7 +36,7 @@
       "socketMax": 0,
       "iconKey": "icon.base.quilted-vest",
       "flavorKey": "flavor.base.quilted-vest",
-      "flavor": "Stitched and padded for comfort. The quilting catches everything\u2014wind, warmth, and worry.",
+      "flavor": "Stitched and padded for comfort. The quilting catches everything—wind, warmth, and worry.",
       "tags": [
         "light",
         "organic",
@@ -69,7 +69,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.spun-shirt",
       "flavorKey": "flavor.base.spun-shirt",
       "flavor": "Woven on a wheel and worn by someone before you. The seams know their job.",
@@ -105,10 +105,10 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.woven-jersey",
       "flavorKey": "flavor.base.woven-jersey",
-      "flavor": "Knitted tight, worn soft. The weave holds the body together\u2014literally and metaphorically.",
+      "flavor": "Knitted tight, worn soft. The weave holds the body together—literally and metaphorically.",
       "tags": [
         "light",
         "organic",
@@ -138,10 +138,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.secondhand-apron",
       "flavorKey": "flavor.base.secondhand-apron",
       "flavor": "Someone else's work garment. The stains are old; the wear is familiar.",
@@ -175,7 +175,7 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.mending",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -251,7 +251,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.boiled-raincoat",
       "flavorKey": "flavor.base.boiled-raincoat",
       "flavor": "Leather treated to shed water and wounds alike. It heals its own cracks before they reach you.",
@@ -321,10 +321,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.supple-jumpsuit",
       "flavorKey": "flavor.base.supple-jumpsuit",
       "flavor": "Leather soft enough to move in, stiff enough to stand against. One piece covers everything.",
@@ -357,10 +357,10 @@
       "class": "leather",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.threadbare-harness",
       "flavorKey": "flavor.base.threadbare-harness",
       "flavor": "Worn leather straps, repurposed and buckled. Thin enough to feel your breath, strong enough to catch your fall.",
@@ -394,10 +394,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.regeneration",
+        "family": "atom.mending",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.frayed-crate",
       "flavorKey": "flavor.base.frayed-crate",
       "flavor": "Wood slats wrapped in fabric and tied to your middle. Ridiculous, but it holds together.",
@@ -431,10 +431,10 @@
       "class": "cloth",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.vitality",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.hemmed-cage",
       "flavorKey": "flavor.base.hemmed-cage",
       "flavor": "A cage for the chest, padded at the seams. Built to trap harm before it reaches you.",

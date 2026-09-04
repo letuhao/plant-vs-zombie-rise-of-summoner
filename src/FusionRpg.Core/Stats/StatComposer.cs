@@ -64,6 +64,20 @@ public sealed class StatComposer
                     AttackInterval = baseline.AttackInterval,
                     ProduceInterval = baseline.ProduceInterval,
                     ZombieSpeed = baseline.ZombieSpeed,
+                    // E38: no composition to do with scales off and no Override present — same
+                    // pass-through as every other channel above.
+                    PlantShield = baseline.PlantShield,
+                    AttackCountdown = baseline.AttackCountdown,
+                    AttackSpeedAdder = baseline.AttackSpeedAdder,
+                    ProduceCountdown = baseline.ProduceCountdown,
+                    PlantSpeed = baseline.PlantSpeed,
+                    PlantMoveSpeed = baseline.PlantMoveSpeed,
+                    PlantLevel = baseline.PlantLevel,
+                    ShootingLevel = baseline.ShootingLevel,
+                    ArmorFlat = baseline.ArmorFlat,
+                    TakeDmgMultiplier = baseline.TakeDmgMultiplier,
+                    ZombieSpeedCurrent = baseline.ZombieSpeedCurrent,
+                    ZombieOriginSpeed = baseline.ZombieOriginSpeed,
                     Contributions = all
                 };
             }
@@ -90,6 +104,24 @@ public sealed class StatComposer
         double Interval(string channel, double y0) =>
             Real(channel, y0, StatChannels.MinimumInterval);
 
+        // E38 (spec-entity-fields-12plus.md): deliberately NOT `Real`/`Interval` — those treat a
+        // zero baseline as "this entity has no such stat", true for E16's three (each captured on
+        // only one side of the entity model, so the wrong-side baseline is always a C# default
+        // zero). All twelve of E38's channels are captured from a genuine live field on THEIR OWN
+        // side (EntityApply.cs's plant/zombie baseline construction), so a zero baseline is an
+        // ordinary value — "no shield right now", "no attack-speed adder applied" — and skipping
+        // composition on it would make the channel uncomposable for the common case, not merely
+        // inert for an absent one.
+        double RealAlways(string channel, double y0, double min) =>
+            Math.Max(min, _strategy.ComposeChannel(y0, all.Where(m => m.Channel == channel)));
+
+        // attackCountdown/produceCountdown share the interval floor's structural reason (driven to
+        // zero or below is the same divide-by-zero / infinite-fire-rate risk an interval has) but
+        // not `Interval`'s absent-baseline skip — a firing plant's countdown legitimately reads 0
+        // mid-cycle, and that must still compose.
+        double IntervalAlways(string channel, double y0) =>
+            RealAlways(channel, y0, StatChannels.MinimumInterval);
+
         ComposeDefense(all, out var defPct, out var defFlat);
 
         return new EntityFinal
@@ -106,6 +138,30 @@ public sealed class StatComposer
             AttackInterval = Interval(StatChannels.AttackInterval, baseline.AttackInterval),
             ProduceInterval = Interval(StatChannels.ProduceInterval, baseline.ProduceInterval),
             ZombieSpeed = Real(StatChannels.ZombieSpeed, baseline.ZombieSpeed, min: 0),
+
+            // E38's twelve. Magnitudes go through the same long `Chan` every other magnitude channel
+            // uses; ratios/timers go through `RealAlways`/`IntervalAlways` above (never `Real`/
+            // `Interval` — see those helpers' own doc comments). Plant speed/move-speed mirror
+            // `zombieSpeed`'s existing `Real` shape exactly: most plants never move, so a zero
+            // baseline there genuinely does mean "this plant has no such stat" the same way E16's
+            // three do.
+            PlantShield = Chan(StatChannels.PlantShield, baseline.PlantShield, min: 0),
+            AttackCountdown = IntervalAlways(StatChannels.AttackCountdown, baseline.AttackCountdown),
+            // Unguarded by design (§2b, decided 2026-09-03): an adder is a signed delta, so it gets
+            // no floor at all — not even zero. A negative value is ordinary content here, unlike the
+            // countdowns above (which cannot be negative) or the speeds (which freeze at zero).
+            AttackSpeedAdder = RealAlways(
+                StatChannels.AttackSpeedAdder, baseline.AttackSpeedAdder, min: double.NegativeInfinity),
+            ProduceCountdown = IntervalAlways(StatChannels.ProduceCountdown, baseline.ProduceCountdown),
+            PlantSpeed = Real(StatChannels.PlantSpeed, baseline.PlantSpeed, min: 0),
+            PlantMoveSpeed = Real(StatChannels.PlantMoveSpeed, baseline.PlantMoveSpeed, min: 0),
+            PlantLevel = Chan(StatChannels.PlantLevel, baseline.PlantLevel, min: 0),
+            ShootingLevel = Chan(StatChannels.ShootingLevel, baseline.ShootingLevel, min: 0),
+            ArmorFlat = RealAlways(StatChannels.ArmorFlat, baseline.ArmorFlat, min: 0),
+            TakeDmgMultiplier = RealAlways(StatChannels.TakeDmgMultiplier, baseline.TakeDmgMultiplier, min: 0),
+            ZombieSpeedCurrent = Real(StatChannels.ZombieSpeedCurrent, baseline.ZombieSpeedCurrent, min: 0),
+            ZombieOriginSpeed = Real(StatChannels.ZombieOriginSpeed, baseline.ZombieOriginSpeed, min: 0),
+
             Contributions = bag.All
         };
     }

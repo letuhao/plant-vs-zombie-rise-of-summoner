@@ -1,8 +1,9 @@
 namespace FusionRpg.Core.World;
 
 /// <summary>
-/// The fourteen creation rules (spec-world-model.md §Creation and validation). A malformed world
-/// must never reach the turn engine, so this throws loudly at the gate rather than returning a flag.
+/// The sixteen creation rules (spec-world-model.md §Creation and validation; 15-16 added
+/// spec-sector-development.md W44). A malformed world must never reach the turn engine, so this
+/// throws loudly at the gate rather than returning a flag.
 /// </summary>
 public static class WorldValidation
 {
@@ -36,6 +37,8 @@ public static class WorldValidation
         Rule12HandicapBounded(world);
         Rule13TemplateSizeMatchesItsDeclaredTier(world);
         Rule14StructureSlotKindMatches(world);
+        Rule15RecruitStockNonNegative(world);
+        Rule16ProjectTurnsRemainingNeedsAProjectId(world);
         return world;
     }
 
@@ -374,5 +377,25 @@ public static class WorldValidation
                         $"Sector '{s.SectorId}' slot {slot.SlotIndex} ({slotKind}) cannot carry structure " +
                         $"'{slot.StructureId}', which requires {structure.RequiredSlotKind}.");
             }
+    }
+
+    /// <summary>Same shape as <see cref="Rule10LoamStockNonNegative"/>, one level up — a stock, never a debt.</summary>
+    static void Rule15RecruitStockNonNegative(WorldState w)
+    {
+        foreach (var s in w.Sectors)
+            if (s.RecruitStock < 0)
+                throw new InvalidOperationException($"Sector '{s.SectorId}' has negative recruit stock {s.RecruitStock}.");
+    }
+
+    /// <summary>
+    /// Mirrors `WorldSlot`'s own `ConstructionTurnsRemaining`/`StructureId` pairing, one level up —
+    /// a turns-remaining count with nothing it is counting down is a malformed world, not content.
+    /// </summary>
+    static void Rule16ProjectTurnsRemainingNeedsAProjectId(WorldState w)
+    {
+        foreach (var s in w.Sectors)
+            if (s.ProjectTurnsRemaining is not null && s.ProjectId is null)
+                throw new InvalidOperationException(
+                    $"Sector '{s.SectorId}' has ProjectTurnsRemaining {s.ProjectTurnsRemaining} with no ProjectId.");
     }
 }

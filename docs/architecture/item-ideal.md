@@ -5,7 +5,7 @@
 [item-map.md](item-map.md).** Discussion document, not a spec and not a plan. No build is
 authorized from it.
 
-> ✅ **See §2b and §2f; §2g is what is open.** **Twenty-nine owner rulings (D1–D29)** plus four resolved
+> ✅ **See §2b and §2f; §2g is what is open.** **Forty-one owner rulings (D1–D41)** plus four resolved
 > by recommendation, and **D16 ratifies the ~110 lane-internal picks as a batch.** All 144 open questions
 > across the seventeen lanes and four decision documents are accounted for, and **§2e verifies the three
 > defect claims that had stood unverified since 2026-08-22** (one was real and has since been fixed by
@@ -1352,16 +1352,89 @@ reach level 32, which is **X5**.
 
 ## 2g. What is open after the audit (2026-09-03)
 
-**Twenty-nine rulings, four recommendations, D16's batch ratification, §2e's five verifications and
+**Forty-one rulings, four recommendations, D16's batch ratification, §2e's five verifications and
 §2f's six corrections.** What remains, honestly.
 
-### Needs a decision — three
+### ~~Needs a decision~~ — ✅ **all cleared 2026-09-04 (D30–D35)**
+
+| ~~0c~~ | ✅ **RESOLVED 2026-09-04 — a shrinking soft cap, recorded identically in both specs.** `gain(n) = enhance_cap(rung) × n/(n+K)`; `enhance_cap` is re-specified from a `+X` ceiling to a **‰ gain asymptote**, so SC7 gains a live consumer and nothing is ever forbidden. Original: ⛔ **Two specs assert incompatible tests over `enhance_cap` — whichever ships second turns the other red** | Module 7 registers `enhance_cap_gain_never_exceeds_one_rung_step_at_any_rung` as a **HARD** constraint (`spec-rarity-bands.md:292`), because the measured ladder inverts at the top — a maxed `firstseed` clears a natural `almanac`. Module 15 **removes** the cap and asserts `no_enhancement_cap_is_a_hard_stop` (`spec-enhance-reroll.md:137,342`), correctly citing `AGENTS.md`'s no-hard-ceilings rule. **Both are right about their own half.** ⭐ **Recommended resolution: a shrinking *soft* cap** — enhancement gain follows a curve that **asymptotes below** one rung step instead of stopping at it. Nothing is ever forbidden (D7, no-ceilings) and the ladder still cannot invert. One tuning curve, and both tests are rewritten against it |
+
 
 | # | Open | Why |
 |---|---|---|
-| **0a** | ⛔ **D3's twelve-role core contradicts three shipped sources, one of which gates CI — and correcting them turns 18 of 30 shipped sets RED** | `_registry/core.v1.json` marks **`ward-array` + `jewel-minor-b`** `hybridEligible: false` (13 roles, 895‰); `adapters/items/registries.py:111` hardcodes the same pair; `metrics/linkage.py:28` `NON_HYBRID_ROLES` does too and feeds a **gating** metric. D3 drops **three** roles (12, 800‰). **Measured, not predicted:** the check is clean today and goes to **18 findings** when corrected to D3. Either re-author 18 sets, or revisit which roles D3 drops. `core.v1.json` is `"frozen": true`, so either path is a `registryVersion 2` |
-| **0b** | **Craft pity: scope `ssot-rarity` §3.8 to *drop* pity** | §3.8 forbids pity keying on tier because §3.5's overlap invariant was **measured on independent draws** (2×10⁵ rolls, seed 20260822); D7 requires tier pity. Resolution: craft pity is a counter that **places** the tier at threshold rather than rolling it — the weighted draw never runs, so the measurement stands. One-line scope edit, module 7's. **If declined, D7 is unimplementable on the tier axis** |
-| **1** | **Does a content patch retune items players already own?** | D9's fix leaves the runtime reading the **live catalog**, so a balance change moves owned items. Recorded as deliberate; reverse it by making `ValuesJson` authoritative at bind time. A product call, not a defect |
+| ~~**0a**~~ | ✅ **RESOLVED — D30. Fix the shipped source; D3 wins.** Original: ⛔ **D3's twelve-role core contradicts three shipped sources, one of which gates CI — and correcting them turns 18 of 30 shipped sets RED** | `_registry/core.v1.json` marks **`ward-array` + `jewel-minor-b`** `hybridEligible: false` (13 roles, 895‰); `adapters/items/registries.py:111` hardcodes the same pair; `metrics/linkage.py:28` `NON_HYBRID_ROLES` does too and feeds a **gating** metric. D3 drops **three** roles (12, 800‰). **Measured, not predicted:** the check is clean today and goes to **18 findings** when corrected to D3. Either re-author 18 sets, or revisit which roles D3 drops. `core.v1.json` is `"frozen": true`, so either path is a `registryVersion 2` |
+| ~~**0b**~~ | ✅ **RESOLVED — D31. Make the edit, and land it before D7.** Original: **Craft pity: scope `ssot-rarity` §3.8 to *drop* pity** | §3.8 forbids pity keying on tier because §3.5's overlap invariant was **measured on independent draws** (2×10⁵ rolls, seed 20260822); D7 requires tier pity. Resolution: craft pity is a counter that **places** the tier at threshold rather than rolling it — the weighted draw never runs, so the measurement stands. One-line scope edit, module 7's. **If declined, D7 is unimplementable on the tier axis** |
+| ~~**1**~~ | ✅ **RESOLVED — D32. Yes; the runtime keeps reading the live catalog.** Original: **Does a content patch retune items players already own?** | D9's fix leaves the runtime reading the **live catalog**, so a balance change moves owned items. Recorded as deliberate; reverse it by making `ValuesJson` authoritative at bind time. A product call, not a defect |
+
+### ✅ Cleared 2026-09-04 — owner rulings D30–D34
+
+**Two of the five questions were malformed, and the owner rejected the premise rather than the option.**
+Both rejections are the same mistake on my part and it is recorded here so it is not repeated:
+**`data/seed/demons/_registry/themes.v1.json` holds 84 species; `data/seed/demons/species/` holds 386**
+(292 plant + 94 zombie, counted 2026-09-04). The registry is a **stale snapshot of a generated
+population**, and the population grows every time the generator runs. Any proportion computed over it
+is fiction.
+
+> ⛔ **Standing rule from this round: never derive a design proportion from a registry snapshot of a
+> generated corpus.** Count the corpus, or do not quote a proportion. I built a frame classification
+> over the 84 and reported *"hybrids are 6% of the population"* as an input to D30 — it was garbage,
+> and it was garbage in the direction that made the cheap answer look right.
+
+| id | Ruling | Consequence |
+|---|---|---|
+| **D30** | ⭐ **D3 wins over the shipped sources — correct the source, re-author the 18 sets.** The twelve-role hybrid core (800‰) stands. The counter-proposal (keep the shipped thirteen at 895‰) was built on the fake 6% figure and is withdrawn with it | `_registry/core.v1.json` → `registryVersion 2` (the same v2 bump module 6 needs for D35, so **one pass, not two**); `adapters/items/registries.py:111` and `metrics/linkage.py:28` `NON_HYBRID_ROLES` corrected; 18 of 30 sets re-authored; D3's prose corrected from *"both jewels"* (eleven) to the twelve |
+| **D31** | **Scope `ssot-rarity` §3.8 to *drop* pity — and land it before D7.** Craft pity **places** the tier at threshold; the weighted draw never runs, so §3.5's overlap invariant (2×10⁵ rolls, seed 20260822) stands unmeasured-against | Ordering constraint on module 7: the §3.8 scope edit is a **predecessor** of D7's tier pity, not a co-delivery. D7 is unimplementable on the tier axis until it lands |
+| **D32** | **A content patch does retune items players already own.** The runtime keeps reading the live catalog | Module 1's R2 fix stays as specced — per-atom compatibility, no freeze of `ValuesJson` at bind. §2g #1 closes as *deliberate*, not *deferred* |
+| **D33** | ⭐ **Both halves.** (a) Charms bind at **actor** scope, not `player:`. (b) **The absence of an atom-level apply scope is an architecture defect**, filed against `buff-debuff-scope` — see §2g.1 below | (a) unblocks module 12 with no cross-program dependency; (b) is a real defect with a real owner, not an item-program workaround |
+| **D35** | ⭐ **Unfreeze and re-derive `classes.v1.json` — `registryVersion 4`.** Lift the 32-family global exclusion whose stated reason (*"quarantined None/None/None (D6); no executor until E12"*) expired when `AtomKindRegistry.cs:255` shipped `Full/Full/None`; refill the **five** stopgap slates from each role's real §2.3 cluster; add the directional-profile field the entry shape lacks. **Author base types after, never before** | **One pass with D30's `core.v1.json` v2** — the regeneration that re-authors the 18 legacy sets is the regeneration that re-slates against the lifted quarantine. ⚠ Five stopgap roles, not four: `footing` was missed by the registry's own `_meta.designNotes` and by §2g's BLOCKING block below |
+| **D34** | **`basis = "name"` is not a constraint to design around — it is missing data, and the pipeline generates data.** The LLM stage writes the name and flavour text, exactly as the demon-species and action generators already do. There is no *"Ask first"* to answer because there is no name-basis theme left once the stage runs | Two follow-ups, both seedsmith's: **(i)** a theme-enrichment stage that raises `basis: name` → `basis: text`; **(ii)** ⛔ **`themes.v1.json` is stale at 84 against 386 shipped species** — a separate defect, and the one that made §2g #9d look like a product question |
+
+### 2g.1 ⛔ D33(b) — there is no atom-level apply scope, and that is the defect
+
+**Two parallel scope systems ship today, and only one of them knows what an atom is.**
+
+| | `ScopeCompatibility` | `StatApplyScope` |
+|---|---|---|
+| Where | `src/FusionRpg.Core/Scope/ScopeCompatibility.cs` | `src/FusionRpg.Core/Stats/StatApplyScope.cs` |
+| Key | **`(AtomKindId, WhereScope, WhoKind, ScopeHost, Channel)`** | a **string grammar** — `match` \| `plant:N` \| `zombie:N` \| `entity:HEX` \| `player:{id}` |
+| Atom dimension | ✅ the primary key | ⛔ **none at all** |
+| Unknown combination | throws `ScopeUnsupportedException` — *"an unlisted combination is not assumed safe"* | falls through to `return false`, except `player:` which **`return true`s** (`:82`) |
+
+**So an effect delivered through `StatApplyScope` never consults the atom scope model.** That is the
+rule the owner states — *every effect must apply through the atom effect runtime* — being violated by
+construction, because the type on the delivery path has no field in which the atom could appear.
+
+**`player:` is the symptom, not the disease.** It is a scope the grammar accepts and the resolver
+cannot express, so it degrades to the most permissive answer available: `:82` returns `true`
+unconditionally and `IsMatchWide` (`:92`) folds it into match-wide. `Matches` is side-aware for
+`plant:`/`zombie:` and **not** for `player:`, so a player-scoped buff reaches the zombies. Anything
+routed this way inherits the same hole.
+
+⚠ **`WhoKind` has no `Player` member either** — it is `{ Target, Type, UniqueDemon, Relation }`
+(`WhoSelector.cs:10-16`). So the fix is not *"call `ScopeCompatibility` from `StatApplyScope`"*; the
+target model does not yet express the concept. **That is the buff-debuff-scope program's call**, and
+the item program does not need it resolved: D33(a) binds charms at actor scope, which the atom model
+already supports (`stat.derived` / `Relation` / both hosts, `PerEntityGrant`).
+
+
+### ✅ Cleared 2026-09-04 (round 2) — owner rulings D36–D41
+
+| id | Ruling | Consequence |
+|---|---|---|
+| **D36** | ⛔ **`action-corpus` is out of item scope and under another owner's active construction.** *"action corpus is take care by other agent and building, it is not item scope, fix your boundary, avoid to touch other agent work."* X3 is an **ordinary external dependency**: we consume a production caller for `ActionSeeder.Generate` when one ships | `spec-granted-actions.md`'s three-option block is **struck** — two of the three proposed changes inside `action-corpus` (amending its §8 exclusion; the item program building a call site in their runtime). ⛔ **We also stop reading their map's approval state and schedule to reason about our own work** — inspection-to-infer is the same violation, quieter. Module 19 ships GA2 standalone (DDL + validator + zero rows) and waits |
+| **D37** | ⭐ **The consumable carry limit is a *belt*, not a number.** *"add bag feature like diablo belt."* Capacity is a property of an **equipped item**, earned and upgraded, not a constant | ⭐ **`girdle` already exists as one of the fifteen equip roles** — the belt slot is shipped, so this needs no sixteenth role. A `girdle` base type carries a **consumable-slot count**; better girdles carry more. Replaces `spec-consumables.md` §10.1's *"`N`, proposed 2"* — which the lane itself called *"the single most consequential number here"* — with a **content axis**, which is the answer this program prefers to a tunable everywhere else |
+| **D38** | **Drop rate is a flat 5 % per kill, for *any* item, and it is tunable.** ⚠ **The owner's own disambiguation, verbatim:** *"this is just drop rate for any item not 5% chance to drop rarity 10 item, it is different catalog."* Two independent rolls: **does anything drop** (50‰), then **what rung** (the rarity catalog's weights) | Answers §A③'s *"volume slope"* question by **removing the slope from the kill path**. `DropChanceOnKillMilli = 50` in `data/tuning/item-drop-volume.v1.json`. ⚠ **D18's `Θ`-linear volume term is not repealed** — it still governs non-kill sources (chest, boss, completion). Flagged rather than silently resolved: if the kill path should also scale with `Θ`, that is a one-line tuning change, not a redesign |
+| **D39** | ⭐ **Add `Override` to `stat.modify`'s ops.** *"add override, this is funny feature."* Damage-type conversion (*"your fire damage becomes ice"*) ships as a real capability rather than being refused | ⚠ **This deliberately overrides the standing rule** *"do not add the kind before the consumer"* (the `status.expose.*` / `stat.derived` mistake, twice). So the consumer is now **required, not optional**: `AtomKindRegistry.cs:220`'s op set grows, and the **damage applier** must exist or `Override` binds to nothing. Cross-program request to **effect-atom**, with the consumer named as part of the ask — not a kind added and left inert |
+| **D40** | **Charm carry splits to its own module 22.** The lane's honest sizing was right: five tables, a gate, five reason codes and a run-lifecycle hook is larger than the threshold evaluator it would have attached to | **The program is 22 modules, not 21.** Module 12 keeps the threshold evaluator; module 22 `charm-carry` depends on it |
+| **D41** | **Socket recipes are unordered.** *"we only need collect enough type of socket and put it to the item, if the item match condition, it will got bonus, no need order."* | A **multiset match**, which is what module 13's gate already is — `(capability, threshold-family multiset)`. Module 16 states the invariant; module 20's swap-distance machinery is sized against unordered, and the 102 combinations do not multiply by their permutations |
+
+**And the six standing recommendations were confirmed as a block** (*"all B"*): relics become
+**uniques** (module 17); the 36 build sets get a third append-only **`build.`** theme namespace; the 20
+`standard` orphan entries are **retired, not deleted** (`enabled: false`, id retired forever); the 25
+legacy socket-words are **regenerated**, not retained alongside the 102; D22's affinity bonus keys on
+**each ingredient gem's own element** (no 12→6 mapping invented); and `rpg_demon_materials` →
+`rpg_materials` proceeds — ⚠ **nine** SQL sites across five files, not the four I9 §6.4 claims.
+
 
 ### Needs another program — four
 
@@ -1380,15 +1453,20 @@ reach level 32, which is **X5**.
 | 7 | **Re-issue `socket_max` against I2's fifteen role ids** | The lane's table uses the **old twelve** (`core-protective`, `sense-utility`…) and assigns nothing to `ward-array`, `infusion`, `retinue` — two of which are in the hybrid core |
 | 8 | ~~**A per-actor Strain/Splice cap**~~ ⚠ **premise was stale — corrected 2026-09-04** | I claimed *"twelve Splices on one actor is legal"* against the **old** `socket_max` table. With D20's 4-ingredient fix and the re-issued 15-role table, **only `armament-primary` and `core-guard` reach 4 sockets — the real ceiling is 2 per actor.** A tunable ships at 3 as a non-binding backstop |
 | 9 | **Price `socket.imbue`** | I9 §7.4's table has nine operations and no row for it. Band-linear, like `bore` |
-| **9b** | ⛔ **A `player:`-scoped charm buffs the zombies** | `ssot-charms.md` §3.1 binds resonance at `player:{id}`; `StatApplyScope.cs:81-82` degrades that to match-wide and `:52-53` matches **both sides**. The charm-carry consumer is blocked on an owner decision about scope; module 12's evaluator ships scope-parametric so it is not blocked with it |
+| ~~**9b**~~ | ✅ **RESOLVED — D33, both halves.** Original: ⛔ **A `player:`-scoped charm buffs the zombies** | `ssot-charms.md` §3.1 binds resonance at `player:{id}`; `StatApplyScope.cs:81-82` degrades that to match-wide and `:52-53` matches **both sides**. The charm-carry consumer is blocked on an owner decision about scope; module 12's evaluator ships scope-parametric so it is not blocked with it |
 | **9c** | **Two id defects that would ship broken** | `set` *requires* `themeKey` (`kinds.py:62-65`) but the 36 **build** sets belong to no species — they need a third `build.*` population. And `naming.v1.json`'s `set.{themeId}-{seq:03}` over a demon `themeKey` yields `set.demon.allpeater-001` — **two dots, ungrammatical**. Ids must key on `speciesId` (all 84 verified kebab-legal) |
-| **9d** | **31 of 84 published themes are `basis = "name"`** | `spec-demon-themes.md` §7 makes generating from a name-basis theme an **Ask first**. That is **37%** of the species population, not an edge case — module 13 needs a standing answer, not a per-run one |
+| ~~**9d**~~ | ✅ **RESOLVED — D34. Wrong question: generate the missing basis.** Original: **31 of 84 published themes are `basis = "name"`** | `spec-demon-themes.md` §7 makes generating from a name-basis theme an **Ask first**. That is **37%** of the species population, not an edge case — module 13 needs a standing answer, not a per-run one |
 | 10 | **Two `ssot-rarity` §3.3 rows do not sum to their published band** | `sprout` 1–2 vs halves 0–2; `heirloom` 3–4 vs halves 4–4. Cheap now, a migration after module 7 seeds |
 | **11** | ⭐ **D27 renames every combination container id** | `definitions.md` §1 forces the `container_id` prefix to match the kind, so `gem.combo-pure-fire-3` → **`combo.pure-fire-3`**. Traced 2026-09-04 while speccing module 16 — a consequence of D27 nobody had followed through |
 | **12** | **`pool_rolls` does not exist anywhere in code** | Both `ContainerRow` and `RarityRow` carry `PrefixRolls`/`SuffixRolls`, and `Instantiator.Draw` runs `DrawBudget` **twice**. **I7's whole `T` / `K = pool_rolls − T` algebra is written against a field that is not there** — restated per budget in module 15. ⭐ It also *dissolves* the two-sources-of-truth hazard I7 handed to I1 |
 | **13** | **I9 §6.4 understates the `rpg_demon_materials` rename** | It claims *"four SQL sites — grep-verified, that is the complete list."* There are **nine**, across five files, including `Migrations/ShardRungs.cs`, which post-dates the lane. Still ask-first, still unscheduled |
 
-### ⛔ BLOCKING — found 2026-09-04 while speccing module 6
+### ✅ ~~BLOCKING~~ — RESOLVED by D35 (2026-09-04); found while speccing module 6
+
+> ✅ **D35 rules the path: unfreeze, re-derive at `registryVersion 4`, then author.** The analysis below
+> stands unchanged — it is *why* — with one correction: **five roles sit on stopgap slates, not four.**
+> `footing` carries a 2-family slate alongside `ward-array`, `head-guard`, `sense` (2 each) and `mantle`
+> (3). Counted against `implicitSlates` 2026-09-04.
 
 **D11 is not expressible today, and the shipped corpus actively violates it.** D11 is the correctness
 condition D3's whole hybrid design rests on; measured against the 740-entry base-type corpus:
@@ -1397,7 +1475,7 @@ condition D3's whole hybrid design rests on; measured against the 740-entry base
 |---|---|
 | **In 14 of 16 roles the humanoid and plant implicit-family sets are IDENTICAL** | measured across the corpus; the two exceptions differ by one family each |
 | **There is no field for a directional stat profile at all** | `seed-contract.md:324-343`, `adapters/items/kinds.py:49-51` |
-| **Root cause: a stale quarantine baked into a frozen registry.** `_registry/classes.v1.json` (`registryVersion: 3`, `frozen: true`) excludes **32 families** from every implicit slate, citing *"`stat.derived` — quarantined None/None/None (D6); no executor until E12"* | ✅ **The quarantine lifted** — `AtomKindRegistry.cs:255` ships `Full/Full/None` (§2a B1). Four roles (`ward-array`, `mantle`, `head-guard`, `sense`) sit on frame-blind *"stopgap slates"* as a direct consequence — which is precisely why their implicit sets match across frames |
+| **Root cause: a stale quarantine baked into a frozen registry.** `_registry/classes.v1.json` (`registryVersion: 3`, `frozen: true`) excludes **32 families** from every implicit slate, citing *"`stat.derived` — quarantined None/None/None (D6); no executor until E12"* | ✅ **The quarantine lifted** — `AtomKindRegistry.cs:255` ships `Full/Full/None` (§2a B1). **Five** roles (`ward-array`, `mantle`, `head-guard`, `sense`, `footing`) sit on frame-blind *"stopgap slates"* as a direct consequence — which is precisely why their implicit sets match across frames |
 | `ssot-affixes.md` §4.9 and §9.14 are stale for the same reason | same lifted quarantine |
 | ⚠ **`_registry/core.v1.json` (frozen) contradicts D3 on the hybrid core** — it drops `ward-array` + `jewel-minor-b` (13 roles, 105‰); D3 drops three (12 roles, 200‰) | the ruling wins; the registry needs a v2 |
 | ⚠ **`socketMax` tops out at 2 in the corpus** while D20 fixes the Splice ingredient count at **4** | no existing base type can host a Splice |
@@ -1424,6 +1502,87 @@ question and cannot be answered until it runs.
 is cheapest in the lightest roles, so 6/6 costs ~230‰ of a 800‰ body rather than half of it. Weighting
 the minority count by `budget_permille` makes D3's stated mechanism true. **D11's correlated-directionality
 amendment (§2f.2) is the other half of the same fix.**
+
+---
+
+## 2h. Spec-audit round — seven auditors over 21 specs (2026-09-04)
+
+| Axis | Result |
+|---|---|
+| **Coverage** | **144 / 171** mechanisms — 26/29 rulings, 98/121 lane mechanisms, 20/21 open items. **11 outright gaps** |
+| **Consistency** | **32 / 46** pairwise comparisons clean. *"More coherent than a six-author parallel session has any right to be"* |
+| **Buildability** | **5 of 21** buildable now; 2 underspecified; 14 blocked — **10 on a decision**, 4 on another program |
+| **Code claims** | Every re-measured corpus and code figure came back **exact** (740 base types, 98 families, 656 pairs, 895‰ over 13 roles, 20 flat coefficients) |
+| **Testability** | 10 central invariants fully tested, 11 partial, **0 wholly untested** |
+| **Fidelity** | **All nine traced intents arrived intact as rules.** One — D26 — arrived without its reason |
+
+### 2h.1 ⭐ D3's mechanism is sound; its stated justification is not
+
+**The sharpest finding of the round, and it is about an edit I made.**
+
+§2f.2 widened D11 to require **correlated** directionality, to stop the binomial collapse (uncorrelated, a hybrid conceding nothing averages 958‰ and the floor binds on 0.63% of builds). **That fix dissolves the abuse D3 says it exists to punish.** D3's own words presuppose *uncorrelated* preference — *"if the better pick is humanoid in 10 of 12 roles, you take them, the minority count is 2."* With one fixed lean per frame there is **no role where one frame is stronger**; there is only *how much of axis A versus axis B*.
+
+**So the cherry-pick cannot occur, and the mechanism still does something worth doing.** Restated honestly:
+
+> **A hybrid pays 200‰ for the only base profile that spans both axes, and earns it back by actually spanning them.**
+> A hybrid that specialises (all one frame) stays at 800‰ — correctly, because it is doing what a pure frame does, worse. A hybrid that commits to generalism (6/6) reaches parity. **The floor prices generalism; the bonus rewards committing to it.**
+
+That is a better story than the cheat framing and it is what the code would do anyway. **Action: restate D3's rationale; change no mechanism.**
+
+⚠ **Two things that must go with it.** D3 has **no player surface** — `frame-mix` appears in modules 3, 6 and 12 and in **none** of module 20's six surfaces. And **the hybrid population has never been counted**: `frame-classify` (X1) has not run, so the apparatus serves the commander plus an unknown number of species. **The cheap insurance is one command — run X1, count the hybrids, then decide how much of D11 to buy.**
+
+### 2h.2 The blockers, ranked
+
+| # | Blocker | Evidence |
+|---|---|---|
+| 1 | **Nothing owns item naming.** I8's grammar, word tables and plant variant have no home; `affix-legality` mentions naming **zero times** while `item-card` tests a *"generated name"* | coverage audit; verified |
+| 2 | **`socket_max` is described four ways** and the corpus settles it: it **varies within a role today** (`armament-primary` = `{0:18, 1:26, 2:4}`), so module 16's *"fixed per role"* invariant and its test are false | verified against 740 entries |
+| 3 | **`salvage-craft` prices 10× off** — keys on 0–9 where `rarity.ordinal` is 10…100, which module 7 makes a **Never**. Modules 15 and 16 cite that table verbatim | flagged in place |
+| 4 | **Nothing owns the comparison algorithm** — module 20's headline surface; three specs point at each other | coverage audit |
+| 5 | **`enhance_cap`: module 7 seeds it, module 15 deletes its consumer** — and module 7's SC7 rule makes an unconsumed key **reject**, so its load fails | §2g #0c |
+| 6 | **Module 12 forbids `player:`-scoped combat atoms (they buff the zombies); module 18 ships one** | `StatApplyScope.cs:81-82,52-53` |
+| 7 | **Are recipes ordered?** Module 20 builds swap-distance machinery; module 16 never says *order*, and 21 says *"unordered pair"* | half of module 20's design hangs on it |
+| 8 | ⭐ **`power_ceiling` is deliberately unseeded, and that makes D11's lint run in its weak form indefinitely** — so **D3 degrades silently, exactly as §2d warned**. The single highest-leverage unblock in the program | module 9's own ratio argument shows a provisional value is safe |
+
+### 2h.3 Two costs nobody computed — both inside D26's scope
+
+**The sinks have an expiry date.** From shipped constants: a perfected `almanac` from Θc=20 ≈ **950**; a freshly-dropped, unenhanced `sprout` at Θc=500 ≈ 17 × 92.8 = **1,578**. Somewhere near Θc ≈ 350–450 a bottom-rung drop beats a fully-invested top-rung item, and the investment is largely unrecoverable — the only path in I6/I9 is **transfer at 700‰**. ⚠ *An earlier draft blamed "R2's strict-loss rule"; R2 is the catalog-revision defect closed by D9 and says nothing about loss on replacement. The finding stands; the citation was wrong*. **That is an item-versus-item comparison, which D26 puts squarely in scope** — and every spec pushed it out as content pacing. Express it as *"a crafting investment is worth N realms."*
+
+✅ **COMPUTED 2026-09-04, against `PowerLadder` and shipped constants** (`c=80,000 · B=400 · A=26,200`,
+`pinValue=680`, `WfMilli=WaMilli=25,000` ⇒ **one realm = 25 Θ**):
+
+| | N |
+|---|---:|
+| At v1's shipped reach (Θc 20, ilvl 32, gain ×1.24) | **0.19 realms** |
+| Under §4a's soft cap (`almanac` asymptote ×1.20) | ≤ 0.16 |
+| At the reachable +12 with K=8 | **0.09** |
+| N reaches 2 only at | Θc ≈ **123** — five realms past a ladder that stops at level 10 today (X5) |
+
+**N < 2 by an order of magnitude.** §2h.3's estimate reproduces exactly: perfected `almanac`
+770 × 1.24 = **954.8**, `sprout` at Θc 500 = 17 × 92.76 = **1,577**, crossing at **Θc = 376** — inside the
+350–450 band predicted independently.
+
+⚠ **And both ways of raising N are refused, for reasons that hold.** Steepening the enhancement track
+**re-inverts the rarity ladder**; flattening `contentScale` is **not ours** (PS-7). So the honest
+consequence is recorded rather than engineered away: **do not size module 15's risk bands or pity
+threshold as a progression choice at v1 depth** — transfer is the module's real answer, and
+`CraftingHorizonReport` ships so the figure moves with the dials.
+
+**102 combinations meet a geometry that permits 2 per actor.** Only `socket_max = 4` roles host a 4-ingredient recipe — two of them — and each is keyed to one aptitude or pair, so **~88 of 102 are irrelevant to any given build by construction**. Generation cost was never the binding constraint; consumption is.
+
+### 2h.5 The three rulings the coverage matrix marked `?` — dispositioned
+
+Not gaps. Each is covered in substance and needed its status saying out loud.
+
+| Ruling | Disposition |
+|---|---|
+| **D4** — *v1 content reaches ilvl 32* | ✅ **Retired as an item decision.** D29 made the content ladder unbounded and tier saturating, so "reach 32" became a request that *content* exist at level 32 — which is **X5**, owned by the world map, wave catalog and event generator. Its substance lands in modules 8 and 11 (I12's ladder, t5@32); the ruling itself is correctly unclaimed |
+| **D16** — *~110 lane picks ratified as a batch* | ✅ **Meta-ruling, deliberately has no module.** It changes the *status* of existing lane text, not the work. Its one live consequence is recorded: the sampling was partly by section number, and at least five picks carry no recommendation to ratify (§2f) |
+| **D25** — *PoE-style links out of scope* | ✅ **Now durable.** It previously existed only as two one-line mentions inside specs; it is now a row in [item-map.md](item-map.md) §6's exclusion table, where a reservation survives |
+
+### 2h.4 What to copy
+
+`power-reads` — **a spec that deleted its own reason for existing.** Chartered by D13 to *build* the power model, it opened the file, found E9 shipped with 33 tests and live consumers, declared its ruling **VOID**, and shrank to four call sites. Two habits transfer: **replace "blocked on X" with a per-consumer sensitivity table** (which would unblock #8 above, and `base-types`, `rarity-bands`, `strain-splice-gen` and `granted-actions` each have a blocker that shrinks under it); and **derive numbers instead of choosing them** — its display band is asserted *equal to* the cost function's known error, not picked.
 
 ---
 

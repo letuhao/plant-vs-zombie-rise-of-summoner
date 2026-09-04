@@ -17,19 +17,18 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "inferred",
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
-        "rarity": "split",
-        "threatBand": "high"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T14:41:02Z",
+      "emittedUtc": "2026-09-04T10:01:44Z",
       "minorityValues": {
-        "elementPrimary": "earth",
-        "rarity": "chimeric"
+        "elementPrimary": "air"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -47,37 +46,36 @@
     ],
     "aptitudePrimary": "Retribution",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "inferred",
+    "attackTempo": "quick",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "air",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Ballistic Flora"
+      "ballistic-flora"
     ],
-    "gameTypeId": 1369,
+    "gameTypeId": 1417,
     "posture": "Bastion",
     "pure": true,
     "rarity": "fused",
     "reach": "short",
-    "reason": "It functions as a reactive defensive mechanism that recycles projectiles rather than initiating direct, overwhelming attacks.",
+    "reason": "The creature acts as a passive defensive utility that recycles existing projectiles rather than generating independent lethal threats.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "CabbageFume",
+    "speciesId": "CabbageCaltrop",
     "targetPreference": "frontline",
-    "threatBand": "nuisance",
     "traits": [
-      "Kinetic Deflection",
-      "Projectile Ricochet",
-      "Low-Angle Trajectory"
+      "projectile-recycling",
+      "kinetic-redirection",
+      "reactive-defense"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
-    ]
+      "mutated"
+    ],
+    "verdict": "agree"
   }
 ]

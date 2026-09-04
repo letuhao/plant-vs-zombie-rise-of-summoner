@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:21:44Z",
+      "emittedUtc": "2026-09-04T10:49:50Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -65,15 +66,14 @@
     "speciesId": "IronPuff",
     "targetPreference": "backline",
     "traits": [
-      "Metallic-cellulose structure",
-      "Kinetic projectile discharge",
-      "Armor-penetrating impact",
-      "High-density planting"
+      "Metallic-density",
+      "Knockback-inducing",
+      "Armor-piercing",
+      "Low-profile"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
+      "mutated"
     ],
     "verdict": "too-high"
   }

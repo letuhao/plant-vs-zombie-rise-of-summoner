@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from typing import Any, Mapping, Sequence
 
+from ....pipeline.model import BLOCKED_FIELD
+
 __all__ = [
     "SYSTEM_PROMPT", "AFFIX_SCHEMA", "ID_PREFIX", "build_context", "build_brief", "entry_for",
     "refs_are_known_atoms", "bundle_has_at_least_two_refs",
@@ -21,6 +23,17 @@ ID_PREFIX = "affix.authored."
 
 #: No magnitude field anywhere — `name` and `refs` only. `refs` names EXISTING atom ids from the
 #: shared library; the model never invents an atom, only bundles ones that already exist.
+#:
+#: `blocked` (below) was added 2026-09-04 by `validate-heal` (A-S4, spec-validate-heal.md SS6
+#: hazard 1): the shipped schema had `additionalProperties: false` and no `blocked` property, so
+#: this pipeline's own model had NO WAY to decline — a live defect, not paperwork — and the schema
+#: failed `pipeline.model.audit_schema`'s own "every schema needs a blocked variant" rule the
+#: moment that rule was applied to it. Scope held tight per the spec: this property and its
+#: description only, nothing else about the pipeline changed. `required`/`additionalProperties`
+#: are untouched, so `name`/`refs` are still required even when `blocked` is true — a real,
+#: separate functional gap this fix does not close (named follow-up: `affix-schema-blocked`,
+#: SS6 hazard 1's own fallback if `python -m pytest tools/seedsmith/tests` had gone red, which it
+#: did not).
 AFFIX_SCHEMA: "dict[str, Any]" = {
     "type": "object",
     "properties": {
@@ -29,6 +42,14 @@ AFFIX_SCHEMA: "dict[str, Any]" = {
             "type": "array",
             "items": {"type": "string"},
             "minItems": 2,
+        },
+        BLOCKED_FIELD: {
+            "type": "boolean",
+            "description": (
+                "True only when the model genuinely cannot bundle two or more of the given "
+                "atoms into one coherent named affix — never a way to skip a real bundle, and "
+                "never left unset just because the model is unsure."
+            ),
         },
     },
     "required": ["name", "refs"],

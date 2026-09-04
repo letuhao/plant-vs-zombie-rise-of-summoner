@@ -231,6 +231,10 @@ public class LoamPhasesTests
         Assert.Equal("f1", f1Entry.Subject);
         Assert.Equal("loam.handicap:500", f1Entry.Detail);
         Assert.DoesNotContain(report.Entries, e => e.Subject == "f2" && e.Detail.StartsWith("loam.handicap:"));
+
+        // world-stage W12 (fog defect A): a faction-scoped line names no ground, so `Audience` is
+        // the only thing that stops it reaching every viewer.
+        Assert.Equal("f1", f1Entry.Audience);
     }
 
     [Fact]
@@ -258,5 +262,33 @@ public class LoamPhasesTests
 
         Assert.True(Find(world, "harsh").StabilityMilli < 1000, "the harsher sector must degrade before the milder one");
         Assert.Equal(1000, Find(world, "mild").StabilityMilli);
+    }
+
+    /// <summary>W25: `Pressure`'s own `ceded` map is threaded straight into `LoamForecast.Weakest` —
+    /// filing "mild" as the faction's own choice overrides the default worst-balance pick ("harsh")
+    /// without a second rule, and leaves "harsh" untouched instead.</summary>
+    [Fact]
+    public void Pressures_ceded_map_overrides_which_sector_absorbs_the_shortfall()
+    {
+        var mild = Sector("mild", "f1", stock: 0, stability: 1000, development: 1, danger: 0);
+        var harsh = Sector("harsh", "f1", stock: 0, stability: 1000, development: 5, danger: 4);
+        var world = new WorldState
+        {
+            WorldId = "w", TemplateId = "t", Seed = 1,
+            Factions = new[] { new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" } },
+            Sectors = new[] { mild, harsh, Sector("elsewhere", "f1", stock: 0, slots: new[] { Rootbed(0) }) },
+            Lanes = new[] { Lane("l", "mild", "harsh") }
+        };
+
+        var produced = LoamPhases.Production(world, new TurnReport(), Phase);
+        var withoutCede = LoamPhases.Pressure(produced, new TurnReport(), Phase);
+        var withCede = LoamPhases.Pressure(produced, new TurnReport(), Phase,
+            ceded: new Dictionary<string, string> { ["f1"] = "mild" });
+
+        Assert.True(Find(withoutCede, "harsh").StabilityMilli < 1000, "default ordering fades the harsher sector");
+        Assert.Equal(1000, Find(withoutCede, "mild").StabilityMilli);
+
+        Assert.True(Find(withCede, "mild").StabilityMilli < 1000, "the ceded sector must absorb the shortfall instead");
+        Assert.Equal(1000, Find(withCede, "harsh").StabilityMilli);
     }
 }

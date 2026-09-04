@@ -49,8 +49,9 @@ export function assertNoEmptyPendingReasons<T>(value: T): void {
 
 // ---------------------------------------------------------------------------
 // Guard 2: `stages/`, `layers/` and `ui/` bind to the contract, never to a
-// REST DTO type. `src/contract/` is the one place adapting a DTO is the
-// point, so it's exempt.
+// REST DTO type — matched by the wire's own `*Dto` naming, not by which
+// module happens to import or re-export it (W3, below). `src/contract/` is
+// the one place adapting a DTO is the point, so it's exempt.
 // ---------------------------------------------------------------------------
 
 const GUARDED_DIRS = ["stages", "layers", "ui"];
@@ -78,9 +79,34 @@ function walk(rootDir: string, onFile: (filePath: string) => void): void {
 /** A type-only import (`import type {...}` or an inline `type X`) from `@/lib/bus...`. */
 const BUS_TYPE_IMPORT_PATTERN = /from\s+["']@\/lib\/bus/;
 
-function isTypeImportOfBusModule(line: string): boolean {
-  if (!BUS_TYPE_IMPORT_PATTERN.test(line)) return false;
+/**
+ * world-stage W3 (2026-09-04): the class this guard exists to close, not just the world's instance
+ * of it. Before this, the guard matched only the *import path* `@/lib/bus` — so a DTO re-exported
+ * through anywhere else (a feature-local shim, a barrel file, a future domain's own `Types.ts`)
+ * reached `stages/`, `layers/` or `ui/` uncaught. `worldTypes.ts` was exactly that hole: the world's
+ * DTOs lived there, not under `@/lib/bus`, until W2 moved them.
+ *
+ * The fix matches the wire's own naming discipline instead of a path: every REST DTO type in this
+ * codebase is named `*Dto` (`WorldSectorDto`, `UniqueActorDto`, `ActorDerivedDto`, …), and the one
+ * legitimate place to import one is `src/contract/` itself (adapting a DTO into a view is the whole
+ * point of that directory, and it is never one of `GUARDED_DIRS`). So: a type-only import of a
+ * `*Dto`-suffixed identifier from anywhere **other than** `contract/` is a violation, regardless of
+ * which module re-exports it. The original `@/lib/bus` path check is kept — it still catches a
+ * direct bus import that happens to name something not ending in `Dto` (rare today, but the class of
+ * defect this guard polices is "binds to a DTO", not "binds to a DTO named a certain way").
+ */
+const DTO_IDENTIFIER_PATTERN = /\b[A-Z]\w*Dto\b/;
+const CONTRACT_IMPORT_PATTERN = /from\s+["'](?:@\/)?(?:\.\.?\/)*contract\//;
+
+function isTypeImportLine(line: string): boolean {
   return /^\s*import\s+type\s+\{/.test(line) || /\{\s*[^}]*\btype\s+[A-Z]\w*/.test(line);
+}
+
+function isForbiddenDtoImport(line: string): boolean {
+  if (!isTypeImportLine(line)) return false;
+  if (BUS_TYPE_IMPORT_PATTERN.test(line)) return true;
+  if (CONTRACT_IMPORT_PATTERN.test(line)) return false; // src/contract/ is the one exempt place
+  return DTO_IDENTIFIER_PATTERN.test(line);
 }
 
 export function scanForRestDtoImports(srcDir: string): GuardViolation[] {
@@ -90,7 +116,7 @@ export function scanForRestDtoImports(srcDir: string): GuardViolation[] {
       const relPath = relative(srcDir, filePath).split("\\").join("/");
       const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
       lines.forEach((line, index) => {
-        if (isTypeImportOfBusModule(line)) {
+        if (isForbiddenDtoImport(line)) {
           violations.push({ file: relPath, line: index + 1, text: line.trim() });
         }
       });

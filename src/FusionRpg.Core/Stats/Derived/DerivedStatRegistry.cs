@@ -44,7 +44,16 @@ public sealed class DerivedStatRegistry
     /// per-status-id ones resolved on demand. Both must agree on which cap value they saw.</summary>
     readonly double _categoryResistCap;
 
-    DerivedStatRegistry() => _categoryResistCap = DerivedStatPolicy.CategoryResistCap;
+    /// <summary>T14/B28 — the turn.speed channel's base, captured at construction for the same reason
+    /// <see cref="_categoryResistCap"/> is: a registry instance must stay internally consistent with the
+    /// values its defs were frozen against.</summary>
+    readonly long _turnDefaultSpeed;
+
+    DerivedStatRegistry()
+    {
+        _categoryResistCap = DerivedStatPolicy.CategoryResistCap;
+        _turnDefaultSpeed = DerivedStatPolicy.TurnDefaultSpeed;
+    }
 
     public static DerivedStatRegistry CreateDefault()
     {
@@ -107,7 +116,7 @@ public sealed class DerivedStatRegistry
         // (Haste). Class: null matches the Progression channels above — a pacing axis, not a combat
         // stat with a counterpart. FlatSum, not FlatReplace: a haste buff/item contributes an amount,
         // it does not replace the whole channel.
-        Register(new(DerivedTurnChannels.Speed, DerivedComposeKind.FlatSum, DerivedTurnChannels.BaseSpeed,
+        Register(new(DerivedTurnChannels.Speed, DerivedComposeKind.FlatSum, _turnDefaultSpeed,
                      Class: null, Unit: UnitClass.GameUnits));
         Register(new(DerivedTurnChannels.Haste, DerivedComposeKind.FlatSum, DerivedTurnChannels.NominalHasteMilli,
                      Class: null, Unit: UnitClass.PerMilleRatio));
@@ -172,14 +181,27 @@ public sealed class DerivedStatRegistry
         // participates in the formula but every one of its three construction sites (OverlayCombatMath.cs,
         // DebugCombatActions.cs, BattleEngine.cs) leaves it at the default 1.0 no-op -- nothing sets it
         // from this channel. Both await the action/timeline layer (action-map.md, approved unbuilt).
+        // The note is per-CATEGORY on purpose. The reader MECHANISM is generic -- any action whose
+        // envelope names `skill.cooldown.{category}` / `skill.effectiveness.{category}` is read
+        // (species-skills S2/S3) -- but only shipped CONTENT decides which categories are actually
+        // exercised, and today exactly one action ships: the basic attack, which is `attack`.
+        // Claiming a reader for the other four would make `MovementPayloadTests`'s deliberate
+        // "no production reader today" tripwire lie, which is the opposite of what it is for.
         foreach (var category in DerivedStatChannels.ActionCategories)
         {
+            var opted = category == DerivedStatChannels.ActionCategoryAttack;
+
             Register(new(DerivedStatChannels.SkillCooldown(category), DerivedComposeKind.FlatSum, 0,
                          Class: StatClass.Race,
-                         UnitClassNote: "No reader: CooldownMath.ApplyReduction and ActionEnvelope.CooldownChannel both exist with zero callers -- the action/timeline layer that would wire them is unbuilt (action-map.md)."));
+                         UnitClassNote: opted
+                             ? "Read by CooldownLedger.Start via CooldownMath.ApplyReduction, resolved from ActionEnvelope.CooldownChannel at the ARMING site (species-skills S2, 2026-09-04). The shipped basic attack opts in, so this is live in every battle; 0 is neutral and is the exact identity. NOT read by the balance predictor -- DominanceGuard.BuildReservedFamilies still reserves it, correctly, because that list is about the closed-form duel model rather than the battle path."
+                             : "No reader in shipped content: the MECHANISM exists (CooldownLedger.Start reads whatever channel ActionEnvelope.CooldownChannel names, species-skills S2), but no shipped action in this category names it -- the basic attack is the only opted-in action and it is `attack`. Wiring one here must update this note."));
+
             Register(new(DerivedStatChannels.SkillEffectiveness(category), DerivedComposeKind.FlatSum, 0,
                          Class: StatClass.Feeder,
-                         UnitClassNote: "No reader: OverlayCombatRequest.EffectivenessMultiplier is multiplied into the damage formula, but every construction site leaves it at its default 1.0 no-op -- nothing sets it from this channel."));
+                         UnitClassNote: opted
+                             ? "Read by BasicAttack, which sets OverlayCombatRequest.EffectivenessMultiplier from this channel via OverlayCombatRequest.MultiplierFromPerMille, resolved from ActionEnvelope.EffectivenessChannel (species-skills S3, 2026-09-04). 0 is neutral and yields exactly 1.0. NOT read by the balance predictor -- see the cooldown note."
+                             : "No reader in shipped content: the MECHANISM exists (BasicAttack reads whatever channel ActionEnvelope.EffectivenessChannel names, species-skills S3), but no shipped action in this category names it. Wiring one here must update this note."));
         }
 
         // H.4 -- healing. Pool, unpaired (owner decision 2026-08-24 — dissolves §4.3 rather than

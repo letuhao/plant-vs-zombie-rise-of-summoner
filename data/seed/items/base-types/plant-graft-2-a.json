@@ -29,7 +29,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -64,7 +64,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.floating-pin",
       "flavorKey": "flavor.base.floating-pin",
       "flavor": "A spike held aloft on nothing but itself. Something was grafted here once; it did not quite take.",
@@ -93,7 +93,7 @@
       "class": "spore",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -129,7 +129,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.strewn-notch",
       "flavorKey": "flavor.base.strewn-notch",
       "flavor": "A rough cut, scattered across the stem. Two branches were joined here and then tore free.",
@@ -158,10 +158,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.stored-scar",
       "flavorKey": "flavor.base.stored-scar",
       "flavor": "A sealed wound. What healed here was never meant to heal; now it holds something else.",
@@ -193,7 +193,7 @@
         "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.engorged-burl",
       "flavorKey": "flavor.base.engorged-burl",
       "flavor": "Swollen with sap and stubborn defiance. The graft took and then kept growing past where it should have stopped.",
@@ -222,10 +222,10 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.nourished-gall",
       "flavorKey": "flavor.base.nourished-gall",
       "flavor": "A knot of wood fed from both sides. The host and the graft, learning to feed each other.",
@@ -254,7 +254,7 @@
       "class": "bulb",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -289,7 +289,7 @@
         "family": "atom.ferocity",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.ingrown-knob",
       "flavorKey": "flavor.base.ingrown-knob",
       "flavor": "Fused so deep it draws sap from the parent wood. To remove it now would kill the whole branch.",
@@ -321,7 +321,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.indivisible-outgrowth",
       "flavorKey": "flavor.base.indivisible-outgrowth",
       "flavor": "One flesh now, though it began as two. The scar tissue has become stronger than either parent.",
@@ -350,10 +350,10 @@
       "class": "graft",
       "band": "a",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.permanent-peg",
       "flavorKey": "flavor.base.permanent-peg",
       "flavor": "Hammered in so long ago that the wood has healed over it. Pulling it free would splinter the whole limb.",
@@ -382,7 +382,7 @@
       "class": "graft",
       "band": "a",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "socketMax": 0,

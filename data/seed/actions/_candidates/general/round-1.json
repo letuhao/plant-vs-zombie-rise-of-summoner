@@ -1,0 +1,503 @@
+{
+  "_meta": {
+    "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+    "candidateSetHash": "2e9c948c40ef3752816cd907563f63ab92b5a3243f17f9bb6baf414650c51049",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "partition": "general",
+    "promptVersion": "general-propose/1",
+    "round": 1
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "511ae2dce91a1766eba49f65469a64980faae06961d8efedcb1d89af6d94e343",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "8d9ef95b4f67ffb915cb7ad7925238c49f36b69a69b1bfa39cead0da6d2cda7b",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "86d26345a36c998cbb88295dbed8090a695fbe82bc101de85fb3f169c079864c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.003",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "a7170f7d6ae53daa36f5b5a613b307fe828148f1549065d000698e97074d7177",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.004",
+      "candidateId": "candidate.general.003",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "a7170f7d6ae53daa36f5b5a613b307fe828148f1549065d000698e97074d7177",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.evd-brace",
+          "atom.sust-grit"
+        ],
+        "briefId": "brief.general.general.004",
+        "candidateId": "candidate.general.003",
+        "flavor": "A sudden tightening of posture to meet the coming impact.",
+        "name": "Brace",
+        "rationale": "A fundamental defensive posture that relies on physical resolve and readiness, applicable to any entity regardless of origin.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "d9b24e04d8ee2fad9bad4232730a97088fe9999e8edde0649cafccaca597b266",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.005",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "686b6e5f25aa252dd358c6111cc33b178765dcc20e8c5ac7a4ef292f98355b71",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.006",
+      "candidateId": "candidate.general.005",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "686b6e5f25aa252dd358c6111cc33b178765dcc20e8c5ac7a4ef292f98355b71",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.evd-brace",
+          "atom.fortitude"
+        ],
+        "briefId": "brief.general.general.006",
+        "candidateId": "candidate.general.005",
+        "flavor": "A sudden tightening of form to meet the coming impact.",
+        "name": "Brace",
+        "rationale": "The action focuses on self-preservation through physical or mental readiness, utilizing the core concepts of bracing and fortitude to provide a foundational defense.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.evd-brace|atom.sust-grit"
+    },
+    {
+      "_provenance": {
+        "briefHash": "5e2fd8b3c227d7a40d8b702bbc40a48a60481cdb1bd24737859ac7a709f02eb1",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.007",
+      "candidateId": "candidate.general.006",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "5e2fd8b3c227d7a40d8b702bbc40a48a60481cdb1bd24737859ac7a709f02eb1",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.tempo-surge",
+          "atom.vitality"
+        ],
+        "briefId": "brief.general.general.007",
+        "candidateId": "candidate.general.006",
+        "flavor": "A rhythmic cadence that synchronizes the breathing of those standing together.",
+        "name": "Shared Pulse",
+        "rationale": "The action provides a rhythmic boost to allies, focusing on the core essence of life and the momentum of action without being tied to a specific element or species.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "b187248fcb074e6f8d71ed5eec0e815fab9809c3a22245f7a5eb3503bcc78f32",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.008",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "95b77ca194c200e0e8cfa4f5ccd993efca1a78f8ac700980b04ff5f0c136320a",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.009",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "43e2fab60881f2807ad80431f4e5b77ce816dc82d526859b1dab3ed481003f71",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.010",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "2c667385acc04542ced9ee81bb6d181b4e9e1eceae98ed785fcb22d07cfdaf4a",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.011",
+      "candidateId": "candidate.general.010",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2c667385acc04542ced9ee81bb6d181b4e9e1eceae98ed785fcb22d07cfdaf4a",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.swiftness",
+          "atom.tempo-surge"
+        ],
+        "briefId": "brief.general.general.011",
+        "candidateId": "candidate.general.010",
+        "flavor": "A sudden change in momentum that leaves the previous position behind.",
+        "name": "Shift",
+        "rationale": "The action focuses on the self and movement, utilizing swiftness for the physical displacement and tempo-surge to represent the sudden burst of speed required for a rolled target movement.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.evasion|atom.quickening"
+    },
+    {
+      "_provenance": {
+        "briefHash": "2ead8046d6a12c4f67ee8c1ef2beab66ca2898c2bbf7f00b8ba6706f971a23f0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.012",
+      "candidateId": "candidate.general.011",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2ead8046d6a12c4f67ee8c1ef2beab66ca2898c2bbf7f00b8ba6706f971a23f0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.evasion",
+          "atom.swiftness"
+        ],
+        "briefId": "brief.general.general.012",
+        "candidateId": "candidate.general.011",
+        "flavor": "A sudden redistribution of weight to find a new center.",
+        "name": "Shift",
+        "rationale": "The action is a fundamental movement of self, utilizing swiftness for the displacement and evasion to define the nature of the repositioning.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.swiftness|atom.tempo-surge"
+    },
+    {
+      "_provenance": {
+        "briefHash": "f1911e4b274320fe53d41d4c5de0b6cecb14add2d24de43cf45a152df1de6563",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.013",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "86c67a25de08b3c3513f1158dbfc879bf76ca791039e9fcdcd2bcf58d9dc74d5",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.014",
+      "candidateId": "candidate.general.013",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "86c67a25de08b3c3513f1158dbfc879bf76ca791039e9fcdcd2bcf58d9dc74d5",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T04:16:43+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.dooming",
+          "atom.withering"
+        ],
+        "briefId": "brief.general.general.014",
+        "candidateId": "candidate.general.013",
+        "flavor": "The very air vibrates with the weight of a recent impact, unsettling those caught in its wake.",
+        "name": "Lingering Tremor",
+        "rationale": "As a status effect applied to a row of enemies, this represents the kinetic aftermath of a strike that disrupts the rhythm of those standing nearby.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.hit-followthrough|atom.tempo-surge"
+    },
+    {
+      "_provenance": {
+        "briefHash": "e0cddbd2fee85c6e2b5779f475cf0d7a1c18128e207c0f6d5680b32a345c946f",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T04:16:43+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.015",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    }
+  ],
+  "kind": "action-candidate",
+  "schemaVersion": 1
+}

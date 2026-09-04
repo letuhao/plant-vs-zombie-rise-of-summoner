@@ -1,0 +1,84 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:45:38Z",
+      "minorityValues": {
+        "elementPrimary": "dark"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "Abyssal Sovereign",
+      "Undead Monarch"
+    ],
+    "gameTypeId": 218,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "firstseed",
+    "reach": "long",
+    "reason": "The creature's ability to instantly replenish high-tier minions and deal 1,000,000 damage per projectile establishes it as an unstoppable, world-ending threat consistent with a calamity.",
+    "resourceProfile": [
+      "hp",
+      "spirit"
+    ],
+    "side": "zombie",
+    "speciesId": "UltimateFootballDrown",
+    "targetPreference": "swarm",
+    "traits": [
+      "Leadership",
+      "Infinite Reinforcement",
+      "Mythic Weaponry",
+      "Temporal Persistence"
+    ],
+    "variants": [
+      "ancient",
+      "cursed",
+      "normal"
+    ],
+    "verdict": "agree"
+  }
+]

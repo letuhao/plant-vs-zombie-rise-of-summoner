@@ -16,7 +16,7 @@ ideal.)
 
 | Term | Means | Why not the obvious word |
 |---|---|---|
-| **stock** | An empire quantity — loam, essence, souls | `resource` is taken by `resource-hub-ssot.md` for the five **actor pools**; different scope entirely |
+| **stock** | An empire quantity — loam, essence, souls | `resource` is taken by `resource-hub-ssot.md` for the **actor pools**; different scope entirely. **Corrected 2026-09-04: there are six, not five** — `poise` was registered 2026-08-26 (class-system, `poise-resource`), three days after this document was written, and the count was never re-checked. The *distinction* this row draws is the load-bearing part and it stands; see §8's narrowed rejection, which this row is the evidence for |
 | **loam** | The stock that keeps ground real | New. Collides with nothing in `src/`, the web app, or `docs/` |
 | **the Fracture** | The force that unmakes unanchored ground | `chaos` collides with the `chaos-marked` demon trait (`TraitBattleCatalog.cs:86`), and "fracture" is already the codebase's word (`SectorTypeCatalog.cs:8`) |
 | **rootworks** | `StructureKind.LoamSource` — the category of things that make loam | `anchor` is the effect-atom layer's (`AnchorResolver`, `AnchorOrigin`, 20 files) |
@@ -284,8 +284,38 @@ observed defect where `Explore` fired three times and then never again) · deep 
 reavers · Fracture surges (`TurnCalendar` already rolls `Plague`, pure in `(turn, seed)`, and its
 effects have never landed).
 
-**Rejected, with cause:** a loam market (**P5**) · loam as a battle resource (scope collision with the
-actor hub) · loam grades or tiers (**P7**, and no `min(x,y)` bottleneck so also **P4**) · the Fracture
+> ### ⛔ Correction 2026-09-04 — the "loam as a battle resource" rejection was over-broad
+>
+> **Owner call, and this document's own §1 is the evidence.** The rejection below reads *"loam as a
+> battle resource (scope collision with the actor hub)"*. §1 of this same file states that a **stock**
+> and an **actor pool** are *"different scope entirely"* — so a stock being spent during a battle
+> cannot collide with the actor hub unless it is modelled *as* an actor pool, which nothing proposed.
+>
+> **What actually collides, and what the rejection should have said:** loam as a **seventh actor
+> pool**, sitting beside `stamina`/`qi` on `resource-hub-ssot.md`'s closed six-value set. That would
+> collide, and it stays rejected.
+>
+> **What does not collide, and is now permitted:** a **side-scoped, transient battle budget** —
+> seeded from world stock when the battle is requested, spent inside the board, and reconciled back
+> through the outcome record. No actor ever holds loam; no pool is added. This is the **depot**
+> pattern already named in `world-graph-ideal.md:458` (*"depot (starting resource for the fight)"*),
+> and it is how `base-defense-ideal.md` §5.13 prices in-battle construction.
+>
+> **Two things that make this a defect rather than a judgement call**, recorded so the correction is
+> auditable:
+> 1. It contradicts §1 of its own document.
+> 2. It is the **only** entry in the rejected list with no principle behind it — its siblings cite
+>    **P5**, **P7**, **P4**, or a stated mechanism. A four-word parenthetical was doing the work of a
+>    tested conclusion.
+>
+> **The `combat-handoff` constraint in §9 is untouched and still binding:** a world battle must never
+> **pay** loam. Spending is a sink and drains; paying is a faucet and would collapse §7a's farming
+> throttle. The guardrail that keeps the two apart: **destroying a building never refunds loam.**
+
+**Rejected, with cause:** a loam market (**P5**) · **loam as a seventh actor pool** — *narrowed
+2026-09-04 from "loam as a battle resource (scope collision with the actor hub)", see the box above;
+a side-scoped battle budget is permitted, a per-actor pool is not* · loam grades or tiers (**P7**,
+and no `min(x,y)` bottleneck so also **P4**) · the Fracture
 as a commanding faction (a third brain to produce what a spread pass gives free — it is a *field*) ·
 per-demon loam upkeep (contracts already charge a daily soul tribute) · randomised yields (determinism
 survives it; *planning* does not — variance belongs in announced surges).

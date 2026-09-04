@@ -33,7 +33,7 @@
         "family": "atom.cleansing",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.articulated-rig",
       "flavorKey": "flavor.base.articulated-rig",
       "flavor": "Fitted to move with you, not against you.",
@@ -66,7 +66,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "high"
       },
       "socketMax": 2,
@@ -103,10 +103,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.cleansing",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.netted-hamper",
       "flavorKey": "flavor.base.netted-hamper",
       "flavor": "Something held together by the very grid that binds it.",
@@ -142,7 +142,7 @@
         "family": "atom.cleansing",
         "powerBand": "high"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.stapled-cylinder",
       "flavorKey": "flavor.base.stapled-cylinder",
       "flavor": "A duct in the rough. You become its cargo.",
@@ -175,7 +175,7 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.stalwart",
         "powerBand": "medium"
       },
       "socketMax": 2,
@@ -212,10 +212,10 @@
       "class": "scale",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.cleansing",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.corrugated-satchel",
       "flavorKey": "flavor.base.corrugated-satchel",
       "flavor": "Carved from the outside, strengthened from within.",
@@ -248,10 +248,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.elemental-defense",
         "powerBand": "extreme"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.soldered-burden",
       "flavorKey": "flavor.base.soldered-burden",
       "flavor": "One piece, one weight, one purpose. That is all it knows.",
@@ -288,7 +288,7 @@
         "family": "atom.cleansing",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.rigid-ladder",
       "flavorKey": "flavor.base.rigid-ladder",
       "flavor": "Every rung is a decision that was made long before your war.",
@@ -320,10 +320,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.cleansing",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.ponderous-cylinder",
       "flavorKey": "flavor.base.ponderous-cylinder",
       "flavor": "Every step reminds you why you carry it.",
@@ -356,10 +356,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.elemental-defense",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.monolithic-hamper",
       "flavorKey": "flavor.base.monolithic-hamper",
       "flavor": "A block that cannot be reshaped because it has never known a different form.",
@@ -395,7 +395,7 @@
         "family": "atom.cleansing",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.bevelled-rig",
       "flavorKey": "flavor.base.bevelled-rig",
       "flavor": "Edges sharpened so it can cut through the air it parts.",
@@ -427,10 +427,10 @@
       "class": "plate",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.cleansing",
         "powerBand": "extreme"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.unyielding-ladder",
       "flavorKey": "flavor.base.unyielding-ladder",
       "flavor": "To climb it is to learn what cannot change.",

@@ -138,7 +138,8 @@ picker are all inspectable against real data, and the only unknown left is the j
 | Channel pools (L2) | **effect-atom E30** | A generated action's atoms reference pools |
 | Binding production | **effect-pipeline module 4** `instance-producer` | `effect_binding` has **zero rows**; without it the corpus is authored into a runtime nothing reaches |
 | Species anchors (motifs, family, theme) | **seedsmith D2/D5** | 84 motif, **53 family**. Rarity for the rest is unspecced |
-| Rung window in the caps register | **A-G1** (was: power) | `ssot-power-scale.md` §11 has **no row** for it; §5 constraint 2 promised one |
+| Rung window in the caps register | **A-G1** (was: power) | ✅ **Done 2026-09-04.** `ssot-power-scale.md` §11.2 now carries the `powerBudgetMilli` row §5 constraint 2 promised |
+| `restriction` axis detection | **effect-atom** (per-atom payload/target data) | ⛔ **Still absent, and not A-G1's to close alone.** `StructureBudgetGuard.SpentAxes` reads only `rpg_action` + `rpg_action_cost` + `rpg_action_effect_scope` — none carry per-atom payload/target data, so `restriction` (action-ideal.md §8.7: a self-debuff, `status.apply` scoped to `caster`) cannot be detected from here. A-G1 (spec-tier-access-gate.md §3.3, AC8) makes this explicit via `StructureBudgetGuard.UndetectableAxes()` rather than reporting `0` |
 
 ## 8. What stays out
 

@@ -117,10 +117,18 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       own) — no pre-existing scenario places a structure at all, so nothing about the *play*
     //       changed, only the row shape the hash is taken over.
     //
-    // The plan expected one re-bless. Four were needed for world-intel, each for a behaviour change
-    // rather than a drift, and each recorded here. Protecting the hash in any of them would have
-    // meant shipping something known to be wrong.
-    const string GoldenFinalHash = "a7abb774047dc1aa53215892b1152fe36c803330692a4cfddfcc16f33031a553";
+    //   13. **world-map W44, 2026-09-04** — `WorldCanonical` gains three sector fields:
+    //       `RecruitStock`/`ProjectId`/`ProjectTurnsRemaining` (spec-sector-development.md §1/§3).
+    //       This module's own budgeted field batch, `RulesetVersion` unchanged — matching
+    //       `loam-model`'s and L25's own precedent for a field-only addition. Every field sits at
+    //       its default (0/null/null) for this scenario — no growth or project behaviour is wired
+    //       yet (that lands at W50/W52), so nothing about the *play* changed, only the row shape the
+    //       hash is taken over.
+    //
+    // The plan expected one re-bless. Five were needed — four for world-intel plus this one, each
+    // for a behaviour change or a budgeted field batch rather than a drift, and each recorded here.
+    // Protecting the hash in any of them would have meant shipping something known to be wrong.
+    const string GoldenFinalHash = "b52bf25177135c3efb1c3689260344e4e4646632c98ddf5ce78afc73ee5743e3";
 
     readonly string _dir;
     readonly RpgStore _store;

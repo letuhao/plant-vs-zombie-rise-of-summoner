@@ -111,8 +111,33 @@ Four properties, each load-bearing:
 4. **`long` throughout, widen before multiplying, divide by 1000 last, exactly once.**
 
 `VolumeBaseMilli`, `VolumeSlopeMilli`, `FloorMilli` and `ΘPin` live in
-`data/tuning/item-drop-volume.v1.json`. Starting slope is the owner's — it is the single number that
-decides whether a veteran sees twice the drops or ten times.
+`data/tuning/item-drop-volume.v1.json`.
+
+### ⭐ D38 — the kill path is a flat 5 %, and it is two rolls, not one
+
+> **Owner, 2026-09-04:** *"make the game drop rare, 5% drop rate on kill for all rarity — this is just
+> drop rate for any item, not 5% chance to drop rarity 10 item, it is different catalog. The number is
+> tunable."*
+
+⛔ **The disambiguation is the load-bearing half and it must survive into code.** Two independent rolls:
+
+| Roll | Question | Source |
+|---|---|---|
+| **1** | **Does anything drop at all?** | `DropChanceOnKillMilli` = **50‰**, tunable |
+| **2** | **Which rung?** | the rarity catalog's own weights — a **different table**, untouched by roll 1 |
+
+**So a 5 % kill rate does not mean a 5 % chance at an `almanac`.** Conflating them would make the top
+rung 20× more common than the rarity catalog says, and it is the exact misreading the owner pre-empted.
+A test asserts the two roll independently.
+
+✅ **This answers the "starting slope" question by removing the slope from the kill path.** The line
+that stood here — *"the single number that decides whether a veteran sees twice the drops or ten
+times"* — is retired: on kills, a veteran and a beginner see **the same rate**, and progression shows up
+as *what* drops, not *how often*.
+
+⚠ **D18 is not repealed.** Its `Θ`-linear volume term still governs **non-kill** sources — chest, boss,
+completion. Recorded rather than silently resolved: if the kill path should also scale with `Θ`, that is
+a one-line change to this tuning file, not a redesign.
 
 ### ⭐ Correction 2 — the `40/day` line asks for a loot filter, not a cap
 
@@ -154,12 +179,28 @@ them (D18's own closing paragraph). The old `2/run, 12/day` PvZ cap was already 
 
 ### Item level — content, never the player
 
-**Verified as written** (`ssot-generation.md` §4.1):
+⛔ **Correction 4 — `WaveDef.RecommendedLevel` does not exist, and this spec asserted it under a
+heading reading "Verified as written."** The field is **`WaveDef.ContentIndex`**
+(`src/FusionRpg.Core/Battle/WaveCatalog.cs:21`), and its own doc comment records the rename and its
+completeness: *"`ContentIndex` is Θ_content — same values as the old `RecommendedLevel` name (1/3/6/10),
+a vocabulary rename only. No external reader referenced the old name (verified: zero hits for
+`RecommendedLevel` anywhere else in the repo), so this is a full rename, not an alias"*
+(`WaveCatalog.cs:5-10`). Re-verified 2026-09-04: the only two hits for the old name in `src/` are those
+two comment lines. **`ssot-generation.md` carries the stale name 7 times** (§4.1 and §11 Q8) and
+`decision-d4-content-budget.md` once; all need the same correction, and they are the lane's, filed
+from here.
+
+⭐ **The rename is not cosmetic for this module.** `ContentIndex` **is `Θ_content`** — the same axis
+`ContentScale.Milli(thetaContent, …)` reads (`Power/ContentScale.cs:17`). So §4.1's first row is not
+"a level that happens to be a number"; it is the content half of the power ladder, and D18's split
+(volume on `Θ_actor`, strength on `P(Θ_content)`) is expressed in one vocabulary rather than two.
+
+The block below is `ssot-generation.md` §4.1 **with the rename applied**:
 
 ```text
 contentLevel:
-  web battle       WaveDef.RecommendedLevel        (src/FusionRpg.Core/Battle/WaveCatalog.cs)
-  expedition tick  the resolved wave's own RecommendedLevel — NOT a second formula
+  web battle       WaveDef.ContentIndex            (src/FusionRpg.Core/Battle/WaveCatalog.cs:21)
+  expedition tick  the resolved wave's own ContentIndex — NOT a second formula
   expedition boss  same, at BossWaveId = "rift-tyrant"
   world sector     sectorLevel(danger_band)        — owed by the world program (X5)
   PvZ run          ⛔ UNDESIGNED
@@ -209,6 +250,30 @@ post-hoc correction); **base before rarity** (uniques and set pieces are defined
 **sockets last** (a socket count consuming a stream earlier would move every affix roll at that band with
 no content-hash change).
 
+#### ⚠ Step 10 and two `entry_kind` values are downstream vocabulary — they ship as a documented no-op
+
+This module is **11 of 21**. Step 10 implements module **16**'s socket rule and `entry_kind ∈
+{insert, charm}` implement modules **16** and **13**'s payload kinds. Both are gated on **X7** — D27's
+four `container_kind` values (`gem` · `set` · `charm` · `combo`) that `ContainerRow.cs:7-14` does not
+ship (`item-map.md` §3, X7). **Implementing them here would author a second answer to a question two
+later modules own.**
+
+| Surface | Ships as | Flips when |
+|---|---|---|
+| **Step 10 SOCKETS** | the step **exists and consumes its stream** — `DeriveStream(roll_seed, "item.socket")` — and resolves to **0 sockets** while `rarity.socket_min`/`socket_max` are unseeded | module 7 seeds the two columns after I4, and module 16 lands the count rule |
+| `entry_kind = insert` | **rejected at import** by name — `ContentRuleViolated{drop.entry-kind-unavailable}`, never silently dropped | X7 lands `gem` |
+| `entry_kind = charm` | same | X7 lands `charm`, module 13 generates the corpus |
+
+⭐ **The step consumes its stream even when it resolves to zero, and that is the whole point.** The
+stream is derived and advanced now, so landing the real count later changes **no other draw** — which
+is exactly the property `sockets_roll_last_and_shift_no_affix` asserts. A step added later would move
+every affix roll at that band with no content-hash change, which is the defect the ordering exists to
+prevent. **A no-op that reserves its stream is cheap; a step inserted after the corpus ships is a
+migration.**
+
+**Named tests, both written to flip:** `step_10_is_a_documented_no_op_and_reserves_its_stream` and
+`an_insert_or_charm_entry_is_refused_by_name_until_x7_lands`.
+
 Step 11 is one transaction because the summoning flow already paid for that lesson —
 `spec-demon-summoning.md`'s two-transaction bug — *with one extra hazard: nothing is spent, so a partial
 commit mints free items rather than losing paid ones.*
@@ -235,6 +300,93 @@ Two consequences worth stating:
   say so with that word. A trash drop and a boss drop roll the same affixes today (the exact defect
   `effect-pipeline-ideal.md` §5.6 names), and the column is what makes closing it a one-call change.
 
+### ⛔ Correction 5 — pity keys on rung **ids**, and I12's `r4`/`r6` labels are a seven-rung vocabulary
+
+`item_loot_pity(items_since_r4, items_since_r6)` and *"R4 floor at 25, R6 ramp from 150"* are I12's
+own, and I12 was authored against **seven** rungs. Module 7 re-derived the ladder to **ten** and seeds
+`pity_guarded = 1` at ordinals **70 (`heirloom`)** and **90 (`sunwoven`)** (`spec-rarity-bands.md`,
+§3.8). Carrying `r4`/`r6` forward would leave two columns whose names name nothing.
+
+| I12 (7 rungs) | Ten-rung equivalent | Column |
+|---|---|---|
+| `items_since_r4` — "epic+", natural 10.0% | **`heirloom`+**, ordinal **70** | `items_since_heirloom` |
+| `items_since_r6` — "relic+", natural 1.0% | **`sunwoven`+**, ordinal **90** | `items_since_sunwoven` |
+
+**Key on the rung id, never on an ordinal or a positional label.** This is the same discipline module 7
+states as a rule for `rarity.ordinal` — the string id is the join, and a positional label is what
+survives a ladder-length change with the wrong meaning. `SummonRoller` already made the opposite trade
+deliberately (`PityState(PullsSinceHeirloom, PullsSinceSunwoven)` in code over SQL columns that *"kept
+their old labels"*, `SummonRoller.cs:6-11`); a table with no rows yet has no reason to inherit that.
+
+**⚠ The thresholds do not carry over unchanged, and this module owns re-deriving them.** I12 sized 25
+and 150 against *its own* weights (R4+ at 10.0%, R6+ at 1.0%). Under module 7's re-derived table
+`heirloom`-and-above is **5.9%** (2,500 + 1,600 + 1,100 + 700) and `sunwoven`-and-above is **1.8%**
+(1,100 + 700) — so the droughts are differently shaped and the 7.2%-at-threshold property I12 tuned for
+does not hold at 25. Re-solve against the seeded weights; **`pity_fires_where_the_drought_is_real` is
+the test, and it asserts the drought probability, not the threshold**, so it survives a reweight.
+
+**The top rung stays unguarded.** §3.8 puts no counter on ordinal 100 on purpose, and D7's lift of
+rule 7 makes promotion a *deterministic* route there instead — see the next section.
+
+### A deterministic source for `almanac` — registered by module 7, **answered here**
+
+`ssot-rarity.md` §3.8: *"Rung 100 must have at least one deterministic source. An unreachable top rung
+is a frustration, not a fantasy … **I12 owns which.**"* Module 7 registers the requirement and assigns
+it to this module (`spec-rarity-bands.md`, D7 section); this spec never mentioned it. It does now.
+
+| Source | Deterministic? | Owner |
+|---|---|---|
+| **Promotion to ordinal 100** | ✅ yes — D7 lifted rule 7, `promote_from = 1` on all ten rungs, and the price is a configurable soft cap | module 15 `enhance-reroll` |
+| **First clear of a content id** | ✅ yes — `item_first_clear` fires once per `(player_id, source_kind, source_id)` and grants a **fixed, authored** container with no rolls (`ssot-generation.md` §3.5) | **this module** |
+| A pity counter at 100 | ❌ — §3.8 leaves ordinal 100 unguarded on purpose | — |
+
+**This module's answer is the first-clear grant, and it is the cheaper of the two.** The mechanism
+already exists in §3.5 and needs no new machinery: **at least one authored first-clear item in the
+shipped corpus carries `rarity = 'almanac'`.** A first clear is deterministic by construction (it is
+recorded, it fires once, and it never rolls), so the requirement is met by content rather than by code.
+
+⚠ **Which content id carries it is the owner's**, because it decides how deep the top rung sits. The
+obligation this module accepts is that **the set is non-empty and CI says so** —
+`at_least_one_first_clear_grant_is_rung_100` is a corpus test, not a runtime check.
+
+⚠ **Promotion is the *other* source and it is real**, so if the owner would rather the top rung be
+purely earned, the first-clear grant can be dropped without leaving §3.8 unsatisfied. Recorded so the
+choice stays open rather than being made here by omission.
+
+### Smart loot — ⛔ **deferred**, with the reason and the trigger
+
+I12 §3.3 designs it in full and recommends it: **frame-weighted, role-flat, affix-blind, with a
+250-weight floor**, a player-visible toggle recorded in `context_json` as a **replay input**. This spec
+carried it as one line in *Ask first* — *"whether smart loot is on by default"* — with no design, no
+schema and no test, which is the shape of an accidental omission rather than a decision.
+
+**Made a decision: it does not ship in this module.** Two reasons, both structural rather than
+budgetary:
+
+| Reason | Detail |
+|---|---|
+| **Its input does not exist yet** | `frameWeight(f) = 250 + 750 × squadShareMilli(f) / 1000` reads the **deployed squad's frame mix**, and `frame` exists on no species type today — that is **X1**, resolved 2026-09-03 as a seedsmith `frame-classify` stage and **unbuilt** (`item-map.md` §3.1). A frame-weighted draw over an unclassified roster is a uniform draw with extra code |
+| **It is the one bias that can break step 6, and step 6 is X4's supplier** | Smart loot biases the **base-type** draw at step 6. Step 6 feeds step 9's `affix_channel`, and X4 weights composition off that channel. Landing a bias into step 6 before X4's weights exist means the two get tuned against each other later, from opposite sides |
+
+**What ships instead, so this is a deferral and not a hole:**
+
+- Step 6 draws base types **uniform over the legal set**, and the code says *why* it is uniform with a
+  pointer to this section — an unexplained uniform draw is how a deferral becomes a permanent default.
+- `item_drop_log.context_json` reserves the two keys smart loot will write — `smartLoot` (bool) and
+  `squadFrameMix` — and **writes them today** with `smartLoot: false` and the mix it can observe. That
+  keeps §4.3's *"a settings change must not alter an already-sealed result"* rule true from the first
+  drop, rather than retrofitting a replay input onto a log that never had one.
+- `smart_loot_is_off_and_the_draw_is_uniform_over_legal_base_types` is the test, and it is written to
+  **flip** when the bias lands.
+
+**Trigger to revisit: X1 built and X4 landed** — whichever is later. **Owner:** this module, in a
+follow-up; it is not reassigned elsewhere.
+
+**Not deferred:** the 250-weight serendipity floor's *reason* is recorded now, because it is the part a
+later session would drop. I12: *"one drop in six is for a body you may not own … the only reason to
+keep hunting a frame you have not unlocked."* A frame-weighted draw with no floor is the D3-style
+manufactured-loot failure §9 names.
+
 ### Two schema facts the lane has wrong
 
 | Lane says | Shipped | Consequence |
@@ -256,8 +408,8 @@ Tables are `ssot-generation.md` §5.1, carried unchanged except where noted.
 | `drop_table_group(table_id, group_key, seq, rolls)` | an **independent** draw unit — the opposite of `effect_container_pool.group`, which is an *exclusion* unit | `rolls` is now the **pre-scale** count read by step 5a |
 | `drop_table_entry(…, entry_kind, ref_id, weight, min/max_count, min/max_ilvl, rarity_floor, rarity_weight_shift_json, enabled)` | typed entries: `equipment\|material\|currency\|insert\|charm\|table\|nothing` | **+ `affix_channel`** (X4) |
 | `item_drop_log(...)` | idempotency, replay, and **the inflow measurement the loot filter needs** | — |
-| `item_generation(instance_id PK, drop_log_id, base_type_id, rarity_ordinal, item_level, socket_count, frame, role)` | the per-instance stamp, written once, never updated | — |
-| `item_loot_pity(player_id, items_since_r4, items_since_r6, updated_utc)` | mirrors `rpg_summon_pity` | — |
+| `item_generation(instance_id PK, drop_log_id, base_type_id, rarity_ordinal, item_level, frame, role)` | the per-instance stamp, written once, never updated | ⛔ **`socket_count` DROPPED** — see below |
+| `item_loot_pity(player_id, items_since_heirloom, items_since_sunwoven, updated_utc)` | mirrors `rpg_summon_pity` | **renamed** — Correction 5; the `r4`/`r6` labels are I12's seven-rung vocabulary |
 | `item_first_clear(player_id, source_kind, source_id, granted_utc)` | first-clear grants | — |
 
 **Reused unchanged:** `effect_container` / `effect_container_pool`, `rarity`,
@@ -267,6 +419,18 @@ Tables are `ssot-generation.md` §5.1, carried unchanged except where noted.
 
 **`item_generation` deliberately does not settle "what an item row is."** It carries only what the
 *pipeline decided*. The durable owned row is module 1's `rpg_item`.
+
+⛔ **`socket_count` is dropped from `item_generation` — it was a third copy of one fact.** Module 16
+derives the count from a seeded stream and states that nothing is stored: *"`socketSeed =
+SeededRng.DeriveStream(roll_seed, "item.socket")` … **Nothing is stored, so nothing can drift**"*
+(`spec-sockets.md:143-145`), and D2 §6 makes `item_socket` **the SSOT** — *"it is not a materialized
+view of anything"* (`spec-sockets.md:29`). A stamp here would be a third representation of the same
+number, and the two that already exist are both authoritative in their own sense (one derivable, one
+durable). **Three copies is how a socket count silently disagrees with the sockets an item has.**
+
+The other `item_generation` columns stay, and the difference is the point: `base_type_id`,
+`rarity_ordinal`, `item_level`, `frame` and `role` are **decisions the pipeline made that nothing else
+records**. `socket_count` is not one of them.
 
 **Retention:** `item_drop_log` ships with a **watermarked tail-trim on day one**, not as a deferral —
 the soul ledger already paid for that lesson. What trims is `context_json` / `result_json` beyond the
@@ -279,9 +443,10 @@ horizon; `item_generation` is the permanent record. **The horizon is the owner's
 | A `drop_table` whose `source_allow` omits `web` | standalone-first rejection (§4.6 rule 2) | import |
 | A PvZ-only entry, or a PvZ source with an equipment-rate or rarity boost | standalone-first rejection | import |
 | A `loot_source` of kind `pvz-run` (no `contentLevel` source exists) | **refused by name**, never defaulted | import |
-| `entry_kind = equipment` with an unknown base-type-set `ref_id` | `UnknownBaseTypeSet` | import |
-| An entry naming an unknown rarity ordinal in `rarity_weight_shift_json` | `UnknownRarity` | import |
-| `affix_channel` not in `{drop, boss}` | `BadParamValue` | import |
+| `entry_kind = equipment` with an unknown base-type-set `ref_id` | `ContentRuleViolated{drop.unknown-base-type-set}` | import |
+| An entry naming an unknown rarity ordinal in `rarity_weight_shift_json` | `ContentRuleViolated{rarity.unknown}` | import |
+| `affix_channel` not in `{drop, boss}` | `BadParamValue` — a **shipped** member (`AtomRejection.cs:30`), reused as-is | import |
+| `entry_kind` in `{insert, charm}` before X7 | `ContentRuleViolated{drop.entry-kind-unavailable}` | import |
 | A `(base type × rarity × ilvl band)` combination whose envelope would narrow | **warning lint** — the author sees it before a player does | import |
 | A narrowed envelope at drop time | `envelope_narrowed` in the log; **narrow `rolls`, never reject a legal drop** | runtime |
 | A drop table referencing disabled content | `enabled = 0` keeps the row and never draws it (E5's rule) | runtime |
@@ -305,7 +470,8 @@ src/FusionRpg.Core/Items/Drops/DropTableModel.cs      new — rows, typed entrie
 src/FusionRpg.Core/Items/Drops/DropEnvelope.cs        new — band ∩ ilvl cap; the collapse rule
 src/FusionRpg.Core/Items/Drops/LootStreams.cs         new — the named stream ids, in one place
 src/FusionRpg.Data/Sqlite/RpgStore.Loot.cs            new — the eight tables, one transaction at step 11
-data/tuning/item-drop-volume.v1.json                  new — ΘPin, base, slope, floor
+data/tuning/item-drop-volume.v1.json                  new — DropChanceOnKillMilli (D38),
+                                                       ΘPin, base, slope, floor (non-kill sources)
 data/seed/loot/                                       new — drop tables as content, hash-covered
 tests/FusionRpg.Core.Tests/Items/DropVolumeTests.cs   new
 ```
@@ -356,7 +522,14 @@ public static long VolumeScaleMilli(int thetaActor, DropVolumeTuning t)
 | `pvz_can_never_be_the_best_source` | set containment at import: no PvZ-only entry, no non-web table, no PvZ rate or rarity boost |
 | `replay_within_one_revision_pair_is_identical` | `(loot_seed, catalog_revision, drop_table_revision)` ⇒ same manifest; **cross-revision difference is informational, never a failure** |
 | `affix_channel_is_authored_and_threaded_to_step_9` | the X4 supply, provable before X4 lands |
-| `pity_fires_where_the_drought_is_real` | R4 floor at 25 items, R6 ramp from 150 with a ceiling at 400 |
+| `pity_fires_where_the_drought_is_real` | asserts the **drought probability** at the threshold, not the threshold — so a reweight moves the number and not the test. Re-solved against module 7's seeded weights (`heirloom`+ = 5.9%, `sunwoven`+ = 1.8%), never against I12's 10.0% / 1.0% |
+| `pity_counters_are_keyed_on_rung_ids` | Correction 5 — no `r4`/`r6`, no ordinal, no positional label anywhere in `Items/Drops/` |
+| `step_10_is_a_documented_no_op_and_reserves_its_stream` | resolves to 0 sockets, still derives `item.socket`, and every other draw is byte-identical to a run with the step removed |
+| `an_insert_or_charm_entry_is_refused_by_name_until_x7_lands` | `ContentRuleViolated{drop.entry-kind-unavailable}` — never a silent drop |
+| `smart_loot_is_off_and_the_draw_is_uniform_over_legal_base_types` | the deferral, written to flip when X1 and X4 land |
+| `context_json_carries_smartLoot_and_squadFrameMix_from_the_first_drop` | the replay input exists before the feature does, so §4.3 never has to be retrofitted |
+| `at_least_one_first_clear_grant_is_rung_100` | §3.8's deterministic source for `almanac`, as a corpus test |
+| `item_generation_has_no_socket_count_column` | the three-copies defect, closed by schema rather than by convention |
 | `pity_cannot_be_banked_in_trivial_content` | item level comes from content, so a forced epic at ilvl 1 is an ilvl-1 epic |
 
 ## Boundaries
@@ -365,11 +538,16 @@ public static long VolumeScaleMilli(int thetaActor, DropVolumeTuning t)
 correlation id server-side; persist in one transaction; roll sockets last; narrow a tight envelope and
 record it; keep every volume number in `data/tuning/item-drop-volume.v1.json`.
 
-**Ask first:** the volume **slope** (the one number that decides whether a veteran sees 2× or 10× the
-drops); the `item_drop_log` retention horizon (I12 §11 Q6); whether uniques get pity (§11 Q2); whether
-smart loot is on by default (§11 Q3); adding a third `affix_channel` value.
+**Ask first:** ~~the volume **slope**~~ — **settled by D38**: flat 50‰ on kill, and `Θ`-scaling
+survives only on non-kill sources. The `item_drop_log` retention horizon (I12 §11 Q6); whether uniques get pity (§11 Q2); which
+content id carries the rung-100 first-clear grant; adding a third `affix_channel` value.
+**No longer ask-first:** *"is smart loot on by default"* — it is deferred with a reason and a trigger,
+and the answer while it is deferred is `false`.
 
-**Never:** ⛔ add a drop cap, an inventory ceiling, or any cost curve that rises with player power —
+**Never:** re-derive a socket count into `item_generation` — `item_socket` is the SSOT (D2 §6) and the
+draw is reproducible from `roll_seed`. Never key a pity counter on a positional label or an ordinal
+rather than a rung id. Never bias the step-6 base-type draw before X1 and X4 land. ⛔ Never add a drop
+cap, an inventory ceiling, or any cost curve that rises with player power —
 **D26**. Never write a private `f(level)` for loot — D18 and `ssot-power-scale.md` §10's closed
 inventory. Never let item level read the player. Never default a `pvz-run` content level. Never let a
 volume change touch affix **composition** — that is L0's (X4). Never reject a legal drop from legal
@@ -392,3 +570,20 @@ content because a pool narrowed.
       one-call change.
 - [ ] Replay inside one revision pair is identical; cross-revision difference is informational.
 - [ ] Standalone-first is enforced by import-time set containment, in CI, not in prose.
+- [ ] `RecommendedLevel` appears nowhere in `Items/Drops/`, and nowhere in this spec or
+      `ssot-generation.md` **except** where it is explicitly named as the retired name — the field is
+      `WaveDef.ContentIndex` (`Battle/WaveCatalog.cs:21`) and it **is** `Θ_content`. The lane's 7
+      occurrences plus `decision-d4-content-budget.md`'s one are filed as a correction from here.
+- [ ] Pity counters are keyed on rung ids (`heirloom`, `sunwoven`), and their thresholds are re-solved
+      against module 7's seeded weights rather than inherited from I12's seven-rung table.
+- [ ] `almanac` has a named deterministic source in the shipped corpus, proven by a CI corpus test.
+- [ ] **Smart loot is deferred, not omitted**: the reason, the trigger (X1 and X4), the owner and the
+      reserved `context_json` keys are all written down, and the uniform draw carries a comment saying
+      it is a deferral.
+- [ ] Step 10 and the `insert` / `charm` entry kinds ship as **documented no-ops** — step 10 reserves
+      its stream, the two entry kinds are refused by name, and both tests are written to flip.
+- [ ] `item_generation` has no `socket_count` column.
+- [ ] **No new member of the closed 33-code list** (`AtomRejection.cs`, verified 2026-09-04: 33 codes
+      plus `None`, and `ContentRuleViolated` is not yet among them). Shipped codes are reused where they
+      fit (`BadParamValue`); everything else this module needs is a namespaced
+      `ContentRuleViolated{drop.*}` / `{rarity.*}` per §2b.1.

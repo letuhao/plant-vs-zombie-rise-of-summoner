@@ -33,7 +33,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.irrevocable-lanyard",
       "flavorKey": "flavor.base.irrevocable-lanyard",
       "flavor": "Once tied, the knot cannot be undone. You carry a binding that cannot be broken.",
@@ -100,7 +100,7 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -136,10 +136,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.substantial-collar",
       "flavorKey": "flavor.base.substantial-collar",
       "flavor": "Wrought heavier than fashion calls for, a weight worn on purpose. What it takes, it gives partway back.",
@@ -206,10 +206,10 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.worked-pendant",
       "flavorKey": "flavor.base.worked-pendant",
       "flavor": "Hammered past the point a smith would call finished. The extra blows are why it still bites.",
@@ -245,7 +245,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.gleaming-necklace",
       "flavorKey": "flavor.base.gleaming-necklace",
       "flavor": "Polished until it throws back more light than it should. Something in the metal keeps mending itself.",
@@ -277,7 +277,7 @@
       "class": "torc",
       "band": "b",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -312,10 +312,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.expired-padlock",
       "flavorKey": "flavor.base.expired-padlock",
       "flavor": "The contract it guarded is void, but the lock itself remains. What was sealed cannot be forgotten.",
@@ -350,7 +350,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.final-chain",
       "flavorKey": "flavor.base.final-chain",
       "flavor": "Forged to mark the end of all negotiation. No appeal remains once this is worn.",
@@ -418,10 +418,10 @@
       "class": "seal",
       "band": "b",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.unbreakable-trophy",
       "flavorKey": "flavor.base.unbreakable-trophy",
       "flavor": "A prize that will outlast you. Wearing it declares victory that time itself cannot erase.",

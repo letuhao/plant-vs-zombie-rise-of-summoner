@@ -1,0 +1,83 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:47:37Z",
+      "minorityValues": {
+        "aptitudePrimary": "Ferocity"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "Onslaught",
+    "attackTempo": "steady",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "mimicry-grain"
+    ],
+    "gameTypeId": 303,
+    "posture": "Finesse",
+    "pure": false,
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "Its ability to infinitely scale both attack and resilience through repeated transformations allows it to eventually overwhelm any opponent through sheer statistical growth.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "ImitateWheat",
+    "targetPreference": "backline",
+    "threatBand": "tyrant",
+    "traits": [
+      "adaptive-morphology",
+      "stat-scaling",
+      "reactive-evolution"
+    ],
+    "variants": [
+      "mutated",
+      "blessed",
+      "cursed"
+    ]
+  }
+]

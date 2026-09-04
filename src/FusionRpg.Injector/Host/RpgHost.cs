@@ -61,9 +61,10 @@ public static class RpgHost
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
             FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "loam.v1.json"))));
-        FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v1.json"))));
+        var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
+            System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "world.v4.json")));
+        FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
+        FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
         FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
             FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "souls.v1.json"))));
@@ -84,7 +85,7 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "status.v1.json"))));
         FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
             FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v1.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v2.json"))));
         // T4.7 step 2 / T4.8 (catalog-runtime): behaviour-preserving today — the SAME compiled
         // roster `DemonSpeciesCatalog.All` always read, now routed through Configure. NOT the
         // store-backed flip (SpeciesSnapshot.cs's own doc comment says why).

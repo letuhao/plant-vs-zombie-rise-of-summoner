@@ -20,15 +20,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:51:00Z",
-      "minorityValues": {
-        "rarity": "heirloom"
-      },
+      "emittedUtc": "2026-09-04T10:38:24Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -44,8 +43,8 @@
       "Summonable"
     ],
     "aptitudePrimary": "Bulwark",
-    "aptitudeSecondary": "Fortitude",
-    "attackTempo": "steady",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
@@ -53,28 +52,30 @@
     "family": [
       "fortification-flora"
     ],
-    "gameTypeId": 225,
+    "gameTypeId": 1266,
     "posture": "Bastion",
-    "pure": false,
-    "rarity": "cultivated",
-    "reach": "melee",
-    "reason": "The creature's ability to grant steel-like durability and explosive resistance to other plants makes it a critical strategic asset rather than a mere harbinger.",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a defensive tank with high resilience, but it lacks offensive capabilities or world-ending scale required for a calamity rating.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "HelmetPlant",
+    "speciesId": "HugeWallNut",
     "targetPreference": "frontline",
     "traits": [
-      "symbiotic-hardening",
-      "low-profile",
-      "explosive-resistance"
+      "heavy-armored",
+      "size-scaling",
+      "defensive-synergy",
+      "crush-immune"
     ],
     "variants": [
       "normal",
-      "blessed"
+      "ancient",
+      "mutated"
     ],
-    "verdict": "too-low"
+    "verdict": "too-high"
   }
 ]

@@ -1,7 +1,7 @@
 # Spec: `uniques`
 
 **Module id:** `uniques` · **Program:** [item](../item-map.md) · **Build order:** 17 of 21
-**Depends on:** `affix-legality` (8), `power-reads` (9)
+**Depends on:** `affix-legality` (8), `item-power-reads` (9)
 **Rulings:** D7 (rule 7 lifted), D15, D16, D26, D27 · lane [G1 `ssot-uniques.md`](ssot-uniques.md)
 
 ## Objective
@@ -152,7 +152,25 @@ it.**
 | **Why the closed vocabulary cannot express it** | `stat.modify`'s ops are `Flat\|Increased\|More` and cannot emit `Override` (`AtomKindRegistry.cs:220`); `stat.derived` has `Replace` but replacing a derived channel is not converting a damage type |
 | **Blocked on** | the damage consumer/applier spec, **which has no owner today** |
 | **Standing rule** | *do not add the kind before the consumer* — that is the `status.expose.*` and `stat.derived` mistake for the third time |
-| **The open question** | *deferred until the applier spec has an owner*, or *refused permanently*? **The owner decides** (`ssot-uniques.md` §10.1). Leaving it open and letting it arrive one exception at a time is the outcome neither answer permits |
+| ~~**The open question**~~ | ✅ **RESOLVED — D39: add `Override`.** Owner, 2026-09-04: *"add override, this is funny feature."* Damage-type conversion ships as a real capability |
+
+### ⭐ D39 — `Override` is added, and the consumer comes with it
+
+**The ruling deliberately overrides a standing rule, so the override is stated rather than buried.**
+That rule is *do not add the kind before the consumer* — the `status.expose.*` and `stat.derived`
+mistake, made twice. D39 says build it anyway, because the feature is worth it.
+
+⛔ **Therefore the consumer is part of the ask, not a follow-up.** `Override` added to
+`stat.modify`'s op set (`AtomKindRegistry.cs:220`, today `Flat | Increased | More`) **and** a damage
+applier that reads it. An `Override` that binds to nothing is the third instance of the same defect,
+and this ruling is the reason to avoid it, not permission to repeat it.
+
+| | |
+|---|---|
+| Request goes to | **effect-atom** — the op set is theirs |
+| Shape of the ask | *"add `Override`, and here is the consumer that reads it"* — never the op alone |
+| Item-side surface | a unique's conversion line on the item card (module 10), and a `battle-only` presentation tag if it does not resolve on the lawn |
+| Blocked until | the applier exists. **This is a wiring order, not a refusal** |
 
 ## Commands
 
@@ -239,7 +257,8 @@ counter-pressure against content; run every cross-row check at import, never at 
 atom row; carry `flavour_key` as a key, never a literal.
 
 **Ask first:** ⛔ **`damage.convert`, a 13th atom kind** — recorded, blocked on an applier spec with no
-owner, and the deferred-vs-refused call is the owner's. Adding **`ContentRuleViolated`** to
+owner — ✅ but the deferred-vs-refused call is **RULED as D39: neither. `Override` is added**, with the
+damage applier as part of the same ask. Adding **`ContentRuleViolated`** to
 `AtomRejectionReason` (effect-atom's closed enum, 34 today). Moving the rung floor below ordinal 30
 (§10.7). Whether `counter_pressure` stays a hard requirement at all (§10.8) — some of the genre's
 best-loved uniques have no drawback. Whether a unique is salvageable (§10.6, recommendation: no).

@@ -30,7 +30,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "trivial"
       },
       "socketMax": 0,
@@ -69,7 +69,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.filamentous-shade",
       "flavorKey": "flavor.base.filamentous-shade",
       "flavor": "A net of hair-fine threads that grows denser where the light is strongest.",
@@ -105,7 +105,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.tender-veil",
       "flavorKey": "flavor.base.tender-veil",
       "flavor": "Young growth that shields without stiffening, flexible as the wind that shapes it.",
@@ -138,7 +138,7 @@
       "class": "fibre",
       "band": "a",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -177,7 +177,7 @@
         "family": "atom.vitality",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.wispy-trellis",
       "flavorKey": "flavor.base.wispy-trellis",
       "flavor": "A framework of gossamer vines that climbs and spreads, finding strength in number.",
@@ -213,7 +213,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.slender-parasol",
       "flavorKey": "flavor.base.slender-parasol",
       "flavor": "A thin canopy that rises on lean stems, shade bought with grace instead of weight.",
@@ -246,7 +246,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -321,7 +321,7 @@
         "family": "atom.fortitude",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.layered-spread",
       "flavorKey": "flavor.base.layered-spread",
       "flavor": "Each husk shell rests on the one below, turning aside what strikes.",
@@ -354,7 +354,7 @@
       "class": "husk",
       "band": "a",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "medium"
       },
       "socketMax": 1,
@@ -429,7 +429,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.desiccated-shade",
       "flavorKey": "flavor.base.desiccated-shade",
       "flavor": "Completely dried to brittleness and then bound tight, it shelters by refusing to bend.",

@@ -65,10 +65,10 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.gardener",
+        "family": "atom.dooming",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.engraved-kazoo",
       "flavorKey": "flavor.base.engraved-kazoo",
       "flavor": "A humble toy that grows something where it was played.",
@@ -104,7 +104,7 @@
         "family": "atom.volley",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.modest-rattle",
       "flavorKey": "flavor.base.modest-rattle",
       "flavor": "When shaken, it calls down a scatter of reinforcements.",
@@ -136,10 +136,10 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.cherry-bloom",
+        "family": "atom.gravemaking",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.dinged-bell",
       "flavorKey": "flavor.base.dinged-bell",
       "flavor": "It has rung many times. The lawn remembers each one.",
@@ -171,7 +171,7 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.flash-freeze",
+        "family": "atom.summoner",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -209,7 +209,7 @@
         "family": "atom.dooming",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.slight-chime",
       "flavorKey": "flavor.base.slight-chime",
       "flavor": "A delicate call that darkens the board.",
@@ -244,7 +244,7 @@
         "family": "atom.firelining",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.twisted-horn",
       "flavorKey": "flavor.base.twisted-horn",
       "flavor": "A curved call that leaves embers where allies stand.",
@@ -279,7 +279,7 @@
         "family": "atom.gravemaking",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.understated-buzzer",
       "flavorKey": "flavor.base.understated-buzzer",
       "flavor": "Quiet and insistent. Graves open where it sounds.",
@@ -312,7 +312,7 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.gravedigging",
+        "family": "atom.gravemaking",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -348,10 +348,10 @@
       "class": "torc",
       "band": "a",
       "implicit": {
-        "family": "atom.terraforming",
+        "family": "atom.summoner",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 1,
       "iconKey": "icon.base.burnished-gong",
       "flavorKey": "flavor.base.burnished-gong",
       "flavor": "A deep resonance reshapes the ground where it sounds.",
@@ -422,7 +422,7 @@
         "family": "atom.volley",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.gleaming-rattle",
       "flavorKey": "flavor.base.gleaming-rattle",
       "flavor": "Its bright surface catches eyes from across the field, drawing aid.",

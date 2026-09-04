@@ -30,10 +30,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-toughness",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.grooved-shuck",
       "flavorKey": "flavor.base.grooved-shuck",
       "flavor": "A weathered husk split by seasons. Its ridges catch and slow what passes through.",
@@ -67,10 +67,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.corky-casing",
       "flavorKey": "flavor.base.corky-casing",
       "flavor": "Sponge-light yet unyielding, pocked with tiny chambers. It absorbs harm without breaking.",
@@ -108,7 +108,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.rough-carapace",
       "flavorKey": "flavor.base.rough-carapace",
       "flavor": "Bark so coarse it seems to have been scraped clean by time. Splinters repel more than they hurt.",
@@ -180,10 +180,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.lichened-shroud",
       "flavorKey": "flavor.base.lichened-shroud",
       "flavor": "Grey-green growth has woven a net across the bark. The symbiosis makes it stronger than either alone.",
@@ -217,10 +217,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.mossy-pod",
       "flavorKey": "flavor.base.mossy-pod",
       "flavor": "Soft moss clings to hardwood underneath, a living seal against decay and damage both.",
@@ -258,7 +258,7 @@
         "family": "atom.mending",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.gnarled-rind",
       "flavorKey": "flavor.base.gnarled-rind",
       "flavor": "Twisted beyond all recognition by decades of wind and ice. What looks like damage is precisely the protection.",
@@ -296,7 +296,7 @@
         "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.hoary-armature",
       "flavorKey": "flavor.base.hoary-armature",
       "flavor": "Frost-white with age, its lattice frame has outlasted the wood it once supported. Now it stands alone.",
@@ -331,10 +331,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.seasoned-sheath",
       "flavorKey": "flavor.base.seasoned-sheath",
       "flavor": "Each year adds a ring of hardness. This bark has weathered a century of storms without flinching.",
@@ -371,7 +371,7 @@
         "family": "atom.mending",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 3,
       "iconKey": "icon.base.cracked-capsule",
       "flavorKey": "flavor.base.cracked-capsule",
       "flavor": "Fractured from dryness but sealed shut by its own contraction. Nothing passes through the cracks.",
@@ -406,10 +406,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.shield-regen",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.scabrous-testa",
       "flavorKey": "flavor.base.scabrous-testa",
       "flavor": "Roughened by age and use, its surface is a maze that confuses any blade seeking purchase.",
@@ -443,10 +443,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.warded",
+        "family": "atom.mending",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.inert-periderm",
       "flavorKey": "flavor.base.inert-periderm",
       "flavor": "No longer living, yet unbreakable. It has given up growth to become something harder and colder.",

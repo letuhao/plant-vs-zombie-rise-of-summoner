@@ -104,7 +104,7 @@
                  },
     "unendingCount":  0,
     "_meta":  {
-                  "measuredAt":  "2026-09-03T13:27:16.3175775Z",
+                  "measuredAt":  "2026-09-04T13:37:04.4719872Z",
                   "conditions":  "data/tuning/aptitudes.v5.json (live shipped config -- P8.2 stamina bind + P8.3 mitigation dial, and this tool\u0027s own resolver was ported 2026-08-27 to apply that dial the same way Core\u0027s AptitudeResolver.EffectiveKMilli does). FORCE=fire/FINESSE=air/BASTION=earth (scratch copies of tools/CombatSim/builds/*.json with only element changed, never overwriting the tracked fire/fire/fire files). Theta=100, seed 8888, 3000 trials/arrow. Elements genuinely live: closed-form and simulated win shares both move with the matchup (P8.1\u0027s own headline finding, e.g. FORCE v FINESSE closed-form ~98% vs simulated ~68%), not the ~100%/~0% same-element result the tracked builds alone would have produced."
               }
 }

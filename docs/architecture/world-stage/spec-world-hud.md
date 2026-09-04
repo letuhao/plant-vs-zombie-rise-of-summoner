@@ -102,8 +102,12 @@ What is real, and it is far better prepared than "a new mechanic" suggests:
 [`TurnCalendar.cs`](../../../src/FusionRpg.Core/World/Turn/TurnCalendar.cs) runs a complete clock — a
 turn is a day, `DaysPerWeek` days a week, `WeeksPerMonth` weeks a month (`:22-24`), rolled purely from
 `(turn, seed)` with per-boundary derived RNG streams (`:41`, `:48`), every rate already tunable
-(`SpecialWeekChanceMilli`, `SpecialMonthChanceMilli`, `PlagueChanceMilli`, `:27-29`). The rolls reach
-the client as `calendar` report entries (`TurnReportKinds.Calendar`, `TurnReport.cs:7`).
+(`SpecialWeekChanceMilli`, `SpecialMonthChanceMilli`, `PlagueChanceMilli`, `:27-29`). **Corrected
+post-`world-wire` (world-stage W15):** the roll reaches the client on `WorldStateDto.Calendar`
+(`TurnCalendar.Roll(world.CurrentTurn, seed)`, computed server-side on every poll), not as a `calendar`
+report entry — `TurnEngine.cs` only emits that entry on an actual week boundary, so a report-entry
+read is blank six turns out of seven. The DTO carries `DaysPerWeek`/`WeeksPerMonth` alongside the
+current roll; the seed itself and any future roll never reach the wire.
 
 The file's own comment states the deferral: *"Wave 1 records the rolls; the economic effects land with
 sector-development, which is the module that owns growth"* (`:6-7`). So seasons are the **effects half
@@ -236,7 +240,7 @@ web/fusion-rpg-web/src/
     ComponentSplit.tsx       → the six states, max three rows
     ComponentSplit.test.tsx
     componentSplit.ts        → grouping + sort + fold — pure
-    calendarLabel.ts         → week/month + flavour from `calendar` report entries
+    calendarLabel.ts         → week/month + flavour from `WorldStateDto.Calendar` (world-stage W15)
   theme/
     kit.css / band model     → band-2 scrim covers band 0 only
 docs/architecture/game-gui-principles.md   → GG-5's band table gains the band-1 exemption
@@ -289,7 +293,8 @@ asserting it in prose.
    conditional occupant.
 6. **The denominator is honest** — with `EffectiveCapacity` unprojected, the stock reads its
    `Pending` reason rather than a fabricated bar, and **no test fixture makes the client derive it**.
-7. **The calendar slot** — renders week and month with flavour from `calendar` report entries, and
+7. **The calendar slot** — renders week and month with flavour from `WorldStateDto.Calendar`
+   (world-stage W15), not from `calendar` report entries (blank six turns out of seven), and
    contains no season vocabulary. A guard against re-importing the plate's uncorrected §G.1 label.
 8. **Type floor** — no top-strip reading resolves to `--text-2xs`, `--text-xs` or `--faint`, and the
    strip survives a 200% text scale without clipping or reordering.
@@ -315,8 +320,9 @@ asserting it in prose.
    of the frame.
 2. The top strip renders income · upkeep · net · stock, each with its unit family, and the stock's
    missing denominator renders a player-readable `Pending` reason rather than an inferred bar.
-3. Turn and calendar render from `WorldHeaderDto.CurrentTurn` and `calendar` report entries; **no
-   season vocabulary appears anywhere.**
+3. Turn renders from `WorldHeaderDto.CurrentTurn`; the calendar renders from `WorldStateDto.Calendar`
+   (world-stage W15), never from `calendar` report entries; **no season vocabulary appears
+   anywhere.**
 4. All six component-split states render, capped at three rows, with starving sorted first and never
    folded, and the empty state is a sentence.
 5. **A band-2 layer does not scrim band 1**, asserted by a test — and the rule is written into GG-5's

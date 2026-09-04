@@ -11,7 +11,9 @@ from seedsmith.adapters.demons.anchor.derive import (
     clamp_variant_count,
     derive_posture,
     derive_pure,
+    resolve_unresolved_threat_band,
 )
+from seedsmith.adapters.demons.power.bands import ThreatTuning
 
 
 def test_truncates_to_the_bands_high_end():
@@ -82,3 +84,20 @@ def test_derive_pure_false_when_primary_aptitude_is_unresolved():
 
 def test_derive_pure_false_when_secondary_aptitude_is_unresolved():
     assert derive_pure("Might", "unresolved") is False
+
+
+# ---- resolve_unresolved_threat_band (2026-09-04, demon-corpus-self-heal F1) ---------------------
+
+def test_a_resolved_threat_band_passes_through_unchanged():
+    tuning = ThreatTuning.load()
+    value, was_deterministic = resolve_unresolved_threat_band("tyrant", tuning=tuning)
+    assert value == "tyrant"
+    assert was_deterministic is False
+
+
+def test_unresolved_threat_band_resolves_to_the_real_sanctioned_default():
+    tuning = ThreatTuning.load()
+    value, was_deterministic = resolve_unresolved_threat_band("unresolved", tuning=tuning)
+    # The exact value the real, committed demon-threat.v1.json names — never invented here.
+    assert value == tuning.threshold_for_rung(tuning.inferred_default_rung).id
+    assert was_deterministic is True

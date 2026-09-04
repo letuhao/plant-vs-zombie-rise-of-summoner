@@ -20,12 +20,13 @@
       "basis": "observed",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "split",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:51:30Z",
+      "emittedUtc": "2026-09-04T10:12:15Z",
       "minorityValues": {
         "elementPrimary": "light"
       },
@@ -45,18 +46,18 @@
     ],
     "aptitudePrimary": "Fortitude",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "observed",
     "deployMode": "HypnoAlly",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Matryoshka Construct"
+      "matryoshka-construct"
     ],
     "gameTypeId": 22,
     "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
+    "rarity": "fused",
     "reach": "melee",
     "reason": "The creature's high resilience and ability to spawn new entities upon armor destruction suggest a persistent, escalating threat that exceeds a mere tyrant.",
     "resourceProfile": [
@@ -65,15 +66,15 @@
     ],
     "side": "zombie",
     "speciesId": "DollGold",
-    "targetPreference": "frontline",
+    "targetPreference": "backline",
     "traits": [
-      "Layered Composition",
-      "Material Regression",
-      "Successive Rebirth"
+      "layered-composition",
+      "material-succession",
+      "structural-shedding"
     ],
     "variants": [
-      "shiny",
-      "normal"
+      "normal",
+      "shiny"
     ],
     "verdict": "too-low"
   }

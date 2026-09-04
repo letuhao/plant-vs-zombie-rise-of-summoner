@@ -13,21 +13,23 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 2,
+        "kit-shape": 1,
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "split",
         "deployMode": "high",
-        "elementPrimary": "split",
-        "rarity": "high"
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:35:51Z",
+      "emittedUtc": "2026-09-04T11:52:34Z",
       "minorityValues": {
-        "elementPrimary": "earth"
+        "attackTempo": "steady"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -43,39 +45,40 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Retribution",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "attackTempo": "slow",
+    "basis": "inferred",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "confectionary-botanical"
+      "confectionary-botanical",
+      "projectile-catalyst"
     ],
-    "gameTypeId": 1003,
-    "posture": "Bastion",
+    "gameTypeId": 948,
+    "posture": "Force",
     "pure": true,
-    "rarity": "fused",
-    "reach": "melee",
-    "reason": "The creature is a specialized defensive unit that heals from specific damage types and lacks the scale or destructive capability to be classified as a harbinger.",
+    "rarity": "chimeric",
+    "reach": "short",
+    "reason": "Its ability to manipulate and multiply projectile damage across the entire field, combined with automated area-of-effect attacks and explosive death triggers, makes it a high-scale battlefield disruptor.",
     "resourceProfile": [
       "hp",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "CherryNut",
-    "targetPreference": "backline",
+    "speciesId": "UltimateStarTorch",
+    "targetPreference": "swarm",
+    "threatBand": "calamity",
     "traits": [
-      "cherry-bomb immunity",
-      "cherry-bomb absorption",
-      "post-mortem explosive release"
+      "bullet-shaping",
+      "star-shaped-trajectory",
+      "explosive-fruit-generation",
+      "elemental-amplifier"
     ],
     "variants": [
-      "normal",
       "mutated",
       "blessed"
-    ],
-    "verdict": "too-high"
+    ]
   }
 ]

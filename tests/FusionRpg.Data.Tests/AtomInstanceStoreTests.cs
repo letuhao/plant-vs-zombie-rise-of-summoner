@@ -39,7 +39,7 @@ public class AtomInstanceStoreTests : IDisposable
             {
                 AtomId = AtomRow.DeriveId(family, "", tier),
                 KindId = "stat.modify", FamilyId = family, Variant = "", Tier = tier,
-                ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
+                Name = family, ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":45}",
             }).IsOk);
 
         foreach (var id in new[] { "trait.stalwart", "item.ember-band" })

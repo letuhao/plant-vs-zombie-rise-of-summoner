@@ -1,0 +1,82 @@
+[
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:45:10Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "undead-flora"
+    ],
+    "gameTypeId": 259,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "firstseed",
+    "reach": "short",
+    "reason": "The creature's ability to convert plants into its own kind, suppress resource production, and inflict widespread status effects makes it a world-altering threat consistent with a calamity.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "zombie",
+    "speciesId": "UltimateEndoflameZombie",
+    "targetPreference": "structure",
+    "traits": [
+      "cycle-shifting",
+      "status-imposing",
+      "resource-denial",
+      "soul-infused",
+      "immortal-budding"
+    ],
+    "variants": [
+      "ancient",
+      "corrupted",
+      "normal"
+    ],
+    "verdict": "agree"
+  }
+]

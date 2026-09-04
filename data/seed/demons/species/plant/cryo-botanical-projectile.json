@@ -20,12 +20,13 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:06:37Z",
+      "emittedUtc": "2026-09-04T10:42:54Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -43,13 +44,13 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "quick",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Botanical Projectile"
+      "cryo-botanical projectile"
     ],
     "gameTypeId": 1375,
     "posture": "Force",
@@ -63,12 +64,91 @@
     ],
     "side": "plant",
     "speciesId": "IceCabbage",
-    "targetPreference": "structure",
+    "targetPreference": "frontline",
     "traits": [
-      "Cryogenic Impact",
-      "Thermal Excitement",
-      "Chain-Reaction Burst",
-      "Status-Triggered Velocity"
+      "cryogenic-impact",
+      "chain-reaction",
+      "metabolic-acceleration"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 2,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:58:53Z",
+      "minorityValues": {
+        "aptitudePrimary": "Pierce"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Precision",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-botanical projectile"
+    ],
+    "gameTypeId": 1443,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The creature functions as a standard projectile unit with moderate damage and utility, fitting the profile of a low-level nuisance rather than a major threat.",
+    "resourceProfile": [
+      "hp",
+      "poise"
+    ],
+    "side": "plant",
+    "speciesId": "MagicSnowPea",
+    "targetPreference": "swarm",
+    "traits": [
+      "ricocheting projectiles",
+      "frost-infusion",
+      "synergistic freezing"
     ],
     "variants": [
       "normal",

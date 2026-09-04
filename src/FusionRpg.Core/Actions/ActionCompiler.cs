@@ -63,7 +63,7 @@ public static class ActionCompiler
             row.ActionId, row.Kind, row.Rung, row.Tags, row.Enabled, row.Revision, row.Grantable, row.DefaultAttackEligible,
             row.ContainerId, row.Envelope, TargetSpecCompiler.Compile(row.Targeting),
             row.MinRange, row.MaxRange, row.RangeChannel, row.RequiresLineOfSight,
-            conditionResult.Compiled, scaledCosts, scopes);
+            conditionResult.Compiled, scaledCosts, scopes, row.Category);
 
         return (ActionRejection.Ok, compiled);
     }

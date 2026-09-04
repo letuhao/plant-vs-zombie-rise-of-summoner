@@ -52,7 +52,7 @@ four bands, and they are the four ids already shipped."* **Verified false as of 
 
 Consequence: I9's *"single hardest dependency in this lane"* no longer exists. Module 7 `rarity-bands`
 seeds the `rarity` table's rows; this module reads `DemonRarityLadder` for material ids and the seeded
-`rarity.ordinal` for curve input. **Costs key on ordinal 0–9, band-linear becomes rung-linear.**
+`rarity.ordinal` for curve input. **⛔ **CORRECTED 2026-09-04 — costs key on the RUNG INDEX 0–9, which is *not* `rarity.ordinal`.** `rarity.ordinal` is **10…100** (`_registry/core.v1.json`), and `spec-rarity-bands.md:307` makes writing an enum member index into it a **Never**. Reading `rarity.ordinal` into `b` would make every cost row and every salvage coefficient wrong by **10×**. The field is `TargetRungIndex`, derived via `DemonRarityLadder`, band-linear becomes rung-linear.**
 
 ### The five spends — the artefact modules 15 and 16 cite
 
@@ -223,7 +223,11 @@ complete list."* Verified today: **nine**, in five files.
 | `src/FusionRpg.Data/Sqlite/RpgStore.Fusion.cs` | `395` |
 | `src/FusionRpg.Data/Sqlite/Migrations/ShardRungs.cs` | `48`, `71`, `89` (+ doc comments at `11`, `16`, `18`) |
 
-Also note the DDL is at `RpgStore.cs:573-579`, **not** `:520-526` as I9 cites. **Decider: the owner.**
+Also note the DDL is at `RpgStore.cs:573-579`, **not** `:520-526` as I9 cites.
+
+✅ **The rename is RULED (confirmed 2026-09-04):** `rpg_demon_materials` → `rpg_materials` proceeds.
+⚠ **Nine** SQL sites across five files — the table above — not the four I9 §6.4 calls *"the complete
+list"*. `Migrations/ShardRungs.cs` post-dates the lane, which is how the count drifted.
 
 ### Overflow
 
@@ -312,8 +316,8 @@ inline; spend in fixed class order inside one transaction; return the recorded o
 correlation; write nothing on a refusal; keep every quantity in `data/tuning/materials.v1.json`.
 
 **Ask first:** a **sixth spend class** — a lane wanting one must say which of the five questions is
-unanswerable; the `rpg_demon_materials` → `rpg_materials` rename (**owner's word, nine SQL sites, not
-scheduled**); a fourth catalyst; adding an `operation` verb (it needs an executor and an owning module).
+unanswerable; ✅ ~~the `rpg_demon_materials` → `rpg_materials` rename~~ — **confirmed 2026-09-04 and
+scheduled** (⚠ nine SQL sites across five files); a fourth catalyst; adding an `operation` verb (it needs an executor and an owning module).
 
 **Never:** a cost term that reads the player's `Θ`, level, power index, item count, or any wall-clock or
 per-day counter (**D26**). Never a source-tagged material id (`essence.fire.pvz`) — the injector

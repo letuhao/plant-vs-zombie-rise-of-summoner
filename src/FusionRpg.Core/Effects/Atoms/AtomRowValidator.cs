@@ -189,6 +189,16 @@ public static class AtomRowValidator
         if (!string.IsNullOrWhiteSpace(row.PowerOverrideJson) && string.IsNullOrWhiteSpace(row.PowerNote))
             return Fail(AtomRejectionReason.MissingPowerNote, row.AtomId ?? "(no id)");
 
+        // C3 (item-ideal.md, durable-ownership) — last, deliberately. row.Name is never validated
+        // elsewhere: every other check in this file reads `def.Name`, a PARAMETER definition's name,
+        // never the atom's own display name. An empty one loads clean today and only surfaces as a
+        // blank line wherever the name is rendered. Placed after every structural/kind/param check so
+        // a row with a real defect is refused for THAT reason, not shadowed by the missing name — a
+        // more specific refusal is more useful to the author than a generic one. First real consumer
+        // of ContentRuleViolated (§2b.1).
+        if (string.IsNullOrWhiteSpace(row.Name))
+            return AtomRejection.ContentRule("atom.empty-name", $"'{row.AtomId}' has no display name");
+
         return AtomRejection.Ok;
 
         AtomRejection Fail(AtomRejectionReason reason, string detail) =>

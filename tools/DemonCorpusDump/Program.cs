@@ -43,7 +43,7 @@ var tuningDir = new[]
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "data", "tuning")
     }
     .Select(Path.GetFullPath)
-    .FirstOrDefault(d => File.Exists(Path.Combine(d, "derived-stats.v1.json")));
+    .FirstOrDefault(d => File.Exists(Path.Combine(d, "derived-stats.v2.json")));
 if (tuningDir is null)
 {
     Console.Error.WriteLine($"no tuning dir found (looked in {Path.Combine(dataDir, "tuning")} and data/tuning)");
@@ -51,7 +51,7 @@ if (tuningDir is null)
 }
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
 
 var store = new RpgStore(dataDir);
 store.Init();

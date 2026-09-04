@@ -33,8 +33,13 @@ public static class BattleReporting
         if (outcome.GuardCleared && request.SlotIndex is { } slotIndex)
             next = BattleApplication.ClearGuard(next, request.LocationId, slotIndex);
 
+        // `LocationId` is "sector id, or lane id for a crossing" (`BattleSeam.cs:34`) — a lane-kind
+        // battle must not put a lane id in the sector slot, which is exactly the class of bug
+        // world-stage W13 exists to fix elsewhere in `MovementPhase.cs`; this line does not
+        // reintroduce it for the one battle kind that can carry a lane id here.
         report.Add(phase, TurnReportKinds.Battle, request.BattleId,
-            $"{request.Kind}:{request.LocationId}:{outcome.WinnerEntityId ?? "none"}");
+            $"{request.Kind}:{request.LocationId}:{outcome.WinnerEntityId ?? "none"}",
+            sectorId: request.Kind == BattleKinds.Lane ? null : request.LocationId);
 
         return next;
     }

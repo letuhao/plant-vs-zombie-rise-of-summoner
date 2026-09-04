@@ -19,16 +19,16 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
-        "elementPrimary": "split",
-        "rarity": "split"
+        "elementPrimary": "high",
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:50:50Z",
+      "emittedUtc": "2026-09-04T11:13:27Z",
       "minorityValues": {
-        "elementPrimary": "dark",
-        "rarity": "chimeric"
+        "aptitudePrimary": "Vigor"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -52,31 +52,112 @@
     "elementPrimary": "light",
     "elementSecondary": "none",
     "family": [
-      "Gacha-Construct"
+      "gacha-construct"
     ],
-    "gameTypeId": 215,
+    "gameTypeId": 110,
     "posture": "Force",
     "pure": true,
-    "rarity": "heirloom",
+    "rarity": "cultivated",
     "reach": "melee",
-    "reason": "The creature functions as a high-health summoner with RNG mechanics rather than a world-ending threat capable of a calamity rating.",
+    "reason": "The creature's high resilience and ability to spawn multiple full-health minions upon death make it a significant tactical threat rather than a mere raider.",
+    "resourceProfile": [
+      "hp",
+      "spirit"
+    ],
+    "side": "zombie",
+    "speciesId": "RandomPlusZombie",
+    "targetPreference": "backline",
+    "traits": [
+      "loot-drop",
+      "armor-triggered-summoning",
+      "stochastic-buffing"
+    ],
+    "variants": [
+      "normal",
+      "shiny"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:13:27Z",
+      "minorityValues": {
+        "aptitudePrimary": "Retribution",
+        "rarity": "cultivated"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Fortitude",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "HypnoAlly",
+    "elementPrimary": "dark",
+    "elementSecondary": "none",
+    "family": [
+      "gacha-construct",
+      "box-bound undead"
+    ],
+    "gameTypeId": 105,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to spawn multiple randomized reinforcements makes it a significant tactical threat beyond a simple nuisance.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "zombie",
-    "speciesId": "DiamondRandomZombie",
+    "speciesId": "RandomZombie",
     "targetPreference": "backline",
     "traits": [
-      "Loot-Drop",
-      "Armor-Triggered",
-      "Summoner",
-      "Variable-Scaling"
+      "probabilistic manifestation",
+      "armor-triggered summoning",
+      "variable vitality scaling",
+      "cooldown-gated loot-drop"
     ],
     "variants": [
-      "shiny",
+      "normal",
       "corrupted"
     ],
-    "verdict": "too-high"
+    "verdict": "agree"
   }
 ]

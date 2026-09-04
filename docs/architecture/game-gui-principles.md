@@ -125,6 +125,19 @@ sit above earlier ones. No surface may float outside a band.
 | 4 | **Toast** | Result of an action, error, drop notice | **no** | running | auto-expire |
 | 5 | **System** | Settings, keybinds, quit, connection failure | yes | paused | Esc |
 
+**Amendment (2026-09-04, owner-authorised, world-stage W55).** A Panel's dimming scrim is not the
+same stacking concern as the Panel's own content: **the scrim covers band 0 (Stage) only — band 1
+(HUD) sits above it, fully legible and interactive; band 3 (Dialog) and above are unchanged.** The
+mechanism is a dedicated `--band-scrim` tier strictly between `--band-stage` and `--band-hud`
+(`docs/design/_kit/tokens.css`) — the scrim's own z-index no longer equals the Panel content's, so
+the HUD's higher z-index both keeps it visually undimmed (it paints over the scrim, not under it)
+and keeps it clickable (its own DOM region intercepts pointer events before they reach the scrim
+underneath). "Blocks input below" for Panel means *the Stage*, not the HUD — a Panel was never
+meant to disable the resource bar or the wave clock while it is open, only the board beneath it.
+Found as a live defect (`PanelShell.tsx:61` set the scrim to the Panel's own z-index, which sits
+above the HUD's), not a hypothetical: opening any inspector measurably dropped `--text` on the rail
+from 14.08:1 to 2.12:1 contrast.
+
 **Why.** Z-order arguments are the most common source of "why is this behind that" bugs, and are
 trivially avoidable with a declared band. Bands also make time and input rules mechanical rather
 than per-screen judgement calls.

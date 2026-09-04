@@ -138,6 +138,11 @@
 
   /* --- bands — GG-5. Nothing outside this list may set a stacking order --- */
   --band-stage:  0;
+  /* A band-2 (Panel) scrim's own dimming tier — strictly between Stage and HUD, so the scrim
+     covers the Stage only and the HUD stays fully legible and interactive above it (GG-5
+     amendment, 2026-09-04 — owner-authorised, world-stage W55: the scrim's z-index and the
+     panel *content*'s z-index are no longer the same value). */
+  --band-scrim:  50;
   --band-hud:   100;
   --band-panel: 200;
   --band-dialog:300;

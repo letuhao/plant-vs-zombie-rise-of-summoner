@@ -18,7 +18,7 @@
     "promptVersion": 1,
     "model": "claude-haiku-4-5-20251001",
     "authoredUtc": "2026-08-22T00:00:00Z",
-    "sourceRef": "seed-contract.md \u00a72-6, \u00a79; words.v1.json v3 rewritten for scavenged/domestic/improvised vocabulary per v2Note; classes.v1.json implicit slates"
+    "sourceRef": "seed-contract.md §2-6, §9; words.v1.json v3 rewritten for scavenged/domestic/improvised vocabulary per v2Note; classes.v1.json implicit slates"
   },
   "entries": [
     {
@@ -66,10 +66,10 @@
       "class": "blade",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "trivial"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.slashing-clipper",
       "flavorKey": "flavor.base.slashing-clipper",
       "flavor": "Garden shears with the springs intact. Faster than it was ever meant to be.",
@@ -138,10 +138,10 @@
       "class": "blade",
       "band": "a",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.darting-broom",
       "flavorKey": "flavor.base.darting-broom",
       "flavor": "The bristles are stiff. The shaft is surprisingly good for thrusting.",
@@ -210,7 +210,7 @@
       "class": "launcher",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -247,10 +247,10 @@
       "class": "launcher",
       "band": "a",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.levered-crowbar",
       "flavorKey": "flavor.base.levered-crowbar",
       "flavor": "The fulcrum is always ready. Whatever you pry open will not recover.",
@@ -284,7 +284,7 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "low"
       },
       "socketMax": 1,
@@ -323,7 +323,7 @@
         "family": "atom.searing-strike",
         "powerBand": "low"
       },
-      "socketMax": 0,
+      "socketMax": 1,
       "iconKey": "icon.base.edged-machete",
       "flavorKey": "flavor.base.edged-machete",
       "flavor": "The blade has a history. Every edge is still sharp enough to remember.",
@@ -392,10 +392,10 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.deathblast",
+        "family": "atom.searing-strike",
         "powerBand": "trivial"
       },
-      "socketMax": 0,
+      "socketMax": 2,
       "iconKey": "icon.base.crushing-spade",
       "flavorKey": "flavor.base.crushing-spade",
       "flavor": "The flat blade catches everything. Finality in a straight swing.",
@@ -428,10 +428,10 @@
       "class": "blunt",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.might",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.hafted-mallet",
       "flavorKey": "flavor.base.hafted-mallet",
       "flavor": "The head is solid wood, the shaft is solid intent.",

@@ -66,10 +66,10 @@
       "class": "seal",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.signed-dogtag",
       "flavorKey": "flavor.base.signed-dogtag",
       "flavor": "A name written in someone else's hand. Proof you belonged to something once.",
@@ -105,7 +105,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.certified-brooch",
       "flavorKey": "flavor.base.certified-brooch",
       "flavor": "Stamped and sealed. Whoever wore this was trusted to do something specific.",
@@ -138,10 +138,10 @@
       "class": "seal",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.official-locket",
       "flavorKey": "flavor.base.official-locket",
       "flavor": "It opens and closes. The hinges remember something you need to keep safe.",
@@ -174,10 +174,10 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.engraved-pendant",
       "flavorKey": "flavor.base.engraved-pendant",
       "flavor": "Marks cut into metal, each line deliberate. What did you want the world to know?",
@@ -250,7 +250,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.modest-scarf",
       "flavorKey": "flavor.base.modest-scarf",
       "flavor": "Fabric wrapped without fuss. It keeps the cold and the questions off your neck.",
@@ -283,10 +283,10 @@
       "class": "signet",
       "band": "a",
       "implicit": {
-        "family": "atom.fortitude",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.punched-muffler",
       "flavorKey": "flavor.base.punched-muffler",
       "flavor": "Holes in the fabric, each one a blow it has already taken. Ready for another.",
@@ -322,7 +322,7 @@
         "family": "atom.might",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.impressed-necklace",
       "flavorKey": "flavor.base.impressed-necklace",
       "flavor": "Something pressed its form into the metal and never let go. The mark stays.",
@@ -355,7 +355,7 @@
       "class": "seal",
       "band": "a",
       "implicit": {
-        "family": "atom.lifesteal",
+        "family": "atom.vitality",
         "powerBand": "low"
       },
       "socketMax": 0,
@@ -391,10 +391,10 @@
       "class": "seal",
       "band": "a",
       "implicit": {
-        "family": "atom.ferocity",
+        "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 0,
       "iconKey": "icon.base.filed-collar",
       "flavorKey": "flavor.base.filed-collar",
       "flavor": "Edges worn smooth by work, then sharpened again. Something is always being prepared.",
@@ -430,7 +430,7 @@
         "family": "atom.midas",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 0,
       "iconKey": "icon.base.unadorned-torc",
       "flavorKey": "flavor.base.unadorned-torc",
       "flavor": "An ancient ring worn as a collar. No decoration survives what it has carried.",

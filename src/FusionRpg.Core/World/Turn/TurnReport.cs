@@ -20,9 +20,15 @@ public static class TurnReportKinds
 ///
 /// Null means "nowhere in particular": a calendar tick, or a command refused before it named ground.
 /// Those are shown to everyone, because they reveal nothing about the map.
+///
+/// <paramref name="Audience"/> is the other half of who may see a line (world-stage W12, fog defect
+/// A): a faction-scoped line that names no ground — a handicap notice, a legion topping up its
+/// supply — still needs to reach only the faction it is about, not "nowhere in particular" read as
+/// "everyone". Null on every line built before this field existed, which reads as "no restriction",
+/// exactly the behaviour those rows already had.
 /// </summary>
 public readonly record struct TurnReportEntry(
-    string Phase, string Kind, string Subject, string Detail, string? SectorId = null);
+    string Phase, string Kind, string Subject, string Detail, string? SectorId = null, string? Audience = null);
 
 /// <summary>
 /// What a turn did — the presentation feed, the "while you were away" screen, and the record a
@@ -60,6 +66,6 @@ public sealed class TurnReport
 
     internal void BeginPhase(string phase) => _phases.Add(phase);
 
-    internal void Add(string phase, string kind, string subject, string detail, string? sectorId = null) =>
-        _entries.Add(new TurnReportEntry(phase, kind, subject, detail, sectorId));
+    internal void Add(string phase, string kind, string subject, string detail, string? sectorId = null, string? audience = null) =>
+        _entries.Add(new TurnReportEntry(phase, kind, subject, detail, sectorId, audience));
 }

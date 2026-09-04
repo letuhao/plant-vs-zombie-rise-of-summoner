@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { beforeEach, describe, expect, it } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
@@ -94,6 +96,52 @@ describe.each([
     await user.keyboard("{Escape}");
     await waitFor(() => expect(screen.queryByTestId("shell-under-test")).not.toBeInTheDocument());
     await waitFor(() => expect(document.activeElement).toBe(opener));
+  });
+});
+
+describe("PanelShell — the scrim sits below the HUD, not at the panel's own tier (GG-5 amendment, world-stage W55)", () => {
+  beforeEach(() => {
+    useLayerStack.setState({ layers: [] });
+    resetKeymapForTests();
+  });
+
+  it("the panel's own scrim is band-scrim, never band-panel — the live defect this amendment fixes", () => {
+    render(<PanelShell open onOpenChange={() => {}} title="Roster" testId="t">Body</PanelShell>);
+    const overlay = screen.getByTestId("t-overlay");
+    expect(overlay.className).toContain("band-scrim");
+    expect(overlay.className).not.toContain("band-panel");
+  });
+
+  it("the panel's own content still stacks at band-panel, unchanged", () => {
+    render(<PanelShell open onOpenChange={() => {}} title="Roster" testId="t">Body</PanelShell>);
+    expect(screen.getByTestId("t").className).toContain("band-panel");
+  });
+
+  it("the system band's scrim is unaffected — the amendment named band-2 (Panel) only", () => {
+    render(
+      <PanelShell open onOpenChange={() => {}} title="Settings" testId="t" band="system">
+        Body
+      </PanelShell>
+    );
+    const overlay = screen.getByTestId("t-overlay");
+    expect(overlay.className).toContain("band-system");
+    expect(overlay.className).not.toContain("band-scrim");
+  });
+
+  it("--band-scrim sits strictly between --band-stage and --band-hud in the shipped tokens — the ordering the visual/interactive guarantee depends on", () => {
+    // jsdom never loads the real Tailwind-generated stylesheet, so a class-name assertion (above)
+    // is this repo's own established proof for GG-5 stacking (`Toasts.test.tsx`'s "is band-toast,
+    // never a bespoke z-index"); the numeric ordering itself is verified here directly against the
+    // real generated file, the same technique `bandGuard.test.ts` uses for the token definitions.
+    const tokensCss = readFileSync(join(__dirname, "..", "theme", "tokens.css"), "utf8");
+    const valueOf = (name: string) => {
+      const match = new RegExp(`--${name}:\\s*(\\d+)`).exec(tokensCss);
+      if (!match) throw new Error(`token --${name} not found in theme/tokens.css`);
+      return Number(match[1]);
+    };
+    expect(valueOf("band-stage")).toBeLessThan(valueOf("band-scrim"));
+    expect(valueOf("band-scrim")).toBeLessThan(valueOf("band-hud"));
+    expect(valueOf("band-hud")).toBeLessThan(valueOf("band-panel"));
   });
 });
 

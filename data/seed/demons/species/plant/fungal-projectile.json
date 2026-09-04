@@ -17,19 +17,17 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "split",
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:27:48Z",
-      "minorityValues": {
-        "aptitudePrimary": "Onslaught",
-        "rarity": "chaff"
-      },
+      "emittedUtc": "2026-09-04T10:18:53Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -44,33 +42,33 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Pierce",
+    "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "attackTempo": "quick",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "air",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Fungal-Projectile"
+      "fungal-projectile"
     ],
-    "gameTypeId": 7,
-    "posture": "Finesse",
+    "gameTypeId": 1019,
+    "posture": "Force",
     "pure": true,
-    "rarity": "cultivated",
-    "reach": "long",
-    "reason": "The ability to bypass iron doors and Class 2 armor via infinite penetration makes it a significant tactical threat capable of breaching fortified positions.",
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's low damage output and simple projectile mechanic align with a minor nuisance level.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "FumeShroom",
-    "targetPreference": "backline",
+    "speciesId": "DoublePuff",
+    "targetPreference": "frontline",
     "traits": [
-      "Aerosolized-Penetration",
-      "Armor-Bypassing",
-      "Continuous-Damage"
+      "low-profile",
+      "high-density_planting",
+      "dual-projectile_burst"
     ],
     "variants": [
       "normal",
@@ -99,15 +97,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:13:53Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
+      "emittedUtc": "2026-09-04T10:46:01Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -124,19 +121,19 @@
     ],
     "aptitudePrimary": "Pierce",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "slow",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Fungal-Projectile"
+      "fungal-projectile"
     ],
     "gameTypeId": 1035,
     "posture": "Finesse",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
+    "reach": "short",
     "reason": "The creature's low damage output and small size suggest it is a minor environmental obstacle rather than a significant threat.",
     "resourceProfile": [
       "hp",
@@ -144,13 +141,13 @@
     ],
     "side": "plant",
     "speciesId": "IcePuff",
-    "targetPreference": "backline",
+    "targetPreference": "frontline",
     "traits": [
-      "Low-profile",
-      "Clustered-growth",
-      "Piercing-ice-shards",
-      "Cryo-inflicting",
-      "Frost-synergy"
+      "low-profile",
+      "dense-growth",
+      "piercing-ice-shards",
+      "cryo-status-infliction",
+      "zombie-synergy"
     ],
     "variants": [
       "normal",

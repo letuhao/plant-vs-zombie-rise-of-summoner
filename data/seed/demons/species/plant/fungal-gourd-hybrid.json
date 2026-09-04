@@ -13,22 +13,21 @@
         "element-primary": 1,
         "element-secondary": 1,
         "identity": 1,
-        "kit-shape": 1,
+        "kit-shape": 2,
         "threat-audit": 1
       },
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:27:43Z",
-      "minorityValues": {
-        "rarity": "fused"
-      },
+      "emittedUtc": "2026-09-04T11:12:31Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -43,38 +42,40 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Pierce",
+    "aptitudePrimary": "Bulwark",
+    "aptitudeSecondary": "none",
     "attackTempo": "steady",
     "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "air",
+    "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Fungal-Gourd Hybrid"
+      "fungal-gourd hybrid"
     ],
-    "gameTypeId": 1350,
-    "posture": "Force",
-    "pure": false,
-    "rarity": "chimeric",
-    "reach": "long",
-    "reason": "The creature's stats describe a standard projectile-based enemy with limited range and moderate damage, which does not justify a world-ending cataclysm rating.",
+    "gameTypeId": 1349,
+    "posture": "Bastion",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature is a defensive support unit designed to protect others rather than an entity capable of widespread destruction.",
     "resourceProfile": [
       "hp",
-      "stamina"
+      "poise"
     ],
     "side": "plant",
-    "speciesId": "FumePumpkin",
-    "targetPreference": "frontline",
+    "speciesId": "PuffPumpkin",
+    "targetPreference": "backline",
     "traits": [
-      "Vertical Smoke Projection",
-      "Infinite Piercing",
-      "Multi-directional Area Denial"
+      "defensive perimeter",
+      "symbiotic protector",
+      "low-profile",
+      "regenerative"
     ],
     "variants": [
+      "normal",
       "mutated",
-      "corrupted"
+      "blessed"
     ],
-    "verdict": "too-high"
+    "verdict": "too-low"
   }
 ]

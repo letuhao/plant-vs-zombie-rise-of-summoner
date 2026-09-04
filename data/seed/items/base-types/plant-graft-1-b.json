@@ -30,7 +30,7 @@
       "class": "spore",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "iconKey": "icon.base.floating-eye",
@@ -51,7 +51,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-002",
@@ -83,7 +84,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-003",
@@ -94,7 +96,7 @@
       "class": "spore",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.ferocity",
         "powerBand": "low"
       },
       "iconKey": "icon.base.feather-light-gemma",
@@ -115,7 +117,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-004",
@@ -147,7 +150,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-005",
@@ -158,7 +162,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.lifesteal",
         "powerBand": "medium"
       },
       "iconKey": "icon.base.engorged-whip",
@@ -179,7 +183,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-006",
@@ -211,7 +216,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-007",
@@ -222,7 +228,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.vitality",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
       "iconKey": "icon.base.husbanded-graft",
@@ -243,7 +249,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-008",
@@ -254,7 +261,7 @@
       "class": "bulb",
       "band": "b",
       "implicit": {
-        "family": "atom.midas",
+        "family": "atom.lifesteal",
         "powerBand": "medium"
       },
       "iconKey": "icon.base.gathered-ligature",
@@ -275,7 +282,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-009",
@@ -291,7 +299,7 @@
       },
       "iconKey": "icon.base.knit-splice",
       "flavorKey": "flavor.base.knit-splice",
-      "flavor": "Two tissues woven together so tightly they breathe as one \u2014 inseparable and drawing life from both.",
+      "flavor": "Two tissues woven together so tightly they breathe as one — inseparable and drawing life from both.",
       "tags": [
         "heavy",
         "organic",
@@ -307,7 +315,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-010",
@@ -339,7 +348,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-011",
@@ -350,12 +360,12 @@
       "class": "graft",
       "band": "b",
       "implicit": {
-        "family": "atom.might",
+        "family": "atom.lifesteal",
         "powerBand": "high"
       },
       "iconKey": "icon.base.meshed-callus",
       "flavorKey": "flavor.base.meshed-callus",
-      "flavor": "Scar tissue so densely interwoven it becomes stronger than the tissue it mended \u2014 a monument to endurance.",
+      "flavor": "Scar tissue so densely interwoven it becomes stronger than the tissue it mended — a monument to endurance.",
       "tags": [
         "heavy",
         "organic",
@@ -371,7 +381,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     },
     {
       "id": "item.plant-graft-1-b-012",
@@ -387,7 +398,7 @@
       },
       "iconKey": "icon.base.seated-wedge",
       "flavorKey": "flavor.base.seated-wedge",
-      "flavor": "A wedge so firmly set it becomes the foundation itself \u2014 the anchor point that holds everything else in place.",
+      "flavor": "A wedge so firmly set it becomes the foundation itself — the anchor point that holds everything else in place.",
       "tags": [
         "heavy",
         "organic",
@@ -403,7 +414,8 @@
           "atLevel": 12,
           "family": "atom.enhance-edge"
         }
-      ]
+      ],
+      "socketMax": 1
     }
   ]
 }

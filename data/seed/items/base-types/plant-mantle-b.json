@@ -30,10 +30,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.grooved-pergola",
       "flavorKey": "flavor.base.grooved-pergola",
       "flavor": "Channels flow where grooves have guided them for seasons.",
@@ -138,10 +138,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.ancient-bough",
       "flavorKey": "flavor.base.ancient-bough",
       "flavor": "It remembers every season of the forest it spanned across.",
@@ -177,7 +177,7 @@
         "family": "atom.fortitude",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 2,
       "iconKey": "icon.base.stony-eave",
       "flavorKey": "flavor.base.stony-eave",
       "flavor": "Its wood has turned mineral-hard, an overhang of stone.",
@@ -246,10 +246,10 @@
       "class": "heartwood",
       "band": "b",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.fortitude",
         "powerBand": "medium"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.lichened-overstory",
       "flavorKey": "flavor.base.lichened-overstory",
       "flavor": "Living light-filters crown its bark, filtering poison down to safe.",
@@ -285,7 +285,7 @@
         "family": "atom.fortitude",
         "powerBand": "medium"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.mossy-pergola",
       "flavorKey": "flavor.base.mossy-pergola",
       "flavor": "Soft green clings to wood, healing what season scours.",
@@ -321,7 +321,7 @@
         "family": "atom.vitality",
         "powerBand": "high"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.oaken-canopy",
       "flavorKey": "flavor.base.oaken-canopy",
       "flavor": "The trunk's own crown, dense as the heartwood beneath.",
@@ -357,7 +357,7 @@
         "family": "atom.vitality",
         "powerBand": "low"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.gnarled-awning",
       "flavorKey": "flavor.base.gnarled-awning",
       "flavor": "Twisted by wind and storm, it casts shadow that knows what it shelters.",
@@ -390,10 +390,10 @@
       "class": "bark",
       "band": "b",
       "implicit": {
-        "family": "atom.cleansing",
+        "family": "atom.immunity",
         "powerBand": "low"
       },
-      "socketMax": 1,
+      "socketMax": 3,
       "iconKey": "icon.base.hoary-arbour",
       "flavorKey": "flavor.base.hoary-arbour",
       "flavor": "Grey-frosted by age, it has tasted and shedded the rot of ten thousand seasons.",
@@ -429,7 +429,7 @@
         "family": "atom.fortitude",
         "powerBand": "high"
       },
-      "socketMax": 2,
+      "socketMax": 3,
       "iconKey": "icon.base.sunken-limb",
       "flavorKey": "flavor.base.sunken-limb",
       "flavor": "Hollowed by time but still standing, it holds because it has learned to flex.",

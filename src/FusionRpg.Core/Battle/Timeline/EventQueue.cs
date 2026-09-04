@@ -163,6 +163,39 @@ public sealed class EventQueue
     }
 
     /// <summary>
+    /// T8 (spec-turn-order-forecast.md) — the next <paramref name="max"/> events in true pop order,
+    /// <b>without touching this queue</b>. Appends to <paramref name="into"/> and returns the count.
+    ///
+    /// <para><b>Why a sorted copy rather than k pops off a cloned heap.</b> A binary heap's array
+    /// order is not pop order — only the root is guaranteed — so reading the first k slots would be
+    /// wrong. Sorting a copy by the queue's own total order is O(n log n) against the pop loop's
+    /// O(k log n), and that is the right trade here: a forecast runs at UI cadence, not per frame,
+    /// and the sorted copy reuses the SAME `(DueTick, Seq)` comparison the heap itself is ordered by
+    /// rather than restating it. Duplicating the ordering rule is exactly how a projection starts
+    /// disagreeing with the thing it projects.</para>
+    ///
+    /// <para>Cancelled events cannot appear: <c>Cancel</c> removes them from the heap, so a copy of
+    /// the heap contains only live events by construction.</para>
+    /// </summary>
+    internal int ProjectNext(int max, List<ScheduledEvent> into)
+    {
+        if (into == null) throw new ArgumentNullException(nameof(into));
+        if (max < 0) throw new ArgumentOutOfRangeException(nameof(max));
+        if (max == 0 || _heap.Count == 0) return 0;
+
+        var copy = new List<ScheduledEvent>(_heap);
+        copy.Sort(static (a, b) =>
+        {
+            var byTick = a.DueTick.CompareTo(b.DueTick);
+            return byTick != 0 ? byTick : a.Seq.CompareTo(b.Seq);
+        });
+
+        var take = Math.Min(max, copy.Count);
+        for (var i = 0; i < take; i++) into.Add(copy[i]);
+        return take;
+    }
+
+    /// <summary>
     /// Resolves a handle to its live heap position. The map lookup is the whole liveness test:
     /// fired and cancelled events are removed from it, and a foreign or never-issued id is simply
     /// absent — so a bogus handle cannot mutate anything.

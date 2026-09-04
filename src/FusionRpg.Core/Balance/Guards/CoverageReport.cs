@@ -15,8 +15,17 @@ namespace FusionRpg.Core.Balance.Guards;
 /// <param name="ReservedFamilies">Channel families registered in the shipped roster/catalog with no
 /// reader yet — confirmed present in `data/tuning/aptitudes.v1.json`'s own edges this session, not
 /// assumed: `resource.efficiency.*` (spec-action-costs.md §1: registered, "has no reader" until A3
-/// ships), `skill.cooldown.*` / `skill.effectiveness.*` and `move.range` (the action layer's own,
-/// unbuilt). Points spent on these are live in the roster but invisible to this guard's prediction.</param>
+/// ships) and `move.range` (the action layer's own, unbuilt).
+///
+/// `skill.cooldown.*` / `skill.effectiveness.*` are a different case as of 2026-09-04 and are listed
+/// here for a narrower reason: they DO have readers now (combat-unification `species-skills` S2/S3 —
+/// `CooldownLedger.Start` and `OverlayCombatRequest.EffectivenessMultiplier`, both live on the shipped
+/// basic attack), but those readers are on the BATTLE path, and this guard predicts with a closed-form
+/// duel model that does not run one. So they remain reserved *for prediction* while no longer being
+/// unbuilt — a distinction worth keeping, because "the predictor cannot see it" and "nothing reads it"
+/// are different problems with different fixes.
+///
+/// Points spent on any of these are live in the roster but invisible to this guard's prediction.</param>
 public readonly record struct CoverageReport(
     string ElementAxis,
     IReadOnlyList<string> ReservedFamilies)

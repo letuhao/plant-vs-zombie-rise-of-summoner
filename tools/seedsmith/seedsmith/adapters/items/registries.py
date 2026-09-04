@@ -103,10 +103,12 @@ def partition_kind_map() -> dict[str, str]:
 # live registry, so a future registry edit that changes this rule cannot silently drift away
 # from what this module assumes without a test noticing.
 HYBRID_FRAME_CITATION = (
-    "a chimera body combining both natures. Carries 13 of the 15 roles "
-    "(drops ward-array and jewel-minor-b); each remaining role accepts a base type from either "
+    "a chimera body combining both natures. Carries 12 of the 15 roles "
+    "(drops ward-array, head-guard and sense); each remaining role accepts a base type from either "
     "pure frame's ladder. The commander never wears this frame — it takes humanoid or plant only."
 )
 
-HYBRID_FRAME_EXCLUDED_ROLES = frozenset({"ward-array", "jewel-minor-b"})
+# D30 (2026-09-04, core.v1.json registryVersion 2): D3 wins over the prior 13-role/895‰ shape this
+# constant used to name. jewel-minor-b is now hybrid-eligible; head-guard and sense are not.
+HYBRID_FRAME_EXCLUDED_ROLES = frozenset({"ward-array", "head-guard", "sense"})
 COMMANDER_ROLE = "standard"

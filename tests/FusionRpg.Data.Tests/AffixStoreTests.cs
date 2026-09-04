@@ -46,7 +46,7 @@ public class AffixStoreTests : IDisposable
             {
                 AtomId = AtomRow.DeriveId(family, variant, tier),
                 KindId = "stat.modify", FamilyId = family, Variant = variant, Tier = tier,
-                ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":10}",
+                Name = family, ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":10}",
             });
             Assert.True(r.IsOk, r.ToString());
         }

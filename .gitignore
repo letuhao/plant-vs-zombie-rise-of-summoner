@@ -81,6 +81,7 @@ web/fusion-rpg-web/coverage/
 web/fusion-rpg-web/playwright-report/
 web/fusion-rpg-web/test-results/
 web/fusion-rpg-web/blob-report/
+web/fusion-rpg-web/e2e/.artifacts/
 _tmp_reflect/
 src/FusionRpg.Injector/CheatMenuGui.Legacy.cs.bak
 AGENTS.md

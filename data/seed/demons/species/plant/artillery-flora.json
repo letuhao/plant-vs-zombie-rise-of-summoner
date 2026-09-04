@@ -17,94 +17,16 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:34:13Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "fire",
-    "elementSecondary": "none",
-    "family": [
-      "Artillery-Flora"
-    ],
-    "gameTypeId": 1017,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "fused",
-    "reach": "short",
-    "reason": "A machine gun unit with high-frequency burst damage and explosive fusion potential represents a significant tactical threat rather than a mid-tier warden.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "plant",
-    "speciesId": "CherryGatling",
-    "targetPreference": "swarm",
-    "traits": [
-      "Rapid-fire",
-      "Cherry-based projectiles",
-      "High-velocity"
-    ],
-    "variants": [
-      "normal",
-      "mutated",
-      "blessed"
-    ],
-    "verdict": "too-low"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T15:43:56Z",
+      "emittedUtc": "2026-09-04T09:59:09Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -122,19 +44,174 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "earth",
     "elementSecondary": "none",
     "family": [
-      "Artillery-Flora"
+      "artillery-flora"
+    ],
+    "gameTypeId": 1161,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's ability to scale its fire rate and projectile speed indefinitely makes it a high-threat siege engine capable of overwhelming most defenses.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "BigGatling",
+    "targetPreference": "frontline",
+    "traits": [
+      "rapid-fire",
+      "momentum-scaling",
+      "triple-barreled",
+      "gigantic"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "agree"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:02:14Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1342,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to provide area-of-effect coverage against all enemies in multiple rows makes it a high-tier tactical threat rather than a mere scourge.",
+    "resourceProfile": [
+      "hp"
+    ],
+    "side": "plant",
+    "speciesId": "CabbageCannon",
+    "targetPreference": "swarm",
+    "traits": [
+      "area-of-effect",
+      "projectile-deflection",
+      "multi-target",
+      "colossal"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:09:29Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
     ],
     "gameTypeId": 1120,
     "posture": "Force",
     "pure": true,
     "rarity": "fused",
-    "reach": "long",
+    "reach": "short",
     "reason": "A single projectile dealing 1800 damage with a massive 1.5-tile radius is a high-tier siege weapon that far exceeds the threat level of a mere 'scourge'.",
     "resourceProfile": [
       "hp",
@@ -144,10 +221,10 @@
     "speciesId": "CobCannon",
     "targetPreference": "swarm",
     "traits": [
-      "Manual-Triggered",
-      "Dual-Base Requirement",
-      "Area-of-Effect",
-      "High-Impact"
+      "manual-trigger",
+      "area-of-effect",
+      "heavy-caliber",
+      "dual-base-requirement"
     ],
     "variants": [
       "normal",
@@ -177,15 +254,14 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split"
+        "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:19:04Z",
-      "minorityValues": {
-        "rarity": "chimeric"
-      },
+      "emittedUtc": "2026-09-04T10:24:18Z",
+      "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -202,13 +278,13 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Artillery-Flora"
+      "artillery-flora"
     ],
     "gameTypeId": 1122,
     "posture": "Force",
@@ -224,13 +300,168 @@
     "speciesId": "FireCannon",
     "targetPreference": "frontline",
     "traits": [
-      "Explosive-Fusion",
-      "Thermal-Induction",
-      "Manual-Triggered",
-      "Gigantic"
+      "explosive-payload",
+      "fusion-catalyst",
+      "thermal-induction"
     ],
     "variants": [
       "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:43:21Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1123,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The creature is a single-use projectile/buff mechanism rather than a persistent entity capable of large-scale devastation.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IceCannon",
+    "targetPreference": "frontline",
+    "traits": [
+      "cryogenic-payload",
+      "fusion-catalyst",
+      "heavy-caliber"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:01:00Z",
+      "minorityValues": {
+        "attackTempo": "ponderous",
+        "rarity": "chimeric"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1132,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The ability to deliver 44 high-damage projectiles in a wide area-of-effect bombardment far exceeds the capabilities of a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "MelonCannon",
+    "targetPreference": "swarm",
+    "traits": [
+      "area-of-effect bombardment",
+      "high-volume payload",
+      "hybridized projectile"
+    ],
+    "variants": [
       "mutated",
       "blessed"
     ],
@@ -254,15 +485,578 @@
         "threat-audit": 1
       },
       "auditVerdict": null,
-      "basis": "observed",
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:05:50Z",
+      "minorityValues": {
+        "aptitudePrimary": "Precision",
+        "attackTempo": "flurry",
+        "threatBand": "pest"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "quick",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1404,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its role as a basic projectile-based support unit with predictable firing patterns makes it a minor annoyance rather than a significant combat threat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "PeaPot",
+    "targetPreference": "frontline",
+    "threatBand": "nuisance",
+    "traits": [
+      "recoil-driven",
+      "low-profile",
+      "carrier-class",
+      "barren-land-compatible"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "split",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:30:49Z",
+      "minorityValues": {
+        "elementPrimary": "fire"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "air",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1168,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature possesses high-frequency multi-shot capabilities and a defensive mechanism that grants temporary invulnerability and massive area-of-effect damage.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SuperGatling",
+    "targetPreference": "swarm",
+    "traits": [
+      "rapid-fire",
+      "stochastic-burst",
+      "adaptive-transformation",
+      "reactive-fortification"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T16:37:11Z",
+      "emittedUtc": "2026-09-04T11:31:05Z",
+      "minorityValues": {
+        "aptitudePrimary": "Retribution"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1407,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's stats describe a high-damage turret with healing mechanics, but it lacks the world-altering scale required for a cataclysm rating.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SuperGatlingPumpkin",
+    "targetPreference": "backline",
+    "traits": [
+      "rapid-fire projectile",
+      "stochastic regeneration",
+      "damage immunity",
+      "pea-scatter"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:33:24Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Bulwark",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1165,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "fused",
+    "reach": "long",
+    "reason": "The creature possesses high-frequency rapid fire, massive damage output, and a defensive ability that grants temporary invulnerability and health regeneration.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SuperSnowGatling",
+    "targetPreference": "swarm",
+    "traits": [
+      "cryogenic-projectile",
+      "reactive-fortification",
+      "burst-fire"
+    ],
+    "variants": [
+      "mutated",
+      "blessed"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:34:02Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Fortitude",
+    "attackTempo": "flurry",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 1271,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The ability to trigger massive damage bursts alongside complete damage and crush immunity makes it an overwhelming force in sustained combat.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "SuperThreeGatling",
+    "targetPreference": "frontline",
+    "threatBand": "tyrant",
+    "traits": [
+      "triple-lane projection",
+      "stochastic healing",
+      "temporary invulnerability",
+      "burst-fire capability"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:41:01Z",
+      "minorityValues": {
+        "attackTempo": "quick",
+        "rarity": "almanac"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "earth",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 368,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature's ability to deal massive burst damage (5400) and its high-volume projectile branches elevate it far beyond a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "Tower_threeMine",
+    "targetPreference": "backline",
+    "traits": [
+      "projectile-burst",
+      "recharge-cycle",
+      "directional-pivot",
+      "explosive-impact"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:43:09Z",
+      "minorityValues": {
+        "attackTempo": "slow"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "ponderous",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "fire",
+    "elementSecondary": "none",
+    "family": [
+      "artillery-flora"
+    ],
+    "gameTypeId": 966,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "almanac",
+    "reach": "short",
+    "reason": "The creature's ability to deal 300 damage every 0.75 seconds with multi-target explosive projectiles and potential cherry bomb procs far exceeds the threat level of a mere marauder.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "UltimateCabbageCannon",
+    "targetPreference": "swarm",
+    "traits": [
+      "explosive-projectile-launching",
+      "multi-target-saturation",
+      "thermal-overload-capability",
+      "defensive-deflection-interaction"
+    ],
+    "variants": [
+      "mutated",
+      "blessed",
+      "normal",
+      "ancient"
+    ],
+    "verdict": "too-high"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:45:19Z",
       "minorityValues": {},
       "promptVersions": {
         "aptitude-primary": 1,
@@ -280,34 +1074,35 @@
     ],
     "aptitudePrimary": "Onslaught",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
+    "attackTempo": "ponderous",
+    "basis": "stated",
     "deployMode": "PlantAvatar",
-    "elementPrimary": "earth",
+    "elementPrimary": "fire",
     "elementSecondary": "none",
     "family": [
-      "Artillery-Flora"
+      "artillery-flora",
+      "siege-botanicals"
     ],
-    "gameTypeId": 1032,
+    "gameTypeId": 953,
     "posture": "Force",
     "pure": true,
-    "rarity": "fused",
-    "reach": "short",
-    "reason": "A unit that fires 80 damage every 1.5 seconds via a four-way fusion is a significant offensive force, far exceeding the capabilities of a mere 'raider'.",
+    "rarity": "chimeric",
+    "reach": "long",
+    "reason": "The creature's ability to trigger chain-reaction nuclear explosions and drop massive meteors that deal 80x damage across the entire field elevates it far beyond a mere tyrant into a calamity-class threat.",
     "resourceProfile": [
       "hp",
       "stamina"
     ],
     "side": "plant",
-    "speciesId": "GatlingPea",
+    "speciesId": "UltimateExplodeCannon",
     "targetPreference": "swarm",
     "traits": [
-      "Multi-projectile burst",
-      "Rapid-fire cadence",
-      "Fusion-derived"
+      "explosive-fusion",
+      "popcorn-shrapnel",
+      "overload-nuclear",
+      "meteor-summoning"
     ],
     "variants": [
-      "normal",
       "mutated",
       "blessed"
     ],
@@ -334,14 +1129,15 @@
       "basis": "stated",
       "confidence": {
         "aptitudePrimary": "high",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "split"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:07:47Z",
+      "emittedUtc": "2026-09-04T11:49:47Z",
       "minorityValues": {
-        "rarity": "heirloom"
+        "rarity": "fused"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -358,40 +1154,38 @@
       "Summonable"
     ],
     "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "aptitudeSecondary": "Precision",
+    "attackTempo": "ponderous",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Artillery-Flora"
+      "artillery-flora"
     ],
-    "gameTypeId": 1123,
+    "gameTypeId": 964,
     "posture": "Force",
-    "pure": true,
-    "rarity": "fused",
+    "pure": false,
+    "rarity": "chimeric",
     "reach": "long",
-    "reason": "The creature is a single-use projectile/buff mechanism rather than a persistent entity capable of large-scale devastation.",
+    "reason": "The creature's ability to deliver full-screen cluster munitions with freezing effects and permanent speed debuffs justifies a high-tier threat rating.",
     "resourceProfile": [
       "hp",
-      "stamina",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "IceCannon",
-    "targetPreference": "frontline",
+    "speciesId": "UltimateMelonCannon",
+    "targetPreference": "swarm",
     "traits": [
-      "Cryogenic-Payload",
-      "Fusion-Catalyst",
-      "Manual-Triggered",
-      "Gigantism"
+      "cluster-fire",
+      "cryogenic-debuff",
+      "guided-payload",
+      "massive-scale"
     ],
     "variants": [
-      "normal",
       "mutated",
-      "blessed"
+      "corrupted"
     ],
-    "verdict": "too-high"
+    "verdict": "agree"
   }
 ]

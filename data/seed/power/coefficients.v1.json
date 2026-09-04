@@ -1,0 +1,90 @@
+{
+  "schemaVersion": 1,
+  "kind": "power-coefficient",
+  "entries": [
+    {
+      "kindId": "stat.modify",
+      "channel": "plantShield",
+      "coeffMilli": 1000,
+      "referenceScale": 10,
+      "note": "E38 (spec-entity-fields-12plus.md), first-pass -- NOT a fitted sweep result. plantShield is a long magnitude like arm1/arm2 (extra hit points ahead of the entity's real health pool), so it is priced on the same reference scale those already use: one shield point costs the same as one armor point until a sweep says otherwise."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "attackCountdown",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. LowerIsBetter timer (structural floor, same reason attackInterval has one); referenceScale 1 mirrors stat.derived's own 'one resolver point' scale rather than arm1's, because a countdown in seconds is a much smaller natural range than a hit-point pool."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "attackSpeedAdder",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. A signed delta with no floor (unguarded by design, spec §2b) -- small numbers matter here, so referenceScale 1 keeps a modest adder from pricing as noise."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "produceCountdown",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as attackCountdown: LowerIsBetter timer, structural floor, small natural range."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "plantSpeed",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Most plants never move, so a baseline of zero is ordinary (see StatComposer's own Real() note) -- when it does apply, movement speed is a small natural range, referenceScale 1."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "plantMoveSpeed",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as plantSpeed."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "plantLevel",
+      "coeffMilli": 1000,
+      "referenceScale": 10,
+      "note": "E38, first-pass -- NOT a fitted sweep result. A long magnitude, priced on arm1/maxHp's own reference scale -- a level-up is a meaningful, discrete magnitude change, not a fractional ratio."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "shootingLevel",
+      "coeffMilli": 1000,
+      "referenceScale": 10,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as plantLevel."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "armorFlat",
+      "coeffMilli": 1000,
+      "referenceScale": 2,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Conceptually the same family as the existing 'defense' channel (a flat mitigation stat), so it is priced on defense's own reference scale rather than arm1's hit-point scale."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "takeDmgMultiplier",
+      "coeffMilli": 1000,
+      "referenceScale": 2,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Bearer frame (decided 2026-09-03, spec-entity-fields-12plus.md sec 2c): this channel stays LowerIsBetter, so a RAISE on your OWN takeDmgMultiplier prices as a penalty and a REDUCTION prices as a benefit -- both correct under the bearer frame. takeDmgMultiplier is NOT the authoring surface for 'enemies take more damage': that debuff is a status.apply payload, priced by its own coefficient/trigger/uptime, never a stat.modify on this channel. Reference scale mirrors 'defense' (same damage-mitigation family)."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "zombieSpeedCurrent",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Mirrors the existing zombieSpeed (uniqueSpeed) channel's own small natural range."
+    },
+    {
+      "kindId": "stat.modify",
+      "channel": "zombieOriginSpeed",
+      "coeffMilli": 1000,
+      "referenceScale": 1,
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as zombieSpeedCurrent."
+    }
+  ]
+}

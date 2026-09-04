@@ -20,16 +20,420 @@
       "basis": "inferred",
       "confidence": {
         "aptitudePrimary": "split",
+        "attackTempo": "split",
         "deployMode": "high",
         "elementPrimary": "high",
-        "rarity": "split",
+        "rarity": "high",
         "threatBand": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:06:26Z",
+      "emittedUtc": "2026-09-04T10:45:07Z",
       "minorityValues": {
-        "aptitudePrimary": "Onslaught",
-        "rarity": "chimeric"
+        "aptitudePrimary": "Fortitude",
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Vigor",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-flora"
+    ],
+    "gameTypeId": 37,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature is a passive healer that lacks offensive capabilities or defensive deterrents, serving only to sustain nearby flora.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IceLotus",
+    "targetPreference": "frontline",
+    "threatBand": "nuisance",
+    "traits": [
+      "frost-immune",
+      "thermal-conversion",
+      "healing-pulse",
+      "dormancy-cycle"
+    ],
+    "variants": [
+      "normal",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:45:42Z",
+      "minorityValues": {
+        "aptitudePrimary": "Pierce"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "Pierce",
+    "attackTempo": "flurry",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-flora"
+    ],
+    "gameTypeId": 237,
+    "posture": "Force",
+    "pure": false,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The creature possesses multi-target piercing attacks, crowd control (freeze) mechanics, and a massive 4x damage multiplier against frozen enemies, making it a significant threat rather than a mere nuisance.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IcePeach",
+    "targetPreference": "swarm",
+    "traits": [
+      "fan-shaped projectile spread",
+      "piercing strikes",
+      "chilling aura",
+      "freeze-synergy"
+    ],
+    "variants": [
+      "normal",
+      "shiny"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T10:46:46Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Pierce",
+    "aptitudeSecondary": "none",
+    "attackTempo": "steady",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-flora",
+      "spiked-vegetation"
+    ],
+    "gameTypeId": 1074,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's high resilience and ability to inflict crowd-control freezing effects suggest a threat level higher than a mere warden.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "IceSpikeRock",
+    "targetPreference": "frontline",
+    "traits": [
+      "frost-infusion",
+      "low-profile",
+      "status-application"
+    ],
+    "variants": [
+      "normal",
+      "mutated",
+      "corrupted"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "stated",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "split",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:35:41Z",
+      "minorityValues": {
+        "attackTempo": "ponderous"
+      },
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Onslaught",
+    "aptitudeSecondary": "none",
+    "attackTempo": "quick",
+    "basis": "stated",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-flora"
+    ],
+    "gameTypeId": 40,
+    "posture": "Force",
+    "pure": true,
+    "rarity": "cultivated",
+    "reach": "short",
+    "reason": "The ability to deal massive burst damage (4200 total) and inflict freezing status makes it a high-tier combatant rather than a mere warden.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "Thorns",
+    "targetPreference": "backline",
+    "traits": [
+      "snowball-projectile",
+      "thermal-manipulator",
+      "frost-immunity",
+      "area-of-effect-debuff"
+    ],
+    "variants": [
+      "normal",
+      "mutated"
+    ],
+    "verdict": "too-low"
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "high"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:35:52Z",
+      "minorityValues": {},
+      "promptVersions": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      }
+    },
+    "acquisition": [
+      "Summonable"
+    ],
+    "aptitudePrimary": "Focus",
+    "aptitudeSecondary": "none",
+    "attackTempo": "slow",
+    "basis": "inferred",
+    "deployMode": "PlantAvatar",
+    "elementPrimary": "ice",
+    "elementSecondary": "none",
+    "family": [
+      "cryo-flora",
+      "lotus-hybrids"
+    ],
+    "gameTypeId": 1403,
+    "posture": "Finesse",
+    "pure": true,
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "Its ability to provide massive healing, status application, and resource generation for allies makes it a powerful defensive support unit.",
+    "resourceProfile": [
+      "hp",
+      "stamina"
+    ],
+    "side": "plant",
+    "speciesId": "ThornsLotus",
+    "targetPreference": "frontline",
+    "threatBand": "warden",
+    "traits": [
+      "cryo-immunity",
+      "recharge-based-awakening",
+      "area-of-effect-resurrection",
+      "elemental-synergy"
+    ],
+    "variants": [
+      "normal",
+      "ancient",
+      "blessed"
+    ]
+  },
+  {
+    "_derived": [
+      "basis",
+      "posture",
+      "pure"
+    ],
+    "_provenance": {
+      "attempts": {
+        "aptitude-primary": 1,
+        "aptitude-secondary": 1,
+        "deployment": 1,
+        "element-primary": 1,
+        "element-secondary": 1,
+        "identity": 1,
+        "kit-shape": 1,
+        "threat-audit": 1
+      },
+      "auditVerdict": null,
+      "basis": "inferred",
+      "confidence": {
+        "aptitudePrimary": "high",
+        "attackTempo": "high",
+        "deployMode": "high",
+        "elementPrimary": "high",
+        "rarity": "high",
+        "threatBand": "split"
+      },
+      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
+      "emittedUtc": "2026-09-04T11:40:01Z",
+      "minorityValues": {
+        "threatBand": "warden"
       },
       "promptVersions": {
         "aptitude-primary": 1,
@@ -53,190 +457,30 @@
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Flora"
+      "cryo-flora"
     ],
-    "gameTypeId": 1276,
+    "gameTypeId": 363,
     "posture": "Finesse",
     "pure": true,
-    "rarity": "fused",
+    "rarity": "cultivated",
     "reach": "long",
-    "reason": "Its impact is limited by a very short lifespan and low base damage, serving as a temporary utility buff rather than a direct combat threat.",
+    "reason": "The creature is a temporary support unit with low direct damage that functions primarily to buff existing defenses rather than acting as a primary combatant.",
     "resourceProfile": [
       "hp",
-      "stamina",
-      "poise"
+      "stamina"
     ],
     "side": "plant",
-    "speciesId": "IceBlover",
+    "speciesId": "Tower_iceblover",
     "targetPreference": "swarm",
     "threatBand": "nuisance",
     "traits": [
-      "Aero-thermal emission",
-      "Temporal expiration",
-      "Status amplification",
-      "Synergistic fusion"
+      "frost-emission",
+      "temporal-decay",
+      "buffing-catalyst"
     ],
     "variants": [
       "normal",
-      "mutated",
-      "blessed"
-    ]
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "observed",
-      "confidence": {
-        "aptitudePrimary": "high",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:06:58Z",
-      "minorityValues": {
-        "rarity": "sprout"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Pierce",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "observed",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "ice",
-    "elementSecondary": "none",
-    "family": [
-      "Cryo-Flora"
-    ],
-    "gameTypeId": 1180,
-    "posture": "Finesse",
-    "pure": true,
-    "rarity": "chaff",
-    "reach": "short",
-    "reason": "The creature's description describes a simple environmental hazard with low damage and minor status effects, which does not justify a Warden-level threat.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "plant",
-    "speciesId": "IceCaltrop",
-    "targetPreference": "frontline",
-    "traits": [
-      "Frost-inducing",
-      "Low-profile",
-      "Thermal-draining"
-    ],
-    "variants": [],
-    "verdict": "too-high"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "inferred",
-      "confidence": {
-        "aptitudePrimary": "split",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split",
-        "threatBand": "high"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:11:38Z",
-      "minorityValues": {
-        "aptitudePrimary": "Fortitude",
-        "rarity": "cultivated"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Vigor",
-    "aptitudeSecondary": "none",
-    "attackTempo": "steady",
-    "basis": "inferred",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "ice",
-    "elementSecondary": "none",
-    "family": [
-      "Cryo-Flora"
-    ],
-    "gameTypeId": 37,
-    "posture": "Force",
-    "pure": true,
-    "rarity": "heirloom",
-    "reach": "short",
-    "reason": "The creature is a passive healer that lacks offensive capabilities or defensive deterrents, serving only to sustain nearby flora.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "plant",
-    "speciesId": "IceLotus",
-    "targetPreference": "frontline",
-    "threatBand": "nuisance",
-    "traits": [
-      "Frost-Immunity",
-      "Thermal-Absorption",
-      "Pulse-Healing",
-      "Stasis-Cycle"
-    ],
-    "variants": [
-      "normal",
-      "blessed",
-      "ancient"
+      "mutated"
     ]
   },
   {
@@ -259,14 +503,17 @@
       "auditVerdict": null,
       "basis": "stated",
       "confidence": {
-        "aptitudePrimary": "high",
+        "aptitudePrimary": "split",
+        "attackTempo": "high",
         "deployMode": "high",
         "elementPrimary": "high",
         "rarity": "high"
       },
       "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:12:25Z",
-      "minorityValues": {},
+      "emittedUtc": "2026-09-04T11:54:38Z",
+      "minorityValues": {
+        "aptitudePrimary": "Onslaught"
+      },
       "promptVersions": {
         "aptitude-primary": 1,
         "aptitude-secondary": 1,
@@ -281,120 +528,41 @@
     "acquisition": [
       "Summonable"
     ],
-    "aptitudePrimary": "Retribution",
+    "aptitudePrimary": "Ferocity",
     "aptitudeSecondary": "none",
-    "attackTempo": "steady",
+    "attackTempo": "flurry",
     "basis": "stated",
     "deployMode": "PlantAvatar",
     "elementPrimary": "ice",
     "elementSecondary": "none",
     "family": [
-      "Cryo-Flora"
+      "cryo-flora",
+      "steel-leafed vegetation"
     ],
-    "gameTypeId": 1189,
+    "gameTypeId": 1218,
     "posture": "Bastion",
     "pure": true,
-    "rarity": "cultivated",
-    "reach": "melee",
-    "reason": "The creature is a simple edible nut that only applies a minor freezing effect when bitten, which does not align with the threat level of a harbinger.",
+    "rarity": "fused",
+    "reach": "short",
+    "reason": "The creature's high attack speed and scaling damage mechanics make it a persistent threat, but its predictable nature and lack of massive area-of-effect or world-altering abilities keep it within the nuisance tier.",
     "resourceProfile": [
       "hp",
       "poise"
     ],
     "side": "plant",
-    "speciesId": "IceNut",
+    "speciesId": "WaterShulk",
     "targetPreference": "backline",
     "traits": [
-      "Endothermic",
-      "Frost-inducing",
-      "High-Resilience"
+      "frost-affinity",
+      "cold-resilience",
+      "kinetic-charge absorption",
+      "thermal-damage scaling"
     ],
     "variants": [
       "normal",
-      "ancient"
-    ],
-    "verdict": "too-high"
-  },
-  {
-    "_derived": [
-      "basis",
-      "posture",
-      "pure"
-    ],
-    "_provenance": {
-      "attempts": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      },
-      "auditVerdict": null,
-      "basis": "stated",
-      "confidence": {
-        "aptitudePrimary": "split",
-        "deployMode": "high",
-        "elementPrimary": "high",
-        "rarity": "split"
-      },
-      "dumpHash": "cc322647cd0118c72d2dc80826cfe7cea7d02077a59aedfb0bb167319d38a10d",
-      "emittedUtc": "2026-09-03T17:12:25Z",
-      "minorityValues": {
-        "aptitudePrimary": "Pierce",
-        "rarity": "cultivated"
-      },
-      "promptVersions": {
-        "aptitude-primary": 1,
-        "aptitude-secondary": 1,
-        "deployment": 1,
-        "element-primary": 1,
-        "element-secondary": 1,
-        "identity": 1,
-        "kit-shape": 1,
-        "threat-audit": 1
-      }
-    },
-    "acquisition": [
-      "Summonable"
-    ],
-    "aptitudePrimary": "Onslaught",
-    "aptitudeSecondary": "Pierce",
-    "attackTempo": "steady",
-    "basis": "stated",
-    "deployMode": "PlantAvatar",
-    "elementPrimary": "ice",
-    "elementSecondary": "none",
-    "family": [
-      "Cryo-Flora"
-    ],
-    "gameTypeId": 237,
-    "posture": "Force",
-    "pure": false,
-    "rarity": "heirloom",
-    "reach": "short",
-    "reason": "The creature possesses multi-target piercing attacks, crowd control (freeze) mechanics, and a massive 4x damage multiplier against frozen enemies, making it a significant threat rather than a mere nuisance.",
-    "resourceProfile": [
-      "hp",
-      "stamina"
-    ],
-    "side": "plant",
-    "speciesId": "IcePeach",
-    "targetPreference": "swarm",
-    "traits": [
-      "Fan-shaped projectile spread",
-      "Piercing capability",
-      "Frostbite application",
-      "Freeze-stacking mechanism",
-      "Shatter-damage multiplier"
-    ],
-    "variants": [
-      "normal",
-      "ancient",
+      "mutated",
       "blessed"
     ],
-    "verdict": "too-low"
+    "verdict": "agree"
   }
 ]

@@ -20,6 +20,7 @@ using FusionRpg.Core.Hud;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Ai;
+using FusionRpg.Core.World.Growth;
 using FusionRpg.Core.World.Loam;
 
 namespace FusionRpg.Core.Tests;
@@ -43,6 +44,7 @@ internal static class ContractTuningTestBootstrap
         ContractPolicy.Configure(DefaultContracts);
         LoamPolicy.Configure(DefaultLoam);
         WorldTuningHub.Configure(DefaultWorld);
+        RecruitPolicy.Configure(DefaultWorld.Growth);
         SoulEarnPolicy.Configure(DefaultSouls);
         PatronPolicy.Configure(DefaultPatron);
         ShieldPolicy.Configure(DefaultShield);
@@ -151,7 +153,19 @@ internal static class ContractTuningTestBootstrap
             DefenderBonusMilli: 1250, WipeoutRatioMilli: 250, RoutWoundMilli: 750, GuardWoundMilli: 100),
         Calendar: new WorldCalendarTuning(
             DaysPerWeek: 7, WeeksPerMonth: 4,
-            SpecialWeekChanceMilli: 250, SpecialMonthChanceMilli: 400, PlagueChanceMilli: 100));
+            SpecialWeekChanceMilli: 250, SpecialMonthChanceMilli: 400, PlagueChanceMilli: 100),
+        // world-stage W30, matches data/tuning/world.v2.json's own starting value.
+        Movement: new MovementTuning(DowseBudgetMilli: 250),
+        // world-map W42/W51, matches data/tuning/world.v4.json's own identity/placeholder values.
+        Growth: new WorldGrowthTuning(
+            SeatPulsePerWeek: 0, LairMultiplierMilli: 1000, SpecialWeekMultiplierMilli: 1000,
+            RaiseCostPoints: 100, RaiseMemberHp: 110,
+            LegionTarget: new LegionTargetTuning(Min: 6, Max: 10, ByTurn: 40)),
+        Seasons: new WorldSeasonsTuning(
+            Count: 4, MonthsPerSeason: 3,
+            YieldMilli: new[] { 1000, 1000, 1000, 1000 },
+            UpkeepMilli: new[] { 1000, 1000, 1000, 1000 },
+            MovementMilli: new[] { 1000, 1000, 1000, 1000 }));
 
     public static readonly SoulEarnTuning DefaultSouls = new(
         SchemaVersion: 1,
@@ -253,7 +267,7 @@ internal static class ContractTuningTestBootstrap
         });
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
-        SchemaVersion: 1, Version: 1, CategoryResistCap: 0.95);
+        SchemaVersion: 2, Version: 2, CategoryResistCap: 0.95, TurnDefaultSpeed: 100);
 
     public static readonly StatusTuning DefaultStatus = new(
         SchemaVersion: 1,
@@ -305,7 +319,9 @@ internal static class ContractTuningTestBootstrap
             ShinyDie: 64, InjuryPowerDivisor: 4));
 
     public static readonly MatchTuning DefaultMatch = new(
-        SchemaVersion: 1, Version: 1, MaxLivingPlants: 50, MaxLivingZombies: 80);
+        SchemaVersion: 1, Version: 1, MaxLivingPlants: 50, MaxLivingZombies: 80,
+        // E36 (spec-wave-control.md §2.2), matches data/tuning/match.v1.json's own waveHoldFloorSeconds.
+        WaveHoldFloorSeconds: 30);
 
     public static readonly EffectsTuning DefaultEffects = new(
         SchemaVersion: 1, Version: 1,
@@ -340,7 +356,15 @@ internal static class ContractTuningTestBootstrap
             ["genius"] = new(SpecimenXpBonusMilli: 250),
             ["void-touched"] = new(EssenceProcMilli: 100, EssenceRiderMilli: 150),
             ["chaos-marked"] = new(EssenceProcMilli: 100, EssenceRiderMilli: 150),
-        });
+        },
+        TimelineProfiles: new Dictionary<string, TimelineProfileTuning>(StringComparer.Ordinal)
+        {
+            ["classic-round"] = new(W: 1, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            ["galaxy-sync"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            ["hybrid-atb"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
+        },
+        // Wave E3: 0 = the shipped default, secondary contributes nothing, goldens unmoved.
+        HybridSecondaryWeightMilli: 0);
 
     public static readonly SummoningTuning DefaultSummoning = new(
         SchemaVersion: 1, Version: 1,
