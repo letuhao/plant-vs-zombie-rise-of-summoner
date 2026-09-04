@@ -1,6 +1,6 @@
 # Spec: `siege-ai`
 
-**Module 14 of 21 · level 6 · depends on `siege-positions`, `siege-cover` · [base-defense-map.md](../base-defense-map.md)**
+**Module 14 of 29 · level 6 · depends on `siege-positions`, `siege-cover` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -102,11 +102,29 @@ public sealed class SiegeIntentSource : IIntentSource
 
 This is what makes decision (round 6) *"both sides move"* cheap: symmetry is structural.
 
-### 2. R1 — aggro tier and target choice are two steps
+### 2. R1/R2 — THREE things, not two, and the audit conflated two of them
+
+⛔ **A draft of this spec replaced aggro tiers with signed aggression and deleted the stance. They are
+different axes and both are required.**
+
+| Axis | Lives on | Values | Answers |
+|---|---|---|---|
+| **Stance** (§5.16 R2) | the **actor** | `Hold` / `Guard` / `Engage` — *"three values and no more"* | *How far will I leave my post?* |
+| **Aggression** (§5.20 rule 4) | the **target** | signed `−2 … +2` | *How much does this thing pull?* |
+| **Score** (§5.16 R3) | the pair | additive | *Which of the pulling things do I hit?* |
+
+**The stance is what stops the worst-looking behaviour on a defence board.** §5.16 R2, ⭐-marked:
+
+> *"a garrison abandoning the objective to chase a bait unit — HOMM3's dragon-fly trick and Clash of
+> Clans' 'Giants that have flattened every defence will happily wander off to punch a builder's hut'
+> are the same defect in a turn-based and a real-time game."*
+
+Signed aggression cannot express that: a taunt would still pull a `Hold` garrison off the Core.
 
 ```
-Step 1: tier   — which BAND of candidates do I care about?   (taunt, threat, objective proximity)
-Step 2: choose — within the best non-empty band, which one?  (the additive score, R2)
+Step 1: stance — how far may I leave my post?           (Hold / Guard / Engage, on the actor)
+Step 2: tier   — which candidates pull, after aggression? (signed −2..+2, on the target)
+Step 3: choose — within the best non-empty tier, which?   (the additive score, R3)
 ```
 
 Merging them is the classic mistake: a taunt then has to be modelled as an enormous score bonus, which
@@ -119,20 +137,35 @@ promote, never demote**, so stealth needed a second mechanism. One signed field 
 
 ### 3. R2 — additive scoring with an explicit risk term
 
+⛔ **A draft of this spec invented weights (kill 300 > damage 100). §5.16 R3 carries XCOM's SHIPPED
+weights, and they are the opposite shape** — the correction matters because the inversion produces
+precisely the behaviour the research names.
+
+> *"XCOM's shipped weights (**hit-chance dominates lethality 70 : 15** — an AI that maximises expected
+> damage with no risk term reads as **suicidal**, the most-cited 'stupid AI' complaint in the whole
+> survey) plus Fire Emblem's two defensive terms and its turn-count term, a soft anti-turtle timer
+> that is monotonic and invisible."*
+
 ```csharp
 // Additive, not multiplicative. A multiplicative score is unreadable (nobody can say which factor
 // produced a number) and one zero factor silences every other consideration. Every weight is a
 // tunable; there are no literals in this method.
-score = w.Damage      * expectedDamageMilli
-      + w.Kill        * (isKillingBlow ? 1000 : 0)
-      + w.Proximity   * proximityMilli
-      + w.Objective   * objectiveValueMilli
-      - w.Risk        * incomingThreatMilli;       // R2's risk term, and it SUBTRACTS
+score = w.HitChance   * hitChanceMilli          // +70  — DOMINANT. XCOM's own ordering
+      + w.Objective   * objectiveClassMilli     // +50
+      + w.Kill        * (isKillingBlow ? 1000 : 0)  // +15 — lethality is a FIFTH of hit-chance
+      + w.LowHp       * targetMissingHpMilli    // +10
+      + w.CannotCounter * (targetCanCounter ? 0 : 1000) // +10 — Fire Emblem's defensive term
+      + w.Round       * currentRound            // the anti-turtle timer, below
+      - w.Risk        * incomingThreatMilli;    // −N, and it SUBTRACTS
 ```
 
-**The risk term is what stops an AI walking a siege unit into a kill zone** to reach a marginally
-better target. Without it, cover is decorative for the AI even though it works for the player — and an
-AI that ignores a mechanic the player must respect reads as broken.
+**The risk term is what stops an AI walking a siege unit into a kill zone.** Without it, cover is
+decorative for the AI even though it works for the player.
+
+**`w.Round × currentRound` is a soft anti-turtle timer** — Fire Emblem's, and *"monotonic and
+invisible"*. It costs nothing, it is deterministic, and it means a defender who never engages faces an
+opponent that grows steadily bolder rather than one that waits forever. It is the **AI-side** answer to
+the same problem F8's clock solves on the wave side.
 
 `incomingThreatMilli` sums enemy damage potential reaching the candidate cell, **discounted by that
 cell's cover** — which is the one line that makes `siege-cover` matter to the AI.
@@ -166,14 +199,56 @@ unreachable when the feature is absent"* for free: absent streams cannot leak.
 **No `float`.** Every score is an integer per-mille sum. A `float` score reorders candidates
 differently on different runtimes, which is a replay divergence that reproduces nowhere.
 
-### 7. R6 — readability, on the trace that already exists
+### 7. R6 — readability, and `Consideration.cs` is its first real caller
 
 Each decision emits its **top three scored candidates with their term breakdown** to `DecisionTrace`
-(`Battle/Timeline/DecisionTrace.cs`, already built). A designer asking *"why did it do that"* reads a
-row, not a debugger.
+(`Battle/Timeline/DecisionTrace.cs`, already built), gated behind the trace being non-null exactly as
+`BattleTrace` is, so it costs nothing when off.
 
-Gated behind the trace being non-null, exactly as `BattleTrace` already is, so it costs nothing when
-off.
+**And the arithmetic is already shipped and inert.** §5.16:
+
+> *"`World/Ai/Utility/Consideration.cs` has product-of-considerations with arity compensation **and a
+> `Weakest()` that hands the turn report a reason string for free.** Its own comment says 'Nothing
+> calls this yet… scoring wants an economy to score against and there is not one until
+> `sector-development`.' **A siege board has one** — loam, materials, field-cap slots — **so this is
+> its first real caller.**"*
+
+**Read it before writing a scorer.** `Weakest()` is R6 for free. Two cautions if it is adopted:
+
+- It is **product-of-considerations**, and R3 above is **additive**. Use its `Weakest()` reason-string
+  machinery without importing the product form, or state explicitly why the product is right here.
+- Confirm it is still uncalled. If something now calls it, follow that code.
+
+### 7b. ⛔ Two things the AI must never do
+
+**No hidden difficulty thumb.** §5.16:
+
+> *"Total War's player-penalty / AI-bonus tables produce a metagame **about the resolver** rather than
+> the game. `spec-ai-commander.md`'s assumption 3 already binds this — **'Difficulty is which policy,
+> not a stat bonus'** — and it extends to the siege AI verbatim."*
+
+**Do not put the score on `ActionTargetOrdering`.** *"That enum has two values, and the runtime
+`TargetSpec` has no ordering field at all — it is authored, serialized, and dropped at compile.
+Extending it costs a closed-vocabulary change plus a wire-contract change plus a golden move."* The
+score lives in the intent source, where `bloodthirsty` already lives (`BasicAttack.cs:180-188`).
+
+### 7c. The auto-versus-played dial is a tunable from line one
+
+§5.16 names a tension this program cannot avoid and must not discover late:
+
+> *"Playing it yourself should be **meaningfully better, never mandatory**"* — and with one kernel
+> **both are set by the same dial**. *"Too far and auto is unusable (mandatory play); not far enough
+> and playing is pointless — **fheroes2's maintainers hit the second one and openly debated making
+> their auto-battle AI dumber.**"*
+
+`ai.autoResolveHandicapMilli`, a tunable from the first line of code. **Not a stat bonus** — it selects
+how many candidates the AI scores and how deep it looks, i.e. *which policy*, per 7b.
+
+### 7d. What this AI deliberately omits
+
+> *"no planner, no multi-turn plan, no inter-actor coordination, no adaptation to the player's build.
+> Clash of Clans' entire strategic depth is a target-class enum, a layout, and a deployment position.
+> **The board carries the depth; the AI carries the legibility.**"*
 
 ### 8. §5.20 rule 2 — a **named, visible** validity filter
 
@@ -271,11 +346,15 @@ already deliver.
 
 | Key | Unit | Default | Why |
 |---|---|---|---|
-| `ai.weight.damage` | weight | `100` | Balance |
-| `ai.weight.kill` | weight | `300` | Balance |
-| `ai.weight.proximity` | weight | `50` | Balance |
-| `ai.weight.objective` | weight | `80` | Balance |
-| `ai.weight.risk` | weight | `120` | Balance — **the dial that decides how cautious the AI is**, and the one a balance pass will touch most |
+| `ai.weight.hitChance` | weight | `70` | **XCOM's shipped value, and dominant by design** |
+| `ai.weight.objective` | weight | `50` | XCOM |
+| `ai.weight.kill` | weight | `15` | XCOM — a fifth of hit-chance. **Inverting this makes the AI read as suicidal** |
+| `ai.weight.lowHp` | weight | `10` | XCOM |
+| `ai.weight.cannotCounter` | weight | `10` | Fire Emblem's defensive term |
+| `ai.weight.round` | weight | `1` | Fire Emblem's anti-turtle timer — monotonic, invisible |
+| `ai.weight.risk` | weight | `120` | Balance — **how cautious the AI is**, and decision 31's rollback (`0` = cover-blind) |
+| `ai.stance.default` | stance | `Guard` | Balance — `Hold`/`Guard`/`Engage`, three values and no more |
+| `ai.autoResolveHandicapMilli` | per-mille | `1000` | Balance — the play-vs-auto dial (§7c). **Policy depth, never a stat bonus** |
 | `ai.retargetLatencyTicks` | sim ticks | `0` | Balance — §5.20 rule 3. The value matters less than it being **stated** |
 | `ai.aggression.range` | ± | `2` | **Structural** — the -2..+2 range IS the vocabulary (§5.20 rule 4). Widening it makes aggression dominate the score it modulates. Comment says so |
 | `ai.maxCandidatesScored` | candidates | `32` | **Structural** per-decision work bound, not a progression ceiling. Comment must say so |
@@ -318,7 +397,13 @@ where to stop, and nothing more.
 | `Same_board_same_decisions_10000_times` | **R5**, and it is the module's central claim |
 | `No_rng_is_reachable_from_the_ai` | source scan over the AI namespace for `Random`/`SeededRng` — structural, not empirical |
 | `No_float_in_the_scoring_path` | the same scan, for `float`/`double` |
-| `Taunt_dominates_within_its_band_and_not_outside` | **R1**, both halves |
+| `A_hold_stance_garrison_does_not_chase_bait` | **§5.16 R2's ⭐ finding** — the dragon-fly trick, prevented |
+| `Stance_and_aggression_are_independent_axes` | a taunt cannot pull a `Hold` actor off the objective |
+| `Hit_chance_outweighs_lethality_seventy_to_fifteen` | **XCOM's ordering**, asserted — the anti-suicidal invariant |
+| `The_round_term_makes_a_stalled_ai_bolder_over_time` | the anti-turtle timer |
+| `No_stat_bonus_difficulty_exists` | 7b — source scan; difficulty selects policy only |
+| `Score_is_not_on_ActionTargetOrdering` | 7b — no closed-vocabulary change, no golden move |
+| `Taunt_dominates_within_its_tier_and_not_outside` | **R1**, both halves |
 | `Risk_term_prevents_walking_into_a_kill_zone` | **R2.** Same board, `ai.weight.risk` at 0 and at default; assert different and correct |
 | `Cover_reduces_perceived_risk` | the `siege-cover` link |
 | `Unit_boxed_in_by_allies_still_advances` | **R3**, and the reason for two occupancy views |

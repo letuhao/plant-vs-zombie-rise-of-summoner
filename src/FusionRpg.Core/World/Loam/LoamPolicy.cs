@@ -104,6 +104,10 @@ public static class LoamPolicy
     /// <summary>What one member, fighter or bearer, burns per turn beyond supply. Harness-tuned alongside <see cref="CarryPerBearer"/>.</summary>
     public static long BurnPerMember => Tuning.LegionSupply.BurnPerMember;
 
+    /// <summary>base-defense siege-supply, decision 42. See <see cref="LoamLegionSupplyTuning"/>'s own
+    /// doc comment for the separability argument behind the 1000 (no-op) shipped default.</summary>
+    public static int BesiegedRationMilli => Tuning.LegionSupply.BesiegedRationMilli;
+
     // ---- loam-structures (spec-loam-structures.md) ----
 
     /// <summary>
@@ -114,10 +118,10 @@ public static class LoamPolicy
     public static int WellYieldMultiplierMilli => Tuning.Structures.WellYieldMultiplierMilli;
 
     /// <summary>What a well costs to build, spent from the founding legion's own `CarriedLoam`.</summary>
-    public static long WellCostMilli => Tuning.Structures.WellCostMilli;
+    public static long WellCost => Tuning.Structures.WellCost;
 
     /// <summary>What a waystation costs to build. Same spend path as a well's.</summary>
-    public static long WaystationCostMilli => Tuning.Structures.WaystationCostMilli;
+    public static long WaystationCost => Tuning.Structures.WaystationCost;
 
     /// <summary>How many `Production` passes a well takes to finish, decrementing to zero.</summary>
     public static int WellBuildTurns => Tuning.Structures.WellBuildTurns;
@@ -134,13 +138,46 @@ public static class LoamPolicy
     // ---- loam-texture (spec-loam-texture.md) ----
 
     /// <summary>What a granary costs to build.</summary>
-    public static long GranaryCostMilli => Tuning.Structures.GranaryCostMilli;
+    public static long GranaryCost => Tuning.Structures.GranaryCost;
 
     /// <summary>How much a granary raises a sector's storage cap by, on top of <see cref="LoamCapacity"/>.</summary>
     public static long GranaryCapacityBonus => Tuning.Structures.GranaryCapacityBonus;
 
     /// <summary>How many `Production` passes a granary takes to finish.</summary>
     public static int GranaryBuildTurns => Tuning.Structures.GranaryBuildTurns;
+
+    // ---- sector-development yield kinds (spec-sector-development.md §3, world-map W56) ----
+
+    /// <summary>What a soul conduit costs to build. Same spend path as a well's.</summary>
+    public static long SoulConduitCost => Tuning.Structures.SoulConduitCost;
+
+    /// <summary>What a soul conduit adds to its sector's loam production, flat, every turn it is active.</summary>
+    public static long SoulConduitFlatYieldPerTurn => Tuning.Structures.SoulConduitFlatYieldPerTurn;
+
+    /// <summary>How many `Production` passes a soul conduit takes to finish.</summary>
+    public static int SoulConduitBuildTurns => Tuning.Structures.SoulConduitBuildTurns;
+
+    /// <summary>What an extractor costs to build.</summary>
+    public static long ExtractorCost => Tuning.Structures.ExtractorCost;
+
+    /// <summary>What an extractor adds to its sector's loam production, flat, every turn it is active.</summary>
+    public static long ExtractorFlatYieldPerTurn => Tuning.Structures.ExtractorFlatYieldPerTurn;
+
+    /// <summary>How many `Production` passes an extractor takes to finish.</summary>
+    public static int ExtractorBuildTurns => Tuning.Structures.ExtractorBuildTurns;
+
+    /// <summary>What a hatchery costs to build.</summary>
+    public static long HatcheryCost => Tuning.Structures.HatcheryCost;
+
+    /// <summary>
+    /// Per-mille, 1000 = unchanged. What an active hatchery multiplies its sector's recruit pulse by
+    /// (world-map W56) — read by <c>GrowthPhases</c> through <c>RecruitPolicy.PulseFor</c>'s own
+    /// existing `lairMultiplierMilli` parameter, never a second formula.
+    /// </summary>
+    public static int HatcheryYieldMultiplierMilli => Tuning.Structures.HatcheryYieldMultiplierMilli;
+
+    /// <summary>How many `Production` passes a hatchery takes to finish.</summary>
+    public static int HatcheryBuildTurns => Tuning.Structures.HatcheryBuildTurns;
 
     /// <summary>How much an actively-fading sector raises `PressureMilli` on each lane-adjacent sector, per turn.</summary>
     public static int ContagionPressurePerTurn => Tuning.Texture.ContagionPressurePerTurn;

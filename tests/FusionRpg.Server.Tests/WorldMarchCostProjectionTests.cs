@@ -100,7 +100,7 @@ public class WorldMarchCostProjectionTests : IAsyncLifetime
     [Fact]
     public async Task A_selected_legions_march_cost_is_real_lane_cost_math()
     {
-        // l-df1-df2: corridor, length 800, no hazard -> 800 * 700‰ = 560 (data/tuning/world.v4.json's
+        // l-df1-df2: corridor, length 800, no hazard -> 800 * 700‰ = 560 (data/tuning/world.v5.json's
         // corridor multiplier), a plain check that the projection isn't a placeholder.
         var state = await StateAsync(LegionId);
         var costs = state.GetProperty("marchCosts");
@@ -141,9 +141,9 @@ public class WorldMarchCostProjectionTests : IAsyncLifetime
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v2.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
+            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
         _tuningConfigured = true;
     }
 

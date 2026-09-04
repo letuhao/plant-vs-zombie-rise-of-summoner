@@ -1,6 +1,6 @@
 # Spec: `siege-economy`
 
-**Module 13 of 21 · level 6 · depends on `siege-construction` · [base-defense-map.md](../base-defense-map.md)**
+**Module 13 of 29 · level 6 · depends on `siege-construction` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -107,6 +107,18 @@ ordering rather than needing a rule.
 > exactly one of them owns the sector. A shared mutable stock would let the attacker spend the
 > defender's loam by accident.
 
+### 2b. ⛔ The board never reads `WorldSlot.OwnerFactionId`
+
+§5.13, stated as a rule rather than a note because the failure is silent:
+
+> *"**The board never reads `WorldSlot.OwnerFactionId`.** A Well has a world owner and no board owner.
+> **The moment board logic consults world ownership, the two models diverge and capture gets
+> ambiguous.**"*
+
+Board possession is **occupation** (decision 12); world ownership is durable and settled by the outcome
+record. Two models, one direction of travel — and `siege-supply`'s §7-cost-6 fix (slots follow sector
+capture) is the *world* half, which the board still never reads.
+
 ### 3. Capture transfers the stockpile — F11
 
 ```csharp
@@ -176,13 +188,16 @@ throughout.
 ## Boundaries
 
 **Always:** `long` for every resource quantity · reconcile spend-only · ordinal cell order for income ·
-`checked` arithmetic · guard `MaxHp <= 0` before dividing.
+`checked` arithmetic · guard `MaxHp <= 0` before dividing · draw the defender's budget from the
+sector's stock and the attacker's from `CarriedLoam`.
 
 **Ask first:** letting board income persist past the battle (it changes the whole economy's shape) ·
 scaling node yield with `Θ`.
 
 **Never:** overwrite world stock with a depot balance · yield to a non-garrisoned node · put a yield on
-`P(Θ)` · divide before multiplying · a bare literal in the economy policy file.
+`P(Θ)` · divide before multiplying · a bare literal in the economy policy file · **read
+`WorldSlot.OwnerFactionId` from board logic** (§2b) · debit `LoamStock` or `CarriedLoam` from inside a
+battle.
 
 ---
 
@@ -202,6 +217,10 @@ scaling node yield with `Θ`.
 | `Depletion_advances_on_harvest_not_on_time` | an ungarrisoned node never depletes |
 | `Contested_nodes_deplete_faster` | both sides working it |
 | `Exhausted_nodes_stop_yielding_and_report_once` | |
+| `Board_logic_never_reads_slot_owner_faction` | **§2b**, by source scan |
+| `Defender_budget_is_the_sectors_stock` | the asymmetry |
+| `Attacker_budget_is_carried_loam` | and is finite — the reason decision 27 has four paths |
+| `Blockading_production_stops_the_defender_rebuilding` | the mechanic the asymmetry exists for |
 | `Income_order_is_deterministic_over_10000_runs` | it is a sum |
 | `Transfer_overflows_loudly` | `OverflowException` |
 | `World_goldens_byte_identical_with_no_siege` | **the gate** |

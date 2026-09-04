@@ -1,6 +1,6 @@
 # Spec: `siege-stage`
 
-**Module 17 of 21 · level 8 · depends on `board-render`, `siege-resolver` · [base-defense-map.md](../base-defense-map.md)**
+**Module 17 of 29 · level 8b · depends on `board-render` (8), `siege-resolver` (7) · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04. **✅ Unblocked** — the `decisions.md` fifth-stage amendment was approved
 by the owner on 2026-09-04.
 
@@ -198,14 +198,92 @@ navigation as a withdrawal.
 
 ## Open questions
 
-**One, and it is small but real.** What happens to an in-progress siege if the player closes the
-client?
+**None.** ✅ **Decision 41** — the engine supports pause. ✅ **Decision 46** — and it is a **persisted
+decision log**, not a session held in memory.
 
-A siege spans many rounds inside one world turn, so an abandoned siege leaves the world turn
-un-advanced.
+> *"pause the game, this is single play game, the engine should be support pause."* — decision 41
+>
+> *"we won't store battle state? maybe it correct in heroes of might and magic and other game? they
+> have reason for it, maybe we should follow."* — decision 46
 
-**Recommendation: auto-resolve it with `siege-ai` on the next world turn advance**, and report the
-outcome. This is why `siege-ai` is a dependency of `siege-resolver` rather than of this stage: the
-auto-resolver must exist independently of the FE, and it does. The alternative — persisting partial
-siege state — would make battle state persistent, which **violates the world/combat seam** (*"combat
-is stateless between turns"*) and is not worth it for a disconnect case.
+A closed client **pauses**. It does not auto-resolve, does not forfeit, and **stores no battle state.**
+
+### ⛔ Why the first draft of this section was wrong
+
+It held the session in the server process and then had to invent a clause — *"a pause must never
+survive a world-turn boundary"* — to keep §2 rule 7 (*"never a battle paused in memory"*) true. That
+clause worked, but it was **load-bearing scaffolding around a mechanism that did not need to exist.**
+
+**HoMM3's reason for refusing a mid-battle save is that a battle is re-derivable from its inputs.** It
+is not squeamishness about memory. Games that *do* persist tactical state — XCOM, Fire Emblem, AoW4 —
+are ones where the tactical layer **is** the game. Ours is not; §2 rule 7 says so, and decision 24
+already borrowed HoMM3's turn/round boundary for the same reason.
+
+### The shape: `(setup, seed, trace)` → replay
+
+```text
+pause  →  persist the DECISION LOG          (input, not state)
+resume →  replay it                          (the exact board, byte-identically)
+```
+
+**Every piece is already built, and one is missing:**
+
+| Piece | Evidence | State |
+|---|---|---|
+| `DecisionTrace` | `(Tick, ActorKey, ActionId, TargetKey, Source)`, ordered by `(Tick, Seq)`, replay cursor, `ReplayExhausted` | **Built** |
+| The replay driver | `InteractiveIntentSource`'s replay constructor — *"read the trace, never the player … a completed trace reproduces its battle byte-identically, and an AFK timeout replays as the same timeout"* | **Built** |
+| The column | `RpgStore.cs:603` `EnsureColumn(…, "decisions_json", "TEXT")`, read at `RpgStore.WebMatches.cs:180` | **Built and read** |
+| **A writer** | — | ⚠️ **MISSING** — §3.7: *"`DecisionsJson` is read and never written … a column, a reader and a guard with no producer"* |
+
+`DecisionTrace`'s own doc comment names this exact failure as the reason it exists:
+
+> *"**Appended per decision, never written at the end.** A trace produced only on completion is
+> worthless for the failure it exists to cover — **a disconnect mid-battle** would leave a row that
+> still *looks* auto-resolvable, and the boot sweep would re-resolve it with AI decisions, **silently
+> overwriting a player's real result.** That is the hole T6 must not ship without."*
+
+### ⛔ Scope — the writer is NOT this program's
+
+Audit **F4**: *"the played seat is another program's … **consume T6/T10/T11, never re-derive**."*
+`spec-interactive-turns.md` owns T10 and `decisions_json`.
+
+**This module consumes it, and names it a prerequisite** — stated so it is not discovered at landing:
+
+> **Prerequisite:** a `decisions_json` **writer**, appended per decision. Without it a paused siege
+> cannot resume, and — worse, per the comment above — the boot sweep may overwrite a played result
+> with an AI re-resolve. **That risk exists today, for every played battle, independently of this
+> program.**
+
+### What this buys, against the in-memory version it replaces
+
+| | In-memory pause (superseded) | Decision 46 |
+|---|---|---|
+| §2 rule 7 | true **only** under an added clause | **unconditionally true** — no battle is in memory |
+| §2 rule 8's save model (*"`(seed, template, command log)`"*) | not used | **is exactly this** |
+| Survives a server restart | ❌ no | ✅ **yes** |
+| Mechanism added | a `Paused` session state + a turn-commit gate + a timeout suppressor | **none** — closes a wiring gap |
+| Pass 4's *"pause must not survive a turn boundary"* clause | required | **moot, and removed** |
+
+### What still holds from decision 41
+
+- The **world turn does not commit** while a siege is unresolved. Not because a session is held, but
+  because the engagement has not produced an outcome — which was always the real reason.
+- **No timeout fires on a paused siege.** `ConsecutiveTimeouts` is an interactive-multiplayer concept;
+  this is single-player. A `Timeout` in the trace is *"a real decision, not an absence"* and must never
+  be manufactured by a player simply being away.
+- `MayWriteResult => State == Live && Completed` is **unchanged and still correct** — a partial trace
+  never writes a result.
+
+### Tests
+
+| Test | Asserts |
+|---|---|
+| `A_paused_siege_stores_no_board_state` | **decision 46** — scan the persisted row for cells, HP, initiative |
+| `Resume_replays_the_trace_to_the_exact_board` | byte-identical |
+| `Resume_survives_a_server_restart` | the thing the in-memory version could not do |
+| `An_afk_timeout_replays_as_the_same_timeout` | `InteractiveIntentSource`'s own contract |
+| `A_partial_trace_never_writes_a_result` | `MayWriteResult` |
+| `The_boot_sweep_never_re_resolves_a_traced_battle` | the hole `DecisionTrace`'s comment names |
+| `The_world_turn_does_not_commit_while_unresolved` | decision 24's boundary |
+| `No_timeout_fires_on_a_paused_single_player_siege` | |
+| `Decisions_json_has_a_writer` | ⚠️ **the prerequisite** — and a companion asserting it had none before |

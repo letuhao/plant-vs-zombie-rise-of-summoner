@@ -69,7 +69,7 @@ public static class MaterialCatalog
 
     static IReadOnlyList<string> Build()
     {
-        var ids = new List<string>(27);
+        var ids = new List<string>();
 
         // The sixteen shipped ids come from DemonMaterialCatalog, never re-derived here — the spec's
         // "reuse, not re-mint" line. Its own order is essence-then-shard; this list is class order.

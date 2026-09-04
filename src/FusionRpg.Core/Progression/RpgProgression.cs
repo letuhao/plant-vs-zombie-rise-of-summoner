@@ -32,7 +32,7 @@ public static class RpgXpCurve
         "RpgXpCurve.Configure(...) has not run. Every XP curve reads " +
         "data/tuning/progression.v{n}.json (tunables-ssot.md T5) — there is no built-in default to fall back to.");
 
-    public static (double First, double Step) ParamsFor(string kind) => kind switch
+    public static (long First, long Step) ParamsFor(string kind) => kind switch
     {
         RpgActorKinds.Plant => (Tuning.PlantCurve.First, Tuning.PlantCurve.Step),
         RpgActorKinds.Zombie => (Tuning.ZombieCurve.First, Tuning.ZombieCurve.Step),
@@ -40,23 +40,33 @@ public static class RpgXpCurve
         _ => (Tuning.PlayerCurve.First, Tuning.PlayerCurve.Step)
     };
 
-    public static double XpToNext(string kind, long level)
+    /// <summary>
+    /// The arithmetic cost ladder `first + (L−1)·step` — ssot-power-scale.md §10 row 6, kept
+    /// unchanged as a COST ladder (exempt from the one-ladder rule; only its ratio against `P(Θ)`
+    /// matters, §10.5). `long` end to end: XP is a persisted magnitude, so overflow throws rather
+    /// than silently losing precision the way a `double` would past 2^53.
+    /// </summary>
+    public static long XpToNext(string kind, long level)
     {
         if (level < 1) level = 1;
         var (first, step) = ParamsFor(kind);
-        var need = first + (level - 1) * step;
-        if (double.IsNaN(need) || double.IsInfinity(need) || need < 1.0)
-            return 1.0;
-        return need;
+        long need;
+        checked { need = first + (level - 1) * step; }
+        return need < 1 ? 1 : need;
     }
 
-    public static double TotalToReach(string kind, long level)
+    /// <summary>
+    /// Cumulative XP to reach `level` — the triangular sum of the arithmetic ladder above, which is
+    /// why total cost is QUADRATIC while each step is linear (§10.5). `n·(2·first + (n−1)·step)` is
+    /// always even, so the halving is exact and no rounding decision exists to get wrong.
+    /// </summary>
+    public static long TotalToReach(string kind, long level)
     {
         if (level <= 1) return 0;
         var (first, step) = ParamsFor(kind);
         // sum_{i=0}^{L-2} (first + i*step)
         var n = level - 1;
-        return n * (2 * first + (n - 1) * step) / 2.0;
+        checked { return n * (2 * first + (n - 1) * step) / 2; }
     }
 }
 
@@ -76,17 +86,18 @@ public static class RpgXpAwards
         "RpgXpAwards.Configure(...) has not run. Every award reads data/tuning/progression.v{n}.json " +
         "(tunables-ssot.md T5) — there is no built-in default to fall back to.")).Awards;
 
-    public static double Kill => Tuning.Kill;
-    public static double Defeat => Tuning.Defeat;
-    public static double Mower => Tuning.Mower;
-    public static double PlantPlace => Tuning.PlantPlace;
-    public static double ZombieSpawn => Tuning.ZombieSpawn;
+    public static long Kill => Tuning.Kill;
+    public static long Defeat => Tuning.Defeat;
+    public static long Mower => Tuning.Mower;
+    public static long PlantPlace => Tuning.PlantPlace;
+    public static long ZombieSpawn => Tuning.ZombieSpawn;
 }
 
 public sealed class RpgActorState
 {
     public long Level { get; set; } = 1;
-    public double Xp { get; set; }
+    /// <summary>Whole XP. `long`, never `double` — this value is persisted (CLAUDE.md numeric rule).</summary>
+    public long Xp { get; set; }
     public long HighestLevel { get; set; } = 1;
     public long DemotionCount { get; set; }
     public long Revision { get; set; }
@@ -99,7 +110,7 @@ public sealed class LevelChangeEvent
     public int TypeId { get; init; }
     public long LevelBefore { get; init; }
     public long LevelAfter { get; init; }
-    public double XpAfter { get; init; }
+    public long XpAfter { get; init; }
     public long DemotionCount { get; init; }
     public string Reason { get; init; } = "";
     public string Direction { get; init; } = "up"; // up | down
@@ -113,10 +124,17 @@ public sealed class RpgXpApplyResult
 
 public static class RpgXpApply
 {
+    /// <summary>
+    /// Applies a whole-XP delta. `delta` is `long` because XP is a persisted magnitude: any
+    /// fractional scaling (today `RpgXpAwardMap.NoKillPowerScaleYet = 1.0`, tomorrow content-scale)
+    /// is rounded ONCE at the award boundary in <see cref="RpgXpAwardMap"/>, never accumulated as a
+    /// fraction here — an XP total built from repeated fractional adds is order-dependent, and
+    /// `state.Xp >= need` would then compare accumulated error against a threshold.
+    /// </summary>
     public static RpgXpApplyResult Apply(
         string kind,
         RpgActorState state,
-        double delta,
+        long delta,
         long playerId = 0,
         int typeId = 0,
         string reason = "")

@@ -264,7 +264,7 @@ public static class WorldEndpoints
                 Name = s.Name,
                 Kind = s.Kind.ToString(),
                 RequiredSlotKind = s.RequiredSlotKind.ToString(),
-                Cost = s.CostMilli,
+                Cost = s.Cost,
                 YieldMultiplierMilli = s.YieldMultiplierMilli,
                 BuildTurns = s.BuildTurns,
                 CapacityBonus = s.CapacityBonus

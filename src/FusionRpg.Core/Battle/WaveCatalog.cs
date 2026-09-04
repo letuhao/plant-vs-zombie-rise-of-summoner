@@ -143,7 +143,8 @@ public static class WaveCatalog
                     TraitIds = species.TraitPool,
                     MaxHp = BattleRuleset.BaseHp(theta),
                     Atk = BattleRuleset.BaseAtk(theta),
-                    Defense = BattleRuleset.BaseDefense(theta)
+                    Defense = BattleRuleset.BaseDefense(theta),
+                    AttackIntervalMs = species.AttackIntervalMs
                 });
             }
         }

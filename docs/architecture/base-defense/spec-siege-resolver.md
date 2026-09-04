@@ -1,6 +1,6 @@
 # Spec: `siege-resolver`
 
-**Module 15 of 21 · level 7 · depends on `siege-ai`, `siege-seam`, `siege-objective` · [base-defense-map.md](../base-defense-map.md)**
+**Module 15 of 29 · level 7 · depends on `siege-ai`, `siege-seam`, `siege-objective` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 **⭐ This is the gate.** When this module is green, a siege is **playable and CI-provable with no FE at
 all.** Everything after it is presentation.
@@ -130,6 +130,27 @@ same one it used at `:509` without any stored state.
 > `:603` could not construct it and the re-derivation would be permanently divergent. Keep it
 > constructible from statics.
 
+### 4b. §2 rule 8 — every resolution is stamped
+
+Found missing by pass 4. Rule 8:
+
+> *"every resolution stamped `(engineVersion, rulesetVersion, seed)`. **A save is
+> `(seed, template, command log)` and replay must be byte-identical.**"*
+
+A district assault is a resolution, so it carries the stamp — and here the stamp is not bookkeeping,
+it is what makes the `:603` re-derivation **detectable** when it diverges:
+
+```csharp
+// Without the stamp, a re-derived report that disagrees with the original looks like a UI bug.
+// With it, the two carry different rulesetVersions and the cause is named in the artifact itself.
+outcome with { EngineVersion = ..., RulesetVersion = BattleRuleset.Version, Seed = battleSeed }
+```
+
+**`RulesetVersion` is currently `4`** (`BattleModels.cs:108`). Adding the `siege` profile does not move
+it — a new *row* is not a rules change — but **`battle-clock-profile`'s `MaxRounds` move might**, and
+that is the module which must decide. Stated here because this is where a version mismatch becomes
+visible.
+
 ### 5. Feature-absence is structural
 
 Gate B: *"every new RNG stream is structurally unreachable when the feature is absent — an early
@@ -179,6 +200,8 @@ from statics only · reuse `SeededRng` · `long` end to end.
 | `Non_district_kinds_delegate_unchanged` | sector, lane and guard each assert reference-equality with the placeholder's own outcome |
 | `World_goldens_byte_identical` | **the gate** |
 | `Same_seed_same_siege_10000_times` | full end-to-end determinism |
+| `Every_resolution_carries_the_version_stamp` | **P4-3**, §2 rule 8 |
+| `A_version_mismatch_between_original_and_re_derived_is_detectable` | the stamp earning its place |
 | `Two_assaults_in_one_turn_get_different_seeds` | the `IdFor` mix, not the turn |
 | `Structure_hp_survives_the_round_trip_as_long` | world → setup → outcome → world, no narrowing |
 | `Destroyed_structures_leave_ruined_slots` | through the real `BattleApplication` path |

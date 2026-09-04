@@ -76,7 +76,7 @@ public sealed partial class RpgStore
 
     RpgProgressionDirty? TryApplyXpUnlocked(
         SqliteConnection db, long playerId, string kind, int typeId, long runId, string t,
-        double delta, string reason, string dedupeKey, long? factId, string? payloadJson)
+        long delta, string reason, string dedupeKey, long? factId, string? payloadJson)
     {
         EnsureActorRowUnlocked(db, playerId, kind, typeId);
         var state = ReadActorStateUnlocked(db, playerId, kind, typeId);
@@ -166,7 +166,19 @@ public sealed partial class RpgStore
         return "{}";
     }
 
-    static string MergeXpReasonBucket(string bucketsJson, string reason, double delta)
+    /// <summary>
+    /// Reads a whole-XP column tolerantly. XP became `long`/INTEGER on 2026-09-04 (CLAUDE.md numeric
+    /// rule — it is a persisted magnitude), but `CREATE TABLE IF NOT EXISTS` never rewrites an
+    /// existing database, so a player who has played before still has a column with REAL affinity
+    /// holding whole values like `100.0`. `GetValue` returns the STORED class (double there, long in
+    /// a fresh db) and `Convert.ToInt64` accepts both, so no data migration is needed and no legacy
+    /// save fails to load. Every value ever written was integral: awards and curve steps are whole,
+    /// and the one scaled award rounds at its own boundary (RpgXpAwardMap.ScaledAward).
+    /// </summary>
+    static long ReadXp(Microsoft.Data.Sqlite.SqliteDataReader r, int ordinal) =>
+        r.IsDBNull(ordinal) ? 0L : Convert.ToInt64(r.GetValue(ordinal));
+
+    static string MergeXpReasonBucket(string bucketsJson, string reason, long delta)
     {
         Dictionary<string, XpReasonBucket> map;
         try
@@ -223,7 +235,7 @@ public sealed partial class RpgStore
         return new RpgActorState
         {
             Level = r.GetInt64(0),
-            Xp = r.GetDouble(1),
+            Xp = r.GetInt64(1),
             HighestLevel = r.GetInt64(2),
             DemotionCount = r.GetInt64(3),
             Revision = r.GetInt64(4)
@@ -682,13 +694,13 @@ public sealed partial class RpgStore
             cmd.Parameters.AddWithValue("$k", kind.Trim());
         cmd.Parameters.AddWithValue("$lim", limit);
         cmd.Parameters.AddWithValue("$off", offset);
-        var rows = new List<(long PlayerId, string Kind, int TypeId, long Level, double Xp, long Highest, long Demotion, long Revision, string Updated)>();
+        var rows = new List<(long PlayerId, string Kind, int TypeId, long Level, long Xp, long Highest, long Demotion, long Revision, string Updated)>();
         using (var r = cmd.ExecuteReader())
         {
             while (r.Read())
             {
                 rows.Add((
-                    r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3), r.GetDouble(4),
+                    r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3), ReadXp(r, 4),
                     r.GetInt64(5), r.GetInt64(6), r.GetInt64(7), r.GetString(8)));
             }
         }
@@ -707,12 +719,12 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$t", typeId);
         using var r = cmd.ExecuteReader();
         if (!r.Read()) return null;
-        return ToActorDto(db, r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3), r.GetDouble(4),
+        return ToActorDto(db, r.GetInt64(0), r.GetString(1), r.GetInt32(2), r.GetInt64(3), ReadXp(r, 4),
             r.GetInt64(5), r.GetInt64(6), r.GetInt64(7), r.GetString(8));
     }
 
     RpgActorProgressionDto ToActorDto(
-        SqliteConnection db, long playerId, string kind, int typeId, long level, double xp,
+        SqliteConnection db, long playerId, string kind, int typeId, long level, long xp,
         long highest, long demotion, long revision, string updated)
     {
         var (first, step) = RpgXpCurve.ParamsFor(kind);

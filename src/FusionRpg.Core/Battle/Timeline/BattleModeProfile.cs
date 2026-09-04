@@ -114,6 +114,29 @@ public sealed record BattleModeProfile
     /// turn, which is a slow way to produce a worse auto-resolve.</para>
     /// </summary>
     public bool RequiresLiveInput { get; init; }
+
+    /// <summary>
+    /// base-defense F2 — the battle's absolute round horizon, moved here from the engine-global
+    /// <see cref="BattleRuleset.MaxRounds"/>. A siege needs a longer horizon than a squad fight, and
+    /// with the value global, giving one gives all.
+    ///
+    /// <para><b>A structural bound, not a progression ceiling.</b> AGENTS.md's no-hard-ceilings rule
+    /// exempts "per-frame/runtime caps" and this is one: it bounds how long a single battle may run,
+    /// not how strong anything may become.</para>
+    ///
+    /// <para><b>No literal default here.</b> Every shipped row's concrete value comes from
+    /// `BattleModeProfileCatalog.Build`, resolved from tuning with a fallback to
+    /// <see cref="BattleRuleset.MaxRounds"/> — the same "overwritten from config for every shipped
+    /// profile" status <see cref="W"/> and <see cref="PassQuantum"/> already carry. `Build` throws if
+    /// this would resolve to zero, so a hand-constructed profile that forgets it fails loudly rather
+    /// than silently producing a battle with no rounds.</para>
+    /// </summary>
+    public int MaxRounds { get; init; }
+
+    /// <summary>Paired with <see cref="MaxRounds"/> — they are only ever read together
+    /// (`maxBattleTick` multiplies them), so splitting their resolution would let a profile carry
+    /// half a horizon. Same no-literal-default status.</summary>
+    public int RoundDurationMs { get; init; }
 }
 
 /// <summary>
@@ -129,6 +152,7 @@ public static class BattleModeProfileCatalog
     public const string ClassicRoundId = "classic-round";
     public const string GalaxySyncId = "galaxy-sync";
     public const string HybridAtbId = "hybrid-atb";
+    public const string SiegeId = "siege";
 
     // T14/B29 — the STRUCTURE of each row is here; its MAGNITUDES (W, WReact, PassQuantum, and
     // hybrid-atb's maxPoints) come from data/tuning/battle.v{n}.json's timeline.profiles.
@@ -140,7 +164,7 @@ public static class BattleModeProfileCatalog
     // on directly (`Assert.Same(BattleModeProfileCatalog.ClassicRound, ...)`).
 
     static BattleTuning? _tuning;
-    static BattleModeProfile? _classicRound, _galaxySync, _hybridAtb;
+    static BattleModeProfile? _classicRound, _galaxySync, _hybridAtb, _siege;
 
     /// <summary>Called by <see cref="BattleTuningHub.Configure"/>, never directly by game code.
     /// Resets the cached rows so a reconfigure (CombatSim's `compare`, a scoped test) is honoured
@@ -148,7 +172,7 @@ public static class BattleModeProfileCatalog
     public static void Configure(BattleTuning tuning)
     {
         _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
-        _classicRound = _galaxySync = _hybridAtb = null;
+        _classicRound = _galaxySync = _hybridAtb = _siege = null;
     }
 
     static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
@@ -181,9 +205,35 @@ public static class BattleModeProfileCatalog
         // Active-Time-Battle mode that ignored speed would be one in name only.
         ordersBySpeed: true);
 
+    /// <summary>The district board (base-defense-ideal.md §5.11/§5.16). Turn-based like
+    /// <c>classic-round</c>, but speed-ordered and interactive — movement precedes contact on a
+    /// board, so who steps first is a decision rather than a formality, and a siege is played, not
+    /// auto-resolved by default (though `siege-ai` may supply its own <see cref="IIntentSource"/> and
+    /// never dwell).
+    ///
+    /// <para><c>WScope.PerSide</c>, not <c>Global</c>: decision — both sides move. Under
+    /// <c>WScope.Global</c> with <c>W=1</c> the two sides interleave one actor at a time
+    /// (<c>classic-round</c>'s shape), which is not what "both sides move" means. <c>PerSide</c> is
+    /// the scope <c>galaxy-sync</c> already proves concurrent under.</para>
+    ///
+    /// <para><c>points: false</c> — <b>one action per activation, never <c>ActionPointsEconomy</c>.</b>
+    /// `action-map.md:430`: "No compound move-and-attack action is required, and no Action Points.
+    /// The time cost is the economy... it is simply not what this mode needs." Readiness is work over
+    /// rate: a fast actor's cheap step and a slow actor's expensive strike already cost differently
+    /// through each action's own `TimeCostTicks`, so a fast actor can fit both a move and a strike
+    /// into the window a slow one needs for one swing. Decision 14's "build is a third peer of move
+    /// and attack" is satisfied by a heavy `TimeCostTicks` on the build action, not by a second
+    /// economy.</para>
+    /// </summary>
+    public static BattleModeProfile Siege => _siege ??= Build(
+        SiegeId, AdvancePolicyKind.NextEvent, WScope.PerSide, Commitment.LateBound, points: false,
+        forecast: ForecastExactness.Exact,
+        ordersBySpeed: true,
+        requiresLiveInput: true);
+
     static BattleModeProfile Build(
         string id, AdvancePolicyKind advance, WScope wScope, Commitment commitment, bool points,
-        ForecastExactness forecast, bool ordersBySpeed = false)
+        ForecastExactness forecast, bool ordersBySpeed = false, bool requiresLiveInput = false)
     {
         var t = Tuning.ProfileOf(id);
         if (points && t.MaxPoints is null)
@@ -193,6 +243,21 @@ public static class BattleModeProfileCatalog
             throw new BattleTuningRejection(
                 $"battle tuning: timeline.profiles.{id} carries 'maxPoints' but its economy has no budget — " +
                 "a value that can never be read is a balance row lying about what it controls.");
+
+        // base-defense F2: null means "content did not choose", inherited from the ruleset. Resolved
+        // HERE, once, so every reader (BattleEngine) sees a concrete int and never has to know the
+        // profile could have left it unset.
+        var maxRounds = t.MaxRounds ?? BattleRuleset.MaxRounds;
+        var roundDurationMs = t.RoundDurationMs ?? BattleRuleset.RoundDurationMs;
+        if (maxRounds <= 0)
+            throw new BattleTuningRejection(
+                $"battle tuning: timeline.profiles.{id} resolves to maxRounds={maxRounds} (0 or " +
+                "negative) — a hand-constructed profile or a misconfigured ruleset fallback would " +
+                "silently produce a battle with no rounds.");
+        if (roundDurationMs <= 0)
+            throw new BattleTuningRejection(
+                $"battle tuning: timeline.profiles.{id} resolves to roundDurationMs={roundDurationMs} " +
+                "(0 or negative).");
 
         return new BattleModeProfile
         {
@@ -207,7 +272,10 @@ public static class BattleModeProfileCatalog
                 ? () => new ActionPointsEconomy(t.MaxPoints!.Value)
                 : static () => new OneActionPerTurnEconomy(),
             ForecastExactness = forecast,
-            OrdersBySpeed = ordersBySpeed
+            OrdersBySpeed = ordersBySpeed,
+            RequiresLiveInput = requiresLiveInput,
+            MaxRounds = maxRounds,
+            RoundDurationMs = roundDurationMs
         };
     }
 
@@ -225,6 +293,7 @@ public static class BattleModeProfileCatalog
         ClassicRoundId => ClassicRound,
         GalaxySyncId => GalaxySync,
         HybridAtbId => HybridAtb,
+        SiegeId => Siege,
         _ => throw new ArgumentException($"Unknown battle mode profile id '{profileId}'.", nameof(profileId))
     };
 }

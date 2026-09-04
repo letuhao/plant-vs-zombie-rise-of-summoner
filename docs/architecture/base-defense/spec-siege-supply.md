@@ -1,6 +1,6 @@
 # Spec: `siege-supply`
 
-**Module 2 of 21 · level 0 · no dependencies · [base-defense-map.md](../base-defense-map.md)**
+**Module 2 of 29 · level 0 · no dependencies · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -227,11 +227,41 @@ kind of thing that reproduces on one machine and not another.
 
 ## Open questions
 
-**One, and it is a balance question rather than a design one.** Should a besieged sector's garrison
-top-up be *rationed* — drawing at a reduced rate, so a stockpile lasts longer under siege than it
-would in peacetime? It is defensible (sieges historically ran on rationing) and it is a one-line
-multiplier in `LoamPolicy`.
+**None.** ✅ **Decision 42 (owner, 2026-09-04): a besieged garrison's top-up IS rationed.**
 
-**Recommendation: no, not in this module.** It is a balance dial on a defect fix, and shipping the two
-together makes it impossible to tell which one changed a playtest. Land the fix; add the dial in
-`siege-economy` if a real board says the stockpile drains too fast.
+```csharp
+/// <summary>
+/// Draw rate for a garrison topping up inside a besieged sector, per-mille of normal. Below 1000, a
+/// stockpile lasts proportionally longer under siege than in peacetime — which is what a siege
+/// historically was.
+///
+/// <para><b>Bounded ratio</b> (0..1000), exempt from AGENTS.md's no-hard-ceilings rule, stated here as
+/// that rule requires.</para>
+/// </summary>
+public static int BesiegedRationMilli { get; }   // data/tuning/loam.v{n}.json
+```
+
+Applied to the `Demand` computed in `LegionSupply.Resolve`'s top-up loop, **before**
+`DrawProportionally` — so a rationed garrison **asks for less** rather than being served less, and the
+proportional-draw arithmetic is untouched.
+
+> ### ⚠️ The recommendation was *no*, and why it was overruled matters for the test plan
+>
+> The objection was attribution: *"a balance dial on a defect fix makes it impossible to tell which one
+> changed a playtest."* That objection is **answered by a test, not by deferral**:
+>
+> **`Ration_at_1000_reproduces_the_unrationed_fix_exactly`.** At the neutral default the ration is a
+> no-op, so the defect fix can be validated on its own by setting one tuning row. The dial and the fix
+> stay separable at any time, which is what the deferral was really buying.
+>
+> **Default it to `1000` (no rationing) on first landing**, flip it in the first balance pass. The fix
+> lands clean; the dial is already there when it is wanted.
+
+### Tests this adds
+
+| Test | Asserts |
+|---|---|
+| `Ration_at_1000_reproduces_the_unrationed_fix_exactly` | **decision 42's separability guarantee** |
+| `Ration_below_1000_makes_a_stockpile_last_longer` | the dial does what it says |
+| `Rationing_does_not_change_proportional_draw_arithmetic` | applied to `Demand`, before `DrawProportionally` |
+| `Rationing_applies_only_under_siege` | a peacetime garrison is unaffected |

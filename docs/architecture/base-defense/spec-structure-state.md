@@ -1,6 +1,6 @@
 # Spec: `structure-state`
 
-**Module 7 of 21 · level 3 · depends on `siege-seam` · [base-defense-map.md](../base-defense-map.md)**
+**Module 7 of 29 · level 3 · depends on `siege-seam` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 **⛔ This is the golden-locked landing.** Levels 0–2 move no hash. This module writes to `WorldState`
 and therefore to `WorldCanonical`. It is one batched landing, sharing a triage pass with anyone else
@@ -54,7 +54,7 @@ This module copies that shape exactly, including the reason in the comment.
 - `WorldSlot` — `SlotIndex`, `SlotTypeId`, `Element`, `State`, `OwnerFactionId`, `GuardWaveId`,
   `GuardState`, **`StructureId`**, **`ConstructionTurnsRemaining`**.
 - `StructureCatalog` — **four** hand-authored rows (`loam-source-placeholder`, `well`, `waystation`,
-  `granary`), all `LoamSource` or `Storage` kind, with `CostMilli`, `YieldMultiplierMilli`,
+  `granary`), all `LoamSource` or `Storage` kind, with `Cost`, `YieldMultiplierMilli`,
   `BuildTurns`, `CapacityBonus`. Validated at load: kebab ids, no duplicates, no negative cost.
 - `WorldCanonical.Row` + the `faction-scope` conditional-row precedent.
 - `WorldSector.DepletionMilli` — **sector-scoped**, and already claimed by the loam program.
@@ -216,12 +216,12 @@ public static long RepairCost(StructureDef def, long currentHp)
     if (missing <= 0) return 0;
 
     // long × long × long, one divide, at the end. Overflow throws.
-    return checked(def.CostMilli * missing * StructurePolicy.RepairCostRatioMilli
+    return checked(def.Cost * missing * StructurePolicy.RepairCostRatioMilli
                    / def.MaxHp / 1000);
 }
 ```
 
-**`checked` is not decoration.** `CostMilli` is already a `long` and already a magnitude
+**`checked` is not decoration.** `Cost` (renamed off `CostMilli` world-map W57) is already a `long` and already a magnitude
 `contentScale` reaches; multiplying it by `missing` and again by a per-mille ratio is exactly the
 "three magnitudes multiplied" shape `CLAUDE.md`'s rule 5 says must throw rather than wrap.
 

@@ -232,12 +232,16 @@ public static partial class BattleEngine
         const string RoundEventOwnerKey = "round";
         const string StatusPulseEventOwnerKey = "status-pulse";
 
-        // The battle's own absolute horizon (BattleRuleset.MaxRounds, converted to a tick). The
-        // pre-B16 loop was ALWAYS bounded by `rounds < MaxRounds`; status pulses now live on the
-        // same timeline and need the identical ceiling, or a long/unbounded-duration status against
-        // two sides that never wipe each other schedules forever once round events stop — a real
-        // infinite loop this exact scenario hit and was caught by, not a hypothetical.
-        var maxBattleTick = (long)BattleRuleset.MaxRounds * BattleRuleset.RoundDurationMs;
+        // The battle's own absolute horizon — base-defense F2: read from the PROFILE, not the
+        // engine-global BattleRuleset, so a siege can run a longer horizon than a squad fight without
+        // moving every other battle's. `classic-round` inherits BattleRuleset.MaxRounds/RoundDurationMs
+        // exactly (TimelineProfileTuning's null-means-inherit resolution in
+        // BattleModeProfileCatalog.Build), so this is byte-identical to the pre-F2 read for every
+        // existing battle. The pre-B16 loop was ALWAYS bounded by `rounds < MaxRounds`; status pulses
+        // now live on the same timeline and need the identical ceiling, or a long/unbounded-duration
+        // status against two sides that never wipe each other schedules forever once round events
+        // stop — a real infinite loop this exact scenario hit and was caught by, not a hypothetical.
+        var maxBattleTick = (long)activeProfile.MaxRounds * activeProfile.RoundDurationMs;
 
         void ScheduleNextStatusPulse()
         {
@@ -248,8 +252,8 @@ public static partial class BattleEngine
         }
 
         var rounds = 0;
-        if (rounds < BattleRuleset.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
-            roundQueue.Schedule(BattleRuleset.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
+        if (rounds < activeProfile.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
+            roundQueue.Schedule(activeProfile.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
         ScheduleNextStatusPulse();   // initial statuses may already carry a due pulse in flight
 
         // Belt-and-suspenders on top of `maxBattleTick`, the same shape the kernel's own test rigs
@@ -257,17 +261,22 @@ public static partial class BattleEngine
         // is the domain-correct fix, but a hard iteration cap means a bug this shape ever produces
         // again throws loudly and fast instead of spinning to an OOM crash — which is exactly what
         // happened here once already, from status-pulse events not being bounded by MaxRounds.
-        // 200k comfortably covers the worst realistic case (a 1 ms period for the full 50-round
-        // horizon is 50,000 pulses) with headroom, and a real runaway still fails fast well short
-        // of exhausting memory.
-        const int MaxLoopIterations = 200_000;
+        //
+        // base-defense F2: scaled to THIS battle's horizon via BattleRuleset.LoopGuardRoundMultiple
+        // (tuning: ruleset.loopGuardRoundMultiple, structural not balance) rather than hard-coded to
+        // classic-round's 50 rounds — a siege with a larger horizon would otherwise throw on a legal
+        // battle, which is worse than the runaway this guards against. `checked`: an overflow here
+        // means a profile asked for a horizon the guard cannot express, and that must throw rather
+        // than silently wrap into a cap too small to hold a legal battle.
+        // Reproduces exactly 200,000 at classic-round's shipped 50 rounds (50 * 4000).
+        var maxLoopIterations = checked(activeProfile.MaxRounds * BattleRuleset.LoopGuardRoundMultiple);
         var loopGuard = 0;
 
         while (roundQueue.Count > 0)
         {
-            if (++loopGuard > MaxLoopIterations)
+            if (++loopGuard > maxLoopIterations)
                 throw new InvalidOperationException(
-                    $"BattleEngine.Resolve exceeded {MaxLoopIterations} scheduling iterations — a runaway event loop, not a long battle. WaveId '{setup.WaveId}', seed {seed}.");
+                    $"BattleEngine.Resolve exceeded {maxLoopIterations} scheduling iterations — a runaway event loop, not a long battle. WaveId '{setup.WaveId}', seed {seed}.");
 
             if (!state.AnyActive("squad") || !state.AnyActive("wave")) break;   // decided by an earlier sub-round pulse; a stale scheduled event is never acted on
 
@@ -457,7 +466,7 @@ public static partial class BattleEngine
                 // B17: true ms tick, not the round counter — matches DurationTicks now carrying
                 // true ms (BattleRunState.cs), so an innate shield expires at its authored duration
                 // instead of being silently extended to the next whole round boundary.
-                state.Shields.Tick(roundClock.Now, BattleRuleset.RoundDurationMs, ownerKey =>
+                state.Shields.Tick(roundClock.Now, activeProfile.RoundDurationMs, ownerKey =>
                 {
                     var key = ownerKey.StartsWith("entity:", StringComparison.Ordinal)
                         ? ownerKey.Substring("entity:".Length)
@@ -473,8 +482,8 @@ public static partial class BattleEngine
                 // re-evaluated `rounds < Max && bothActive` exactly, just checked once per round
                 // instead of once per loop entry, since `rounds` here already holds the round that
                 // just finished.
-                if (rounds < BattleRuleset.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
-                    roundQueue.Schedule(roundClock.Now + BattleRuleset.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
+                if (rounds < activeProfile.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
+                    roundQueue.Schedule(roundClock.Now + activeProfile.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
             }
         }
 

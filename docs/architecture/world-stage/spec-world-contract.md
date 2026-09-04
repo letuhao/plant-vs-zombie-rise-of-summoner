@@ -88,10 +88,12 @@ The four families in play, and the `UnitClass` each maps to:
 | counts / indices | `int` | `dangerBand`, `developmentLevel`, `intelAge`, `wardLevel` |
 | enum-as-string | `string` | .NET casing — `"Watched"`, `"Held"`, `"Warband"` — never kebab |
 
-**The trap this module must make unrepresentable:** `StructureDef.CostMilli` and
-`LoamPolicy.WellCostMilli` / `WaystationCostMilli` / `GranaryCostMilli` are named `…Milli` and hold
-**whole loam units** — compared directly against `CarriedLoam` at `BuildResolver.cs:101` and
-subtracted at `:115`. A renderer trusting the name is wrong by 1000×. The view types therefore carry
+**The trap this module must make unrepresentable:** `StructureDef.Cost` and
+`LoamPolicy.WellCost` / `WaystationCost` / `GranaryCost` (named `…CostMilli` until world-map W57
+renamed them off the misleading suffix) hold **whole loam units** — compared directly against
+`CarriedLoam` at `BuildResolver.cs:101` and subtracted at `:115`. A renderer trusting a `Milli` name
+is wrong by 1000×, which the rename removes at the source but the view types must still not depend
+on the field's own name to get right. The view types therefore carry
 the family in the type, so a magnitude cannot reach a renderer unlabelled. `world-numbers` **extends**
 the existing renderer to refuse an unlabelled value; this module is what makes "unlabelled" impossible
 upstream.

@@ -556,10 +556,10 @@
     </table>
 
     <div class="note" style="margin-top:var(--sp-4)">
-      <strong>A unit trap that is in the model, not the UI (GG-46).</strong>
-      <code>StructureDef.CostMilli</code> and <code>LoamPolicy.WellCostMilli</code> are named
-      <code>…Milli</code> but hold <b>whole loam units</b>. A renderer that trusts the name is wrong by
-      1000×. The three families on this node are not interchangeable: <b>per-mille</b>
+      <strong>A unit trap that was in the model, not the UI (GG-46), fixed 2026-09-05 (world-map W57).</strong>
+      <code>StructureDef.Cost</code> and <code>LoamPolicy.WellCost</code> (named <code>…Milli</code>
+      until the rename) hold <b>whole loam units</b>. A renderer that trusted the old name would have
+      been wrong by 1000×, and the caution still applies to any field not yet renamed. The three families on this node are not interchangeable: <b>per-mille</b>
       (<code>StabilityMilli</code>, <code>PressureMilli</code>), <b>whole loam</b>
       (<code>Loam*</code>, <code>Component*</code>), and <b>indices</b> (<code>DangerBand</code>,
       <code>DevelopmentLevel</code>, <code>IntelAge</code>). The magnitude renderer must be told the
@@ -4194,10 +4194,11 @@
         <strong>Why every number carries a family badge.</strong> Four incompatible unit families sit
         side by side on this stage &mdash; whole loam units (<code>long</code>), per-mille
         (<code>int</code>, 0&ndash;1000), counts and indices (<code>int</code>), and enum strings in
-        .NET casing. The badge is not decoration: <code>StructureDef.CostMilli</code> and
-        <code>LoamPolicy.WellCostMilli</code> are <em>named</em> <code>&hellip;Milli</code> and hold
+        .NET casing. The badge is not decoration: <code>StructureDef.Cost</code> and
+        <code>LoamPolicy.WellCost</code> (named <code>&hellip;CostMilli</code> until world-map W57's
+        rename) hold
         <b>whole loam units</b>, compared directly against <code>CarriedLoam</code> at
-        <code>BuildResolver.cs:96</code>. A renderer that trusts the name is wrong by 1000&times;.
+        <code>BuildResolver.cs:96</code>. A renderer that trusts a <code>Milli</code> suffix is wrong by 1000&times;.
         A renderer that was not <em>told</em> its unit family may not guess one.
         <span class="ref">GG-46 &mdash; Tier-1 hard gate</span>
       </div>
@@ -6592,27 +6593,27 @@
 
     <!-- the trap -->
     <div class="wsd-trap" style="margin-top:var(--sp-5)">
-      <h4>&#9888; The trap: four fields named <code>&hellip;Milli</code> that hold whole loam units</h4>
+      <h4>&#9888; The trap (fixed 2026-09-05, world-map W57): four fields were named <code>&hellip;Milli</code> while holding whole loam units</h4>
       <p style="margin:0 0 var(--sp-3);font-size:var(--text-sm)">
-        <code>StructureDef.CostMilli</code>, and the three policy values behind it —
-        <code>LoamPolicy.WellCostMilli</code>, <code>WaystationCostMilli</code>,
-        <code>GranaryCostMilli</code>. They are compared <b>directly</b> against
-        <code>CarriedLoam</code> and subtracted from it, so they are whole loam. <b>Any renderer that
-        trusts the name is wrong by 1000&times;.</b> This is in the model, not the UI — which is
-        exactly the ambiguity GG-46 exists to catch.
+        <code>StructureDef.Cost</code>, and the three policy values behind it —
+        <code>LoamPolicy.WellCost</code>, <code>WaystationCost</code>,
+        <code>GranaryCost</code> — were named <code>&hellip;CostMilli</code>. They are compared <b>directly</b> against
+        <code>CarriedLoam</code> and subtracted from it, so they are whole loam. <b>A renderer that
+        trusted the old name would have been wrong by 1000&times;.</b> This was in the model, not the UI — which is
+        exactly the ambiguity GG-46 exists to catch. Renamed off the misleading suffix, no value changed.
       </p>
       <div class="wsd-two">
         <div class="wsd-unitcard">
           <h4><span>What the shipped values are</span></h4>
           <div class="wsd-pair" data-v="ok"><span class="mk">&#10003;</span><span>
             <span class="render">A Well costs 200 loam</span>
-            <span class="why"><code>wellCostMilli: 200</code> — two hundred loam, out of a legion's 180 carried, so the build is refused</span></span></div>
+            <span class="why"><code>wellCost: 200</code> (<code>wellCostMilli</code> before world-map W57) — two hundred loam, out of a legion's 180 carried, so the build is refused</span></span></div>
           <div class="wsd-pair" data-v="ok"><span class="mk">&#10003;</span><span>
             <span class="render">A Waystation costs 300 loam</span>
-            <span class="why"><code>waystationCostMilli: 300</code></span></span></div>
+            <span class="why"><code>waystationCost: 300</code> (<code>waystationCostMilli</code> before world-map W57)</span></span></div>
           <div class="wsd-pair" data-v="ok"><span class="mk">&#10003;</span><span>
             <span class="render">A Granary costs 150 loam and keeps 300 more</span>
-            <span class="why"><code>granaryCostMilli: 150</code>, <code>granaryCapacityBonus: 300</code> — the bonus has no <code>Milli</code> in its name and is the same unit as the cost</span></span></div>
+            <span class="why"><code>granaryCost: 150</code> (<code>granaryCostMilli</code> before world-map W57), <code>granaryCapacityBonus: 300</code> — the bonus never had a <code>Milli</code> name and is the same unit as the cost</span></span></div>
         </div>
         <div class="wsd-unitcard">
           <h4><span>What a name-trusting renderer prints</span></h4>
@@ -6624,14 +6625,15 @@
             <span class="why">the per-mille formatter, applied because the suffix said so</span></span></div>
           <div class="wsd-pair" data-v="no"><span class="mk">&#10007;</span><span>
             <span class="render">Build &mdash; free</span>
-            <span class="why"><code>loam-source-placeholder</code> has <code>CostMilli = 0</code>, which is genuinely free; a renderer cannot tell that apart from a rounding artefact</span></span></div>
+            <span class="why"><code>loam-source-placeholder</code> has <code>Cost = 0</code> (<code>CostMilli</code> before world-map W57), which is genuinely free; a renderer cannot tell that apart from a rounding artefact</span></span></div>
         </div>
       </div>
       <div class="note" style="margin-top:var(--sp-3)">
-        <strong>The fix is not a special case in the renderer.</strong> The magnitude renderer
+        <strong>The fix was not only a special case in the renderer.</strong> The magnitude renderer
         <b>requires</b> an explicit unit family and refuses without one, and these four fields are
-        declared <code>loam</code> at the projection boundary. Renaming them in the model is the real
-        repair; declaring the family is what stops the bug reaching a screen in the meantime.
+        declared <code>loam</code> at the projection boundary. Renaming them in the model
+        (world-map W57, 2026-09-05) is the real repair; declaring the family is what stopped the bug
+        reaching a screen in the meantime, and still matters for any field not yet renamed.
       </div>
     </div>
 

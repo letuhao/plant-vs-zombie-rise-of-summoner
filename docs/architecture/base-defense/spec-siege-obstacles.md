@@ -1,8 +1,21 @@
 # Spec: `siege-obstacles`
 
-**Module 19 of 21 · level 5 · depends on `structure-state`, `siege-cover`, `siege-construction` · [base-defense-map.md](../base-defense-map.md)**
-**Status:** spec, 2026-09-04. **Added by the completeness audit** — §5.18's vocabulary had no module,
-and `Mine` had no home anywhere in the original 17.
+**Module 19 of 29 · level 4 · depends on `structure-state` · [base-defense-map.md](../base-defense-map.md)**
+**Status:** spec, 2026-09-04. Added by the completeness audit (§5.18 had no module, and `Mine` had no
+home). **Moved to level 4 by pass 3**, which found a dependency cycle.
+
+> ### ⛔ Pass 3 — this module is the STRUCTURE VOCABULARY, and that broke a cycle
+>
+> It previously declared `siege-cover` as a dependency while `siege-cover` declared **this module** as
+> one — a cycle, which the map's own rule forbids: *"If two modules each need the other, they are one
+> module."*
+>
+> **The dependency was never real.** A Trench's cover value is a **data field**, not a call into the
+> cover module. So this module owns the **vocabulary** — `ObstacleKind`, `AcquisitionPath`, the
+> cover-radius fields, and the cell-entry transition — and `siege-cover` (11) and `siege-construction`
+> (12) both **consume** it.
+>
+> Moving to level 4 costs nothing downstream: every consumer was already at level 5 or later.
 
 ---
 
@@ -22,6 +35,17 @@ forbids.
 ---
 
 ## The vocabulary — §5.18's table, and the decision each row creates
+
+### The vocabulary this module owns
+
+Three declarations, consumed by two other modules and defined once here:
+
+| Type | Consumed by | Why here |
+|---|---|---|
+| `ObstacleKind` | `siege-cover`, `siege-construction` | the five rows below |
+| `AcquisitionPath` | `siege-construction` (implements the four paths) | decision 27's vocabulary is structure identity, not construction machinery |
+| `CoverRadius` / `CoverPowerMilli` on `StructureDef` | `siege-cover` (reads them) | **data, not a call** — this is the field that used to look like a dependency |
+| `ScopeMembershipTransition.CellEntered/Exited` | this module's Mine | see above |
 
 | # | Kind | Verbs | Material | Mechanically | **The decision it creates** |
 |---|---|---|---|---|---|
@@ -152,13 +176,37 @@ Wire silently becomes a second Rough.
 Damage on entry. Nothing in the engine fires on cell entry today, so this needs a trigger — and it
 reuses the transition `siege-cover` already introduces rather than adding a second:
 
+> ### ⛔ Pass 3 — this module OWNS the trigger. It used to borrow one that no longer exists.
+>
+> This section read *"fired on `ScopeMembershipTransition.CellEntered`, **which siege-cover already
+> emits**."* The decision-35 rewrite made that false: `siege-cover` §8 now states it introduces **no**
+> membership change, because cover is evaluated per shot. **Cover released the program's one allowed
+> vocabulary change and this module never claimed it — so the Mine fired on nothing.**
+
 ```csharp
 /// <summary>
-/// Fired on ScopeMembershipTransition.CellEntered, which siege-cover already emits. ONE cell-entry
-/// mechanism, two consumers — cover grants a modifier, a mine deals damage. A second entry hook would
-/// be two mechanisms for one event, and they would drift on ordering.
+/// The program's ONE reviewed vocabulary change, spent here — on a real mechanic, which is the bar.
+///
+/// <para>siege-cover originally introduced this and released it when decision 35 replaced terrain
+/// cover with per-shot shooting math. A mine genuinely needs a cell-entry event: nothing else in the
+/// engine fires when an actor enters a cell.</para>
 /// </summary>
+public enum ScopeMembershipTransition
+{
+    Bound,
+    Cleared,
+    MindControlToggled,
+    /// <summary>An actor entered a board cell. A mine on that cell triggers.</summary>
+    CellEntered,
+    /// <summary>Left a board cell. Paired with CellEntered — emitted on move, death and withdrawal,
+    /// so an entry can never be left dangling.</summary>
+    CellExited
+}
 ```
+
+**`BattlefieldOwnSideReactor.cs:75-86` switches on the existing three values.** Adding two is exactly
+where an unhandled-case throw or a silent default appears — assert the new values fall through
+harmlessly.
 
 Four properties, each from §5.18's row:
 
@@ -187,7 +235,37 @@ specs the mechanism and this is its first real content.
 real only because the field cap (`siege-objective`) makes bodies scarce. Without decision 5, an
 emplacement is free value.
 
-### 7. What §5.18 cut — do not re-add
+### 7. Each kind declares which paths can produce it
+
+§5.24: *"**§5.18's four obstacle kinds** — Unchanged as a vocabulary — but **each kind now declares
+which paths can produce it.** A moat is path 4; a pillbox is path 1 or 2."*
+
+```csharp
+/// <summary>
+/// Which of decision 27's four acquisition paths can produce this structure. A subset of
+/// {built, assembled, summoned, laboured}; **`none` is illegal** — a structure no path can produce is
+/// a catalog row that can never appear on a board.
+/// </summary>
+public IReadOnlyList<AcquisitionPath> AcquisitionPaths { get; init; } = Array.Empty<AcquisitionPath>();
+```
+
+| Kind | Typical paths |
+|---|---|
+| Trench | laboured, built |
+| Rampart (incl. the moat) | **laboured** for a dug moat; built for a raised wall |
+| Wire | built, assembled |
+| Mine | built, assembled |
+| Emplacement | built, assembled |
+
+> **This is also a `structure-seed` change**, and §5.24 names it: *"**New in the structure seed
+> contract:** an `acquisitionPaths` field — `VALIDATED`, a subset of
+> `{built, assembled, summoned, laboured}`, `none` illegal. It joins the eleven catalogs in
+> `structure-seed-ideal.md` §5 as a **twelfth**."* Recorded here because this module consumes it; the
+> catalog belongs to that program.
+
+**Validated at load**, like every other catalog rule: an empty `AcquisitionPaths` throws.
+
+### 8. What §5.18 cut — do not re-add
 
 Recorded so a later session does not helpfully restore one:
 
@@ -263,7 +341,12 @@ cell-entry hook · directional cover (there is no facing) · a moat modelled as 
 | `Mine_fires_on_the_same_transition_cover_uses` | one mechanism |
 | `Emplacement_lends_its_action_when_garrisoned` | `combatant-kind` §4's first content |
 | `No_directional_cover_exists` | source scan for a facing field |
+| `Every_obstacle_declares_at_least_one_acquisition_path` | §5.24 — `none` illegal, throws at load |
+| `A_dug_moat_is_a_laboured_rampart` | the layer split and the path, together |
 | `Obstacle_kind_defaults_to_none` | four shipped rows unaffected, goldens unmoved |
+| `This_module_does_not_depend_on_siege_cover` | **P3-1**, the cycle — an import scan |
+| `Every_cell_entered_is_paired_with_a_cell_exited` | move, death and withdrawal all emit — **the leak test**, inherited from the old cover spec |
+| `Existing_membership_consumers_ignore_the_new_transitions` | `BattlefieldOwnSideReactor.cs:75-86` falls through, never throws |
 
 ## Success criteria
 

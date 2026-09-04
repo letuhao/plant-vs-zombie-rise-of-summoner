@@ -136,4 +136,114 @@ public class EligibilityRuleTests
         Assert.Same(AllAffixes.Single(a => a.AffixId == "affix.fire-power"),
             AllAffixes.Single(a => a.AffixId == "affix.fire-power"));
     }
+
+    // ---- AffixTags: the derived tagsOf (T5.8, `spec-eligibility-tags.md`) ----------------------------
+    //
+    // Everything above resolves eligibility against a HAND-TYPED tag dictionary, the shape the shipped
+    // resolver's tests always used. Nothing in production ever supplied one — these tests prove the
+    // real supplier `AffixTags` adds: tags derived from the refs' own `AtomRow.TagsJson`, never
+    // authored on the affix, exactly as `AffixRow.Class` is already derived by
+    // `AffixValidator.ResolveClass`.
+
+    static AtomRow Atom(string atomId, string familyId, string variant, string tagsJson) => new()
+    {
+        AtomId = atomId,
+        KindId = "stat.modify",
+        FamilyId = familyId,
+        Variant = variant,
+        Tier = 1,
+        Name = atomId,
+        TagsJson = tagsJson,
+    };
+
+    [Fact]
+    public void Affix_tags_are_the_union_of_its_refs_atom_tags()
+    {
+        // A real multi-ref bundle (item-ideal.md's "master of fire and ice" shape) — not a hand-typed
+        // dictionary. Two concrete refs, each carrying its OWN tags on the atom row; the affix's
+        // derived tags are the union, not either ref's tags alone.
+        var fireAtom = Atom("atom.fire-rider.t1", "atom.fire-rider", "fire", """{"element":"fire","theme":"elemental"}""");
+        var speedAtom = Atom("atom.swift-step.t1", "atom.swift-step", "", """{"category":"mobility"}""");
+
+        var bundle = new AffixRow(
+            "affix.fire-and-speed", AffixClass.Prefix,
+            new[]
+            {
+                new AffixRefRow(1, fireAtom.AtomId),
+                new AffixRefRow(2, speedAtom.AtomId),
+            });
+
+        Func<string, AtomRow?> lookupAtom = id => id switch
+        {
+            "atom.fire-rider.t1" => fireAtom,
+            "atom.swift-step.t1" => speedAtom,
+            _ => null,
+        };
+
+        var tags = AffixTags.Of(bundle, lookupAtom, _ => null);
+
+        Assert.Equal(
+            new Dictionary<string, string> { ["element"] = "fire", ["theme"] = "elemental", ["category"] = "mobility" },
+            tags);
+    }
+
+    [Fact]
+    public void A_slot_ref_with_no_resolvable_pattern_narrows_rather_than_widens()
+    {
+        // One concrete ref (real tags) plus one slot ref whose family has no atom at all — a pattern
+        // that resolves to nothing. The safe direction (spec `:56-60`) means the slot contributes
+        // NOTHING: the derived set is exactly the concrete ref's own tags, never more.
+        var concreteAtom = Atom("atom.plain-strength.t1", "atom.plain-strength", "", """{"theme":"physical"}""");
+
+        var bundle = new AffixRow(
+            "affix.strength-plus-unresolved-slot", AffixClass.Prefix,
+            new[]
+            {
+                new AffixRefRow(1, concreteAtom.AtomId),
+                new AffixRefRow(2, AtomId: null, SlotName: "E1", SlotDomain: "element",
+                    SlotPick: 1, SlotAtomPattern: "atom.no-such-family.$E1"),
+            });
+
+        Func<string, AtomRow?> lookupAtom = id => id == concreteAtom.AtomId ? concreteAtom : null;
+        Func<string, AtomRow?> lookupAtomByFamily = _ => null; // the slot's family resolves to nothing
+
+        var tags = AffixTags.Of(bundle, lookupAtom, lookupAtomByFamily);
+
+        // If the slot had accidentally widened the set, this would fail — asserted, not assumed.
+        Assert.Equal(new Dictionary<string, string> { ["theme"] = "physical" }, tags);
+    }
+
+    [Fact]
+    public void The_production_tagsOf_is_wired_and_not_only_a_test_delegate()
+    {
+        // The whole point of the module: `AffixTags.ProductionSupplier` composed over REAL production
+        // pieces — `AffixLibraryGenerator` (module 3, shipped) generating affixes from real atom rows,
+        // never a hand-authored `AffixRow`/tag dictionary — reachable and callable by the shipped
+        // `EligibilityResolver` exactly as any real caller would use it.
+        var fireAtom = Atom("atom.fire-rider.t1", "atom.fire-rider", "fire", """{"element":"fire","theme":"elemental"}""");
+        var iceAtom = Atom("atom.ice-rider.t1", "atom.ice-rider", "ice", """{"element":"ice","theme":"elemental"}""");
+        var plainAtom = Atom("atom.plain-strength.t1", "atom.plain-strength", "", """{"theme":"physical"}""");
+        var atoms = new[] { fireAtom, iceAtom, plainAtom };
+
+        // The real generator (module 3) — one affix per atom, 1:1 — the same call
+        // `RpgStore.Import.cs` makes in production, never a fixture built by hand.
+        var generated = AffixLibraryGenerator.Generate(atoms).ToDictionary(a => a.AffixId, StringComparer.Ordinal);
+        AffixRow? LookupAffix(string id) => generated.TryGetValue(id, out var a) ? a : null;
+
+        var tagsOf = AffixTags.ProductionSupplier(LookupAffix, atoms);
+
+        var rule = new EligibilityRule(
+            RequireTags: new[] { "element" }, AnyOfTags: Array.Empty<string>(),
+            Allow: Array.Empty<string>(), Deny: Array.Empty<string>());
+
+        var catalog = generated.Values.ToList();
+        var pool = EligibilityResolver.DrawablePool(catalog, tagsOf, rule);
+
+        Assert.Equal(new[] { "affix.fire-rider.t1", "affix.ice-rider.t1" }, pool.OrderBy(x => x, StringComparer.Ordinal));
+
+        // And the shipped load-time check runs against it too — the same resolver, the same tagsOf,
+        // no separate code path for validation vs. drawing.
+        var check = EligibilityResolver.Validate(rule, catalog, tagsOf, prefixRolls: 1, suffixRolls: 0);
+        Assert.True(check.IsOk, check.ToString());
+    }
 }

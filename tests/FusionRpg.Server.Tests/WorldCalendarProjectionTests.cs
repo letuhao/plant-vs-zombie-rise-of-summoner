@@ -96,7 +96,7 @@ public class WorldCalendarProjectionTests : IAsyncLifetime
     [Fact]
     public async Task A_week_boundary_turn_carries_the_real_roll_matching_turn_calendar_directly()
     {
-        // DaysPerWeek is 7 (data/tuning/world.v4.json) — turn 7 is the first week boundary.
+        // DaysPerWeek is 7 (data/tuning/world.v5.json) — turn 7 is the first week boundary.
         SetCurrentTurn(7);
         var expected = TurnCalendar.Roll(7, Seed);
 
@@ -144,9 +144,9 @@ public class WorldCalendarProjectionTests : IAsyncLifetime
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v2.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
+            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
         _tuningConfigured = true;
     }
 

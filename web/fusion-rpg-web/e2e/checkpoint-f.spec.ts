@@ -7,7 +7,9 @@ import { test, expect, type Page, type Route } from "@playwright/test";
  *   1. Reachability matrix (GG-7): every Sanctum layer actually opens.
  *   2. Viewport sweep (GG-36): every layer at the three declared widths, no horizontal scroll.
  *   3. axe scan (GG-21/GG-30): every layer, zero violations.
- *   4. Old routes: all redirect, none 404, except /world (T16 excludes World from this sweep).
+ *   4. Old routes: all redirect, none 404. `/world` is a real destination route like `/lawn` or
+ *      `/demons`, not a redirect — it now reaches the world stage directly (world-stage routing
+ *      work, 2026-09-05; the old `@xyflow/react`-based `WorldPage` it used to exempt is deleted).
  * This file is that check, not a per-task spec — it's Checkpoint F's own gate made durable.
  */
 
@@ -196,7 +198,7 @@ test.describe("Checkpoint F.3 — axe scan per layer (GG-21/GG-30)", () => {
   }
 });
 
-test.describe("Checkpoint F.4 — every old route redirects; none 404, except /world", () => {
+test.describe("Checkpoint F.4 — every old route redirects; none 404", () => {
   const OLD_ROUTES: string[] = [
     "status",
     "stats",
@@ -228,10 +230,17 @@ test.describe("Checkpoint F.4 — every old route redirects; none 404, except /w
     });
   }
 
-  test("/world stays on its own route — the one deliberate exception (T16)", async ({ page }) => {
+  test("/world reaches the world stage, not the legacy page", async ({ page }) => {
     await mockEverythingUnlocked(page);
     const response = await page.goto("/#/world");
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveURL(/#\/world$/);
+
+    // The real stage, not merely "didn't 404" — its own SVG camera root is visible.
+    await expect(page.getByTestId("world-stage-svg")).toBeVisible();
+
+    // The legacy `WorldPage`'s own markers never render — it is deleted, not merely unreached.
+    await expect(page.getByTestId("chunk-fallback-world")).not.toBeVisible();
+    await expect(page.getByTestId("world-canvas")).toHaveCount(0);
   });
 });

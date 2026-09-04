@@ -502,11 +502,43 @@ not touched; the build was rechecked after their edit settled and came back clea
       fixed a real wiring gap: the validator supported the check from the start, but neither production
       call site was passing the predicate, so `UnknownRarity` could never actually fire before this pass
 
+⭐ **Addendum 2026-09-04 — `salvage_yield` is no longer awaiting, and this row is now five keys plus
+one.** Module 14 (`salvage-craft`, P4.1 below) decided its shape: **one integer per rung, the substrate
+quantity a salvage of that rung returns before the affix bonus**, read from
+`data/tuning/materials.v1.json`'s `salvageCoefficient.{rung}.substrateBase` and seeded by
+`RpgStore.SeedSalvageYield`. It meets `ssot-rarity.md` §9.8's one constraint on this key — *"must not
+reuse `shard.{DemonRarity}` ids"* — by naming **no shard id at all**: the shard leg of a salvage is R1's
+derived rung−1 rule, not a per-rung budget row. `RarityBudgetKeys` flips it to `HasDecidedShape: true`
+and this section's own `RarityBudgetKeysTests` row moved with it (renamed
+`The_ready_keys_are_registered`) rather than being loosened — `socket_min`, `socket_max` and
+`reroll_cost_mult` stay pinned as unregistered exactly as hard as before. Seeding is deliberately in
+`SeedSalvageYield`, **not** folded into `SeedRarityLadder`, so this module's seeding never grows a
+dependency on a later module's tuning file.
+
+⭐ **Addendum 2026-09-05 — `reroll_cost_mult` is no longer awaiting, and one authored-but-unread
+row was removed from this module's own tuning file.** Module 15 (`enhance-reroll`, P4.2 below) decided
+the key's shape: **the per-rung integer is the reroll price's RUNG LEG**,
+`1000 + rerollCostRungSlopeMilli × rungIndex` (`chaff` 1000 … `almanac` 2980), read from
+`data/tuning/enhancement.v1.json` and seeded by `RpgStore.SeedRerollCostMult`. `ssot-rarity.md` §9.7's
+constraint — *"must also scale with **affix count**, not rung alone"* — is met by a second leg that is
+deliberately **not** a per-rung row, and `EnhancementTuning.Parse` refuses at load any tuning whose
+affix leg does not out-spread the rung leg. `RarityBudgetKeys` flips it to `HasDecidedShape: true` and
+this section's `RarityBudgetKeysTests` row moved with it; `socket_min` and `socket_max` stay pinned as
+unregistered exactly as hard as before.
+
+⛔ **And a real defect in this module's output, found and fixed there:** `data/tuning/item-rarity.v1.json`
+carried **`enhanceCapAsymptoteK: 8`, which nothing read.** `ItemRarityTuning.Parse` never parses it and
+no test touched it, while `spec-enhance-reroll.md` §4a is explicit that *"module 7 owns the column; this
+module owns `K`"* — so the live copy is `enhancement.v1.json`'s `asymptoteK` and this one was a second
+source of truth a balance pass could edit with no effect. Removed 2026-09-05 and replaced with a note
+naming where `K` actually lives. Seeding this module's own `enhance_cap` column is unaffected.
+
 **Not this module's job, named so nobody re-derives it here:** the `ceilingFor` reader / `pinAE`
 live-pricing (module 9); the D11 dominance lint leaving channel-split mode (module 6, consumes the
-seeded `power_ceiling` row); `socket_min`/`socket_max`, `reroll_cost_mult`, `salvage_yield` budget keys
-(await modules 16/15/14's decided shapes, per SC7 — attempting to seed them now is the exact
-regression `RarityBudgetKeysTests` pins against); a light-theme palette for the ten rung colours
+seeded `power_ceiling` row); `socket_min`/`socket_max` and `reroll_cost_mult` budget keys
+(await modules 16/15's decided shapes, per SC7 — attempting to seed them now is the exact
+regression `RarityBudgetKeysTests` pins against; ~~`salvage_yield`~~ **resolved 2026-09-04, see the
+addendum above**); a light-theme palette for the ten rung colours
 (module 20 `item-surfaces`) — `colourToken`s already exist in `core.v1.json` and are asserted distinct
 here, but the deuteranope-transform test needs a palette that does not exist yet.
 
@@ -1767,33 +1799,546 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
 
 ## Phase 4 — economy and depth
 
-### P4.1 — Module 14 `salvage-craft`
+### ✅ P4.1 — Module 14 `salvage-craft` — BUILT AND VERIFIED 2026-09-04 (the `rpg_demon_materials` rename, the ten missing shard display rows, and the seven `reroll` corpus recipes explicitly deferred with owners named)
 
-- [ ] I9 — materials, salvage, the cost vocabulary. The first sink and the cheapest
-- [ ] ⛔ **Re-key the price table from 0–9 to `rarity.ordinal` 10…100** — it is **10× off**, and
-      modules 15 and 16 cite it verbatim
-- [ ] Price `socket.imbue` — band-linear, like `bore` (I9 §7.4 has nine operations and no row for it,
-      so the reference table goes to **ten**). ⚠ `socket-imbue` is a new `op_kind` and it is
-      **module 15's** to add, not this module's
-- [ ] ⭐ **D23: sockets are extended by crafting, at any rarity, and rarity sets the price.** The
-      owner's words: *"add socket slot extension in craft feature, use material to increase socket
-      slot. any rarity can extend socket slot but higher rarity cost more."* ⚠ D23 is a **pricing**
-      ruling, not a new layer — `ssot-sockets` §4.1 already tops up to `base_type.socket_max`; only the
-      per-rarity **table** grants zero at the bottom. `bore` is the operation; price it band-linear so
-      a `chaff` chassis can reach its ceiling and pays less than an `almanac` for the same hole
-- [ ] ⚠ `rpg_demon_materials` rename touches **nine** SQL sites across five files, not the four I9 §6.4
-      claims. Still ask-first
+- [x] ⛔ **The 10× re-key, done — and the field is named so the mistake cannot be made again.**
+      `RecipeContext.TargetRungIndex` / `SalvageInput.RungIndex` are the rung **index** 0–9 on
+      `RarityLadder.RungIds`, never `rarity.ordinal` (10…100). Both throw on an out-of-range value
+      rather than clamping, and `An_out_of_range_rung_throws_rather_than_clamping` feeds one a
+      literal `60` — a real mid-rung `ordinal` — and asserts the refusal, so the 10× defect is a red
+      test rather than a silently wrong price. ⚠ **The spec's own Code-style block still spells the
+      field `TargetRarityOrdinal, // 0..9, the rarity table's own ordinal`**, which is exactly the
+      confusion its own Platform-correction section warns against; the correction wins, and the
+      divergence is recorded in the type's XML doc so a reader of the spec finds it.
+- [x] ⭐ **The 27-id closed vocabulary, five classes, with the shipped sixteen REUSED not re-minted.**
+      `MaterialCatalog` builds `shard.*` ×10 off `DemonRarityLadder.All` and `essence.*` ×6 off
+      `ElementRoster.Concrete` — the same two rosters `DemonMaterialCatalog` reads — and appends the
+      eleven this module owns (`substrate.{frame}.{grade}` ×8, `catalyst.{verb}` ×3). **27 and not
+      28** because souls carry no id: they are a ledger balance, and the test asserts that too. The
+      four legacy shard ids are `IsKnown` **true** / `IsIssuable` **false**, so a saved reference
+      resolves and nothing new is ever created in the retired vocabulary
+- [x] **A source-tagged id has no spelling at all.** `essence.fire.pvz` / `shard.heirloom.web` /
+      `catalyst.forge.lawn` are refused by `ClassOf` on the dot count, not by a deny-list — the
+      Boundaries' "Never" made structural. The injector enriches; it never gates (SC8)
+- [x] ⭐ **`socket.imbue` has a cost row, it is `bore`'s verbatim, and the equality is checked AT
+      LOAD.** I9 §7.4 has nine operations and no row for imbuing at all; the reference table now has
+      **ten**. `imbue`'s souls (`50 × b`) and substrate (`3 × b`) legs are byte-equal to `bore`'s, per
+      D24, plus one essence leg (`2 × b`) because essence is the class whose whole job is direction
+      without magnitude. `MaterialTuning.Parse` **refuses a tuning where they diverge**
+      (`A_tuning_that_breaks_D24_is_refused_at_load_not_at_the_first_crafted_socket` moves `imbue`'s
+      coefficient by 1 in a temp copy and asserts the message names D24), so a balance pass that
+      moves `bore` and forgets `imbue` fails at boot rather than at the first crafted socket.
+      ⚠ `socket-imbue` as an `op_kind` is still **module 15's** to add and this module mints none —
+      `CraftOperations.TryParse("socket-imbue")` returns false, asserted
+- [x] ⭐ **D23 is real on the wire: any rarity can bore, and the bottom of the ladder pays a real
+      price.** `bore` is rung-linear (`50 × b`, `b` = rung index + 1), so
+      `Cost_rises_with_the_target_and_theta_is_not_an_input_at_all` walks all ten rungs asserting each
+      costs strictly more than the one below **and** that `chaff` costs more than zero — the exact
+      failure the old per-rarity table had, where the bottom rung was granted zero and could not
+      reach its own `socket_max`
+- [x] ⭐ **D26 is proven MECHANICALLY, not reviewed.** `RecipeContext` and `SalvageInput` are asserted
+      by reflection to expose exactly their five/six target fields and nothing else;
+      `MaterialRecipeCatalog.Resolve` is asserted to take `(string, RecipeContext)` and no third
+      argument that could smuggle a player stat past the type; and the closed `CostVariable` enum is
+      asserted to have **no spelling** for `theta` / `playerLevel` / `powerIndex` / a daily or session
+      counter. There is nowhere to put a player property, which is the point
+- [x] **Every quantity is in `data/tuning/materials.v1.json`, and the parser REFUSES rather than
+      defaults.** No key has a default: stripping any of the five top-level sections throws at load
+      (asserted section by section against the real file). Nine structural invariants are checked at
+      parse time, each with its own message — grade count against the substrate vocabulary, the
+      upcycle cap below the top grade, the upcycle ratio against its own drain valve, D24's equality,
+      the cost-class matrix against every priced leg, salvage monotonicity, R1's bottom edge, and a
+      positive `substrateBase` on every rung
+- [x] **`audit-magic-numbers.py --summary` reports `M1 = 0`** — the `materials` domain appeared with
+      one M1 mid-build (a `new List<string>(27)` capacity hint, not a balance number) and it is gone;
+      the domain no longer appears in the table at all. `audit-overflow.py`: **0 critical, zero
+      findings anywhere under `Items/Materials/`**
+- [x] **`long` on every magnitude, widened before multiplying, divided by 1000 last and exactly
+      once.** `CostLeg.BaseQty` is `checked` and widens (`Coefficient * (rungIndex + 1L)`), and
+      `MaterialTuning.ApplyBand` is the single divide:
+      `checked(Math.Max(1, (baseQty * multiplierPerMille + 999) / 1000))`. A 3-billion base quantity —
+      past `int`'s 2,147,483,647 ceiling — resolves exactly to 24,000,000,000; `long.MaxValue`
+      **throws**, it does not wrap. ⚠ `ContentScale.Apply`'s `int` return (the A3 target the spec
+      warns about) is **not** copied onto the cost path: nothing in `Items/Materials/` calls it
+- [x] ⭐ **The band→quantity resolution is the seed contract working, and it is asserted against the
+      FROZEN registry.** `seed-contract.md` §1 forbids an author typing a magnitude, so the 30
+      shipped recipes author a `costBand` and this module resolves it:
+      `resolvedQty = max(1, ceil(baseQty × multiplierPerMille / 1000))`, bands.v1.json's own formula.
+      The multiplier table is mirrored into `materials.v1.json` (Core never reads a file) and
+      `The_cost_band_table_mirrors_the_frozen_registry_value_for_value` reads the **real**
+      `bands.v1.json`, asserts it is still `frozen`, and compares every value and the whole enum — so
+      a drift is a red test rather than a silent 2× price change
+- [x] ⭐ **I9's two worked examples both reproduce off the shipped files.** §7.5 example 1 (forge a
+      plant base at grade 2 — souls 80, substrate 8, catalyst 1) reproduces off the reference table
+      exactly; ⚠ **no shipped recipe reproduces it verbatim**, and that is the band mechanism working
+      rather than a mismatch — `recipe.004` authors `standard` (×2.000) where the example is the
+      `modest` (×1.000) baseline, so the same row resolves to exactly 2×, asserted. §7.5 example 2
+      (salvage a level-60 epic humanoid chest: 11 fine substrate, 2 fire, 1 dark, 2 shards, 2 temper)
+      reproduces **line for line** on the ten-rung ladder, because `epic` anchors on `heirloom`
+- [x] **`socket` costs ten souls and nothing else, at every rung — and the rule survives the author's
+      band.** I9 §7.4 states it as a rule, not an illustration; the shipped `recipe.022` authors
+      `soulsCostBand: "cheap"`, which would resolve it to **5**. The souls leg is `bandImmune` with
+      the reason in the tuning file itself, and the test walks all ten rungs asserting a single line
+      of exactly 10
+- [x] **The upcycle cap is a BOUNDED RATIO and the file a balance pass edits says so.**
+      `upcycle.capNote` carries "BOUNDED RATIO … not a ceiling on how much a player may earn", and
+      the test asserts that string is present, not just that the number is 2. Raising
+      `maxInputGrade` to the top grade is **refused at load** — upcycling into `prime` is the leak
+      the cap closes (I9 §5.3), and it throws rather than clamping
+- [x] ⭐ **The salvage coefficients are RE-DERIVED to ten rungs by a stated rule, and the derivation
+      is re-computed in the test rather than transcribed.** I9's four-row table is keyed on the
+      retired bands. The four anchors are **not chosen** — they are `LegacyDemonRarityIds.ForwardMap`,
+      the shipped one-way band→rung map, so `common`→`chaff`, `rare`→`cultivated`, `epic`→`heirloom`,
+      `legendary`→`sunwoven` land value for value (asserted against the live map, not a copy).
+      Between anchors: integer linear interpolation with **floor**, never round-half-up, because
+      rounding a salvage yield **up** is the only direction that can break R2. Above the top anchor:
+      `substrateBase`/`shardBack` continue the last segment's slope, floored; `essenceCap` stays flat,
+      because I9's own table already stopped it growing at epic. All thirty numbers are re-computed
+      from the four anchors plus that rule and compared to the file
+- [x] **R1 on the ten-rung ladder, and its bottom edge as data.** Salvage returns
+      `shard.{rung − 1}`, never the item's own — asserted for all nine non-bottom rungs by id, not
+      just by count. `chaff` returns none, and `MaterialTuning` **refuses a tuning** that gives the
+      bottom rung a non-zero `shardBack`, so R1's edge cannot be edited away
+- [x] **The two bottleneck classes have no faucet, proven over the whole input space.**
+      `catalyst.forge` and `catalyst.flux` never appear in a yield at any rung × any enhancement ×
+      any affix count; every catalyst line a salvage ever produces is `catalyst.temper`. Souls are
+      never returned at all — not even as a zero line, because a zero line is a row that invites
+      someone to make it non-zero
+- [x] **The grade lock, and the D26 distinction it is easy to get wrong.** A level-10 zone returns
+      `crude` across 2,000 salvages; a level-75 item returns `prime` immediately, with no counter and
+      no cooldown between them. ⚠ That is **not** metering the player — it is the salvage output of a
+      *low-level item* being low-level, a property of the target
+- [x] ⭐ **The spend transaction, every property copied from a shipped path and each one tested.**
+      `RpgStore.TrySpendRecipe` — replay returns the **original** outcome ref and spends nothing; a
+      reused correlation with **different** arguments returns `correlation.mismatch` (compared against
+      a SHA-256 digest of the resolved lines, so a different recipe *or* a different quantity is
+      caught, not just a different total); a refusal writes nothing, so a retried refusal
+      re-evaluates and succeeds once funded; the material legs use `RpgStore.Fusion.cs:395`'s
+      conditional decrement verbatim; an unknown material id **throws** at the write boundary; and a
+      forced throw from step 5 leaves **zero rows across all three stores** — materials unchanged,
+      souls ledger unchanged, spend log empty
+- [x] **Fixed class order is enforced at the write boundary, not only in the resolver.** A caller
+      handing `TrySpendRecipe` lines out of the souls → shard → substrate → essence → catalyst order
+      is refused with an `ArgumentException` naming the rule, so "two logs of one refusal are
+      byte-comparable" is a fact about the store rather than about one call site
+- [x] ⭐ **`salvage_yield` is UNBLOCKED, registered and seeded — the sixth `rarity_budget` key.**
+      `ssot-rarity.md` §5 recorded it as "awaiting I9"; the decided shape is **one integer per rung,
+      the substrate quantity a salvage of that rung returns before the affix bonus**. It satisfies
+      §9.8's one constraint — *"must not reuse `shard.{DemonRarity}` ids"* — by naming **no shard id
+      at all**: the shard leg is R1's derived rung−1 rule, not a per-rung budget row.
+      `RpgStore.SeedSalvageYield` seeds all ten from `materials.v1.json` and is wired into
+      `Program.cs` at boot, deliberately **separate** from `SeedRarityLadder` so module 7's own
+      seeding never grows a dependency on a later module's tuning file. **Cross-referenced into P2.1
+      below**
+- [x] **No new member of the closed 33-code list.** `AtomRejectionReason` still has exactly 35 names,
+      asserted. Every refusal this module raises is a namespaced `ContentRuleViolated{material.*}`
+      under a `material` namespace registered through `ContentRuleNamespaces.Register`
+- [x] **Two builds of the recipe catalog are byte-identical** (the fusion-catalog golden precedent) —
+      an ordinal-sorted SHA-256 over every loaded recipe and cost line
 
-### P4.2 — Module 15 `enhance-reroll`
+**⛔ Five defects / spec-vs-code divergences found while building, all named rather than silently absorbed:**
 
-- [ ] I6 + I7 under one mutation contract. **D7: cost, never luck** — steep tier-keyed cost, a success
-      chance, mandatory bad-luck protection (`rpg_summon_pity` is the precedent)
-- [ ] The `enhance_cap` shrinking soft cap, identical to module 7's text. **Never a hard stop**
-- [ ] ⚠ `pool_rolls` **does not exist in code.** `ContainerRow`/`RarityRow` carry
-      `PrefixRolls`/`SuffixRolls` and `Instantiator.Draw` runs `DrawBudget` twice — restate I7's
-      `T` / `K` algebra **per budget**
-- [ ] `CraftingHorizonReport` ships. ⚠ **N ≈ 0.19 realms** at v1 depth is a recorded constraint —
-      **do not size risk bands or the pity threshold as a progression choice**
+1. ⛔ **R2 AS WRITTEN IS A MINT-SHAPED INVARIANT, and it is false for the six mutation verbs.**
+   Measured, not argued: `recipe.012` (temper +0 → +1) spends **1** `substrate.humanoid.crude` and
+   salvaging its output returns **2** — and no pricing fixes that, because 2 is `substrateBase[chaff]`,
+   what the *item* was already worth, paid for by the drop and not by tempering. R2's own text ("for
+   every class a recipe spends, salvaging that recipe's output returns strictly less of that class")
+   silently assumes the recipe *minted* its output. **The property test therefore asserts the two forms
+   that are actually true**, over the whole loadable table × ten rungs × six enhancement levels × three
+   content levels: **mints** get R2 literally (per id, against a fresh-base salvage), and **mutations**
+   get the **marginal** form — running the operation may never raise its output's salvage yield by more
+   than it cost — backed by the **cumulative** strict form I9 §5.3 actually states
+   (`Temper_returns_strictly_less_catalyst_than_enhancement_paid_in`, n = 1…30, all strict). 1,000+
+   (recipe, material) pairs are checked in each half and the counts are asserted, so a test that
+   quietly stopped checking anything fails.
+2. ⛔ **R2 must be per material ID, not per class — and the class-level reading is measurably wrong.**
+   `catalyst.forge` and `catalyst.temper` are non-fungible sinks, and I9 §5.3's own table is per id
+   ("`catalyst.forge` → **never**"). Measured and pinned as its own test: boring a hole into a +12 item
+   spends 1 `catalyst.forge` and its output salvages for 4 `catalyst.temper`, so the **class** sum
+   rises 1 → 4 while **every per-id claim still holds** (nothing spent comes back). Recorded so a later
+   session that "tightens" R2 to the class level knows which case it will hit and why the looser
+   reading is the wrong one.
+3. ⛔ ⭐ **A forge can be priced below its own salvage floor with one authored word, and nothing
+   refused it — now closed at import.** The SC7 line ("adding a forge recipe is one row plus two or
+   three cost rows and **no code**") means an author can build a substrate perpetual-motion machine
+   without a review: `cheap` halves a grade-1 forge's 4 substrate to **2**, and salvaging the output
+   returns the chaff floor of **2** — not strictly less. The shipped corpus happens not to contain one,
+   so a property test over the shipped table alone would **never have seen it**. `MaterialRecipeCatalog`
+   now runs the check at **load**, on every mint, against the same coefficients `SalvagePolicy` reads,
+   and refuses by name (`ContentRuleViolated{material.strict-loss-violated}`) with the fix in the
+   message. Two tests: the leaky recipe is refused, and the same recipe one band up is accepted — the
+   guard refuses the leak, not the shape.
+4. ⛔ **The shipped 30-recipe corpus is 40 % unresolvable, and each entry is refused BY NAME with the
+   module that unblocks it** (module 11's pattern, kept). **18 load, 12 are refused:**
+   **seven `reroll` recipes** (recipe.015/016/017/018/026/027/028) name a verb that predates the
+   `reroll-one` / `reroll-all` split — **module 15** owns that split and the `op_kind` namespace it
+   lives in, and inventing it here would mint a second vocabulary the Boundaries forbid outright; and
+   **five `elevate` recipes** (recipe.009/010/011/025/029) name one of the four **retired band shard
+   ids**, which resolve but are never minted, so they are recipes nothing can ever pay. Counts are
+   asserted against the real file so a corpus change cannot quietly move them. ⚠ Two of the seven
+   `reroll` recipes *also* carry a legacy shard, but a refusal names **one** reason — the verb, checked
+   first.
+5. ⛔ **`spec-salvage-craft.md`'s own re-issued cost table has a column shift on the `reroll-all` row.**
+   It prints `b` `flux` in the **Essence** column and leaves **Catalyst** blank. I9 §7.4, the source,
+   has essence `—` and catalyst `b flux`. The source wins; the reason is written into that row's own
+   `note` in `materials.v1.json`, where a balance pass reads it.
+   ⚠ **And the spec's `rpg_demon_materials` site count does not match its own table.** It says *"nine
+   SQL sites across five files"*; the table below it lists **eight** lines in **four** files, and a
+   fresh repo-wide grep confirms **eight SQL sites in four files** plus three doc-comment mentions
+   (eleven occurrences total). The reset site is `RpgStore.cs:714`, not `:697`. Corrected list below.
+
+**Two decisions this module had to make that the spec does not state, both named:**
+
+- ⭐ **A missing `soulsCostBand` means the recipe authors NO souls leg — the corpus wins over the
+  reference table.** Four of the thirty recipes (all `upcycle`) omit it, and `KindCatalog` already
+  marks the field optional. I9 §7.4 prices upcycle at `20 × g` souls; the reference row stays in the
+  tuning for modules 15/16 to price against, but a recipe that authors no band gets no leg, because
+  defaulting one to `modest` would invent a price no author wrote. Asserted by the resolve tests over
+  the whole table.
+- ⚠ **The authored band scales the upcycle ratio too, so two shipped recipes convert at 10:1 rather
+  than the reference 5:1.** `recipe.006` and `recipe.008` author `standard` (×2.000) on their
+  substrate line, so `inputPerOutput: 5` resolves to 10 for those two. That is the band mechanism
+  working as designed — an author choosing `standard` means "twice the reference" — but a balance pass
+  reading `5` in the tuning file and expecting every recipe to convert at 5:1 would be surprised, so
+  it is written down here. Not a defect: the reference row and the per-recipe band are two different
+  decisions on purpose, and the drain-valve guarantee (more in than out) holds at every band.
+- ⭐ **A recipe prices on the grade its OWN substrate line names**, falling back to the target's item
+  level only when it has no substrate line. That keeps the grade a property of the thing being made —
+  a `crude` forge is a grade-1 forge whatever the target's level — rather than letting a high-level
+  context silently reprice a low-grade recipe. It is also what makes the upcycle cap checkable at
+  resolve time.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.MaterialVocabularyTests\|FullyQualifiedName~Items.MaterialCorpusTests\|FullyQualifiedName~Items.SalvagePolicyTests"` | **48 passed** (new — `MaterialVocabularyTests` 12, `MaterialCorpusTests` 20, `SalvagePolicyTests` 16). The filtered run measured **47** before the last fact (`Upcycles_own_strict_loss_is_its_conversion_ratio`) was added at 23:46; all 48 are inside the fully-green 6308-test full-suite run below, which started at 23:59 — so every one of them is verified, the aggregate just came from the full run rather than a re-filtered one |
+| `dotnet test tests\FusionRpg.Data.Tests --filter MaterialSpendTests` | **12 passed** (new) |
+| `dotnet run --project tools\ItemSeedValidator` | **165 errors across 120 partitions — identical to the module-6/8/11/12/13 baseline.** Zero new findings |
+| `dotnet run --project tools\AtomImporter -- --check --validate` | **clean** — 17 files, 66 atoms, 7 containers, 10 rarity bands, catalog revision 2, byte-identical to P3.3's snapshot |
+| `python scripts\audit-overflow.py` | **0 critical**, 57 findings total, **zero** under `Items/Materials/` |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**; `materials` no longer appears in the table |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer.ps1` / `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` | **all four OK** |
+| `dotnet build src\FusionRpg.Server` | **0 errors** — boot parses `materials.v1.json`, seeds `salvage_yield`, imports the recipe corpus and prints every refusal |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **198 / 198**, unchanged from the session-start baseline |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | ⭐ **723 passed / 0 failed** — fully green. ⚠ A run mid-build showed **4** failures, all `UniqueActorStoreTests.Equipment_*`; they were ruled out as this module's by **ownership rather than by name** (`git diff src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs` is a 47-line `CutoverUniqueEquipmentModsAbsorption` addition plus a `double`→`long` `Xp` read, cites `spec-mods-absorption.md`, and mentions `material`/`salvage`/`recipe` **zero** times) and the concurrent stream cleared them before this final run |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | ⭐ **6308 passed / 0 failed** — fully green, including this module's 48 and module 7's moved `salvage_yield` row. The 13-failure baseline measured at the start of this module is **gone**, cleared upstream by the concurrent stream mid-build |
+
+⚠ **The baseline was re-measured fresh at the start of this module rather than inherited, and it
+moved in both directions during the build.** At session start: `Core` **13 failed / 6215 passed**
+(4 `Atoms.UiPresentTests`, 7 `World.Loam.*`, `AtomCatalogSsotDriftTests`, `AtomCompilerTests` — all the
+concurrent stream's), `Data` **0 failed / 711 passed** (host crash after), `Guard` **198 / 198**,
+`ItemSeedValidator` **165**. Mid-build the concurrent stream cleared all 13 Core failures and then
+introduced a repo-wide `double`→`long` migration plus a `mods-absorption` cutover that took `Data` to
+4. **Compare against the numbers in each row below, not against an earlier module's snapshot.**
+
+⚠ **One shipped guard caught a real defect in this module's first draft, which is the guard working.**
+`SalvagePolicy` computed R1's rung−1 as `DemonRarityLadder.RungsBelow((DemonRarity)item.RungIndex, 1)`,
+and `Guard.Tests DemonRarityLadderGuardTests.No_bare_cast_between_int_and_DemonRarity_outside_the_ladder_helper`
+went red on it — the bare cast is exactly the form that silently changed meaning the day the enum
+widened from four values to ten. Rewritten as `OneRungBelow(DemonRarityLadder.All[item.RungIndex])`,
+which indexes the ladder's own ordered list and has no cast at all. Guard back to **198/198**.
+
+⚠ **Three transient build breaks from the concurrent stream, all resolved by retry and none in a file
+this module touched** — `StructureCatalog.cs`/`LoamPolicy` (mid-edit, `data/tuning/loam.v3.json`
+untracked), `ContractTuningTestBootstrap.cs` vs a widened `LoamStructuresTuning` record, and
+`RpgProgression.cs`'s `CS0266`. Also hit `MSB3027` on `FusionRpg.Core.dll` locked by another
+`testhost` several times. Same pattern P3.1 recorded.
+
+⚠ **One test in module 7's own suite had to move, and it is this module's change that moved it.**
+`RarityBudgetKeysTests.A_key_awaiting_a_decided_shape_is_not_registered_yet` pinned `salvage_yield` as
+**unregistered**. It moved to the ready set (renamed `The_ready_keys_are_registered`) rather than being
+loosened — the three keys that *are* still awaiting (`socket_min`, `socket_max`, `reroll_cost_mult`)
+stay pinned exactly as hard, and `MaterialSpendTests` re-asserts at the DAL that writing one still
+throws.
+
+- [ ] ⏸ **The `rpg_demon_materials` → `rpg_materials` rename is RULED but deliberately NOT in this
+      module's task list**, exactly as the spec's Success criteria require. This module ships against
+      the shipped name. ⛔ **The site list, re-measured today and corrected — EIGHT SQL sites in FOUR
+      files, not the spec's "nine across five":**
+      `src/FusionRpg.Data/Sqlite/RpgStore.cs` **573** (DDL), **714** (reset — *not* `:697`);
+      `RpgStore.Expeditions.cs` **232**, **252**; `RpgStore.Fusion.cs` **395**;
+      `Migrations/ShardRungs.cs` **48**, **71**, **89** (plus doc-comment mentions at `11`, `16`, `18`).
+      Nothing outside `src/FusionRpg.Data/` references the table. Recorded for the day the owner says go.
+- [ ] ⏸ ⛔ **The shipped materials DISPLAY corpus is 21 rows for a 27-id vocabulary, and its four
+      shard rows point at ids that are never minted.** `data/seed/items/materials/materials.json`
+      authors `shard.common` / `rare` / `epic` / `legendary` — the retired band ids — and **zero** of
+      the ten `shard.{rung}` ids that actually ship, so six-plus shards would render with no name and
+      no icon. Everything that is not a shard row is already correct and issuable, which is what makes
+      this a re-author of ten rows rather than a corpus rebuild. Measured and pinned by
+      `The_shipped_materials_display_corpus_is_measured_not_assumed` so it cannot quietly change size.
+      **Not fixed here** because it is a stage-1a *generated* seed file whose ids are allocated by
+      `NamespaceAllocation`, and because the four legacy rows' retirement is bound up with the
+      "resolvable for one release" window `spec-rarity-migration.md` §4 point 4 owns — the same
+      four-things-move-together shape P3.3 recorded for the resonance ids. **Owner: this module, as a
+      corpus re-author; the presentation consumer is module 20 `item-surfaces`.**
+- [x] ⭐ **RESOLVED IN PART 2026-09-05 by module 15 — the corpus is 23 of 30 resolvable, up from 18.**
+      The seven `reroll` rows were re-authored against the split verb the moment module 15 minted the
+      `op_kind` namespace it lives in: `recipe.015/016/026/027/028` → `reroll-one` and
+      `recipe.017/018` → `reroll-all`, read off each row's own `nameKey`. **No recipe is refused on
+      the verb any longer** and `MaterialCorpusTests` asserts `Assert.Empty(verbRefusals)`.
+      ⛔ **The split also made a second, pre-existing defect visible on two of those rows:** this
+      section already recorded that *"two `reroll` recipes also carry a legacy shard, but a refusal
+      names ONE reason — the verb, checked first."* With the verb fixed, `recipe.017`'s `shard.rare`
+      and `recipe.018`'s `shard.epic` surface their own refusal, so the legacy-shard count moves
+      **5 → 7** and the resolvable corpus moves **18 → 23, not 25**. That is the same corpus re-author
+      the ten missing shard display rows need — **still this module's**, still unscheduled, and now
+      with two more rows on its list.
+- [ ] ⏸ **`a_t5_affix_costs_more_than_a_t1_at_every_theta` is asserted on the RUNG axis, not the tier
+      axis, and the reason is a real gap rather than a shortcut.** All ten rows of I9 §7.4's reference
+      table are keyed on rung, grade or enhancement — **not one leg reads tier**. Tier enters pricing
+      only through `qty_curve_id` → `effect_curve`, whose `CurveInput` is exactly `{ Level, Rarity,
+      Tier }` (verified in `CurveTable.cs:4-9`, as the spec claims) and which **no shipped recipe
+      authors**. So D26's positive half is asserted where the shipped table actually prices — cost
+      rises strictly with the target across all ten rungs, and Θ is not an input anywhere — and the
+      tier half waits on **module 15**, which owns the per-affix operations that would price on it.
+      The `material_recipe.qty_curve_id` column ships so the seam exists.
+- [ ] ⏸ **Step 5 (`perform`) is an injected delegate, not yet wired to a production mutation.**
+      `TrySpendRecipe` runs the owning module's mutation inside the same transaction and the tests
+      exercise the seam (including the forced-throw rollback), but the mints and mutations themselves
+      belong to modules 14's own forge executor and 15/16 — a **wiring gap** with named owners, not a
+      wall. Nothing in this module's scope produces an `effect_container` instance yet, because a
+      per-base-type item container is a thing no module has authored.
+- [ ] ⏸ **No `forge-gem` or `imbue` recipe exists to author against.** Both have priced reference rows
+      and both are in the operation vocabulary; neither has a content row, because gems are
+      **module 16**'s and D24's `socket-imbue` `op_kind` is **module 15**'s. The rows exist so those
+      modules price against a fixed vocabulary rather than a moving one, which is this module's whole
+      stated purpose.
+- [ ] ⏸ **A sixth spend class, a fourth catalyst, and a new operation verb all stay ask-first** — the
+      Boundaries list, unchanged. `MaterialClass` has five members and `CatalystVerbs` three, both
+      asserted closed.
+
+**Files:** `data/tuning/materials.v1.json` (new — the ten-operation reference cost table, the ten-rung
+salvage coefficients with their derivation, the grade function, the upcycle bounded ratio, the mirrored
+cost-band multipliers); `src/FusionRpg.Core/Items/Materials/{MaterialCatalog.cs, CostClassMatrix.cs,
+MaterialTuning.cs, MaterialRecipeCatalog.cs, SalvagePolicy.cs}` (new);
+`src/FusionRpg.Core/Items/RarityBudgetKeys.cs` (EDIT — `salvage_yield` → `HasDecidedShape: true`);
+`src/FusionRpg.Data/Sqlite/RpgStore.Materials.cs` (new — the three tables, `ImportRecipeCatalog`,
+`TrySpendRecipe`, `GrantMaterials`, `SeedSalvageYield`); `src/FusionRpg.Data/Sqlite/RpgStore.cs`
+(EDIT — `EnsureMaterialSchemaUnlocked` in `Init`); `src/FusionRpg.Server/Program.cs` (EDIT — parses the
+tuning at boot, seeds `salvage_yield`, imports the recipe corpus and prints every refusal);
+`tests/FusionRpg.Core.Tests/Items/{MaterialVocabularyTests.cs, MaterialCorpusTests.cs,
+SalvagePolicyTests.cs}`, `tests/FusionRpg.Data.Tests/Items/MaterialSpendTests.cs` (new);
+`tests/FusionRpg.Core.Tests/Items/RarityBudgetKeysTests.cs` (EDIT — `salvage_yield` moves to the ready set).
+
+⚠ **One deviation from the spec's Project structure, stated rather than silent:** the five Core files
+live under `src/FusionRpg.Core/Items/Materials/` rather than flat in `Items/`, matching what modules
+10/11/12 already did (`Display/`, `Drops/`, `Thresholds/`). Same files, same names.
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.MaterialVocabularyTests|FullyQualifiedName~Items.MaterialCorpusTests|FullyQualifiedName~Items.SalvagePolicyTests"`; `dotnet test tests\FusionRpg.Data.Tests --filter MaterialSpendTests`; `dotnet run --project tools\ItemSeedValidator`
+
+### ✅ P4.2 — Module 15 `enhance-reroll` — BUILT AND VERIFIED 2026-09-05 (the `Mixed`-affix reroll, the workbench executor and module 1's two §9 defects explicitly handled — two closed already, one refused by name, one named below)
+
+⛔ **The four things module 14 filed here are all answered.** Each is resolved or carried with its
+reason, in the order P4.1 filed them:
+
+1. ⭐ **The `reroll-one` / `reroll-all` split landed, and the seven shipped recipes were re-authored
+   against it.** Module 14 could not invent the verb (its Boundaries forbid defining an `op_kind`
+   outside `ssot-enhancement.md` §5.3); this module owns that namespace, so it made the call from each
+   row's own `nameKey`: `recipe.015/016/026/027/028` → **`reroll-one`** (`reroll-single-common`,
+   `reroll-single-elemental`, `reroll-essence-fire|dark|air`) and `recipe.017/018` → **`reroll-all`**
+   (`reroll-all-rare`, `reroll-all-epic`). **Not one recipe is refused on the verb any more** and
+   `MaterialCorpusTests` asserts `Assert.Empty(verbRefusals)` rather than the old count of 7.
+2. ⭐ **`socket-imbue` exists in the `op_kind` namespace before module 16 needs it.** D24's operation
+   was priced by module 14 (`CraftOperation.Imbue`, `bore`'s curve verbatim) with **no** `op_kind`;
+   minting one in module 16 would fork the namespace, so it is minted here as
+   `MutationOpKind.SocketImbue` → `"socket-imbue"`, alongside `socket-add`/`socket-insert`/
+   `socket-remove`. The namespace is a closed ten and a test pins the list.
+3. ⭐ **`reroll_cost_mult` has a decided shape and is registered.** Priced against module 14's
+   published vocabulary, not re-derived. **The shape:** the `rarity_budget` integer is the **rung
+   leg** (`1000 + rerollCostRungSlopeMilli × rungIndex` — `chaff` 1000 … `almanac` 2980), and
+   `ssot-rarity.md` §9.7's *"must scale with **affix count**, not rung alone"* is met by a **second
+   leg that is deliberately not a per-rung row**: `affixBase + affixStep × affixCount`. The total is
+   `rungLeg × affixLeg / 1000` — widened first, divided by 1000 once, at the end.
+   ⭐ **And the §9.7 constraint is enforced at LOAD, not left as a comment:**
+   `EnhancementTuning.Parse` refuses a document whose affix leg does not out-spread the rung leg
+   (×4.00 against ×2.98 as shipped), because a rung-dominant price inverts `ssot-rarity.md` §8.1's
+   *"low rungs are the best crafting bases"* mechanism — *"cheap to own and expensive to use, and the
+   mechanism inverts"* is its own wording.
+4. ⏸ **`a_t5_affix_costs_more_than_a_t1` is still unassertable, and this module did not make it
+   assertable.** Carried forward with the same evidence: none of I9 §7.4's ten reference rows reads
+   tier, and this module prices reroll on **rung × affix count**, which is what §9.7 asked for — not
+   on tier. The tier axis still enters only through `qty_curve_id` → `CurveInput.Tier`, which no
+   shipped recipe authors. **Owner: whoever authors the first tier-keyed `qty_curve_id` row**; the
+   column ships, so the seam exists.
+
+**What was built:**
+
+- [x] **I6 + I7 under one mutation contract — D2 §9 adopted verbatim, not re-derived.** `MutationOp`
+      (the closed ten-member `op_kind` namespace, the `MutationResult` delta record, `MutationLimits`),
+      `MutationReplay` (the transcript law), `MutationCanonical` (the `result_json` canonical form and
+      the `state_hash`), plus the DAL half in `RpgStore.InstanceOps.cs`: `effect_instance_op` with
+      `UNIQUE(instance_id, correlation_id)`, the five head columns
+      (`enhance_level`, `enhance_pity_counter`, `mutation_seq`, `state_hash`, `origin_values_json`)
+      and `effect_instance_atom.suppressed`. ⚠ **`origin_catalog_revision` was NOT added** — it already
+      exists as `effect_instance.catalog_revision` and D2 §7.1 granted it as a semantic lock;
+      I6 §5.1's request for a new column stays refused
+- [x] ⭐ **Clause 4 is enforced by the TYPE, not by a comment.** Every method on `MutationReplay` takes
+      an origin head and a list of ops **and nothing else** — there is no parameter through which a
+      tuning, a catalog, a container or an RNG could reach it, so a re-simulating replay is not
+      expressible. `Replay_never_reads_the_rules_table` asserts it by reflection over the real
+      signatures, and `A_rebalance_of_the_odds_table_changes_no_owned_item` shows the head is
+      byte-identical across a wrecked tuning
+- [x] **D7 — cost, never luck, on all three of its named mechanisms.** Material cost was module 14's
+      (built); the success chance is §4's three bands, read from tuning; the **mandatory** bad-luck
+      protection is `CraftPityCounter`. ⭐ **The odds never reach zero at any level** —
+      `The_success_curve_never_reaches_zero_at_any_level` walks +1…+5000, and the loader refuses a
+      `successEndMilli` of 0 by name, quoting D7
+- [x] ⭐ **The craft-pity resolution, implemented exactly as §5 decided it — the guarantee is not a
+      draw.** Below the threshold the container's weighted tier draw runs and its answer is used
+      **unmodified**; at the threshold the draw delegate **is never called at all** and the tier is
+      *placed* at `max_tier`. `Craft_pity_shifts_no_draw_weight` proves it by counting delegate
+      invocations, so `ssot-rarity.md` §3.5's measured overlap invariant (2×10⁵ rolls/rung, seed
+      `20260822`) is untouched. D31 (§3.8 scoped to *drop* pity) had already landed as module 7's E1 —
+      re-verified in the shipped doc, not assumed
+- [x] **The `enhance_cap` shrinking soft cap, consuming module 7's seeded column.**
+      `EnhancePolicy.GainMicro(n, cap) = cap × 1000 × n / (n + K)`, `K = 8` from
+      `data/tuning/enhancement.v1.json`. `No_enhancement_gain_is_a_hard_stop` runs **every rung × every
+      n to 4096** and `Enhancement_gain_stays_below_its_rungs_asymptote_at_every_n` pairs with module
+      7's `Enhance_cap_asymptotes_below_one_rung_step_at_every_rung` — neither spec can move without
+      the other going red, which is the property the previous arrangement lacked
+- [x] ⭐ **The curve is compared EXACTLY, not through a rounded render.**
+      `GainIsStrictlyIncreasing` cross-multiplies in `long` (`cap·a·(b+K) < cap·b·(a+K)`), so the
+      answer is the mathematical one at every `n`. This was a real correctness call, not a flourish:
+      a per-mille render of the same curve **ties** above `n ≈ 1265` under integer division, and a tie
+      reads exactly like the hard stop the test exists to forbid. Micro is the canonical unit for the
+      same reason
+- [x] ⚠ **`pool_rolls` does not exist, and the algebra is restated per budget.** `BudgetTargets`
+      carries `PrefixRolls`/`SuffixRolls` and their two target counts;
+      `ANCHOR_MULT = 2^(K_prefix + K_suffix)`, and it **throws** rather than saturating past 2^63.
+      `RetainedGroups` seeds each budget's exclusion set from *that budget's* retained affixes, and
+      `ValidatePostOp` restates the post-op invariant per budget. Proven both ways the success
+      criterion asks for: by test, and by a test that greps the module's own non-comment source for
+      `PoolRolls`
+- [x] ⚠ **The `Mixed` hazard is DECIDED, not discovered.** A `Mixed` affix consumes a prefix roll
+      **and** a suffix roll simultaneously, and `Instantiator.Draw`'s own comment calls today's
+      two-independent-draws model *"an interim, honestly-documented simplification"*. This module
+      refuses to build a second one on top of it: a reroll targeting a `Mixed` affix is refused
+      `ContentRuleViolated{reroll.mixed-affix-undefined}` naming module 2 (`resolution-order`), and
+      the gate is a **parameter** — the day that module lands, the refusal stops firing without a code
+      change here
+- [x] **Transfer ships** (§6a) — both `op_kind`s, the 700‰ ratio and the ±8 window in tuning, role
+      equality on module 3's stable id, the donor emptied to `+0`, the grant clamped to the
+      *recipient's own* item-level cap, and a hybrid frame refused by name until module 3 settles
+      hybrid role ids (I6 §9 #7). ⭐ **A lossless ratio is refused at load**, quoting I6's own reason
+- [x] ⛔ **`CraftingHorizonReport` ships, and it reproduces §4b's whole table from the shipped
+      `power-scale.v2.json` rather than from a number in a doc.** Θ′ is solved by exact integer
+      interpolation between the two bracketing Θ on the ladder's own per-mille values — no floating
+      point, and no bracket-and-report-the-integer, which would round N = 0.19 to 0. All seven rows
+      match to the last digit, `FirstThetaReachingRealms(2 realms)` **computes** Θc = 123, and
+      `The_horizon_moves_when_the_power_dial_moves` shows the figure tracks `bMilli`
+- [x] ⛔ **N ≈ 0.19 is recorded in code, with its consequence.** The tuning file's own
+      `craftPityNote` says the threshold is `rpg_summon_pity`'s shipped 25 **reused verbatim and
+      deliberately not sized as a progression choice**, and cites §4b for why there is nothing to size
+      it against at v1 depth. §4a's soft cap makes it smaller on purpose: ×1.12 → N = 0.09 at v1's
+      reachable +12 on an `almanac`, and N ≤ 0.16 at *any* n — asserted, both of them
+- [x] **The one module-9 read is used, and it is the only one.** `MutationPreview` calls
+      `ItemPowerReads.CardPower` (R3) for the before/after figure and nothing else; a test walks the
+      module's own source and fails if it declares a `PowerVector`, a `PowerScalar` or a second
+      pricer. `showPowerOnCard: false` suppresses **both** halves of the preview, so G3 §10 Q7's
+      reversal is a whole reversal
+- [x] **`mutation_seq ≤ 4096` is the one legal ceiling and it says so.** Structural — it bounds a
+      retry loop and a log's length, not how strong an item may become — and it **throws** on the
+      append path rather than clamping. `Mutation_seq_is_capped_at_4096_and_the_comment_says_it_is_structural`
+      asserts the comment text as well as the number
+- [x] **D26 holds on every input.** `EnhanceContext` has nowhere to *put* a player property, and the
+      test asserts that by walking its property names — the same guard shape module 14 used on
+      `RecipeContext`
+- [x] **Module 1's two §9 defects: verified CLOSED before the first operation shipped.** Both were
+      fixed in P1.1 and re-checked here rather than assumed: the orphan sweep now needs
+      `NOT HasBinding AND NOT HasOwner` (two reachability roots, so unequipping no longer deletes the
+      item), and D9's strict `catalog_revision` equality is gone, replaced by the per-atom
+      `AtomIdentityDigest` test. Nothing in this module had to ship over a live defect
+
+**Two decisions this module had to make that the spec does not state, both named:**
+
+- ⭐ **Milestones are a STRIDE, not a five-entry list.** I6 authors them at +4/+8/+12/+16/+20. A
+      five-entry list is a hard stop at +20 wearing content's clothes — the exact shape AGENTS.md
+      forbids and the one §4a spent a whole section removing from `enhance_cap`. Shipped as
+      `milestoneStride: 4`, so +24 and +400 are milestones too, and the test says so.
+- ⭐ **A natural `max_tier` roll resets the pity counter, not only a guaranteed one.** The counter
+      exists to guarantee `max_tier`; continuing to count toward a guarantee of something the player
+      just rolled would be a counter that means nothing. Stated here because the spec's own code-style
+      block resets only on the guarantee.
+
+⛔ **One real defect found in an earlier module's output, and fixed:**
+
+- **`data/tuning/item-rarity.v1.json` carried `enhanceCapAsymptoteK: 8`, which nothing read.** Module
+  7 (P2.1) authored it alongside `enhanceCapStepMarginAlphaMilli`, but `ItemRarityTuning.Parse` never
+  reads it and neither did any test — while the spec is explicit that *"module 7 owns the column; this
+  module owns `K`"*. Two files holding the same dial, one of them inert, is a balance pass editing a
+  number with no effect. **Removed from `item-rarity.v1.json` and replaced with a note pointing at
+  `enhancement.v1.json`'s `asymptoteK`, which is the live one.** Cross-referenced into P2.1 above.
+
+⛔ **One defect the reroll split made VISIBLE (it is not new, and it is not this module's to fix):**
+
+- **`recipe.017` and `recipe.018` name a retired band shard** (`shard.rare`, `shard.epic`). P4.1
+  already recorded that *"two `reroll` recipes also carry a legacy shard, but a refusal names ONE
+  reason — the verb, checked first."* With the verb fixed, the second reason surfaces, so the
+  legacy-shard refusal count moves **5 → 7** and the resolvable corpus moves **18 → 23**, not to 25.
+  `MaterialCorpusTests` was updated to the new counts with the reason written next to them. **Owner:
+  module 14's own deferred corpus re-author** (the same one the ten missing shard display rows need);
+  cross-referenced into P4.1 above.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| PLACEHOLDER | |
+
+**Deferred, with owners named:**
+
+- [ ] ⏸ **No workbench executor — the operations are decided here and performed by a caller that does
+      not exist yet.** `EnhancePolicy.Resolve`, `RerollPolicy.*`, `TransferPolicy.Resolve` and
+      `CraftPityCounter` are pure decisions; `RpgStore.AppendMutationOp` commits one. What is missing
+      is the thing that calls the decision, spends module 14's materials through `TrySpendRecipe`'s
+      `perform` delegate and writes the head — the same **wiring gap** P4.1 named at its own step 5,
+      with the same owner. Nothing here is inert by design: every piece has a test driving it, and the
+      seam module 14 built is the one it plugs into.
+- [ ] ⏸ **A reroll does not call `Instantiator.DrawBudget` with an exclusion set yet.** The spec's one
+      behavioural ask of the instantiator — `count` and `excludeGroups` parameters on `DrawBudget` —
+      is **not** made here. `RerollPolicy.RetainedGroups` computes exactly what those parameters take
+      and `ValidatePostOp` checks the result, so the contract is specified and tested from this side;
+      threading it through `Instantiator` touches the shared instantiation path every other module
+      draws from, and doing that *without* module 2's `Mixed` semantics would bake in the second
+      simplification §2 forbids. **Owner: this module, once `resolution-order` (module 2) lands.**
+- [ ] ⏸ **`Restore` is in the namespace and has no implementation.** It is an administrative rollback
+      to a recorded `op_seq`; the ledger it needs is built and dense, so it is a small addition, but no
+      surface asks for it and shipping an untriggered rollback path is how a destructive operation
+      reaches production untested. **Owner: this module, when an admin surface exists (module 20).**
+- [ ] ⏸ **The milestone ATOMS are not authored.** The stride is decided and tested; the reserved family
+      space no affix pool may draw from is content, and no `affix-families/*.json` entry declares one.
+      **Owner: the authoring fleet, same lane as the phantom families P2.2/P2.3 named.**
+- [ ] ⏸ **No endpoint, no wire DTO, no UI.** Consistent with modules 2/4/5/10–14: the item program's
+      server surface is **module 20 `item-surfaces`**, and adding an ad-hoc endpoint here would be the
+      second surface that module exists to prevent.
+
+**Files:** `data/tuning/enhancement.v1.json` (new — the gain asymptote's `K`, the three risk bands,
+the `ilvl_cap` floor, the milestone stride, the craft-pity threshold, the transfer ratio and window,
+and the reroll price's two legs; **THE soft cap lives here**);
+`src/FusionRpg.Core/Items/Mutation/{EnhancementTuning.cs, MutationOp.cs, EnhancePolicy.cs,
+RerollPolicy.cs, CraftPityCounter.cs, TransferPolicy.cs, MutationReplay.cs, CraftingHorizonReport.cs,
+MutationPreview.cs}` (new); `src/FusionRpg.Core/Items/RarityBudgetKeys.cs` (EDIT — `reroll_cost_mult`
+→ `HasDecidedShape: true`); `data/tuning/item-rarity.v1.json` (EDIT — the unread `enhanceCapAsymptoteK`
+duplicate removed, note added); `data/seed/items/recipes/recipes.json` (EDIT — seven `reroll` rows
+re-authored to `reroll-one`/`reroll-all`); `src/FusionRpg.Data/Sqlite/RpgStore.InstanceOps.cs` (new —
+`effect_instance_op`, the five head columns, `suppressed`, `AppendMutationOp`, `ReadMutationOps`,
+`SetInstancePityCounter`, `SeedRerollCostMult`); `src/FusionRpg.Data/Sqlite/RpgStore.cs` (EDIT —
+`EnsureInstanceOpSchemaUnlocked` in `Init`); `src/FusionRpg.Server/Program.cs` (EDIT — parses
+`enhancement.v1.json` at boot, seeds `reroll_cost_mult`);
+`tests/FusionRpg.Core.Tests/Items/{EnhancePolicyTests.cs, RerollPolicyTests.cs,
+MutationReplayTests.cs}`, `tests/FusionRpg.Data.Tests/Items/InstanceOpTests.cs` (new);
+`tests/FusionRpg.Core.Tests/Items/RarityBudgetKeysTests.cs` (EDIT — `reroll_cost_mult` moves to the
+ready set); `tests/FusionRpg.Core.Tests/Items/MaterialCorpusTests.cs` (EDIT — the verb refusals are
+gone, the legacy-shard count moves 5 → 7, the resolvable corpus 18 → 23).
+
+⚠ **One deviation from the spec's Project structure, stated rather than silent:** the nine Core files
+live under `src/FusionRpg.Core/Items/Mutation/` rather than flat in `Items/`, matching what modules
+10/11/12/14 already did (`Display/`, `Drops/`, `Thresholds/`, `Materials/`). Same files, same names,
+plus `MutationPreview.cs` for §10's single read, which the spec describes but does not list.
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.EnhancePolicyTests|FullyQualifiedName~Items.RerollPolicyTests|FullyQualifiedName~Items.MutationReplayTests"`;
+`dotnet test tests\FusionRpg.Data.Tests --filter InstanceOpTests`; `dotnet run --project tools\ItemSeedValidator`
 
 ### P4.3 — Module 16 `sockets`
 

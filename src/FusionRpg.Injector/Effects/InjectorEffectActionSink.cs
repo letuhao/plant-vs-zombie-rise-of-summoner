@@ -4,6 +4,7 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Injector.Stats;
 using UnityEngine;
 
@@ -144,11 +145,19 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
             return true;
         }
 
-        var channel = JsonOverlay.GetString(p, "channel") ?? "hp";
-        if (!string.Equals(channel, "hp", StringComparison.OrdinalIgnoreCase))
+        var rawChannel = JsonOverlay.GetString(p, "channel") ?? "hp";
+
+        // E28 fix #1 (spec-param-parity.md §3 row 1): all six ResourceIds are honoured now, not
+        // just hp — the stat layer covers hp/stamina/hunger/spirit/qi/poise and a channel outside
+        // that closed set is a REFUSAL, not a skip ("declared, accepted, ignored" is exactly the
+        // third state this whole module exists to remove).
+        var channel = NormalizeResourceChannel(rawChannel);
+        if (channel == null)
         {
-            skipped = true;
-            return true;
+            CheatState.Error(
+                $"debug.resource-delta: '{rawChannel}' is not one of the six registered resource " +
+                "ids (hp/stamina/hunger/spirit/qi/poise) — refusing rather than silently doing nothing");
+            return false;
         }
 
         var amount = (long)JsonOverlay.GetDouble(p, "amount");
@@ -162,40 +171,102 @@ public sealed class InjectorEffectActionSink : IEffectActionSink
         }
 
         var source = "effect.fa10:" + item.GrantId;
-        // Registry first (O(1), runs per FA10 action in combat); scans only on a registry miss
-        // so a unit the hooks never saw still takes its delta.
-        var zHit = InjectorEntityRegistry.FindZombie(targetPtr);
-        if (zHit != null)
+
+        if (string.Equals(channel, "hp", StringComparison.Ordinal))
         {
-            EntityStatWriter.AddZombieHp(zHit, amount, source);
+            // Registry first (O(1), runs per FA10 action in combat); scans only on a registry miss
+            // so a unit the hooks never saw still takes its delta.
+            var zHit = InjectorEntityRegistry.FindZombie(targetPtr);
+            if (zHit != null)
+            {
+                EntityStatWriter.AddZombieHp(zHit, amount, source);
+                return true;
+            }
+
+            var pHit = InjectorEntityRegistry.FindPlant(targetPtr);
+            if (pHit != null)
+            {
+                EntityStatWriter.AddPlantHp(pHit, amount, source);
+                return true;
+            }
+
+            foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
+            {
+                if (z == null) continue;
+                if (!CombatPtr.EqualsPtr(GameDumps.Ptr(z), targetPtr)) continue;
+                EntityStatWriter.AddZombieHp(z, amount, source);
+                return true;
+            }
+
+            foreach (var plant in UnityEngine.Object.FindObjectsOfType<Plant>())
+            {
+                if (plant == null) continue;
+                if (!CombatPtr.EqualsPtr(GameDumps.Ptr(plant), targetPtr)) continue;
+                EntityStatWriter.AddPlantHp(plant, amount, source);
+                return true;
+            }
+
+            skipped = true;
             return true;
         }
 
-        var pHit = InjectorEntityRegistry.FindPlant(targetPtr);
-        if (pHit != null)
+        // The other five (stamina/hunger/spirit/qi/poise) never reach Unity by design
+        // (resource-hub-ssot.md §7 — "rpg.* ... No, by design"; hp is the one exception, because
+        // Unity is hp's own SSOT there). EntityStatWriter is the guarded single writer for the ten
+        // literal PvZ fields (guard-single-writer.ps1) and was never meant to own these, so the
+        // write goes through the actor's own ActorResourcePools instance instead — same registry
+        // first / scan-on-miss lookup shape as the hp branch above, no NEW scan kind introduced.
+        object? target = InjectorEntityRegistry.FindZombie(targetPtr);
+        target ??= InjectorEntityRegistry.FindPlant(targetPtr);
+        if (target == null)
         {
-            EntityStatWriter.AddPlantHp(pHit, amount, source);
+            foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
+            {
+                if (z == null) continue;
+                if (!CombatPtr.EqualsPtr(GameDumps.Ptr(z), targetPtr)) continue;
+                target = z;
+                break;
+            }
+        }
+        if (target == null)
+        {
+            foreach (var plant in UnityEngine.Object.FindObjectsOfType<Plant>())
+            {
+                if (plant == null) continue;
+                if (!CombatPtr.EqualsPtr(GameDumps.Ptr(plant), targetPtr)) continue;
+                target = plant;
+                break;
+            }
+        }
+        if (target == null)
+        {
+            skipped = true;
             return true;
         }
 
-        foreach (var z in UnityEngine.Object.FindObjectsOfType<Zombie>())
-        {
-            if (z == null) continue;
-            if (!CombatPtr.EqualsPtr(GameDumps.Ptr(z), targetPtr)) continue;
-            EntityStatWriter.AddZombieHp(z, amount, source);
-            return true;
-        }
-
-        foreach (var plant in UnityEngine.Object.FindObjectsOfType<Plant>())
-        {
-            if (plant == null) continue;
-            if (!CombatPtr.EqualsPtr(GameDumps.Ptr(plant), targetPtr)) continue;
-            EntityStatWriter.AddPlantHp(plant, amount, source);
-            return true;
-        }
-
-        skipped = true;
+        // Same resolve every combat/shield collaborator already uses for this ptr
+        // (InjectorCombatBridge.ResolveActor — EffectRuntime.WireCombatMath's "same resolve as
+        // combat"), so resource.max/resource.regen honour the actor's actual buffs/gear rather
+        // than a stub. The pool itself is never written through directly — always through
+        // ActorResourcePools's own settle-then-clamp API (Add), never a raw dictionary write.
+        var derived = InjectorCombatBridge.ResolveActor(targetPtr, attackerLess: false).Derived;
+        var nowTick = EffectRuntime.NowMs();
+        var pool = InjectorEntityRegistry.ResourcePools.GetOrCreate(targetPtr, derived, nowTick);
+        pool.Add(channel, amount, nowTick, derived);
         return true;
+    }
+
+    /// <summary>Case-insensitive match against the closed six-id <see cref="DerivedStatChannels.ResourceIds"/>
+    /// set, returning the canonical (lowercase) id — <c>ActorResourcePools</c>'s own <c>IndexOf</c>
+    /// compares by exact string, so a caller-supplied "Stamina" must be canonicalized before it
+    /// reaches the pool. Null means the channel is not one of the six.</summary>
+    static string? NormalizeResourceChannel(string? raw)
+    {
+        if (string.IsNullOrEmpty(raw)) return null;
+        foreach (var id in DerivedStatChannels.ResourceIds)
+            if (string.Equals(id, raw, StringComparison.OrdinalIgnoreCase))
+                return id;
+        return null;
     }
 
     /// <summary>Prefer event TargetPtr; if empty, use ActorPtr (OnSpawn / dealt actor).</summary>

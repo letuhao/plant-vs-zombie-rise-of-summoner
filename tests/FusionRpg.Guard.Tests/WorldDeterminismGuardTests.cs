@@ -10,6 +10,35 @@ namespace FusionRpg.Guard.Tests;
 /// A wall-clock read or a `System.Random` inside the turn path would not fail a test — it would
 /// quietly make replays disagree between machines, weeks later, with no obvious cause. Cheaper to
 /// forbid the symbols outright.
+///
+/// <para><b>base-defense Gate 0 part 2 (2026-09-05):</b> widened the clock/RNG scan from
+/// <c>Core/World</c> to <c>Core/World + Core/Battle + Core/Effects</c> — a siege resolves inside
+/// <c>Core/Battle</c> and reads <c>Core/Effects</c>, so a wall clock or an unowned RNG in either tree
+/// is exactly as replay-breaking as one in <c>World</c>. Widening surfaced three real defects in the
+/// guard itself, fixed alongside the scope change rather than worked around:</para>
+///
+/// <para><b>1. The scan stopped at the first match per (file, symbol).</b> <c>text.IndexOf</c> found
+/// only the first occurrence, so a comment mentioning a banned symbol before a real usage would have
+/// masked the real one entirely. Now scans every occurrence.</para>
+///
+/// <para><b>2. The scan was comment-blind.</b> A doc comment that explains the rule — "never
+/// System.Random", "Owned-PRNG adapter... never System.Random" — contains the banned substring and
+/// tripped the ban meant to enforce the rule it was documenting. `Core/World` never had this problem
+/// because nothing in it happened to explain the rule in prose; `Core/Battle`/`Core/Effects` are full
+/// of exactly that prose (four hits on first widening, all comments, zero real violations). Comment
+/// text is now stripped before matching, the same discipline <see cref="ReadsTheWorldItself"/>
+/// already applies one line at a time.</para>
+///
+/// <para><b>3. The float-purity check does NOT widen with the clock/RNG check.</b> `Core/Battle`'s
+/// derived-stat/aura recompose system (aura-skill T4: <c>ActorDerivedSnapshot</c>,
+/// <c>BattleDerivedModifierLedger</c>, <c>combat.*</c> channel values) is `double`-typed by a prior,
+/// reviewed, already-shipped program — not something Gate 0 for base-defense has license to relitigate
+/// into a fixed-point refactor. Every `double` found on first widening is either that subsystem
+/// (recompute-each-battle intermediate math, never itself hashed — only the resolved `long` outcome
+/// is) or presentation (`DamageFx`, `UiPresentSink` — VFX/UI, not simulation). Rule 8 in
+/// base-defense-ideal.md §2 says "integer/fixed-point only in <b>game-affecting branches</b>", not
+/// "everywhere `Core/Battle` touches" — so this check stays scoped to `Core/World`'s own stored,
+/// hashed state, which is what it was written to certify and is unaffected by this widening.</para>
 /// </summary>
 public class WorldDeterminismGuardTests
 {
@@ -25,21 +54,36 @@ public class WorldDeterminismGuardTests
         "new Random("
     };
 
+    /// <summary>
+    /// The one narrow, named exemption for the clock/RNG scan — not a file skip, a single-class
+    /// skip. `SystemEffectClock` (`EffectModels.cs`) exists to BE the real wall clock for exactly one
+    /// legitimate, non-replayed caller: `FusionRpg.Injector/Effects/EffectRuntime.cs`'s live-PvZ
+    /// composition root, which explicitly constructs it (never an implicit default — see
+    /// `EffectBag.UtcNow`'s fix in the same Gate-0 pass for the contrast). The injector applies
+    /// effects to a live, real-time match; nothing about it claims replay determinism, and
+    /// `AGENTS.md`'s hard boundaries never make that claim either. Exempting the TYPE rather than the
+    /// FILE means a new, accidental wall-clock read anywhere else in `EffectModels.cs` is still caught.
+    /// </summary>
+    const string SystemEffectClockException = "public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;";
+
     [Fact]
     public void The_world_simulation_reads_no_clock_and_rolls_no_unowned_dice()
     {
         var violations = new List<string>();
 
-        foreach (var file in WorldSourceFiles())
+        foreach (var file in SimulationSourceFiles())
         {
-            var text = File.ReadAllText(file);
-            foreach (var banned in BannedSymbols)
+            var lines = File.ReadAllLines(file);
+            for (var i = 0; i < lines.Length; i++)
             {
-                var index = text.IndexOf(banned, StringComparison.Ordinal);
-                if (index < 0) continue;
+                var codeOnly = StripLineComment(lines[i]);
+                if (codeOnly.Trim() == SystemEffectClockException) continue;
 
-                var line = text.Take(index).Count(c => c == '\n') + 1;
-                violations.Add($"{Path.GetFileName(file)}:{line} → {banned}");
+                foreach (var banned in BannedSymbols)
+                {
+                    if (!codeOnly.Contains(banned, StringComparison.Ordinal)) continue;
+                    violations.Add($"{Path.GetFileName(file)}:{i + 1} → {banned}");
+                }
             }
         }
 
@@ -47,11 +91,23 @@ public class WorldDeterminismGuardTests
             "world simulation purity violated (no wall clock, no unowned RNG):\n" + string.Join("\n", violations));
     }
 
+    /// <summary>Drops a trailing <c>//</c> line comment (including <c>///</c> doc comments, which
+    /// start with the same two characters) so a banned symbol named IN PROSE — explaining the rule
+    /// rather than breaking it — cannot trip the scan. Does not attempt block-comment (<c>/* */</c>)
+    /// stripping: none of this tree uses them, and a real block-comment scanner needs multi-line
+    /// state this single-pass, per-line scan does not carry.</summary>
+    static string StripLineComment(string line)
+    {
+        var i = line.IndexOf("//", StringComparison.Ordinal);
+        return i < 0 ? line : line[..i];
+    }
+
     [Fact]
     public void Game_affecting_world_state_carries_no_floating_point()
     {
         // Integer or fixed-point only: a float in stored state is a cross-machine hash difference
-        // waiting to happen.
+        // waiting to happen. Scoped to Core/World only — see the class-level comment's point 3 for
+        // why this does NOT widen alongside the clock/RNG check.
         var floats = new Regex(@"\b(double|float|decimal)\s+\w+\s*[;={)]", RegexOptions.Compiled);
         var violations = new List<string>();
 
@@ -59,7 +115,7 @@ public class WorldDeterminismGuardTests
         {
             var lines = File.ReadAllLines(file);
             for (var i = 0; i < lines.Length; i++)
-                if (floats.IsMatch(lines[i]))
+                if (floats.IsMatch(StripLineComment(lines[i])))
                     violations.Add($"{Path.GetFileName(file)}:{i + 1} → {lines[i].Trim()}");
         }
 
@@ -139,12 +195,104 @@ public class WorldDeterminismGuardTests
         Assert.Contains(files, f => f.EndsWith("WorldState.cs", StringComparison.Ordinal));
     }
 
+    [Fact]
+    public void The_scan_actually_finds_battle_and_effects_sources()
+    {
+        // The Gate 0 widening, proven the same way The_scan_actually_finds_the_world_sources proves
+        // the original scope: seen to include a real, named file, not just asserted to.
+        var files = SimulationSourceFiles().ToList();
+        Assert.Contains(files, f => f.EndsWith("BattleEngine.cs", StringComparison.Ordinal));
+        Assert.Contains(files, f => f.EndsWith("EffectBag.cs", StringComparison.Ordinal));
+        Assert.Contains(files, f => f.EndsWith("WorldState.cs", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Comment_stripping_hides_prose_but_not_code_on_the_same_line()
+    {
+        // The exact shape that produced all four false positives on first widening: a doc comment
+        // EXPLAINING the ban, worded so it repeats the banned phrase.
+        Assert.DoesNotContain("System.Random",
+            StripLineComment("    /// Owned-PRNG adapter — never System.Random on a replayable path."));
+
+        // And the fix must not become a new hiding place: real code before a trailing comment stays
+        // visible.
+        Assert.Contains("System.Random", StripLineComment("var r = new System.Random(); // TODO seed me"));
+
+        // A bare code line with no // at all is returned whole.
+        Assert.Equal("var x = 1;", StripLineComment("var x = 1;"));
+    }
+
+    [Fact]
+    public void The_scan_finds_every_occurrence_not_just_the_first()
+    {
+        // Reproduces the exact hazard the old text.IndexOf(banned) shape had: a comment mentioning a
+        // banned symbol earlier in a file could mask a real violation of the SAME symbol later in it.
+        // This test constructs that shape directly against the scanning logic (StripLineComment +
+        // per-line Contains, as the real fact runs it) rather than against a planted file, so it does
+        // not depend on the tree staying clean of a second, deliberately-planted violation.
+        var lines = new[]
+        {
+            "    // never System.Random here, obviously",
+            "    var leaked = new System.Random();"
+        };
+
+        var hitLines = lines
+            .Select((line, i) => (line: StripLineComment(line), i))
+            .Where(x => x.line.Contains("System.Random", StringComparison.Ordinal))
+            .Select(x => x.i)
+            .ToList();
+
+        Assert.Single(hitLines);
+        Assert.Equal(1, hitLines[0]); // the SECOND line — the first is stripped as a comment
+    }
+
+    [Fact]
+    public void The_system_effect_clock_exemption_is_narrow_not_a_file_skip()
+    {
+        // The exemption matches the exact declaration line, not the file or the class. A DIFFERENT
+        // wall-clock read added anywhere else in the same file must still be caught.
+        var exempt = StripLineComment("    public DateTimeOffset UtcNow => DateTimeOffset.UtcNow;").Trim();
+        Assert.Equal(SystemEffectClockException, exempt);
+
+        var notExempt = "        var leaked = DateTimeOffset.UtcNow; // a different line, same file";
+        Assert.NotEqual(SystemEffectClockException, StripLineComment(notExempt).Trim());
+        Assert.Contains("DateTimeOffset.UtcNow", StripLineComment(notExempt));
+    }
+
+    /// <summary>
+    /// base-defense Gate 0 part 2: World-only, for `Game_affecting_world_state_carries_no_floating_point`
+    /// and the AI-belief and source-count checks below — UNCHANGED. See the class-level comment's
+    /// point 3 for why the float check does not widen with the clock/RNG one.
+    /// </summary>
     static IEnumerable<string> WorldSourceFiles()
     {
         var root = Path.Combine(FindRepoRoot(), "src", "FusionRpg.Core", "World");
         return Directory.Exists(root)
             ? Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories)
             : Enumerable.Empty<string>();
+    }
+
+    /// <summary>
+    /// base-defense Gate 0 part 2: World + Battle + Effects, for
+    /// `The_world_simulation_reads_no_clock_and_rolls_no_unowned_dice` only. A siege resolves inside
+    /// `Core/Battle` and reads `Core/Effects`, so a wall clock or an unowned RNG in either tree is
+    /// exactly as replay-breaking as one in `World` — the guard was scoped to `World` only because
+    /// that was the only turn-based simulation in the repo when it was written, not because the other
+    /// two are exempt.
+    /// </summary>
+    static IEnumerable<string> SimulationSourceFiles()
+    {
+        var coreRoot = Path.Combine(FindRepoRoot(), "src", "FusionRpg.Core");
+        var roots = new[]
+        {
+            Path.Combine(coreRoot, "World"),
+            Path.Combine(coreRoot, "Battle"),
+            Path.Combine(coreRoot, "Effects"),
+        };
+
+        return roots
+            .Where(Directory.Exists)
+            .SelectMany(root => Directory.EnumerateFiles(root, "*.cs", SearchOption.AllDirectories));
     }
 
     static string FindRepoRoot()

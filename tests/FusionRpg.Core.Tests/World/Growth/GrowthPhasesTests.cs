@@ -6,9 +6,10 @@ using Xunit;
 namespace FusionRpg.Core.Tests.World.Growth;
 
 /// <summary>
-/// world-map W50 acceptance: with the real, shipped pulse (0, identity until W58) every existing
-/// golden is byte-identical and the locked-phase-order test is untouched; with a non-zero pulse
-/// supplied locally (never the shared `RecruitPolicy` singleton), stock accrues on week boundaries
+/// world-map W50 acceptance, updated by W58: the real, shipped pulse moved off identity (0), so the
+/// live-tuning test below now proves growth genuinely accrues through the real production caller
+/// rather than proving it stays inert. With a non-zero pulse supplied **locally** (never the shared
+/// `RecruitPolicy` singleton) in every other test in this file, stock accrues on week boundaries
 /// only, in stable sector-id order, and the report gains one structural entry per accruing sector.
 /// </summary>
 public class GrowthPhasesTests
@@ -39,19 +40,32 @@ public class GrowthPhasesTests
         GrowthPhases.Growth(world, report, Phase, turn, seed, seatPulse, lairMultiplier, specialWeekMultiplier);
 
     [Fact]
-    public void At_the_real_shipped_identity_pulse_nothing_accrues_and_nothing_reports()
+    public void At_the_real_shipped_pulse_a_held_seat_accrues_exactly_what_PulseFor_computes()
     {
+        // world-map W58 turned growth on for real (data/tuning/world.v5.json) — this now proves the
+        // real production caller (TurnEngine.Growth → RecruitPolicy's own live-configured accessors)
+        // composes correctly, rather than proving growth stays inert the way this test did pre-W58.
+        // The expected value is derived from the same pure `PulseFor` the production path itself
+        // calls, rather than a hand-picked literal, so this stays correct through a future balance
+        // pass without needing to track whichever week/special-week roll turn 7/seed 1 happens to
+        // produce.
+        const int turn = 7;
+        const ulong seed = 1;
         var world = World(currentTurn: 6, Sector("s1", "f1", new[] { Seat("f1") }));
         var report = new TurnReport();
 
-        // The real production caller reads RecruitPolicy.SeatPulsePerWeek, which ships at 0.
-        var result = GrowthPhases.Growth(world, report, Phase, turn: 7, seed: 1,
+        var result = GrowthPhases.Growth(world, report, Phase, turn, seed,
             seatPulsePerWeek: RecruitPolicy.SeatPulsePerWeek,
             lairMultiplierMilli: RecruitPolicy.LairMultiplierMilli,
             specialWeekMultiplierMilli: RecruitPolicy.SpecialWeekMultiplierMilli);
 
-        Assert.Equal(0, result.Sectors.Single().RecruitStock);
-        Assert.Empty(report.Entries);
+        var expectedPulse = RecruitPolicy.PulseFor(
+            hasSeat: true, lairCleared: false, TurnCalendar.Roll(turn, seed),
+            RecruitPolicy.SeatPulsePerWeek, RecruitPolicy.LairMultiplierMilli, RecruitPolicy.SpecialWeekMultiplierMilli);
+
+        Assert.True(expectedPulse > 0, "the real shipped pulse must be non-zero since world-map W58 turned growth on");
+        Assert.Equal(expectedPulse, result.Sectors.Single().RecruitStock);
+        Assert.Single(report.Entries);
     }
 
     [Fact]

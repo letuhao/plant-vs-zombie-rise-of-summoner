@@ -27,6 +27,7 @@ public class ModeProfileTuningBindingTests
     [InlineData(BattleModeProfileCatalog.ClassicRoundId)]
     [InlineData(BattleModeProfileCatalog.GalaxySyncId)]
     [InlineData(BattleModeProfileCatalog.HybridAtbId)]
+    [InlineData(BattleModeProfileCatalog.SiegeId)]
     public void EveryPublishedMagnitudeBinds(string profileId)
     {
         var profile = BattleModeProfileCatalog.Resolve(profileId);
@@ -35,6 +36,141 @@ public class ModeProfileTuningBindingTests
         Assert.Equal(tuned.W, profile.W);
         Assert.Equal(tuned.WReact, profile.WReact);
         Assert.Equal(tuned.PassQuantum, profile.PassQuantum);
+    }
+
+    // ---- base-defense F2 / battle-clock-profile: MaxRounds/RoundDurationMs ----
+
+    /// <summary>Decision 29 keeps `timeline.profiles.siege.maxRounds/roundDurationMs` unset in every
+    /// shipped bootstrap, alongside the three pre-existing rows (which never named them at all). All
+    /// four must inherit the ruleset horizon identically — the whole byte-identity argument for
+    /// `classic-round` rests on "names neither, so it inherits both".</summary>
+    [Theory]
+    [InlineData(BattleModeProfileCatalog.ClassicRoundId)]
+    [InlineData(BattleModeProfileCatalog.GalaxySyncId)]
+    [InlineData(BattleModeProfileCatalog.HybridAtbId)]
+    [InlineData(BattleModeProfileCatalog.SiegeId)]
+    public void EveryShippedProfileInheritsTheRulesetHorizonWhenTuningNamesNeither(string profileId)
+    {
+        var tuned = Configured.ProfileOf(profileId);
+        Assert.Null(tuned.MaxRounds);
+        Assert.Null(tuned.RoundDurationMs);
+
+        var profile = BattleModeProfileCatalog.Resolve(profileId);
+        Assert.Equal(BattleRuleset.MaxRounds, profile.MaxRounds);
+        Assert.Equal(BattleRuleset.RoundDurationMs, profile.RoundDurationMs);
+    }
+
+    [Fact]
+    public void SiegeRowResolvesAndIsCached()
+    {
+        Assert.Same(BattleModeProfileCatalog.Siege, BattleModeProfileCatalog.Resolve(BattleModeProfileCatalog.SiegeId));
+        Assert.Same(BattleModeProfileCatalog.Siege, BattleModeProfileCatalog.Siege);
+    }
+
+    /// <summary>§5.12 / decision "both sides move" — siege is speed-ordered and per-side-concurrent,
+    /// which classic-round is neither.</summary>
+    [Fact]
+    public void SiegeIsSpeedOrderedPerSideAndInteractive()
+    {
+        var siege = BattleModeProfileCatalog.Siege;
+        Assert.True(siege.OrdersBySpeed);
+        Assert.Equal(WScope.PerSide, siege.WScope);
+        Assert.True(siege.RequiresLiveInput);
+
+        var classic = BattleModeProfileCatalog.ClassicRound;
+        Assert.False(classic.OrdersBySpeed);
+        Assert.False(classic.RequiresLiveInput);
+    }
+
+    /// <summary>battle-clock-profile §5's own correction, pinned as a regression test: the siege row
+    /// must run `OneActionPerTurnEconomy`, never `ActionPointsEconomy` — action-map.md:430's "no
+    /// Action Points... it is simply not what this mode needs". A points economy here was the exact
+    /// wrong fix this module's own spec records having made once already.</summary>
+    [Fact]
+    public void SiegeRunsOneActionPerTurnNeverActionPoints()
+    {
+        var economy = BattleModeProfileCatalog.Siege.NewEconomy();
+        Assert.IsType<OneActionPerTurnEconomy>(economy);
+    }
+
+    [Fact]
+    public void UnknownProfileIdStillThrows()
+    {
+        Assert.Throws<ArgumentException>(() => BattleModeProfileCatalog.Resolve("sieg"));
+    }
+
+    /// <summary>A hand-constructed profile with a horizon that resolves to zero must fail loudly at
+    /// `Build`, not silently produce a battle with no rounds — proven at the loader, matching every
+    /// other refusal in this file.</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void AZeroOrNegativeMaxRoundsIsRefused(int bad)
+    {
+        var ex = Assert.Throws<BattleTuningRejection>(() =>
+            BattleTuningLoader.Parse(Doc(
+                "\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1,\"maxRounds\":" + bad + "}")));
+        Assert.Contains("maxRounds must be > 0", ex.Message);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void AZeroOrNegativeRoundDurationIsRefused(int bad)
+    {
+        var ex = Assert.Throws<BattleTuningRejection>(() =>
+            BattleTuningLoader.Parse(Doc(
+                "\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1,\"roundDurationMs\":" + bad + "}")));
+        Assert.Contains("roundDurationMs must be > 0", ex.Message);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(-1)]
+    public void ANonPositiveLoopGuardRoundMultipleIsRefused(int bad)
+    {
+        var doc =
+            "{\"schemaVersion\":2,\"version\":2," +
+            "\"ruleset\":{\"roundDurationMs\":1000,\"maxRounds\":50,\"loopGuardRoundMultiple\":" + bad + "}," +
+            "\"statComposer\":{\"primaryAffinityDivisor\":4,\"secondaryAffinityDivisor\":8}," +
+            "\"timeline\":{\"profiles\":{" + Classic + "}}," +
+            "\"hybrid\":{\"secondaryWeightMilli\":0}," +
+            "\"traits\":{}}";
+        var ex = Assert.Throws<BattleTuningRejection>(() => BattleTuningLoader.Parse(doc));
+        Assert.Contains("loopGuardRoundMultiple must be > 0", ex.Message);
+    }
+
+    /// <summary>A profile that DOES name its own horizon gets it, distinct from the ruleset — proven
+    /// at the pure loader/tuning level (never through the global catalog, per this file's own
+    /// documented parallel-safety discipline) so the resolution arithmetic
+    /// (`t.MaxRounds ?? BattleRuleset.MaxRounds`) is exercised without racing other tests.</summary>
+    [Fact]
+    public void AProfileNamingItsOwnHorizonGetsIt()
+    {
+        var tuning = BattleTuningLoader.Parse(Doc(
+            "\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1,\"maxRounds\":120,\"roundDurationMs\":500}"));
+        var row = tuning.ProfileOf(BattleModeProfileCatalog.ClassicRoundId);
+        Assert.Equal(120, row.MaxRounds);
+        Assert.Equal(500, row.RoundDurationMs);
+
+        // The resolution BattleModeProfileCatalog.Build performs, reproduced directly: named wins
+        // over the ruleset fallback.
+        Assert.Equal(120, row.MaxRounds ?? tuning.MaxRounds);
+        Assert.Equal(500, row.RoundDurationMs ?? tuning.RoundDurationMs);
+    }
+
+    /// <summary>The belt-and-suspenders guard reproduces exactly 200,000 at classic-round's shipped
+    /// 50 rounds (50 * 4000) — the refactor from a hard-coded constant to a profile-derived value must
+    /// not be a behaviour change wearing a refactor's clothes.</summary>
+    [Fact]
+    public void LoopGuardReproducesTwoHundredThousandAtFiftyRounds()
+    {
+        Assert.Equal(50, BattleRuleset.MaxRounds);
+        Assert.Equal(4000, BattleRuleset.LoopGuardRoundMultiple);
+        checked
+        {
+            Assert.Equal(200_000, BattleRuleset.MaxRounds * BattleRuleset.LoopGuardRoundMultiple);
+        }
     }
 
     /// <summary>`maxPoints` is the one magnitude that reaches an economy rather than the profile
@@ -68,7 +204,7 @@ public class ModeProfileTuningBindingTests
     // brace-counting against `$$"""` is a needless way to make a test fixture hard to read.
     static string Doc(string profiles) =>
         "{\"schemaVersion\":2,\"version\":2," +
-        "\"ruleset\":{\"roundDurationMs\":1000,\"maxRounds\":50}," +
+        "\"ruleset\":{\"roundDurationMs\":1000,\"maxRounds\":50,\"loopGuardRoundMultiple\":4000}," +
         "\"statComposer\":{\"primaryAffinityDivisor\":4,\"secondaryAffinityDivisor\":8}," +
         "\"timeline\":{\"profiles\":{" + profiles + "}}," +
         // Wave E3 made `hybrid` a required section; 0 is the shipped, inert value.

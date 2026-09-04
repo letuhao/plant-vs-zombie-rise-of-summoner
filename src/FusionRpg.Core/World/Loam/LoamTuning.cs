@@ -18,12 +18,27 @@ public sealed record LoamFadeTuning(
     int RecoveryMilli, int BaseDecayMilli, int DecayPerDeficitUnitMilli,
     long DecayScaleDivisor, int MaxDecayMilli, int AbandonmentHorizonTurns);
 
-public sealed record LoamLegionSupplyTuning(long CarryPerBearer, long BurnPerMember);
+/// <summary>
+/// base-defense siege-supply, decision 42: <paramref name="BesiegedRationMilli"/> — a garrison
+/// topping up inside a BESIEGED sector draws at this per-mille of normal. `1000` = no rationing, the
+/// shipped default, so the F1/F1b defect fix and this balance dial stay separable: at the neutral
+/// default the ration is a no-op, and setting it below 1000 is a pure balance-pass change that touches
+/// nothing else. Bounded ratio (0..1000), exempt from AGENTS.md's no-hard-ceilings rule, stated here
+/// as that rule requires.
+/// </summary>
+public sealed record LoamLegionSupplyTuning(long CarryPerBearer, long BurnPerMember, int BesiegedRationMilli);
 
+// world-map W57: the six `*Cost` fields below were `*CostMilli` — every one is a whole loam unit
+// compared directly against a legion's CarriedLoam or a sector's LoamStock, never a per-mille. The
+// `Milli` suffix lied; renamed, no value changed (see BuildResolver.cs / StructureCatalog.cs).
 public sealed record LoamStructuresTuning(
-    int WellYieldMultiplierMilli, long WellCostMilli, long WaystationCostMilli,
+    int WellYieldMultiplierMilli, long WellCost, long WaystationCost,
     int WellBuildTurns, int WaystationBuildTurns, int WaystationRangeHops,
-    long GranaryCostMilli, long GranaryCapacityBonus, int GranaryBuildTurns);
+    long GranaryCost, long GranaryCapacityBonus, int GranaryBuildTurns,
+    // world-map W56 (spec-sector-development.md §3) — the yield kinds.
+    long SoulConduitCost, long SoulConduitFlatYieldPerTurn, int SoulConduitBuildTurns,
+    long ExtractorCost, long ExtractorFlatYieldPerTurn, int ExtractorBuildTurns,
+    long HatcheryCost, int HatcheryYieldMultiplierMilli, int HatcheryBuildTurns);
 
 public sealed record LoamTextureTuning(
     int ContagionPressurePerTurn, int MaxPressureMilli, int PressureDecayPerTurn,
@@ -83,21 +98,36 @@ public static class LoamTuningLoader
                 AbandonmentHorizonTurns: Int(f, "abandonmentHorizonTurns", "fade"));
 
             var ls = Obj(root, "legionSupply", "$");
+            var besiegedRationMilli = Int(ls, "besiegedRationMilli", "legionSupply");
+            if (besiegedRationMilli < 0 || besiegedRationMilli > 1000)
+                throw new LoamTuningRejection(
+                    $"loam tuning: legionSupply.besiegedRationMilli must be within 0..1000 (it is a " +
+                    $"draw-rate ratio); got {besiegedRationMilli}");
             var legionSupply = new LoamLegionSupplyTuning(
                 CarryPerBearer: Long(ls, "carryPerBearer", "legionSupply"),
-                BurnPerMember: Long(ls, "burnPerMember", "legionSupply"));
+                BurnPerMember: Long(ls, "burnPerMember", "legionSupply"),
+                BesiegedRationMilli: besiegedRationMilli);
 
             var s = Obj(root, "structures", "$");
             var structures = new LoamStructuresTuning(
                 WellYieldMultiplierMilli: Int(s, "wellYieldMultiplierMilli", "structures"),
-                WellCostMilli: Long(s, "wellCostMilli", "structures"),
-                WaystationCostMilli: Long(s, "waystationCostMilli", "structures"),
+                WellCost: Long(s, "wellCost", "structures"),
+                WaystationCost: Long(s, "waystationCost", "structures"),
                 WellBuildTurns: Int(s, "wellBuildTurns", "structures"),
                 WaystationBuildTurns: Int(s, "waystationBuildTurns", "structures"),
                 WaystationRangeHops: Int(s, "waystationRangeHops", "structures"),
-                GranaryCostMilli: Long(s, "granaryCostMilli", "structures"),
+                GranaryCost: Long(s, "granaryCost", "structures"),
                 GranaryCapacityBonus: Long(s, "granaryCapacityBonus", "structures"),
-                GranaryBuildTurns: Int(s, "granaryBuildTurns", "structures"));
+                GranaryBuildTurns: Int(s, "granaryBuildTurns", "structures"),
+                SoulConduitCost: Long(s, "soulConduitCost", "structures"),
+                SoulConduitFlatYieldPerTurn: Long(s, "soulConduitFlatYieldPerTurn", "structures"),
+                SoulConduitBuildTurns: Int(s, "soulConduitBuildTurns", "structures"),
+                ExtractorCost: Long(s, "extractorCost", "structures"),
+                ExtractorFlatYieldPerTurn: Long(s, "extractorFlatYieldPerTurn", "structures"),
+                ExtractorBuildTurns: Int(s, "extractorBuildTurns", "structures"),
+                HatcheryCost: Long(s, "hatcheryCost", "structures"),
+                HatcheryYieldMultiplierMilli: Int(s, "hatcheryYieldMultiplierMilli", "structures"),
+                HatcheryBuildTurns: Int(s, "hatcheryBuildTurns", "structures"));
 
             var t = Obj(root, "texture", "$");
             var texture = new LoamTextureTuning(

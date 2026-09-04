@@ -24,7 +24,9 @@ public sealed record AffixFamilySource(string FamilyId, IReadOnlyList<string> Ro
 /// </summary>
 public static class RoleFamilyTable
 {
-    public const int DefaultMaxTier = 5;
+    /// <summary>Balance surface (tunables-ssot.md T1) — reads through <see cref="ItemsTuningHub"/>,
+    /// not a bare const.</summary>
+    public static int DefaultMaxTier => ItemsTuningHub.Tuning.DefaultMaxTier;
 
     public static IReadOnlyList<RoleFamilyCell> Derive(
         IReadOnlyList<AffixFamilySource> families, FamilyOverrides overrides, RoleRelocationTable relocation)

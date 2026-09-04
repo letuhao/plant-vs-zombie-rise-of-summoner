@@ -162,6 +162,118 @@ buildings and obstacles exist to serve it. See §5.13.
     Belongs to `structure-seed`; recorded here because decision 32 depends on it.
 34. **The bulk material is `rubble`.** `ironwork` is refined from it (decision 28).
 
+**Round 9 — the spec round's seven open questions, cleared (2026-09-04).**
+
+35. **⛔ COVER IS THE HoMM3 SHOOTING MODEL, not terrain cover.** This replaces §5.17's
+    cover-as-dodge recommendation wholesale. Owner, verbatim:
+    > *"obstacle need cover area, target in the area consider coverage · the obstacle can be target and
+    > destroy · there will be two types of projectile: 1 will be penalty when fight through obstacle,
+    > 2 will get no penalty · range attack have range penalty, if shooter is block by unit or obstacle,
+    > the power will reduce · this mechanism is inspire of heroes of might and magic 3 shoot mechanism ·
+    > we make it more by add targetable obstacle so shooter or some unit can destroy obstacle/building ·
+    > this mechanism need to build both battle engine and action system"*
+
+    Four mechanics, not one: a **cover area** projected by an obstacle; a **range penalty** on distance;
+    an **obstruction penalty** when a unit or obstacle is in the line of fire; and a **projectile kind**
+    that says whether a given shot pays them. Obstacles being targetable is the addition beyond HoMM3.
+36. **Diagonal moves are legal and cost the same as orthogonal.** Chebyshev already means this; a
+    surcharge would make a unit move in a Chebyshev circle at a Euclidean price.
+37. **The defender's legions are player-placed pre-battle.** Decision 5's deployment step is the
+    mechanism. The auto seat places by a deterministic AI policy — same step, different driver — so
+    step 7's standalone gate does not wait on a UI.
+38. **`rubble` and `ironwork` trade freely between sectors.** ⚠️ **This deliberately gives up material
+    denial as a siege lever**, which round 5 had protected. Accepted with that stated: **the blockade's
+    teeth are loam and board income**, not materials — `siege-supply`'s besieged sector is still its own
+    supply component for loam, and a besieger still takes the board's income nodes. Decision 19's
+    logistics framing wins on materials.
+39. **An obstacle's cover area is an authored radius per obstacle kind.** The seed writes the kind; a
+    tunable writes the cells.
+40. **`board-render` serves BOTH `battle` and `siege`.** This retires `railState.ts:31`'s
+    declared-but-unbuilt `battle` id rather than adding a second one beside it — which removes the
+    third cost the `decisions.md` fifth-stage amendment named.
+41. **⛔ THE ENGINE SUPPORTS PAUSE.** *"pause the game, this is single play game, the engine should be
+    support pause."* A closed client pauses; it does not auto-resolve and does not forfeit.
+    **This is a wiring gap, not a new capability** — `BattleSessionState.Disconnected` already means
+    *"the session is preserved and resumable — its trace is intact, it simply has nobody to ask right
+    now"*, and `BattleSessionRegistry.Resume` ships at `:119`. What is missing is a **deliberate**
+    `Paused` state distinct from a dropped connection, a world turn that does not advance while one is
+    held, and a timeout that does not fire on it.
+42. **A besieged garrison's top-up is rationed** — a reduced draw rate, so a stockpile lasts longer
+    under siege than in peacetime.
+
+**Round 10 — the last three, and two of them change scope (2026-09-04).**
+
+43. **PvZ's static plants STAY demons.** Wall-nut, Tall-nut, Pumpkin, Spikeweed and Lily Pad are not
+    reclassified. This confirms what `structure-seed-ideal.md` §3 already argued from the owner's own
+    earlier words (*"cannot use soul to summon a wall, that confuse with wallnut demon family"*):
+    reclassifying them *"would take content out of the summon roster."*
+
+    > ⚠️ **The question's own framing was wrong and the correction matters.** It offered "stay demons"
+    > as implying a **datamine-classify** pipeline. §3 says the opposite, explicitly: *"the PvZ corpus
+    > is **not** available for reuse here … **So the source material is the design research, not a
+    > datamine**"* — §5.18's four obstacle kinds plus §5.21's ten economic roles, **~25–30 seed concepts
+    > authored by hand first and generated second.** Staying demons means an **INVENTION** pipeline,
+    > which has a different failure surface (mode collapse and generic flavour, neither caught by
+    > majority vote). The decision stands; the reasoning attached to it does not.
+
+44. **`#/battle` is built here, as a thin stage on `board-render`.** Decision 40 said the layer serves
+    both; this says the dead id is retired **by using it**, not by deleting it. **Thin is a constraint,
+    not an aspiration:** `#/battle` renders a **resolved `BattleReport` in playback** on the generic
+    board layer. It invents no battle requirements — the battle already resolves today and produces a
+    report; the stage shows one. Anything beyond playback needs `battle`'s own spec.
+45. **⛔ DECISION 30 IS REVISED. `structure-seed` folds into `base-defense` as modules**, rather than
+    standing as its own program beside it. One map, one plan, one todo pair. Its ideal
+    ([structure-seed-ideal.md](structure-seed-ideal.md)) stays as the design record and is **not**
+    superseded — only its program boundary is.
+
+**Round 11 — the pause mechanism, corrected by following the prior art (2026-09-05).**
+
+46. **⛔ DECISION 41'S MECHANISM IS REVISED. A paused siege is a PERSISTED DECISION LOG, not a session
+    held in memory.** Its intent is unchanged — a closed client pauses, does not auto-resolve and does
+    not forfeit.
+
+    **The owner's question was the right one:** *"we won't store battle state? maybe it correct in
+    heroes of might and magic and other game? they have reason for it, maybe we should follow."*
+
+    **They do have a reason, and it is not squeamishness about memory.** HoMM3 and Total War refuse a
+    mid-battle save because a battle is **re-derivable from its inputs** — so it never needs storing.
+    Games that *do* store tactical state (XCOM, Fire Emblem, AoW4) are ones where the tactical layer
+    **is** the game. Ours is not: the map is the game and §2 rule 7 already says so.
+
+    So the correct shape is neither *"hold the board in memory"* nor *"lose the siege"*:
+
+    ```text
+    (setup, seed, DECISION TRACE)  →  replay  →  the exact board
+    ```
+
+    **The machinery is already built and inert:**
+
+    | Piece | State |
+    |---|---|
+    | `DecisionTrace` — `(Tick, ActorKey, ActionId, TargetKey, Source)`, ordered by `(Tick, Seq)`, with a replay cursor | **Built** |
+    | `InteractiveIntentSource`'s **replay constructor** — *"read the trace, never the player … a completed trace reproduces its battle byte-identically"* | **Built** |
+    | `decisions_json` column — `RpgStore.cs:603`, read at `RpgStore.WebMatches.cs:180` | **Built, and READ** |
+    | A **writer** for it | ⚠️ **Missing** — §3.7 already recorded it: *"`DecisionsJson` is read and never written … a column, a reader and a guard with no producer"* |
+
+    And `DecisionTrace`'s own comment names this exact case as the hole it exists to cover:
+    *"Appended per decision, never written at the end. A trace produced only on completion is worthless
+    for the failure it exists to cover — **a disconnect mid-battle** … That is the hole T6 must not
+    ship without."*
+
+    **What this buys over the in-memory pause, on every axis:**
+
+    - **No battle state is stored** — a decision log is *input*, not state. §2 rule 7 is satisfied
+      **unconditionally**; the *"a pause must never survive a turn boundary"* clause pass 4 had to
+      invent is no longer needed, because there is no battle in memory to span anything.
+    - It **is** §2 rule 8's own save model: *"A save is `(seed, template, command log)` and replay must
+      be byte-identical."*
+    - **It survives a server restart**, which the in-memory version explicitly could not.
+    - It closes a documented wiring gap instead of adding a mechanism.
+
+    **Scope:** the `decisions_json` **writer belongs to `spec-interactive-turns.md` (T10)**, per audit
+    F4 — *"consume T6/T10/T11, never re-derive."* This program **consumes** it and names it a
+    prerequisite.
+
 **No open questions remain.**
 
 **Consequence worth stating, because two of these answers combine:** with the central area as a
@@ -574,9 +686,16 @@ layout, garrison and structures). *"Playing it yourself should be meaningfully b
 mandatory — a campaign where every skirmish on every front must be hand-played turns a good turn into
 a chore."*
 
-This is architecturally free because **outcomes are records, not dependencies**: world replay reuses
-the stored record rather than re-simulating, which is precisely what makes a hand-played board legal
-in a byte-identical replay.
+> ⛔ **CORRECTED IN PLACE 2026-09-04.** This paragraph originally read *"world replay reuses the
+> stored record rather than re-simulating."* **That is false** — §11.4 correction #2 recorded it and
+> the source was never fixed here, so a `/spec` session read the wrong version.
+> `RpgStore.WorldTurns.cs:599-606` **re-simulates from turn zero**, in a loop, with **no resolver
+> supplied**. A hand-played board is therefore legal only if the resolver is supplied at **both**
+> `:509` **and** `:603` — see §8 prerequisite 2.
+
+Auto-resolve is still architecturally cheap, but for a different reason than this section first gave:
+the seam is `intentSource`, already present as `Resolve`'s eighth parameter, and the played and
+auto-resolved paths run **the same kernel** rather than two estimators (§5.16).
 
 Attacking is the same board with the seats swapped — you drive a force against a layout an opponent
 (or Zomboss's AI) authored. **Not a second mode.**
@@ -889,16 +1008,30 @@ are real barriers; positioning is the tactical game.
 
 #### The turn economy is already locked, and it is not HOMM3's
 
-[action-corpus-ideal.md:434](action-corpus-ideal.md): *"No compound move-and-attack action is
-required, and no Action Points. **The time cost is the economy**, and `A9 movement-actions` is a peer
-of attack rather than a phase of it."*
+> ⛔ **CORRECTED IN PLACE 2026-09-04.** This paragraph cited the wrong file and drew the opposite
+> conclusion from the source. §11.4 correction #5 recorded it; the source was never fixed here, and a
+> later `/spec` session then "fixed" a spec **toward Action Points** on the strength of the surviving
+> error. Two wrong answers from one uncorrected paragraph — which is the argument for correcting in
+> place rather than only in an errata table.
 
-So a unit that moves **does not also strike that turn**. HOMM3 lets a stack move *and* attack, which
-is a large part of why its sieges resolve quickly. Ours will not, and that has a concrete
-consequence: **a unit crossing the outer ground contributes nothing while it crosses.** The lever
-that keeps this from being tedious is how far one move action carries — a movement stat in cells, not
-one cell per turn — plus a board sized against it. Both are tunables, and both should be sized in the
-same balance pass, not separately.
+The authority is [action-map.md:430](action-map.md), *"Resolved 2026-08-22"* item 2 — **not**
+`action-corpus-ideal.md`:
+
+> *"**Move and attack: two separate actions, and the clock decides whether you get both.** This is
+> already what the kernel was built to do, and it needs no new economy. … a cheap step (200) and an
+> expensive strike (800) cost differently, so **a fast actor can fit *both* into the window a slow one
+> needs for one swing.** No compound move-and-attack action is required, **and no Action Points. The
+> time cost is the economy** … (`ActionPoints` still ships in the timeline's economy set for modes
+> wanting a fixed per-turn budget — **it is simply not what this mode needs**.)"*
+
+So **a unit may move and strike in the same window if it is fast enough** — readiness is work over
+rate, and each action carries its own `TimeCostTicks`. The economy is `OneActionPerTurnEconomy` (one
+action per *activation*), **never `ActionPointsEconomy`**.
+
+The consequence for the board is still real, just smaller than first stated: **a slow unit crossing
+the outer ground contributes little while it crosses.** The lever is how far one move action carries —
+a movement stat in cells, not one cell per turn — plus a board sized against it. Both are tunables and
+both should be sized in the same balance pass.
 
 #### This joins `A10` in the "cannot be defaulted" row
 

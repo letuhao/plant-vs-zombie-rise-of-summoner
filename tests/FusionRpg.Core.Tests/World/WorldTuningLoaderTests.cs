@@ -24,7 +24,7 @@ public class WorldTuningLoaderTests
     [Fact]
     public void The_real_shipped_world_tuning_file_parses_with_matching_season_array_lengths()
     {
-        var path = Path.Combine(RepoRoot(), "data", "tuning", "world.v4.json");
+        var path = Path.Combine(RepoRoot(), "data", "tuning", "world.v5.json");
         var tuning = WorldTuningLoader.Parse(File.ReadAllText(path));
 
         Assert.Equal(tuning.Seasons.Count, tuning.Seasons.YieldMilli.Count);

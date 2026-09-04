@@ -70,6 +70,13 @@ public class WorldCedeForecastTests : IAsyncLifetime
         // Development/danger are pushed hard too: d-home and d-flank-1 each carry a rootbed, and
         // their combined production alone (100/turn) would otherwise cover the four sectors' base
         // upkeep (40/turn) and mask the shortfall this test needs on the very first predicted turn.
+        //
+        // world-map W55 (empire-economy-ssot.md A8) note: `danger_band = 4 + 2 * 20 = 44`, not the
+        // original `4` — once `LoamProduction.For` reads `DevelopmentLevel` too, A8 requires its
+        // yield rate to exceed its own upkeep rate, so `development_level = 20` alone is now a net
+        // *contributor* (120 loam/turn per sector at the real shipped tuning), not a drag. The extra
+        // danger compensates exactly (`DevelopmentYieldPerLevel(6) / DangerUpkeepPerBand(3) == 2` at
+        // the real configured tuning), reproducing this fixture's original pre-W55 shortfall.
         using var db = new SqliteConnection($"Data Source={_store.HotPath}");
         db.Open();
         foreach (var sectorId in DaveSectors)
@@ -77,7 +84,7 @@ public class WorldCedeForecastTests : IAsyncLifetime
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
                 UPDATE rpg_world_sectors
-                SET loam_stock = 0, stability_milli = 50, development_level = 20, danger_band = 4
+                SET loam_stock = 0, stability_milli = 50, development_level = 20, danger_band = 44
                 WHERE world_id = $world AND sector_id = $sector;
                 """;
             cmd.Parameters.AddWithValue("$world", WorldId);
@@ -165,9 +172,15 @@ public class WorldCedeForecastTests : IAsyncLifetime
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v2.json")));
-        FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
+        var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json"));
+        FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
+        // world-map W42/W50 (pre-existing gap, found and fixed here rather than left): committing a
+        // turn now always runs `Growth`, which reads `RecruitPolicy` — this bootstrap predates that
+        // phase and never configured it, so any commit through this test's own `/turn` route threw
+        // "RecruitPolicy.Configure(...) has not run" the moment `Growth` stopped being a no-op,
+        // unrelated to this task's own change but only ever exercised by actually running this file.
+        FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
         // Committing "dave" alone runs Zomboss's FrontierRulesPolicy too (two-hearths' AI auto-fill),
         // which reads this the same way AptitudeChannelModsTests.cs's own bootstrap already does.
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(

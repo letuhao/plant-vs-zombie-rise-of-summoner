@@ -236,6 +236,12 @@ public sealed partial class RpgStore
                 Acquisition = s.Acquisition,
                 Variants = s.Variants,
                 TraitPool = Array.Empty<string>(),
+                // battle-tempo tempo-content -- carries the already-authored, already-persisted
+                // interval into the compiled roster battle actually reads. Confirmed 2026-09-05 (a
+                // real, one-line gap found via review): the Core-side roster never copied this field
+                // before, so no battle path could reach it despite ConcreteSpecies carrying it since
+                // species generation.
+                AttackIntervalMs = s.AttackIntervalMs,
             });
         }
         return snapshot;

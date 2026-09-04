@@ -1,6 +1,6 @@
 # Spec: `board-render`
 
-**Module 16 of 21 · level 8 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
+**Module 16 of 29 · level 8 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 **Largest single module in the program.** Measured: `src/stages/world` is **6,902 LOC**, the Phaser
 island under `src/game` is the second-largest. Budget this at world-stage scale, not as a reuse.
@@ -138,7 +138,18 @@ unbind the camera on teardown · lazy-load the board layer · keyboard parity.
 
 **Never:** import lawn constants into the generic layer · let Phaser's camera write back to the model ·
 redraw static terrain per frame · statically import the siege stage from the entry chunk · give a
-structure an initiative marker.
+structure an initiative marker · **predict any part of the living set on the client.**
+
+> ### ⛔ §2 rule 3 — server-authoritative, and the temptation lives here
+>
+> *"Web-mode outcomes resolve server-side from a recorded seed. **The FE renders and commands; it never
+> rolls.** No client prediction of the living set (the lawn projector's **RT-15, rejected there and
+> rejected here**)."*
+>
+> A board layer with smooth movement is exactly where prediction gets added for feel — interpolate the
+> unit toward where it *will* be, resolve later. **RT-15 was rejected in the lawn projector for this,
+> and rule 3 says it is rejected here too.** Interpolating between two *server-confirmed* states is
+> rendering; extrapolating past the last one is prediction. The line is that one word.
 
 ---
 
@@ -161,6 +172,7 @@ structure an initiative marker.
 | `Keyboard_navigation_reaches_every_cell` | GG accessibility |
 | `Reduced_motion_is_respected` | |
 | `Board_layer_is_not_in_the_entry_chunk` | **a bundle-size assertion**, so the 180 KB budget cannot regress silently |
+| `No_client_side_prediction_exists` | **P4-4**, §2 rule 3 — the layer never extrapolates past a confirmed state |
 | `Fractional_cell_coordinate_throws` | |
 
 ## Success criteria
@@ -174,15 +186,22 @@ structure an initiative marker.
 
 ## Open questions
 
-**One, and it is a scoping decision the owner should make.** `railState.ts:31` already declares a
-`battle` stage that has never been built. Does `board-render` serve **both** `battle` and `siege`, or
-only `siege`?
+**None.** ✅ **Decision 40 (owner, 2026-09-04): `board-render` serves BOTH `battle` and `siege`.**
 
-Serving both would retire a declared-but-unbuilt stage id and is architecturally cleaner — the
-amendment's own third cost is precisely that approving `siege` leaves *two* declared-and-unbuilt ids
-rather than one.
+This **retires** `railState.ts:31`'s declared-but-unbuilt `battle` id rather than adding a second one
+beside it — which **removes the third cost the `decisions.md` fifth-stage amendment named**
+(*"approving this leaves two declared-but-unbuilt ids unless `#/battle` lands first"*). After this
+there is one stage id per built stage.
 
-**Recommendation: build for `siege` only, but keep the layer generic enough that `battle` can adopt it
-later.** `battle` has no spec, no owner and no timeline; designing this module against a stage nobody
-has specified means guessing at requirements twice over. Generic-but-unused is free here because the
-layer is generic anyway — that is the module's whole point.
+**What it changes in this module:** the five extractions are unchanged — the layer was always generic,
+which is the module's whole point. What is added is a **second consumer at acceptance time**:
+
+| Obligation | Why |
+|---|---|
+| The generic layer is proven by **two** callers, not one | A layer with one consumer is a layer only by assertion. `battle` adopting it is the proof |
+| **`battle` has no spec**, so its board contract is inferred | ⛔ Do not invent battle-specific behaviour here. If `battle` needs something the siege does not, that is a `battle` spec's job — this module ships the shared layer and nothing else |
+| The `battle` stage's own shell rows | Six rows, same as `siege-stage`'s — and the stage-count assertion becomes **5 built**, not 5 declared with 2 empty |
+
+> **Scope honesty:** building `#/battle` itself is not in this program. Decision 40 says the *render
+> layer* serves both, and that the dead id is retired — which means `battle` either lands as a thin
+> stage on this layer or its id is removed. **Whichever, no id is left declared and empty.**

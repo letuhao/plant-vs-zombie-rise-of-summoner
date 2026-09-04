@@ -155,8 +155,9 @@ public class PerfProbeValueTests
     [Fact]
     public void SeededResolve_emitsPoiseRegen()
     {
-        // class-system-todo.md V5/P7.1: PoiseRuntime now exists (Checkpoint 7), so the mechanism this
-        // metric needs is live -- but no aptitude edge feeds resource.regen.poise in the real shipped
+        // class-system-todo.md V5/P7.1: the poise pool exists (Checkpoint 7; unified onto
+        // PoiseLedger/ActorResourcePools by battle-tempo poise-unification, 2026-09-05), so the
+        // mechanism this metric needs is live -- but no aptitude edge feeds resource.regen.poise in the real shipped
         // config yet (P7.2's own named, still-open gap), so this reads 0 on a real resolve, matching
         // UnhydratedResolve_emitsZeroProgressionPower's own "present, not omitted" contract: "not fed
         // yet" is a value this metric reports, not a silently missing key.

@@ -35,6 +35,21 @@ public static class LoamProduction
             total += LoamPolicy.SeepPerTurn * multiplierMilli / 1000;
         }
 
+        // world-map W56 (spec-sector-development.md §3): a flat, structure-only yield add — unlike
+        // the Rootbed loop above, this reads *every* slot's own active structure regardless of slot
+        // kind (a soul conduit sits on an EssenceDeposit, an extractor on a ShardVein, neither a
+        // Rootbed), additive to the sum, defaulting to 0 so every structure minted before this task
+        // is untouched.
+        foreach (var slot in sector.Slots)
+        {
+            if (slot.StructureId is not { } flatStructureId
+                || slot.ConstructionTurnsRemaining is > 0
+                || !StructureCatalog.IsKnown(flatStructureId))
+                continue;
+
+            total += StructureCatalog.Get(flatStructureId).FlatYieldPerTurn;
+        }
+
         // world-map W55 (empire-economy-ssot.md A8): the yield half of "development must pay" —
         // additive to the Rootbed sum above, the same way a well's own multiplier is additive to it,
         // never a replacement. Ships real (not identity) the moment a sector's DevelopmentLevel is

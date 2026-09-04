@@ -1,6 +1,7 @@
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Turn;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Xunit;
 
 namespace FusionRpg.Data.Tests;
@@ -163,6 +164,43 @@ public class WorldTurnCommitTests : IDisposable
         var rederived = _store.GetWorldTurnReport("w", 0);
         Assert.NotNull(rederived);
         Assert.Equal(storedEntries, rederived!.Entries.ToList());
+    }
+
+    /// <summary>
+    /// world-map W58's own acceptance: "a test asserts the stored-versus-engine replay refuses across
+    /// the [RulesetVersion] bump rather than fabricating a report." `GetWorldTurnReport`'s own doc
+    /// comment already states the contract ("Re-derivation refuses across a version change rather
+    /// than fabricating a report the current engine would not have produced") — this is the first
+    /// test that actually forces the mismatch and proves it, rather than trusting the comment.
+    /// Stamps the log row's own `ruleset_version` column one below whatever the live engine reports,
+    /// which stays meaningful across any future bump too, not only W58's real 6 → 7 one.
+    /// </summary>
+    [Fact]
+    public void A_stored_log_at_an_older_ruleset_version_refuses_to_re_derive_rather_than_fabricating()
+    {
+        _store.SubmitWorldCommand("w", new WorldCommand
+        {
+            CommanderId = "dave", CommandId = "c1", Kind = WorldCommandKinds.StandFast
+        });
+        CommitAll();
+
+        // Force re-derivation to be the only possible path — the same setup
+        // `A_trimmed_report_is_re_derived_identically_from_the_command_log` already uses.
+        _store.TrimWorldTurnReports("w", keepLast: 0);
+        Assert.NotNull(_store.GetWorldTurnReport("w", 0)); // sanity: re-derivation genuinely works today
+
+        using (var hot = SqliteConnectionFactory.Open(_store.HotPath))
+        {
+            using var cmd = hot.CreateCommand();
+            cmd.CommandText = "UPDATE rpg_world_turn_log SET ruleset_version = $rv WHERE world_id = $w AND turn = 0;";
+            cmd.Parameters.AddWithValue("$rv", TurnEngine.RulesetVersion - 1);
+            cmd.Parameters.AddWithValue("$w", "w");
+            Assert.Equal(1, cmd.ExecuteNonQuery());
+        }
+
+        // The row is still there — this is a version refusal, not a missing row.
+        Assert.NotNull(_store.GetWorldTurnLog("w", 0));
+        Assert.Null(_store.GetWorldTurnReport("w", 0));
     }
 
     // ---- W25: a commit names the turn it means to end ---------------------------------

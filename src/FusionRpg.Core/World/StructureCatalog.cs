@@ -9,7 +9,16 @@ public enum StructureKind
     LoamSource,
 
     /// <summary>Raises capacity — a real third thing a structure can do (spec-loam-texture.md).</summary>
-    Storage
+    Storage,
+
+    /// <summary>
+    /// world-map W56 (spec-sector-development.md §3): the yield kinds the reward layer needs — a
+    /// soul conduit, extractors, a hatchery on a lair. This module's own structures produce **loam
+    /// and recruits only**; the reward layer itself (souls, essence, materials) is unassigned and
+    /// stays out (spec-sector-development.md's own fourth open question) — these rows are the
+    /// mechanism the reward layer will eventually attach to, not that layer itself.
+    /// </summary>
+    Yield
 }
 
 /// <summary>One structure type. Mirrors <see cref="SlotTypeDef"/>'s own shape exactly.</summary>
@@ -23,7 +32,7 @@ public sealed record StructureDef
     public SlotKind RequiredSlotKind { get; init; }
 
     /// <summary>Upfront build cost, spent from the building legion's own <c>CarriedLoam</c>.</summary>
-    public long CostMilli { get; init; }
+    public long Cost { get; init; }
 
     /// <summary>
     /// Per-mille, 1000 = unchanged. A Well multiplies its Rootbed's existing yield; a Waystation
@@ -39,6 +48,16 @@ public sealed record StructureDef
 
     /// <summary>Read only by `Storage`-kind structures — how much a granary raises a sector's cap by (spec-loam-texture.md).</summary>
     public long CapacityBonus { get; init; }
+
+    /// <summary>
+    /// world-map W56 (spec-sector-development.md §3): a flat per-turn loam add, structure-only —
+    /// the field `spec-structure-substrate.md` explicitly deferred to "a new field added when there
+    /// is a real row to test it against." Read by <c>LoamProduction.For</c> for *every* active
+    /// structure regardless of the slot kind it sits on (unlike <see cref="YieldMultiplierMilli"/>,
+    /// which only ever multiplies a Rootbed's own seep) — additive to the existing sum, never a
+    /// replacement. Defaults to 0, so every structure minted before this task is untouched.
+    /// </summary>
+    public long FlatYieldPerTurn { get; init; }
 }
 
 /// <summary>
@@ -68,7 +87,7 @@ public static class StructureCatalog
             Name = "Loam Source (placeholder)",
             Kind = StructureKind.LoamSource,
             RequiredSlotKind = SlotKind.Rootbed,
-            CostMilli = 0,
+            Cost = 0,
             YieldMultiplierMilli = 1000
         },
         new()
@@ -77,7 +96,7 @@ public static class StructureCatalog
             Name = "Well",
             Kind = StructureKind.LoamSource,
             RequiredSlotKind = SlotKind.Rootbed,
-            CostMilli = Loam.LoamPolicy.WellCostMilli,
+            Cost = Loam.LoamPolicy.WellCost,
             YieldMultiplierMilli = Loam.LoamPolicy.WellYieldMultiplierMilli,
             BuildTurns = Loam.LoamPolicy.WellBuildTurns
         },
@@ -87,7 +106,7 @@ public static class StructureCatalog
             Name = "Waystation",
             Kind = StructureKind.LoamSource,
             RequiredSlotKind = SlotKind.Seat,
-            CostMilli = Loam.LoamPolicy.WaystationCostMilli,
+            Cost = Loam.LoamPolicy.WaystationCost,
             // A Seat's own base yield is already zero, so the multiplier is irrelevant here —
             // 1000 (unchanged) rather than a special case in LoamProduction's formula.
             YieldMultiplierMilli = 1000,
@@ -99,11 +118,48 @@ public static class StructureCatalog
             Name = "Granary",
             Kind = StructureKind.Storage,
             RequiredSlotKind = SlotKind.Wildland,
-            CostMilli = Loam.LoamPolicy.GranaryCostMilli,
+            Cost = Loam.LoamPolicy.GranaryCost,
             // Unused for Storage-kind structures — a granary does not produce, it raises capacity.
             YieldMultiplierMilli = 1000,
             BuildTurns = Loam.LoamPolicy.GranaryBuildTurns,
             CapacityBonus = Loam.LoamPolicy.GranaryCapacityBonus
+        },
+        new()
+        {
+            StructureId = "soul-conduit",
+            Name = "Soul Conduit",
+            Kind = StructureKind.Yield,
+            RequiredSlotKind = SlotKind.EssenceDeposit,
+            Cost = Loam.LoamPolicy.SoulConduitCost,
+            // Unused for Yield-kind structures — the flat field below is what this one produces.
+            YieldMultiplierMilli = 1000,
+            BuildTurns = Loam.LoamPolicy.SoulConduitBuildTurns,
+            FlatYieldPerTurn = Loam.LoamPolicy.SoulConduitFlatYieldPerTurn
+        },
+        new()
+        {
+            StructureId = "extractor",
+            Name = "Extractor",
+            Kind = StructureKind.Yield,
+            RequiredSlotKind = SlotKind.ShardVein,
+            Cost = Loam.LoamPolicy.ExtractorCost,
+            YieldMultiplierMilli = 1000,
+            BuildTurns = Loam.LoamPolicy.ExtractorBuildTurns,
+            FlatYieldPerTurn = Loam.LoamPolicy.ExtractorFlatYieldPerTurn
+        },
+        new()
+        {
+            StructureId = "hatchery",
+            Name = "Hatchery",
+            Kind = StructureKind.Yield,
+            RequiredSlotKind = SlotKind.Lair,
+            Cost = Loam.LoamPolicy.HatcheryCost,
+            // world-map W56: read by GrowthPhases as the sector's own lair multiplier, through
+            // RecruitPolicy.PulseFor's existing `lairMultiplierMilli` parameter — never a second
+            // formula. Unlike every other row here, this one's own YieldMultiplierMilli is real.
+            YieldMultiplierMilli = Loam.LoamPolicy.HatcheryYieldMultiplierMilli,
+            BuildTurns = Loam.LoamPolicy.HatcheryBuildTurns
+            // FlatYieldPerTurn unset (0) — a hatchery produces more recruits, not more loam.
         }
     };
 
@@ -129,10 +185,12 @@ public static class StructureCatalog
                 throw new InvalidOperationException($"Duplicate structure id '{s.StructureId}'.");
             if (string.IsNullOrWhiteSpace(s.Name))
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has no display name.");
-            if (s.CostMilli < 0)
+            if (s.Cost < 0)
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has negative cost.");
             if (s.YieldMultiplierMilli < 0)
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has a negative yield multiplier.");
+            if (s.FlatYieldPerTurn < 0)
+                throw new InvalidOperationException($"Structure '{s.StructureId}' has a negative flat yield.");
         }
 
         return structures;

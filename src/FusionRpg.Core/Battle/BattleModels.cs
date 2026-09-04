@@ -43,6 +43,23 @@ public sealed record BattleActorSetup
     public long Atk { get; init; }
     public long Defense { get; init; }
 
+    /// <summary>
+    /// `battle-tempo` `tempo-content` — the actor's own attack interval, carried alongside
+    /// <see cref="MaxHp"/>/<see cref="Atk"/>/<see cref="Defense"/> as a base stat rather than through
+    /// <see cref="ChannelMods"/> (that field is the CALLER'S generic additive overlay; this is
+    /// per-actor identity data the composer reads directly, the same shape those three already are).
+    /// `0` (the default) means "no tempo authored" and floors to the default `turn.speed`
+    /// (<see cref="Battle.SpeciesTempoProjection.SpeedFor"/>) — every existing setup literal in the
+    /// tree (hand-built battle goldens included) stays exactly as it was without being touched.
+    ///
+    /// <para><b>Moves the expedition tier-resolution hash the moment a wave enemy carries a non-zero
+    /// value</b> (`ExpeditionResolverTests.Tier_goldens_are_locked` serializes this record) — a MORE
+    /// SPECIFIC instance of `tempo-content`'s own documented "moves goldens" cost
+    /// (spec-tempo-content.md §9), not a new one: turn order was always going to move once species
+    /// tempo varies, and this field is what lets it vary per actor.</para>
+    /// </summary>
+    public long AttackIntervalMs { get; init; }
+
     /// <summary>Additive derived-channel adjustments (trait stat mods, equipment later). Integer amounts only.</summary>
     public IReadOnlyList<BattleChannelMod> ChannelMods { get; init; } = Array.Empty<BattleChannelMod>();
 
@@ -120,6 +137,11 @@ public static class BattleRuleset
     /// <summary>Synthetic clock per round — every reused subsystem is millisecond-based.</summary>
     public static int RoundDurationMs => Tuning.RoundDurationMs;
     public static int MaxRounds => Tuning.MaxRounds;
+
+    /// <summary>base-defense F2: the ruleset-wide fallback every profile's `MaxRounds ?? this` and
+    /// `RoundDurationMs ?? this` resolve against (see `TimelineProfileTuning`'s own doc comment).
+    /// `classic-round` names neither, so it inherits this pair unchanged.</summary>
+    public static int LoopGuardRoundMultiple => Tuning.LoopGuardRoundMultiple;
 
     /// <summary>Wave E3 — the secondary element's per-mille share of an attack payload. 0 (the
     /// shipped default) means the primary carries the whole payload, which is byte-identical to the

@@ -52,7 +52,7 @@ public class StructureCatalogTests
     {
         var badCost = new[]
         {
-            new StructureDef { StructureId = "bad-cost", Name = "A", RequiredSlotKind = SlotKind.Rootbed, CostMilli = -1 }
+            new StructureDef { StructureId = "bad-cost", Name = "A", RequiredSlotKind = SlotKind.Rootbed, Cost = -1 }
         };
         Assert.Throws<InvalidOperationException>(() => StructureCatalog.Validate(badCost));
 

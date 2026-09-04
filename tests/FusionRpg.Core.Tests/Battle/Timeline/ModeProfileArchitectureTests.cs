@@ -24,7 +24,7 @@ public class ModeProfileArchitectureTests
     /// <summary>Ids named in battle-timeline-map.md T4. Adding a fourth mode adds a row to THIS
     /// array too — the same "the map is the closed inventory" discipline the power ladder and the
     /// atom vocabulary already use elsewhere in this repo.</summary>
-    static readonly string[] KnownProfileIds = { "classic-round", "galaxy-sync", "hybrid-atb" };
+    static readonly string[] KnownProfileIds = { "classic-round", "galaxy-sync", "hybrid-atb", "siege" };
 
     static readonly string[] BannedTokens =
     {

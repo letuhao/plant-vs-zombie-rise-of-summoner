@@ -94,9 +94,9 @@ public class AptitudeChannelModsTests : IDisposable
         FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
             FusionRpg.Core.Demons.Contracts.ContractTuningLoader.Parse(Read("contracts.v1.json")));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v2.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
+            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
         FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
             FusionRpg.Core.Demons.SoulEarnTuningLoader.Parse(Read("souls.v1.json")));
         FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(

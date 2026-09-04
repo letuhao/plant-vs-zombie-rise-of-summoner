@@ -10,7 +10,8 @@
   },
   "ruleset": {
     "roundDurationMs": 1000,
-    "maxRounds": 50
+    "maxRounds": 50,
+    "loopGuardRoundMultiple": 4000
   },
   "statComposer": {
     "primaryAffinityDivisor": 4,
@@ -33,6 +34,11 @@
         "wReact": 0,
         "passQuantum": 1,
         "maxPoints": 2
+      },
+      "siege": {
+        "w": 2,
+        "wReact": 0,
+        "passQuantum": 1
       }
     }
   },

@@ -38,7 +38,8 @@ structures it already knows about.
   one kind to express Well and Waystation both; more kinds belong to whatever `sector-development`
   eventually adds, not invented here on spec.
 - `StructureDef`: `StructureId`, `Name`, `Kind` (`StructureKind`), `RequiredSlotKind` (`SlotKind` — what
-  the slot beneath it must already be), `CostMilli` (upfront, long), `YieldMultiplierMilli` (per-mille,
+  the slot beneath it must already be), `Cost` (upfront, long, whole loam units — named `CostMilli`
+  until world-map W57 renamed it off the misleading suffix), `YieldMultiplierMilli` (per-mille,
   default `1000` = unchanged, following the `LaneTypeDef.CostMultiplierMilli` / `WorldFaction.
   UpkeepHandicapMilli` per-mille convention already used everywhere else in this program rather than a
   raw multiplier float).

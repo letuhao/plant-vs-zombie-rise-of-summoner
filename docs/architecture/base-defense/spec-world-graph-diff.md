@@ -1,6 +1,6 @@
 # Spec: `world-graph-diff`
 
-**Module 21 of 21 · level 0 · no dependencies · [base-defense-map.md](../base-defense-map.md)**
+**Module 21 of 29 · level 0 · no dependencies · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04. **Added by the completeness audit.** §8 prerequisite 1, which the
 original 17 specs dropped.
 

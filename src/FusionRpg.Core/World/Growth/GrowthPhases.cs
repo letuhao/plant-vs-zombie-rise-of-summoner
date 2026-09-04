@@ -45,11 +45,14 @@ public static class GrowthPhases
             }
 
             var hasSeat = working.Slots.Any(sl => sl.SlotTypeId == SlotTypeCatalog.SeatSlotTypeId);
-            var lairCleared = working.Slots.Any(sl =>
-                SlotTypeCatalog.Get(sl.SlotTypeId).Kind == SlotKind.Lair && sl.GuardState == GuardState.Cleared);
+            var clearedLairSlots = working.Slots
+                .Where(sl => SlotTypeCatalog.Get(sl.SlotTypeId).Kind == SlotKind.Lair && sl.GuardState == GuardState.Cleared)
+                .ToList();
+            var lairCleared = clearedLairSlots.Count > 0;
 
             var pulse = RecruitPolicy.PulseFor(
-                hasSeat, lairCleared, roll, seatPulsePerWeek, lairMultiplierMilli, specialWeekMultiplierMilli);
+                hasSeat, lairCleared, roll, seatPulsePerWeek,
+                EffectiveLairMultiplierMilli(clearedLairSlots, lairMultiplierMilli), specialWeekMultiplierMilli);
 
             if (pulse <= 0)
             {
@@ -64,6 +67,41 @@ public static class GrowthPhases
         }
 
         return world with { Sectors = sectors };
+    }
+
+    /// <summary>
+    /// world-map W56 (spec-sector-development.md §3): "a hatchery on a lair multiplies that sector's
+    /// recruit pulse through W43's policy rather than through a second code path" — folds any active
+    /// hatchery's own <see cref="StructureDef.YieldMultiplierMilli"/> into the SAME
+    /// `lairMultiplierMilli` value <see cref="RecruitPolicy.PulseFor"/> already takes, rather than
+    /// adding a second multiplier parameter or a parallel formula. A hatchery only ever contributes
+    /// while its own lair slot is actually cleared (an intact lair's hatchery, if that were ever
+    /// legal to build, contributes nothing — <c>PulseFor</c> ignores this value entirely unless
+    /// <c>lairCleared</c> is true, so this never needs to special-case that itself). Composed as one
+    /// combined per-mille product with a single division at the end (widened to `long` before
+    /// multiplying, `checked`) — the identical AGENTS.md overflow discipline every other per-mille
+    /// composition in this module already follows.
+    /// </summary>
+    static int EffectiveLairMultiplierMilli(IReadOnlyList<WorldSlot> clearedLairSlots, int lairMultiplierMilli)
+    {
+        var hatcheryFactorMilli = 1000L;
+
+        foreach (var slot in clearedLairSlots)
+        {
+            if (slot.StructureId is not { } structureId
+                || slot.ConstructionTurnsRemaining is > 0
+                || !StructureCatalog.IsKnown(structureId))
+                continue;
+
+            var structure = StructureCatalog.Get(structureId);
+            if (structure.Kind != StructureKind.Yield) continue;
+
+            checked { hatcheryFactorMilli = hatcheryFactorMilli * structure.YieldMultiplierMilli / 1000; }
+        }
+
+        if (hatcheryFactorMilli == 1000) return lairMultiplierMilli;
+
+        checked { return (int)((long)lairMultiplierMilli * hatcheryFactorMilli / 1000); }
     }
 
     /// <summary>

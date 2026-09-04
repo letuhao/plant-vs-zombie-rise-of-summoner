@@ -18,8 +18,19 @@ public sealed record TraitMagnitudes(
 ///
 /// <para><paramref name="MaxPoints"/> is null for profiles whose economy has no budget
 /// (<c>OneActionPerTurnEconomy</c>); supplying it for one of those is refused at load rather than
-/// silently ignored.</para></summary>
-public sealed record TimelineProfileTuning(int W, int WReact, long PassQuantum, long? MaxPoints);
+/// silently ignored.</para>
+///
+/// <para><b>base-defense F2 / battle-clock-profile:</b> <paramref name="MaxRounds"/> and
+/// <paramref name="RoundDurationMs"/> are the battle's round horizon, moved here from the
+/// engine-global <see cref="BattleRuleset"/> — a siege needs a longer horizon than a squad fight, and
+/// with the value global, giving one gives all. <b>Null means "inherit the ruleset"</b>, which is
+/// what keeps <c>classic-round</c> byte-identical without a special case: it names neither, so it
+/// inherits both, so <see cref="BattleModeProfileCatalog"/>'s resolved
+/// <see cref="Timeline.BattleModeProfile.MaxRounds"/> equals <see cref="BattleRuleset.MaxRounds"/>
+/// exactly.</para></summary>
+public sealed record TimelineProfileTuning(
+    int W, int WReact, long PassQuantum, long? MaxPoints,
+    int? MaxRounds = null, int? RoundDurationMs = null);
 
 /// <summary>Battle balance surface (tunables-ssot.md T1) — round/affinity constants plus every
 /// trait's magnitudes. Trait ids/mechanisms stay in <see cref="TraitBattleCatalog"/> (schema).</summary>
@@ -29,7 +40,26 @@ public sealed record BattleTuning(
     int PrimaryAffinityDivisor, int SecondaryAffinityDivisor,
     IReadOnlyDictionary<string, TraitMagnitudes> Traits,
     IReadOnlyDictionary<string, TimelineProfileTuning> TimelineProfiles,
-    int HybridSecondaryWeightMilli)
+    int HybridSecondaryWeightMilli,
+    /// <summary>
+    /// base-defense F2 (audit C1) — the belt-and-suspenders iteration cap on <c>BattleEngine.Resolve</c>
+    /// scaled to a battle's OWN horizon rather than hard-coded to classic-round's 50 rounds.
+    /// <b>Structural, not balance</b> — AGENTS.md's per-frame/runtime-cap exemption; it bounds one
+    /// resolve's scheduling work, never a progression ceiling. Lives in config anyway because
+    /// <c>200_000 / 50 = 4000</c> must stay derivable from the shipped 50-round default rather than
+    /// being a second, disconnected magic constant living in code.
+    /// </summary>
+    int LoopGuardRoundMultiple,
+    /// <summary>
+    /// `battle-tempo` `tempo-content` (spec-tempo-content.md §2.1) — the reference tempo
+    /// <see cref="Battle.SpeciesTempoProjection.SpeedFor"/> projects every species' interval against:
+    /// <c>turn.speed = TurnDefaultSpeed × ReferenceIntervalMs / attackIntervalMs</c>. The ONE new
+    /// number this module introduces; every other value it reads (`attackTempoIntervalMs`,
+    /// `TurnDefaultSpeed`) already exists elsewhere. `long`, milliseconds — a magnitude the ladder
+    /// does not scale (it is a fixed content anchor, not a `Θ`-driven value), but `long` throughout
+    /// this file's own convention regardless.
+    /// </summary>
+    long SpeciesTempoReferenceIntervalMs)
 {
     public TraitMagnitudes TraitOf(string traitId) =>
         Traits.TryGetValue(traitId, out var m) ? m : new TraitMagnitudes();
@@ -94,18 +124,46 @@ public static class BattleTuningLoader
                 var v = prop.Value;
                 if (v.ValueKind != JsonValueKind.Object)
                     throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name} is not an object");
+                // base-defense F2: MaxRounds/RoundDurationMs are OPTIONAL per profile — absent means
+                // "content did not choose", inherited from `ruleset.*` at resolve time
+                // (BattleModeProfileCatalog.Build). Present-but-invalid still fails loudly here, the
+                // same stance every other field in this profile row already takes.
+                int? maxRounds = v.TryGetProperty("maxRounds", out var mr) && mr.ValueKind == JsonValueKind.Number
+                    ? mr.GetInt32() : null;
+                int? roundDurationMs = v.TryGetProperty("roundDurationMs", out var rd) && rd.ValueKind == JsonValueKind.Number
+                    ? rd.GetInt32() : null;
+
                 profiles[prop.Name] = new TimelineProfileTuning(
                     W: Int(v, "w"),
                     WReact: Int(v, "wReact"),
                     PassQuantum: Int(v, "passQuantum"),
                     MaxPoints: v.TryGetProperty("maxPoints", out var mp) && mp.ValueKind == JsonValueKind.Number
                         ? mp.GetInt64()
-                        : null);
+                        : null,
+                    MaxRounds: maxRounds,
+                    RoundDurationMs: roundDurationMs);
                 if (profiles[prop.Name].W <= 0)
                     throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name}.w must be > 0 (it is a slot count); got {profiles[prop.Name].W}");
                 if (profiles[prop.Name].PassQuantum <= 0)
                     throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name}.passQuantum must be > 0 (a zero quantum reschedules at `now` forever); got {profiles[prop.Name].PassQuantum}");
+                if (maxRounds is <= 0)
+                    throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name}.maxRounds must be > 0 when present (0 would silently produce a battle with no rounds); got {maxRounds}");
+                if (roundDurationMs is <= 0)
+                    throw new BattleTuningRejection($"battle tuning: timeline.profiles.{prop.Name}.roundDurationMs must be > 0 when present; got {roundDurationMs}");
             }
+
+            var loopGuardRoundMultiple = Int(ruleset, "loopGuardRoundMultiple");
+            if (loopGuardRoundMultiple <= 0)
+                throw new BattleTuningRejection(
+                    $"battle tuning: ruleset.loopGuardRoundMultiple must be > 0 (it is a per-round " +
+                    $"scheduling-work bound); got {loopGuardRoundMultiple}");
+
+            var speciesTempo = Obj(root, "speciesTempo");
+            var referenceIntervalMs = Long(speciesTempo, "referenceIntervalMs");
+            if (referenceIntervalMs <= 0)
+                throw new BattleTuningRejection(
+                    $"battle tuning: speciesTempo.referenceIntervalMs must be > 0 (it is a projection's " +
+                    $"denominator scale); got {referenceIntervalMs}");
 
             return new BattleTuning(
                 SchemaVersion: Int(root, "schemaVersion"),
@@ -116,7 +174,9 @@ public static class BattleTuningLoader
                 SecondaryAffinityDivisor: Int(composer, "secondaryAffinityDivisor"),
                 Traits: traits,
                 TimelineProfiles: profiles,
-                HybridSecondaryWeightMilli: HybridWeight(root));
+                HybridSecondaryWeightMilli: HybridWeight(root),
+                LoopGuardRoundMultiple: loopGuardRoundMultiple,
+                SpeciesTempoReferenceIntervalMs: referenceIntervalMs);
         }
     }
 
@@ -185,6 +245,13 @@ public static class BattleTuningLoader
     static int Int(JsonElement parent, string key)
     {
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt32(out var v))
+            throw new BattleTuningRejection($"battle tuning: missing or non-integer '{key}'");
+        return v;
+    }
+
+    static long Long(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number || !el.TryGetInt64(out var v))
             throw new BattleTuningRejection($"battle tuning: missing or non-integer '{key}'");
         return v;
     }

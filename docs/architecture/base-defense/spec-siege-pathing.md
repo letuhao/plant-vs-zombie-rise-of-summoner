@@ -1,6 +1,6 @@
 # Spec: `siege-pathing`
 
-**Module 4 of 21 · level 2 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
+**Module 4 of 29 · level 2 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---

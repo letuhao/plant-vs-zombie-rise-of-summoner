@@ -32,9 +32,9 @@ FusionRpg.Core.Demons.Contracts.ContractPolicy.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "contracts.v1.json"))));
 FusionRpg.Core.World.Loam.LoamPolicy.Configure(
     FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "loam.v2.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "loam.v4.json"))));
 var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(
-    File.ReadAllText(Path.Combine(tuningDir, "world.v4.json")));
+    File.ReadAllText(Path.Combine(tuningDir, "world.v5.json")));
 FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
 FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
 FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
@@ -137,6 +137,13 @@ _ = frameMixTuning;
 // crafted socket. Consumed by SeedSalvageYield and by the recipe import below.
 var materialTuning = FusionRpg.Core.Items.Materials.MaterialTuning.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "materials.v1.json")));
+// item-ideal.md, enhance-reroll (module 15): the gain asymptote's K, the three risk bands, the craft
+// pity threshold, the transfer ratio and the reroll price's two legs. ⛔ THE soft cap lives in this
+// file — the parser refuses a closed top band, a zero success floor, a lossless transfer ratio and a
+// rung-dominant reroll price at BOOT, so an edit that would put a hard ceiling back on +X fails here
+// rather than at the first crafted item. Consumed by SeedRerollCostMult below.
+var enhancementTuning = FusionRpg.Core.Items.Mutation.EnhancementTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "enhancement.v1.json")));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -178,6 +185,10 @@ store.SeedRarityLadder(itemRarityTuning);
 // than inside SeedRarityLadder so module 7's own seeding never grows a dependency on a later
 // module's tuning file.
 store.SeedSalvageYield(materialTuning.Salvage);
+// item-ideal.md, enhance-reroll (module 15): `reroll_cost_mult`, the seventh `rarity_budget` key,
+// whose shape ssot-rarity.md §5 recorded as "awaiting I7" until this module decided it. Same
+// placement rule as salvage_yield above — a later module's tuning never reaches module 7's seeding.
+store.SeedRerollCostMult(enhancementTuning);
 
 // item-ideal.md, salvage-craft (module 14): the authored recipe corpus
 // (data/seed/items/recipes/*.json) resolved against the reference cost table. Never fatal, same rule

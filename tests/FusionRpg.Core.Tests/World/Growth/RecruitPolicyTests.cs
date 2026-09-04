@@ -19,10 +19,11 @@ public class RecruitPolicyTests
     public void Every_accessor_reads_the_configured_growth_tuning()
     {
         // Values match ContractTuningTestBootstrap.DefaultWorld.Growth, already configured once for
-        // this whole assembly (tunables-ssot.md §7.2) — read back, not reconfigured here.
-        Assert.Equal(0, RecruitPolicy.SeatPulsePerWeek);
-        Assert.Equal(1000, RecruitPolicy.LairMultiplierMilli);
-        Assert.Equal(1000, RecruitPolicy.SpecialWeekMultiplierMilli);
+        // this whole assembly (tunables-ssot.md §7.2) — read back, not reconfigured here. Real,
+        // non-identity numbers since world-map W58 (data/tuning/world.v5.json).
+        Assert.Equal(20, RecruitPolicy.SeatPulsePerWeek);
+        Assert.Equal(4000, RecruitPolicy.LairMultiplierMilli);
+        Assert.Equal(1500, RecruitPolicy.SpecialWeekMultiplierMilli);
         Assert.Equal(100, RecruitPolicy.RaiseCostPoints);
         Assert.Equal(110, RecruitPolicy.RaiseMemberHp);
         Assert.Equal(6, RecruitPolicy.LegionTarget.Min);
@@ -51,11 +52,12 @@ public class RecruitPolicyTests
             $"LegionTarget referenced outside its schema/accessor: {string.Join(", ", offenders)}");
     }
 
-    // Non-identity test values — SeatPulsePerWeek ships at 0 in the real tuning (world-map W42,
-    // identity until W58), so the bootstrap's own configured value can't exercise the multiplier
-    // logic below; PulseFor takes every number as an explicit parameter for exactly this reason
-    // (never reads RecruitPolicy's own accessors internally — a real xUnit-parallelism hazard,
-    // since Configure sets one static field shared by the whole assembly).
+    // Local, isolated test values — deliberately independent of whatever the real tuning ships
+    // (world-map W58 turned it on for real, but these tests still want their own fixed numbers so a
+    // future balance pass cannot silently change what this file proves). PulseFor takes every number
+    // as an explicit parameter for exactly this reason (never reads RecruitPolicy's own accessors
+    // internally — a real xUnit-parallelism hazard, since Configure sets one static field shared by
+    // the whole assembly).
     const long SeatPulse = 100;
     const int LairMultiplier = 2000; // a cleared lair doubles the pulse
     const int SpecialWeekMultiplier = 1500; // a special week adds half again
@@ -119,8 +121,9 @@ public class RecruitPolicyTests
     [Fact]
     public void Zero_seat_pulse_per_week_stays_zero_regardless_of_multipliers()
     {
-        // The real, shipped identity state (world.v4.json: seatPulsePerWeek 0) — nothing accrues
-        // and no golden moves until a later publish turns growth on (W58).
+        // A hypothetical zero pulse (the real shipped value moved off 0 at world-map W58,
+        // data/tuning/world.v5.json) — the pure function's own zero-stays-zero property, proven
+        // independent of whatever the live tuning currently ships.
         Assert.Equal(0, RecruitPolicy.PulseFor(hasSeat: true, lairCleared: true, SpecialWeekRoll, seatPulsePerWeek: 0, LairMultiplier, SpecialWeekMultiplier));
     }
 

@@ -7,6 +7,7 @@ to build it.
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
 
 import pytest
@@ -14,6 +15,7 @@ import pytest
 from seedsmith.adapters.demons.anchor.audit import numeric_audit
 from seedsmith.adapters.demons.anchor.vote import resolve_vote
 from seedsmith.adapters.effects.affix.derive import canonical_bundle_key, derive_affix_class
+from seedsmith.adapters.effects.affix.generate_affixes import run_voted_draws
 from seedsmith.adapters.effects.affix.prompts import (
     AFFIX_SCHEMA,
     ID_PREFIX,
@@ -93,6 +95,79 @@ def test_a_1_1_1_split_on_bundle_composition_resolves_unresolved():
     result = resolve_vote([a, b, c])
     assert result.confidence == "unresolved"
     assert result.value is None  # never silently the first sample
+
+
+# ---- T7.2: name + ref bundle are voted through the REAL generate_affixes CLI path, not resolve_vote
+# ---- called in isolation -----------------------------------------------------------------------------
+
+
+def _stub_call(responses: "list[dict]"):
+    """A `call()` double plus the captured `user` briefs, in call order — the same injection seam
+    `build_affix_authoring_graph(call=...)` already uses everywhere else in this file, used here to
+    prove `run_voted_draws` (what `generate_affixes.main()` itself calls) makes THREE model calls
+    per draw, not one. Zero real HTTP: this never reaches `llm_caller.call_model`."""
+    log: "list[str]" = []
+
+    def call(system, user, *, config=None, schema=None):
+        log.append(user)
+        return json.dumps(responses[len(log) - 1])
+
+    return call, log
+
+
+def test_named_bundle_composition_is_3_way_voted_via_generate_affixes_cli():
+    """A real 2-1 split on the ref bundle, driven through `run_voted_draws` — the actual function
+    `generate_affixes.main()` calls — not `resolve_vote` called directly against a fixture."""
+    responses = [
+        {"name": "Master of Fire and Ice", "refs": ["atom.a", "atom.b"]},
+        {"name": "Master of Fire and Ice", "refs": ["atom.b", "atom.a"]},  # reordered, same bundle
+        {"name": "Master of Fire and Ice", "refs": ["atom.a", "atom.c"]},  # minority
+    ]
+    call, log = _stub_call(responses)
+
+    fresh, unresolved, results = run_voted_draws(
+        count=1, eligible=["atom.a", "atom.b", "atom.c"],
+        atom_triggers={"atom.a": False, "atom.b": False, "atom.c": True},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"},
+        call=call, workers=1)
+
+    assert len(log) == 3, "one draw must make exactly THREE model calls, not one"
+    assert len(set(log)) > 1, "the three calls must carry genuinely different (permuted) briefs"
+
+    assert unresolved == {}
+    assert len(fresh) == 1
+    entry = next(iter(fresh.values()))
+    assert entry["name"] == "Master of Fire and Ice"
+    assert sorted(entry["refs"]) == ["atom.a", "atom.b"]
+    assert entry["_provenance"]["voteConfidence"]["refs"] == "split"
+    assert entry["_provenance"]["voteMinority"]["refs"] == canonical_bundle_key(["atom.a", "atom.c"])
+    assert all(r.get("outcome") == "persisted" for r in results.values())
+
+
+def test_a_1_1_1_split_on_bundle_composition_resolves_unresolved_via_generate_affixes_cli():
+    """Three genuinely different bundles from three permuted calls resolve `unresolved` — never
+    silently the first sample (spec §4's own explicit warning) — proven through the real CLI path,
+    not `resolve_vote` called directly."""
+    responses = [
+        {"name": "X", "refs": ["atom.a", "atom.b"]},
+        {"name": "X", "refs": ["atom.a", "atom.c"]},
+        {"name": "X", "refs": ["atom.a", "atom.d"]},
+    ]
+    call, log = _stub_call(responses)
+
+    fresh, unresolved, results = run_voted_draws(
+        count=1, eligible=["atom.a", "atom.b", "atom.c", "atom.d"],
+        atom_triggers={"atom.a": False, "atom.b": False, "atom.c": False, "atom.d": False},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"},
+        call=call, workers=1)
+
+    assert len(log) == 3
+    assert fresh == {}, "a 1-1-1 split must never fabricate a persisted entry"
+    assert len(unresolved) == 1
+    detail = next(iter(unresolved.values()))
+    assert detail["reason"] == "vote_unresolved"
+    assert detail["refs"]["confidence"] == "unresolved"
+    assert detail["name"]["confidence"] == "high"  # the name DID resolve 3-0; only refs split 1-1-1
 
 
 # ---- validators -----------------------------------------------------------------------------------

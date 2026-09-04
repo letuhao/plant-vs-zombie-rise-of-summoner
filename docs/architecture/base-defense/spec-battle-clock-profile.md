@@ -1,6 +1,6 @@
 # Spec: `battle-clock-profile`
 
-**Module 1 of 21 · level 0 · no dependencies · [base-defense-map.md](../base-defense-map.md)**
+**Module 1 of 29 · level 0 · no dependencies · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04. Written after Gate 0's re-survey; §3 rows 1 and 3 of the map's Gate 0
 table changed this module's scope, and this spec reflects the corrected reading.
 
@@ -141,39 +141,57 @@ var maxLoopIterations = checked(activeProfile.MaxRounds * BattleTuning.LoopGuard
 `LoopGuardRoundMultiple` is a new **structural** tunable (see §Tunables). At `classic-round`'s 50
 rounds it must reproduce 200,000 exactly, or this is a behaviour change wearing a refactor's clothes.
 
-### 5. ⛔ The economy: `ActionPointsEconomy`, and the audit corrected this
+### 5. ⛔ The economy: `OneActionPerTurnEconomy` — and this section records TWO wrong answers
 
-**The first draft of this spec set `points: false`, and it was wrong.** Recorded rather than quietly
-fixed, because the same mistake has now been made twice in this program.
+**Read this before changing the economy.** The same question has now been got wrong twice from
+opposite directions, and both errors are recorded so a third session does not make a third.
 
-`OneActionPerTurnEconomy`'s own source states what it means:
+#### The source, quoted in full
 
-> *"Exactly one action, spent once, per `ResetForNewTurn`. The simplest economy — every classic-round
-> battle in this game today."* · `Scope => TurnEconomyScope.PerActor`
+`action-map.md:430`, *"Resolved 2026-08-22"*, item 2 — **the authority**:
 
-**One action per turn means move OR attack, never both.** On a 24-cell district board a unit would take
-twenty-four turns to cross and never swing. It contradicts two settled things:
+> **"2. Move and attack: two separate actions, and the clock decides whether you get both.** This is
+> already what the kernel was built to do, and **it needs no new economy.**
+>
+> Readiness is **work over rate**: an actor waits `TimeCostTicks / rate`, where `rate` comes from
+> `turn.speed` and `turn.haste`. With a 1000-cost action, speed 200 waits 5 ticks and speed 100 waits
+> 10 — **the fast actor simply acts twice as often**. And because every action carries its own
+> `TimeCostTicks`, a cheap step (200) and an expensive strike (800) cost differently, so **a fast
+> actor can fit *both* into the window a slow one needs for one swing.**
+>
+> **No compound move-and-attack action is required, and no Action Points. The time cost is the
+> economy** … (`ActionPoints` still ships in the timeline's economy set for modes wanting a fixed
+> per-turn budget — **it is simply not what this mode needs**.)"
 
-- `action-map.md:430`, whose heading is *"Move and attack: two separate actions, **and the clock
-  decides whether you get both**"* — and which the ideal's §11.4 correction **#5** records this
-  session getting backwards **once already**, while citing the wrong file.
-- **Decision 14**: *"build is a third peer of move and attack."* Three peers cannot share a budget of
-  one.
+#### Error 1 — the ideal's §5.12, never corrected at source
 
-So the siege row runs `points: true`. That forces `timeline.profiles.siege.maxPoints` to exist —
-`Build` throws otherwise, with a message that says why:
+§5.12 says *"a unit that moves **does not also strike that turn**"* and attributes the quote to
+`action-corpus-ideal.md:434`. **Both halves are wrong**, and §11.4 correction #5 already recorded it:
+the conclusion is the opposite of the source, and the file cited is not where the text lives.
+§5.12 was never fixed in place — which is how error 2 happened.
 
-```csharp
-if (points && t.MaxPoints is null)
-    throw new BattleTuningRejection(
-        $"battle tuning: timeline.profiles.{id} runs an ActionPoints economy but carries no 'maxPoints'.");
-```
+#### Error 2 — this spec's own completeness-audit "fix"
 
-A guard that makes the omission impossible to ship, rather than a convention.
+The audit read `OneActionPerTurnEconomy` as *"one action per round"* and concluded a unit would take
+24 turns to cross a 24-cell board. **It would not.** *Turn* here is a per-actor activation, reset by
+`ResetForNewTurn` whenever the caller says a boundary happened — and under readiness scheduling a fast
+actor is activated more often. `TimeCostTicks` on each action is what makes a step cheap and a strike
+expensive, so **the clock already decides whether you get both.**
 
-**It also stops `hybrid-atb` being the only row that exercises the other half of `ITurnEconomy`** —
-B12's own acceptance line wanted a genuine second consumer, and a turn-based board that budgets
-move/attack/build separately is a better one than a real-time mode nobody selects.
+Switching to `ActionPointsEconomy` would have added the *"fixed per-turn budget"* the source
+explicitly says this mode does not need — a second economy beside the one that already works.
+
+#### So: `points: false`, and decision 14 still holds
+
+**Build is a third peer of move and attack** — a third action with its own `TimeCostTicks`, priced in
+**time**, which decision 14 already locked as the economy. Three peers, one clock, no points.
+
+§5.19 independently confirms it from the content side: across seven surveyed games *"not one lets a
+unit build a structure on the field as an ordinary turn action"*, and the two exceptions **both charge
+the unit's whole turn** — which is exactly what one action per activation is.
+
+**What the siege row must set instead** is a build action whose `TimeCostTicks` is heavy enough to be
+a real commitment. That is content, in the action catalog, not a profile field.
 
 ### 6. The `siege` row — three lines, and the catalog says so
 
@@ -192,9 +210,9 @@ public const string SiegeId = "siege";
 /// is fought, and a defender who holds is playing correctly rather than stalling.</summary>
 public static BattleModeProfile Siege => _siege ??= Build(
     SiegeId, AdvancePolicyKind.NextEvent, WScope.PerSide, Commitment.LateBound,
-    // ActionPoints, NOT one-action-per-turn: move, attack and build are three peers (decision 14)
-    // and a unit that crosses ground must still be able to swing. See §5.
-    points: true,
+    // One action per ACTIVATION, not per round — the clock decides whether you get both (§5).
+    // action-map.md:430: "no Action Points. The time cost is the economy."
+    points: false,
     forecast: ForecastExactness.Exact,
     // Movement precedes contact on a board, so who steps first is a decision rather than a formality.
     // classic-round pins readiness to a constant by design; a siege must not.
@@ -233,10 +251,13 @@ where "off" is already the only behaviour would be a claim rather than a feature
 | `timeline.profiles.siege.w` | actors concurrent per side | `2` | Balance: how much of a side moves at once is the core pacing dial |
 | `timeline.profiles.siege.passQuantum` | sim ms | `1` | Balance: how long a pass costs |
 | `timeline.profiles.siege.wReact` | reaction width | `0` | Off until `siege-cover` asks for it |
-| `timeline.profiles.siege.maxPoints` | action points/turn | **required, unset** | Balance — **the pacing dial.** `Build` THROWS if an ActionPoints economy carries no `maxPoints`, so this row cannot be forgotten. Decision 29 keeps the value unset until a board exists to measure on |
-| `siege.actionCost.move` | points | `1` | Balance — what a step costs |
-| `siege.actionCost.attack` | points | `1` | Balance |
-| `siege.actionCost.build` | points | `1` | Balance — decision 14's third peer, priced beside the other two |
+| `siege.timeCostTicks.move` | sim ticks | `200` | Balance — **the real pacing dial.** `action-map.md:430`'s own worked example: a cheap step at 200 against an expensive strike at 800 |
+| `siege.timeCostTicks.attack` | sim ticks | `800` | Balance |
+| `siege.timeCostTicks.build` | sim ticks | **unset, and heavy** | Balance — decision 14's third peer. §5.19: the two shipped games that allow field construction **both charge the unit's whole turn**. Decision 29 defers the value |
+
+**No `maxPoints` row.** The siege profile runs `OneActionPerTurnEconomy`, and `Build` throws if a
+non-points economy carries a `maxPoints` — *"a value that can never be read is a balance row lying
+about what it controls."*
 | `timeline.profiles.siege.maxRounds` | rounds | **unset** | Balance: the horizon. Deliberately unset in this module — decision 29 keeps force-size and duration numbers unset until a real board exists to measure them on. Unset = inherit ruleset (50). |
 | `timeline.profiles.siege.roundDurationMs` | sim ms | **unset** | Same. Unset = inherit ruleset. |
 | `ruleset.loopGuardRoundMultiple` | iterations per round | `4000` | **Structural, not balance** — but it lives in config because `200_000 / 50 = 4000` must stay derivable rather than being a second magic constant. Documented as structural in its own comment. |

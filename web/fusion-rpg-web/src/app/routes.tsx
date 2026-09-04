@@ -6,7 +6,7 @@ import { AppShell } from "./AppShell";
 import { SaveSelect } from "./SaveSelect";
 import { TitleScreen } from "./TitleScreen";
 
-// GG-38: entry loads the Sanctum only. Lawn (Phaser) and World (@xyflow/react) are the two
+// GG-38: entry loads the Sanctum only. Lawn (Phaser) and World (the SVG stage) are the two
 // heaviest dependencies in the tree (tech-stack.md §2) and neither is needed to reach the Sanctum
 // — each becomes its own chunk, fetched only when its route is actually visited.
 const DemonsPage = lazy(() => import("@/features/demons/DemonsPage").then((m) => ({ default: m.DemonsPage })));
@@ -18,9 +18,10 @@ const ActorMenuScopePickerDemoPage = lazy(() =>
   import("@/ui/scope/ActorMenuScopePickerDemoPage").then((m) => ({ default: m.ActorMenuScopePickerDemoPage }))
 );
 const StoragePage = lazy(() => import("@/features/storage/StoragePage").then((m) => ({ default: m.StoragePage })));
-const WorldPage = lazy(() => import("@/features/world/WorldPage").then((m) => ({ default: m.WorldPage })));
-// world-stage W33: the new stage is reachable here without touching `#/world` — whether it flips
-// to become `#/world` is the Owner decision noted at the end of `world-shell`'s task list.
+// world-stage W33/owner decision (2026-09-04): `#/world` now serves the new stage directly — the
+// old `@xyflow/react`-based `WorldPage` is deleted (its three production files and two test mocks
+// went with it). `#/world-stage` keeps working too, as an alias to the same lazy chunk, so nothing
+// that already links there needs to change.
 const WorldStage = lazy(() => import("@/stages/world/WorldStage").then((m) => ({ default: m.WorldStage })));
 
 /** T12: these nine now live in the developer tree, reached via `` ` `` or `?dev=<id>` — never a route of their own. */
@@ -93,7 +94,7 @@ export function AppRoutes() {
           path="world"
           element={
             <Suspense fallback={<ChunkFallback testId="chunk-fallback-world" />}>
-              <WorldPage />
+              <WorldStage />
             </Suspense>
           }
         />

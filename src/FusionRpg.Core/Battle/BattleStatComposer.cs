@@ -110,13 +110,21 @@ public static class BattleStatComposer
         // battle-adoption mapping table: Atk is the resolver's BaseOverlayDamage — it must
         // NOT also sit in power.omni (double count). Defense stays: the defense channel is
         // its only consumer. Affinity shares remain genuine adjustments on both sides.
+        // battle-tempo tempo-content -- the species' own attack interval projects into `turn.speed`,
+        // seeded here so readiness ordering (B39) has something other than TurnDefaultSpeed for every
+        // actor to tie on. A projection, not a second curve (spec-tempo-content.md §2.1): the only new
+        // number is Tuning.SpeciesTempoReferenceIntervalMs, read from config, never a literal.
+        var turnSpeed = SpeciesTempoProjection.SpeedFor(
+            setup.AttackIntervalMs, Tuning.SpeciesTempoReferenceIntervalMs, DerivedStatPolicy.TurnDefaultSpeed);
+
         var snap = ActorDerivedSnapshot.FromValues(new[]
         {
             new KeyValuePair<string, double>(DerivedStatChannels.CombatDefenseOmni, setup.Defense),
             new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(theta)),
             new KeyValuePair<string, double>(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(theta)),
             new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta))
+            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta)),
+            new KeyValuePair<string, double>(Timeline.DerivedTurnChannels.Speed, turnSpeed)
         });
 
         if (setup.ElementPrimary is { } primary)

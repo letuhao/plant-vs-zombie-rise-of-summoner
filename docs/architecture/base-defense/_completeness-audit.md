@@ -15,7 +15,327 @@ rejects.
 
 ---
 
-## A. The three specs that are wrong
+## PASS 2 — 2026-09-04, and it found the first pass incomplete
+
+**Pass 1 read §5.8, 5.9, 5.17, 5.18 and 5.20 in full and the rest by heading only.** Pass 2 read every
+remaining §5 subsection. It found **nine more items, one reverted fix, and a root cause.**
+
+### ⛔ P0 — the root cause: two §5 paragraphs are known-wrong and were never corrected in place
+
+§11.4 recorded six corrections to this document's own claims. **Two of them were logged in the errata
+table and left standing in the body**, so a downstream session reading §5 gets the wrong version:
+
+| § | Said | Truth |
+|---|---|---|
+| **5.4** | *"world replay reuses the stored record rather than re-simulating"* | `RpgStore.WorldTurns.cs:599-606` re-simulates from turn zero with no resolver (§11.4 #2) |
+| **5.12** | *"a unit that moves does not also strike that turn"*, cited to `action-corpus-ideal.md:434` | The opposite of `action-map.md:430`, and the wrong file (§11.4 #5) |
+
+**Both are now corrected in place**, with a box saying what they used to say. An errata table is not
+enough: pass 1 read §5.12's surviving text and produced finding A1 from it.
+
+### ⛔ P1 — A1 was a FALSE finding, and its "fix" broke a correct spec. Reverted.
+
+Pass 1 claimed `OneActionPerTurnEconomy` gives a siege unit one action per *round*, and switched the
+profile to `ActionPointsEconomy`. **`action-map.md:430` forbids exactly that**:
+
+> *"No compound move-and-attack action is required, **and no Action Points. The time cost is the
+> economy** … (`ActionPoints` still ships in the timeline's economy set for modes wanting a fixed
+> per-turn budget — **it is simply not what this mode needs**.)"*
+
+*Turn* is a per-actor **activation**, reset by `ResetForNewTurn` when the caller says a boundary
+happened; under readiness scheduling a fast actor activates more often, and per-action `TimeCostTicks`
+makes a step cheap and a strike expensive. **The clock already decides whether you get both.**
+`points: false` restored, with both errors recorded in the spec so a third session does not make a
+third.
+
+§5.19 confirms it independently: across seven surveyed games, the two that allow field construction
+**both charge the unit's whole turn** — which *is* one action per activation.
+
+### ⛔ P2 — `district-layout` grew the board. §5.1 and §5.25 both forbid it.
+
+§5.1's title is the rule: **"The grid does not grow. The placement budget does."**
+
+> *"Rows and columns come from **base tier** and are **fixed** … `DevelopmentLevel` buys **build
+> slots**."*
+
+and §5.25 lists `Grid dimensions = f(DevelopmentLevel)` as **rejected**. The spec's
+`side = base + perDev × DevelopmentLevel + perSlot × Slots.Count` was the rejected formula.
+**Corrected to a lookup keyed by base tier.**
+
+### ⛔ P3 — the SECOND budget, and the thing that makes a fixed board legal
+
+§5.1: *"**There are two budgets, not one**"* — legion slots (the central area) **and defense slots**
+(`DevelopmentLevel`). Pass 1 specced the first and the field cap, and missed the second entirely.
+
+**And with it, the escape valve** — without which this program has a hard progression ceiling:
+
+> *"Once slots fill the board, further development buys **tower tier** — a magnitude, so it reads
+> `P(Θ)` and rises forever. **The board stops growing; the investment never does.**"*
+
+Added to `siege-objective` as stages 1–3 with the switch point as a tunable.
+
+### P4–P9 — six more, all now folded in
+
+| # | Finding | Landed in |
+|---|---|---|
+| **P4** | **§5.16 R3 carries XCOM's SHIPPED weights** — hit-chance **+70**, objective **+50**, kill **+15**, low-HP **+10**, cannot-counter **+10**, threat **−N**. *"Hit-chance dominates lethality 70:15 — an AI that maximises expected damage with no risk term reads as **suicidal**."* Pass 1 invented weights that **inverted** it (kill 300 > damage 100) | `siege-ai` |
+| **P5** | **The anti-turtle timer** — Fire Emblem's `+ current round` term, *"monotonic and invisible"* | `siege-ai` |
+| **P6** | **R2's stance is `Hold`/`Guard`/`Engage` on the ACTOR, "three values and no more"** — a different axis from §5.20's signed aggression, and pass 1 deleted it when it replaced bands. Signed aggression cannot stop *"a garrison abandoning the objective to chase a bait unit"* (the ⭐ finding) | `siege-ai` |
+| **P7** | **`World/Ai/Utility/Consideration.cs` is shipped, uncalled, and has `Weakest()` giving a reason string for free.** *"A siege board has one [an economy] — so this is its first real caller"* | `siege-ai` |
+| **P8** | **⛔ Never a hidden difficulty thumb** (*"Difficulty is which policy, not a stat bonus"*) · **⛔ do not put the score on `ActionTargetOrdering`** · the **auto-versus-played dial**, *"a tunable from line one"*, which fheroes2 got wrong in the other direction | `siege-ai` |
+| **P9** | **A garrisoning unit costs a field-cap slot** (§5.13) — the *structure* does not count, the *body* inside it does. F7's residual, left ambiguous by pass 1 | `siege-objective` |
+
+### Closed in pass 2 — the six smaller items
+
+All six landed; listed so the trail is visible rather than implied:
+
+| # | Item | Where it belongs |
+|---|---|---|
+| 1 | The **depot budget crosses on `BattleRequest`** (§5.13's `BattleRequest{ budget }` diagram) | `siege-seam` |
+| 2 | **Defender draws sector `LoamStock`; attacker draws `CarriedLoam`** — the asymmetry is the blockade mechanic | `siege-economy` |
+| 3 | **"The board never reads `WorldSlot.OwnerFactionId`"** — a Never, not a note | `siege-economy` |
+| 4 | **Builder killed mid-build → total loss, `InterruptRefundMilli = 0`** (§5.19) | `siege-construction` |
+| 5 | **`BuildResolver.cs` is the five-plumbing-sites reference implementation** — *"a new order kind inherits a working reference rather than a hunt"* | `siege-construction` |
+| 6 | **Each obstacle kind declares `acquisitionPaths`** — a **twelfth** catalog in `structure-seed` (§5.24) | `siege-obstacles` + `structure-seed` |
+
+**One item leaves this program:** `structure-seed`'s twelfth catalog (`acquisitionPaths`) and its
+**deterministic planner stage** (decision 33) both belong to that program's own spec round. They are
+recorded in [structure-seed-ideal.md](../structure-seed-ideal.md)'s consumers, not built here.
+
+---
+
+## PASS 4 — 2026-09-04, auditing pass 3's own changes and §2
+
+Pass 3 predicted a fourth pass would find something, because pass 3 itself **added a module and moved
+another**. It did.
+
+Pass 4 also read [base-defense-ideal.md](../base-defense-ideal.md) **§2 in full** — the ten load-bearing
+principles this program's specs cite by number **28 times** without anyone having verified the numbers.
+
+**Seven findings. One is a self-inflicted contradiction pass 3 created — and four were found by a
+ten-line script, not by reading.**
+
+### ✅ First, the good news: every §2 citation was correct
+
+All 28 rule-number citations across the specs check out — rule 1 (RPG layer), rule 4 (one ladder, two
+reads), rule 7 (world/combat seam), rule 10 (closed vocabularies). No drift. And two of pass 2 and pass
+3's own fixes are **independently confirmed** by rules I had not read:
+
+- Rule 5 names *"**Grid dimensions per tier**"* as config — confirming pass 2's correction of
+  `district-layout` from `f(DevelopmentLevel)` to a per-tier lookup.
+- Rule 6 says *"A ceiling on tower **power** would not [be exempt], and must stay uncapped"* —
+  confirming `siege-objective`'s stage-3 escape valve.
+
+### ⛔ P4-1 — The build order still encoded the cycle pass 3 removed
+
+Pass 3 moved `siege-obstacles` to level 4 and fixed every spec header. **It did not fix the map's build
+order**, which still read:
+
+```text
+5.  siege-cover · siege-construction
+5b. siege-obstacles                    (needs both of 5)
+```
+
+while the module table two sections above already said `siege-cover` **depends on** `siege-obstacles`.
+
+**A dependency table and a build order that disagree is worse than either being wrong alone**, because
+each looks authoritative in isolation and a builder would follow whichever they opened first.
+Corrected: obstacles joins level 4; cover and construction both consume it at level 5.
+
+### ⛔ P4-2 — §2 rule 7 says *"never a battle paused in memory"*, and decision 41 is exactly that
+
+Rule 7, first bullet, verbatim:
+
+> *"**Combat is stateless between turns.** A multi-turn siege is a **fresh engagement each turn, built
+> from world-held state** — **never a battle paused in memory.**"*
+
+`siege-stage` holds a paused session in the server process. The first draft argued *"the pause is
+within a turn, not between turns"* — which is right, but the spec never stated **the clause that makes
+it right**.
+
+> ### ✅ SUPERSEDED, and better — decision 46 (2026-09-05)
+>
+> The owner asked *"we won't store battle state? maybe it correct in heroes of might and magic … they
+> have reason for it, maybe we should follow."* **They do**: a battle is re-derivable from its inputs,
+> so it never needs storing. A paused siege is now a **persisted decision log replayed on resume**, not
+> a session in memory — which makes rule 7 **unconditionally** true, **removes** the clause below as
+> scaffolding, uses §2 rule 8's own save model, and **survives a server restart** (which the in-memory
+> version could not). It also closes a wiring gap §3.7 already recorded: `decisions_json` is *"read and
+> never written."*
+>
+> **The finding stands as a finding; its fix was replaced by a better one.**
+
+~~**Added:** *a pause must never survive a world-turn boundary.*~~ The world turn cannot commit while a
+siege is paused, so a pause and a boundary can never coexist — and if a code path ever lets a paused
+session outlive a commit, **rule 7 is violated for real**, because the siege would then be spanning
+turns as a battle held in memory. That one clause is the whole difference between a suspended session
+and the thing the rule forbids.
+
+### P4-3 — §2 rule 8's version stamp was missing from the module that resolves sieges
+
+> *"every resolution stamped `(engineVersion, rulesetVersion, seed)`."*
+
+Present in `siege-supply` and `structure-state`; **absent from `siege-resolver`**. And here it is not
+bookkeeping — it is what makes a `:509` / `:603` divergence **detectable**: without it, a re-derived
+report that disagrees with the original looks like a UI bug; with it, the two carry different
+`rulesetVersion`s and the artifact names its own cause.
+
+### P4-4 — §2 rule 3's ban on client prediction was nowhere in the FE specs
+
+> *"The FE renders and commands; **it never rolls**. No client prediction of the living set (the lawn
+> projector's **RT-15, rejected there and rejected here**)."*
+
+`board-render` is exactly where prediction gets added for feel — interpolate the unit toward where it
+*will* be, resolve later. **RT-15 was rejected in the lawn projector for this.** Added as a `Never`
+with the line drawn precisely: interpolating between two **server-confirmed** states is rendering;
+extrapolating past the last one is prediction.
+
+### P4-5 — A duplicated level label
+
+`c3` appeared twice in the build order. `structure-instantiate` and `structure-planner` are genuinely
+parallel; now labelled as such rather than as a typo.
+
+### ⛔ P4-7 — Four MORE ordering errors, found by a script after the eye had passed
+
+P4-1 was found by reading. **Then a mechanical check over all 29 module headers found four more that
+reading had missed** — three real, one cosmetic:
+
+| Module | Declared | Depends on | Problem |
+|---|---|---|---|
+| `siege-objective` | level 3 | `combatant-kind` (3) | build order said **parallel** |
+| `siege-engagement` | level 7 | `siege-resolver` (7) | build order said **parallel** |
+| `siege-stage` | level 8 | `board-render` (8) | `→` implied ordering the level did not encode |
+| `battle-stage` | level 8 | `board-render` (8) | same |
+
+Plus a naming inconsistency **pass 3 introduced**: the content family used plain levels `0–5` in its
+headers while the map labelled them `c0–c5`, and `structure-instantiate` (added by pass 3) used `c3`.
+**One family, two conventions.**
+
+Fixed with explicit sub-levels — `3b`, `7b`, `8b` — and `c0–c5` throughout the content family.
+
+> ### ⭐ The lesson is the method, not the four rows
+>
+> Passes 1–4 all read specs and found real defects. **This check took ten lines of Python and found
+> four things four passes of careful reading had not.** A dependency graph is a machine-checkable
+> property, and "I read it and it looked consistent" is not a check.
+>
+> **The graph is now verified mechanically: 29 modules, no cycles, every dependency at a strictly
+> earlier level.** That assertion is reproducible, which is more than any of the prose findings above
+> can claim — and it should be re-run after any module is added or moved.
+
+### P4-6 — The line-of-fire trace could become a fifth area shape
+
+§2 rule 10: *"the action layer already owns a grid vocabulary (`GridPos`, Chebyshev distance, **four
+area shapes**, `ChosenCell` anchoring). Inventing a second grid model beside it is the exact defect the
+atom program exists to stop."*
+
+Measured: the four are `Row · Column · Square · Rectangle` (`ActionTargetSpec.cs:42-48`).
+`siege-cover`'s Bresenham trace is **not** one, and must not become one — it is a traversal used to
+compute a penalty, returning cells to *inspect*, never cells to *hit*. Stated, with a test: **if the
+trace's output is ever passed to a targeting resolver, a fifth shape has arrived by the back door.**
+
+---
+
+## PASS 3 — 2026-09-04, auditing what passes 1 and 2 could not see
+
+**Passes 1 and 2 both ran before rounds 9 and 10.** Decisions **35–45** — eleven of them — had never
+been audited, and eleven specs were written or rewritten after pass 2 closed: `siege-cover` (rewritten
+whole), `battle-stage`, and the six `structure-*` modules, plus round-9 edits to six more.
+
+Pass 3 read `structure-seed-ideal.md` **§1 and §2**, which the six structure specs were written without
+— a gap of exactly the shape pass 2's root cause described.
+
+**Seven findings. Two are breaks, not gaps.**
+
+### ⛔ P3-1 — A DEPENDENCY CYCLE, and the map's own rule forbids it
+
+| Module | Declares |
+|---|---|
+| 11 `siege-cover` | *depends on `siege-positions`, **`siege-obstacles`*** |
+| 19 `siege-obstacles` | *depends on `structure-state`, **`siege-cover`**, `siege-construction`* |
+
+The map's Phase-0 rule: *"**Dependency direction, no cycles.** If two modules each need the other, they
+are one module."*
+
+**Introduced by the decision-35 rewrite.** Cover used to key off terrain, so it needed no obstacles;
+the HoMM3 model has obstacles *project* cover, so it does. Meanwhile obstacles still claimed a
+dependency on cover for the Trench's cover value — which is **not a dependency at all**, it is a data
+field.
+
+**Fix (applied):** `siege-obstacles` becomes the **structure-vocabulary module at level 4**, depending
+on `structure-state` alone. It owns `ObstacleKind`, `AcquisitionPath`, the cover-radius fields and the
+cell-entry trigger. `siege-cover` (5) and `siege-construction` (5) both **consume** it. No cycle, and
+**no cascade** — every downstream level is unchanged.
+
+### ⛔ P3-2 — The Mine has no trigger. The rewrite deleted it.
+
+`spec-siege-obstacles.md:157`:
+
+> *"Fired on `ScopeMembershipTransition.CellEntered`, **which siege-cover already emits.**"*
+
+`spec-siege-cover.md` §8, after the decision-35 rewrite:
+
+> *"**No `ScopeMembershipTransition` change.** The program's one allowed vocabulary change is **not
+> spent here** — cover is evaluated per shot, so no membership is entered or left."*
+
+**Cover released the budget and obstacles never claimed it.** The Mine — the only obstacle that
+punishes the safe-looking cell — fires on nothing. `spec-combatant-kind.md:183` carries the same stale
+reference, calling the cell-entry transition *"the one reviewed vocabulary change"*.
+
+**Fix (applied):** `siege-obstacles` **owns** the transition, and both stale references are corrected.
+
+### P3-3 — Law 1's middle layer is absent from all six structure specs
+
+`structure-seed-ideal.md` §1 law 1, **binding**:
+
+> *"**Seed → concrete → per-player. Three layers, and the middle one rolls.** … The **game runtime**
+> rolls the concrete object per player, seeded, like Diablo loot. `Instantiator.TryInstantiate` is the
+> shared SDK … **Never design a second roll.**"*
+
+and §2.2:
+
+> *"The concrete-roll layer has **no production caller** — `Instantiator.TryInstantiate`: **zero.**
+> Every *'we need a runtime generator'* finding for structures is therefore a **wiring gap on a shipped
+> SDK**, not a new build."*
+
+**The six specs cover seed → catalog. That is two layers of three.** Nothing rolls a concrete
+per-player structure instance.
+
+**Fix (applied):** new module **`structure-instantiate` (29)** — a wiring module, explicitly not a new
+roll.
+
+### P3-4 — The fourth ownership level is missing
+
+§1 law 4 names **four**: `AUTHORED` · `DERIVED` · **`GENERATED`** · `VALIDATED` — and *"a field with
+none is a contract defect."* `spec-structure-schema.md` lists **three**. `GENERATED` (a generator emits
+rows) is exactly the level `structure-pipeline`'s output needs, and it had no name.
+
+### P3-5 — A generated corpus with no surface
+
+§2.2, a wiring gap none of the six specs mentions:
+
+> *"**`StructureDef.Name` has no reader** outside its own validator. **Nothing in the game or web UI can
+> name a structure** — so a generated corpus has no surface today."*
+
+Generating ~36 structures whose names nothing can display is a corpus that exists only in JSON.
+
+### P3-6 — Two overlapping vocabularies, unreconciled
+
+§2.3: *"**`StructureKind` has 2 values** — `LoamSource`, `Storage`. **§5.21 of the base-defense ideal
+names ten roles.**"* (`siege-construction` adds `Refinery`, making three.)
+
+So a structure carries a 3-value C# **kind** and a 10-value seed **role**, and no spec says how they
+relate. Left alone, one of them silently becomes decoration.
+
+### P3-7 — A wrong number
+
+`spec-structure-schema.md:30` said *"~841 anchors"*. Measured: **415** plant species files, **503**
+across all species. 841 was the seedsmith **stage-run** figure (841 anchors × 8 pipelines = 6,728),
+carried across from a different audit. The ideal's own *"408"* is also now stale.
+
+---
+
+## A. The three specs that are wrong (pass 1)
 
 These matter more than the gaps: a missing spec gets written, a wrong one gets built.
 
@@ -35,11 +355,16 @@ contradicts two things the ideal already settled:
   **once already**, citing the wrong file while doing it.
 - Decision 14: *"build is a third peer of move and attack."* Three peers cannot share a budget of one.
 
-**Fix:** the `siege` row runs `ActionPointsEconomy` (`points: true`), which forces
+> ### ⛔ SUPERSEDED BY PASS 2 — this finding was WRONG. See P1 above.
+> `action-map.md:430` says *"no Action Points … it is simply not what this mode needs."* *Turn* is a
+> per-actor **activation**, not a round, so the original `points: false` was correct and this "fix"
+> broke it. Left standing, struck through, because the error is the more useful record.
+
+~~**Fix:** the `siege` row runs `ActionPointsEconomy` (`points: true`), which forces
 `timeline.profiles.siege.maxPoints` to exist — `BattleModeProfileCatalog.Build` throws otherwise, so
 the compiler-adjacent guard already exists. Move, attack and build each cost points; the clock decides
 how many you get. This also stops being the "other half of `ITurnEconomy`" that only `hybrid-atb`
-exercises today.
+exercises today.~~
 
 ### A2 ⛔ `siege-cover` uses the wrong unit, and the ideal computed the right one
 
@@ -158,7 +483,7 @@ vocabulary, and the multi-turn loop.
 | **NEW** | `siege-objective` (level 3) | Decisions **1, 4, 5, 10-half** — win condition, legion slots, max members per legion, the field cap via `CapPolicy`'s pattern, the central area as a pure arena. **This is the game's rules module and its absence is the audit's headline finding** |
 | **NEW** | `siege-obstacles` (level 5) | §5.18's four kinds + Emplacement; **Mine**/BITE; **Wire**/stamina; the terrain-vs-structure split |
 | **NEW** | `siege-engagement` (level 7) | Decision **24** — one engagement per map turn, inconclusive outcomes, repetition across turns, the `Withdrawn`/spent/objective-fell exits |
-| **REWRITE** | `battle-clock-profile` | A1 — `ActionPointsEconomy` |
+| **REWRITE** | `battle-clock-profile` | A1 — **reverted in pass 2**; `OneActionPerTurnEconomy` stands, both errors recorded in the spec |
 | **REWRITE** | `siege-cover` | A2 — flat contest points; §5.17 rules 2, 4, 5 |
 | **REWRITE** | `siege-ai` | A3 — the risk-term line (see §D1 below); §5.20's rules 2–5 |
 | **EXTEND** | `siege-construction` | Decisions 16/17/18/28 — the bulk stock and the refine chain; the Core-zone exclusion; §7 cost 3's five plumbing sites |

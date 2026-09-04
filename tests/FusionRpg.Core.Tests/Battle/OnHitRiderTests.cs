@@ -18,7 +18,7 @@ public class OnHitRiderTests
 {
     static string Doc(string traits) =>
         "{\"schemaVersion\":2,\"version\":2," +
-        "\"ruleset\":{\"roundDurationMs\":1000,\"maxRounds\":50}," +
+        "\"ruleset\":{\"roundDurationMs\":1000,\"maxRounds\":50,\"loopGuardRoundMultiple\":4000}," +
         "\"statComposer\":{\"primaryAffinityDivisor\":4,\"secondaryAffinityDivisor\":8}," +
         "\"timeline\":{\"profiles\":{\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1}}}," +
         "\"hybrid\":{\"secondaryWeightMilli\":0}," +

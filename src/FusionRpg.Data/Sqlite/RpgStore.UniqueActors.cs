@@ -388,7 +388,7 @@ public sealed partial class RpgStore
         TypeId = r.GetInt32(3),
         Phase = r.GetString(4),
         Level = r.GetInt64(5),
-        Xp = r.GetDouble(6),
+        Xp = ReadXp(r, 6),
         MatchKey = r.IsDBNull(7) ? null : r.GetString(7),
         LastPtr = r.IsDBNull(8) ? null : r.GetString(8),
         DeployCorrelationId = r.IsDBNull(9) ? null : r.GetString(9),
@@ -758,6 +758,52 @@ public sealed partial class RpgStore
                 source: UniqueEquipAtomSource, out _, out _,
                 origin: InstanceOrigin.Grant, catalogRevision: catalogRevision);
         }
+    }
+
+    /// <summary>
+    /// `mods-absorption` (spec-mods-absorption.md) — the actual per-actor cutover for existing save
+    /// data. Re-runs the same pair every equip/unequip already runs
+    /// (<see cref="RebuildUniqueModsFromEquipmentUnlocked"/>, then
+    /// <see cref="ReconcileUniqueEquipmentAtomBindingsUnlocked"/>) for every unique actor that has
+    /// ever equipped something, so a row saved before this module shipped — carrying an atom-backed
+    /// item's grant in <c>mods_json</c> from the pre-cutover <c>BuildModsJson</c> — gets rewritten to
+    /// the post-cutover shape. Idempotent: an actor whose <c>mods_json</c> is already clean and whose
+    /// bindings already match its loadout writes nothing new (the double-grant invariant, same as the
+    /// per-equip path).
+    ///
+    /// <para><b>Per-actor atomic, not one giant transaction</b> (⛔ DECIDED 2026-09-03,
+    /// spec-mods-absorption.md §"no read-through window"): each actor's own <c>lock(_gate)</c>
+    /// critical section is the atomic unit, matching every other write in this file — the same shape
+    /// <see cref="UpsertUniqueEquipment"/> already uses for one actor. A crash mid-sweep leaves
+    /// already-cut-over actors cut over and the rest exactly as they were before this call; there is
+    /// no window where one actor is half on each path. Returns the count of actors touched.</para>
+    /// </summary>
+    public int CutoverUniqueEquipmentModsAbsorption()
+    {
+        List<string> ids;
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT DISTINCT instance_id FROM rpg_unique_equipment;";
+            using var r = cmd.ExecuteReader();
+            ids = new List<string>();
+            while (r.Read()) ids.Add(r.GetString(0));
+        }
+
+        var touched = 0;
+        foreach (var id in ids)
+        {
+            lock (_gate)
+            {
+                using var db = OpenUnlocked();
+                if (ReadUniqueActorUnlocked(db, id) is null) continue;
+                RebuildUniqueModsFromEquipmentUnlocked(db, id);
+                ReconcileUniqueEquipmentAtomBindingsUnlocked(db, id);
+            }
+            touched++;
+        }
+        return touched;
     }
 
     public string RebuildUniqueModsFromEquipment(string instanceId)

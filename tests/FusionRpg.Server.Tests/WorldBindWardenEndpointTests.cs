@@ -174,9 +174,9 @@ public class WorldBindWardenEndpointTests : IAsyncLifetime
         var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
         string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
         FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v2.json")));
+            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
         FusionRpg.Core.World.WorldTuningHub.Configure(
-            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v4.json")));
+            FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json")));
         FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
             FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
         // Server.Tests' own PowerAndAptitudeTuningTestBootstrap module initializer configures

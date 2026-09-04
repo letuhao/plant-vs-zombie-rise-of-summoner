@@ -85,10 +85,10 @@ public enum UnitClass
     ///
     /// <para>No context part: it is a plain whole count, and a flow's own sign/arrow/colour belong to
     /// `LoamFigure`'s composition rather than to this class. Covers `WorldSectorDto`'s loam production
-    /// / upkeep / net / stock blocks and the four `…Milli`-named loam-cost fields
-    /// (`StructureDef.CostMilli`, `LoamPolicy.WellCostMilli` / `WaystationCostMilli` /
-    /// `GranaryCostMilli`) — those names say milli but carry whole loam, which is precisely the
-    /// misreading `BuildResolver.cs:101,115` exists downstream of.</para>
+    /// / upkeep / net / stock blocks and `StructureDef.Cost` / `LoamPolicy.WellCost` /
+    /// `WaystationCost` / `GranaryCost` — those fields were named `…CostMilli` and said milli while
+    /// carrying whole loam, which is precisely the misreading `BuildResolver.cs:101,115` exists
+    /// downstream of; renamed off the misleading suffix world-map W57 (2026-09-05).</para>
     ///
     /// <para>⛔ **Added here 2026-09-04, later than it should have been.** The doc and the TypeScript
     /// `UnitClass` union both gained it on the authorisation date; this enum did not, so

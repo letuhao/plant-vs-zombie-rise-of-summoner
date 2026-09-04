@@ -98,6 +98,16 @@ public static class UniqueEquipmentCatalog
     /// <summary>
     /// Build mods_json: keep existing absolutes (nested + flat root keys); replace grants from equipped slots.
     /// GrantIds are stamped <c>base:slot</c> so the same stub in two slots does not collapse.
+    ///
+    /// <para><b>`mods-absorption` (spec-mods-absorption.md) — the grant half stops here for
+    /// atom-backed items.</b> An item <see cref="TryGetAtomBackedContainerId"/> maps now grants
+    /// exclusively through <c>effect_binding</c>
+    /// (<c>RpgStore.ReconcileUniqueEquipmentAtomBindingsUnlocked</c>, called alongside this rebuild on
+    /// every equip/unequip) — this method never writes that same item's grant into <c>mods_json</c> too,
+    /// or the actor would carry the same slot's effect through both paths at once, exactly the
+    /// double-grant the migration exists to close. Only an item with no real atom behind it (today,
+    /// only <c>stub.hp_charm</c> / <c>relic.cracked_seal</c>, both <c>fx.entity_atk</c>) still gets a
+    /// grant here — the legacy path stays live for whatever the atom layer does not yet cover.</para>
     /// </summary>
     public static string BuildModsJson(
         string? existingModsJson,
@@ -144,6 +154,10 @@ public static class UniqueEquipmentCatalog
             string slot;
             try { slot = NormalizeSlot(slotRaw); }
             catch { continue; }
+            // Atom-backed: the reconciler already binds this slot's real effect through
+            // effect_binding — never also stamp it into the legacy grant blob (the double-grant
+            // invariant this module exists to close).
+            if (TryGetAtomBackedContainerId(itemId, out _)) continue;
             if (!TryGetGrant(itemId, out var g)) continue;
             g.GrantId = $"{g.GrantId}:{slot}";
             grants.Add(g);

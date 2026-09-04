@@ -1209,28 +1209,164 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     combined W52-W54 full-suite baseline is captured once, cleanly, under W56's own Done note instead of
     being re-run three more times for marginal benefit.
 
-- [ ] **Task W55: The A8 invariant — development must pay**
+- [x] **Task W55: The A8 invariant — development must pay**
   - Description: `empire-economy-ssot.md:318` is binding: **development must raise yield faster than it raises upkeep, or nobody will ever develop.** Today only the upkeep half exists (`LoamPolicy.cs:52-53`). Add `DevelopmentYield` reading a new `development` block **in the same file** as `upkeep.developmentUpkeepPerLevel` — `data/tuning/loam.v{n}.json` — because the invariant is a comparison between two numbers and splitting them across files makes it unverifiable by reading. The file's `_meta.owner` gains this spec as a second owner. Ships at level 0 for every shipped sector, so it moves nothing until W53's producer runs.
   - Acceptance: **the invariant is asserted across the whole authored level range, not at one sample point** — for every level, marginal yield exceeds marginal upkeep; the test fails if either tuning row is edited to break it, and its message names A8; every magnitude on the path is `long` and divides by 1000 exactly once, last.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `python scripts\audit-magic-numbers.py --summary`
   - Files: `data/tuning/loam.v2.json`, `src/FusionRpg.Core/World/Growth/DevelopmentYield.cs`, `src/FusionRpg.Core/World/Loam/LoamProduction.cs`, `tests/FusionRpg.Core.Tests/World/DevelopmentYieldTests.cs`.
   - Dependencies: W53.
   - Scope: M.
+  - **Done (2026-09-04) — one citation correction found before writing anything**: A8 actually
+    lives at `empire-economy-ssot.md:348` (its own invariant-registry table row), not `:318` — the
+    text at `:318` is unrelated; confirmed by grep before trusting the task's own line number.
+    **Schema addition, hand-authored, matching W42/W51's own precedent** (`publish.py` refuses to
+    invent an undocumented key): `data/tuning/loam.v1.json` → `loam.v2.json`, carrying every v1 key
+    byte-identical plus a new `development.yieldPerLevel` block. `LoamTuning.cs` gained
+    `LoamDevelopmentTuning(long YieldPerLevel)` + the `Development` field on `LoamTuning`, loader
+    parsing, and `LoamPolicy.DevelopmentYieldPerLevel`. **`DevelopmentYield.For` takes
+    `yieldPerLevel` as an explicit parameter** rather than reading `LoamPolicy` internally — the
+    identical split this whole module already establishes for `RecruitPolicy.PulseFor`/
+    `GrowthPhases.Growth` — found necessary specifically because the real shipped rate (6) can never
+    overflow within `developmentLevel`'s own `int` range, so a genuine forced-overflow test needed a
+    huge *local* rate rather than mutating the shared `LoamPolicy` singleton (the exact xUnit-
+    parallelism hazard W43's own Done note already documents avoiding). Wired additively into
+    `LoamProduction.For(WorldSector)` (the truth overload only — the belief overload has no
+    `DevelopmentLevel` parameter at all, a genuine, documented, out-of-scope gap: see below).
+    **`yieldPerLevel` chosen as 6, not a rounder number, and the reason is load-bearing**: A8 requires
+    it to exceed `developmentUpkeepPerLevel`(5), and it is also exactly double
+    `DangerUpkeepPerBand`(3) — a deliberate choice, not a coincidence, explained next.
+    **The real defect this task's own wiring exposed, found by running the suite rather than
+    assumed safe**: four pre-existing Loam-domain test fixtures
+    (`LoamForecastTests.cs`, `LoamPhasesTests.cs`, `LoamTextureTests.cs`, `SustainResolverTests.cs`)
+    used a sourceless sector's `DevelopmentLevel` purely as an upkeep-only "drag" lever, a design
+    assumption A8 makes permanently false: any `yieldPerLevel > developmentUpkeepPerLevel` makes
+    *every* positive `DevelopmentLevel` a genuine net contributor from now on, for any legal value.
+    Repaired with an exact, derived compensation rather than trial and error: `DangerBand += 2 *
+    DevelopmentLevel` (the `2` is `DevelopmentYieldPerLevel(6) / DangerUpkeepPerBand(3)`, exact at
+    this real tuning) reproduces each fixture's original pre-W55 upkeep-minus-production balance
+    number-for-number — verified directly, not merely argued: `SustainResolverTests`' own exact
+    `"loam.shortfall:3"` assertion stayed `3` unchanged after the repair. The identical pattern was
+    also found and fixed in `tests/FusionRpg.Server.Tests/WorldCedeForecastTests.cs` (all four Dave
+    sectors shared `development_level = 20`; `danger_band` moved `4` → `44`), which in turn uncovered
+    a second, genuinely pre-existing, unrelated gap: that test's own tuning bootstrap has never
+    called `RecruitPolicy.Configure` since `Growth` stopped being a no-op (world-map W50, before this
+    task), so any turn commit reaching `Growth` threw `"RecruitPolicy.Configure(...) has not run"` —
+    masked until now because the test's own original A8 regression made it fail one assertion
+    earlier, before ever reaching a commit. Fixed with the same one-line addition every other
+    bootstrap already carries.
+    New tests: `DevelopmentYieldTests.cs` (`World/`, 6 tests) — the level-times-rate formula; the
+    real shipped rate already satisfies A8; **the invariant walked across a 2000-level range**,
+    marginal yield vs. marginal upkeep at every level, using the real configured rate rather than a
+    hand-picked local pair (the acceptance's own "not at one sample point," and a future edit to
+    either formula that broke linearity would be caught at the exact level, not merely on average);
+    every magnitude typed `long`; a genuinely forced overflow (via an injected huge local rate)
+    throws `OverflowException` rather than wrapping. `LoamProductionTests.cs` gained 5 cases: identity
+    at `DevelopmentLevel` 0; a developed sector yields more by exactly the development term; a
+    developed, sourceless sector yields the term alone; an unowned developed sector still yields
+    nothing (G-B governs the whole sum, not just the Rootbed half); and the belief-overload gap
+    named above, proven directly (`truth - DevelopmentYield.For(...) == belief`) rather than left
+    for a future session to rediscover from scratch. `dotnet test tests\FusionRpg.Core.Tests --filter
+    "FullyQualifiedName~DevelopmentYield|FullyQualifiedName~LoamProductionTests"` → **16/16 passed**.
+    Full `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **865/865
+    passed** (this task's own closing count, before W56's own additions). `dotnet test
+    tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~World|FullyQualifiedName~Loam"` →
+    **88/88 passed**, confirming the golden acceptance run stayed byte-identical. `dotnet test
+    tests\FusionRpg.Server.Tests --filter FullyQualifiedName~WorldCedeForecastTests` → **1/1 passed**
+    (after both fixes above); full `dotnet test tests\FusionRpg.Server.Tests` → 99/125 (26
+    pre-existing, unrelated — atom/loadout/reforge content issues, the identical set W46's own Done
+    note already recorded, confirmed by name). `python scripts\audit-overflow.py` → **0 critical**,
+    no new finding in any file this task touched. `python scripts\audit-magic-numbers.py --summary`
+    → **17 total, none in the world domain** — the new `yieldPerLevel`/blast-radius keys all reach
+    their call sites through named `LoamPolicy` accessors. **Blast radius, found by a repo-wide grep
+    before editing rather than discovered file by file**: both host pins (`Program.cs`, `RpgHost.cs`),
+    3 `ContractTuningTestBootstrap.cs` copies, 12 `Server.Tests` files' `Read("loam.v1.json")` call
+    sites, and one doc-comment citation in `WorldCatalogE2ETests.cs` — all moved to `loam.v2.json`
+    (later re-pointed to `v3.json` by W56 in the same session pass, tracked there).
 
-- [ ] **Task W56: The yield structure kinds the reward layer needs**
+- [x] **Task W56: The yield structure kinds the reward layer needs**
   - Description: the structure **mechanism** is done and wired — `StructureCatalog`, `WorldSlot.StructureId` + `ConstructionTurnsRemaining`, `BuildResolver.Run` called at `TurnEngine.cs:280`, and `Rule14StructureSlotKindMatches` validating it. What is missing is rows and kinds. Add a new `StructureKind` for yield structures (a soul conduit, extractors, a hatchery on a lair) as catalog rows, plus the **flat structure-only yield field** `spec-structure-substrate.md` explicitly deferred to *"a new field added when there is a real row to test it against"* — this is that row. **Note the audit correction:** `StructureCatalog.cs` defers to `loam-structures`, not to this module; the deferral to `sector-development` is the substrate spec's. This module's structures produce **loam and recruits only** — the reward layer (souls, essence, materials) is unassigned and stays out (see the spec's fourth open question, which is not this phase's to answer).
   - Acceptance: every new row validates against `Rule14StructureSlotKindMatches` and its `RequiredSlotKind`; the flat yield field is read by `LoamProduction` and defaults to 0 so no existing structure changes; a hatchery on a lair multiplies that sector's recruit pulse through W43's policy rather than through a second code path; content is data — no `switch` over structure ids.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Structure`
   - Files: `src/FusionRpg.Core/World/Loam/StructureCatalog.cs`, `src/FusionRpg.Core/World/Loam/LoamProduction.cs`, `data/tuning/loam.v2.json`, tests.
   - Dependencies: W55.
   - Scope: M.
+  - **Done (2026-09-04) — one real path correction, same as W52's**: `StructureCatalog.cs` actually
+    lives at `src/FusionRpg.Core/World/StructureCatalog.cs`, not under a `Loam/` subfolder as this
+    task's own Files list states — confirmed by reading it before editing, matching the audit
+    correction this task's own Description already flags for the *deferral* (loam-structures, not
+    this module).
+    Added one new `StructureKind.Yield` (matching the task's own singular "a new StructureKind"
+    wording — soul conduit, extractor and hatchery all share it, distinguished by data, never a
+    `switch`) and `StructureDef.FlatYieldPerTurn` (`long`, defaults 0). Three new rows:
+    `soul-conduit` (`RequiredSlotKind: EssenceDeposit`), `extractor` (`ShardVein`), `hatchery`
+    (`Lair`) — every cost/build-turn/yield number reached its row through a new named `LoamPolicy`
+    accessor, never a literal in the catalog itself. **Schema addition, hand-authored**:
+    `loam.v2.json` → `loam.v3.json` (W55's own file, same session pass), carrying v2 byte-identical
+    plus nine new `structures.*` keys. `hatcheryYieldMultiplierMilli` (1500) is deliberately real,
+    non-identity content — a hatchery is meant to visibly matter the moment it is built, unlike the
+    every-other-number-here provisional-placeholder convention, stated explicitly in the file's own
+    `_meta.note` so a future reader does not mistake it for an oversight.
+    **The flat-yield field wired into `LoamProduction.For` as its own loop, separate from the
+    existing Rootbed-only loop**: unlike `YieldMultiplierMilli` (which only ever multiplies a
+    Rootbed's own seep), `FlatYieldPerTurn` is read from *every* active structure regardless of slot
+    kind — a soul conduit sits on an EssenceDeposit, an extractor on a ShardVein, neither a Rootbed,
+    so the existing loop's `Kind != SlotKind.Rootbed continue` guard would have silently discarded
+    both. Defaults to 0, so every structure minted before this task (including the three from
+    `loam-structures`) is untouched — proven, not merely argued, by a dedicated test reading all
+    four pre-existing ids' own `FlatYieldPerTurn` back as 0.
+    **The hatchery/recruit-pulse wiring is the acceptance's own most specific clause, and it is
+    implemented exactly as worded**: a new `GrowthPhases.EffectiveLairMultiplierMilli` helper folds
+    any active hatchery's own `YieldMultiplierMilli` into the *same* `lairMultiplierMilli` value
+    `RecruitPolicy.PulseFor` (W43, unchanged) already takes as a parameter — composed as one combined
+    per-mille product with a single division at the end, widened to `long` before multiplying,
+    `checked` — rather than adding a second multiplier parameter to `PulseFor` or a parallel formula
+    elsewhere, which is precisely what "through W43's policy rather than through a second code path"
+    forbids. A hatchery on an *intact* lair contributes nothing (matching `PulseFor`'s own
+    `lairCleared` gate, never special-cased separately) and a hatchery still under construction
+    contributes nothing either (the same `ConstructionTurnsRemaining` check every other structure
+    read already uses).
+    New tests, all in `LoamStructuresTests.cs` (this module's own established test home, matching
+    W48's precedent of extending rather than forking): the three new rows are known and carry
+    `StructureKind.Yield`; each validates against the real, full sixteen-rule `WorldValidation.Validate`
+    pipeline on a real named slot of the shipped `first-light` template (ember-hollow's
+    essence-deposit for soul-conduit, ember-hollow's lair for hatchery, verdant-shelf's shard-vein
+    for extractor — not a hand-built minimal fixture, so all sixteen rules run, not Rule14 alone) —
+    the private `Rule14StructureSlotKindMatches` method is not directly callable from a test, so this
+    is the same technique `WorldInvariantTests.cs`'s own existing Rule14 tests already use, not a new
+    one; a hatchery on a non-Lair slot fails, message naming the sector; a soul conduit's flat yield
+    is additive; an extractor under construction contributes nothing yet, and contributes its flat
+    yield the exact pass it finishes; every pre-existing structure's `FlatYieldPerTurn` reads back as
+    0; an active hatchery on a cleared lair multiplies the sector's recruit pulse by the exact
+    composed per-mille product (asserted numerically, not just "went up"); a hatchery still under
+    construction, and an intact lair's hatchery, both contribute no extra multiplier at all.
+    `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~Structure` → **54/54 passed**
+    (the task's own stated Verify command, exactly as written). Full `dotnet test
+    tests\FusionRpg.Core.Tests --filter FullyQualifiedName~World` → **877/877 passed** (up from W55's
+    865, +12 across the new `LoamStructuresTests.cs` cases). Full `dotnet test
+    tests\FusionRpg.Core.Tests` → **6304/6304 passed** — genuinely clean, no pre-existing failure
+    remaining at all (the `ClassSystem`/`Demons`/`Atoms` failures earlier tasks' own Done notes
+    recorded as a standing, separate, concurrent stream's own defects have since cleared on their own,
+    confirming those really were transient and not this phase's). `dotnet build
+    src\FusionRpg.Core`/`src\FusionRpg.Data` → both green. `python scripts\audit-overflow.py` →
+    **0 critical**, no new finding. `python scripts\audit-magic-numbers.py --summary` → **17 total,
+    none in the world domain** — every one of the nine new structure numbers reaches its catalog row
+    through a named `LoamPolicy` accessor, confirmed by running the audit, not assumed from the
+    pattern alone. **A large, unrelated, actively-in-progress concurrent stream** (an XP-curve
+    `double` → `long` refactor spanning `ProgressionTuning.cs`, `RpgProgression.cs`,
+    `RpgStore.Progression.cs`, `RpgStore.UniqueActors.cs`, `ExpeditionEndpoints.cs` and all three
+    `ContractTuningTestBootstrap.cs` copies' own unrelated `XpCurveParams` lines) broke every
+    project's build for a real stretch of wall-clock time mid-verification here — confirmed
+    unrelated by content and by `git status` (none of those files are this task's own), and confirmed
+    transient by polling `dotnet build` every 15s until it cleared on its own rather than assumed to
+    clear; every number in this Done note comes from runs made once it genuinely had.
 
 - [ ] **Task W57: Rename the `*CostMilli` tuning keys that are not per-mille (ask-first)**
   - Description: every `*CostMilli` in `data/tuning/loam.v1.json`'s `structures` block — `wellCostMilli` 200, `waystationCostMilli` 300, `granaryCostMilli` 150 — is a **whole loam unit, not a per-mille**: `StructureDef.CostMilli` is compared directly against `WorldEntity.CarriedLoam` at `BuildResolver.cs:101`, and that is a plain count. The maths is right and the name lies, which is exactly the kind of name that later grows a spurious `/ 1000`. This is a `publish.py` migration plus a loader edit, not a redesign. **The spec files this under ask-first**, so it does not land without the owner saying go.
   - Acceptance: the keys read `*Cost` and the field reads `Cost`; every structure cost comparison is unchanged in value, proven by the existing build goldens staying byte-identical; the old key names appear nowhere in `src/`, `data/tuning/` or the docs that cite them.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `python scripts\audit-magic-numbers.py --summary`
   - Files: `data/tuning/loam.v2.json`, `src/FusionRpg.Core/World/Loam/StructureCatalog.cs`, `src/FusionRpg.Core/World/Loam/LoamPolicy.cs`, `docs/architecture/loam/spec-structure-substrate.md`.
-  - Dependencies: W56, and owner sign-off.
+  - Dependencies: W56, and owner sign-off. **✅ Authorized 2026-09-04** (asked directly via
+    `AskUserQuestion`, answered "Yes, do it").
   - Scope: S.
 
 - [ ] **Task W58: Turn the numbers on — `RulesetVersion` advances exactly once**
@@ -1238,7 +1374,11 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
   - Acceptance: `RulesetVersion` is exactly one greater than whatever it read, and a test asserts the stored-versus-engine replay refuses across the bump rather than fabricating a report; the re-bless is **triaged in advance** with a predicted-delta writeup naming which goldens move and why, and the prediction is checked against the actual diff rather than assumed; `decisions.md` carries the row; this is the **second and final** re-bless of the phase.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests` · `dotnet test tests\FusionRpg.E2E.Tests`
   - Files: `src/FusionRpg.Core/World/Turn/TurnEngine.cs`, `data/tuning/world.v3.json`, `docs/architecture/decisions.md`, the golden constants.
-  - Dependencies: W50, W49, W55, and the first two owner decisions.
+  - Dependencies: W50, W49, W55, and the first two owner decisions. **✅ All satisfied 2026-09-04**:
+    recruit-rate shape (lair-heavy burst) and season scope (yield + upkeep + movement — though only
+    the upkeep seam is built; yield/movement stay out of this task's own scope per that decision's
+    own text) were decided earlier the same day, and the bump itself was asked and authorized
+    directly via `AskUserQuestion` ("Yes, do it").
   - Scope: M.
 
 - [ ] **Task W59: Forty turns, and a legion count that is measured rather than enforced**

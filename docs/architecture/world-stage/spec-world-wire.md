@@ -212,11 +212,12 @@ Structures (id, name, kind, required slot kind, cost, yield multiplier, capacity
 strength bands (index, name, floor, ceiling) and lane types.
 
 **The `CostMilli` trap is the reason this route matters and the reason it must be named carefully.**
-`StructureDef.CostMilli` (`StructureCatalog.cs:26`) holds **whole loam units**, not per-mille — it is
+`StructureDef.Cost` (`StructureCatalog.cs:26`) holds **whole loam units**, not per-mille — it is
 compared directly against `CarriedLoam` at `BuildResolver.cs:101` and subtracted at `:115`. The DTO
-field is named **`Cost`**, not `CostMilli`, and its XML doc says the unit in words. Renaming the Core
-constant is out of scope; misleading a renderer by 1000× on the way out is not acceptable, and GG-46
-is a Tier-1 gate.
+field is named **`Cost`**, and its XML doc says the unit in words. **Renamed 2026-09-05 (world-map
+W57)**: the Core field was `CostMilli`, matching the DTO's own name now instead of lying by 1000×
+across the wire boundary — was out of scope when this was written, is not anymore, and GG-46 stays a
+Tier-1 gate regardless.
 
 ### 6. The turn-report fixture
 
@@ -331,9 +332,10 @@ visible to whom, because that is the file's whole subject. Magnitudes are `long`
 public long LoamCapacity { get; init; }
 
 /// <summary>
-/// Whole loam units, despite `StructureDef.CostMilli`'s name — the model compares it directly
-/// against a legion's `CarriedLoam` (`BuildResolver.cs:101`). Named `Cost` here on purpose:
-/// a renderer trusting `Milli` is wrong by 1000×.
+/// Whole loam units — the model compares it directly against a legion's `CarriedLoam`
+/// (`BuildResolver.cs:101`). Named `Cost` here on purpose (matching `StructureDef.Cost` since
+/// world-map W57 renamed it off its former, misleading `CostMilli` name): a renderer trusting
+/// `Milli` would be wrong by 1000×.
 /// </summary>
 public long Cost { get; init; }
 ```

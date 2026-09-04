@@ -1,6 +1,6 @@
 # Spec: `siege-seam`
 
-**Module 6 of 21 · level 2 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
+**Module 6 of 29 · level 2 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -106,6 +106,38 @@ public sealed record BoardProjection
 **The world sends inputs, not a grid.** `district-layout` is a pure function of those inputs, so both
 sides can derive the identical board without the world module depending on `Core/Battle`. This also
 keeps the dependency arrow pointing the way the map drew it.
+
+### 1b. `BattleRequest` also carries the DEPOT BUDGET
+
+§5.13's own diagram, and it is the mechanism that keeps *"combat never writes world state"* true while
+letting a side build during a battle:
+
+```text
+world turn  --BattleRequest{ budget }-->  siege board
+                                          spends internally
+            <--OutcomeRecord{ spent }--   world debits
+```
+
+```csharp
+/// <summary>
+/// What each side may spend during this battle. Null for every battle kind without a board.
+///
+/// <para><b>An in-battle build may NOT debit `WorldSector.LoamStock` or `WorldEntity.CarriedLoam`
+/// directly</b> — §2 rule 7: "Combat never writes world state. It does not claim sectors, spend
+/// shards, or move legions." The budget crosses in, the SPEND crosses back, and only the world
+/// debits. siege-economy owns the reconciliation.</para>
+/// </summary>
+public IReadOnlyList<SideBudget>? Budgets { get; init; }
+```
+
+**The asymmetry is authored here, not invented downstream** (§5.13):
+
+| Side | Source | Consequence |
+|---|---|---|
+| **Defender** | the sector's own `LoamStock` / `RubbleStock` / `IronworkStock` — at home, supplied | **Blockading production is how an attacker stops them rebuilding** |
+| **Attacker** | `WorldEntity.CarriedLoam` — what the legion marched in with | Finite, and why decision 27's other three paths exist |
+
+Still unhashed and unpersisted, so still zero goldens.
 
 ### 2. `BattleSideOutcome` gains a withdrawal, and it is not a rout
 
@@ -254,6 +286,9 @@ on `BattleRequest` · let `Withdrawn` imply `Routed` · construct a `BattleReque
 | `District_kind_puts_a_sector_id_in_the_sector_slot` | the W13 bug class, not reintroduced |
 | `Battle_id_format_is_shared` | `BattleKinds.IdFor` used for district too — the drift its colocation exists to prevent |
 | `Board_projection_round_trips` | including the empty-slots case |
+| `Budget_crosses_in_and_spend_crosses_back` | §5.13's diagram, both directions |
+| `Defender_and_attacker_budgets_come_from_different_sources` | the blockade asymmetry |
+| `No_battle_path_writes_world_stock_directly` | **§2 rule 7**, by source scan over the resolver namespace |
 
 ## Success criteria
 

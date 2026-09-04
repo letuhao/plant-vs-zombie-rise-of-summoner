@@ -141,11 +141,35 @@ python scripts\audit-magic-numbers.py --domain aptitudes
 ## 7. Project structure
 
 ```text
-src/FusionRpg.Core/Combat/Guard/PoiseRuntime.cs        the pool, drain, regen, riposte conversion
-src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs  ResourceIds gains `poise` - AFTER the ADR
+src/FusionRpg.Core/Actions/Defence/PoiseLedger.cs      the cost path: flat commit, absorb drain, per-tick hold
+src/FusionRpg.Core/Actions/Defence/Riposte.cs          the riposte conversion (bounded ratio, PS-8 exempt)
+src/FusionRpg.Core/Actions/Cost/ActorResourcePools.cs  the pool itself - the six-resource SSOT, not a private dictionary
+src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs  ResourceIds - `poise` is registered (the ADR landed)
 data/tuning/aptitudes.v{n}.json                        recovery.families gains poise regen
-tests/FusionRpg.Core.Tests/Combat/Guard/PoiseRuntimeTests.cs
+tests/FusionRpg.Core.Tests/Actions/PoiseLedgerTests.cs
+tests/FusionRpg.Core.Tests/Actions/PoiseTerminationTests.cs
+tests/FusionRpg.Core.Tests/Actions/DefenceActionRiposteTests.cs
 ```
+
+> **Amended 2026-09-05 (`battle-tempo` `poise-unification`).** This module originally shipped as
+> `Combat/Guard/PoiseRuntime.cs` — a self-contained pool with its own `Dictionary<string, long>`,
+> built inert (no production caller) ahead of the action layer that would trigger it. When
+> `spec-defence-actions.md`'s T25/T26 later built the SAME three-part cost against
+> `ActorResourcePools` (the resource SSOT `PoiseRuntime` predates), the two never merged — a real,
+> named fork (`battle/audit-2026-08-21.md`-style finding **D9**), harmless only because both stacks
+> had zero callers. `battle-tempo`'s `reaction-lane` module was the first caller in line, which is
+> what forced the reconciliation: `PoiseRuntime.cs` and its test file are **deleted**;
+> `PoiseLedger`/`Riposte`/`ActorResourcePools` are the surviving, single path. Every property this
+> spec's §9 table names was migrated, not dropped — see
+> [spec-poise-unification.md](../battle-tempo/spec-poise-unification.md) §6 for the mapping.
+>
+> **One behavioural decision fell out of the merge, and it favours this spec's OWN §3 intent over
+> the code `PoiseRuntime` shipped:** its `Commit` floored at zero instead of refusing, justified in
+> its own comment as a PS-8 requirement (*"a 'cannot afford to guard' refusal would be exactly [a
+> hard cap] in a different shape"*). That reasoning does not hold — PS-8 forbids progression
+> **ceilings**, not affordability, and `stamina`/`qi` already refuse through this exact
+> `ActorResourcePools.TrySpend` path without anyone calling that a cap. The surviving `TryCommit`
+> **refuses** (all-or-nothing), matching every other resource in the hub.
 
 **`PoiseRuntime` is shaped after `ShieldRuntime`, deliberately.** Ideal §7 records that shields were
 closed by **phase decomposition** — effective HP plus a gate on reflection — and that *"`poise` will
@@ -189,7 +213,7 @@ F2). `poise` collides with nothing in `src/`.
 | 6 | `Riposte_scales_with_the_ladder` | An uncapped pool converting a bounded share stays uncapped. PS-8 |
 | 7 | `Poise_at_zero_applies_exhaustion_not_death` | §2's table — `hp`'s exemption does not transfer |
 | 8 | `Termination_invariant_holds_with_poise_live` | Re-run `balance-guard`'s hard half. **A new recovery source is exactly what could break it** |
-| 9 | `Guard_costs_stamina_before_the_ADR` | The documented fallback works, so this module is not a hard block on the program |
+| 9 | `Guard_costs_stamina_before_the_ADR` | The documented fallback works, so this module is not a hard block on the program. ⚠️ **Stale after the 2026-09-05 amendment above** — the ADR landed and `PoiseRuntime`'s own copy of this test's premise ("poise not yet registered") was already false before this note; `poise-unification`'s migration recorded it as not-applicable rather than porting a test with a false premise |
 
 **Test 8 is the one that must not be skipped.** `poise` regen is a recovery term, and the termination
 invariant is `damage − recovery`. Adding a recovery source without re-running the hard criterion is how

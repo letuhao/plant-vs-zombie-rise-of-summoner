@@ -237,16 +237,32 @@ public static class EffectOverlayMerge
             "amount", "element", "priority", "sourceClass", "durationTicks", "refillOnMerge",
             "target", "chance", "icd_ms", "max_stacks", "filters"
         },
-        // E41 (spec-ui-attach-point.md §2b): ui.present's own overlay allowlist. Found missing for
-        // ModifyMatch/WaveControl/BulletModify (E35/E36/E37) while wiring this one — none of the
-        // three has an entry here either, so a real Grant() of match.modify/wave.control/bullet.modify
-        // content would hit this same "unknown action" refusal; those three kinds are still unwired
-        // further down this specific funnel (out of this module's scope — noted, not fixed).
         [EffectActions.PresentUi] = new(StringComparer.OrdinalIgnoreCase)
         {
             "op", "amount", "tag", "bannerId", "meterId", "ratio", "durationMs",
             "chance", "icd_ms", "max_stacks", "filters"
-        }
+        },
+        // Found 2026-09-04 while re-verifying E41's own report: this dictionary is not merely an
+        // overlay-key allowlist consulted on the Runner path (as AtomCompiler.cs's own nearby comment
+        // about a DIFFERENT three kinds might suggest at a glance) — EffectBag.Grant calls
+        // EffectOverlayMerge.TryValidateOverlayForDef(def.Actions, ...) UNCONDITIONALLY, for every
+        // grant, and TryValidateOverlayForDef fails with "unknown action <X>" the instant ANY action
+        // in the def's compiled list is missing from this dictionary, even against an EMPTY overlay.
+        // ModifyMatch (E35), WaveControl (E36) and BulletModify (E37) had no entry here, so any real
+        // Grant() of match.modify/wave.control/bullet.modify content — the only way any of that
+        // shipped work ever runs in a live match — threw at the very first line of Grant, regardless
+        // of runtime, regardless of overlay content. Each module's own tests never caught this because
+        // they exercise AtomCompiler.Compile / InjectorEffectActionSink.Execute directly, never
+        // EffectBag.Grant. Keys mirror each kind's own compiled action params exactly (ToOpcodeShape
+        // only rewrites stat.modify/stat.derived, so all three kinds' authored params travel unchanged
+        // — confirmed against each kind's own AtomKindRegistry.cs ParamSchema and Compilability.cs
+        // comment), plus the same generic chance/icd_ms/max_stacks/filters every other entry carries.
+        [EffectActions.ModifyMatch] = new(StringComparer.OrdinalIgnoreCase)
+            { "field", "amount", "chance", "icd_ms", "max_stacks", "filters" },
+        [EffectActions.WaveControl] = new(StringComparer.OrdinalIgnoreCase)
+            { "op", "wave", "timerMs", "enabled", "chance", "icd_ms", "max_stacks", "filters" },
+        [EffectActions.BulletModify] = new(StringComparer.OrdinalIgnoreCase)
+            { "op", "amount", "bulletType", "moveWay", "chance", "icd_ms", "max_stacks", "filters" }
     };
 
     public static bool TryValidateOverlayForDef(

@@ -150,11 +150,13 @@ machinery that exists and is inert — never a wall.
   (`MovementPhase.cs:105, 195`), so `Believed(...)` returns null and the line is filtered out for
   **everyone** — meaning the client's existing `halt` keyframe can never fire against a live server.
 
-**A GG-46 hazard already sitting in the data.** `StructureDef.CostMilli` (`StructureCatalog.cs:26`)
-and `LoamPolicy.WellCostMilli` / `WaystationCostMilli` / `GranaryCostMilli` (`LoamPolicy.cs:106, 109,
-126`) are named `…Milli` but hold **whole loam units** — compared directly against `CarriedLoam` at
-`BuildResolver.cs:101` and subtracted at `:115`. Any renderer that trusts the name is wrong by 1000×.
-This is exactly the ambiguity GG-46 exists to catch, and it is in the model, not the UI.
+**A GG-46 hazard that was sitting in the data, fixed 2026-09-05 (world-map W57).**
+`StructureDef.Cost` (`StructureCatalog.cs:26`) and `LoamPolicy.WellCost` / `WaystationCost` /
+`GranaryCost` (`LoamPolicy.cs:106, 109, 126`) were named `…CostMilli` but held **whole loam units** —
+compared directly against `CarriedLoam` at `BuildResolver.cs:101` and subtracted at `:115`. A renderer
+trusting the old name would have been wrong by 1000×. This was exactly the ambiguity GG-46 exists to
+catch, and it was in the model, not the UI — the rename removed the trap at the source; the renderer
+must still never trust a field's own suffix for anything not yet renamed.
 
 ### 2.3 Real gap — no mechanism exists anywhere
 
@@ -626,9 +628,10 @@ are not interchangeable:
 - **counts and indices `int`** — `DangerBand`, `DevelopmentLevel`, `IntelAge`, `WardLevel`;
 - **enums-as-strings** in .NET casing (`"Watched"`, `"Held"`, `"Warband"`), not kebab.
 
-**And one trap that is in the model, not the UI:** `CostMilli` holds whole loam units. Any renderer
-trusting the name is wrong by 1000×. The magnitude renderer must **require** an explicit unit family
-and refuse without one — which is the enforcement GG-46 already specifies.
+**And one trap that was in the model, not the UI:** `StructureDef.Cost` (named `CostMilli` until
+world-map W57's rename) held whole loam units under a name that said milli. The magnitude renderer
+must **require** an explicit unit family and refuse without one regardless of any field's own name —
+which is the enforcement GG-46 already specifies.
 
 A number's **provenance** is a separate obligation (GG-49): *"why did my net income drop"* must be
 answerable from the interface. Nested tooltips are the genre's navigation answer and EL2's is the

@@ -185,7 +185,33 @@ public sealed class EffectBag
     public FusionRpg.Core.Combat.CombatActorResolve? ActorResolve { get; set; }
     public StatusRuntime? Status { get; set; }
     public IStatusRng StatusRng { get; set; } = new FixedStatusRng(0.0);
-    public Func<DateTimeOffset> UtcNow { get; set; } = () => DateTimeOffset.UtcNow;
+
+    /// <summary>
+    /// base-defense Gate 0 (audit C4): moved from an implicit wall-clock default at the FIELD to a
+    /// loud failure that forces every caller to choose explicitly at its own COMPOSITION ROOT — the
+    /// fix the audit itself names. The old default (`() => DateTimeOffset.UtcNow`) worked correctly
+    /// for the one caller that legitimately wants real time (`FusionRpg.Injector`'s live-PvZ host,
+    /// which now sets this explicitly, matching the three deterministic hosts that already did) — but
+    /// it meant a NEW deterministic composition root (a siege resolver, an expedition harness) could
+    /// silently inherit wall-clock status timing by forgetting one line, and nothing would fail until
+    /// a replay disagreed with itself on a different machine, weeks later.
+    ///
+    /// <para>Read only when a status-timed feature (<see cref="TickDots"/>,
+    /// <see cref="StatusEffectBridge.TryApplyFromGrant"/>) is actually exercised — a battle with no
+    /// `Status` wired never reads this and never throws, so boardless/statusless harnesses are
+    /// unaffected.</para>
+    /// </summary>
+    public Func<DateTimeOffset> UtcNow
+    {
+        get => _utcNow ?? throw new InvalidOperationException(
+            "EffectBag.UtcNow has not been set. Every composition root that times statuses must " +
+            "choose explicitly: a deterministic host wires this to its own SimulationClock/IEffectClock " +
+            "(see BattleEffects.cs, FoundationHarness.cs, SimEffectHost.cs); a live, non-replayed host " +
+            "(the injector) wires it to the real wall clock explicitly, on purpose, at its own " +
+            "composition root — never as a silent field default.");
+        set => _utcNow = value ?? throw new ArgumentNullException(nameof(value));
+    }
+    Func<DateTimeOffset>? _utcNow;
     /// <summary>Debug Selected ptr. Grant overlays with <c>target.mode=Selected</c> rewrite to Single.</summary>
     public string? SelectedPtr { get; set; }
 
@@ -757,10 +783,14 @@ public sealed class EffectBag
 
     public int TickDots()
     {
-        var now = UtcNow();
         var n = 0;
         if (Status != null)
         {
+            // Gate 0: UtcNow() moved inside this branch — it now throws if unset (see the property's
+            // own doc comment), and a caller with no Status wired must not pay for a clock it never
+            // uses. Reading it unconditionally, as this used to, meant every TickDots() call — even
+            // on a boardless/statusless harness — required a wired clock for a value it then discarded.
+            var now = UtcNow();
             var sink = new StatusFunnelPulseSink(
                 BoardSnapshot,
                 new EffectEventDto { Trigger = EffectTriggers.OnTimer, ChainDepth = 0 },

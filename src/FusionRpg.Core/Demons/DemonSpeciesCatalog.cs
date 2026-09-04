@@ -21,6 +21,17 @@ public sealed record DemonSpeciesDef
     public DemonAcquisition Acquisition { get; init; }
     public IReadOnlyList<string> Variants { get; init; } = Array.Empty<string>();
     public IReadOnlyList<string> TraitPool { get; init; } = Array.Empty<string>();
+
+    /// <summary>
+    /// `battle-tempo` `tempo-content` (spec-tempo-content.md §1.1) — the species' own attack tempo,
+    /// carried from `ConcreteSpecies.AttackIntervalMs` (already authored, already persisted; this
+    /// field is a PROJECTION into the compiled roster, not a new column on the corpus). `0` (the
+    /// default) means "no tempo carried" — a fixture or a pre-tempo snapshot — and
+    /// <see cref="Battle.SpeciesTempoProjection.SpeedFor"/> floors it to the default `turn.speed`
+    /// rather than throwing, so every existing `DemonSpeciesDef` literal in the tree stays valid
+    /// without being touched.
+    /// </summary>
+    public long AttackIntervalMs { get; init; }
 }
 
 public static partial class DemonSpeciesCatalog

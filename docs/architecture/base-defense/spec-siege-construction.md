@@ -1,6 +1,6 @@
 # Spec: `siege-construction`
 
-**Module 12 of 21 · level 5 · depends on `siege-seam`, `structure-state` · [base-defense-map.md](../base-defense-map.md)**
+**Module 12 of 29 · level 5 · depends on `siege-seam`, `structure-state` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -32,11 +32,11 @@ a besieging force that can meaningfully fortify.
 
 **Built.**
 
-- `StructureCatalog` + `StructureDef` — `CostMilli`, `BuildTurns`, `RequiredSlotKind`, validated at
+- `StructureCatalog` + `StructureDef` — `Cost`, `BuildTurns`, `RequiredSlotKind`, validated at
   load. Plus `MaxHp` / `BlocksMovement` from `structure-state`.
 - `WorldSlot.ConstructionTurnsRemaining` — *"a positive count means a structure was just built and is
   not yet active"*. **Declared, and this module is among its first real users.**
-- `LoamPolicy.WellCostMilli` etc. — the costed-build path, already working for loam structures.
+- `LoamPolicy.WellCost` etc. — the costed-build path, already working for loam structures (renamed off `*CostMilli` world-map W57 — every one is a whole loam unit, never a per-mille).
 - **Five actor resources**: `hp`, `stamina`, `hunger`, `spirit`, `qi` (resource hub). Paths 3 and 4
   spend these, and they are already modelled, already persisted, already regenerating.
 - The action system — `ActionCatalog`, `CompiledAction`, `ActionValidator`, container binding. Paths
@@ -245,7 +245,43 @@ a live gap rather than a hypothetical. Plus an admission arm and a resolver.
 the turn, read it back, assert it survived. That is the one test the five-site list cannot be silently
 half-done under.
 
-### 8. Pre-battle and in-battle both
+### 8. A builder killed mid-build loses everything — no refund
+
+§5.19 surveyed three shipped answers: the Days of Ruin Rig **restarts from scratch**; Total War
+Warhammer III **destroys in-progress construction** when the funding capture point is lost; SC2/WC3
+refund **75%** — but only on a *voluntary* cancel.
+
+**Total loss needs no new mechanism:**
+
+> *"`ActionRunner.Interrupt` already cancels every outstanding hit, and `InterruptRefundMilli` is
+> per-envelope — **set it to zero.**"*
+
+So a build envelope authors `InterruptRefundMilli = 0`. **Not a new rule — an authored value on a
+shipped field**, which is why it is a line in this spec and not a module.
+
+The distinction that matters: an **involuntary** interrupt (the builder dies, is displaced, is stunned)
+refunds nothing. Whether a **voluntary** cancel refunds is a separate authored value, and the shipped
+games only ever refund the voluntary case.
+
+### 9. `BuildResolver.cs` is the reference implementation — read it first
+
+§5.19: *"`BuildResolver.cs` is a complete, tested vertical slice — **ten refusal gates**, debit at
+`:115`, site written at `:124`, resolving in `Snapshot` so it can see a claim that landed the same
+turn. And **`build` passes all five plumbing sites**, unlike `bind-warden` — a new order kind inherits
+a working reference implementation rather than a hunt."*
+
+**Read it before writing `WorldCommandKinds.Assault`.** §7 cost 3's five sites are a checklist; this
+file is a worked example of all five done correctly.
+
+Two of its properties change under decision 14 and must be changed deliberately, not inherited:
+
+1. *"Build costs no action and no movement today"* — `BuildResolver` never touches
+   `MovementRemaining`. Decision 14 makes build cost an action.
+2. *"There is no per-entity order cap anywhere … **One legion may file 200 builds in a turn**"*
+   (`MaxCommandsPerSubmit = 200`). Pricing build in a unit's action closes this for the board; the
+   **world-scope** hole stays open and is named here so it is not mistaken for closed.
+
+### 10. Pre-battle and in-battle both
 
 Decision 5: *"pre battle and in battle, deployment cost unit action and requirement resources."*
 **One code path, two entry points.** Pre-battle deployment is round 0 with a larger action budget —
@@ -326,6 +362,8 @@ canonical rows · deployment costs an action on every path.
 | `Assault_command_survives_the_api_round_trip` | **§7 cost 3's five sites**, as one test rather than a checklist |
 | `Ironwork_round_trips_as_long_through_sqlite` | |
 | `Build_cost_overflows_loudly` | `OverflowException`, not a wrapped negative |
+| `Interrupted_build_refunds_nothing` | §5.19 — `InterruptRefundMilli = 0` on an involuntary interrupt |
+| `Killing_a_builder_destroys_the_progress` | the same rule from the player's side |
 | `A_besieging_legion_can_afford_more_than_one_structure` | **the audit finding, as a test.** Simulate a plausible besieging force and assert it can place at least four structures across the paths |
 
 That last test is unusual and deliberate: the finding that motivated decision 27 was economic, so the
@@ -343,16 +381,30 @@ acceptance is economic.
 
 ## Open questions
 
-**One, for the owner.** Can `ironwork` be traded between sectors, or is it strictly local?
+**None.** ✅ **Decision 38 (owner, 2026-09-04): `rubble` and `ironwork` trade FREELY between sectors.**
 
-Decision 19's *"a city, you can consider it as a planet, so it full economy and can run along, trading
-between sectors like city trading or stellar training"* points at tradeable. But if ironwork flows
-freely, **blockading a besieged city stops mattering** — which is the mechanic the owner protected
-explicitly in round 5 (*"not good if resource come from world map, the siege block resource cannot
-work"*).
+Decision 19's logistics framing wins: *"a city, you can consider it as a planet, so it full economy and
+can run along, trading between sectors like city trading or stellar trading."*
 
-**Recommendation: tradeable along supply lines only, which `siege-supply` already makes impossible for
-a besieged sector.** The blockade then falls out of the supply rule with no new mechanism — a besieged
-district is its own single-sector component and trades with nobody. That preserves both decisions at
-once and adds no code. **Confirm this reading; it is the one place two owner decisions come close to
-colliding.**
+> ### ⚠️ What this deliberately gives up, stated once so it is not rediscovered
+>
+> The recommendation was *supply-lines-only*, because free trade means **material denial stops being a
+> siege lever** — a besieged city ships walls in. Round 5 had protected that (*"the siege block
+> resource cannot work"*). **The owner chose free trade with that cost stated, and it is accepted.**
+>
+> **The blockade still has teeth, in two other places**, and this is why the choice is coherent rather
+> than a loss:
+>
+> | Lever | Still bites? | Why |
+> |---|---|---|
+> | **Loam** — life-force, upkeep, garrison top-up | **Yes** | `siege-supply` makes a besieged sector its own single-sector supply component. Loam does **not** trade freely; it is drawn per connected component |
+> | **Board income** — the nodes on the siege board | **Yes** | `siege-economy`: a besieger who garrisons a node takes its yield during the engagement |
+> | **Materials** — `rubble` / `ironwork` | **No** | Decision 38 |
+>
+> So a siege starves a base of **life and ground**, not of stone. That is a defensible shape — the
+> defender can keep rebuilding walls while their garrison goes hungry, which makes the loam clock the
+> real one and stops the siege from being decided by a stockpile check.
+>
+> **If a playtest shows sieges never resolve because walls are infinitely replaceable**, the narrow fix
+> is `refine.perTurnCap` and the labour cost of placement — both already tunables here — before
+> reopening decision 38.

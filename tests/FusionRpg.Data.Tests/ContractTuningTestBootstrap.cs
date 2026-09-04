@@ -17,6 +17,7 @@ using FusionRpg.Core.Progression;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Hud;
+using FusionRpg.Core.Items;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Ai;
@@ -71,6 +72,7 @@ internal static class ContractTuningTestBootstrap
         ActorHudTuningHub.Configure(DefaultActorHud);
         PowerTuningHub.Configure(DefaultPower);
         SealedCompactionPolicy.Configure(DefaultData);
+        ItemsTuningHub.Configure(DefaultItems);
     }
 
     public static readonly ContractTuning DefaultContracts = new(
@@ -119,11 +121,16 @@ internal static class ContractTuningTestBootstrap
         Fade: new LoamFadeTuning(
             RecoveryMilli: 20, BaseDecayMilli: 40, DecayPerDeficitUnitMilli: 1,
             DecayScaleDivisor: 5, MaxDecayMilli: 300, AbandonmentHorizonTurns: 3),
-        LegionSupply: new LoamLegionSupplyTuning(CarryPerBearer: 200, BurnPerMember: 10),
+        LegionSupply: new LoamLegionSupplyTuning(CarryPerBearer: 200, BurnPerMember: 10, BesiegedRationMilli: 1000),
         Structures: new LoamStructuresTuning(
-            WellYieldMultiplierMilli: 2000, WellCostMilli: 200, WaystationCostMilli: 300,
+            WellYieldMultiplierMilli: 2000, WellCost: 200, WaystationCost: 300,
             WellBuildTurns: 2, WaystationBuildTurns: 4, WaystationRangeHops: 3,
-            GranaryCostMilli: 150, GranaryCapacityBonus: 300, GranaryBuildTurns: 2),
+            GranaryCost: 150, GranaryCapacityBonus: 300, GranaryBuildTurns: 2,
+            // world-map W56, matches loam.v4.json's own soulConduit*/extractor*/hatchery* keys
+            // (renamed off *CostMilli by world-map W57 -- no value changed).
+            SoulConduitCost: 250, SoulConduitFlatYieldPerTurn: 20, SoulConduitBuildTurns: 3,
+            ExtractorCost: 200, ExtractorFlatYieldPerTurn: 15, ExtractorBuildTurns: 2,
+            HatcheryCost: 300, HatcheryYieldMultiplierMilli: 1500, HatcheryBuildTurns: 3),
         Texture: new LoamTextureTuning(
             ContagionPressurePerTurn: 60, MaxPressureMilli: 300, PressureDecayPerTurn: 40,
             SurgeDecayMultiplierMilli: 1500, UnmadeSpawnAfterTurns: 5,
@@ -158,15 +165,16 @@ internal static class ContractTuningTestBootstrap
             SpecialWeekChanceMilli: 250, SpecialMonthChanceMilli: 400, PlagueChanceMilli: 100),
         // world-stage W30, matches data/tuning/world.v2.json's own starting value.
         Movement: new MovementTuning(DowseBudgetMilli: 250),
-        // world-map W42/W51, matches data/tuning/world.v4.json's own identity/placeholder values.
+        // world-map W58, matches data/tuning/world.v5.json's own real growth-pulse/season values
+        // (world.v42/W51 identity is history now -- growth and the season upkeep term are live).
         Growth: new WorldGrowthTuning(
-            SeatPulsePerWeek: 0, LairMultiplierMilli: 1000, SpecialWeekMultiplierMilli: 1000,
+            SeatPulsePerWeek: 20, LairMultiplierMilli: 4000, SpecialWeekMultiplierMilli: 1500,
             RaiseCostPoints: 100, RaiseMemberHp: 110,
             LegionTarget: new LegionTargetTuning(Min: 6, Max: 10, ByTurn: 40)),
         Seasons: new WorldSeasonsTuning(
-            Count: 4, MonthsPerSeason: 3,
+            Count: 4, MonthsPerSeason: 1,
             YieldMilli: new[] { 1000, 1000, 1000, 1000 },
-            UpkeepMilli: new[] { 1000, 1000, 1000, 1000 },
+            UpkeepMilli: new[] { 1000, 850, 1100, 1400 },
             MovementMilli: new[] { 1000, 1000, 1000, 1000 }));
 
     public static readonly SoulEarnTuning DefaultSouls = new(
@@ -334,9 +342,9 @@ internal static class ContractTuningTestBootstrap
 
     public static readonly ProgressionTuning DefaultProgression = new(
         SchemaVersion: 1, Version: 1,
-        PlantCurve: new XpCurveParams(80.0, 32.0),
-        ZombieCurve: new XpCurveParams(70.0, 28.0),
-        PlayerCurve: new XpCurveParams(100.0, 45.0),
+        PlantCurve: new XpCurveParams(80, 32),
+        ZombieCurve: new XpCurveParams(70, 28),
+        PlayerCurve: new XpCurveParams(100, 45),
         Awards: new XpAwardsTuning(Kill: 12, Defeat: -100, Mower: -30, PlantPlace: 8, ZombieSpawn: 9));
 
     public static readonly BattleTuning DefaultBattle = new(
@@ -362,9 +370,16 @@ internal static class ContractTuningTestBootstrap
             ["classic-round"] = new(W: 1, WReact: 0, PassQuantum: 1, MaxPoints: null),
             ["galaxy-sync"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
             ["hybrid-atb"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
+            // base-defense F2/decision 29: w/wReact/passQuantum are real values (spec's own
+            // tunables table); MaxRounds/RoundDurationMs stay null (unset) so siege inherits
+            // the ruleset horizon until a real board exists to measure one on.
+            ["siege"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
         },
         // Wave E3: 0 = the shipped default, secondary contributes nothing, goldens unmoved.
-        HybridSecondaryWeightMilli: 0);
+        HybridSecondaryWeightMilli: 0,
+        // base-defense F2: matches data/tuning/battle.v2.json's shipped value exactly, so
+        // 50 * 4000 = 200_000 reproduces the pre-F2 MaxLoopIterations constant.
+        LoopGuardRoundMultiple: 4000);
 
     public static readonly SummoningTuning DefaultSummoning = new(
         SchemaVersion: 1, Version: 1,
@@ -422,6 +437,11 @@ internal static class ContractTuningTestBootstrap
         EliteTierThreshold: null,
         MagnitudeMidThreshold: 10.0,
         MagnitudeHighThreshold: 30.0);
+
+    // Matches data/tuning/items.v1.json exactly (magic-number fix, 2026-09-05) — the two values are
+    // unchanged from their prior ItemNameComposer/RoleFamilyTable consts (3, 5).
+    public static readonly ItemsTuning DefaultItems = new(
+        SchemaVersion: 1, Version: 1, RareNameThreshold: 3, DefaultMaxTier: 5);
 
     public static readonly DataTuning DefaultData = new(
         SchemaVersion: 1, Version: 1,

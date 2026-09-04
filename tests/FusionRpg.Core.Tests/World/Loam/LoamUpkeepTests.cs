@@ -1,5 +1,6 @@
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Loam;
+using FusionRpg.Core.World.Turn;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.World.Loam;
@@ -222,15 +223,27 @@ public class LoamUpkeepTests
     /// world-map W48: `BreakdownFor` reads the real season off `world.CurrentTurn` — every one of
     /// the four authored seasons must index cleanly into `Seasons.UpkeepMilli` (catching an
     /// off-by-one in the tuning array itself), at whatever turn actually lands in each.
+    ///
+    /// Updated by world-map W58, which turned the season upkeep term on for real
+    /// (data/tuning/world.v5.json: `upkeepMilli` [1000,1000,1000,1000] → [1000,850,1100,1400],
+    /// `monthsPerSeason` 3 → 1): the days-per-season and the expected multiplier are now both read
+    /// from the live configured tuning rather than hardcoded (`84` assumed `monthsPerSeason` stayed
+    /// 3 forever, and `1000` assumed every season stayed identity forever — both assumptions this
+    /// task's own tuning change breaks), matching `TurnCalendarSeasonTests`' own established
+    /// "read the real tuning, not a literal" discipline one file over.
     /// </summary>
     [Theory]
     [InlineData(0)] // season 0
-    [InlineData(84)] // season 1 (a season is 7*4*3 = 84 days at world.v4.json's shipped tuning)
-    [InlineData(84 * 2)] // season 2
-    [InlineData(84 * 3)] // season 3
-    [InlineData(84 * 4)] // wraps back to season 0
-    public void The_truth_overload_reads_the_real_season_for_every_authored_season_index(int turn)
+    [InlineData(1)] // season 1
+    [InlineData(2)] // season 2
+    [InlineData(3)] // season 3
+    [InlineData(4)] // wraps back to season 0
+    public void The_truth_overload_reads_the_real_season_for_every_authored_season_index(int seasonMultiple)
     {
+        var daysPerSeason = TurnCalendar.DaysPerMonth * TurnCalendar.MonthsPerSeason;
+        var turn = seasonMultiple * daysPerSeason;
+        var expectedSeason = seasonMultiple % TurnCalendar.SeasonCount;
+
         var withSource = new WorldSector { SectorId = "s-source", OwnerFactionId = "f1", Slots = new[] { Rootbed(0) } };
         var sector = new WorldSector { SectorId = "s-target", OwnerFactionId = "f1" };
         var world = WorldWith(sector, new WorldFaction { FactionId = "f1", Kind = WorldFactionKind.Player, Name = "F1" }, withSource) with
@@ -239,7 +252,8 @@ public class LoamUpkeepTests
         };
 
         var breakdown = LoamUpkeep.BreakdownFor(world, sector);
-        Assert.Equal(1000, breakdown.SeasonMilli); // identity everywhere until a later publish turns growth/seasons on
+        Assert.Equal(expectedSeason, TurnCalendar.SeasonOf(turn)); // the test's own premise, proven rather than assumed
+        Assert.Equal(WorldTuningHub.Tuning.Seasons.UpkeepMilli[expectedSeason], breakdown.SeasonMilli);
     }
 
     [Fact]

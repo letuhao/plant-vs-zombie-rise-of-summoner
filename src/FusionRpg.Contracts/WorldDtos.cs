@@ -363,9 +363,10 @@ public sealed record WorldStructureDto
     public string RequiredSlotKind { get; init; } = "";
 
     /// <summary>
-    /// Whole loam units, despite `StructureDef.CostMilli`'s name — the model compares it directly
-    /// against a legion's `CarriedLoam` (`BuildResolver.cs:101`). Named `Cost` here on purpose:
-    /// a renderer trusting `Milli` is wrong by 1000×.
+    /// Whole loam units — the model compares it directly against a legion's `CarriedLoam`
+    /// (`BuildResolver.cs:101`). Named `Cost` here on purpose (matching `StructureDef.Cost` since
+    /// world-map W57 renamed it off its former, misleading `CostMilli` name): a renderer trusting
+    /// a `Milli` suffix would be wrong by 1000×.
     /// </summary>
     public long Cost { get; init; }
 

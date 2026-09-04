@@ -264,7 +264,7 @@ public sealed partial class RpgStore
     public sealed record ExpeditionRewardApply(
         long EventSouls,
         IReadOnlyList<(string MaterialId, long Qty)> Materials,
-        IReadOnlyList<(string InstanceId, double Xp)> SpecimenXp,
+        IReadOnlyList<(string InstanceId, long Xp)> SpecimenXp,
         IReadOnlyList<DemonMintSpec> WildMints);
 
     /// <summary>

@@ -1,0 +1,554 @@
+{
+  "at": "2026-09-05T01:22:49.1714855\u002B07:00",
+  "theta": 100,
+  "note": "PRE-F baseline: the closed form reads allocation only; tree power and the focus multiplier F are not modelled. Sized for passive-tree-ideal.md 3.3.",
+  "dominant": [],
+  "builds": [
+    {
+      "label": "Might",
+      "kind": "corner",
+      "meanWinShare": 0.9795,
+      "beatenBy": 1
+    },
+    {
+      "label": "Might\u002BPierce",
+      "kind": "hybrid2",
+      "meanWinShare": 0.95698,
+      "beatenBy": 1
+    },
+    {
+      "label": "Might\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.94518,
+      "beatenBy": 5
+    },
+    {
+      "label": "Might\u002BOnslaught",
+      "kind": "hybrid2",
+      "meanWinShare": 0.93668,
+      "beatenBy": 4
+    },
+    {
+      "label": "Might\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.93489,
+      "beatenBy": 3
+    },
+    {
+      "label": "Might\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.92975,
+      "beatenBy": 6
+    },
+    {
+      "label": "Might\u002BFortitude",
+      "kind": "hybrid2",
+      "meanWinShare": 0.90836,
+      "beatenBy": 7
+    },
+    {
+      "label": "Ferocity\u002BMight\u002BFortitude",
+      "kind": "hybrid3",
+      "meanWinShare": 0.89205,
+      "beatenBy": 8
+    },
+    {
+      "label": "Retribution",
+      "kind": "corner",
+      "meanWinShare": 0.8904,
+      "beatenBy": 9
+    },
+    {
+      "label": "Pierce",
+      "kind": "corner",
+      "meanWinShare": 0.86516,
+      "beatenBy": 8
+    },
+    {
+      "label": "Pierce\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.85457,
+      "beatenBy": 11
+    },
+    {
+      "label": "Onslaught\u002BPierce",
+      "kind": "hybrid2",
+      "meanWinShare": 0.85232,
+      "beatenBy": 11
+    },
+    {
+      "label": "Pierce\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.85213,
+      "beatenBy": 10
+    },
+    {
+      "label": "Pierce\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.83513,
+      "beatenBy": 13
+    },
+    {
+      "label": "Might\u002BComposure",
+      "kind": "hybrid2",
+      "meanWinShare": 0.83507,
+      "beatenBy": 12
+    },
+    {
+      "label": "Onslaught\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.81278,
+      "beatenBy": 17
+    },
+    {
+      "label": "Precision\u002BFerocity\u002BMight",
+      "kind": "hybrid3",
+      "meanWinShare": 0.80953,
+      "beatenBy": 16
+    },
+    {
+      "label": "Bulwark\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.80717,
+      "beatenBy": 18
+    },
+    {
+      "label": "Ferocity",
+      "kind": "corner",
+      "meanWinShare": 0.79601,
+      "beatenBy": 19
+    },
+    {
+      "label": "Retribution\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.79217,
+      "beatenBy": 16
+    },
+    {
+      "label": "Fortitude\u002BPierce",
+      "kind": "hybrid2",
+      "meanWinShare": 0.79156,
+      "beatenBy": 19
+    },
+    {
+      "label": "Might\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.78523,
+      "beatenBy": 20
+    },
+    {
+      "label": "Onslaught",
+      "kind": "corner",
+      "meanWinShare": 0.77168,
+      "beatenBy": 23
+    },
+    {
+      "label": "Might\u002BVigor",
+      "kind": "hybrid2",
+      "meanWinShare": 0.76873,
+      "beatenBy": 22
+    },
+    {
+      "label": "Might\u002BAgility",
+      "kind": "hybrid2",
+      "meanWinShare": 0.74767,
+      "beatenBy": 25
+    },
+    {
+      "label": "Onslaught\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.73948,
+      "beatenBy": 23
+    },
+    {
+      "label": "Fortitude\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.7394,
+      "beatenBy": 26
+    },
+    {
+      "label": "Onslaught\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.73449,
+      "beatenBy": 27
+    },
+    {
+      "label": "Might\u002BFortitude\u002BVigor",
+      "kind": "hybrid3",
+      "meanWinShare": 0.71495,
+      "beatenBy": 28
+    },
+    {
+      "label": "Might\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.68959,
+      "beatenBy": 29
+    },
+    {
+      "label": "Fortitude\u002BOnslaught",
+      "kind": "hybrid2",
+      "meanWinShare": 0.68064,
+      "beatenBy": 30
+    },
+    {
+      "label": "Composure\u002BPierce",
+      "kind": "hybrid2",
+      "meanWinShare": 0.67108,
+      "beatenBy": 30
+    },
+    {
+      "label": "Composure\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.62269,
+      "beatenBy": 32
+    },
+    {
+      "label": "Pierce\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.60667,
+      "beatenBy": 33
+    },
+    {
+      "label": "Vigor\u002BPierce",
+      "kind": "hybrid2",
+      "meanWinShare": 0.60145,
+      "beatenBy": 35
+    },
+    {
+      "label": "Retribution\u002BPrecision\u002BFerocity",
+      "kind": "hybrid3",
+      "meanWinShare": 0.59586,
+      "beatenBy": 35
+    },
+    {
+      "label": "Pierce\u002BFocus\u002BBulwark",
+      "kind": "hybrid3",
+      "meanWinShare": 0.57976,
+      "beatenBy": 39
+    },
+    {
+      "label": "even12",
+      "kind": "spread",
+      "meanWinShare": 0.57686,
+      "beatenBy": 38
+    },
+    {
+      "label": "Precision\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.57684,
+      "beatenBy": 35
+    },
+    {
+      "label": "Agility\u002BPierce",
+      "kind": "hybrid2",
+      "meanWinShare": 0.57061,
+      "beatenBy": 40
+    },
+    {
+      "label": "Onslaught\u002BComposure",
+      "kind": "hybrid2",
+      "meanWinShare": 0.5548,
+      "beatenBy": 39
+    },
+    {
+      "label": "Vigor\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.55001,
+      "beatenBy": 43
+    },
+    {
+      "label": "Agility\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.51828,
+      "beatenBy": 44
+    },
+    {
+      "label": "Bulwark\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.51608,
+      "beatenBy": 42
+    },
+    {
+      "label": "Pierce\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.51538,
+      "beatenBy": 45
+    },
+    {
+      "label": "Fortitude\u002BVigor\u002BOnslaught",
+      "kind": "hybrid3",
+      "meanWinShare": 0.5005,
+      "beatenBy": 45
+    },
+    {
+      "label": "Fortitude\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.48651,
+      "beatenBy": 41
+    },
+    {
+      "label": "Agility\u002BComposure\u002BPierce",
+      "kind": "hybrid3",
+      "meanWinShare": 0.48624,
+      "beatenBy": 49
+    },
+    {
+      "label": "Onslaught\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.48549,
+      "beatenBy": 47
+    },
+    {
+      "label": "Vigor\u002BOnslaught",
+      "kind": "hybrid2",
+      "meanWinShare": 0.48431,
+      "beatenBy": 47
+    },
+    {
+      "label": "Focus\u002BFerocity",
+      "kind": "hybrid2",
+      "meanWinShare": 0.46142,
+      "beatenBy": 51
+    },
+    {
+      "label": "Composure\u002BPierce\u002BFocus",
+      "kind": "hybrid3",
+      "meanWinShare": 0.45474,
+      "beatenBy": 51
+    },
+    {
+      "label": "Onslaught\u002BAgility",
+      "kind": "hybrid2",
+      "meanWinShare": 0.45394,
+      "beatenBy": 49
+    },
+    {
+      "label": "Composure\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.42047,
+      "beatenBy": 51
+    },
+    {
+      "label": "Retribution\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.40077,
+      "beatenBy": 54
+    },
+    {
+      "label": "Vigor\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.39319,
+      "beatenBy": 53
+    },
+    {
+      "label": "Onslaught\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.3923,
+      "beatenBy": 54
+    },
+    {
+      "label": "Agility\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.37984,
+      "beatenBy": 54
+    },
+    {
+      "label": "Onslaught\u002BAgility\u002BComposure",
+      "kind": "hybrid3",
+      "meanWinShare": 0.37616,
+      "beatenBy": 58
+    },
+    {
+      "label": "Bulwark\u002BRetribution\u002BPrecision",
+      "kind": "hybrid3",
+      "meanWinShare": 0.36248,
+      "beatenBy": 57
+    },
+    {
+      "label": "Focus\u002BRetribution",
+      "kind": "hybrid2",
+      "meanWinShare": 0.33764,
+      "beatenBy": 60
+    },
+    {
+      "label": "Fortitude",
+      "kind": "corner",
+      "meanWinShare": 0.31789,
+      "beatenBy": 57
+    },
+    {
+      "label": "Focus\u002BBulwark\u002BRetribution",
+      "kind": "hybrid3",
+      "meanWinShare": 0.31364,
+      "beatenBy": 60
+    },
+    {
+      "label": "Fortitude\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.30822,
+      "beatenBy": 60
+    },
+    {
+      "label": "Vigor\u002BOnslaught\u002BAgility",
+      "kind": "hybrid3",
+      "meanWinShare": 0.3066,
+      "beatenBy": 64
+    },
+    {
+      "label": "Fortitude\u002BComposure",
+      "kind": "hybrid2",
+      "meanWinShare": 0.27838,
+      "beatenBy": 63
+    },
+    {
+      "label": "Fortitude\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.26815,
+      "beatenBy": 66
+    },
+    {
+      "label": "Fortitude\u002BVigor",
+      "kind": "hybrid2",
+      "meanWinShare": 0.26747,
+      "beatenBy": 64
+    },
+    {
+      "label": "Fortitude\u002BAgility",
+      "kind": "hybrid2",
+      "meanWinShare": 0.2664,
+      "beatenBy": 64
+    },
+    {
+      "label": "Bulwark",
+      "kind": "corner",
+      "meanWinShare": 0.24818,
+      "beatenBy": 68
+    },
+    {
+      "label": "Composure\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.22394,
+      "beatenBy": 70
+    },
+    {
+      "label": "Bulwark\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.21164,
+      "beatenBy": 71
+    },
+    {
+      "label": "Fortitude\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.2037,
+      "beatenBy": 72
+    },
+    {
+      "label": "Agility\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.18204,
+      "beatenBy": 73
+    },
+    {
+      "label": "Vigor\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.17904,
+      "beatenBy": 74
+    },
+    {
+      "label": "Composure",
+      "kind": "corner",
+      "meanWinShare": 0.17075,
+      "beatenBy": 75
+    },
+    {
+      "label": "Focus\u002BBulwark",
+      "kind": "hybrid2",
+      "meanWinShare": 0.15286,
+      "beatenBy": 76
+    },
+    {
+      "label": "Composure\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.14783,
+      "beatenBy": 77
+    },
+    {
+      "label": "Vigor\u002BComposure",
+      "kind": "hybrid2",
+      "meanWinShare": 0.13146,
+      "beatenBy": 78
+    },
+    {
+      "label": "Agility\u002BComposure",
+      "kind": "hybrid2",
+      "meanWinShare": 0.12173,
+      "beatenBy": 79
+    },
+    {
+      "label": "Vigor\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.09761,
+      "beatenBy": 81
+    },
+    {
+      "label": "Composure\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.09691,
+      "beatenBy": 80
+    },
+    {
+      "label": "Precision",
+      "kind": "corner",
+      "meanWinShare": 0.08875,
+      "beatenBy": 82
+    },
+    {
+      "label": "Agility\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.07898,
+      "beatenBy": 83
+    },
+    {
+      "label": "Vigor",
+      "kind": "corner",
+      "meanWinShare": 0.06594,
+      "beatenBy": 84
+    },
+    {
+      "label": "Vigor\u002BAgility",
+      "kind": "hybrid2",
+      "meanWinShare": 0.05446,
+      "beatenBy": 85
+    },
+    {
+      "label": "Focus\u002BPrecision",
+      "kind": "hybrid2",
+      "meanWinShare": 0.04558,
+      "beatenBy": 86
+    },
+    {
+      "label": "Agility",
+      "kind": "corner",
+      "meanWinShare": 0.04505,
+      "beatenBy": 87
+    },
+    {
+      "label": "Vigor\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.02504,
+      "beatenBy": 88
+    },
+    {
+      "label": "Agility\u002BFocus",
+      "kind": "hybrid2",
+      "meanWinShare": 0.01747,
+      "beatenBy": 89
+    },
+    {
+      "label": "Focus",
+      "kind": "corner",
+      "meanWinShare": 0.00267,
+      "beatenBy": 90
+    }
+  ]
+}

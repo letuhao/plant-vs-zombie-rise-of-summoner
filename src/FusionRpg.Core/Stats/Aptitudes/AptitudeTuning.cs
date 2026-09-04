@@ -45,11 +45,13 @@ public sealed record AptitudePointEconomy(
     long RespecPrice);
 
 /// <summary>class-system-todo.md P7.1-P7.3, spec-guard-economy.md §3/§5/§8 — the three coefficients
-/// `PoiseRuntime` reads. <see cref="FlatCommitCost"/>: Reading C's flat half, paid on every guard
-/// commit regardless of outcome (§3: "committing is what costs, not landing"). <see cref="AbsorbDrainSharePermille"/>:
+/// `PoiseLedger`/`Riposte` read (unified onto this one pair by battle-tempo `poise-unification`,
+/// 2026-09-05 — the deleted `Combat/Guard/PoiseRuntime.cs` read the same three before then).
+/// <see cref="FlatCommitCost"/>: Reading C's flat half, paid on every guard commit regardless of
+/// outcome (§3: "committing is what costs, not landing"). <see cref="AbsorbDrainSharePermille"/>:
 /// Reading C's proportional half, drained against what a guard actually stopped. <see cref="RiposteShareCapPermille"/>:
 /// §5's conversion, a BOUNDED RATIO over an uncapped pool (PS-8 — the comment §8's code-style example
-/// requires lives on <c>PoiseRuntime.Riposte</c> itself, not here). All three are UNMEASURED
+/// requires lives on <c>Riposte.DamageFromSpentPoise</c> itself, not here). All three are UNMEASURED
 /// placeholders — §10 "Ask first: the riposte share, it is BASTION's whole offence" — shipped per the
 /// same "shipping a guess is fine, calling it balance is not" posture this session already applied to
 /// `AptitudePointEconomy`'s own tier weights and respec price.</summary>

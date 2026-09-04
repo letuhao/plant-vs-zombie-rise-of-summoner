@@ -212,12 +212,36 @@ Every number this introduces. None is a `const`, and none is in a seed file.
 
 ## 8. Open questions — owner decisions only
 
+**None. Both were closed by the owner on 2026-09-04** (base-defense-ideal.md §0, round 10):
+
+| Was | Decision | Answer |
+|---|---|---|
+| Own program or a module? | **45** | ⛔ **A module set inside `base-defense`.** Decision 30 is revised. This document stays as the design record; only the program boundary changed |
+| Do static plants stay demons? | **43** | **Yes** — confirming §3's own argument. So the pipeline is **INVENTION**, not datamine: the source is the design research (§5.18 + §5.21), hand-authored first, generated second |
+
+**Three obligations were added while these were open**, and they are part of the module set:
+
+- **Decision 32** — a structure's HP is `P(Θ_development) × an authored MATERIAL TIER ordinal`. That
+  ordinal is this schema's **`strengthBand`**; do not add a second one beside it.
+- **Decision 33** — a **deterministic planner stage runs before any model call**, fixing which kinds,
+  which tiers, how many variants and which slots. Promoted from the seedsmith guideline *"order the
+  build so the model-free modules come first"* to a required stage.
+- **Decision 35** — an **`acquisitionPaths`** field, `VALIDATED`, a subset of
+  `{built, assembled, summoned, laboured}`, `none` illegal. ⚠️ **Reconcile it with §5's existing
+  `acquisition`** (`built · authored-on-map · captured`) — those are two different questions (*how it
+  reached the MAP* versus *how it reaches the BOARD*) and shipping both under similar names is the
+  second-vocabulary defect. Name them apart or merge them deliberately.
+
+<details><summary>The questions as originally posed</summary>
+
 1. **Is this its own program, or a module of `base-defense`?** It has its own corpus, its own pipeline
    and its own metrics, which argues for its own map — the same shape `demon-seed` has beside
    `demon-system`. But it exists only to serve base defense.
 2. **Do PvZ's static plants stay demons?** The owner's framing says yes. Worth confirming, because it
    is the difference between a datamine-classify pipeline (cheap, proven) and an invention pipeline
    (§3, and a different failure surface).
+
+</details>
 
 **Deliberately not open:** the band intervals, the per-role counts, and the corpus size — those are a
 tuning pass once the schema exists.

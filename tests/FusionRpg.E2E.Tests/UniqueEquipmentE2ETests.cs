@@ -39,7 +39,9 @@ public class UniqueEquipmentE2ETests : IAsyncLifetime
         put.EnsureSuccessStatusCode();
         var eq = await put.Content.ReadFromJsonAsync<UniqueEquipmentListDto>(Json);
         Assert.Contains(eq!.Items, x => x.Slot == "weapon" && x.ItemId == "stub.atk_ring");
-        Assert.Contains("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
+        // mods-absorption (spec-mods-absorption.md): stub.atk_ring is atom-backed, so its grant no
+        // longer reaches mods_json — it grants exclusively through effect_binding now.
+        Assert.DoesNotContain("fx.passive_atk_flat", eq.ModsJson, StringComparison.Ordinal);
 
         var get = await _http.GetFromJsonAsync<UniqueEquipmentListDto>(
             $"/api/unique/actors/{actor.InstanceId}/equipment", Json);

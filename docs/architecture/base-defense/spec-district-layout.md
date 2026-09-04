@@ -1,6 +1,6 @@
 # Spec: `district-layout`
 
-**Module 5 of 21 · level 2 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
+**Module 5 of 29 · level 2 · depends on `siege-board` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -76,16 +76,41 @@ Implemented as a **ring walk from the Seat**, deterministic and collision-free b
 slot `i` takes the `i`-th cell of a fixed spiral order out from the centre, with the spiral's
 *rotation* (not its shape) picked from `districtSeed`. Growth appends; it never re-deals.
 
-### 2. Board size — from base tier, and it is a genuine cap question
+### 2. ⛔ Board size is FIXED per base tier — the grid does not grow
 
-Board size scales with the sector. Two candidate inputs, and **`AGENTS.md`'s no-hard-ceilings rule
-makes this a design decision rather than a formula choice**:
+**A draft of this spec grew the board with `DevelopmentLevel` and slot count. Two sections of the
+ideal reject that explicitly**, and the correction is recorded rather than silently applied.
+
+§5.1's own title is the rule: **"The grid does not grow. The placement budget does."**
+
+> *"**Rows and columns come from base tier and are fixed** — 5 lanes for a stronghold, 3 for an
+> outpost, the homeworld's boards authored per region. **`DevelopmentLevel` buys build slots**: how
+> many defenses may stand on the board at once."*
+
+And §5.25 lists `Grid dimensions = f(DevelopmentLevel)` among the **rejected**: *"Unrenderable at
+depth, and it needs a new `f(level)` curve, which the power ladder forbids. Both shipped
+base-builders surveyed do the opposite."*
 
 ```
-side = boardBaseSide + boardSidePerDevelopment × DevelopmentLevel + boardSidePerSlot × Slots.Count
+side = BaseTierCatalog.SideFor(tier)      // a lookup, not a formula
 ```
 
-All three terms are **flat integer tunables in `data/tuning/siege.v1.json`**.
+**A table keyed by base tier**, authored in `data/tuning/siege.v1.json` — Clash of Clans' shape (fixed
+grid, growing building count) and Arknights' dial.
+
+> ### How this satisfies no-hard-ceilings — §5.1's three-stage answer
+>
+> | | |
+> |---|---|
+> | **The collision** | Endless grind forbids hard progression ceilings. A 2D grid is finite and must stay renderable |
+> | **The resolution** | The grid is a **§11.3 board cap** — *"bounds how much can exist at one moment, not how far you can get"* — exempt **by the register's own words**, and it **must say so in a comment**. `MaxLivingPlants = 50` is the named precedent |
+> | **What stays uncapped** | Once slots fill the board, further development buys **tower tier** — a magnitude, so it reads `P(Θ)` and rises forever. **The board stops growing; the investment never does** |
+>
+> *"Three stages, no ceiling, no unrenderable board."* The escape valve is `siege-objective`'s, not
+> this module's — but it is the reason a fixed board is legal, so it is stated here too.
+
+**`P(Θ)` still never touches a board dimension**, for the reason the boxed note below already gives:
+`P(1) = 106` at the shipped dial.
 
 > ### ⛔ This is deliberately NOT on the power ladder, and that is a correction
 >
@@ -178,9 +203,7 @@ level 2.
 
 | Key | Unit | Default | Why tunable |
 |---|---|---|---|
-| `district.boardBaseSide` | cells | `24` | Balance — the base district |
-| `district.boardSidePerDevelopment` | cells | `2` | Balance |
-| `district.boardSidePerSlot` | cells | `1` | Balance |
+| `district.sideByBaseTier.<tier>` | cells | `18, 24, 30, …` | Balance — **a lookup per base tier, not a formula** (§5.1). Fixed for a given tier |
 | `district.coreSideMilli` | per-mille of side | `400` | **Ratio** — bounded 0..1000, exempt, and it must say so |
 | `district.gateCount` | gates | `2` | Balance |
 | `district.rampartThickness` | cells | `1` | Balance |
@@ -237,7 +260,9 @@ reading a field the map's §3 lists as declared-and-unread without first verifyi
 | `Entry_edge_is_stable_when_two_lanes_share_an_endpoint` | ordinal ordering, asserted |
 | `Fortress_flag_changes_the_wall` | **and a companion test asserting some shipped sector type actually sets the flag** — otherwise report it as a wiring gap |
 | `Ruined_slots_are_rough_and_carry_no_structure` | |
-| `Board_never_exceeds_maxCells` | at the largest legal `DevelopmentLevel` and slot count |
+| `Board_never_exceeds_maxCells` | at the largest authored base tier |
+| `Board_size_does_not_change_with_development_level` | **§5.1's rule**, asserted — raise development, assert the grid is byte-identical |
+| `Board_size_does_not_change_when_slots_grow` | the same rule from the other side; S4 already covers placement, this covers dimensions |
 | `Core_zone_is_never_empty` | the degenerate small-board case: `coreSideMilli` of a 24-cell side must not floor to 0 |
 | `World_goldens_unmoved` | nothing here is hashed |
 
@@ -252,7 +277,22 @@ reading a field the map's §3 lists as declared-and-unread without first verifyi
 
 ## Open questions
 
-**One, and it needs the owner.** Where do the *defender's* legions start?
+**None.** ✅ **Decision 37 (owner, 2026-09-04): the defender's legions are PLAYER-PLACED pre-battle.**
+
+Decision 5's pre-battle deployment step is the mechanism — it *"costs unit action and requirement
+resources"* and was always going to exist.
+
+**This module still owns a deterministic default, and that is not a hedge.** The auto seat has to place
+too: `siege-ai` runs a **deterministic placement policy** at the same step, so deployment is *one step
+with two drivers* exactly as `SiegeIntentSource` makes combat one battle with two drivers. Step 7's
+standalone gate therefore does not wait on a UI — the AI places, and CI proves it.
+
+So: **this module's spiral placement is the AI's policy and the pre-battle default**; the player
+overrides it in `siege-positions`. Both are the same `Place` call.
+
+<details><summary>The question as originally posed (superseded)</summary>
+
+**Where do the *defender's* legions start?**
 
 The win condition is the legions in the central defense area (decision 26). Two readings:
 
@@ -265,3 +305,5 @@ The win condition is the legions in the central defense area (decision 26). Two 
 default placement is needed regardless — for auto-resolve at step 7, which is the gate that proves the
 whole program works with no FE. (b) then becomes an override rather than a prerequisite, and step 7
 does not wait on a deployment UI.
+
+</details>

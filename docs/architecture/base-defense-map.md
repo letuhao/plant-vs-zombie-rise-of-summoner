@@ -8,8 +8,8 @@ outright wrong. Gate 0 taken in full; the fifth-stage `decisions.md` amendment a
 **Gate 0 was run before any spec was written — see [§ Gate 0 results](#gate-0-results-run-2026-09-04).
 Six §3 rows moved.**
 
-**Ideal it implements:** [base-defense-ideal.md](base-defense-ideal.md) — **34 owner decisions** across
-eight rounds (§0), plus a **four-lens adversarial audit** (§11: economy, playability, engineering,
+**Ideal it implements:** [base-defense-ideal.md](base-defense-ideal.md) — **46 owner decisions** across
+eleven rounds (§0), plus a **four-lens adversarial audit** (§11: economy, playability, engineering,
 architecture) whose findings are verified against source.
 **Plan / tasks:** `tasks/base-defense-plan.md` · `tasks/base-defense-todo.md` (the prefixed pair per
 `AGENTS.md` — `tasks/plan.md` is the perf stream's and is never a fallback).
@@ -27,9 +27,10 @@ Both sides move. Buildings are a new actor kind with no ownership; possession is
 
 - **Not a redesign of the battle kernel.** It adds a **fourth mode-profile row**, not a branch —
   *"adding a mode should mean adding a row"*.
-- **Not the structure content pipeline.** `structure-seed` is its own program (decision 30):
-  [structure-seed-ideal.md](structure-seed-ideal.md). This program **consumes** its corpus and ships
-  against the four hand-authored rows until it lands.
+- ~~**Not the structure content pipeline.**~~ ⛔ **Decision 45 REVISED decision 30**: `structure-seed`
+  is now a **module set inside this program** (modules 23–28), not a separate one. One map, one plan,
+  one todo pair. Its ideal, [structure-seed-ideal.md](structure-seed-ideal.md), stays as the design
+  record — only the program boundary changed.
 - **Not the planet economy.** Sector-scale economy and inter-sector trade are `sector-development`
   plus an economy program (decision 19). This program reads `DevelopmentLevel` and defaults it (§5.10).
 - **Not the played seat's machinery.** `spec-interactive-turns.md` owns T6/T10/T11 — **consume, never
@@ -49,8 +50,20 @@ Both sides move. Buildings are a new actor kind with no ownership; possession is
 
 ## Modules
 
-**Twenty-one.** Levels 0–2 are golden-free and can start immediately; level 3 is the one golden-locked
-landing; levels 4–6 build on it.
+**Twenty-nine**, in two families that barely touch:
+
+| Family | Modules | Shape |
+|---|---|---|
+| **The siege** | 1–22 | Engine, world seam, board, AI, FE |
+| **Structure content** (folded in by decision 45) | 23–29 | Seed schema → corpus → catalog → **instantiate** → planner → pipeline → metrics |
+
+The two families meet at exactly one point: `structure-catalog-import` (25) replaces the four
+hand-authored `StructureCatalog` rows the siege ships against. **Everything else is independent**, and
+the content family is **model-free until module 27** — *"a parse, a table, a schema and a dump produce
+real value with zero tokens spent."*
+
+Levels 0–2 are golden-free and can start immediately; level 3 is the one golden-locked landing;
+levels 4–6 build on it.
 
 > ### ⛔ Four modules added 2026-09-04 by the completeness audit
 >
@@ -81,17 +94,25 @@ landing; levels 4–6 build on it.
 | `combatant-kind` | The **actor-kind discriminator** on `BattleActorSetup`, `[JsonIgnore(WhenWritingDefault)]`. Gate `AnyActive` and the forced-basic-attack path so a structure never enters initiative and never keeps a battle alive | `battle-clock-profile` |
 | `siege-positions` | Make `PositionOf` real; assign `EffectBag.BoardSnapshot`; pass a board to `Status.Tick` — **all three gated on a board existing**, `null` otherwise. Sets `boardAvailable: true` at the one production call site | `siege-board`, `combatant-kind` |
 | `siege-waves` | Mid-battle **roster growth** for batches; the **batch trigger as a clock** (F8 — state-based is turtle-exploitable); **bounded/resumable drain** (F9/C7 — the kernel baseline's one named hole) | `combatant-kind` |
-| `siege-cover` | Flat **dodge delta on the occupant**, delivered by a **cell-entry/exit `ScopeMembershipTransition`** (the one reviewed vocabulary change, with a real mechanic behind it). The `(damage source × cover type)` table | `siege-positions` |
+| `siege-cover` | ⛔ **REWRITTEN for decision 35 — the HoMM3 shooting model, not terrain cover.** Four multipliers: **cover area** (authored radius per obstacle kind), **range penalty**, **obstruction penalty** (a unit *or* obstacle in the line **reduces** power, never blocks), and a **`ProjectilePenalties` flag** saying which a shot pays. Spans the **battle engine and the action system**. `RequiresLineOfSight`'s first reader. **Does not spend the vocabulary-change budget** — cover is per-shot, so no membership is entered | `siege-positions`, `siege-obstacles` |
 | `siege-construction` | **The four acquisition paths** (decision 27): built (materials, accumulates) · assembled (consumable, immediate) · summoned (`qi`) · laboured (`stamina`/`hunger`). Paths 3–4 are ordinary actions and need no new economy | `siege-seam`, `structure-state` |
 | `siege-economy` | **Board income** — nodes yield per turn to whoever garrisons them; the **depot** budget seeded from world stock and reconciled spend-only; the **capture-transfers-stockpile** fix (F11) | `siege-construction` |
 | `siege-ai` | **R1–R6**: aggro tier separate from target choice, additive score with a risk term, objective fallback, frozen acting order, deterministic and readable. One `IIntentSource` **dispatching on `SideOf`** — a wrapper, no signature change | `siege-positions`, `siege-cover` |
 | `siege-resolver` | `IBattleResolver` implementation, supplied at **BOTH `RpgStore.WorldTurns.cs:509` AND `:603`** — wiring only `:509` makes every re-derived turn report disagree with what happened | `siege-ai`, `siege-seam` |
 | `board-render` | The **generic board layer** the FE lacks: `GridSpec` passed not imported, a generic entity registry, a caller-supplied kind→visual mapping, `createGame({scenes})`, cell picking, and the **camera bridge** between the pure `Camera` model and a Phaser camera | `siege-board` |
-| `siege-stage` | The `siege` stage, its route, and the six conditional shell files. Plus §7 cost 5's `*Dto` guard. **✅ Amendment approved** | `board-render`, `siege-resolver` |
+| `siege-stage` | The `siege` stage, its route, and the six conditional shell files. Plus §7 cost 5's `*Dto` guard. **Pause = a persisted DECISION LOG replayed on resume** (decision 46), never a session in memory — so §2 rule 7 holds unconditionally and a pause survives a server restart. ⚠️ **Prerequisite: a `decisions_json` writer**, which `spec-interactive-turns.md` (T10) owns and which does not exist today | `board-render`, `siege-resolver` |
 | `siege-objective` | **The win condition** (decision 1) · legion slots and max members (4) · **the field cap** (5) — authored, symmetric, never derived from empty cells · the Core as a pure arena (10) · `DefenderBonusMilli` shrinking so the defender is not paid twice | `combatant-kind`, `district-layout` |
 | `siege-obstacles` | §5.18's **Trench · Rampart · Wire · Mine · Emplacement** — five rows, five distinct decisions. Wire taxes **stamina**; Mine is **revealed** (F9) and fires on the cell-entry transition `siege-cover` already introduces | `structure-state`, `siege-cover`, `siege-construction` |
 | `siege-engagement` | Decision **24** — `Spent` as a normal outcome, what persists between engagements (world state) and what must not (board state), `IsUnderSiege` **derived not stored**, no engagement cap | `siege-resolver`, `siege-objective` |
 | `world-graph-diff` | §8 prerequisite 1. **Measure first** (C5): statement reuse may beat a diffing writer. Equivalence-guarded by `WorldCanonical` read-back | — |
+| `battle-stage` | **Decision 44** — `#/battle` as **playback of a resolved `BattleReport`** on the generic layer. Retires the dead stage id **by using it**; proves `board-render` generic with a genuinely different second consumer. **Thin is a constraint**: if a requirement is not derivable from a report that already exists, it is out of scope | `board-render` |
+| `structure-schema` | The seed contract — 17 fields, **not one a number**, audited mechanically. `strengthBand` **is** decision 32's material tier (one ordinal, not two); `acquisitionPaths` **replaces** `acquisition` | — |
+| `structure-corpus` | **Hand-author ~36 rows from the research** (§5.18 + §5.21), dump today's four, prove the importer. ⛔ **Invention, not datamine** (decision 43) — so hand-authoring first is the guard against mode collapse, which majority vote cannot catch | `structure-schema` |
+| `structure-catalog-import` | `StructureCatalog` reads the corpus instead of a C# literal. **The one place an ordinal becomes a magnitude** | `structure-corpus` |
+| `structure-planner` | **Decision 33** — a deterministic, committed, diffable plan **before any model call**: the ordered tier ladder, per-role targets, slot legality, variant counts, and the call budget | `structure-corpus` |
+| `structure-pipeline` | The **only** module that calls a model, and it writes **identity only**. Permuted enums, declared vote set, `1-1-1` → `unresolved`, byte-identical rerun proven by hash | `structure-planner` |
+| `structure-instantiate` | **Pass 3 (P3-3)** — Law 1's missing middle layer: the game runtime rolls a **concrete per-player instance** via `Instantiator.TryInstantiate`, which has **zero production callers** today. A **wiring** module — traits and actions roll; **HP and every ordinal-derived magnitude do not** (decision 32) | `structure-catalog-import` |
+| `structure-metrics` | Every metric declares **closed or open**; **an open-loop metric never fails a build**. Skew checked at plan and at output; rarity proven not to be a power axis | `structure-pipeline` |
 
 **No cycles.** `siege-supply` and `battle-clock-profile` deliberately depend on nothing — they are the
 two unblocking changes, and both are small.
@@ -102,18 +123,44 @@ two unblocking changes, and both are small.
 0.  battle-clock-profile · siege-supply · world-graph-diff  (parallel, no deps)
 1.  siege-board                                            (then:)
 2.  siege-pathing · district-layout · siege-seam           (parallel)
-3.  structure-state · combatant-kind · siege-objective     (parallel)
-4.  siege-positions · siege-waves                          (parallel)
-5.  siege-cover · siege-construction
-5b. siege-obstacles                                        (needs both of 5)
+3.  structure-state · combatant-kind                       (parallel)
+3b. siege-objective                                        (needs combatant-kind)
+4.  siege-positions · siege-waves · siege-obstacles        (parallel)
+5.  siege-cover · siege-construction                       (both CONSUME obstacles)
 6.  siege-economy · siege-ai
-7.  siege-resolver · siege-engagement   ← ⭐ playable and CI-provable HERE, with no FE
-8.  board-render → siege-stage
+7.  siege-resolver          ← ⭐ playable and CI-provable HERE, with no FE
+7b. siege-engagement                                       (needs siege-resolver)
+8.  board-render
+8b. siege-stage · battle-stage                             (parallel; both need board-render)
+
+    the content family, independent of every level above:
+c0. structure-schema
+c1. structure-corpus
+c2. structure-catalog-import          ← the only join: replaces the 4 hand-authored rows
+c3. structure-instantiate · structure-planner   (parallel)
+      instantiate = Law 1's middle layer, wiring not a build
+      planner     = still zero tokens spent
+c4. structure-pipeline                ← ⭐ the FIRST model call in the whole program
+c5. structure-metrics
 ```
+
+**The content family runs in parallel with the siege family** and joins once, at `c2`. Its first four
+modules spend **no tokens at all** — which is the seedsmith rule *"order the build so the model-free
+modules come first"*, and it means the expensive stage's inputs are reviewable before it runs.
 
 **`siege-objective` joins level 3** because the win condition is what `siege-resolver` evaluates, and
 because the field cap is what makes `siege-waves` mean anything. **`world-graph-diff` sits at level 0**
 and starts with a measurement, not a build.
+
+> ### ⛔ `siege-obstacles` is at level 4, and it used to be at 5b
+>
+> Pass 3 broke a cover↔obstacles **dependency cycle** by making obstacles the structure-vocabulary
+> module. **Pass 4 found the build order still encoding the old, cyclic ordering** — it read
+> *"5b. siege-obstacles (needs both of 5)"* while the module table already said cover depends on
+> obstacles.
+>
+> **A spec table and a build order that disagree is worse than either being wrong alone**, because each
+> looks authoritative on its own. Corrected above; the ordering now follows the declared dependencies.
 
 Three orderings are deliberate and worth confirming:
 
@@ -185,11 +232,22 @@ Confirmed unchanged (re-verified, not assumed):
 - **`StructureCatalog`** still ships **four** hand-authored rows, all loam-flavoured
   (`LoamSource`/`Storage`), with no HP and no cell — the defaulting in §5.10 is still required.
 
-**Part 2 — the guard is extended.** `WorldDeterminismGuardTests` gains `Core/Battle` and
-`Core/Effects` alongside `Core/World`. This is expected to go **red on first run**: `EffectBag.cs:180`
-defaults `UtcNow` to `() => DateTimeOffset.UtcNow`, which is a real wall clock inside a newly-scanned
-tree. That is the finding, not a blocker — the fix (an injected clock, defaulted at the composition
-root rather than at the field) belongs to Gate 0 and lands before `siege-board`.
+**Part 2 — the guard is extended. DONE 2026-09-05, and it was not one line.** `WorldDeterminismGuardTests`
+gains a `Core/Battle` + `Core/Effects` scan for the clock/RNG check. It did go red on first run — but
+on **eight** hits, not the one predicted, because the naive widening exposed three real defects in the
+guard itself that had never mattered while it only scanned `Core/World`: the scan stopped at the
+**first** match per (file, symbol) rather than finding all of them; it was **comment-blind**, so four
+of the eight hits were doc comments *explaining* the very rule they tripped; and the float-purity
+check would have forced an out-of-scope fixed-point refactor of `Core/Battle`'s pre-existing
+derived-stat/aura `double` architecture (aura-skill T4) had it widened alongside the clock/RNG check —
+so it deliberately did not. All three are fixed in the guard itself, each with its own proving test.
+
+The one real, predicted finding — `EffectBag.cs:188` (line moved from `:180`) defaulting `UtcNow` to
+`() => DateTimeOffset.UtcNow` — is fixed: the field now throws if read unset, and every production
+composition root (three deterministic hosts already wired their own clock; the injector's live PvZ
+host now wires the wall clock explicitly, on purpose, rather than inheriting it silently) says which
+clock it wants. `GUARD` 202/202, `CORE` 6311/6311, boundary guards green. Full evidence:
+`tasks/base-defense-todo.md` G0.1/G0.2.
 
 ---
 
@@ -201,6 +259,23 @@ inside `FusionRpg.Data`.
 
 ## Open items carried from the ideal
 
-The `decisions.md` amendment for the fifth stage (**owner approval owed**) · the four force-size
-tunables, deliberately unset (decision 29) · and `structure-seed`'s two questions, which belong to that
-program.
+**None open.** All three items this section used to carry are closed:
+
+| Was carried | Now |
+|---|---|
+| The `decisions.md` amendment for the fifth stage — *"owner approval owed"* | ✅ **Approved** 2026-09-04 |
+| `structure-seed`'s two questions, *"which belong to that program"* | ✅ **Closed** by decisions **43** and **45** — and it is no longer a separate program |
+| The four force-size tunables, deliberately unset (decision 29) | **Answered, with "unset"** — a balance-pass input, not a design gate |
+
+**Two things are owed, neither a design decision:**
+
+1. ⚠️ **A `decisions_json` writer** (decision 46). The column is built and read; **no writer exists**
+   anywhere in `src/`. It belongs to `spec-interactive-turns.md` (T10), not here — but a paused siege
+   cannot resume without it, and per `DecisionTrace`'s own comment the boot sweep may **overwrite a
+   played result with an AI re-resolve** in the meantime. **That risk is live today for every played
+   battle, independent of this program.**
+2. A coordination check: `structure-state` is the one
+golden-locked landing, and this map says it should *"share a triage pass with whoever else moves
+`RulesetVersion`."* Ten other task files mention `RulesetVersion`; **whether any of them has a move
+queued is not answerable from this repo**, and it is cheap to ask before level 3 rather than at
+landing time.

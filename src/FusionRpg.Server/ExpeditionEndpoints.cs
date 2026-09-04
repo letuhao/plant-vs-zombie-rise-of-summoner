@@ -65,7 +65,7 @@ public sealed class ExpeditionService
         long SoulsAwarded,
         IReadOnlyList<MaterialDrop> Materials,
         IReadOnlyList<DemonSpecimenDto> WildJoins,
-        IReadOnlyList<(string InstanceId, double Xp)> SpecimenXp);
+        IReadOnlyList<(string InstanceId, long Xp)> SpecimenXp);
 
     public async Task<(bool Ok, string Reason, CollectResult? Result)> CollectAsync(
         long expeditionId, long playerId, bool recall)
@@ -101,7 +101,11 @@ public sealed class ExpeditionService
 
         // Battles run first — each is correlation-idempotent, so a crashed collect replays them.
         var battleResults = new List<CollectBattleResult>();
-        var specimenXp = new Dictionary<string, double>(StringComparer.Ordinal);
+        // Accumulated in MILLI-XP as long, divided by 1000 exactly once at the award below —
+        // CLAUDE.md's numeric rule ("widen before multiplying, divide by 1000 last"). Summing
+        // `rate * xpMilli / 1000.0` per battle instead would accumulate float error into a value
+        // that is then persisted (progression-shape-audit-2026-09-04.md §4.1).
+        var specimenXpMilli = new Dictionary<string, long>(StringComparer.Ordinal);
         var victories = 0;
         foreach (var plan in resolution.Battles)
         {
@@ -126,9 +130,12 @@ public sealed class ExpeditionService
                     var slot = SlotIndex(actor.Key);
                     if (slot < 0 || slot >= squadIds.Count) continue;
                     var instanceId = squadIds[slot];
-                    specimenXp.TryGetValue(instanceId, out var have);
-                    specimenXp[instanceId] = have +
-                        resolution.Rewards.SpecimenXpPerBattleWon * actor.XpMilli / 1000.0;
+                    specimenXpMilli.TryGetValue(instanceId, out var haveMilli);
+                    checked
+                    {
+                        specimenXpMilli[instanceId] = haveMilli +
+                            (long)resolution.Rewards.SpecimenXpPerBattleWon * actor.XpMilli;
+                    }
                 }
             }
         }
@@ -153,8 +160,11 @@ public sealed class ExpeditionService
         }).ToList();
 
         var state = recall && elapsed < tier.TickCount ? ExpeditionStates.Recalled : ExpeditionStates.Collected;
-        var xpAwards = specimenXp.OrderBy(kv => kv.Key, StringComparer.Ordinal)
-            .Select(kv => (kv.Key, kv.Value)).ToList();
+        // The single divide, half away from zero — the same rounding direction PowerLadder and
+        // RpgXpAwardMap use, so every XP that reaches the store was rounded once and identically.
+        var xpAwards = specimenXpMilli.OrderBy(kv => kv.Key, StringComparer.Ordinal)
+            .Select(kv => (kv.Key, Xp: (kv.Value + (kv.Value >= 0 ? 500L : -500L)) / 1000L))
+            .ToList();
         var (applied, applyReason, minted) = _store.ApplyExpeditionRewards(
             row.Id, playerId, state,
             new RpgStore.ExpeditionRewardApply(

@@ -60,9 +60,10 @@ public class WorldCatalogE2ETests
 
     /// <summary>
     /// world-stage W69: a waystation's build range read from the tuning row
-    /// (`data/tuning/loam.v2.json:38`, `waystationRangeHops: 3` — world-map W55 bumped the pinned
-    /// file from v1 to v2 to add a `development` block, byte-identical otherwise), not hard-coded a
-    /// second time on either side of the wire.
+    /// (`data/tuning/loam.v4.json:39`, `waystationRangeHops: 3` — world-map W55 bumped the pinned
+    /// file v1 to v2 for a `development` block, W56 bumped it again to v3 for three new
+    /// structure rows, and W57 bumped it to v4 to rename the `*CostMilli` keys, all byte-identical
+    /// to v1 otherwise except the key names), not hard-coded a second time on either side of the wire.
     /// </summary>
     [Fact]
     public async Task Waystation_range_hops_is_read_from_the_tuning_row()

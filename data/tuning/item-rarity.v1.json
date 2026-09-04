@@ -17,5 +17,5 @@
     "almanac":    { "dropWeightPer100k": 700,   "enhanceCapMilli": 200, "powerCeilingShareMilli": 1000 }
   },
   "enhanceCapStepMarginAlphaMilli": 900,
-  "enhanceCapAsymptoteK": 8
+  "enhanceCapAsymptoteNote": "The curve enhance_cap feeds is gain(n) = enhance_cap(rung) x n/(n+K). K is MODULE 15's and lives in data/tuning/enhancement.v1.json (asymptoteK), read by EnhancePolicy -- it was authored here on 2026-09-04 as well and nothing ever read that copy, so the duplicate was removed 2026-09-05 rather than left as a second source of truth a balance pass could edit with no effect."
 }

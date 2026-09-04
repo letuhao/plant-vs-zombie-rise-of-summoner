@@ -98,6 +98,11 @@ public static class EffectRuntime
                 catch (Exception ex) { CheatState.Error("status stat withdraw: " + ex.Message); }
             };
             _bag = new EffectBag(catalog, grants, proc, new InjectorEffectActionSink());
+            // base-defense Gate 0 (audit C4): explicit at THIS composition root, on purpose — the
+            // injector applies effects to the live, real-time PvZ match, which is the one legitimate
+            // non-replayed caller. EffectBag.UtcNow no longer defaults silently (see its own doc
+            // comment); every host, including this one, must now say which clock it wants.
+            _bag.UtcNow = () => DateTimeOffset.UtcNow;
             _bag.Status = _status;
             // E41 (spec-ui-attach-point.md §2b): op:meter/op:banner's own collaborator, wired the same
             // way DamageFxCueAdapter.Sink is wired onto the Funnel below for op:number.

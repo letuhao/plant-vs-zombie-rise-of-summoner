@@ -1,6 +1,6 @@
 # Spec: `siege-board`
 
-**Module 3 of 21 · level 1 · depends on nothing built here (see below) · [base-defense-map.md](../base-defense-map.md)**
+**Module 3 of 29 · level 1 · depends on nothing built here (see below) · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -259,15 +259,13 @@ exactly"* · store `BoardState` in `WorldState` · put a movement cost in code.
 
 ## Open questions
 
-**One.** Are diagonal moves legal, and if so do they cost more?
+**None.** ✅ **Decision 36 (owner, 2026-09-04): diagonal moves are legal and cost the same as
+orthogonal.**
 
-Chebyshev distance already *implies* diagonals are one step — that is what Chebyshev means, and
-`GridDistance.Square` already enumerates diagonal neighbours as equidistant. So the metric has
-answered "are they legal": **yes**, and changing that would desynchronise movement from every range
-check already shipped.
+Chebyshev already *means* diagonals are one step — `GridDistance.Square` enumerates them as
+equidistant, and the shipped `Square` area shape is a Chebyshev ball. A surcharge would have made a
+unit move in a Chebyshev circle at a Euclidean price, desynchronising movement from every range check
+already shipped.
 
-The open half is cost. **Recommendation: same cost as orthogonal** (`board.moveCost.open` for both),
-because a differing cost re-introduces the Chebyshev/Euclidean mismatch through the back door — a unit
-would move in a Chebyshev circle but pay a Euclidean price. If playtest says diagonal movement feels
-too strong, the dial is `board.moveCost.diagonalSurcharge`, integer, defaulting to `0`. **Owner
-decision; the recommendation is safe to build against and reversible in one tuning row.**
+`board.moveCost.diagonalSurcharge` stays in the tuning schema **at `0`**, so a later balance pass can
+revisit it in one row without a code change — but it is not a design question any more.

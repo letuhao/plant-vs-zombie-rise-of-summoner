@@ -93,6 +93,19 @@ public sealed class MaterialRecipeCatalog
     public const string UnknownBandRule = "material.unknown-cost-band";
     public const string DuplicateRecipeRule = "material.duplicate-recipe-id";
 
+    /// <summary>
+    /// ⭐ R2, the strict-loss invariant, ENFORCED at import rather than only asserted in a test.
+    ///
+    /// <para>Found while building this module: the SC7 line — "adding a base type's forge recipe is
+    /// one row plus two or three cost rows and <b>no code</b>" — means an author can create a
+    /// substrate perpetual-motion machine with a single word. A `forge` whose substrate leg resolves
+    /// to no more than the chaff salvage floor turns forge-then-salvage into a net gain, and R2 as a
+    /// test over the SHIPPED table would never see it: it only fires the day someone authors the
+    /// cheap band. So the check runs at load, on every mint, against the same salvage coefficients
+    /// <see cref="SalvagePolicy"/> reads.</para>
+    /// </summary>
+    public const string StrictLossRule = "material.strict-loss-violated";
+
     static bool _namespaceRegistered;
 
     static void EnsureNamespace()
@@ -220,7 +233,7 @@ public sealed class MaterialRecipeCatalog
                     continue;
                 }
 
-                recipes[id] = new MaterialRecipe(
+                var recipe = new MaterialRecipe(
                     id, op,
                     Str(e, "outputKind"),
                     e.TryGetProperty("outputRef", out var orf) && orf.ValueKind == JsonValueKind.String ? orf.GetString() : null,
@@ -228,10 +241,57 @@ public sealed class MaterialRecipeCatalog
                     Str(e, "frame"),
                     soulsBand,
                     lines);
+
+                var leak = StrictLossLeak(recipe, tuning);
+                if (leak != null)
+                {
+                    refusals.Add(new RecipeRefusal(id, StrictLossRule, leak));
+                    continue;
+                }
+
+                recipes[id] = recipe;
             }
         }
 
         return new MaterialRecipeCatalog(recipes, refusals, tuning);
+    }
+
+    /// <summary>
+    /// R2's import-time half, for MINTS only. A mint's output is a brand-new base: I9 §7.5 example 1
+    /// states its rarity as <b>Normal</b> — the bottom rung — and it carries no enhancement, so its
+    /// salvage yield is exactly the chaff floor. If the recipe's own substrate leg does not exceed
+    /// that floor, forge-then-salvage is a net gain and the loop stops being lossy.
+    ///
+    /// <para>Mutations are deliberately NOT checked here: their output is an item the recipe did not
+    /// pay for in full, so the invariant that holds for them is the per-id one the property test
+    /// asserts, not a comparison against a floor.</para>
+    /// </summary>
+    static string? StrictLossLeak(MaterialRecipe recipe, MaterialTuning tuning)
+    {
+        if (recipe.Operation is not (CraftOperation.Forge or CraftOperation.ForgeGem))
+            return null;
+
+        var cost = tuning.Operations[recipe.Operation];
+        if (cost.Substrate is not { } leg) return null;
+
+        var floor = tuning.Salvage[RarityLadder.RungIds[0]].SubstrateBase;
+
+        foreach (var authored in recipe.CostLines)
+        {
+            var grade = MaterialCatalog.GradeOf(authored.MaterialId);
+            if (grade == 0) continue;
+
+            var qty = leg.BandImmune
+                ? leg.BaseQty(grade, 0, 0)
+                : MaterialTuning.ApplyBand(leg.BaseQty(grade, 0, 0), tuning.BandMultiplier(authored.CostBand));
+
+            if (qty <= floor)
+                return $"R2: minting at cost band '{authored.CostBand}' resolves '{authored.MaterialId}' to {qty}, " +
+                       $"but salvaging the output returns {floor} substrate — forge-then-salvage would be a net gain. " +
+                       "Author a band that costs more than the chaff salvage floor.";
+        }
+
+        return null;
     }
 
     /// <summary>

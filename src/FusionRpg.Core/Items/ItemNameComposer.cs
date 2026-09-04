@@ -17,9 +17,10 @@ public static class ItemNameComposer
 {
     /// <summary>
     /// `rareNameThreshold`: 3+ affixes get a seeded two-word name rather than being named after two
-    /// of (possibly) many affixes, which the spec calls "a lie about what the item does".
+    /// of (possibly) many affixes, which the spec calls "a lie about what the item does". Balance
+    /// surface (tunables-ssot.md T1) — reads through <see cref="ItemsTuningHub"/>, not a bare const.
     /// </summary>
-    public const int RareNameThreshold = 3;
+    public static int RareNameThreshold => ItemsTuningHub.Tuning.RareNameThreshold;
 
     public static string Compose(
         string baseTypeName, IReadOnlyList<NamedAffix> rolled, string frame,

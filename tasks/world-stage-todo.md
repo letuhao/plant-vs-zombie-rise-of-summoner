@@ -1632,11 +1632,67 @@ in parallel (level 3). Every task in this phase depends on Gate A having passed.
     pre-existing, unrelated GG-55 failure, up from 850 by these 2 new cases); `npm run build` →
     **green**.
 
-- [ ] **Owner decision:** does `#/world` flip to the new stage at the end of Phase 2 — so **Gate B is
+- [x] **Owner decision:** does `#/world` flip to the new stage at the end of Phase 2 — so **Gate B is
   played on the real route**, and `@xyflow/react`, the two test mocks and the three old view files go
   early — or does the temporary route carry Gate B and everything old survive to Phase 4? The
   arbitration table settles *who* deletes the old tree and *when* (retirement), not which route the
   playtest runs on. Both are cheap; only the first makes `grep -r "@xyflow"` empty in Phase 2.
+  **✅ Decided 2026-09-04 (asked directly via `AskUserQuestion`): flip now, at the end of Phase 2.**
+  Gate B's own playtest runs on the real `#/world-stage` route rather than a page about to be
+  retired. The actual route flip and early old-tree retirement are real, buildable Phase-2-scoped
+  infrastructure work (not gated by Gate B's own playtest, which is a separate, later thing) — see
+  the routing work tracked below.
+
+  **✅ Built and verified 2026-09-05.** `routes.tsx`'s `world` route now renders `WorldStage` (the
+  `WorldPage` lazy import removed; `world-stage`'s own route stays too, as a second alias to the
+  same lazy chunk — `WorldStage-*.js` is the only "World" chunk in the real build output now,
+  confirmed by inspecting `npm run build`'s manifest, so nothing regressed GG-38's split).
+  `AppShell.tsx`'s `NON_SCROLLING_ROUTES` gained `/world` alongside `/world-stage`, since it is the
+  same stage component and needs the same unpadded, non-scrolling outlet — missing this would have
+  reintroduced exactly the below-the-fold defect `spec-world-shell.md` §1 describes for the old page.
+  Retired early, per the decision above: `src/features/world/WorldPage.tsx`, `SectorNode.tsx`,
+  `LaneEdge.tsx` and their two test-only `@xyflow/react` mocks (`SectorFog.test.tsx`,
+  `SectorNode.test.tsx`), plus the `@xyflow/react` dependency itself (`package.json`, and
+  `package-lock.json` via `npm install`) — `grep -rn "xyflow" src/` now hits nothing but comments
+  and the guard test's own doc comment. `xyflowGuard.test.ts`'s second case (previously pinned to
+  the five known references) now asserts an empty list, proving the removal rather than assuming it.
+  `check-bundle.mjs` gained the matching `@xyflow/react`-absent assertion next to the existing
+  `recharts` one (its old comment explaining why `@xyflow` couldn't be asserted yet was stale).
+  **One incidental finding, not fixed:** `WorldPage.tsx` was the only production consumer of
+  `features/world/LegionMarker.tsx`, `LoamGauge.tsx` and `SectorPanel.tsx` — deleting it leaves
+  those three (and their four colocated tests) referenced by nothing but their own tests. Left in
+  place rather than silently expanding this session's scope past what the decision above named
+  ("the two test mocks and the three old view files") — **W108 should fold these three files in
+  when it deletes the rest of the tree**, noted there below.
+
+  `e2e/world.spec.ts` (the old page's own ten-test suite) is deleted — its testids (`world-canvas`,
+  `sector-status`, `toggle-lifelines`, `sector-lifeline`, `world-inspector`, `world-orders`, the
+  "March here" button label) don't exist in the new stage's DOM, so keeping it would have gone red
+  on this same change, not merely duplicated coverage. Of its ten tests: selection, inspector
+  fill/close, staleness ("N turns ago") and march-queue/take-back were already equivalently covered
+  in `e2e/world-stage.spec.ts` under the new stage's own testids (W65/W71). One genuinely new,
+  cheap-to-keep case — "ground nobody has seen is a silhouette without a name" (`black-gate`,
+  real-browser proof of `sectorChannels.ts`'s `shape: "unknown"` branch) — was ported into
+  `world-stage.spec.ts`. The lifeline-overlay show/hide pair was **not** ported: `LifelineOverlay.tsx`
+  (W48) exists but `WorldScene.tsx`'s own comment says it "is still not wired in" to the new stage —
+  there is no toggle in the real UI yet to click, so writing that e2e test would either fabricate a
+  path or fail; this is a pre-existing, already-documented wiring gap, not one introduced here.
+  `e2e/bundle-splitting.spec.ts`'s "World's map chunk stays off the Sanctum path" test asserted
+  against `WorldPage-*.js`, a chunk name that (checked against the real build output) never actually
+  existed even before today — fixed to assert against the real `WorldStage-*.js` chunk name instead.
+
+  Verified: `cd web\fusion-rpg-web` — `npm test -- --run` → **1271/1272 passed** (the one failure is
+  the standing pre-existing `disabledReasonGuard` GG-55 case this whole session has seen every run,
+  confirmed unrelated: `CommandersLayer.tsx`/`CommanderSheetFooter.tsx` disabled buttons, nothing
+  world-related); `npm run build` → **green**, `node scripts/check-bundle.mjs` → all four checks OK
+  including the new `@xyflow/react` one; `npx playwright test e2e/*.spec.ts --project=chromium` (the
+  full top-level suite, 27 files — `e2e/helpers/live-debug-api-core.test.ts` breaks Playwright's own
+  collection on this Windows checkout regardless of this change, a pre-existing path-separator issue
+  in `testIgnore`'s regex, unrelated to routing, worked around by listing `e2e/*.spec.ts` explicitly
+  rather than the whole directory) → **209/211 passed**. The two failures are both pre-existing and
+  unrelated to this change — `sanctum.spec.ts`'s "sectors held" copy assertion and `system.spec.ts`'s
+  Sound-tab tooltip-text assertion are both stale text expectations against Sanctum/System copy this
+  task never touched (confirmed by re-running both in isolation, same failures, same messages).
 
 ### `world-numbers` (parallel with `world-shell`)
 
@@ -3750,7 +3806,12 @@ and does not make the change; W41 makes registration deterministic, which is the
   - Dependencies: W79, W81.
   - Scope: S.
 
-- [ ] **Owner decision: how the force-end shortcut gets a key** — `web/fusion-rpg-web/src/shell/useGlobalKeys.ts:25` is `dispatchGlobalVerb(event.key)` and carries **no modifier state at all**, so `Shift+Enter` and `Enter` arrive at the registry as the same key `"Enter"` and the plate's `⇧⏎` force-end binding is **not expressible in the shipped keymap**. Two resolutions, both costed in `spec-world-turn.md` §4: **(a)** teach the keymap a canonical modified-key form (`"Shift+Enter"`) produced at the listener and consumed by the registry — correct and small, but it touches every stage's keymap and is therefore ask-first; **(b)** bind the hatch to an unmodified key of its own and keep `⏎` for the ordinary end — ships with no shell change, and costs the gesture's family resemblance to Civ VI's. **The pointer path (W46) ships either way**, so this constrains the shortcut and nothing else. Needed before W46 is called done, not before W40 starts.
+- [x] **Owner decision: how the force-end shortcut gets a key** — `web/fusion-rpg-web/src/shell/useGlobalKeys.ts:25` is `dispatchGlobalVerb(event.key)` and carries **no modifier state at all**, so `Shift+Enter` and `Enter` arrive at the registry as the same key `"Enter"` and the plate's `⇧⏎` force-end binding is **not expressible in the shipped keymap**. Two resolutions, both costed in `spec-world-turn.md` §4: **(a)** teach the keymap a canonical modified-key form (`"Shift+Enter"`) produced at the listener and consumed by the registry — correct and small, but it touches every stage's keymap and is therefore ask-first; **(b)** bind the hatch to an unmodified key of its own and keep `⏎` for the ordinary end — ships with no shell change, and costs the gesture's family resemblance to Civ VI's. **The pointer path (W46) ships either way**, so this constrains the shortcut and nothing else. Needed before W46 is called done, not before W40 starts.
+  **✅ Decided (and the ask-first action it names authorized in the same answer) 2026-09-04, asked
+  directly via `AskUserQuestion`: option (a), teach the keymap real modifier-key support.** Still
+  cannot be *built* yet — the task that consumes it, W83, sits inside Phase 3, which Gate B blocks
+  as a phase boundary regardless of this decision being answered. Recorded now so W83 starts from a
+  settled design the day Gate B clears, rather than reopening this question then.
 
 ### `world-notify` — two classes, and half of it already ships
 
@@ -3953,7 +4014,7 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
   - Dependencies: W87, W91, W105, Phase 2 `world-inspector` and `world-playback`.
   - Scope: XS.
 
-- [ ] **W107: Retire the three exemptions — and edit a green test to assert its opposite**
+- [x] **W107: Retire the three exemptions — and edit a green test to assert its opposite**
   - Description: `#/world` is currently exempt from three things at once, and they retire **in the same change** so the tree is never half-migrated. (1) `src/theme/hexGuard.ts:27` lists `"features/world/"` in `SKIPPED_PATH_PREFIXES`; per the map's arbitration `world-render` deletes that entry in the change that makes the map token-only, and this task confirms it is gone rather than re-deleting it. (2) The **GG-7 reachability exception** — `e2e/checkpoint-f.spec.ts` documents *"all redirect, none 404, except /world (T16 excludes World from this sweep)"* at `:10`. (3) The **shell's redirect exception** — `src/app/routes.tsx:89-96` still serves the legacy `WorldPage` on its own route while `roster`, `expeditions`, `fusion` and `pacts` all `Navigate` away.
     **`e2e/checkpoint-f.spec.ts:231` is a passing test asserting `/world` stays on its own route**, so retiring the exemption means editing a green test to assert its opposite. **The replacement assertion, stated here so it is not improvised at the keyboard:** the test is renamed *"`/world` reaches the world stage, not the legacy page"* and asserts `response.ok()`, that the world stage's own `data-testid` is visible, and that the legacy page's markers (`chunk-fallback-world` and `WorldPage`'s sidebar) are **absent**. That assertion holds whether or not `world-shell` kept the `#/world` URL in Phase 1, so it does not smuggle in a route decision that is not this task's to make. The header comment at `:10` and the `describe` title at `:199` both lose the exception clause.
   - Acceptance: `SKIPPED_PATH_PREFIXES` contains `"game/"` only; `routes.tsx` no longer imports `@/features/world/WorldPage`; the renamed checkpoint-f test passes against the new stage; no test anywhere still asserts the legacy page renders.
@@ -3961,25 +4022,50 @@ standing exemptions retired in the same change, and the GG-50 registry closed.
   - Files: `src/theme/hexGuard.ts`, `src/app/routes.tsx`, `e2e/checkpoint-f.spec.ts`.
   - Dependencies: W106, and every module task above.
   - Scope: M.
+  - **✅ Done 2026-09-05**, ahead of its own dependency ordering — landed as the owner-decision's
+    "flip now" routing work rather than waiting for a fresh W106 pass, since every module task it
+    actually depended on (`world-targeting`, `world-inspector`, `world-render`, and the rest) was
+    already closed and W106's registry work is independent of routing. All three exemptions
+    confirmed retired: (1) `hexGuard.ts`'s `SKIPPED_PATH_PREFIXES` already held only `"game/"` — W49
+    beat this task to it, confirmed by reading the file rather than assumed. (2) & (3)
+    `routes.tsx`'s `world` route now renders `WorldStage` (`WorldPage` import removed), and
+    `checkpoint-f.spec.ts`'s test was renamed and rewritten exactly as prescribed above — asserts
+    `response.ok()`, `world-stage-svg` visible, `chunk-fallback-world` not visible and
+    `world-canvas` (the deleted `WorldPage`'s own canvas testid) has zero matches. The header
+    comment (`:10`) and `describe` title lost their exception clause too. Verified:
+    `npx playwright test e2e/checkpoint-f.spec.ts --project=chromium` → **58/58 passed**; full
+    `npm test -- --run` → **1271/1272** (standing pre-existing GG-55 failure only); `npm run build`
+    → green.
 
-- [ ] **W108: Delete `features/world/` and the E2E spec that drives it**
-  - Description: the pure layer has already **moved, not died** (map arbitration §A) — `worldSelection.ts`, `worldViewModel.ts`, `turnPlayback.ts`, `commanderIntent.ts` and both fixtures relocated to `stages/world/` at their consuming module's phase. What is left is the old page and its components: `WorldPage.tsx`, `SectorNode.tsx`, `LaneEdge.tsx`, `LegionMarker.tsx`, `LoamGauge.tsx`, `SectorPanel.tsx`, `worldTypes.ts` and their colocated tests. Deleting `WorldPage.tsx`, `SectorNode.tsx` and `LaneEdge.tsx` is also what removes the last three production imports of `@xyflow/react` (`decisions.md:93`). **`e2e/world.spec.ts` drives the old page and cannot survive this** — its ten tests either move to the new stage (the fog-treatment and band-name assertions are still the right questions) or are deleted with their reason recorded in the task's done-note; leaving it in place would go red on the same commit.
-    > **The exact inventory `world-shell` W36 recorded (2026-09-04, `xyflowGuard.test.ts`), so this
-    > task starts from a checked fact, not a fresh `grep`:** `src/features/world/WorldPage.tsx:2`
-    > (`import { ReactFlow, Background, Controls, MiniMap, ... } from "@xyflow/react"`) and `:3`
-    > (`import "@xyflow/react/dist/style.css"`); `src/features/world/SectorNode.tsx:2`; `src/features/world/LaneEdge.tsx:2`
-    > — the three production imports above. Plus two test-only mocks that die with the files they
-    > mock: `src/features/world/SectorFog.test.tsx:12` and `src/features/world/SectorNode.test.tsx:18`
-    > (`vi.mock("@xyflow/react", ...)`). The dependency itself is `package.json:31`
-    > (`"@xyflow/react": "^12.11.3"`). Once all five files are gone, re-run `xyflowGuard.test.ts`'s
-    > second case with an empty expected list (or delete the test — the module it guards no longer
-    > exists) before dropping the `package.json` entry, so the guard proves the removal instead of
-    > merely assuming it.
-  - Acceptance: `src/features/world/` does not exist; `grep -r "@xyflow/react" src/` returns nothing and the dependency is dropped from `package.json`; `e2e/world.spec.ts` is replaced or deleted with each of its ten tests accounted for; `npm run build` succeeds with no unresolved import.
+- [ ] **W108: Delete the rest of `features/world/` — now four files, not seven**
+  - Description: narrowed by the routing work above (2026-09-05), which retired the `@xyflow/react`
+    half of this task early per the owner's "flip now" decision: `WorldPage.tsx`, `SectorNode.tsx`,
+    `LaneEdge.tsx`, their two test-only `@xyflow/react` mocks (`SectorFog.test.tsx`,
+    `SectorNode.test.tsx`) and the `package.json` dependency line are **already gone** —
+    `xyflowGuard.test.ts`'s second case already asserts an empty reference list. `e2e/world.spec.ts`
+    is already deleted too (retired, not moved — see that session's own done-note above for which of
+    its ten tests already have an equivalent in `world-stage.spec.ts` and which one genuine gap
+    — the unwired lifeline overlay — was left honestly open rather than faked).
+    **What is actually left, and it is smaller than W108 originally scoped:** `worldSelection.ts`,
+    `worldViewModel.ts`, `turnPlayback.ts`, `commanderIntent.ts`, `labels.ts`, `playbackKeyframes.ts`,
+    `playbackTable.ts` and `worldTypes.ts` (the `lib/bus/world.ts` re-export shim) are all still
+    **live production dependencies of `WorldStage.tsx`** — not part of this deletion, and this task
+    should not touch them. Genuinely dead, found as a side effect of deleting `WorldPage.tsx` (its
+    only consumer): `LegionMarker.tsx`, `LoamGauge.tsx` and `SectorPanel.tsx`, each with a colocated
+    test that now only exercises an orphaned unit (confirmed by grep — nothing outside their own
+    `.test.tsx` imports any of the three). Left in place rather than deleted by the routing work,
+    since the owner's decision named only "the two test mocks and the three old view files" as going
+    early — these three were not part of that authorization, even though they are dead today.
+  - Acceptance: `src/features/world/LegionMarker.tsx`, `LoamGauge.tsx`, `SectorPanel.tsx` and their
+    three colocated tests do not exist (four files were already deleted by the routing work and need
+    no further action); `grep -r "@xyflow/react" src/` still returns nothing; `npm run build`
+    succeeds with no unresolved import. Once these three are gone, revisit whether `worldTypes.ts`'s
+    shim and the still-feature-scoped modules above are ready to actually move under `stages/world/`
+    (the map's own §A arbitration), which is the real remainder of "delete `features/world/`."
   - Verify: `cd web\fusion-rpg-web; npm test` then `npm run build`
-  - Files: `src/features/world/` (deleted), `e2e/world.spec.ts`, `package.json`.
-  - Dependencies: W107.
-  - Scope: L (a deletion — many paths, one decision).
+  - Files: `src/features/world/LegionMarker.tsx`, `LoamGauge.tsx`, `SectorPanel.tsx` and their tests.
+  - Dependencies: W107 (done).
+  - Scope: S (down from L — four of the original seven files and the E2E spec are already gone).
 
 ### Checkpoint C — complete
 

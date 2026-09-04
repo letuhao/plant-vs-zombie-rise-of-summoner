@@ -76,12 +76,19 @@ public static class LegionSupply
             if (!connectedByFaction.TryGetValue(faction.FactionId, out var connected) || connected.Count == 0)
                 continue;
 
-            foreach (var component in TerritoryComponents.For(world, faction.FactionId))
+            // base-defense siege-supply §2: `TerritoryComponents.For` pools by ownership + lane
+            // adjacency ONLY — it does not itself cut on contested-ness (verified by reading it, not
+            // assumed; it has four OTHER callers — loam upkeep, an AI policy, a server endpoint — so
+            // fixing contested-ness INTO that shared function would silently change all of them).
+            // Re-split its output LOCALLY, here, so a besieged sector never pools with a friendly
+            // neighbour for legion top-up specifically: "a besieged sector draws only on itself."
+            foreach (var rawComponent in TerritoryComponents.For(world, faction.FactionId))
+            foreach (var component in SplitOutBesieged(rawComponent, world, faction.FactionId))
             {
                 var toppingUp = world.Entities
                     .Where(e => string.Equals(e.OwnerFactionId, faction.FactionId, StringComparison.Ordinal))
                     .Where(e => e.AtSectorId is { } at && component.Contains(at))
-                    .Select(e => (Entity: e, Demand: Math.Max(0, Capacity(e) - carriedById[e.EntityId])))
+                    .Select(e => (Entity: e, Demand: RationedDemand(e, carriedById[e.EntityId], world, faction.FactionId)))
                     .Where(x => x.Demand > 0)
                     .OrderBy(x => x.Entity.EntityId, StringComparer.Ordinal)
                     .ToList();
@@ -146,6 +153,52 @@ public static class LegionSupply
         var sectors = world.Sectors.Select(s => s with { LoamStock = stockById[s.SectorId] }).ToList();
 
         return world with { Sectors = sectors, Entities = survivingEntities };
+    }
+
+    /// <summary>
+    /// Re-partitions a `TerritoryComponents.For` component so a BESIEGED sector never pools with its
+    /// neighbours for legion top-up (audit F1 §2). `TerritoryComponents.For` is shared by four other
+    /// callers (loam upkeep, an AI policy, a server endpoint) and does not itself cut on
+    /// contested-ness — this is a LOCAL, LegionSupply-only re-split, never a change to that shared
+    /// utility, which would silently change behaviour for all of them.
+    ///
+    /// <para>Ordinal by sector id within each yielded group, so the enumeration order this feeds into
+    /// (a `foreach` whose body draws stock) is replay-stable regardless of dictionary iteration order
+    /// upstream.</para>
+    /// </summary>
+    static IEnumerable<IReadOnlyList<string>> SplitOutBesieged(
+        IReadOnlyList<string> component, WorldState world, string factionId)
+    {
+        var remaining = new List<string>(component.Count);
+        foreach (var sectorId in component.OrderBy(id => id, StringComparer.Ordinal))
+        {
+            if (SupplyGraph.IsBesieged(world, sectorId, factionId))
+                yield return new[] { sectorId };   // its own singleton — draws only on itself
+            else
+                remaining.Add(sectorId);
+        }
+
+        if (remaining.Count > 0)
+            yield return remaining;
+    }
+
+    /// <summary>
+    /// base-defense siege-supply, decision 42: a garrison topping up inside a BESIEGED sector draws
+    /// at `LoamPolicy.BesiegedRationMilli` of normal — applied to DEMAND, before
+    /// <see cref="DrawProportionally"/>-equivalent distribution runs, so a rationed garrison asks for
+    /// less rather than being served less and the proportional-draw arithmetic downstream is
+    /// untouched. `1000` (shipped default) is a no-op, keeping the F1/F1b defect fix and this balance
+    /// dial independently verifiable.
+    /// </summary>
+    static long RationedDemand(WorldEntity entity, long carried, WorldState world, string factionId)
+    {
+        var raw = Math.Max(0, Capacity(entity) - carried);
+        if (raw <= 0) return raw;
+        if (entity.AtSectorId is not { } at || !SupplyGraph.IsBesieged(world, at, factionId))
+            return raw;
+
+        // long * int, one divide, last, checked — CLAUDE.md rules 3/4/5.
+        return checked(raw * LoamPolicy.BesiegedRationMilli / 1000);
     }
 
     /// <summary>Same shape as <see cref="LoamPhases.DrawProportionally"/>, one level down: proportional by demand share, remainder to the first legion in ordinal id order.</summary>

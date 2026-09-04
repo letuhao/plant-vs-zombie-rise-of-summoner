@@ -1,6 +1,6 @@
 # Spec: `siege-positions`
 
-**Module 9 of 21 · level 4 · depends on `siege-board`, `combatant-kind` · [base-defense-map.md](../base-defense-map.md)**
+**Module 9 of 29 · level 4 · depends on `siege-board`, `combatant-kind` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---

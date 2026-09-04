@@ -16,8 +16,8 @@ public sealed class RpgActorProgressionDto
     /// <summary>Promoted PlantInfo.cost (sun/cooldown) from almanac dump.</summary>
     [JsonPropertyName("almanacCost")] public string? AlmanacCost { get; set; }
     [JsonPropertyName("level")] public long Level { get; set; }
-    [JsonPropertyName("xp")] public double Xp { get; set; }
-    [JsonPropertyName("xpToNext")] public double XpToNext { get; set; }
+    [JsonPropertyName("xp")] public long Xp { get; set; }
+    [JsonPropertyName("xpToNext")] public long XpToNext { get; set; }
     [JsonPropertyName("highestLevel")] public long HighestLevel { get; set; }
     [JsonPropertyName("demotionCount")] public long DemotionCount { get; set; }
     [JsonPropertyName("revision")] public long Revision { get; set; }

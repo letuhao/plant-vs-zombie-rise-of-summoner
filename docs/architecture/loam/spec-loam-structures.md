@@ -91,7 +91,7 @@ structure to exist *and not yet work*.
   finished one; a positive value means `StructureId` is set but the structure is **not yet active** —
   it contributes to neither `LoamProduction` nor `Habitability` while this is above zero.
 - **New command**: `WorldCommandKinds.Build` — a legion standing on a sector its own faction holds may
-  order construction of a named structure on a compatible, empty slot. Cost (`StructureDef.CostMilli`)
+  order construction of a named structure on a compatible, empty slot. Cost (`StructureDef.Cost`, renamed off `CostMilli` world-map W57 — a whole loam unit, never a per-mille)
   is spent from the **issuing legion's own `CarriedLoam`** (`loam-legions`), not the component pool —
   this is G1's bootstrap spend exactly: the sector may have no connected pool of its own yet (that is
   the paradox G1 exists to solve), so the army's own reserves are the only thing that can pay. Sets
@@ -178,7 +178,7 @@ dotnet test tests\FusionRpg.Guard.Tests
 src/FusionRpg.Core/World/WorldState.cs                  → WorldSlot.ConstructionTurnsRemaining
 src/FusionRpg.Core/World/WorldCanonical.cs               → the field into the hash — part of the batched post-gate golden move, see spec-loam-texture.md
 src/FusionRpg.Core/World/StructureCatalog.cs             → well, waystation rows added
-src/FusionRpg.Core/World/Loam/LoamPolicy.cs              → WellYieldMultiplierMilli, *CostMilli, *BuildTurns, WaystationRangeHops (harness-tuned)
+src/FusionRpg.Core/World/Loam/LoamPolicy.cs              → WellYieldMultiplierMilli, *Cost, *BuildTurns, WaystationRangeHops (harness-tuned)
 src/FusionRpg.Core/World/Loam/LoamProduction.cs          → multiplier applied per active structure
 src/FusionRpg.Core/World/Loam/Habitability.cs            → truth overload extended; belief overload's signature widened (structure id + active flag)
 src/FusionRpg.Core/World/Intel/ (IntelRecorder.cs, IntelSeed.cs, FactionIntel.cs) → belief slot snapshot gains structure id + active flag, terrain-visible

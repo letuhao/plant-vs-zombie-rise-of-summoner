@@ -211,7 +211,8 @@ static-vs-dynamic line, and a remembered army is a lie waiting to happen.
   band-3 layers. This module renders the verb that opens them.
 - **Targeting.** `March here` reaches past this sector, so its route preview and range overlay are
   `world-targeting`'s, drawn **on the map**. The inspector holds only the sector's own verbs.
-- **The magnitude renderer.** `world-numbers` owns it, including the `CostMilli` trap. Every number
+- **The magnitude renderer.** `world-numbers` owns it, including the whole-loam-unit structure-cost
+  trap (the Core field was `CostMilli` until world-map W57 renamed it to `Cost`). Every number
   in every block above goes through it with an explicit family.
 - **The translation table.** `world-playback` owns it. This module is a consumer.
 - **The cede order itself.** `world-commands`. See §3 — this module's obligation is to not draw it

@@ -1,6 +1,7 @@
 using System.Linq;
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Rungs;
+using FusionRpg.Core.Battle;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Power;
 
@@ -67,6 +68,17 @@ public sealed partial class RpgStore
                 continue;
             }
 
+            // battle-tempo action-timing (D2): the realized-power figure the budget check below
+            // computes is exactly the input action-timing's wind-up/recovery formula needs
+            // (spec-action-timing.md §2.2a) -- fetched once here, reused for both, rather than a
+            // second atom read.
+            var containerAtoms = container?.Atoms
+                .Select(a => GetAtom(a.AtomId))
+                .Where(a => a is not null)
+                .Select(a => a!)
+                .ToList() ?? new List<AtomRow>();
+            var realizedPowerMilli = (long)Effects.Atoms.Power.ActorPowerCache.Compose(containerAtoms).Total;
+
             // A-G1 (spec-tier-access-gate.md §3.2): this is the real production caller for the
             // rung-keyed power budget -- every action this store holds passes through here on the
             // way to a battle-usable catalog (WebMatchService's own three call sites). Only the FIXED
@@ -82,11 +94,7 @@ public sealed partial class RpgStore
                 var localContainer = container;
                 var budget = ContentValidation.Budget(
                     new[] { localContainer },
-                    _ => localContainer.Atoms
-                        .Select(a => GetAtom(a.AtomId))
-                        .Where(a => a is not null)
-                        .Select(a => a!)
-                        .ToList(),
+                    _ => containerAtoms,
                     _ => row.Rung,
                     rung => rungTable.TryGet(rung, out var rr) ? rr.PowerBudgetMilli : null);
 
@@ -100,6 +108,16 @@ public sealed partial class RpgStore
                     continue;
                 }
             }
+
+            // battle-tempo action-timing (D2): derived HERE, at catalog build, never by the seeder --
+            // BasicAttack's own token wind-up is exempt from this formula (it has no rung/container)
+            // and is seeded separately in BasicAttack.cs itself, so this path only ever touches
+            // seeded/authored actions with a real rung.
+            var cdMulti = rungTable.TryGet(row.Rung, out var rungRowForTiming) ? rungRowForTiming.CdMulti : 1000;
+            var derivedEnvelope = ActionTimingDerivation.Derive(
+                action.Envelope, row.Category, realizedPowerMilli, BattleRuleset.RoundDurationMs,
+                cdMulti, ActionTimingPolicy.Tuning);
+            action = action with { Envelope = derivedEnvelope };
 
             compiled.Add(action);
         }

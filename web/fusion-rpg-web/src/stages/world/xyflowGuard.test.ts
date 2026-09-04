@@ -44,18 +44,9 @@ describe("xyflowGuard", () => {
     expect(findReferences(join(__dirname, ".."))).toEqual([]);
   });
 
-  it("the whole src tree carries only the five known old-tree references, pending Phase 4 retirement", () => {
+  it("the whole src tree is clean — the old tree's five references were retired early (world-stage routing work, 2026-09-05), not at Phase 4's W108", () => {
     const references = findReferences(join(__dirname, "..", "..")).map((r) => `${r.file}:${r.line}`);
 
-    expect(references.sort()).toEqual(
-      [
-        "src/features/world/LaneEdge.tsx:2",
-        "src/features/world/SectorFog.test.tsx:12",
-        "src/features/world/SectorNode.test.tsx:18",
-        "src/features/world/SectorNode.tsx:2",
-        "src/features/world/WorldPage.tsx:2",
-        "src/features/world/WorldPage.tsx:3"
-      ].sort()
-    );
+    expect(references).toEqual([]);
   });
 });

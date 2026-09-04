@@ -51,7 +51,7 @@ public class ExpeditionRewardApplyTests : IDisposable
         var rewards = new RpgStore.ExpeditionRewardApply(
             EventSouls: 120,
             Materials: new[] { ("shard.common", 2L) },
-            SpecimenXp: new[] { (instanceId, 30.0) },
+            SpecimenXp: new[] { (instanceId, 30L) },
             WildMints: new[] { Spec() });
 
         var first = _store.ApplyExpeditionRewards(row!.Id, 1, ExpeditionStates.Collected, rewards);
@@ -90,7 +90,7 @@ public class ExpeditionRewardApplyTests : IDisposable
         var rewards = new RpgStore.ExpeditionRewardApply(
             EventSouls: 1000, // headroom is only 100 -- this must be refused, not shorted to 100
             Materials: Array.Empty<(string, long)>(),
-            SpecimenXp: Array.Empty<(string, double)>(),
+            SpecimenXp: Array.Empty<(string, long)>(),
             WildMints: Array.Empty<DemonMintSpec>());
 
         Assert.Throws<ArgumentOutOfRangeException>(() =>
@@ -111,7 +111,7 @@ public class ExpeditionRewardApplyTests : IDisposable
         Assert.ThrowsAny<Exception>(() => _store.ApplyExpeditionRewards(
             row!.Id, 1, ExpeditionStates.Collected,
             new RpgStore.ExpeditionRewardApply(50, new[] { ("essence.plasma", 1L) },
-                Array.Empty<(string, double)>(), Array.Empty<DemonMintSpec>())));
+                Array.Empty<(string, long)>(), Array.Empty<DemonMintSpec>())));
 
         // Validation failed before the transaction: still open, still collectable, no souls.
         Assert.Equal(ExpeditionStates.Dispatched, _store.TryGetExpedition(row!.Id)!.State);

@@ -19,6 +19,15 @@ public static class TurnEngine
 {
     public const int EngineVersion = 1;
     /// <summary>
+    /// Bumped to 7 on 2026-09-05 (world-map W58, spec-sector-development.md §1/§2, decisions.md): the
+    /// phase's own second and final re-bless — `growth.seatPulsePerWeek` moves off 0 (a held Seat now
+    /// genuinely accrues `RecruitStock` on a week boundary) and `LoamUpkeep`'s season factor moves off
+    /// 1000-per-mille for seasons 1-3 (season 0 stays identity, so any world that never leaves it sees
+    /// no change). Both terms existed and were wired inert since W43/W48 — this is the tuning-only
+    /// publish that makes them real, not a new code path, and it is real hashed behaviour: the same
+    /// command log against a sector with an owned Seat, or one that lives long enough to cross a
+    /// season boundary, now produces a different state than version 6 did.
+    ///
     /// Bumped to 4 on 2026-08-23 (spec-loam-turn.md): `Production` and `Pressure` stop being
     /// pass-throughs. A sector now earns loam and pays upkeep every turn, and ground can be lost to
     /// the Fracture for the first time. The program's second and last golden re-bless — the first
@@ -46,7 +55,7 @@ public static class TurnEngine
     /// — this bump exists only for the case a real order changes the outcome, and covers `bind-warden`
     /// (W28) and `dowse` (W30) landing after it without a second bump, per the same decision.
     /// </summary>
-    public const int RulesetVersion = 6;
+    public const int RulesetVersion = 7;
 
     public static class Phases
     {
@@ -249,6 +258,16 @@ public static class TurnEngine
                 report.Add(Phases.Events, TurnReportKinds.Calendar, "month",
                     roll.Plague ? "plague" : roll.SpecialMonth ? "special" : "ordinary");
         }
+
+        // world-map W58 (spec-sector-development.md §2, "the season is visible in the turn report"):
+        // reported only on the turn a season actually changes — the same "week"/"month" precedent
+        // immediately above, which reports only at its own boundary rather than every turn. Season
+        // is never fogged (TurnCalendar.SeasonOf's own doc comment), so this needs no belief-side
+        // twin: every faction computes the same season from the same turn. Turn 0 reports nothing —
+        // there is no prior season to have changed from, matching every other boundary check's own
+        // `turn > 0` guard in this file.
+        if (turn > 0 && roll.Season != TurnCalendar.SeasonOf(turn - 1))
+            report.Add(Phases.Events, TurnReportKinds.Calendar, "season", roll.Season.ToString());
 
         return world;
     }

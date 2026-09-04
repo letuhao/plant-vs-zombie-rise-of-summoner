@@ -82,7 +82,7 @@ rejection (§8).
 | `LadderIndex` | `Θ 20` | `→ 680 power` — **exact, not an estimate** (§3.2) | `progression.power` `progression.realm` | [ResistanceEvaluator.cs:190-217](../../src/FusionRpg.Core/Status/ResistanceEvaluator.cs) reads it **linearly** as a contest delta; `PowerLadder.Value(Θ)` reads it as `P(Θ)` for magnitudes |
 | `AptitudePoints` | `Might 55` | `→ +2,200 omni power` — **an estimate, allowed only on a surface with a real allocation** (§3.2's precedent; class-system/spec-primary-stats.md §3.2) | the twelve aptitudes (sources, never registered channels — class-system-map.md §2aa) | Read by both PS-3 functions the aptitude-tuning module owns; class-system, authorised 2026-08-26 |
 | `ReciprocalPoints` | `Onslaught 40 penetration` | an estimate, same suppression rule as `StatusPotencyPoints` | `combat.penetration` `combat.absorption` `combat.amplification` `combat.reduction` | [OverlayCombatCalculator.cs](../../src/FusionRpg.Core/Combat/OverlayCombatCalculator.cs)'s mitigation chain — `PierceFactor`/`AmpFactorReciprocal`, both asymptotic rather than sigmoid; class-system/spec-unit-class-close.md §3.3/§3.5, authorised 2026-08-26 |
-| `LoamUnits` | `200 loam` | none — a plain whole count; a flow's own sign/arrow/colour are `LoamFigure`'s composition, not this class's | loam production/upkeep/net/stock (`WorldSectorDto`'s loam and component blocks), the four `…Milli`-named loam-cost fields (`StructureDef.CostMilli`, `LoamPolicy.WellCostMilli`/`WaystationCostMilli`/`GranaryCostMilli`) | world-numbers W37/W38, authorised 2026-09-04 — [magnitude.ts](../../web/fusion-rpg-web/src/i18n/magnitude.ts); [BuildResolver.cs:101,115](../../src/FusionRpg.Core/World/Movement/BuildResolver.cs) is the consumer the class exists to stop misreading |
+| `LoamUnits` | `200 loam` | none — a plain whole count; a flow's own sign/arrow/colour are `LoamFigure`'s composition, not this class's | loam production/upkeep/net/stock (`WorldSectorDto`'s loam and component blocks), the structure-cost fields (`StructureDef.Cost`, `LoamPolicy.WellCost`/`WaystationCost`/`GranaryCost` — named `…CostMilli` until world-map W57's rename) | world-numbers W37/W38, authorised 2026-09-04 — [magnitude.ts](../../web/fusion-rpg-web/src/i18n/magnitude.ts); [BuildResolver.cs:101,115](../../src/FusionRpg.Core/World/Movement/BuildResolver.cs) is the consumer the class exists to stop misreading |
 
 **Thirteen, not four** (nine when this document was written; `LadderIndex` added 2026-08-24;
 `AptitudePoints`/`ReciprocalPoints` added 2026-08-26 by the class-system program;
@@ -110,10 +110,13 @@ moved to `GameUnits`, and `GameUnitsPerSecond`, `Count`, `Flag`, `LadderIndex`, 
 > `long` count of loam, distinct from `GameUnits` because its ledger row needs no `channel` (loam is
 > not a derived channel) and it must never always render signed the way `GameUnits` does (a cost or
 > a stock is a plain count; only a flow wants a sign, and that is `LoamFigure`'s own composition, not
-> this class's). Exists chiefly to make one bug unrepresentable: four fields named `…Milli`
-> (`StructureDef.CostMilli`, `LoamPolicy.WellCostMilli`/`WaystationCostMilli`/`GranaryCostMilli`) hold
-> **whole loam units**, not per-mille — a renderer trusting the suffix would print *"A Well costs 0.2
-> loam"*. The same authorisation adds `absolute` to `Magnitude.op` (§3's `PerMilleRatio` row): a field
+> this class's). Exists chiefly to make one bug unrepresentable: four fields were named `…Milli`
+> (`StructureDef.CostMilli`, `LoamPolicy.WellCostMilli`/`WaystationCostMilli`/`GranaryCostMilli`) and
+> held **whole loam units**, not per-mille — a renderer trusting the suffix would print *"A Well costs
+> 0.2 loam"*. World-map W57 (2026-09-05) renamed all four (`StructureDef.Cost`,
+> `LoamPolicy.WellCost`/`WaystationCost`/`GranaryCost`) off the misleading suffix, but the class this
+> ledger row describes still exists to stop the same misreading for any field not yet renamed. The
+> same authorisation adds `absolute` to `Magnitude.op` (§3's `PerMilleRatio` row): a field
 > whose own neutral baseline is 1000, not zero, renders as a raw multiplier with no delta convention
 > — `1400` → `×1.40` — fixing a verified defect where the shipped `more` op read it as a delta and
 > rendered `×2.40` instead. Both proposed and authorised the same day, same terms as the classes

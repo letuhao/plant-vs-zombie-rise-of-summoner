@@ -1,6 +1,6 @@
 # Spec: `siege-engagement`
 
-**Module 20 of 21 · level 7 · depends on `siege-resolver`, `siege-objective` · [base-defense-map.md](../base-defense-map.md)**
+**Module 20 of 29 · level 7b · depends on `siege-resolver` (7), `siege-objective` (3b) · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04. **Added by the completeness audit** — decision 24's multi-turn loop had
 no module, and `siege-resolver` treated a district assault as one battle that always resolves to a
 winner.

@@ -590,12 +590,12 @@ Swept 2026-08-23 across `src/` and `docs/architecture/`.
 
 | # | Scale | Shape | Location | Verdict |
 |---|---|---|---|---|
-| 1 | `BaseHp/BaseAtk/BaseDefense(level)` | linear `a+b·L` | `BattleModels.cs:61-63` | **Becomes `P(Θ)`.** Identical at `B=0` — `battle-magnitude` |
-| 2 | `BaseAccuracy/Dodge/CritRate/CritResist(level)` | linear `a+b·L` | `BattleModels.cs:73-76` | **Becomes `Θ`** (rate read, PS-3) — `battle-rates` |
+| 1 | `BaseHp/BaseAtk/BaseDefense(level)` | linear `a+b·L` | `BattleModels.cs:150-153` | **Becomes `P(Θ)`.** Identical at `B=0` — `battle-magnitude` |
+| 2 | `BaseAccuracy/Dodge/CritRate/CritResist(level)` | linear `a+b·L` | `BattleModels.cs:171-174` | **Becomes `Θ`** (rate read, PS-3) — `battle-rates` |
 | 3 | `ProgressionPowerCurve.PowerFromLevel` | `2^min(L,12)` | `IProgressionPowerProvider.cs:19` | **Deleted.** Replaced by `Θ` — `status-contest` (§6) |
 | 4 | `RpgXpPowerScale.ForKill` | stub `1.0` | `RpgXpPowerScale.cs:9` | **Deleted.** Its documented future job ("scale kill XP by zombie power") is `Θ_content` |
 | 5 | `LoamPolicy.DevelopmentUpkeepPerLevel = 5` | linear | `LoamPolicy.cs:30` | **Economy magnitude — scales on `P(Θ)` only if its matching faucet does** (§10.4) |
-| 6 | `XpToNext = first + (L−1)·step` | arithmetic | `rpg-progression.md` | **Kept, unchanged.** It is the *cost* ladder, not a power ladder — see §10.5 |
+| 6 | `XpToNext = first + (L−1)·step` | arithmetic | `Progression/RpgProgression.cs:43` | **Kept, unchanged in SHAPE.** It is the *cost* ladder, not a power ladder — see §10.5. **Type corrected 2026-09-04:** `double` → `long` end to end (curve, awards, `RpgActorState.Xp`, DTOs, and the `xp`/`delta` columns) — XP is a persisted magnitude and CLAUDE.md's rule had never been applied to it ([progression-shape-audit-2026-09-04.md](../../research/progression-shape-audit-2026-09-04.md) §4.1) |
 
 Row 17 (`RpgProgressionSubsystem`'s `level`-gated bonus flats, found latent by class-system P1.13,
 2026-08-26) is **retired, not merely re-verdicted** — class-system P3.3 (2026-08-27) deleted the stub
@@ -615,11 +615,11 @@ nobody "unifies" them into `Θ` by mistake.
 | 8 | Value band `lo/hi = 0.67/1.33 × m_t` | fixed ratio | `spec-numerics.md` | Roll width, relative |
 | 9 | `m₁ = share × B_family(20)` | anchor | `ssot-affixes.md:177` | **This is the pin.** Already reads `BattleRuleset` at level 20 — §4.3 formalises what it already does |
 | 10 | `ElementHub.SlotMultiplier` | ×1.25 / ×0.8 per slot | `ElementHub.cs:44` | Matchup, bounded, level-free |
-| 11 | `CombatPolicies.*Scale = 100.0` | sigmoid divisor | `CombatPolicies.cs:10-12` | Units of the resolver, not a growth curve |
+| 11 | `CombatPolicies.*Scale = 100.0` | sigmoid divisor | `Stats/Derived/CombatPolicies.cs` | Units of the resolver, not a growth curve |
 | 12 | `PowerVector` cost function | coeff × normalize × conditionality | `spec-power-vector.md` (E9) | **Prices relative content.** Must stay scale-free — scaling it double-counts (§1) |
 | 13 | `PowerScalar.Of` — geomean over 5 categories | geometric mean | `PowerReads.cs:38` | **Display only, and it has no production caller.** Never a balance input |
 | 15 | `double` in stat composition (14 sites) | IEEE-754 | `CombatDerivedReader`, `ElementHub`, `StatModifier`, `CombatPolicies` | **Decided 2026-08-23: it stands** — §10.7 |
-| 14 | `maxTierAt(itemLevel)` — t3@8, t4@18, t5@32 | step function | `ssot-generation.md` §4.1 | Gates tier *access* by content level. A gate, not a magnitude |
+| 14 | `maxTierAt(itemLevel)` — t3@8, t4@18, t5@32 | step function | `Items/IlvlTierLadder.cs` (spec: `ssot-generation.md` §4.1) | Gates tier *access* by content level. A gate, not a magnitude |
 | 16 | `PatronPolicy.AuraMilli(rarity, star, level, pTheta)` | `flatPart(rarityBase + perStar·star + level, clamped at AuraClampMilli)` + `pThetaTermMilli(= PThetaKMilli/1000 · P(Θ))`, uncapped | `PatronPolicy.cs:37` | **Two axes now, on separate owners.** `flatPart` is unchanged since `power-guard`'s G2 sweep (T4.1, 2026-08-24) — `level` there is the *patron demon's own* level, hard-clamped, unrelated to the ladder. **`pThetaTermMilli` is a NEW, reviewed read of the actor's real `Θ` via `PowerLadder.Value`, added by aura-skill T22 (owner sign-off 2026-08-30)** so the patron aura stops being permanently capped at content depth — it calls the shared `PowerLadder`, not a private `f(level)`, so §10's anti-duplication clause is satisfied. `AuraClampMilli` still bounds `flatPart` only; the `Θ` term is intentionally uncapped, matching this repo's no-hard-ceiling rule |
 | 18 | `thetaOffset` — species threat rung | table lookup, ten rungs, 0–40 | `data/tuning/demon-threat.v1.json` via `threat-band` (`demon-seed` module 4) | **Added 2026-09-01 (`seed-to-concrete` T0.1).** Lives *inside* `Θ` itself, additive, before `P(Θ)` runs — not a bounded display value scaled a second time. Table-driven because the captured PvZ stat distribution is lumpy: a fitted curve would put most of the roster in two rungs and leave others empty (`spec-threat-band.md` §3). `blocked`/`inferred` species never silently collapse to rung 1 |
 | 19 | Action unlock ladder — `effectiveRung(n) = min(earnCount, rungCap)` | ratchet, capped at `rungCap` | `data/tuning/action-unlock.v1.json` via `UnlockLadder.EffectiveRung` | **Added 2026-09-03 (A-U1, `spec-rung-semantics.md`).** Input is `earnCount` (a per-holder counter, never `Θ`), so this is not a level curve and never collapses into `Θ`. `rungCap` bounds it — a soft, tunable ceiling (§11.2). **Distinct from `ActionRow.Rung`** — the AUTHORED value `StructureBudgetGuard` reads, which fixes structure and is a property of the content, not of who holds it (§3.1's "two readings, both named"); this row is only the HOLDER-derived reading, wrapped as `EffectiveRung` so the two cannot re-merge |

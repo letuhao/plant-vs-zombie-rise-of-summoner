@@ -20,7 +20,7 @@ public sealed class UniqueActorDto
     [JsonPropertyName("typeId")] public int TypeId { get; set; }
     [JsonPropertyName("phase")] public string Phase { get; set; } = UniqueActorPhases.Roster;
     [JsonPropertyName("level")] public long Level { get; set; } = 1;
-    [JsonPropertyName("xp")] public double Xp { get; set; }
+    [JsonPropertyName("xp")] public long Xp { get; set; }
     [JsonPropertyName("matchKey")] public string? MatchKey { get; set; }
     [JsonPropertyName("lastPtr")] public string? LastPtr { get; set; }
     [JsonPropertyName("deployCorrelationId")] public string? DeployCorrelationId { get; set; }

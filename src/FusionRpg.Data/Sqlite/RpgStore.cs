@@ -357,7 +357,7 @@ public sealed partial class RpgStore : IRpgDb
               kind TEXT NOT NULL,
               type_id INTEGER NOT NULL,
               level INTEGER NOT NULL DEFAULT 1,
-              xp REAL NOT NULL DEFAULT 0,
+              xp INTEGER NOT NULL DEFAULT 0,
               highest_level INTEGER NOT NULL DEFAULT 1,
               demotion_count INTEGER NOT NULL DEFAULT 0,
               revision INTEGER NOT NULL DEFAULT 0,
@@ -373,7 +373,7 @@ public sealed partial class RpgStore : IRpgDb
               type_id INTEGER NOT NULL,
               run_id INTEGER NOT NULL DEFAULT 0,
               t TEXT NOT NULL,
-              delta REAL NOT NULL,
+              delta INTEGER NOT NULL,
               reason TEXT NOT NULL,
               activity_fact_id INTEGER,
               level_before INTEGER NOT NULL,
@@ -394,7 +394,7 @@ public sealed partial class RpgStore : IRpgDb
               type_id INTEGER NOT NULL,
               phase TEXT NOT NULL,
               level INTEGER NOT NULL DEFAULT 1,
-              xp REAL NOT NULL DEFAULT 0,
+              xp INTEGER NOT NULL DEFAULT 0,
               match_key TEXT,
               last_ptr TEXT,
               deploy_correlation_id TEXT,
@@ -625,6 +625,10 @@ public sealed partial class RpgStore : IRpgDb
         // salvage-craft (module 14). The material INVENTORY table (rpg_demon_materials) is DDL'd
         // above with the demon tables and is deliberately not renamed here.
         EnsureMaterialSchemaUnlocked(db);
+        // effect_instance_op + the five mutation head columns + effect_instance_atom.suppressed --
+        // D2 §9, enhance-reroll (module 15). Must run AFTER EnsureAtomInstanceSchemaUnlocked, whose
+        // tables it adds columns to.
+        EnsureInstanceOpSchemaUnlocked(db);
         // item_set / item_set_member / item_set_tier — ssot-sets.md §4.2, threshold-grants (module 12).
         EnsureItemSetSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).

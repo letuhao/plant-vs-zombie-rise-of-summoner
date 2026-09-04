@@ -42,8 +42,19 @@ public static partial class BattleEngine
         /// envelope was designed to sidestep. `TargetSpecCompiler.Compile` and `PredicateCompiler.Always`
         /// are still the REAL compiler pieces, reused rather than re-guessed, for the two fields that
         /// have one.
+        ///
+        /// <para><b>battle-tempo `action-timing` (2026-09-05):</b> this field moved from `static
+        /// readonly` to an ordinary instance field, computed once per `BattleRunState` (i.e. once per
+        /// battle) rather than once per process — the ONLY change that made room for
+        /// <see cref="ActionTimingDerivation.DeriveBasicAttack"/> to read
+        /// <see cref="ActionTimingPolicy.Tuning"/> here: a `static readonly` initializer runs at first
+        /// type touch, which could race host startup's `ActionTimingPolicy.Configure` call and throw
+        /// for any caller that reaches `BattleRunState` first. An instance initializer runs during
+        /// `new BattleRunState(...)`, by which point every real caller (`BattleEngine.Resolve`) has
+        /// already configured tuning — the same timing every other `Policy`/`Tuning` read in this
+        /// class already assumes.</para>
         /// </summary>
-        static readonly CompiledAction BasicAttackCompiled = new(
+        readonly CompiledAction BasicAttackCompiled = new(
             ActionId: BasicAttackEnvelope.ActionId,
             Kind: ActionKind.Basic,
             Rung: 0,
@@ -53,7 +64,7 @@ public static partial class BattleEngine
             Grantable: false,
             DefaultAttackEligible: true,
             ContainerId: "",
-            Envelope: BasicAttackEnvelope,
+            Envelope: ActionTimingDerivation.DeriveBasicAttack(BasicAttackEnvelope, ActionTimingPolicy.Tuning),
             Targeting: TargetSpecCompiler.Compile(BasicAttackTargeting),
             MinRange: 0,
             MaxRange: int.MaxValue,

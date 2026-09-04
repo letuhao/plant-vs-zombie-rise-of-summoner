@@ -161,7 +161,7 @@ public class ActorChannelsTests
         // module registers the channel only): this proves the documented contract formula --
         // finalXp = award.Delta * award.PowerScale * (1 + xpRate) -- is a no-op at the shipped
         // default (0), and that Award.Delta/PowerScale are untouched by this module.
-        var award = new RpgXpAwardMap.Award("plant", 3, Delta: 100.0, Reason: "kill", PowerScale: 1.0);
+        var award = new RpgXpAwardMap.Award("plant", 3, Delta: 100, Reason: "kill", PowerScale: 1.0);
         double ApplyXpRate(RpgXpAwardMap.Award a, double xpRate) => a.Delta * a.PowerScale * (1.0 + xpRate);
 
         Assert.Equal(award.Delta * award.PowerScale, ApplyXpRate(award, xpRate: 0.0), 6);

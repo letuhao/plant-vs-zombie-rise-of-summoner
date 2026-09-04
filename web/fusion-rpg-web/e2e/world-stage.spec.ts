@@ -151,6 +151,22 @@ test.describe("the new stage draws real sectors and they are clickable", () => {
     await expect(page.getByTestId("world-stage-svg")).toHaveAttribute("data-selected-sector", "homeworld");
   });
 
+  // Ported from the old `#/world` page's own `e2e/world.spec.ts` (retired when `#/world` started
+  // serving this stage, world-stage routing work 2026-09-05) — the one assertion there that this
+  // file did not already cover under its own testids: a sector nobody has scouted renders as a
+  // silhouette with no name, real-browser fidelity for `sectorChannels.ts`'s `shape: "unknown"`
+  // branch rather than only the jsdom coverage `WorldScene.test.tsx` already has.
+  test("ground nobody has seen is a silhouette without a name", async ({ page }) => {
+    await mockWorld(page);
+    await page.goto("/#/world-stage");
+
+    const dark = page.getByTestId("sector-node-black-gate");
+    await expect(dark).toBeVisible();
+    await expect(dark).toHaveAttribute("data-shape", "unknown");
+    await expect(dark).not.toContainText("Black Gate");
+    await expect(dark).toContainText("unexplored");
+  });
+
   test("clicking the same sector again deselects it (world-stage W65)", async ({ page }) => {
     await mockWorld(page);
     await page.goto("/#/world-stage");

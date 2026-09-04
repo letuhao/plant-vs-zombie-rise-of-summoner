@@ -11,8 +11,13 @@ import { Banner } from "@/ui";
  * scrollbar (GG-36 forbids exactly that dressed as a feature). Route-scoped on purpose: this is an
  * opt-in lookup, not a blanket AppShell layout change, so Sanctum and Lawn — neither of which is in
  * this set — render byte-identically to before.
+ *
+ * `/world` joined this set the same turn `#/world` started serving `WorldStage` (the owner's
+ * "flip now" decision, 2026-09-04): it is the same stage component under a second route, and it
+ * needs the same unpadded, non-scrolling outlet `/world-stage` already gets — not a copy of the
+ * old `WorldPage`'s scrolling layout.
  */
-const NON_SCROLLING_ROUTES = new Set(["/world-stage"]);
+const NON_SCROLLING_ROUTES = new Set(["/world-stage", "/world"]);
 
 export function AppShell() {
   useGlobalKeys();

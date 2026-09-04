@@ -1,6 +1,6 @@
 # Spec: `combatant-kind`
 
-**Module 8 of 21 · level 3 · depends on `battle-clock-profile` · [base-defense-map.md](../base-defense-map.md)**
+**Module 8 of 29 · level 3 · depends on `battle-clock-profile` · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04.
 
 ---
@@ -180,7 +180,9 @@ not receive aura, buff or debuff** — those scopes serve demon-kind actors.
 This module enforces the first two by construction (`Level` is unread for structures; `SpecimenId` is
 null so `EquipAtomSource.ModsFor` resolves to nothing). **The buff/debuff scope question is not solved
 here** — it is `siege-cover`'s, which introduces the one reviewed vocabulary change the program allows
-(a cell-entry/exit `ScopeMembershipTransition`) with a real mechanic behind it.
+(a cell-entry/exit `ScopeMembershipTransition`) with a real mechanic behind it — **`siege-obstacles`'
+Mine**, not cover. Cover introduced it, then released it when decision 35 replaced terrain cover with
+per-shot shooting math; pass 3 caught the gap and reassigned it.
 
 ---
 

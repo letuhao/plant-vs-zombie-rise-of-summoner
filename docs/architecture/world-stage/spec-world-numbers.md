@@ -101,10 +101,15 @@ loam units:
 
 | Field | Declared | Proof it is whole loam |
 |---|---|---|
-| `StructureDef.CostMilli` | `StructureCatalog.cs:26` (`long`) | compared against `CarriedLoam` at `BuildResolver.cs:101`, subtracted at `:115` |
-| `LoamPolicy.WellCostMilli` | `LoamPolicy.cs:106` (`long`) | feeds `StructureDef.CostMilli` |
-| `LoamPolicy.WaystationCostMilli` | `LoamPolicy.cs:109` (`long`) | same |
-| `LoamPolicy.GranaryCostMilli` | `LoamPolicy.cs:126` (`long`) | same; and `GranaryCapacityBonus` alongside it has no `Milli` in its name and is the **same unit** |
+| `StructureDef.Cost` | `StructureCatalog.cs:26` (`long`) | compared against `CarriedLoam` at `BuildResolver.cs:101`, subtracted at `:115` |
+| `LoamPolicy.WellCost` | `LoamPolicy.cs:106` (`long`) | feeds `StructureDef.Cost` |
+| `LoamPolicy.WaystationCost` | `LoamPolicy.cs:109` (`long`) | same |
+| `LoamPolicy.GranaryCost` | `LoamPolicy.cs:126` (`long`) | same; and `GranaryCapacityBonus` alongside it has no `Milli` in its name and is the **same unit** |
+
+(All four fields above were named `…CostMilli` until world-map W57 (2026-09-05) renamed them off the
+misleading suffix — no value changed, only the name. The table below describes the pre-rename
+naming trap as the reason the renderer must not trust a field's own suffix; it is now a historical
+example rather than a live defect, and the same argument still holds for any future field.)
 
 A renderer trusting the suffix prints *"A Well costs 0.2 loam"* and the player cannot understand why a
 legion carrying 180 is refused. **The repair in the model is a rename; declaring the family at the
@@ -210,8 +215,10 @@ channel genuinely had no contributor, not a loading state"* — which is the sam
   module owns only the numbers inside those sentences.
 - **The HUD strip and the inspector blocks.** `world-hud` and `world-inspector` compose these
   renderers; they do not reimplement them.
-- **Renaming `CostMilli` in the model.** That is the real repair and it is a C# change on the
-  `world-wire` / engine side. This module makes the name irrelevant to the client.
+- **Renaming `CostMilli` in the model.** That was the real repair and it was a C# change on the
+  `world-wire` / engine side, done by world-map W57 (2026-09-05: `StructureDef.Cost`,
+  `LoamPolicy.WellCost`/`WaystationCost`/`GranaryCost`/`SoulConduitCost`/`ExtractorCost`/
+  `HatcheryCost`). This module makes the name irrelevant to the client regardless.
 
 ## Commands
 
@@ -282,7 +289,8 @@ otherwise be found by a player.
    round-away-from-zero), loam units (stock with and without a denominator, signed flow, period),
    counts (`dangerBand` with its denominator, `intelAge` phrased in the fiction's word for a turn),
    and the enum table (unmapped value throws loudly).
-3. **The `CostMilli` case, by name** — `wellCostMilli: 200` renders *"A Well costs 200 loam"*, and a
+3. **The `CostMilli` case, by name** — `wellCost: 200` (named `wellCostMilli` until world-map W57's
+   rename) renders *"A Well costs 200 loam"*, and a
    legion carrying 180 is refused. The three wrong renderings plate §M draws (`0.2 loam`, `20%`,
    `free`) are asserted **not** to occur. This test exists because the defect is in the model and no
    client-side type can catch it; only a fixture can.
@@ -320,7 +328,7 @@ otherwise be found by a player.
    renderer, and the unit ledger in `spec-magnitude-and-units.md`, edited together.
 3. `FractureIntensityMilli 1400` renders `×1.40`; `StabilityMilli 240` renders `24%`; a small non-zero
    per-mille never renders `0%`.
-4. A fixture proves `wellCostMilli: 200` reads as *200 loam* and that none of plate §M's three wrong
+4. A fixture proves `wellCost: 200` (`wellCostMilli` before world-map W57) reads as *200 loam* and that none of plate §M's three wrong
    renderings occur.
 5. The ledger nests exactly three levels, its rows are the five `LoamUpkeep.For` arguments with **no
    calendar term**, and a property test proves the rows reproduce the total.

@@ -1,350 +1,369 @@
 # Spec: `siege-cover`
 
-**Module 11 of 21 · level 5 · depends on `siege-positions` · [base-defense-map.md](../base-defense-map.md)**
-**Status:** spec, 2026-09-04.
+**Module 11 of 29 · level 5 · depends on `siege-positions`, `siege-obstacles` (level 4) · [base-defense-map.md](../base-defense-map.md)**
+**Status:** spec, **rewritten 2026-09-04 for owner decision 35.** The previous version specced cover as
+a terrain-keyed dodge bonus. **Decision 35 replaces that mechanism entirely** with the Heroes of Might
+and Magic III shooting model plus targetable obstacles.
+
+---
+
+## ⛔ What changed, and why the old spec was not salvageable by editing
+
+| | Old spec (superseded) | Decision 35 |
+|---|---|---|
+| **What grants cover** | the terrain of the cell you stand on | an **obstacle projecting a cover area** around itself |
+| **What it modifies** | the defender's `combat.dodge.omni` (a contest) | the **shot's power** (a multiplier) |
+| **Line of fire** | `Blocking` terrain blocks a shot outright | **a unit or obstacle in the way REDUCES power** — it does not stop the shot |
+| **Distance** | not modelled | **a range penalty** — HoMM3's most characteristic rule |
+| **Who ignores it** | nothing | **a projectile kind** that pays no penalty |
+| **Obstacles** | terrain, not targetable | **targetable and destructible** — the addition beyond HoMM3 |
+
+The old version keyed everything off `CellTerrain`. The new one keys off *what stands between two
+actors*, which is a different question asked at a different time. Editing would have left the terrain
+assumption buried in the tunables and the tests.
 
 ---
 
 ## Objective
 
-**Make standing behind something matter — which is the whole of trench warfare (owner decision, round 4).**
+**Shooting is a decision about the line, not just the target.**
 
-The owner's framing: obstacles and buildings exist *for this purpose*. A trench that does not change
-your odds is scenery. So cover is the mechanic that makes every other structure decision meaningful,
-and it is the one place this program changes a shipped vocabulary.
+Owner decision 35, verbatim:
 
-**Success looks like:** occupying a cover cell grants a flat dodge bonus, delivered through the effect
-system that already exists, and the bonus is granted and revoked exactly on cell entry and exit.
+> *"obstacle need cover area, target in the area consider coverage · the obstacle can be target and
+> destroy · there will be two types of projectile: 1 will be penalty when fight through obstacle,
+> 2 will get no penalty · range attack have range penalty, if shooter is block by unit or obstacle,
+> the power will reduce · this mechanism is inspire of heroes of might and magic 3 shoot mechanism ·
+> we make it more by add targetable obstacle so shooter or some unit can destroy obstacle/building ·
+> **this mechanism need to build both battle engine and action system**"*
+
+**Four mechanics**, and each creates a decision the others cannot:
+
+| # | Mechanic | The decision it creates |
+|---|---|---|
+| 1 | **Cover area** — an obstacle covers cells within an authored radius | *Where do I stand?* |
+| 2 | **Range penalty** — power falls off with distance | *Do I close, or shoot from here?* |
+| 3 | **Obstruction penalty** — a unit or obstacle in the line reduces power | *Do I move for a clean line, or shoot through?* |
+| 4 | **Projectile kind** — some shots pay none of it | *Which shooter do I bring?* |
+
+Plus the addition beyond HoMM3: **the obstacle is a target.** Shoot the rampart down, then shoot what
+was behind it. That is what makes mechanic 3 a *problem to solve* rather than a tax to accept.
+
+---
+
+## The prior art, with its shipped numbers
+
+HoMM3's shooters take a **50% damage penalty** in each of three situations, and they stack:
+
+| Situation | Penalty | Our analogue |
+|---|---|---|
+| Target beyond half the battlefield | ×0.5 | **mechanic 2** — the range penalty |
+| Shooting over a castle wall during a siege | ×0.5 | **mechanic 3** — obstruction |
+| Shooter adjacent to an enemy (in melee) | ×0.5 | **mechanic 3b** — the melee lock |
+| Sharpshooter / Grand Elf variants | **ignore them** | **mechanic 4** — the projectile kind |
+
+**Two things to take, and one not to.**
+
+⭐ **Take: the penalties are multiplicative, not subtractive.** This resolves §5.17's own objection to
+damage-side cover — *"a damage-side cover value must justify itself against `P(Θ)`, and a flat one
+would decay to irrelevance as Θ grows."* **A per-mille multiplier is scale-free.** `×500‰` is `×500‰`
+at Θ=1 and at Θ=200, so it never touches `P(Θ)` and never decays. A flat *subtraction* would have; a
+ratio does not. **This is the whole reason decision 35 is architecturally legal.**
+
+⭐ **Take: a unit that ignores the penalty is the counter-play.** HoMM3's Sharpshooter is a whole unit
+identity built out of one exemption — decision 35's *"two types of projectile"*, and a content axis
+both `structure-seed` and the demon corpus can use.
+
+⛔ **Do not take: 50% everywhere.** HoMM3 uses one number for three different situations because it
+was cheap, not because it was right. Ours are three tunables.
 
 ---
 
 ## What already exists (verified at HEAD, 2026-09-04)
 
-**Built — and this is why cover is not a new capability.**
+**Built.**
 
-- **`combat.dodge.*` is a registered derived-channel family.** `DerivedStatChannels.cs:88-91` —
-  `CombatDodgeOmni`, `CombatDodgeFire`, `CombatDodgeIce`, `CombatDodgeAir`, and more. `CLAUDE.md`'s
-  own RPG-layer rule uses this exact channel as its worked example of the right question:
-  > *"Does the RPG layer express dodge? Yes — `combat.dodge.*` is a registered channel read by
-  > `OverlayCombatCalculator`."*
-- `FamilyExpansion.cs:55` — `combat.dodge.{variant}` maps to `pool.element-dodge`, so the channel is
-  atom-reachable, not just declared.
-- `ScopeMembershipEvent` / `ScopeMembershipTransition` (`Core/Match/ScopeMembershipEvents.cs:7`) —
-  three values today: `Bound`, `Cleared`, `MindControlToggled`. Consumed by
-  `BattlefieldOwnSideReactor.cs:75-86` and raised from `UniqueBindings.cs:146,224` and
-  `MatchRuntime.cs:140`.
-- `GridSpec.CellTerrain` (`siege-board`) — including `Gap`, which blocks movement but not sight.
+- `GridDistance.Chebyshev` — the metric mechanic 2 measures in.
+- `DamagePacket` → `CombatDamageDispatcher` → `ShieldGate`/`OverlayCombatCalculator` → Funnel — where
+  a power multiplier applies.
+- `CompiledAction.MinRange` / `MaxRange` — Chebyshev cells, compiled and carried.
+- `BattleStatComposer.cs:116-117` + `OverlayCombatCalculator.cs:162-164` — the **contest** path
+  (`accuracy − dodge` through a sigmoid). **This module no longer uses it**, said plainly so a reader
+  does not go looking for a dodge grant that is not there.
 
-**Real gap.** Nothing connects a cell to a stat.
+**Wiring gap.**
 
----
+- **`RequiresLineOfSight`** — declared (`ActionRow.cs:49`), compiled (`ActionCompiler.cs:65`), carried
+  (`CompiledAction.cs:37`), **persisted twice** (`RpgStore.Actions.cs:256`, `:373`), hardcoded `false`
+  in the battle fallback (`BattleRunState.cs:61`) — **and read by no evaluator anywhere in `src/`.**
+  This module is its first reader, and decision 35 changes its meaning: not *"the shot is blocked"* but
+  *"the shot pays the obstruction penalty."*
 
-## The one reviewed vocabulary change
-
-The program allows exactly one, and this is it. It is allowed because there is a real mechanic behind
-it rather than a speculative slot.
-
-```csharp
-public enum ScopeMembershipTransition
-{
-    Bound,
-    Cleared,
-    MindControlToggled,
-
-    /// <summary>
-    /// An actor entered a board cell (base-defense-ideal.md, trench warfare). Cover is delivered as
-    /// scope membership rather than as a per-hit lookup: the effect system already owns "this actor
-    /// has this modifier while a condition holds", and a second mechanism for the same idea would
-    /// mean cover expiring by a different rule than every other temporary modifier in the game.
-    /// </summary>
-    CellEntered,
-
-    /// <summary>Left a board cell. Paired with <see cref="CellEntered"/> — every entry has exactly
-    /// one exit, including the exit caused by death.</summary>
-    CellExited
-}
-```
-
-**Why membership and not a per-hit lookup.** A per-hit "is the target in cover" check is simpler to
-write and it is the wrong shape: cover would then be invisible to every UI that reads modifiers, would
-not stack or cap by the same rules as other dodge sources, and would need its own expiry logic. Scope
-membership makes cover *the same kind of thing* as every other temporary modifier.
-
-**The pairing invariant is load-bearing.** An unpaired `CellEntered` leaks a permanent dodge bonus onto
-an actor. Enforced by a test, and by emitting `CellExited` from exactly three places: move, death,
-withdrawal.
+**Real gaps.** No line-of-fire trace. No range falloff. No projectile kind. No cover area.
 
 ---
 
 ## The contract
 
-### 1. ⛔ Cover is flat CONTEST POINTS — not per-mille. The audit corrected this.
+### 1. Mechanic 1 — the cover area, an authored radius per kind
 
-**The first draft of this spec wrote per-mille, and it was wrong.** §5.17 computed the actual scale
-from shipped code, and a per-mille cover value is a fraction of something that does not exist:
-
-> `BaseAccuracy(Θ) = 220 + 26·Θ` and `BaseDodge(Θ) = 26·Θ` (`BattleModels.cs:171-172`), with
-> `accuracyScale: 100.0` — so **100 contest points is one sigmoid unit, and +50 dodge is half a
-> unit.** Because both sides' `26·Θ` terms cancel in the `accuracy − dodge` difference, **a flat
-> cover value stays exactly as decisive at Θ=200 as at Θ=1.**
-
-That last sentence is the whole ladder argument, and **it only holds in the contest's own units.**
-§2 rule 4: contests read `Θ` linearly, magnitudes read `P(Θ)`. Cover is a contest.
+Decision 39.
 
 ```csharp
 /// <summary>
-/// Cover value by terrain, in FLAT CONTEST POINTS added to `combat.dodge.omni`.
+/// How far this obstacle's cover reaches, in Chebyshev cells. 0 = no cover area at all.
 ///
-/// <para><b>Not per-mille.</b> 100 points is one sigmoid unit (`accuracyScale: 100.0`); §5.17's own
-/// figures are <b>trench +40, emplacement +80</b>. Both sides' 26·Θ terms cancel in the
-/// accuracy−dodge difference, so a flat value is exactly as decisive at Θ=200 as at Θ=1 — which is
-/// precisely what §2 rule 4 demands of a contest, and what a per-mille value would quietly break by
-/// introducing a second scale beside the one the contest already uses.</para>
-///
-/// <para><b>Never `P(Θ)`, never a new `f(level)`.</b></para>
+/// <para><b>Authored per obstacle kind</b> (decision 39): the seed writes the KIND, a tunable writes
+/// the CELLS. Seedsmith Law 2 — a model has no calibrated sense of how many cells a rampart shelters,
+/// and a wrong number there is invisible in review while a wrong kind is not.</para>
 /// </summary>
-public static int DodgePointsFor(CellTerrain terrain);
+public int CoverRadius { get; init; }
 ```
 
-### 2. Delivered as an effect grant on the channel that already exists
+A target within `CoverRadius` of a **live** obstacle is **covered**: incoming ranged power is
+multiplied by that obstacle's `CoverPowerMilli`.
 
-Entering a cover cell grants a `combat.dodge.omni` modifier scoped to the actor; exiting revokes it.
-**No new channel, no new atom, no new resolver.** §5.18 verified the path end to end:
-`BattleStatComposer.cs:116-117` writes `CombatAccuracyOmni`/`CombatDodgeOmni`, and
-`OverlayCombatCalculator.cs:162-164` resolves `accuracy − dodge` through the sigmoid.
+**Live is load-bearing.** A destroyed obstacle (`SlotState.Ruined`) projects nothing — the whole reason
+mechanic 5 matters.
 
-`combat.dodge.omni` rather than an element variant: cover works against arrows and fire alike —
-except where rule 2 below says otherwise, which is a *matrix row*, not a different channel.
+**Cover does not stack across obstacles. The best single cover applies.** Stacking makes a cluster of
+cheap works strictly better than one good one, which is the distribution-skew failure
+`05-failure-modes.md` records: every individual number defensible, the offering degenerate.
 
-### 3. The `(damage source × cover type)` table
-
-Cover is not uniform. A trench is excellent against direct fire and useless against something dropped
-on you.
-
-| Cover terrain | vs `Direct` | vs `Area` | vs `Melee` |
-|---|---|---|---|
-| `Open` | 0 | 0 | 0 |
-| `Rough` | partial | partial | 0 |
-| `Blocking` (adjacent) | high | partial | 0 |
-| `Gap` (behind) | high | 0 | 0 |
-
-| `Trench` / `Emplacement` (`siege-obstacles`) | **+40 / +80** | partial | 0 |
-
-**A fourth damage source: `Entry`** — a mine (`siege-obstacles` kind 4) *"ignores cover"*, so every
-row against `Entry` is **0**. This is exactly why the matrix is a data shape rather than a scalar on
-the defender: §5.17's *"one CoH3 idea to adopt regardless"*.
-
-**Every cell is a tunable**, in `data/tuning/siege.v1.json` as a nested map of **contest points** — not
-a `switch` in code. This is a balance surface by [tunables-ssot.md](../tunables-ssot.md)'s own test: a balance
-pass would absolutely change these, and a rebuild-per-tweak loop here is the expensive kind.
-
-**Melee is zero everywhere**, and that is structural rather than tuned: cover is about interposing
-something between you and a distant attacker, and someone in your trench is not distant. It is still
-a table row so a designer can see the zero and know it is deliberate.
-
-### 4. Damage source classification
-
-`DamageSourceKind` — `Direct`, `Area`, `Melee` — derived from the action's existing targeting mode
-(`ActionTargetMode.Area` → `Area`; range 1 → `Melee`; otherwise `Direct`). **Derived, not a new
-authored field**, so no content needs re-authoring and `structure-seed` inherits no new obligation.
-
-### 5. `Gap` blocks line of sight — and it does not
-
-`siege-board` defines `Blocking` as blocking movement *and* sight, `Gap` as blocking movement only.
-Cover reads both:
-
-- Standing **behind** a `Blocking` cell relative to the shooter: high cover.
-- Standing **behind** a `Gap`: cover against direct fire (they must shoot across it), none against
-  area (it lands anyway).
-
-This is what makes the moat from decision 27's "laboured" path a real defensive work rather than a
-decoration — and it is why `siege-board` split the two terrain values in the first place.
-
-### 6. `RequiresLineOfSight` gets its first reader
-
-The ideal found `RequiresLineOfSight` declared and unread. Cover's LOS trace is its natural consumer:
-a `Blocking` cell between shooter and target either blocks the shot entirely (if the action requires
-LOS) or grants cover (if it does not).
-
-**Verify it is still unread before claiming this.** If something else has since started reading it,
-follow that code rather than this spec.
-
-### 7. §5.17 rule 2 — beat cover with a damage TYPE, not a bigger number
-
-**The most consistent finding across three independent games**, and §5.17 states the consequence of
-omitting it bluntly: *"without it the trench-warfare fantasy becomes the stalemate it is named
-after."*
-
-| Game | Mechanism |
-|---|---|
-| CoH3 | flame is **×1.25** damage into green cover, **×1.5** into a garrison |
-| Foxhole | trenches carry **97% HE mitigation** but are *"resistant to all damage types except Demolition"* |
-| Panzer Corps 2 | engineers **ignore 50–100%** of entrenchment |
-
-**We already have an element hub, so this is a table row, not a mechanism.**
+### 2. Mechanic 2 — the range penalty
 
 ```csharp
 /// <summary>
-/// Elements that ignore a given cover kind, wholly or partly. §5.17 rule 2: "fire ignores trench
-/// cover is a one-row rule that makes composition matter and cannot be brute-forced."
-///
-/// <para>Authored per (element x cover kind) in tuning — a THIRD axis on the matrix rather than a
-/// special case in code, so adding "acid ignores rampart cover" is a row a balance pass writes.</para>
+/// Power multiplier from distance. Measured in Chebyshev cells against a threshold authored as a
+/// FRACTION of the board's own side (district-layout §2) rather than as an absolute — an 18-cell
+/// board and a 30-cell board must not share a falloff point, or a stronghold's longer sightlines are
+/// a free buff to every archer standing on it.
 /// </summary>
-// cover.ignoreMilli.fire.trench = 1000   — fire ignores a trench entirely
+public static int RangePowerMilli(int chebyshevDistance, int boardSide, SiegeShootingPolicy policy);
 ```
 
-**Per-mille here is correct and is not a contradiction of §1.** This value *is* a fraction — of the
-cover points, which are themselves flat contest points. The flat value is the magnitude; the ignore
-factor is a ratio of it, bounded 0..1000, and `AGENTS.md` exempts bounded ratios explicitly.
+**The threshold scales with the board; the multiplier does not.**
 
-### 8. §5.17 rule 4 — cover decays with the occupant's CONDITION, not with turns
+### 3. Mechanic 3 — the obstruction penalty, and it REDUCES rather than blocks
 
-Advance Wars scales terrain defense by **current HP** — *"a 5 HP unit in 2-star woods gets 10%, not
-20%"* — so a fortress stops being one exactly when it is most needed. §5.17: *"We have a better hook
-and it needs no new mechanism: stamina/hunger exhaustion already debuffs derived stats and is
-re-evaluated on read."*
+The line from shooter to target is traced. **Every cell it crosses holding a live obstacle or a live
+actor contributes one obstruction.**
 
-**So this is not a new mechanism at all.** Cover grants a `combat.dodge.omni` modifier; exhaustion
-already debuffs derived stats through the resource hub's exhaustion-as-status path. An exhausted
-occupant's cover is worth less **because their dodge is worth less**, with no cover-specific decay
-code.
-
-**Verify this before claiming it.** Read the exhaustion path and confirm it reaches
-`combat.dodge.omni`. If it debuffs only a narrower set of channels, say so — that is a **wiring gap**
-with a `file:line`, not a delivered feature.
-
-> It also *"closes the loop with decision 13's block their resource and exhaust them"* — a besieger who
-> cuts the supply line makes the defender's trenches worse, which is the trench-warfare fantasy and the
-> economy pointing at the same mechanic.
-
-### 9. §5.17 rule 5 — show the number on the wire
-
-**Cover illegibility is the most repeated bug class in Relic's entire patch history** — two separate
-patches for indicators *"rendered floating in the air"*, plus a long tail of *"balustrades now provide
-cover as expected"*, *"removed cover from Greek staircases"*, *"hangar assets no longer provide cover
-— suspended sections were providing cover to units beneath them"*. **The recurring failure is that the
-cover a player sees and the cover the sim computes drift apart.**
-
-XCOM's two most-cited problems are the same class: the 95%-miss perception gap, and per-difficulty aim
-assist that is never surfaced.
-
-**The pattern to copy is built and inert:** `BlockedTarget.tsx` / `blockedPlacement.ts`. The wire
-carries the contribution, not just the total:
-
-```
-"this shot is at -40 because the target is in a trench"
+```csharp
+/// <summary>
+/// Power multiplier from things standing in the line of fire. Decision 35: "if shooter is block by
+/// unit or obstacle, the power will reduce" — REDUCE, not block. A blocked shot is a refused action
+/// the player must be taught to understand; a weakened shot is a decision they already understand.
+///
+/// <para><b>Units obstruct too, not only obstacles.</b> That is what makes body-blocking a real tactic
+/// and a defender's own crowded courtyard a liability.</para>
+///
+/// <para><b>Multiplicative per obstruction, bounded by a soft floor.</b> Two obstructions are worse
+/// than one; twenty are not twenty times worse, or a crowded board makes shooting pointless.</para>
+/// </summary>
+public static int ObstructionPowerMilli(IReadOnlyList<Obstruction> inLine, SiegeShootingPolicy policy);
 ```
 
-**We are structurally immune to the drift itself** — decision 3 makes the structure *be* the cover
-source, so there is one object, one class, one sprite. The remaining obligation is stating the number,
-and GG-55 points the same way.
+**The trace is a Bresenham line over the grid, and it is determinism-sensitive**: it must produce the
+same cell sequence for `(a → b)` on every machine, and — because a shot and a return shot trace the
+same corridor — **it must be symmetric**, or A obstructs B without B obstructing A.
 
-### 10. Structures do not receive cover
+> ### ⚠️ §2 rule 10 — the trace is NOT a fifth area shape
+>
+> *"Closed vocabularies — do not start a third. The action layer already owns a grid vocabulary
+> (`GridPos`, Chebyshev distance, **four area shapes**, `ChosenCell` anchoring). Inventing a second grid
+> model beside it is the exact defect the atom program exists to stop."*
+>
+> The four shipped shapes are `Row · Column · Square · Rectangle`
+> (`ActionTargetSpec.cs:42-48`). **A line-of-fire trace is not among them and must not become a fifth**
+> — it is a *traversal used to compute a penalty*, never a way to select targets. It returns cells to
+> inspect, not cells to hit.
+>
+> **The test:** if anything ever passes the trace's output to a targeting resolver, a fifth shape has
+> been introduced by the back door.
 
-`combatant-kind`: structures get no aura, buff or debuff. A wall does not hide behind a wall.
-Enforced by a guard on the grant, not by convention — a structure entering a cell emits no
-`CellEntered`.
+Where a line passes exactly between two cells, the tie-break is **the lower cell index**, stated
+explicitly. Same discipline `siege-pathing` applies to its heap, for the identical reason:
+`ReachMap`'s own warning that an implicit tie-break lets *"a replay disagree with itself."*
+
+**`RequiresLineOfSight` gets its first reader here**, with its meaning fixed by decision 35: an action
+that sets it pays the obstruction penalty; one that does not ignores obstructions entirely. It is
+**never** a hard block.
+
+#### 3b. The melee lock
+
+HoMM3's third penalty: a shooter with an enemy adjacent shoots at half power. One adjacency check; it
+makes closing on archers the correct answer; without it a ranged unit standing in a melee is strictly
+better than one that retreated. `meleeLockPowerMilli`, tunable, exemptible by the projectile kind.
+
+### 4. Mechanic 4 — the projectile kind
+
+```csharp
+/// <summary>
+/// Which shooting penalties this action pays. Decision 35's "two types of projectile", widened to
+/// flags because HoMM3's own exemptions are not uniform — a Grand Elf ignores the range penalty; a
+/// Sharpshooter ignores all three.
+///
+/// <para><b>Flags, not two values.</b> Two values force every future exemption into an all-or-nothing
+/// choice, and the shipped prior art already has both shapes.</para>
+/// </summary>
+[Flags]
+public enum ProjectilePenalties
+{
+    None        = 0,
+    Range       = 1 << 0,
+    Obstruction = 1 << 1,
+    MeleeLock   = 1 << 2,
+    All         = Range | Obstruction | MeleeLock
+}
+```
+
+**Default is `All`** — an ordinary shot pays everything, and an exemption is authored content. A
+conservative default makes every exemption a deliberate identity choice rather than an oversight.
+
+**This is the action-system half decision 35 names.** `ActionRow` gains the field, `ActionCompiler`
+compiles it, `CompiledAction` carries it, and it persists in the two places `RequiresLineOfSight`
+already does (`RpgStore.Actions.cs:256`, `:373`) — **that flag is the reference for all five sites.**
+
+### 5. Mechanic 5 — obstacles are targets
+
+Already delivered by `structure-state` (HP) and `combatant-kind` (a `Structure` never takes a turn but
+is targetable). **This module's addition is that shooting one is worth doing**: destroying a rampart
+removes its cover area *and* its obstruction — a two-for-one that makes "shoot the wall first" a plan
+rather than a wasted turn.
+
+**Assert both effects disappear together.** A destroyed obstacle that still obstructs is exactly the
+bug this mechanic's appeal rests on not having.
+
+### 6. Where the multipliers apply — one place, once
+
+All four compose into a **single per-mille power factor** applied to the outgoing `DamagePacket`
+**before** the dispatcher, so shields, elements, the Funnel and FA10 all see one already-adjusted
+number.
+
+```csharp
+// long × int × int × int × int, one divide chain, all at the end, checked.
+// CLAUDE.md rule 3 (widen before multiplying) and rule 4 (divide by 1000 last).
+var power = checked(basePower
+    * cover * range * obstruction * meleeLock
+    / 1000 / 1000 / 1000 / 1000);
+```
+
+**Four divides, each by 1000, all after every multiply.** Combining them into `/ 1_000_000_000_000` is
+arithmetically equal and **forbidden** — that divisor is itself large, and the product above it
+overflows first. This is the rule-4 case where the naive simplification *is* the bug.
+
+### 7. Legibility — §5.17 rule 5 survives the rewrite
+
+Relic's most repeated bug class is cover illegibility; XCOM's two most-cited complaints are both
+perception gaps. **The wire carries each factor separately**, never only the product:
+
+```
+range ×500 · obstruction ×700 · cover ×600  →  ×210 total
+```
+
+`BlockedTarget.tsx` / `blockedPlacement.ts` are built and inert — the pattern to copy. **Four
+multipliers make this more important than it was for one dodge number, not less.**
+
+### 8. What this module no longer does
+
+- **No `combat.dodge.omni` grant.** The contest path is untouched by cover.
+- **No `ScopeMembershipTransition` change.** The program's one allowed vocabulary change is **not spent
+  here** — cover is evaluated per shot, so no membership is entered or left.
+  ⛔ **`siege-obstacles` now OWNS that transition for its Mine** — pass 3 found the budget released here
+  and claimed by nobody, which left the Mine firing on nothing. It is claimed there; do not re-add it.
+- **No `(damage source × cover type)` matrix.** Superseded by four multipliers plus the projectile
+  flags, which express the same counter-play with one fewer table.
 
 ---
 
 ## Tunables
 
-`data/tuning/siege.v1.json`, `cover.*`. **Contest points, not per-mille**, except the ignore factors.
+`data/tuning/siege.v1.json`, `shooting.*`. **All per-mille multipliers, 1000 = no penalty.**
 
 | Key | Unit | Default | Why |
 |---|---|---|---|
-| `cover.points.trench` | contest points | `40` | §5.17's own figure |
-| `cover.points.trenchRevetted` | contest points | `60` | Balance |
-| `cover.points.emplacement` | contest points | `80` | §5.17's own figure |
-| `cover.points.rough` | contest points | `15` | Balance |
-| `cover.points.blockingAdjacent` | contest points | `30` | Balance |
-| `cover.points.gapBehind` | contest points | `25` | Balance |
-| `cover.sourceMultiplierMilli.<source>.<kind>` | per-mille | see §3 | Balance — the `(damage source x cover type)` matrix. `melee` and `entry` rows are **0** and structural; the comment says so |
-| `cover.ignoreMilli.<element>.<kind>` | per-mille | `fire.trench = 1000`, rest `0` | Balance — §5.17 rule 2 |
-| `cover.maxStackPoints` | contest points | `100` | Balance — a **soft** cap (one full sigmoid unit), configurable per `AGENTS.md`. Not a hard ceiling |
+| `shooting.rangeThresholdMilli` | per-mille of board side | `500` | HoMM3's "half the battlefield", as a ratio so it scales |
+| `shooting.rangePowerMilli` | per-mille | `500` | HoMM3's 50% |
+| `shooting.obstructionPowerMilli` | per-mille, **per obstruction** | `700` | Ours — HoMM3 has a single wall check |
+| `shooting.obstructionFloorMilli` | per-mille | `250` | **Soft floor**, configurable per `AGENTS.md`, so a crowded board stays shootable |
+| `shooting.meleeLockPowerMilli` | per-mille | `500` | HoMM3's 50% |
+| `obstacles.<kind>.coverRadius` | cells | `1` | **Decision 39** — authored per kind |
+| `obstacles.<kind>.coverPowerMilli` | per-mille | `600` | Balance |
 
-**100 points is one sigmoid unit**, so `maxStackPoints = 100` is a legible default: stacked cover can
-be worth at most one full unit of contest advantage.
+**No `P(Θ)` in this file**, for the reason the prior-art section gives: multipliers are scale-free, so
+they need no ladder and cannot decay.
 
 ## Numeric types
 
-- Cover values: **`int` flat contest points.** Not per-mille, not bounded above by 1000 — they are
-  points on the same scale as `BaseDodge(Θ) = 26·Θ`. **Never `P(Θ)`**: a contest reads `Θ` linearly
-  (§2 rule 4), and the flat value is what makes cover equally decisive at every `Θ`.
-- Source multipliers and ignore factors: **`int` per-mille**, bounded 0..1000 — exempt ratios, stated
-  in their comments. **The divide by 1000 happens once, last**, after every multiply (`CLAUDE.md`
-  rule 4).
-- Stacked cover: **`int`**, summed as points before any multiplier is applied.
-- **No `float` anywhere.** The contest resolves an integer point difference through the sigmoid; a
-  float cover value would reorder outcomes differently on different runtimes.
+| Value | Type | Why |
+|---|---|---|
+| Base power / damage | **`long`** | a magnitude `contentScale` reaches |
+| Every multiplier | `int` per-mille, bounded 0..1000 | exempt ratio, stated in each comment |
+| The composed product | **`long`, `checked`** | four multiplies before any divide — the widen is the safety argument |
+| Distances, radii, cell indices | `int` | board-bounded, structural |
+
+**No `float`.** A power chain in floating point produces a different last digit on a different runtime,
+and this chain feeds a hashed battle report.
 
 ## Boundaries
 
-**Always:** pair every `CellEntered` with a `CellExited` · **contest points, never per-mille, never
-`P(Θ)`** · every cover value in tuning · integer arithmetic throughout · show the contribution on the
-wire, not just the total.
+**Always:** multiplicative per-mille, never a flat subtraction · divide by 1000 **four times, each
+after every multiply** · trace the line deterministically, symmetrically, with a stated tie-break ·
+surface each factor separately on the wire · a destroyed obstacle projects nothing.
 
-**Ask first:** a sixth `ScopeMembershipTransition` value — this module spends the program's one
-allowed vocabulary change · making `cover.maxStackMilli` a hard cap.
+**Ask first:** a fifth multiplier · making an obstruction a hard block · stacking cover.
 
-**Never:** a per-hit cover lookup that bypasses the effect system · cover on a structure · a `float`
-dodge value · a `Math.Min` that silently clamps rather than a documented soft cap · **cover expressed
-as a per-mille of anything** · a turn-counting dig-in bonus (§5.17 rule 1: *"do not add passive dig-in
-that grows with turns stationary"* — decision 14 already prices building as an action, and free
-entrenchment would be a second unpriced path to the same bonus).
+**Never:** `P(Θ)` on a multiplier · a `float` in the chain · combining the four divides into one ·
+blocking a shot outright (decision 35 says *reduce*) · a cover grant on `combat.dodge.omni` · spending
+the vocabulary-change budget here.
 
 ---
 
 ## Testing
 
+`tests/FusionRpg.Core.Tests/Battle/Board/` and `.../Actions/`.
+
 | Test | Asserts |
 |---|---|
-| `Cover_grants_and_revokes_on_cell_entry_and_exit` | the core loop |
-| `Every_cell_entered_is_paired_with_a_cell_exited` | over a 50-round battle including deaths and withdrawals — **the leak test** |
-| `Death_emits_cell_exited` | one of the three emit sites |
-| `Withdrawal_emits_cell_exited` | the third, and the one most likely to be forgotten |
-| `Melee_ignores_cover_entirely` | every terrain |
-| `Gap_covers_against_direct_but_not_area` | the reason `Gap` exists, end-to-end |
-| `Blocking_between_shooter_and_target_grants_cover` | the LOS trace |
-| `Requires_line_of_sight_blocks_the_shot_outright` | its first reader — **and a companion test asserting the field is genuinely unread today**, or report a wiring gap |
-| `Structures_receive_no_cover` | `combatant-kind`'s rule, enforced |
-| `Cover_stacks_up_to_the_soft_cap_and_the_cap_is_configurable` | not a hard stop |
-| `Dodge_channel_is_read_by_the_existing_calculator` | through `OverlayCombatCalculator`, not a parallel path |
-| `Existing_membership_consumers_ignore_the_new_transitions` | `BattlefieldOwnSideReactor.cs:75-86` switches on three values — assert the two new ones fall through harmlessly rather than throwing |
-| `Cover_is_expressed_in_contest_points_not_per_mille` | **the correction**, asserted — +40 moves the sigmoid by 0.4 units |
-| `Flat_cover_is_equally_decisive_at_theta_1_and_theta_200` | the ladder argument, as a test |
-| `Fire_ignores_trench_cover` | §5.17 rule 2 |
-| `An_exhausted_occupant_gets_less_from_cover` | §5.17 rule 4 — **and a companion test proving exhaustion actually reaches `combat.dodge.omni`**, or report a wiring gap |
-| `The_wire_carries_the_cover_contribution_not_just_the_total` | §5.17 rule 5 |
-| `Mines_ignore_cover` | the `Entry` source row |
-| `No_turn_counting_dig_in_bonus_exists` | §5.17 rule 1, by source scan |
-| `All_goldens_byte_identical_with_no_board` | no cover without a board |
-
-**The `BattlefieldOwnSideReactor` test is the one a first implementation misses.** Adding enum values
-to a type another module `switch`es on is exactly where a silent default or an unhandled-case throw
-appears.
+| `Target_in_a_cover_area_takes_reduced_power` | mechanic 1 |
+| `Cover_radius_is_authored_per_kind` | decision 39 |
+| `Best_single_cover_applies_and_covers_do_not_stack` | the degenerate-cluster failure, prevented |
+| `A_destroyed_obstacle_projects_no_cover_and_no_obstruction` | **both together** — mechanic 5's whole appeal |
+| `Power_falls_off_beyond_the_range_threshold` | mechanic 2 |
+| `Range_threshold_scales_with_board_side` | an 18-cell and a 30-cell board differ |
+| `A_unit_in_the_line_reduces_power` | **units obstruct, not only obstacles** |
+| `An_obstruction_reduces_but_never_blocks` | decision 35's own word |
+| `Obstructions_compound_but_stop_at_the_floor` | a crowded board is still shootable |
+| `Line_trace_is_identical_across_10000_runs` | determinism |
+| `Line_trace_is_symmetric` | A obstructs B iff B obstructs A |
+| `The_trace_is_never_passed_to_a_targeting_resolver` | **P4-6**, §2 rule 10 — no fifth area shape |
+| `Line_trace_tie_breaks_to_the_lower_cell_index` | the stated rule |
+| `Requires_line_of_sight_finally_has_a_reader` | **plus a companion test proving it had none before** |
+| `Requires_line_of_sight_means_pays_obstruction_not_blocked` | the meaning decision 35 fixed |
+| `A_shooter_with_an_adjacent_enemy_shoots_weaker` | 3b |
+| `Projectile_flags_exempt_exactly_what_they_name` | one per flag, plus `All` and `None` |
+| `Default_projectile_pays_every_penalty` | conservative default |
+| `Projectile_kind_survives_all_five_plumbing_sites` | the action-system half, round-tripped |
+| `Penalties_compose_multiplicatively_in_one_place` | and the packet reaches the dispatcher pre-adjusted |
+| `Power_chain_overflows_loudly` | `OverflowException`, not a wrapped negative |
+| `Four_divides_beat_one_combined_divide` | against a `BigInteger` reference at a magnitude where the combined divisor overflows |
+| `Multipliers_are_equally_decisive_at_theta_1_and_theta_200` | the scale-free claim |
+| `The_wire_carries_each_factor_separately` | §5.17 rule 5 |
+| `All_goldens_byte_identical_with_no_board` | **the gate** |
 
 ## Success criteria
 
-1. Cover grants and revokes correctly, with zero leaks over a full battle.
-2. Every cover value lives in tuning; the code contains no bare cover literal.
-3. `Gap` and `Blocking` behave differently, proven.
-4. `RequiresLineOfSight` has a reader, or is reported as a wiring gap with `file:line`.
-5. Existing `ScopeMembershipTransition` consumers are unaffected.
-6. All goldens byte-identical with no board.
+1. Four mechanics, each with its own tests and tunables.
+2. Every multiplier per-mille and scale-free; **no `P(Θ)`, no `float`** in this module.
+3. The line trace is deterministic over 10,000 runs, symmetric, with a stated tie-break.
+4. `RequiresLineOfSight` has a reader, meaning *pays obstruction*, never *blocked*.
+5. Destroying an obstacle removes cover **and** obstruction, proven together.
+6. `ProjectilePenalties` passes all five sites `RequiresLineOfSight` already occupies.
+7. Each factor separately visible on the wire.
+8. All goldens byte-identical with no board.
 
 ## Open questions
 
-**One, and the owner should settle it.** Does cover apply against the **attacker's** accuracy or the
-**defender's** dodge?
-
-They are numerically equivalent in a single-roll system and they diverge the moment anything else
-reads either channel — a demon with high innate dodge stacks differently from one whose attacker is
-being penalised.
-
-**Recommendation: the defender's dodge**, i.e. `combat.dodge.omni` as specced. It is the channel that
-already exists and is already read, it makes cover visible in the defender's own stat panel (which is
-where a player looks to understand why they survived), and it stacks with innate dodge by the rules
-the game already has rather than by a new interaction. **Safe to build against; reversible by moving
-the grant to the accuracy channel if playtest disagrees.**
+None. Decision 35 specifies the mechanism, decision 39 the cover area; the numbers are tunables and
+belong to the first balance pass.

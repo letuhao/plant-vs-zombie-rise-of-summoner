@@ -1,6 +1,6 @@
 # Spec: `siege-objective`
 
-**Module 18 of 21 · level 3 · depends on `combatant-kind`, `district-layout` · [base-defense-map.md](../base-defense-map.md)**
+**Module 18 of 29 · level 3b · depends on `combatant-kind` (3), `district-layout` (2) · [base-defense-map.md](../base-defense-map.md)**
 **Status:** spec, 2026-09-04. **Added by the completeness audit** — its absence was the audit's
 headline finding.
 
@@ -147,7 +147,52 @@ public int LegionSlotsPerSide { get; }
 startup error rather than a runtime surprise. An odd slot count silently breaks the pairing rule the
 whole fight's legibility rests on.
 
-### 4. Max members per legion — the number that does not exist yet
+### 4. ⛔ The SECOND budget — defense slots, and the uncapped escape valve
+
+**Missed by the first completeness audit.** §5.1: *"**There are two budgets, not one** — and that is
+the shape Dungeon Defenders shipped: a fungible currency plus a non-fungible per-level allowance,
+'structurally the same pair as Arknights' DP and `characterLimit`.'"*
+
+| Budget | Sized by | Gates |
+|---|---|---|
+| **Legion slots** | the central area's size (§5.7–5.8) | how many legions stand in the heart — **even and paired** |
+| **Defense slots** | **`DevelopmentLevel`** | how many towers, walls and traps may stand on the board |
+
+> *"They are orthogonal on purpose: raising development buys more **fortification**, not more **army**.
+> Army comes from the empire-wide legion budget, which is scarce for entirely different reasons."*
+
+```csharp
+/// <summary>
+/// How many structures may stand on this board at once. §5.1's second budget — the thing
+/// DevelopmentLevel actually buys, now that the GRID is fixed per base tier (district-layout §2).
+///
+/// <para><b>A board cap, exempt and saying so</b> — ssot-power-scale.md §11.3: "bounds how much can
+/// exist at one moment, not how far you can get". MaxLivingPlants = 50 is the named precedent.</para>
+/// </summary>
+public static int DefenseSlotsFor(int developmentLevel);
+```
+
+#### The escape valve — this is what makes a fixed board legal
+
+§5.1's third stage, and **without it the whole design has a hard progression ceiling**:
+
+> *"Once slots fill the board, further development buys **tower tier** — a magnitude, so it reads
+> `P(Θ)` and rises forever. **The board stops growing; the investment never does.**"*
+
+So `DevelopmentLevel` spends in two phases, and the transition is a tunable:
+
+1. **Below `slots.defense.gridCapacityPoint`** — each level buys more defense slots.
+2. **At and above it** — each level buys **tower tier** instead, which is
+   `structure-state`'s `P(Θ_development)` HP and damage. Uncapped, forever.
+
+**Three stages, no ceiling, no unrenderable board.** This module owns stages 1 and 2; `structure-state`
+owns the magnitude that stage 3 rises on.
+
+> **This is the answer to `AGENTS.md`'s no-hard-ceilings rule for the whole program**, and it must be
+> stated in a comment at the switch — a reviewer who sees a slot count stop growing needs to see, in
+> the same file, what starts growing instead.
+
+### 5. Max members per legion — the number that does not exist yet
 
 §3.6 established there is **no limit today**, so this is free to choose. Two shipped precedents say
 which way to author it, and they disagree — §6 names the winner:
@@ -158,7 +203,7 @@ which way to author it, and they disagree — §6 names the winner:
 A tunable, from the first line of code. Growth per `DevelopmentLevel` is a second tunable, defaulting
 to zero.
 
-### 5. The central area is a pure arena
+### 6. The central area is a pure arena
 
 Decision 10: *"Nothing is built inside the central area."* One rule, enforced in the shared placement
 validator `siege-construction` owns:
@@ -174,7 +219,7 @@ if (zone == DistrictZone.Core) return Reject(SiegeRejectReasons.CoreIsAnArena);
 
 **Both sides, both phases.** An attacker who breaches cannot wall the Core shut behind them either.
 
-### 6. `DefenderBonusMilli` must shrink as fortifications land
+### 7. `DefenderBonusMilli` must shrink as fortifications land
 
 §5.8, verified live at `PlaceholderBattleResolver.cs:79-83`:
 
@@ -203,6 +248,9 @@ before this module.
 |---|---|---|---|
 | `field.maxLivingPerSide` | units | **unset (−1)** | **The difficulty dial** (§5.9, Arknights). Decision 29 keeps it unset until a real board exists to measure on |
 | `field.betweenWavesPauseTicks` | sim ticks | **unset** | Decision 6's batch pause |
+| `slots.defense.atDevelopmentZero` | structures | `4` | **§5.1's second budget.** Balance |
+| `slots.defense.perDevelopmentLevel` | structures | `2` | Balance |
+| `slots.defense.gridCapacityPoint` | structures | **unset** | **The stage-2→3 switch.** Past it, development buys tower tier instead of slots — the uncapped escape valve. Decision 29 defers the value |
 | `slots.legion.perSide` | legions | `2` | Even by decision 4 |
 | `slots.legion.perDevelopmentLevel` | legions | `0` | Growth, off by default |
 | `legion.maxMembers` | members | **unset** | §3.6 — free to choose, and decision 29 defers it |
@@ -247,6 +295,11 @@ let `DefenderBonusMilli` stack with fortifications · a `const` roster limit —
 | `Unlimited_sentinel_is_minus_one` | matches `CapPolicy` exactly |
 | `Odd_legion_slot_count_throws_at_load` | decision 4, loudly |
 | `A_three_legion_attacker_may_assault_a_four_slot_area` | §5.8's *"I cannot attack and I do not know why"* |
+| `Defense_slots_grow_with_development_until_the_capacity_point` | **§5.1's second budget** |
+| `Past_the_capacity_point_development_buys_tier_not_slots` | **the escape valve** — assert slot count is flat and `P(Θ)` HP is rising |
+| `There_is_no_hard_ceiling_on_investment` | run development to a large index; assert structure HP still grows |
+| `Defense_slots_and_legion_slots_are_orthogonal` | raising one does not move the other |
+| `A_garrisoning_unit_costs_a_field_cap_slot` | §5.13 — the STRUCTURE does not count, the body inside it does. **F7's residual**, made explicit rather than left ambiguous |
 | `Nothing_can_be_built_in_the_core` | decision 10, **both sides, both phases** |
 | `District_assault_reads_defender_bonus_as_zero` | §5.8's double-pay, prevented |
 | `Placeholder_battles_still_read_1250` | the non-district path is untouched |

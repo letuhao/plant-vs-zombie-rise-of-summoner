@@ -37,7 +37,7 @@ not gate habitability, it raises **capacity** — a third thing a structure can 
 kind rather than overloading `LoamSource`.
 
 - **New**: `StructureKind.Storage`. `StructureDef { StructureId: "granary", Kind: Storage,
-  RequiredSlotKind: Wildland, CostMilli: GranaryCostMilli, YieldMultiplierMilli: 1000 (unused for this
+  RequiredSlotKind: Wildland, Cost: GranaryCost, YieldMultiplierMilli: 1000 (unused for this
   kind) }` plus a new `StructureDef.CapacityBonus` (`long`) field, read only by `Storage`-kind
   structures.
 - `LoamPhases.Production`'s existing cap (`room = Max(0, LoamPolicy.LoamCapacity - sector.LoamStock)`)
@@ -181,7 +181,7 @@ dotnet test tests\FusionRpg.Guard.Tests
 
 ```
 src/FusionRpg.Core/World/StructureCatalog.cs             → StructureKind.Storage, granary row, CapacityBonus field
-src/FusionRpg.Core/World/Loam/LoamPolicy.cs               → GranaryCostMilli, CapacityBonus, ContagionPressurePerTurn, MaxPressureMilli, SurgeDecayMultiplierMilli (harness-tuned)
+src/FusionRpg.Core/World/Loam/LoamPolicy.cs               → GranaryCost, CapacityBonus, ContagionPressurePerTurn, MaxPressureMilli, SurgeDecayMultiplierMilli (harness-tuned)
 src/FusionRpg.Core/World/Loam/LoamPhases.cs               → EffectiveCapacity; contagion spread pass; surge multiplier read from CalendarRoll
 src/FusionRpg.Core/World/Loam/FadePolicy.cs               → PressureMilli and surge terms added to DecayFor
 src/FusionRpg.Core/World/WorldState.cs                    → WorldSector.WardenBindingId, a neglect-turn counter for Unmade spawning
