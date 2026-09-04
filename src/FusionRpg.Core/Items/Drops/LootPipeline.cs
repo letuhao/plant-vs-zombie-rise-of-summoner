@@ -77,7 +77,13 @@ public sealed record LootContentView(
     Func<string, string, string, bool>? FirstClearAlreadyGranted = null,
     Func<string, string, string?>? RecordedManifestFor = null,
     Func<string, int, int, int>? DrawableAffixGroups = null,
-    Func<LootGrant, LootMintResult>? Mint = null);
+    Func<LootGrant, LootMintResult>? Mint = null,
+    /// <summary>⭐ Step 10, live as of module 16. The base type's own <c>socketMax</c>, by id.</summary>
+    Func<string, int>? SocketMaxFor = null,
+    /// <summary>⭐ Step 10, live as of module 16. Both this and <see cref="SocketMaxFor"/> must be
+    /// supplied or the step stays the documented no-op it was — half a socket rule would silently
+    /// grant the wrong count rather than none.</summary>
+    FusionRpg.Core.Items.Sockets.SocketTuning? SocketTuning = null);
 
 /// <summary>Server-derived correlation ids (§4.4). One shape per source kind, none client-reachable.</summary>
 public static class LootCorrelation
@@ -335,7 +341,7 @@ public static class LootPipeline
                 i, DropEntryKind.Equipment, entry.RefId, 1, entry.AffixChannel,
                 baseTypeId, entry.Frame, entry.Role, rung.RarityId, rung.Ordinal, itemLevel,
                 envelope.MinTier, envelope.MaxTier, envelope.PrefixRolls, envelope.SuffixRolls,
-                SocketCount: Sockets(rollSeed), RollSeed: rollSeed,
+                SocketCount: Sockets(rollSeed, view, baseTypeId, rung.RarityId), RollSeed: rollSeed,
                 EnvelopeNarrowed: envelope.Narrowed, PityForced: pityOutcome.Forced);
 
             if (view.Mint is { } mint)
@@ -369,19 +375,30 @@ public static class LootPipeline
     public static int LevelReq(int itemLevel) => Math.Max(1, itemLevel - 2);
 
     /// <summary>
-    /// ⏸ <b>Step 10 — a DOCUMENTED NO-OP that reserves its stream, and that is the whole point.</b>
+    /// ⭐ <b>Step 10 — LIVE as of module 16 (`sockets`), 2026-09-05.</b>
     ///
-    /// <para>Module 16 owns the count rule and D2 §6 makes <c>item_socket</c> its SSOT. Until module 7
-    /// seeds <c>rarity.socket_min</c>/<c>socket_max</c> (SC7 refuses them today — no decided shape)
-    /// and module 16 lands the rule, this resolves to <b>0 sockets</b>. It still DERIVES and ADVANCES
-    /// its stream, so landing the real count later changes no other draw. A step inserted after the
-    /// corpus ships is a migration; a no-op that reserves its stream is cheap.</para>
+    /// <para>It shipped as a documented no-op that reserved its stream, because module 16 owned the
+    /// count rule and <c>rarity.socket_min</c>/<c>socket_max</c> had no decided shape yet (SC7 refused
+    /// them). Both are now closed: <see cref="Sockets.SocketGeometry.SocketsAtDrop"/> is the rule and
+    /// the two <c>rarity_budget</c> keys are registered. Reserving the stream is exactly what makes
+    /// this a wiring change and not a migration — <b>every affix roll at every band is byte-identical
+    /// across the switch</b>, because the count was always drawn from its own derived stream.</para>
+    ///
+    /// <para>The host supplies the corpus lookup and the tuning; with either absent the step stays the
+    /// no-op it was, and still advances. <b>Half a socket rule would grant the wrong count</b>, which
+    /// is worse than granting none.</para>
     /// </summary>
-    static int Sockets(ulong rollSeed)
+    static int Sockets(ulong rollSeed, LootContentView view, string baseTypeId, string rungId)
     {
-        var socketRng = SeededRng.DeriveStream(rollSeed, LootStreams.Sockets);
-        _ = socketRng.NextULong();
-        return 0;
+        if (view.SocketMaxFor is null || view.SocketTuning is null)
+        {
+            var socketRng = SeededRng.DeriveStream(rollSeed, LootStreams.Sockets);
+            _ = socketRng.NextULong();
+            return 0;
+        }
+
+        return FusionRpg.Core.Items.Sockets.SocketGeometry.SocketsAtDrop(
+            view.SocketMaxFor(baseTypeId), rungId, rollSeed, view.SocketTuning);
     }
 
     /// <summary>

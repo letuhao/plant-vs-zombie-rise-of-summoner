@@ -1,5 +1,5 @@
 {
-  "at": "2026-08-30T23:05:21.6309724+07:00",
+  "at": "2026-09-05T02:50:33.5532329+07:00",
   "phase": "static+live",
   "signatures": [
     {
@@ -271,10 +271,10 @@
   ],
   "staticTestPass": true,
   "liveSetup": {
-    "TargetPtr": "217F9C66960",
-    "PlantPtr": "217F9A05480",
-    "LevelType": "Advanture",
-    "Entered": true,
+    "TargetPtr": "222F5C76960",
+    "PlantPtr": "222F5DF9000",
+    "LevelType": "",
+    "Entered": false,
     "Scenario": "lab-overlay"
   },
   "live": [
@@ -421,11 +421,11 @@
     "fail": []
   },
   "stressOffline": {
-    "refreshNoFlicker": "pass-unit-test-historical-prove",
     "horde": "skipped-no-live",
-    "globalCap24": "pass-unit-test",
+    "refreshNoFlicker": "pass-unit-test-historical-prove",
     "vanillaCoexistence": "skipped-no-live",
-    "twoStatusCap_markerPriority": "pass-unit-test"
+    "twoStatusCap_markerPriority": "pass-unit-test",
+    "globalCap24": "pass-unit-test"
   },
   "note": "Forced-choice human trials and screenshots require in-game viewer; record humanCorrect in forcedChoiceMatrix after LIVE."
 }

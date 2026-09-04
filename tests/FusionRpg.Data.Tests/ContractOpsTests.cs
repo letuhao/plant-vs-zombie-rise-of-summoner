@@ -133,7 +133,7 @@ public class ContractOpsTests : IDisposable
         var id = Mint();
         _store.SetLoyaltyForTest(id, 150);                     // insubordinate: defeats put it here
         var personality = _store.GetContract(id)!.Personality;
-        var price = ContractPolicy.RitualPrice(Species.BaseRarity);
+        var price = ContractPolicy.RitualPrice(Species.BaseRarity, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning);
         var before = _store.GetSoulBalance(1).Balance;
 
         var ritual = _store.PerformRitual(1, id, "corr-ritual-1", Day0);

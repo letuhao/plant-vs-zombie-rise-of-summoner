@@ -100,9 +100,18 @@ public class MaterialSpendTests : IDisposable
 
         Assert.True(RarityBudgetKeys.IsRegistered("salvage_yield"));
 
-        // The three keys still awaiting their own module's decided shape stay refused.
-        foreach (var key in new[] { "socket_min", "socket_max", "reroll_cost_mult" })
-            Assert.Throws<RarityBudgetKeyRejection>(() => _store.SetRarityBudget("chaff", key, 1));
+        // ⭐ reroll_cost_mult left the awaiting list 2026-09-05 (module 15), and socket_min/socket_max
+        // followed the same day (module 16, `sockets` — two integers per rung, the drop grant window).
+        // Every key in the closed list is now decided, so the SC7 gate is pinned against a key with no
+        // consumer at all rather than against a real one: the mechanism must survive the list being
+        // fully decided today, because the next key added will not be.
+        foreach (var key in new[] { "socket_min", "socket_max" })
+        {
+            Assert.True(RarityBudgetKeys.IsRegistered(key));
+            _store.SetRarityBudget("chaff", key, 0);
+        }
+
+        Assert.Throws<RarityBudgetKeyRejection>(() => _store.SetRarityBudget("chaff", "no_such_key", 1));
     }
 
     // ---- the spend transaction ---------------------------------------------------------------------

@@ -164,6 +164,21 @@ public class WorldTurnReportFogTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Rule_4_a_line_with_no_audience_and_no_ground_is_shown_to_everyone()
+    {
+        // world-map W59: the gap this suite left open — a calendar tick (week/month/season) carries
+        // neither, and used to be dropped silently (`VisibleTo` returned false for exactly this
+        // shape until this defect was found by playing the phase's own acceptance scenario).
+        SeedTurnLog(new[]
+        {
+            new TurnReportEntry("events", TurnReportKinds.Calendar, "season", "1", SectorId: null)
+        });
+
+        Assert.True(Has(await EntriesFor("dave"), "1"));
+        Assert.True(Has(await EntriesFor("zomboss"), "1"));
+    }
+
+    [Fact]
     public async Task Rule_2_a_battle_on_ground_currently_watched_is_shown()
     {
         // d-home is Dave's own capital — live-watched every turn, the contrasting case that proves

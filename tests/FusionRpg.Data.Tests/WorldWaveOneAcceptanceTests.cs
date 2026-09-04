@@ -8,8 +8,10 @@ namespace FusionRpg.Data.Tests;
 /// <summary>
 /// **Checkpoint 3 — wave-1 acceptance** (world-map-plan.md). Twenty turns that actually play: a
 /// legion marches, clears two guards, claims the sector, meets a warband head-on in the middle of a
-/// lane, pushes on to the frontier, and finally has its supply line cut by a third faction walking
-/// into the sector behind it.
+/// lane, pushes on to the frontier, and finally has its frontier sector besieged by a third faction
+/// walking directly onto it (base-defense siege-supply F1/F1b, 2026-09-05: a besieged sector still
+/// supplies ITSELF now — "a base with stores is not a legion in the field" — so this is no longer a
+/// `supply.cut`, see re-bless entry #14 below).
 ///
 /// The scenario is scripted rather than improvised, so its value is in the invariants: one turn-log
 /// row per turn, a stable hash sequence, and — the sharp one — the pure engine reproducing the
@@ -125,10 +127,44 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       yet (that lands at W50/W52), so nothing about the *play* changed, only the row shape the
     //       hash is taken over.
     //
-    // The plan expected one re-bless. Five were needed — four for world-intel plus this one, each
-    // for a behaviour change or a budgeted field batch rather than a drift, and each recorded here.
-    // Protecting the hash in any of them would have meant shipping something known to be wrong.
-    const string GoldenFinalHash = "b52bf25177135c3efb1c3689260344e4e4646632c98ddf5ce78afc73ee5743e3";
+    //   14. **base-defense `siege-supply` F1/F1b, 2026-09-05** — `SupplyGraph.ConnectedSectors`
+    //       stopped silently dropping a besieged sector from its own supply. The audit's own finding:
+    //       a hostile force standing IN a sector you hold made that sector, and everything reachable
+    //       only through it, vanish from `ConnectedSectors` — indistinguishable from a sector that
+    //       was never yours. Fixed by splitting "traversable" (owned, not held against — gates BFS
+    //       and Seat-seeding) from "besieged" (owned, held against — unioned back in post-BFS as a
+    //       self-source: it can still supply itself, it just cannot be routed THROUGH). A real
+    //       behaviour change, not a field addition (`RulesetVersion` unchanged — nothing about how a
+    //       turn is hashed moved, only what a besieged sector's own supply state resolves to).
+    //
+    //       This scenario's own frontier claim is exactly the case the bug hid: Zomboss's band
+    //       marches directly onto `ash-waste` (turns 11-12), which Dave claimed on turn 10. Under the
+    //       old (buggy) behaviour that made `ash-waste` read as fully cut off, firing `supply.cut:`.
+    //       Under the fix it correctly reads as besieged-but-self-supplying, firing
+    //       `supply.besieged:` instead — `ash-waste` is first-light's only Seat-less sector
+    //       (`SupplyTests.cs`'s own documented reason), so it is the only holding on this map that
+    //       can ever be cut off at all, and this script's one hostile incursion stands directly in it
+    //       rather than behind it. There is therefore no longer any scripted event in this 20-turn
+    //       run that produces a genuine `supply.cut` — `Every_wave_one_verb_fires_somewhere_in_the_
+    //       twenty_turns` was updated to require `supply.besieged:` in its place, matching what this
+    //       script actually — and now correctly — produces.
+    //
+    //   15. **world-map W58 (`RulesetVersion` 6 → 7), 2026-09-05 — recorded retroactively, found
+    //       missing while closing Phase 12's own checkpoint audit.** `growth.seatPulsePerWeek`
+    //       moved off 0 (`data/tuning/world.v5.json`, 0 → 20). This scenario holds two Seats across
+    //       its own week boundaries (turns 7, 14): `homeworld` from turn 0, and the claimed,
+    //       lair-cleared `ember-hollow` from turn 3 — both now accrue `WorldSector.RecruitStock`
+    //       (a field `WorldCanonical` has hashed since entry #13), which moves this golden on its
+    //       own, independent of entry #14's supply fix. `decisions.md`'s own W58 row named this
+    //       exact test as the one golden the bump would move and predicted the reason correctly —
+    //       the diff was genuinely checked in advance, only the matching numbered entry here was
+    //       never written, leaving the file's own "every re-bless recorded" convention silently
+    //       broken by one entry despite the substance being right.
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #15 above —
+    // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
+    // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
+    const string GoldenFinalHash = "11cff991ba55f9e579a8e2cdbe0e73ea80a2bb1102336a818c3c041299f015e7";
 
     readonly string _dir;
     readonly RpgStore _store;
@@ -274,7 +310,12 @@ public class WorldWaveOneAcceptanceTests : IDisposable
             ("crossing", e => e.Kind == TurnReportKinds.Battle && e.Detail.StartsWith("lane:")),
             ("claim", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("claim.held:")),
             ("zone-of-control", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("halt:zoc:")),
-            ("supply cut", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.cut:")),
+            // base-defense siege-supply F1/F1b (re-bless entry #14): this script's one hostile
+            // incursion stands directly IN ash-waste (first-light's only Seat-less sector), which
+            // now besieges it rather than cutting it off — there is no scripted event left in this
+            // run that produces a genuine `supply.cut:`, so the wave-1 "hostile-blocked supply" verb
+            // is proven by `supply.besieged:` instead.
+            ("supply besieged", e => e.Kind == TurnReportKinds.Event && e.Detail.StartsWith("supply.besieged:")),
             // spec-loam-legions.md (L27): wound-based attrition is retired; a legion beyond supply
             // now burns carried loam (surviving on its reserve) or, if that reserve runs out, is
             // destroyed outright rather than bled slowly.

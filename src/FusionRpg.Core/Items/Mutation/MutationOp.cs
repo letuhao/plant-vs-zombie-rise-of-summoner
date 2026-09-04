@@ -117,6 +117,12 @@ public sealed record MutationResult(
 /// One row of <c>effect_instance_op</c> (D2 §9 clause 2). <c>Seq</c> is dense and gapless per
 /// instance; <c>CorrelationId</c> is unique per instance and carries clause 8's idempotency.
 /// </summary>
+/// <param name="CatalogRevision">D2 clause 5 — the op stamps its <b>own</b> catalog revision. It is
+/// NOT <c>effect_instance.catalog_revision</c>, which is origin-only and which no operation rewrites.</param>
+/// <param name="RulesVersion">D2 clause 5's other half: which rules decided this op. Recorded for
+/// provenance only — replay never reads it, because replay never re-runs a formula (clause 4).</param>
+/// <param name="CostJson">D2 clause 11 — the spend, in module 14's material vocabulary. "A spent cost
+/// with no op is theft; an op with no cost is duplication."</param>
 public sealed record MutationOp(
     string InstanceId,
     int Seq,
@@ -124,7 +130,10 @@ public sealed record MutationOp(
     string CorrelationId,
     long OpSeed,
     MutationResult Result,
-    string AppliedUtc);
+    string AppliedUtc,
+    long CatalogRevision = 0,
+    int RulesVersion = 0,
+    string CostJson = "{}");
 
 /// <summary>Ids, parsing and the seeded stream name. Kebab-case, matching what a row stores.</summary>
 public static class MutationOpKinds
@@ -253,8 +262,13 @@ public static class MutationCanonical
 
     /// <summary>
     /// The head's canonical form: every field length-prefixed, atoms sorted by <c>seq</c> and keys
-    /// sorted ordinally, then concatenated and hashed once. Length prefixes are what stop
-    /// <c>("ab","c")</c> and <c>("a","bc")</c> hashing the same.
+    /// sorted ordinally, then concatenated and hashed once, <b>including suppressed rows</b> (D2
+    /// clause 12). Length prefixes are what stop <c>("ab","c")</c> and <c>("a","bc")</c> hashing the
+    /// same, and XOR-folding is banned because it is order-insensitive by construction.
+    ///
+    /// <para>definitions §8's <c>N:</c> NULL marker is honoured by <see cref="Null"/>; no field on the
+    /// head is nullable today, so it is never emitted — it exists so a nullable column added later
+    /// cannot be silently encoded as an empty string, which would collide with a real empty one.</para>
     /// </summary>
     public static string StateHash(InstanceHead head)
     {
@@ -276,8 +290,13 @@ public static class MutationCanonical
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 
-    static void Append(StringBuilder sb, string field) =>
-        sb.Append(field.Length.ToString(CultureInfo.InvariantCulture)).Append(':').Append(field).Append('|');
+    /// <summary>definitions §8's NULL marker — distinct from a zero-length string by construction.</summary>
+    internal const string Null = "N:";
+
+    static void Append(StringBuilder sb, string? field) =>
+        sb.Append(field is null
+            ? Null
+            : field.Length.ToString(CultureInfo.InvariantCulture) + ":" + field).Append('|');
 }
 
 /// <summary>

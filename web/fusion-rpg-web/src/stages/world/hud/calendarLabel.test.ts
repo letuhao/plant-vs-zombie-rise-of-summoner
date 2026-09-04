@@ -8,22 +8,23 @@ const blank = {
   monthBoundary: false,
   specialWeek: false,
   specialMonth: false,
-  plague: false
+  plague: false,
+  season: 0
 };
 
 describe("calendarLabelFor — WorldStateDto.Calendar, never a report entry (world-stage W53)", () => {
   it("populates on a non-boundary turn — not blank six turns out of seven", () => {
     const label = calendarLabelFor(3, blank);
-    expect(label).toEqual({ turn: 3, week: 1, month: 1, flavour: null });
+    expect(label).toEqual({ turn: 3, week: 1, month: 1, season: 1, flavour: null });
   });
 
   it("turn 0 (before any roll) is week 1 of month 1, no flavour", () => {
-    expect(calendarLabelFor(0, blank)).toEqual({ turn: 0, week: 1, month: 1, flavour: null });
+    expect(calendarLabelFor(0, blank)).toEqual({ turn: 0, week: 1, month: 1, season: 1, flavour: null });
   });
 
   it("rolls week and month numbers forward correctly across boundaries", () => {
     // daysPerWeek=7, weeksPerMonth=4 → day 22 is week 4 (days 22-28), month 1 (weeks 1-4).
-    expect(calendarLabelFor(22, blank)).toEqual({ turn: 22, week: 4, month: 1, flavour: null });
+    expect(calendarLabelFor(22, blank)).toEqual({ turn: 22, week: 4, month: 1, season: 1, flavour: null });
     // day 28 is the last day of week 4 / month 1; day 29 starts week 5 / month 2.
     expect(calendarLabelFor(28, blank).week).toBe(4);
     expect(calendarLabelFor(28, blank).month).toBe(1);
@@ -54,28 +55,32 @@ describe("calendarLabelFor — WorldStateDto.Calendar, never a report entry (wor
   it("a plain week with no rolled flags carries no flavour clause at all", () => {
     expect(calendarLabelFor(7, { ...blank, weekBoundary: true }).flavour).toBeNull();
   });
+
+  it("season is 1-indexed for display, unlike the wire's 0-indexed value", () => {
+    expect(calendarLabelFor(3, { ...blank, season: 0 }).season).toBe(1);
+    expect(calendarLabelFor(3, { ...blank, season: 2 }).season).toBe(3);
+  });
 });
 
-describe("formatCalendarLabel — no season vocabulary, ever (§8b.7)", () => {
-  it("formats turn/week/month plainly with no flavour", () => {
-    expect(formatCalendarLabel({ turn: 3, week: 1, month: 1, flavour: null })).toBe(
-      "Day 3 · Week 1 · Month 1"
+describe("formatCalendarLabel — day/week/month/season, plus a flavour clause (§8b.7, superseded 2026-09-05)", () => {
+  it("formats turn/week/month/season plainly with no flavour", () => {
+    expect(formatCalendarLabel({ turn: 3, week: 1, month: 1, season: 1, flavour: null })).toBe(
+      "Day 3 · Week 1 · Month 1 · Season 1"
     );
   });
 
   it("appends a flavour clause when one exists", () => {
-    expect(formatCalendarLabel({ turn: 28, week: 4, month: 1, flavour: "plague" })).toBe(
-      "Day 28 · Week 4 · Month 1 — plague"
+    expect(formatCalendarLabel({ turn: 28, week: 4, month: 1, season: 2, flavour: "plague" })).toBe(
+      "Day 28 · Week 4 · Month 1 · Season 2 — plague"
     );
   });
 
-  it("never emits the rejected §G.1/§G.2 season vocabulary", () => {
+  it("never invents §G.1/§G.2's rejected season name, even though a season number now renders", () => {
     const rendered = [
-      formatCalendarLabel({ turn: 0, week: 1, month: 1, flavour: null }),
-      formatCalendarLabel({ turn: 28, week: 4, month: 1, flavour: "plague" }),
-      formatCalendarLabel({ turn: 7, week: 1, month: 1, flavour: "a special week" })
+      formatCalendarLabel({ turn: 0, week: 1, month: 1, season: 1, flavour: null }),
+      formatCalendarLabel({ turn: 28, week: 4, month: 1, season: 2, flavour: "plague" }),
+      formatCalendarLabel({ turn: 7, week: 1, month: 1, season: 1, flavour: "a special week" })
     ].join("\n");
-    expect(rendered).not.toMatch(/season/i);
     expect(rendered).not.toMatch(/long wither/i);
   });
 });

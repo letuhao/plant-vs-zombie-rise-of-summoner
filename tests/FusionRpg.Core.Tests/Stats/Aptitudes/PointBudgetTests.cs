@@ -75,11 +75,15 @@ public class PointBudgetTests
     }
 
     [Fact]
-    public void Commander_budget_is_smallest_and_unique_largest()
+    public void Rates_are_ordered_commander_smallest_unique_largest()
     {
-        // spec-point-economy.md §2.1's decision and §7 test 3, over the SHIPPED tuning -- not a
-        // synthetic fixture, since this is a claim about the real data, not about PointBudget's own
-        // arithmetic (that's tested separately, without needing any particular ordering).
+        // ⛔ RENAMED (species-build T0.3, audit A1) from "Commander_budget_is_smallest_...". Holding
+        // the source constant on purpose ONLY proves the RATE table's own ordering (3 < 4 <= 4 < 6) --
+        // it does NOT prove the BUDGET ordering the old name claimed, because the four scopes' real
+        // sources are in different UNITS (an index vs an accumulation). That gap is exactly what let
+        // the DemonType-source defect (almanac XP, a 176x inversion at species L12) ship undetected --
+        // this test kept passing straight through it. See Real_budgets_are_ordered_at_representative_sources
+        // below for the test that actually proves the budget claim.
         var tuning = ShippedTuning();
         const long sameSourceValue = 100; // isolates the RATE ordering from any per-scope source difference.
 
@@ -91,6 +95,69 @@ public class PointBudgetTests
         Assert.True(commander < demonType, $"commander ({commander}) must be < demonType ({demonType})");
         Assert.True(demonType <= aspect, $"demonType ({demonType}) must be <= aspect ({aspect})");
         Assert.True(aspect < uniqueDemon, $"aspect ({aspect}) must be < uniqueDemon ({uniqueDemon})");
+    }
+
+    [Fact]
+    public void Real_budgets_are_ordered_at_representative_sources()
+    {
+        // species-build T0.3, audit A1 -- the test the old (renamed) one above could not be, because
+        // it held the source constant. Each scope is fed a REPRESENTATIVE VALUE IN ITS OWN UNITS,
+        // drawn from this repo's own already-recorded ordinary-play numbers, and the ordering is
+        // asserted on the resulting BUDGETS -- the claim the class actually needs to hold.
+        //
+        // Sources, all picked at the SAME representative "mid-game milestone" magnitude -- the whole
+        // point of species-build's audit A1 fix is that species level is now an INDEX comparable in
+        // scale to Theta_player and specimen level, unlike the old "almanac XP" accumulation (2,640 at
+        // species L12) that was never comparable to anything:
+        //   commander:   Theta_player = 20        (ssot-power-scale.md's own pin, "P(20) = 680")
+        //   demonType:   species level 21 -> DemonTypeSourceFromLevel(21) = 20
+        //   uniqueDemon: specimen level 20         (rpg-progression.md's own balance note:
+        //                                            "L12-20 after 20 matches" -- the range's own top)
+        //
+        // Aspect is deliberately EXCLUDED. Its real source, `element_mastery`, does not exist yet --
+        // it is owned by the demon program's `aspect-scope` module, itself reverted and not authorized
+        // to build (decisions.md, "Demon program" row). Inventing a value for it here would decide the
+        // very ordering this test exists to prove, which is the same "fabricated source" defect this
+        // module exists to fix -- so this test asserts commander < demonType < uniqueDemon over real
+        // sources only, and leaves Aspect's own ordering proof to whoever builds that tier for real.
+        var tuning = ShippedTuning();
+
+        const long thetaPlayer = 20;
+        const long speciesLevel = 21;
+        const long specimenLevel = 20;
+
+        var commanderBudget = PointBudget.PointsFor(AllocationScope.Commander, thetaPlayer, tuning);
+        var demonTypeBudget = PointBudget.PointsFor(
+            AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(speciesLevel), tuning);
+        var uniqueDemonBudget = PointBudget.PointsFor(AllocationScope.UniqueDemon, specimenLevel, tuning);
+
+        Assert.True(commanderBudget < demonTypeBudget,
+            $"commander ({commanderBudget}) must be < demonType ({demonTypeBudget}) at real sources");
+        Assert.True(demonTypeBudget < uniqueDemonBudget,
+            $"demonType ({demonTypeBudget}) must be < uniqueDemon ({uniqueDemonBudget}) at real sources");
+    }
+
+    [Fact]
+    public void DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne()
+    {
+        // species-build T0.4 -- an unrecorded actor's progression defaults to Level = 1
+        // (RpgStore.Progression.cs's own DefaultPlayerDtoUnlocked), so a never-levelled species must
+        // carry EXACTLY ZERO points or every battle/expedition golden would move the moment
+        // `demon-type-allocation`'s compose-at-read baseline lands.
+        Assert.Equal(0, PointBudget.DemonTypeSourceFromLevel(0));
+        Assert.Equal(0, PointBudget.DemonTypeSourceFromLevel(1));
+        Assert.Equal(1, PointBudget.DemonTypeSourceFromLevel(2));
+        Assert.Equal(11, PointBudget.DemonTypeSourceFromLevel(12));
+    }
+
+    [Fact]
+    public void PointsFor_demonType_atLevelZeroOrOne_isZeroBudget()
+    {
+        // The composed proof: PointsFor(DemonType, DemonTypeSourceFromLevel(level)) is zero for a
+        // never-levelled species, at any real DemonType rate.
+        var tuning = ShippedTuning();
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(0), tuning));
+        Assert.Equal(0, PointBudget.PointsFor(AllocationScope.DemonType, PointBudget.DemonTypeSourceFromLevel(1), tuning));
     }
 
     [Fact]

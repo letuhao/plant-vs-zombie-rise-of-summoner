@@ -22,7 +22,11 @@ No task is done until its verification command is green.
 - [ ] **D28 / E43** — family tags stamped into `AtomRow.TagsJson`. Owner: **effect-atom**.
       Gates module **8** (every tag-gated rule is inert without it)
 - [ ] **`bind_ordinal` on `effect_binding`** — requested by `ssot-sockets` §5.4, **absent** from the
-      shipped DDL. Owner: **effect-atom**. Gates module **16**
+      shipped DDL. Owner: **effect-atom**. ~~Gates module **16**~~ ✅ **Re-scoped 2026-09-05: it did NOT
+      gate module 16.** P4.3 shipped with the socket half of the contract built and tested
+      (`SocketOperations.BindOrdinalFor(i) = i + 1`, content-derived); the column and the comparer arm
+      stay effect-atom's, and the comparer **has no implementation anywhere yet**, so nothing is broken
+      today. Landing it later is a wiring change, not a design one
 - [x] **X3** — ✅ **D36: nothing to do.** `action-corpus` owns `ActionSeeder.Generate` and is under
       active construction by another owner. We consume a production caller when one ships. ⛔ **Do not
       file a request against their map, propose amendments to their scope, or read their documents to
@@ -511,7 +515,8 @@ reuse `shard.{DemonRarity}` ids"* — by naming **no shard id at all**: the shar
 derived rung−1 rule, not a per-rung budget row. `RarityBudgetKeys` flips it to `HasDecidedShape: true`
 and this section's own `RarityBudgetKeysTests` row moved with it (renamed
 `The_ready_keys_are_registered`) rather than being loosened — `socket_min`, `socket_max` and
-`reroll_cost_mult` stay pinned as unregistered exactly as hard as before. Seeding is deliberately in
+`reroll_cost_mult` stay pinned as unregistered exactly as hard as before. *(⭐ Superseded 2026-09-05:
+all three are now decided — see the two addenda below.)* Seeding is deliberately in
 `SeedSalvageYield`, **not** folded into `SeedRarityLadder`, so this module's seeding never grows a
 dependency on a later module's tuning file.
 
@@ -524,7 +529,8 @@ constraint — *"must also scale with **affix count**, not rung alone"* — is m
 deliberately **not** a per-rung row, and `EnhancementTuning.Parse` refuses at load any tuning whose
 affix leg does not out-spread the rung leg. `RarityBudgetKeys` flips it to `HasDecidedShape: true` and
 this section's `RarityBudgetKeysTests` row moved with it; `socket_min` and `socket_max` stay pinned as
-unregistered exactly as hard as before.
+unregistered exactly as hard as before. *(⭐ Superseded 2026-09-05 by module 16 — see the next
+addendum.)*
 
 ⛔ **And a real defect in this module's output, found and fixed there:** `data/tuning/item-rarity.v1.json`
 carried **`enhanceCapAsymptoteK: 8`, which nothing read.** `ItemRarityTuning.Parse` never parses it and
@@ -533,12 +539,29 @@ module owns `K`"* — so the live copy is `enhancement.v1.json`'s `asymptoteK` a
 source of truth a balance pass could edit with no effect. Removed 2026-09-05 and replaced with a note
 naming where `K` actually lives. Seeding this module's own `enhance_cap` column is unaffected.
 
+⭐ **Addendum 2026-09-05 — `socket_min` and `socket_max` are no longer awaiting, and the closed
+key list is now fully decided.** Module 16 (`sockets`, P4.3 below) decided the shape `ssot-rarity.md`
+§5 recorded as *"awaiting I4"*: **two integers per rung, the inclusive window a drop's socket count is
+rolled from**, before the base type's own `socketMax` clamps it —
+`rarityGrant.{rung}.socketMin`/`.socketMax` in `data/tuning/sockets.v1.json`, seeded by
+`RpgStore.SeedSocketGrants` and read by `SocketGeometry.SocketsAtDrop`. `ssot-sockets.md` §9.5's one
+constraint — *"rarity grants a **range**, not a number"*, so OD4's overlap principle reaches this axis
+— is met and **enforced at LOAD**: `SocketTuning.Parse` refuses a table whose adjacent windows do not
+overlap or whose grant is non-monotonic, because a gap turns socket count into a strict ladder and
+re-opens `ssot-sockets.md` §8.1 at full strength. Seeding is again its own method, **not** folded into
+`SeedRarityLadder`, so this module's seeding never grows a dependency on a later module's tuning file.
+`RarityBudgetKeys` flips both to `HasDecidedShape: true`, and ⭐ **with every listed key now decided,
+this section's `RarityBudgetKeysTests` row was MOVED rather than dropped**: the "not decided is not
+safe-to-seed" gate is now asserted against a *synthetic* key with no consumer at all, because the
+mechanism has to survive the closed list happening to be fully decided today — the next key added will
+not be. Three sibling rows in modules 14/15's own suites moved the same way; all four are named in
+P4.3's verification section.
+
 **Not this module's job, named so nobody re-derives it here:** the `ceilingFor` reader / `pinAE`
 live-pricing (module 9); the D11 dominance lint leaving channel-split mode (module 6, consumes the
-seeded `power_ceiling` row); `socket_min`/`socket_max` and `reroll_cost_mult` budget keys
-(await modules 16/15's decided shapes, per SC7 — attempting to seed them now is the exact
-regression `RarityBudgetKeysTests` pins against; ~~`salvage_yield`~~ **resolved 2026-09-04, see the
-addendum above**); a light-theme palette for the ten rung colours
+seeded `power_ceiling` row); ~~`socket_min`/`socket_max` and `reroll_cost_mult` budget keys~~
+(**all three resolved — `reroll_cost_mult` 2026-09-05 by module 15, `socket_min`/`socket_max`
+2026-09-05 by module 16; see the two addenda above**; ~~`salvage_yield`~~ **resolved 2026-09-04**); a light-theme palette for the ten rung colours
 (module 20 `item-surfaces`) — `colourToken`s already exist in `core.v1.json` and are asserted distinct
 here, but the deuteranope-transform test needs a palette that does not exist yet.
 
@@ -627,7 +650,17 @@ draft this list was written from:**
          by reshaping per (role, frame) instead of per role
 - [x] **`socketCeiling(role)` forward-seeded** — `data/tuning/sockets.v1.json`, the exact 15-row table
       `spec-sockets.md` §3 already publishes (module 16 hasn't built yet; same precedent as module 7's
-      provisional `power_ceiling`, module 16 stays the numbers' owner)
+      provisional `power_ceiling`, module 16 stays the numbers' owner).
+      ✅ **Confirmed 2026-09-05, not corrected.** Module 16 (P4.3 below) built and took ownership of the
+      file (`version` 1 → 2) and carried all fifteen rows **unchanged, value for value** — re-deriving
+      them would have minted a second source of truth. Both of this module's claims held on inspection:
+      the ceiling is module 16's, and the per-entry value is module 6's. ⭐ **And the note this module
+      wrote into the file — that module 16 must restate its own *"never varies by base type"* invariant
+      as *"never exceeds its role's ceiling"* — was right, and module 16 restated it exactly that way
+      (its correction **S2**). The corpus fact this module measured (`armament-primary` = `{0:18, 1:26,
+      2:4}`) is what settled it.** Module 16's `SocketGeometry.ValidateEntry` now runs the same bound
+      this module's `SocketMaxCheck` enforces, and the two agree on the real 720-entry corpus with zero
+      findings
 - [x] `ItemSeedValidator` wired to `classes.v2.json` (`RegistrySet.Load`), plus two new checks:
       `FrameDirectionCheck.cs` (clause 1 disjointness, **and** a real gap found while building it — no
       check previously verified an entry's `implicit.family` is even legal for its role at all; both
@@ -2241,6 +2274,15 @@ reason, in the order P4.1 filed them:
       retry loop and a log's length, not how strong an item may become — and it **throws** on the
       append path rather than clamping. `Mutation_seq_is_capped_at_4096_and_the_comment_says_it_is_structural`
       asserts the comment text as well as the number
+- [x] **D2 clauses 5 and 11 have their columns, not just their comments.** `effect_instance_op`
+      carries `catalog_revision` and `rules_version` — <b>the op's own</b>, stamped per row, never
+      `effect_instance.catalog_revision` which stays origin-only — and `cost_json`, clause 11's record
+      of the spend in module 14's vocabulary (*"a spent cost with no op is theft; an op with no cost is
+      duplication"*). ⚠ **Caught by reading D2 §9's fifteen clauses one at a time against the
+      implementation rather than trusting a summary** — the first draft had the ledger, the replay law
+      and the idempotency and would have shipped clauses 5 and 11 as prose. Also fixed there:
+      definitions §8's `N:` NULL marker, which the canonical form now honours even though no head field
+      is nullable today, so a nullable column added later cannot be silently encoded as an empty string
 - [x] **D26 holds on every input.** `EnhanceContext` has nowhere to *put* a player property, and the
       test asserts that by walking its property names — the same guard shape module 14 used on
       `RecipeContext`
@@ -2270,6 +2312,24 @@ reason, in the order P4.1 filed them:
   number with no effect. **Removed from `item-rarity.v1.json` and replaced with a note pointing at
   `enhancement.v1.json`'s `asymptoteK`, which is the live one.** Cross-referenced into P2.1 above.
 
+⛔ **The power guard caught this module's own curve, and the fix was to REGISTER it, not to rename
+around it.** `guard-power.ps1` failed G2/G3 on `EnhancePolicy.GainMicro` and `LinearGainMilli` —
+*"private `f(level)`-shaped method outside Core/Power"* and *"not listed in `inventory.json`"*. That is
+the guard working: AGENTS.md's one-power-ladder rule says a scale not in `ssot-power-scale.md` §10's
+inventory *"does not have permission to exist yet"*. Renaming the parameter would have dodged the check
+and left the scale undeclared, so instead it is now **§10.2 row 24**, with `inventory.json` rows 24/25
+and `EnhancePolicy.cs` on the G2 allowlist beside `PatronPolicy.cs`. **The standing is row 16's,
+verbatim:** the input is the *item's own* `+n`, a per-item counter, never a character or content level;
+the curve is bounded by an asymptote it never reaches; and everything Θ-shaped in this module reads the
+shared `PowerLadder` (`CraftingHorizonReport`) rather than a private `f(Θ)`. Guard green afterwards.
+
+⚠ **Two magic-number findings in this module's own first draft, both fixed rather than filed:**
+`RerollPolicy.cs`'s bare `63` in the anchor-overflow guard is now `const int MaxAnchorExponent = 62`
+with a comment saying it is `long`'s width and not a balance dial; and `CraftingHorizonReport`'s
+`V1ThetaContent`/`V1ItemLevel` consts are **gone entirely** — Θc is read from the power curve's own
+`pinIndex` (so v1's reach cannot drift from the curve it is measured against) and the item level is the
+caller's, because it is D4's content decision. `--targets M1` reports nothing in this module now.
+
 ⛔ **One defect the reroll split made VISIBLE (it is not new, and it is not this module's to fix):**
 
 - **`recipe.017` and `recipe.018` name a retired band shard** (`shard.rare`, `shard.epic`). P4.1
@@ -2284,7 +2344,18 @@ reason, in the order P4.1 filed them:
 
 | Command | Result |
 |---|---|
-| PLACEHOLDER | |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "…EnhancePolicyTests\|…RerollPolicyTests\|…MutationReplayTests\|…RarityBudgetKeysTests\|…MaterialCorpusTests\|…MaterialVocabularyTests"` | **107 passed / 0 failed** — **62 new here** (`EnhancePolicyTests` 25, `RerollPolicyTests` 23, `MutationReplayTests` 14) plus module 7's `RarityBudgetKeysTests` and module 14's `MaterialCorpusTests`/`MaterialVocabularyTests`, re-run in the same filter because this module moved three of their assertions |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "…InstanceOpTests\|…MaterialSpendTests"` | **24 passed / 0 failed** — `InstanceOpTests` 12 (new) + module 14's `MaterialSpendTests` 12, re-run because this module moved its awaiting-key list |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **409 passed / 0 failed** — the WHOLE item program's Core suite, modules 1-15, green together |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6425 passed / 14 failed** — **zero in `Items.*`** (grepped, count 0). All 14 are `Battle.*`, `ClassSystem.*` and `Expeditions.*`: the concurrent battle-tempo/class-system stream's in-flight work, confirmed against `git status` showing `src/FusionRpg.Core/Battle/*`, `RpgStore.Expeditions.cs` and the class-system tuning mid-edit — none touched by this module |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **734 passed / 2 failed** — **zero in `Items.*`** (grepped, count 0). Both are `WorldWaveOneAcceptanceTests` (the twenty-turn scenario golden and its verb-coverage check), the concurrent world/battle-tempo stream's, confirmed against `git status` showing `RpgStore.World.cs`, `ClaimResolver.cs` and `LaneCost.cs` mid-edit. ⚠ **The session's own opening baseline for this suite was unusable** — it read `723 passed / 0 failed` but the run ABORTED on a test-host crash, so it never finished; this run completed |
+| `dotnet test tests\FusionRpg.Guard.Tests` | **202 passed / 0 failed — fully green.** Better than this session's own start-of-run baseline (201/1, `ClassSystemBaselineRegenTests`, since fixed by the concurrent stream). The one guard failure this module DID cause, `PowerGuardTests`, is the ⛔ finding below and was fixed, not filed |
+| `dotnet run --project tools\ItemSeedValidator` | **165 errors across 120 partitions — identical to the module-6/8/11/12/13/14 baseline.** Zero new findings, and the seven re-authored recipe rows moved none of them |
+| `dotnet run --project tools\AtomImporter -- --check --validate` | **`--check: clean, and nothing would change`** — this module authors no atom or container content, so the catalog is untouched |
+| `.\scripts\guard-dal.ps1` · `guard-single-writer` · `guard-secondary-no-unity` · `guard-funnel-delta` | all four **OK** |
+| `.\scripts\guard-power.ps1` | **OK** after this module registered its curve — see the ⛔ power-guard finding above |
+| `python scripts/audit-overflow.py` | **0 critical**, 57 findings, none in `Items/Mutation/` |
+| `python scripts/audit-magic-numbers.py --targets M1` | **0 in this module** after two fixes — see the ⚠ magic-number note above |
 
 **Deferred, with owners named:**
 
@@ -2330,7 +2401,14 @@ re-authored to `reroll-one`/`reroll-all`); `src/FusionRpg.Data/Sqlite/RpgStore.I
 MutationReplayTests.cs}`, `tests/FusionRpg.Data.Tests/Items/InstanceOpTests.cs` (new);
 `tests/FusionRpg.Core.Tests/Items/RarityBudgetKeysTests.cs` (EDIT — `reroll_cost_mult` moves to the
 ready set); `tests/FusionRpg.Core.Tests/Items/MaterialCorpusTests.cs` (EDIT — the verb refusals are
-gone, the legacy-shard count moves 5 → 7, the resolvable corpus 18 → 23).
+gone, the legacy-shard count moves 5 → 7, the resolvable corpus 18 → 23);
+`tests/FusionRpg.Core.Tests/Items/MaterialVocabularyTests.cs` (EDIT — the `reroll`/`socket-imbue`
+comments now say which vocabulary each name belongs to, the assertions unchanged);
+`tests/FusionRpg.Data.Tests/Items/MaterialSpendTests.cs` (EDIT — `reroll_cost_mult` leaves the
+still-awaiting list); `docs/architecture/power/ssot-power-scale.md` (EDIT — §10.2 row 24),
+`docs/architecture/power/inventory.json` (EDIT — rows 24/25) and `scripts/guard-power.ps1`
+(EDIT — `EnhancePolicy.cs` on the G2 allowlist with its reason), all three from the power-guard
+finding above.
 
 ⚠ **One deviation from the spec's Project structure, stated rather than silent:** the nine Core files
 live under `src/FusionRpg.Core/Items/Mutation/` rather than flat in `Items/`, matching what modules
@@ -2340,32 +2418,287 @@ plus `MutationPreview.cs` for §10's single read, which the spec describes but d
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.EnhancePolicyTests|FullyQualifiedName~Items.RerollPolicyTests|FullyQualifiedName~Items.MutationReplayTests"`;
 `dotnet test tests\FusionRpg.Data.Tests --filter InstanceOpTests`; `dotnet run --project tools\ItemSeedValidator`
 
-### P4.3 — Module 16 `sockets`
+### ✅ P4.3 — Module 16 `sockets` — BUILT AND VERIFIED 2026-09-05 (the `gem`/`combo` container kinds, `bind_ordinal` and the 102 explicitly deferred to their real owners — all three upstream, none skipped)
 
 ⛔ **Addendum 2026-09-04, found while building module 11 (`drop-volume`).** Two things filed from
 there: (1) the shipped seedsmith drop-table corpus already references **41 `insert` entries** that
 cannot resolve until X7 lands the `gem` container kind and this module lands the count rule — module
 11's importer refuses each by name with `ContentRuleViolated{drop.entry-kind-unavailable}`, naming this
-module. (2) ⚠ **The lane disagrees with itself on the socket stream's name.** `ssot-generation.md`
+module. **⏸ Still refused after this module** — the count rule landed, X7 has not; see the deferred
+list below. (2) ⚠ **The lane disagrees with itself on the socket stream's name.** `ssot-generation.md`
 §4.3's stream table says `item.socket.{i}` derived from the **loot seed**; `spec-sockets.md:143` (this
 module) and `spec-drop-volume.md`'s own step-10 row both say `DeriveStream(roll_seed, "item.socket")`.
-Module 11 shipped **this module's** spelling — using the other would hand this module a different
-stream than it is written against — and recorded the divergence in `LootStreams.Sockets`' doc comment.
-Step 10 already **derives and advances** that stream while resolving to 0 sockets, so landing the real
-count here moves no other draw.
+Module 11 shipped **this module's** spelling — ✅ **confirmed correct here**, and step 10 now consumes
+exactly that stream, so the divergence recorded in `LootStreams.Sockets`' doc comment is resolved in
+this module's favour rather than left open.
 
-- [ ] I4 — inserts as instance bindings on the same owner; the combination evaluator (25 resonances +
-      Strains/Splices); D22's affinity **bonus**; D21's set-piece exclusivity validator
-- [ ] ⭐ **D27 renames every combination container id**: `gem.combo-pure-fire-3` → **`combo.pure-fire-3`**
-      (`definitions.md` §1 forces the prefix to match the kind)
-- [ ] Validate per-entry `socketMax` against module 6's `socketCeiling(role)`; the **740-row migration**
-      in four named steps
-- [ ] ⛔ Drop the *"fixed per role"* invariant and its test — the corpus varies within a role
-      (`armament-primary` = `{0:18, 1:26, 2:4}`) 740 times
-- [ ] ✅ **D41: recipes are UNORDERED** — a multiset match, the shape module 13's gate already uses.
-      The 102 combinations stay 102; module 20's `distance` counts *missing kinds*, never positions.
-      ⛔ `bind_ordinal` is for **stable display order only** — a matcher that reads it is a bug.
-      Test: the same inserts in any arrangement resolve to the same combination
+⛔ **Four spec corrections, each checked in the file the spec cites, recorded rather than absorbed:**
+
+| # | `spec-sockets.md` says | Verified | What shipped |
+|---|---|---|---|
+| **S1** | §12: mint `NotSocketable` / `NoFreeSocket` / `SocketOccupied`, *"moves that assertion 34 → 37, and it is a reviewed change"* | **Refused by the code's own rule.** `AtomRejectionReason.ContentRuleViolated`'s declaration reads *"the 34th and last member by design — a caller that wants a new rule registers a namespace, it never mints a 35th code"*; item-ideal.md §2b.1 says the same. ⚠ The spec's arithmetic is wrong too: the shipped list is 33 + `None` + `ContentRuleViolated` = **35**, which `AtomKindRegistryTests.cs:45` already asserts | The three land as `ContentRuleViolated{socket.not-socketable / .no-free-socket / .occupied}` (plus `.not-imbuable`, `.entry-exceeds-role-ceiling`). §12's actual requirement — **each operator fix stays distinct** — is met, and the enum stays **35**, asserted |
+| **S2** | §3: *"`socket_max` is a ROLE property, **fixed per role, not varied per base type**"*, with a named test `socket_max_is_fixed_per_role_and_never_varies_by_base_type` | **Contradicted by the shipped corpus.** Module 6 measured `armament-primary` = `{0:18, 1:26, 2:4}` across 740 entries; that test is unwritable without refusing the corpus | Re-stated as the enforceable half — **"never EXCEEDS its role's ceiling"** (`SocketGeometry.ValidateEntry`), which is the clause that actually defends §8.1. Proven against the **real live corpus** (720 live entries walked, zero violations), not a fixture. Module 6's `sockets.v1.json` note had already anticipated this exact restatement; ✅ **confirmed, not re-derived** |
+| **S3** | ssot §5.2: `socket_combo_ingredient` is keyed `(combo_id, **position**)`, consecutive from socket 0 | **Superseded by D41** (unordered multiset) | The table is `(combo_id, family_id, min_tier)` + `qty`. ⛔ **No `position` column exists**, deliberately: a schema with one is how a matcher becomes order-sensitive by accident. Asserted by reflection over `ComboIngredient` as well as by the DDL |
+| **S4** | ssot §5.2: `item_socket` is *"a materialized view of I6's operation log, not the SSOT"* | **D2 §6 refused it by name**, and clause 13 exempts sockets from the reconstruction clauses entirely | `item_socket` **is** the SSOT. `GetSockets` takes one instance id and reaches no op log — asserted by reflection on the real signature **and** by writing sockets with zero ops and reading them back |
+
+**What was built:**
+
+- [x] ⭐ **Module 16 took real ownership of `data/tuning/sockets.v1.json` (`version` 1 → 2).** Module 6
+      forward-seeded it with the `socketCeiling` table alone and said explicitly *"module 16 owns the
+      ceiling"*. The fifteen rows are carried **unchanged, value for value** — they are
+      `spec-sockets.md` §3's own re-issued table and re-deriving them would have minted a second source
+      of truth — and seven new sections are added here: `structuralCeiling`, `maxCombosPerActor`,
+      `rarityGrant`, `insertTiers`, `removal`, `resonance`, `strainSplice`. ✅ **Module 6's ownership
+      claim is confirmed rather than corrected** — see the ⭐ addendum added to P2.2 above
+- [x] **I4 — sockets, inserts and the four operations.** `SocketOperations` is four pure state
+      transitions over one item's `item_socket` rows: `socket-add` (opens an empty **crafted** socket),
+      `socket-insert` (explicit index, or a deterministic lowest-empty auto-pick), `socket-remove`,
+      `socket-imbue`. ⛔ **This module defines no `op_kind`** — the namespace is module 15's and already
+      carries all four; a reflection test asserts this module exposes no enum of its own
+- [x] ⭐ **The combination evaluator — 127 rows, one pure function.** `Evaluate(host, fill, catalog,
+      tuning)`: no RNG, no clock, no ambient state, no writes. Resolution order is carried by
+      `ComboShape`'s own **declaration order** (Strain, Splice, Pure, Ring, Eclipse, Diversity) rather
+      than by a method's statement sequence, so a later shape cannot be slipped ahead of Strain by
+      writing it earlier in a loop — asserted
+      (`Strains_resolve_before_pure_before_ring_eclipse_and_diversity`)
+- [x] **The 25 resonances are GENERATED, and the generator re-derives its own count.**
+      `ResonanceGenerator` builds `|Concrete| × |pureThresholds|` Pure + `|ringOrder|` Ring + 1 Eclipse
+      + `|diversityThresholds|` Diversity = 6×3 + 4 + 1 + 2 = **25** off `ElementRoster.Concrete` and
+      the tuning. The test asserts **both** the literal 25 **and** the re-derivation, so adding a
+      seventh element grows the catalog instead of going red. ssot §6.4's authoring rule (*"a resonance
+      may not repeat a family its triggering inserts carry"*) is structurally impossible rather than
+      reviewed: a generated recipe names no ingredient families at all
+- [x] ⭐ **D27 renamed every combination container id** — `combo.pure-fire-3`, `combo.ring-fire-ice`,
+      `combo.eclipse`, `combo.diversity-3`, `combo.strain-*`, `combo.splice-*`. The lane's
+      `gem.combo-*` / `gem.word-*` spelling is retired (definitions.md §1 forces the prefix to match
+      the kind); inserts keep `gem.`. Asserted per row, not by spot check
+- [x] **D22 as amended — affinity is a BONUS on both layers, and the gate is gone.** A mismatched fill
+      still fires (`Affinity_is_a_bonus_and_a_mismatched_fill_still_fires`). All-attuned raises a
+      **resonance's effective count** by 1 and a **Strain/Splice's granted tier** by 1 — the shared
+      `+1`, both arms tested. ssot §7.1 and §7.2's worked examples both reproduce: two attuned earth
+      inserts reach `combo.pure-earth-3`; one unattuned contributor removes the whole bonus and the
+      item lands on `combo.pure-fire-2`
+- [x] ⛔ **A real design defect the spec's own §8/§5.2 reading would have shipped, found by a red test
+      and fixed.** Giving a generated Pure row `min_sockets = k` (the obvious reading of ssot §5.2's
+      column) makes attunement's `+1` **unreachable by construction** — a 2-socket item could never
+      fire the k=3 step, which is exactly ssot §7.4's worked payoff (*"three attuned inserts on a
+      three-socket item fire `pure-earth-4`"*) and §4.2's *"single most load-bearing anti-tax
+      mechanism"*. Generated rows now carry `MinSockets = 0` and are **self-gating** (you cannot put
+      three fire inserts in two sockets); `min_sockets` belongs to **authored** recipes, which gate on
+      host size before any insert is placed. Pinned as
+      `Attunement_reaches_a_step_the_socket_count_alone_could_not`
+- [x] **Affinity never scales an insert's magnitude — asserted by reflection, not by intent.**
+      `CombinationResult` carries exactly `{ComboId, Shape, EffectiveCount, GrantedTier, AllAttuned}`,
+      so there is nowhere to put a scaled magnitude and §4.3's inventory defence cannot collapse
+- [x] **`omni` counts toward Diversity only, and an ELEMENT-FREE insert counts toward nothing.** Both
+      tested. The second is stated because its absence would otherwise read as an oversight: `""` is an
+      absent element, not a seventh one, so a vitality gem joins no shape at all. `omni` is refused as
+      an affinity at **load** (`SocketTuning.Parse`) and at **imbue time** (`BadParamValue`)
+- [x] ⛔ **D21's exclusivity validator — and it mints no reason code.** A set piece never fires a
+      Strain or Splice; the inserts stay and every resonance still fires; socketing *toward* one is
+      **allowed** (refusing the insert would punish a fill that is legal for resonance).
+      `SetExclusivityValidator.SuppressionReason` is display copy naming D21, not a code — and
+      `Evaluate` is asserted to return a list with no rejection channel at all, so a code cannot be
+      minted for a bonus that did not fire
+- [x] **✅ D41 — recipes are UNORDERED, proven four ways.** `MultisetSatisfied` counts and claims; the
+      same inserts in any arrangement resolve identically
+      (`The_same_inserts_in_any_arrangement_resolve_to_the_same_combination`); the DDL carries no
+      `position` column; and `bind_ordinal` is computed for **display order only**
+      (`SocketOperations.BindOrdinalFor(i) = i + 1`, content-derived) with a comment saying a matcher
+      that reads it is a bug. ⛔ **A real matcher defect was caught while writing it**: a first-come
+      ingredient loop lets a `minTier 1` requirement eat the only t5 insert and starve a `minTier 5`
+      one on the same family. Fixed by matching most-specific-first and spending the lowest qualifying
+      tier; pinned as `A_min_tier_ingredient_is_not_starved_by_a_lower_one_claiming_the_high_insert`
+- [x] ⭐ **`socket_min` / `socket_max` have a decided shape and are registered** — the two keys
+      `ssot-rarity.md` §5 recorded as *"awaiting I4"*, and the **last two** undecided rows in
+      `RarityBudgetKeys`' closed list. **The shape:** two integers per rung, the **inclusive window a
+      drop's socket count is rolled from**, before the base type's own `socketMax` clamps it.
+      Transcribed from ssot-sockets.md §4.1's five ordinal **bands** onto the shipped ten rungs (two
+      rungs per band) — not re-derived. ⭐ **§9.5's one constraint (*"rarity grants a RANGE, not a
+      number"*) is enforced at LOAD**: `SocketTuning.Parse` refuses a table whose adjacent windows do
+      not overlap or whose grant is non-monotonic, because a gap makes socket count a strict ladder and
+      re-opens §8.1 at full strength. Seeded by `RpgStore.SeedSocketGrants`, deliberately its own method
+      so module 7's seeding never grows a dependency on a later module's tuning file (module 14's
+      precedent, module 15's follow). Cross-referenced into **P2.1** and **P2.3** above
+- [x] ⭐ **Step 10 of the loot pipeline is LIVE, and the switch moved no other draw.** Module 11 shipped
+      it as a documented no-op that *reserved and advanced* `DeriveStream(roll_seed, "item.socket")`.
+      Both blockers it named are now closed, so `LootPipeline` calls `SocketGeometry.SocketsAtDrop` —
+      and because the stream was always reserved, **every affix roll at every band is byte-identical
+      across the change** (`LootPipelineTests` green, unmodified). The host supplies `SocketMaxFor` and
+      `SocketTuning`; with either absent the step stays the no-op it was and still advances, because
+      **half a socket rule grants the wrong count**, which is worse than granting none
+- [x] **`item_socket` + `socket_combo_recipe` + `socket_combo_ingredient` DDL and their operations**
+      (`RpgStore.Sockets.cs`, inside `FusionRpg.Data` — `guard-dal` green). `SetSockets` writes the
+      whole next state in one transaction rather than a diff, because the Core operations already
+      return the whole next state and a diff would put a second, weaker copy of the transition rules in
+      the DAL. A sparse socket list **throws**; it is never stored
+- [x] ⛔ **`item_socket.instance_id` carries a live FK to `effect_instance` — and it caught its own
+      test fixture.** The first version of `ItemSocketStoreTests` wrote against made-up host ids and
+      four tests failed with `SQLite Error 19: FOREIGN KEY constraint failed`. That is the constraint
+      working, not a bug: a socket cannot exist without a host, and `ON DELETE CASCADE` means deleting
+      the item takes its sockets with it. The tests now mint **real** `effect_instance` rows via
+      `SaveInstance`
+- [x] **Nothing socketing does can reach the host's frozen instance — asserted, not promised.** No
+      method on `SocketOperations` returns or accepts `AtomAppend` / `MutationResult` / `InstanceHead`
+      (reflection over the real signatures), and `Socketing_writes_no_row_the_host_instance_owns` writes
+      two sockets against a **real store** and shows the mutation head's `state_hash`, `mutation_seq`
+      and `enhance_level` all unchanged and the op log still empty. SC5 is not strained by this module
+- [x] **The structural ceiling qualifies, and it was checked rather than waved through.**
+      `SocketLimits.SocketMaxCeiling = 4` is exempt under AGENTS.md as a **legibility** limit on one
+      item's recipe shape, and the comment says so **and names what stays open**: `insertTiers.count`
+      is a **soft content axis** (raise it in the file and the ladder extends — tested at 12), a
+      combination's granted tier is unbounded above, and magnitude growth rides `contentScale`, which
+      this layer never reads. A ceiling above it **THROWS at load**, never clamps. The file and the
+      `const` cannot drift: `Parse` refuses a `structuralCeiling` that disagrees with the code, in both
+      directions, and a test asserts the file's own note carries the words `STRUCTURAL`, `LEGIBILITY`
+      and `contentScale` so a tidy-up cannot delete the justification
+- [x] **Every number a balance pass would touch is in the tuning file, and the parser REFUSES rather
+      than defaults.** Stripping any of the six sections throws at load, asserted section by section
+      against the real file. Nine structural invariants are checked at parse time, each with its own
+      message: the fifteen ceiling rows against the role registry; `standard`'s deliberate absence
+      (D14 — a zero row would read as *"in scope, allowed no sockets"*); every ceiling against the
+      structural 4; the grant windows' well-formedness, monotonicity and OD4 overlap; the ring against
+      the concrete element roster; `omni` refused as any resonance member; the removal thresholds
+      against the tier ladder (a table with no commitment tier is refused); the upcycle ratio's drain
+      direction; and D20's ingredient count against the ceiling
+- [x] **`audit-magic-numbers.py --summary` reports `M1 = 0`** and **zero** findings anywhere under
+      `Items/Sockets/`; `audit-overflow.py` reports **0 critical** and **zero** findings under
+      `Items/Sockets/`. The module holds no magnitude of its own — counts, tiers and thresholds are
+      shape indices, and the numbers a combination *grants* live on its `combo` container's atoms,
+      which are X7's
+
+**⛔ Two real defects found, named, not silently fixed:**
+
+- [x] ⛔ **`gem.g1-007` ("Primal Shard") declares `affinityElement: "omni"`, and `omni` is not an
+      affinity.** `element-hub-ssot.md` §4 is explicit that `omni` is not an actor type slot, and
+      `spec-sockets.md` §6 restates it — so this gem names a socket that can never exist and its
+      attuned bonus can never fire. Found by reading the real corpus; confirmed against `git show HEAD`
+      to **predate this session** (seedsmith batch `gems-g1`, authored 2026-08-22). **Not hand-fixed**
+      — `ItemSeedValidator`'s own footer says *"Re-run the partitions named above; do not hand-fix"* —
+      but it is now **reported by name** instead of invisible: new check `GemAffinityCheck.cs`
+      (`GemAffinityNotConcrete` / `GemElementUnknown`), wired into `Validator.cs`. **This moves the
+      validator baseline 165 → 166, and the single new error is this row.** Owner: the authoring
+      fleet's `gems/1` partition re-run. Also pinned in
+      `SocketOperationsTests.No_shipped_gem_declares_an_omni_affinity` so the set cannot grow silently
+- [x] ⛔ **`spec-sockets.md` §12's enum arithmetic is wrong** (34 → 37; the shipped list is 35). Filed
+      as **S1** above rather than absorbed, because a spec that miscounts the closed list is how a 36th
+      code eventually gets minted "to match the doc". No code change needed — the rule already refuses
+      it, and the test now pins 35 with the reason written next to it
+
+**⏸ Deferred, each with its owner named — none silently skipped:**
+
+- [ ] ⏸ **`ContainerKind.Gem` and `ContainerKind.Combo` — effect-atom's (X7), not this module's.**
+      `ContainerRow.cs` is still six values (`Item · Trait · Skill · SpeciesPassive · Patron ·
+      WorldBuff`) with six `PrefixOf` arms, verified. `spec-sockets.md`'s own Project Structure marks
+      that row **"NOT this module's"** by name. **Consequence, stated plainly:** this module cannot
+      author a single `gem.*` or `combo.*` **container row**, so the 25 generated resonances land in
+      `socket_combo_recipe` (their *recipe*) and the atoms they grant do not exist yet. What shipped is
+      the count rule, the evaluator, the operations and the state — which is the whole of what is
+      reachable at build position 16. ⛔ This is also why module 11's **41 `insert` drop entries stay
+      refused**: they need the container kind, not the count rule
+- [ ] ⏸ **`bind_ordinal INTEGER NOT NULL DEFAULT 0` on `effect_binding` — effect-atom E6's.** Today's
+      DDL is `binding_id · instance_id · owner_kind · owner_key · slot · priority · source ·
+      bound_utc · revision`, confirmed in `RpgStore.AtomInstances.cs`. The socket half of the contract
+      **is** built and tested (`BindOrdinalFor`), so landing the column is a wiring change, not a
+      design one. ⚠ The comparer it would tiebreak **has no implementation anywhere yet**, so nothing
+      is broken today — which is precisely why the spec argues to add it now rather than after E12.
+      Requested here, not built: a column on another program's table is not ours to add
+- [ ] ⏸ **The 102 Strains and Splices — module 21's (`strain-splice-gen`, P4.4 below).** The evaluator,
+      the recipe tables, D20's four-ingredient rule, the one-per-item cap, the lowest-`container_id`
+      tie-break and the per-actor backstop are all built and tested **against synthetic Strain rows**,
+      because the real ones are model-call output. The seam is real and asserted: `SeedComboRecipes`
+      never deletes a row it did not write, so the 102 land beside the 25 in one table
+- [ ] ⏸ **The 25 legacy `sockword.*` entries are NOT migrated, and that is P4.4's call, not an
+      oversight.** They are position-ordered (D41 makes recipes unordered), carry the retired
+      `gem.word-*` runtime ids (D27 renames them `combo.*`), and **not one reaches D20's four
+      ingredients**, so not one is a legal Strain or Splice today. The carry table below already rules
+      *"regenerate, not retain"*. Recorded as a standing test
+      (`The_legacy_socket_word_corpus_is_ordered_and_awaits_module_21s_retirement`) so *"we forgot"* and
+      *"we decided"* stay distinguishable
+- [ ] ⏸ **Wave-1 insert authoring — held, deliberately (ssot §9.13).** A `+armour` insert is
+      `ScopeUnsupported` at any per-actor scope (G8) and most element gems are `stat.derived`,
+      quarantined until E12. Authoring them now produces *"a row no code consumes, which is a lie in a
+      table"*. The restriction itself **cannot be enforced here** because no `gem` container can exist
+      yet (X7, above); it becomes enforceable the moment one can. Owner: whoever authors the first
+      `gem` container after X7
+- [ ] ⏸ **Socket-combination budget versus set budget on one item — module 9's (`item-power-reads`).**
+      §2g's surviving half of D21. It is a budget question and cannot be answered before the power
+      reads run. Named in `SetExclusivityValidator`'s own doc comment so a reader finds it in the code
+      as well as here
+- [ ] ⏸ **The compendium, the socket-UI preview and the "one swap away" hint — module 20's
+      (`item-surfaces`).** This module's stated obligation was to expose `evaluate()` in a **write-free
+      preview form** so module 20 has something truthful to render, and that is done and tested:
+      `Preview` is literally the same code path (a second implementation is how a preview starts lying
+      about what socketing will do), plus `PreviewWithOneMore` for the hint
+- [ ] ⏸ **The workbench executor that debits and appends a socket op.** Pricing is module 14's and
+      already shipped — `bore`, `imbue`, `socket` and `upcycle` all carry cost rows, D24's
+      `imbue == bore` equality is checked at load, and `socket` costs a flat ten souls at every rung.
+      `AppendMutationOp` and `TrySpendRecipe` are both shipped too, so the call site that joins them to
+      `SetSockets` is a composition rather than a design — the same carry module 15 recorded for its
+      own executor, deliberately not duplicated here
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter SocketGeometryTests\|CombinationEvaluatorTests\|SocketOperationsTests` | **72 passed / 0 failed** (new — 3 classes) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter ItemSocketStoreTests` | **8 passed / 0 failed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **481 passed / 0 failed** — the whole item program, modules 1–15's own suites included, still green under this module's two registry changes |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **96 passed / 0 failed** — the item program's whole DAL half, including modules 7/11/12/14/15's own store suites, green under the new socket schema and the four moved SC7 rows |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6564 passed / 8 failed** — all 8 in `Atoms.EntityFieldsTwelvePlusTests` (1), `Battle.*` (3), `ClassSystem.ProveAptitudeJsonEmitTests` (3) and `Expeditions.ExpeditionResolverTests` (1), the concurrent stream's own in-flight work; **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **763 passed / 1 failed** — `WorldGraphDiffTests`, whose test file **and** its `RpgStore.WorldGraphDiff.cs` are both untracked (`git status ??`), i.e. the concurrent stream's brand-new work; **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **202 passed / 0 failed** — clean, zero-tolerance held |
+| `dotnet run --project tools\ItemSeedValidator` | **166 errors** (165 before this module). The **one** new finding is `gem.g1-007 GemAffinityNotConcrete`, the real pre-existing corpus defect this module's new check makes visible. **Zero** new findings from `SocketMaxCheck`, and no other check moved |
+| `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`** overall; the `items` domain shows 1 M3 (`ArmouryQuery.cs:79`, module 2's) and **nothing** under `Items/Sockets/` |
+| `python scripts\audit-overflow.py` | **0 critical**, 57 findings, **zero** under `Items/Sockets/` |
+| `python -m pytest tools/seedsmith` | **not run — no Python content touched.** This module edited no `tools/seedsmith/**` and no `data/seed/**` file; the only data file it wrote is `data/tuning/sockets.v1.json`, which seedsmith does not read |
+
+⚠ **Baseline re-measured fresh at the start of this session, not carried forward.** `Data` measured
+**736 passed / 0 failed** before any of this module's code — the 3 failures P2.1–P4.2 recorded are
+**gone**, closed by the owner's own commits. `Guard` measured **201/201** (now 202/202; the concurrent
+stream added one). `Core` could not be measured before the build because that stream's uncommitted
+`Progression/SpeciesProgression.cs` did not yet compile against its own new
+`tests/FusionRpg.Core.Tests/Progression/` — it resolved on retry, exactly as expected. Every Core and
+Data failure in the runs above was checked by name against `git status`: their source files
+(`ActionEnvelope.cs`, `ActionRunner.cs`, `ActorPowerCache.cs`, `CoefficientTable.cs`,
+`AptitudeSubsystem.cs`, `PointBudget.cs`, `ContractPolicy.cs`, `RpgStore.Expeditions.cs`,
+`RpgStore.WorldGraphDiff.cs`, `affixes/all.json`, `coefficients.v1.json`) are all mid-edit or brand-new
+in that stream and **none is touched by this module.**
+
+⚠ **Three tests outside this module went red and all three WERE this module's** — named rather than
+quietly edited, and all three **moved rather than loosened**:
+`Items.RarityBudgetKeysTests.A_key_awaiting_a_decided_shape_is_not_registered_yet`,
+`Items.RerollPolicyTests.Reroll_cost_mult_is_registered_with_a_decided_shape` (module 15's) and
+`Items.MaterialSpendTests.Salvage_yield_is_seeded_for_all_ten_rungs_and_matches_the_tuning` +
+`Items.InstanceOpTests.Reroll_cost_mult_seeds_every_rung_through_the_SC7_gate` (modules 14/15's) all
+pinned `socket_min`/`socket_max` as **unregistered**. Deciding their shape is precisely what this
+module owed. Each now asserts the keys **are** registered and that each names `sockets (16)` as its
+consumer — a strictly stronger claim. ⭐ **And the SC7 gate itself is preserved, not dropped:** with
+every key in the closed list now decided, *"not decided is not safe-to-seed"* is asserted against a
+**synthetic key with no consumer at all**, because the mechanism has to survive the list happening to
+be fully decided today — the next key added will not be.
+
+**Files:** `data/tuning/sockets.v1.json` (EDIT — v1 → v2, module 16 takes ownership; the fifteen
+ceiling rows unchanged, seven sections added);
+`src/FusionRpg.Core/Items/Sockets/{SocketTuning.cs, SocketModel.cs, SocketGeometry.cs,
+ResonanceGenerator.cs, CombinationEvaluator.cs, SetExclusivityValidator.cs, SocketOperations.cs}`
+(new); `src/FusionRpg.Core/Items/RarityBudgetKeys.cs` (EDIT — `socket_min`/`socket_max` →
+`HasDecidedShape: true`); `src/FusionRpg.Core/Items/Drops/LootPipeline.cs` (EDIT — step 10 live;
+`LootContentView` gains optional `SocketMaxFor` + `SocketTuning`);
+`src/FusionRpg.Data/Sqlite/RpgStore.Sockets.cs` (new — the three tables, `GetSockets`/`SetSockets`,
+`SeedComboRecipes`/`GetComboRecipes`, `SeedSocketGrants`);
+`src/FusionRpg.Data/Sqlite/RpgStore.cs` (EDIT — `EnsureSocketSchemaUnlocked` in `Init`, after the
+instance schema it references); `src/FusionRpg.Server/Program.cs` (EDIT — parses `sockets.v1.json` at
+boot, then `SeedSocketGrants` + `SeedComboRecipes`);
+`tools/ItemSeedValidator/Checks/GemAffinityCheck.cs` (new), wired into `Validator.cs`;
+`tests/FusionRpg.Core.Tests/Items/{SocketGeometryTests.cs, CombinationEvaluatorTests.cs,
+SocketOperationsTests.cs}` (new); `tests/FusionRpg.Data.Tests/Items/ItemSocketStoreTests.cs` (new);
+`tests/FusionRpg.Core.Tests/Items/{RarityBudgetKeysTests.cs, RerollPolicyTests.cs}` and
+`tests/FusionRpg.Data.Tests/Items/{InstanceOpTests.cs, MaterialSpendTests.cs}` (EDIT — the four moved
+SC7 rows above).
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Socket|FullyQualifiedName~Combination"`; `dotnet test tests\FusionRpg.Data.Tests --filter ItemSocketStoreTests`; `dotnet run --project tools\ItemSeedValidator`
+
 
 ### P4.4 — Module 21 `strain-splice-gen` (model calls)
 

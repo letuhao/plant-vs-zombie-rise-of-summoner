@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Turn;
 using Xunit;
@@ -237,5 +239,56 @@ public class TurnCalendarTests
             if (roll.Plague) Assert.True(roll.MonthBoundary);
             if (roll.SpecialWeek) Assert.True(roll.WeekBoundary);
         }
+    }
+}
+
+/// <summary>
+/// world-map W58 (spec-sector-development.md §2, "the season is visible in the turn report"):
+/// `TurnEngine.Events` reports a `calendar`/`season` entry the turn a season actually changes, the
+/// same "only at its own boundary" precedent `TurnReportKinds.Calendar`'s existing `week`/`month`
+/// entries already follow one block above — proven through a real <see cref="TurnEngine.Step"/>
+/// commit, not the pure <see cref="TurnCalendar"/> formula alone, since this is specifically about
+/// what reaches the report.
+/// </summary>
+public class TurnEngineSeasonReportTests
+{
+    static WorldState World(int currentTurn) =>
+        WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1) with { CurrentTurn = currentTurn };
+
+    static bool HasSeasonEntry(TurnReport report, out string? detail)
+    {
+        var entry = report.Entries.FirstOrDefault(e =>
+            e.Kind == TurnReportKinds.Calendar && e.Subject == "season");
+        detail = entry.Subject == "season" ? entry.Detail : null;
+        return detail != null;
+    }
+
+    [Fact]
+    public void A_season_boundary_turn_reports_the_new_season_index()
+    {
+        // world.v5.json: monthsPerSeason 1, so day 28 (world.CurrentTurn 27 -> Step turn 28) is the
+        // first day of season 1 — the real, shipped boundary this task's own tuning change created.
+        var daysPerSeason = TurnCalendar.DaysPerMonth * TurnCalendar.MonthsPerSeason;
+        var result = TurnEngine.Step(World(daysPerSeason - 1), Array.Empty<WorldCommand>(), seed: 1);
+
+        Assert.True(HasSeasonEntry(result.Report, out var detail));
+        Assert.Equal("1", detail);
+        Assert.Equal(1, TurnCalendar.SeasonOf(daysPerSeason));
+    }
+
+    [Fact]
+    public void A_non_boundary_turn_reports_no_season_entry_at_all()
+    {
+        var result = TurnEngine.Step(World(currentTurn: 2), Array.Empty<WorldCommand>(), seed: 1);
+
+        Assert.False(HasSeasonEntry(result.Report, out _));
+    }
+
+    [Fact]
+    public void The_very_first_turn_reports_no_season_entry_there_is_no_prior_season_to_have_changed_from()
+    {
+        var result = TurnEngine.Step(World(currentTurn: 0), Array.Empty<WorldCommand>(), seed: 1);
+
+        Assert.False(HasSeasonEntry(result.Report, out _));
     }
 }

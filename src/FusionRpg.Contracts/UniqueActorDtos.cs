@@ -83,7 +83,10 @@ public sealed class PutUniqueEquipmentRequest
 
 public sealed class AwardUniqueActorXpRequest
 {
-    [JsonPropertyName("delta")] public double Delta { get; set; }
+    // XP is an integer magnitude end to end (CLAUDE.md numeric rules): long on the wire, long in
+    // the store, INTEGER in the column. Was `double` until 2026-09-05 -- the same defect the
+    // 2026-09-04 XP pass fixed on rpg_actor_progression, surviving on the sibling table.
+    [JsonPropertyName("delta")] public long Delta { get; set; }
     [JsonPropertyName("reason")] public string? Reason { get; set; }
 }
 

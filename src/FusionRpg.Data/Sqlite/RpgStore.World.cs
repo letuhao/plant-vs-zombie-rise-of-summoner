@@ -161,6 +161,16 @@ public sealed partial class RpgStore
         EnsureColumn(db, "rpg_world_sectors", "project_id", "TEXT");
         EnsureColumn(db, "rpg_world_sectors", "project_turns_remaining", "INTEGER");
 
+        // base-defense world-graph-diff 3.3: found by the diffing writer's own equivalence guard,
+        // not designed in — `WorldCanonical.Write`'s "intel" row has always hashed
+        // `IntelSnapshot.DevelopmentLevel` (world-map W45), but `rpg_world_faction_intel` never
+        // carried a column for it, so a snapshot with a non-zero DevelopmentLevel silently read back
+        // as 0 on every load. Nothing ever caught it before because nothing previously wrote a world
+        // and then re-loaded and re-hashed it within the same operation. An existing saved world
+        // reads this back at its shipped default (0), matching every snapshot recorded before this
+        // column existed — the same field-only-addition precedent as recruit_stock/project_id above.
+        EnsureColumn(db, "rpg_world_faction_intel", "development_level", "INTEGER NOT NULL DEFAULT 0");
+
         EnsureWorldTurnSchemaUnlocked(db);
     }
 
@@ -208,135 +218,160 @@ public sealed partial class RpgStore
     /// <summary>
     /// Writes the whole graph (factions, sectors, slots, lanes, entities, members) for a world.
     /// Used by creation and by every turn commit: the turn engine hands back a complete world, so
-    /// the store replaces the graph rather than diffing it. At six sectors that is far cheaper than
-    /// the bug surface a partial-update path would carry; revisit if a world ever reaches hundreds.
+    /// the store replaces the graph rather than diffing it. Revisit the clear-and-rewrite choice
+    /// itself if a world's ROW COUNT ever reaches the point a diffing writer's own bug surface
+    /// (spec-world-graph-diff.md) is worth taking on — decision 19's 18×20-slot scale already
+    /// crossed the point where that revisit is tracked (base-defense `world-graph-diff` 3.3).
+    ///
+    /// <para>Each table below uses ONE <see cref="SqliteCommand"/>, prepared once and reused across
+    /// every row of that table (base-defense `world-graph-diff` 3.2, spec-world-graph-diff.md step 2)
+    /// — the audit's own build cost C5 flagged a fresh command per row as suspect overhead; measured
+    /// at ~20% of write cost (docs/research/perf/02-world-graph-write.md), real but not dominant, and
+    /// free to fix regardless: same SQL text, same parameter names, same column order, same
+    /// per-row values as before. No logic change, no schema change — only how the command object is
+    /// reused.</para>
     /// </summary>
     static void WriteWorldGraphUnlocked(SqliteConnection db, SqliteTransaction tx, WorldState world)
     {
+        using (var cmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_factions (world_id, faction_id, kind, name, policy_id, upkeep_handicap_milli)
+            VALUES ($w, $f, $k, $n, $pol, $handicap);
+            """,
+            "$w", "$f", "$k", "$n", "$pol", "$handicap"))
         {
             foreach (var f in world.Factions)
-                Insert(db, tx, """
-                    INSERT INTO rpg_world_factions (world_id, faction_id, kind, name, policy_id, upkeep_handicap_milli)
-                    VALUES ($w, $f, $k, $n, $pol, $handicap);
-                    """,
-                    ("$w", world.WorldId), ("$f", f.FactionId), ("$k", f.Kind.ToString()),
-                    ("$n", f.Name), ("$pol", (object?)f.PolicyId), ("$handicap", f.UpkeepHandicapMilli));
+                ExecuteWith(cmd, world.WorldId, f.FactionId, f.Kind.ToString(), f.Name,
+                    (object?)f.PolicyId, f.UpkeepHandicapMilli);
+        }
 
+        using (var sectorCmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_sectors (world_id, sector_id, type_id, climate, danger_band,
+                phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
+                development_level, intel, last_seen_turn, layout_x, layout_y,
+                loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
+                recruit_stock, project_id, project_turns_remaining, revision)
+            VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
+                    $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected,
+                    $recruit, $project, $projTurns, 0);
+            """,
+            "$w", "$s", "$type", "$climate", "$danger", "$phase", "$owner", "$stab", "$press", "$depl",
+            "$dev", "$intel", "$seen", "$x", "$y", "$loam", "$intensity", "$warden", "$neglected",
+            "$recruit", "$project", "$projTurns"))
+        using (var slotCmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_slots (world_id, sector_id, slot_index, slot_type_id,
+                element, state, owner_faction_id, guard_wave_id, guard_state,
+                structure_id, construction_turns_remaining, revision)
+            VALUES ($w, $s, $i, $type, $elem, $state, $owner, $guard, $gstate,
+                    $structure, $construction, 0);
+            """,
+            "$w", "$s", "$i", "$type", "$elem", "$state", "$owner", "$guard", "$gstate",
+            "$structure", "$construction"))
+        {
             foreach (var s in world.Sectors)
             {
-                Insert(db, tx, """
-                    INSERT INTO rpg_world_sectors (world_id, sector_id, type_id, climate, danger_band,
-                        phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
-                        development_level, intel, last_seen_turn, layout_x, layout_y,
-                        loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
-                        recruit_stock, project_id, project_turns_remaining, revision)
-                    VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
-                            $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected,
-                            $recruit, $project, $projTurns, 0);
-                    """,
-                    ("$w", world.WorldId), ("$s", s.SectorId), ("$type", s.TypeId),
-                    ("$climate", (object?)s.Climate?.ToString()), ("$danger", s.DangerBand),
-                    ("$phase", s.Phase.ToString()), ("$owner", (object?)s.OwnerFactionId),
-                    ("$stab", s.StabilityMilli), ("$press", s.PressureMilli), ("$depl", s.DepletionMilli),
-                    ("$dev", s.DevelopmentLevel), ("$intel", s.AuthoredIntel.ToString()),
-                    ("$seen", s.LastSeenTurn), ("$x", s.LayoutX), ("$y", s.LayoutY),
-                    ("$loam", s.LoamStock), ("$intensity", s.FractureIntensityMilli),
-                    ("$warden", (object?)s.WardenBindingId), ("$neglected", s.NeglectedTurns),
-                    ("$recruit", s.RecruitStock), ("$project", (object?)s.ProjectId),
-                    ("$projTurns", (object?)s.ProjectTurnsRemaining));
+                ExecuteWith(sectorCmd,
+                    world.WorldId, s.SectorId, s.TypeId, (object?)s.Climate?.ToString(), s.DangerBand,
+                    s.Phase.ToString(), (object?)s.OwnerFactionId, s.StabilityMilli, s.PressureMilli,
+                    s.DepletionMilli, s.DevelopmentLevel, s.AuthoredIntel.ToString(), s.LastSeenTurn,
+                    s.LayoutX, s.LayoutY, s.LoamStock, s.FractureIntensityMilli,
+                    (object?)s.WardenBindingId, s.NeglectedTurns, s.RecruitStock,
+                    (object?)s.ProjectId, (object?)s.ProjectTurnsRemaining);
 
                 foreach (var sl in s.Slots)
-                    Insert(db, tx, """
-                        INSERT INTO rpg_world_slots (world_id, sector_id, slot_index, slot_type_id,
-                            element, state, owner_faction_id, guard_wave_id, guard_state,
-                            structure_id, construction_turns_remaining, revision)
-                        VALUES ($w, $s, $i, $type, $elem, $state, $owner, $guard, $gstate,
-                                $structure, $construction, 0);
-                        """,
-                        ("$w", world.WorldId), ("$s", s.SectorId), ("$i", sl.SlotIndex),
-                        ("$type", sl.SlotTypeId), ("$elem", (object?)sl.Element?.ToString()),
-                        ("$state", sl.State.ToString()), ("$owner", (object?)sl.OwnerFactionId),
-                        ("$guard", (object?)sl.GuardWaveId), ("$gstate", sl.GuardState.ToString()),
-                        ("$structure", (object?)sl.StructureId),
-                        ("$construction", (object?)sl.ConstructionTurnsRemaining));
+                    ExecuteWith(slotCmd,
+                        world.WorldId, s.SectorId, sl.SlotIndex, sl.SlotTypeId,
+                        (object?)sl.Element?.ToString(), sl.State.ToString(), (object?)sl.OwnerFactionId,
+                        (object?)sl.GuardWaveId, sl.GuardState.ToString(), (object?)sl.StructureId,
+                        (object?)sl.ConstructionTurnsRemaining);
             }
+        }
 
-            // Belief. Slots and forces go in as JSON rather than as sub-tables because a snapshot
-            // is always read whole for one sector and never queried by slot — two more tables would
-            // buy nothing and cost a join on every projection.
+        // Belief. Slots and forces go in as JSON rather than as sub-tables because a snapshot
+        // is always read whole for one sector and never queried by slot — two more tables would
+        // buy nothing and cost a join on every projection.
+        using (var cmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_faction_intel (world_id, faction_id, sector_id, last_seen_turn,
+                detail, owner_faction_id, phase, climate, danger_band, development_level, slots_json, forces_json)
+            VALUES ($w, $f, $s, $turn, $detail, $owner, $phase, $climate, $danger, $dev, $slots, $forces);
+            """,
+            "$w", "$f", "$s", "$turn", "$detail", "$owner", "$phase", "$climate", "$danger", "$dev", "$slots", "$forces"))
+        {
             foreach (var intel in world.Intel)
             foreach (var snap in intel.Sectors)
-                Insert(db, tx, """
-                    INSERT INTO rpg_world_faction_intel (world_id, faction_id, sector_id, last_seen_turn,
-                        detail, owner_faction_id, phase, climate, danger_band, slots_json, forces_json)
-                    VALUES ($w, $f, $s, $turn, $detail, $owner, $phase, $climate, $danger, $slots, $forces);
-                    """,
-                    ("$w", world.WorldId), ("$f", intel.FactionId), ("$s", snap.SectorId),
-                    ("$turn", snap.LastSeenTurn), ("$detail", snap.Detail.ToString()),
-                    ("$owner", (object?)snap.OwnerFactionId), ("$phase", snap.Phase.ToString()),
-                    ("$climate", (object?)snap.Climate?.ToString()), ("$danger", snap.DangerBand),
-                    ("$slots", JsonSerializer.Serialize(snap.Slots)),
-                    ("$forces", JsonSerializer.Serialize(snap.Forces)));
+                ExecuteWith(cmd,
+                    world.WorldId, intel.FactionId, snap.SectorId, snap.LastSeenTurn,
+                    snap.Detail.ToString(), (object?)snap.OwnerFactionId, snap.Phase.ToString(),
+                    (object?)snap.Climate?.ToString(), snap.DangerBand, snap.DevelopmentLevel,
+                    JsonSerializer.Serialize(snap.Slots), JsonSerializer.Serialize(snap.Forces));
+        }
 
+        using (var cmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_lanes (world_id, lane_id, from_sector_id, to_sector_id,
+                type_id, length, width, hazard_milli, ward_level, gate_key_id, state, revision)
+            VALUES ($w, $l, $from, $to, $type, $len, $width, $haz, $ward, $gate, $state, 0);
+            """,
+            "$w", "$l", "$from", "$to", "$type", "$len", "$width", "$haz", "$ward", "$gate", "$state"))
+        {
             foreach (var l in world.Lanes)
-                Insert(db, tx, """
-                    INSERT INTO rpg_world_lanes (world_id, lane_id, from_sector_id, to_sector_id,
-                        type_id, length, width, hazard_milli, ward_level, gate_key_id, state, revision)
-                    VALUES ($w, $l, $from, $to, $type, $len, $width, $haz, $ward, $gate, $state, 0);
-                    """,
-                    ("$w", world.WorldId), ("$l", l.LaneId), ("$from", l.FromSectorId),
-                    ("$to", l.ToSectorId), ("$type", l.TypeId), ("$len", l.Length), ("$width", l.Width),
-                    ("$haz", l.HazardMilli), ("$ward", l.WardLevel),
-                    ("$gate", (object?)l.GateKeyId), ("$state", l.State.ToString()));
+                ExecuteWith(cmd,
+                    world.WorldId, l.LaneId, l.FromSectorId, l.ToSectorId, l.TypeId, l.Length, l.Width,
+                    l.HazardMilli, l.WardLevel, (object?)l.GateKeyId, l.State.ToString());
+        }
 
+        using (var entityCmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_entities (world_id, entity_id, kind, owner_faction_id,
+                at_sector_id, on_lane_id, on_lane_toward_sector_id, lane_progress_milli,
+                stance, movement_remaining, routed, carried_loam, revision)
+            VALUES ($w, $e, $kind, $owner, $at, $lane, $toward, $prog, $stance, $move, $routed,
+                    $carried, 0);
+            """,
+            "$w", "$e", "$kind", "$owner", "$at", "$lane", "$toward", "$prog", "$stance", "$move",
+            "$routed", "$carried"))
+        using (var memberCmd = Prepared(db, tx, """
+            INSERT INTO rpg_world_entity_members (world_id, entity_id, member_index,
+                instance_id, species_id, level, hp, wounds, role)
+            VALUES ($w, $e, $i, $inst, $sp, $lvl, $hp, $wounds, $role);
+            """,
+            "$w", "$e", "$i", "$inst", "$sp", "$lvl", "$hp", "$wounds", "$role"))
+        {
             foreach (var e in world.Entities)
             {
-                Insert(db, tx, """
-                    INSERT INTO rpg_world_entities (world_id, entity_id, kind, owner_faction_id,
-                        at_sector_id, on_lane_id, on_lane_toward_sector_id, lane_progress_milli,
-                        stance, movement_remaining, routed, carried_loam, revision)
-                    VALUES ($w, $e, $kind, $owner, $at, $lane, $toward, $prog, $stance, $move, $routed,
-                            $carried, 0);
-                    """,
-                    ("$w", world.WorldId), ("$e", e.EntityId), ("$kind", e.Kind.ToString()),
-                    ("$owner", e.OwnerFactionId), ("$at", (object?)e.AtSectorId),
-                    ("$lane", (object?)e.OnLaneId), ("$toward", (object?)e.OnLaneTowardSectorId),
-                    ("$prog", e.LaneProgressMilli),
-                    ("$stance", e.Stance), ("$move", e.MovementRemaining),
-                    ("$routed", e.Routed ? 1 : 0), ("$carried", e.CarriedLoam));
+                ExecuteWith(entityCmd,
+                    world.WorldId, e.EntityId, e.Kind.ToString(), e.OwnerFactionId,
+                    (object?)e.AtSectorId, (object?)e.OnLaneId, (object?)e.OnLaneTowardSectorId,
+                    e.LaneProgressMilli, e.Stance, e.MovementRemaining, e.Routed ? 1 : 0, e.CarriedLoam);
 
                 for (var i = 0; i < e.Members.Count; i++)
                 {
                     var m = e.Members[i];
-                    Insert(db, tx, """
-                        INSERT INTO rpg_world_entity_members (world_id, entity_id, member_index,
-                            instance_id, species_id, level, hp, wounds, role)
-                        VALUES ($w, $e, $i, $inst, $sp, $lvl, $hp, $wounds, $role);
-                        """,
-                        ("$w", world.WorldId), ("$e", e.EntityId), ("$i", i),
-                        ("$inst", (object?)m.InstanceId), ("$sp", m.SpeciesId),
-                        ("$lvl", m.Level), ("$hp", m.Hp), ("$wounds", m.Wounds),
-                        ("$role", m.Role.ToString()));
+                    ExecuteWith(memberCmd,
+                        world.WorldId, e.EntityId, i, (object?)m.InstanceId, m.SpeciesId,
+                        m.Level, m.Hp, m.Wounds, m.Role.ToString());
                 }
             }
         }
     }
 
-    /// <summary>Clears a world's graph rows so the next write is a clean replace.</summary>
-    static void ClearWorldGraphUnlocked(SqliteConnection db, SqliteTransaction tx, string worldId)
+    /// <summary>Creates and prepares one command, its parameters declared once in the same order the
+    /// caller will supply values in — <see cref="ExecuteWith"/> assigns positionally.</summary>
+    static SqliteCommand Prepared(SqliteConnection db, SqliteTransaction tx, string sql, params string[] paramNames)
     {
-        foreach (var table in new[]
-                 {
-                     "rpg_world_faction_intel", "rpg_world_entity_members", "rpg_world_entities",
-                     "rpg_world_lanes", "rpg_world_slots", "rpg_world_sectors", "rpg_world_factions"
-                 })
-        {
-            using var del = db.CreateCommand();
-            del.Transaction = tx;
-            del.CommandText = $"DELETE FROM {table} WHERE world_id = $w;";
-            del.Parameters.AddWithValue("$w", worldId);
-            del.ExecuteNonQuery();
-        }
+        var cmd = db.CreateCommand();
+        cmd.Transaction = tx;
+        cmd.CommandText = sql;
+        foreach (var name in paramNames)
+            cmd.Parameters.Add(name, SqliteType.Text); // SQLite is dynamically typed per-value; the declared type here is advisory only.
+        cmd.Prepare();
+        return cmd;
+    }
+
+    /// <summary>Assigns <paramref name="values"/> positionally to <paramref name="cmd"/>'s already-declared
+    /// parameters and executes — the reused half of the prepared-statement pattern.</summary>
+    static void ExecuteWith(SqliteCommand cmd, params object?[] values)
+    {
+        for (var i = 0; i < values.Length; i++)
+            cmd.Parameters[i].Value = values[i] ?? DBNull.Value;
+        cmd.ExecuteNonQuery();
     }
 
     /// <summary>The player's active world header, without loading the graph.</summary>
@@ -369,6 +404,25 @@ public sealed partial class RpgStore
             var header = ReadWorldHeaderUnlocked(db, worldId);
             if (header is null) return null;
 
+            return LoadWorldGraphUnlocked(db, worldId) with
+            {
+                WorldId = header.WorldId, TemplateId = header.TemplateId,
+                Seed = header.Seed, CurrentTurn = header.CurrentTurn
+            };
+        }
+    }
+
+    /// <summary>
+    /// The graph half of <see cref="LoadWorldState"/> — factions/sectors/lanes/entities/intel, in
+    /// stable id order — taking an already-open connection so a caller mid-transaction (the
+    /// world-graph-diff equivalence guard) reads its own uncommitted write, not a separate snapshot.
+    /// <see cref="WorldState.WorldId"/>/<see cref="WorldState.TemplateId"/>/<see cref="WorldState.Seed"/>/
+    /// <see cref="WorldState.CurrentTurn"/> are left at their defaults; the header lives in a
+    /// different table this method does not touch, so every caller sets those four itself.
+    /// </summary>
+    static WorldState LoadWorldGraphUnlocked(SqliteConnection db, string worldId)
+    {
+        {
             var factions = new List<WorldFaction>();
             using (var cmd = db.CreateCommand())
             {
@@ -553,7 +607,7 @@ public sealed partial class RpgStore
             {
                 cmd.CommandText = """
                     SELECT faction_id, sector_id, last_seen_turn, detail, owner_faction_id, phase,
-                           climate, danger_band, slots_json, forces_json
+                           climate, danger_band, development_level, slots_json, forces_json
                     FROM rpg_world_faction_intel WHERE world_id = $w
                     ORDER BY faction_id, sector_id;
                     """;
@@ -580,9 +634,10 @@ public sealed partial class RpgStore
                         Phase = Enum.Parse<SectorPhase>(r.GetString(5)),
                         Climate = r.IsDBNull(6) ? null : Enum.Parse<ElementTypeId>(r.GetString(6)),
                         DangerBand = r.GetInt32(7),
-                        Slots = JsonSerializer.Deserialize<List<RememberedSlot>>(r.GetString(8))
+                        DevelopmentLevel = r.GetInt32(8),
+                        Slots = JsonSerializer.Deserialize<List<RememberedSlot>>(r.GetString(9))
                                 ?? new List<RememberedSlot>(),
-                        Forces = JsonSerializer.Deserialize<List<RememberedForce>>(r.GetString(9))
+                        Forces = JsonSerializer.Deserialize<List<RememberedForce>>(r.GetString(10))
                                  ?? new List<RememberedForce>()
                     });
                 }
@@ -593,10 +648,6 @@ public sealed partial class RpgStore
 
             return new WorldState
             {
-                WorldId = header.WorldId,
-                TemplateId = header.TemplateId,
-                Seed = header.Seed,
-                CurrentTurn = header.CurrentTurn,
                 Factions = factions,
                 Sectors = sectors,
                 Lanes = lanes,

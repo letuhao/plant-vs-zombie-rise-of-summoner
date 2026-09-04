@@ -4,6 +4,7 @@ using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Loadout;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons.Contracts;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
@@ -63,8 +64,16 @@ public sealed class WebMatchService
         _hub = hub;
     }
 
+    /// <param name="TurnOrder">
+    /// `battle-tempo` `forecast-rail` FR3 (spec-forecast-rail.md §2, §6): the acting order this
+    /// battle actually recorded, projected from the trace FR1 built — a RECORD of what happened, not
+    /// a forecast (an expedition is resolved before the player sees it). Empty when no trace was
+    /// built for this resolve (never null — "declared, not deferred", `game-gui-map.md`'s own
+    /// contract discipline every other DTO in this repo already follows).
+    /// </param>
     public sealed record WebMatchOutcome(
-        bool Replayed, string MatchKey, long? RunId, BattleReport Report);
+        bool Replayed, string MatchKey, long? RunId, BattleReport Report,
+        IReadOnlyList<TurnOrderEntry> TurnOrder);
 
     public async Task<(bool Ok, string Reason, WebMatchOutcome? Outcome)> RunWebMatchAsync(
         long playerId, string correlationId, string waveId, IReadOnlyList<string>? squadInstanceIds)
@@ -101,12 +110,19 @@ public sealed class WebMatchService
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup == null || storedSetup.WaveId != waveId)
                 return (false, "correlation.mismatch", null);
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
-            return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport));
+            // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
+            var replayTrace = new BattleTrace();
+            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
+            // FR3: BattleTrace is a class -- `replayTrace` reflects the resolve that just ran, no
+            // second return path needed.
+            var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
+            return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport, replayTurnOrder));
         }
 
         // 3–4. Resolve + dedicated ingest; 5. notify.
-        var (report, notify) = ResolveAndIngest(playerId, matchKey, setup, seed);
+        // FR1: player-facing -- opts in.
+        var freshTrace = new BattleTrace();
+        var (report, notify) = ResolveAndIngest(playerId, matchKey, setup, seed, freshTrace);
         // 4b. The squad lived it: contracted members gain or lose loyalty for the result. Replays
         //     return above, so a retry never credits a second time. Deliberately OUTSIDE the
         //     log-before-ingest envelope: a crash between ingest and here loses ±15 loyalty and the
@@ -116,7 +132,8 @@ public sealed class WebMatchService
         await BroadcastAsync(playerId, notify).ConfigureAwait(false);
 
         var linked = _store.TryGetWebMatchLog(playerId, corr);
-        return (true, "ok", new WebMatchOutcome(false, matchKey, linked?.RunId, report));
+        var turnOrder = TurnOrderRecord.FromTrace(freshTrace, setup);
+        return (true, "ok", new WebMatchOutcome(false, matchKey, linked?.RunId, report, turnOrder));
     }
 
     /// <summary>
@@ -143,14 +160,20 @@ public sealed class WebMatchService
             var storedSetup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson);
             if (storedSetup == null || entry.Seed != seed || entry.MatchKey != matchKey)
                 return (false, "correlation.mismatch", null);
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
-            return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport));
+            // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
+            var replayTrace = new BattleTrace();
+            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
+            var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
+            return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport, replayTurnOrder));
         }
 
-        var (report, notify) = ResolveAndIngest(playerId, matchKey, setup, seed);
+        // FR1: player-facing (an expedition collect) -- opts in, same as RunWebMatchAsync.
+        var freshTrace = new BattleTrace();
+        var (report, notify) = ResolveAndIngest(playerId, matchKey, setup, seed, freshTrace);
         await BroadcastAsync(playerId, notify).ConfigureAwait(false);
         var linked = _store.TryGetWebMatchLog(playerId, corr);
-        return (true, "ok", new WebMatchOutcome(false, matchKey, linked?.RunId, report));
+        var turnOrder = TurnOrderRecord.FromTrace(freshTrace, setup);
+        return (true, "ok", new WebMatchOutcome(false, matchKey, linked?.RunId, report, turnOrder));
     }
 
     /// <summary>Boot sweep: re-ingest logged matches whose ingest never landed. Version-guarded —
@@ -226,6 +249,9 @@ public sealed class WebMatchService
                     _store.MarkWebMatchSweepRefused(entry.Id, "unreadable setup_json");
                     continue;
                 }
+                // FR1: the boot sweep -- the ONE caller that must never trace. Nobody is watching a
+                // crash-recovery re-ingest; tracing it would be exactly the bulk-path cost D3 scopes
+                // this feature away from. `trace` defaults to null; left unpassed deliberately.
                 ResolveAndIngest(entry.PlayerId, entry.MatchKey, setup, entry.Seed);
                 healed++;
             }
@@ -238,8 +264,15 @@ public sealed class WebMatchService
         return healed;
     }
 
+    /// <param name="trace">
+    /// `battle-tempo` `forecast-rail` FR1 (spec-forecast-rail.md §2.2, D3): trace opt-in PER BATTLE —
+    /// null (the default) traces nothing. `SweepUnresolved` (the boot-sweep bulk path) is the ONE
+    /// caller that must always pass null; every other caller of this method is player-facing and
+    /// opts in. `Turns` is excluded from `BattleTrace.Digest` by design, so passing one here moves no
+    /// determinism hash regardless of which callers opt in.
+    /// </param>
     (BattleReport Report, EventInsertNotify Notify) ResolveAndIngest(
-        long playerId, string matchKey, BattleSetup setup, ulong seed)
+        long playerId, string matchKey, BattleSetup setup, ulong seed, BattleTrace? trace = null)
     {
         // E12: the report carries WHICH CONTENT produced it. Stamped here, where the store is, and
         // never recomputed later — a power or a trait magnitude read back under a different
@@ -248,7 +281,7 @@ public sealed class WebMatchService
 
 
         // platform stamp is, or every added row would look like a determinism break.
-        var report = BattleEngine.Resolve(setup, seed, profile: ProfileForWave(setup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)) with
+        var report = BattleEngine.Resolve(setup, seed, trace, profile: ProfileForWave(setup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)) with
         {
             ContentHash = _store.ComputeContentHash().ToCompact(),
         };
@@ -370,10 +403,12 @@ public sealed class WebMatchService
     public static IReadOnlyList<BattleChannelMod> StarChannelMods(int star, int level)
     {
         if (star <= 0) return Array.Empty<BattleChannelMod>();
+        // The per-mille bonus is now a CURVE indexed on the triangular sacrifice cost, not `star`
+        // times a flat rate (StarPolicy.StarPowerMilli) -- so `star` must not be multiplied in again.
         var power = Math.Max(star,
-            BattleRuleset.BaseAtk(level) * star * FusionRpg.Core.Demons.Fusion.StarPolicy.PerStarPowerMilli / 1000);
+            BattleRuleset.BaseAtk(level) * FusionRpg.Core.Demons.Fusion.StarPolicy.StarPowerMilli(star) / 1000);
         var defense = Math.Max(star,
-            BattleRuleset.BaseDefense(level) * star * FusionRpg.Core.Demons.Fusion.StarPolicy.PerStarDefenseMilli / 1000);
+            BattleRuleset.BaseDefense(level) * FusionRpg.Core.Demons.Fusion.StarPolicy.StarDefenseMilli(star) / 1000);
         return new[]
         {
             new BattleChannelMod(FusionRpg.Core.Stats.Derived.DerivedStatChannels.CombatPowerOmni, power),

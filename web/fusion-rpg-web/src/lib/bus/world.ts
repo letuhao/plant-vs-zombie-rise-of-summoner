@@ -86,6 +86,13 @@ export type WorldCalendarDto = {
   specialWeek: boolean;
   specialMonth: boolean;
   plague: boolean;
+  /**
+   * Meaningful on every turn, never fogged (`TurnCalendar.SeasonOf`'s own doc comment) — unlike
+   * the boundary flags above, this is not blank between week boundaries. Added 2026-09-05, wiring
+   * the HUD's calendar slot to sector-development's real season now that one exists (superseding
+   * §8b.7's "calendar, not a season" premise, made when no season concept did).
+   */
+  season: number;
 };
 
 export type WorldSectorDto = {

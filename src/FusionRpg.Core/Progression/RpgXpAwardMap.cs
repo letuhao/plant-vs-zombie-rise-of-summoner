@@ -1,4 +1,5 @@
 using FusionRpg.Core.Activity;
+using FusionRpg.Core.Demons;
 
 namespace FusionRpg.Core.Progression;
 
@@ -8,9 +9,12 @@ public static class RpgXpAwardMap
     /// <summary>
     /// One XP award. <c>Delta</c> is whole XP (`long`) — the ONE place a scaled award is rounded, so
     /// no fraction ever reaches the persisted total. <c>PowerScale</c> stays `double`: it is carried
-    /// into the kill ledger's audit payload and is never itself a magnitude.
+    /// into the kill ledger's audit payload and is never itself a magnitude. <c>ScopeKey</c>
+    /// (species-build T1.1) carries a human-readable key alongside <c>TypeId</c> for kinds where the
+    /// int id alone isn't self-describing — today only <see cref="RpgActorKinds.Species"/>, which
+    /// writes it into `rpg_actor_progression.scope_key`; every other kind leaves it null.
     /// </summary>
-    public readonly record struct Award(string Kind, int TypeId, long Delta, string Reason, double PowerScale = 1.0);
+    public readonly record struct Award(string Kind, int TypeId, long Delta, string Reason, double PowerScale = 1.0, string? ScopeKey = null);
 
     /// <summary>
     /// The single rounding point for a scaled award — half away from zero, matching
@@ -56,11 +60,47 @@ public static class RpgXpAwardMap
             case PvzActivityKinds.MowerUsed:
                 return new[] { new Award(RpgActorKinds.Player, 0, RpgXpAwards.Mower, RpgXpReasons.Mower) };
             case PvzActivityKinds.PlantPlaced:
-                return new[] { new Award(RpgActorKinds.Plant, typeId ?? 0, RpgXpAwards.PlantPlace, RpgXpReasons.PlantPlace) };
+                return WithSpeciesPlacement(
+                    new Award(RpgActorKinds.Plant, typeId ?? 0, RpgXpAwards.PlantPlace, RpgXpReasons.PlantPlace),
+                    "plant", typeId);
             case PvzActivityKinds.ZombieSpawned:
-                return new[] { new Award(RpgActorKinds.Zombie, typeId ?? 0, RpgXpAwards.ZombieSpawn, RpgXpReasons.ZombieSpawn) };
+                return WithSpeciesPlacement(
+                    new Award(RpgActorKinds.Zombie, typeId ?? 0, RpgXpAwards.ZombieSpawn, RpgXpReasons.ZombieSpawn),
+                    "zombie", typeId);
             default:
                 return Array.Empty<Award>();
         }
+    }
+
+    /// <summary>
+    /// `species-build` T1.2 — projects the SAME lawn placement fact onto the species' own progression
+    /// row (spec-species-xp.md §2 "Lawn" source), alongside the existing PvZ-type award above, which
+    /// stays untouched. `typeAward` is deliberately NOT `!pvzGame`-gated the way `award.Kind !=
+    /// RpgActorKinds.Player` gates PvZ almanac types in `RpgStore.Progression.cs` — a species row is
+    /// not a PvZ almanac type (spec's own ⛔ callout), so it levels from this fact regardless of which
+    /// game mode produced it.
+    ///
+    /// <para>Best-effort, never a hard requirement: most progression tests never configure
+    /// <see cref="DemonSpeciesCatalog"/> or <see cref="SpeciesProgressionTuningHub"/>, and awarding the
+    /// existing type/player XP above must keep working identically without either configured. Only the
+    /// two live-game hosts (`Server/Program.cs`, `Injector/Host/RpgHost.cs`) configure the roster, and
+    /// only the server configures species tuning, so this only ever fires for real.</para>
+    /// </summary>
+    static IReadOnlyList<Award> WithSpeciesPlacement(Award typeAward, string side, int? gameTypeId)
+    {
+        if (gameTypeId is not { } tid || !DemonSpeciesCatalog.IsConfigured || !SpeciesProgressionTuningHub.IsConfigured)
+            return new[] { typeAward };
+
+        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+        if (!index.TryGet(side, tid, out var species))
+            return new[] { typeAward };
+
+        return new[]
+        {
+            typeAward,
+            new Award(RpgActorKinds.Species, species.DemonTypeId,
+                SpeciesProgressionTuningHub.Tuning.PlacementAward, typeAward.Reason,
+                ScopeKey: species.SpeciesId)
+        };
     }
 }

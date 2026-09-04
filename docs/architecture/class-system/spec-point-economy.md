@@ -34,7 +34,7 @@ bearing. The allocation tiers ride them:
 | Tier | Keyed by | Points come from | Reads as |
 |---|---|---|---|
 | **commander** | player | `Θ_player` — daveLevel, realms advanced, run term | **who you are.** Shared by every demon you field |
-| **demon type** | `typeId` | type almanac XP | **what a species is.** Shared by every specimen |
+| **demon type** | `typeId` | species level — an **index**, `max(0, level − 1)`, never the cumulative XP that produced it. ⛔ **Corrected 2026-09-05 (`species-build` audit A1):** this row previously read "type almanac XP", an *accumulation*. `PointBudget.PointsFor` multiplies `sourceValue × rate` with no unit conversion, so an accumulation here inverted the locked commander-smallest-to-unique-largest ordering by 176× at ordinary play levels (species L12 vs commander Θ20). The other three tiers all read indices (`Θ_player`, `element_mastery`, specimen level); this one now does too — see `PointBudget.DemonTypeSourceFromLevel` | **what a species is.** Shared by every specimen |
 | **aspect** | `(typeId, element)` | `element_mastery` (§10.1) — tier built by the **demon program**, [demons/spec-aspect-scope.md](../demons/spec-aspect-scope.md) | **which strain** |
 | **unique demon** | `instanceId` | specimen level | **this one, that you invested in** |
 

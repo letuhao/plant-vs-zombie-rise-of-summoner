@@ -389,7 +389,8 @@ public sealed partial class RpgStore
             var row = ReadContractUnlocked(db, id);
             if (row is null || !row.Bound || row.PlayerId != playerId) return (false, "contract.unbound", null);
 
-            var price = ContractPolicy.RitualPrice(rarity);
+            var price = ContractPolicy.RitualPrice(
+                rarity, VanillaPvzKillAndRunTheta, Core.Power.PowerTuningHub.Tuning);
             if (ReadSoulBalanceUnlocked(db, playerId).Balance < price)
                 return (false, "souls.insufficient", null);
 
@@ -429,7 +430,8 @@ public sealed partial class RpgStore
             var purchased = state?.PurchasedSlots ?? 0;
             if (!ContractPolicy.CanBuySlot(purchased)) return (false, "capacity.max", null);
 
-            var price = ContractPolicy.NextSlotPrice(purchased);
+            var price = ContractPolicy.NextSlotPrice(
+                purchased, VanillaPvzKillAndRunTheta, Core.Power.PowerTuningHub.Tuning);
             if (ReadSoulBalanceUnlocked(db, playerId).Balance < price)
                 return (false, "souls.insufficient", null);
 

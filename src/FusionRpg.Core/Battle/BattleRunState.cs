@@ -1,4 +1,5 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
@@ -150,11 +151,19 @@ public static partial class BattleEngine
         /// instead of failing the whole battle. Empty on every setup a golden has ever blessed.</summary>
         public readonly List<string> Warnings = new();
 
+        /// <summary>
+        /// base-defense siege-board (spec-siege-board.md §4): null for every caller that does not
+        /// supply one, which is every caller until siege-resolver. This is what keeps the module
+        /// golden-free — a field nothing sets changes no serialized bytes and no code path.
+        /// </summary>
+        readonly BoardState? _board;
+
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
-            IContainerEffectResolver? containerResolver = null)
+            IContainerEffectResolver? containerResolver = null, BoardState? board = null)
         {
             Trace = trace;
+            _board = board;
 
             InitiativeRng = SeededRng.DeriveStream(seed, "initiative");
             ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit"));
@@ -401,8 +410,9 @@ public static partial class BattleEngine
         }
 
         // ---- IBattleView (A17): the read seam StubIntentSource is confined to — never a direct
-        // read of Actors/ByKey from outside this class. PositionOf is always null (no board exists
-        // yet), which is what makes NearestEnemy's own SourceOrder fallback the live behavior today.
+        // read of Actors/ByKey from outside this class. PositionOf is null with no board (every
+        // caller until siege-resolver), which is what makes NearestEnemy's own SourceOrder fallback
+        // the live behavior today; a real board makes it return real positions (siege-board §4).
         public IReadOnlyList<string> LiveActorKeys
         {
             get
@@ -415,7 +425,8 @@ public static partial class BattleEngine
 
         public int SideOf(string actorKey) => ByKey[actorKey].Setup.Side == "squad" ? 0 : 1;
 
-        public GridPos? PositionOf(string actorKey) => null;
+        public GridPos? PositionOf(string actorKey) =>
+            _board is null ? null : _board.Positions.TryGetValue(actorKey, out var p) ? p : null;
 
         public EntityFacts FactsOf(string actorKey)
         {

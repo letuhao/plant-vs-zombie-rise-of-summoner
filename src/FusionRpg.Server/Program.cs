@@ -77,9 +77,31 @@ FusionRpg.Core.SimDefaults.Configure(
 FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
     FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "progression.v1.json"))));
+// species-build T1.1: server-only, mirroring AptitudeTuningHub's own shape — the injector never
+// computes a species level, so it never loads this file.
+FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
+    FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "species-progression.v1.json"))));
+// species-build T1.5: server-only, mirroring SpeciesProgressionTuningHub's own shape — the generation
+// tool (tools/DemonBuildPlanGen) reads this file directly and never goes through this hub.
+FusionRpg.Core.Demons.Generation.SpeciesBuildTuningHub.Configure(
+    FusionRpg.Core.Demons.Generation.SpeciesBuildTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "species-build.v1.json"))));
 FusionRpg.Core.Battle.BattleTuningHub.Configure(
     FusionRpg.Core.Battle.BattleTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "battle.v2.json"))));
+        // v2 -> v3 (battle-tempo tempo-content, 2026-09-05): adds speciesTempo.referenceIntervalMs.
+        // v3 also closes a pre-existing, unrelated gap -- ruleset.loopGuardRoundMultiple, which
+        // BattleTuningLoader already required (base-defense F2 WIP) but no version of this file ever
+        // carried; see battle.v3.json's own _meta.noteV3LoopGuard.
+        // v3 -> v4 (battle-tempo reaction-lane RL1, 2026-09-05): timeline.profiles.hybrid-atb.wReact
+        // 0 -> 1, published via tools/tuning/publish.py (no hand-edit). classic-round/galaxy-sync
+        // stay at 0. Config-only -- ReactionLane has no production caller yet (D14's own pattern), so
+        // this is a tuning row change with no observable effect until a caller exists, matching the
+        // module's own "buy the option, don't pay for the feature" framing.
+        File.ReadAllText(Path.Combine(tuningDir, "battle.v4.json"))));
+FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
+    FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));
 FusionRpg.Core.Demons.SummoningTuningHub.Configure(
     FusionRpg.Core.Demons.SummoningTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "summoning.v1.json"))));
@@ -107,6 +129,11 @@ FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
     FusionRpg.Core.Actions.Rungs.RungTableLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "action-rungs.v1.json"))));
+// battle-tempo action-timing (2026-09-05): every seeded action's wind-up/recovery/timeCost/cooldown,
+// derived at RpgStore.BuildActionCatalog (D2), never by the seeder.
+FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
+    FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "action-timing.v1.json"))));
 // item-ideal.md, rarity-bands (module 7): no Hub needed today -- SeedRarityLadder consumes this
 // parse once, at boot, to populate rarity_budget rows. A future consumer (drop-volume/enhance-reroll)
 // reads those rows back through RpgStore.GetRarityBudget, not this parsed value directly.
@@ -144,6 +171,14 @@ var materialTuning = FusionRpg.Core.Items.Materials.MaterialTuning.Parse(
 // rather than at the first crafted item. Consumed by SeedRerollCostMult below.
 var enhancementTuning = FusionRpg.Core.Items.Mutation.EnhancementTuning.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "enhancement.v1.json")));
+// item-ideal.md, sockets (module 16): the per-role socket ceiling, the per-rung grant windows, the
+// resonance shapes, the removal tiers and D20's ingredient count. Parsed and validated at boot for
+// the same reason as the five above — the parser refuses a ceiling above the structural 4, a
+// rarityGrant table whose adjacent windows do not overlap (which would make socket count a strict
+// ladder), a `standard` ceiling row D14 puts out of scope, and an ingredient count no item could
+// ever hold. Consumed by SeedSocketGrants and SeedComboRecipes below.
+var socketTuning = FusionRpg.Core.Items.Sockets.SocketTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "sockets.v1.json")));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -189,6 +224,14 @@ store.SeedSalvageYield(materialTuning.Salvage);
 // whose shape ssot-rarity.md §5 recorded as "awaiting I7" until this module decided it. Same
 // placement rule as salvage_yield above — a later module's tuning never reaches module 7's seeding.
 store.SeedRerollCostMult(enhancementTuning);
+// item-ideal.md, sockets (module 16): `socket_min` and `socket_max`, the eighth and ninth
+// `rarity_budget` keys, whose shape ssot-rarity.md §5 recorded as "awaiting I4" until this module
+// decided it. Same placement rule as the two above.
+store.SeedSocketGrants(socketTuning);
+// The 25 resonance combinations, GENERATED from the element roster rather than authored
+// (ssot-sockets.md §4.4). Module 21's 102 Strains and Splices land in the same table beside them;
+// this seed never deletes a row it did not write.
+store.SeedComboRecipes(FusionRpg.Core.Items.Sockets.ResonanceGenerator.Generate(socketTuning));
 
 // item-ideal.md, salvage-craft (module 14): the authored recipe corpus
 // (data/seed/items/recipes/*.json) resolved against the reference cost table. Never fatal, same rule

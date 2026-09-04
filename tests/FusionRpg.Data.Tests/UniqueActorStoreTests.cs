@@ -404,12 +404,18 @@ public class UniqueActorStoreTests : IDisposable
         Assert.Equal("phase.retired", refuse.Reason);
     }
 
+    /// <summary>
+    /// Was `Award_xp_rejects_non_finite_delta`: `AwardUniqueActorXp`'s `delta` moved from `double` to
+    /// `long` (effort-power reconciliation, 2026-09-05, RpgStore.UniqueActors.cs's own doc comment) —
+    /// a `long` can never be NaN or infinite, so those two cases no longer compile. `delta &lt;= 0` is
+    /// the guard that replaced them (same file, same "bad_delta" reason), so the non-positive cases
+    /// it actually covers now are zero and negative.
+    /// </summary>
     [Fact]
-    public void Award_xp_rejects_non_finite_delta()
+    public void Award_xp_rejects_a_non_positive_delta()
     {
         var a = _store.CreateUniqueActor(_playerId, "plant", 1);
-        Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, double.PositiveInfinity).Reason);
-        Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, double.NaN).Reason);
+        Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, -1).Reason);
         Assert.Equal("bad_delta", _store.AwardUniqueActorXp(a.InstanceId, 0).Reason);
         Assert.Equal(1, _store.GetUniqueActor(a.InstanceId)!.Level);
     }

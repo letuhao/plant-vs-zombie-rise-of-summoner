@@ -15,7 +15,7 @@ public class TurnCalendarSeasonTests
     [Fact]
     public void Season_of_turn_matches_the_formula_across_a_full_cycle_and_its_boundaries()
     {
-        // Read from the real configured tuning (world.v4.json, world-map W42) rather than a
+        // Read from the real configured tuning (world.v5.json, world-map W42/W58) rather than a
         // hardcoded literal — this table stays correct if a balance pass ever moves these numbers.
         var daysPerSeason = TurnCalendar.DaysPerMonth * TurnCalendar.MonthsPerSeason;
         var seasonCount = TurnCalendar.SeasonCount;

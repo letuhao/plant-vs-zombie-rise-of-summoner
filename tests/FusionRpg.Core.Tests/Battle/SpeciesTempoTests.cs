@@ -1,4 +1,5 @@
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -92,7 +93,7 @@ public class SpeciesTempoTests
         var swift = TraitBattleCatalog.All.Single(t => t.TraitId == "swift");
         Assert.True(swift.InitiativeBonusMilli > 0, "swift must still carry its initiative bonus");
         Assert.Empty(swift.ChannelMods.Where(m =>
-            m.ChannelId == Timeline.DerivedTurnChannels.Speed || m.ChannelId == Timeline.DerivedTurnChannels.Haste));
+            m.ChannelId == DerivedTurnChannels.Speed || m.ChannelId == DerivedTurnChannels.Haste));
     }
 
     /// <summary>
@@ -109,16 +110,16 @@ public class SpeciesTempoTests
         var derivedA = BattleStatComposer.Compose(setupA);
         var derivedB = BattleStatComposer.Compose(setupB);
 
-        var speedA = derivedA.Get(Timeline.DerivedTurnChannels.Speed);
-        var speedB = derivedB.Get(Timeline.DerivedTurnChannels.Speed);
+        var speedA = derivedA.Get(DerivedTurnChannels.Speed);
+        var speedB = derivedB.Get(DerivedTurnChannels.Speed);
         Assert.True(speedA > speedB, "the flurry-tempo actor must project a higher turn.speed");
 
         // Contrast in the OTHER direction -- swap which setup is fast, confirm the relationship flips,
         // so an initiative roll cannot be passing this by luck.
         var setupC = new BattleActorSetup { Key = "c", MaxHp = 100, AttackIntervalMs = Ponderous };
         var setupD = new BattleActorSetup { Key = "d", MaxHp = 100, AttackIntervalMs = Flurry };
-        var speedC = BattleStatComposer.Compose(setupC).Get(Timeline.DerivedTurnChannels.Speed);
-        var speedD = BattleStatComposer.Compose(setupD).Get(Timeline.DerivedTurnChannels.Speed);
+        var speedC = BattleStatComposer.Compose(setupC).Get(DerivedTurnChannels.Speed);
+        var speedD = BattleStatComposer.Compose(setupD).Get(DerivedTurnChannels.Speed);
         Assert.True(speedD > speedC);
     }
 }

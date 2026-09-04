@@ -13,7 +13,8 @@ const blankCalendar: CalendarRollView = {
   monthBoundary: false,
   specialWeek: false,
   specialMonth: false,
-  plague: false
+  plague: false,
+  season: 0
 };
 
 const baseProps: TopStripProps = {
@@ -90,11 +91,13 @@ describe("TopStrip — empire-scope income/upkeep/net/stock (world-stage W52)", 
   });
 });
 
-describe("TopStrip — the calendar slot (world-stage W53)", () => {
+describe("TopStrip — the calendar slot (world-stage W53, season wired in 2026-09-05)", () => {
   it("renders from WorldHeaderDto.CurrentTurn and WorldStateDto.Calendar, populated on a non-boundary turn", () => {
     render(<TopStrip {...baseProps} turn={3} calendar={blankCalendar} />);
 
-    expect(screen.getByTestId("top-strip-calendar")).toHaveTextContent("Day 3 · Week 1 · Month 1");
+    expect(screen.getByTestId("top-strip-calendar")).toHaveTextContent(
+      "Day 3 · Week 1 · Month 1 · Season 1"
+    );
   });
 
   it("carries flavour through from a rolled month boundary", () => {
@@ -109,7 +112,13 @@ describe("TopStrip — the calendar slot (world-stage W53)", () => {
     expect(screen.getByTestId("top-strip-calendar")).toHaveTextContent("plague");
   });
 
-  it("never renders the rejected §G.1/§G.2 season vocabulary", () => {
+  it("renders the real season number from the wire, 1-indexed for display", () => {
+    render(<TopStrip {...baseProps} turn={35} calendar={{ ...blankCalendar, season: 2 }} />);
+
+    expect(screen.getByTestId("top-strip-calendar")).toHaveTextContent("Season 3");
+  });
+
+  it("never invents §G.1/§G.2's rejected season name, even though a season number now renders", () => {
     const { container } = render(
       <TopStrip
         {...baseProps}
@@ -118,7 +127,6 @@ describe("TopStrip — the calendar slot (world-stage W53)", () => {
       />
     );
 
-    expect(container.textContent).not.toMatch(/season/i);
     expect(container.textContent).not.toMatch(/long wither/i);
   });
 });

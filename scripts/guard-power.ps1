@@ -13,7 +13,18 @@ param(
     #  - RpgProgression.cs: XpToNext/TotalToReach(kind, level) -- the XP COST ladder (SSOT S10.1 row 6,
     #    "kept, unchanged... it is the cost ladder, not a power ladder"), already in inventory.json so
     #    G3 already passes; G2's own list is separate and needs the same file named here too.
-    [string[]]$G2AllowlistFiles = @("PatronPolicy.cs", "RpgProgression.cs")
+    # 3. EnhancePolicy.cs (item module 15, enhance-reroll) - GainMicro/LinearGainMilli take the
+    #    ITEM's own enhancement level (+n), not a character or content level. Bounded by an
+    #    asymptote it never reaches (ssot-power-scale.md §10.2 row 24), and it calls no private
+    #    f(Theta) - CraftingHorizonReport reads the shared PowerLadder for anything Theta-shaped.
+    #    Same standing as PatronPolicy's own-level term (row 16); in inventory.json, so G3 passes
+    #    on its own separate check.
+    # 4. SpeciesProgression.cs (species-build T1.1, module 3 species-xp) - SpeciesXpCurve.XpToNext
+    #    is the identical arithmetic COST ladder shape RpgProgression.cs's own XpToNext already has
+    #    (ssot-power-scale.md §10.1 row 26, same verdict as row 6: "cost ladder, not a power
+    #    ladder"), just for a demon SPECIES' own per-player level on its own separate tunable pair.
+    #    Already in inventory.json, so G3 passes on its own separate check.
+    [string[]]$G2AllowlistFiles = @("PatronPolicy.cs", "RpgProgression.cs", "EnhancePolicy.cs", "SpeciesProgression.cs")
 )
 
 $ErrorActionPreference = "Stop"

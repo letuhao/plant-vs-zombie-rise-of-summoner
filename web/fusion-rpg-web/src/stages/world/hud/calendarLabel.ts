@@ -6,12 +6,13 @@
  * public tunables is ordinary calendar arithmetic — not a re-derivation of the hidden roll, which
  * only ever decides the boolean flags below.
  *
- * **§8b.7 is binding: this is a calendar, not a season.** No season name, no "Long Wither" — only
- * the day/week/month numbers plus whichever of `plague`/`specialMonth`/`specialWeek` the server
- * actually rolled. `Roll()`'s own rule (`plague` beats `specialMonth` on the same month) means at
- * most one of those two ever fires together; `specialWeek` can still co-occur on a month-boundary
- * turn, so the label surfaces plague/specialMonth as the headline flavour and folds specialWeek in
- * as a second clause rather than dropping it silently.
+ * **§8b.7's premise no longer holds.** It read "this is a calendar, not a season — no season name,
+ * no 'Long Wither'" at a time there was no season concept in the turn engine at all. Sector-development
+ * has since shipped one (`TurnCalendar.SeasonOf`, real, hashed, replayed, never fogged), and the owner
+ * decided directly (2026-09-05, asked because §8b.7 was a documented decision, not silently overridden)
+ * to wire it into this slot. `season` is a plain 0-indexed number: no season-name catalog exists
+ * anywhere in the engine or `data/tuning/world.v5.json`, and inventing flavour text here would be a
+ * content decision this task was never asked to make — "Season 2", not "Long Wither".
  */
 export type CalendarRollView = {
   daysPerWeek: number;
@@ -21,6 +22,7 @@ export type CalendarRollView = {
   specialWeek: boolean;
   specialMonth: boolean;
   plague: boolean;
+  season: number;
 };
 
 export type CalendarLabel = {
@@ -28,6 +30,8 @@ export type CalendarLabel = {
   /** 1-indexed: the very first turn (turn 0) is week 1 of month 1. */
   week: number;
   month: number;
+  /** 1-indexed for display — the wire's `season` is 0-indexed. */
+  season: number;
   /** `null` on a plain day — no flavour to report, not an empty gap. */
   flavour: string | null;
 };
@@ -45,11 +49,14 @@ export function calendarLabelFor(turn: number, calendar: CalendarRollView): Cale
   else if (calendar.specialMonth) clauses.push("a special month");
   if (calendar.specialWeek) clauses.push("a special week");
 
-  return { turn, week, month, flavour: clauses.length > 0 ? clauses.join(", ") : null };
+  return { turn, week, month, season: calendar.season + 1, flavour: clauses.length > 0 ? clauses.join(", ") : null };
 }
 
-/** Plain text for the strip — e.g. `"Day 22 · Week 4 · Month 1"`, with a flavour clause appended. */
+/**
+ * Plain text for the strip — e.g. `"Day 22 · Week 4 · Month 1 · Season 2"`, with a flavour clause
+ * appended.
+ */
 export function formatCalendarLabel(label: CalendarLabel): string {
-  const base = `Day ${label.turn} · Week ${label.week} · Month ${label.month}`;
+  const base = `Day ${label.turn} · Week ${label.week} · Month ${label.month} · Season ${label.season}`;
   return label.flavour ? `${base} — ${label.flavour}` : base;
 }

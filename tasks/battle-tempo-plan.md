@@ -4,6 +4,20 @@ Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-ma
 under [docs/architecture/battle-tempo/](../docs/architecture/battle-tempo/).
 Task list: [battle-tempo-todo.md](battle-tempo-todo.md).
 
+**Status, 2026-09-05: 21 of 23 tasks complete, 1 partial, 2 genuinely blocked.** Built:
+`poise-unification` (all 4), `action-timing` (all 4), `tempo-content` (both), `MEAS`,
+`commitment-binding` (both), `reaction-lane` (RL1/RL4 complete, RL2 partial), `forecast-rail` (all 4).
+Every completed task is probed against real compiled code with an executed falsifier (`Core.Tests`
+itself stays blocked by pre-existing, unrelated WIP in other streams — see PU1's own evidence).
+
+**⛔⛔ D14 is the reason anything remains open.** Measured, not assumed: `BattleEngine.Resolve`'s live
+combat path reads none of `WindupTicks`/`RecoveryTicks`/`TimeCostTicks` — the kernel that would
+(`ActionRunner`) has zero production callers. This blocks `RL2`'s remaining live-wiring half, all of
+`RL3` (its own acceptance criterion IS a live win-rate measurement), and Checkpoint B/`LAND1`/`LAND2`.
+`LAND2` is additionally **owner-only by the plan's own original design** — not a gate discovered
+after the fact. See the map's own D14 entry and `MEAS`'s evidence block in the todo for the full
+reasoning and the precise root cause.
+
 ---
 
 ## Overview

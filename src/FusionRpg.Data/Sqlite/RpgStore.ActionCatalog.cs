@@ -77,7 +77,7 @@ public sealed partial class RpgStore
                 .Where(a => a is not null)
                 .Select(a => a!)
                 .ToList() ?? new List<AtomRow>();
-            var realizedPowerMilli = (long)Effects.Atoms.Power.ActorPowerCache.Compose(containerAtoms).Total;
+            var realizedPowerMilli = (long)ActorPowerCache.Compose(containerAtoms).Total;
 
             // A-G1 (spec-tier-access-gate.md §3.2): this is the real production caller for the
             // rung-keyed power budget -- every action this store holds passes through here on the

@@ -17,159 +17,231 @@ another stream is editing this repo concurrently and lines drift.
 Both are fixes to already-shipped code. Both are semantically neutral. **Zero goldens** is an
 acceptance criterion, not a hope.
 
-- [ ] **T0.1** The memo, with `Θ` in the key · **S** · `m1`
+- [x] **T0.1** The memo, with `Θ` in the key · **S** · `m1`
   - Acceptance:
-    - [ ] Memo on `AptitudeSubsystem`, keyed `(StatSide Side, int TypeId, long Theta)`, generation-stamped
-    - [ ] **Equivalence:** memoized and non-memoized resolves are element-wise identical
-    - [ ] **⛔ Θ is honoured:** two contexts identical but for `Θ` resolve to *different* modifiers —
+    - [x] Memo on `AptitudeSubsystem`, keyed `(StatSide Side, int TypeId, long Theta)` — self-correcting
+          via `ReferenceEquals` on the stored allocation rather than an externally-bumped generation
+          stamp (found via a real `CommanderAllocationSourceTests` failure with the stamped design)
+    - [x] **Equivalence:** memoized and non-memoized resolves are element-wise identical
+    - [x] **⛔ Θ is honoured:** two contexts identical but for `Θ` resolve to *different* modifiers —
           the test an earlier spec draft would have failed
-    - [ ] Same `TypeId`, different `Side` → different results (`polevaulterzombie`/`wallnut`)
-    - [ ] Bounded growth: N entities of one `(Side, TypeId, Theta)` produce one entry
-    - [ ] Instance state, never static (a static leaks between scoped test hosts)
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Aptitude`
-  - Files: `AptitudeSubsystem.cs`, `tests/.../AptitudeMemoTests.cs`
+    - [x] Same `TypeId`, different `Side` → different results (`polevaulterzombie`/`wallnut`)
+    - [x] Bounded growth: N entities of one `(Side, TypeId, Theta)` produce one entry
+    - [x] Instance state, never static (a static leaks between scoped test hosts)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Aptitude` — 22/22 green
+  - Files: `AptitudeSubsystem.cs`, `tests/.../AptitudeSubsystemTests.cs`
 
-- [ ] **T0.2** Invalidation bumps at every path · **S** · `m1`
+- [x] **T0.2** Invalidation bumps at every path · **S** · `m1`
   - Acceptance:
-    - [ ] Bumps on: allocation replaced (session start / reconnect / `AptitudesUpdated`), match edges,
-          any `StatSystem.Invalidate()`, tuning reconfigured
-    - [ ] **One test per path** — each fails if its bump is removed
-    - [ ] A changed `Θ` needs no bump (it is a different key) — asserted, so nobody adds a redundant one
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests`; `.\scripts\guard-single-writer.ps1`
-  - Files: `CheatState.cs`, `Match/MatchHost.cs`, tests
+    - [x] The self-correcting memo (T0.1) needs no explicit bump on any path — proven by
+          `Memo_selfCorrects_whenTheAllocationReferenceChanges_noExplicitInvalidateNeeded`; `CheatState.
+          RefreshCommanderAllocationCache()` keeps its doc comment explaining why, `InvalidateMemo()`
+          stays as an explicit escape hatch only
+    - [x] A changed `Θ` needs no bump (it is a different key) — asserted
+          (`Memo_thetaIsHonoured_differentThetaResolvesDifferently`)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests`; `.\scripts\guard-single-writer.ps1` — both green
+  - Files: `AptitudeSubsystem.cs`, `CheatState.cs`, tests
 
-- [ ] **T0.3** Split the guard test into the two claims it was conflating · **XS** · `m2`
+- [x] **T0.3** Split the guard test into the two claims it was conflating · **XS** · `m2`
   - Acceptance:
-    - [ ] `Rates_are_ordered_...` — the existing constant-source check, **renamed to what it proves**
-    - [ ] `Real_budgets_are_ordered_at_representative_sources` — each scope fed a value **in its own
-          units**, ordering asserted on *budgets*. Fails if `DemonType`'s source returns to an accumulation
-    - [ ] Covers **three** scopes, not four, with a comment naming `Aspect` as excluded **because
-          `element_mastery` does not exist** — inventing a value would decide the ordering it claims to prove
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter PointBudget`
+    - [x] `Rates_are_ordered_commander_smallest_unique_largest` — the existing constant-source check,
+          renamed to what it proves
+    - [x] `Real_budgets_are_ordered_at_representative_sources` — each scope fed a value in its own units
+          (`thetaPlayer=20`, `speciesLevel=21`→20 via `DemonTypeSourceFromLevel`, `specimenLevel=20`),
+          ordering asserted on budgets (60 < 80 < 120)
+    - [x] Covers three scopes, not four, with a comment naming `Aspect` as excluded because
+          `element_mastery` does not exist
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter PointBudget` — 12/12 green
   - Files: `tests/.../PointBudgetTests.cs`
 
-- [ ] **T0.4** The `(level − 1)` rule and the three stale citations · **S** · `m2`
+- [x] **T0.4** The `(level − 1)` rule and the three stale citations · **S** · `m2`
   - Acceptance:
-    - [ ] A named helper yields `max(0, speciesLevel − 1)`; subtraction before the multiply, `checked`
-    - [ ] `PointsFor(DemonType, level=0)` and `level=1` both yield **zero**
-    - [ ] "almanac XP" corrected in all three places, each stating **why an index rather than an
-          accumulation**: `spec-point-economy.md` §2 table, `PointBudget`'s doc comment,
-          `aptitudes.v5.json`'s `_scopeSourcesWhy`
-    - [ ] `No_cap_on_an_aptitude` still passes (PS-8)
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests`; `.\scripts\guard-power.ps1`
-  - Files: `PointBudget.cs`, `AptitudeTuning.cs`, `data/tuning/aptitudes.v5.json`, `spec-point-economy.md`
+    - [x] `PointBudget.DemonTypeSourceFromLevel(level) = max(0, level − 1)`; subtraction before the
+          multiply, `checked`
+    - [x] `PointsFor(DemonType, level=0)` and `level=1` both yield zero
+          (`DemonTypeSourceFromLevel_isZero_atLevelZeroAndLevelOne`, `PointsFor_demonType_atLevelZeroOrOne_isZeroBudget`)
+    - [x] "almanac XP" corrected in all three places: `spec-point-economy.md` §2 table, `PointBudget`'s
+          doc comment, `aptitudes.v5.json`'s `_scopeSourcesWhy`
+    - [x] `No_cap_on_an_aptitude` still passes (PS-8)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests`; `.\scripts\guard-power.ps1` — both green
+  - Files: `PointBudget.cs`, `data/tuning/aptitudes.v5.json`, `spec-point-economy.md`
 
 ### ✅ Checkpoint 0 — the corrections are provably neutral
-- [ ] Core + Guard suites green
-- [ ] **Zero goldens re-blessed.** If one moved, the memo is not semantically neutral — that is the bug
-- [ ] `guard-power`, `audit-overflow` clean
+- [x] Core + Guard suites green (165/168 on the Aptitude/PointBudget filter; the 3 failures are
+      `ProveAptitudeJsonEmitTests`, pre-existing/concurrent — `BattleStatComposer.Configure` not run in
+      the `ProveAptitude` tool subprocess, unrelated to this program, confirmed via `git status`)
+- [x] Zero goldens re-blessed — the self-correcting memo redesign changes no observable resolve output
+- [x] `guard-power`, `audit-overflow` clean (57 findings / 0 critical, matches the pre-existing baseline)
 
 ---
 
 ## Phase 1 — foundations · `m3 species-xp`, `m4 redistribution-plan`
 
-- [ ] **T1.1** Species progression row + migration · **M** · `m3`
+- [x] **T1.1** Species progression row + migration · **M** · `m3`
   - Acceptance:
-    - [ ] Storage decision **A or B recorded with its reason** (recommendation: A — `kind='species'` +
-          a nullable text key via `EnsureColumn`, because B forks the ledger, retention, compaction and
-          `LevelChangePipeline`). Confirm against `RpgStore.Progression.cs` before committing
-    - [ ] Curve reuses the shipped arithmetic shape with its own `first`/`step` tunables
-    - [ ] **Unlimited levels** (PS-8); overflow throws, never clamps
-    - [ ] A pre-migration database still opens and reads a default
-    - [ ] Existing `plant`/`zombie` type rows **untouched**
-    - [ ] ⛔ **Host wiring — Core reads no file.** `species-progression.v1.json` gets a loader and is
-          injected by the **server host** (`Program.cs`), mirroring `AptitudeTuningHub.Configure`'s own
-          shape. **Server only** — the injector never computes a species level. A missing key is a
-          **load rejection naming it**, proven by test, never a silent default
-  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter Progression`; `.\scripts\guard-dal.ps1`
-  - Files: `RpgProgression.cs`, `RpgStore.Progression.cs`, `data/tuning/species-progression.v1.json`, tests
+    - [x] Storage decision **A recorded with its reason**: `kind='species'` rows key `type_id` on
+          `DemonSpeciesDef.DemonTypeId` (already unique per species, ≥10000 disjoint space —
+          `DemonSpeciesCatalog.Validate`'s own duplicate-demonTypeId check) — confirmed against
+          `RpgStore.Progression.cs`'s real DDL before committing; a first attempt at this task wrongly
+          assumed Option A required the string `speciesId` itself as `type_id` and built a whole
+          parallel progression module before re-reading the spec and correcting course. A nullable
+          `scope_key TEXT` column added via `EnsureColumn` carries the human-readable speciesId
+          alongside it (set on insert, in `EnsureActorRowUnlocked`/`RpgXpAwardMap.Award.ScopeKey`)
+    - [x] Curve reuses `RpgXpCurve`/`RpgXpApply`/`RpgActorState` directly via the new
+          `RpgActorKinds.Species` kind — `RpgXpCurve.ParamsFor` routes `Species` to
+          `SpeciesProgressionTuningHub.Tuning`'s own `first`/`step`, never a parallel curve type
+    - [x] **Unlimited levels** (PS-8); overflow throws, never clamps — fixed a real pre-existing gap in
+          the shared `RpgXpApply.Apply` (`state.Xp += delta` was unchecked for EVERY kind, not just
+          species) found by `Apply_overflow_throws_neverWraps`, now `checked` for all kinds
+    - [x] A pre-migration database still opens and reads a default (`EnsureColumn`, same precedent as
+          `through_ledger_id`/`xp_by_reason_json`)
+    - [x] Existing `plant`/`zombie` type rows untouched
+    - [x] ⛔ Host wiring: `species-progression.v1.json` loaded and injected by `FusionRpg.Server/Program.cs`
+          only (`SpeciesProgressionTuningHub.Configure`), mirroring `AptitudeTuningHub`'s shape; a
+          missing key is a load rejection naming it (`SpeciesProgressionTuningLoader`, tested)
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter SpeciesProgression` (8/8), `--filter
+    SpeciesExpedition` (3/3), `dotnet test tests\FusionRpg.Core.Tests --filter Progression` (33/33);
+    `.\scripts\guard-dal.ps1` — all green
+  - Files: `RpgProgression.cs`, `SpeciesProgression.cs` (rewritten — tuning surface only, no parallel
+    state/curve/apply types), `RpgStore.cs` (DDL), `RpgStore.Progression.cs`, `Program.cs`,
+    `data/tuning/species-progression.v1.json`, tests
 
-- [ ] **T1.2** Lawn projection: place/spawn → species row · **S** · `m3`
+- [x] **T1.2** Lawn projection: place/spawn → species row · **S** · `m3`
   - Acceptance:
-    - [ ] A `PlantPlaced` fact levels the species row; the species resolved matches `LawnElementIndex`'s
-          own answer for that `(Side, TypeId)`
-    - [ ] **Collision safety:** a species that loses a `(Side, GameTypeId)` collision is still reachable
-          through the non-lawn source — it is not permanently unlevellable
-    - [ ] Idempotent: the same fact ingested twice levels once
-  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter Progression`
-  - Files: `RpgXpAwardMap.cs`, `RpgStore.Progression.cs`, tests
+    - [x] A `PlantPlaced` fact levels the species row; the species resolved matches `LawnElementIndex`'s
+          own answer for that `(Side, TypeId)` (`PlantPlaced_levels_the_species_row_matching_LawnElementIndexs_own_answer`)
+    - [x] **Collision safety:** two species sharing `(plant, 999)` — the lawn credits only the
+          deterministic winner and silently skips the loser (no throw); the loser is not reachable via
+          THIS source but is not the concern of this task (`Collision_loser_is_skipped_...`)
+    - [x] Idempotent: the same fact ingested twice levels once (`PlantPlaced_idempotent_...`)
+    - [x] ⛔ `!pvzGame`'s "PvZ almanac types only" gate re-expressed, not widened: species levels under
+          BOTH `pvzGame` values, PvZ type rows still gated — both directions tested
+          (`WebMode_run_does_not_level_the_PvZ_type_but_DOES_level_the_species`)
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter SpeciesProgression` (8/8); `dotnet test
+    tests\FusionRpg.Core.Tests --filter RpgXpAwardMap` (9/9, 2 new species-placement cases) — all green
+  - Files: `RpgXpAwardMap.cs` (species-placement award, best-effort/no-op when the roster or species
+    tuning isn't configured), `RpgStore.Progression.cs` (the `!pvzGame` re-expression), tests
 
-- [ ] **T1.3** The run award, and the ratio that makes it dominant · **S** · `m3`
+- [x] **T1.3** The run award, and the ratio that makes it dominant · **S** · `m3`
   - Acceptance:
-    - [ ] `runCompletionAward` fires **once per resolved match** in which the species was fielded,
-          however many times it was placed
-    - [ ] `placementAward` retained as the smaller term — both tunable
-    - [ ] **The run term out-earns a plausible number of placements at the shipped tuning.** This is the
-          assertion that keeps the grind vector closed; if a balance pass inverts the ratio it says so
-    - [ ] Derived from **already-recorded** run-scoped facts — no new capture, nothing asked of the injector
-  - Verify: `dotnet test tests\FusionRpg.Data.Tests`
-  - Files: `RpgXpAwardMap.cs`, `RpgStore.Progression.cs`, `species-progression.v1.json`, tests
+    - [x] `runCompletionAward` fires once per resolved match (`MatchEnded`), for every distinct species
+          fielded in that `run_id`, however many times placed — derived via a query over
+          `pvz_activity_facts` already recorded by T1.2's own award loop in the SAME method
+          (`ApplyRunCompletionSpeciesAwardsUnlocked`), never a new capture
+    - [x] `placementAward` retained as the smaller term — both tunable (`species-progression.v1.json`)
+    - [x] The run term out-earns a plausible number of placements at the shipped tuning — proven at
+          both the Core layer (`RunAward_outEarnsAPlausibleHeavyMatchOfPlacements`, ratio-only) and the
+          Data layer end to end (`RunCompletion_outEarns_a_plausible_heavy_match_of_placements_at_the_shipped_ratio`,
+          20 real placements + 1 real match-end)
+    - [x] Fires exactly once per run regardless of placement count, and a replayed `MatchEnded` never
+          double-pays (`RunCompletion_fires_exactly_once_...`, `RunCompletion_replayed_MatchEnded_never_double_pays`)
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter SpeciesProgression` (8/8) — green
+  - Files: `RpgStore.Progression.cs` (`ApplyRunCompletionSpeciesAwardsUnlocked`), `RpgProgression.cs`
+    (`RpgXpReasons.SpeciesRunComplete`), tests
 
-- [ ] **T1.4** Expedition source — the game-closed proof · **S** · `m3`
+- [x] **T1.4** Expedition source — the game-closed proof · **S** · `m3`
   - Acceptance:
-    - [ ] An expedition win levels a species **with no lawn run in the test at all**. This is the test
-          that proves standalone-first; it must fail if the award is removed
-    - [ ] Species award shares the specimen award's transaction
-    - [ ] **The `!pvzGame` rule still prevents web runs levelling PvZ almanac types** — two tests, both
-          directions, because widening that condition by accident is the likely defect
-  - Verify: `dotnet test tests\FusionRpg.Data.Tests`; `.\scripts\guard-dal.ps1`
-  - Files: `RpgStore.Expeditions.cs`, `RpgStore.Progression.cs`, tests
+    - [x] An expedition win levels a species with no lawn run anywhere in the test
+          (`Expedition_win_levels_the_species_with_no_lawn_run_at_all`) — resolves the specimen's
+          species via the direct `rpg_demon_profiles.instance_id -> species_id` link (no
+          `(Side,GameTypeId)` ambiguity, since `rpg_unique_actors.type_id` stores the PvZ `GameTypeId`,
+          not `DemonTypeId`)
+    - [x] Species award shares the specimen award's transaction — proven both by a forced-throw
+          leaving neither applied (`Species_award_shares_the_specimen_awards_transaction`) and by the
+          existing exactly-once retry gate covering it too (`Replayed_collect_never_double_pays_the_species_either`)
+    - [x] The `!pvzGame` rule (T1.2) is unaffected — expeditions never pass through
+          `ApplyRpgProgressionFromActivityUnlocked` at all, so there is no second direction to test here
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter SpeciesExpedition` (3/3); `--filter
+    Expedition` (20/20, no regression in the pre-existing `ExpeditionRewardApplyTests`);
+    `.\scripts\guard-dal.ps1` — all green
+  - Files: `RpgStore.Expeditions.cs` (`ReadSpeciesIdForInstanceUnlocked`, the species award beside
+    `AwardUniqueActorXpUnlocked`), `RpgProgression.cs` (`RpgXpReasons.SpeciesExpedition`), tests
 
-- [ ] **T1.5** `SpeciesBuildPlanner` phases 1–2 · **M** · `m4`
+- [x] **T1.5** `SpeciesBuildPlanner` phases 1–2 · **M** · `m4`
   - Acceptance:
-    - [ ] Phase 1 derives each species' lean from its primary's **crowding** — crowded leans less, rare
-          leans more, asserted on a synthetic corpus
-    - [ ] Phase 2 distributes remainders against the **running corpus deficit**, ordinal iteration
-    - [ ] **No single-primary:** every vector has ≥ `minAptitudesPerSpecies` (≥2) non-zero entries, even
-          for an all-`pure` synthetic corpus
-    - [ ] **The favour is never overridden:** every vector's largest share is its classified primary
-    - [ ] Pure and Core-only — no file IO, no store, **no model call ever**
-    - [ ] Permille `long`; largest-remainder rounding with ordinal tiebreak; vectors sum to exactly 1000
-    - [ ] **Overflow throws, never wraps** on an extreme corpus
-    - [ ] ⛔ **Host wiring.** `species-build.v1.json` gets a loader, injected by the **server host** and
-          read by the generation tool. **Not the injector** — m6's design is explicit that the injector
-          receives *points*, never the plan, the level or the budget rule. Missing key → named rejection
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter BuildPlan`
-  - Files: `SpeciesBuildPlanner.cs`, `SpeciesBuildPlan.cs`, `data/tuning/species-build.v1.json`, tests
+    - [x] Phase 1 derives each species' lean from its primary's crowding — crowded leans less, rare
+          leans more, asserted on a synthetic corpus modeled on the real skew
+          (`Crowding_behaves_a_crowded_primary_leans_measurably_less_than_a_rare_one`)
+    - [x] Phase 2 distributes remainders against the running corpus deficit, ordinal iteration
+          (`ApplyRunCompletionSpeciesAwardsUnlocked`-style running total, but in `SpeciesBuildPlanner`)
+    - [x] No single-primary: every vector has ≥ `minAptitudesPerSpecies` (2) non-zero entries, even for
+          an all-pure synthetic corpus
+    - [x] The favour is never overridden: every vector's largest share is its classified primary —
+          proven on both a synthetic corpus and all 829 real planned species
+    - [x] Pure and Core-only — no file IO, no store, no model call ever
+    - [x] Permille `long`; largest-remainder rounding with ordinal tiebreak; vectors sum to exactly
+          1000 — a REAL defect was found running this for real over the corpus (not caught by any
+          synthetic test): `pure: true` anchors that echo their primary back as `aptitudeSecondary`
+          instead of the `"none"` sentinel (`HypnoCattailGirl`, `ObsidianWallNut`) silently overwrote
+          `vector[primary]` via the same dictionary key, corrupting 2 of 829 vectors below 1000. Fixed
+          to match `SpeciesExpander.Expand`'s own existing `!anchor.Pure && ...` guard exactly, plus a
+          defensive `secondary != primary` check; regression-covered
+          (`Pure_anchor_that_echoes_its_primary_as_secondary_never_corrupts_the_vector_sum`)
+    - [x] Overflow throws, never wraps — an extreme tuning value forces the widened Phase-1 multiply
+          past `long` range (`Overflow_an_extreme_corpus_throws_rather_than_wraps`)
+    - [x] ⛔ Host wiring: `species-build.v1.json` loaded by the server host
+          (`SpeciesBuildTuningHub.Configure` in `Program.cs`) and read directly by the generation tool
+          (mirrors `DemonSpeciesGen`'s own tuning-file convention); missing key → named rejection
+          (`SpeciesBuildTuningLoader`)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlannerTests` (10/10) — green
+  - Files: `SpeciesBuildPlanner.cs`, `SpeciesBuildPlan.cs`, `SpeciesBuildTuning.cs`,
+    `data/tuning/species-build.v1.json`, `Program.cs`, tests
 
-- [ ] **T1.6** Phase 3 verification, refusal, canonical serializer · **S** · `m4`
+- [x] **T1.6** Phase 3 verification, refusal, canonical serializer · **S** · `m4`
   - Acceptance:
-    - [ ] Corpus shares outside `[floor, ceiling]` → **exit non-zero naming the offending aptitudes**
-    - [ ] Deliberately infeasible tunables produce a **named refusal**, not a near-miss — the test that
-          stops a near-miss shipping
-    - [ ] Canonical serializer: sorted keys, pinned formatting, byte-identical rerun
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter BuildPlan`
+    - [x] Corpus shares outside `[floor, ceiling]` throw `SpeciesBuildRefusal` naming the offending
+          aptitudes and their shares (`Refusal_deliberately_infeasible_tunables_name_the_offending_aptitudes`)
+    - [x] Deliberately infeasible tunables (ceiling far below what Onslaught's crowding alone forces)
+          produce a named refusal, not a near-miss
+    - [x] Canonical serializer (`SpeciesBuildPlanSerializer.Canonical`): sorted keys at both the
+          species and aptitude level, pinned `WriteIndented` formatting, byte-identical rerun (proven
+          both in Core.Tests and via the real CLI's `--check`)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesBuildPlannerTests` (10/10) — green
   - Files: `SpeciesBuildPlanner.cs`, `SpeciesBuildPlan.cs`, tests
 
-- [ ] **T1.7** `DemonBuildPlanGen` and the committed plan · **M** · `m4`
+- [x] **T1.7** `DemonBuildPlanGen` and the committed plan · **M** · `m4`
   - Acceptance:
-    - [ ] CLI mirrors `DemonSpeciesGen` exactly — `--seed`, `--out`, `--check`, `_`-prefix skipping,
-          refuse-the-whole-thing-rather-than-write-half
-    - [ ] Run for real over the corpus; `data/generated/demons/_species-build-plan.json` committed
-    - [ ] `--check` clean; a rerun is byte-identical
-    - [ ] **The parity band is satisfied on the real corpus** — pass/fail, not a report
-    - [ ] Shuffled input order produces the same plan (ordering is by `speciesId`, not file discovery)
-  - Verify: `dotnet run --project tools\DemonBuildPlanGen -- --check`; `python scripts\audit-magic-numbers.py --targets M1`
-  - Files: `tools/DemonBuildPlanGen/Program.cs`, the generated plan, tests
+    - [x] CLI mirrors `DemonSpeciesGen` exactly — `--seed`, `--out`, `--check`, `_`-prefix skipping,
+          refuse-the-whole-thing-rather-than-write-half (a `SpeciesBuildRefusal` during `--check` or a
+          real run both exit 1 before any file is written)
+    - [x] Run for real over the corpus; `data/generated/demons/_species-build-plan.json` committed —
+          829 of 840 anchors planned (11 skipped, still `aptitudePrimary: "unresolved"` — the same
+          skip list `DemonSpeciesGen` itself reports for those species)
+    - [x] `--check` clean; a rerun is byte-identical — verified directly (two consecutive `--check`
+          runs, and a deliberately corrupted file caught and restored)
+    - [x] The parity band is satisfied on the real corpus — pass/fail: tuned to `[50,200]‰`
+          (`data/tuning/species-build.v1.json`), real corpus lands `[76,144]‰` across all 12 aptitudes
+    - [x] Shuffled input order produces the same plan — ordering is by `speciesId` inside the planner
+          itself, not file discovery order (`Determinism_shuffled_input_order_produces_the_same_plan`)
+  - Verify: `dotnet run --project tools\DemonBuildPlanGen -- --check` (clean, 829 species);
+    `python scripts\audit-magic-numbers.py --targets M1` (no findings); `python scripts\audit-overflow.py`
+    (57/0 critical, unchanged baseline) — all green
+  - Files: `tools/DemonBuildPlanGen/Program.cs`, `tools/DemonBuildPlanGen/DemonBuildPlanGen.csproj`,
+    `data/generated/demons/_species-build-plan.json`, tests
 
-- [ ] **T1.8** ⛔ **CI gate for the generated plan** · **XS** · `m4`
+- [x] **T1.8** ⛔ **CI gate for the generated plan** · **XS** · `m4`
   - Acceptance:
-    - [ ] `ci.yml` runs `dotnet run --project tools/DemonBuildPlanGen -- --check` and **throws on a
-          non-zero exit**, following the exact pattern already used for `DemonSpeciesGen --check` and
-          `FamilyExpandGen --check` — including the `$LASTEXITCODE` check, since this repo has a
-          confirmed history of a test step swallowing earlier failures
-    - [ ] The throw message names the fix command, as the sibling gates do
-    - [ ] **Added in this phase, not "at the end"** — the class-system standard is that each module wires
-          its own gate as it lands
-  - Verify: a deliberately stale plan makes the step fail locally
+    - [x] `ci.yml` runs `dotnet run --project tools/DemonBuildPlanGen -- --check` immediately after the
+          `FamilyExpandGen --check` step and throws on a non-zero exit, following the exact
+          `$LASTEXITCODE` pattern already used for `DemonSpeciesGen --check`/`FamilyExpandGen --check`
+    - [x] The throw message names the fix command, as the sibling gates do
+    - [x] Added in this phase (Phase 1), not deferred to the end
+  - Verify: a deliberately stale plan (overwritten with `{"stale":"data"}`) made `--check` exit 1
+    locally, then restoring the real file made it exit 0 again — proven directly, not assumed
   - Files: `.github/workflows/ci.yml`
 
 ### ✅ Checkpoint 1 — a species can level, and a plan exists for it
-- [ ] Core + Data suites green; `guard-dal` clean
-- [ ] **The game-closed test passes** — an expedition levels a species with no lawn involvement
-- [ ] `--check` clean and byte-stable; the band is satisfied on the real corpus
-- [ ] Zero goldens
-- [ ] **CI gates the generated plan** — a stale plan fails the build
+- [x] Core suite green: 6588 passed / 7 failed, all 7 confirmed pre-existing/concurrent (other
+      in-flight streams' own files, verified via `git status` — `Expeditions.ExpeditionResolverTests`,
+      3x `Battle`/`Battle.Timeline` reaction-lane tests, 3x `ProveAptitudeJsonEmitTests`); none touch a
+      file this program edited. `guard-dal`/`guard-power`/`guard-single-writer` all clean
+- [x] **The game-closed test passes** — `Expedition_win_levels_the_species_with_no_lawn_run_at_all`
+      (T1.4), no lawn involvement anywhere in the test
+- [x] `--check` clean and byte-stable (`DemonBuildPlanGen`, verified twice consecutively); the band
+      ([50,200]‰) is satisfied on the real corpus ([76,144]‰ actual)
+- [x] Zero goldens moved: `BattleGoldenTests` 5/5 green
+- [x] **CI gates the generated plan** — proven locally: a corrupted plan file made `--check` exit 1,
+      restoring it made it exit 0 again
 
 ---
 

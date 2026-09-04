@@ -69,6 +69,17 @@ jobs:
           dotnet run --project tools/FamilyExpandGen -- --check
           if ($LASTEXITCODE -ne 0) { throw "FamilyExpandGen --check found the generated tree stale — run 'dotnet run --project tools/FamilyExpandGen' and commit the result" }
 
+      - name: species-build plan staleness guard (T1.8, spec-redistribution-plan.md §"Commands")
+        shell: pwsh
+        run: |
+          # redistribution-plan (species-build module 4) commits its generated plan
+          # (data/generated/demons/_species-build-plan.json) to the repo, same DemonSpeciesGen
+          # --check pattern above — --check replans the whole real corpus and fails if the committed
+          # file differs, OR if the replanned corpus falls outside the shipped parity band (Phase 3's
+          # own refusal, exit 1) — a near-miss never ships silently.
+          dotnet run --project tools/DemonBuildPlanGen -- --check
+          if ($LASTEXITCODE -ne 0) { throw "DemonBuildPlanGen --check found the plan stale or out of band — run 'dotnet run --project tools/DemonBuildPlanGen' and commit the result" }
+
       - name: Balance guard (class-system-todo.md P5.3 — termination HARD, dominance-mechanism HARD, dominance-verdict SOFT)
         shell: pwsh
         run: |

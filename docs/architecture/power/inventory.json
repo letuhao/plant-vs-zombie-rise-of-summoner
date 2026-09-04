@@ -3,28 +3,200 @@
   "_meta": {
     "owner": "docs/architecture/power/ssot-power-scale.md §10",
     "note": "Machine-readable mirror of SSOT §10.1 (level curves — collapse into Θ) and §10.2 (non-level scales — legitimate, stay). Generated from the table, reviewed with it (spec-power-guard.md §2.3, T4.1, 2026-08-24). guard-power.ps1's G3 check diffs power-shaped code against the `location` values here — a match at a location not listed here is a new, unreviewed curve.",
-    "rebalance": "Adding a row is a reviewed change to ssot-power-scale.md §10 first, this file second — never the other way around."
+    "rebalance": "Adding a row is a reviewed change to ssot-power-scale.md §10 first, this file second — never the other way around.",
+    "resync": "Resynced 2026-09-05 to ssot-power-scale.md §10 after the effort-power reconciliation audit found the two lists diverged in BOTH directions. Rows 18 and 19 existed in §10 and had never been mirrored (added here). Rows 20-23 and 25 existed only here and were promoted into §10, which is the authority. Rows 3 and 4 pointed at deleted files and were repointed (see each row's locationNote). Rows 27 and 28 are new in both. Both lists carry 27 rows; row 17 is retired and its id is not reassigned."
   },
   "scales": [
-    { "id": 1, "scale": "BaseHp/BaseAtk/BaseDefense(level)", "shape": "linear a+b*L", "location": "src/FusionRpg.Core/Battle/BattleModels.cs", "verdict": "becomes-P-theta" },
-    { "id": 2, "scale": "BaseAccuracy/Dodge/CritRate/CritResist(level)", "shape": "linear a+b*L", "location": "src/FusionRpg.Core/Battle/BattleModels.cs", "verdict": "becomes-theta-rate" },
-    { "id": 3, "scale": "ProgressionPowerCurve.PowerFromLevel", "shape": "2^min(L,12)", "location": "src/FusionRpg.Core/Stats/Derived/IProgressionPowerProvider.cs", "verdict": "deleted" },
-    { "id": 4, "scale": "RpgXpPowerScale.ForKill", "shape": "stub 1.0", "location": "src/FusionRpg.Core/Progression/RpgXpPowerScale.cs", "verdict": "deleted" },
-    { "id": 5, "scale": "LoamPolicy.DevelopmentUpkeepPerLevel", "shape": "linear", "location": "src/FusionRpg.Core/World/Loam/LoamPolicy.cs", "verdict": "economy-magnitude-theta-invariant" },
-    { "id": 6, "scale": "XpToNext = first + (L-1)*step", "shape": "arithmetic", "location": "src/FusionRpg.Core/Progression/RpgProgression.cs", "verdict": "cost-ladder-not-power-ladder" },
-    { "id": 7, "scale": "Affix tier ladder m_t = m1 x 1.75^(t-1)", "shape": "geometric, 5 rungs", "location": "docs/architecture/item/ssot-affixes.md", "verdict": "bounded-relative-stays" },
-    { "id": 8, "scale": "Value band lo/hi = 0.67/1.33 x m_t", "shape": "fixed ratio", "location": "docs/architecture/item/spec-numerics.md", "verdict": "relative-stays" },
-    { "id": 9, "scale": "m1 = share x B_family(20)", "shape": "anchor", "location": "docs/architecture/item/ssot-affixes.md", "verdict": "is-the-pin" },
-    { "id": 10, "scale": "ElementHub.SlotMultiplier", "shape": "x1.25 / x0.8 per slot", "location": "src/FusionRpg.Core/Combat/Element/ElementHub.cs", "verdict": "matchup-bounded-level-free" },
-    { "id": 11, "scale": "CombatPolicies.*Scale = 100.0", "shape": "sigmoid divisor", "location": "src/FusionRpg.Core/Stats/Derived/CombatPolicies.cs", "verdict": "resolver-unit-not-growth-curve" },
-    { "id": 12, "scale": "PowerVector cost function", "shape": "coeff x normalize x conditionality", "location": "src/FusionRpg.Core/Effects/Atoms/Power/CostFunction.cs", "verdict": "prices-relative-content-scale-free" },
-    { "id": 13, "scale": "PowerScalar.Of geomean over 5 categories", "shape": "geometric mean", "location": "src/FusionRpg.Core/Effects/Atoms/Power/PowerReads.cs", "verdict": "display-only-no-production-caller" },
-    { "id": 14, "scale": "maxTierAt(itemLevel) t3@8 t4@18 t5@32", "shape": "step function", "location": "docs/architecture/item/ssot-generation.md", "verdict": "gate-not-magnitude" },
-    { "id": 15, "scale": "double in stat composition (14 sites)", "shape": "IEEE-754", "location": "src/FusionRpg.Core/Combat/CombatDerivedReader.cs, src/FusionRpg.Core/Combat/Element/ElementHub.cs, src/FusionRpg.Core/Stats/ModifierOp.cs, src/FusionRpg.Core/Stats/Derived/CombatPolicies.cs", "verdict": "stands-decided-10-7" },
-    { "id": 16, "scale": "PatronPolicy.AuraMilli(rarity, star, level)", "shape": "rarityBase + perStar*star + level, clamped", "location": "src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs", "verdict": "different-axis-patron-own-level-T4.1" },
-    { "id": 20, "scale": "PowerLadder P(Theta) = C + A*Theta + B*Theta(Theta-1)/2", "shape": "triangular, integer-exact", "location": "src/FusionRpg.Core/Power/PowerLadder.cs", "verdict": "the-one-ladder-T1.2" },
-    { "id": 21, "scale": "ChannelLadder per-channel proportional B_ch", "shape": "triangular, per-channel", "location": "src/FusionRpg.Core/Power/ChannelLadder.cs", "verdict": "the-one-ladder-T2.1" },
-    { "id": 22, "scale": "ContentScale = P(Theta_c) / pinValue", "shape": "ratio of P(Theta)", "location": "src/FusionRpg.Core/Power/ContentScale.cs", "verdict": "the-one-ladder-T3.4" },
-    { "id": 23, "scale": "mapLevel(M) = Wm * DangerBand(M)", "shape": "linear", "location": "docs/architecture/power/ssot-power-scale.md §10.3", "verdict": "closed-Wm-5" }
+    {
+      "id": 1,
+      "scale": "BaseHp/BaseAtk/BaseDefense(level)",
+      "shape": "linear a+b*L",
+      "location": "src/FusionRpg.Core/Battle/BattleModels.cs",
+      "verdict": "becomes-P-theta"
+    },
+    {
+      "id": 2,
+      "scale": "BaseAccuracy/Dodge/CritRate/CritResist(level)",
+      "shape": "linear a+b*L",
+      "location": "src/FusionRpg.Core/Battle/BattleModels.cs",
+      "verdict": "becomes-theta-rate"
+    },
+    {
+      "id": 3,
+      "scale": "ProgressionPowerCurve.PowerFromLevel",
+      "shape": "2^min(L,12)",
+      "location": "src/FusionRpg.Core/Power/IPowerIndexProvider.cs",
+      "locationNote": "Repointed 2026-09-05. The original address (Stats/Derived/IProgressionPowerProvider.cs) is a deleted file and no longer resolves; IPowerIndexProvider.cs:7 records that it structurally replaces it. The verdict is unchanged - the curve itself is still deleted.",
+      "verdict": "deleted"
+    },
+    {
+      "id": 4,
+      "scale": "RpgXpPowerScale.ForKill",
+      "shape": "stub 1.0",
+      "location": "src/FusionRpg.Core/Progression/RpgXpAwardMap.cs",
+      "locationNote": "Repointed 2026-09-05. The original address (Progression/RpgXpPowerScale.cs) is a deleted file. What survives of it is RpgXpAwardMap.NoKillPowerScaleYet (:41), the 1.0 identity that holds the seat for a real content-scale multiplier - and PS-5x in SSOT 10.5 is the rule that governs wiring it.",
+      "verdict": "deleted"
+    },
+    {
+      "id": 5,
+      "scale": "LoamPolicy.DevelopmentUpkeepPerLevel",
+      "shape": "linear",
+      "location": "src/FusionRpg.Core/World/Loam/LoamPolicy.cs",
+      "verdict": "economy-magnitude-theta-invariant"
+    },
+    {
+      "id": 6,
+      "scale": "XpToNext = first + (L-1)*step",
+      "shape": "arithmetic",
+      "location": "src/FusionRpg.Core/Progression/RpgProgression.cs",
+      "verdict": "cost-ladder-not-power-ladder"
+    },
+    {
+      "id": 7,
+      "scale": "Affix tier ladder m_t = m1 x 1.75^(t-1)",
+      "shape": "geometric, 5 rungs",
+      "location": "docs/architecture/item/ssot-affixes.md",
+      "verdict": "bounded-relative-stays"
+    },
+    {
+      "id": 8,
+      "scale": "Value band lo/hi = 0.67/1.33 x m_t",
+      "shape": "fixed ratio",
+      "location": "docs/architecture/item/spec-numerics.md",
+      "verdict": "relative-stays"
+    },
+    {
+      "id": 9,
+      "scale": "m1 = share x B_family(20)",
+      "shape": "anchor",
+      "location": "docs/architecture/item/ssot-affixes.md",
+      "verdict": "is-the-pin"
+    },
+    {
+      "id": 10,
+      "scale": "ElementHub.SlotMultiplier",
+      "shape": "x1.25 / x0.8 per slot",
+      "location": "src/FusionRpg.Core/Combat/Element/ElementHub.cs",
+      "verdict": "matchup-bounded-level-free"
+    },
+    {
+      "id": 11,
+      "scale": "CombatPolicies.*Scale = 100.0",
+      "shape": "sigmoid divisor",
+      "location": "src/FusionRpg.Core/Stats/Derived/CombatPolicies.cs",
+      "verdict": "resolver-unit-not-growth-curve"
+    },
+    {
+      "id": 12,
+      "scale": "PowerVector cost function",
+      "shape": "coeff x normalize x conditionality",
+      "location": "src/FusionRpg.Core/Effects/Atoms/Power/CostFunction.cs",
+      "verdict": "prices-relative-content-scale-free"
+    },
+    {
+      "id": 13,
+      "scale": "PowerScalar.Of geomean over 5 categories",
+      "shape": "geometric mean",
+      "location": "src/FusionRpg.Core/Effects/Atoms/Power/PowerReads.cs",
+      "verdict": "display-only-no-production-caller"
+    },
+    {
+      "id": 14,
+      "scale": "maxTierAt(itemLevel) t3@8 t4@18 t5@32",
+      "shape": "step function",
+      "location": "docs/architecture/item/ssot-generation.md",
+      "verdict": "gate-not-magnitude"
+    },
+    {
+      "id": 15,
+      "scale": "double in stat composition (14 sites)",
+      "shape": "IEEE-754",
+      "location": "src/FusionRpg.Core/Combat/CombatDerivedReader.cs, src/FusionRpg.Core/Combat/Element/ElementHub.cs, src/FusionRpg.Core/Stats/ModifierOp.cs, src/FusionRpg.Core/Stats/Derived/CombatPolicies.cs",
+      "verdict": "stands-decided-10-7"
+    },
+    {
+      "id": 16,
+      "scale": "PatronPolicy.AuraMilli(rarity, star, level)",
+      "shape": "rarityBase + perStar*star + level, clamped",
+      "location": "src/FusionRpg.Core/Demons/Patron/PatronPolicy.cs",
+      "verdict": "different-axis-patron-own-level-T4.1"
+    },
+    {
+      "id": 18,
+      "scale": "thetaOffset - species threat rung",
+      "shape": "table lookup, ten rungs, 0-40",
+      "location": "data/tuning/demon-threat.v1.json",
+      "verdict": "inside-theta-additive-before-P-theta-seed-to-concrete-T0.1"
+    },
+    {
+      "id": 19,
+      "scale": "Action unlock ladder effectiveRung(n) = min(earnCount, rungCap)",
+      "shape": "ratchet, capped at rungCap",
+      "location": "src/FusionRpg.Core/Actions/Unlock/UnlockLadder.cs",
+      "verdict": "holder-counter-not-theta-soft-cap-A-U1"
+    },
+    {
+      "id": 20,
+      "scale": "PowerLadder P(Theta) = C + A*Theta + B*Theta(Theta-1)/2",
+      "shape": "triangular, integer-exact",
+      "location": "src/FusionRpg.Core/Power/PowerLadder.cs",
+      "verdict": "the-one-ladder-T1.2"
+    },
+    {
+      "id": 21,
+      "scale": "ChannelLadder per-channel proportional B_ch",
+      "shape": "triangular, per-channel",
+      "location": "src/FusionRpg.Core/Power/ChannelLadder.cs",
+      "verdict": "the-one-ladder-T2.1"
+    },
+    {
+      "id": 22,
+      "scale": "ContentScale = P(Theta_c) / pinValue",
+      "shape": "ratio of P(Theta)",
+      "location": "src/FusionRpg.Core/Power/ContentScale.cs",
+      "verdict": "the-one-ladder-T3.4"
+    },
+    {
+      "id": 23,
+      "scale": "mapLevel(M) = Wm * DangerBand(M)",
+      "shape": "linear",
+      "location": "docs/architecture/power/ssot-power-scale.md §10.3",
+      "verdict": "closed-Wm-5"
+    },
+    {
+      "id": 24,
+      "scale": "EnhancePolicy.GainMicro(level, enhanceCap) = cap x 1000 x n / (n + K)",
+      "shape": "bounded asymptote, approaches enhance_cap and never reaches it",
+      "location": "src/FusionRpg.Core/Items/Mutation/EnhancePolicy.cs",
+      "verdict": "different-axis-items-own-plus-n-module-15"
+    },
+    {
+      "id": 25,
+      "scale": "EnhancePolicy.LinearGainMilli(level) = scalarPerLevelMilli x n",
+      "shape": "linear, never compounded",
+      "location": "src/FusionRpg.Core/Items/Mutation/EnhancePolicy.cs",
+      "verdict": "naive-track-report-only-module-15"
+    },
+    {
+      "id": 26,
+      "scale": "SpeciesXpCurve.XpToNext = first + (L-1)*step",
+      "shape": "arithmetic, identical shape to row 6",
+      "location": "src/FusionRpg.Core/Progression/SpeciesProgression.cs",
+      "verdict": "cost-ladder-not-power-ladder-species-own-tunables-T1.1"
+    },
+    {
+      "id": 27,
+      "scale": "Specimen (unique-demon) level - rpg_unique_actors.xp/level drained through RpgXpCurve.XpToNext",
+      "shape": "arithmetic, identical shape to row 6",
+      "location": "src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs, data/tuning/progression.v1.json",
+      "verdict": "cost-ladder-not-power-ladder-corrected-from-flat-100-2026-09-05"
+    },
+    {
+      "id": 28,
+      "scale": "DropVolume.VolumeScaleMilli(thetaActor) = base + slope*(Theta - pin)",
+      "shape": "linear in Theta, floored, no ceiling",
+      "location": "src/FusionRpg.Core/Items/Drops/DropVolume.cs",
+      "verdict": "linear-in-theta-deliberately-count-is-a-rate-D18"
+    }
   ]
 }

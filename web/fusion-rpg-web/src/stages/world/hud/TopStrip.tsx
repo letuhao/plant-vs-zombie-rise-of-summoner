@@ -34,10 +34,11 @@ export type TopStripProps = {
  * text content, which is the one thing that would break that guarantee.
  *
  * Turn and calendar (world-stage W53) share this strip per `spec-world-hud.md`'s own arbitration —
- * both are "this module." The calendar slot is a calendar, never a season (§8b.7): the label carries
- * only day/week/month numbers plus whichever of plague/specialMonth/specialWeek the server actually
- * rolled, sourced from `WorldStateDto.Calendar`, never a `calendar` report entry (blank six turns in
- * seven).
+ * both are "this module." The calendar label carries day/week/month/season numbers plus whichever of
+ * plague/specialMonth/specialWeek the server actually rolled, sourced from `WorldStateDto.Calendar`,
+ * never a `calendar` report entry (blank six turns in seven). §8b.7 ("a calendar, never a season")
+ * no longer holds — sector-development shipped a real season and the owner decided directly
+ * (2026-09-05) to show it; see `calendarLabel.ts`'s own doc comment for the full history.
  */
 export function TopStrip({ turn, calendar, income, upkeep, net, stock, stockCapacity }: TopStripProps) {
   const upkeepAsCost: Magnitude = { ...upkeep, value: -Math.abs(upkeep.value) };

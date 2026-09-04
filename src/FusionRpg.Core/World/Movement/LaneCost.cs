@@ -48,7 +48,7 @@ public static class MovementPolicy
     {
         Hold => 0,
         Scout => ScoutPointsPerTurn,
-        // Balance number, not a structural one — data/tuning/world.v4.json, read through
+        // Balance number, not a structural one — data/tuning/world.v5.json, read through
         // WorldTuningHub the same way LoamPolicy.CarryPerBearer and TurnCalendar.DaysPerWeek already
         // are (world-stage W30). Never a const here: a dowser seeing four lanes out against a
         // scout's two is exactly the kind of number a balance pass wants to move.

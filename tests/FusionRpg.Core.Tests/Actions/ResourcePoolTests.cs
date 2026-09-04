@@ -165,4 +165,65 @@ public class ResourcePoolTests
 
         Assert.Throws<ArgumentOutOfRangeException>(() => pools.Resolve("hp", nowTick: 50, derived));
     }
+
+    // ---- Add (E28 fix #1, spec-param-parity.md §3 row 1) ----
+    // ExecApplyResourceDelta's own write path for the five non-hp resources — Add is the
+    // signed-delta complement to TrySpend, for a caller applying a generic delta rather than
+    // gating a pre-checked cost.
+
+    [Fact]
+    public void AddIncreasesAResourceClampedAtMax()
+    {
+        var derived = SnapshotWith("qi", max: 100, regenPerTick: 0.0);
+        var pools = ActorResourcePools.FromStored(
+            DerivedStatChannels.ResourceIds.ToDictionary(id => id, _ => 40L), atTick: 0);
+
+        var afterSmall = pools.Add("qi", 10, nowTick: 0, derived);
+        Assert.Equal(50, afterSmall);
+        Assert.Equal(50, pools.Resolve("qi", nowTick: 0, derived));
+
+        var afterOverflow = pools.Add("qi", 1000, nowTick: 0, derived);
+        Assert.Equal(100, afterOverflow); // clamped at max, not 1050
+    }
+
+    [Fact]
+    public void AddWithANegativeAmountDrainsAndClampsAtZeroRatherThanRefusing()
+    {
+        // Unlike TrySpend (which refuses outright when the pool can't afford the amount and
+        // leaves it byte-for-byte unchanged), Add is a generic delta: a drain bigger than the
+        // current value still lands, clamped at 0 — the same shape Resolve's own formula already
+        // gives a pool nothing has touched in a long time.
+        var derived = SnapshotWith("hunger", max: 100, regenPerTick: 0.0);
+        var pools = ActorResourcePools.FromStored(
+            DerivedStatChannels.ResourceIds.ToDictionary(id => id, _ => 10L), atTick: 0);
+
+        var result = pools.Add("hunger", -1000, nowTick: 0, derived);
+
+        Assert.Equal(0, result);
+        Assert.Equal(0, pools.Resolve("hunger", nowTick: 0, derived));
+    }
+
+    [Fact]
+    public void AddSettlesRegenAccruedSinceTheLastTouchBeforeApplyingTheDelta()
+    {
+        // Mirrors TrySpend's own contract ("this pool is first settled ... so regen accrued since
+        // the last touch is folded in before the delta lands") — Add must not bypass regen either.
+        var derived = SnapshotWith("stamina", max: 1000, regenPerTick: 5.0);
+        var pools = ActorResourcePools.FromStored(
+            DerivedStatChannels.ResourceIds.ToDictionary(id => id, _ => 0L), atTick: 0);
+
+        // 10 ticks of regen (50) folded in, then +7 on top.
+        var result = pools.Add("stamina", 7, nowTick: 10, derived);
+
+        Assert.Equal(57, result);
+    }
+
+    [Fact]
+    public void AddOnAnUnknownResourceIdThrows()
+    {
+        var derived = SnapshotWith("hp", max: 100, regenPerTick: 0.0);
+        var pools = ActorResourcePools.CreateFull(derived, atTick: 0);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => pools.Add("mana", 10, nowTick: 0, derived));
+    }
 }

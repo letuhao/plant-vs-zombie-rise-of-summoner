@@ -203,9 +203,14 @@ public class RerollPolicyTests
         Assert.True(RarityBudgetKeys.IsRegistered("reroll_cost_mult"));
         var def = RarityBudgetKeys.All.Single(k => k.Key == "reroll_cost_mult");
         Assert.Equal("enhance-reroll (15)", def.ConsumerModule);
-        // The two sockets keys stay pinned as unregistered exactly as hard as before.
-        Assert.False(RarityBudgetKeys.IsRegistered("socket_min"));
-        Assert.False(RarityBudgetKeys.IsRegistered("socket_max"));
+        // ⭐ 2026-09-05: module 16 (`sockets`) decided socket_min/socket_max — two integers per rung,
+        // the inclusive window a drop's socket count is rolled from. This row previously pinned them
+        // as unregistered; it is MOVED, not loosened — the keys now assert their own decided consumer,
+        // which is a strictly stronger claim than "still awaiting".
+        Assert.True(RarityBudgetKeys.IsRegistered("socket_min"));
+        Assert.True(RarityBudgetKeys.IsRegistered("socket_max"));
+        Assert.Equal("sockets (16)", RarityBudgetKeys.All.Single(k => k.Key == "socket_min").ConsumerModule);
+        Assert.Equal("sockets (16)", RarityBudgetKeys.All.Single(k => k.Key == "socket_max").ConsumerModule);
     }
 
     // ---- §5, craft pity -----------------------------------------------------------------------------

@@ -222,7 +222,7 @@ public class ContractRegressionTests : IDisposable
 
         // The warden property (SSOT §11.1a): the Nth slot costs strictly more than the (N-1)th,
         // arbitrarily far past the old ceiling -- because of the price, never because of a cap.
-        Assert.True(ContractPolicy.NextSlotPrice(purchases) > ContractPolicy.NextSlotPrice(purchases - 1));
+        Assert.True(ContractPolicy.NextSlotPrice(purchases, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning) > ContractPolicy.NextSlotPrice(purchases - 1, FusionRpg.Core.Demons.SoulSinkPolicy.VanillaPvzTheta, FusionRpg.Core.Power.PowerTuningHub.Tuning));
     }
 
     [Fact]

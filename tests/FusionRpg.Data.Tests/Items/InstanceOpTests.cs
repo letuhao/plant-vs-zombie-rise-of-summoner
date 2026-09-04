@@ -266,8 +266,11 @@ public class InstanceOpTests : IDisposable
             Assert.Equal(RerollPolicy.RungLegMilli(i, t), _store.GetRarityBudget(rung, "reroll_cost_mult"));
         }
 
-        // SC7 still refuses the two keys whose consumers have no decided shape — this module
-        // unblocked exactly one key, not the whole awaiting list.
-        Assert.Throws<RarityBudgetKeyRejection>(() => _store.SetRarityBudget("almanac", "socket_max", 3));
+        // ⭐ 2026-09-05: module 16 (`sockets`) decided socket_min/socket_max, so this row MOVED
+        // rather than loosening — the key now writes, and the SC7 gate is asserted against a key with
+        // no consumer at all. The gate has to survive the closed list happening to be fully decided.
+        _store.SetRarityBudget("almanac", "socket_max", 4);
+        Assert.Equal(4, _store.GetRarityBudget("almanac", "socket_max"));
+        Assert.Throws<RarityBudgetKeyRejection>(() => _store.SetRarityBudget("almanac", "no_such_key", 3));
     }
 }

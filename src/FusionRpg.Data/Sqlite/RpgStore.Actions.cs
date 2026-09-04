@@ -244,7 +244,10 @@ public sealed partial class RpgStore
                 ("$tct", e.TimeCostTicks), ("$speedCh", e.SpeedChannel),
                 ("$cdCh", (object?)e.CooldownChannel ?? DBNull.Value), ("$windup", e.WindupTicks),
                 ("$offsets", JsonSerializer.Serialize(e.ResolveOffsets)),
-                ("$recovery", e.RecoveryTicks), ("$commitment", e.Commitment.ToString()),
+                // battle-tempo commitment-binding: null means "no override, inherit the profile
+                // default" -- the column stays TEXT NOT NULL (no migration), so null is the empty
+                // string, which never collides with a real Commitment enum name.
+                ("$recovery", e.RecoveryTicks), ("$commitment", e.Commitment?.ToString() ?? ""),
                 ("$interruptible", e.Interruptible.ToString()), ("$refund", e.InterruptRefundMilli),
                 ("$slotConsuming", e.SlotConsuming ? 1 : 0), ("$priority", e.PriorityBand),
                 ("$cdClass", e.Class.ToString()), ("$cdKey", (object?)e.CooldownKey ?? DBNull.Value),
@@ -327,7 +330,7 @@ public sealed partial class RpgStore
             WindupTicks = r.GetInt64(13),
             ResolveOffsets = offsets,
             RecoveryTicks = r.GetInt64(15),
-            Commitment = Enum.Parse<Commitment>(r.GetString(16)),
+            Commitment = r.GetString(16) is { Length: > 0 } commitmentStr ? Enum.Parse<Commitment>(commitmentStr) : null,
             Interruptible = Enum.Parse<Interruptible>(r.GetString(17)),
             InterruptRefundMilli = r.GetInt32(18),
             SlotConsuming = r.GetInt32(19) != 0,

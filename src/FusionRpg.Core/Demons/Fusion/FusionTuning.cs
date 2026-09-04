@@ -13,6 +13,7 @@ public sealed record FusionTuning(
     int PerStarPowerMilli, int PerStarDefenseMilli,
     IReadOnlyDictionary<DemonRarity, int> StarCap,
     FusionCostTuning StarMergeCost, FusionCostTuning PromotionCost,
+    IReadOnlyDictionary<DemonRarity, FusionCostTuning> PromotionCostByRarity,
     IReadOnlyDictionary<DemonRarity, RecipeCostTuning> RecipeCost,
     IReadOnlyDictionary<DemonRarity, int> SlotsByRarity);
 
@@ -49,6 +50,21 @@ public static class FusionTuningLoader
             var starMergeCost = Cost(root, "starMergeCost");
             var promotionCost = Cost(root, "promotionCost");
 
+            // Per-rung promotion price (effort-power M5, 2026-09-05). Every rung must be present;
+            // `promotionCost` above stays as the shape the flat price used to have, and is the
+            // fallback a rung falls back to only if this table ever loses one.
+            var promoEl = Obj(root, "promotionCostByRarity", "$");
+            var promotionCostByRarity = new Dictionary<DemonRarity, FusionCostTuning>();
+            foreach (var rarity in DemonRarityLadder.All)
+            {
+                var key = rarity.ToString().ToLowerInvariant();
+                var el = Obj(promoEl, key, "promotionCostByRarity");
+                promotionCostByRarity[rarity] = new FusionCostTuning(
+                    Souls: Long(el, "souls", $"promotionCostByRarity.{key}"),
+                    ShardCount: Int(el, "shardCount", $"promotionCostByRarity.{key}"),
+                    EssenceCount: Int(el, "essenceCount", $"promotionCostByRarity.{key}"));
+            }
+
             // Eligible-for-recipes is DemonRecipeCatalog's own eligibility floor (Cultivated and
             // up, spec-rarity-migration.md §3's translation of the old ">= Rare") — one source of
             // truth, never a second hardcoded list here.
@@ -72,7 +88,7 @@ public static class FusionTuningLoader
                 slotsByRarity[rarity] = Int(slotsEl, rarity.ToString().ToLowerInvariant(), "slotsByRarity");
 
             return new FusionTuning(schemaVersion, version, perStarPowerMilli, perStarDefenseMilli,
-                starCap, starMergeCost, promotionCost, recipeCost, slotsByRarity);
+                starCap, starMergeCost, promotionCost, promotionCostByRarity, recipeCost, slotsByRarity);
         }
     }
 

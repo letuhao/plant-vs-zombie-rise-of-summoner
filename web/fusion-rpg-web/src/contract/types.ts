@@ -517,3 +517,18 @@ export type CommanderSheetMeta = {
   locationStub: string | null;
   legionStub: string | null;
 };
+
+// ===========================================================================
+// 11. Battle turn order — forecast-rail (battle-tempo FR2/FR3). Mirrors
+//     FusionRpg.Core.Battle.Timeline.TurnOrderEntry field-for-field (parity
+//     guarded — see ClassSystem/TurnOrderRecordContractParityTests.cs). A
+//     RECORD of an already-resolved battle, never a live forecast (spec
+//     spec-forecast-rail.md §2.0) — round + a display name only. No
+//     actorKey, no tick numbers, no TurnState: engine vocabulary never
+//     reaches this type (§2.4).
+// ===========================================================================
+
+export type TurnOrderEntry = {
+  round: number;
+  displayName: string;
+};

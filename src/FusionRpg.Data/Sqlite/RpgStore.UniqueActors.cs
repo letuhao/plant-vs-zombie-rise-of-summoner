@@ -1,6 +1,7 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Progression;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
@@ -843,13 +844,21 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// W8-B: award specimen XP (not type RpgProgression). Level stub: 100 XP per level.
+    /// W8-B: award specimen XP (not type RpgProgression).
+    ///
+    /// <para>The level ladder is <see cref="RpgXpCurve"/>'s shared arithmetic cost curve under the
+    /// <see cref="RpgActorKinds.Specimen"/> kind, NOT the flat 100-per-level stub this carried until
+    /// 2026-09-05. That stub was a private <c>f(level)</c> feeding the same quadratic <c>P(Theta)</c>
+    /// every other level feeds, which made specimen power quadratic IN EFFORT where
+    /// ssot-power-scale.md §10.5 requires linear — at level 1,000 a specimen level bought the same
+    /// power as a player level for a small fraction of the effort. `first` is tuned to 100 so the
+    /// cost at level 1 is byte-identical to the old stub; only the late-game divergence changes.</para>
     /// </summary>
     public (bool Ok, string Reason, UniqueActorDto? Actor) AwardUniqueActorXp(
-        string instanceId, double delta, string? reason = null)
+        string instanceId, long delta, string? reason = null)
     {
         if (string.IsNullOrWhiteSpace(instanceId)) return (false, "bad_args", null);
-        if (!double.IsFinite(delta) || delta <= 0) return (false, "bad_delta", null);
+        if (delta <= 0) return (false, "bad_delta", null);
         var id = instanceId.Trim();
         lock (_gate)
         {
@@ -862,18 +871,21 @@ public sealed partial class RpgStore
 
     /// <summary>XP award inside an open transaction — used by the expedition reward apply.</summary>
     internal (bool Ok, string Reason, UniqueActorDto? Actor) AwardUniqueActorXpUnlocked(
-        SqliteConnection db, string instanceId, double delta)
+        SqliteConnection db, string instanceId, long delta)
     {
         var row = ReadUniqueActorUnlocked(db, instanceId);
         if (row is null) return (false, "not_found", null);
         if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
             return (false, "phase.retired", row);
 
-        var xp = row.Xp + delta;
+        long xp;
+        checked { xp = row.Xp + delta; }
         var level = row.Level < 1 ? 1 : row.Level;
-        while (xp >= 100.0)
+        // XpToNext is >= 1 by construction (RpgXpCurve clamps), so this always terminates.
+        for (var need = RpgXpCurve.XpToNext(RpgActorKinds.Specimen, level); xp >= need;
+             need = RpgXpCurve.XpToNext(RpgActorKinds.Specimen, level))
         {
-            xp -= 100.0;
+            xp -= need;
             level++;
         }
 

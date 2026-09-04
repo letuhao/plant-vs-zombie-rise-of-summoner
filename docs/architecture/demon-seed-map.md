@@ -44,12 +44,20 @@ data/generated/demons/**.json                CONCRETE — checked in, diffable, 
 SQLite  -->  catalog-runtime  -->  WaveCatalog · SummonRoller · LaneCost · RpgStore · endpoints
 ```
 
-**Honest scope statement: `data/generated/` does not exist.** `seed-contract.md` carries the status
+~~**Honest scope statement: `data/generated/` does not exist.** `seed-contract.md` carries the status
 *"Proposed 2026-08-22 … Nothing is authorized to be authored from it yet"*, and there is no generator
-and no generated tree in the repo today — verified, the directory is absent. `tools/AtomImporter`
-exists and is the transaction discipline `species-import` extends, but the middle stage of the chain
-is **new work this program does first**. Anyone reading this map as "the item pipeline already exists,
+and no generated tree in the repo today — verified, the directory is absent.~~ `tools/AtomImporter`
+exists and is the transaction discipline `species-import` extends, ~~but the middle stage of the chain
+is **new work this program does first**~~. Anyone reading this map as "the item pipeline already exists,
 just point it at demons" is reading it wrong.
+
+**Corrected 2026-09-05 — the middle stage has landed.** `data/generated/demons/` holds **830 committed
+JSON files**, one per concrete species, all tracked (counted this session; first committed 2026-09-04 in
+`52713f4`). The generator exists too: `DemonSpeciesGenerator` / `SpeciesExpander` /
+`ConcreteSpeciesSerializer` under `src/FusionRpg.Core/Demons/Generation/`, with the import side in
+`RpgStore.Species.cs`. The struck text was written on 2026-09-01, when the stage was still proposed, and
+was never revisited. The last sentence still stands: the chain was not free, and this is not the item
+pipeline pointed at demons.
 
 ---
 

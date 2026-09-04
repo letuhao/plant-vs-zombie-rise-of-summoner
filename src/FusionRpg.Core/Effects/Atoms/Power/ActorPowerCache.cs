@@ -84,6 +84,12 @@ public sealed class ActorPowerCache
                              + Math.Abs(CostFunction.MeanMagnitude(atom, kind, pars));
         }
 
+        // E44/D2: remembers each channel's own priced points (not just their sum into `total`) so the
+        // interaction pass below can read "what did THIS channel price to" per side of a named pair —
+        // the thing neither refuted attempt had, because neither kept a per-channel figure around
+        // after folding it into the total.
+        var channelPoints = new Dictionary<(string Kind, string Channel), int>();
+
         foreach (var ((kindId, channel), magnitude) in byChannel)
         {
             var coeff = t.Find(kindId, channel);
@@ -92,11 +98,56 @@ public sealed class ActorPowerCache
 
             var normalisedMilli =
                 PowerMath.DivRound((long)magnitude * PowerMath.One, Math.Max(1, coeff.ReferenceScale));
-            total += PowerVector.FromCategory(
-                kind.Categories, PowerMath.MulMilli(normalisedMilli, coeff.CoeffMilli));
+            var points = PowerMath.MulMilli(normalisedMilli, coeff.CoeffMilli);
+            total += PowerVector.FromCategory(kind.Categories, points);
+            channelPoints[(kindId, channel)] = points;
         }
 
-        return total;
+        return total + Interaction(channelPoints, t);
+    }
+
+    /// <summary>
+    /// E44 (spec-power-sweep.md §4.2, closing definitions.md §13 D2): the genuinely non-linear term
+    /// the two prior attempts lacked. For every named pair present on the actor (both sides), adds
+    /// <c>coeffMilli × pointsA × pointsB / 1,000,000</c> — proportional to the PRODUCT of the two
+    /// sides' own priced points, not their sum, which is the one shape with an actual cross term:
+    /// <c>marginal(x, A)</c> now depends on what else is in <c>A</c>, because this term does.
+    ///
+    /// <para><b>Why /1,000,000 in one division, not two.</b> Both <c>pointsA</c> and <c>pointsB</c>
+    /// are already-realized "points" (each is itself a per-mille factor already divided down once by
+    /// <see cref="PowerMath.MulMilli"/>), so their raw product carries two implied per-mille scales —
+    /// one from <c>coeffMilli</c> being a per-mille dial, one from treating 1000 points as "one
+    /// reference unit" the way <c>RungPowerBudgetTests.ReferencePower</c> already does. Collapsing
+    /// both into a single <c>DivRound</c> at the end is <i>more</i> exact than two chained
+    /// <see cref="PowerMath.CombineMilli"/> calls would be, not less — one widened multiply, one
+    /// rounding, matching the "divide by 1000 last, exactly once" discipline's actual intent (avoid
+    /// compounding intermediate rounding error), not a literal count of divisions in the file.</para>
+    ///
+    /// <para><b>Overflow throws.</b> <c>checked</c>, matching <see cref="CostFunction.PricePooled"/>'s
+    /// own precedent for new arithmetic in this namespace — a term large enough to overflow a widened
+    /// <c>long</c> product must fail loudly, never wrap or silently clamp.</para>
+    /// </summary>
+    static PowerVector Interaction(
+        IReadOnlyDictionary<(string Kind, string Channel), int> channelPoints, PowerTables t)
+    {
+        var correction = PowerVector.Zero;
+
+        foreach (var row in t.Interactions)
+        {
+            if (!channelPoints.TryGetValue((row.KindA, row.ChannelA), out var pointsA)) continue;
+            if (!channelPoints.TryGetValue((row.KindB, row.ChannelB), out var pointsB)) continue;
+            if (pointsA == 0 || pointsB == 0) continue;
+
+            checked
+            {
+                var product = (long)pointsA * pointsB;                    // widened before multiplying
+                var scaled = product * row.CoeffMilli;                    // still widened
+                var points = (int)PowerMath.DivRound(scaled, PowerMath.One * PowerMath.One); // divides once
+                correction += PowerVector.FromCategory(row.Category, points);
+            }
+        }
+
+        return correction;
     }
 
     /// <summary>

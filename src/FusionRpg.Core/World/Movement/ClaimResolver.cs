@@ -82,7 +82,16 @@ public static class ClaimResolver
                             // Warding vs. capture (spec-loam-texture.md): the ward exempts FadePolicy
                             // only, never combat — capture ends the binding outright, no transfer to
                             // the new owner and no refund to the old one.
-                            WardenBindingId = null
+                            WardenBindingId = null,
+                            // base-defense siege-supply §7 cost 6: slot ownership follows the sector.
+                            // The board is the sector zoomed in (base-defense decision 3), so a
+                            // captured sector's slots keeping the previous owner becomes VISIBLE on
+                            // the board — every structure would read as the loser's. Buildings still
+                            // have no ownership ON THE BOARD (decision 12, possession is by
+                            // occupation); this is the world-layer fact the outcome record settles.
+                            Slots = s.Slots
+                                .Select(sl => sl with { OwnerFactionId = command.CommanderId })
+                                .ToList()
                         }
                         : s)
                     .ToList()

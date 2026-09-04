@@ -22,6 +22,12 @@ public static partial class DemonSpeciesCatalog
     static IReadOnlyList<DemonSpeciesDef>? _configured;
     static readonly AsyncLocal<IReadOnlyList<DemonSpeciesDef>?> Scoped = new();
 
+    /// <summary>`species-build` T1.2 — a non-throwing check for callers that must treat the roster as
+    /// an optional enrichment rather than a hard requirement (`RpgXpAwardMap`'s species-placement
+    /// award: most progression tests never configure a roster, and awarding type/player XP must keep
+    /// working exactly as it always has when one isn't present).</summary>
+    public static bool IsConfigured => Scoped.Value != null || _configured != null;
+
     /// <summary>
     /// Process-wide. What a host calls once, after loading the roster from its store
     /// (<c>RpgStore.BuildDemonSpeciesSnapshot()</c>). Validates and rejects a bad roster the same way

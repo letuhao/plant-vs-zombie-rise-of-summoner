@@ -22,6 +22,7 @@ public class OnHitRiderTests
         "\"statComposer\":{\"primaryAffinityDivisor\":4,\"secondaryAffinityDivisor\":8}," +
         "\"timeline\":{\"profiles\":{\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1}}}," +
         "\"hybrid\":{\"secondaryWeightMilli\":0}," +
+        "\"speciesTempo\":{\"referenceIntervalMs\":1500}," +
         "\"traits\":{" + traits + "}}";
 
     // ---- inert by default: the wave's byte-identity invariant ----

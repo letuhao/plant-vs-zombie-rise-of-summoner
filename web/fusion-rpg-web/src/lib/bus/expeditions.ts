@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { getJson, sendJson } from "./rest";
 import type { DemonSpecimenDto } from "./demons";
+import type { TurnOrderEntry } from "@/contract/types";
 
 // ---- DTOs (spec-expeditions.md wire shapes) ----
 
@@ -49,6 +50,10 @@ export type ExpeditionBattleResultDto = {
   outcome: "victory" | "defeat" | "stalemate";
   runId?: number | null;
   matchKey: string;
+  /** battle-tempo forecast-rail FR3 — the acting order this battle actually recorded. A RECORD
+   * (spec-forecast-rail.md §2.0), never empty-meaning-"unknown": empty is a legal value only
+   * when the resolve genuinely had no live actors, which never happens for a real battle. */
+  turnOrder: TurnOrderEntry[];
 };
 
 export type ExpeditionCollectDto = {

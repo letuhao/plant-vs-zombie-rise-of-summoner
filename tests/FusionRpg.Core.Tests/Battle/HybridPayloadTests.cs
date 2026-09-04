@@ -109,6 +109,7 @@ public class HybridPayloadTests
             "\"statComposer\":{\"primaryAffinityDivisor\":4,\"secondaryAffinityDivisor\":8}," +
             "\"timeline\":{\"profiles\":{\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1}}}," +
             "\"hybrid\":{\"secondaryWeightMilli\":" + w + "}," +
+            "\"speciesTempo\":{\"referenceIntervalMs\":1500}," +
             "\"traits\":{}}";
 
         Assert.Throws<BattleTuningRejection>(() => BattleTuningLoader.Parse(Doc(1001)));

@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "_meta": {
+    "owner": "docs/architecture/base-defense-map.md",
+    "note": "base-defense siege-board (spec-siege-board.md). Costs are integer, base 10 rather than base 1, so a future '0.5x road' fits as 5 without ever introducing a fraction.",
+    "noteMaxCells": "board.maxCells is STRUCTURAL, not a progression ceiling (AGENTS.md's exemption for structural limits/buffers) -- an allocation/perf bound on one board. A spec larger than this is a bug in district-layout, not an ambitious player. Kept as a config row anyway, per tunables-ssot.md, rather than a hidden code constant.",
+    "noteDiagonal": "diagonalSurcharge ships at 0 -- decision 36 (owner, 2026-09-04): Chebyshev already means a diagonal costs one step, same as orthogonal; a surcharge would desynchronize movement from every range check already shipped (GridDistance.InRange/Square). Kept in the schema, not removed, so a later balance pass can revisit it in one row without a code change."
+  },
+  "board": {
+    "moveCost": {
+      "open": 10,
+      "rough": 20,
+      "diagonalSurcharge": 0
+    },
+    "maxCells": 4096
+  }
+}

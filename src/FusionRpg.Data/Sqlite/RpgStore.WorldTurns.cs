@@ -509,8 +509,11 @@ public sealed partial class RpgStore
             var commands = ListWorldCommandsUnlocked(db, tx, worldId, turn);
             var result = TurnEngine.Step(world, commands, header.Seed);
 
-            ClearWorldGraphUnlocked(db, tx, worldId);
-            WriteWorldGraphUnlocked(db, tx, result.World);
+            // base-defense world-graph-diff 3.2/3.3: turn commit writes only what changed, not the
+            // whole graph — `world` (pre-step) and `result.World` (post-step) are exactly `previous`
+            // and `next`. World *creation* (CreateWorld) is unaffected and still uses
+            // WriteWorldGraphUnlocked on an empty graph, which is already the cheapest possible case.
+            DiffWorldGraphUnlocked(db, tx, world, result.World);
 
             using (var log = db.CreateCommand())
             {

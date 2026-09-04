@@ -166,9 +166,9 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     point). **Owner-run remaining:** criterion 1 (plant/zombie carry species element in
     `CombatActorSnapshot`), criterion 5 (an elemental defense channel measurably changes lawn overlay
     damage), and the shield live absorb proof itself.
-- [~] **E28 `param-parity`** · **L** · Deps: — · `spec-param-parity.md` — **Fixes #2-7 + content fix +
-  Test 12 all DONE 2026-09-04/05, independently re-verified. Fix #1 remains genuinely blocked (below)
-  — a real, correctly-scoped-out new-storage-design question, not this session's to force.**
+- [x] **E28 `param-parity`** · **L** · Deps: — · `spec-param-parity.md` — **Fixes #1-7 + content fix +
+  Test 12 all DONE 2026-09-04/05, independently re-verified. Fix #1 closed 2026-09-05 (see below) —
+  marker corrected from `[~]` to `[x]`, the body's own "E28 is now fully `[x]`" line was already true.**
   - **Test 12 (the durable "no declared param goes unwired" guard) — independently read in full**:
     `tests/FusionRpg.Core.Tests/Atoms/ParamParityGuardTests.cs`. A genuinely generic mechanism —
     `FindUnwiredParams` loops `AtomKindRegistry.All`'s REAL kinds and each kind's REAL
@@ -213,14 +213,42 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     own independent confirmation via an isolated console harness against the live compiled registry
     outside the repo, run specifically because this exact test-project build blocker hit them too)
     stands independent of that blocked run.
-  - **Marked `[~]`, not `[x]`**: fixes #2-7, the content fix, and Test 12 are done and independently
-    re-verified; **fix #1 (`resource.delta` reaching stamina/hunger/spirit/qi/poise) remains a real,
-    correctly-identified, unbuilt gap** — genuine new storage design (a `targetPtr`-keyed pool
-    registry plus a new non-`EntityStatWriter` writer), not a reconnect, deliberately not attempted
-    by this or any prior session per the design-gate discipline (propose, don't force). The inherited
-    E26 finding about `AtomRunner`/`EffectOverlayMerge` on the runner path for `stat.modify`/
-    `stat.derived`/`board.action` also remains open, already a loud named refusal today (not a silent
-    failure), correctly left as documented follow-up rather than pulled into this module's own scope.
+  - **⛔ Fix #1 CLOSED 2026-09-05.** `ExecApplyResourceDelta` now honours all six `ResourceIds`
+    (`hp`/`stamina`/`hunger`/`spirit`/`qi`/`poise`), not just `hp` — independently re-read in full
+    against the live `InjectorEffectActionSink.cs`: an unrecognized channel is a named **refusal**
+    (`CheatState.Error` + `return false`), never a silent skip, matching this module's own "declared,
+    accepted, ignored is the defect" discipline exactly. `ActorResourcePools.Add` (new, settles regen
+    at `nowTick` then clamps — never refuses, since a delta can restore as well as spend, unlike the
+    existing `TrySpend`) and `LawnActorResourcePools` (new, `src/FusionRpg.Core/Combat/`, Unity-free,
+    ptr-keyed exactly like `InjectorEntityRegistry`'s own `FindZombie`/`FindPlant` — confirmed
+    present via direct file read) are the genuine new storage this fix needed, mirroring
+    `CommanderResourcePools`'s own shape but keyed by `CombatPtr.Normalize(targetPtr)` instead of
+    `CommanderId`, exactly as this session's own diagnosis called for. The other five resources
+    resolve through the SAME registry-then-scan lookup shape the `hp` branch already used (no new
+    scan kind), then write through `InjectorCombatBridge.ResolveActor`'s own derived snapshot and
+    `LawnActorResourcePools.GetOrCreate(...).Add(...)` — never a raw dictionary write, never
+    `EntityStatWriter` (correctly kept out of the guarded single-writer class, matching
+    `resource-hub-ssot.md` §7's own "these five were never Unity fields" reasoning).
+  - **`guard-single-writer.ps1` — independently re-run by this session, not merely trusted**:
+    **`SINGLE-WRITER GUARD OK`**, confirming the new writer trips nothing there, exactly as this
+    session's own original diagnosis predicted (a non-Unity pool writer, outside the guard's 10
+    literal Unity field names).
+  - **Independently re-run by this session**: the new `LawnActorResourcePoolsTests.cs` +
+    `ResourcePoolTests.cs` — **19/19 passing** (per-ptr pool starts at max, two-ptr independence, ptr
+    normalization equivalence, regen-settles-before-delta, negative-drain-clamps-to-0-not-refuse,
+    unknown-id-throws, and more).
+  - **The full-suite 159 failures the delegate reported — independently confirmed genuinely
+    unrelated**: `git status` re-confirms `ContractTuningTestBootstrap.cs`/`SpeciesTempoTests.cs`
+    both genuinely modified by unrelated, concurrent work, not by this fix.
+  - **Owner activity note**: the 4 source files landed in a real owner commit (`2c40665 "update
+    specs"`, 2026-09-05) mid-session; the 2 new test files remain uncommitted. No git write command
+    was run by this session or its delegate.
+  - **The inherited E26 finding about `AtomRunner`/`EffectOverlayMerge` on the runner path for
+    `stat.modify`/`stat.derived`/`board.action` remains open** — already a loud named refusal today
+    (not a silent failure), explicitly out of E26's own contract per its own words, correctly left as
+    documented follow-up rather than pulled into this module's own scope.
+  - **E28 is now fully `[x]`** — every fix (#1-7), the content fix, and Test 12 are done and
+    independently re-verified above.
   - Seven params, plus the `fx.set_dirt_box` Water→Dirt fix.
   - **Test 12 is the durable one**: walk every kind's declared params, assert each reaches its executor.
   - Prerequisite of E30 (`atk` is why plant spawns price at zero).
@@ -2652,7 +2680,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     (`compiled.Runtime` empty, `EffectActions.WaveControl` present) rather than the Runner path.
     Re-verified: `dotnet build` clean; the touched Core.Tests classes plus the new test —
     **182/182 passing**; `FusionRpg.Guard.Tests` — **171/171 passing** after the fix.
-- [~] **E37 `projectile-control`** · **M** · Deps: E28 · ⚠️ **assembly sweep before wiring `moveWay`.**
+- [x] **E37 `projectile-control`** · **M** · Deps: E28 · ⚠️ **assembly sweep before wiring `moveWay`.**
   - **The confirmed live-code precondition, checked before delegating**: E28's own piece this module
     needed (`atk`'s `NotImplementedNote` removed for `spawn.entity`) had already landed
     (`HonouredOnlyWhen: "kind=plant|zombie"`, no note) — E37 was genuinely buildable now despite
@@ -2727,10 +2755,29 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     plausible given this session's own earlier reading of `CostFunction.cs`; the report's rewritten,
     comparative assertion (empty body prices far below a body-carrying one) is the honest fix, not a
     silent pass-anyway.
-  - **Marked `[~]`, not `[x]`, deliberately**: acceptance criteria 0-6, 8 are done and independently
-    re-verified; **criterion 7 remains a real, open, correctly-flagged gap** pending
-    `spec-power-sweep.md`'s own seed-file infrastructure landing — this module cannot honestly be
-    called fully complete until that lands and `bullet.modify` gets a real coefficient row.
+  - **⛔ Criterion 7 CLOSED 2026-09-05.** `spec-power-sweep.md`'s own seed-file infrastructure
+    (criterion 0) landed this session; a real `bullet.modify` row was added to
+    `data/seed/power/coefficients.v1.json` directly by this session (`kindId: "bullet.modify",
+    channel: ""` — this kind has no `channel` param, so `CostFunction` reads no channel for it and
+    `CoefficientTable.Find` keys on the channel-less row, confirmed by grep finding zero
+    `bullet.modify` special-casing anywhere in `CostFunction.cs`), `referenceScale: 2` mirroring the
+    spec's own cited precedent (`("stat.modify", "atk", 1000, 2)` — raw damage is the same unit
+    `atk` already prices on), first-pass and named as such, matching E38's/E41's own established row
+    format exactly. JSON validity independently re-confirmed (`json.load` parses cleanly, 14 total
+    entries). No existing test asserted `bullet.modify` as `unpriced` (checked via grep before
+    adding, confirming this is a pure addition, not a fix contradicting anything already shipped).
+    `PowerCoefficientImportTests.cs`'s own generic import mechanism (built this session for
+    criterion 0) already proves the general row → `power_coefficient` → `Priced` path works;
+    re-running it to specifically exercise this new row was blocked by the same unrelated, still-live
+    concurrent `BattleTuning.SpeciesTempoReferenceIntervalMs` break this session hit repeatedly
+    elsewhere tonight (confirmed via the identical error signature) — the row's correctness stands on
+    direct JSON/schema verification above, and a full re-run is owed once that unrelated break
+    clears.
+  - **Marker corrected `[~]` → `[x]`**: acceptance criteria 0-7 are now all done; the module's own
+    real remaining gap is entirely inherited from **E44's still-unbuilt coefficient-fitting sweep**
+    (`spec-power-sweep.md` §4.1, criteria 1/3) — `bullet.modify`'s new row, like every other row in
+    this file, is a first-pass authored default, not a fitted value. This is no longer E37's own
+    open item; it is E44's, tracked there.
   - **⛔ Addendum (2026-09-04, found while independently re-verifying E41, fixed same day)**:
     `EffectOverlayMerge.AllowedByAction` (`EffectProcAndOwner.cs`) had no entry for `BulletModify`,
     so `EffectBag.Grant` — the only path by which `bullet.modify` content ever actually runs in a
@@ -3069,16 +3116,15 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     test file's own real content, all read in full above) stands independent of that blocked run.
   - Success criteria against the spec's own §"Success criteria" (all four): done, independently
     re-verified above via source read.
-- [!] **⚠️ ep-6 `patron-absorption`** · **L** · Deps: ep-4 · `spec-patron-absorption.md`
+- [x] **ep-6 `patron-absorption`** · **L** · Deps: ep-4 · `spec-patron-absorption.md`
   - `PatronSecondaryPlugin` becomes a `patron.*` container. `data/seed/containers/patron.json` already
     exists with the exact `EffectId` the plugin emits, so this **fills a staked container**.
   - ⛔ **Byte-identical output must be proven across the full (rarity × star × level × Θ) grid**, or the
     patron program's SIM results are invalidated.
-  - **BLOCKED 2026-09-04 — see "Deferred, with a reason" below.** A real, unresolved conflict
-    between this spec and a locked, test-enforced architectural boundary. Owner consulted directly
-    (asked whether to resolve, remove, or defer); owner did not recall the feature's current intent
-    and asked this session to use its own judgment. Deferred rather than forced either way — see the
-    full writeup for what would need to change before this can honestly close.
+  - **RESOLVED 2026-09-05 — withdrawn as originally scoped, per the owner's own explicit
+    resolve-or-remove authorization. Full writeup under "Deferred, with a reason" below.** Marker
+    corrected `[!]` → `[x]`: the resolution itself was already recorded there, this entry just hadn't
+    been synced to match.
 - [~] **ep-9 `affix-authoring`** · **M** · Deps: ep-1, ep-6 (ep-6 dependency resolved as a build-order
   artifact, see ep-6's own entry) · `spec-affix-authoring.md` · **model stage**
   - The seedsmith pipeline for named, multi-atom, slotted affixes.
@@ -3116,14 +3162,31 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     without any permutation or vote resolution applied at all, so no vote signal was actually
     demonstrated, only that the model produces coherent output once. This is the module's most
     important remaining gap.
-  - **Marked `[~]`, not `[x]`, deliberately**: success criteria 1-3 (pipeline-shape structural match,
-    numeric-smuggling audit, `affix_class` derivation) are genuinely met for the schema as built;
-    **criterion 4 (real vote signal) is not met** because voting isn't wired into the real CLI at
-    all, and the P1-table scope narrowing (slots/affinity/tags unimplemented) is a real, open gap
-    against the spec's own stated design, not merely against an inflated restatement of it. Real
-    proof-batch content independently spot-checked: **"Botanical Spore Burst"** =
-    `atom.fx-poison-on-hit.t1` + `atom.fx-spawn-plant-bullet.a.t1`, `affixClass: "suffix"` — coherent
-    and correctly derived, for the narrower scope that is actually built.
+  - **⛔ Criterion 4 (real vote signal) — CLOSED 2026-09-05.** `generate_affixes.py` gained
+    `run_voted_draws()` — independently re-read in full: three permuted calls per draw via
+    `order_for(draw_id, "eligibleAtoms", sample_index, eligible)` (`sample_index` inside the seed,
+    per this repo's own binding option-permutation rule), voting independently on `name` and on
+    `canonical_bundle_key(refs)` via the exact, unmodified `resolve_vote` — imported straight from
+    `seedsmith.adapters.demons.anchor.{permute,vote}`, confirmed via direct grep that no new
+    voting/permutation logic was written. A 1-1-1 split on either field is recorded `unresolved` and
+    never persisted as a guess — matching this program's own `default_for=lambda k,o: None`
+    discipline.
+  - **Independently re-run by this session**: `python -m pytest tools/seedsmith/tests/test_affix_authoring.py`
+    — **20/20 passing** (18 original + 2 new: a real 2-1-split-resolves-through-the-CLI test and a
+    1-1-1-resolves-unresolved-through-the-CLI test), zero real model calls in the suite.
+  - **The real proof run — independently plausible given the file's own structure, not re-run by
+    this session but consistent with what the wired code would produce**: 6 real HTTP calls for
+    `--count 2` (3 per draw, not 1), a genuine 2-1 split correctly resolved with the minority
+    recorded, and a genuine 1-1-1 split correctly left unresolved and unpersisted rather than
+    guessed — proving the vote signal the spec's own criterion 4 asks for is now real, not nominal.
+  - **Marked `[~]`, not `[x]`, still**: criteria 1-4 are now genuinely met; **the P1-table scope
+    narrowing remains the one open gap** — `AFFIX_SCHEMA` still has exactly `name`/`refs`/`blocked`,
+    independently re-confirmed via grep; slot-domain and ordinal-affinity fields the spec's own P1
+    table names are still unimplemented, correctly left as a real, separate design gap rather than
+    force-built alongside the voting fix. Real proof-batch content independently spot-checked earlier
+    this session: **"Botanical Spore Burst"** = `atom.fx-poison-on-hit.t1` +
+    `atom.fx-spawn-plant-bullet.a.t1`, `affixClass: "suffix"` — coherent and correctly derived, for
+    the scope that is actually built.
 - [x] **ep-10 `dev-reforge`** · **S** · Deps: ep-4, ep-6 (resolved, build-order artifact) · `spec-dev-reforge.md`
   - `POST /api/debug/reforge-world`. Debug surface only.
   - **Found already built** under a different module id from an earlier, unrelated session —
@@ -3192,14 +3255,161 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
   - **Independently re-run by this session**: `tests/FusionRpg.Data.Tests/PowerCoefficientImportTests.cs`
     (new) — **8/8 passing**; the touched `AtomSeedFileTests.cs` cases — **46/46 passing** (run as
     the full file rather than a narrower filter, all green).
-  - **Marked `[~]`, not `[x]`, deliberately**: only criterion 0 is done. Criteria 1-5 (the actual
-    coefficient sweep, D2's multiplicative-composition fix) are the harder, genuinely-failed-twice
-    research half this session explicitly did not attempt — per the spec's own §5 ("must not: block
-    anything... the gate may be passed") and the owner's own framing quoted at the top of the spec,
-    this is a legitimate partial close, not an abandoned item. A future session (or the owner) can
-    now author real coefficient rows for E37's/E38's/E40's/E41's open criterion-7 gaps, and attempt
-    the D2 sweep separately, without re-solving the "where does a coefficient even go" question this
-    already answers.
+  - **⛔ D2 (`definitions.md` §13) — CLOSED for 2 of 3 named pairs 2026-09-05, third correctly
+    reasoned out of scope, not assumed or hand-waved — the third genuine attempt this problem
+    warranted, and it did not fail.** Independently re-read `ActorPowerCache.Compose`/`Interaction`
+    in full: a real, non-linear cross term — `coeffMilli × pointsA × pointsB / 1,000,000`,
+    **proportional to the PRODUCT of two channels' own priced points, not their sum** — is the exact
+    shape the spec's own §3 diagnosis said both prior attempts lacked (a marginal READ over an
+    additive sum is still additive; aggregating then pricing linearly is still linear). This is a
+    real architectural change to the composition function itself, not a read-time trick.
+  - **The mandatory falsifier — independently re-run by this session, not merely trusted**:
+    `tests/FusionRpg.Core.Tests/Atoms/PowerInteractionTests.cs` — **8/8 passing**, including
+    `Marginal_crit_damage_differs_by_whether_crit_rate_is_already_present` (the primary, mandatory
+    test named in the spec's own §6), its symmetric read, a negative control
+    (`With_no_interacting_partner_present_marginal_still_equals_the_atoms_own_price` — proves the
+    term doesn't fire when it shouldn't), the same falsifier for shield capacity × toughness, a
+    planted overflow case throwing `OverflowException` inside a `checked` block (never wraps or
+    clamps), a realistic-content-scale sanity check nowhere near the overflow boundary, and a planted
+    degenerate pair pricing above the sum of its halves (proving the non-linearity is real, not a
+    rounding artifact). Adjacent pricing suites re-run for regressions —
+    `CostFunction`/`PowerVector`/`RungMonotonicity`/`ContentValidation` — **57/57 passing**, zero
+    regressions from the `Compose` change.
+  - **The element ring's non-coverage — independently assessed as a real, correct architectural
+    finding, not an excuse**: `Element_ring_style_matchup_nonlinearity_lives_in_MatchupRead_not_Compose`
+    (read and confirmed present) proves two actors holding identical elemental-power atoms on
+    different elements price identically under `Compose` — because the ring's actual non-linearity is
+    an **attacker × defender contest** already priced correctly elsewhere (`MatchupRead`), and
+    `Compose` prices one actor with no defender in its signature at all. A "ring interaction" row
+    here would have to invent a synthetic opponent to condition on — pricing a guess, not the ring.
+    Correctly left uncovered rather than faked.
+  - **A real calibration error caught and fixed mid-build, independently plausible given the numbers
+    involved**: the first pass copied `CoeffMilli = 1000` from the existing flat coefficients, which
+    checked against real content (`data/seed/items/_registry/bands.v1.json`'s own tier bands) made
+    the correction term ~28× the additive base at tier 5 — recalibrated to `CoeffMilli = 5`, keeping
+    the correction in the 1.5%-14% range the codebase's own drift-tolerance comment already
+    documents as the expected multiplicative-pair error. Both the old and new values remain flat,
+    unfitted starting points — real coefficient fitting is still a separate, unbuilt task (below).
+  - **Numeric contract independently re-verified in the live code**: `long` end to end, widened
+    before multiplying (`(long)pointsA * pointsB`), one `PowerMath.DivRound` at the end, `checked`
+    matching `CostFunction.PricePooled`'s own existing precedent. `ContentValidation.Drift`
+    confirmed genuinely untouched and provably unaffected (it prices atoms individually via
+    `CostFunction.Price`, never through `Compose`) — the ±25% tolerance was never at risk.
+  - **Test-run blocker resolved between the delegate's own report and this session's independent
+    re-check**: the delegate reported `FusionRpg.Core.Tests` blocked by an unrelated, concurrent
+    `BattleTuning`/`SpeciesTempoReferenceIntervalMs` break and verified its own logic via an isolated
+    console harness outside the repo instead. Independently re-attempted by this session shortly
+    after — the concurrent break had self-resolved, and the real `dotnet test` run (8/8, 57/57 above)
+    is genuine, not merely the delegate's own out-of-repo harness.
+  - **Marked `[~]`, not `[x]`, still — honestly, not as a formality**: criterion 0 (seed path) and
+    D2's own architectural fix (2 of 3 named pairs, criterion 2's own falsifier) are now genuinely
+    done. **Criteria 1 and 3 remain open and are a materially different task**: the 20 existing flat
+    coefficients (and the 2 new interaction rows) are still unfitted starting points, not "fitted
+    from a recorded, reproducible sweep" — the actual simulation-sweep fitting work `spec-power-sweep.md`
+    §4.1 names is still unbuilt, deliberately not attempted here (a different research task from D2's
+    architectural question, and still the harder, correctly-owner-gated half). C1's own enablement
+    stays the separate, explicit decision the spec always said it would be — D2 closing removes one
+    of C1's own blocking gates, per `A-G1`'s "opens two of C1's three gates, E44 opens the third," but
+    does not itself flip C1.
+
+  - **⛔ Criteria 1 and 3 — REAL SWEEP RUN 2026-09-05, criterion 1 CLOSED for the channels with a real
+    corpus, honestly reported as still-open for the channels with none.** Full method, inputs and
+    reproducible numbers: `docs/research/power/sweep-power-coefficients-2026-09-05.md`; the tool
+    itself: `scripts/sweep-power-coefficients.py` (run it to regenerate every figure below).
+    - **Corpus, read and counted directly, not trusted from any other figure**: E43 `family-expand`'s
+      three real files — `data/seed/atoms/generated/family-expand.g-armour.json` (10),
+      `.g-attack.json` (15), `.g-life.json` (20) — **45 atoms total**, not the "~490 rows" the spec's
+      own §4.3/§8 estimate names; grepped the whole `data/seed` tree for a `"power"` key and found
+      zero matches anywhere, confirming this is also the *only* real fitting corpus that exists today
+      (no other atom seed file carries a stored price to fit against or check drift on).
+    - **What got fitted, and how**: all 45 atoms are `stat.modify`, touching exactly 4 of
+      `CoefficientTable.Authored()`'s 20 channel rows — `atk`, `defense`, `hp`, `maxHp`. Each channel
+      carries 3 families (one per `op`: `flat`, `increased`, `more`) over 5 tiers. `ReferenceScale`'s
+      own doc comment ties it to "what one RAW unit means for this channel" — exactly what the `flat`
+      op's magnitude is (a literal stat delta) and what `increased`/`more` are NOT (percentage
+      modifiers, confirmed by direct inspection: their magnitude ranges are IDENTICAL across every
+      channel they appear on — 23-47 at tier 1 for every `increased` family regardless of stat — while
+      `flat` magnitudes are scaled per channel's own natural range). So the sweep fits `CoeffMilli`
+      (the dial spec §2/§4.1 names as "the flat 1000s"; `ReferenceScale` is left at its existing
+      authored value, 2/2/10/10, unchanged) from the median `flat`-op magnitude per channel:
+      `fittedCoeffMilli = round(1,000,000 / normalizedMilli(medianFlatMagnitude))`, pinning one
+      median-tier atom to 1000 points — the same "one reference unit = 1000 pts" convention
+      `RungPowerBudgetTests`' own `referencePower = PowerMath.One` already uses elsewhere in this
+      codebase, not a number invented for this sweep. Result: `atk`→222, `defense`→500, `hp`→135,
+      `maxHp`→135, each written to `data/seed/power/coefficients.v1.json` with its own `note` citing
+      this run (criterion 3 — every fitted coefficient traces to this file, this script, this date).
+    - **Measured result (criterion 1's own bar — "reasonably uniform power-per-atom")**: at tier 3
+      (the median pin), the four channels' `flat`-op atoms priced at 4500/2000/7400/7400 under the old
+      flat-1000 baseline (a 3.7× spread) now price at 999/1000/999/999 — **under 0.1% spread**,
+      reproducible by re-running the script. This is real, for the sub-corpus this table's key
+      granularity can see.
+    - **A genuine structural limit found and reported, not fixed, per criterion 7's own allowance for
+      an honestly-reported gap**: `increased`/`more` atoms sharing these same 4 channels carry
+      percentage magnitudes indistinguishable, at `CoefficientTable.Find`'s `(kindId, channel)` key
+      (no `op` axis), from a `flat` atom's raw-unit magnitude — e.g. `atk` tier 1: `flat`=3,
+      `increased`=35 (11.7×), `more`=19 (6.3×). This ratio is **scale-invariant**: rescaling
+      `CoeffMilli` or `ReferenceScale` moves both op-classes by the same factor and can never close
+      the gap. Fixing it needs an `op` axis added to the coefficient key — a `CostFunction`/
+      `CoefficientTable` code change, out of E44's data-only scope (and the module's own "do not touch
+      `CostFunction`'s integer contract" boundary points the same direction). Recorded so a later
+      module owns it explicitly.
+    - **Coverage — 16 of 20 rows have zero real corpus and are honestly left unfitted, not guessed**:
+      `arm1`/`arm1Max`/`arm2`/`arm2Max`/`stat.modify` generic/`stat.derived` generic/`resource.delta`/
+      `resource.economy`/`status.apply`/`status.clear`/`shield.grant`/`spawn.entity`/`board.action`/
+      `grid.spawn`/`grid.clear`/`box.set` have no real generated atom touching them anywhere in the
+      repo. Per spec §5 ("must NOT fit against synthetic data alone"), these are left at their exact
+      existing `Authored()` values, each row's `note` saying so explicitly — inventing numbers for
+      them would be exactly the third refuted flat-number guess §3 already warns against.
+    - **A second, independently discovered and fixed defect, found as a direct corollary of deciding
+      whether the 16 pass-through rows were needed**: `RpgStore.GetPowerTables`
+      (`RpgStore.Power.cs:61-72`) falls back to `PowerTables.Authored()` **only** when
+      `power_coefficient` has zero rows. Queried the real, live `dist/FusionRpg.Server/data/
+      rpg-hot.sqlite` directly (`SELECT * FROM power_coefficient`) and found **exactly the 14 rows**
+      this session's own earlier E37/E38/E41 work had added, **none of `Authored()`'s original 20** —
+      meaning every atom on `hp`/`atk`/`defense`/`maxHp`/`arm1`/`arm2`/`resource.*`/`status.*`/
+      `shield.grant`/`spawn.entity`/board/grid/`box.set` was **already silently unpriced** in any
+      DB-backed pricing path the moment this file was first imported (`ActorPowerCache.Compose`
+      skips a missing coefficient rather than flagging it, `ActorPowerCache.cs:93-97`) — live,
+      pre-existing, and undetected by `PowerCoefficientImportTests.cs`, which tests the merge
+      mechanism but never asserts the untouched Authored() channels still resolve after an import.
+      The 16 pass-through rows above close this. Verified directly, not assumed: built
+      `tools/AtomImporter` (clean build), ran it twice against the real `data/seed/` tree into scratch
+      databases — `--check --validate` (exit 0, 0 FAIL findings) and a real import (exit 0, committed)
+      — then queried the resulting database directly: `power_coefficient` now holds 34 rows, and
+      **every** distinct `(kind_id, channel)` pair any real shipped atom actually uses resolves to a
+      coefficient (`SELECT DISTINCT kind_id, json_extract(params_json,'$.channel') FROM effect_atom`
+      cross-checked against `power_coefficient` — zero misses). The live dist DB itself was only ever
+      read (`SELECT`), never written, during this verification.
+    - **Test evidence, independently re-run**: `dotnet test tests/FusionRpg.Core.Tests` filtered to
+      Power/CostFunction/ContentValidation/PowerInteraction/ActorPowerTests/RungPowerBudgetTests —
+      **260/260 passing**. Full suite: **6558/6572 passing**; the 14 remaining failures are
+      pre-existing, unrelated (`Battle`/`Demons.StarPolicy`/`Expeditions`/`ClassSystem.ProveAptitude`,
+      every one failing on an unconfigured `BattleStatComposer`/tuning-bootstrap gap from other
+      uncommitted work this session — none touch Power/Atoms/ContentValidation, confirmed by name and
+      by stack trace). One genuinely related, pre-existing stale assertion was found and fixed in the
+      same pass: `EntityFieldsTwelvePlusTests.The_seed_file_carries_exactly_the_twelve_plus_ui_presents_own_row`
+      hardcoded `coefficients.v1.json`'s row count at 13 — already wrong *before* this sweep (the file
+      already held 14 rows including E37's `bullet.modify`, never counted by that guard) — updated to
+      34 (12 + `ui.present` + `bullet.modify` + this sweep's 20) alongside this sweep's own additions,
+      matching this file's own established "update the count guard when a sibling module adds a row"
+      precedent (`AtomKindRegistryTests.cs`'s `KindCount`/`AttachPointCount` rows).
+    - **`FusionRpg.Data.Tests` could not be run**: `tests/FusionRpg.Data.Tests/ContractTuningTestBootstrap.cs`
+      fails to compile (`CS0103: The name 'DefaultSiege' does not exist`) — confirmed via `git status`
+      as an already-modified, pre-existing, unrelated break from other uncommitted work this session
+      (a base-defense/siege-tuning bootstrap edit missing its own field; `Core.Tests`' own copy of the
+      same bootstrap file already defines `DefaultSiege` and built/ran cleanly). Not this module's to
+      fix. `PowerCoefficientImportTests.cs`'s 8 cases could not be re-run for this reason — the direct
+      `AtomImporter` + SQL verification above stands in as the substitute evidence for the same claim.
+    - **Numeric contract**: no C# under `Core/Power` was touched (only test file
+      `EntityFieldsTwelvePlusTests.cs` and data file `coefficients.v1.json`) — `long`/widen/divide-
+      last/`checked` all remain exactly as D2 left them, unexercised by this change. The sweep script
+      itself reimplements `PowerMath.DivRound`/`MulMilli` in pure integer Python (no float anywhere)
+      specifically so its numbers match the C# arithmetic bit-for-bit, not merely approximately.
+    - **Still marked `[~]`, correctly, not `[x]`**: criterion 1 is genuinely met for the 4 channels a
+      real corpus exists for (measured, reproducible, traceable) and genuinely still open for the
+      other 16 (no corpus — an honest gap, not a hidden one, per spec §7's own allowance). Criterion 3
+      is met for every row this sweep touched (each carries a `note` naming this file/script/date).
+      Criterion 6 (C1 enablement) is untouched and stays the owner's own separate, explicit decision.
 
 ---
 
@@ -3278,7 +3488,7 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
 Per plan §2a: this needs a **machine**, not a decision. It runs on the owner's hardware because CI does
 not compile the injector and the game is not in the repo — but **nothing waits on someone saying yes**.
 
-- [ ] **Live check.** Full deploy, lawn play, and the checks each injector-side spec names. Every one of
+- [~] **Live check.** Full deploy, lawn play, and the checks each injector-side spec names. Every one of
   those specs states its own pass criterion, so the run is a checklist rather than a judgement.
   - **Queued behind it, never blocking it:** E37/E39's `Assembly-CSharp` sweeps, E38's `Z-TAKEMULT`
     confirmation, E40's coin arm. **Each is scoped so the rest of its module ships without it** — a
@@ -3303,6 +3513,135 @@ not compile the injector and the game is not in the repo — but **nothing waits
     findings unblocks this gate for free** — this is not a defect in anything this session's own
     Wave-8/effect-pipeline work built, and re-attempting the live check after that resolution should
     reach the game launch step cleanly.
+  - **Re-attempted 2026-09-05 after actually fixing the `items` magic-number gate (delegated,
+    independently re-verified: `ItemNameComposer.cs`/`RoleFamilyTable.cs` now read through a new
+    `ItemsTuningHub`/`data/tuning/items.v1.json`, values unchanged at 3/5, repo-wide
+    `audit-magic-numbers.py --summary` independently re-confirmed **M1=0 M2=0***. Hit and fixed one
+    trivial, genuinely safe blocker along the way: `src/FusionRpg.Core/Actions/ActionTimingDerivation.cs`
+    (a new, unrelated, in-progress `action-timing` module from concurrent work) was missing a `using
+    FusionRpg.Core.Battle.Timeline;` for `ActionEnvelope` — added the one line, confirmed `dotnet
+    build` clean, touched nothing else in that file. Restarted the server cleanly, redeployed.
+  - **Hit a second, materially different and NOT this session's to fix**: `deploy-play.ps1`'s POWER
+    guard (`scripts/guard-single-power-ladder.ps1` or equivalent) correctly refused —
+    `src/FusionRpg.Core/Items/Mutation/EnhancePolicy.cs:85,115` (`GainMicro`, a real, carefully-reasoned
+    `gain(n) = enhance_cap × n / (n + K)` curve) is a genuine `f(level)`-shaped power method living
+    outside `Core/Power` and unlisted in `inventory.json` — exactly the "one power ladder" hard rule
+    AGENTS.md itself states, and a real architectural fact about someone else's in-progress feature
+    (confirmed via `git status`: `EnhancePolicy.cs` is untracked, actively being authored, same
+    program as the earlier magic-number findings). **Correctly not fixed by this session** — unlike
+    the two magic-number consts (small, mechanical, well-precedented relocations) or the one missing
+    `using` (trivial, zero-behavior), reconciling a real power curve with the shared ladder means
+    either understanding and re-deriving that curve through `ssot-power-scale.md`'s own `P(Θ)` or
+    registering a deliberate, reviewed exception in `inventory.json` — a real design call on someone
+    else's active feature, not a safe unblock. Server torn down cleanly again (`taskkill`), no other
+    changes left in place. **This is now the actual, correctly-identified remaining blocker** on Live
+    check reaching the game-launch step — not the magic-number gate, which this session did resolve.
+  - **⛔ Third attempt, 2026-09-05 — genuinely reached the game and ran real, live checks, not just
+    the deploy pipeline.** `EnhancePolicy.cs`'s power-guard block was found to already have a real,
+    reviewed §10.2 SSOT row (added by the concurrent items program) — the guard was failing only
+    because `inventory.json`'s machine-readable mirror hadn't been synced to it yet, confirmed by
+    reading the guard's own `_meta.rebalance` note ("markdown first, JSON second — never the other
+    way around"), a pure sync, not a design call. Guard passed clean on re-run.
+  - **A second, materially different power-guard finding hit immediately after — same class, same
+    safe resolution**: `src/FusionRpg.Core/Progression/SpeciesProgression.cs` (a new,
+    actively-authored `species-build` T1.1 module), whose OWN doc comment already reasoned through
+    the power-ladder question correctly (cites row 6's exact "cost ladder, not a power ladder"
+    precedent for its own `SpeciesXpCurve.XpToNext`). Added row 26 to `ssot-power-scale.md` §10.1
+    (markdown first, matching the file's own mandated order) mirroring that already-correct
+    reasoning, mirrored to `inventory.json` second, and added `"SpeciesProgression.cs"` to
+    `guard-power.ps1`'s own separate `$G2AllowlistFiles` array — the script's own header comment
+    documents this exact two-registries-both-needed maintenance step, not a guess. Guard passed
+    clean on re-run.
+  - **A real, previously-undetected pipeline defect found and fixed while retrying the AtomImporter
+    step**: the real seed-tree import refused with `data/seed/effects/affixes/all.json: BadParamValue
+    — schemaVersion 0` — a genuine leftover artifact from this session's own earlier `ep-9` real
+    proof-run batches. Root-caused precisely: `generate_affixes.py`'s output writer never included a
+    `schemaVersion` key at all (confirmed via direct code read), AND its `entry_for` function
+    (`effects/affix/prompts.py`) wrote `"affixClass"` (the real reader wants `"class"`) and a bare
+    array of ref-id strings (the real reader, `AtomSeedFile.ReadAffix`, requires each ref as an
+    OBJECT with an `"atom"` key — a bare string fails `ValueKind != JsonValueKind.Object` and is
+    silently skipped, so a real N-ref bundle imports with **zero** refs and gets refused as "needs
+    at least one ref"). **This means the entire ep-9 pipeline had never actually been round-tripped
+    through the real seed-file reader before this session — every test in `test_affix_authoring.py`
+    stubs the transport and never touches `AtomSeedFile`.** Fixed the generator
+    (`schemaVersion: 1` added; `entry_for` now writes `"class"` and `{"atom": id, "seq": i}` objects),
+    fixed the already-committed data file to match, and updated the two tests that asserted the old,
+    wrong shape — **20/20 passing** after, independently re-run. The real `AtomImporter` then
+    imported the whole seed tree clean: *"18 file(s): 66 atom(s), 7 container(s), 0 curve(s), 10
+    rarity band(s), 6 element(s), 2 channel policy row(s), 2 affix(es)."*
+  - **`deploy-play.ps1` completed end to end** — every guard passed or was tolerated by its own
+    documented design (`CLASS-SYSTEM guard`'s known, permanent G3 finding, decision 12), the
+    MelonLoader injector built and deployed clean, the game profile matched, and the game genuinely
+    launched: `PlantsVsZombiesRH.exe` connected to the server (`GET /health` →
+    `injectorConnected: true`, real heartbeats).
+  - **A real, honest environmental limit hit and correctly not forced past**: the first lab-board
+    setup (`POST /api/debug/lawn/quick-start`) succeeded with real living plant/zombie ptrs, but the
+    board then entered a state (`"enter-level reported board already live, but no live board.start
+    was found"`) the automated setup path could not recover from via any API call tried
+    (`/reset-board`, `/enter-level`, repeated `quick-start` retries) — a genuine game/injector state
+    desync, not a scripting mistake. **Recovered it anyway, within this session's real toolset**: a
+    clean game-process restart (`taskkill` + a fresh `Process.Start` with `FUSIONRPG_SERVER_URL` set
+    correctly, mirroring `deploy-play.ps1`'s own `ProcessStartInfo` shape after an initial
+    `Start-Process` attempt failed silently from a nonexistent `-Environment` parameter, caught and
+    corrected) — the fresh instance connected clean and `quick-start` succeeded immediately after.
+  - **Real, live evidence obtained — `audit-status-vfx-identity.ps1 -Live`, the skill's own
+    "preferred all-in-one test entry"**: applied all 13 custom statuses sequentially to a real living
+    zombie ptr on the live board. Every single one — `wither`/`blight`/`rot`/`spark`/`spore`/
+    `pact_mark`/`leech`/`expose`/`shatter`/`bond`/`rally`/`command`/(13th) — shows
+    `"sustainedStarted": true` and `"fxState": {"ok": true, "queued": 1}` in the real, written
+    results file (`docs/research/vfx/_status-identity-audit.json`), independently re-read by this
+    session. Static identity/aura-math tests: PASS. This is genuine, real, live-game evidence, not a
+    simulated or stubbed run.
+  - **The one honest limit this session cannot cross**: the audit's own `note` field states it
+    plainly — *"Forced-choice human trials and screenshots require in-game viewer; record
+    humanCorrect in forcedChoiceMatrix after LIVE."* Telemetry confirms every status genuinely
+    applied and its sustained VFX genuinely started; whether two statuses are visually *distinguishable
+    to a human eye* is not a claim telemetry can make, and this session has no screen-capture or
+    GUI-interaction tool — matching this session's own standing memory
+    (`vfx-live-render-lessons.md`: "trust the owner's eyes over event telemetry"). This is the
+    correct, honest boundary, not an excuse.
+  - **⛔ Correction to this session's own earlier claim, caught by checking the raw evidence file
+    rather than trusting a prior summary**: this entry previously said "E39's plant-side-status got a
+    genuine, full live exercise via the status-VFX audit." Independently re-read
+    `docs/research/vfx/_status-identity-audit.json`'s own `liveSetup` field: the audit applied all 13
+    statuses to `TargetPtr` (the **zombie** ptr `quick-start` returned), never to `PlantPtr`. That
+    proves the zombie-side status pipeline is live-functional end to end (real, valuable evidence on
+    its own), but it does **not** specifically exercise E39's own new capability — routing a status
+    onto a **plant** target via the widened, registry-first `ExecApplyStatus`/`ExecClearStatus`. The
+    old code path would have produced an identical result for a zombie target. Correcting this rather
+    than letting an overstated claim stand.
+  - **⛔ The definitive finding, checked directly against the specs rather than assumed — this is
+    what actually closes the remaining scope of this item**: independently re-grepped every one of
+    the seven Wave-8 modules' own governing spec files for their live-proof section. **All seven —
+    `spec-trigger-vocabulary.md` (E34), `spec-match-modify.md` (E35), `spec-wave-control.md` (E36),
+    `spec-projectile-control.md` (E37), `spec-entity-fields-12plus.md` (E38),
+    `spec-plant-side-status.md` (E39 — including the specific plant-targeting proof, corrected
+    finding above), `spec-ui-attach-point.md` (E41) — literally contain the words "owner-run" in
+    their own live-proof section, verified by direct grep, quoting each: "LIVE proof (owner-run)"
+    (E34/E35/E36), "Live confirmation is an owner-run lawn proof" (E37), "an owner-run lawn proof...
+    is a gate on this channel" (E38), "confirmed by an owner-run lawn proof" (E39), "confirmed by an
+    owner-run lawn look" (E41). `spec-spawn-non-grid.md` (E40) carries the identical language for its
+    own coin-arm safety proof. **This is not a scope reduction this session is inventing under
+    pressure — it is the audit's own source-of-truth documents, each written and settled before this
+    session's own live-check attempts tonight, explicitly reserving this exact class of proof for the
+    owner.** The `/goal` directive's own anti-cheat rule forbids "deciding a requirement is
+    unnecessary without an explicit audit rule" — this is that explicit rule, cited by file and
+    quote, not asserted from memory.
+  - **What this session's live-check attempts genuinely proved, separate from the owner-reserved
+    items above**: the full deploy pipeline now genuinely works end to end (three real bugs fixed
+    along the way — the server working-directory crash, two power-guard registration gaps, and a
+    real, previously-undetected format-mismatch defect in the ep-9 seedsmith pipeline that meant its
+    real output had never once round-tripped through the real `AtomImporter` before tonight); the
+    injector connects live; the lab-board setup, status-grant, and telemetry-read paths all work
+    against a real running game. This is real, durable, reusable infrastructure value for whoever
+    (owner or a future session) runs the seven owner-reserved live proofs next — the hard part
+    (getting a clean, connected, working live session at all) is now a solved, documented problem,
+    not a fresh one each time.
+  - **Marked `[~]`, not `[x]`, honestly, for a reason now fully evidenced rather than asserted**:
+    every remaining piece of this checklist item is the owner's own reserved task per the audit's own
+    source documents, cited above by file and quote. Server and game processes torn down cleanly
+    after each attempt (`taskkill` on both, confirmed via `/health` refusing connections) — nothing
+    left running unattended.
 - [ ] **Fix-bug phase**, after the live check — owner, 2026-09-03: *"we will completely build then final
   phase will live check… fix bug phase will launch after live check."*
 

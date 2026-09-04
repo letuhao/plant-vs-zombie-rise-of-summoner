@@ -56,11 +56,14 @@ def test_an_empty_bundle_raises_rather_than_guessing():
 
 def test_affix_class_is_never_a_field_the_model_authors():
     """The model's own draft schema has no `affixClass` property at all — deriving it is the ONLY
-    way it reaches the committed entry."""
+    way it reaches the committed entry. The committed key is `class`, matching
+    AtomSeedFile.ReadAffix's real reader, never `affixClass` (found and fixed 2026-09-05 running
+    this pipeline's real output through the real AtomImporter for the first time)."""
     assert "affixClass" not in AFFIX_SCHEMA["properties"]
     entry = entry_for({"name": "Master of Fire and Ice", "refs": ["atom.a", "atom.b"]},
                        affix_id="affix.authored.test", affix_class="mixed")
-    assert entry["affixClass"] == "mixed"
+    assert entry["class"] == "mixed"
+    assert "affixClass" not in entry
 
 
 # ---- named bundle composition is 3-way voted, same machinery as demon-seed --------------------------
@@ -138,7 +141,10 @@ def test_named_bundle_composition_is_3_way_voted_via_generate_affixes_cli():
     assert len(fresh) == 1
     entry = next(iter(fresh.values()))
     assert entry["name"] == "Master of Fire and Ice"
-    assert sorted(entry["refs"]) == ["atom.a", "atom.b"]
+    # refs are objects with an "atom" key (AtomSeedFile.ReadAffix's real shape), not bare id
+    # strings — a bare string is silently skipped by the real reader (found 2026-09-05).
+    assert sorted(r["atom"] for r in entry["refs"]) == ["atom.a", "atom.b"]
+    assert all("seq" in r for r in entry["refs"])
     assert entry["_provenance"]["voteConfidence"]["refs"] == "split"
     assert entry["_provenance"]["voteMinority"]["refs"] == canonical_bundle_key(["atom.a", "atom.c"])
     assert all(r.get("outcome") == "persisted" for r in results.values())

@@ -135,7 +135,16 @@ public sealed record ActionEnvelope
     /// </summary>
     public int InterruptCooldownMilli { get; init; } = 1000;
 
-    public Commitment Commitment { get; init; } = Commitment.LateBound;
+    /// <summary>
+    /// `battle-tempo` `commitment-binding` (spec §2.1, D6/D11): <c>null</c> means "no override — read
+    /// the active profile's <see cref="BattleModeProfile.DefaultCommitment"/>", never a third
+    /// magnitude of its own. Nullable specifically so an action that does not care can be
+    /// distinguished from one deliberately locked to a value — the same shape
+    /// <see cref="Timeline.TimelineProfileTuning.MaxRounds"/>/<c>RoundDurationMs</c> already use for
+    /// "inherit the ruleset". Resolution order is envelope first, profile default second — the same
+    /// precedence every other envelope field with a profile-level fallback uses.
+    /// </summary>
+    public Commitment? Commitment { get; init; }
 
     /// <summary>
     /// The zero-length action. Proves FSM plumbing, and nothing else — with every field at zero,
@@ -211,7 +220,7 @@ public sealed record ActionEnvelope
         hash.Add((int)Interruptible);
         hash.Add(InterruptRefundMilli);
         hash.Add(InterruptCooldownMilli);
-        hash.Add((int)Commitment);
+        hash.Add(Commitment); // nullable now (D6) -- HashCode.Add handles Commitment? directly
         // Indexed, not foreach: iterating an IReadOnlyList<long> boxes its enumerator — 32 bytes
         // per call, on the operation a cache key uses most. Same reason OffsetsEqual is a manual
         // loop rather than SequenceEqual.

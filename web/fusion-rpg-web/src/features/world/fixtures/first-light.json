@@ -540,7 +540,8 @@
     "monthBoundary": false,
     "specialWeek": false,
     "specialMonth": false,
-    "plague": false
+    "plague": false,
+    "season": 0
   },
   "prospectedSectorIds": []
 }

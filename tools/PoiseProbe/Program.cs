@@ -7,6 +7,7 @@
 
 using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Actions.Defence;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Stats.Derived;
 
 // Configure from the real published tuning file -- the same one production loads (Server/Injector
@@ -180,6 +181,49 @@ bool pools_resolve_eq(ActorResourcePools pools, ActorDerivedSnapshot derived, lo
     CheckThrows("RiposteShareAboveOneThrows", () => Riposte.DamageFromSpentPoise(1000, 1001));
     var enormous = Riposte.DamageFromSpentPoise(2_000_000_000_000L, 300);
     Check("RiposteScalesWithNoPrivateCeiling", enormous == 600_000_000_000L);
+}
+
+// -- reaction-lane RL2: ReactionCounter.TryCounter -- the spend IS the attack (decision 12) --
+{
+    var derived = PoiseSnapshot(1000, 0);
+    var pools = ActorResourcePools.CreateFull(derived, 0);
+    var (committed, damage) = ReactionCounter.TryCounter(pools, poiseSpend: 400, riposteShareCapMilli: 300, 0, derived);
+    Check("ASuccessfulCounterCommitsThePoiseAndDealsExactlyRiposteDamage",
+        committed && damage == 120 && pools.Resolve(PoiseLedger.ResourceId, 0, derived) == 600);
+}
+{
+    var derived = PoiseSnapshot(100, 0);
+    var pools = ActorResourcePools.CreateFull(derived, 0);
+    var (committed, damage) = ReactionCounter.TryCounter(pools, poiseSpend: 500, riposteShareCapMilli: 300, 0, derived);
+    Check("AnUnaffordableCounterRefusesAndChangesNothing",
+        !committed && damage == 0 && pools.Resolve(PoiseLedger.ResourceId, 0, derived) == 100);
+}
+{
+    var derived = PoiseSnapshot(1000, 0);
+    var smallPools = ActorResourcePools.CreateFull(derived, 0);
+    var bigPools = ActorResourcePools.CreateFull(derived, 0);
+    var (_, smallDamage) = ReactionCounter.TryCounter(smallPools, 100, 300, 0, derived);
+    var (_, bigDamage) = ReactionCounter.TryCounter(bigPools, 800, 300, 0, derived);
+    Check("ABiggerSpendDealsMoreDamageButLeavesLessPoiseForWhatComesNext",
+        bigDamage > smallDamage && bigPools.Resolve(PoiseLedger.ResourceId, 0, derived) < smallPools.Resolve(PoiseLedger.ResourceId, 0, derived));
+}
+{
+    var derived = PoiseSnapshot(100, 0);
+    var pools = ActorResourcePools.CreateFull(derived, 0);
+    var (committed, damage) = ReactionCounter.TryCounter(pools, poiseSpend: 0, riposteShareCapMilli: 300, 0, derived);
+    Check("ZeroSpendIsLegalAndDealsZeroDamage", committed && damage == 0 && pools.Resolve(PoiseLedger.ResourceId, 0, derived) == 100);
+}
+{
+    const long enormous = 2_000_000_000_000L;
+    var derived = PoiseSnapshot(enormous, 0);
+    var pools = ActorResourcePools.CreateFull(derived, 0);
+    var (committed, damage) = ReactionCounter.TryCounter(pools, poiseSpend: enormous, riposteShareCapMilli: 300, 0, derived);
+    Check("AnEnormousSpendConvertsProportionallyWithNoPrivateCeiling", committed && damage == enormous * 300 / 1000);
+}
+{
+    var derived = PoiseSnapshot(1000, 0);
+    var pools = ActorResourcePools.CreateFull(derived, 0);
+    CheckThrows("AnOutOfRangeShareThrows", () => ReactionCounter.TryCounter(pools, 100, 1001, 0, derived));
 }
 
 // -- Confirms PoiseRuntime no longer exists anywhere in the loaded assembly (D9's single-pool claim) --

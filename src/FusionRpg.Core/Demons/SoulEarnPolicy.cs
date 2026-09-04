@@ -71,11 +71,11 @@ public static class SoulEarnPolicy
     /// <c>Instantiator</c>, T3.4) — a caller with no real depth signal must say so explicitly at the
     /// pin (Θ=20), never silently.
     /// </summary>
-    public static int KillEarn(int thetaEnemy, PowerTuning tuning) =>
+    public static long KillEarn(int thetaEnemy, PowerTuning tuning) =>
         ContentScale.Apply(KillDelta, ContentScale.Milli(thetaEnemy, tuning));
 
     /// <summary>Souls for a match result: <c>(victory ? VictoryDelta : DefeatDelta) ×
     /// contentScale(thetaRun)</c> (SSOT §11.7a).</summary>
-    public static int MatchEndEarn(bool victory, int thetaRun, PowerTuning tuning) =>
+    public static long MatchEndEarn(bool victory, int thetaRun, PowerTuning tuning) =>
         ContentScale.Apply(victory ? VictoryDelta : DefeatDelta, ContentScale.Milli(thetaRun, tuning));
 }

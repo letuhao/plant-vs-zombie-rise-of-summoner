@@ -208,9 +208,18 @@ export function ExpeditionsPage() {
               ? "A squad member was injured"
               : "Quiet march";
     return (
-      <li key={tick.tickIndex} className="flex items-center gap-2 text-sm">
-        <span className="w-14 shrink-0 text-xs text-muted">tick {tick.tickIndex}</span>
-        <span className={tick.kind === "quiet" ? "text-muted" : ""}>{label}</span>
+      <li key={tick.tickIndex} className="text-sm">
+        <div className="flex items-center gap-2">
+          <span className="w-14 shrink-0 text-xs text-muted">tick {tick.tickIndex}</span>
+          <span className={tick.kind === "quiet" ? "text-muted" : ""}>{label}</span>
+        </div>
+        {/* battle-tempo forecast-rail FR3: a RECORD of who acted, in order -- the battle already
+            resolved before this renders, so this names what happened, never what will. */}
+        {battle && battle.turnOrder.length > 0 ? (
+          <div className="ml-16 mt-0.5 text-xs text-muted">
+            Acting order: {battle.turnOrder.map((t) => t.displayName).join(" → ")}
+          </div>
+        ) : null}
       </li>
     );
   }

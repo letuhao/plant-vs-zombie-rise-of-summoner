@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Expeditions;
 using FusionRpg.Core.Stats.Derived;
@@ -56,7 +57,12 @@ public sealed class ExpeditionService
         return (ok, reason, row);
     }
 
-    public sealed record CollectBattleResult(int BattleIndex, bool Boss, string Outcome, long? RunId, string MatchKey);
+    /// <param name="TurnOrder">`battle-tempo` `forecast-rail` FR3 — the acting order this battle
+    /// actually recorded (spec-forecast-rail.md §6: rendered in the expedition result view, a
+    /// RECORD of what happened since the battle already resolved before the player collects).</param>
+    public sealed record CollectBattleResult(
+        int BattleIndex, bool Boss, string Outcome, long? RunId, string MatchKey,
+        IReadOnlyList<TurnOrderEntry> TurnOrder);
 
     public sealed record CollectResult(
         string State, int ElapsedTicks,
@@ -118,7 +124,8 @@ public sealed class ExpeditionService
             var report = outcome!.Report;
             battleResults.Add(new CollectBattleResult(
                 plan.BattleIndex, plan.Boss,
-                report.Outcome.ToString().ToLowerInvariant(), outcome.RunId, outcome.MatchKey));
+                report.Outcome.ToString().ToLowerInvariant(), outcome.RunId, outcome.MatchKey,
+                outcome.TurnOrder));
 
             // Specimen XP per battle won: survivors earn the tier rate × their genius multiplier.
             if (report.Outcome == BattleOutcome.Victory)

@@ -131,10 +131,15 @@ public class MaterialVocabularyTests
         Assert.True(CraftOperations.TryParse("imbue", out var imbue));
         Assert.Equal(CraftOperation.Imbue, imbue);
 
-        // ⛔ `reroll` (the shipped corpus's verb) is deliberately NOT parseable — the reroll-one /
-        // reroll-all split is module 15's, and inventing it here would mint a second op_kind
-        // vocabulary the spec's Boundaries forbid outright.
+        // ⛔ `reroll` is deliberately NOT parseable — the reroll-one / reroll-all split was module
+        // 15's to make, and inventing it here would have minted a second op_kind vocabulary the
+        // spec's Boundaries forbid outright. ⭐ Module 15 made it 2026-09-05 and re-authored the
+        // seven corpus rows onto the split verbs, so the bare verb is now used by nothing at all —
+        // this assertion pins that it never comes back.
         Assert.False(CraftOperations.TryParse("reroll", out _));
+        // `socket-imbue` is an OP_KIND (MutationOpKind.SocketImbue, minted by module 15), never a
+        // CraftOperation: the priced verb for D24's operation is `imbue`, asserted above. Two
+        // vocabularies, one name each — this pins that they stay separate.
         Assert.False(CraftOperations.TryParse("socket-imbue", out _));
     }
 

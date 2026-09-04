@@ -18,8 +18,12 @@ public sealed record WorldHeaderDto
 /// <summary>
 /// The current turn's calendar roll only (`TurnCalendar.Roll`, pure in `(turn, seed)`) — never the
 /// seed itself, and never a future roll, both of which would let a client enumerate the campaign's
-/// plague months ahead of time (world-stage W15). Blank (every flag false) on any turn that is not
-/// a week boundary — `TurnCalendar.Roll` itself returns `default` there, not "no roll happened".
+/// plague months ahead of time (world-stage W15). The boundary flags are blank (false) on any turn
+/// that is not a week boundary — `TurnCalendar.Roll` itself returns `default` there, not "no roll
+/// happened". <see cref="Season"/> is the one exception: unlike the boundary flags it is meaningful
+/// on every turn, never fogged (`TurnCalendar.SeasonOf`'s own doc comment) — world-map's own §8b.7
+/// decision ("calendar, not a season", made when no season concept existed) is superseded now that
+/// one does; wired 2026-09-05 per direct owner decision.
 /// </summary>
 public sealed record WorldCalendarDto
 {
@@ -30,6 +34,7 @@ public sealed record WorldCalendarDto
     public bool SpecialWeek { get; init; }
     public bool SpecialMonth { get; init; }
     public bool Plague { get; init; }
+    public int Season { get; init; }
 }
 
 public sealed record WorldFactionDto

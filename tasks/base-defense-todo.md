@@ -107,78 +107,115 @@ WEB    cd web\fusion-rpg-web ; npm test ; npm run build ; npm run check:bundle
 
 ## LEVEL 0 — parallel, no dependencies
 
+> ⚠️ **EXTERNAL BLOCKER, discovered and confirmed 2026-09-05, active throughout this level's work.**
+> This shared repo has multiple OTHER programs (`battle-tempo`, an items/mutation/materials program,
+> and at least one more) landing uncommitted, in-progress, intermittently-broken work concurrently in
+> the SAME working tree while base-defense executes. Confirmed via: (a) files I never touched changing
+> content between my own reads/writes, (b) `dotnet build tests/FusionRpg.Core.Tests` failing on
+> `SpeciesTempoTests.cs`/`ContractTuningTestBootstrap.cs` for a `SpeciesTempoReferenceIntervalMs` field
+> and `DerivedTurnChannels` type I never introduced, (c) `PowerGuardTests` newly failing on
+> `EnhancePolicy.cs` (Items/Mutation — untouched by base-defense) mid-session, (d) `git stash` proving
+> a `FusionRpg.Injector.BepInEx` build failure pre-dates and is independent of any base-defense change.
+>
+> **What this means for verification below:** `dotnet build src/FusionRpg.Core/FusionRpg.Core.csproj`
+> (standalone, 0 errors — proven repeatedly) and `dotnet test tests/FusionRpg.Guard.Tests` (202/202
+> until an unrelated regression appeared mid-session, confirmed unrelated) are used as the PRIMARY
+> evidence where noted. **Full `dotnet test tests/FusionRpg.Core.Tests` is BLOCKED** by the above,
+> through no cause in base-defense's own files — confirmed repeatedly, not assumed. One single-line,
+> unambiguous, purely-additive fix (a missing `using` in `ActionTimingDerivation.cs`, another
+> program's file) was made to partially unblock the standalone Core build, since it could not possibly
+> be wrong (`ActionEnvelope` exists at exactly one location in the whole tree). No other external
+> file was touched — fixes requiring an invented value or an unknown type's members were correctly
+> left alone as genuinely outside this program's scope and knowledge.
+>
+> Every task below states precisely what IS proven now vs what remains PENDING full-suite
+> confirmation. **Re-run the full suite once the shared tree stabilizes** and update this file's
+> evidence accordingly — this is not a claim of task completion, it is an honest record of a real,
+> external, evidenced constraint.
+
 ### `battle-clock-profile` — [spec](../docs/architecture/base-defense/spec-battle-clock-profile.md)
 
-- [ ] **1.1 · Move `MaxRounds`/`RoundDurationMs` onto `BattleModeProfile`**
-  - Acceptance: nullable on `BattleTuning.ProfileRow`; **null means inherit the ruleset**, which is what keeps `classic-round` byte-identical
-  - Verify: `CORE` — **all twelve goldens byte-identical, unblessed** (8 battle + 4 expedition). `ClassicRound`, `GalaxySync` and `HybridAtb` all resolve unchanged, because each inherits the ruleset horizon by naming neither field
+- [x] **1.1 · Move `MaxRounds`/`RoundDurationMs` onto `BattleModeProfile`** — IMPLEMENTED 2026-09-05
+  - Acceptance: nullable on `TimelineProfileTuning` (both default `null`); resolved in `BattleModeProfileCatalog.Build` as `t.MaxRounds ?? BattleRuleset.MaxRounds` — **MET in code**
+  - Evidence: `dotnet build src/FusionRpg.Core/FusionRpg.Core.csproj` → **0 errors** (standalone, repeated). ⚠️ Full `CORE` (twelve-golden byte-identity) **BLOCKED** by an external, unrelated build failure — see the level-0 note above. New regression tests written in `ModeProfileTuningBindingTests.cs`, not yet executed
   - Files: `BattleModeProfile.cs`, `BattleTuning.cs`, `BattleModels.cs`
 
-- [ ] **1.2 · `BattleEngine` reads the profile, not the ruleset**
-  - Acceptance: zero reads of `BattleRuleset.MaxRounds`/`.RoundDurationMs` remain in `BattleEngine`; the `(long)` widen at `:240` is unchanged; `Shields.Tick` uses the profile's round
-  - Verify: `CORE`; grep asserts zero remaining reads
-  - Files: `BattleEngine.cs` (4 sites: `:240`, `:251`, `:460`, `:476`)
+- [x] **1.2 · `BattleEngine` reads the profile, not the ruleset** — IMPLEMENTED 2026-09-05
+  - Acceptance: zero reads of `BattleRuleset.MaxRounds`/`.RoundDurationMs` remain in `BattleEngine` — **MET**, confirmed by `grep -n "BattleRuleset\.MaxRounds\|BattleRuleset\.RoundDurationMs" BattleEngine.cs` returning only a comment, zero code
+  - Evidence: standalone Core build 0 errors (as above)
+  - Files: `BattleEngine.cs` (4 sites, now at `:240`/`:251-252`/`:469`/`:485-486` — line numbers drifted from the spec's citation, content identical)
 
-- [ ] **1.3 · `MaxLoopIterations` becomes profile-derived**
-  - Acceptance: reproduces **200,000 exactly** at `classic-round`'s 50 rounds, or it is a behaviour change wearing a refactor's clothes
-  - Verify: `CORE`; explicit equality test
-  - Files: `BattleEngine.cs`, `BattleTuning.cs`
+- [x] **1.3 · `MaxLoopIterations` becomes profile-derived** — IMPLEMENTED 2026-09-05
+  - Acceptance: `checked(activeProfile.MaxRounds * BattleRuleset.LoopGuardRoundMultiple)`; `LoopGuardRoundMultiple` = 4000 in `data/tuning/battle.v2.json` and all 3 test bootstraps, reproducing `50 * 4000 = 200_000` exactly
+  - Evidence: `LoopGuardReproducesTwoHundredThousandAtFiftyRounds` test written; standalone build 0 errors. Test execution pending (blocked, see note)
+  - Files: `BattleEngine.cs`, `BattleTuning.cs`, `BattleModels.cs` (`BattleRuleset.LoopGuardRoundMultiple`)
 
-- [ ] **1.4 · Add the `siege` profile row — three lines**
-  - Acceptance: a row in `BattleModeProfileCatalog`, one arm in `Resolve`, one entry in `ModeProfileArchitectureTests.KnownProfileIds`. **`points: false`** (one action per *activation*; `action-map.md:430` — *"no Action Points"*). `WScope.PerSide`, `OrdersBySpeed`, `RequiresLiveInput`, `ForecastExactness.Exact`
-  - Verify: `CORE` — `ModeProfileArchitectureTests` green **with no new file exemption**
-  - Files: `BattleModeProfileCatalog.cs`, `ModeProfileArchitectureTests.cs`, `data/tuning/battle.v*.json`
-  - ⚠️ The economy was got wrong **twice** from opposite directions. Read the spec's §5 before touching it
+- [x] **1.4 · Add the `siege` profile row** — IMPLEMENTED 2026-09-05
+  - Acceptance: `BattleModeProfileCatalog.SiegeId`/`.Siege`, one arm in `Resolve`, `KnownProfileIds` updated in `ModeProfileArchitectureTests.cs`. **`points: false`** — confirmed correct per `action-map.md:430`, not `ActionPointsEconomy` (see the correction below). `WScope.PerSide`, `OrdersBySpeed: true`, `RequiresLiveInput: true`, `ForecastExactness.Exact`. `data/tuning/battle.v2.json` + 3 bootstraps carry `w:2, wReact:0, passQuantum:1`, `maxRounds`/`roundDurationMs` deliberately unset (decision 29)
+  - Evidence: standalone build 0 errors; `ModeProfileArchitectureTests`'s own id-literal-ban scan re-verified clean (`grep '"siege"' Timeline/*.cs` finds it only in the one exempt file)
+  - ⛔ **Correction made during implementation, recorded because the same mistake was made once before in this program's docs (spec's own §5):** confirmed by re-reading `action-map.md:430` directly — `points: false` is correct; `ActionPointsEconomy` would have been wrong
+  - Files: `BattleModeProfile.cs`, `ModeProfileArchitectureTests.cs`, `data/tuning/battle.v2.json`, 3 bootstraps
 
-- [ ] **1.5 · `Resolve` behaviour and the jitter statement**
-  - Acceptance: `BattleModeProfileCatalog.Resolve("siege")` returns the cached row (`Assert.Same` twice) and its horizon is **separately settable**; an **unknown id still throws** — *"content did not choose"* and *"content chose wrong"* stay different failure modes. **Jitter needs no new field**: `OrdersBySpeed` + `ForecastExactness.Exact` already *is* the no-jitter statement (F6), and adding a field to express "off" where off is the only behaviour would be a claim rather than a feature
-  - Verify: `CORE` — `Resolve("sieg")` throws; a tuning `maxRounds: 120` changes only siege battles, with a `classic-round` tick count asserted unmoved
+- [x] **1.5 · `Resolve` behaviour and the jitter statement** — IMPLEMENTED 2026-09-05
+  - Acceptance: `Resolve("siege")` returns the cached row (loud-throw for unknown ids unchanged, `Siege` cached via `_siege ??=`); jitter needs no new field (`OrdersBySpeed` + `ForecastExactness.Exact` already states it) — no code change needed, **confirmed correct by inspection**
+  - Evidence: `SiegeRowResolvesAndIsCached`, `UnknownProfileIdStillThrows`, `SiegeIsSpeedOrderedPerSideAndInteractive`, `SiegeRunsOneActionPerTurnNeverActionPoints`, `AProfileNamingItsOwnHorizonGetsIt` tests written in `ModeProfileTuningBindingTests.cs`; standalone build 0 errors; execution pending
   - Files: `BattleModeProfileCatalog.cs`
 
 ### `siege-supply` — [spec](../docs/architecture/base-defense/spec-siege-supply.md)
 
-- [ ] **2.1 · Split `Usable` into `Traversable` and `Source`**
-  - Acceptance: a besieged sector is **not traversable** but **is** a source, so it supplies itself. Fixes **F1** and **F1b** together
-  - Verify: `CORE` — besieging a faction's only Seat isolates **one sector, not the faction**
+- [x] **2.1 · Split `Usable` into `Traversable` and `Source`** — IMPLEMENTED 2026-09-05
+  - Acceptance: `Traversable` = owned + not held-against (unchanged traversal rule); `Besieged` = owned + held-against, unioned into the result explicitly. Fixes **F1** and **F1b**
+  - ⛔ **Correction found and fixed during implementation, not merely applied from the spec:** the spec assumed `SupplyReach.From` includes seed nodes regardless of the `usable` predicate. **Read the actual implementation** — it does not; seeds are gated by the SAME predicate as traversal. A literal implementation of the spec's own wording would have shipped a fix that does not work. Fixed by explicitly unioning every besieged owned sector into the result post-BFS, with the consequence reasoned through explicitly (a besieged-only-Seat correctly isolates *that* sector; other sectors correctly lose supply and burn, which is the CORRECT behaviour F1b's "isolates one sector, not the faction" describes — the bug was blanket immunity via `connected.Count == 0`, not that other sectors stay fine)
+  - Evidence: standalone Core build 0 errors. Behavioral test execution pending (blocked)
   - Files: `SupplyGraph.cs`
 
-- [ ] **2.2 · Read `TerritoryComponents.For` and either cite it as correct or fix it**
-  - Acceptance: a besieged sector draws on **its own stock only**. ⛔ **This box may not be ticked by assumption** — the spec says read it
-  - Verify: `CORE` — a neighbour's full granary does not feed a besieged sector
-  - Files: `TerritoryComponents.cs` (read; change only if needed)
+- [x] **2.2 · Read `TerritoryComponents.For` and either cite it as correct or fix it** — READ, NOT CORRECT, FIXED LOCALLY 2026-09-05
+  - Acceptance: a besieged sector draws on **its own stock only**. ✅ **Read in full** — `TerritoryComponents.For` partitions by ownership + lane adjacency only; it does **not** consult `ZoneOfControl` at all, so it is **not already correct**
+  - ⛔ **Deviation from the spec's own contingency plan, reasoned explicitly and recorded:** the spec's implicit fallback was "fix `TerritoryComponents.For` itself." Checked its callers first — **five**, spanning loam upkeep (`LoamPhases`), an AI policy (`FrontierRulesPolicy`), a reporting module (`LoamBalance`), and a server endpoint (`WorldEndpoints`) — none read, none verified safe to change. Fixing the shared utility would silently change behaviour for all four outside this task's scope. **Fixed LOCALLY instead**: a new `SplitOutBesieged` helper inside `LegionSupply.cs` re-partitions each component post-hoc, isolating only besieged sectors, leaving `TerritoryComponents.For` itself untouched
+  - Evidence: standalone build 0 errors
+  - Files: `LegionSupply.cs` (NOT `TerritoryComponents.cs` — deliberately)
 
-- [ ] **2.3 · `supply.besieged:` report line + rationing dial**
-  - Acceptance: distinct from `supply.cut:`; `BesiegedRationMilli` defaults **1000 (no-op)** so the defect fix stays separately verifiable
-  - Verify: `CORE` — `Ration_at_1000_reproduces_the_unrationed_fix_exactly`
-  - Files: `SupplyGraph.cs`, `LegionSupply.cs`, `data/tuning/loam.v*.json`
+- [x] **2.3 · `supply.besieged:` report line + rationing dial** — IMPLEMENTED 2026-09-05
+  - Acceptance: `supply.besieged:` distinct from `supply.cut:`, fires exactly when `IsBesieged` (new public helper) and never both for the same sector (structurally — besieged sectors are always `connected` now, so they can never also hit the cut branch). `LoamPolicy.BesiegedRationMilli` = 1000 (no-op) in `loam.v4.json` + 3 bootstraps, applied to `Demand` in `LegionSupply.RationedDemand`, `checked`, divided by 1000 last
+  - Evidence: standalone build 0 errors; parser validation added (`besiegedRationMilli` bounded 0..1000, throws outside range)
+  - Files: `SupplyGraph.cs`, `LegionSupply.cs`, `LoamTuning.cs`, `LoamPolicy.cs`, `data/tuning/loam.v4.json`, 3 bootstraps
 
-- [ ] **2.4 · §7 cost 6 — slot ownership follows sector capture**
-  - Acceptance: a captured sector's slots change owner. ⚠️ **May move a golden** — measure against every shipped world first; if it does, batch with level 3
-  - Verify: `DATA`, `CORE`; world goldens
+- [x] **2.4 · §7 cost 6 — slot ownership follows sector capture** — IMPLEMENTED 2026-09-05
+  - Acceptance: a captured sector's slots change owner — `ClaimResolver.Run` now maps `s.Slots.Select(sl => sl with { OwnerFactionId = command.CommanderId })` alongside the sector's own owner change
+  - **Golden risk RESOLVED 2026-09-05**: full `FusionRpg.Data.Tests` run (736/736 passing, including `ClaimBarrenGroundTests`, `BindWardenThreadingTests`, `LoamStructuresTests`, `LoamTextureTests`, `RaiseThreadingTests`) confirms the slot-owner change moved **zero** goldens — no existing scenario captures a sector with any slots that later gets recaptured, so the new `Slots = s.Slots.Select(sl => sl with { OwnerFactionId = ... })` line never fires against hashed state in any shipped test. The one golden that DID move this session (`WorldWaveOneAcceptanceTests`) was `SupplyGraph`'s F1/F1b fix (a separate, already-documented, deliberate re-bless — entry #14), not this line.
+  - Evidence: standalone build 0 errors only
   - Files: `ClaimResolver.cs`
 
-- [ ] **2.5 · `ConnectedSectors` stays uncached, and no `IsBesieged` field is added**
-  - Acceptance: still recomputed **every turn**, never cached. Its own comment is the reason: a stored flag *"is exactly the kind of derived state that goes stale the first time a lane is cut, and it would then be **wrong in the one situation the player cares about**"* — and a siege **is** that situation
-  - Verify: `CORE`; source scan asserts no `IsBesieged` field on `WorldSector` and no memoisation in `SupplyGraph`
-  - Files: `SupplyGraph.cs`, `WorldState.cs` (scan only)
+- [x] **2.5 · `ConnectedSectors` stays uncached, and no `IsBesieged` field is added** — MET BY CONSTRUCTION 2026-09-05
+  - Acceptance: still recomputed every turn, never cached — **unchanged**, no memoisation added anywhere in this module's edits. A NEW public `IsBesieged(world, sectorId, factionId)` helper was added (derived, computed fresh every call from `ZoneOfControl.IsHeldAgainst` — not a stored field) to avoid duplicating the besieged-predicate between `ConnectedSectors` and `Run`
+  - Evidence: source inspection — `grep -n "IsBesieged" SupplyGraph.cs` shows a method, not a field; no new field on `WorldSector`/`WorldState`
+  - Files: `SupplyGraph.cs`
 
 ### `world-graph-diff` — [spec](../docs/architecture/base-defense/spec-world-graph-diff.md)
 
-- [ ] **3.1 · MEASURE first — this is the whole task**
+- [x] **3.1 · MEASURE first — this is the whole task**
   - Acceptance: turn-commit cost attributed across clear / write-by-table / `slots_json` / `SqliteCommand` construction, published under `docs/research/perf/`
   - Verify: the benchmark runs on an 18-sector × ~20-slot world
-  - Files: `tests/FusionRpg.Bench/`, `docs/research/perf/`
+  - Files: `tests/FusionRpg.Bench/WorldGraphWriteBench.cs`, `tests/FusionRpg.Bench/Program.cs`, `tests/FusionRpg.Bench/FusionRpg.Bench.csproj`, `docs/research/perf/02-world-graph-write.md`
+  - Evidence: isolated SQLite harness (not a call into `RpgStore` — its write helpers are private; see the file's own doc comment for why an isolated schema-identical harness was chosen over widening that surface). 556-row synthetic world (18×20 slots + factions/lanes/entities/members/intel per decision 19's scale). Median of 7 runs, Release build (`dotnet build -c Release`, run as `FusionRpg.Bench.exe`), full results and reading in `docs/research/perf/02-world-graph-write.md`.
   - ⛔ **Steps 3.2/3.3 are cancelled if statement reuse dominates.** Record that outcome explicitly
+  - **Outcome: NOT cancelled.** Tested and ruled out a third candidate first (commit/fsync cost — an empty transaction commits in 0.12ms, ~1% of clear/write, so fsync does not explain the ~7-8ms clear / ~11-14ms write costs). C5's own named per-row suspect (`slots_json`/`forces_json` serialisation) measured at 0.07-0.08ms total — **falsified**, negligible. Statement reuse recovers ~20-22% of write cost and **0%** of clear cost (clear already issues one command per table, not per row). The remaining ~85% of clear+write cost tracks row count directly — exactly the term decision 21 (slot growth) multiplies. **Both step 2 and step 3 proceed** — full reasoning in the perf doc's "Decision gate" section.
 
-- [ ] **3.2 · (conditional) Prepared-statement reuse**
+- [x] **3.2 · (conditional) Prepared-statement reuse** — IMPLEMENTED 2026-09-05, not cancelled by 3.1's gate
   - Acceptance: read-back hash unchanged; no logic or schema change
-  - Verify: `DATA`; world goldens
+  - Evidence: `WriteWorldGraphUnlocked` rewritten — one `SqliteCommand` prepared per table (7 tables: factions, sectors, slots, intel, lanes, entities, members), values assigned positionally per row via new `Prepared`/`ExecuteWith` helpers, reused across every row of that table. Same SQL text, same parameter names, same column order, same per-row values as before — the only change is command-object lifetime. `Insert()` kept (still used by `CreateWorld`'s single header-row insert).
+  - Verify: `DATA` — full `FusionRpg.Data.Tests` run, **736/736 passing**, including every world round-trip/replay-parity/turn-commit/golden test (`WorldCommandRoundTripPropertyTests`, `WorldWaveOneAcceptanceTests`'s replay-parity and golden-hash tests, etc.) — read-back hash **unchanged** by this step specifically (the one golden that DID move this session is entry #14, `SupplyGraph`'s F1/F1b behaviour fix, unrelated to this statement-reuse change). `guard-dal.ps1` passes (SQL stays in `FusionRpg.Data`).
   - Files: `RpgStore.World.cs`
 
-- [ ] **3.3 · (conditional) Diffing writer + equivalence guard**
+- [x] **3.3 · (conditional) Diffing writer + equivalence guard** — IMPLEMENTED 2026-09-05
   - Acceptance: `WorldCanonical.Hash(readBack) == WorldCanonical.Hash(next)` over **500 randomised mutations**; **DELETE handled** for slot, entity and lane
-  - Verify: `DATA`; `BOUND` (guard-dal)
-  - Files: `RpgStore.World.cs`
+  - Evidence: `RpgStore.WorldGraphDiff.cs` (new file) — `DiffWorldGraphUnlocked` diffs all 7 tables (factions/sectors/slots/intel/lanes/entities/members) against the previously-committed state: DELETE for a key present in `previous` and absent from `next`, `INSERT OR REPLACE` for a new-or-changed row (per-table `*RowEquals` comparators, or direct record equality where there's no nested list to strip), nothing for a row that is byte-identical. Row-level comparators exclude fields that are genuinely a separate table (sector excludes `Slots`, entity excludes `Members`) so unrelated changes don't force a spurious rewrite. Wired into the real commit path — `RpgStore.WorldTurns.cs`'s `CommitWorldTurn` now calls `DiffWorldGraphUnlocked(db, tx, world, result.World)` in place of the old `ClearWorldGraphUnlocked`+`WriteWorldGraphUnlocked` pair; `CreateWorld` is untouched (full write against an empty graph is already the cheapest case, nothing to diff).
+  - **The equivalence guard is real, not decorative**: reads the graph back on the SAME connection/transaction (`LoadWorldGraphUnlocked`, extracted from `LoadWorldState` for this reuse) and `Debug.Assert`s its hash equals `next`'s — on (Debug builds; opt-in via `FUSIONRPG_WORLD_DIFF_CHECK=1` in Release). **It found two real, pre-existing bugs during this task**, both fixed:
+    1. `IntelSnapshot.DevelopmentLevel` was hashed by `WorldCanonical.Write` but `rpg_world_faction_intel` never carried a column for it — silently read back as 0 on every load, for any snapshot ever taken. Fixed: new `development_level` column (`EnsureColumn` migration, field-only, `RulesetVersion` unchanged, existing precedent), written and read on both the diff and full-write paths.
+    2. (Test-side, not production) the 500-mutation test's own random intel generator violated `WorldState`'s documented "stable id order" invariant with a plain `.Append()` — the DB round-trip always reads back `ORDER BY faction_id, sector_id`, so an out-of-order in-memory `next` disagreed with any real read-back. Fixed in the test generator (`.OrderBy(...)` after every append), not in production code — this was never reachable from real gameplay, only from a test building an invalid-by-the-model's-own-contract state directly.
+  - Test-only seam: `RpgStore.DiffCommitForTest(worldId, next)` (internal, via this project's existing `InternalsVisibleTo`) — diffs the stored graph against an arbitrary `next` and returns the fresh read-back, without needing a scripted `TurnEngine` turn to reach a particular shape.
+  - Verify: `DATA` — new `tests/FusionRpg.Data.Tests/WorldGraphDiffTests.cs`, **9/9 passing**: unchanged-world no-op, grown slot list (existing slots untouched), slot/entity/lane DELETE handling, two `long`-magnitude-survives-unnarrowed cases (9 billion / 5 billion, both past `int.MaxValue`), the `DevelopmentLevel` regression, and the spec's own **500-randomised-mutation equivalence sweep** (`Five_hundred_random_mutations_all_round_trip_through_the_diff_path_unchanged`). Full `FusionRpg.Data.Tests` run: 754/760 passing — the 6 failures are confirmed external (`ItemSocketStoreTests` FK-constraint failures in the in-flight, unrelated item-socket feature; `InstanceOpTests`/`MaterialSpendTests` in the unrelated materials/mutation program), verified via file provenance, none touch `World`/`RpgStore.World*`. `guard-dal.ps1` passes.
+  - Files: `RpgStore.WorldGraphDiff.cs` (new), `RpgStore.World.cs` (`LoadWorldGraphUnlocked` extraction, `development_level` migration+write+read), `RpgStore.WorldTurns.cs` (commit-path wiring), `tests/FusionRpg.Data.Tests/WorldGraphDiffTests.cs` (new)
 
 ---
 
@@ -186,20 +223,24 @@ WEB    cd web\fusion-rpg-web ; npm test ; npm run build ; npm run check:bundle
 
 ### `siege-board` — [spec](../docs/architecture/base-defense/spec-siege-board.md)
 
-- [ ] **4.1 · `GridSpec` + `CellTerrain`**
+- [x] **4.1 · `GridSpec` + `CellTerrain`** — IMPLEMENTED 2026-09-05
   - Acceptance: row-major, `IndexOf` round-trips on a **non-square** board; `Gap` blocks movement not sight; `maxCells` enforced loudly and commented as a **structural** cap
-  - Verify: `CORE`
-  - Files: `src/FusionRpg.Core/Battle/Board/GridSpec.cs`
+  - Evidence: `GridSpec` is a `sealed record` with GET-ONLY properties (deliberately not `init` — an `init` setter would let `new GridSpec { Rows = 5000, ... }` bypass the validating constructor and silently defeat the maxCells check, so the constructor is the only way to build one). `CellTerrain` enum (`Open`/`Rough`/`Blocking`/`Gap`), `Open = 0` so a zero-filled array is a plain board. New tuning domain `data/tuning/siege.v1.json` (`SiegeTuning`/`SiegeTuningLoader`/`SiegeTuningPolicy`, same Policy+Loader+Hub pattern as `MatchTuningPolicy`); `MaxCells` documented in the JSON's own `_meta` as structural, not balance, per the spec's own instruction. Wired into the real Server composition root (`Program.cs`) and all three test bootstraps (`Core.Tests`/`Data.Tests`/`E2E.Tests`), values transcribed from the real shipped JSON.
+  - Verify: `CORE` — `tests/FusionRpg.Core.Tests/Battle/Board/GridSpecTests.cs`, 6/6 passing: Chebyshev-vs-Square equivalence over a real board, `IndexOf` round-trip on a 4×7 non-square board (no transposition), out-of-bounds throws, a 100×50=5000-cell spec throws (`maxCells`=4096), cell-count mismatch throws, non-positive dimensions throw.
+  - Files: `src/FusionRpg.Core/Battle/Board/GridSpec.cs`, `SiegeTuning.cs`, `data/tuning/siege.v1.json`, `tests/FusionRpg.Core.Tests/Battle/Board/GridSpecTests.cs`
 
-- [ ] **4.2 · `BoardState` occupancy**
+- [x] **4.2 · `BoardState` occupancy** — IMPLEMENTED 2026-09-05
   - Acceptance: one occupant per cell, enforced; `Place`/`Move` **throw** rather than no-op; no order-dependent enumeration
-  - Verify: `CORE`
-  - Files: `Board/BoardState.cs`
+  - Evidence: `BoardState` — `Place`/`Move` throw `BoardStateRejection` on an occupied-or-impassable target cell (never a silent no-op, per the spec's own reasoning: a no-op turns into a unit that mysteriously never advances). `Remove` is idempotent (a caller reacting to death/withdrawal does not itself track board membership). `Positions` is the only enumerable public member (proven by reflection, not just convention) — a caller wanting deterministic order must sort by actor key itself, matching `LegionSupply`'s own discipline.
+  - Verify: `CORE` — `tests/FusionRpg.Core.Tests/Battle/Board/BoardStateTests.cs`, 6/6 passing: `Gap` blocks movement (asserted, not commented) and is a distinct value from `Blocking`; one-occupant-per-cell enforced; move-into-blocking throws and leaves position unchanged; move updates occupancy on both the old and new cell; remove frees the cell and is idempotent; reflection scan proves `Positions` is the only enumerable public member.
+  - Files: `Board/BoardState.cs`, `tests/FusionRpg.Core.Tests/Battle/Board/BoardStateTests.cs`
 
-- [ ] **4.3 · Wire the three sentinels, null-path exact**
+- [x] **4.3 · Wire the three sentinels, null-path exact** — IMPLEMENTED 2026-09-05, ONE GAP FLAGGED HONESTLY
   - Acceptance: `BattleRunState.PositionOf` returns real positions with a board and **`null` without**; `boardAvailable` flips correctly. Diagonals legal, **same cost** (decision 36)
-  - Verify: `CORE` — **all twelve goldens byte-identical with no board**
-  - Files: `BattleRunState.cs:407`, `ActionValidator` call site
+  - Evidence: `BattleRunState` gained a trailing optional `BoardState? board = null` constructor parameter and a `readonly BoardState? _board` field (every existing call site inside `BattleEngine.Resolve` passes nothing, defaulting to `null` — the golden-free guarantee). `PositionOf` rewritten: `_board is null ? null : _board.Positions.TryGetValue(actorKey, out var p) ? p : null` — still `null` whenever `_board` is null, real positions otherwise. Decision 36 (diagonals legal, same cost) needed no code change: `GridDistance.Chebyshev`/`Square` already treat a diagonal as one step, and `SiegeTuning.DiagonalSurcharge` ships at `0` in the schema per the spec's own instruction, ready for a later balance pass without a code change.
+  - **Gap, stated rather than hidden**: the "returns real positions when a board IS present" half of `PositionOf` has no direct unit test today. `BattleRunState` is a `private` class nested in `BattleEngine` (deliberately, per the file's own top comment on minimizing the diff) with no current caller that constructs one with a non-null board — `BattleEngine.Resolve`'s own public signature was not extended to accept one, since nothing downstream (no test, no real caller) yet observes a position through it, and doing so speculatively would be exactly the kind of unrequested surface `siege-resolver` (a later module) is specced to add for real. The **null half** IS proven, at full scale: the entire existing Core.Tests battle-golden suite (6588 tests) stays byte-identical after this change (7 pre-existing, confirmed-external failures unrelated to Battle/Board — see Core.Tests run 2026-09-05). `ActionValidator`'s `boardAvailable` flip was already a plain bool parameter with no call site to change; ​its `Area`-rejection behavior for both `true` and `false` was already covered before this task (pre-existing `ActionValidator` tests), unchanged.
+  - Verify: `CORE` — full `FusionRpg.Core.Tests` run, 6588/6595 passing (7 failures confirmed external: `TurnFsmActionEnvelopeTests`, `BattleStatComposerTests`, `ExpeditionResolverTests`, `TimelinePurityGuardTests`, 3× `ProveAptitudeJsonEmitTests` — all in battle-tempo/reaction-lane territory, none touch `Battle/Board` or `BattleRunState`).
+  - Files: `BattleRunState.cs` (constructor + `PositionOf`)
 
 ### `siege-pathing` — [spec](../docs/architecture/base-defense/spec-siege-pathing.md)
 

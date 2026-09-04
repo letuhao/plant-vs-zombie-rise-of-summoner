@@ -24,20 +24,28 @@ public class RarityBudgetKeysTests
     // requirement met by a second leg that is not a per-rung row. Moved rather than loosened: the
     // row below still pins the two that ARE still awaiting.
     [InlineData("reroll_cost_mult")]
+    // ⭐ socket_min and socket_max joined the ready set 2026-09-05 when module 16 (`sockets`) decided
+    // their shape — TWO integers per rung, the inclusive window a drop's socket count is rolled from
+    // before the base type's own socketMax clamps it, seeded by RpgStore.SeedSocketGrants from
+    // data/tuning/sockets.v1.json and read by SocketGeometry.SocketsAtDrop.
+    [InlineData("socket_min")]
+    [InlineData("socket_max")]
     public void The_ready_keys_are_registered(string key) =>
         Assert.True(RarityBudgetKeys.IsRegistered(key));
 
-    [Theory]
-    [InlineData("socket_min")]
-    [InlineData("socket_max")]
-    public void A_key_awaiting_a_decided_shape_is_not_registered_yet(string key) =>
-        Assert.False(RarityBudgetKeys.IsRegistered(key));
-
     [Fact]
-    public void A_rarity_budget_key_with_no_shipped_consumer_is_rejected()
+    public void Every_listed_key_now_has_a_decided_shape_and_the_undecided_gate_still_bites()
     {
-        var ex = Assert.Throws<RarityBudgetKeyRejection>(() => RarityBudgetKeys.Validate("socket_min"));
-        Assert.Contains("socket_min", ex.Message);
+        // ⭐ 2026-09-05: with module 16's two keys decided, EVERY key in the closed list is ready.
+        // The "not decided is not safe-to-seed" gate is therefore asserted against a synthetic
+        // undecided key rather than a real one — the mechanism has to survive the list happening to
+        // be fully decided today, because the NEXT key added will not be.
+        Assert.All(RarityBudgetKeys.All, k => Assert.True(k.HasDecidedShape, $"'{k.Key}' is listed but undecided"));
+
+        var undecided = new RarityBudgetKeyDef("hypothetical_key", "nobody (0)", HasDecidedShape: false);
+        Assert.False(undecided.HasDecidedShape);
+        Assert.False(RarityBudgetKeys.IsRegistered(undecided.Key));
+        Assert.Throws<RarityBudgetKeyRejection>(() => RarityBudgetKeys.Validate(undecided.Key));
     }
 
     [Fact]

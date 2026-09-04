@@ -111,7 +111,7 @@
   },
   {
     "turn": 2,
-    "stateHash": "892060c4e72aaa0865b5d2c5c51b7c1dac87b26dfed55911f2f23a5402918eea",
+    "stateHash": "f3f5c1fd6f68e1159811161cc7c8f4047e1de801d1fdf961b158f6fd30def32f",
     "phases": [
       "Reveal",
       "Sieges",
@@ -177,7 +177,7 @@
   },
   {
     "turn": 3,
-    "stateHash": "b5802ebd42ac2dbecdbbf242f09fbad86b47a2c4d1aabb073e3714e1a7607a6e",
+    "stateHash": "34f7790c325ba1f759ac0ef21f26e73bb914f641004f804b53a6a23392b4ae56",
     "phases": [
       "Reveal",
       "Production",
@@ -228,7 +228,7 @@
   },
   {
     "turn": 4,
-    "stateHash": "a4011b033a86805ee1ed0b47baea745bd64829e5ce619d46957f01940d04630c",
+    "stateHash": "e0bd4f468e58fd5af81faabddf7e2f6745894a3bd5dffe96405597ba86b5040a",
     "phases": [
       "Reveal",
       "Movement",
@@ -293,7 +293,7 @@
   },
   {
     "turn": 5,
-    "stateHash": "ba56420a62b2150e709673c78eee56dee4b7c05ee8fc0d3f4c7d6c14071d40f6",
+    "stateHash": "666fe0ff798a52783705bdbb7f91e73d173f23ad83340d6d7169bccd8f13f9df",
     "phases": [
       "Reveal",
       "Movement",

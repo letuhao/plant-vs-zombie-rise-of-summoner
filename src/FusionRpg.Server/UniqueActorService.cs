@@ -64,7 +64,7 @@ public sealed class UniqueActorService
         PutEquipment(instanceId, slot, "");
 
     public (bool Ok, string Reason, UniqueActorDto? Actor) AwardXp(
-        string instanceId, double delta, string? reason) =>
+        string instanceId, long delta, string? reason) =>
         _store.AwardUniqueActorXp(instanceId, delta, reason);
 
 

@@ -1,3 +1,4 @@
+using System;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Demons.Fusion;
 using Xunit;
@@ -9,10 +10,11 @@ namespace FusionRpg.Core.Tests.Demons;
 public class StarPolicyTests
 {
     [Theory]
-    [InlineData(DemonRarity.Chaff, 3)]
-    [InlineData(DemonRarity.Cultivated, 4)]
-    [InlineData(DemonRarity.Heirloom, 5)]
-    [InlineData(DemonRarity.Sunwoven, 5)]
+    // Doubled 2026-09-05 alongside MaxStar 5 -> 10, preserving the rarity shape exactly (3/4/5 -> 6/8/10).
+    [InlineData(DemonRarity.Chaff, 6)]
+    [InlineData(DemonRarity.Cultivated, 8)]
+    [InlineData(DemonRarity.Heirloom, 10)]
+    [InlineData(DemonRarity.Sunwoven, 10)]
     public void Star_caps_by_rarity(DemonRarity rarity, int cap) =>
         Assert.Equal(cap, StarPolicy.StarCap(rarity));
 
@@ -22,7 +24,10 @@ public class StarPolicyTests
         Assert.Equal(2, StarPolicy.SacrificesForStar(1));
         Assert.Equal(4, StarPolicy.SacrificesForStar(3));
         Assert.Throws<ArgumentOutOfRangeException>(() => StarPolicy.SacrificesForStar(0));
-        Assert.Throws<ArgumentOutOfRangeException>(() => StarPolicy.SacrificesForStar(6));
+        // Stars run 1..MaxStar, raised 5 -> 10 by the owner on 2026-09-05. Asserted against the
+        // constant rather than a literal, so the next range change moves one number, not two.
+        Assert.Equal(StarPolicy.MaxStar + 1, StarPolicy.SacrificesForStar(StarPolicy.MaxStar));
+        Assert.Throws<ArgumentOutOfRangeException>(() => StarPolicy.SacrificesForStar(StarPolicy.MaxStar + 1));
     }
 
     [Fact]
@@ -39,12 +44,53 @@ public class StarPolicyTests
         // Sunwoven, which is merely where Legendary's species happened to migrate to
         // (seed-to-concrete T4.1). A Sunwoven demon CAN now promote further, to Almanac; only
         // Almanac itself has no ceiling above it.
-        Assert.True(StarPolicy.CanPromote(DemonRarity.Chaff, 3, promoted: false));
-        Assert.False(StarPolicy.CanPromote(DemonRarity.Chaff, 2, promoted: false)); // not maxed
-        Assert.False(StarPolicy.CanPromote(DemonRarity.Chaff, 3, promoted: true));  // once only
-        Assert.True(StarPolicy.CanPromote(DemonRarity.Sunwoven, 5, promoted: false)); // can still promote to Almanac
-        Assert.False(StarPolicy.CanPromote(DemonRarity.Almanac, 5, promoted: false)); // no ceiling above the true top
-        Assert.True(StarPolicy.CanPromote(DemonRarity.Heirloom, 5, promoted: false));
+        // Read each cap rather than repeating it: the ladder doubled on 2026-09-05 (3/4/5 -> 6/8/10)
+        // and a literal here would have to be chased every time it moves again.
+        var chaffCap = StarPolicy.StarCap(DemonRarity.Chaff);
+        Assert.True(StarPolicy.CanPromote(DemonRarity.Chaff, chaffCap, promoted: false));
+        Assert.False(StarPolicy.CanPromote(DemonRarity.Chaff, chaffCap - 1, promoted: false)); // not maxed
+        Assert.False(StarPolicy.CanPromote(DemonRarity.Chaff, chaffCap, promoted: true));  // once only
+        Assert.True(StarPolicy.CanPromote(
+            DemonRarity.Sunwoven, StarPolicy.StarCap(DemonRarity.Sunwoven), promoted: false)); // still promotes to Almanac
+        Assert.False(StarPolicy.CanPromote(
+            DemonRarity.Almanac, StarPolicy.StarCap(DemonRarity.Almanac), promoted: false)); // no ceiling above the true top
+        Assert.True(StarPolicy.CanPromote(
+            DemonRarity.Heirloom, StarPolicy.StarCap(DemonRarity.Heirloom), promoted: false));
+    }
+
+    [Fact]
+    public void Star_reward_is_paired_to_the_triangular_sacrifice_cost()
+    {
+        // The defect (effort-power reconciliation M4): cumulative sacrifices to star n are
+        // C(n) = n(n+3)/2, triangular, while the reward was perStar * n, linear. Reward per
+        // sacrifice was 60/(n+3), so star 5 was an exactly 2x worse deal than star 1.
+        // The fix indexes the reward on the cost, anchored so star 5 keeps its old value.
+        static int Cumulative(int star)
+        {
+            var total = 0;
+            for (var k = 1; k <= star; k++) total += StarPolicy.SacrificesForStar(k);
+            return total;
+        }
+
+        // The anchor holds: nobody's existing star-5 demon changes value.
+        Assert.Equal(150, StarPolicy.StarPowerMilli(StarPolicy.ReferenceStar));
+        Assert.Equal(150, StarPolicy.StarDefenseMilli(StarPolicy.ReferenceStar));
+        Assert.Equal(0, StarPolicy.StarPowerMilli(0));
+
+        // Reward per sacrifice is now FLAT, which is the property the old curve did not have.
+        // Computed, not copied: ratio(n) = R(n)/C(n) should be constant across the whole ladder.
+        var reference = (double)StarPolicy.StarPowerMilli(1) / Cumulative(1);
+        for (var star = 1; star <= StarPolicy.MaxStar; star++)
+        {
+            var ratio = (double)StarPolicy.StarPowerMilli(star) / Cumulative(star);
+            // Within half a per-mille of flat -- the only drift is integer rounding of R(n).
+            Assert.True(Math.Abs(ratio - reference) < 0.5,
+                $"star {star}: reward/sacrifice {ratio:0.###} drifted from {reference:0.###}");
+        }
+
+        // And it is monotonic, so a deeper star is never a smaller bonus.
+        for (var star = 2; star <= StarPolicy.MaxStar; star++)
+            Assert.True(StarPolicy.StarPowerMilli(star) > StarPolicy.StarPowerMilli(star - 1));
     }
 
     [Fact]
@@ -53,8 +99,13 @@ public class StarPolicyTests
         var merge = FusionCostTable.StarMerge(DemonRarity.Cultivated);
         Assert.Equal((50L, DemonRarity.Cultivated, 1, 1), (merge.Souls, merge.ShardRarity, merge.ShardCount, merge.EssenceCount));
 
+        // Promotion escalates per rung since 2026-09-05 (effort-power M5) instead of a flat 200 --
+        // it sat flat while Recipe escalated 150 -> 1000 in the same file.
         var promo = FusionCostTable.Promotion(DemonRarity.Heirloom);
-        Assert.Equal((200L, DemonRarity.Heirloom, 3, 3), (promo.Souls, promo.ShardRarity, promo.ShardCount, promo.EssenceCount));
+        Assert.Equal((820L, DemonRarity.Heirloom, 4, 7), (promo.Souls, promo.ShardRarity, promo.ShardCount, promo.EssenceCount));
+        var promoLow = FusionCostTable.Promotion(DemonRarity.Chaff);
+        Assert.Equal((150L, DemonRarity.Chaff, 2, 2), (promoLow.Souls, promoLow.ShardRarity, promoLow.ShardCount, promoLow.EssenceCount));
+        Assert.True(promo.Souls > promoLow.Souls, "promotion must cost more at a higher rung");
 
         Assert.Equal((150L, DemonRarity.Chaff, 2, 2), Tuple(FusionCostTable.Recipe(DemonRarity.Cultivated)));
         Assert.Equal((400L, DemonRarity.Cultivated, 3, 4), Tuple(FusionCostTable.Recipe(DemonRarity.Heirloom)));

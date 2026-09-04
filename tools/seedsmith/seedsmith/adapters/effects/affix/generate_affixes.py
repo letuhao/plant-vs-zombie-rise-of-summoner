@@ -257,7 +257,7 @@ def main(argv=None) -> int:
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     (OUTPUT_DIR / "all.json").write_text(
-        json.dumps({"kind": "affix", "_meta": {"partition": "all"}, "entries": entries},
+        json.dumps({"schemaVersion": 1, "kind": "affix", "_meta": {"partition": "all"}, "entries": entries},
                    ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8")
 

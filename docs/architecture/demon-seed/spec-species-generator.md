@@ -21,10 +21,17 @@ item seed and concrete item principle that we already define."*
 data/seed/demons/species/**.json  ->  species-generator  ->  data/generated/demons/**.json
 ```
 
-**Honest statement: `data/generated/` is absent from the repo.** `seed-contract.md` carries the status
+~~**Honest statement: `data/generated/` is absent from the repo.** `seed-contract.md` carries the status
 *"Proposed 2026-08-22 … Nothing is authorized to be authored from it yet"*, and no generator or
-generated tree exists today. This module builds that stage for the first time. It is not "point the
+generated tree exists today.~~ This module builds that stage for the first time. It is not "point the
 item generator at demons" — there is no item generator to point.
+
+**Corrected 2026-09-05 — this module has shipped.** `data/generated/demons/` holds **830 committed JSON
+files**, one per concrete species, all tracked (counted this session; first committed 2026-09-04 in
+`52713f4`), and the generator is `src/FusionRpg.Core/Demons/Generation/` —
+`DemonSpeciesGenerator`, `SpeciesExpander`, `ConcreteSpeciesSerializer`, `DemonCorpusBuilder` — with the
+import side in `RpgStore.Species.cs`. §1's heading above still reads *"it does not exist yet"*, and is kept
+as written: it was true when this spec was authored and it records what this module was asked to build.
 
 That also makes this module a **precedent**, not just a feature. The shape chosen here is the shape
 the item and action programs will follow, so it is worth getting the boundaries exactly right.

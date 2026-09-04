@@ -62,8 +62,13 @@ public sealed record PredicateFrequencyRow(
 /// sides' own priced points (see <see cref="ActorPowerCache"/>'s <c>Interaction</c> for the exact
 /// arithmetic) — the same "coefficient over a data row" shape <see cref="PowerCoefficientRow"/>
 /// already uses, so a later sweep can propose against this table exactly the way it proposes against
-/// that one. <b>Flat and unfitted here</b> (mirrors the 20 flat-1000 rows in <see cref="PowerTables.Authored"/>)
-/// — fitting either table is E44's separate, out-of-scope half (spec-power-sweep.md §4.1).</param>
+/// that one. <b>Flat and unfitted here</b>, the same discipline the 20 flat-1000 rows in
+/// <see cref="PowerTables.Authored"/> follow — but NOT flat-1000 itself: 1000‰ means something
+/// different for a term that scales a PRODUCT of two already-priced points than it does for a term
+/// that scales a single normalized magnitude, and copying the number without re-deriving what it means
+/// here was this construction's first mistake, caught and corrected — see
+/// <see cref="PowerTables.InteractionCoeffMilli"/>'s own comment for the corrected value and why.
+/// Fitting either table is E44's separate, out-of-scope half (spec-power-sweep.md §4.1).</param>
 /// <param name="Category">Which of the five categories the correction lands in. Not derived from
 /// either side's <c>AtomKind.Categories</c> (both sides here are <c>stat.derived</c>, whose kind-level
 /// categories are Offense|Survivability|Control regardless of which channel it writes) — the
@@ -207,9 +212,25 @@ public sealed class PowerTables
     /// <summary>
     /// E44/D2's two closed pairs — crit rate × crit damage, shield capacity × shield toughness — each
     /// generated once per element slot (omni + the 6-member roster, matching every other 7-slot family
-    /// in <c>DerivedStatChannels</c>) rather than hand-listed 14 times. <b>Flat 1000‰</b>, the same
-    /// unfitted-placeholder discipline the 20 rows above already use — a later sweep proposes against
-    /// this table exactly the way it proposes against that one (spec-power-sweep.md §4.1/§4.2).
+    /// in <c>DerivedStatChannels</c>) rather than hand-listed 14 times.
+    ///
+    /// <para><b>Why 5‰, not a copy-pasted 1000‰.</b> Unlike <see cref="PowerCoefficientRow"/>, where
+    /// 1000‰ means "apply the normalized magnitude unchanged" — a genuinely neutral starting point —
+    /// <see cref="PowerInteractionRow.CoeffMilli"/> scales a PRODUCT of two already-priced point
+    /// values, so 1000‰ there is not neutral at all: at real authored magnitudes it made the
+    /// correction dwarf the additive base by an order of magnitude (checked against
+    /// <c>data/seed/items/_registry/bands.v1.json</c>'s own <c>sigmoidDerivedChannel</c> worked
+    /// example — tier 1 mid = 6 points, tier 5 mid = 56 points, the real range this fires over). 5‰
+    /// keeps the correction a modest, single-to-low-double-digit percent of the additive base even at
+    /// tier 5's top of that range, while staying unambiguously non-zero and provable at the synthetic
+    /// magnitudes <c>PowerInteractionTests</c> uses to make the effect legible. <b>Still flat and
+    /// unfitted</b> — a starting value chosen to be plausible at content scale, not measured — a later
+    /// sweep proposes against this table exactly the way it proposes against the 20 rows above
+    /// (spec-power-sweep.md §4.1/§4.2). <b>Honestly:</b> because the correction is bilinear in the two
+    /// sides' magnitudes while a believable "interaction error" is closer to a constant percentage, no
+    /// single flat coefficient holds that percentage across all five tiers at once — it under-corrects
+    /// at tier 1 and over-corrects (relatively) at tier 5. That is exactly the imprecision E44's
+    /// out-of-scope fitting half exists to close, not something hidden here.</para>
     ///
     /// <para>"The element ring" — the third pair spec-power-sweep.md §4.2 names — is deliberately
     /// absent here. Its multiplicative-ness (`ElementHub`'s 1.25 × 1.25 = 1.5625 for two strong slots,
@@ -220,6 +241,8 @@ public sealed class PowerTables
     /// not price the element ring, it would price a guess. This is a scope boundary, not a gap in the
     /// construction below.</para>
     /// </summary>
+    const int InteractionCoeffMilli = 5;
+
     static IReadOnlyList<PowerInteractionRow> AuthoredInteractions()
     {
         var rows = new List<PowerInteractionRow>();
@@ -228,11 +251,11 @@ public sealed class PowerTables
             rows.Add(new PowerInteractionRow(
                 "stat.derived", $"combat.crit.rate.{slot}",
                 "stat.derived", $"combat.crit.damage.{slot}",
-                CoeffMilli: 1000, PowerCategory.Offense));
+                InteractionCoeffMilli, PowerCategory.Offense));
             rows.Add(new PowerInteractionRow(
                 "stat.derived", $"{DerivedStatChannels.CombatShieldCapacityPrefix}.{slot}",
                 "stat.derived", $"{DerivedStatChannels.CombatShieldToughnessPrefix}.{slot}",
-                CoeffMilli: 1000, PowerCategory.Survivability));
+                InteractionCoeffMilli, PowerCategory.Survivability));
         }
         return rows;
     }

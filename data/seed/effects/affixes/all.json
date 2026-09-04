@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "kind": "affix",
   "_meta": {
     "partition": "all"
@@ -7,10 +8,10 @@
     {
       "id": "affix.authored.affix-draw-000",
       "name": "Frostbite Venom",
-      "affixClass": "suffix",
+      "class": "suffix",
       "refs": [
-        "atom.fx-cold-on-hit.t1",
-        "atom.fx-poison-on-hit.t1"
+        { "atom": "atom.fx-cold-on-hit.t1", "seq": 0 },
+        { "atom": "atom.fx-poison-on-hit.t1", "seq": 1 }
       ],
       "_provenance": {
         "pipeline": "affix-authoring",
@@ -30,10 +31,10 @@
     {
       "id": "affix.authored.affix-draw-001",
       "name": "Botanical Spore Burst",
-      "affixClass": "suffix",
+      "class": "suffix",
       "refs": [
-        "atom.fx-poison-on-hit.t1",
-        "atom.fx-spawn-plant-bullet.a.t1"
+        { "atom": "atom.fx-poison-on-hit.t1", "seq": 0 },
+        { "atom": "atom.fx-spawn-plant-bullet.a.t1", "seq": 1 }
       ],
       "_provenance": {
         "pipeline": "affix-authoring",

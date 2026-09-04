@@ -300,17 +300,31 @@ public class EntityFieldsTwelvePlusTests
     }
 
     // E41 (spec-ui-attach-point.md §2c): landed a thirteenth row (ui.present, kind-wide, coeffMilli 0)
-    // in this same seed file after this test was written — updated here rather than left stale the
-    // moment a sibling module added its own row, matching this session's own established precedent
-    // for a shared-file count guard (AtomKindRegistryTests.cs's KindCount/AttachPointCount rows).
+    // in this same seed file after this test was written, and E37 (spec-projectile-control.md §2c)
+    // landed a fourteenth (bullet.modify, channel-less) alongside it without this guard being updated
+    // for either — found stale here 2026-09-05 while re-verifying against the real file (it already
+    // read 14 rows, not 13, before this session's own E44 additions). E44 (spec-power-sweep.md §4.1,
+    // criteria 1/3) then added 20 more: 4 sweep-fitted (stat.modify/atk, defense, hp, maxHp — the only
+    // channels the E43 family-expand corpus actually covers) plus 16 unfitted pass-throughs of
+    // CoefficientTable.Authored()'s remaining original rows, added to close a real, independently
+    // confirmed gap (RpgStore.GetPowerTables falls back to Authored() only when power_coefficient has
+    // ZERO rows — once any row is imported, every Authored() channel this file does not also carry
+    // becomes silently unpriced in a DB-backed context; confirmed live against the shipped dist DB,
+    // which held exactly this session's pre-E44 14 rows and none of the missing 20). 14 + 20 = 34,
+    // updated here rather than left stale the moment either module added its own row — matching this
+    // session's own established precedent for a shared-file count guard (AtomKindRegistryTests.cs's
+    // KindCount/AttachPointCount rows).
     [Fact]
     public void The_seed_file_carries_exactly_the_twelve_plus_ui_presents_own_row()
     {
         // A removed row makes the atom report unpriced once a real import runs — this is the sibling
         // check that a stray or duplicated row was not authored either.
         var content = LoadCoefficientSeedFile(out _);
-        Assert.Equal(TwelveChannels.Length + 1, content.Coefficients.Count);
+        Assert.Equal(TwelveChannels.Length + 1 /* ui.present */ + 1 /* bullet.modify */
+            + 20 /* E44: 4 sweep-fitted + 16 pass-through, 2026-09-05 */, content.Coefficients.Count);
         Assert.Contains(content.Coefficients, c => c.KindId == "ui.present" && c.Channel == "");
+        Assert.Contains(content.Coefficients, c => c.KindId == "bullet.modify" && c.Channel == "");
+        Assert.Contains(content.Coefficients, c => c.KindId == "stat.modify" && c.Channel == "atk");
     }
 
     static SeedContent LoadCoefficientSeedFile(out IReadOnlyList<SeedError> errors)

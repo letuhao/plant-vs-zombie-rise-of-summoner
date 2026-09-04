@@ -20,17 +20,22 @@ public static class ContentScale
     }
 
     /// <summary>Applies a per-mille content scale to one rolled magnitude — round half away from
-    /// zero, once, matching every other milli→whole conversion in this module.</summary>
-    public static int Apply(int rolledValue, long contentScaleMilli)
+    /// zero, once, matching every other milli→whole conversion in this module.
+    ///
+    /// <para><c>long</c> in and out since 2026-09-05 (effort-power reconciliation P3). This is the one
+    /// funnel every content-scaled magnitude passes through, and <c>P(Θ)</c> is quadratic, so an
+    /// <c>int</c> result stops being able to hold what the curve produces long before the ladder
+    /// itself runs out — CLAUDE.md's rule is <c>long</c> for any magnitude <c>contentScale</c> can
+    /// touch. The arithmetic was already correct (widen before multiplying, divide by 1000 once,
+    /// overflow throws); only the width was wrong.</para></summary>
+    public static long Apply(long rolledValue, long contentScaleMilli)
     {
-        long numerator = checked((long)rolledValue * contentScaleMilli);
+        long numerator = checked(rolledValue * contentScaleMilli);
         long q = numerator / 1000;
         long r = numerator % 1000;
-        if (r == 0) return checked((int)q);
+        if (r == 0) return q;
         long twiceR = checked(Math.Abs(r) * 2);
-        bool roundsUp = twiceR >= 1000;
-        if (!roundsUp) return checked((int)q);
-        bool negative = numerator < 0;
-        return checked((int)(negative ? q - 1 : q + 1));
+        if (twiceR < 1000) return q;
+        return checked(numerator < 0 ? q - 1 : q + 1);
     }
 }

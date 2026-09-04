@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Activity;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Progression;
 using Microsoft.Data.Sqlite;
 
@@ -31,21 +32,88 @@ public sealed partial class RpgStore
         {
             // Web-mode runs never level PvZ almanac type actors (audit 2026-08-21) —
             // player-kind XP still flows (one economy); demon specimen XP is expedition-owned.
-            if (!pvzGame && award.Kind != RpgActorKinds.Player)
+            // species-build T1.2: a species row is NOT a PvZ almanac type (spec-species-xp.md §2's
+            // ⛔ callout) — this rule exists to protect `plant`/`zombie` kind rows specifically, so it
+            // must not widen to skip Species too, or standalone/web-mode species levelling breaks.
+            if (!pvzGame && award.Kind is not (RpgActorKinds.Player or RpgActorKinds.Species))
                 continue;
             var ledgerPayload = award.Reason == RpgXpReasons.Kill
                 ? MergePowerScalePayload(payload, award.PowerScale)
                 : payload;
             var d = TryApplyXpUnlocked(
                 db, playerId, award.Kind, award.TypeId, runId ?? 0, t,
-                award.Delta, award.Reason, runScopedDedupe, factId, ledgerPayload);
+                award.Delta, award.Reason, runScopedDedupe, factId, ledgerPayload, award.ScopeKey);
             if (d is { } item)
             {
                 dirty.Add(item);
                 _progressionNotifyBatch?.Add(item);
             }
         }
+
+        // species-build T1.3: the run-completion term (the DOMINANT term, spec-species-xp.md §3)
+        // fires once per resolved match for every species that had at least one PlantPlaced/
+        // ZombieSpawned fact in THIS run — derived entirely from facts already recorded above by
+        // earlier calls to this same method, never a new injector capture. Not `!pvzGame`-gated for
+        // the same reason the per-placement award above isn't (a species row is not a PvZ almanac
+        // type). `runId` of 0/null has no real run scope to query, so it's skipped rather than
+        // silently pooling unrelated placements under a shared "run 0" bucket.
+        if (factKind == PvzActivityKinds.MatchEnded && runId is { } rid && rid != 0
+            && SpeciesProgressionTuningHub.IsConfigured && DemonSpeciesCatalog.IsConfigured)
+        {
+            foreach (var d in ApplyRunCompletionSpeciesAwardsUnlocked(db, playerId, rid, t, factId))
+            {
+                dirty.Add(d);
+                _progressionNotifyBatch?.Add(d);
+            }
+        }
+
         return dirty;
+    }
+
+    /// <summary>`species-build` T1.3 — see the call site's comment above for the design. One award
+    /// per DISTINCT species fielded in <paramref name="runId"/>, deduped so a replayed `MatchEnded`
+    /// fact never double-pays it (T1.2/T1.3's own idempotence acceptance criterion).</summary>
+    List<RpgProgressionDirty> ApplyRunCompletionSpeciesAwardsUnlocked(
+        SqliteConnection db, long playerId, long runId, string t, long? factId)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        var fielded = new List<DemonSpeciesDef>();
+        var index = new LawnElementIndex(DemonSpeciesCatalog.All);
+
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = """
+                SELECT kind, payload_json FROM pvz_activity_facts
+                WHERE player_id=$p AND run_id=$r AND kind IN ($pp, $zs);
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$r", runId);
+            cmd.Parameters.AddWithValue("$pp", PvzActivityKinds.PlantPlaced);
+            cmd.Parameters.AddWithValue("$zs", PvzActivityKinds.ZombieSpawned);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var kind = r.GetString(0);
+                var payloadJson = r.IsDBNull(1) ? "{}" : r.GetString(1);
+                if (TryInt(payloadJson, "type") is not { } tid) continue;
+                var side = kind == PvzActivityKinds.PlantPlaced ? "plant" : "zombie";
+                if (!index.TryGet(side, tid, out var species)) continue;
+                if (seen.Add(species.SpeciesId))
+                    fielded.Add(species);
+            }
+        }
+
+        var results = new List<RpgProgressionDirty>();
+        foreach (var species in fielded)
+        {
+            var dedupe = $"run-complete:{runId}:{species.SpeciesId}";
+            var d = TryApplyXpUnlocked(
+                db, playerId, RpgActorKinds.Species, species.DemonTypeId, runId, t,
+                SpeciesProgressionTuningHub.Tuning.RunCompletionAward, RpgXpReasons.SpeciesRunComplete,
+                dedupe, factId, payloadJson: null, scopeKey: species.SpeciesId);
+            if (d is { } item) results.Add(item);
+        }
+        return results;
     }
 
     static string MergePowerScalePayload(string? payloadJson, double powerScale)
@@ -76,9 +144,9 @@ public sealed partial class RpgStore
 
     RpgProgressionDirty? TryApplyXpUnlocked(
         SqliteConnection db, long playerId, string kind, int typeId, long runId, string t,
-        long delta, string reason, string dedupeKey, long? factId, string? payloadJson)
+        long delta, string reason, string dedupeKey, long? factId, string? payloadJson, string? scopeKey = null)
     {
-        EnsureActorRowUnlocked(db, playerId, kind, typeId);
+        EnsureActorRowUnlocked(db, playerId, kind, typeId, scopeKey);
         var state = ReadActorStateUnlocked(db, playerId, kind, typeId);
         var levelBefore = state.Level;
         var xpBefore = state.Xp;
@@ -198,24 +266,33 @@ public sealed partial class RpgStore
         return System.Text.Json.JsonSerializer.Serialize(map);
     }
 
+    /// <summary>A denormalized per-reason aggregate, persisted as JSON in a payload column.
+    /// <c>Sum</c> stays <c>double</c> deliberately: existing payloads on live databases serialize it as
+    /// `12.0`, and a `long` property would refuse to deserialize those. This is a CACHE derived from
+    /// `rpg_xp_ledger.delta`, which IS `long` end to end — the SSOT value is exact, and only this
+    /// rebuildable summary carries the wider type.</summary>
     sealed class XpReasonBucket
     {
         public double Sum { get; set; }
         public int Count { get; set; }
     }
 
-    void EnsureActorRowUnlocked(SqliteConnection db, long playerId, string kind, int typeId)
+    void EnsureActorRowUnlocked(SqliteConnection db, long playerId, string kind, int typeId, string? scopeKey = null)
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
             INSERT OR IGNORE INTO rpg_actor_progression(
-              player_id, kind, type_id, level, xp, highest_level, demotion_count, revision, updated_utc)
-            VALUES($p,$k,$t,1,0,1,0,0,$u);
+              player_id, kind, type_id, level, xp, highest_level, demotion_count, revision, updated_utc, scope_key)
+            VALUES($p,$k,$t,1,0,1,0,0,$u,$sk);
             """;
         cmd.Parameters.AddWithValue("$p", playerId);
         cmd.Parameters.AddWithValue("$k", kind);
         cmd.Parameters.AddWithValue("$t", typeId);
         cmd.Parameters.AddWithValue("$u", DateTime.UtcNow.ToString("o"));
+        // scope_key (species-build T1.1): a human-readable key alongside type_id for kind='species'
+        // rows — NULL for every other kind, and NULL here means "leave the column's default alone"
+        // (DemonTypeId never repeats across species, so nothing keys off this column, only reads it).
+        cmd.Parameters.AddWithValue("$sk", (object?)scopeKey ?? DBNull.Value);
         cmd.ExecuteNonQuery();
     }
 
@@ -372,15 +449,17 @@ public sealed partial class RpgStore
             }
             cmd.CommandText += " ORDER BY id DESC LIMIT $lim;";
             cmd.Parameters.AddWithValue("$lim", limit);
-            var items = new List<(long Id, long PlayerId, string Kind, int TypeId, long RunId, string T, double Delta, string Reason, long? FactId, long Lb, double Xb, long La, double Xa, long Db, long Da, string? Payload)>();
+            var items = new List<(long Id, long PlayerId, string Kind, int TypeId, long RunId, string T, long Delta, string Reason, long? FactId, long Lb, long Xb, long La, long Xa, long Db, long Da, string? Payload)>();
             using (var r = cmd.ExecuteReader())
             {
                 while (r.Read())
                 {
                     items.Add((
                         r.GetInt64(0), r.GetInt64(1), r.GetString(2), r.GetInt32(3), r.GetInt64(4), r.GetString(5),
-                        r.GetDouble(6), r.GetString(7), r.IsDBNull(8) ? null : r.GetInt64(8),
-                        r.GetInt64(9), r.GetDouble(10), r.GetInt64(11), r.GetDouble(12), r.GetInt64(13), r.GetInt64(14),
+                        // ReadXp, not GetDouble/GetInt64: a legacy database still holds REAL affinity on
+                        // these three, a fresh one holds INTEGER, and Convert.ToInt64 accepts either.
+                        ReadXp(r, 6), r.GetString(7), r.IsDBNull(8) ? null : r.GetInt64(8),
+                        r.GetInt64(9), ReadXp(r, 10), r.GetInt64(11), ReadXp(r, 12), r.GetInt64(13), r.GetInt64(14),
                         r.IsDBNull(15) ? null : r.GetString(15)));
                 }
             }
@@ -473,7 +552,7 @@ public sealed partial class RpgStore
                     recent.Add(new RpgRecentDeltaDto
                     {
                         T = r.GetString(0),
-                        Delta = r.GetDouble(1),
+                        Delta = ReadXp(r, 1),
                         Reason = r.GetString(2)
                     });
                 }
@@ -537,7 +616,7 @@ public sealed partial class RpgStore
                 {
                     maxId = Math.Max(maxId, r.GetInt64(0));
                     var reason = r.GetString(1);
-                    var delta = r.GetDouble(2);
+                    var delta = ReadXp(r, 2);   // tolerant: REAL on legacy rows, INTEGER on fresh
                     if (!map.TryGetValue(reason, out var bucket) || bucket is null)
                         bucket = new XpReasonBucket();
                     bucket.Sum += delta;

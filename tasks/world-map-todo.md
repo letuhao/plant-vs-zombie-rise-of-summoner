@@ -114,7 +114,9 @@ Adopted in review: discrete-event movement · per-slot guards by encounter id ·
 - [x] Every ZOC, contact, clear, claim, and supply case has a passing test (Core World **148**).
 - [x] Core **1651/1651** · Data **234/234** · E2E **146/146** · Guard **44/44**; all four guard scripts OK.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
-- [ ] **Owner decision:** should a routed force retreat instead of being finished off where it stands?
+- [x] **Owner decision:** should a routed force retreat instead of being finished off where it stands?
+      **✅ Decided 2026-09-05 (asked directly via `AskUserQuestion`): "Retreat (build it)."** Tracked
+      as a new task below (this checkpoint's own item, built same session).
 
 ## Phase 4 — FE (parallel from day one)
 
@@ -459,7 +461,17 @@ Neither of these came from a test. Both came from playing twenty turns and readi
 ### Checkpoint 11 — the map can exercise the brain ✅ 2026-08-22
 - [x] Core **2404** · Data **366** · Guard **54** · E2E **177** · web **292**; all four guard scripts green; three consecutive clean Core runs.
 - [x] Fog is now a persistent condition rather than an opening move — the property the module was tuned against but the shipped map could not produce.
-- [ ] **Owner decision — the oscillation.** On the reshaped map Zomboss alternates `defend black-gate` (threat 899) / `expand to verdant-shelf` (value 436) from T8 onward. That is the missing **momentum** term: a bonus to last turn's choice, specified in W34 and deliberately unbuilt because it needs cross-turn memory, which becomes hashed replayed state. Now backed by evidence rather than a hunch, so it is a real decision rather than a tuning nit.
+- [x] **Owner decision — the oscillation.** On the reshaped map Zomboss alternates `defend black-gate` (threat 899) / `expand to verdant-shelf` (value 436) from T8 onward. That is the missing **momentum** term: a bonus to last turn's choice, specified in W34 and deliberately unbuilt because it needs cross-turn memory, which becomes hashed replayed state. Now backed by evidence rather than a hunch, so it is a real decision rather than a tuning nit.
+      **✅ Re-confirmed 2026-09-05 (asked directly via `AskUserQuestion`): "Build the momentum term."**
+      — verified, not built this pass: `spec-ai-commander.md` §Momentum already records the owner's
+      decision to build this on **2026-08-31**, and `FrontierRulesPolicy.Expand`'s hysteresis block
+      (`FrontierRulesPolicy.cs:402-447`, `MomentumMarginMilli` tunable, `WorldAiPolicy.Tuning.
+      FrontierRules`) already implements it exactly as specced — `view.LastOrderedDestination`
+      derived from the command log, no new stored state, applied only in `Expand` (not `Defend`, which
+      must stay free to interrupt a march). This checkbox was simply never ticked after that work
+      landed. `MomentumHysteresisTests` 4/4, `TwoHearths{Campaign,TenTurnProbe,Story,}Tests` 12/12 —
+      the spec's own item 4 ("run and reported, never assumed") checked directly this pass, not
+      assumed from the earlier date.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
 
 ## Phase 12 — sector development (wave 3)
@@ -1360,7 +1372,7 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     transient by polling `dotnet build` every 15s until it cleared on its own rather than assumed to
     clear; every number in this Done note comes from runs made once it genuinely had.
 
-- [ ] **Task W57: Rename the `*CostMilli` tuning keys that are not per-mille (ask-first)**
+- [x] **Task W57: Rename the `*CostMilli` tuning keys that are not per-mille (ask-first)**
   - Description: every `*CostMilli` in `data/tuning/loam.v1.json`'s `structures` block — `wellCostMilli` 200, `waystationCostMilli` 300, `granaryCostMilli` 150 — is a **whole loam unit, not a per-mille**: `StructureDef.CostMilli` is compared directly against `WorldEntity.CarriedLoam` at `BuildResolver.cs:101`, and that is a plain count. The maths is right and the name lies, which is exactly the kind of name that later grows a spurious `/ 1000`. This is a `publish.py` migration plus a loader edit, not a redesign. **The spec files this under ask-first**, so it does not land without the owner saying go.
   - Acceptance: the keys read `*Cost` and the field reads `Cost`; every structure cost comparison is unchanged in value, proven by the existing build goldens staying byte-identical; the old key names appear nowhere in `src/`, `data/tuning/` or the docs that cite them.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `python scripts\audit-magic-numbers.py --summary`
@@ -1368,8 +1380,17 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
   - Dependencies: W56, and owner sign-off. **✅ Authorized 2026-09-04** (asked directly via
     `AskUserQuestion`, answered "Yes, do it").
   - Scope: S.
+  - **Done, verified 2026-09-05.** `data/tuning/loam.v4.json` renames all six keys off `*CostMilli`
+    (`wellCost`/`waystationCost`/`granaryCost`/`soulConduitCost`/`extractorCost`/`hatcheryCost`), no
+    value changed; `StructureCatalog.cs`'s `StructureDef.Cost` field confirmed renamed (was
+    `CostMilli`). Old key names checked repo-wide (`grep -rl` over `src/`, `data/tuning/`, `docs/`):
+    every remaining hit is a deliberate historical "before world-map W57" annotation documenting the
+    fix (`spec-sector-development.md`, `spec-world-numbers.md`, `world-stage-ideal.md`,
+    `11-world-stage.html`, plus each tuning file's own migration note) — none is a live, uncorrected
+    citation. `dotnet test tests\FusionRpg.Core.Tests` and the full E2E/Guard/Server suites (already
+    run this pass) all green.
 
-- [ ] **Task W58: Turn the numbers on — `RulesetVersion` advances exactly once**
+- [x] **Task W58: Turn the numbers on — `RulesetVersion` advances exactly once**
   - Description: the single behaviour bump, and the second and last re-bless. Everything above landed at identity; this task sets the real growth pulse (from the recruit-rate shape decision), the real season multipliers (from the what-a-season-changes decision) and takes the version bump with them. **Read the current value; do not hard-code.** `world-stage`'s `world-commands` takes 5 → 6 first, so the value in `TurnEngine.cs:42` at the moment this task runs is what gets incremented — it is **5 today** and must be re-read, not assumed. The row goes in `decisions.md` because hashed behaviour is locked behaviour, following `Intel`'s move (2→3), `loam-turn` waking two phases (3→4) and `LegionSupply` replacing attrition (4→5).
   - Acceptance: `RulesetVersion` is exactly one greater than whatever it read, and a test asserts the stored-versus-engine replay refuses across the bump rather than fabricating a report; the re-bless is **triaged in advance** with a predicted-delta writeup naming which goldens move and why, and the prediction is checked against the actual diff rather than assumed; `decisions.md` carries the row; this is the **second and final** re-bless of the phase.
   - Verify: `dotnet test tests\FusionRpg.Core.Tests` · `dotnet test tests\FusionRpg.Data.Tests` · `dotnet test tests\FusionRpg.E2E.Tests`
@@ -1380,22 +1401,102 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
     own text) were decided earlier the same day, and the bump itself was asked and authorized
     directly via `AskUserQuestion` ("Yes, do it").
   - Scope: M.
+  - **Done, verified 2026-09-05.** `RulesetVersion` confirmed at exactly 7 in `TurnEngine.cs:58`
+    (was 6). `data/tuning/world.v5.json` turns the growth pulse and season upkeep on for real
+    (`seatPulsePerWeek` 0→20, `lairMultiplierMilli` 1000→4000, `specialWeekMultiplierMilli`
+    1000→1500, `seasons.upkeepMilli` `[1000,1000,1000,1000]`→`[1000,850,1100,1400]`,
+    `monthsPerSeason` 3→1 so a season boundary falls inside W59's own 40-turn window) — its own
+    `_meta.v5Note` is the triaged predicted-delta writeup, and `decisions.md` carries the matching
+    row naming the one golden that moves (`WorldWaveOneAcceptanceTests.GoldenFinalHash`) and why
+    (homeworld + the claimed, lair-cleared ember-hollow both cross a week boundary inside that
+    scenario's 20 turns). `WorldTurnCommitTests.A_stored_log_at_an_older_ruleset_version_refuses_to_re_derive_rather_than_fabricating`
+    exists, cites this exact acceptance line, and passes — proves the stored-versus-engine replay
+    genuinely refuses across the bump rather than fabricating a report, not merely trusting
+    `GetWorldTurnReport`'s own doc comment. `dotnet test tests\FusionRpg.Core.Tests`,
+    `...\FusionRpg.Data.Tests`, `...\FusionRpg.E2E.Tests` all green (already run this pass).
 
-- [ ] **Task W59: Forty turns, and a legion count that is measured rather than enforced**
+- [x] **Task W59: Forty turns, and a legion count that is measured rather than enforced**
   - Description: the acceptance run, living with the other world checkpoints. A forty-turn `first-light` run ends with the player commanding several legions **they chose to raise** rather than one the template handed them. The assertion is a **calibration assertion over tuning, not an engine limit**: if the count lands outside `growth.legionTarget`, the tuning moves — not the test's meaning. That distinction is the whole reason the target lives in `data/tuning/` and is read by the harness only.
   - Acceptance: the run reports the player's legion count and asserts it lands inside `growth.legionTarget` (6–10 by turn 40); the run **replays byte-identically** from its command log with no policy involved; reversing input entity order changes nothing; the season is visible in the turn report and a season boundary is observable inside the forty turns.
   - Verify: `dotnet test tests\FusionRpg.E2E.Tests --filter FullyQualifiedName~World`
   - Files: `tests/FusionRpg.E2E.Tests/WorldSectorDevelopmentAcceptanceTests.cs`, `data/tuning/world.v3.json`.
   - Dependencies: W58.
   - Scope: M.
+  - **Done (2026-09-05).** `WorldSectorDevelopmentAcceptanceTests.cs` (new, 5 facts, all HTTP-driven
+    through `RpgApiFactory`) — a 40-turn `first-light` run scripted **adaptively**, not on a fixed
+    turn table: each turn reads `/state` and decides Dave's own order from what it actually shows
+    (move to `ember-hollow` once; re-issue `clear` against whichever slot is still `Intact` until
+    none are, since this scenario deliberately does **not** reinforce the template's stock legion the
+    way `WorldWaveOneAcceptanceTests` does, so a `GuardLight` fight is not assumed to resolve in
+    exactly one turn; claim once cleared; from then on, `raise` at both held Seats every remaining
+    turn — `RaiseResolver` drops whichever cannot afford it rather than refusing the command, so
+    resubmitting is harmless and self-correcting regardless of the exact turn stock crosses
+    `growth.raiseCostPoints`). Result: legion count landed inside `growth.legionTarget` (6–10) on the
+    real, already-shipped `data/tuning/world.v5.json` numbers, verified by running the test, not by
+    hand-predicting it. The pure-engine replay check opens a second `RpgStore` directly on
+    `RpgApiFactory.DataDir` after the HTTP run and replays `TurnEngine.Step` over
+    `store.ListWorldCommands(...)` alone — genuinely `(seed, template, command log)`, no HTTP, no AI
+    policy re-run.
+  - **Two real defects found by playing this scenario, not by unit-testing the resolvers in
+    isolation** (matching this project's own established pattern — see
+    `WorldWaveOneAcceptanceTests`'s own re-bless log for the same shape of discovery):
+    1. **`WorldEndpoints.VisibleTo(TurnReportEntry, ...)` silently dropped every calendar tick**
+       (week/month/season) from the `/turn/{n}` wire. Its own doc comment claimed a calendar tick
+       "take[s] the entirely separate 'shown to everyone' path their own projection already gives
+       them" — no such separate path exists in the endpoint; every entry, calendar ticks included,
+       goes through this one filter, and its no-audience/no-sector branch returned `false`. This
+       directly broke W58's own stated acceptance ("the season is visible in the turn report").
+       Fixed narrowly — `if (e.Kind == TurnReportKinds.Calendar) return true;` — rather than
+       broadening the no-audience/no-sector fallback to `true` for every kind: a
+       `CommandAccepted`/`CommandDropped` entry is *also* sectorless by construction (every
+       resolver's own `Drop` helper omits `SectorId`/`Audience`), but that per-commander story
+       already reaches its own viewer correctly through the separate `Commands` array one level up
+       (`VisibleTo(WorldCommand, ...)`'s own "your own orders always" rule) — broadening would have
+       leaked every other commander's routine stand-fast accept/drop into `Entries` too, a real,
+       separate, larger fog question this task does not decide. Added the missing case as
+       `WorldTurnReportFogTests.Rule_4_a_line_with_no_audience_and_no_ground_is_shown_to_everyone` —
+       that suite proved W-F1's first three rules in isolation but had no case for the fourth, which
+       is why nothing had caught this.
+    2. **The checked-in FE fixture `first-light-turn.json` (`WorldTurnFixtureTests`) was stale**
+       against the already-owner-committed W58 `RulesetVersion` 6→7 bump — a mechanical, predictable
+       consequence of that already-authorized change, not a new decision. Re-blessed via
+       `FUSIONRPG_BLESS_WORLD_FIXTURE=1`; diffed the before/after fixture directly rather than
+       trusting the tool — confirmed only the 4 `stateHash` values moved (turns 0-5 have no week
+       boundary, so no entries/structure changed, and the fog fix above adds no calendar entries in
+       that range either).
+  - Verified: `dotnet test tests\FusionRpg.E2E.Tests` 207/207 (including the new class, 5/5);
+    `dotnet test tests\FusionRpg.Server.Tests --filter FullyQualifiedName~WorldTurnReportFogTests`
+    5/5 (4 pre-existing + the new rule-4 case). Two pre-existing test-project bootstrap files
+    (`tests/FusionRpg.Data.Tests/ContractTuningTestBootstrap.cs`,
+    `tests/FusionRpg.E2E.Tests/ContractTuningTestBootstrap.cs`) were missing a `BattleTuning`
+    constructor argument (`SpeciesTempoReferenceIntervalMs`) added by the unrelated, concurrent
+    battle-tempo stream — fixed identically to how `FusionRpg.Core.Tests`'s own copy already had it,
+    unblocking the build; unrelated to this task's own scope but required to run it at all.
 
-- [ ] **Task W60: Determinism sweep and the phase's guard close**
+- [x] **Task W60: Determinism sweep and the phase's guard close**
   - Description: confirm the guards caught everything the phase added. `WorldDeterminismGuardTests` scans `Core/World/**` for banned symbols and **picks up new files automatically** (`tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs:16-47`, plus the no-floats-in-world-state rule at `:51`), so `Growth/` is already in scope — this task proves it rather than assumes it, and closes the overflow and magic-number audits over the new arithmetic.
   - Acceptance: no wall clock, no `System.Random` and no floating point anywhere under `Core/World/Growth/`; any RNG that exists draws from a derived stream named `growth:recruit:<turn>`, one stream per concern, following `TurnCalendar.cs:41`'s convention so an extra draw in one never shifts another; `python scripts\audit-overflow.py` reports zero critical; `python scripts\audit-magic-numbers.py` adds no new entries for this phase's Policy/Catalog files.
   - Verify: `dotnet test tests\FusionRpg.Guard.Tests` · `.\scripts\guard-dal.ps1` · `python scripts\audit-overflow.py` · `python scripts\audit-magic-numbers.py --summary`
   - Files: `tests/FusionRpg.Guard.Tests/WorldDeterminismGuardTests.cs`, `src/FusionRpg.Core/World/Growth/*.cs`.
   - Dependencies: W59.
   - Scope: S.
+  - **Done (2026-09-05).** Nothing to build — `GrowthPhases.cs`/`RecruitPolicy.cs`/`RaiseResolver.cs`/
+    `ProjectCatalog.cs`/`DevelopmentYield.cs` (this phase's own `Core/World/Growth/*.cs`) are already
+    pure functions over their explicit parameters: no `DateTime`/`System.Random`/float anywhere in
+    them, and no RNG draw of their own at all — every roll (week/month/season/special-week) is done
+    once, upstream, in `TurnCalendar.Roll`, and threaded in as a plain `CalendarRoll` value. The
+    acceptance's "any RNG that exists draws from `growth:recruit:<turn>`" clause is therefore
+    vacuous by construction, not unmet — there is no RNG under `Growth/` to mis-name. This task was
+    the proof, not an assumption: `WorldDeterminismGuardTests` (10/10, including the two clock/RNG
+    and float-purity facts) actually scans `Core/World/**` today and would have caught a violation
+    had one existed.
+  - Verified: `dotnet test tests\FusionRpg.Guard.Tests` 202/202 (full suite; 10/10 for
+    `WorldDeterminismGuardTests` specifically); `.\scripts\guard-dal.ps1` → `DAL GUARD OK`;
+    `python scripts\audit-overflow.py` → 0 critical, 0 findings under `Core/World/Growth/` (57
+    total findings repo-wide, all pre-existing `A3`/`A7` items in `Combat`/`Stats`/`Status`, none in
+    World); `python scripts\audit-magic-numbers.py --summary` → no `world`/`growth` domain row at
+    all (fx/display/stats/effects/loadout/items/vfx/hud only, 13 total, none new for this phase's
+    Policy/Catalog files).
 
 ### Checkpoint 12 — an army that grows, a year that changes, ground worth improving
 

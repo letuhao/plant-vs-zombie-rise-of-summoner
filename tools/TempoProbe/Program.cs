@@ -16,7 +16,7 @@ if (dir == null) throw new InvalidOperationException("could not locate data/tuni
 string Load(string rel) => File.ReadAllText(Path.Combine(dir.FullName, "data", "tuning", rel));
 
 DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(Load("derived-stats.v2.json")));
-BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v3.json")));
+BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v4.json")));
 
 var failures = 0;
 void Check(string name, bool condition)

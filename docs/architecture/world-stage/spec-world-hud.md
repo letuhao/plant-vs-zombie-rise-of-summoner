@@ -92,11 +92,20 @@ player-readable reason, and the strip says so in words.
 Every magnitude here renders through `world-numbers` — a flow carries its period, a stock carries its
 denominator or a stated reason for its absence, and no number is unlabelled.
 
-### 3. The calendar is a calendar, not a season
+### 3. The calendar is a calendar, not a season — superseded 2026-09-05
 
-§8b.7, and the plate has not caught up: §G.1 and §G.2 still draw a **Season · Long Wither** slot. That
-slot has no field behind it and no season concept in the turn engine. **This module follows the
+§8b.7 read this way when written: §G.1 and §G.2 still drew a **Season · Long Wither** slot, and that
+slot had no field behind it and no season concept in the turn engine. **This module followed the
 decision, not the drawing.**
+
+**The premise changed.** `sector-development` (world-map W47/W58) shipped a real season —
+`TurnCalendar.SeasonOf`, hashed, replayed, never fogged — and asked the owner directly whether the
+HUD should now show it, since §8b.7 was a documented decision and not one to override silently. The
+owner said yes. `WorldCalendarDto.Season` (0-indexed) now reaches the wire, and `calendarLabel.ts`
+renders it as a plain `Season N` (1-indexed for display) — no name, no "Long Wither": no season-name
+catalog exists anywhere in the engine or `data/tuning/world.v5.json`, and inventing flavour text was
+never the question asked. §G.1/§G.2's own **name** ("Long Wither") remains unbuilt content, not this
+module's decision to make.
 
 What is real, and it is far better prepared than "a new mechanic" suggests:
 [`TurnCalendar.cs`](../../../src/FusionRpg.Core/World/Turn/TurnCalendar.cs) runs a complete clock — a

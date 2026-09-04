@@ -192,7 +192,21 @@ bases, and the basic attack's token — and is **loaded by a host and injected**
 
 ### 2.4 What this module does NOT change
 
-- **No engine change.** `BattleEngine` already reads the envelope; it simply reads zeros today.
+- ⛔ **CORRECTED 2026-09-05 (D14) — this claim was wrong, proven false, not merely revised.** ~~"No
+  engine change. `BattleEngine` already reads the envelope; it simply reads zeros today."~~
+  **`BattleEngine.Resolve`'s live combat path reads NONE of `WindupTicks`/`RecoveryTicks`/
+  `TimeCostTicks` — for any action, basic attack or content.** Its round loop transitions every actor
+  `Ready → Committed → Resolving` in the same iteration, then calls `RunBasicAttackStep`, which computes
+  damage immediately with no scheduling. The real consumer of those three fields —
+  `Battle/Timeline/ActionRunner.cs`, a complete, independently-tested DES-kernel resolver — has **zero
+  callers from `BattleEngine.Resolve`** (confirmed by grep). This module's own derivation is correct and
+  proven (`tools/ActionTimingProbe`); what was wrong was the assumption about what would READ it.
+  ⭐ **`CooldownTicks`/`Class`/`CooldownKey` are the exception — genuinely live.**
+  `CooldownLedger.Start` does read and arm them, for whatever action `StubIntentSource.TryDeclare`
+  returns (real `HeldActions`, not only the basic attack). Only wind-up/recovery/time-cost are
+  unreachable. **Making them reachable is a full `BattleEngine.Resolve` dispatch rewrite — its own
+  module, its own design-gate pass** — not something this spec's own scope, or `battle-tempo`'s original
+  six modules, ever covered. See the map's own D14 and `MEAS`'s evidence in `battle-tempo-todo.md`.
 - **No new `ActionEnvelope` field.** Every field it writes already exists.
 - **No structure axis.** See §1.1.
 - **No change to `Interruptible`.** Interruption is `reaction-lane`'s business.

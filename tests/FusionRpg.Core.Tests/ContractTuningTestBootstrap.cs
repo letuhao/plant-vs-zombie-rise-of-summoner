@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using FusionRpg.Core;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
 using FusionRpg.Core.Demons;
@@ -65,7 +66,18 @@ internal static class ContractTuningTestBootstrap
         EffectsTuningHub.Configure(DefaultEffects);
         SimDefaults.Configure(DefaultSim);
         ProgressionTuningHub.Configure(DefaultProgression);
+        SpeciesProgressionTuningHub.Configure(DefaultSpeciesProgression);
         BattleTuningHub.Configure(DefaultBattle);
+        // base-defense siege-board (2026-09-05): values transcribed from the real, shipped
+        // data/tuning/siege.v1.json, matching this file's own stated convention.
+        SiegeTuningPolicy.Configure(DefaultSiege);
+        // battle-tempo action-timing (2026-09-05): the bootstrap's own new gap this session's
+        // base-defense work found and closed -- BattleRunState's constructor now unconditionally
+        // reads ActionTimingPolicy.Tuning, and this Configure call was missing from every test
+        // bootstrap. Values transcribed from the real, shipped data/tuning/action-timing.v1.json,
+        // matching this file's own stated convention ("same working set as the matching
+        // data/tuning/*.v1.json") -- not invented.
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(DefaultActionTiming);
         SummoningTuningHub.Configure(DefaultSummoning);
         WorldAiPolicy.Configure(DefaultAi);
         VfxTuningHub.Configure(DefaultVfx);
@@ -253,13 +265,23 @@ internal static class ContractTuningTestBootstrap
         // promotion star-merge test hit Sprout, which fell back to Almanac, which wasn't here).
         StarCap: new Dictionary<DemonRarity, int>
         {
-            [DemonRarity.Chaff] = 3, [DemonRarity.Sprout] = 3, [DemonRarity.Grafted] = 3,
-            [DemonRarity.Cultivated] = 4, [DemonRarity.Fused] = 4, [DemonRarity.Chimeric] = 4,
-            [DemonRarity.Heirloom] = 5, [DemonRarity.Firstseed] = 5, [DemonRarity.Sunwoven] = 5,
-            [DemonRarity.Almanac] = 5,
+            [DemonRarity.Chaff] = 6, [DemonRarity.Sprout] = 6, [DemonRarity.Grafted] = 6,
+            [DemonRarity.Cultivated] = 8, [DemonRarity.Fused] = 8, [DemonRarity.Chimeric] = 8,
+            [DemonRarity.Heirloom] = 10, [DemonRarity.Firstseed] = 10, [DemonRarity.Sunwoven] = 10,
+            [DemonRarity.Almanac] = 10,
         },
         StarMergeCost: new FusionCostTuning(Souls: 50, ShardCount: 1, EssenceCount: 1),
         PromotionCost: new FusionCostTuning(Souls: 200, ShardCount: 3, EssenceCount: 3),
+        // Per-rung promotion price (effort-power M5). Mirrors the shipped table so a fixture drift
+        // shows up as a test failure rather than as silently different balance.
+        PromotionCostByRarity: new Dictionary<DemonRarity, FusionCostTuning>
+        {
+            [DemonRarity.Chaff] = new(150, 2, 2), [DemonRarity.Sprout] = new(185, 2, 2),
+            [DemonRarity.Grafted] = new(220, 2, 3), [DemonRarity.Cultivated] = new(320, 3, 4),
+            [DemonRarity.Fused] = new(450, 3, 5), [DemonRarity.Chimeric] = new(620, 4, 6),
+            [DemonRarity.Heirloom] = new(820, 4, 7), [DemonRarity.Firstseed] = new(1000, 5, 8),
+            [DemonRarity.Sunwoven] = new(1000, 5, 8), [DemonRarity.Almanac] = new(1000, 5, 8),
+        },
         RecipeCost: new Dictionary<DemonRarity, RecipeCostTuning>
         {
             [DemonRarity.Cultivated] = new(Souls: 150, ShardRarity: DemonRarity.Chaff, ShardCount: 2, EssenceCount: 2),
@@ -347,7 +369,20 @@ internal static class ContractTuningTestBootstrap
         PlantCurve: new XpCurveParams(80, 32),
         ZombieCurve: new XpCurveParams(70, 28),
         PlayerCurve: new XpCurveParams(100, 45),
+        SpecimenCurve: new XpCurveParams(100, 45),
         Awards: new XpAwardsTuning(Kill: 12, Defeat: -100, Mower: -30, PlantPlace: 8, ZombieSpawn: 9));
+
+    // species-build T1.1/T1.2 — same working set as the shipped species-progression.v1.json, per
+    // this file's own convention. Configuring it here (not just in SpeciesProgressionTests' own
+    // static ctor) makes RpgXpAwardMap's species-placement award a permanent, deterministic part of
+    // this assembly's ambient state rather than something that only appears when some other test
+    // class happens to run first and configure it as a side effect.
+    public static readonly SpeciesProgressionTuning DefaultSpeciesProgression = new(
+        CurveFirst: 60, CurveStep: 24, RunCompletionAward: 100, PlacementAward: 4);
+
+    public static readonly SiegeTuning DefaultSiege = new(
+        SchemaVersion: 1, Version: 1,
+        MoveCostOpen: 10, MoveCostRough: 20, DiagonalSurcharge: 0, MaxCells: 4096);
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,
@@ -381,7 +416,24 @@ internal static class ContractTuningTestBootstrap
         HybridSecondaryWeightMilli: 0,
         // base-defense F2: matches data/tuning/battle.v2.json's shipped value exactly, so
         // 50 * 4000 = 200_000 reproduces the pre-F2 MaxLoopIterations constant.
-        LoopGuardRoundMultiple: 4000);
+        LoopGuardRoundMultiple: 4000,
+        // battle-tempo tempo-content (2026-09-05): matches data/tuning/battle.v3.json's shipped
+        // speciesTempo.referenceIntervalMs exactly (1500ms = the shipped "steady" attack tempo).
+        SpeciesTempoReferenceIntervalMs: 1500);
+
+    public static readonly FusionRpg.Core.Actions.ActionTimingTuning DefaultActionTiming = new(
+        WindupPerPowerMilli: 20,
+        WindupCapReferenceMilli: 300,
+        RecoveryPerPowerMilli: 8,
+        BasicAttack: new FusionRpg.Core.Actions.BasicAttackTimingTuning(WindupTicks: 150, RecoveryTicks: 50),
+        Categories: new Dictionary<FusionRpg.Core.Actions.ActionCategory, FusionRpg.Core.Actions.ActionTimingCategoryTuning>
+        {
+            [FusionRpg.Core.Actions.ActionCategory.Attack] = new(TimeCostBaseTicks: 100, CooldownBaseTicks: 200),
+            [FusionRpg.Core.Actions.ActionCategory.Defense] = new(TimeCostBaseTicks: 120, CooldownBaseTicks: 150),
+            [FusionRpg.Core.Actions.ActionCategory.Support] = new(TimeCostBaseTicks: 100, CooldownBaseTicks: 250),
+            [FusionRpg.Core.Actions.ActionCategory.Movement] = new(TimeCostBaseTicks: 80, CooldownBaseTicks: 100),
+            [FusionRpg.Core.Actions.ActionCategory.Status] = new(TimeCostBaseTicks: 90, CooldownBaseTicks: 180),
+        });
 
     public static readonly SummoningTuning DefaultSummoning = new(
         SchemaVersion: 1, Version: 1,

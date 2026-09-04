@@ -16,6 +16,7 @@ public sealed record XpAwardsTuning(long Kill, long Defeat, long Mower, long Pla
 public sealed record ProgressionTuning(
     int SchemaVersion, int Version,
     XpCurveParams PlantCurve, XpCurveParams ZombieCurve, XpCurveParams PlayerCurve,
+    XpCurveParams SpecimenCurve,
     XpAwardsTuning Awards);
 
 public sealed class ProgressionTuningRejection : Exception
@@ -47,6 +48,7 @@ public static class ProgressionTuningLoader
                 PlantCurve: Curve(curve, "plant"),
                 ZombieCurve: Curve(curve, "zombie"),
                 PlayerCurve: Curve(curve, "player"),
+                SpecimenCurve: Curve(curve, "specimen"),
                 Awards: new XpAwardsTuning(
                     Kill: Long(awards, "kill"),
                     Defeat: Long(awards, "defeat"),

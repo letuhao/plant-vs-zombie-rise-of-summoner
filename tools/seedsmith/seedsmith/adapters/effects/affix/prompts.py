@@ -121,12 +121,21 @@ def entry_for(
 ) -> "dict[str, Any]":
     """The committed seed entry. `affixClass` is passed in ALREADY DERIVED (via
     `derive.derive_affix_class`) — this function never computes it, so there is exactly one place
-    in the whole pipeline that turns refs into a class."""
+    in the whole pipeline that turns refs into a class.
+
+    Key names and the `refs` shape match `AtomSeedFile.ReadAffix` exactly (`src/FusionRpg.Core/
+    Effects/Atoms/AtomSeedFile.cs`) — the real importer reads a top-level `class` key (not
+    `affixClass`) and each `refs[]` entry as an OBJECT with an `atom` key (not a bare id string);
+    a bare string fails `ValueKind != JsonValueKind.Object` and is silently skipped, so an affix
+    with N real refs would import with zero and be refused as "needs at least one ref" — found by
+    running this pipeline's own real output through the real `AtomImporter` for the first time,
+    2026-09-05, not caught by any test because every test in this pipeline stubs the transport and
+    never round-trips through the real seed-file reader."""
     entry: "dict[str, Any]" = {
         "id": affix_id,
         "name": draft["name"],
-        "affixClass": affix_class,
-        "refs": list(draft["refs"]),
+        "class": affix_class,
+        "refs": [{"atom": atom_id, "seq": i} for i, atom_id in enumerate(draft["refs"])],
     }
     if provenance:
         entry["_provenance"] = dict(provenance)

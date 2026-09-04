@@ -51,6 +51,13 @@ public sealed partial class RpgStore
               op_seed        INTEGER NOT NULL,
               result_json    TEXT NOT NULL,
               applied_utc    TEXT NOT NULL,
+              -- D2 clause 5: the op stamps its OWN catalog revision and rules version. Neither is
+              -- effect_instance.catalog_revision, which is origin-only and which no operation rewrites.
+              catalog_revision INTEGER NOT NULL DEFAULT 0,
+              rules_version    INTEGER NOT NULL DEFAULT 0,
+              -- D2 clause 11: the spend, in module 14's material vocabulary. "A spent cost with no op
+              -- is theft; an op with no cost is duplication."
+              cost_json        TEXT NOT NULL DEFAULT '{}',
               PRIMARY KEY (instance_id, op_seq),
               FOREIGN KEY (instance_id) REFERENCES effect_instance(instance_id) ON DELETE CASCADE
             );
@@ -92,7 +99,8 @@ public sealed partial class RpgStore
     /// </summary>
     public MutationAppendResult AppendMutationOp(
         string instanceId, MutationOpKind kind, string correlationId, long opSeed,
-        MutationResult result, string? newStateHash, string? originValuesJson, string appliedUtc)
+        MutationResult result, string? newStateHash, string? originValuesJson, string appliedUtc,
+        long catalogRevision = 0, int rulesVersion = 0, string costJson = "{}")
     {
         if (string.IsNullOrWhiteSpace(correlationId))
             throw new ArgumentException("a mutation op needs a correlation id — it is what makes a retry idempotent", nameof(correlationId));
@@ -152,11 +160,14 @@ public sealed partial class RpgStore
                     $"{MutationLimits.MutationSeqCap}. This is a retry-loop bound, not a design ceiling — it refuses rather than wrapping");
 
             ExecIn(db, tx, """
-                INSERT INTO effect_instance_op (instance_id, op_seq, op_kind, correlation_id, op_seed, result_json, applied_utc)
-                VALUES ($id, $seq, $kind, $cid, $seed, $json, $utc);
+                INSERT INTO effect_instance_op
+                  (instance_id, op_seq, op_kind, correlation_id, op_seed, result_json, applied_utc,
+                   catalog_revision, rules_version, cost_json)
+                VALUES ($id, $seq, $kind, $cid, $seed, $json, $utc, $rev, $rules, $cost);
                 """,
                 ("$id", instanceId), ("$seq", nextSeq), ("$kind", kindId), ("$cid", correlationId),
-                ("$seed", opSeed), ("$json", resultJson), ("$utc", appliedUtc));
+                ("$seed", opSeed), ("$json", resultJson), ("$utc", appliedUtc),
+                ("$rev", catalogRevision), ("$rules", rulesVersion), ("$cost", costJson));
 
             ExecIn(db, tx, """
                 UPDATE effect_instance
@@ -201,7 +212,8 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT op_seq, op_kind, correlation_id, op_seed, result_json, applied_utc
+                SELECT op_seq, op_kind, correlation_id, op_seed, result_json, applied_utc,
+                       catalog_revision, rules_version, cost_json
                 FROM effect_instance_op WHERE instance_id = $id ORDER BY op_seq;
                 """;
             cmd.Parameters.AddWithValue("$id", instanceId);
@@ -214,7 +226,8 @@ public sealed partial class RpgStore
                     throw new InvalidOperationException(
                         $"instance '{instanceId}' op {r.GetInt32(0)} carries op_kind '{r.GetString(1)}', which is not in the closed namespace");
                 ops.Add(new MutationOp(instanceId, r.GetInt32(0), kind, r.GetString(2), r.GetInt64(3),
-                    MutationCanonical.ReadResult(r.GetString(4)), r.GetString(5)));
+                    MutationCanonical.ReadResult(r.GetString(4)), r.GetString(5),
+                    r.GetInt64(6), r.GetInt32(7), r.GetString(8)));
             }
 
             return ops;

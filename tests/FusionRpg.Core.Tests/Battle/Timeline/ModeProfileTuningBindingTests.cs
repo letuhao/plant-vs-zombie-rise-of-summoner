@@ -209,6 +209,7 @@ public class ModeProfileTuningBindingTests
         "\"timeline\":{\"profiles\":{" + profiles + "}}," +
         // Wave E3 made `hybrid` a required section; 0 is the shipped, inert value.
         "\"hybrid\":{\"secondaryWeightMilli\":0}," +
+        "\"speciesTempo\":{\"referenceIntervalMs\":1500}," +
         "\"traits\":{}}";
 
     const string Classic = "\"classic-round\":{\"w\":1,\"wReact\":0,\"passQuantum\":1}";

@@ -321,17 +321,30 @@ public static class WorldEndpoints
     /// 3. Remembered sight, for a static fact. A claim, ownership changing — shown on any ground
     ///    this viewer has ever seen (`Believed(sectorId) is not null`), Civ VI's own rule.
     ///
-    /// A line with no `Audience` and no `SectorId` reaches nobody through this rule — the same lines
-    /// W12 stopped emitting that way in the first place (a calendar tick, or a command refused
-    /// before it named ground, take the entirely separate "shown to everyone" path their own
-    /// projection already gives them; this filter is reached only by entries that carry ground or an
-    /// audience to begin with).
+    /// 4. Nowhere in particular, but only the calendar. A `Calendar`-kind line (week/month/season)
+    ///    carries no `Audience` and no `SectorId` and reveals no ground — shown to everyone
+    ///    (world-map W59: found by playing this rule's own scenario. This branch previously
+    ///    unconditionally returned `false` for *any* no-audience/no-sector entry, silently dropping
+    ///    every calendar tick from the wire despite <c>TurnEngine.cs</c>'s own doc comment for the
+    ///    season line stating "the season is visible in the turn report."
+    ///    <see cref="WorldTurnReportFogTests"/> proved rules 1-3 in isolation but had no case for
+    ///    this fourth one, which is why nothing caught it).
+    ///
+    ///    Scoped to `Calendar` specifically, not every sectorless entry: a `CommandAccepted`/
+    ///    `CommandDropped` entry is also sectorless by construction (`TurnEngine.cs`'s admission
+    ///    loop and every resolver's own `Drop` helper call `report.Add` with no `SectorId`/`Audience`
+    ///    argument at all), but that per-commander accept/drop story already reaches its own viewer
+    ///    correctly through the separate `Commands` array one level up in this same endpoint (its own
+    ///    `VisibleTo(WorldCommand, ...)` overload states "your own orders always") — broadening this
+    ///    rule to every kind would leak every other commander's routine stand-fast accept/drop into
+    ///    `Entries` too, which is a real, separate, larger fog question this task does not decide.
     /// </summary>
     static bool VisibleTo(TurnReportEntry e, string? viewer, BelievedWorldView? believed)
     {
         if (believed is null || viewer is null) return true; // SIM / no viewer
+        if (e.Kind == TurnReportKinds.Calendar) return true; // rule 4: the calendar, shown to everyone
         if (e.Audience is { } audience) return string.Equals(audience, viewer, StringComparison.Ordinal);
-        if (e.SectorId is not { } sectorId) return false; // W-F1: no audience, no ground
+        if (e.SectorId is not { } sectorId) return false; // no audience, no ground, no calendar kind
         return IsStaticFact(e.Kind, e.Detail)
             ? believed.Believed(sectorId) is not null
             : believed.StateOf(sectorId) == IntelState.Watched;
@@ -663,7 +676,8 @@ public static class WorldEndpoints
                 MonthBoundary = calendar.MonthBoundary,
                 SpecialWeek = calendar.SpecialWeek,
                 SpecialMonth = calendar.SpecialMonth,
-                Plague = calendar.Plague
+                Plague = calendar.Plague,
+                Season = calendar.Season
             },
             // world-stage W16: separate from `Sectors[].Intel` on purpose — never merged in.
             ProspectedSectorIds = Prospecting.Reveal(w, view.FactionId).OrderBy(id => id, StringComparer.Ordinal).ToList(),

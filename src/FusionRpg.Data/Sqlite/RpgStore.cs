@@ -377,9 +377,11 @@ public sealed partial class RpgStore : IRpgDb
               reason TEXT NOT NULL,
               activity_fact_id INTEGER,
               level_before INTEGER NOT NULL,
-              xp_before REAL NOT NULL,
+              -- INTEGER since 2026-09-05: XP is an integer magnitude, and the 2026-09-04 pass
+              -- migrated rpg_actor_progression.xp but not the ledger that mirrors it.
+              xp_before INTEGER NOT NULL,
               level_after INTEGER NOT NULL,
-              xp_after REAL NOT NULL,
+              xp_after INTEGER NOT NULL,
               demotion_before INTEGER NOT NULL,
               demotion_after INTEGER NOT NULL,
               payload_json TEXT,
@@ -582,6 +584,11 @@ public sealed partial class RpgStore : IRpgDb
         EnsureColumn(db, "pvz_activity_rollups", "schema_version", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "through_ledger_id", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_actor_progression", "xp_by_reason_json", "TEXT");
+        // species-build T1.1 (spec-species-xp.md §1 Option A): kind='species' rows key on
+        // DemonSpeciesDef.DemonTypeId in the existing type_id column (already unique per species) —
+        // this nullable text column carries the human-readable speciesId alongside it, so a row can be
+        // read back without a roster round-trip. Every other kind leaves it NULL.
+        EnsureColumn(db, "rpg_actor_progression", "scope_key", "TEXT");
         EnsureColumn(db, "rpg_demon_profiles", "star", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_demon_profiles", "promoted", "INTEGER NOT NULL DEFAULT 0");
         // Wardens (spec-loam-texture.md): a permanent, non-releasable bind — the same capacity slot
@@ -629,6 +636,10 @@ public sealed partial class RpgStore : IRpgDb
         // D2 §9, enhance-reroll (module 15). Must run AFTER EnsureAtomInstanceSchemaUnlocked, whose
         // tables it adds columns to.
         EnsureInstanceOpSchemaUnlocked(db);
+        // item_socket (THE SSOT for socket state, D2 §6) + socket_combo_recipe / _ingredient —
+        // spec-sockets.md §5.2, sockets (module 16). Must run AFTER EnsureAtomInstanceSchemaUnlocked,
+        // whose effect_instance it references.
+        EnsureSocketSchemaUnlocked(db);
         // item_set / item_set_member / item_set_tier — ssot-sets.md §4.2, threshold-grants (module 12).
         EnsureItemSetSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).

@@ -87,22 +87,13 @@ public static class CheatState
     /// <summary>Edge-triggered sync of <see cref="CommanderAllocation"/> hot-path cache — match
     /// start/end and allocation poll, never per stat resolve.
     ///
-    /// <para>`species-build` T0.2: also the ONE real place the aptitude subsystem's per-entity memo
-    /// must clear. Traced against the real call graph rather than assumed: `ApplyCommanderAllocation`
-    /// (session start / `AptitudesUpdated` push) and both `MatchHost` match-edge sites all funnel
-    /// through this one method — so a single clear here covers every live path, not several bump
-    /// sites. Looked up by <see cref="AptitudeSubsystem.SubsystemId"/> rather than a stored reference,
-    /// since `ActorHubBootstrap.CreateDefault` owns constructing and registering it.</para></summary>
-    internal static void RefreshCommanderAllocationCache()
-    {
-        CommanderAllocation.Refresh();
-        if (_actorHub is not null)
-        {
-            foreach (var s in _actorHub.Subsystems)
-                if (s is FusionRpg.Core.Stats.Derived.Subsystems.AptitudeSubsystem aptitude)
-                    aptitude.InvalidateMemo();
-        }
-    }
+    /// <para>`species-build` T0.1/T0.2: `AptitudeSubsystem`'s per-entity memo needs no explicit
+    /// invalidation from here — it self-corrects by checking the allocation's own object reference on
+    /// every read, so `CommanderAllocation.Refresh()` replacing `_cached` with a new instance is
+    /// already sufficient (see that type's own doc comment for why an earlier draft's explicit-bump
+    /// design was wrong: it could not cover a Core-only caller that never goes through
+    /// `CheatState`).</para></summary>
+    internal static void RefreshCommanderAllocationCache() => CommanderAllocation.Refresh();
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
     /// <summary>Θ ladder index. Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this
     /// must not race — <c>PowerTuningHub.Tuning</c> throws (not a stale default) before Configure runs,
