@@ -57,7 +57,12 @@ class ModelTiers:
     strong: str = "opus"
     cheap: str = "sonnet"
     invents_identity: frozenset[str] = frozenset({
-        "base-type", "unique", "set", "charm", "socket-word", "consumable", "gem", "material",
+        # `combination` is item module 21's rename of `socket-word` (D20, ruled 2026-09-04:
+        # "regenerate, do not retain"). BOTH ids are listed rather than one replacing the other —
+        # a kind id that is dropped here silently downgrades its wave to the cheap model, and a
+        # combination invents a name and an id exactly as a socket-word did.
+        "base-type", "unique", "set", "charm", "socket-word", "combination", "consumable",
+        "gem", "material",
     })
 
     def for_kind(self, kind: str) -> str:

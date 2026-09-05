@@ -111,6 +111,29 @@ describe("SystemLayer (T20)", () => {
     expect(currentKeyFor("creatures")).toBe("c");
   });
 
+  // world-stage W95: 1-9 are information-architecture.md's own reserved range.
+  it("a rebind onto the digit row is refused, and the stage still mounts afterward", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SystemLayer open onOpenChange={() => {}} />, { withGlobalKeys: true });
+    await user.click(screen.getByTestId("system-tab-controls"));
+
+    await user.click(screen.getByTestId("keybind-change-relics"));
+    await user.keyboard("3");
+    await waitFor(() => expect(screen.getByTestId("keybind-reserved-refusal")).toBeInTheDocument());
+    expect(screen.getByTestId("keybind-reserved-refusal")).toHaveTextContent(/reserved/i);
+    expect(currentKeyFor("relics")).toBe("r");
+
+    // The refused rebind must not have left the settings panel itself in a broken state — it can
+    // still be dismissed and the table underneath is provably untouched (asserted above). The
+    // stronger claim — a stage that later registers "3" as its own hotkey (world-lenses, W96) still
+    // mounts without a `registerGlobalVerb` throw — is proven directly in `keybindings.test.ts`
+    // ("the eight existing letter defaults still rebind freely" + the reserved-range test), since
+    // `rebind` itself is what would have corrupted the table; this component-level test is the UI
+    // half of the same guarantee.
+    await user.click(screen.getByTestId("keybind-reserved-dismiss"));
+    expect(screen.queryByTestId("keybind-reserved-refusal")).not.toBeInTheDocument();
+  });
+
   it("Escape while listening cancels the rebind without changing anything", async () => {
     const user = userEvent.setup();
     renderWithProviders(<SystemLayer open onOpenChange={() => {}} />, { withGlobalKeys: true });

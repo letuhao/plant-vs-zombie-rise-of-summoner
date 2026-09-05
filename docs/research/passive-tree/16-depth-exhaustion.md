@@ -90,6 +90,21 @@ carries concentration. Above it, `H_points` is identical for every build that ha
 | **`w`** | Promote from "measurement-gated open item" to **a primary design parameter**. It is the only thing carrying concentration past the crossover |
 | **The model** | `tools/HybridViability` must learn the soul track before any further sweep means anything above Θ≈300. Today it silently reports a saturated late game because it cannot see the half that still grows |
 
+## Resolution — what this measurement can and cannot separate
+
+These numbers come from the **closed form**: `DominanceGuard.Measure` → `Predictor.Predict`, which is
+deterministic. There are no trials and therefore no sampling noise, so the crossover at `Θ ≈ 300` is
+exact *for the model*.
+
+That is not the same as being resolvable by a **trial-based** harness. `Marginal.cs:21-23` records a
+measured noise floor of **0.9pp at 3,000 trials**, and the gap this table turns on is 0.8pp at
+`Θ=400`. So `squad-harness` cannot confirm or refute the crossover at screening depth — it needs
+common random numbers, per-cell half-widths, and a refine pass, and it must report `transfers: false`
+whenever an ordering sits inside its own half-width.
+
+**The finding is a property of the model, stated exactly. Whether it survives in simulation is a
+separate question, and the harness has to be built to answer it rather than assumed to.**
+
 ## What was NOT measured
 
 The soul track, mechanism nodes, and D25's rising unlock cost are all outside this model. This sweep

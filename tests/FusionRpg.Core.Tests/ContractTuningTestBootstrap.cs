@@ -386,7 +386,29 @@ internal static class ContractTuningTestBootstrap
         District: new DistrictTuning(
             SideByBaseTier: new Dictionary<int, int> { [0] = 18, [1] = 24, [2] = 30 },
             CoreSideMilli: 400, GateCount: 2, RampartThickness: 1, FortressRampartBonus: 1,
-            ApproachDepth: 4, ApproachDepthPerWardLevel: 1));
+            ApproachDepth: 4, ApproachDepthPerWardLevel: 1),
+        Structure: new StructureTuning(
+            RepairCostRatioMilli: 600,
+            TierMultiplierMilli: new Dictionary<int, int> { [1] = 1000, [2] = 1800, [3] = 3000 },
+            StorageCapacityPerDevelopmentLevel: 50,
+            DepletionPerHarvestMilli: 10),
+        Objective: new SiegeObjectiveTuning(
+            FieldCapMaxLivingPerSide: -1,
+            LegionSlotsPerSide: 2, LegionSlotsPerDevelopmentLevel: 0,
+            MaxLegionMembers: -1,
+            DefenseSlotsAtDevelopmentZero: 4, DefenseSlotsPerDevelopmentLevel: 2, DefenseSlotsGridCapacityPoint: 2,
+            DistrictDefenderBonusMilli: 1000),
+        Waves: new SiegeWavesTuning(
+            MaxArrivalsPerRound: 8, BatchIntervalTicks: -1, FieldClearedThreshold: 0, BatchSize: -1),
+        Shooting: new FusionRpg.Core.Battle.Siege.SiegeShootingTuning(
+            RangeThresholdMilli: 500, RangePowerMilli: 500,
+            ObstructionPowerMilli: 700, ObstructionFloorMilli: 250, MeleeLockPowerMilli: 500),
+        Construction: new ConstructionTuning(
+            ShardVeinYieldPerTurn: 4, MaterialSeamYieldPerTurn: 3,
+            RefineRubblePerIronwork: 4, RefineYieldMilli: 600, RefinePerTurnCap: -1),
+        Economy: new EconomyTuning(
+            NodeYieldPerRoundLoam: 5, NodeYieldPerRoundIronwork: 3,
+            DepotSeedMilli: 1000, CaptureRecoveryMilli: 1000));
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,

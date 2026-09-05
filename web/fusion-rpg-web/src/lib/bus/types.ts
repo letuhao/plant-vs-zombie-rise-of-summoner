@@ -455,3 +455,43 @@ export type AptitudesState = {
   withinBudget: boolean;
   shares: Record<string, number>;
 };
+
+/** spec-allocation-surface.md — GET /api/aptitudes/species/{playerId}/{speciesId}. `shares` is the
+ * EFFECTIVE (baseline-or-override) allocation; `baseline` is the shipped plan's own vector, always,
+ * so an override renders as a deviation from it rather than as a standalone build. */
+export type SpeciesAptitudesState = {
+  speciesId: string;
+  level: number;
+  budget: number;
+  spent: number;
+  withinBudget: boolean;
+  hasOverride: boolean;
+  shares: Record<string, number>;
+  baseline: Record<string, number>;
+};
+
+/** spec-species-respec.md — GET /api/species-build/respec-price/{playerId}/{speciesId}. A read-only
+ * preview of what the NEXT change would cost, so the price can be shown before the confirm.
+ * `everRespecced` (NOT `respecCount === 0`) is the correct free-vs-priced predictor: `respecCount`
+ * decays back to zero over time even for a species touched long ago. */
+export type SpeciesRespecPrice = {
+  speciesId: string;
+  respecCount: number;
+  priceResource: string;
+  priceAmount: number;
+  everRespecced: boolean;
+};
+
+/** spec-species-respec.md — POST /api/species-build/respec. The one save path for a species' build:
+ * a first override and a revert-to-baseline are both free (`priced: false`); any other change is
+ * priced and its `priceAmount` reflects what was actually charged. */
+export type SpeciesRespecResult = {
+  speciesId: string;
+  level: number;
+  priced: boolean;
+  priceAmount: number;
+  respecCount: number;
+  soulBalance: number;
+  replay: boolean;
+  shares: Record<string, number>;
+};

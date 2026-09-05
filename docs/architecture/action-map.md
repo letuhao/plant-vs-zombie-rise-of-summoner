@@ -759,3 +759,14 @@ program's re-bless event.
 - **⛔ Checkpoint H — a balance pass can actually run.** A20: two different synthetic loadouts on the
   same actor produce measurably different aggregate outcomes across many seeds — the acceptance bar
   this whole reopening was built to reach.
+
+## 13. Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `delve.break` corpus action with a stamina cost row | `party-dungeon/spec-supplies-and-objects.md` §5 | the `destroy` verb's stamina path on a gated door: `CostLedger.TryPay` on `stamina`, `objects.breakStaminaMilli` of max; usable only in a delve room, never in a fight |
+| camp actions with `useContext: rest` | `party-dungeon/spec-delve-attrition.md` §5 | corpus actions paid from the six pools through `CostLedger`, competing for the five equipped slots; `rest.activations` uses per member |
+| `loadout.slots` derived channel read | `party-dungeon/spec-unique-pipeline.md` §4; `decisions.md` row "Action model — extended action slots" | `LoadoutSet.MaxSize` stays `const 5` with the exemption comment (the structural base); the three readers (`LoadoutSet.cs:60`, `AutoEquip.cs:55`, `CapPolicy.cs:39`) read `base + (channel > 0 ? 1 : 0)` — one extra slot at a time whatever is worn; the channel is registered in `DerivedStatRegistry` and fed by a `stat.derived` atom, no seventeenth kind |
+| `act.capture` — the second code-backed action after `act.attack` | `party-dungeon/spec-wild-room.md` §5 | a corpus `ActionRow` (`Kind = Skill`, `Relation = Enemy`, `Mode = Single`, E3 conditions `HpBelowMilli(Target) ∧ HoldsStock(Self, seal)`) whose resolver `CaptureAction.Resolve` lives in the action layer; the runner gains one id → resolver row beside `act.attack` (`BattleEngine.cs:553`); the seal is its cost — A3's item-cost row gates it |
+| a `battle` supply use riding an action's item-cost row (A3) | `party-dungeon/spec-supplies-and-objects.md` §3 | `GrantsActionId` names the action; the item is the cost — the A3 row is the gate for battle use only |
+

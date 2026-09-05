@@ -30,7 +30,9 @@ import type {
   UniqueActorListDto,
   UniqueEquipmentListDto,
   RelicCatalogListDto,
-  AptitudesState
+  AptitudesState,
+  SpeciesAptitudesState,
+  SpeciesRespecPrice
 } from "./types";
 
 function hubConnected(status: string): boolean {
@@ -97,6 +99,30 @@ export function useAptitudes(playerId: number | null | undefined) {
     queryKey: queryKeys.aptitudes(playerId ?? 0),
     queryFn: () => getJson<AptitudesState>(`/api/aptitudes/${playerId}`),
     enabled: playerId != null && playerId > 0,
+    refetchInterval: hubConnected(hub) ? false : 8000
+  });
+}
+
+/** spec-allocation-surface.md — the shipped baseline + effective override for one species. */
+export function useSpeciesAptitudes(playerId: number | null | undefined, speciesId: string | null | undefined) {
+  const hub = useHubStatus();
+  return useQuery({
+    queryKey: queryKeys.speciesAptitudes(playerId ?? 0, speciesId ?? ""),
+    queryFn: () =>
+      getJson<SpeciesAptitudesState>(`/api/aptitudes/species/${playerId}/${encodeURIComponent(speciesId!)}`),
+    enabled: playerId != null && playerId > 0 && !!speciesId,
+    refetchInterval: hubConnected(hub) ? false : 8000
+  });
+}
+
+/** spec-species-respec.md — read-only preview so the price is shown BEFORE the confirm, never after. */
+export function useSpeciesRespecPrice(playerId: number | null | undefined, speciesId: string | null | undefined) {
+  const hub = useHubStatus();
+  return useQuery({
+    queryKey: queryKeys.speciesRespecPrice(playerId ?? 0, speciesId ?? ""),
+    queryFn: () =>
+      getJson<SpeciesRespecPrice>(`/api/species-build/respec-price/${playerId}/${encodeURIComponent(speciesId!)}`),
+    enabled: playerId != null && playerId > 0 && !!speciesId,
     refetchInterval: hubConnected(hub) ? false : 8000
   });
 }

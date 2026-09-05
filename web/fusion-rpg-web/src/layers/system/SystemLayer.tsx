@@ -11,6 +11,7 @@ import {
   conflictFor,
   currentBindings,
   rebind,
+  reservedRangeReasonFor,
   resetBindings,
   type BindableActionId
 } from "./keybindings";
@@ -151,7 +152,13 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
         return;
       }
       if (listForbiddenKeys().some((k) => k.toLowerCase() === key.toLowerCase())) {
-        setReservedAttempt(key);
+        setReservedAttempt(`${key.toUpperCase()} is reserved for the game launcher and can't be bound here.`);
+        setListeningFor(null);
+        return;
+      }
+      const digitReason = reservedRangeReasonFor(key);
+      if (digitReason != null) {
+        setReservedAttempt(digitReason);
         setListeningFor(null);
         return;
       }
@@ -449,9 +456,7 @@ export function SystemLayer({ open, onOpenChange }: { open: boolean; onOpenChang
 
           {reservedAttempt ? (
             <div className="rounded-sm border border-bad p-3" data-testid="keybind-reserved-refusal">
-              <p className="text-sm text-bad">
-                {reservedAttempt.toUpperCase()} is reserved for the game launcher and can't be bound here.
-              </p>
+              <p className="text-sm text-bad">{reservedAttempt}</p>
               <Button
                 size="sm"
                 variant="ghost"

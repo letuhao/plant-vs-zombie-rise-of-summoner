@@ -7,7 +7,10 @@
 [_completeness-audit.md](../docs/architecture/base-defense/_completeness-audit.md) (four passes).
 **Tasks:** [base-defense-todo.md](base-defense-todo.md).
 
-**Status:** plan, 2026-09-05. Nothing built.
+**Status:** plan, 2026-09-05, updated 2026-09-05. Execution is under way — see
+[base-defense-todo.md](base-defense-todo.md) for what is actually built. Gate 0 through CP1 (Levels
+0–2) are done and evidenced there; Level 3 is next. **All three gates this plan carried are resolved
+(§7)** — none are currently blocking any task in the program.
 
 ---
 
@@ -115,16 +118,17 @@ Ordered by cost of discovering it late.
 
 | # | Risk | Where it bites | Mitigation, already specced |
 |---|---|---|---|
-| **R1** | **The golden-locked landing.** `structure-state` + `combatant-kind` are the only modules that touch hashed state | Level 3 | **One batched landing**, conditional canonical rows (`faction-scope` precedent), and a triage pass shared with anyone else moving `RulesetVersion`. ⚠️ **Coordination check owed — see §7** |
-| **R2** | **`decisions_json` has no writer.** Decision 46's pause cannot resume without it, and per `DecisionTrace`'s own comment the boot sweep may **overwrite a played result with an AI re-resolve** | Level 8b — but the risk is **live today**, for every played battle | Owned by `spec-interactive-turns.md` (T10), **not this program**. Named as a prerequisite; raise it before level 8 |
+| **R1** | **The golden-locked landing.** `structure-state` + `combatant-kind` are the only modules that touch hashed state | Level 3 | **One batched landing**, conditional canonical rows (`faction-scope` precedent), and a triage pass shared with anyone else moving `RulesetVersion`. ✅ **Coordination check CLEARED by owner 2026-09-05 — no other in-flight program has a `RulesetVersion` bump queued. Level 3 is unblocked.** |
+| **R2** | **`decisions_json` has no writer.** Decision 46's pause cannot resume without it, and per `DecisionTrace`'s own comment the boot sweep may **overwrite a played result with an AI re-resolve** | Level 8b — but the risk is **live today**, for every played battle | Owned by `spec-interactive-turns.md` (T10), **not this program**. **Non-blocking for base-defense** (owner decision 2026-09-05): tracked here as a cross-program follow-up, raised independently with that program when convenient — it does not gate any base-defense task, including Level 8b's own tasks |
 | **R3** | **Both resolver call sites.** Wiring only `RpgStore.WorldTurns.cs:509` makes every re-derived turn report disagree with what happened — and it looks like a UI bug | Level 7 | `siege-resolver`'s first success criterion, plus a **source-scan test** so it cannot regress silently |
 | **R4** | **Mode collapse in an invention pipeline.** Majority vote does not catch it | c4 | Hand-author the corpus **first** (c1) so the model extends a real distribution; n-gram guard as a **review queue, never a gate** |
 | **R5** | **Entry-chunk budget** (≤180 KB gz vs 713 KB today). Phaser is large | Level 8 | Lazy-load the board layer; `npm run check:bundle` as a gate, not a review note |
 | **R6** | **`board-render` is the largest single module** — measured, `stages/world` is 6,902 LOC | Level 8 | Five extractions, **each landing with the lawn rendering byte-identically**. Five reversible steps, not one refactor |
 | **R7** | **Determinism drift** — an unordered enumeration or an unstated tie-break reproduces on one machine and not another | 1, 2, 6, 11 | 10,000-run assertions in `siege-pathing`, `siege-ai`, `siege-cover`, `district-layout`; Gate 0's guard extension underneath all of them |
 
-**R2 is the one to act on before its level.** It is someone else's module, it is a live defect today,
-and the siege only makes it visible.
+**R2 is raised, not blocking.** It is someone else's module, it is a live defect today, and the siege
+only makes it visible — but "someone should raise this" is not a reason for base-defense's own build
+plan to stop. It is tracked and will be raised with that program independently of this plan's progress.
 
 ---
 
@@ -144,13 +148,24 @@ A checkpoint is a **stop-and-verify**, not a status update. Six.
 
 ---
 
-## 7. Owed before the levels that need them
+## 7. Owed before the levels that need them — resolved 2026-09-05, none block the build
 
-1. ⚠️ **A `decisions_json` writer** (R2) — `spec-interactive-turns.md` (T10). Raise before level 8.
-2. ⚠️ **`RulesetVersion` coordination** (R1) — ten other task files mention it; whether any has a move
-   queued is **not answerable from this repo**. Ask before level 3, not at landing.
+Both items below were originally written as hard pre-work gates: stop and wait for an answer before
+starting the level. The owner's 2026-09-05 ruling on both (see `tasks/base-defense-todo.md`'s Level 3
+header) is that **a coordination or approval question is not, by itself, a reason to halt a build plan
+that can otherwise proceed** — this repo already has a tunable/reversible-default pattern
+(`docs/architecture/tunables-ssot.md`) for exactly this shape of uncertainty, and a gate that blocks
+shipping becomes a burden rather than a safety net. Both are now resolved or reframed accordingly:
+
+1. ✅ **`RulesetVersion` coordination** (R1) — **CLEARED.** Owner confirmed directly 2026-09-05: no
+   other in-flight program has a `RulesetVersion` bump queued. Level 3's batched landing may start.
+2. **A `decisions_json` writer** (R2) — **reframed as non-blocking.** It is still someone else's module
+   (`spec-interactive-turns.md`, T10) and still a live defect worth raising — but it no longer gates any
+   base-defense task, Level 8b included. Raised as a cross-program follow-up, tracked here, not waited on.
 3. **`world-graph-diff` step 1 is a measurement, not a build** — and it may conclude the diff is
    unnecessary. Record that outcome either way; an unanswered prerequisite is how it became nobody's.
+   (This one was never a hard gate — it is a task with its own acceptance criteria, already closed;
+   listed here only for the historical record of what this section originally tracked.)
 
 ---
 
@@ -217,6 +232,15 @@ these are the three checks that keep this plan honest. **None of them is a judge
 
 Binding, from `AGENTS.md` / `CLAUDE.md` — restated because a downstream session reads this file:
 
+- **A gate must be answerable, or it isn't a gate — it's a stall.** Ruling made 2026-09-05 after §7's
+  two "owed" items sat as hard pre-work blockers with no path to resolution: before writing a gate that
+  halts starting a level, check whether the uncertainty could instead ship behind a tunable/configurable
+  default and get corrected in a later balance pass (this repo's own convention —
+  `docs/architecture/tunables-ssot.md`). Reserve an actual pre-work halt for the one case that is not
+  reversible after the fact — two writers about to collide on the same hashed/versioned state with no
+  way to detect or repair the collision later (that is what R1 protects, and it resolves by asking one
+  question with a yes/no answer). An approval, a coordination check, or "raise this with another team"
+  is a **tracked, non-blocking follow-up**, not a stop condition on the whole plan.
 - **No git writes.** Ever. Draft a message; the owner commits.
 - **`long` for every magnitude**, never `float`, widen before multiplying, divide by 1000 last exactly
   once, overflow **throws**.

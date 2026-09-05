@@ -45,6 +45,12 @@ REPO_ROOT = Path(__file__).resolve().parents[6]
 ATOMS_ROOT = REPO_ROOT / "data" / "seed" / "atoms"
 OUTPUT_DIR = REPO_ROOT / "data" / "seed" / "effects" / "affixes"
 
+#: The real, committed member vocabulary of the one slot DOMAIN this repo actually documents.
+#: `RpgStore.Containers.cs`'s own `DomainMembers` returns `ElementRoster.Concrete` for `"element"`
+#: and an empty list for every other domain name — so `element` is not merely the first domain, it
+#: is the only one with members at all. Read from the real roster rather than hardcoded.
+ELEMENT_ROSTER = REPO_ROOT / "data" / "seed" / "elements" / "roster.json"
+
 PROMPT_VERSION = "affix-authoring/1"
 
 #: Every draw is voted over exactly this many permuted samples — spec-affix-authoring.md's own
@@ -80,6 +86,75 @@ def load_eligible_atoms(atoms_root: Path, only: "list[str] | None" = None) -> "d
         wanted = set(only)
         has_trigger = {k: v for k, v in has_trigger.items() if k in wanted}
     return has_trigger
+
+
+def load_element_domain(roster_path: "Path | None" = None) -> "set[str]":
+    """The real concrete element ids (`fire/ice/air/earth/light/dark`), read from the committed
+    roster — never a hardcoded list, so a roster change is picked up rather than silently diverged
+    from."""
+    path = roster_path or ELEMENT_ROSTER
+    if not path.exists():
+        return set()
+    doc = json.loads(path.read_text(encoding="utf-8"))
+    return {e["id"] for e in doc.get("entries", []) if e.get("id")}
+
+
+def load_slot_eligible_families(atoms_root: "Path | None" = None,
+                                element_domain: "set[str] | None" = None) -> "dict[str, dict]":
+    """Which atom families a SLOT could parameterise, DERIVED from the real catalog rather than
+    invented — `family -> {"variants": [...], "domain": "element" | None}`.
+
+    **What a slot needs, and why this is a derivation and not a new vocabulary.** An affix slot
+    (`spec-affix-schema.md` §"What is genuinely new here": `slot E1 : domain = element, pick = 1`,
+    ref `atom.elemental-power.$E1`) is a parameterised atom reference: it names a DOMAIN and lets one
+    choice be shared across several refs. The catalog's own unique key is already
+    `(family_id, tier, variant)`, so the families a slot could vary over are exactly those carrying
+    **more than one variant** — the same "read what the shipped data already says" move
+    `AffixTags.Of` makes when it derives an affix's tags from its refs instead of having them
+    authored.
+
+    **`domain` is the honest half.** A multi-variant family is only *groundable* for a model when its
+    variant axis matches a real, named domain with real members. Today that is `element` and nothing
+    else. A family whose variants are opaque discriminators (`a`/`b`/`c`) is structurally
+    slot-shaped but semantically empty: asking a model to pick a domain for it would be asking it to
+    invent a vocabulary, which is precisely the "plausible-looking guess" P1 forbids — the same
+    reason `data/seed/items/affix-families/g-armour.json`'s own authoring notes give for refusing to
+    invent a `variants.generate` vocabulary for channel-pairs.
+
+    **Expected to be empty of groundable rows today, and that is the correct answer, not a bug.**
+    Nothing in the shipped tree uses an element-variant axis yet, so this returns the structurally
+    eligible families with `domain: None`. It lights up on its own the day E30's element pools ship
+    a family whose variants are real element ids — no code change needed, which is the whole point
+    of deriving it rather than hand-listing it.
+    """
+    root = atoms_root or ATOMS_ROOT
+    domain = element_domain if element_domain is not None else load_element_domain()
+
+    variants: "dict[str, set[str]]" = {}
+    for path in sorted(root.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        if doc.get("kind") != "atom":
+            continue
+        for entry in doc.get("entries", []):
+            v = entry.get("variant")
+            if v:
+                variants.setdefault(entry["family"], set()).add(v)
+
+    out: "dict[str, dict]" = {}
+    for family, vs in sorted(variants.items()):
+        if len(vs) < 2:
+            continue  # one variant is not an axis to vary over
+        out[family] = {
+            "variants": sorted(vs),
+            "domain": "element" if domain and vs <= domain else None,
+        }
+    return out
+
+
+def groundable_slot_families(registry: "Mapping[str, dict]") -> "dict[str, dict]":
+    """The subset a model could actually be asked to pick a slot domain for — those whose variant
+    axis resolves to a real, named domain. Empty today, by design (see the loader's docstring)."""
+    return {f: r for f, r in registry.items() if r["domain"] is not None}
 
 
 def load_existing() -> "dict[str, dict]":

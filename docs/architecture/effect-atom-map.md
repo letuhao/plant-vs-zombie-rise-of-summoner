@@ -423,3 +423,14 @@ because `A9 movement-actions` is blocked on it and nothing else is.
    effect-pipeline one.
 6. **Every generation-adjacent module ships `--dry-run` and a small `--count`** (§W7.10) — a full run is
    an owner decision behind a quality gate, never a step a plan schedules.
+
+## 19. Filed by the party-dungeon program (2026-09-05, specs approved or in wave 3)
+
+Two rows the delve modules need from this program; each is one reviewed change here, consumed there.
+
+| Ask | Filed by | Shape | Until it lands |
+|---|---|---|---|
+| `InstanceOrigin.Delve` | `party-dungeon/spec-event-deck.md` §5 | a new member so an event's frozen instance says where it came from | v1 reads `Drop` with the binding source (`delve:{delveId}`) carrying scope |
+| `Freeze` leaves count-unit channels unscaled | `party-dungeon/spec-unique-pipeline.md` §4 | `Instantiator.Freeze` (`Instantiator.cs:313-315`) applies `ContentScale.Apply` to every fixed value; `Apply(1, 4235)` is 4, and a `stat.derived` on `loadout.slots` (a count) must stay 1 — one guard reading the channel's `UnitClass`, tested by *"frozen at Θ 100, still 1"* | the unique build refuses `unique.slot-scaled` rather than ship five extra slots |
+| `status.clear` admitted on `OnActivate` | `party-dungeon/spec-supplies-and-objects.md` §3 | one trigger row in `AtomKindRegistry` (today `Events`-only, `AtomKindRegistry.cs:638-646`) so an antidote supply can fire | the supply validator refuses such a row at import (`consumable.trigger-not-allowed`) |
+

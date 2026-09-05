@@ -544,3 +544,11 @@ item is done, and none needed a decision:
 | B4 | no CI cutover for absorbing `seed_graph` | S10's cutover | `tools/seed_graph/` **deleted**; `ci.yml:85` runs *"Item seed reachability (seedsmith)"* with the cutover recorded in-line |
 
 The grounding corrections landed with the specs they belonged to.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `dungeon` adapter and pipelines | `party-dungeon/spec-dungeon-seed-contract.md` (approved) | `adapters/registry.py:13-15` gains `dungeon`; seven corpus kinds under `data/seed/dungeon/`; `python -m seedsmith dungeon contract --audit \| plan \| run \| audit \| emit`; planner per-cell motif briefs; provenance `{planHash, briefHash, promptVersions, registryVersions, motifSubsetHash}`; `stale_ids`; nothing exists on disk today (`party-dungeon/spec-domain-catalog.md` §Drift 5) |
+| `uniques` extension | `party-dungeon/spec-unique-pipeline.md` §1 | one ownership level per `unique` field on `adapters/items/kinds.py:56-60`; a set-stem audit check; `adapters/items/uniques/{planner,briefs,pipelines,audit}.py` over the `frame × axis × band` grid (30 cells, 2–3 per cell, first ship 30 beside the 49 at rung 80+); `python -m seedsmith items uniques contract --audit \| plan --dry-run \| run \| audit`; tests stub the transport to raise |
+

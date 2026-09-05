@@ -249,3 +249,12 @@ Future tests (not authored here):
 **Still out:** Full gear shop polish (W12); ActiveBound mid-match equip / Hot re-push; specimen XP balance curves; full ActiveBound Hello rehydrate of gear catalogs.
 
 When extending, cite this file + [match-runtime.md](match-runtime.md) and do not reopen Foundation Effects contract v1 opcodes without an ADR.
+
+### 11.1 Party-dungeon `delve-attrition` (2026-09-05, specced, unbuilt)
+
+`Retired` gains a **second producer**: extraction from a delve on a permadeath rung (`PermadeathGate.Applies`)
+retires a `downedOnce` demon — the release path in `RpgStore.UniqueActors.cs:216` stops being the only
+write. `Recovering` becomes a **durable** row for a delve wound, counted down **in delves** at `CloseDelve`
+(never timed — no `*_utc` column, no `ElapsedDays`), left by the counter reaching 0 or by the recovery
+ritual. The W4 one-write note (§6 Recover: `ActiveBound → Recovering → Roster` in one step) still holds for
+lawn deaths. Spec: [party-dungeon/spec-delve-attrition.md](party-dungeon/spec-delve-attrition.md) §7.

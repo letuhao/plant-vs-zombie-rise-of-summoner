@@ -7,6 +7,7 @@ import {
   currentBindings,
   currentKeyFor,
   rebind,
+  reservedRangeReasonFor,
   resetBindings
 } from "./keybindings";
 
@@ -98,5 +99,31 @@ describe("keybindings (T20)", () => {
     resetBindings();
     expect(onChange).toHaveBeenCalledTimes(2);
     window.removeEventListener(KEYBINDINGS_CHANGED_EVENT, onChange);
+  });
+
+  // world-stage W95: 1-9 are information-architecture.md's own reserved range.
+  it("rebind('relics', '3') is refused: the table is unchanged and no change event fires", () => {
+    const onChange = vi.fn();
+    window.addEventListener(KEYBINDINGS_CHANGED_EVENT, onChange);
+    const result = rebind("relics", "3");
+    expect(result).toEqual(DEFAULT_BINDINGS);
+    expect(currentKeyFor("relics")).toBe("r");
+    expect(onChange).not.toHaveBeenCalled();
+    window.removeEventListener(KEYBINDINGS_CHANGED_EVENT, onChange);
+  });
+
+  it("reservedRangeReasonFor names the reason for 1-9 and is null for every other key", () => {
+    for (const digit of "123456789") {
+      expect(reservedRangeReasonFor(digit)).toContain("reserved");
+    }
+    expect(reservedRangeReasonFor("0")).toBeNull();
+    expect(reservedRangeReasonFor("r")).toBeNull();
+  });
+
+  it("the eight existing letter defaults still rebind freely", () => {
+    for (const key of Object.values(DEFAULT_BINDINGS)) {
+      expect(reservedRangeReasonFor(key)).toBeNull();
+    }
+    expect(rebind("almanac", "z").almanac).toBe("z");
   });
 });

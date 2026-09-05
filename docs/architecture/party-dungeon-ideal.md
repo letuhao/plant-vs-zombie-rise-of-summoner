@@ -170,8 +170,8 @@ Each row names the specific line that is switched off.
 | **`DecisionsJson` is read and never written** | `RpgStore.cs:603` creates it; no writer in `src/` | The played-battle persistence half is a column and a reader with no producer |
 | **Expeditions bypass the profile resolver** | `WaveCatalog.ProfileForExpedition` (`WaveCatalog.cs:65`) — callers are tests only (`ExpeditionInteractiveBarTests.cs:34`, `ProductionProfilePathTests.cs:52`); `ExpeditionService.CollectAsync` never calls it | The Delve resolves its profile from content the way the map says it should |
 | **`Retreated` has one producer, a trait** | `BattleRunState.cs:591` sets it only for `coward` | A player-ordered retreat is the same flag from a different source — no new state |
-| **Downed/revive exists in the timeline FSM, not in `Resolve`** | `ActorTurnMachine`, `ActionRunner`, `ReadinessDriver`, `RendezvousLane`: 21 test files, **zero constructions in `src/`**; `BattleEngine.cs:65-68` is a binary `Alive => Hp > 0` | `decisions.md` row 42 already locks `Downed` as *"HP ≤ 0 is veto-capable, never a terminal edge"*. The Delve needs Downed; the engine has it built and not wired |
-| **Reaction lane and rendezvous are gated off** | *(review correction)* the engine has **no reader** of `profile.WReact` — `battle.v4.json:37` already ships `hybrid-atb.wReact: 1`, so the inert line is "no consumer", not "value 0"; `RendezvousEnabled` false everywhere; `ReactionLane.cs:60` gates on `wReact > 0` | Press-turn (SMT) and link strikes are profile rows away — owner already put both in scope (2026-08-21) |
+| **Downed/revive exists in the timeline FSM, not in `Resolve`** | `ActorTurnMachine`, `ActionRunner`, `ReadinessDriver`, `RendezvousLane`: 21 test files. *(Corrected 2026-09-05, wave-2 verification:)* B38 already constructs one `ActorTurnMachine` per actor (`BattleRunState.cs:136-141`); the engine transitions only `Ready/Committed/Resolving/Recovering/Charging` (`BattleEngine.cs:419-466`) and **never enters `Downed` or `Dead`** — `BattleEngine.cs:65-68` is still a binary `Alive => Hp > 0` | `decisions.md` row 42 already locks `Downed` as *"HP ≤ 0 is veto-capable, never a terminal edge"*. The Delve needs Downed; the engine has it built and not wired |
+| **Reaction lane and rendezvous are gated off** | *(review correction, refined 2026-09-05 during propagation)* `battle.v4.json:37` ships `hybrid-atb.wReact: 1` and `BattleEngine.cs:230` **does read** `activeProfile.WReact` into `ReactionLane`; the lane is consumed only under `activeProfile.UsesTimelineDispatch` (`BattleEngine.cs:373`), which **no catalog row or test sets** — so the inert line is the dispatch flag, not the value and not a missing reader; `RendezvousEnabled` false everywhere | Press-turn (SMT) and link strikes are profile rows away — owner already put both in scope (2026-08-21) |
 | **`resource.delta` reaches the bag only from a test seam** | `BattleEngine.cs:132-137` — *"Null in every production and golden call site"* | Hunger/spirit attrition in a delve fight is a grant through this seam |
 | **Loot pipeline has zero production callers** | `LootPipeline.Resolve` (`:134`) — tests only; no `LootEndpoints.cs` exists | The Delve is the first caller. A fifth `sourceKind` and correlation shape at `LootPipeline.cs:91-98` |
 | **`Instantiator.TryInstantiate` has zero production callers** | `Instantiator.cs:98`; five specs independently record this | Every "we need a runtime generator" finding below is a wiring gap on this SDK, not a new build |
@@ -581,8 +581,8 @@ domain, owner `docs/architecture/party-dungeon/` once specced; published by
 | `graph.eliteEarliestRow`, `graph.restEarliestRow`, `graph.noRestRow` | StS 6 / 6 / 14 | tier-relative |
 | `nodes.{kind}.weightMilli` | unassigned node weights | fight 530, event 220, elite 80, rest 120, merchant 50 (StS); ascension-style rows raise elite |
 | `nodes.unknown.pity.{cache,merchant,fight}.baseMilli/stepMilli` | unknown-room pity | 20/20, 30/30, 100/100 |
-| `depth.bandStepPerRow` | how fast the band rises per row | 1 per 2 rows |
-| `depth.bossBand` | the boss room's band | 6 (`boss-lair`) |
+| `depth.rowsPerBandStep` *(was `depth.bandStepPerRow` — a prose rate; renamed by the difficulty-ladder spec, review S2-2)* | rows per band step | 2 |
+| `depth.bossBandDelta` *(was the absolute `depth.bossBand: 6` — a copy of `boss-lair`'s band that a long corridor could overtake; review N4)* | bands added to the last corridor's band for the boss room | +1 |
 | `attrition.hunger.perRoom.{fight,elite,event,rest}` | hunger cost per room kind | tunable, rest negative |
 | `attrition.spirit.perElite`, `attrition.spirit.bossPresence`, `attrition.spirit.retreat` | nerve drains | DD +25-stress shape |
 | `attrition.restHealMilli` | HP/hunger/spirit restored at a rest | ‰ of max |
@@ -927,7 +927,10 @@ modifiers that are not power-shaped at all. A room reads terms that are all buil
 and the species `thetaOffset` (`demon-threat.v1.json`, ten rungs 0…40, §10 row 18). Worked, at the
 shipped weights and `B = 0.4`: a `rich` entrance (band 3), tier 1, two realms, a `raider` species
 (+13) → `Θ_room = 15 + 5 + 50 = 70`, `Θ_enemy = 83`, `P(83) = 3,616` (the enemy's `MaxHp`),
-`contentScale = ×5.32`; the boss room at band 6 → `Θ = 98`, `P = 4,549`, `×6.69`. `P(Θ)` stays in
+`contentScale = ×5.32`; the boss room at band 6 → `Θ = 98`, `P = 4,549`, `×6.69` *(the difficulty-ladder spec corrects
+this line: the absolute boss band is retired for `depth.bossBandDelta` on the last corridor's band,
+so an 11-row `rich` domain's boss composes to `Θ = 100`; and `×5.32` is `contentScale(83)`, the soul
+faucet's read of `Θ_enemy`, whereas the loot pipeline reads the room's `Θ`, `×4.24` at Θ 70)*. `P(Θ)` stays in
 `long` until `Θ = 214,748,299`, where `PowerLadder` throws.
 
 **The composition point does not exist in production** — `ContentContext` has zero constructors in
@@ -1105,7 +1108,7 @@ predicate over a **report** (the delve report, extended with room-kind counts, c
 downed list, hunger at extraction, haul by kind) plus a reward manifest; evaluation is pure and
 idempotent on `(playerId, questId, delveId)` under the expedition exactly-once envelope
 (`RpgStore.Expeditions.cs:270-274`); rewards go through `LootPipeline.Resolve` with a server-derived
-correlation `loot:quest:{delveId}:{questId}`, never a hand-written grant. Doran and Parberry's
+correlation `loot:delve:{delveId}:quest:{questId}` (spelling settled by `spec-dungeon-loot.md` §3, source kind `dungeon-quest`), never a hand-written grant. Doran and Parberry's
 structural analysis (>750 quests, 9 motivations each with 2–7 strategies as verb-noun pairs) decides
 the template list: our templates are their strategies with the noun replaced by a kind ref and the
 count by a band.
@@ -1180,7 +1183,7 @@ walks on the lawn, not that the species is a delve boss. A boss slot is filled b
 the top rungs (tyrant … calamity: 23 anchors today, thin but real) at the room's `boss-lair` band:
 `Θ` = 30 (`Wm·6`) + up to +40, both shipped. **The shipped threat ladder already covers "boss"**;
 nothing new joins §10. The boss **kit**, as ordinals: `build` (a `ZombossPattern` id — 9 exist, 3 pure
-+ 6 mixed, `ZombossPatterns.cs:74-117`; `ZombossCommanderAllocation.Refresh(theta, tuning)` has one
++ 6 mixed, `ZombossPatterns.cs:33-77`; `ZombossCommanderAllocation.Refresh(theta, tuning)` has one
 production caller and nothing feeds a wave actor an allocation — wiring gap) · `phaseCount` (`none ·
 two · three`; precedent: `berserker`'s two HP thresholds, `TraitBattleCatalog.cs:46-47` — a phase *is*
 an HP-threshold grant; `BattleStatModifierLedger` and `RecomposeDerived` are the seam *"a real trigger
@@ -1207,7 +1210,7 @@ to roll. PoE 3.20's rule after removing Archnemesis — *"mods do one specific t
 not co-roll.
 
 **Formation on a null board — the cheap version and its cost.** There is no geometry:
-`PositionOf(actorKey) => null` (`BattleRunState.cs:418`), *"which is what makes NearestEnemy's own
+`PositionOf(actorKey) => null` (`BattleRunState.cs:474`), *"which is what makes NearestEnemy's own
 SourceOrder fallback the live behavior today"*. What exists is **`SideIndex` — "position within its own
 side (adjacency)"** (`BattleEngine.cs:50`), set from setup order and already consumed by `loyal`'s
 `GuardsAdjacentAlly`. **Darkest Dungeon proves a 1-D rank per side makes formation a decision** — in-
@@ -1733,7 +1736,7 @@ Retired by Part II: §5's `risk.oath.bandUnlock` (replaced by `domain.maxRungWit
 >     needs a per-ten-thousand unit or a `Micro` key; the spec picks the unit and names it, per T6);
 >     (c) on rung ≥ 90 uniques the effect may be a **fixed core atom**, never rolled.
 
-### 11.11 Review decisions — owner rulings on the twelve forks the review raised (2026-09-05)
+### 11.10 Review decisions — owner rulings on the twelve forks the review raised (2026-09-05)
 
 The six-lens review ([party-dungeon/audit-2026-09-05.md](party-dungeon/audit-2026-09-05.md) §5)
 returned eleven forks plus one sub-fork. The owner ruled on all of them the same day. These bind
@@ -1768,7 +1771,7 @@ module 7; decision 13's sub-pipeline list is the intent and the tool derives the
 the delve stage is the **sixth** and needs a new id `delve` with a Game-GUI `decisions.md` row; the
 four `decisions.md` rows and nine stale-doc propagations the record lists precede the capability map.
 
-### 11.10 What Part II deliberately does not decide
+### 11.11 What Part II deliberately does not decide
 
 Any number in any table above (starting shapes for the balance pass); the exact room-kind catalog
 rows beyond the eleven named; which of the fourteen sub-mechanisms ships first (the capability map's

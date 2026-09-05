@@ -51,9 +51,17 @@ public static class LoamPhases
 
     /// <summary>
     /// <see cref="LoamPolicy.LoamCapacity"/>, plus any active granary's <c>CapacityBonus</c>
-    /// (spec-loam-texture.md) — additive to the shape `LoamProduction`'s own well multiplier already
-    /// uses. Public and shared with <see cref="LoamForecast.ProjectedStock"/> so the engine and the
-    /// player-facing forecast read the same ceiling rather than risking two copies drifting apart.
+    /// (spec-loam-texture.md), plus base-defense `structure-state`'s F12 growth term
+    /// (<see cref="StructurePolicy.CapacityGrowthFor"/>) — additive to the shape `LoamProduction`'s own
+    /// well multiplier already uses. Public and shared with <see cref="LoamForecast.ProjectedStock"/>
+    /// so the engine and the player-facing forecast read the same ceiling rather than risking two
+    /// copies drifting apart.
+    ///
+    /// <para><b>F12, base-defense audit finding</b>: decision 21 grows a sector's rootbed SLOTS with
+    /// `DevelopmentLevel`, but a fixed storage cap meant a new slot's entire output became overflow the
+    /// moment the cap was already full — "decision 21 buys zero economy" at equilibrium. The growth
+    /// term here is what makes a new slot actually produce, additive to the base/granary capacity
+    /// above, never a replacement of it.</para>
     /// </summary>
     public static long EffectiveCapacity(WorldSector sector)
     {
@@ -68,7 +76,7 @@ public static class LoamPhases
             if (structure.Kind == StructureKind.Storage) bonus += structure.CapacityBonus;
         }
 
-        return LoamPolicy.LoamCapacity + bonus;
+        return checked(LoamPolicy.LoamCapacity + bonus + StructurePolicy.CapacityGrowthFor(sector.DevelopmentLevel));
     }
 
     /// <summary>Every slot still under construction counts down by one, this pass, before anything reads it.</summary>

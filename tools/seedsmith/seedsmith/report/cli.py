@@ -292,6 +292,9 @@ def cmd_items(args: argparse.Namespace) -> int:
         print(f"unknown items command {args.items_command!r}", file=sys.stderr)
         return EXIT_CANNOT_RUN
 
+    if args.kind == "combination":
+        return _cmd_items_combination(args)
+
     from ..adapters.items.setgen import run as run_mod
     from ..adapters.items.setgen import themes as themes_mod
     from ..adapters.items.setgen import tuning as tuning_mod
@@ -330,6 +333,61 @@ def cmd_items(args: argparse.Namespace) -> int:
         print("seedsmith: --write is refused — the generation graph for `items generate` is not "
               "wired yet (module 13's own deferred item). The plan above is real; the model call "
               "is not.", file=sys.stderr)
+        return EXIT_REFUSED
+    return EXIT_CLEAN
+
+
+def _cmd_items_combination(args: argparse.Namespace) -> int:
+    """`seedsmith items generate --kind combination --shape strain|splice` (item module 21).
+
+    ⛔ **`--dry-run` is the default here too.** A real run is 102 model calls; the plan, the ids, the
+    gem-supply precheck and the learnability report all run without one, which is what makes the run
+    inspectable before a token is spent.
+
+    ⚠ **`--population` is meaningless for a combination and is refused rather than ignored.** The
+    grid is closed — 12 aptitudes x 3 archetypes and C(12,2) — so there is no species/build split to
+    make, and silently accepting the flag would let a caller believe they had selected something.
+    """
+    from ..adapters.items.combogen import migrate as migrate_mod
+    from ..adapters.items.combogen import run as run_mod
+    from ..adapters.items.combogen import supply as supply_mod
+    from ..adapters.items.combogen import tuning as tuning_mod
+
+    if getattr(args, "population", None) not in (None, "species"):
+        # "species" is the parser default, i.e. "not passed"; anything else was passed on purpose.
+        print("seedsmith: --population does not apply to --kind combination — the grid is closed "
+              "(12 aptitudes x 3 archetypes, and C(12,2)); use --shape strain|splice",
+              file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    tuning = tuning_mod.load()
+    try:
+        supply = supply_mod.build()
+        plan = run_mod.plan_run(shape=args.shape, tuning=tuning, supply=supply)
+    except (ValueError, supply_mod.SupplyRefused) as exc:
+        print(f"seedsmith: {exc}", file=sys.stderr)
+        return EXIT_CANNOT_RUN
+
+    legality = migrate_mod.legality_report(tuning, host_roles=plan.host_roles)
+    summary = {
+        **plan.summary(),
+        "kind": "combination",
+        "ingredientCount": tuning.ingredient_count,
+        "maxCombosPerActor": tuning.max_combos_per_actor,
+        "attunedTierBonus": tuning.attuned_tier_bonus,
+        "legacyRetirement": legality.to_dict(),
+    }
+    print(json.dumps(summary, ensure_ascii=False, indent=2))
+
+    if args.sample_brief and plan.subjects:
+        print("\n--- sample brief ---")
+        print(plan.subjects[0].brief)
+
+    if args.write:
+        print("seedsmith: --write is refused — the generation graph for `items generate --kind "
+              "combination` is not wired, and the `socket-word` -> `combination` kind rename it "
+              "lands with touches a FROZEN registry (naming.v1.json v4). The plan above is real; "
+              "the model call is not.", file=sys.stderr)
         return EXIT_REFUSED
     return EXIT_CLEAN
 
@@ -977,11 +1035,15 @@ def build_parser() -> argparse.ArgumentParser:
                      help="fix-unresolved: report what would change without writing anything")
     demons.set_defaults(func=cmd_demons)
 
-    items = sub.add_parser("items", help="item corpus generation entrypoints (module 13)")
+    items = sub.add_parser("items", help="item corpus generation entrypoints (modules 13, 21)")
     items_sub = items.add_subparsers(dest="items_command", required=True)
-    igen = items_sub.add_parser("generate", help="plan a set/charm generation run")
-    igen.add_argument("--kind", default="set", choices=("set", "charm"))
-    igen.add_argument("--population", default="species", choices=("species", "build"))
+    igen = items_sub.add_parser("generate", help="plan a set/charm/combination generation run")
+    igen.add_argument("--kind", default="set", choices=("set", "charm", "combination"))
+    igen.add_argument("--population", default="species", choices=("species", "build"),
+                      help="set/charm only; a combination's grid is closed, so --shape selects it")
+    igen.add_argument("--shape", default="strain", choices=("strain", "splice"),
+                      help="combination only: 36 Strains (12 aptitudes x 3 archetypes) or 66 "
+                           "Splices (C(12,2))")
     igen.add_argument("--dry-run", dest="dry_run", action="store_true",
                       help="the default and currently the only mode — assemble the plan, make no "
                            "model calls")

@@ -223,6 +223,11 @@ public static class BattleModeProfileCatalog
         // B39: the profile whose turn order `turn.speed`/`turn.haste` actually decide. An
         // Active-Time-Battle mode that ignored speed would be one in name only.
         ordersBySpeed: true);
+        // `battle-tempo` `LAND1` (2026-09-05): staged for the Phase 2 sweep by temporarily appending
+        // `with { UsesTimelineDispatch = true }` here, measured (see spec-timeline-dispatch.md §12 /
+        // battle-tempo-todo.md's own LAND1 evidence), then REVERTED — this row stays byte-identical to
+        // every other shipped profile until the owner actually lands Phase 2. To reproduce the sweep,
+        // re-add `with { UsesTimelineDispatch = true }` to this property.
 
     /// <summary>The district board (base-defense-ideal.md §5.11/§5.16). Turn-based like
     /// <c>classic-round</c>, but speed-ordered and interactive — movement precedes contact on a

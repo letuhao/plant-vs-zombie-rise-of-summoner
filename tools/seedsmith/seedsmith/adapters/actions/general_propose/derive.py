@@ -21,7 +21,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ....pipeline.llm_caller import LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.vote import VoteResult, resolve_vote
+from ...demons.anchor.vote import SetVoteResult, resolve_set_vote
 from .prompts import (
     SYSTEM_PROMPT,
     atom_families_are_allowed,
@@ -46,12 +46,11 @@ SAMPLE_COUNT = 3
 MAX_HEAL = 2
 
 #: A sample whose own self-heal was exhausted (F9: `default_for_none` returns `None` for the
-#: still-failing key) contributes NO usable `atomFamilies` pick. It must still cast a VOTE --
-#: silently dropping it from the count would let two real samples out-vote a total of two instead
-#: of three, changing what "1-1-1" and "2-1" mean. This sentinel can never collide with a real
-#: pick (canonical keys are `|`-joined atom-family ids, none of which is this literal string), so
-#: it always counts as its own, distinct, losing vote.
-_UNRESOLVED_SENTINEL = "\x00general-propose:unresolved-sample\x00"
+#: still-failing key) contributes NO usable `atomFamilies` pick, and is passed to the vote as
+#: `None`. It still counts against the majority threshold -- `resolve_set_vote`'s denominator is
+#: always `SAMPLE_COUNT`, never "samples that answered" -- preserving exactly the rule the old
+#: string sentinel enforced here, for the same stated reason: silently dropping it would let two
+#: real samples out-vote a total of two instead of three.
 
 
 def canonical_family_key(values: Sequence[str]) -> str:
@@ -162,7 +161,7 @@ class Candidate:
     brief_id: str
     outcome: str                          # "accepted" | "blocked" | "unresolved"
     entry: "dict[str, Any] | None"
-    vote: "VoteResult | None"
+    vote: "SetVoteResult | None"
     provenance: "dict[str, Any]"
 
 
@@ -176,14 +175,21 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
        `flavor`/`rationale` are prose, never voted (spec SS2) -- sample 0 is therefore this
        candidate's own single, deterministic prose source throughout, stated once here rather
        than re-decided per field.
-    2. Otherwise, majority vote over the three samples' own canonical `atomFamilies` key
-       (`resolve_vote`, reused, never reimplemented). A 1-1-1 split -- or a vote whose WINNING key
-       is the "sample never produced a usable pick" sentinel -- writes `outcome='unresolved'`,
-       `entry=None`, `vote.value is None` where applicable: **never sample 0's raw pick**
-       (binding constraint 4, asserted explicitly by this module's own tests).
-    3. On a resolved vote, the final `atomFamilies` is the VOTE's own resolved set, split back
-       into a sorted list -- never any one sample's raw draft value (mirrors
-       `validate_heal.derive._finalize_atom_families`'s identical rule for the sibling stage).
+    2. Otherwise, PER-MEMBER majority vote over the three samples' `atomFamilies` sets
+       (`resolve_set_vote`, reused from the shared anchor vote module, never reimplemented). A
+       member joins the resolved set when 2 of 3 samples chose it. Only an EMPTY result -- no
+       member reached the threshold -- writes `outcome='unresolved'`, `entry=None`,
+       `vote.value is None`: **never sample 0's raw pick** (binding constraint 4, asserted
+       explicitly by this module's own tests, and structurally impossible here since a member needs
+       two independent samples to enter).
+    3. On a resolved vote, the final `atomFamilies` is the VOTE's own resolved member set -- never
+       any one sample's raw draft value (mirrors `validate_heal.derive._finalize_atom_families`'s
+       identical rule for the sibling stage).
+
+    **Changed 2026-09-05 (SMOKE BATCH criterion 2).** This used to flatten each sample's whole set
+    into one `|`-joined string and hand those to the scalar `resolve_vote`, so `{a,b}` / `{a,c}` /
+    `{a,d}` scored 1-1-1 unresolved while `a` in fact had unanimous 3/3 support. That aggregation,
+    not the model, is what held the real unresolved rate at 40-55% across five measured attempts.
     """
     if len(drafts) != SAMPLE_COUNT:
         raise ValueError(f"finalize_candidate needs exactly {SAMPLE_COUNT} drafts, got {len(drafts)}")
@@ -195,17 +201,29 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
     if isinstance(primary, Mapping) and primary.get(BLOCKED_FIELD):
         return Candidate(brief_id=brief_id, outcome="blocked", entry=None, vote=None, provenance=prov)
 
-    keys: "list[str]" = []
+    samples: "list[list[str] | None]" = []
     for draft in drafts:
         families = draft.get("atomFamilies") if isinstance(draft, Mapping) else None
-        keys.append(canonical_family_key(families) if isinstance(families, list) and families
-                   else _UNRESOLVED_SENTINEL)
+        samples.append(sorted(set(families)) if isinstance(families, list) and families else None)
 
-    vote = resolve_vote(keys)
-    if vote.confidence == "unresolved" or vote.value == _UNRESOLVED_SENTINEL:
+    vote = resolve_set_vote(samples, sample_count=SAMPLE_COUNT)
+
+    # Observability (SMOKE BATCH, 2026-09-05): an unresolved row used to persist `draft: null` and
+    # nothing else, so the one question worth asking of it -- how much per-member agreement did the
+    # samples actually reach? -- was unanswerable from the artifact without a re-run. The raw picks
+    # are recorded on EVERY outcome, resolved or not.
+    #
+    # The TALLY is deliberately NOT persisted, though `SetVoteResult` carries it in memory for a
+    # caller that wants to report on it: a count is a number, and this program's own numeric-
+    # smuggling audit forbids any numeric value in candidate output (`NoNumericOutputTests`, which
+    # caught exactly this on the first run of it). It is reconstructible from `samplePicks` anyway,
+    # so persisting it would trade a real, deliberate contract for a derived convenience.
+    prov["samplePicks"] = samples
+
+    if vote.confidence == "unresolved":
         return Candidate(brief_id=brief_id, outcome="unresolved", entry=None, vote=vote, provenance=prov)
 
-    atom_families = sorted(vote.value.split("|")) if vote.value else []
+    atom_families = list(vote.values)
     entry = entry_for({**primary, "atomFamilies": atom_families}, candidate_id=candidate_id,
                       brief_id=brief_id, provenance=prov)
     return Candidate(brief_id=brief_id, outcome="accepted", entry=entry, vote=vote, provenance=prov)
@@ -258,7 +276,7 @@ def candidate_row(candidate: Candidate, *, pipeline_id: str = "A-P1", scope: str
         "scope": scope,
         "outcome": candidate.outcome,
         "confidence": candidate.vote.confidence if candidate.vote else None,
-        "voteMinority": candidate.vote.minority if candidate.vote else None,
+        "voteMinority": candidate.vote.minority_key if candidate.vote else None,
         "draft": candidate.entry,
         "_provenance": candidate.provenance,
     }

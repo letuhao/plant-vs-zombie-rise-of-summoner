@@ -55,12 +55,35 @@ This is scale-invariant: rescaling CoeffMilli or ReferenceScale moves both op-cl
 factor and never changes the ratio between them. Reported so a later module owns it explicitly
 rather than rediscovering it.
 
-COVERAGE: only 4 of the 20 `CoefficientTable.Authored()` channel rows (`stat.modify` / atk, defense,
-hp, maxHp) have any real generated content to fit against. The other 16 rows (arm1/arm1Max/arm2/
-arm2Max/stat.modify"" /stat.derived""/resource.delta/resource.economy/status.apply/status.clear/
-shield.grant/spawn.entity/board.action/grid.spawn/grid.clear/box.set) have zero real corpus under
-data/seed/atoms/ today and are NOT fitted here — per spec §5, this script does not fit against
-synthetic data alone, and inventing numbers for them would be a third refuted flat-number guess.
+COVERAGE — ⛔ CORRECTED 2026-09-05. An earlier pass of this script claimed the other 16 rows "have
+zero real corpus under data/seed/atoms/ today". **That was wrong**, and only true of the GENERATED
+sub-tree it happened to glob. The SHIPPED catalog (`data/seed/atoms/fx-*.json`) carries real atoms
+for status.apply (6), spawn.entity (3), shield.grant (3), and one each of board.action, grid.spawn,
+grid.clear, box.set, resource.delta, resource.economy, status.clear, stat.derived. That catalog is
+what actually ships to players, so it is real content, not the "synthetic data" §5 forbids fitting
+against.
+
+The real reason most of those rows still cannot be FITTED is sharper, structural, and permanent —
+it is a property of the kind, not a shortage of content. `CostFunction.MeanMagnitude` walks a kind's
+own declared params for the first `ParamKind.Value` one; **a kind that declares none has no
+magnitude at all and returns a fixed `1`** ("one reference unit ... so it prices as 'one of whatever
+this kind does'", its own doc comment). For those kinds every atom prices identically no matter how
+much content exists, so there is no distribution to fit and the coefficient is a pure balance-policy
+choice, not a measurement. No amount of future content changes that. Measured against the real
+registry and the real corpus, per row:
+
+  * FITTABLE, real distribution ... stat.modify atk/defense/hp/maxHp (fitted, below) and
+                                    status.apply (`duration`: 2,3,3,4,5,5 — fitted, below)
+  * single real value only ....... resource.economy (amount=25, n=1), stat.derived (amount=150, n=1)
+                                    — a normalisation of one point, not a fit; left authored
+  * NO magnitude param at all .... status.clear, shield.grant, board.action, grid.spawn, grid.clear,
+                                    box.set, resource.delta — magnitude is structurally fixed at 1;
+                                    coefficient is a policy choice, permanently unfittable
+  * priced off a DIFFERENT path .. spawn.entity — its body goes through
+                                    `ActorPowerCache.PriceBody(hp, atk)` (CostFunction.SpawnBody),
+                                    not this coefficient's normalisation, so its hp/atk magnitudes
+                                    must NOT be fitted into this row
+  * no real atom of any kind ..... arm1/arm1Max/arm2/arm2Max — genuinely awaiting content
 
 Usage (repo root):
     python scripts/sweep-power-coefficients.py             # print the fit + full report
@@ -72,6 +95,7 @@ Exit codes: 0 always (this is a research/report tool, not a gate).
 import argparse
 import glob
 import json
+import re
 import statistics
 from collections import defaultdict
 
@@ -83,6 +107,82 @@ TARGET_POINTS = 1000  # one reference unit == 1000 pts (PowerMath.One's own conv
 AUTHORED_REFERENCE_SCALE = {"atk": 2, "defense": 2, "hp": 10, "maxHp": 10}
 
 CORPUS_GLOB = "data/seed/atoms/generated/family-expand.*.json"
+
+#: The SHIPPED catalog — real content, what a player actually gets. Globbed separately from the
+#: generated tree because an earlier pass of this script only ever looked at the latter and
+#: concluded, wrongly, that every other coefficient row had "zero real corpus".
+#:
+#: Deliberately EVERY committed `*.json` at the top of `data/seed/atoms/`, not an `fx-*` pattern:
+#: a first cut of this used `fx-*.json` and silently missed `trait-critical-hunter.json` (the only
+#: real `stat.derived` atom in the repo). Naming a shape rather than a location is how a corpus
+#: sweep quietly under-reports, which is the exact failure this whole correction exists to undo.
+SHIPPED_GLOB = "data/seed/atoms/*.json"
+
+#: Registry source of truth for which param carries a kind's magnitude. Parsed from the live C#
+#: rather than hand-mirrored, the same discipline `ParamParityGuardTests` uses for the same reason:
+#: a hand-copied list silently goes stale the first time a kind gains or renames a param.
+REGISTRY_CS = "src/FusionRpg.Core/Effects/Atoms/AtomKindRegistry.cs"
+
+#: `spawn.entity`'s body is priced by `ActorPowerCache.PriceBody(hp, atk)` inside
+#: `CostFunction.SpawnBody`, NOT by this coefficient's normalisation — so its hp/atk/x/y magnitudes
+#: must never be fitted into this row. Named here rather than silently skipped.
+FIT_EXCLUDED_KINDS = {"spawn.entity"}
+
+
+def kind_value_params(root: str = ".") -> "dict[str, list[str]]":
+    """kindId -> its declared `ParamKind.Value` param names, in declaration order — which is the
+    order `CostFunction.MeanMagnitude` itself scans, so the FIRST one present on an atom is the
+    magnitude that kind actually prices on."""
+    src = open(f"{root}/{REGISTRY_CS}", encoding="utf-8").read()
+    starts = [(m.start(), m.group(1)) for m in re.finditer(r'\bnew\("([a-z][a-z.]+)",\s*AttachPoint\.', src)]
+    out: "dict[str, list[str]]" = {}
+    for i, (pos, kid) in enumerate(starts):
+        end = starts[i + 1][0] if i + 1 < len(starts) else len(src)
+        out[kid] = re.findall(r'new ParamDef\("([^"]+)",\s*ParamKind\.Value', src[pos:end])
+    return out
+
+
+def mean_magnitude(params: dict, value_params: "list[str]"):
+    """`CostFunction.MeanMagnitude`, reimplemented exactly: the first declared Value param present
+    wins; a range reads as its own mean; NO Value param at all means the kind has no magnitude and
+    C# returns a fixed 1 -- represented here as `None` so the caller can tell "structurally has no
+    magnitude" apart from "really measured 1"."""
+    for name in value_params:
+        if name in params:
+            v = params[name]
+            if isinstance(v, dict) and "min" in v and "max" in v:
+                return div_round(int(v["min"]) + int(v["max"]), 2)
+            if isinstance(v, bool):
+                continue
+            if isinstance(v, int):
+                return v
+    return None
+
+
+def load_shipped_corpus(root: str = "."):
+    """Every real shipped atom, keyed the way `CoefficientTable.Find` keys it: (kindId, channel),
+    with channel empty for the channel-less kinds."""
+    vps = kind_value_params(root)
+    rows = defaultdict(list)
+    for f in sorted(glob.glob(f"{root}/{SHIPPED_GLOB}")):
+        for e in json.load(open(f, encoding="utf-8")).get("entries", []):
+            kind = e.get("kind")
+            params = e.get("params") or {}
+            rows[(kind, params.get("channel", ""))].append({
+                "file": f, "family": e.get("family"), "tier": e.get("tier"),
+                "mag": mean_magnitude(params, vps.get(kind, [])),
+            })
+    return rows
+
+
+def fit_one(mags: "list[int]", ref_scale: int):
+    """The identical pin used for the channel fit: put the MEDIAN real atom at TARGET_POINTS."""
+    med = int(statistics.median(sorted(mags)))
+    normalized = div_round(med * ONE, max(1, ref_scale))
+    if normalized == 0:
+        return None
+    return {"median": med, "referenceScale": ref_scale, "normalizedMilliAtMedian": normalized,
+            "fittedCoeffMilli": div_round(TARGET_POINTS * ONE, normalized)}
 
 
 def div_round(n: int, d: int) -> int:
@@ -198,6 +298,36 @@ def main():
     for ch, ops in sorted(by_chan_op_t1.items()):
         print(f"  {ch}: {ops}")
 
+    # ---- the SHIPPED catalog, and why most of its rows are not fittable ------------------------
+    print()
+    print(f"== Shipped catalog ({SHIPPED_GLOB}) -- real content, per coefficient row ==")
+    print("   (an earlier pass globbed only the generated tree and wrongly reported 'zero corpus')")
+    shipped = load_shipped_corpus()
+    authored = {(e["kindId"], e.get("channel", "")): e
+                for e in json.load(open("data/seed/power/coefficients.v1.json", encoding="utf-8"))["entries"]}
+
+    shipped_fits = {}
+    for (kind, ch), rows in sorted(shipped.items()):
+        mags = [r["mag"] for r in rows if r["mag"] is not None]
+        row = authored.get((kind, ch))
+        scale = row["referenceScale"] if row else 1
+        label = f"{kind} ch={ch or '-'}"
+        if kind in FIT_EXCLUDED_KINDS:
+            print(f"  {label:42s} n={len(rows):2d}  NOT FITTED -- priced via ActorPowerCache.PriceBody, "
+                  f"not this coefficient")
+        elif not mags:
+            print(f"  {label:42s} n={len(rows):2d}  NOT FITTABLE -- kind declares no ParamKind.Value "
+                  f"param, so MeanMagnitude is a fixed 1 for every atom (policy choice, not a measurement)")
+        elif len(set(mags)) == 1:
+            print(f"  {label:42s} n={len(mags):2d}  single value {mags[0]} -- a normalisation of one "
+                  f"point, not a fit; left authored")
+        else:
+            fit_detail = fit_one(mags, scale)
+            shipped_fits[(kind, ch)] = fit_detail
+            print(f"  {label:42s} n={len(mags):2d}  FITTABLE mags={sorted(mags)} median="
+                  f"{fit_detail['median']} refScale={scale} -> fitted CoeffMilli="
+                  f"{fit_detail['fittedCoeffMilli']} (was {row['coeffMilli'] if row else 'n/a'})")
+
     if args.json:
         print()
         print("== coefficients.v1.json entries (fitted rows only) ==")
@@ -206,6 +336,11 @@ def main():
             entries.append({
                 "kindId": "stat.modify", "channel": ch,
                 "coeffMilli": fitted[ch], "referenceScale": AUTHORED_REFERENCE_SCALE[ch],
+            })
+        for (kind, ch), d in sorted(shipped_fits.items()):
+            entries.append({
+                "kindId": kind, "channel": ch,
+                "coeffMilli": d["fittedCoeffMilli"], "referenceScale": d["referenceScale"],
             })
         print(json.dumps(entries, indent=2))
 

@@ -59,11 +59,16 @@ UNBOUNDED_MILLI = re.compile(r"(stock|total|sum|balance|treasury|banked|accrued|
 # "unit" and "peractor" added by the P0.3 triage: ElementTable.ShieldUnit returns an elemental
 # matchup tier (-1/0/1/2), not a shield amount; ShieldPolicy.MaxShieldsPerActor is a slot count.
 # Both end in a word this list already exists to catch, so no new mechanism, just two more entries.
+#
+# "percontainer" added by item module 19 (granted-actions), the same shape as "peractor":
+# ItemGrantLimits.MaxDefaultAttacksPerContainer is a ROW COUNT (how many `default-attack` rows one
+# base type may declare), matched only because "DefaultAttacks" contains "attack". Nothing multiplies
+# it and nothing scales it with Theta.
 NOT_MAGNITUDE = re.compile(
     r"(id|ids|index|idx|count|len|length|size|version|revision|seed|hash|ms|millis|sec|seconds|"
     r"time|deltatime|unscaleddeltatime|tick|ticks|frame|fps|row|col|column|lane|slot|port|"
     r"priority|ordinal|rank|tier|band|level|x|y|z|width|height|capacity|cap|max|min|limit|"
-    r"unit|units|peractor)$", re.I)
+    r"unit|units|peractor|percontainer)$", re.I)
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}
 SKIP_FILE = re.compile(r"\.Generated\.cs$|\.designer\.cs$", re.I)

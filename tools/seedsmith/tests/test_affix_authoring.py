@@ -263,3 +263,54 @@ def test_zero_bare_http_calls_outside_llm_caller():
                     else [node.module or ""] if isinstance(node, ast.ImportFrom) else [])
             hit = [m for m in mods if m.split(".")[0] in forbidden]
             assert not hit, f"{path.name} imports {hit} directly — route through llm_caller instead"
+
+
+# ---------------------------------------------------------------------------------------------
+# Slot eligibility -- DERIVED from the real catalog, never authored (ep-9's remaining P1-table
+# row). Added 2026-09-05. Correctly INERT today; these tests are what make it light up on its own.
+# ---------------------------------------------------------------------------------------------
+
+def test_element_domain_is_read_from_the_real_committed_roster():
+    from seedsmith.adapters.effects.affix.generate_affixes import load_element_domain
+    assert load_element_domain() == {"fire", "ice", "air", "earth", "light", "dark"}
+
+
+def test_slot_eligible_families_are_derived_from_the_real_variant_axis():
+    # A family is slot-shaped when the shipped catalog gives it more than one variant -- the same
+    # (family, tier, variant) key the importer already derives ids from. Not a hand-listed set.
+    from seedsmith.adapters.effects.affix.generate_affixes import load_slot_eligible_families
+    reg = load_slot_eligible_families()
+    assert set(reg) == {"atom.fx-grid-item-cycle", "atom.fx-shield-grant",
+                        "atom.fx-spawn-plant-bullet"}
+    assert reg["atom.fx-shield-grant"]["variants"] == ["a", "b", "c"]
+
+
+def test_a_single_variant_family_is_not_slot_eligible():
+    from seedsmith.adapters.effects.affix.generate_affixes import load_slot_eligible_families
+    reg = load_slot_eligible_families()
+    # one variant is not an axis to vary over
+    assert all(len(r["variants"]) >= 2 for r in reg.values())
+
+
+def test_no_slot_family_is_GROUNDABLE_today_and_that_is_the_correct_answer():
+    """⛔ THE INERTNESS TEST. Every slot-shaped family today varies over opaque discriminators
+    (`a`/`b`/`c`), not a named domain, so there is nothing real for a model to pick a domain FROM.
+    Asking it anyway would be inventing a vocabulary -- the exact `plausible-looking guess` P1
+    forbids. **This test is expected to GO RED the day a family ships element-id variants** -- that
+    is when the slot field becomes genuinely authorable and ep-9's last P1-table row can be built.
+    """
+    from seedsmith.adapters.effects.affix.generate_affixes import (
+        groundable_slot_families, load_slot_eligible_families)
+    reg = load_slot_eligible_families()
+    assert groundable_slot_families(reg) == {}, (
+        "a slot family now resolves to a real domain -- the slot field is groundable, build it "
+        "(spec-affix-authoring.md P1 row 2)")
+
+
+def test_a_family_varying_over_real_element_ids_would_be_groundable():
+    """The positive twin of the inertness test -- proves the mechanism actually fires rather than
+    being vacuously empty, using a planted family whose variants ARE real element ids."""
+    from seedsmith.adapters.effects.affix.generate_affixes import groundable_slot_families
+    planted = {"atom.elemental-power": {"variants": ["fire", "ice"], "domain": "element"},
+               "atom.fx-shield-grant": {"variants": ["a", "b"], "domain": None}}
+    assert set(groundable_slot_families(planted)) == {"atom.elemental-power"}

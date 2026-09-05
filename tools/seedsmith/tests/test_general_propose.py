@@ -62,7 +62,7 @@ from seedsmith.adapters.actions.general_propose.derive import (  # noqa: E402
 )
 from seedsmith.adapters.actions import generate_general_actions as gen_mod  # noqa: E402
 from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import VoteResult  # noqa: E402
+from seedsmith.adapters.demons.anchor.vote import SetVoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
@@ -537,6 +537,10 @@ class VoteResolutionTests(unittest.TestCase):
         self.assertEqual(cand.entry["atomFamilies"], ["atom.a", "atom.b"])
 
     def test_2_1_split_records_the_minority_and_still_accepts(self):
+        # Under per-member voting the minority is the MEMBER that fell below the threshold
+        # (`atom.c`, chosen by one sample), not the whole losing SET. The old whole-set answer
+        # here was `"atom.a|atom.c"` -- which named `atom.a` as minority even though all three
+        # samples chose it, a genuinely misleading record this change fixes.
         brief = make_brief()
         drafts = [make_draft(atomFamilies=["atom.a", "atom.b"]),
                  make_draft(atomFamilies=["atom.a", "atom.b"]),
@@ -544,7 +548,8 @@ class VoteResolutionTests(unittest.TestCase):
         cand = finalize_candidate(brief, drafts, candidate_id="candidate.general.000")
         self.assertEqual(cand.outcome, "accepted")
         self.assertEqual(cand.vote.confidence, "split")
-        self.assertEqual(cand.vote.minority, "atom.a|atom.c")
+        self.assertEqual(cand.vote.minority, ("atom.c",))
+        self.assertEqual(cand.entry["atomFamilies"], ["atom.a", "atom.b"])
 
     def test_1_1_1_split_is_unresolved_value_is_none_never_sample_zero(self):
         brief = make_brief()
@@ -556,6 +561,56 @@ class VoteResolutionTests(unittest.TestCase):
         self.assertIsNone(cand.entry)
         self.assertIsNone(cand.vote.value)
         self.assertEqual(cand.vote.confidence, "unresolved")
+
+    def test_THE_FIX_partial_overlap_resolves_on_the_unanimous_member_instead_of_unresolved(self):
+        # The exact case the old whole-set aggregation got wrong, and the reason the real batches
+        # sat at 40-55% unresolved: every sample chose `atom.a`, and they differed only on their
+        # second pick. Flattened to `"a|b"` / `"a|c"` / `"a|d"` that scored 1-1-1 -> unresolved,
+        # discarding a unanimous 3/3 signal. Per-member voting keeps it.
+        brief = make_brief()
+        drafts = [make_draft(atomFamilies=["atom.a", "atom.b"]),
+                 make_draft(atomFamilies=["atom.a", "atom.c"]),
+                 make_draft(atomFamilies=["atom.a", "atom.d"])]
+        cand = finalize_candidate(brief, drafts, candidate_id="candidate.general.000")
+        self.assertEqual(cand.outcome, "accepted")
+        self.assertEqual(cand.entry["atomFamilies"], ["atom.a"])
+        self.assertEqual(cand.vote.confidence, "split")
+        self.assertEqual(cand.vote.minority, ("atom.b", "atom.c", "atom.d"))
+
+    def test_a_member_chosen_by_only_one_sample_never_enters_the_resolved_set(self):
+        # The binding "never sample 0's raw pick" rule, restated per-member: two independent
+        # samples are required, so a lone pick can never ride along on another member's majority.
+        brief = make_brief()
+        drafts = [make_draft(atomFamilies=["atom.a", "atom.solo"]),
+                 make_draft(atomFamilies=["atom.a", "atom.b"]),
+                 make_draft(atomFamilies=["atom.a", "atom.b"])]
+        cand = finalize_candidate(brief, drafts, candidate_id="candidate.general.000")
+        self.assertEqual(cand.entry["atomFamilies"], ["atom.a", "atom.b"])
+        self.assertNotIn("atom.solo", cand.entry["atomFamilies"])
+
+    def test_fully_disjoint_picks_are_still_unresolved(self):
+        # The negative control: per-member voting must NOT rescue a genuine three-way
+        # disagreement. No member reaches two samples, so the resolved set is empty.
+        brief = make_brief()
+        drafts = [make_draft(atomFamilies=["atom.a", "atom.b"]),
+                 make_draft(atomFamilies=["atom.c", "atom.d"]),
+                 make_draft(atomFamilies=["atom.e", "atom.f"])]
+        cand = finalize_candidate(brief, drafts, candidate_id="candidate.general.000")
+        self.assertEqual(cand.outcome, "unresolved")
+        self.assertIsNone(cand.entry)
+        self.assertIsNone(cand.vote.value)
+
+    def test_sample_picks_are_recorded_for_every_outcome_including_unresolved(self):
+        # The observability gap this fix also closes: an unresolved row used to persist
+        # `draft: null` and nothing else, so nobody could see how close the samples actually were.
+        brief = make_brief()
+        drafts = [make_draft(atomFamilies=["atom.a"]),
+                 make_draft(atomFamilies=["atom.b"]),
+                 make_draft(atomFamilies=["atom.c"])]
+        cand = finalize_candidate(brief, drafts, candidate_id="candidate.general.000")
+        self.assertEqual(cand.outcome, "unresolved")
+        self.assertEqual(cand.provenance["samplePicks"],
+                         [["atom.a"], ["atom.b"], ["atom.c"]])
 
     def test_atom_family_order_within_a_pick_does_not_create_a_false_split(self):
         brief = make_brief()
@@ -705,7 +760,8 @@ class DryRunEntrypointTests(unittest.TestCase):
                 brief_id=brief["briefId"], outcome="accepted",
                 entry=entry_for(make_draft(), candidate_id=candidate_id, brief_id=brief["briefId"],
                                provenance=provenance),
-                vote=VoteResult(value="atom.a|atom.b", confidence="high", minority=None),
+                vote=SetVoteResult(values=("atom.a", "atom.b"), confidence="high",
+                                   minority=(), tally={"atom.a": 3, "atom.b": 3}),
                 provenance=dict(provenance or {}),
             )
 

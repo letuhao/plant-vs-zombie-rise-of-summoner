@@ -3,10 +3,11 @@
 **Status:** idea phase, 2026-09-04. **Not a spec. No build authorized.**
 
 **What it serves:** [base-defense-ideal.md](base-defense-ideal.md) needs a structure corpus —
-§5.21 estimates **24–40 types** against the **4** that exist. This document is how that corpus gets
+§5.21 estimates **24–40 types** against the ~~**4**~~ **7** that exist (recounted 2026-09-05, see §2.3). This document is how that corpus gets
 authored, and it is written against the worked example rather than from scratch:
-[demon-seed-map.md](demon-seed-map.md) and the **408** shipped species anchors under
-`data/seed/demons/species/`.
+[demon-seed-map.md](demon-seed-map.md) and the ~~**408**~~ **502** shipped species anchors under
+`data/seed/demons/species/` (recounted 2026-09-05 — 415 plant + 87 zombie anchor files; `_index.json`
+maps 840 game species ids onto them, many-to-one).
 
 ---
 
@@ -45,7 +46,7 @@ A downstream session reads this document, not its links.
 
 | Thing | Evidence |
 |---|---|
-| **A complete seed → anchor pipeline at scale** | **408** species files under `data/seed/demons/species/plant/` plus zombie, with `_index.json` keyed by species id |
+| **A complete seed → anchor pipeline at scale** | ~~**408**~~ **502** species files under `data/seed/demons/species/plant/` plus zombie (**corrected 2026-09-05:** 415 plant + 87 zombie anchors on disk, `zombie/_needs-review.json` excluded; the 408 was the count at the 2026-09-04 write-up), with `_index.json` keyed by species id (840 entries — several game species share one anchor) |
 | **The anchor shape, and it is enums-only** | `aerial-flora.json`: `aptitudePrimary: "Bulwark"`, `attackTempo: "steady"`, `threatBand: "nuisance"`, `reach: "short"`, `rarity: "fused"`, `deployMode: "PlantAvatar"`. **Not one magnitude.** The only number is `gameTypeId: 1204`, an identity key |
 | **Provenance that makes idempotency checkable** | `_provenance` carries per-field `attempts`, per-field `confidence`, `dumpHash`, `emittedUtc`, `minorityValues`, `promptVersions`, `auditVerdict`, `basis` |
 | **`_derived` declares ownership in-file** | `"_derived": ["basis", "posture", "pure"]` — the anchor states which of its own fields it did not author |
@@ -70,8 +71,13 @@ static readonly IReadOnlyList<StructureDef> Seed = new StructureDef[]
     new() { StructureId = "loam-source-placeholder", ... }
 ```
 
-The variable is *called* `Seed` and is a hardcoded array of **four** rows. Compare 408 JSON anchors for
-demons. And `data/seed/` holds **sixteen** domains — actions, aptitudes, atoms, channel-policy,
+The variable is *called* `Seed` and is a hardcoded array of ~~**four**~~ **seven** rows. Compare ~~408~~ 502 JSON anchors for
+demons. **Corrected 2026-09-05 (party-dungeon audit §6, verified against `StructureCatalog.cs`):** the
+array holds seven `StructureId =` rows — `loam-source-placeholder`, `well`, `waystation`, `granary`,
+`soul-conduit`, `extractor`, `hatchery` (`StructureCatalog.cs:86-152`) — and `StructureKind` has three values,
+`LoamSource`, `Storage`, `Yield` (`:7-22`; `Yield` landed with world-map W56). The four/two counts below and in §7
+were true when this was written on 2026-09-04 and are left as the reasoning trail; the conclusion — a hardcoded
+array, no seed corpus, no generator — is unchanged by the recount. And `data/seed/` holds **sixteen** domains — actions, aptitudes, atoms, channel-policy,
 channel-pools, containers, curves, demons, derived-stats, elements, external-reference, items, loot,
 rarity, resources, zomboss — **and none is structures**.
 
@@ -84,7 +90,7 @@ reviewable."*
 | Other real gaps | Note |
 |---|---|
 | No structure seed corpus | — |
-| `StructureKind` has 2 values | `LoamSource`, `Storage`. §5.21 of the base-defense ideal names ten roles |
+| `StructureKind` has ~~2~~ 3 values | `LoamSource`, `Storage`, and — corrected 2026-09-05 — `Yield` (`StructureCatalog.cs:21`). §5.21 of the base-defense ideal names ten roles |
 | No structure generator of any kind | — |
 
 ---

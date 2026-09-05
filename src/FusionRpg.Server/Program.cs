@@ -95,6 +95,11 @@ FusionRpg.Core.Demons.Generation.SpeciesBuildPlanCatalog.Configure(
     FusionRpg.Core.Demons.Generation.SpeciesBuildPlanReader.Parse(
         File.ReadAllText(Path.Combine(
             Directory.GetParent(tuningDir)!.FullName, "generated", "demons", "_species-build-plan.json"))));
+// species-build T4.4: ⛔ server-only — the Zomboss exists on battle and expedition surfaces, never the
+// lawn, so wiring this into the injector would be dead weight.
+FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Configure(
+    FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "zomboss-adaptive.v1.json"))));
 FusionRpg.Core.Battle.BattleTuningHub.Configure(
     FusionRpg.Core.Battle.BattleTuningLoader.Parse(
         // v2 -> v3 (battle-tempo tempo-content, 2026-09-05): adds speciesTempo.referenceIntervalMs.
@@ -142,6 +147,12 @@ FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
 FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
     FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "action-timing.v1.json"))));
+// battle-tempo reaction-lane RL2 (2026-09-05): the counter's poise spend and riposte share --
+// UNMEASURED placeholders (RL3 sizes them against the Phase 2 sweep), loaded regardless so
+// ReactionCounter.TryCounter has a real, non-hardcoded number wherever a caller reaches it.
+FusionRpg.Core.Battle.Timeline.ReactionLanePolicy.Configure(
+    FusionRpg.Core.Battle.Timeline.ReactionLaneTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "reaction-lane.v1.json"))));
 // item-ideal.md, rarity-bands (module 7): no Hub needed today -- SeedRarityLadder consumes this
 // parse once, at boot, to populate rarity_budget rows. A future consumer (drop-volume/enhance-reroll)
 // reads those rows back through RpgStore.GetRarityBudget, not this parsed value directly.
@@ -187,6 +198,14 @@ var enhancementTuning = FusionRpg.Core.Items.Mutation.EnhancementTuning.Parse(
 // ever hold. Consumed by SeedSocketGrants and SeedComboRecipes below.
 var socketTuning = FusionRpg.Core.Items.Sockets.SocketTuning.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "sockets.v1.json")));
+// item-ideal.md, strain-splice-gen (module 21): the min-tier plan D20's four ingredients are priced
+// on, the per-shape base tier, the learnability bar and the two name-distinctness thresholds.
+// CROSS-VALIDATED against socketTuning at parse time — a min-tier plan whose length disagrees with
+// the ingredient count, or a tier outside the shipped insert ladder, fails here rather than
+// producing 102 combinations the evaluator can never match. ⛔ It deliberately re-declares NONE of
+// module 16's socket numbers; the seedsmith parser refuses a file that does.
+var strainSpliceTuning = FusionRpg.Core.Items.Sockets.StrainSpliceTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "strain-splice.v1.json")), socketTuning);
 // item-ideal.md, uniques (module 17): the rung floor, the identity spread, the shared 1.5 AE premium,
 // `narrow`'s ceiling, the role quota and the parity band. Parsed at boot for the same reason as the
 // six above — the parser refuses an inverted parity band, a forbiddenRoles entry naming a role that
@@ -194,6 +213,35 @@ var socketTuning = FusionRpg.Core.Items.Sockets.SocketTuning.Parse(
 // so a bad edit fails here rather than at the first imported unique. Consumed by SeedUniqueEligible.
 var uniqueTuning = FusionRpg.Core.Items.Uniques.UniqueTuning.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "uniques.v1.json")));
+// item-ideal.md, consumables (module 18): which of the six classes and four use contexts v1 authors,
+// `bands.v1.json`'s mirrored grade map, §4.4's authoring ceiling and the run-start binding priority.
+// Parsed and validated at boot for the same reason as the seven above — the parser refuses a
+// gradeTierMap that is not a bijection onto 1..5, an empty authored list, and (BY NAME) a withdrawn
+// `carryLimit` key, so a balance edit that would silently do nothing fails here rather than at the
+// first dispatch. ⛔ Nothing seeds a rarity_budget key from it: consumables never enter the ladder.
+var consumableTuning = FusionRpg.Core.Items.Consumables.ConsumableTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "consumables.v1.json")));
+_ = consumableTuning;
+// item-ideal.md, item-surfaces (module 20): the GG-50 render bands, the compendium's four-state
+// boundary and name-only tail cap, the loot filter's default and its two per-content-event watch
+// numbers, and each surface's GG-44 unlock key. Parsed at boot for the same reason as the eight
+// above — the parser refuses an unordered render band, a zero one-away distance (which would name
+// the active set) and, by name, a surfaceUnlocks table that has forgotten one of the six surfaces,
+// because a surface with no declared unlock renders as present-but-dead. ⛔ Nothing here meters the
+// player: every number is a presentation threshold and D26 keeps it that way.
+var itemSurfaceTuning = FusionRpg.Core.Items.Surfaces.ItemSurfaceTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "item-surfaces.v1.json")));
+// item-ideal.md, charm-carry (module 22, split out of 12 by D40): the AP cost domain, the capacity
+// LADDER (its last rung is the last AUTHORED rung, never a ceiling — AGENTS.md), the axis and copy
+// caps, and the run-start binding shape. Parsed at boot for the same reason as the nine above — the
+// parser refuses a starting capacity below the largest charm (which would make every signet dead
+// content), a `unique_carry` cap looser than the default, a non-negative binding priority, and BY
+// NAME both a `maxCapacityAp`-shaped ceiling key and a `player`/`match` binding owner kind, because
+// D33(a) binds charms at unique-actor: scope and `player:` resolves match-wide in the stat layer —
+// a charm that buffs the zombies. A bad edit fails here rather than at the first dispatch.
+var charmAttunementTuning = FusionRpg.Core.Items.Thresholds.CharmAttunementTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "charm-attunement.v1.json")));
+_ = charmAttunementTuning;
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -248,10 +296,44 @@ store.SeedSocketGrants(socketTuning);
 // than authored as a second per-rung table, and seeded here under the same placement rule as the three
 // above — a later module's tuning never reaches module 7's own seeding.
 store.SeedUniqueEligible(uniqueTuning);
-// The 25 resonance combinations, GENERATED from the element roster rather than authored
-// (ssot-sockets.md §4.4). Module 21's 102 Strains and Splices land in the same table beside them;
-// this seed never deletes a row it did not write.
-store.SeedComboRecipes(FusionRpg.Core.Items.Sockets.ResonanceGenerator.Generate(socketTuning));
+{
+    var comboRecipes = FusionRpg.Core.Items.Sockets.ResonanceGenerator.Generate(socketTuning);
+    // item-ideal.md, strain-splice-gen (module 21): every Strain/Splice recipe on the seed path is
+    // checked against the DERIVED 102-cell grid before it is written — the id is a real grid cell,
+    // it takes D20's four ingredients, its `min_sockets` is the derived value and its host role can
+    // actually hold that many inserts. ⛔ Live, not dead code: today's 25 generated resonances are
+    // neither Strain nor Splice so it refuses nothing, and it starts refusing the moment the
+    // authored 102 land beside them — which is the point of putting the guard in before the content.
+    // The archetype axis is READ from module 13's registry, never declared in Core (§7.2).
+    var archetypes = new List<string>();
+    var buildThemesPath = Path.Combine(
+        AppContext.BaseDirectory, "data", "seed", "items", "_registry", "build-themes.v1.json");
+    if (File.Exists(buildThemesPath))
+    {
+        using var themesDoc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(buildThemesPath));
+        foreach (var theme in themesDoc.RootElement.GetProperty("themes").EnumerateArray())
+            if (theme.TryGetProperty("archetype", out var arch) &&
+                arch.GetString() is { Length: > 0 } value && !archetypes.Contains(value))
+                archetypes.Add(value);
+    }
+    if (archetypes.Count > 0)
+    {
+        var refused = 0;
+        foreach (var recipe in comboRecipes)
+            foreach (var problem in FusionRpg.Core.Items.Sockets.StrainSpliceGrid.ValidateRecipe(
+                         recipe, socketTuning, archetypes, strainSpliceTuning))
+            {
+                Console.WriteLine($"[items] combo recipe refused: {problem.Detail}");
+                refused++;
+            }
+        if (refused > 0)
+            Console.WriteLine($"[items] {refused} Strain/Splice refusals — see strainsplice.* above");
+    }
+    // The 25 resonance combinations, GENERATED from the element roster rather than authored
+    // (ssot-sockets.md §4.4). Module 21's 102 Strains and Splices land in the same table beside them;
+    // this seed never deletes a row it did not write.
+    store.SeedComboRecipes(comboRecipes);
+}
 
 // item-ideal.md, salvage-craft (module 14): the authored recipe corpus
 // (data/seed/items/recipes/*.json) resolved against the reference cost table. Never fatal, same rule
@@ -341,6 +423,49 @@ store.SeedComboRecipes(FusionRpg.Core.Items.Sockets.ResonanceGenerator.Generate(
     }
 }
 
+// item-ideal.md, charm-carry (module 22): the authored charm catalog (data/seed/items/charms/*.json)
+// into ssot-charms.md §4.2's charm_def and charm_resonance. Never fatal, same rule as the two corpus
+// imports above. `resonance.json` is a SEPARATE population and is deliberately imported only into
+// charm_resonance — §4.2: "a `charm.` container with no charm_def row is not attunable", which is how
+// a resonance tier can be granted BY the pouch and never sit in it. ⛔ The containers these ids name
+// still cannot be bound: ContainerKind ships six values and D27's `charm` is not one of them (X7,
+// effect-atom's own ask), so this populates the def and breakpoint tables the gate and the evaluator
+// read, and stops there. A wiring gap, named, not a silent drop.
+{
+    var charmsDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "charms");
+    if (Directory.Exists(charmsDir))
+    {
+        try
+        {
+            var defs = new List<FusionRpg.Core.Items.Thresholds.CharmDef>();
+            var resonance = new List<FusionRpg.Core.Items.Thresholds.CharmResonanceRow>();
+
+            foreach (var f in Directory.EnumerateFiles(charmsDir, "*.json").OrderBy(f => f, StringComparer.Ordinal))
+            {
+                var json = File.ReadAllText(f);
+                if (Path.GetFileNameWithoutExtension(f).Equals("resonance", StringComparison.OrdinalIgnoreCase))
+                    resonance.AddRange(FusionRpg.Core.Items.Thresholds.CharmResonance.DeriveTable(json));
+                else
+                    defs.AddRange(FusionRpg.Core.Items.Thresholds.CharmCorpus.Parse(json));
+            }
+
+            foreach (var d in defs)
+            {
+                var fails = FusionRpg.Core.Items.Thresholds.CharmPouchGate.ValidateForCarry(d, charmAttunementTuning);
+                foreach (var fail in fails) Console.WriteLine($"[charms] {fail}");
+            }
+
+            store.ImportCharmCorpus(defs, resonance);
+            Console.WriteLine($"[charms] imported {defs.Count} attunable charms, "
+                              + $"{resonance.Count} resonance breakpoints");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[charms] charm corpus import failed — no charms loaded: {ex.Message}");
+        }
+    }
+}
+
 // E46 (player-content-boot): AtomImporter was only ever invoked from a dev script
 // (scripts/deploy-play.ps1), never from a player's own install — so a real player's content tables
 // were never populated and the server ran forever on the shipped code fallback with nothing saying
@@ -408,10 +533,15 @@ app.MapContracts();
 app.MapWorld();
 app.MapWorldWarden();
 app.MapAptitudes();
+app.MapSpeciesBuild();
 app.MapLoadout();
 app.MapAuraDerived();
 app.MapAuraRuntime();
 app.MapAuraCatalog();
+// item module 20 (`item-surfaces`) — READ-ONLY. No MapPost lives in that file: equipping, socketing
+// and salvaging already have owners (modules 4, 16, 14), and a second write path through the
+// presentation layer is the "second surface" this module exists to prevent.
+app.MapItemSurfaces(itemSurfaceTuning, socketTuning);
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

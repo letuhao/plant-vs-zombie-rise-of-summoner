@@ -40,8 +40,13 @@ Both sides move. Buildings are a new actor kind with no ownership; possession is
 
 1. **In-place work** in the existing solution. No new assembly.
 2. **`structure-seed` may land after this program starts.** Every structure input is defaulted (§5.10).
-3. **The `siege` stage is gated on a `decisions.md` amendment** (audit §11.5) — proposed on the Game
-   GUI row, **not yet approved**. Only `siege-stage` is blocked by it; everything else proceeds.
+3. ✅ **The `siege` stage's `decisions.md` amendment (audit §11.5, Game GUI row) was already APPROVED
+   2026-09-04** — this assumption was stale the day this map was written (2026-09-05): `decisions.md`'s
+   own "Game GUI (2026-08-22)" row already states *"✅ Amended 2026-09-04 — a FIFTH stage, `siege`
+   (`#/siege/{id}`), APPROVED by the owner."* Corrected here 2026-09-05 while resolving base-defense's
+   other stale gates, per `decisions.md`'s own status-header-wins rule. `siege-stage` was never actually
+   blocked by anything live — only by this document not having been re-read against its own source of
+   truth.
 4. **Force-size numbers stay tunable and unset** (decision 29). Modules must not bake a field cap.
 5. **Golden discipline:** phases 0–2 are golden-free by construction; phase 3 is **one batched landing**
    sharing a triage pass with whoever else moves `RulesetVersion`.
@@ -100,7 +105,7 @@ levels 4–6 build on it.
 | `siege-ai` | **R1–R6**: aggro tier separate from target choice, additive score with a risk term, objective fallback, frozen acting order, deterministic and readable. One `IIntentSource` **dispatching on `SideOf`** — a wrapper, no signature change | `siege-positions`, `siege-cover` |
 | `siege-resolver` | `IBattleResolver` implementation, supplied at **BOTH `RpgStore.WorldTurns.cs:509` AND `:603`** — wiring only `:509` makes every re-derived turn report disagree with what happened | `siege-ai`, `siege-seam` |
 | `board-render` | The **generic board layer** the FE lacks: `GridSpec` passed not imported, a generic entity registry, a caller-supplied kind→visual mapping, `createGame({scenes})`, cell picking, and the **camera bridge** between the pure `Camera` model and a Phaser camera | `siege-board` |
-| `siege-stage` | The `siege` stage, its route, and the six conditional shell files. Plus §7 cost 5's `*Dto` guard. **Pause = a persisted DECISION LOG replayed on resume** (decision 46), never a session in memory — so §2 rule 7 holds unconditionally and a pause survives a server restart. ⚠️ **Prerequisite: a `decisions_json` writer**, which `spec-interactive-turns.md` (T10) owns and which does not exist today | `board-render`, `siege-resolver` |
+| `siege-stage` | The `siege` stage, its route, and the six conditional shell files. Plus §7 cost 5's `*Dto` guard. **Pause = a persisted DECISION LOG replayed on resume** (decision 46), never a session in memory — so §2 rule 7 holds unconditionally and a pause survives a server restart. Uses a `decisions_json` writer owned by `spec-interactive-turns.md` (T10), which does not exist today — **non-blocking** (owner ruling 2026-09-05): raised with that program as a follow-up, not a prerequisite on this module | `board-render`, `siege-resolver` |
 | `siege-objective` | **The win condition** (decision 1) · legion slots and max members (4) · **the field cap** (5) — authored, symmetric, never derived from empty cells · the Core as a pure arena (10) · `DefenderBonusMilli` shrinking so the defender is not paid twice | `combatant-kind`, `district-layout` |
 | `siege-obstacles` | §5.18's **Trench · Rampart · Wire · Mine · Emplacement** — five rows, five distinct decisions. Wire taxes **stamina**; Mine is **revealed** (F9) and fires on the cell-entry transition `siege-cover` already introduces | `structure-state`, `siege-cover`, `siege-construction` |
 | `siege-engagement` | Decision **24** — `Spent` as a normal outcome, what persists between engagements (world state) and what must not (board state), `IsUnderSiege` **derived not stored**, no engagement cap | `siege-resolver`, `siege-objective` |
@@ -267,15 +272,14 @@ inside `FusionRpg.Data`.
 | `structure-seed`'s two questions, *"which belong to that program"* | ✅ **Closed** by decisions **43** and **45** — and it is no longer a separate program |
 | The four force-size tunables, deliberately unset (decision 29) | **Answered, with "unset"** — a balance-pass input, not a design gate |
 
-**Two things are owed, neither a design decision:**
+**Two things were tracked here, neither a design decision, and both resolved 2026-09-05:**
 
-1. ⚠️ **A `decisions_json` writer** (decision 46). The column is built and read; **no writer exists**
-   anywhere in `src/`. It belongs to `spec-interactive-turns.md` (T10), not here — but a paused siege
+1. **A `decisions_json` writer** (decision 46). The column is built and read; **no writer exists**
+   anywhere in `src/`. It belongs to `spec-interactive-turns.md` (T10), not here — a paused siege
    cannot resume without it, and per `DecisionTrace`'s own comment the boot sweep may **overwrite a
-   played result with an AI re-resolve** in the meantime. **That risk is live today for every played
-   battle, independent of this program.**
-2. A coordination check: `structure-state` is the one
-golden-locked landing, and this map says it should *"share a triage pass with whoever else moves
-`RulesetVersion`."* Ten other task files mention `RulesetVersion`; **whether any of them has a move
-queued is not answerable from this repo**, and it is cheap to ask before level 3 rather than at
-landing time.
+   played result with an AI re-resolve** in the meantime, a risk that is live today for every played
+   battle, independent of this program. **Owner ruling 2026-09-05: non-blocking for base-defense** —
+   raised as a cross-program follow-up rather than a prerequisite gate on any task here, including
+   `siege-stage`'s pause/resume task (21.5), which no longer waits on it.
+2. ✅ **The `RulesetVersion` coordination check — CLEARED by the owner 2026-09-05.** No other in-flight
+   program has a `RulesetVersion` move queued; `structure-state`'s golden-locked landing may proceed.

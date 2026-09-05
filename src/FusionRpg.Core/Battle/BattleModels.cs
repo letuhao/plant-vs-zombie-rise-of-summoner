@@ -87,6 +87,52 @@ public sealed record BattleActorSetup
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public IReadOnlyList<string>? EquippedActionIds { get; init; }
+
+    /// <summary>
+    /// base-defense `combatant-kind` (owner decision 4): what sort of thing this actor is. Structures
+    /// and obstacles are a new actor kind — no level, no equipment, no aura — but traits, actions, and
+    /// hit points.
+    ///
+    /// <para><b>Plain <see cref="JsonIgnoreAttribute"/>, matching <see cref="Index"/> and
+    /// <see cref="SpecimenId"/> exactly.</b> Both of those carry one because expedition tier resolution
+    /// serializes this record into a golden hash and any newly-serialized member moves it — found the
+    /// hard way, twice, and recorded in their own comments above. <c>WhenWritingDefault</c> was
+    /// considered and rejected: it would move that hash at the first siege instead of never, which is
+    /// the same defect with a delay long enough that the responsible module is no longer suspected.</para>
+    ///
+    /// <para>Safe to ignore because the kind is construction-time: a setup is built fresh from world
+    /// state on every resolve, so it is never read back out of JSON.</para>
+    /// </summary>
+    [JsonIgnore]
+    public CombatantKind Kind { get; init; } = CombatantKind.Animate;
+
+    /// <summary>
+    /// The animate actor's <see cref="Key"/> currently occupying this structure, or null. A garrisoned
+    /// structure lends its actions to its occupant (<see cref="BattleEngine"/>'s
+    /// <c>BattleRunState.HeldActionsOf</c>); it never acts on its own initiative, so
+    /// <see cref="CombatantKind.Structure"/> stays a complete statement of "does not take turns."
+    /// <see cref="JsonIgnoreAttribute"/> for the same reason as <see cref="Kind"/> — construction-time,
+    /// never read back, and always null outside a siege so ignoring it costs nothing today and avoids
+    /// the identical delayed-golden-move risk at the first garrisoned siege.
+    /// </summary>
+    [JsonIgnore]
+    public string? GarrisonedBy { get; init; }
+}
+
+/// <summary>
+/// base-defense `combatant-kind`: does this actor take a turn. Two values, not a richer taxonomy —
+/// obstacle vs. building vs. emplacement is content identity and belongs to `structure-seed`; the
+/// kernel needs exactly one bit.
+/// </summary>
+public enum CombatantKind
+{
+    /// <summary>A demon, a legion member, anything that takes turns. Index 0, so the default is
+    /// today's behaviour for every existing caller.</summary>
+    Animate,
+
+    /// <summary>A wall, a tower, a barricade. Occupies a cell, can be attacked, never acts on its own
+    /// initiative. May still act when garrisoned — see <see cref="BattleActorSetup.GarrisonedBy"/>.</summary>
+    Structure
 }
 
 /// <summary>
@@ -211,6 +257,60 @@ public sealed record BattleSetup
     /// delivery only, never the magnitude math (T10's own job, already proven independently) — keeping
     /// the two concerns composable rather than re-deriving Θ/tuning inside the battle resolver.</summary>
     public IReadOnlyList<ActiveCommanderAura> ActiveAuras { get; init; } = Array.Empty<ActiveCommanderAura>();
+
+    /// <summary>species-build-todo.md T4.5, spec-zomboss-adaptive.md's own determinism rule: the
+    /// pattern is part of the SETUP, resolved before the battle runs — never rolled during resolution,
+    /// or a battle would stop being reproducible from its own `(setup, seed)`. Null for every existing
+    /// caller and every non-Zomboss battle (no behavior change) — the wave-building seam
+    /// (`WebMatchService.cs`, T4.6) is the only writer.
+    ///
+    /// <para><see cref="JsonIgnoreAttribute"/> is load-bearing here, not decoration — the exact same
+    /// reason <see cref="BattleActorSetup.EquippedActionIds"/>'s own comment warns about: this record
+    /// rides into `ExpeditionResolution`'s own serialized+hashed shape
+    /// (<c>ExpeditionResolverTests.Tier_goldens_are_locked</c>), and a nullable field with no
+    /// suppression serializes as an added `"ZombossPatternId":null` key for every existing caller,
+    /// moving that golden for a shape change nobody reviewed as a determinism break.</para></summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public string? ZombossPatternId { get; init; }
+
+    /// <summary>species-build-todo.md T4.6 — which encounter (in this player's own Zomboss-adaptation
+    /// sequence) this setup was chosen for, so a REPLAY of a stored setup can still compute the correct
+    /// delayed reveal (`RpgStore.GetRevealedZombossPatternId`) without re-invoking the selector. Null
+    /// alongside <see cref="ZombossPatternId"/> for every non-Zomboss battle. Same
+    /// <see cref="JsonIgnoreAttribute"/> treatment, for the same golden-safety reason.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int? ZombossEncounterIndex { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-waves` §7: reinforcement batches scheduled for this battle. Empty for every
+    /// existing caller — with it empty, the reinforcement event kind is never scheduled, so the event
+    /// queue behaves exactly as it does today (a never-scheduled event kind cannot change a tick
+    /// sequence, the structural half of this module's byte-identity argument).
+    /// </summary>
+    public IReadOnlyList<ReinforcementBatch> Reinforcements { get; init; } = Array.Empty<ReinforcementBatch>();
+}
+
+/// <summary>
+/// base-defense `siege-waves` §1: one reinforcement batch — WHEN it arrives and WHAT arrives.
+///
+/// <para><b>A tick, not a condition.</b> Audit F8: a state-based trigger ("when the current batch
+/// drops below 30%") is turtle-exploitable — a defender who never engages never advances the trigger,
+/// so the dominant strategy becomes standing still. A clock cannot be gamed by declining to play.
+/// <see cref="World.Turn.TurnEngine"/> is unrelated; this is battle-internal simulation time.</para>
+/// </summary>
+public sealed record ReinforcementBatch
+{
+    /// <summary>Simulation tick of arrival, absolute from battle start. `long` — compared against
+    /// `maxBattleTick`, which is already `long`; a narrower type here would silently truncate at
+    /// exactly the horizon that matters.</summary>
+    public long AtTick { get; init; }
+    public string Side { get; init; } = "";
+    public IReadOnlyList<BattleActorSetup> Actors { get; init; } = Array.Empty<BattleActorSetup>();
+
+    /// <summary>Which board edge they enter from. Ignored in a boardless battle — resolving an edge
+    /// into real candidate cells is `siege-resolver`'s job (a later module), the same scoping
+    /// `Board/Placement.cs` already states for initial placement.</summary>
+    public World.District.BoardEdge Edge { get; init; }
 }
 
 /// <summary>aura-skill T12: one commander aura's already-resolved delivery — "an aura is on" made
@@ -336,6 +436,17 @@ public sealed record BattleReport
     public string WaveId { get; init; } = "";
     public BattleOutcome Outcome { get; init; }
     public int Rounds { get; init; }
+
+    /// <summary>species-build-todo.md T4.5/T4.6 — carried straight from <see cref="BattleSetup.ZombossPatternId"/>,
+    /// same "omitted when default" treatment as <see cref="ContentHash"/> one property up and for the
+    /// same reason: a non-Zomboss battle must serialize byte-identically to before this field existed,
+    /// or every existing golden moves for a reason that is not a determinism break. The DELAYED reveal
+    /// (spec's own decision 4 — "after the next fight," per `revealDelayEncounters`) is the server
+    /// seam's own job (T4.6): this field is the raw, undelayed pattern the battle actually resolved
+    /// with, not what a player is shown.</summary>
+    [System.Text.Json.Serialization.JsonIgnore(
+        Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)]
+    public string? ZombossPatternId { get; init; }
 
     /// <summary>Battle-level Souls multiplier (‰, base 1000) — greedy squad survivors raise it.</summary>
     public int SoulLootMilli { get; init; } = 1000;

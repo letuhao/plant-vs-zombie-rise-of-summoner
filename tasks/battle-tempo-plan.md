@@ -4,32 +4,49 @@ Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-ma
 under [docs/architecture/battle-tempo/](../docs/architecture/battle-tempo/).
 Task list: [battle-tempo-todo.md](battle-tempo-todo.md).
 
-**Status, 2026-09-05: 25 of 26 tasks complete, 2 genuinely blocked on a narrower gap, 1 owner-only.**
-Built: `poise-unification` (all 4), `action-timing` (all 4), `tempo-content` (both), `MEAS`,
-`commitment-binding` (both), `reaction-lane` (RL1/RL4 complete), `forecast-rail` (all 4), and a 7th
-module, `timeline-dispatch` (D14's fix, all three tasks): **`TD1`** specs it
-([spec-timeline-dispatch.md](../docs/architecture/battle-tempo/spec-timeline-dispatch.md)), **`TD2`**
-lands its additive pieces, and **`TD3`** builds and measures the dispatch branch itself — `W` and
-`Commitment` both proven non-zero for the first time in this program's history, through the real
-`BattleEngine.Resolve`, on synthetic profiles only (every shipped profile stays byte-identical). Every
-completed task is probed against real compiled code with an executed falsifier (`Core.Tests` itself
-stays blocked by pre-existing, unrelated WIP in other streams — see PU1's own evidence).
+**Status, 2026-09-05: 27 of 28 tasks complete or correctly partial; 2 tasks genuinely blocked on named,
+external gates; 1 owner-only.** Built: `poise-unification` (all 4), `action-timing` (all 4),
+`tempo-content` (both), `MEAS`, `commitment-binding` (both), `reaction-lane` (RL1/RL4 complete, RL2
+partial — see below), `forecast-rail` (all 4), and an 8th module, `timeline-dispatch` (D14's fix, all
+four tasks): **`TD1`** specs it ([spec-timeline-dispatch.md](../docs/architecture/battle-tempo/spec-timeline-dispatch.md)),
+**`TD2`** lands its additive pieces, **`TD3`** builds and measures the dispatch branch itself, and
+**`TD4`** live-wires `reaction-lane`'s own counter mechanism into it. Every completed task is probed
+against real compiled code with an executed falsifier (`Core.Tests` itself stays blocked by
+pre-existing, unrelated WIP in other streams — see PU1's own evidence).
 
 **D14 is resolved — built and measured, not just specced.** `spec-timeline-dispatch.md` gives the
 built design: a local, per-round discrete-event dispatch (`RunTimelineActionPhase`) behind an opt-in
 profile flag defaulting `false` for every shipped profile, so it moves no golden by construction.
-Measured: `W` +14.17 percentage points win rate (W=1 vs W=4), `Commitment` −0.671 average rounds-to-win
-(EarlyBound vs LateBound), both falsified against a flag-off control. A real, previously-undiscovered
-defect surfaced and was fixed along the way (`BasicAttackEnvelope.Commitment` was hardcoded, making
-`DefaultCommitment` unreachable regardless of dispatch completeness — confirmed inert for the atomic
-path before fixing). This closes `battle-tempo-todo.md` Checkpoint B and unblocks `LAND1`/`LAND2`'s
-dependency — but does not itself land anything: `LAND1` (flip the flag for `hybrid-atb`, re-run the
-full staged sweep, re-bless goldens, bump `RulesetVersion`) and `LAND2` (the win-rate sweep sign-off,
-**owner-only by the plan's own original design**, not a gate discovered after the fact) remain
-separate, unstarted, and correctly gated. `RL2`/`RL3` remain blocked too, on a now-narrower and
-separate gap: a defender's own counter-intent interrupting an attacker's wind-up is a not-yet-designed
-integration `timeline-dispatch` does not provide. See the map's own D14 entry and the todo's `TD1`–
-`TD3` evidence for the full reasoning.
+Measured: `W` +12.92 percentage points win rate (W=1 vs W=4), `Commitment` −0.725 average rounds-to-win
+(EarlyBound vs LateBound), both falsified against a flag-off control. Two real, previously-undiscovered
+defects surfaced and were fixed along the way, both confirmed inert for the atomic path:
+`BasicAttackEnvelope.Commitment` was hardcoded, making `DefaultCommitment` unreachable regardless of
+dispatch completeness; and a dead attacker's own already-scheduled `Resolve` could still land a hit
+(fixing this moved the `W` numbers above from their first, buggy measurement). This closes
+`battle-tempo-todo.md` Checkpoint B and unblocks `LAND1`/`LAND2`'s dependency.
+
+**`LAND1`'s own sweep has now been run, per the owner's explicit direction** ("run the sweep, stop
+before sign-off"): flag staged on for `HybridAtb`, full sweep measured, flag reverted — nothing landed,
+no golden re-blessed, no `RulesetVersion` bump. A THIRD real defect surfaced and was fixed in the
+process (a non-monotonic clock feeding per-battle-persistent `Cooldowns`/`ResourcePools`, caught only by
+a real-content seed, never by a synthetic probe). Result: **zero win-rate movement on the existing
+golden shape** (verified as a real "moved nothing," not a silent no-op), but a small, real shift on more
+volatile, asymmetric content. `LAND2` (the win-rate sweep sign-off, **owner-only by the plan's own
+original design**, not a gate discovered after the fact) remains untouched and correctly gated — the
+sweep above is the input to that decision, not a substitute for it.
+
+**`RL2`'s own remaining gap is now built too** (`TD4`): the defender's counter-intent wiring
+(`ReactionLane.TryEnter`/`ReactionCounter.TryCounter`/`Exit`) fires for real inside
+`RunTimelineActionPhase`, using a new per-battle resource-pool registry (`LawnActorResourcePools`,
+reused verbatim) and a new dedicated tunable file (`data/tuning/reaction-lane.v1.json`). That wiring
+surfaced a THIRD real, previously-undiscovered gap: every battle actor's resource pools (poise
+included) are always empty, because no derived-stat composer sets a `resource.max.*`/`resource.regen.*`
+channel for a battle actor (grep-confirmed across `BattleStatComposer.cs`/`BattleEffects.cs`/
+`BattleDerivedModifierLedger.cs`). The lane correctly, honestly declines every counter today — the
+mechanism works; nothing gives a battle actor poise to spend yet, and deciding how much is a
+balance/design question outside this program's own "intent, cost, and payoff" scope for `RL2`. `RL3`
+stays blocked on that gap plus its own pre-existing, independent dependency on the owner-gated Phase 2
+sweep. See the map's own D14 entry and the todo's `TD1`–`TD4` evidence for the full reasoning.
 
 ---
 

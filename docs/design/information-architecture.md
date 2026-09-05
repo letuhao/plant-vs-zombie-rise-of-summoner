@@ -14,6 +14,14 @@ current build has. Plates draw these surfaces; this document says what they are 
 **Four stages, one at a time. Nine player layers, openable over any of them. One developer tree,
 off by default.**
 
+> **Amended 2026-09-05 — six stages, not four.** `siege` (`#/siege/{id}`) was approved as the fifth on
+> 2026-09-04 (decisions.md, Game GUI row amendment; [base-defense-ideal.md](../architecture/base-defense-ideal.md)
+> decisions 8/9) and `delve` (`#/delve/{id}`) as the sixth on 2026-09-05 (decisions.md row *"Game GUI — sixth
+> stage `delve`"*; [party-dungeon-map.md](../architecture/party-dungeon-map.md)). Both pass GG-4's test — a place
+> the player acts in, not looks at — which is why each is a stage and not a layer. The four-stage wording
+> above and the §2 catalog are kept as written; §2.4a is the `delve` stub, and the `siege` stub is owed by the
+> base-defense program. The rail still renders from state (GG-44), so neither stage adds a rail entry.
+
 ```text
                     ┌─────────── SHELL (band −1) ───────────┐
                     │   boot → title → save select          │
@@ -101,6 +109,14 @@ The turn-based stage, on the discrete-event kernel.
 | **Enter** | Commit a legion on the world map; an expedition resolving into a fight |
 | **Leave** | Resolution → result → sanctum |
 | **Forbidden while here** | Stage travel with a committed turn (§6) |
+
+### 2.4a Delve — `#/delve/{id}` (stub, 2026-09-05)
+
+The sixth stage, approved 2026-09-05. **Not designed here** — the room graph, its fights, the pack and
+wild-talk layers, the extraction result and the band-4 reports are specified in
+[party-dungeon-map.md](../architecture/party-dungeon-map.md) and its module specs; the decisions.md row
+*"Game GUI — sixth stage `delve`"* fixes the band assignments. This entry exists so the catalog's count
+matches the approved stages; it fills in when that program reaches its GUI module.
 
 ### 2.5 Shell — band −1
 
@@ -206,6 +222,7 @@ they are not present-but-dead.
 | Fusion | Second creature of one species held |
 | Pacts | First contract offered |
 | Expeditions | First sector held |
+| Delve | First domain found (expedition) — *added 2026-09-05 with the sixth stage* |
 
 The rail therefore renders from **state**, never from a constant list — the architectural
 consequence GG-44 exists to force.

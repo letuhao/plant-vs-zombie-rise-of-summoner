@@ -79,29 +79,37 @@ public sealed partial class RpgStore
             throw new ArgumentException("scopeKey must not be empty", nameof(scopeKey));
         if (allocation is null) throw new ArgumentNullException(nameof(allocation));
 
-        var scopeText = ScopeToText(scope);
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-
-            ExecIn(db, tx, "DELETE FROM rpg_aptitude_allocation WHERE scope = $scope AND scope_key = $key;",
-                ("$scope", scopeText), ("$key", scopeKey));
-
-            foreach (var apt in AptitudeCatalog.All)
-            {
-                var points = allocation.PointsAt(scope, apt.Id);
-                if (points == 0) continue; // no row for an unspent aptitude -- nothing to persist.
-
-                ExecIn(db, tx, """
-                    INSERT INTO rpg_aptitude_allocation (scope, scope_key, aptitude_id, points)
-                    VALUES ($scope, $key, $apt, $points);
-                    """,
-                    ("$scope", scopeText), ("$key", scopeKey), ("$apt", apt.Id), ("$points", points));
-            }
-
+            SaveAllocationUnlocked(db, tx, scope, scopeKey, allocation);
             tx.Commit();
+        }
+    }
+
+    /// <summary>species-build-todo.md T4.2 — extracted so <c>TryRespecSpecies</c>
+    /// (<c>RpgStore.SpeciesRespec.cs</c>) can write the override in the SAME transaction as its soul
+    /// spend and counter update; a public <see cref="SaveAllocation"/> call would open its own
+    /// connection/transaction and break the "neither applied on failure" atomicity that module needs.
+    /// Same delete-then-insert-nonzero-only shape as before this extraction — no behavior change.</summary>
+    void SaveAllocationUnlocked(SqliteConnection db, SqliteTransaction tx, AllocationScope scope, string scopeKey, AptitudeAllocation allocation)
+    {
+        var scopeText = ScopeToText(scope);
+
+        ExecIn(db, tx, "DELETE FROM rpg_aptitude_allocation WHERE scope = $scope AND scope_key = $key;",
+            ("$scope", scopeText), ("$key", scopeKey));
+
+        foreach (var apt in AptitudeCatalog.All)
+        {
+            var points = allocation.PointsAt(scope, apt.Id);
+            if (points == 0) continue; // no row for an unspent aptitude -- nothing to persist.
+
+            ExecIn(db, tx, """
+                INSERT INTO rpg_aptitude_allocation (scope, scope_key, aptitude_id, points)
+                VALUES ($scope, $key, $apt, $points);
+                """,
+                ("$scope", scopeText), ("$key", scopeKey), ("$apt", apt.Id), ("$points", points));
         }
     }
 
@@ -114,24 +122,32 @@ public sealed partial class RpgStore
         if (string.IsNullOrWhiteSpace(scopeKey))
             throw new ArgumentException("scopeKey must not be empty", nameof(scopeKey));
 
-        var scopeText = ScopeToText(scope);
-
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            using var cmd = db.CreateCommand();
-            cmd.CommandText =
-                "SELECT aptitude_id, points FROM rpg_aptitude_allocation " +
-                "WHERE scope = $scope AND scope_key = $key;";
-            cmd.Parameters.AddWithValue("$scope", scopeText);
-            cmd.Parameters.AddWithValue("$key", scopeKey);
-            using var r = cmd.ExecuteReader();
-
-            var allocation = AptitudeAllocation.Empty;
-            while (r.Read())
-                allocation += AptitudeAllocation.Single(scope, r.GetString(0), r.GetInt64(1));
-            return allocation;
+            return LoadAllocationUnlocked(db, scope, scopeKey);
         }
+    }
+
+    /// <summary>species-build-todo.md T4.2 — extracted for the same reason as
+    /// <see cref="SaveAllocationUnlocked"/>: <c>TryRespecSpecies</c> needs to read the CURRENT override
+    /// inside its own transaction (to decide free-vs-priced) without opening a second connection.</summary>
+    AptitudeAllocation LoadAllocationUnlocked(SqliteConnection db, AllocationScope scope, string scopeKey)
+    {
+        var scopeText = ScopeToText(scope);
+
+        using var cmd = db.CreateCommand();
+        cmd.CommandText =
+            "SELECT aptitude_id, points FROM rpg_aptitude_allocation " +
+            "WHERE scope = $scope AND scope_key = $key;";
+        cmd.Parameters.AddWithValue("$scope", scopeText);
+        cmd.Parameters.AddWithValue("$key", scopeKey);
+        using var r = cmd.ExecuteReader();
+
+        var allocation = AptitudeAllocation.Empty;
+        while (r.Read())
+            allocation += AptitudeAllocation.Single(scope, r.GetString(0), r.GetInt64(1));
+        return allocation;
     }
 
     /// <summary>
@@ -165,11 +181,26 @@ public sealed partial class RpgStore
         if (string.IsNullOrWhiteSpace(speciesId))
             throw new ArgumentException("speciesId must not be empty", nameof(speciesId));
 
-        var scopeKey = Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId);
-        var overrideAllocation = LoadAllocation(AllocationScope.DemonType, scopeKey);
+        var overrideAllocation = LoadAllocation(AllocationScope.DemonType,
+            Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId));
         if (overrideAllocation.TotalForScope(AllocationScope.DemonType) > 0)
             return overrideAllocation;
 
+        return SpeciesBaselineAllocation(playerId, speciesId, tuning);
+    }
+
+    /// <summary>
+    /// species-build-todo.md T5.1 — the shipped plan's own baseline, ALWAYS, regardless of whether an
+    /// override exists (unlike <see cref="EffectiveSpeciesAllocation"/>, which returns whichever of the
+    /// two currently applies). `spec-allocation-surface.md`'s own design needs BOTH numbers at once —
+    /// "the shipped baseline... the player's override, if any, shown as a deviation FROM the
+    /// baseline" — so the two are exposed as separate values here rather than only ever the winner.
+    /// Same best-effort-on-an-unconfigured-plan-catalog contract as `EffectiveSpeciesAllocation`.
+    /// </summary>
+    public AptitudeAllocation SpeciesBaselineAllocation(long playerId, string speciesId, AptitudeTuning tuning)
+    {
+        if (string.IsNullOrWhiteSpace(speciesId))
+            throw new ArgumentException("speciesId must not be empty", nameof(speciesId));
         if (!SpeciesBuildPlanCatalog.IsConfigured)
             return AptitudeAllocation.Empty;
 
@@ -178,4 +209,11 @@ public sealed partial class RpgStore
         var shares = SpeciesBuildPlanCatalog.SharesFor(speciesId);
         return Core.Stats.Aptitudes.SpeciesAllocation.Baseline(shares, level, tuning);
     }
+
+    /// <summary>Whether the player has ever set a DemonType override for this species — the exact
+    /// signal <c>spec-allocation-surface.md</c>'s "shown as a deviation" UI needs to decide whether to
+    /// render the override state at all, distinct from the override happening to equal the baseline.</summary>
+    public bool HasSpeciesOverride(long playerId, string speciesId) =>
+        LoadAllocation(AllocationScope.DemonType, Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId))
+            .TotalForScope(AllocationScope.DemonType) > 0;
 }

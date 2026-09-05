@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useDemonRoster, usePlayers, useSpeciesIndex } from "@/lib/bus";
 import { newCorrelationId } from "@/lib/bus/demons";
 import { usePatron, useSetPatron } from "@/lib/bus/patron";
@@ -11,6 +12,7 @@ import {
 } from "@/features/demons/contractView";
 import { displayName } from "@/features/demons/rosterSplit";
 import { auraLabel, auraPreviewMilli } from "@/features/demons/patronView";
+import { AptitudesLayer } from "@/layers/aptitudes/AptitudesLayer";
 import { PanelShell } from "@/shell/PanelShell";
 import { EmptyState } from "@/ui/EmptyState";
 import { Badge, Banner, Button } from "@/ui";
@@ -62,7 +64,14 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
   const rows = contracts.data?.contracts.filter((c) => c.bound) ?? [];
   const bySpecimenId = new Map((roster.data?.items ?? []).map((s) => [s.profile.instanceId, s]));
 
+  // spec-allocation-surface.md — the chosen entry point (owner, 2026-09-05): a "View build" button on
+  // each pact row, opening `AptitudesLayer` as a NESTED layer scoped to that row's own `speciesId`,
+  // the same locally-owned open/close pattern `CommandersLayer` already uses for its nested
+  // `ActorPanel` sheet rather than a second top-level rail slot.
+  const [buildSpeciesId, setBuildSpeciesId] = useState<string | null>(null);
+
   return (
+    <>
     <PanelShell
       open={open}
       onOpenChange={onOpenChange}
@@ -157,6 +166,16 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
                 ) : null}
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    disabled={!specimen}
+                    title={specimen ? undefined : "Roster entry still loading"}
+                    onClick={() => specimen && setBuildSpeciesId(specimen.profile.speciesId)}
+                    data-testid={`pact-view-build-${c.instanceId}`}
+                  >
+                    View build
+                  </Button>
                   {condition === "insubordinate" ? (
                     <>
                       <Button size="sm" disabled title="Renegotiate" data-testid={`pact-renegotiate-${c.instanceId}`}>
@@ -210,5 +229,13 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
         </div>
       )}
     </PanelShell>
+    <AptitudesLayer
+      open={buildSpeciesId !== null}
+      onOpenChange={(next) => {
+        if (!next) setBuildSpeciesId(null);
+      }}
+      speciesId={buildSpeciesId}
+    />
+    </>
   );
 }

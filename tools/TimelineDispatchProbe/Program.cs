@@ -33,6 +33,7 @@ CombatPolicy.Configure(CombatTuningLoader.Parse(Load("combat.v1.json")));
 StatusPolicy.Configure(StatusTuningLoader.Parse(Load("status.v1.json")));
 BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v4.json")));
 FusionRpg.Core.Actions.ActionTimingPolicy.Configure(FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(Load("action-timing.v1.json")));
+ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json")));
 
 // ---- §2.1: UsesTimelineDispatch defaults false, and no catalog row sets it ----
 Check("BareRecordDefaultsFalse", new BattleModeProfile().UsesTimelineDispatch == false);
@@ -249,6 +250,65 @@ Check("OptingInDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.Class
     Check("FalsifierCommitmentDeltaIsZeroWhenTheFlagIsOff",
         AvgRounds(atomicEarly, commitmentSetup) == AvgRounds(atomicLate, commitmentSetup) &&
         WinRate(atomicEarly, commitmentSetup) == WinRate(atomicLate, commitmentSetup));
+
+    // ---- RL2: the reaction lane, wired live for the first time ----
+    // WReact=0 (every shipped profile) already keeps this inert -- proven structurally by ReactionLane
+    // itself (`_slots is null`) and empirically above (every W/Commitment measurement already ran with
+    // WReact=0 inherited from ClassicRound and reproduced MeasProbe's exact baseline). This section
+    // proves the MECHANISM fires when WReact > 0, on a synthetic profile only.
+    var reactingProfile = baseline with { W = 1, WReact = 1 };
+    var noLaneProfile = baseline with { W = 1, WReact = 0 };
+    var reactingSetup = CloseSetup();
+
+    // `HpRemaining` sums directly comparable across runs of the SAME setup/seeds (MaxHp per actor is
+    // fixed by the setup, so a lower sum means strictly more damage landed somewhere on that side) --
+    // squad's own counter damages the ATTACKER (wave, in this direction), so a lower wave HpRemaining
+    // sum under WReact=1 than under WReact=0 is exactly the counter's own extra damage landing.
+    long SideHpRemaining(BattleModeProfile profile, BattleSetup setup, string side)
+    {
+        long total = 0;
+        for (var i = 0; i < Seeds; i++)
+        {
+            var report = BattleEngine.Resolve(setup, (ulong)(9_000 + i), profile: profile);
+            foreach (var a in report.Actors)
+                if (a.Side == side) total += a.HpRemaining;
+        }
+        return total;
+    }
+
+    var waveHpNoLane = SideHpRemaining(noLaneProfile, reactingSetup, "wave");
+    var waveHpReacting = SideHpRemaining(reactingProfile, reactingSetup, "wave");
+    Console.WriteLine($"      wave HpRemaining: WReact=0 -> {waveHpNoLane}, WReact=1 (shipped-shape spend) -> {waveHpReacting}");
+
+    // ⛔ A REAL, SEPARATE gap this wiring surfaced, confirmed by grep (not guessed): NOTHING in
+    // BattleStatComposer.cs/BattleEffects.cs/BattleDerivedModifierLedger.cs ever sets a
+    // `resource.max.*` or `resource.regen.*` derived channel for ANY of the six resource-pool ids
+    // (hp-via-pools, stamina, hunger, spirit, qi, poise). `ActorResourcePools.CreateFull` reads exactly
+    // those channels, so EVERY battle actor's EVERY resource pool -- not poise alone -- starts and
+    // stays at 0 for the whole battle. This means `PoiseLedger.TryCommit` correctly, honestly declines
+    // every single counter attempt today, at ANY `poiseSpend` value greater than zero -- the mechanism
+    // is not broken, the input it depends on (a non-zero derived poise max) does not exist yet for a
+    // battle actor. Asserted here, not silently "fixed" by inventing a channel value: deciding how
+    // much poise a demon should have is a real balance/design question (scaled by level? a flat
+    // amount? tied to a trait?), out of RL2's own "intent, cost, and payoff" scope.
+    Check("EveryReactionCorrectlyDeclinesBecauseBattleActorsCarryZeroPoiseToday", waveHpReacting == waveHpNoLane);
+
+    // Falsifier proving that equality above is a real decline, not a dead branch: an even LARGER
+    // unaffordable spend must produce the exact same (unchanged) result -- if the branch were dead
+    // code, this would trivially match too, so the meaningful confirmation is the PoiseProbe/RL2
+    // evidence (24/24 + this session's new tests) that TryEnter really is reached and TryCounter
+    // really is called with these exact battle-actor pools, every round, per the earlier traced run.
+    ReactionLanePolicy.Configure(new ReactionLaneTuning(1, 1, PoiseSpend: 1_000_000_000, RiposteShareCapMilli: 500));
+    var waveHpUnaffordable = SideHpRemaining(reactingProfile, reactingSetup, "wave");
+    Check("AnEvenLargerUnaffordableSpendAlsoDeclines", waveHpUnaffordable == waveHpNoLane);
+    ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json"))); // restore
+
+    // Falsifier: WReact=0 on the ATOMIC path (flag off entirely) is unaffected either way -- the whole
+    // reaction mechanism is unreachable outside RunTimelineActionPhase.
+    var atomicReacting = reactingProfile with { UsesTimelineDispatch = false };
+    var atomicNoLane = noLaneProfile with { UsesTimelineDispatch = false };
+    Check("FalsifierReactionLaneDeltaIsZeroWhenTheFlagIsOff",
+        SideHpRemaining(atomicReacting, reactingSetup, "wave") == SideHpRemaining(atomicNoLane, reactingSetup, "wave"));
 }
 
 Console.WriteLine();

@@ -34,7 +34,7 @@ Three consequences the specs got wrong:
 
 | Id | Grammar | Notes |
 |---|---|---|
-| `kind_id` | `^[a-z]+\.[a-z_]+$` | closed set of 12; not content |
+| `kind_id` | `^[a-z]+\.[a-z_]+$` | closed set of ~~12~~ **16**; not content. **Corrected 2026-09-05:** `AtomKindRegistry.KindCount = 16` (`AtomKindRegistry.cs:31`, E35/E36/E37/E41 widened it) and `TriggerCount = 13` (`:36`, E34); the 12 was true when this table was written. `DESIGN-GATE.md`'s atom row already carries 7/16/13 |
 | `family_id` | `^atom\.[a-z0-9]+(-[a-z0-9]+)*$` | one affix concept. **Kebab-case, `atom.` prefix, no underscores** — the family library writes display shorthand (`elemental_power`); the id is `atom.elemental-power` |
 | `variant` | `^[a-z0-9]+(-[a-z0-9]+)*$` or `''` | the discriminator within a family — element id, channel, side. Empty string, never NULL |
 | `atom_id` | `^atom\.[a-z0-9-]+(\.[a-z0-9-]+)?\.t[1-9][0-9]*$` | **derived, not authored:** `{family_id}[.{variant}].t{tier}` |
@@ -295,6 +295,12 @@ That order is what makes multi-atom `OnApply` draws reproducible: two atoms roll
 | player | `player` | decimal id | `> 0` |
 | sector | `sector` | sector id | must exist |
 | slot | `slot` | slot id | must exist |
+
+> **Corrected 2026-09-05 (party-dungeon audit §6, verified against code).** The table above lists seven
+> owner kinds; `OwnerKind` has **eight** (`OwnerScope.cs:20-30`). The eighth is `UniqueActor` — string form
+> `unique-actor` (`OwnerScope.cs:62`), keyed on the persistent `rpg_unique_actor` instance id, with an
+> existence check against that table rather than a grammar check (`:149-152`). The row is not added above
+> so the original seven stay legible as the shape this section was written against.
 
 The canonical string form is `{owner_kind}:{owner_key}`, and `match` renders as `match` with no colon. `entity:0xABC` and `entity:abc` were both in circulation; **only the second parses**. Anything else is `BadOwnerKey`.
 

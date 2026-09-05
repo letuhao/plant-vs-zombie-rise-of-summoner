@@ -69,3 +69,10 @@ Shipped expeditions keep running on their real-time timers; their refactor onto 
 ## Open questions carried from the ideal
 
 Homeworld loss penalty (menu in the ideal §10.5) · campaign length in turns · sim steps per turn · whether the RTS/idle barrier policies stay genuinely open or remain a documented property · one world per save vs seasonal reroll.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `world-generator` places domain entrances | `party-dungeon/spec-domain-catalog.md` §Interface | entrance slots (`Lair · Tear · Vault · Anomaly`, `SlotTypeCatalog.cs:14-20`) are placed from `dungeon_domain.entrance_hint`; until it lands the Sanctum picker offers found domains directly (decision 15) |
+| `delve-scope` row | `party-dungeon/spec-delve-scope.md` | `rpg_worlds.kind = 'delve'` / `parent_world_id`; `WorldValidation.Validate(world, profile)` with the delve profile; `GetActiveWorld` keeps `kind = 'map'` |

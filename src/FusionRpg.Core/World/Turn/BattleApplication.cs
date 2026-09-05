@@ -126,11 +126,13 @@ public static class BattleApplication
 
     /// <summary>
     /// A district assault's third application step (spec-siege-seam.md §4) — empty for every
-    /// existing battle kind, so every existing battle takes the identical path. Applies only what
-    /// this module owns: who ended the battle occupying a slot (possession is by occupation,
-    /// decision 4 — buildings have no ownership) and whether a destroyed structure's identity is
-    /// cleared. It does NOT persist remaining structure HP — `WorldSlot` has no HP field yet, and
-    /// wiring one is `structure-state`'s job, not this seam-widening module's.
+    /// existing battle kind, so every existing battle takes the identical path. Applies who ended the
+    /// battle occupying a slot (possession is by occupation, decision 4 — buildings have no ownership)
+    /// and, since base-defense `structure-state` (task 8.4), persists remaining structure HP and turns
+    /// a destroyed structure into rubble: `SlotState.Ruined`, `StructureId`/`StructureHp`/
+    /// `ConstructionTurnsRemaining` all cleared — `SlotState.Ruined`'s first reader, closing a wiring
+    /// gap rather than adding a new enum. `district-layout` §5 already maps `Ruined` → `Rough` terrain,
+    /// so rubble-you-can-cross-but-slowly falls out free.
     /// </summary>
     public static WorldState ApplySlotResults(WorldState world, string sectorId, IReadOnlyList<SlotOutcome> slotResults)
     {
@@ -148,7 +150,11 @@ public static class BattleApplication
                                 ? sl with
                                 {
                                     OwnerFactionId = result.HeldByFactionId,
-                                    StructureId = result.StructureDestroyed ? null : sl.StructureId
+                                    State = result.StructureDestroyed ? SlotState.Ruined : sl.State,
+                                    StructureId = result.StructureDestroyed ? null : sl.StructureId,
+                                    StructureHp = result.StructureDestroyed ? null : result.StructureHp,
+                                    ConstructionTurnsRemaining = result.StructureDestroyed
+                                        ? null : sl.ConstructionTurnsRemaining
                                 }
                                 : sl)
                             .ToList()

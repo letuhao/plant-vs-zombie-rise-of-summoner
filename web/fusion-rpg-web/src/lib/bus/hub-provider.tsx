@@ -133,6 +133,22 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["commanders"] });
     };
 
+    // species-build-todo.md T5.1 — real gap found and fixed while wiring the species-build panel:
+    // the SERVER has broadcast "AptitudesUpdated" since `demon-type-allocation` (module 5) shipped,
+    // but nothing on the web side ever subscribed to it (confirmed by direct grep across this whole
+    // assembly). Every `useAptitudes`/species-aptitudes query relied entirely on its own
+    // `refetchInterval` fallback, which is disabled whenever the hub IS connected — so a commander or
+    // species allocation change from ANOTHER client (e.g. the injector reloading it) never live-
+    // updated a connected web client. Mirrors `onCommandersUpdated`'s exact shape: player-scoped when
+    // the payload carries one, plus a bare invalidation so an unscoped broadcast still refreshes.
+    const onAptitudesUpdated = (msg: { playerId?: number } | null) => {
+      if (msg?.playerId != null) {
+        void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(msg.playerId) });
+      }
+      void qc.invalidateQueries({ queryKey: ["aptitudes"] });
+      void qc.invalidateQueries({ queryKey: ["speciesAptitudes"] });
+    };
+
     c.on("Event", onEvent);
     c.on("EventBatch", onBatch);
     c.on("Health", onHealth);
@@ -145,6 +161,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("SoulsUpdated", onSoulsUpdated);
     c.on("AlmanacTextUpdated", onAlmanacTextUpdated);
     c.on("CommandersUpdated", onCommandersUpdated);
+    c.on("AptitudesUpdated", onAptitudesUpdated);
 
     c.onreconnecting(() => setStatus("off"));
     c.onreconnected(() => {
@@ -178,6 +195,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("DemonsUpdated", onDemonsUpdated);
       c.off("SoulsUpdated", onSoulsUpdated);
       c.off("CommandersUpdated", onCommandersUpdated);
+      c.off("AptitudesUpdated", onAptitudesUpdated);
       void c.stop();
     };
   }, [qc]);

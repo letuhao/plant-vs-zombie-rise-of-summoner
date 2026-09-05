@@ -740,7 +740,10 @@ class VoteResolutionTests(unittest.TestCase):
         cand = finalize_candidate(make_brief(), drafts, candidate_id="candidate.signature.000")
         self.assertEqual(cand.outcome, "accepted")
         self.assertEqual(cand.votes["atomFamilies"].confidence, "split")
-        self.assertEqual(cand.votes["atomFamilies"].minority, "atom.a|atom.b")
+        # Per-member voting names the member that lost (`atom.b`), not the whole losing set --
+        # the old answer listed `atom.a` as minority despite all three samples choosing it.
+        self.assertEqual(cand.votes["atomFamilies"].minority, ("atom.b",))
+        self.assertEqual(cand.entry["atomFamilies"], ["atom.a", "atom.c"])
 
     def test_2_1_split_on_differentiator_records_the_minority_and_still_accepts(self):
         drafts = [make_draft(differentiator="timing"), make_draft(differentiator="timing"),

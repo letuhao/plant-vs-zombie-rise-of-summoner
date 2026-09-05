@@ -55,6 +55,14 @@ public sealed partial class RpgStore
         // column rather than a field on WorldCommand because that record is the replay unit — an
         // audit string inside it would travel through the engine and the hash for no reason.
         EnsureColumn(db, "rpg_world_commands", "reason", "TEXT");
+
+        // `TurnReport.Phases` (the locked phase order, made observable) was never persisted
+        // alongside `Entries`, only re-derivable from them — and a phase that ran with zero entries
+        // (`Growth`'s own named no-op, most turns) leaves nothing behind to re-derive it from, so it
+        // silently vanished from every already-stored turn's report. Found by actually watching a
+        // turn play back, not by a test. A legacy row with no `phases_json` falls back to that lossy
+        // reconstruction (`TurnReport.FromEntries`) rather than refusing.
+        EnsureColumn(db, "rpg_world_turn_log", "phases_json", "TEXT");
     }
 
     /// <summary>Files one order against the world's open turn.</summary>
@@ -520,8 +528,8 @@ public sealed partial class RpgStore
                 log.Transaction = tx;
                 log.CommandText = """
                     INSERT OR REPLACE INTO rpg_world_turn_log
-                        (world_id, turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json)
-                    VALUES ($w, $t, $hash, $ev, $rv, $seed, $now, $report);
+                        (world_id, turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json, phases_json)
+                    VALUES ($w, $t, $hash, $ev, $rv, $seed, $now, $report, $phases);
                     """;
                 log.Parameters.AddWithValue("$w", worldId);
                 log.Parameters.AddWithValue("$t", turn);
@@ -531,6 +539,7 @@ public sealed partial class RpgStore
                 log.Parameters.AddWithValue("$seed", header.Seed.ToString());
                 log.Parameters.AddWithValue("$now", now);
                 log.Parameters.AddWithValue("$report", JsonSerializer.Serialize(result.Report.Entries));
+                log.Parameters.AddWithValue("$phases", JsonSerializer.Serialize(result.Report.Phases));
                 log.ExecuteNonQuery();
             }
 
@@ -561,7 +570,7 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json
+                SELECT turn, state_hash, engine_version, ruleset_version, seed, committed_utc, report_json, phases_json
                 FROM rpg_world_turn_log WHERE world_id = $w AND turn = $t;
                 """;
             cmd.Parameters.AddWithValue("$w", worldId);
@@ -570,7 +579,8 @@ public sealed partial class RpgStore
             if (!r.Read()) return null;
             return new WorldTurnLogRow(
                 r.GetInt32(0), r.GetString(1), r.GetInt32(2), r.GetInt32(3),
-                ulong.Parse(r.GetString(4)), r.GetString(5), r.IsDBNull(6) ? null : r.GetString(6));
+                ulong.Parse(r.GetString(4)), r.GetString(5), r.IsDBNull(6) ? null : r.GetString(6),
+                r.IsDBNull(7) ? null : r.GetString(7));
         }
     }
 
@@ -591,6 +601,16 @@ public sealed partial class RpgStore
         if (log.ReportJson is { } json)
         {
             var entries = JsonSerializer.Deserialize<List<TurnReportEntry>>(json) ?? new List<TurnReportEntry>();
+
+            // A row committed before `phases_json` existed has no phase list to trust — fall back to
+            // the lossy entries-only reconstruction rather than refusing a report that is otherwise
+            // still perfectly good.
+            if (log.PhasesJson is { } phasesJson)
+            {
+                var phases = JsonSerializer.Deserialize<List<string>>(phasesJson) ?? new List<string>();
+                return TurnReport.FromStored(phases, entries);
+            }
+
             return TurnReport.FromEntries(entries);
         }
 
@@ -626,7 +646,7 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            UPDATE rpg_world_turn_log SET report_json = NULL
+            UPDATE rpg_world_turn_log SET report_json = NULL, phases_json = NULL
             WHERE world_id = $w AND report_json IS NOT NULL AND turn <= (
               SELECT COALESCE(MAX(turn), -1) - $keep FROM rpg_world_turn_log WHERE world_id = $w
             );
@@ -714,10 +734,13 @@ public sealed record LoggedWorldCommand(WorldCommand Command, string? Reason);
 /// <summary>Outcome of a commit: did it land, and did it release the turn?</summary>
 public sealed record WorldTurnCommitResult(bool Ok, string Reason, bool Advanced, string? StateHash);
 
-/// <summary>A turn's durable record. `ReportJson` is null once the body has been trimmed.</summary>
+/// <summary>A turn's durable record. `ReportJson`/`PhasesJson` are null once the body has been
+/// trimmed — always both together, never one without the other (`TrimWorldTurnReportsUnlocked`).
+/// `PhasesJson` is also null on its own for a row committed before it existed; that legacy case
+/// falls back to `TurnReport.FromEntries`'s lossy reconstruction rather than refusing.</summary>
 public sealed record WorldTurnLogRow(
     int Turn, string StateHash, int EngineVersion, int RulesetVersion,
-    ulong Seed, string CommittedUtc, string? ReportJson);
+    ulong Seed, string CommittedUtc, string? ReportJson, string? PhasesJson);
 
 /// <summary>Per-command result of a submission — a batch never fails as a whole.</summary>
 public sealed record WorldCommandOutcome(string CommandId, bool Ok, string Reason, bool Replayed);

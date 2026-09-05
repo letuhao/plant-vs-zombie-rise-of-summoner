@@ -111,6 +111,16 @@ public static partial class BattleEngine
         /// wiring here when they arrive.</summary>
         public readonly Timeline.CooldownLedger Cooldowns = new();
 
+        /// <summary>`battle-tempo` `reaction-lane` RL2: one registry per battle, mirroring
+        /// `Cooldowns`' own "fresh per battle, not per actor construction elsewhere" shape. Reuses
+        /// `LawnActorResourcePools` verbatim rather than a near-duplicate type — its own mechanism
+        /// (a `Dictionary&lt;ptr, ActorResourcePools&gt;`, lazily filled, full at first access) carries
+        /// no lawn-specific logic despite the name; a battle actor is exactly the second consumer its
+        /// own doc comment already anticipates ("Unity-free by construction"). No faction branch: a
+        /// `wave` actor gets a pool exactly like a `squad` actor does — resource-hub-ssot.md's own
+        /// rule ("one shared set... faction difference is a display label, never a branch").</summary>
+        public readonly LawnActorResourcePools ResourcePools = new();
+
         /// <summary>
         /// B38 — one <see cref="Timeline.ActorTurnMachine"/> per actor, for the whole battle.
         ///
@@ -165,6 +175,11 @@ public static partial class BattleEngine
         /// </summary>
         readonly BoardState? _board;
 
+        /// <summary>base-defense `siege-positions` §3: null for every caller without a board (every
+        /// caller until this module wires siege battles through one) — the value `BattleEngine.Resolve`'s
+        /// round loop passes to `Status.Tick`'s own optional trailing `board` parameter.</summary>
+        public Combat.BoardSnapshot? CombatBoardSnapshot { get; }
+
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
             IContainerEffectResolver? containerResolver = null, BoardState? board = null)
@@ -217,6 +232,21 @@ public static partial class BattleEngine
             // comment) — wired here, to the SAME gate ordinary attacks already absorb through, so a
             // granted shield and a swing-dealt hit share one shield stack rather than two.
             Host.Bag.ShieldGate = ShieldGate;
+
+            // base-defense `siege-positions` §2-3: assigned once, only for a battle that HAS a board
+            // (whoever constructs the BoardState is responsible for having placed actors onto it
+            // before calling BattleEngine.Resolve — this module does not place them itself, see
+            // Board/Placement.cs's own doc comment for why). `Host.Bag.BoardSnapshot` is left at its
+            // default `BoardSnapshot.Empty` otherwise, which is every existing caller's exact current
+            // behaviour (this line does not even run for them). `CombatBoardSnapshot` is the SAME
+            // value but genuinely nullable (Empty is not null) — §3's `Status.Tick` needs true `null`
+            // for "no board", not an empty-but-non-null snapshot, to stay byte-identical for every
+            // existing battle.
+            if (_board is not null)
+            {
+                CombatBoardSnapshot = Board.BoardSnapshotAdapter.ToCombatSnapshot(this);
+                Host.Bag.BoardSnapshot = CombatBoardSnapshot;
+            }
 
             // A18c (spec-battle-resource-shield-grants.md §1): the SAME shape as ShieldGate above,
             // one line down. `EffectBag.cs:439`'s DoT/contagion piggyback (StatusEffectBridge.TryApplyFromGrant,
@@ -334,7 +364,16 @@ public static partial class BattleEngine
             {
                 var ids = a.Setup.EquippedActionIds;
                 IReadOnlyList<CompiledAction> held;
-                if (ids is null || ids.Count == 0)
+                if (a.Setup.Kind == CombatantKind.Structure && (ids is null || ids.Count == 0))
+                {
+                    // base-defense `combatant-kind` §5: a structure with no actions has nothing to do
+                    // — it does not fall back to a basic attack. The fallback below exists so an
+                    // ANIMATE actor is never inert; a wall being inert is the point. This also keeps
+                    // "garrisoning a wall grants nothing" true in HeldActionsOf's union below, since
+                    // the empty list is what gets lent.
+                    held = Array.Empty<CompiledAction>();
+                }
+                else if (ids is null || ids.Count == 0)
                 {
                     held = new[] { BasicAttackCompiled };
                 }
@@ -445,8 +484,31 @@ public static partial class BattleEngine
                 Row: 0, Col: 0, IsMindControlled: false, IsKiller: false, StatusMask: 0);
         }
 
-        public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) =>
-            _heldActions.TryGetValue(actorKey, out var held) ? held : Array.Empty<CompiledAction>();
+        /// <summary>
+        /// base-defense `combatant-kind` §4: a garrisoned structure lends its actions to its occupant —
+        /// the union of the occupant's own held actions and the structure it currently occupies, found
+        /// by a linear scan of <see cref="Actors"/> for the one whose <c>GarrisonedBy</c> names this
+        /// key (small counts, the same discipline <c>FindAdjacentWithTrait</c> already uses; there is
+        /// no reverse index and none is needed at this scale). Byte-identical for every existing
+        /// battle: <c>GarrisonedBy</c> is null on every actor there, so the scan never matches and this
+        /// always returns exactly <c>own</c>.
+        /// </summary>
+        public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey)
+        {
+            var own = _heldActions.TryGetValue(actorKey, out var held) ? held : Array.Empty<CompiledAction>();
+            foreach (var a in Actors)
+            {
+                if (a.Setup.Kind != CombatantKind.Structure || a.Setup.GarrisonedBy != actorKey) continue;
+                var lent = _heldActions.TryGetValue(a.Setup.Key, out var structureHeld)
+                    ? structureHeld : Array.Empty<CompiledAction>();
+                if (lent.Count == 0) return own;
+                var union = new List<CompiledAction>(own.Count + lent.Count);
+                union.AddRange(own);
+                union.AddRange(lent);
+                return union;
+            }
+            return own;
+        }
 
         public DamageApplyResult ApplyHp(
             ActorState owner, long amount, string effectId,
@@ -623,6 +685,51 @@ public static partial class BattleEngine
         public bool AnyActive(string side) => BattleEngine.AnyActive(Actors, side);
 
         /// <summary>
+        /// base-defense `siege-waves` §3: roster growth — a reinforcement joining mid-battle.
+        ///
+        /// <para><b>Runs the SAME key validation `Resolve` applies at setup</b> (extracted to
+        /// <see cref="ValidateActorKey"/> for exactly this reuse) — a mid-battle actor that bypassed
+        /// those checks would be silently unhittable at the shield gate.</para>
+        ///
+        /// <para><b>Appends, never inserts or reorders</b> — <see cref="Actors"/> is a plain
+        /// <see cref="List{T}"/>; an index shift mid-battle would invalidate every in-flight effect
+        /// that captured one (a shield grant, a status instance, anything keyed by list position rather
+        /// than actor key). <see cref="ActorState.SideIndex"/> for the newcomer is the count of actors
+        /// already on its own side — the same 0-based-per-side numbering the constructor's own
+        /// <c>Squad.Select((a,i) => ...)</c>/<c>Wave.Select((a,i) => ...)</c> already establish.</para>
+        ///
+        /// <para><b>Placed on the board only when both a board exists AND a position is supplied</b> —
+        /// resolving a district edge into a real candidate cell is `siege-resolver`'s job (a later
+        /// module), the same scoping <see cref="Board.Placement"/> already states.</para>
+        ///
+        /// <para><b>Scoped out, stated rather than silently skipped</b>: unlike the constructor's own
+        /// per-actor setup, this method does not apply <see cref="BattleActorSetup.InnateShield"/>,
+        /// <see cref="BattleActorSetup.InitialStatuses"/>, active-aura membership, or loadout/container
+        /// compilation for the newcomer — none of those are in this task's own stated contract (append,
+        /// validate, place, never reorder), and building them against no real caller yet would be
+        /// exactly the unrequested surface this program's standing rule warns against. A reinforcement
+        /// still fights (it is `Active`/`Alive`/targetable/damageable the moment it is added) — it just
+        /// arrives without whatever a fresh setup-time actor would have gotten from those four systems,
+        /// until a real caller (`siege-resolver`) needs one of them.</para>
+        /// </summary>
+        public void AddActor(BattleActorSetup setup, Actions.GridPos? position, int round)
+        {
+            var seenKeys = new HashSet<string>(ByKey.Keys, StringComparer.Ordinal);
+            BattleEngine.ValidateActorKey(setup, seenKeys);
+
+            var sideIndex = Actors.Count(a => a.Setup.Side == setup.Side);
+            var actor = new ActorState(setup, sideIndex);
+            Actors.Add(actor);
+            ByKey[setup.Key] = actor;
+            // Round is the actual arrival round, unlike the constructor's own initial-roster loop
+            // (which spawns everyone at round 0, correctly, since that IS when they arrive).
+            Events.Add(new BattleEventRec(round, BattleEventKinds.Spawn, setup.Key, setup.TypeId, setup.Side));
+
+            if (_board is not null && position is { } p)
+                _board.Place(setup.Key, p);
+        }
+
+        /// <summary>
         /// The per-attacker tail (spec-basic-attack-adoption.md's boundary: everything from the
         /// berserker ramp onward is EngineBehavior trait logic, not the declared basic-attack action
         /// itself) — berserker ramp, essence riders, guardian split, apply, flush, tallies, revive,
@@ -698,5 +805,36 @@ public static partial class BattleEngine
 
             CheckRetreats();
         }
+    }
+
+    /// <summary>
+    /// Test-only seam (matching <c>RpgStore.DiffCommitForTest</c>'s established precedent): constructs
+    /// a real <see cref="BattleRunState"/> and returns <c>HeldActionsOf(actorKey)</c>'s action ids
+    /// directly. base-defense `combatant-kind` §4's garrison union has no production reader yet —
+    /// exactly like the pre-existing loadout-compile mechanism it sits beside
+    /// (<c>EquippedActionIdsReportingTests</c>'s own comment: "nothing reads <c>HeldActionsOf</c> for
+    /// real behavior") — and <see cref="BattleRunState"/> itself is private/nested per B13's own
+    /// deviation note, so this is the only way to prove the mechanism without waiting for
+    /// `siege-resolver` to wire a real caller.
+    /// </summary>
+    internal static IReadOnlyList<string> HeldActionIdsForTest(
+        BattleSetup setup, ulong seed, string actorKey, ActionCatalog? actionCatalog = null)
+    {
+        var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, actionCatalog: actionCatalog);
+        return state.HeldActionsOf(actorKey).Select(a => a.ActionId).ToList();
+    }
+
+    /// <summary>
+    /// Test-only seam, same shape and same reason as <see cref="HeldActionIdsForTest"/>: base-defense
+    /// `siege-positions`'s <c>PositionOf</c>/<c>CombatBoardSnapshot</c> live on the private/nested
+    /// <see cref="BattleRunState"/>, so this is the only way to prove them without a production caller
+    /// (that is `siege-resolver`'s job, a later module) yet threading a board all the way through
+    /// <see cref="Resolve"/>.
+    /// </summary>
+    internal static (GridPos? Position, Combat.BoardSnapshot? Snapshot) PositionAndSnapshotForTest(
+        BattleSetup setup, ulong seed, string actorKey, Board.BoardState? board)
+    {
+        var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, board: board);
+        return (state.PositionOf(actorKey), state.CombatBoardSnapshot);
     }
 }

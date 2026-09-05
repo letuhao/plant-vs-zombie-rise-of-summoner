@@ -35,7 +35,7 @@ from typing import Any, Callable, Mapping, Sequence
 
 from ....pipeline.llm_caller import LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
-from ...demons.anchor.vote import VoteResult, resolve_vote
+from ...demons.anchor.vote import SetVoteResult, VoteResult, resolve_set_vote, resolve_vote
 from .prompts import (
     SYSTEM_PROMPT,
     atom_families_are_allowed,
@@ -199,7 +199,7 @@ class Candidate:
     brief_id: str
     outcome: str                              # "accepted" | "blocked" | "unresolved"
     entry: "dict[str, Any] | None"
-    votes: "dict[str, VoteResult] | None"      # {"atomFamilies": VoteResult, "differentiator": VoteResult}
+    votes: "dict[str, Any] | None"             # {"atomFamilies": SetVoteResult, "differentiator": VoteResult}
     provenance: "dict[str, Any]"
 
 
@@ -241,26 +241,29 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
     if isinstance(primary, Mapping) and primary.get(BLOCKED_FIELD):
         return Candidate(brief_id=brief_id, outcome="blocked", entry=None, votes=None, provenance=prov)
 
-    atom_keys: "list[str]" = []
+    atom_samples: "list[list[str] | None]" = []
     differentiator_values: "list[str]" = []
     for draft in drafts:
         families = draft.get("atomFamilies") if isinstance(draft, Mapping) else None
-        atom_keys.append(canonical_family_key(families) if isinstance(families, list) and families
-                         else _UNRESOLVED_ATOM_SENTINEL)
+        atom_samples.append(sorted(set(families)) if isinstance(families, list) and families else None)
 
         differentiator = draft.get("differentiator") if isinstance(draft, Mapping) else None
         differentiator_values.append(differentiator if isinstance(differentiator, str) and differentiator
                                      else _UNRESOLVED_DIFFERENTIATOR_SENTINEL)
 
-    atom_vote = resolve_vote(atom_keys)
+    # `atomFamilies` is set-valued -> per-member majority. `differentiator` is a genuine SCALAR and
+    # keeps `resolve_vote` unchanged (changed 2026-09-05; see `general_propose.derive` for why the
+    # set field needed a different aggregation).
+    atom_vote = resolve_set_vote(atom_samples, sample_count=SAMPLE_COUNT)
     differentiator_vote = resolve_vote(differentiator_values)
     votes = {"atomFamilies": atom_vote, "differentiator": differentiator_vote}
+    prov["samplePicks"] = atom_samples
 
-    if (_is_unresolved(atom_vote, _UNRESOLVED_ATOM_SENTINEL)
+    if (atom_vote.confidence == "unresolved"
             or _is_unresolved(differentiator_vote, _UNRESOLVED_DIFFERENTIATOR_SENTINEL)):
         return Candidate(brief_id=brief_id, outcome="unresolved", entry=None, votes=votes, provenance=prov)
 
-    atom_families = sorted(atom_vote.value.split("|")) if atom_vote.value else []
+    atom_families = list(atom_vote.values)
     entry = entry_for(
         {**primary, "atomFamilies": atom_families, "differentiator": differentiator_vote.value},
         candidate_id=candidate_id, brief_id=brief_id, provenance=prov,

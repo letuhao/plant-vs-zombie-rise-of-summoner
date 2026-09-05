@@ -125,3 +125,13 @@ src/FusionRpg.Server/data/rpg-hot.sqlite-wal
 src/FusionRpg.Server/data/rpg-media.sqlite
 
 /data/seed/demons/_runs/
+src/FusionRpg.Server/data/rpg-media.sqlite-wal
+server-stderr.log
+.worldstage-review-data/rpg-hot.sqlite
+server-stdout.log
+.worldstage-review-data/rpg-hot.sqlite-shm
+.gitignore
+.worldstage-review-data/rpg-hot.sqlite-wal
+.worldstage-review-data/rpg-media.sqlite
+src/FusionRpg.Server/data/rpg-media.sqlite-shm
+*.log

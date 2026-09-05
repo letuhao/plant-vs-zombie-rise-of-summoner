@@ -1,4 +1,5 @@
 using FusionRpg.Core.World;
+using FusionRpg.Core.World.Siege;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.World;
@@ -29,20 +30,26 @@ public class StructureCatalogTests
         Assert.Throws<ArgumentException>(() => StructureCatalog.Get("not-a-real-structure"));
     }
 
+    // base-defense `siege-obstacles`: every fixture below needs a real AcquisitionPaths now that it is
+    // validated non-empty for every structure (not just obstacles) — otherwise these fixtures would
+    // trip THAT check before the ONE each test actually means to exercise, same shape `StructureCatalog`
+    // itself was retrofitted with (`AcquisitionPath.Built`).
+    static readonly AcquisitionPath[] BuiltOnly = { AcquisitionPath.Built };
+
     [Fact]
     public void Duplicate_and_malformed_ids_reject()
     {
         var dupe = new[]
         {
-            new StructureDef { StructureId = "stable", Name = "A", RequiredSlotKind = SlotKind.Rootbed },
-            new StructureDef { StructureId = "stable", Name = "B", RequiredSlotKind = SlotKind.Rootbed }
+            new StructureDef { StructureId = "stable", Name = "A", RequiredSlotKind = SlotKind.Rootbed, AcquisitionPaths = BuiltOnly },
+            new StructureDef { StructureId = "stable", Name = "B", RequiredSlotKind = SlotKind.Rootbed, AcquisitionPaths = BuiltOnly }
         };
         Assert.Contains("Duplicate", Assert.Throws<InvalidOperationException>(
             () => StructureCatalog.Validate(dupe)).Message);
 
         var shouty = new[]
         {
-            new StructureDef { StructureId = "Stable", Name = "A", RequiredSlotKind = SlotKind.Rootbed }
+            new StructureDef { StructureId = "Stable", Name = "A", RequiredSlotKind = SlotKind.Rootbed, AcquisitionPaths = BuiltOnly }
         };
         Assert.Throws<InvalidOperationException>(() => StructureCatalog.Validate(shouty));
     }
@@ -52,15 +59,26 @@ public class StructureCatalogTests
     {
         var badCost = new[]
         {
-            new StructureDef { StructureId = "bad-cost", Name = "A", RequiredSlotKind = SlotKind.Rootbed, Cost = -1 }
+            new StructureDef { StructureId = "bad-cost", Name = "A", RequiredSlotKind = SlotKind.Rootbed, Cost = -1, AcquisitionPaths = BuiltOnly }
         };
         Assert.Throws<InvalidOperationException>(() => StructureCatalog.Validate(badCost));
 
         var badMultiplier = new[]
         {
-            new StructureDef { StructureId = "bad-multiplier", Name = "A", RequiredSlotKind = SlotKind.Rootbed, YieldMultiplierMilli = -1 }
+            new StructureDef { StructureId = "bad-multiplier", Name = "A", RequiredSlotKind = SlotKind.Rootbed, YieldMultiplierMilli = -1, AcquisitionPaths = BuiltOnly }
         };
         Assert.Throws<InvalidOperationException>(() => StructureCatalog.Validate(badMultiplier));
+    }
+
+    [Fact]
+    public void An_empty_acquisition_paths_rejects()
+    {
+        var noPath = new[]
+        {
+            new StructureDef { StructureId = "no-path", Name = "A", RequiredSlotKind = SlotKind.Rootbed }
+        };
+        Assert.Contains("acquisition path", Assert.Throws<InvalidOperationException>(
+            () => StructureCatalog.Validate(noPath)).Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

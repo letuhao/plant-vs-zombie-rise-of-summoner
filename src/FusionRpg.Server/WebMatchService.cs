@@ -112,7 +112,9 @@ public sealed class WebMatchService
                 return (false, "correlation.mismatch", null);
             // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
             var replayTrace = new BattleTrace();
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
+            var storedReport = ApplyZombossReveal(
+                BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)),
+                playerId, storedSetup);
             // FR3: BattleTrace is a class -- `replayTrace` reflects the resolve that just ran, no
             // second return path needed.
             var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
@@ -162,7 +164,9 @@ public sealed class WebMatchService
                 return (false, "correlation.mismatch", null);
             // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
             var replayTrace = new BattleTrace();
-            var storedReport = BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table));
+            var storedReport = ApplyZombossReveal(
+                BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)),
+                playerId, storedSetup);
             var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport, replayTurnOrder));
         }
@@ -328,7 +332,70 @@ public sealed class WebMatchService
             events[i].T = t0.AddMilliseconds(i).ToString("o");
 
         var notify = _store.InsertWebMatchEvents(playerId, matchKey, events);
-        return (report, notify);
+
+        // species-build-todo.md T4.6: ResolveAndIngest is the sole exactly-once ingest point (this
+        // method's own doc history) -- the one place a Zomboss encounter outcome can be recorded
+        // exactly once, never on a replay (the two replay branches above never call this method).
+        if (setup.ZombossPatternId != null)
+            _store.RecordZombossEncounterOutcome(playerId, report.Outcome == BattleOutcome.Victory);
+
+        return (ApplyZombossReveal(report, playerId, setup), notify);
+    }
+
+    /// <summary>
+    /// species-build-todo.md T4.6, spec-zomboss-adaptive.md decision 4: the report leaving this
+    /// service never carries the RAW pattern a battle actually resolved with — only the one from
+    /// `revealDelayEncounters` encounters ago (null before enough history exists, never a fake
+    /// placeholder). The audit trail (the persisted setup, and the events already emitted above) keeps
+    /// the true value regardless; only the value handed back to the caller is delayed.
+    /// </summary>
+    internal BattleReport ApplyZombossReveal(BattleReport report, long playerId, BattleSetup setup)
+    {
+        if (setup.ZombossPatternId is null || setup.ZombossEncounterIndex is not int encounterIndex)
+            return report;
+
+        var revealed = _store.GetRevealedZombossPatternId(
+            playerId, encounterIndex, FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Tuning.RevealDelayEncounters);
+        return report with { ZombossPatternId = revealed };
+    }
+
+    /// <summary>
+    /// species-build-todo.md T4.6 — the enemy side's own commander (spec-zomboss-adaptive.md's own ⛔
+    /// seam callout): resolves which pattern the Zomboss fights this encounter with BEFORE the battle
+    /// runs (never during resolution, so `(setup, seed)` stays reproducible), applies it as real
+    /// combat channel mods on every wave actor, and stamps the setup so the reveal and the post-battle
+    /// outcome record both have what they need.
+    ///
+    /// <para><b>Two different Θ-likes, on purpose.</b> <paramref name="theta"/> is the PLAYER's own
+    /// progression Θ (`IPowerIndexProvider.ActorIndex`) — it drives the Zomboss's point BUDGET via the
+    /// SAME `PointBudget.PointsFor` every commander build uses, so "a harder Zomboss is a higher Θ or a
+    /// better allocation, never a stat nobody could have had" holds literally: the Zomboss spends from
+    /// the identical pool the human commander does. `WaveCatalog.Get(...).ContentIndex` — Θ_content, a
+    /// SEPARATE, already-established scale (`WaveCatalog.cs`'s own doc comment) — is what
+    /// <see cref="ZombossPatternSelector"/> reads as "the Zomboss's own level," since it is the
+    /// difficulty of the CONTENT the player is facing, not the player's personal progression.</para>
+    /// </summary>
+    public BattleSetup ApplyZombossPattern(long playerId, BattleSetup baseSetup, long theta, ulong seed)
+    {
+        var tuning = FusionRpg.Core.Battle.Ai.ZombossAdaptiveTuningHub.Tuning;
+        var level = WaveCatalog.Get(baseSetup.WaveId).ContentIndex;
+        var selection = _store.SelectZombossPattern(playerId, level, seed, tuning);
+
+        var zomboss = new FusionRpg.Core.Battle.Ai.ZombossCommanderAllocation(selection.PatternId);
+        zomboss.Refresh(FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, theta, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
+        var mods = FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
+            zomboss.Resolve(new FusionRpg.Core.Stats.StatContext()),
+            FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
+            new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning),
+            level,
+            FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
+
+        return baseSetup with
+        {
+            ZombossPatternId = selection.PatternId,
+            ZombossEncounterIndex = selection.EncounterIndex,
+            Wave = baseSetup.Wave.Select(a => a with { ChannelMods = a.ChannelMods.Concat(mods).ToList() }).ToList(),
+        };
     }
 
     /// <summary>Server-authoritative squad snapshots from the roster — shared with expeditions.</summary>

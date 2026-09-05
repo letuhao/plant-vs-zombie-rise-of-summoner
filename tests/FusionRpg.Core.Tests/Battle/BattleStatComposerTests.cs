@@ -128,14 +128,15 @@ public class BattleStatComposerTests
         // not throw." Before P0.5, turn.speed/turn.haste were unregistered, so BattleStatComposer's
         // KnownChannels check would have rejected this mod as unknown.
         //
-        // Real finding while writing this test, not assumed: BattleStatComposer.Compose seeds only
-        // the specific channels its own level-formula logic computes (defense/accuracy/dodge/
-        // critrate/critresist) -- everything else, including turn.speed/turn.haste, starts at an
-        // implicit 0 and a ChannelMod overlays ADDITIVELY on that 0, not on DerivedStatRegistry's own
-        // declared default (100/1000). This is the SAME established pattern this codebase already
-        // uses elsewhere (e.g. resource channels default through their OWN reader, not the composer) --
-        // so the consumer (BattleDurationResolver), not this composer, is where the real default gets
-        // applied. See BattleDurationResolverTests for that half of the proof.
+        // `battle-tempo` `tempo-content` (2026-09-05) corrected this test's own original assumption,
+        // found by actually running it for the first time this session (Core.Tests was blocked when
+        // tempo-content landed, so this staleness was invisible until now): `turn.haste` still starts
+        // at an implicit 0 (a ChannelMod overlays additively on that), but `turn.speed` no longer does
+        // -- `BattleStatComposer.Compose` now seeds it from `SpeciesTempoProjection.SpeedFor` (spec-
+        // tempo-content.md §2.1, so `B39`'s readiness ordering has something other than a shared
+        // constant to tie on), which falls back to `DerivedStatPolicy.TurnDefaultSpeed` for any actor
+        // with no authored `AttackIntervalMs` (this test's own `Actor()` helper, unchanged). The mod
+        // still overlays additively -- on that seed, not on an implicit 0.
         var setup = Actor("squad:0", "squad", mods: new[]
         {
             new BattleChannelMod(DerivedTurnChannels.Speed, 50),
@@ -144,7 +145,10 @@ public class BattleStatComposerTests
 
         var snap = BattleStatComposer.Compose(setup);
 
-        Assert.Equal(50, (int)snap.Get(DerivedTurnChannels.Speed)); // implicit 0 + the mod's own 50
+        // tempo-content's own seed (TurnDefaultSpeed, for an actor with no authored AttackIntervalMs)
+        // plus the mod's own 50 -- read from the same tunable this composer itself reads, never
+        // hardcoded, so this stays correct if the tunable's value ever changes.
+        Assert.Equal(DerivedStatPolicy.TurnDefaultSpeed + 50, (int)snap.Get(DerivedTurnChannels.Speed));
         Assert.Equal(-200, (int)snap.Get(DerivedTurnChannels.Haste)); // implicit 0 + the mod's own -200
     }
 }

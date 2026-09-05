@@ -94,13 +94,34 @@ export function conflictFor(candidateKey: string, exclude: BindableActionId): Bi
   return null;
 }
 
+/**
+ * world-stage W95 — `1`-`9` are `information-architecture.md`'s own reserved range ("Stage-specific
+ * hotbar · owned by the current stage"), so a rebind onto one of them is already a rule violation,
+ * not merely a UX nicety this task invents. Enforced *at the source* (`rebind` itself, not only at
+ * one call site) so no caller can corrupt the table into a state that throws the next time a stage
+ * using that digit for its own hotbar tries to register it via `registerGlobalVerb`.
+ */
+const RESERVED_DIGIT_PATTERN = /^[1-9]$/;
+
+export function reservedRangeReasonFor(key: string): string | null {
+  return RESERVED_DIGIT_PATTERN.test(key)
+    ? "1–9 are reserved for the current stage's own hotbar and cannot be rebound here"
+    : null;
+}
+
 /** Rebinds `action` to `key`. If another action already holds `key` (the plate's "Take it"), that
  * action swaps onto whatever `action` is vacating rather than reverting to its own default — a
  * revert-to-default is only safe when that default isn't the very key just taken, which it can be
  * (e.g. Relics defaults to "r" itself), and would otherwise leave both actions resolving to the
  * same key. The vacated key is provably held by nobody else going in, so the swap can never
- * introduce a second collision. Returns the full updated table. */
+ * introduce a second collision. Returns the full updated table — unchanged, and with no change
+ * event fired, if `key` is in the reserved `1`-`9` range (`reservedRangeReasonFor` names why; a
+ * caller that wants to show the reason before attempting the rebind checks it directly). */
 export function rebind(action: BindableActionId, key: string): Record<BindableActionId, string> {
+  if (reservedRangeReasonFor(key) != null) {
+    return currentBindings();
+  }
+
   const previousKey = currentKeyFor(action);
   const overrides = readOverrides();
   const next: Partial<Record<BindableActionId, string>> = { ...overrides, [action]: key.toLowerCase() };

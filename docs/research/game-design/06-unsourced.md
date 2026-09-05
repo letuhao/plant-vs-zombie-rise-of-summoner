@@ -156,6 +156,9 @@ change: Fandom's 402 is bypassable.**
 | `scryfall.com` + API, `mtggoldfish`, `kotaku`, `pcgamesn`, `wiki.leagueoflegends.com`, `store.steampowered.com` (DNS) | blocked | — |
 | Caves of Qud wiki | — | serves `action=raw` |
 | Moegirl, Zhihu, Baidu Baike, Fandom-zh | 403 / 402 | the Chinese-language mod scene is covered second-hand only |
+| `megatenwiki.com` | **bot-verification gate, re-measured 2026-09-05** — and it now blocks through the `r.jina.ai` reader proxy too (party-dungeon prior-art review) | none found — Megaten mechanics are covered from the Fandom mirror via the proxy, and from datamines |
+| `diablo2.diablowiki.net` | 403, measured 2026-09-05 (party-dungeon prior-art review) | none tried beyond a retry — use the Arreat Summit archive or `d2mods` datamines instead |
+| `game8.co` | returns **empty bodies** to the fetcher, measured 2026-09-05 (party-dungeon prior-art review) — a 200 with no content, so it fails silently | none found — treat any game8 citation as unverified until fetched by hand |
 
 **Endpoints confirmed working and worth reusing:**
 `overwatch.blizzard.com/en-us/news/patch-notes/live/<YYYY>/<M>/` ·

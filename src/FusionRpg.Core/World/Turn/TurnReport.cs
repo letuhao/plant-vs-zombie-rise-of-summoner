@@ -50,7 +50,30 @@ public sealed class TurnReport
     public IEnumerable<TurnReportEntry> Dropped =>
         _entries.Where(e => e.Kind == TurnReportKinds.CommandDropped);
 
-    /// <summary>Rebuilds a report from stored entries — the store's read path for the hot tail.</summary>
+    /// <summary>
+    /// Rebuilds a report from its own stored phase list and entries — the store's read path for the
+    /// hot tail, once both are actually persisted. Trusts <paramref name="phases"/> outright rather
+    /// than re-deriving it from <paramref name="entries"/>, because a phase that ran with zero
+    /// entries (`Growth`'s own named no-op, most turns) has no entry to re-derive it *from* — see
+    /// <see cref="FromEntries"/>'s own doc comment for why that reconstruction is lossy.
+    /// </summary>
+    public static TurnReport FromStored(IReadOnlyList<string> phases, IEnumerable<TurnReportEntry> entries)
+    {
+        var report = new TurnReport();
+        report._phases.AddRange(phases);
+        report._entries.AddRange(entries);
+        return report;
+    }
+
+    /// <summary>
+    /// Rebuilds a report from stored entries alone — the legacy fallback for a row committed before
+    /// `phases_json` existed. **Lossy by construction**: a phase that ran with zero entries (`Growth`
+    /// most turns) leaves no entry behind to reconstruct it from, so it silently vanishes from
+    /// <see cref="Phases"/> rather than surviving as an empty section — exactly the "Nothing to
+    /// report this phase" case `PlaybackRail`'s own GG-17 discipline exists to render, not hide.
+    /// Prefer <see cref="FromStored"/>; this exists only so an old row still returns *something*
+    /// rather than refusing outright.
+    /// </summary>
     public static TurnReport FromEntries(IEnumerable<TurnReportEntry> entries)
     {
         var report = new TurnReport();

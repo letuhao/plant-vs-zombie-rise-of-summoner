@@ -52,6 +52,31 @@ const COLLECTION_SURFACES: CollectionEntry[] = [
     surface: "Pacts (PactsLayer bound-contract list)",
     strategy: "render-all",
     reason: "Bounded by the real contract-slot cap (ContractCapacityDto.maxSlots, a small, server-enforced number) — cannot grow past that cap"
+  },
+  {
+    surface: "World Outliner (legion + sector rows)",
+    strategy: "render-all",
+    reason: "~28 rows at spec-world-outliner.md §8e.3's own target, bounded by the two available map tiers — not player-generated volume"
+  },
+  {
+    surface: "World notification rail",
+    strategy: "render-all",
+    reason: "Flushes every End Turn except real blockers (spec-world-notify.md), and the visible stack is capped at three (Toasts.tsx's own VISIBLE_CAP) — never an accumulating list"
+  },
+  {
+    surface: "World turn playback keyframe rail",
+    strategy: "render-all",
+    reason: "One turn's own transcript, discarded at the next (spec-world-playback.md) — revisit only if a single turn's entry count grows past roughly 300"
+  },
+  {
+    surface: "World sector inspector — slot rows",
+    strategy: "render-all",
+    reason: "Four slots max in shipped content — SlotIndex tops out at 3 (spec-world-inspector.md) — a real, small, closed set per sector"
+  },
+  {
+    surface: "World sector inspector — force rows",
+    strategy: "render-all",
+    reason: "Single-digit rows; enemy forces render as bands (ForceView's exact:false case), never per-unit rows, so there is no unbounded count to render at all (spec-world-inspector.md)"
   }
 ];
 
@@ -68,6 +93,20 @@ describe("volume matrix (GG-50)", () => {
   });
 
   it("declares the full known set", () => {
-    expect(COLLECTION_SURFACES).toHaveLength(8);
+    expect(COLLECTION_SURFACES).toHaveLength(13);
+  });
+
+  it("the world stage adds no virtualize entry — every one of its five collections is structurally bounded", () => {
+    const worldSurfaces = COLLECTION_SURFACES.filter((e) => e.surface.startsWith("World "));
+    expect(worldSurfaces).toHaveLength(5);
+    for (const entry of worldSurfaces) {
+      expect(entry.strategy).toBe("render-all");
+    }
+  });
+
+  it("virtualize is still exactly one entry (Creatures) — the world stage did not add a second", () => {
+    const virtualized = COLLECTION_SURFACES.filter((e) => e.strategy === "virtualize");
+    expect(virtualized).toHaveLength(1);
+    expect(virtualized[0]?.surface).toContain("Creatures");
   });
 });

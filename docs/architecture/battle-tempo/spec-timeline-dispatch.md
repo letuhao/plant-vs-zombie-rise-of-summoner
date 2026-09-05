@@ -13,14 +13,22 @@ is built: the flag (§2.1), the accessor (§2.3), the declare/apply split (§2.2
 this spec's own original design — a scoped dispatch branch (§2.5) using a LOCAL, per-round-phase
 `EventQueue` rather than the shared `roundQueue`, which sidesteps Hazard A (§2.4) entirely rather than
 fixing it in place.** `tools/TimelineDispatchProbe/` proves, through the REAL `BattleEngine.Resolve`,
-on synthetic never-catalogued profiles only: `W` moves win rate (+14.17pp, W=1 vs W=4) and `Commitment`
-moves average rounds-to-win (EarlyBound 6.696 vs LateBound 6.025) — the exact two numbers
+on synthetic never-catalogued profiles only: `W` moves win rate (+12.92pp, W=1 vs W=4) and `Commitment`
+moves average rounds-to-win (EarlyBound 6.846 vs LateBound 6.121) — the exact two numbers
 `battle-tempo-todo.md` Checkpoint B named as unmet, now measured non-zero for the first time in this
 program's history. **No entry in `BattleModeProfileCatalog` sets the flag** — every shipped profile is
 provably byte-identical (every existing `battle-tempo` probe reproduces its already-recorded numbers
 exactly after this landed). See §2.5 for the revised design and §9 for one additional finding
 (`BasicAttackEnvelope.Commitment` was hardcoded, making `DefaultCommitment` permanently unreachable
-regardless of dispatch completeness — fixed alongside this module, confirmed inert for the atomic path).
+regardless of dispatch completeness — fixed alongside this module, confirmed inert for the atomic path)
+and §9b for a second (a dead attacker's own scheduled `Resolve` could still land a hit).
+
+**§11 also live-wires `reaction-lane`'s `RL2` counter** into this same dispatch branch — built the same
+day, once `RunTimelineActionPhase` existed to host it. That wiring surfaced a THIRD real finding: every
+battle actor's resource pools (poise included) are always empty, because no derived-stat composer ever
+sets a `resource.max.*`/`resource.regen.*` channel for a battle actor. The lane correctly declines every
+counter today; `RL3` stays blocked on that gap plus its own pre-existing dependency on the owner-gated
+Phase 2 sweep.
 
 ---
 
@@ -276,7 +284,7 @@ program built.
 | `Battle/BattleRunState.cs` | +1 accessor, `BasicAttackEnvelopeCompiled` (narrow exposure of one field the local action phase needs) | ✅ built |
 | `Battle/BattleEngine.cs` | New `if`/`else` branch in the per-attacker loop, gated on the flag; the `else` is the pre-existing do-while, byte-for-byte | ✅ built |
 | `Actions/TimelineDispatch.cs` (new) | `RunTimelineActionPhase` — the local discrete-event action phase (§2.5) | ✅ built |
-| `tools/TimelineDispatchProbe/` | Standalone probe (net6.0, `ProjectReference` to `FusionRpg.Core.csproj` only) — API-level checks plus an end-to-end sweep through real `BattleEngine.Resolve` | ✅ built, 15/15 PASS |
+| `tools/TimelineDispatchProbe/` | Standalone probe (net6.0, `ProjectReference` to `FusionRpg.Core.csproj` only) — API-level checks plus an end-to-end sweep through real `BattleEngine.Resolve` | ✅ built, 17/17 PASS |
 
 No new production test project files — this module's verification is probe-only throughout, matching
 how every prior `battle-tempo` module was proven while `Core.Tests` stays blocked by unrelated,
@@ -295,7 +303,7 @@ practice of naming which hazard a check defends against inline (see hazard 1–7
 
 ## 6. Testing strategy
 
-All built and executed 2026-09-05, via `tools/TimelineDispatchProbe/` (15/15 PASS) since `Core.Tests`
+All built and executed 2026-09-05, via `tools/TimelineDispatchProbe/` (17/17 PASS) since `Core.Tests`
 stays blocked by unrelated, pre-existing WIP in other streams (`PU1`'s own evidence).
 
 1. ✅ **The split is a no-op, proven by re-running existing evidence.** `MeasProbe` captured before the
@@ -315,9 +323,9 @@ stays blocked by unrelated, pre-existing WIP in other streams (`PU1`'s own evide
    separately probed) if the one-round-lifecycle assumption is ever violated, matching
    `BattleEngine.Resolve`'s own `maxLoopIterations` precedent.
 5. ✅ **The full mechanism, end to end, through the REAL `BattleEngine.Resolve`, on synthetic profiles
-   only.** `WIsMeasurablyNonZeroUnderTimelineDispatch`: W=1 vs W=4 win rate, +14.17 percentage points.
+   only.** `WIsMeasurablyNonZeroUnderTimelineDispatch`: W=1 vs W=4 win rate, +12.92 percentage points.
    `CommitmentIsMeasurablyNonZeroUnderTimelineDispatch`: EarlyBound vs LateBound average rounds-to-win,
-   6.696 vs 6.025. Both are the first non-zero measurements of these two axes in this program's
+   6.846 vs 6.121. Both are the first non-zero measurements of these two axes in this program's
    history, closing `battle-tempo-todo.md` Checkpoint B's own previously-unmet line.
 6. ✅ **Every shipped profile, unchanged — with an explicit falsifier, not just a rerun.**
    `FalsifierWDeltaIsZeroWhenTheFlagIsOff` and `FalsifierCommitmentDeltaIsZeroWhenTheFlagIsOff` apply
@@ -356,8 +364,8 @@ stays blocked by unrelated, pre-existing WIP in other streams (`PU1`'s own evide
    own call site — no entry in `BattleModeProfileCatalog` sets it.
 2. ✅ Every existing `battle-tempo` probe reproduces its already-recorded numbers exactly with this
    module's code present (byte-for-byte diff on `MeasProbe`; PASS-for-PASS on the other nine).
-3. ✅ A synthetic, never-shipped test profile with the flag `true` measures `W` (+14.17pp win rate) and
-   `Commitment` (−0.671 rounds-to-win, EarlyBound vs LateBound) both **non-zero** — closing
+3. ✅ A synthetic, never-shipped test profile with the flag `true` measures `W` (+12.92pp win rate) and
+   `Commitment` (−0.725 rounds-to-win, EarlyBound vs LateBound) both **non-zero** — closing
    `battle-tempo-todo.md` Checkpoint B's own previously-unmet line.
 4. ✅ Both hazards are resolved (A by construction, B by a defended, throwing scope guard) rather than
    patched in place — no red-then-green falsifier was needed for Hazard A since the collision it
@@ -388,6 +396,20 @@ at all (only `ActionRunner` does), so removing the hardcoded value changes nothi
 letting `ActionEnvelope.NoOp`'s own `null` default apply; `MeasProbe`'s byte-for-byte diff confirms the
 atomic path is unaffected.
 
+### 9b. A second defect: a dead attacker's own scheduled `Resolve` could still land a hit
+
+Found while building `reaction-lane` `RL2`'s counter wiring (§11), which made this concretely
+observable for the first time — a counter can now kill an attacker between its own commit and its own
+resolve, which nothing before RL2 had a live path to trigger. `ActionRunner.OnResolveDue` only checks
+`IsTargetActive` (the *target's* liveness) before resolving a hit; nothing checked whether the acting
+attacker itself was still alive. Fixed in `RunTimelineActionPhase`'s Resolve handler: `if
+(!actor.Active) continue;` immediately before calling `ApplyBasicAttack`, mirroring
+`DeclareBasicAttack`'s own `!attacker.Active` early return at commit time. This changed the `W`
+measurement itself (a dead squad member no longer lands a "phantom" hit under concurrent `W > 1`
+resolution) — the headline numbers throughout this spec are the numbers **after** this fix, not before
+it. Confirmed inert for the atomic path (`MeasProbe` diffed byte-for-byte) since the atomic path never
+schedules a delayed resolve for anything to die in between.
+
 ---
 
 ## 10. Golden movement
@@ -398,3 +420,98 @@ defect in the split (§2.2) or the branch gating (§2.1), not an accepted cost �
 `battle-tempo` module, this one carries **zero** predicted golden movement, because it is additive
 capability, not a shipped behavior change. The behavior change (flipping the flag for `hybrid-atb`) is
 `LAND1`/`LAND2`'s cost to predict and pay, separately, later, with its own sign-off.
+
+---
+
+## 11. `reaction-lane` RL2 — live-wired inside `RunTimelineActionPhase`
+
+**Built and measured 2026-09-05, same session as TD3.** Once the dispatch branch existed, `reaction-
+lane`'s own remaining gap (a defender declaring a counter-intent during an attacker's wind-up) turned
+out to be tractable with the same opt-in, zero-blast-radius pattern — wired directly into the Resolve
+handler this spec's own §2.5 already describes, not a separate dispatch path.
+
+**The wiring, in the Resolve handler, before `ApplyBasicAttack`:** the defender (the resolving
+attacker's own target) is offered a reaction to the triggering resolution itself, independent of
+whether the ensuing hit lands (`ReactionLane`'s own doc: "resolves *inside* the triggering
+resolution"). `reactionLane.TryEnter(target.Setup.Key, target.Setup.Side, trace)` — one
+`Timeline.ReactionLane` instance per battle (constructed in `BattleEngine.Resolve`, mirroring
+`battleEconomy`'s own per-battle lifetime; `WReact = 0` for every shipped profile makes this
+unconditional construction inert, matching `ReactionLane`'s own "`WReact = 0` is byte-identical to no
+lane at all" contract). On `Entered`: `ReactionCounter.TryCounter` against a per-actor
+`ActorResourcePools` obtained from a new per-battle registry, and on a successful commit, the damage
+applies to the ORIGINAL ATTACKER via `state.ApplyHp` directly (not `DispatchHit` — decision 12's "the
+spend IS the attack" needs no trait tail of its own). The attacker's own hit proceeds unaffected
+afterward — a counter retaliates, it does not negate (RL1's own scope: block/parry are a different,
+unbuilt mechanism).
+
+**The resource-pool bridge, reused rather than duplicated.** `BattleEngine.ActorState` had no bridge to
+`ActorResourcePools` (the type `PoiseLedger`/`ReactionCounter` operate on) before this. A first pass
+misread that as a bigger, unanswered architectural question than it is; corrected on a wider grep:
+`LawnActorResourcePools` (`Combat/LawnActorResourcePools.cs`, E28) already **is** exactly this bridge,
+shipped and production-used for live lawn actors — a generic `Dictionary<ptr, ActorResourcePools>`
+registry with no lawn-specific mechanism in its own body. `BattleRunState.ResourcePools` reuses it
+verbatim, constructed once per battle (mirroring `Cooldowns`). No faction branch gates who gets a pool
+— `resource-hub-ssot.md`'s own rule ("one shared set... faction difference is a display label, never a
+branch") answers the "does an enemy have poise" question that would otherwise have been a second
+open design point.
+
+**A new, dedicated tunable file** — `data/tuning/reaction-lane.v1.json` (`PoiseSpend`, `RiposteShareCapMilli`)
+— rather than a new required section grafted onto `battle.v{n}.json` (whose loader rejects any file
+missing a section it expects, which would have broken every existing fixture predating this module).
+Follows `action-timing.v1.json`'s own "new capability, new file" precedent exactly. `RL2`'s own task
+text already says sizing these numbers is `RL3`'s job — this file ships an explicitly-labeled,
+unmeasured placeholder, the same posture `action-timing.v1.json` itself shipped with.
+
+**What the wiring proved, and what it surfaced.** `tools/TimelineDispatchProbe/` (17/17 PASS) confirms:
+`ReactionLane.TryEnter` really is reached every time a resolve fires under `WReact > 0` (never dead
+code); `ReactionCounter.TryCounter` really is called with a real, per-actor pool; and the whole
+mechanism stays exactly as inert as before whenever `WReact = 0` or the dispatch flag itself is off
+(both falsified against a control). What it surfaced, and could not have been found any other way:
+**every battle actor's resource pools are always empty.** Grep-confirmed — `BattleStatComposer.cs`,
+`BattleEffects.cs`, and `BattleDerivedModifierLedger.cs` never set a `resource.max.*` or
+`resource.regen.*` derived channel for any of the six resource ids, for any actor, anywhere.
+`ActorResourcePools.CreateFull` reads exactly those channels, so `PoiseLedger.TryCommit` correctly,
+honestly refuses every counter attempt today — the mechanism is not broken; the derived-stat input it
+depends on does not exist yet. Deciding how much poise a demon should have (scaled by level? a flat
+amount? tied to a trait?) is a real balance/design question, out of `RL2`'s own "intent, cost, and
+payoff" scope and not decided here.
+
+**`RL3` remains blocked, now on two named things, not one:** the composer gap above (nothing to size a
+spend range against, if no battle actor can ever afford to spend), and its own pre-existing dependency
+on the Phase 2 sweep (`battle-tempo-todo.md`'s own text: "sized against the Phase 2 sweep") — which is
+owner-gated the same way `LAND1`/`LAND2` are.
+
+---
+
+## 12. `LAND1`'s staged sweep — a third real defect, found by real content, not synthetic probes
+
+**Run 2026-09-05, per the owner's own explicit direction ("run the sweep, stop before sign-off"):
+measured, then reverted.** `BattleModeProfile.HybridAtb` was staged with
+`with { UsesTimelineDispatch = true }`, the full `MeasProbe` sweep re-run against it, then the flag was
+reverted — nothing shipped stayed changed; no golden was re-blessed; no `RulesetVersion` bump happened.
+
+**A third real, previously-undiscovered defect surfaced immediately, on the first seed.** `TD3`'s local
+action-phase clock (§2.5) was constructed fresh every round, resetting to tick 0 — but
+`state.Cooldowns` and (as of `TD4`) `state.ResourcePools` are per-BATTLE-persistent state that assumes
+ticks only ever increase. Every synthetic probe this session happened to avoid the exact combination
+(a multi-round battle exercising the reaction lane) that exposes this; the first real-content sweep hit
+it on seed 9000: `ArgumentOutOfRangeException: nowTick precedes LastTick`. **Fixed**: the clock that
+feeds `RunTimelineActionPhase` is now constructed once per battle (`BattleEngine.Resolve`, alongside
+`Cooldowns`/`ResourcePools`/`reactionLane`), not once per round — the per-round `EventQueue`/
+`ActionSlots`/`ActionRunner` correctly stay round-scoped (the drain loop always empties them to
+completion before the method returns, every call, so nothing outlives one round regardless of whether
+the queue itself is fresh or persistent — only the clock feeding cross-round state needed to stop
+resetting). Reverified: every probe green, `MeasProbe` byte-for-byte identical to the recorded
+baseline, all four guards green, zero overflow findings in any touched file.
+
+**What the sweep measured, once it could run.** On `CloseSetup` (the shape the real golden tests use):
+**zero win-rate movement**, 87.92% either way across all 240 seeds, verified not to be a silent no-op
+by tracing one seed directly — the two paths produce genuinely different traces (175 vs. 211
+transition lines; concurrent commits vs. sequential) but bit-for-bit identical per-actor HP/damage/
+kills, because nobody dies mid-round in this fixture, so the fizzle/re-target axis this mechanism
+exists to expose never actually triggers. On a more volatile, asymmetric fixture (mid-round deaths
+common), through the real `HybridAtb` object: win rate still saturates at 100%, but average
+rounds-to-win differs for real (3.396 vs. 3.279). **Conclusion recorded for the owner in
+`battle-tempo-todo.md`'s own `LAND1` entry**: landing this would not move the existing golden suite,
+but would very likely produce small, real shifts on more volatile real wave rosters — exactly the
+content class this whole program exists to make `W`/`Commitment` matter for.

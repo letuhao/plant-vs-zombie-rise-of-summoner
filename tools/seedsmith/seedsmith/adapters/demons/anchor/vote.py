@@ -44,6 +44,75 @@ def resolve_vote(values: Sequence[str]) -> VoteResult:
 
 
 @dataclass(frozen=True)
+class SetVoteResult:
+    """One resolved vote over a SET-valued field. Deliberately shaped so `.value` / `.minority_key`
+    read like `VoteResult`'s own scalar fields — a caller that persists a row keeps its shape."""
+
+    values: "tuple[str, ...]"      # resolved members, sorted; empty only when confidence == "unresolved"
+    confidence: str                # "high" (every sample identical) | "split" | "unresolved"
+    minority: "tuple[str, ...]"    # proposed but below threshold, sorted — recorded, never discarded
+    tally: "dict[str, int]"        # member -> how many samples chose it (the diagnosis this lacked)
+
+    @property
+    def value(self) -> "str | None":
+        """The canonical `|`-joined key, or `None` when unresolved — the exact shape
+        `VoteResult.value` carries, so existing row writers need no reshape."""
+        return "|".join(self.values) if self.values else None
+
+    @property
+    def minority_key(self) -> "str | None":
+        return "|".join(self.minority) if self.minority else None
+
+
+def resolve_set_vote(samples: "Sequence[Sequence[str] | None]", *,
+                     sample_count: int = 3) -> SetVoteResult:
+    """Per-MEMBER majority over a set-valued field — the aggregation `resolve_vote` cannot express.
+
+    **Why this exists (measured, 2026-09-05).** `resolve_vote` is scalar: it compares whole values
+    with `Counter` equality. A set-valued field reaching it has to be flattened to one string first
+    (the action pipelines' own `canonical_family_key`), so `{a,b}` / `{a,c}` / `{a,d}` scores as a
+    1-1-1 split — *unresolved* — even though `a` was chosen unanimously by all three samples. Every
+    member-level agreement is discarded by the flattening. Over a ~98-option pool with multi-member
+    picks, exact whole-set agreement across three independent samples is combinatorially unlikely,
+    which is why the real action-corpus batches measured a 40-55% unresolved rate that five rounds
+    of prompt work could not move: the ceiling was in the aggregation, not the model.
+
+    **The rule.** A member joins the resolved set when at least a majority of `sample_count`
+    samples chose it (2 of 3). The denominator is always `sample_count`, never "samples that
+    answered" — a heal-exhausted sample (`None`) still counts against the threshold, the identical
+    discipline the callers' own unresolved-sample sentinel already enforced, and for the same
+    reason: dropping it would let two samples out-vote a total of two instead of three.
+
+    **It can never fall back to one sample.** A member needs two independent samples to enter the
+    set, which is strictly stronger per-member evidence than whole-set equality ever gave. An empty
+    result is `unresolved` — the genuine ambiguity signal, never sample 0's raw pick.
+    """
+    if len(samples) != sample_count:
+        raise ValueError(f"resolve_set_vote needs exactly {sample_count} samples, got {len(samples)}")
+
+    threshold = sample_count // 2 + 1
+    tally: "Counter[str]" = Counter()
+    usable = 0
+    for sample in samples:
+        if sample is None:
+            continue
+        usable += 1
+        tally.update(set(sample))
+
+    resolved = tuple(sorted(m for m, c in tally.items() if c >= threshold))
+    minority = tuple(sorted(m for m, c in tally.items() if c < threshold))
+
+    if not resolved:
+        return SetVoteResult(values=(), confidence="unresolved", minority=minority, tally=dict(tally))
+
+    # "high" keeps its existing meaning exactly: every sample answered, and answered identically.
+    unanimous = usable == sample_count and not minority and all(
+        c == sample_count for c in tally.values())
+    return SetVoteResult(values=resolved, confidence="high" if unanimous else "split",
+                         minority=minority, tally=dict(tally))
+
+
+@dataclass(frozen=True)
 class VoteRecord:
     """One resolved vote, kept for disagreement reporting (spec §5)."""
     species_id: str

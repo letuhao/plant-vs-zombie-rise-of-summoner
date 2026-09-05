@@ -59,8 +59,18 @@ public sealed partial class RpgStore
                 containerAtomIds = container?.Atoms.Select(a => a.AtomId).ToHashSet();
             }
 
+            // base-defense `siege-positions` §4: true, not false. This is the one production call
+            // site that compiles the WHOLE action catalog (once, server-wide) — flipping it is what
+            // lets an Area-targeted action exist in the catalog at all, for any battle that might run
+            // with a board. It does not make Area targeting incorrect for a boardless battle: runtime
+            // resolution (`ActionTargetResolver`/`GridDistance.InRange`) is already null-safe by design
+            // — "with no board, every range check passes" — so a compiled Area action degrades
+            // gracefully rather than behaving wrongly when the battle it runs in has no board. No
+            // shipped content authors an Area-targeted action today, so this flip changes zero existing
+            // catalog rows' compiled shape — verified by running the full battle golden suite, not
+            // assumed from this reasoning alone.
             var (rejection, action) = ActionCompiler.Compile(
-                row, costs, scopes, containerAtomIds, boardAvailable: false, rungTable);
+                row, costs, scopes, containerAtomIds, boardAvailable: true, rungTable);
 
             if (action is null)
             {

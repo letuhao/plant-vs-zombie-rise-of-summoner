@@ -75,3 +75,12 @@ Build order (revised 2026-08-21; expeditions shipped): `element-extension` → `
 ## Deliberately deferred (not in any v1 module)
 
 Personality-driven in-run AI (Unity-owned), faction kingdoms/diplomacy, demon offspring/breeding mechanics beyond lineage records, prison/garden/market facilities, negotiation outcomes in raids, community discovery sharing.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Module here | Filed by | Shape | Until it lands |
+|---|---|---|---|---|
+| `DemonMintSpec.Level` | `demon-core` | `party-dungeon/spec-wild-room.md` §4 | additive `long? Level` on the spec; `RpgStore.Demons.cs:53` writes `$level = spec.Level ?? 1` — null is today's line for every caller | a recruit or capture mints at level 1 instead of `Θ_room + thetaOffset` |
+| `SummonRoller.Roll` optional `poolFilter` | `demon-summoning` | wild-room §6 | a trailing `Func<DemonSpeciesDef, bool>? poolFilter = null` on `Roll` (`SummonRoller.cs:61`); null = today's pool; `altar.poolFromDomain` stays `false` until it exists | the altar pulls from the whole summonable catalog |
+| A personality mint override | `demon-contracts` | wild-room §2 (**ask first**) | the talk's `PersonalityFor("dungeon:wild:{r}:{c}")` recorded on the mint instead of `PersonalityFor(instanceId)` over a fresh `Guid` (`RpgStore.Demons.cs:45`) | v1 accepts the mismatch |
+

@@ -1,0 +1,2670 @@
+{
+  "_meta": {
+    "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+    "candidateSetHash": "51c1a6f415bbf47aed4a1124f567d7f4233f746a2bb0c038b67b43a5c6280e40",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "partition": "family",
+    "promptVersion": "family-propose/1",
+    "round": 903
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "8af0675d059b787d3798bdd06d7f3a01b145f23510e2dd1d00f520a3655e2544",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.sporing",
+            "atom.withering"
+          ],
+          [
+            "atom.sporing"
+          ],
+          [
+            "atom.gardener",
+            "atom.retribution"
+          ]
+        ]
+      },
+      "briefId": "brief.family.base.001",
+      "candidateId": "candidate.family.000",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "8af0675d059b787d3798bdd06d7f3a01b145f23510e2dd1d00f520a3655e2544",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.sporing",
+              "atom.withering"
+            ],
+            [
+              "atom.sporing"
+            ],
+            [
+              "atom.gardener",
+              "atom.retribution"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.sporing"
+        ],
+        "briefId": "brief.family.base.001",
+        "candidateId": "candidate.family.000",
+        "flavor": "The target's structural integrity is compromised as rapid, invasive growth erupts from within, shattering their defenses from the inside out.",
+        "motifsExpressed": [
+          "植物",
+          "屋顶"
+        ],
+        "name": "Overgrowth Rupture",
+        "rationale": "The action targets the enemy (Relation: enemy) and focuses on the self (Target mode: self) to trigger a burst of growth that damages others. By utilizing 'sporing' and 'withering', the action captures the essence of a botanical takeover. The 'roof' motif is expressed through the concept of structural rupture and the crushing weight of sudden, overwhelming growth.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.gardener|atom.retribution|atom.withering"
+    },
+    {
+      "_provenance": {
+        "briefHash": "805f2528d06aa8532a9d5e5e13281179dc2c60a31874851eeca1260ba37e36b8",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.gardener"
+          ],
+          [
+            "atom.gardener"
+          ],
+          [
+            "atom.entangling"
+          ]
+        ]
+      },
+      "briefId": "brief.family.base.002",
+      "candidateId": "candidate.family.001",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "805f2528d06aa8532a9d5e5e13281179dc2c60a31874851eeca1260ba37e36b8",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.gardener"
+            ],
+            [
+              "atom.gardener"
+            ],
+            [
+              "atom.entangling"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.gardener"
+        ],
+        "briefId": "brief.family.base.002",
+        "candidateId": "candidate.family.001",
+        "flavor": "The target is smothered by a sudden, dense thicket of vegetation that clings to them like a living roof, restricting their movement and obscuring their vision.",
+        "motifsExpressed": [
+          "屋顶",
+          "植物"
+        ],
+        "name": "Overgrowth Canopy",
+        "rationale": "The action uses the 'Gardener' atom to fulfill the 'Plant' motif by spawning vegetation, and the 'Roof' motif is expressed through the description of the growth forming a canopy/covering the target.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.entangling"
+    },
+    {
+      "_provenance": {
+        "briefHash": "31ec0ecda58770a602d4281154c6f00fc3018f759e9154774012bce4c47bc16c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.carapace",
+            "atom.might"
+          ],
+          [
+            "atom.hit-followthrough",
+            "atom.might"
+          ],
+          [
+            "atom.might",
+            "atom.savagery"
+          ]
+        ]
+      },
+      "briefId": "brief.family.bucket.001",
+      "candidateId": "candidate.family.002",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "31ec0ecda58770a602d4281154c6f00fc3018f759e9154774012bce4c47bc16c",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.carapace",
+              "atom.might"
+            ],
+            [
+              "atom.hit-followthrough",
+              "atom.might"
+            ],
+            [
+              "atom.might",
+              "atom.savagery"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.might"
+        ],
+        "briefId": "brief.family.bucket.001",
+        "candidateId": "candidate.family.002",
+        "flavor": "The creature lunges forward with a sudden, jarring momentum, driving its reinforced cranium directly into the enemy to deliver a crushing blow.",
+        "motifsExpressed": [
+          "铁头功",
+          "僵尸"
+        ],
+        "name": "Iron-Skull Impact",
+        "rationale": "The action captures the essence of 'Iron Head' (铁头功) through a self-targeted, high-impact physical charge, and the 'Zombie' (僵尸) motif through the relentless, blunt-force nature of the attack. It utilizes 'Might' for the offensive power of the impact and 'Carapace' to represent the hardened, unyielding nature of the skull used for the strike.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.carapace|atom.hit-followthrough|atom.savagery"
+    },
+    {
+      "_provenance": {
+        "briefHash": "f978604e0b6592244a41db94ab623fd074c9b1b8132f859723800f889707b1e7",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.carapace"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.stoicism"
+          ]
+        ]
+      },
+      "briefId": "brief.family.bucket.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.carapace|atom.retribution|atom.stoicism"
+    },
+    {
+      "_provenance": {
+        "briefHash": "4de89e5ac8152b9a43ac5b18f26537fd7c9a7d4bab15cd5f36bd9ad62eb5a55d",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.death-salvo"
+          ],
+          [
+            "atom.sporing",
+            "atom.volley"
+          ],
+          [
+            "atom.elpw-overflow",
+            "atom.volley"
+          ]
+        ]
+      },
+      "briefId": "brief.family.cactus.001",
+      "candidateId": "candidate.family.004",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "4de89e5ac8152b9a43ac5b18f26537fd7c9a7d4bab15cd5f36bd9ad62eb5a55d",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.death-salvo"
+            ],
+            [
+              "atom.sporing",
+              "atom.volley"
+            ],
+            [
+              "atom.elpw-overflow",
+              "atom.volley"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.volley"
+        ],
+        "briefId": "brief.family.cactus.001",
+        "candidateId": "candidate.family.004",
+        "flavor": "A sudden, violent eruption of sharp protrusions that shred everything in their path.",
+        "motifsExpressed": [
+          "仙人掌",
+          "发射"
+        ],
+        "name": "Barbed Volley",
+        "rationale": "The action captures the essence of the cactus family by using '发射' (launch/fire) to describe the release of '仙人掌' (cactus) needles. By utilizing 'atom.death-salvo', the action triggers upon the death of the unit, representing the biological reality of many cacti releasing seeds or spines as a final, reflexive defense/offense.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-salvo|atom.elpw-overflow|atom.sporing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "1d77a72d199104dbf4c854f09a15fe52ddce9961aa5d445745795488711c8df0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.hit-retort",
+            "atom.volley"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution",
+            "atom.volley"
+          ]
+        ]
+      },
+      "briefId": "brief.family.cactus.002",
+      "candidateId": "candidate.family.005",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "1d77a72d199104dbf4c854f09a15fe52ddce9961aa5d445745795488711c8df0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.hit-retort",
+              "atom.volley"
+            ],
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution",
+              "atom.volley"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.retribution",
+          "atom.volley"
+        ],
+        "briefId": "brief.family.cactus.002",
+        "candidateId": "candidate.family.005",
+        "flavor": "Upon being struck, the creature launches a volley of sharp projectiles from its surface, punishing the aggressor.",
+        "motifsExpressed": [
+          "仙人掌",
+          "发射"
+        ],
+        "name": "Spined Retaliation",
+        "rationale": "The action captures the essence of the cactus family by using their natural defensive spikes to launch projectiles (发射) in response to being hit, fulfilling the defense category and the shared motifs without specifying a single species or using forbidden terms.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.hit-retort"
+    },
+    {
+      "_provenance": {
+        "briefHash": "bcb51381c73f5aab4a3f30fa847dee4a6e6e7d13da7f1758fc3ee8414f3c50c3",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.cherry-bloom",
+            "atom.death-harvest"
+          ],
+          [
+            "atom.cherry-bloom",
+            "atom.sust-callus"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.sust-husk"
+          ]
+        ]
+      },
+      "briefId": "brief.family.cherry.001",
+      "candidateId": "candidate.family.006",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "bcb51381c73f5aab4a3f30fa847dee4a6e6e7d13da7f1758fc3ee8414f3c50c3",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.cherry-bloom",
+              "atom.death-harvest"
+            ],
+            [
+              "atom.cherry-bloom",
+              "atom.sust-callus"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.sust-husk"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.cherry-bloom"
+        ],
+        "briefId": "brief.family.cherry.001",
+        "candidateId": "candidate.family.006",
+        "flavor": "A burst of sweet, dark essence erupts from the shell, mending the spirit through the scent of decay.",
+        "motifsExpressed": [
+          "僵尸",
+          "樱桃"
+        ],
+        "name": "Crimson Husk",
+        "rationale": "The action combines the concept of a 'harvest' (death-harvest) with the 'cherry bloom' motif. It expresses the family's essence by having the creature's death or impact release a restorative burst of cherry-scented essence that heals the user, bridging the gap between the undead (zombie) and the floral (cherry) motifs without violating the anti-motifs.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.arm-hardening|atom.death-harvest|atom.sust-callus|atom.sust-husk"
+    },
+    {
+      "_provenance": {
+        "briefHash": "237756cd199df291eef88dd2e7cc8bc4e4a2791f18178b9856e6193993839817",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.martyrdom"
+          ],
+          [
+            "atom.cherry-bloom",
+            "atom.life-graft"
+          ],
+          [
+            "atom.martyrdom",
+            "atom.mending"
+          ]
+        ]
+      },
+      "briefId": "brief.family.cherry.002",
+      "candidateId": "candidate.family.007",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "237756cd199df291eef88dd2e7cc8bc4e4a2791f18178b9856e6193993839817",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.martyrdom"
+            ],
+            [
+              "atom.cherry-bloom",
+              "atom.life-graft"
+            ],
+            [
+              "atom.martyrdom",
+              "atom.mending"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.martyrdom"
+        ],
+        "briefId": "brief.family.cherry.002",
+        "candidateId": "candidate.family.007",
+        "flavor": "Upon the passing of a comrade, a sudden eruption of crimson petals scatters, invigorating those who remain.",
+        "motifsExpressed": [
+          "僵尸",
+          "樱桃"
+        ],
+        "name": "Burst of the Fallen Bloom",
+        "rationale": "The action utilizes the Martyrdom atom to express the family's shared theme of death and rebirth (zombie/cherry motif) by providing support to allies through the sacrifice of a member, fulfilling the support category and the single target/ally relation requirements.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.cherry-bloom|atom.life-graft|atom.mending"
+    },
+    {
+      "_provenance": {
+        "briefHash": "602c2db488709b4bc86f2f3be9abafe90a6fc7cdeb846fbfd23a0805efe4ed27",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.lifesteal",
+            "atom.savagery"
+          ],
+          [
+            "atom.lifesteal",
+            "atom.summoner"
+          ],
+          [
+            "atom.death-harvest",
+            "atom.lifesteal"
+          ]
+        ]
+      },
+      "briefId": "brief.family.chomper.001",
+      "candidateId": "candidate.family.008",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "602c2db488709b4bc86f2f3be9abafe90a6fc7cdeb846fbfd23a0805efe4ed27",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.lifesteal",
+              "atom.savagery"
+            ],
+            [
+              "atom.lifesteal",
+              "atom.summoner"
+            ],
+            [
+              "atom.death-harvest",
+              "atom.lifesteal"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.lifesteal"
+        ],
+        "briefId": "brief.family.chomper.001",
+        "candidateId": "candidate.family.008",
+        "flavor": "The jaws snap shut, consuming the essence of the fallen to fuel the hunger of the horde.",
+        "motifsExpressed": [
+          "吞食",
+          "僵尸"
+        ],
+        "name": "Gorge",
+        "rationale": "The action 'Gorge' captures the essence of the 'chomper' family by focusing on the act of consuming (吞食) and the predatory nature of the undead (僵尸). By utilizing lifesteal and savagery, the action emphasizes the core mechanic of gaining strength through the consumption of enemies, a trait shared by all members of this family regardless of their specific form.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-harvest|atom.savagery|atom.summoner"
+    },
+    {
+      "_provenance": {
+        "briefHash": "32e6831c1d2e8bbf28ff93ecf49c37d0463f49d1636abaf522857268aaa37c9f",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.lifesteal"
+          ],
+          [
+            "atom.death-harvest"
+          ],
+          [
+            "atom.lifesteal",
+            "atom.mending"
+          ]
+        ]
+      },
+      "briefId": "brief.family.chomper.002",
+      "candidateId": "candidate.family.009",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "32e6831c1d2e8bbf28ff93ecf49c37d0463f49d1636abaf522857268aaa37c9f",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.lifesteal"
+            ],
+            [
+              "atom.death-harvest"
+            ],
+            [
+              "atom.lifesteal",
+              "atom.mending"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.lifesteal"
+        ],
+        "briefId": "brief.family.chomper.002",
+        "candidateId": "candidate.family.009",
+        "flavor": "As the hunger takes hold, the remains of the departed are absorbed into the living mass, mending the vessel through the act of devouring.",
+        "motifsExpressed": [
+          "吞食"
+        ],
+        "name": "Consume the Fallen",
+        "rationale": "The action focuses on the 'chomper' family's core identity of consumption (吞食) to achieve a defensive purpose (healing/lifesteal). It avoids all anti-motifs and uses a single valid atom family to express the shared trait of gaining vitality through the act of eating.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-harvest|atom.mending"
+    },
+    {
+      "_provenance": {
+        "briefHash": "2c0454c756b91840e9bee35f225d03fae7e4437b73884de10d23ca49466833f0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.death-salvo",
+            "atom.volley"
+          ],
+          [
+            "atom.death-salvo"
+          ],
+          [
+            "atom.death-salvo",
+            "atom.volley"
+          ]
+        ]
+      },
+      "briefId": "brief.family.corn.001",
+      "candidateId": "candidate.family.010",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2c0454c756b91840e9bee35f225d03fae7e4437b73884de10d23ca49466833f0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.death-salvo",
+              "atom.volley"
+            ],
+            [
+              "atom.death-salvo"
+            ],
+            [
+              "atom.death-salvo",
+              "atom.volley"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.volley"
+        ],
+        "briefId": "brief.family.corn.001",
+        "candidateId": "candidate.family.010",
+        "flavor": "The user converts their own essence into a rapid discharge of projectiles, sacrificing their own stability to unleash a flurry of kinetic force upon the enemy.",
+        "motifsExpressed": [
+          "制成",
+          "子弹"
+        ],
+        "name": "Self-Inflicted Salvo",
+        "rationale": "The action describes the user 'manufacturing' (制成) 'bullets' (子弹) from themselves to attack an enemy. By utilizing 'atom.death-salvo' and 'atom.volley', the action fulfills the 'attack' category and 'target: self' requirement, as the projectiles are generated from the user's own state/death to strike the enemy.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "d8dd20b88e03ef275d163c0c19be14f49b3d873ca55ee5f424a0e13832e6136a",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.death-salvo",
+            "atom.retribution"
+          ],
+          [
+            "atom.hit-retort"
+          ],
+          [
+            "atom.hit-retort"
+          ]
+        ]
+      },
+      "briefId": "brief.family.corn.002",
+      "candidateId": "candidate.family.011",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "d8dd20b88e03ef275d163c0c19be14f49b3d873ca55ee5f424a0e13832e6136a",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.death-salvo",
+              "atom.retribution"
+            ],
+            [
+              "atom.hit-retort"
+            ],
+            [
+              "atom.hit-retort"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.hit-retort"
+        ],
+        "briefId": "brief.family.corn.002",
+        "candidateId": "candidate.family.011",
+        "flavor": "Upon impact, the creature's outer layers fracture, instantly manufacturing a spray of projectiles from its own structural debris to repel the aggressor.",
+        "motifsExpressed": [
+          "制成",
+          "子弹"
+        ],
+        "name": "Bullet-Shell Refraction",
+        "rationale": "The action fulfills the 'defense' category by using the 'retribution' and 'death-salvo' mechanics to respond to damage. It incorporates '制成' (manufacturing/forming) and '子弹' (bullets) by describing the creation of projectiles from the creature's own shell upon being struck or defeated. It avoids all anti-motifs and adheres to the single-family constraint.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.death-salvo|atom.retribution"
+    },
+    {
+      "_provenance": {
+        "briefHash": "96cb734de0a21a3b8dd0fbc83e61fdfaa5348e4deef431dbf110efbe6ac9b637",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-riveting",
+            "atom.arm-welding"
+          ],
+          [
+            "atom.arm-riveting",
+            "atom.plating"
+          ],
+          [
+            "atom.arm-riveting",
+            "atom.carapace",
+            "atom.plating"
+          ]
+        ]
+      },
+      "briefId": "brief.family.dolls.001",
+      "candidateId": "candidate.family.012",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "96cb734de0a21a3b8dd0fbc83e61fdfaa5348e4deef431dbf110efbe6ac9b637",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-riveting",
+              "atom.arm-welding"
+            ],
+            [
+              "atom.arm-riveting",
+              "atom.plating"
+            ],
+            [
+              "atom.arm-riveting",
+              "atom.carapace",
+              "atom.plating"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-riveting",
+          "atom.plating"
+        ],
+        "briefId": "brief.family.dolls.001",
+        "candidateId": "candidate.family.012",
+        "flavor": "Upon being struck, the creature sheds its outer layer to reveal a smaller, harder shell beneath, reinforcing its structural integrity.",
+        "motifsExpressed": [
+          "套娃",
+          "制成"
+        ],
+        "name": "Matryoshka Shell",
+        "rationale": "The action uses the 'Matryoshka' (套娃) motif by having the creature shed layers to reveal smaller versions of its defensive structure, and the 'Made/Manufactured' (制成) motif by implying a layered, constructed composition. It targets 'self' for 'defense' by increasing armor/carapace through the shedding of outer shells.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.arm-welding|atom.carapace"
+    },
+    {
+      "_provenance": {
+        "briefHash": "0f24a55af4b40790ed132dc07c76c160a3c368e00b73b22f16a1b360f1398f12",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.mending"
+          ],
+          [
+            "atom.mending"
+          ],
+          [
+            "atom.mending"
+          ]
+        ]
+      },
+      "briefId": "brief.family.dolls.002",
+      "candidateId": "candidate.family.013",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "0f24a55af4b40790ed132dc07c76c160a3c368e00b73b22f16a1b360f1398f12",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.mending"
+            ],
+            [
+              "atom.mending"
+            ],
+            [
+              "atom.mending"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.mending"
+        ],
+        "briefId": "brief.family.dolls.002",
+        "candidateId": "candidate.family.013",
+        "flavor": "The entity undergoes a rapid process of self-assembly, unfolding its internal layers to produce a smaller, reinforced version of itself that bolsters an ally.",
+        "motifsExpressed": [
+          "套娃",
+          "制成"
+        ],
+        "name": "Nested Manufacture",
+        "rationale": "The action utilizes the 'Matryoshka' (套娃) motif by having the entity unfold or contain a smaller version of itself, and the 'Manufacture' (制成) motif by describing the process of self-assembly to create this new component. It functions as a support action by granting health restoration (Mending) to an ally through this manufactured sub-unit.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "cb6372822620829642c2c8203cf69794c3151ac3516e09b811dde60698cd717b",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.volley"
+          ],
+          [
+            "atom.death-salvo"
+          ],
+          [
+            "atom.death-salvo"
+          ]
+        ]
+      },
+      "briefId": "brief.family.double.001",
+      "candidateId": "candidate.family.014",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "cb6372822620829642c2c8203cf69794c3151ac3516e09b811dde60698cd717b",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.volley"
+            ],
+            [
+              "atom.death-salvo"
+            ],
+            [
+              "atom.death-salvo"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.death-salvo"
+        ],
+        "briefId": "brief.family.double.001",
+        "candidateId": "candidate.family.014",
+        "flavor": "The creature releases its internal pressure, propelling a projectile through the air toward its foe.",
+        "motifsExpressed": [
+          "发射",
+          "子弹"
+        ],
+        "name": "Kinetic Discharge",
+        "rationale": "The action describes the act of firing a projectile (bullet) which is the core of the '发射' (fire/launch) and '子弹' (bullet) motifs. It applies to any creature capable of launching a projectile as an attack, making it a family-wide characteristic rather than a species-specific trait. It utilizes the 'volley' atom to allow for multiple projectiles, fitting the mid-tier power requirement.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.volley"
+    },
+    {
+      "_provenance": {
+        "briefHash": "47d39b8bfad09550fce60cf55f430678a4d0acb8aee92849a94577913749c476",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.death-salvo",
+            "atom.hit-retort"
+          ],
+          [
+            "atom.hit-retort"
+          ],
+          [
+            "atom.death-salvo",
+            "atom.hit-retort"
+          ]
+        ]
+      },
+      "briefId": "brief.family.double.002",
+      "candidateId": "candidate.family.015",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "47d39b8bfad09550fce60cf55f430678a4d0acb8aee92849a94577913749c476",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.death-salvo",
+              "atom.hit-retort"
+            ],
+            [
+              "atom.hit-retort"
+            ],
+            [
+              "atom.death-salvo",
+              "atom.hit-retort"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.hit-retort"
+        ],
+        "briefId": "brief.family.double.002",
+        "candidateId": "candidate.family.015",
+        "flavor": "When struck, the family discharges a volley of projectiles back at the source.",
+        "motifsExpressed": [
+          "子弹",
+          "发射"
+        ],
+        "name": "Retaliatory Salvo",
+        "rationale": "The action captures the essence of a defensive family that uses its own ammunition (bullets/projectiles) to respond to being hit or dying, fulfilling the 'defense' category and 'self' relation while utilizing the required motifs.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "c3cf47840f912f7783ab17b536433ec8be77e06a5e990568a72fc7b1858596a0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution",
+            "atom.terraforming"
+          ],
+          [
+            "atom.sust-callus"
+          ]
+        ]
+      },
+      "briefId": "brief.family.fire.001",
+      "candidateId": "candidate.family.016",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "c3cf47840f912f7783ab17b536433ec8be77e06a5e990568a72fc7b1858596a0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution",
+              "atom.terraforming"
+            ],
+            [
+              "atom.sust-callus"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.family.fire.001",
+        "candidateId": "candidate.family.016",
+        "flavor": "The surface of the body erupts into jagged, tactile protrusions that punish any contact.",
+        "motifsExpressed": [
+          "触感",
+          "地刺"
+        ],
+        "name": "Spike-Laced Texture",
+        "rationale": "The action utilizes the 'Retribution' atom to reflect damage, fulfilling the 'defense' category and 'self' target mode. It incorporates '触感' (tactile sensation) through the physical sensation of the spikes and '地刺' (ground spikes/thorns) via the mechanism of the defensive protrusions.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.sust-callus|atom.terraforming"
+    },
+    {
+      "_provenance": {
+        "briefHash": "b23ff357e2f73eabad1876e676c5cbb1239ad01cbc3706ac79ec7efb356a33b3",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.terraforming"
+          ],
+          [
+            "atom.terraforming"
+          ],
+          [
+            "atom.terraforming"
+          ]
+        ]
+      },
+      "briefId": "brief.family.fire.002",
+      "candidateId": "candidate.family.017",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "b23ff357e2f73eabad1876e676c5cbb1239ad01cbc3706ac79ec7efb356a33b3",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.terraforming"
+            ],
+            [
+              "atom.terraforming"
+            ],
+            [
+              "atom.terraforming"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.terraforming"
+        ],
+        "briefId": "brief.family.fire.002",
+        "candidateId": "candidate.family.017",
+        "flavor": "The creature lunges forward, driving jagged protrusions through the ground to create a path of tactile hazards.",
+        "motifsExpressed": [
+          "地刺",
+          "触感"
+        ],
+        "name": "Spike Surge",
+        "rationale": "The action involves a movement-based surge that leaves behind jagged terrain (地刺) which provides a specific tactile sensation (触感) to anything traversing it. It utilizes the terraforming atom to modify the ground state.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "369853f18da045746f6f429afc0e7d8ff844de9ba9aa35955b4d333544632fca",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.savagery"
+          ]
+        ]
+      },
+      "briefId": "brief.family.fruit.001",
+      "candidateId": "candidate.family.018",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "369853f18da045746f6f429afc0e7d8ff844de9ba9aa35955b4d333544632fca",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.elpw-overflow"
+            ],
+            [
+              "atom.elpw-overflow"
+            ],
+            [
+              "atom.savagery"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-overflow"
+        ],
+        "briefId": "brief.family.fruit.001",
+        "candidateId": "candidate.family.018",
+        "flavor": "The entity channels its internal essence into a concentrated burst, projecting a surge of power toward the enemy in a specific trajectory.",
+        "motifsExpressed": [
+          "发射",
+          "方向"
+        ],
+        "name": "Directional Discharge",
+        "rationale": "The action describes a self-targeted attack that discharges energy (发射) in a specific direction (方向) to strike an enemy, utilizing the elemental power overflow atom to determine the magnitude of the surge.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.savagery"
+    },
+    {
+      "_provenance": {
+        "briefHash": "faab5147dfac181c493e524803b45923eb41b56af3591a36539309bfc5b67048",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.hit-retort"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution"
+          ]
+        ]
+      },
+      "briefId": "brief.family.fruit.002",
+      "candidateId": "candidate.family.019",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "faab5147dfac181c493e524803b45923eb41b56af3591a36539309bfc5b67048",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.hit-retort"
+            ],
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.family.fruit.002",
+        "candidateId": "candidate.family.019",
+        "flavor": "When struck, the creature discharges its stored kinetic energy in a sudden, directed blast toward the source of the impact.",
+        "motifsExpressed": [
+          "发射",
+          "方向"
+        ],
+        "name": "Retaliatory Burst",
+        "rationale": "The action fulfills the 'defense' category by utilizing a 'retaliatory' mechanism (atom.hit-retort) which triggers upon being hit. It incorporates the '发射' (launch/fire) motif through the discharge of energy and the '方向' (direction) motif by targeting the attacker. It avoids all anti-motifs and adheres to the single-member species restriction by describing a universal physiological response of the family.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.hit-retort"
+    },
+    {
+      "_provenance": {
+        "briefHash": "cae84ab5eca3f022eaa823aefb2557328e4eb87ffe3630dec5ab0ecccda5ba72",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.venomous"
+          ],
+          [
+            "atom.venomous"
+          ],
+          [
+            "atom.sporing"
+          ]
+        ]
+      },
+      "briefId": "brief.family.garlic.001",
+      "candidateId": "candidate.family.020",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "cae84ab5eca3f022eaa823aefb2557328e4eb87ffe3630dec5ab0ecccda5ba72",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.venomous"
+            ],
+            [
+              "atom.venomous"
+            ],
+            [
+              "atom.sporing"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.venomous"
+        ],
+        "briefId": "brief.family.garlic.001",
+        "candidateId": "candidate.family.020",
+        "flavor": "The target's own essence is turned against them, allowing the corruption to fester from within.",
+        "motifsExpressed": [
+          "中毒",
+          "体内"
+        ],
+        "name": "Internal Contamination",
+        "rationale": "The action targets the enemy's internal state (体内) to inflict a lasting sickness (中毒). By using atom.venomous, the family's shared trait of spreading toxicity is expressed as an attack that targets the enemy's internal systems.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.sporing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "b77bd50d0b35aa76b778d2702b8c9ada7acdc7da321d011d4ef4cdab37f939bc",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.venomous"
+          ],
+          [
+            "atom.venomous"
+          ],
+          [
+            "atom.venomous"
+          ]
+        ]
+      },
+      "briefId": "brief.family.garlic.002",
+      "candidateId": "candidate.family.021",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "b77bd50d0b35aa76b778d2702b8c9ada7acdc7da321d011d4ef4cdab37f939bc",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.venomous"
+            ],
+            [
+              "atom.venomous"
+            ],
+            [
+              "atom.venomous"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.venomous"
+        ],
+        "briefId": "brief.family.garlic.002",
+        "candidateId": "candidate.family.021",
+        "flavor": "The essence permeates the bloodstream, turning the very life force into a vessel for the spreading blight.",
+        "motifsExpressed": [
+          "体内",
+          "中毒"
+        ],
+        "name": "Internal Infusion",
+        "rationale": "The action focuses on the internal spread of a toxic state (中毒) within the body (体内) to support allies through a persistent affliction, fitting the 'garlic' family's theme of pungent, pervasive influence without violating anti-motifs or using forbidden multipliers.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "7913751b9874e5dc6239f65d61a65c9013cbd1b688fb4259d6ce111cb0415fe0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.deathblast",
+            "atom.summoner"
+          ],
+          [
+            "atom.deathblast",
+            "atom.mesmerizing"
+          ],
+          [
+            "atom.summoner"
+          ]
+        ]
+      },
+      "briefId": "brief.family.hypno.001",
+      "candidateId": "candidate.family.022",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "7913751b9874e5dc6239f65d61a65c9013cbd1b688fb4259d6ce111cb0415fe0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.deathblast",
+              "atom.summoner"
+            ],
+            [
+              "atom.deathblast",
+              "atom.mesmerizing"
+            ],
+            [
+              "atom.summoner"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.deathblast",
+          "atom.summoner"
+        ],
+        "briefId": "brief.family.hypno.001",
+        "candidateId": "candidate.family.022",
+        "flavor": "The target's very essence wavers, caught between the urge to serve and the instinct to rot.",
+        "motifsExpressed": [
+          "僵尸",
+          "变心"
+        ],
+        "name": "Fickle Reanimation",
+        "rationale": "The action targets an enemy and triggers upon the target's death (self-target/death-trigger logic). It expresses the 'zombie' motif by raising a new entity from the fallen and the 'change of heart' motif by causing a sudden, violent shift in the target's state upon expiration.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.mesmerizing"
+    },
+    {
+      "_provenance": {
+        "briefHash": "a58b8e329c53330aa686b05ead9a2e72e50fefdfea177b9790c5f4e20508c7f2",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.sust-husk"
+          ],
+          [
+            "atom.mesmerizing"
+          ],
+          [
+            "atom.summoner"
+          ]
+        ]
+      },
+      "briefId": "brief.family.hypno.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.mesmerizing|atom.summoner|atom.sust-husk"
+    },
+    {
+      "_provenance": {
+        "briefHash": "7d9c782e36339d0625959a4f32a00a0c6de059b42fd0906cc7ce93bbcde213fd",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.freezing",
+            "atom.savagery"
+          ],
+          [
+            "atom.ferocity"
+          ],
+          [
+            "atom.terraforming"
+          ]
+        ]
+      },
+      "briefId": "brief.family.ice.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.ferocity|atom.freezing|atom.savagery|atom.terraforming"
+    },
+    {
+      "_provenance": {
+        "briefHash": "38871b32df1792b17f52a338dea2b6bfd74e7dae8d137bed722bd445611b9842",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.carapace"
+          ],
+          [
+            "atom.arm-hardening"
+          ],
+          [
+            "atom.sust-callus"
+          ]
+        ]
+      },
+      "briefId": "brief.family.ice.002",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.arm-hardening|atom.carapace|atom.sust-callus"
+    },
+    {
+      "_provenance": {
+        "briefHash": "e08952e0b6b028b78d97ac0df40ffccefaa7a11c579dce07f2c6ede937f04031",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.prec-reckoning",
+            "atom.searing-strike"
+          ],
+          [
+            "atom.retribution"
+          ]
+        ]
+      },
+      "briefId": "brief.family.light.001",
+      "candidateId": "candidate.family.026",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "e08952e0b6b028b78d97ac0df40ffccefaa7a11c579dce07f2c6ede937f04031",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.prec-reckoning",
+              "atom.searing-strike"
+            ],
+            [
+              "atom.retribution"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.family.light.001",
+        "candidateId": "candidate.family.026",
+        "flavor": "The creature erupts in a violent burst of needles, turning its own defensive spikes into a lethal spray that punishes those who strike it.",
+        "motifsExpressed": [
+          "伤害",
+          "仙人掌"
+        ],
+        "name": "Spined Retaliation",
+        "rationale": "The action uses the 'retribution' atom to reflect damage (伤害) and incorporates the 'cactus' (仙人掌) motif through the concept of a defensive, needle-based counter-attack, fulfilling the requirement of a self-targeted attack that harms enemies.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.prec-reckoning|atom.searing-strike"
+    },
+    {
+      "_provenance": {
+        "briefHash": "3430e9610729b737bcb1f3c8ba9b3783adc5249329f1a3638ec7d1714afa1d76",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution"
+          ]
+        ]
+      },
+      "briefId": "brief.family.light.002",
+      "candidateId": "candidate.family.027",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "3430e9610729b737bcb1f3c8ba9b3783adc5249329f1a3638ec7d1714afa1d76",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.family.light.002",
+        "candidateId": "candidate.family.027",
+        "flavor": "The creature's jagged exterior lashes out, turning every strike into a source of pain for the aggressor.",
+        "motifsExpressed": [
+          "伤害",
+          "仙人掌"
+        ],
+        "name": "Thorned Retaliation",
+        "rationale": "The action uses 'Retribution' to reflect damage (傷害) back at the attacker, fulfilling the defensive requirement. The concept of 'Thorned' captures the essence of the cactus (仙人掌) motif without naming a specific species or violating the anti-motifs (no plants, no planting, no pots, no roofs, no protection).",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "ee6c235c33ab2b6c2f4ab92450fb79c6caa1ec4139d1d7ce60b821090afb06f5",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.vitality",
+            "atom.warding"
+          ],
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.firelining"
+          ]
+        ]
+      },
+      "briefId": "brief.family.line.001",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.elpw-overflow|atom.firelining|atom.vitality|atom.warding"
+    },
+    {
+      "_provenance": {
+        "briefHash": "d7b9030994fc3e10065f1559b9c86cf9170511d5e3d1faf5d2065324a41fbe24",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.quickening",
+            "atom.swiftness",
+            "atom.volley"
+          ],
+          [
+            "atom.volley"
+          ],
+          [
+            "atom.swiftness",
+            "atom.volley"
+          ]
+        ]
+      },
+      "briefId": "brief.family.line.002",
+      "candidateId": "candidate.family.029",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "d7b9030994fc3e10065f1559b9c86cf9170511d5e3d1faf5d2065324a41fbe24",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.quickening",
+              "atom.swiftness",
+              "atom.volley"
+            ],
+            [
+              "atom.volley"
+            ],
+            [
+              "atom.swiftness",
+              "atom.volley"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.swiftness",
+          "atom.volley"
+        ],
+        "briefId": "brief.family.line.002",
+        "candidateId": "candidate.family.029",
+        "flavor": "The creature propels itself forward, discharging a rapid succession of three distinct bursts that trace its path.",
+        "motifsExpressed": [
+          "发射",
+          "三行"
+        ],
+        "name": "Triple-Stream Volley",
+        "rationale": "The action fulfills the 'movement' category by propelling the creature forward. It incorporates '发射' (firing/launching) through the discharge of bursts and '三行' (three lines/rows) by structuring the movement into three distinct, sequential trajectories. It utilizes the 'volley' and 'quickening' atoms to define the rapid, multi-shot nature of the movement without violating any anti-motifs or species-specific constraints.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.quickening"
+    },
+    {
+      "_provenance": {
+        "briefHash": "25bc7b06dbcceabd13f969be2cecbde75e2ea98ae355f47a35d6b43ae192200e",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-pierce",
+            "atom.shld-breach"
+          ],
+          [
+            "atom.carapace",
+            "atom.elpw-pierce"
+          ],
+          [
+            "atom.elpw-pierce",
+            "atom.shld-breach"
+          ]
+        ]
+      },
+      "briefId": "brief.family.nut.001",
+      "candidateId": "candidate.family.030",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "25bc7b06dbcceabd13f969be2cecbde75e2ea98ae355f47a35d6b43ae192200e",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.elpw-pierce",
+              "atom.shld-breach"
+            ],
+            [
+              "atom.carapace",
+              "atom.elpw-pierce"
+            ],
+            [
+              "atom.elpw-pierce",
+              "atom.shld-breach"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-pierce",
+          "atom.shld-breach"
+        ],
+        "briefId": "brief.family.nut.001",
+        "candidateId": "candidate.family.030",
+        "flavor": "The creature forcefully propels its densest, most unyielding parts through the enemy's defenses, shattering their resolve with the weight of its own casing.",
+        "motifsExpressed": [
+          "穿透",
+          "坚果"
+        ],
+        "name": "Hardened Shell Breach",
+        "rationale": "The action focuses on the 'nut' (坚果) aspect by utilizing the hardness of a shell to 'pierce' (穿透) through enemy shields and defenses. It is an attack directed at the enemy that targets their structural integrity, fitting the mid-tier power profile without violating any anti-motifs or forbidden pairings.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.carapace"
+    },
+    {
+      "_provenance": {
+        "briefHash": "da6455cdc73cc69af2c340e560ad9266bd6362522912e3c49cd447e4351713c1",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.carapace",
+            "atom.elpw-pierce"
+          ],
+          [
+            "atom.arm-hardening"
+          ],
+          [
+            "atom.carapace",
+            "atom.elpw-pierce"
+          ]
+        ]
+      },
+      "briefId": "brief.family.nut.002",
+      "candidateId": "candidate.family.031",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "da6455cdc73cc69af2c340e560ad9266bd6362522912e3c49cd447e4351713c1",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.carapace",
+              "atom.elpw-pierce"
+            ],
+            [
+              "atom.arm-hardening"
+            ],
+            [
+              "atom.carapace",
+              "atom.elpw-pierce"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.carapace",
+          "atom.elpw-pierce"
+        ],
+        "briefId": "brief.family.nut.002",
+        "candidateId": "candidate.family.031",
+        "flavor": "The density of the outer layer hardens upon impact, driving jagged fragments deep into the target.",
+        "motifsExpressed": [
+          "坚果",
+          "穿透"
+        ],
+        "name": "Hardened Shell Penetration",
+        "rationale": "The action utilizes the 'Carapace' (坚果/Nut/Hard shell) motif to provide defense, while simultaneously applying 'Elemental Pierce' (穿透/Penetration) to fulfill the second motif. This creates a defensive action that expresses the family's shared trait of having a hard, penetrative exterior.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.arm-hardening"
+    },
+    {
+      "_provenance": {
+        "briefHash": "8c3cb07b3795cc624a8ad2f254a0faf1d7ee2efb497f1b33168370d765e1406c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.death-salvo",
+            "atom.summoner",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.sporing",
+            "atom.volley"
+          ],
+          [
+            "atom.death-salvo",
+            "atom.summoner"
+          ]
+        ]
+      },
+      "briefId": "brief.family.pea.001",
+      "candidateId": "candidate.family.032",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "8c3cb07b3795cc624a8ad2f254a0faf1d7ee2efb497f1b33168370d765e1406c",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.death-salvo",
+              "atom.summoner",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.sporing",
+              "atom.volley"
+            ],
+            [
+              "atom.death-salvo",
+              "atom.summoner"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.death-salvo",
+          "atom.summoner"
+        ],
+        "briefId": "brief.family.pea.001",
+        "candidateId": "candidate.family.032",
+        "flavor": "The creature expels a rapid succession of projectiles that carry the essence of the fallen, turning its own demise into a relentless barrage.",
+        "motifsExpressed": [
+          "僵尸",
+          "发射"
+        ],
+        "name": "Undead Volley",
+        "rationale": "The action focuses on the '发射' (fire/launch) motif by triggering projectiles upon death or during combat, and the '僵尸' (zombie) motif by incorporating the summoning or presence of the undead. It targets the enemy, uses the self as the trigger (death/attack), and utilizes the requested mid-tier power axes through death-triggered mechanics.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.sporing|atom.tempo-surge|atom.volley"
+    },
+    {
+      "_provenance": {
+        "briefHash": "45e5946923f4c7296ba9b1bdb23959c4fd67d832c52042e42dda83f2975f5955",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.deathblast",
+            "atom.summoner"
+          ],
+          [
+            "atom.sporing",
+            "atom.tempo-surge"
+          ],
+          [
+            "atom.summoner",
+            "atom.volley"
+          ]
+        ]
+      },
+      "briefId": "brief.family.pea.002",
+      "candidateId": "candidate.family.033",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "45e5946923f4c7296ba9b1bdb23959c4fd67d832c52042e42dda83f2975f5955",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.deathblast",
+              "atom.summoner"
+            ],
+            [
+              "atom.sporing",
+              "atom.tempo-surge"
+            ],
+            [
+              "atom.summoner",
+              "atom.volley"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.summoner"
+        ],
+        "briefId": "brief.family.pea.002",
+        "candidateId": "candidate.family.033",
+        "flavor": "A sudden, rhythmic discharge of projectiles that leaves a trail of the fallen in its wake.",
+        "motifsExpressed": [
+          "僵尸",
+          "发射"
+        ],
+        "name": "Undead Volley",
+        "rationale": "The action combines the 'launch' (发射) motif with the 'zombie' (僵尸) motif by ensuring that the act of firing results in the creation of undead entities at the target's location, fulfilling the movement/single/self/mid-tier requirement through the integration of summoning and death-based offensive triggers.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.deathblast|atom.sporing|atom.tempo-surge|atom.volley"
+    },
+    {
+      "_provenance": {
+        "briefHash": "5bda6a0b93ed54fc209b5dbd5028eeb700f09b7aad0f2df790ba8e5ff4eff3ce",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.deathblast",
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-overflow",
+            "atom.hit-retort"
+          ],
+          [
+            "atom.elpw-overflow",
+            "atom.searing-strike"
+          ]
+        ]
+      },
+      "briefId": "brief.family.sun.001",
+      "candidateId": "candidate.family.034",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "5bda6a0b93ed54fc209b5dbd5028eeb700f09b7aad0f2df790ba8e5ff4eff3ce",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.deathblast",
+              "atom.elpw-overflow"
+            ],
+            [
+              "atom.elpw-overflow",
+              "atom.hit-retort"
+            ],
+            [
+              "atom.elpw-overflow",
+              "atom.searing-strike"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-overflow"
+        ],
+        "briefId": "brief.family.sun.001",
+        "candidateId": "candidate.family.034",
+        "flavor": "The entity erupts in a blinding burst of radiance, discharging its internal energy to strike down all nearby foes.",
+        "motifsExpressed": [
+          "发射",
+          "命中"
+        ],
+        "name": "Solar Flare",
+        "rationale": "The action describes a self-triggered discharge (发射) that strikes enemies (命中) upon the entity's death or state change, utilizing the burst mechanics of deathblast and the power amplification of elemental overflow.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.deathblast|atom.hit-retort|atom.searing-strike"
+    },
+    {
+      "_provenance": {
+        "briefHash": "6df930041f985485a0363be5c13b099893c6516e205fe5e32e38e471694250fe",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.hit-retort"
+          ],
+          [
+            "atom.hit-retort"
+          ],
+          [
+            "atom.hit-retort"
+          ]
+        ]
+      },
+      "briefId": "brief.family.sun.002",
+      "candidateId": "candidate.family.035",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "6df930041f985485a0363be5c13b099893c6516e205fe5e32e38e471694250fe",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.hit-retort"
+            ],
+            [
+              "atom.hit-retort"
+            ],
+            [
+              "atom.hit-retort"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.hit-retort"
+        ],
+        "briefId": "brief.family.sun.002",
+        "candidateId": "candidate.family.035",
+        "flavor": "Upon being struck, the entity discharges a concentrated burst of energy back at the source.",
+        "motifsExpressed": [
+          "命中",
+          "发射"
+        ],
+        "name": "Retaliatory Discharge",
+        "rationale": "The action captures the essence of the family by ensuring that any successful hit (命中) on the entity triggers an immediate discharge (发射) directed at the attacker, fulfilling the defensive requirement through a reactive offensive mechanism.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "55f01854619170e1ed04855e55129f3e764fa23c5414ca3567d19072692995a1",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.savagery"
+          ],
+          [
+            "atom.mesmerizing",
+            "atom.sunbloom"
+          ],
+          [
+            "atom.mesmerizing"
+          ]
+        ]
+      },
+      "briefId": "brief.family.sunflower.001",
+      "candidateId": "candidate.family.036",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "55f01854619170e1ed04855e55129f3e764fa23c5414ca3567d19072692995a1",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.savagery"
+            ],
+            [
+              "atom.mesmerizing",
+              "atom.sunbloom"
+            ],
+            [
+              "atom.mesmerizing"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.mesmerizing"
+        ],
+        "briefId": "brief.family.sunflower.001",
+        "candidateId": "candidate.family.036",
+        "flavor": "The petals unfurl in a violent, golden bloom, consuming the self to complete the cycle of light.",
+        "motifsExpressed": [
+          "嘴花",
+          "完成"
+        ],
+        "name": "Sunburst Completion",
+        "rationale": "The action uses 'savagery' to represent the aggressive, explosive nature of a bloom (嘴花) and the concept of 'completing' a cycle (完成) through a self-targeted attack that consumes the entity's own essence.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.savagery|atom.sunbloom"
+    },
+    {
+      "_provenance": {
+        "briefHash": "83efbf5ab512f0283af5d43b957d6f2f8033357ca979b2a934821bdaad7e323c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-05T06:45:26+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "family-propose",
+        "promptVersion": "family-propose/1",
+        "samplePicks": [
+          [
+            "atom.death-harvest"
+          ],
+          [
+            "atom.sunbloom"
+          ],
+          [
+            "atom.death-harvest"
+          ]
+        ]
+      },
+      "briefId": "brief.family.sunflower.002",
+      "candidateId": "candidate.family.037",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "83efbf5ab512f0283af5d43b957d6f2f8033357ca979b2a934821bdaad7e323c",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-05T06:45:26+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "family-propose",
+          "promptVersion": "family-propose/1",
+          "samplePicks": [
+            [
+              "atom.death-harvest"
+            ],
+            [
+              "atom.sunbloom"
+            ],
+            [
+              "atom.death-harvest"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.death-harvest"
+        ],
+        "briefId": "brief.family.sunflower.002",
+        "candidateId": "candidate.family.037",
+        "flavor": "When the sun reaches its zenith, the petals unfurl to complete the cycle, leaving only a vibrant, gaping maw behind.",
+        "motifsExpressed": [
+          "完成",
+          "嘴花"
+        ],
+        "name": "Golden Bloom",
+        "rationale": "The action focuses on the 'completion' (完成) of a life cycle through a 'gaping maw' (嘴花) effect upon death, utilizing the 'Harvest' (atom.death-harvest) mechanic to represent the family's shared essence of reaping vitality at the moment of their end.",
+        "scope": "family"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P2",
+      "scope": "family",
+      "voteMinority": "atom.sunbloom"
+    }
+  ],
+  "kind": "action-candidate",
+  "schemaVersion": 1
+}

@@ -35,10 +35,10 @@ public class TurnFsmActionEnvelopeTests
         readonly NextEventAdvance _advance = new();
         readonly List<ScheduledEvent> _buffer = new(32);
 
-        public Rig(int width = 4, WScope scope = WScope.Global)
+        public Rig(int width = 4, WScope scope = WScope.Global, Func<string, string?, string?>? reselectTarget = null)
         {
             Slots = new ActionSlots(width, scope);
-            Runner = new ActionRunner(Queue, Slots, Cooldowns, key => !_dead.Contains(key));
+            Runner = new ActionRunner(Queue, Slots, Cooldowns, key => !_dead.Contains(key), reselectTarget: reselectTarget);
         }
 
         public ActorTurnMachine Add(string key)
@@ -203,10 +203,18 @@ public class TurnFsmActionEnvelopeTests
     public void A_late_bound_action_onto_a_dead_target_still_resolves()
     {
         // Without this the fizzle test above proves only that something happened at tick 100.
-        var rig = new Rig();
+        // `battle-tempo` `commitment-binding` (2026-09-05): LateBound resolving here needs a
+        // re-selection delegate configured -- ActionRunner's own contract (D6) is that LateBound
+        // WITHOUT one fizzles too (nothing to re-target onto), which `CommitmentBindingTests`
+        // covers directly (`WithNoReselectionDelegateConfiguredLateBoundGracefullyFizzles`). This
+        // test's own purpose is the ORIGINAL contrast against the fizzle test above -- EarlyBound
+        // fizzles unconditionally, LateBound resolves BY RE-TARGETING onto a live fallback -- so a
+        // reselect delegate redirecting "b" to a live "c" is what actually demonstrates it.
+        var rig = new Rig(reselectTarget: (actorKey, deadTarget) => "c");
         var env = Strike(windup: 100) with { Commitment = Commitment.LateBound };
 
         rig.Add("a");
+        rig.Add("c");
         rig.Commit("a", env, target: "b");
         rig.Kill("b");
 

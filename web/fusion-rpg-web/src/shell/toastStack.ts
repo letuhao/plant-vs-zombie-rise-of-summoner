@@ -7,6 +7,13 @@ export type ToastEntry = {
   tone: ToastTone;
   title: string;
   message?: string;
+  /** world-stage W84: an optional action the toast itself can run — running it also dismisses the
+   * toast, the same as any other resolution. Additive: a toast built without one renders exactly as
+   * it always did. */
+  action?: { label: string; run: () => void };
+  /** world-stage W84: which `world-notify` category (§4) this toast belongs to, when it has one.
+   * Absent for every non-`world-notify` toast in the app today — additive, not a required field. */
+  category?: string;
 };
 
 type ToastStackState = {

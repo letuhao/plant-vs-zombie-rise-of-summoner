@@ -1,0 +1,315 @@
+using System.Net.Http.Json;
+using FusionRpg.Contracts;
+using FusionRpg.Core.Demons;
+using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Effects;
+using FusionRpg.Core.Power;
+using FusionRpg.Data;
+using FusionRpg.Data.Abstractions;
+using FusionRpg.Data.Sqlite;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit;
+
+namespace FusionRpg.Server.Tests;
+
+/// <summary>species-build-todo.md T4.3 — `POST /api/species-build/respec` (spec-species-respec.md,
+/// read in full this session), against a real in-process host (same pattern as
+/// <c>SpeciesAllocationEndpointsTests</c>): free first override and revert, escalation, replay,
+/// insufficient balance, never refused for being a respec, and the pre-existing overbudget gate.</summary>
+public class SpeciesBuildEndpointsTests : IAsyncLifetime
+{
+    const int FumeshroomDemonTypeId = 60007;
+
+    string _dir = "";
+    RpgStore _store = null!;
+    WebApplication _app = null!;
+    HttpClient _http = null!;
+    long _playerId;
+
+    public async Task InitializeAsync()
+    {
+        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-respecep-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(_dir);
+        _store = new RpgStore(_dir);
+        _store.Init();
+        _playerId = _store.GetCurrentPlayerId();
+
+        PowerTuningHub.Configure(
+            PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "power-scale.v2.json"))));
+        FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
+            FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(File.ReadAllText(LatestAptitudesPath())));
+        FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
+            FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "progression.v1.json"))));
+        FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
+            FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
+        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
+        {
+            ["fumeshroom"] = new Dictionary<string, long>(StringComparer.Ordinal)
+            {
+                ["Might"] = 500, ["Vigor"] = 300, ["Fortitude"] = 200
+            }
+        });
+        SpeciesBuildTuningHub.Configure(new SpeciesBuildTuning(
+            SchemaVersion: 1, Version: 1,
+            ParityFloorPermille: 50, ParityCeilingPermille: 200,
+            LeanMinPermille: 350, LeanMaxPermille: 600,
+            CrowdingFactor: 633, SecondarySharePermille: 300,
+            MaxAptitudesPerSpecies: 5, MinAptitudesPerSpecies: 2,
+            RespecBasePrice: 50, RespecEscalationPermille: 500, RespecDecayDays: 3));
+
+        SeedSpeciesLevel(_playerId, FumeshroomDemonTypeId, level: 21, "fumeshroom"); // source = 20
+
+        var port = GetFreeTcpPort();
+        var baseUrl = $"http://127.0.0.1:{port}";
+        var builder = WebApplication.CreateBuilder();
+        builder.Logging.ClearProviders();
+        builder.Services.AddSignalR(o => o.EnableDetailedErrors = true);
+        builder.Services.AddSingleton(_store);
+        builder.Services.AddSingleton<IPowerIndexProvider>(sp =>
+            new FusionRpg.Server.Power.ServerPowerIndexProvider(sp.GetRequiredService<RpgStore>(), PowerTuningHub.Tuning));
+        builder.Services.AddSingleton<InjectorCommandInbox>();
+        builder.Services.AddSingleton<EffectGrantSession>();
+        builder.Services.AddSingleton<IHotCompactor>(sp => new HotCompactor(sp.GetRequiredService<RpgStore>()));
+        builder.Services.AddSingleton<CompactionWorker>();
+        builder.Services.AddSingleton<UniqueActorService>();
+        builder.Services.AddSingleton<EventIngest>();
+        builder.WebHost.UseUrls(baseUrl);
+        _app = builder.Build();
+        _app.UseDeveloperExceptionPage();
+        _app.MapHub<RpgHub>("/hub/rpg");
+        _app.MapAptitudes();
+        _app.MapSpeciesBuild();
+        await _app.StartAsync();
+
+        _http = new HttpClient { BaseAddress = new Uri(baseUrl) };
+    }
+
+    public async Task DisposeAsync()
+    {
+        _http.Dispose();
+        await _app.StopAsync();
+        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+    }
+
+    void SeedSpeciesLevel(long playerId, int demonTypeId, long level, string speciesId)
+    {
+        using var db = SqliteConnectionFactory.Open(_store.HotPath);
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            INSERT INTO rpg_actor_progression(
+              player_id, kind, type_id, level, xp, highest_level, demotion_count, revision, updated_utc, scope_key)
+            VALUES ($p, 'species', $tid, $lvl, 0, $lvl, 0, 0, $now, $sk);
+            """;
+        cmd.Parameters.AddWithValue("$p", playerId);
+        cmd.Parameters.AddWithValue("$tid", demonTypeId);
+        cmd.Parameters.AddWithValue("$lvl", level);
+        cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+        cmd.Parameters.AddWithValue("$sk", speciesId);
+        cmd.ExecuteNonQuery();
+    }
+
+    async Task<RespecResponseDto?> Respec(string speciesId, Dictionary<string, long> shares, string correlationId)
+    {
+        var resp = await _http.PostAsJsonAsync("/api/species-build/respec", new
+        {
+            playerId = _playerId,
+            speciesId,
+            shares,
+            correlationId
+        });
+        return await resp.Content.ReadFromJsonAsync<RespecResponseDto>();
+    }
+
+    async Task<System.Text.Json.JsonElement> RespecPrice(string speciesId)
+    {
+        var resp = await _http.GetAsync($"/api/species-build/respec-price/{_playerId}/{speciesId}");
+        return await resp.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+    }
+
+    [Fact]
+    public async Task RespecPrice_exposesEverRespecced_distinctFromTheDecayedCount()
+    {
+        // species-build-todo.md T5.1: a client predicting free-vs-priced before attempting a save
+        // must read `everRespecced`, not `respecCount == 0` -- the count legitimately decays back to
+        // zero, but `everRespecced` never resets once a species has been touched.
+        var before = await RespecPrice("fumeshroom");
+        Assert.False(before.GetProperty("everRespecced").GetBoolean());
+
+        await Respec("fumeshroom", new() { ["Ferocity"] = 5 }, "free-first"); // free, but marks it touched
+        var afterFree = await RespecPrice("fumeshroom");
+        Assert.True(afterFree.GetProperty("everRespecced").GetBoolean());
+
+        // Revert to baseline: still free, and the marker must NOT reset (T4.2's own fixed exploit).
+        await Respec("fumeshroom", new(), "revert-1");
+        var afterRevert = await RespecPrice("fumeshroom");
+        Assert.True(afterRevert.GetProperty("everRespecced").GetBoolean());
+    }
+
+    [Fact]
+    public async Task First_override_is_free()
+    {
+        _store.AwardSouls(_playerId, 1000, "seed", "bank-1");
+        var body = await Respec("fumeshroom", new() { ["Ferocity"] = 10 }, "r-1");
+
+        Assert.NotNull(body);
+        Assert.False(body!.Priced);
+        Assert.Equal(0, body.PriceAmount);
+        Assert.Equal(10, body.Shares["Ferocity"]);
+        Assert.Equal(1000, _store.GetSoulBalance(_playerId).Balance); // no charge
+    }
+
+    [Fact]
+    public async Task Reverting_to_baseline_is_free_and_a_change_afterward_is_priced()
+    {
+        _store.AwardSouls(_playerId, 1000, "seed", "bank-2");
+        await Respec("fumeshroom", new() { ["Ferocity"] = 10 }, "r-first"); // free
+
+        var revert = await Respec("fumeshroom", new(), "r-revert");
+        Assert.NotNull(revert);
+        Assert.False(revert!.Priced);
+        Assert.Equal(1000, _store.GetSoulBalance(_playerId).Balance);
+
+        var change = await Respec("fumeshroom", new() { ["Ferocity"] = 20 }, "r-change");
+        Assert.NotNull(change);
+        Assert.True(change!.Priced);
+        Assert.Equal(50, change.PriceAmount); // count was 0 going in
+        Assert.Equal(950, _store.GetSoulBalance(_playerId).Balance);
+    }
+
+    [Fact]
+    public async Task Escalation_prices_each_successive_change_higher()
+    {
+        _store.AwardSouls(_playerId, 1000, "seed", "bank-3");
+        await Respec("fumeshroom", new() { ["Ferocity"] = 5 }, "free-first");
+
+        var second = await Respec("fumeshroom", new() { ["Ferocity"] = 10 }, "chg-1");
+        var third = await Respec("fumeshroom", new() { ["Ferocity"] = 15 }, "chg-2");
+
+        Assert.Equal(50, second!.PriceAmount);
+        Assert.Equal(75, third!.PriceAmount);
+        Assert.True(third.PriceAmount > second.PriceAmount);
+    }
+
+    [Fact]
+    public async Task A_replayed_correlation_does_not_spend_again()
+    {
+        _store.AwardSouls(_playerId, 1000, "seed", "bank-4");
+        await Respec("fumeshroom", new() { ["Ferocity"] = 5 }, "free-first");
+        await Respec("fumeshroom", new() { ["Ferocity"] = 10 }, "chg-1");
+        var afterFirst = _store.GetSoulBalance(_playerId).Balance;
+
+        var replay = await Respec("fumeshroom", new() { ["Ferocity"] = 10 }, "chg-1");
+        Assert.NotNull(replay);
+        Assert.True(replay!.Replay);
+        Assert.Equal(afterFirst, _store.GetSoulBalance(_playerId).Balance);
+    }
+
+    [Fact]
+    public async Task Insufficient_balance_refuses_with_409_and_never_because_it_is_a_respec()
+    {
+        await Respec("fumeshroom", new() { ["Ferocity"] = 5 }, "free-first"); // no souls awarded at all
+
+        var resp = await _http.PostAsJsonAsync("/api/species-build/respec", new
+        {
+            playerId = _playerId,
+            speciesId = "fumeshroom",
+            shares = new Dictionary<string, long> { ["Ferocity"] = 10 },
+            correlationId = "poor-1"
+        });
+
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        Assert.Equal("souls.insufficient", body.GetProperty("reason").GetString());
+    }
+
+    [Fact]
+    public async Task Overbudget_is_refused_before_any_spend_or_state_change()
+    {
+        _store.AwardSouls(_playerId, 1_000_000, "seed", "bank-5");
+        await Respec("fumeshroom", new() { ["Ferocity"] = 5 }, "free-first");
+        var balanceBefore = _store.GetSoulBalance(_playerId).Balance;
+
+        var resp = await _http.PostAsJsonAsync("/api/species-build/respec", new
+        {
+            playerId = _playerId,
+            speciesId = "fumeshroom",
+            shares = new Dictionary<string, long> { ["Ferocity"] = 1_000_000 },
+            correlationId = "over-1"
+        });
+
+        Assert.Equal(System.Net.HttpStatusCode.Conflict, resp.StatusCode);
+        var body = await resp.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
+        Assert.Equal("aptitudes.overbudget", body.GetProperty("reason").GetString());
+        Assert.Equal(balanceBefore, _store.GetSoulBalance(_playerId).Balance); // refused before any spend
+    }
+
+    [Fact]
+    public async Task An_arbitrarily_high_respec_count_is_never_refused_for_being_a_respec()
+    {
+        _store.AwardSouls(_playerId, 1_000_000, "seed", "bank-6");
+        await Respec("fumeshroom", new() { ["Ferocity"] = 1 }, "free-first");
+
+        for (var i = 0; i < 10; i++)
+        {
+            var resp = await _http.PostAsJsonAsync("/api/species-build/respec", new
+            {
+                playerId = _playerId,
+                speciesId = "fumeshroom",
+                shares = new Dictionary<string, long> { ["Ferocity"] = i + 2 },
+                correlationId = $"grind-{i}"
+            });
+            Assert.True(resp.IsSuccessStatusCode, $"attempt {i}: {await resp.Content.ReadAsStringAsync()}");
+        }
+    }
+
+    sealed class RespecResponseDto
+    {
+        public string SpeciesId { get; set; } = "";
+        public long Level { get; set; }
+        public bool Priced { get; set; }
+        public long PriceAmount { get; set; }
+        public long RespecCount { get; set; }
+        public long SoulBalance { get; set; }
+        public bool Replay { get; set; }
+        public Dictionary<string, long> Shares { get; set; } = new();
+    }
+
+    static string RepoTuningDir() => Path.Combine(FindRepoRoot(), "data", "tuning");
+
+    static string LatestAptitudesPath()
+    {
+        var dir = RepoTuningDir();
+        var best = Directory.EnumerateFiles(dir, "aptitudes.v*.json")
+            .Select(Path.GetFileName)
+            .Select(n => (Name: n!, Match: System.Text.RegularExpressions.Regex.Match(n!, @"^aptitudes\.v(\d+)\.json$")))
+            .Where(x => x.Match.Success)
+            .OrderByDescending(x => int.Parse(x.Match.Groups[1].Value))
+            .First();
+        return Path.Combine(dir, best.Name);
+    }
+
+    static int GetFreeTcpPort()
+    {
+        var l = new System.Net.Sockets.TcpListener(System.Net.IPAddress.Loopback, 0);
+        l.Start();
+        var port = ((System.Net.IPEndPoint)l.LocalEndpoint).Port;
+        l.Stop();
+        return port;
+    }
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (File.Exists(Path.Combine(dir.FullName, "scripts", "collect-class-system-realrun.ps1"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new DirectoryNotFoundException("could not locate repo root above " + AppContext.BaseDirectory);
+    }
+}

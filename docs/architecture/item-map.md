@@ -152,13 +152,13 @@ Twenty-one. Model calls in **two** (13 and 21).
 |---|---|---|---|
 | 17 | [`uniques`](item/spec-uniques.md) | G1 — hand-authored items that break generator rules and no machine rules | 8, 9 |
 | 18 | [`consumables`](item/spec-consumables.md) | G2 — the use path degenerates, never the effect. Names **`OnActivate`** | 4 |
-| 19 | [`granted-actions`](item/spec-granted-actions.md) | G4 — the `action_id` seam | 4, **X3** |
+| 19 | [`granted-actions`](item/spec-granted-actions.md) | G4 — the `action_id` seam | 4, **6**, **X3** |
 | **20** | ⭐ [`item-surfaces`](item/spec-item-surfaces.md) | **Added 2026-09-03 — nothing owned any player-facing surface.** Armoury list + filter, the equip screen, item-card render, comparison, the socket preview and the **combination compendium** (D20 promotes these from nicety to requirement at 127 combos). `docs/web/spec.md` records the same seam as unclaimed from its side — both maps pointed at each other | 2, 10, 16 |
 | **22** | [`charm-carry`](item/spec-threshold-grants.md) | ⭐ **Split out of 12 by D40, 2026-09-04.** The charm pouch: five tables, the carry gate, five reason codes and the run-lifecycle hook. Sized larger than the threshold evaluator it would have ridden inside. ⚠ **Specced inside `spec-threshold-grants.md` today** — it needs its own file when it is scheduled | 12 |
 | **21** | ⭐ [`strain-splice-gen`](item/spec-strain-splice-gen.md) | **Added 2026-09-03.** The 102 generated combinations — 36 Strains (12 aptitudes × 3 archetypes) + 66 Splices (C(12,2)), seedsmith-configured. **The program's second model call.** Also owns retiring the existing element-keyed `socket-word` corpus | **yes** → 8, 16 |
 
-> ⚠ **Declared dependencies were reconciled against each spec's own body, 2026-09-04.** Five rows
-> understated what the module actually reads:
+> ⚠ **Declared dependencies were reconciled against each spec's own body, 2026-09-04** (a sixth row
+> added 2026-09-05). These rows understated what the module actually reads:
 >
 > | Module | Also depends on | Because |
 > |---|---|---|
@@ -167,6 +167,7 @@ Twenty-one. Model calls in **two** (13 and 21).
 > | 13 `set-charm-gen` | **3** | the twelve-role generator cap is module 3's to issue |
 > | 16 `sockets` | **`bind_ordinal` on `effect_binding`** | requested by the lane (§5.4) and **absent** from the shipped DDL |
 > | 21 `strain-splice-gen` | **6** | inert until `socketMax` can reach 4; no shipped base type hosts a 4-ingredient recipe |
+> | 19 `granted-actions` | **6** | ⭐ **added 2026-09-05 when the module was built** — the sixth row of the same kind. `item_granted_action.container_id` keys on the base type (ssot §4.4), and gate **GA2** is blocked by module 6 in the spec's own gate table. §4.3's `armament-primary`-only rule is likewise a base-type role check |
 >
 > **X7** (D27's container kinds) additionally gates **12, 13, 16, 18 and 21**, and **X4** gates **11, 13,
 > 15, 16 and 17** — not the two each was first recorded against.
@@ -281,3 +282,20 @@ untestable, and `enhance-reroll` needs `item-power-reads` to know what a "better
 - [effect-pipeline-map.md](effect-pipeline-map.md) — the roll machinery this consumes, modules 1–4 built
 - [seedsmith/spec-demon-themes.md](seedsmith/spec-demon-themes.md) — `set-charm-gen`'s upstream
 - [power/ssot-power-scale.md](power/ssot-power-scale.md) — `Θ` and `P(Θ)`; D18 puts drop volume on it
+
+## 9. Filed by the party-dungeon program (2026-09-05)
+
+`dungeon-loot` (`party-dungeon/spec-dungeon-loot.md`) is the first production host of `LootPipeline` and files
+four rows here; each is this program's file to change, consumed there.
+
+| Ask | Where | Shape | Until it lands |
+|---|---|---|---|
+| Three source kinds `dungeon-room` · `dungeon-clear` · `dungeon-quest` | `LootCorrelation.Derive` (`LootPipeline.cs:91`), `DropTableValidator.KnownSourceKinds` (`:52-53`) | correlations `loot:delve:{delveId}:{r}:{c}` · `loot:delve:{delveId}:clear` · `loot:delve:{delveId}:quest:{questId}`, server-derived | a delve room cannot request loot |
+| `LootContentView.BaseTypeSetFor` optional delegate | `LootPipeline.cs:306` | step 6 reads `RefId is { Length: > 0 } ? BaseTypeSetFor(RefId) ∩ legal : legal`; null ⇒ today's path, byte-identical | domain-only base-type subsets are unread |
+| `RollSeed` on the first-clear grant | `LootPipeline.cs:204-210` | **ask-first** — moves every manifest with a `FirstClearGrant`; the delve host instantiates the grant itself on the pipeline's own stream until then | the relic is flat |
+| Module 17 `uniques` amendment | `adapters/items/kinds.py:56-60`, `data/tuning/uniques.v1.json:5`, `data/seed/items/uniques/*-{30,50,70}.json` | one ownership level per field on the `unique` KindSpec (PLANNED `rarity ∈ {firstseed, sunwoven, almanac}`, `powerAxis`, `acquisition`; VALIDATED `actionGrantRef`, `dungeonBinding`); a set-stem audit check; `rungFloorOrdinal` 30 → 80 as its own change; the 95 anchors below rung 80 flip `enabled: false`, never re-runged or deleted — `party-dungeon/spec-unique-pipeline.md` §1 | uniques below decision 13's floor stay eligible |
+| Module 11 `MintUnique` arm | `LootPipeline.cs:274-281` (the flat non-equipment arm), `DropTableModel.cs:158-166` | a `unique` draw gets its own `RollSeed` from `LootStreams.RollSeed(i)` and goes through `view.Mint` (the `MintEquipment` shape at `:292`), rung = the container's own `Rarity`; `UnavailableKinds[Unique]` is removed in the same change — `spec-unique-pipeline.md` §5 | `DropEntryKind.Unique` stays refused and the boss table's `boss-unique` group cannot be written |
+| Module 19 `ItemGrantValidator` admits unique container ids | `Items/Grants/ItemGrantValidator.cs` | `item_granted_action.container_id` may be a unique's `item.<slug>` beside a base type's — one validator arm — `spec-unique-pipeline.md` §3 | a unique cannot grant an action |
+| Lock check on `rpg_delve_pack_lock` | salvage, transfer, assign and bulk paths in `RpgStore.Items.cs` / `ItemSurfaceEndpoints.cs` | refuse an instance carried in a live delve (`pack.carried`); the armoury listing hides or badges it — `party-dungeon/spec-loot-pack.md` §4 | a carried item can be salvaged at home mid-delve |
+| Item-side derived price (`seed-contract.md` §2.1: price DERIVED, none built) | item program | class × grade × `contentScale(Θ)`; the Delve contributes only `merchant.markupMilli` | the delve merchant refuses (`delve.price-undesigned`) and opens as a sell-nothing rest |
+

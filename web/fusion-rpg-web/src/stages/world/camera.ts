@@ -76,6 +76,16 @@ export function panBy(camera: Camera, dx: number, dy: number): Camera {
 }
 
 /**
+ * world-stage W93 — puts world point `(x, y)` at the centre of the viewport, at the camera's
+ * current scale. The select-and-centre dispatch this backs is a *request*: the caller applies it to
+ * its own camera state and this function never reads that state back — centring changes what the
+ * viewport is looking at, never what it is zoomed to.
+ */
+export function centreOn(camera: Camera, x: number, y: number): Camera {
+  return { ...camera, x: x - camera.w / 2, y: y - camera.h / 2 };
+}
+
+/**
  * Put the whole extent on screen with padding, at whatever aspect ratio the viewport actually is —
  * grows the tighter-constrained dimension to match the viewport's aspect rather than cropping the
  * other one, so `fit` never hides part of the authored grid.

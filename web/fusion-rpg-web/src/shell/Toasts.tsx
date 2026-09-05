@@ -8,8 +8,15 @@ import { useToastStack } from "./toastStack";
  * outranks Dialog (300) in the band order, so staying out of the dialog's
  * footprint is what keeps this true rather than the stacking order alone).
  */
+/** world-stage W89 (spec-world-notify.md §1) — at most three at once, newest on top, the remainder
+ * behind a count rather than an ever-growing column. */
+const VISIBLE_CAP = 3;
+
 export function Toasts() {
   const toasts = useToastStack((s) => s.toasts);
+  const dismiss = useToastStack((s) => s.dismiss);
+  const visible = toasts.slice(-VISIBLE_CAP).reverse();
+  const hiddenCount = Math.max(0, toasts.length - VISIBLE_CAP);
 
   return (
     <div
@@ -17,7 +24,12 @@ export function Toasts() {
       data-testid="toast-stack"
       aria-live="polite"
     >
-      {toasts.map((toast) => (
+      {hiddenCount > 0 ? (
+        <p className="pointer-events-none text-xs text-muted" data-testid="toast-hidden-count">
+          +{hiddenCount} more
+        </p>
+      ) : null}
+      {visible.map((toast) => (
         <div
           key={toast.id}
           data-testid={`toast-${toast.id}`}
@@ -37,6 +49,19 @@ export function Toasts() {
             <p className="text-muted" data-testid="toast-message">
               {toast.message}
             </p>
+          ) : null}
+          {toast.action ? (
+            <button
+              type="button"
+              data-testid="toast-action"
+              className="mt-1 rounded-sm border border-border-control px-2 py-1 text-xs text-text hover:bg-panel"
+              onClick={() => {
+                toast.action!.run();
+                dismiss(toast.id);
+              }}
+            >
+              {toast.action.label}
+            </button>
           ) : null}
         </div>
       ))}

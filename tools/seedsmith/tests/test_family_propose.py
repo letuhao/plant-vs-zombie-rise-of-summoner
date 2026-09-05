@@ -63,7 +63,7 @@ from seedsmith.adapters.actions.family_propose.derive import (  # noqa: E402
 )
 from seedsmith.adapters.actions import generate_family_actions as gen_mod  # noqa: E402
 from seedsmith.adapters.demons.anchor.permute import order_for  # noqa: E402
-from seedsmith.adapters.demons.anchor.vote import VoteResult  # noqa: E402
+from seedsmith.adapters.demons.anchor.vote import SetVoteResult  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 REAL_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
@@ -526,7 +526,10 @@ class VoteResolutionTests(unittest.TestCase):
         cand = finalize_candidate(brief, drafts, candidate_id="candidate.family.000")
         self.assertEqual(cand.outcome, "accepted")
         self.assertEqual(cand.vote.confidence, "split")
-        self.assertEqual(cand.vote.minority, "atom.a|atom.c")
+        # Per-member voting names the member that fell below threshold (`atom.c`),
+        # not the whole losing set -- the old answer wrongly listed `atom.a`, which
+        # all three samples chose. See the general-propose twin of this test.
+        self.assertEqual(cand.vote.minority, ("atom.c",))
 
     def test_1_1_1_split_is_unresolved_value_is_none_never_sample_zero(self):
         brief = make_brief()
@@ -699,7 +702,8 @@ class DryRunEntrypointTests(unittest.TestCase):
                 brief_id=brief["briefId"], outcome="accepted",
                 entry=entry_for(make_draft(), candidate_id=candidate_id, brief_id=brief["briefId"],
                                provenance=provenance),
-                vote=VoteResult(value="atom.a|atom.b", confidence="high", minority=None),
+                vote=SetVoteResult(values=("atom.a", "atom.b"), confidence="high",
+                                   minority=(), tally={"atom.a": 3, "atom.b": 3}),
                 provenance=dict(provenance or {}),
             )
 

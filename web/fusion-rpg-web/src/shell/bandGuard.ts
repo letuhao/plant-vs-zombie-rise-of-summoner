@@ -83,16 +83,22 @@ export function scanForLayerStackImports(srcDir: string): GuardViolation[] {
  * GG-53 / D6: only run-ending results may open a blocking (band-3) surface unprompted — level-ups,
  * drops and contract offers report at band 4 and queue for the sanctum instead. No run-result
  * screen exists yet (it's part of T24, excluded this phase), so today's real invariant is
- * narrower and fully checkable: nothing outside `src/shell/` and `ui/ConfirmDialog.tsx` may render
- * `DialogShell` or claim the `band-dialog` class. `ConfirmDialog` is exempt by construction, not by
- * assumption — it is a fully controlled component (the caller's own `open` state decides visibility)
- * and every existing call site sets that state from a direct button click, never a background
- * event; GG-41 also exempts developer surfaces from GG-53 entirely, so the same
- * allow-list `vocabularyGuard.ts` uses for those applies here.
+ * narrower and fully checkable: nothing outside `src/shell/`, `ui/ConfirmDialog.tsx` and the
+ * `world-confirms` module's three dialogs may render `DialogShell` or claim the `band-dialog`
+ * class. Each is exempt by construction, not by assumption — a fully controlled component (the
+ * caller's own `open` state decides visibility), never self-opening from a background event
+ * (`stages/world/confirms/noSelfOpen.test.tsx`, world-stage W105, is that module's own standing
+ * proof); GG-41 also exempts developer surfaces from GG-53 entirely, so the same allow-list
+ * `vocabularyGuard.ts` uses for those applies here.
  */
 const DIALOG_BAND_PATTERNS = [/<DialogShell\b/, /\bband-dialog\b/, /band:\s*["']dialog["']/];
 
-const DIALOG_BAND_ALLOWED_PATHS = new Set(["ui/ConfirmDialog.tsx"]);
+const DIALOG_BAND_ALLOWED_PATHS = new Set([
+  "ui/ConfirmDialog.tsx",
+  "stages/world/confirms/CommitLegionDialog.tsx",
+  "stages/world/confirms/BindWardenDialog.tsx",
+  "stages/world/confirms/ReleaseGroundDialog.tsx"
+]);
 
 const DEV_SURFACE_PREFIXES = [
   "dev/",

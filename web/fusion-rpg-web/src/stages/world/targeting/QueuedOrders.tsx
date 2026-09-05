@@ -26,14 +26,14 @@ export type QueuedOrdersProps = {
 export function QueuedOrders({ orders, onTakeBack }: QueuedOrdersProps) {
   if (orders.length === 0) {
     return (
-      <p data-testid="queued-orders-empty" className="text-sm text-muted">
+      <p data-testid="queued-orders-empty" className="pointer-events-auto text-sm text-muted">
         Nothing queued.
       </p>
     );
   }
 
   return (
-    <ul data-testid="queued-orders" className="flex flex-col gap-1">
+    <ul data-testid="queued-orders" className="pointer-events-auto flex flex-col gap-1">
       {orders.map((order) => (
         <li
           key={order.commandId}

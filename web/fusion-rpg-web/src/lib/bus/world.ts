@@ -207,6 +207,14 @@ export type WorldEntityDto = {
   movementRemaining: number;
   routed: boolean;
   members: WorldEntityMemberDto[];
+  /**
+   * Found missing (world-stage, same drift class as `calendar`/`structureId`/`fractureIntensityMilli`
+   * above): projected since `WorldDtos.cs:301` (world-stage W8, `EntityNaming.DisplayName`), never
+   * added to this hand-written mirror. Never null on the wire (defaults to `""` for a legion the
+   * viewer cannot name — a genuinely absent name, not a gap) — `features/world/labels.ts`'s own
+   * `legionLabel` already treats an empty string as "no name on record" for exactly this reason.
+   */
+  displayName: string;
 };
 
 export type WorldStateDto = {

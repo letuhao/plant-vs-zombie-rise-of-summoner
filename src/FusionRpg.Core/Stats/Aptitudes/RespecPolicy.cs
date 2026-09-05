@@ -1,37 +1,49 @@
+using FusionRpg.Core.Demons.Generation;
+
 namespace FusionRpg.Core.Stats.Aptitudes;
 
 /// <summary>
-/// class-system-todo.md P6.3 — spec-point-economy.md §3: "the only friction left, and it must not be
-/// a ban." Free build withdrew the class price, whose job was to make a build a commitment; nothing
-/// replaced it except this. Deliberately NOT three things, each for the reason §3 states: not a
-/// cooldown (punishes being away from the game); not a cap on respec count (PS-8 — a hard progression
-/// ceiling); not free (a free respec makes a build a menu selection, not a commitment, and every
-/// fight is fought with the optimal counter).
+/// species-build-todo.md T4.1 — spec-species-respec.md, read in full this session. Prices CHURN, not
+/// investment (decision 15, replacing decision 9's level-scaled price after audit finding A2 showed
+/// species level and soul income don't relate the way that formula assumed). Deliberately NOT three
+/// things, same reasoning class-system-todo.md P6.3 already established for the original placeholder:
+/// not a cooldown (a cooldown forbids; this only prices, and the decay means being away makes it
+/// CHEAPER — the opposite of the "punishes being away" failure a cooldown would cause); not a cap on
+/// respec count (PS-8); not free (a free respec makes a build a menu selection, not a commitment).
 ///
-/// <para><b>Placeholder resource choice, not a code default masquerading as a decision</b> — §8 marks
-/// "which resource respec costs" an "Ask first," a mechanism choice this module cannot make alone.
-/// <see cref="Resource"/> is a documented placeholder (Hunger — the closest existing "a resource
-/// fighting also costs": resource-hub's own framing has hunger spent by regenerating the other pools,
-/// which fighting drains), not a tuning value, because WHICH pool is a structural/mechanism decision
-/// (like <see cref="AllocationScope"/> itself), not a magnitude a balance pass would dial — only the
-/// AMOUNT is (§6: "carries no bare literal — every number is a named tunable"), and that one lives in
-/// <see cref="AptitudePointEconomy.RespecPrice"/>.</para>
+/// <para><b>Soul, not Hunger</b> — spec-point-economy.md §8's "Ask first: which resource respec costs"
+/// is answered by spec-species-respec.md's own decision 1. The prior <see cref="RespecResource.Hunger"/>
+/// value was an explicitly documented placeholder pending that answer, not a shipped default.</para>
+///
+/// <para><b>Count, never level</b> — <see cref="PriceOf"/> takes the caller's own persisted respec
+/// counter (<c>RpgStore.SpeciesRespec.cs</c>, T4.2) as an argument; this policy holds no state and does
+/// not know or care which species is being repriced, matching <see cref="RespecPrice"/>'s own
+/// unscoped-by-<see cref="AllocationScope"/> shape from the original design.</para>
 /// </summary>
-public enum RespecResource { Hunger }
+public enum RespecResource { Soul }
 
 public readonly record struct RespecPrice(RespecResource Resource, long Amount);
 
 public static class RespecPolicy
 {
-    /// <summary>Always available, always priced, never refused, never a cooldown, never a cap
-    /// (spec-point-economy.md §3/§7 test 6/§8). There is no "cannot respec" return here on purpose —
-    /// a caller that wants to know the price before paying it calls this; whether the payer CAN
-    /// afford <see cref="RespecPrice.Amount"/> right now is that resource's own concern (a stamina/
-    /// hunger/qi pool check), never this policy's — this type only ever answers "what does it cost,"
-    /// never "are you allowed."</summary>
-    public static RespecPrice PriceOf(AptitudeTuning tuning)
+    /// <summary>`price(count) = basePrice + basePrice × count × escalationPermille / 1000` — linear,
+    /// not geometric (spec's own reasoning: geometric escalation against a flat soul faucet is how a
+    /// price becomes a ceiling, and soul income is flat today per <c>RpgStore.Souls.cs</c>'s Θ pin).
+    /// Widened to `long` throughout and divided by 1000 last, exactly once (CLAUDE.md's overflow
+    /// rules); <c>checked</c> so a runaway count throws rather than wraps. Always available, always
+    /// priced, never refused — there is no "cannot respec" return here on purpose, exactly like the
+    /// policy this replaces.</summary>
+    public static RespecPrice PriceOf(SpeciesBuildTuning tuning, long count)
     {
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
-        return new RespecPrice(RespecResource.Hunger, tuning.PointEconomy.RespecPrice);
+        if (count < 0)
+            throw new ArgumentOutOfRangeException(nameof(count), count, "respec count cannot be negative");
+
+        checked
+        {
+            var amount = tuning.RespecBasePrice
+                + tuning.RespecBasePrice * count * tuning.RespecEscalationPermille / 1000;
+            return new RespecPrice(RespecResource.Soul, amount);
+        }
     }
 }

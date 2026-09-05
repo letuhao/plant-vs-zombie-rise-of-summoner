@@ -91,6 +91,19 @@ with plant **bodies**).
 
 ### P0.5 — ⭐ The one regeneration pass: `core.v1.json` v2 + `classes.v1.json` v4 (D30 + D35)
 
+> ⚠ **Status re-measured 2026-09-05 during the module-22 whole-file consistency pass — the two halves
+> are in DIFFERENT states and the unchecked boxes below were hiding that.** Read off the real registry
+> files, not from any section's prose:
+>
+> | Half | State | Evidence |
+> |---|---|---|
+> | **`core.v1.json` → v2 (D30)** | ✅ **LANDED**, by module 3 at P1.3 | `registryVersion: 2`; exactly **twelve** roles carry `hybridEligible` and they sum to **800‰**; `ward-array` · `head-guard` · `sense` are `false` and `jewel-minor-b` is `true`. Both Python constants moved with it, and P3.2's `The_three_previously_disagreeing_hybrid_role_sources_now_agree` reads all three files so a regression is a named failure |
+> | **`classes.v1.json` → v4 (D35)** | ⛔ **NOT landed** — still `registryVersion: 3`, `frozen: true` | So the 32-family exclusion, the five stopgap slates, the directional-profile field and the stale `frozenNote` are all still open, and every downstream module built against v3 |
+> | **The 18 legacy sets** | ⛔ **Open by design** — closes with module 13's generation run | P3.3 refused to close it deterministically: a member role is a model-chosen identity field, and code-side role swapping is the inversion P1 forbids |
+>
+> Nothing is being marked done here. Recorded so the next reader does not infer from one unchecked
+> list that the core bump never happened, or from the checkpoint banner that the classes bump did.
+
 **`core.v1.json` → registryVersion 2 (D30), three changes that travel together:**
 
 - [ ] `hybridEligible` → `false` on `head-guard` and `sense`; **`true` on `jewel-minor-b`**; add
@@ -595,9 +608,26 @@ number to move if a `sprout`-rung joke unique is ever wanted.
 live-pricing (module 9); the D11 dominance lint leaving channel-split mode (module 6, consumes the
 seeded `power_ceiling` row); ~~`socket_min`/`socket_max` and `reroll_cost_mult` budget keys~~
 (**all three resolved — `reroll_cost_mult` 2026-09-05 by module 15, `socket_min`/`socket_max`
-2026-09-05 by module 16; see the two addenda above**; ~~`salvage_yield`~~ **resolved 2026-09-04**); a light-theme palette for the ten rung colours
-(module 20 `item-surfaces`) — `colourToken`s already exist in `core.v1.json` and are asserted distinct
-here, but the deuteranope-transform test needs a palette that does not exist yet.
+2026-09-05 by module 16; see the two addenda above**; ~~`salvage_yield`~~ **resolved 2026-09-04**);
+~~a light-theme palette for the ten rung colours (module 20 `item-surfaces`)~~ — **✅ RESOLVED
+2026-09-04 by module 10, not by module 20.** See the addendum below.
+
+⭐ **Addendum 2026-09-05 — the light-theme palette and the deuteranope transform this section
+deferred to module 20 were ALREADY BUILT, one module later, and module 20 confirmed it rather than
+building a second one.** This section's own note said *"`colourToken`s already exist in `core.v1.json`
+and are asserted distinct here, but the deuteranope-transform test needs a palette that does not
+exist yet."* Module 10 (`item-card`, P2.5 below) shipped both on 2026-09-04:
+`src/FusionRpg.Core/Items/Display/RarityPalette.cs` implements sRGB → CIE L\*, WCAG 2 contrast and the
+**Machado/Oliveira/Fonseca (2009) deuteranope *and* protanope** simulation matrices, cross-checked
+against this section's own documented figures (`ssot-rarity.md` §3.3's L\* 42.1 → 91.9 reproduced to
+one decimal), **and** the light-theme palette itself — L\* DECREASING 48.0 → 4.5, monotone under both
+colour-blindness transforms, WCAG AA 4.5:1 against white on every rung, with a negative-control test
+proving `Validate()` rejects a flat palette rather than always passing. ⛔ **Module 20 verified this
+before writing a line and deliberately built no second palette or transform** (G3 §8.6's
+one-renderer rule reaches colour science too); its own colour obligation reduced to GG-27's
+*word-and-shape* redundancy channel, which is `DominancePresentation.Badge` and is asserted to carry
+no colour property at all. **Nothing is owed here any longer.** The ten hexes remain a design pass
+the owner may revise, exactly as module 10 recorded.
 
 **Verification, run and green:**
 
@@ -681,7 +711,18 @@ draft this list was written from:**
          `jewel-minor-a` to "every plant entry 0, every humanoid entry 1" by accident** (missing values
          sort lowest, and the two frames' ids happened to cluster on either side of that boundary) —
          caught by re-running the corpus analysis after the first pass, not assumed correct, and fixed
-         by reshaping per (role, frame) instead of per role
+         by reshaping per (role, frame) instead of per role.
+         ⭐ **Addendum 2026-09-05, from module 21 (`strain-splice-gen`): this reshape closed module
+         21's only hard dependency, and it did so a day before the spec that declared the dependency
+         open was even read.** `spec-strain-splice-gen.md` (measured 2026-09-03) states *"the maximum
+         `socketMax` anywhere is 2 … no Strain and no Splice is buildable on any shipped chassis"* and
+         *"this module is inert until"* module 6 issues 4 on `armament-primary` and `core-guard`. The
+         even spread across `[0, ceiling]` did exactly that: the live distribution over 740 entries is
+         `0×253 · 1×255 · 2×148 · 3×68 · 4×16`, the sixteen 4s are 8 `armament-primary` + 8
+         `core-guard`, and **no entry omits the field any more**. So `RolesThatCanHostAStrain` returns
+         a non-empty list, the geometric per-actor Strain ceiling of **2** is live rather than
+         hypothetical, and module 21 is not inert. Recorded here because module 6 is where the fact
+         lives; the stale citations it leaves behind are filed in **P4.3** and **P4.4**
 - [x] **`socketCeiling(role)` forward-seeded** — `data/tuning/sockets.v1.json`, the exact 15-row table
       `spec-sockets.md` §3 already publishes (module 16 hasn't built yet; same precedent as module 7's
       provisional `power_ceiling`, module 16 stays the numbers' owner).
@@ -961,6 +1002,16 @@ ItemNameComposerTests.cs}` (new, the last file carrying both `AffixNameTableTest
       an `almanac`'s ~770 hp-equivalent implicit price through `ItemPowerReads.ImplicitShare` — if it
       does, module 7's rarity bands need re-deriving. This module supplies the read that answers the
       question; it cannot answer it itself with no Splice content to price
+- [x] ⛔ **ADDENDUM 2026-09-05, found and FIXED while building module 19 (`granted-actions`): R2 could
+      report a number but could never say it was too big.** `ItemPowerReads.GrantedActionPrice`
+      computed a share and then returned `Over: false` unconditionally, while
+      `ItemPowerTuning.GrantedActionShareCapMilli` was parsed at boot (`item-power.v1.json`, `null`)
+      and read by **nothing** — a tunable no code consumed, which is SC7 from the inside. This module's
+      own note (*"reportable today and gating only when module 19 `granted-actions` lands"*) described
+      the fix exactly: `GrantedActionPrice` now takes an **optional** `ItemPowerTuning`, so every
+      pre-existing two-argument caller keeps `Over: false` unchanged, and `ItemGrantValidator` — the
+      first caller ever — passes it and gets the gate. The cap stays `null` (no number invented); the
+      fallback is the whole ceiling, 1000‰, a bounded ratio. **Cross-referenced from P5.3.**
 
 **Verification, run and green:**
 
@@ -1041,7 +1092,17 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
       their `kindId` is unknown. Module 17 **excludes them from `narrow`'s raw-stat subtotal rather than
       guessing** (a guess would make an unresolved reference look like a balance failure) and pins the
       five as a set. Same defect, wider blast radius than the display corpus alone; still not fixed
-      from either module, and still the authoring fleet's re-run
+      from either module, and still the authoring fleet's re-run.
+      ⛔ **A NINTH, found from a third direction 2026-09-05 by module 18 (P5.2):**
+      `atom.elemental-power` — named by **11 of the 60 shipped consumables** (every elemental draught),
+      resolving to no affix-family row. It differs from the other eight in one way worth recording: it
+      is not merely unauthored, it is **exemplar-only** — `_exemplars/affix-family.exemplar.json`
+      carries it as template content that P2.3 above explicitly and correctly left outside the real 98,
+      and `ssot-consumables.md` §7.2's own worked example (`atom.elemental-power|fire`) is written
+      against it. So a lane doc, an exemplar and 11 authored rows all name a family the corpus does not
+      have. Module 18 excludes them from its runtime-legality check rather than guessing, and pins the
+      set at exactly one family and 11 rows. ⚠ Note `atom.elemental-defense` **is** real and is what
+      the other two element-bearing consumables use — the near-miss is part of why this went unnoticed
 - [ ] ⏸ **The Card and Compare levels — not built.** `ItemDisplayRenderer.Line` (the Line level) is
       built and tested; assembling an instance's full `DisplayBlock[]` (base/implicit/affixes/sockets/
       set/enhancement/requirements, the eleven ordered blocks) and diffing two cards
@@ -1195,7 +1256,14 @@ seeds `item_display_template` at boot); `tests/FusionRpg.Core.Tests/Items/ItemDi
       it only reads, and nothing in the pipeline consults it — ⛔ a measurement, never a counter that
       could become a gate. The watermarked tail-trim ships day one (`TrimDropLog`): it blanks
       `context_json`/`result_json` past the horizon and **keeps the row**, so inflow stays queryable
-      and `item_generation` stays the permanent record
+      and `item_generation` stays the permanent record.
+      ✅ **The filing was honoured 2026-09-05 by module 20 (P5.4), as a filter and never as a cap:**
+      `LootFilterView` is a client-side view rule over already-owned rows plus the inbox count, and a
+      guard test strips the comments and asserts its source names no `LootPipeline`, `DropTable`,
+      `LootPity`, `DropEnvelope` or `RpgStore` at all. I12's wall-clock axis is restated **per content
+      event** in `data/tuning/item-surfaces.v1.json` — the file has no clock parameter it could read one
+      from. `CountEquipmentMinted` stays exactly what this module made it: a measurement with no
+      consumer that could turn it into a gate
 - [x] **Server boot wired** — `Program.cs` parses `item-drop-volume.v1.json` at startup (so a
       self-inconsistent balance edit fails there, not at the first drop) and imports
       `data/seed/loot/tables*.json` via `ImportLootCorpus`, non-fatally
@@ -1218,6 +1286,16 @@ seeds `item_display_template` at boot); `tests/FusionRpg.Core.Tests/Items/ItemDi
    Each is refused **by name** with `ContentRuleViolated{drop.entry-kind-unavailable}` naming the
    module that lands it — a build order, not a defect, and never a silent drop. **Not this module's to
    fix**, and cross-referenced into the owning modules' sections below.
+   ⭐ **Resolved in part 2026-09-05 by modules 17 and 18 — the two largest blocks are now referentially
+   live, and both reasons MOVED rather than being left pointing at a module that exists.** The 144
+   `unique` refs resolve against module 17's corpus and the 60 `consumable` refs against module 18's
+   (`ConsumableCorpusTests.All_sixty_consumable_drop_entries_resolve_against_this_corpus` asserts every
+   one). **Both entry kinds stay refused**, one step further on in each case: no CONCRETE container
+   exists for either (the corpora hold seeds, and rolling one is the runtime generator's under the
+   seed-to-concrete rule), and `consumable` additionally waits on **X7**'s fifth `container_kind`.
+   `DropTableDraw.UnavailableKinds` carries both updated reasons and both are pinned by a test, so
+   neither can go stale a second time. **204 of the 315 unresolvable rows now have a named, one-step
+   blocker instead of a module pointer;** the remaining 111 (70 `charm`, 41 `insert`) are still X7's.
 3. ⛔ **`spec-drop-volume.md` Correction 1's `warpath-20h` decomposition contradicts shipped code.**
    The spec writes *"`warpath-20h` (4 + boss) — 4 × 0.55 + 1.40 + 0.60"*, i.e. five encounters.
    `ExpeditionResolver.WaveChain("warpath-20h")` (`ExpeditionResolver.cs:202`) is **four waves total** —
@@ -1466,7 +1544,13 @@ boot, imports the loot corpus after `store.Init()`);
    three. That is I5 §3.6's design working — the evaluator counts per set id and never merges — but it
    is a **disclosure requirement** for module 20's tooltip: one equipped piece is simultaneously part
    of three different "3 / 4"s. `One_shipped_item_can_advance_more_than_one_set_and_the_corpus_already_relies_on_it`
-   pins the numbers. **Cross-referenced into P5.4 (module 20).**
+   pins the numbers. **Cross-referenced into P5.4 (module 20).** ✅ **PICKED UP 2026-09-05:** module 20
+   built `SetDisclosure` — `SharedMembers` re-measures all three numbers (154 / 25 / max 3) against the
+   real corpus, and `ForWearer` reports **per piece** which sets it advances and which it is
+   *redundant* in, which is ssot-sets.md §4.5's *"say why the fourth did not count"* half. It counts
+   nothing of its own: the `(set, role)` dedupe is `SetEvaluator.Hits`' own discipline re-expressed,
+   and a test asserts the two agree on the same wearer, so the tooltip can never disagree with the
+   "3 / 4" beside it.
 
 **Three judgement calls this module had to make that the spec does not state, all named:**
 
@@ -1521,13 +1605,19 @@ own measured test.
       table**, and binding them as real container rows waits on X7. **A wiring gap, not a wall** — the
       grammar row in `definitions.md` §1 is the SSOT the regex mirrors and it wins over any spec.
       Same blocker P3.1 recorded for the 70 `charm` and 41 `insert` drop entries and P3.3 carries
-- [ ] ⏸ **Module 22 `charm-carry` (D40) — the pouch is NOT here, by ruling.** The five tables
-      (`charm_def`, `charm_pouch`, `charm_run_hold`, `charm_attunement`, `charm_resonance`), the AP
-      gate (budget · axis cap 3 · copy cap 2 · `unique_carry` 1 · `level_req`), its five reason codes,
-      the run-start snapshot and the `CharmInUse` refusal all belong to module 22, which depends on
-      this one. `data/tuning/charm-attunement.v1.json` is **its** file and is deliberately not created
-      here. What this module keeps is what D40 says it keeps: the evaluator, plus the `charm_def`
-      **class rules** the evaluator's own corpus reader needs
+- [x] ✅ **Module 22 `charm-carry` (D40) — the pouch was NOT here, by ruling, and it is now BUILT at
+      P5.5 (2026-09-05). This deferral is CLOSED.** The five tables (`charm_def`, `charm_pouch`,
+      `charm_run_hold`, `charm_attunement`, `charm_resonance`), the AP gate (budget · axis cap 3 · copy
+      cap 2 · `unique_carry` 1 · `level_req`), its five reason codes, the run-start snapshot and the
+      `CharmInUse` refusal all landed there, and `data/tuning/charm-attunement.v1.json` is its file,
+      created there and not here. What this module kept is what D40 says it keeps: the evaluator, plus
+      the `charm_def` **class rules** the evaluator's own corpus reader needs. ⭐ **Module 22 forked
+      nothing** — its resonance tiers come from `CharmResonance.Consumer` driven through
+      `ThresholdEvaluator`, and a test drives the evaluator by hand over the same snapshot and demands
+      the identical list. ⛔ **One thing module 22 found that this section could not have known:** the
+      five reason codes were **not** minted — §5.2's four player-action names became a module-local
+      `CharmCarryRefusalReason` (module 4's `EquipRefusalReason` precedent) and the fifth became a
+      `ContentRuleViolated{charm.*}` rule id, so definitions.md §10's closed 33 is still untouched
 - [ ] ⏸ **The `(capability, threshold-family multiset)` median ≤ 2 gate is module 13's, and it is
       already passing on today's corpus.** It is `Distribution/CellOccupancy` in
       `spec-set-charm-gen.md` §, a **generation distinctness** gate over the generated population —
@@ -2439,6 +2529,11 @@ caller's, because it is D4's content decision. `--targets M1` reports nothing in
       to a recorded `op_seq`; the ledger it needs is built and dense, so it is a small addition, but no
       surface asks for it and shipping an untriggered rollback path is how a destructive operation
       reaches production untested. **Owner: this module, when an admin surface exists (module 20).**
+      ⚠ **Checked 2026-09-05 and module 20 is NOT that surface.** Its server file is read-only by
+      construction — it carries no `MapPost` at all, deliberately, because a write path through the
+      presentation layer is the "second surface" that module exists to prevent — and an admin console
+      is not one of its six player surfaces. So this stays open with the same owner and a corrected
+      trigger: **an admin surface, which nothing in the item program schedules.** See P5.4
 - [ ] ⏸ **The milestone ATOMS are not authored.** The stride is decided and tested; the reserved family
       space no affix pool may draw from is content, and no `affix-families/*.json` entry declares one.
       **Owner: the authoring fleet, same lane as the phantom families P2.2/P2.3 named.**
@@ -2665,18 +2760,46 @@ this module's favour rather than left open.
       design one. ⚠ The comparer it would tiebreak **has no implementation anywhere yet**, so nothing
       is broken today — which is precisely why the spec argues to add it now rather than after E12.
       Requested here, not built: a column on another program's table is not ours to add
-- [ ] ⏸ **The 102 Strains and Splices — module 21's (`strain-splice-gen`, P4.4 below).** The evaluator,
-      the recipe tables, D20's four-ingredient rule, the one-per-item cap, the lowest-`container_id`
-      tie-break and the per-actor backstop are all built and tested **against synthetic Strain rows**,
-      because the real ones are model-call output. The seam is real and asserted: `SeedComboRecipes`
-      never deletes a row it did not write, so the 102 land beside the 25 in one table
+- [x] ⏸→✅ **The 102 Strains and Splices — module 21's (`strain-splice-gen`, P4.4 below), TAKEN UP
+      2026-09-05.** The evaluator, the recipe tables, D20's four-ingredient rule, the one-per-item cap,
+      the lowest-`container_id` tie-break and the per-actor backstop were all built and tested here
+      **against synthetic Strain rows**, because the real ones are model-call output. ⭐ **Module 21
+      built the generator for them and the seam held exactly as stated** — `StrainSpliceGrid` derives
+      all 102 ids from `AptitudeCatalog.All` × the archetype registry, `SocketTuning`'s
+      `strainSplice.ingredientCount` and `resonance.attunedTierBonus` are read from **this module's**
+      file rather than forked into a second one, `RolesThatCanHostAStrain` is mirrored in Python and
+      the two agree, and `Program.cs` now validates every recipe on the `SeedComboRecipes` path
+      against the derived grid. ⏸ The 102 CONTENT rows are still model-call output and are still
+      unauthored — see P4.4 for who runs it. ⛔ **And module 21 found one stale citation in this
+      module's shipped code** — see the addendum below
+⛔ **Addendum 2026-09-05, found while building module 21 (`strain-splice-gen`).**
+`SocketGeometry.ValidateEntry`'s doc comment cites *"module 6 measured `armament-primary` at
+`{0:18, 1:26, 2:4}`"*, and this entry's own S2 row plus its *"720 live entries walked"* quote the
+same figures. **Module 6 re-issued the `socketMax` table on 2026-09-04** (`dcabac3 update seeds`, the
+owner's own commit, the day this module was built): the live corpus is **740 entries**,
+`armament-primary` is `{0:10, 1:10, 2:10, 3:10, 4:8}`, the maximum anywhere is **4** rather than 2,
+and **no entry omits the field**. ⚠ **The RULE this module chose is unaffected and re-verified across
+all 740** — no role's declared `socketMax` exceeds its ceiling, so S2's restatement to *"never
+EXCEEDS its role's ceiling"* was right and remains right. This is a **stale citation, not a broken
+check**, and it is filed rather than hand-edited because the same numbers appear in
+`spec-sockets.md`, in `spec-strain-splice-gen.md` and in this entry. ⭐ The practical consequence is
+the good one: `RolesThatCanHostAStrain` now returns a **non-empty** list on the real corpus
+(`armament-primary`, `core-guard`), so the geometric Strain ceiling of 2 this module computed is
+live rather than hypothetical.
+
 - [ ] ⏸ **The 25 legacy `sockword.*` entries are NOT migrated, and that is P4.4's call, not an
       oversight.** They are position-ordered (D41 makes recipes unordered), carry the retired
       `gem.word-*` runtime ids (D27 renames them `combo.*`), and **not one reaches D20's four
       ingredients**, so not one is a legal Strain or Splice today. The carry table below already rules
       *"regenerate, not retain"*. Recorded as a standing test
       (`The_legacy_socket_word_corpus_is_ordered_and_awaits_module_21s_retirement`) so *"we forgot"* and
-      *"we decided"* stay distinguishable
+      *"we decided"* stay distinguishable. ⭐ **Confirmed and quantified by module 21 2026-09-05, and
+      this module's claim was exactly right:** `combogen/migrate.py`'s `legality_report()` measures all
+      25 against the new rules and finds **0 legal, 25 illegal**, naming every reason per entry (25 at
+      2 or 3 ingredients, 25 carrying `position`, 25 on `gem.word-*`, 25 with a non-derived
+      `minSockets`, 1 hosted on `ward-array`). ⏸ Still not migrated: the retirement is one of five
+      sites in a rename bundle whose other four include a **frozen registry** and the 102 model calls
+      that replace them. The standing test above is left untouched and still green. See P4.4
 - [ ] ⏸ **Wave-1 insert authoring — held, deliberately (ssot §9.13).** A `+armour` insert is
       `ScopeUnsupported` at any per-actor scope (G8) and most element gems are `stat.derived`,
       quarantined until E12. Authoring them now produces *"a row no code consumes, which is a lie in a
@@ -2687,11 +2810,22 @@ this module's favour rather than left open.
       §2g's surviving half of D21. It is a budget question and cannot be answered before the power
       reads run. Named in `SetExclusivityValidator`'s own doc comment so a reader finds it in the code
       as well as here
-- [ ] ⏸ **The compendium, the socket-UI preview and the "one swap away" hint — module 20's
-      (`item-surfaces`).** This module's stated obligation was to expose `evaluate()` in a **write-free
-      preview form** so module 20 has something truthful to render, and that is done and tested:
-      `Preview` is literally the same code path (a second implementation is how a preview starts lying
-      about what socketing will do), plus `PreviewWithOneMore` for the hint
+- [x] ⏸→✅ **The compendium, the socket-UI preview and the ~~"one swap away"~~ hint — module 20's
+      (`item-surfaces`), TAKEN UP 2026-09-05.** This module's stated obligation was to expose
+      `evaluate()` in a **write-free preview form** so module 20 has something truthful to render, and
+      that is done and tested: `Preview` is literally the same code path (a second implementation is
+      how a preview starts lying about what socketing will do), plus `PreviewWithOneMore` for the hint.
+      ⭐ **Module 20 built `CombinationDistance` on top of it — one call to this module's `Evaluate`,
+      asserted as exactly one** (`DistanceDiagnostics.ActiveSetEvaluations == 1`), with the four closed
+      display states and the `∞`-is-`undiscovered` rule. ⛔ **And it found that the SWAP half of the
+      hint no longer exists:** `spec-item-surfaces.md` (2026-09-03) specifies an INSERT/SWAP split whose
+      swap leg counts `n − cycles(σ)` over an ORDERED recipe, and **D41 (2026-09-04) made recipes
+      unordered the next day**, with a consequence row naming module 20 by name — *"distance counts
+      missing kinds, never positions."* This module shipped it unordered (no `position` column, no
+      `bind_ordinal` read), so a swap distance would always be zero and the hint would be a lie.
+      Module 20 implemented the multiset distance and pinned it over all 24 permutations of a
+      four-insert fill. **Nothing here changes; the record is that D41 reached module 20 correctly and
+      its spec did not.** See P5.4
 - [ ] ⏸ **The workbench executor that debits and appends a socket op.** Pricing is module 14's and
       already shipped — `bore`, `imbue`, `socket` and `upcycle` all carry cost rows, D24's
       `imbue == bore` equality is checked at load, and `socket` costs a flat ten souls at every rung.
@@ -2762,16 +2896,287 @@ SC7 rows above).
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Socket|FullyQualifiedName~Combination"`; `dotnet test tests\FusionRpg.Data.Tests --filter ItemSocketStoreTests`; `dotnet run --project tools\ItemSeedValidator`
 
 
-### P4.4 — Module 21 `strain-splice-gen` (model calls)
+### ✅ P4.4 — Module 21 `strain-splice-gen` — MACHINERY BUILT AND VERIFIED 2026-09-05 (⏸ the generative authoring pass itself is model-call work and is explicitly out of scope for a coding session — named below with who runs it; the `socket-word` kind rename is a five-site BUNDLE that lands *with* that run, and one of its five sites is a frozen registry)
 
-- [ ] 102 combinations — 36 Strains (12 aptitudes × 3 archetypes) + 66 Splices (C(12,2))
-- [ ] Retire the existing element-keyed `socket-word` corpus
-- [ ] **D20 fixes the Splice/Strain ingredient count at 4**, matching `socket_max`'s cap. It was
-      unstated before and it decides how much of the body a `chaff` chassis can capture — do not treat
-      it as a free tunable
-- [ ] ⚠ Inert until `socketMax` can reach 4 — **only `armament-primary` and `core-guard` do**, which is
-      why the real per-actor Splice ceiling is **2**, not twelve. Ship the tunable at 3 as a
-      non-binding backstop
+⭐ **What "model calls" means here, decided by reading module 13's precedent rather than re-deriving
+it.** P3.3 established the shape for a `(model calls)` module: the deterministic generator MACHINERY
+is this session's job, the LLM-authored content draw is the owner's. That holds unchanged. The one
+genuinely generative step — drawing 102 combination identities out of a model — cannot be run from a
+coding session, so it is deferred **by name**, with the command that runs it. Everything the run
+consumes, everything it mints ids for, and everything that judges it afterwards is built and tested
+against real shipped data.
+
+⛔ **Four spec claims checked in the file the spec cites, and the central one is STALE:**
+
+| # | `spec-strain-splice-gen.md` says | Verified 2026-09-05 | What shipped |
+|---|---|---|---|
+| **T1** | ⛔ *"Measured over all 740 shipped base types (read 2026-09-03): the maximum `socketMax` anywhere is **2**"*, therefore *"no Strain and no Splice is buildable on any shipped chassis"* and *"**this module is inert until** [module 6 issues `socketMax = 4`]"* | **Contradicted by the shipped corpus.** Module 6 re-issued the table on **2026-09-04** (`dcabac3 update seeds`, one day after the spec measured). The live distribution over 740 entries is `0×253 · 1×255 · 2×148 · 3×68 · **4×16**`, and the sixteen 4s are **8 `armament-primary` + 8 `core-guard`** — exactly the two roles ssot-sockets §4.1 assigns 4 | ⭐ **The hard dependency is CLOSED and the module is not inert.** The spec's prescribed *failing* fixture `no_shipped_base_type_can_host_a_four_ingredient_combination_today` is written **in its flipped form**, both sides, with the old state named in the test's own docstring so the transition is a recorded fact rather than a test nobody remembers deleting. ✅ This module's own todo stub already said *"only `armament-primary` and `core-guard` do"* — **confirmed, not corrected** |
+| **T2** | §"Ingredient count is 4" per-role table: `armament-primary` `0×18 · 1×26 · 2×4`; *"`jewel-minor-a` additionally has 24 entries with `socketMax` **absent**"* | **Stale in every row.** `armament-primary` is now `0×10 · 1×10 · 2×10 · 3×10 · 4×8`, and **no entry anywhere omits `socketMax`** | Re-measured in the test rather than transcribed. ⛔ The same stale figures are quoted in **module 16's shipped code** — filed as a defect below and cross-referenced into **P4.3** |
+| **T3** | Project structure: `data/tuning/strain-splice.v1.json` — *"per-actor cap, affinity tier bonus"* | **Stale by one module.** Module 16 shipped `maxCombosPerActor: 3` **and** `resonance.attunedTierBonus: 1` in `sockets.v1.json` when it took ownership at v2. Writing them again here would be two sources of truth for the numbers the runtime evaluator reads | The file is created, and it carries **neither**. It holds only what module 16 does not own (the min-tier plan, the per-shape base tier, the learnability bar, two distinctness thresholds), and **both parsers REFUSE a file that declares one of module 16's six keys**, by name, at load |
+| **T4** | *"No `items` subcommand exists… Module 13 adds the group; this module extends it"*; *"the live gem corpus carries **40 entries across 34 families**"*; the 25-entry legacy table (`2 ×15, 3 ×10`; `ward-array` 1) | ✅ **All confirmed exactly** — measured, not assumed. Module 13 did add the group; the gem corpus is 40/34; the legacy corpus is 25 entries at 2 and 3 ingredients with one `ward-array` host | The group is extended with `--kind combination --shape strain\|splice`; the 34 supplied families become the schema's **closed enum**; the 25 legacy rows are measured against the new rules rather than described |
+
+**What was built:**
+
+- [x] ⭐ **The grid is DERIVED from two shipped files, and it re-measures them against each other on
+      every call.** The twelve come from `data/seed/aptitudes/roster.json` (the checked-in mirror of
+      `AptitudeCatalog.All`, whose count is `PostureCount × PerPosture`); the three archetypes come
+      from **module 13's `build-themes.v1.json`**, so `combo.strain-might-offense` and
+      `build.might-offense` are the *same grid cell* rather than two lists that drift.
+      `assert_grid_agrees()` raises on four distinct drifts (registry-only aptitude, roster-only
+      aptitude, a repeated cell, an incomplete product) — the `assert_core_agrees` discipline module
+      13 established, applied to a different pair of axes
+- [x] ⭐ **A Splice pair is sorted by ordinal at MINT time, in both ports.** `(Might, Agility)` and
+      `(Agility, Might)` produce one id; a uniqueness check would only have discovered the collision
+      after 66 rows existed, one of them a wasted call. Asserted by minting all 66 and counting
+      distinct, not by trusting the loop shape
+- [x] ⭐ **`StrainSpliceGrid` (C#) and `combogen/grid.py` (Python) mint the same 102 ids from the same
+      two files** — one reads `AptitudeCatalog.All` in code, the other the roster mirror; both read
+      the archetype registry. Two derivations that agree are worth more than one derivation and one
+      literal, and the C# half is what an authored corpus is checked **against**
+- [x] ⛔ **`ContentRuleViolated{strainsplice.*}` — five rules, and NO new `AtomRejectionReason` is
+      minted.** The enum is closed at 35 by its own declaration (module 16 recorded the same refusal
+      as its S1), so `not-on-the-grid`, `ingredient-count`, `min-sockets-derived`, `host-cannot-hold`
+      and `base-tier-not-tunable` are all one code with a namespaced payload. `ValidateRecipe` returns
+      **all** violations, not the first — asserted with a row that breaks five at once
+- [x] **The validator is LIVE on the seed path, not dead code.** `Program.cs` runs it over every
+      recipe `SeedComboRecipes` is about to write. Today's 25 generated resonances are neither Strain
+      nor Splice, so it refuses nothing — asserted (`The_validator_never_fires_on_a_generated_resonance`)
+      — and it starts refusing the moment the authored 102 land beside them. Putting the guard in
+      before the content is the point
+- [x] ⛔ **The gem-supply precheck runs BEFORE the plan exists, and the supplied set becomes the
+      schema's closed enum.** `Registration/IngredientUnsatisfiable` is `gates = True`; a 102-entry
+      run that minted unsupplied families would be 102 wasted calls plus a red gate. Here the finding
+      is **unproducible from a well-formed answer** rather than merely rare. Measured on the live
+      corpus: **40 gems, 34 families**, and the metric reports **no findings**
+- [x] ⭐ **`Registration/IngredientUnsatisfiable` now follows the kind PERMANENTLY, not at cutover.**
+      The 2026-09-04 ruling's own warning is *"the metric must follow the kind, or a `gates = True`
+      check quietly stops gating"* — and a metric keyed on one spelling does exactly that: it goes on
+      passing, over zero rows, and nothing says so. `COMBINATION_KINDS = ("socket-word",
+      "combination")` removes the failure mode for good; the class is renamed
+      `CombinationIngredients`, the **metric id is unchanged**, and the message is byte-identical for
+      a legacy row (`position` is printed only when present, because D41 superseded it and only the
+      legacy rows carry it). A test drives a synthetic row of **each** kind id through the gate
+- [x] **`data/tuning/strain-splice.v1.json` + two pure parsers, and both refuse rather than default.**
+      A missing section raises at load in Python (`ComboTuningError`) and in C#
+      (`StrainSpliceTuning.Parse`), asserted section by section against the real file. The C# parser
+      **cross-validates against `SocketTuning`**: a min-tier plan whose length disagrees with D20's
+      ingredient count, or a tier outside the shipped insert ladder, fails at boot rather than
+      producing 102 recipes the evaluator can never match. A `baseTier` row for a *resonance* shape is
+      refused by name — a generated resonance's tier is `ResonanceGenerator`'s and is not tunable here
+- [x] ⭐ **`audit_schema`-clean by construction, proven three ways.** `audit_schema(schema) == []`;
+      adding one bare `{"type": "integer"}` field makes `Pipeline(...)` **raise at construction**; and
+      the schema carries **no** `tier`, `cost`, `chance`, `duration`, `minTier`, `baseTier` or
+      `position` field — the names are avoided, never allow-listed past. `ingredients` is a flat array
+      of exactly four family strings **with repeats legal**, because D41 makes a recipe a multiset and
+      four named slots would have re-introduced position by the back door
+- [x] **The brief refuses itself.** `build_brief` scans its own output for D20's banned word before
+      returning, and for the ingredient count spelled as a digit or an English word — the schema's
+      fixed array length is the enforcement, and prose restating it is a second source of truth. ⚠ The
+      guard's first draft refused **every** brief because it matched the `4.` of the brief's own
+      numbered list; found by running it, fixed by stripping enumeration markers first, and the
+      false-positive shape is recorded in the code
+- [x] **D41 holds at the EMIT layer, not only at the matcher.** `ingredient_rows` sorts the four picks
+      by family id before zipping the ascending min-tier plan onto them and folding duplicates into a
+      quantity — so the same four families in any arrangement produce byte-identical rows (asserted
+      over three permutations), and the emitted row has **no `position` key** (asserted by field set)
+- [x] **D22 as amended, both arms, and failure is impossible.** `granted_tier(..., all_attuned)`
+      differs by exactly `attunedTierBonus`, and the unattuned arm still returns a real positive tier.
+      Proven from the abuse side too, at module 16's own evaluator rather than restated: a fill whose
+      insert element does not match its socket affinity **still fires**, at the base tier
+- [x] **D21's exclusivity, at this module's angle.** The same fill on a plain host fires the Strain
+      and on a set piece fires nothing of that shape — module 16's `SetExclusivityValidator`, reused
+      and re-proven from the generator's side rather than re-implemented
+- [x] ⭐ **The 127-against-45 learnability debt is MEASURED and reported, never enforced.**
+      `catalogue.report()` derives the resonance half from module 16's own tuning (`|concrete| ×
+      |pureThresholds| + |ringOrder| + 1 + |diversityThresholds| = 25`, so a seventh element grows it
+      by construction) and prints **127 total against a bar of 45 — `ratioPermille` 2822, i.e. 2.8×**.
+      ⛔ Nothing refuses the 102nd combination: a cap on how many combinations may exist would be a
+      hard content ceiling. What the report carries instead is module 20's two mitigations as
+      **REQUIREMENTS with an owner** — the compendium reveal and the socket-UI preview
+- [x] **The tuning file carries no content ceiling** — `maxCombinations` / `maxStrains` / `maxSplices`
+      / `gridCap` are refused anywhere in it by a test in **both** languages, and the learnability
+      note's own words `REPORTED, NEVER ENFORCED` are asserted so a tidy-up cannot delete the reason
+- [x] ⚠ **No 12 → 6 aptitude-to-element mapping is introduced, and the gap is asserted STRUCTURALLY.**
+      `StrainSpliceGrid.cs` names no element id and no element type, in its source text **and** across
+      every public signature by reflection; no brief names an element; nothing in `combogen/` reads
+      `resonance.attunedEffectiveCountBonus`, which is Pure's bonus and not this layer's. The two
+      layers treat affinity differently **on purpose** and this module re-specifies neither
+- [x] ⛔ **`seedsmith items generate --kind combination --shape strain|splice`** runs, prints the plan
+      plus the catalogue report plus the legacy-retirement measurement as JSON, and `--sample-brief`
+      prints a real assembled brief. **`--write` is refused with a reason** (exit 3) rather than
+      silently writing nothing, and **`--population` is refused for a combination** (exit 2) rather
+      than ignored — the grid is closed, so there is no species/build split to make and silently
+      accepting the flag would let a caller believe they had selected something
+- [x] **No resume ledger, deliberately.** The spec's own Commands block says 102 is small enough not
+      to need the `demons run` harness; module 13 built one because it faced ~1,800. A ledger here
+      would be machinery with no failure to survive, and `plan_run` is byte-identical across runs
+      (asserted over the subject dicts, the assembled briefs **and** the summary), which is the
+      property that makes re-running safe instead
+
+**⛔ Two defects / stale claims found while building, both measured rather than asserted:**
+
+1. ⛔ **Module 16's `SocketGeometry.ValidateEntry` doc comment quotes a socketMax distribution that
+   is one day out of date.** It reads *"module 6 measured `armament-primary` at `{0:18, 1:26, 2:4}`"*
+   over a *"shipped 740-entry corpus"*; the live figures are `{0:10, 1:10, 2:10, 3:10, 4:8}`. ⚠ **The
+   RULE the comment defends is unaffected and still true** — re-verified here across all 740 entries,
+   no role's declared `socketMax` exceeds its ceiling — so this is a stale citation, not a broken
+   check. Filed rather than hand-edited because the same figures appear in **P4.3's own entry** (and
+   its *"720 live entries walked"* is now 740). **Cross-referenced into P4.3.**
+2. ⛔ **`spec-strain-splice-gen.md`'s central inertness claim is stale (T1 above), and its
+   `strain-splice.v1.json` row is stale by one module (T3).** Recorded here rather than absorbed,
+   because a spec that says a built module is *"inert until"* something that already happened is how
+   the next reader skips it. The corrections are pinned by tests against the live corpus, not by this
+   paragraph.
+
+**Three judgement calls the spec does not state, all named:**
+
+- ⚠ **No new tuning file for module 16's numbers, and the parser enforces that rather than trusting
+  it.** `SOCKETS_OWNED_KEYS` lists all six; `_refuse_forked_keys` walks the document's KEYS at every
+  depth (not its text — the ownership note names all six in prose deliberately) and raises. The
+  alternative, copying `ingredientCount` into this module's file, is precisely how a generator and a
+  matcher come to disagree about how many ingredients a Strain takes.
+- ⚠ **A combination may GRANT only from the same closed family vocabulary its ingredients are drawn
+  from.** An atom family no gem supplies is one no insert can carry, so granting it would put the
+  payoff outside the layer's own vocabulary — and it is what makes
+  `Registration/IngredientUnsatisfiable` a sufficient check rather than half of one. Stated in
+  `run.granted_family_vocabulary`'s docstring, because it is a design choice, not an implementation
+  detail.
+- ⚠ **A Splice cell carries NO `themeKey`.** It is a *pair* of build themes, not a 37th one, and
+  minting `build.might-agility` here would add a row to a registry module 13 owns. A Strain cell
+  reuses module 13's existing key verbatim; asserted both ways.
+
+**⏸ Deferred, each with its owner named — none silently skipped:**
+
+- [ ] ⏸ ⭐ **THE GENERATIVE AUTHORING PASS ITSELF — 36 Strains + 66 Splices — is out of scope for this
+      pass, and this is the honest boundary, not a gap in the build.** It is 102 live model calls; a
+      coding session cannot make them. **Who runs it:** the owner, from their own terminal, once X7
+      lands a container home. Everything the run needs is built: the grid derives, the ids mint, the
+      schema is audit-clean, the supply prechecks, the briefs assemble, the validator judges and the
+      catalogue report prints. **Until it runs, `data/seed/items/combinations/` does not exist and the
+      102 are 102 ids with no rows — by design, not by omission.**
+- [ ] ⏸ ⛔ **The `socket-word` → `combination` kind rename is a FIVE-SITE BUNDLE that lands with the
+      run, and one of its five sites is a frozen registry.** Encoded as executable analysis in
+      `combogen/migrate.py` (`MIGRATION_SITES`, asserted to still exist) rather than as prose:
+      **(1)** the gating metric — ✅ **done here**, and done permanently rather than at cutover;
+      **(2)** `adapters/items/kinds.py`'s `KindSpec`; **(3)** `tools/ItemSeedValidator/Registries/KindCatalog.cs`,
+      the C# port the Python list mirrors; **(4)** `naming.v1.json`'s `idNamespaces.socketWords` +
+      its `sockword.{seq:03}` template — **`registryVersion 4, "frozen": true`**, which the spec's own
+      Boundaries put under **Ask first** and which `NamespaceAllocation.ByNamespace` reads, so
+      renaming (3) without bumping (4) breaks the validator's partition allocation; **(5)** the 25
+      entries, which are **model-call output** under the "regenerate, do not retain" ruling.
+      ⚠ **Not one of (2)–(5) is separable without leaving the corpus worse than either endpoint** —
+      renaming the kind over the legacy rows gives a `combination` kind whose every row fails its own
+      required fields, and deleting the 25 with nothing to replace them empties the only input a
+      `gates = True` metric has. So the bundle waits for the content. `kinds.py` still holds **15**
+      kinds and still names `socket-word`; asserted, so "renamed, not removed" survives the wait.
+- [ ] ⏸ ⛔ **The evidence for "regenerate, do not retain" is measured and it is unanimous: NOT ONE of
+      the 25 legacy socket-words is a legal combination today.** `legality_report()` names every
+      reason per entry — 25 take 2 or 3 ingredients instead of D20's 4, 25 carry `position` (D41), 25
+      use the retired `gem.word-*` runtime prefix, 25 declare a `minSockets` that is not the derived
+      value, and **1 is hosted on `ward-array`**, whose ceiling cannot reach four *and* which is
+      outside the twelve-role hybrid core. Module 16's standing test
+      (`The_legacy_socket_word_corpus_is_ordered_and_awaits_module_21s_retirement`) is left untouched
+      and still green — this is its measured companion, not its replacement.
+- [ ] ⏸ **The generation graph is not wired, and `--write` says so instead of writing nothing.** A
+      `workflow/graphs/item_combination.py` (mirroring `workflow/graphs/effect_affix.py`) is what
+      connects `plan_run`'s subjects to `llm_caller`. Deliberately not stubbed, for module 13's
+      reason: a graph that silently produces nothing is worse than a command that refuses.
+- [ ] ⏸ **X7 — `ContainerKind` gaining D27's `combo` value — effect-atom's, and the same blocker P3.1,
+      P3.2 and P4.3 all carry.** `ContainerRow.cs` is still six values. **Consequence, stated plainly:**
+      the 102 have recipe rows waiting for them in `socket_combo_recipe` (module 16's
+      `SeedComboRecipes` never deletes a row it did not write) but **no container to bind their atoms
+      into**, so the run's output cannot be persisted as effects until it lands. A wiring gap with a
+      named owner, not a wall.
+- [ ] ⏸ **The per-actor cap is TUNED but not ENFORCED — module 12's evaluator, at assignment time.**
+      `maxCombosPerActor: 3` ships in `sockets.v1.json` (module 16) and this module asserts it stays a
+      **non-binding backstop above the geometric ceiling of 2**. Nothing counts combinations across
+      *equipped items* yet; item-ideal.md §2g #8 places that in the threshold evaluator, and the spec
+      says **"named here; not built here."** Restated so it stays named.
+- [ ] ⏸ **Module 20's compendium reveal and socket-UI preview are REQUIREMENTS, not niceties — and
+      only half of the pair exists.** P5.4 built `CombinationDistance` on module 16's write-free
+      `Preview`, with the four display states and the multiset swap distance D41 forced. The
+      **compendium reveal** (*"a combination is revealed once the player has held every ingredient at
+      least once"*) has no owner-side state and is not built. Both are carried in this module's
+      catalogue report with `owner: module 20 (item-surfaces)` so a run cannot print 127 without
+      printing who owes the mitigation. **Cross-referenced into P5.4.**
+- [ ] ⏸ **`naming.v1.json` registryVersion 5 — the `socketWords` → `combinations` idNamespace and its
+      `sockword.{seq:03}` template — is an ASK-FIRST on a frozen registry and is not done here.** The
+      grid mints no `{seq:03}` at all (a Strain's identity is its cell, not its position in a wave),
+      so nothing this module built is blocked by the bump not having happened; it is a registry
+      ceremony bundled with site (4) above, and the owner owns it.
+- [ ] ⏸ **`SemanticDedup/NearDuplicate` and `SemanticDedup/ExactDuplicateName` over the 102 — the
+      thresholds ship, the population does not.** `exactDuplicateNamesMax: 0` and
+      `nearDuplicateRateMaxPermille: 5` are in the tuning file with their derivations beside them
+      (the second carried from module 13 rather than re-derived, so both generated item populations
+      are judged on one bar), and at n = 102 a 5‰ rate is **0 pairs** — recorded in the file, because
+      a granularity effect nobody writes down gets rediscovered as a bug. ⚠ Module 13's defect 4 (the
+      shared metric's MinHash over-reports by up to 7× on short names) applies to this population too
+      and is **still not fixed in the shared metric** — its owner is whoever owns that metric's
+      62-finding baseline, unchanged.
+- [ ] ⏸ **`bind_ordinal` on `effect_binding` — effect-atom E6's, restated because this module is the
+      case that makes it bite.** A four-ingredient combination is exactly where two identical inserts
+      tie in a sort `definitions.md` §5 requires to be total. Module 16 built the socket half
+      (`BindOrdinalFor`, display-order only, with a comment saying a matcher that reads it is a bug);
+      the column is another program's table and is not ours to add.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `python -m pytest tests/test_strain_splice_gen.py -q` | **52 passed** (new) |
+| `python -m pytest` (seedsmith, full) | **1678 passed, 1 skipped, 288 subtests** — exactly the **1626** measured at the start of this session plus this module's 52 |
+| `python -m seedsmith items generate --kind combination --shape strain --dry-run` | **36 subjects, complete true**; 34 supplied families from 40 gems; hostRoles `[armament-primary, core-guard]`; `geometricCombosPerActor: 2`; catalogue `127 / bar 45 / 2822‰` |
+| `python -m seedsmith items generate --kind combination --shape splice --dry-run` | **66 subjects, complete true** — 36 + 66 = 102, all ids distinct |
+| `python -m seedsmith items generate --kind combination --shape strain --write` | **refused, exit 3** — the graph is not wired and the rename touches a frozen registry |
+| `python -m seedsmith items generate --kind combination --population build` | **refused, exit 2** — a combination's grid is closed |
+| `python -m seedsmith check … --adapter items --metric Registration/IngredientUnsatisfiable` | **no findings** — the `gates = True` port still gates, now over both kind ids |
+| `python -m seedsmith check … --adapter items --gate` | **61 gap / 80 note / 14 not_measured** — **byte-identical to P3.3's recorded set.** The metric rename and the dual-kind lookup move nothing |
+| `dotnet test tests\FusionRpg.Core.Tests --filter StrainSplice` | **22 passed / 0 failed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **720 passed / 0 failed** — the whole item program, modules 1–20's own suites included, green under this module's Core additions (698 before) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **131 passed / 0 failed** — the item program's whole DAL half |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7004 passed / 6 failed** — `Expeditions.ExpeditionResolverTests` (1), `Atoms.PredicateCompilerTests` (1), `ActorHub.SpecChannelClaimTests` (1) and `ClassSystem.ProveAptitudeJsonEmitTests` (3). Every one traced by name to a file the concurrent stream has mid-edit in `git status` — `PredicateNode.cs`, `RespecPolicy.cs`, `RpgStore.Aptitudes.cs`, `AptitudeEndpoints.cs`, `ExpeditionEndpoints.cs`. **Zero in `Items.*`**, and this module added only two new Core files |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **823 passed / 0 failed** — identical to the baseline measured at the start of this session, with the same intermittent *"Test host process crashed"* after the last test |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **203 passed / 1 failed** — `ClassSystemBaselineRegenTests.DominanceBaseline_coverageNamesEveryAxisHonestly`, which measured **204 / 0** at the start of this session and went red **while it ran**, on the concurrent stream's class-system tuning drift (`docs/research/class-system/_baseline-dominance.json` is mid-edit in `git status`). Not this module's: nothing here touches class-system, and the failure is the already-recorded dominance-baseline drift |
+| `dotnet build src\FusionRpg.Server` | **0 warnings, 0 errors**; `strain-splice.v1.json` copies to the output tree |
+| `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to the baseline measured at the start of this session.** Zero new findings; this module authors no corpus row |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**, 13 total. **Zero** findings under `Items/Sockets/` — every number a balance pass would touch is in `strain-splice.v1.json` or `sockets.v1.json` |
+| `python scripts\audit-overflow.py` | **0 critical**, 59 findings, **zero** naming `StrainSplice`. The module holds no magnitude of its own — counts, tiers and ordinals are shape indices |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer.ps1` / `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` | **all four OK** |
+
+⚠ **Baseline re-measured fresh at the start of this session, not carried forward.** `Items.` measured
+**698 / 0** in Core and the validator **170** before any of this module's code (P4.3 recorded 481 and
+166 — modules 17–20 and the owner's own 2026-09-04 corpus commits moved both). `Data` measured
+**823 / 0**, `Guard` **204 / 204**, seedsmith **1626 passed / 1 skipped**.
+
+⚠ **The Core and Data builds broke twice mid-session on `SiegeTuning.cs` / `ContractTuningTestBootstrap.cs`**
+— the concurrent stream adding a `SiegeShootingTuning` parameter, on files this module never touches.
+Both resolved on retry, exactly as expected.
+
+⚠ **No test outside this module was edited.** The one shared file this module changed behaviourally
+is `metrics/linkage.py`, and its finding message is byte-identical for a `socket-word` row — the
+`position` clause is emitted only when the field is present, which it always is on the legacy corpus.
+`test_linkage.py` and `test_parity_seed_graph.py` are both green, unmodified.
+
+**Files:** `data/tuning/strain-splice.v1.json` (new — the min-tier plan, the per-shape base tier, the
+learnability bar, two distinctness thresholds, and an ownership note naming the six keys it refuses
+to duplicate); `tools/seedsmith/seedsmith/adapters/items/combogen/{__init__.py, grid.py, tuning.py,
+supply.py, schema.py, brief.py, emit.py, catalogue.py, migrate.py, run.py}` (new);
+`tools/seedsmith/seedsmith/metrics/linkage.py` (EDIT — `COMBINATION_KINDS`, `SocketWordIngredients`
+→ `CombinationIngredients`, the gate reads both kind ids);
+`tools/seedsmith/seedsmith/planner/schedule.py` (EDIT — `combination` joins `invents_identity`
+beside `socket-word`); `tools/seedsmith/seedsmith/report/cli.py` (EDIT — `items generate --kind
+combination --shape strain|splice`); `src/FusionRpg.Core/Items/Sockets/StrainSpliceGrid.cs` (new —
+the derived grid, the five content rules, `StrainSpliceRules`);
+`src/FusionRpg.Core/Items/Sockets/StrainSpliceTuning.cs` (new — the pure parser, cross-validated
+against `SocketTuning`); `src/FusionRpg.Server/Program.cs` (EDIT — parses `strain-splice.v1.json` at
+boot and validates every combo recipe on the seed path against the derived grid);
+`tests/FusionRpg.Core.Tests/Items/StrainSpliceGridTests.cs` (new, 22 tests);
+`tools/seedsmith/tests/test_strain_splice_gen.py` (new, 52 tests).
+
+**Verify:** `cd tools\seedsmith; python -m pytest tests/test_strain_splice_gen.py -q`;
+`python -m seedsmith items generate --kind combination --shape splice --dry-run`;
+`python -m seedsmith check ..\..\data\seed\items --adapter items --metric Registration/IngredientUnsatisfiable`;
+`dotnet test tests\FusionRpg.Core.Tests --filter StrainSplice`
 
 > ### ✅ CHECKPOINT 4
 > salvage → craft → enhance → socket is a closed loop on one item. `CraftingHorizonReport` prints.
@@ -3067,7 +3472,7 @@ upsert/get/list, `IsUniqueSetMember`, `SeedUniqueEligible`); `src/FusionRpg.Data
 `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemUnique"`;
 `dotnet run --project tools\ItemSeedValidator`
 
-### P5.2 — Module 18 `consumables`
+### ✅ P5.2 — Module 18 `consumables` — BUILT AND VERIFIED 2026-09-05 (X7's fifth container kind, the seed→concrete generator, the missing menu executor and module 6's `consumableSlots` explicitly deferred to their real owners — all four either upstream or downstream, none skipped)
 
 ⛔ **Addendum 2026-09-04, found while building module 11 (`drop-volume`).** The shipped seedsmith
 drop-table corpus carries **60 `consumable` entries**, added in wave R2 (`entry-shapes.md` §9), while
@@ -3077,32 +3482,1183 @@ true at once: the seed vocabulary grew, the runtime arm did not. Module 11 refus
 with `ContentRuleViolated{drop.entry-kind-unavailable}`, naming this module, rather than picking a
 side. Landing the use path here is what makes those 60 entries drawable.
 
-- [ ] G2 — the **use path** degenerates, never the effect. Names `OnActivate`
-- [ ] ⭐ **D37: there is no global carry limit `N`.** The equipped **`girdle`** is the limit — role 7 of
-      fifteen, budget 60‰, already shipped, so no sixteenth role. §10.1's *"`N`, proposed 2"* is
-      withdrawn. **With no belt equipped the count is 0**, not a default
-- [ ] Module 20 renders the belt as its own strip, not a row of the armoury list
-- [ ] ⛔ Needs D27's fifth `container_kind` (`consumable`), which D27 did not mint — X7
+→ ✅ **Answered here, and the reason MOVED rather than being left pointing at a module that now
+exists.** All 60 refs resolve against the shipped consumable corpus (asserted). The **entry kind stays
+refused**, one step further on: X7 has still not minted the `consumable` `container_kind`, and even
+once it has, the 60 are seeds with no `effect_container` row — see the deferred list. Cross-referenced
+back into **P3.1**.
 
-### P5.3 — Module 19 `granted-actions`
+⭐ **The 60-row corpus was AUTHORED AND NEVER WIRED — the same pattern as `item_role_family`,
+`nameWords`, `displayTemplate`, `UnitClass`, the 144 uniques and the 30-set corpus before it.**
+`data/seed/items/consumables/{k1,k2,k3}.json` shipped **2026-08-22** — 3 partitions × 20 entries, every
+one carrying a class, a use context, a family, a power band and a manifest cost — and **not one line of
+Core read a single row until this module.** So had the whole atom-layer half of the lane's ask: the
+eighth trigger (`OnActivate`, A18b), `LeafId.HoldsStock` (landed 2026-08-28) and `rpg_item_stock`
+(module 2's table, shipped) all exist. This is therefore a **wiring pass plus the validators**, not a
+from-scratch build — checked before assuming, exactly as modules 6/7/8/10/17 were.
 
-- [ ] G4 — the `action_id` seam. Blocked on **X3**
+⛔ **Five doc corrections, each checked in the file the doc cites, recorded rather than absorbed:**
 
-### P5.4 — Module 20 `item-surfaces` ⭐
+| # | The doc says | Verified | What shipped |
+|---|---|---|---|
+| **C1** | `spec-consumables.md`: *"There are **8** triggers, not 7"*, citing `TriggerCount = 8` | **13.** E34 (`spec-trigger-vocabulary.md`) added `OnWave`/`OnMatchStart`/`OnMatchEnd`/`OnSunCollect`/`OnGridPlace` afterwards | Nothing asserts 8. The test asserts `TriggerCount == AtomTriggers.All.Length` and that `OnActivate` is in it — the fact this module actually depends on |
+| **C2** | `spec-consumables.md`: *"Four kinds carry it"* — `stat.modify`, `resource.delta`, `status.apply`, `shield.grant` | **Five.** E41's `ui.present` takes `AllTriggers` too | The set is derived by asking the registry and asserted as five; the spec's four are all still there, so the drift is an addition, not a substitution. Harmless here — `ui.present` is Battle/Sim `None` and `PowerCategory.None`, so the runtime check refuses it anyway |
+| **C3** | `ssot-consumables.md` §7.3: *"`shield.grant`'s battle runtime support is **None**"*, which is why the `ward` class takes the setup road as a declared SC1 deviation | **Battle = `Full`.** T14 wired Battle's own `Bag.ShieldGate`; A18c grew the grant path | The deviation is **narrower than the lane states** — asserted both ways, including that **Sim is still `None`**, which is the half of §9 item 12(b) that has *not* closed |
+| **C4** | `spec-consumables.md`: *"`rpg_item_stock` appears in exactly two `src/` files and both are comments saying it does not exist"* | **The table ships** — `RpgStore.Items.cs:96`, with `AdjustStock`/`ListStock` | The spec's own conclusion (*"this module's real upstream is module 2 `armoury`… `holdsStock` becomes answerable the moment it exists"*) is now satisfied. ⚠ `PredicateNode.cs:10-12` and `CrossProgramLandedFlags.cs:37` still carry the stale *"unbuilt — confirmed absent by search"* comment; that is the **action program's** file and is named below rather than edited from here |
+| **C5** | `ssot-consumables.md` §7.1: a `menu` consumable's road is *"on the lawn, grant → the bag fires the action through the `Passive` lifecycle path"* | **Contradicts its own §6.2**, whose `UseContextUnsupported` row names the two contexts a host may fail to serve as *"`battle` before the action layer, `lawn` with no injector"* — so `menu` cannot be the lawn | §6.2 wins (normative table over worked example): `menu` names **no combat runtime**, and the real consequence — no menu executor exists — is recorded as a named wiring gap rather than papered over |
 
-- [ ] Armoury list + filter, the equip screen, item-card render, comparison, socket preview, the
-      **combination compendium** (D20 makes it a requirement at 127 combos)
-- [ ] ⚠ **D3 has no player surface** — `frame-mix` appears in modules 3, 6 and 12 and in none of the
-      six surfaces. Add it or record the omission
+**What was built:**
 
-### P5.5 — Module 22 `charm-carry` (D40, split out of 12)
+- [x] ⭐ **G2 held exactly: the USE PATH degenerates, the effect does not.** ⛔ **No scalar effect column
+      exists anywhere in the module**, and that is asserted twice rather than reviewed —
+      `No_scalar_effect_column_exists_anywhere_in_the_module` greps every Core and DAL file for
+      `heal_amount`/`duration_ms`/`shield_hp` (comments stripped), and
+      `consumable_def_carries_no_scalar_effect_column` asserts the shipped `PRAGMA table_info` is
+      exactly the ten §5.2 columns. That absence **is** the no-migration proof (§2.5); a `heal_amount INT`
+      would have to be migrated, re-priced, re-displayed and re-hashed the moment an action could fire it
+- [x] **`OnActivate`, not `OnUse` — one name per concept, enforced.** `AtomTriggers.IsKnown("OnUse")` is
+      **false** and the string appears nowhere in the module; an atom authoring it is refused by name and
+      the message says what shipped instead. Which kinds carry the trigger is **read from the registry**,
+      never a copied list, exactly as the spec's own Code-style block instructs
+- [x] **The §14.2 invariant is intact, by the shipped mechanism rather than the lane's remedy.** The lane
+      wanted `stat.modify` **excluded** from the new trigger so *"no trigger"* would keep its one meaning.
+      Shipped code kept it a better way: `AtomKind.TriggerOptional` is a third case in a binary that had
+      two, and `stat.modify` is the **only** kind carrying it — asserted, so a second kind acquiring it
+      would be a red test rather than a silent widening of what "permanent" means
+- [x] ⭐ **D37 built as an item property, not a constant — and there is deliberately NO carry limit in
+      the tuning file.** `BeltCapacity` carries the equipped `girdle`'s own `consumableSlots`;
+      `ConsumableLimits.UnbeltedSlots = 0` is structural and says why (*"an unequipped slot grants
+      nothing, exactly as every other role behaves"*). ⛔ **A reintroduced `N` is refused BY NAME at
+      load** — `ConsumableTuning.Parse` throws on `carryLimit`/`maxManifestEntries`/`n`/`N` with a
+      message naming D37, because a withdrawn key that silently does nothing is the worst failure a
+      balance file can have. **No upper bound is applied to a belt** either (`int.MaxValue` slots is
+      legal and tested): a carry limit the player *grows* is a content axis, and clamping it would be
+      the hard progression ceiling AGENTS.md forbids
+- [x] **The manifest gate, at dispatch and not after, returning EVERY refusal.** `DraughtLimitExceeded`,
+      `DraughtFamilyConflict`, `UseContextUnsupported`, an unknown container and a non-positive qty all
+      reach the player as text, and a manifest with four bad lines reports four. The exclusion key is
+      `(family, variant)` — the **shipped** `ContainerPoolRow.Group` default, reused rather than
+      reinvented — so two fire draughts collide and fire + ice do not, both asserted
+- [x] **The summed manifest cost is a `long`, widened before multiplying, and it THROWS.**
+      `checked(total + (long)ManifestCost * Qty)`. A test drives `int.MaxValue` cost × `int.MaxValue`
+      qty: two lines resolve exactly to 9,223,372,030,926,249,058 and refuse honestly; **three** lines
+      overflow `long` and throw rather than wrapping into a total that would pass any belt
+- [x] ⭐ **The grade is DERIVED, never authored beside the band.** `grade = gradeTierMap[powerBand]`,
+      mirrored value-for-value from `bands.v1.json`'s **frozen** `powerBand.tierMap` (the same device
+      module 14 used for the cost bands). `The_grade_tier_map_mirrors_the_frozen_registry_value_for_value`
+      reads the real registry, asserts it is still `frozen`, and compares every pair — so a drift is a red
+      test rather than a silently re-graded corpus. Asserted from the other side too: **no shipped entry
+      and no property on `ConsumableSeed` carries a `grade` key at all.** Histogram over the real 60:
+      **3 / 17 / 31 / 9 / 0** across grades 1–5
+- [x] **`grade` equals the tier of every core atom** (I3's band-consistency rule, borrowed), and the
+      parser refuses a `gradeTierMap` that is not a bijection onto 1..5 — a hole or a duplicate would
+      grade two bands the same and make the check pass on a row it should refuse
+- [x] ⭐ **The invisible-nerf guard is real, at catalog load, and it CAUGHT SOMETHING** — see the defect
+      below. `UseContexts.RuntimesFor` is a documented four-row table (a decision the spec does not state,
+      named below), and every core atom must be legal in every runtime its context names. A planted
+      violation (`board.action`, Battle = `None`) proves the teeth independently of the corpus
+- [x] **`chance` / `icd_ms` refused at import, with the runtime reason in the message.**
+      `EffectBag.FireGrant` short-circuits both `PassesOverlayFilters` and `_proc.TryPass` on the
+      lifecycle path, so either key would be a silent no-op. The refusal cites the mechanism, not a rule id
+- [x] **`consumable_def` + `rpg_run_draught`, and the dispatch spend as ONE transaction.**
+      `TrySpendDraughts` decrements `rpg_item_stock` with the **verbatim** conditional-decrement shape
+      from module 14's `TrySpendRecipe`, writes the draught rows, and runs the caller's `seal` **inside**
+      the same transaction. `An_insufficient_stack_rolls_the_WHOLE_manifest_back` proves the first line's
+      decrement is gone too — no peek-and-keep; `A_throwing_seal_rolls_back_the_stock_too` proves a
+      dispatch that fails to seal costs nothing; and `Run_draughts_are_written_before_the_seed_resolves`
+      reads the rows **from inside the seal**, which is what §5.3's determinism-input rule actually asks for
+- [x] ⛔ **Recall refunds no draught, and it is proven STRUCTURALLY rather than by not calling one.**
+      `Recall_refunds_no_draught_because_no_refund_path_exists_at_all` reflects over `RpgStore` and
+      asserts the only `*Draught*` methods are `ListRunDraughts` and `TrySpendDraughts`. Failure mode 7 —
+      dispatch, peek at the outcome, recall, get the draughts back — has nowhere to live
+- [x] **A retry on a sealed run is a `"replay"` and spends nothing** (the shipped `TrySpendSouls` /
+      `TrySpendRecipe` spelling, reused), keyed on `(run_kind, run_id)`. A run is sealed once
+- [x] **`effect_binding` carries no duration, asserted as a schema fact** — no `expires_utc`, no
+      `duration_ms`, no `until_tick`. That is *why* a timed buff must be a status and a run-scoped buff is
+      a lifecycle, and it is why this module builds **no second scheduler**: a grep over every Core file
+      asserts no `Timer`, `Stopwatch`, `DateTime.UtcNow`, `Task.Delay` or `Queue<`
+- [x] ⭐ **The run-start snapshot is this module's, and the charm side adopts it.** §9 item 10: *"whoever
+      builds the run-start snapshot first owns it and the other adopts it."* Module 22 `charm-carry` is
+      unbuilt, so `DraughtProjection` fixes the shape — `owner_kind = 'player'`, `slot = NULL`,
+      `source = 'draught'`, priority from the tuning — mirroring `ssot-charms.md`'s charm binding exactly,
+      with `source` the only difference. **Cross-referenced into P5.5 below**
 
-- [ ] The charm pouch: five tables, the carry gate, five reason codes, the run-lifecycle hook
-- [ ] A pouch edit mid-run refuses `CharmInUse` — an expedition is sealed at dispatch by recorded seed;
-      it is never silently held
-- [ ] ⚠ **Specced inside `spec-threshold-grants.md` today** — give it its own file when scheduled
+      ⛔ **CORRECTED 2026-09-05 when module 22 built: `source` is NOT the only difference — the OWNER
+      SCOPE differs too, and that is a ruling rather than a drift.** This bullet, and
+      `consumables.v1.json`'s `_draughtBindingPriorityNote` beside it, both mirror `ssot-charms.md`
+      §3.8's `player:{id}` — which **D33(a) withdrew on 2026-09-04**: *"Charms bind at **actor** scope,
+      not `player:`"* (`item-ideal.md:1388`; `ssot-charms.md` §3.1's own banner says the same). So
+      charms bind at `unique-actor:{specimenId}`, one row per deployed actor, and module 22's tuning
+      refuses `player` **by name** at load. **Nothing here is wrong** — a draught really does bind at
+      `player:` by ssot-consumables' own ruling, and the LIFECYCLE (snapshot at run start, `slot = NULL`,
+      priority −100, withdraw by `source` at run end) is shared and was adopted unchanged, with a test
+      that reads **both** real tuning files and asserts the two priorities still agree. Only the
+      sentence "`source` is the only difference" was too strong
+- [x] **`DraughtProjection` is `ApplyInjuries` with the opposite sign, and pure.** It appends a
+      `BattleChannelMod` to every squad member (v1 is per-squad, §10.4's own answer), never mutates its
+      input, and coexists with an injury on the same channel. ⛔ **A non-positive amount THROWS rather
+      than being clamped** — a draught that lowers a channel is an injury wearing a potion's name, and a
+      clamp would turn "your draught did nothing" into a bug with no symptom. `long` throughout: a
+      3-billion contribution survives the round trip un-narrowed
+- [x] **No new member of the closed 33-code list.** §6.2 proposed **four** (`ConsumableRolls`,
+      `DraughtLimitExceeded`, `DraughtFamilyConflict`, `UseContextUnsupported`); this module mints
+      **none**. `AtomRejectionReason` still has exactly **35** names, asserted, and all **15** rules are
+      namespaced `ContentRuleViolated{consumable.*}` under a registered namespace — asserted by
+      reflection over the rule-id constants, so a new rule added without registration fails
+- [x] **Every number a balance pass would touch is in `data/tuning/consumables.v1.json`, and the parser
+      REFUSES rather than defaults** — stripping any of the five keys throws at load, asserted key by key
+      against the real file. Four structural invariants are checked at parse time: the grade-map
+      bijection, non-empty subsets of both closed vocabularies, the bounded-ratio band on the authoring
+      ceiling, and the withdrawn-`N` refusal
+- [x] ⭐ **The seed id is ALREADY a legal container id, which a unique's was not.**
+      `naming.v1.json idNamespaces.consumables`' template is `consumable.k{slot}-{seq:03}` and §4.6 fixes
+      the kind's prefix as `consumable.`, so the two coincide: this module needs a **grammar check**
+      (`ConsumableContainerIds`, reusing `UniqueContainerIds`' own slug expression) rather than the
+      derivation module 17 had to invent. All 60 pass
+- [x] **`audit-magic-numbers.py --summary` reports `M1 = 0` AND `M2 = 0`, exit 0**, with the
+      `consumables` domain absent from the table entirely; `audit-overflow.py`: **0 critical**, **zero**
+      findings anywhere under `Items/Consumables/`. ⚠ Two structural consts (`MinManifestCost`,
+      `UnbeltedSlots`) matched `BALANCE_WORD` on the substrings "cost" and "slot" and were added to the
+      audit's **`EXEMPT_NAMES`** with the documented-reason discipline that list already uses — the
+      established mechanism (module 17 added two the same way), **not** a rename to dodge the check
 
-**Depends on:** module 12. **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter CharmCarry`
+**⛔ Real defects found, named, not silently fixed:**
+
+- [x] ⛔ ⭐ **One shipped consumable is FAILURE MODE 5 ITSELF — the invisible nerf, live in the corpus,
+      found by the check the lane wrote for exactly this.** `consumable.k2-015` (*"Purifying Tonic"*,
+      class `draught`, `useContext: dispatch`) authors family `atom.cleansing`, which resolves to kind
+      **`status.clear`**. Two independent things are wrong with that, and the row fails both:
+      **(a)** `status.clear` is `Battle = None` (`AtomKindRegistry.cs:644`), and a `dispatch` consumable
+      runs in battle — so it would bind and do nothing; **(b)** `status.clear` carries only
+      `AtomTriggers.Events` (H3, deliberate), so it has **no fire point it may legally name** either —
+      §4.2's "hardest finding" returning on a real row. Its own authored note (*"Removes debuffs at run
+      start"*) describes a capability the runtime cannot deliver. **59 of the 60 are clean.** Refused by
+      name with `ContentRuleViolated{consumable.runtime-unsupported}` and pinned as a **set of exactly
+      one** from both directions, so it can neither grow silently nor be waved away by loosening the
+      check. **Not hand-fixed** (`ItemSeedValidator`'s own footer: *"Re-run the partitions named above;
+      do not hand-fix"*). **Owner: the authoring fleet's `consumables/2` partition** — the fix is to
+      re-author the family, since `cleansing` has no consumable-shaped kind at all today
+- [x] ⛔ **A ninth phantom affix family — `atom.elemental-power`, named by 11 of the 60.** It resolves to
+      no affix-family row, so its kind is unknown, and the 11 are excluded from the runtime check rather
+      than guessed into it (module 17's rule, kept). It differs from the other eight in one way worth
+      recording: it is **exemplar-only**, carried by `_exemplars/affix-family.exemplar.json` as template
+      content P2.3 explicitly and correctly left outside the real 98 — and `ssot-consumables.md` §7.2's
+      own worked example is written against it. A lane doc, an exemplar and 11 authored rows all name a
+      family the corpus does not have. ⚠ `atom.elemental-defense` **is** real and is what the other two
+      element-bearing consumables use; the near-miss is part of why this went unnoticed.
+      **Cross-referenced into P2.5 above**
+- [x] ⛔ **Two shipped comments now assert something false about `rpg_item_stock`.**
+      `PredicateNode.cs:10-12` (*"The underlying inventory/stock SYSTEM (`rpg_item_stock`,
+      item/ssot-consumables.md) is unbuilt — confirmed absent by search, not assumed"*) and
+      `CrossProgramLandedFlags.cs:37` (*"INVENTORY SYSTEM (`rpg_item_stock`) remains unbuilt, by design"*)
+      were true when written and are not now: module 2 `armoury` shipped the table
+      (`RpgStore.Items.cs:96`) with `AdjustStock`/`ListStock`, and this module adds `StockQty`. So
+      `LeafId.HoldsStock` is answerable from a store today and still reads a caller-supplied quantity —
+      a **wiring gap**, not a wall. **Not edited from here:** both files are the **action program's**,
+      and the leaf's own contract (which quantity it reads, and when) is `A4`'s to change. Named so the
+      day someone greps for "is the stock system built" they find this instead of the comment
+
+**Three decisions this module had to make that the spec does not state, all named:**
+
+- ⭐ **`use_context` → runtime is a four-row table, and `menu` names NO combat runtime.** §6.3 requires
+  every core atom to be legal in *every runtime the `use_context` names*, and neither document says
+  which `RuntimeId` each of the four contexts is. `battle` → Battle and `lawn` → Lawn are direct;
+  `dispatch` → **Battle**, because an expedition's encounters resolve through `BattleEngine` and §5.4's
+  projection lands on `BattleActorSetup`. `menu` → **nothing**, derived from §6.2's own code-4 row,
+  which names only *"`battle` before the action layer, `lawn` with no injector"* as the contexts a host
+  can fail to serve — so a menu consumable must not require the game to be running (SC8). ⛔ **The
+  honest consequence, named rather than hidden: the check is vacuously true for the 26 menu-only rows,
+  because no menu executor exists.** Recorded as `ConsumableRules.MenuExecutorAbsent` — a rule id with
+  no raiser, so the gap has a name a report can carry.
+- ⭐ **The exclusion group is DERIVED as `{family}|{element}`, never authored.** §5.2 says it *"defaults
+  to the container's dominant `(family_id, variant)`"*; the corpus authors no `exclusionGroup` key, and
+  adding one would be a second source of truth for a derived fact. Spelled exactly as §7.1/§7.2 do
+  (`atom.vitality|`, `atom.elemental-power|fire`) so a reader of the worked examples recognises the
+  string. Measured over the real 60: **17 groups hold more than one row** — several grades of one
+  family, of which a run may take exactly one. That is the rule forcing breadth, not a collision.
+- ⭐ **The `consumable_def` DDL SHIPS, and the container-kind binding is refused by name instead.**
+  spec-consumables.md says *"this module does not proceed past its DDL until [the container kind] is
+  answered."* The two tables are **kind-agnostic** — `container_id` is a text key and `rpg_run_draught`
+  never mentions a kind — so shipping them costs nothing and blocks nothing, while a live
+  `FK → effect_container` would make the table unusable the moment anything wrote to it. What is
+  actually gated is the **binding**, and `ConsumableValidator.ValidateDef` refuses *every* container
+  kind by name with `ContentRuleViolated{consumable.container-kind-unavailable}`, message citing D27
+  and X7. Neither the enum value **nor the documented `item` fallback** is chosen here — that is the
+  owner's, and §Open is explicit the fallback must be a decision and never a drift.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Consumable\|FullyQualifiedName~DraughtManifest"` | **78 passed / 0 failed** (new — `ConsumableTests` 39 + `ConsumableCorpusTests` 18 + `DraughtManifestTests` 17, measured per class) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RunDraught"` | **14 passed / 0 failed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6792 passed / 9 failed** — **zero** in `Items.*`. All 9 are `Actions.*` (2), `Battle.*` / `Battle.Timeline.*` (3), `ClassSystem.ProveAptitudeJsonEmitTests` (3) and `Expeditions.ExpeditionResolverTests` — the concurrent stream's own in-flight work; `git status` shows `Actions/TimelineDispatch.cs`, `Battle/BattleEngine.cs`, `Battle/BattleModels.cs`, `Battle/BattleRunState.cs` mid-edit and `Battle/Timeline/ReactionLaneTuning.cs` brand new, **none touched by this module** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full, minus the demon CLI test that spawns a process) | ⭐ **793 passed / 0 failed** — fully green |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | ⭐ **204 passed / 0 failed** — the session-start `ClassSystemBaselineRegenTests` dominance drift cleared by the concurrent stream mid-build |
+| `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to module 17's baseline.** Zero new findings; the three `consumables/*` partitions carry only the two pre-existing `MetaRegistryVersion*` notices every partition carries |
+| `python -m pytest tools/seedsmith` | **1608 passed, 1 skipped, 288 subtests** — this module wrote no `tools/seedsmith/**` and no `data/seed/**` file; the only Python it touched is `scripts/audit-magic-numbers.py`'s `EXEMPT_NAMES`, which seedsmith does not import |
+| `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, `M4 = 0`, exit 0**; the `consumables` domain does not appear in the table |
+| `python scripts\audit-overflow.py` | **0 critical**, 57 findings, **zero** under `Items/Consumables/` |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer` / `guard-funnel-delta` / `guard-secondary-no-unity` | all four **OK** |
+| `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | **0 errors** — boot parses `consumables.v1.json`. ⚠ Built to a scratch `OutDir`: the owner's own `FusionRpg Server (61116)` was running and holding `bin\`, and killing it is not this module's call |
+
+⚠ **Baseline re-measured fresh at the start of this module, not inherited, and it moved during the
+build.** At session start: `Core` **10 failed / 6714 passed** (`Actions.ActionsPurityGuardTests`,
+`Atoms.AtomBenchGuardTests`, `Atoms.PredicateCompilerTests`, `Battle.*` ×3, `ClassSystem.*` ×3,
+`Expeditions.*`), `Guard` **201 passed / 1 failed** (the known dominance-baseline drift), `Data`
+**host-crashed** on `DemonSpeciesImportCliTests` before printing a summary. By the end, `Guard` and
+`Data` were fully green and `Core` was 9: the two allocation-budget tests
+(`AtomBenchGuardTests`, `PredicateCompilerTests.Evaluating_allocates_nothing`) had gone green and a
+third of the same kind (`ActionSelectionTests.TryDeclareAllocatesZeroBytesAcrossTwoHundredActors`,
+5,904 bytes against a budget of 0) had gone red — the same allocation-benchmark family, in the same
+`Actions/` tree the concurrent stream is editing. **Compare against the numbers in the rows above, not
+against an earlier module's snapshot.**
+
+⚠ **Two transient build breaks from the concurrent stream, both resolved by waiting, neither in a file
+this module touched** — `BattleEngine.cs:375` (`CS1501`, `RunTimelineActionPhase` mid-signature-change)
+and `RpgStore.cs:679` (`CS0103`, a call to `EnsureSpeciesRespecSchemaUnlocked` landing before the file
+that defines it). The same pattern P3.1 and P4.1 recorded. Also killed one orphaned `testhost` holding
+`FusionRpg.Data.dll` from the crashed baseline run.
+
+⚠ **Three tests were corrected mid-build rather than left passing on a false premise**, and each
+correction is a fact this section now records: `OnActivate` carries on **five** kinds not four (C2),
+the phantom count is **11 rows on one family** not 13 (two element-bearing rows use the real
+`atom.elemental-defense`), and *"every kind the corpus reaches carries `OnActivate`"* is the **wrong
+rule** — a draught is a triggerless permanent modifier by design (§7.2's `stat.derived`), so the real
+requirement is *a fire point **or** no trigger at all*, which is what let `status.clear` stand out as
+the one row that is neither.
+
+**⏸ Deferred, each with its owner named — none silently skipped:**
+
+- [ ] ⏸ ⛔ **`ContainerKind.Consumable` — the owner's, batched with D27, and NOT drifted into.** The lane
+      argues the fifth kind out properly (§4.6) and D27 mints four that do not include it. Re-verified
+      2026-09-05, not assumed: `ContainerRow.cs:7` ships six values and `PrefixOf` has six arms. Both
+      the enum value and the documented `item`-with-`slot IS NULL` fallback are refused here, because
+      §Open is explicit that the fallback is a decision to be taken. **Owner: the owner, through
+      effect-atom, on the same amendment that lands D27's four — one review of five costs what one
+      review of four costs.** `ConsumableLimits.ConsumableContainerKindAvailable = false` is the single
+      line that flips
+- [ ] ⏸ **The seed → concrete generator — the runtime generator's, per the binding seed-to-concrete
+      rule, and the reason three other items below are still open.** The corpus holds 60 **seeds**
+      (a family and a band, never a magnitude); no `effect_container` row exists for any of them, and no
+      `effect_container_atom` row either. Everything this module owns operates on either the seed (the
+      corpus validators, the grade derivation) or on a concrete container supplied by a caller (the
+      per-row validator, `consumable_def`, the projection's `DraughtMod`). Rolling a seed into a
+      container with its atom rows is a **shared-SDK** job — the identical deferral module 17 recorded
+- [ ] ⏸ **`consumableSlots` on `girdle` base types — module 6's, and measured as absent rather than
+      assumed.** D37's consequence 1 says module 6 authors it on the directional-profile pass; a fresh
+      scan of every `girdle` row in `data/seed/items/base-types/` finds the key on **none** of them, and
+      a test pins that. Until it lands, the belt count reaches `GateManifest` as a parameter and an
+      unequipped player is refused at 0 — a **wiring gap** with a named owner, not a wall
+- [ ] ⏸ **No menu executor exists, so a `menu` consumable's effect reaches nothing today.** 26 of the 60
+      rows are `menu`-only. There is no out-of-combat surface that applies a container's atoms to a
+      persistent actor, which is why `UseContexts.RuntimesFor(Menu)` is empty and why the honest name
+      `consumable.menu-executor-absent` exists with no raiser. **Owner: whoever lands the out-of-combat
+      apply path; the player surface is module 20's.** `dispatch` — the 34 rows that matter for v1 — has
+      the real, shipped projection road
+- [ ] ⏸ **`LeafId.HoldsStock` still reads a caller-supplied quantity, and the leaf is the action
+      program's.** `RpgStore.StockQty(playerId, containerId)` ships here so the answer exists; wiring it
+      into `PredicateNode`'s evaluation is `A4`'s, together with the two stale comments named above.
+      ⚠ `ActionCompiler.cs:97-98` already refuses a `HoldsStock` action in **lawn** mode
+      (`ConsumableUnsupportedInMode`), which is the lawn half correctly closed from the action side
+- [ ] ⏸ **No recipe outputs a consumable, pinned as an absence.** §7.5 prices a batch of Lesser
+      Restorative (`operation = forge`, `output_kind = container`, `output_qty = 5`) and I9's schema
+      already allows all three, but module 14's 30-recipe corpus authors **none** — asserted, so
+      *"recipes output consumables"* is not read as shipped. **Owner: module 14 as a corpus addition**
+      (it is one `material_recipe` row plus two or three cost rows and no code — SC7 working)
+- [ ] ⏸ **`grants_action_id` and `cooldown_key` ship, are authored nowhere, and are inert.** Asserted
+      null on all 60 rows and writable through the DAL, so the absorption really is *"one UPDATE on two
+      nullable columns and one INSERT"*. `cooldown_key` is carried now precisely because a cooldown group
+      retrofitted after content ships re-prices every row that already shipped (§3.3). **Owner: `A1`**
+- [ ] ⏸ **A status whose payload is a container of atoms — asked JOINTLY with the Resource model, not
+      from here.** §4.5's conclusion still holds: `effect_binding` has no duration, so a timed buff must
+      be a status, and `StatusDef` carries no container reference. ⚠ One lane claim **has** drifted:
+      `StatusPayloadKind.ModifyStat` now has two production declarers (`ExhaustionPolicy.cs:77`,
+      `StanceRuntime.cs:46`), so *"declared and dead, four references, all in the file that declares
+      them"* is no longer true — but the **mechanism** the lane asked for is still absent, which is the
+      part that matters. v1's run-scoped lifetime needs none of it
+- [ ] ⏸ **The `board`, `revive` and `utility` classes stay declared and ungenerated**, refused by name
+      with the reason each has no executor: `board` waits on an overlay use affordance plus
+      `capPerMatch` (**G4**, still unimplemented), `revive` on the battle-mode use moment (the action
+      layer), `utility` on the menu executor above. Widening `classesAuthored` in
+      `data/tuning/consumables.v1.json` is the whole change the day one lands
+- [ ] ⏸ **`use_context = battle` / `lawn` likewise stay refused**, and widening `contextsAuthored` is one
+      line. ⛔ The **reason** for keeping battle out is now the use SITE, not the runtime — `resource.delta`
+      is Battle `Full` (C3 above) — and the real remaining blocker is the one the lane itself names in
+      §9.5(b) and the action side has not answered: **`rpg_action_cost` is priced against the five actor
+      resources, and a consumable's cost is an item, which is not a resource.** `A3` must either widen
+      `resource_id` or state that consuming the item is a precondition (`A4`) rather than a cost
+- [ ] ⏸ **`rpg_run_draught` has no production writer yet.** `TrySpendDraughts` takes the run's own
+      creation as a `seal` delegate so the store stays free of expedition knowledge, and the tests drive
+      the seam including the forced-throw rollback. The dispatch endpoint that calls it is the
+      **standalone/expedition stream's** — a wiring gap with a named owner. The `battle` `run_kind` is
+      likewise legal in the schema and written by nothing
+- [ ] ⏸ **A `stale` marker on `rpg_item_stock` — inventory's (§9 item 6a), failure mode 8, still open.**
+      `rpg_item.stale` exists for rolled instances; `rpg_item_stock` has four columns and none of them is
+      it, so a stack of potions whose atom an import disabled cannot say so. Re-verified today against
+      the shipped DDL. Not added from here: the column belongs to the table's owner, module 2
+- [ ] ⏸ **`item_category`'s `consumable` row still says *"the action layer, unbuilt — do not author"***
+      (§9 item 8). The menu/dispatch consumer now exists and is `ConsumableCatalog`; the battle/lawn one
+      does not. Flipping the `consumer` column and changing `stack_intent` from `charges` to `qty` is
+      **I3's / module 6's** doc-side edit, not this module's
+- [ ] ⏸ **§4.4's ≤10% authoring ceiling is carried as a tunable and measured by nothing yet.**
+      `authoringCeilingPerMille = 100` is parsed, bounded and asserted, but pricing a consumable's
+      contribution against a geared actor's needs the concrete containers that do not exist. It bounds a
+      **report** and never an import, the same disposition module 17 gave its parity band. **Owner: this
+      module, once the seed→concrete generator lands**
+- [ ] ⏸ **Per-specimen draughts stay the owner's (§10.4).** v1 is per-squad and every member receives
+      every mod. Per-specimen is expressible on the same road today — `ChannelMods` is already per-actor
+      — and would make the manifest a targeting decision rather than a shopping list. Recorded, not decided
+- [ ] ⏸ **PvZ-mode consumables (§10.2), "rest" (§10.6) and the permanent-stat-up confirmation (§10.3)
+      stay open-by-design.** Nothing here contradicts the lane's standing answers (yes-later via the
+      intent road; no refill at rest; refused as consumables and allowed as quest rewards)
+
+**Files:** `data/tuning/consumables.v1.json` (new — the two authored vocabularies, the mirrored grade
+map, §4.4's ceiling, the run-start binding priority, and the recorded absence of a carry limit);
+`src/FusionRpg.Core/Items/Consumables/{ConsumableDef.cs, ConsumableTuning.cs, ConsumableCorpus.cs,
+ConsumableValidator.cs, ConsumableCatalog.cs, ConsumableCorpusValidator.cs, DraughtProjection.cs}` (new);
+`src/FusionRpg.Core/Items/Drops/DropTableModel.cs` (EDIT — the `Consumable` unavailable-reason moved off
+a module that now exists); `src/FusionRpg.Data/Sqlite/RpgStore.Consumables.cs` (new — `consumable_def`,
+`rpg_run_draught`, `TrySpendDraughts`, `ListRunDraughts`, `StockQty`);
+`src/FusionRpg.Data/Sqlite/RpgStore.cs` (EDIT — `EnsureConsumableSchemaUnlocked` in `Init`, after the
+`rpg_item_stock` schema its spend decrements); `src/FusionRpg.Server/Program.cs` (EDIT — parses
+`consumables.v1.json` at boot); `scripts/audit-magic-numbers.py` (EDIT — two structural consts added to
+`EXEMPT_NAMES` with reasons);
+`tests/FusionRpg.Core.Tests/Items/{ConsumableTests.cs, ConsumableCorpusTests.cs, DraughtManifestTests.cs}`,
+`tests/FusionRpg.Data.Tests/Items/RunDraughtStoreTests.cs` (new).
+
+⚠ **One deviation from the spec's Project structure, stated rather than silent:** it lists four Core
+files; seven shipped. `ConsumableCorpus.cs` / `ConsumableCorpusValidator.cs` exist because the spec was
+written before anyone checked whether a corpus existed (it does, 60 rows), and `ConsumableValidator.cs`
+is split out of `ConsumableCatalog.cs` so the per-row rules can run against a seed and a concrete
+container alike. Same directory, same names for the four it does list.
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Consumable|FullyQualifiedName~DraughtManifest"`; `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RunDraught"`; `dotnet run --project tools\ItemSeedValidator`
+
+### ✅ P5.3 — Module 19 `granted-actions` — GATE GA2 BUILT AND VERIFIED 2026-09-05 (GA3/GA4, the `decisions.md` requests and the content-hash registration explicitly deferred to their real owners — all four either upstream or another program's, none skipped)
+
+⭐ **The pattern inverts for the first time in this program: nothing was authored, and half the
+CONSUMER was already built.** Every prior module found a shipped corpus nobody read
+(`item_role_family`, `nameWords`, `displayTemplate`, `UnitClass`, 144 uniques, 30 sets, 60
+consumables). Here `data/seed/items/base-types/**` authors **zero** grant rows — asserted, not
+assumed, by a grep over all 740 — and that is **correct**: gate GA2's whole definition is "DDL,
+validator, reason codes, zero content rows." What *was* already built is the other side of the seam:
+`rpg_action` with both flags, `rpg_action_grant` as §5.5 item 5's option (a) **verbatim** (its DDL
+comment cites this lane by name), `ActionSetAssembler`, `FrozenActionSet` and `CapPolicy`. So this
+module is **one new table, one validator, one projection and the FSM contract** — and the checking
+was still worth it, because it found handshake item 8 already closed (G1 below).
+
+⛔ **Six doc corrections, each checked in the file the doc cites, recorded rather than absorbed:**
+
+| # | The doc says | Verified | What shipped |
+|---|---|---|---|
+| **G1** | `spec-granted-actions.md`'s handshake table: item 8 (the cap) is ⛔ **open** — *"`ActionSetAssembler.cs:30` — 'no cap enforcement (item 8 / T24's own job)'. Nothing enforces one"* | ⭐ **CLOSED, and the answer is "uncapped by design."** `Actions/Grants/CapPolicy.cs` (T24) answers item 8 by NAMING which existing cap governs instead of minting one: `HeldCap` is the levelling faucet, `EquippedSkillCap` (= `LoadoutSet.MaxSize`) is the real bottleneck, and *"granted by paid sources: uncapped, on purpose — an uncapped pool grows the choice, never the power."* The class deliberately **has no `grantedCap` member**, which is the answer, not an omission | `ItemGrantLimits.GrantedCountCapExists = false`, asserted, plus a reflection test that `CapPolicy` carries no `GrantedCap`. §3.7(d)'s proposed **8** and its `TooManyGrantedActions` code have **no raiser on either side of the seam**. The *reject-never-truncate* requirement is carried by the cap that DOES exist — `LoadoutSet.Validate` returns `LoadoutFull` rather than dropping the overflow, asserted |
+| **G2** | `spec-granted-actions.md` invariant 3 and ssot §3.5: *"the enum is `CrowdControl` and `Damage`"* | **THREE members.** `ResourceExhausted` landed with the per-tick cost model, and its own comment already states this lane's rule — *"a mechanical fact about the actor's own resources, never an inventory/content concept reaching this enum"* | Nothing asserts a count. The test asserts the **invariant** — no `InterruptCause` member names an inventory concept (`item`/`equip`/`unequip`/`grant`/`inventory`/`gear`) — so a fourth mechanical cause is not a red test and a third *inventory* cause is |
+| **G3** | `ssot-granted-actions.md` §3.6's runtime matrix: *"Eleven of twelve kinds have no battle consumer at all; one is `Partial`"*, and the headline *"neither runtime executes both halves"* | ⛔ **Stale end to end, and the conclusion INVERTS.** **Five kinds are `Battle = Full`** — `stat.modify` (`AtomKindRegistry.cs:217`), `stat.derived` (`:255`), `resource.delta` (`:290`), `status.apply` (`:344`), `shield.grant` (`:396`) — and **no kind is `Partial`**. Seven stay `None`: the five `AttachPoint.Board` kinds plus `resource.economy` and `status.clear` | **Corrected in the lane doc**, per the spec's own success criterion — a ⛔ block under §3.6 with every line cited and the board-kind count stated as **five**, not six |
+| **G4** | `ssot-granted-actions.md` §5.6: *"four independent reasons, any one alone is sufficient"* | **Two are false.** Reason 1 (*"`rpg_action` does not exist. No table, no `src/FusionRpg.Core/Actions/` directory"*) — both exist. Reason 3 — see G3. Reasons 2 and 4 hold, and 2 is narrower than it reads (module 6 shipped the corpus and the readers, **not a table**) | **Corrected in the lane doc** with a four-row verdict table, and the real remaining blocker named: **X3**, not the four |
+| **G5** | `ssot-granted-actions.md` §4.3 cost 2 / §8.6: per-base-type authoring would be *"344 hand-authored actions"* | ⭐ **48, MEASURED against the shipped corpus.** `default-attack` is legal only on `armament-primary` (§4.3 option C), of which the 740-row corpus has **48**. 344 was I3's whole-catalogue figure and never applied to this rule | The **mitigation's own number is exact**: the corpus has precisely **3 weapon classes × 2 frames = 6** distinct `(frame, class)` pairs on `armament-primary` (`blade`/`blunt`/`launcher` × humanoid, `lash`/`nozzle`/`seedpod` × plant), which is §8.6's "roughly 3 × 2 = 6" to the number. Only the comparator was stale — 48 → 6 is an 8× saving, not 57× |
+| **G6** | `spec-granted-actions.md` §(b): `UpsertGrant` at `RpgStore.Actions.cs:512`, `ListGrants` at `:538`, *"delete by source (`:571`)"* | `:515`, `:541`, `:567` — and the delete is named **`WithdrawGrantsBySource`**, not a "delete" | Cosmetic line drift only; every method is real and at the shape described. Recorded so the next reader does not conclude the methods moved |
+
+**What was built:**
+
+- [x] ⭐ **`item_granted_action` — ssot §5.2's SIX columns, and §5.3's Never list is enforced twice
+      rather than promised.** `The_row_carries_exactly_six_properties…` asserts the record's property
+      set by reflection; `The_item_side_carries_no_cooldown_cost_target_or_condition_column` asserts
+      the shipped `PRAGMA table_info` is exactly `{container_id, seq, action_id, grant_role, enabled,
+      revision}`; and `No_source_file_in_the_module_declares_a_forbidden_column` greps **27** forbidden
+      names (the lane's own list, verbatim) across every Core and DAL file in the module. ⭐ **The grep
+      strips comment lines and, where needed, string-literal contents** — the whole point of the Never
+      list is that it is *discussed* by name in the doc comments, and a grep that could not tell a
+      paragraph from a declaration would forbid explaining the rule it enforces
+- [x] **A child table, not a nullable column on the base type** (§5.2's own reason): a unique granting
+      two abilities needs no schema change, and *"at most one `default-attack`"* is a constraint the
+      validator states rather than a comment. PK `(container_id, seq)`, plus the one index §5.2 asks
+      for — `ix_item_granted_action_action`, so the action layer can answer *"what grants this"*
+      (`ListContainersGranting`, tested)
+- [x] ⭐ **Wiring gap (b) closed at the store: `RpgStore.UpsertGrant` has a caller in `src/` for the
+      first time.** `ApplyEquippedGrants` withdraws by `source` then upserts, at
+      **`OwnerKind.Entity` + the specimen instance id** — *the exact scope*
+      `WebMatchService.EquippedActionIdsFor` (`WebMatchService.cs:517`) already reads, asserted against
+      the shipped reader's own construction rather than against a constant. `source` is the item's
+      container id, so unassign is one delete against `ix_rpg_action_grant_source`, which already
+      exists
+- [x] ⭐ **The `grant_id` is DERIVED, not a fresh `Guid.NewGuid()`, and a test greps for the absence.**
+      A projection is a full rebuild (the shape `EquipProjector` already chose); a random primary key
+      would insert a duplicate row on every re-apply instead of upserting the one that exists.
+      `Re_applying_the_same_projection_upserts_rather_than_duplicating` applies three times and asserts
+      one row; `A_grant_row_removed_from_the_base_type_disappears_on_the_next_apply` proves a content
+      edit **converges** rather than leaving an orphan, which is what withdraw-by-source-first buys
+- [x] **Refusals are RETURNED, never swallowed.** `ApplyEquippedGrants` hands back one
+      `ActionRejection` per grant that failed to write, because `UpsertGrant` runs the shipped
+      `ActionValidator.ValidateGrant`. Proven for an unknown action (`UnknownContainer`) and a
+      non-grantable one (`ActionNotGrantable`), and proven to write **nothing** in both cases
+- [x] **`ItemGrantValidator` — §6.1's nine content rules at IMPORT, returning every failure.** Unknown
+      action and disabled action under **one** rule (the lane's own instruction); non-grantable;
+      basic-collision; `default-attack` on a role other than `armament-primary`; `default-attack` on an
+      ineligible action; a non-`Item` container kind; a malformed container id; a negative `seq`. Plus
+      §6.4's three cross-row checks over a whole base type — duplicate `seq`, duplicate `action_id`,
+      and **at most one `default-attack`** — run once over the catalogue because *"they are properties
+      of the catalog, not of a row"*
+- [x] ⭐ **`default-attack` is `armament-primary` only, and the off-hand keeps `granted` — both arms
+      tested.** The same row that is refused as a default attack on `armament-secondary`,
+      `jewel-major` and `girdle` **passes** as a `granted` row from those roles, so §4.3 option (C)'s
+      actual claim (the conflict is *unrepresentable*, not *banned*) is what is asserted
+- [x] **The item side's wire spelling IS the assembler's constant.** `ItemGrantRoles.Wire(DefaultAttack)`
+      returns `ActionGrantRoles.DefaultAttack` (`Grants/ActionSetAssembler.cs:10`) rather than a second
+      copy of the string, and `TryParse` round-trips it. ⛔ G2's proposed third role (`on-use`) parses
+      as **false** — a consumable is module 18's `grants_action_id` column, not a third grant role
+- [x] ⭐ **No merge of our own, and it is asserted structurally.** Every stacking assertion —
+      two items → one entry with two provenance rows, removing one source leaves the action, an
+      already-known action **reported not swallowed**, `default-attack` replacing the species
+      intrinsic, an unarmed actor keeping it — runs through the **shipped** `ActionSetAssembler`. A
+      source test asserts no file under `Items/Grants/` declares an assembler or writes
+      `DefaultAttackActionId`
+- [x] ⭐ **R2 PICKED UP — module 9 built the read, named this module as its consumer, and nothing had
+      ever called it.** `ItemPowerReads.GrantedActionPrice` gains a third, optional `ItemPowerTuning`
+      parameter, which is the literal mechanism of its own documented lifecycle (*"reportable today and
+      gating only when module 19 `granted-actions` lands"*): with no tuning `Over` stays `false` and
+      every pre-existing caller is unchanged; with one, the share is measured. `ItemGrantValidator`
+      passes it, and it is the first caller ever to do so
+- [x] ⛔ **`unpriced` is REFUSED, never read as `0` — and the two unpriced arms are split, which the
+      spec does not do.** *No resolvable rung* is a **content defect** and refuses
+      (`grant.unpriced`), because G4's stated fear is that *"pricing it at zero would make every
+      action-granting item strictly dominant"*. *No seeded rarity ceiling* is a **caller gap** and is
+      reported, not refused — and that is not hypothetical: `chaff`'s shipped
+      `powerCeilingShareMilli` is **0**, so a real rung in the real ladder reaches that branch.
+      Refusing an authored row because the harness has no ceiling would blame the content
+- [x] **The over-budget refusal is measured against the SHIPPED ladder, not a fixture.** A rung-10
+      action (`action-rungs.v2.json`) priced against `sprout`'s ceiling (`item-rarity.v1.json`, 22‰)
+      refuses with `grant.over-budget`, naming the share and the band
+- [x] ⭐ **No new tuning file, and no invented number.** The one knob a balance pass would touch —
+      `grantedActionShareCapMilli` — **already exists** in `data/tuning/item-power.v1.json` (module 9
+      shipped it, `null`, and boot already parses it at `Program.cs:164`). It stays `null`: the module
+      asserts it is null, asserts the effective cap therefore falls back to the whole ceiling, and
+      asserts that **setting it to 300 makes the same price refuse** — so tightening is a file save,
+      not a code change. `ItemGrantLimits.WholeCeilingShareMilli = 1000` is a **bounded ratio** (the
+      per-mille identity: "this one action costs the item's entire budget") and carries the AGENTS.md
+      exemption comment that rule requires, as do the other three structural constants
+- [x] **The share is a `long`, widened before multiplying, divided by 1000 last.** A max-int rung price
+      against a ceiling of 1 resolves to a share **above `int.MaxValue`**, asserted — which is the
+      reason it is a `long` rather than an assertion that it is one
+- [x] ⭐ **Handshake item 7 CLAIMED and written — the per-`TurnState` removal table.** §5.5 marked it
+      *partial* and assigned it to **nobody**; the audit's own words were *"not written down anywhere
+      the kernel can be held to."* `GrantRemovalPolicy` is that table, verified against the shipped
+      FSM: `Charging`/`Ready` → immediate, `Committed`/`Resolving` → **the run completes** (no refund
+      path exists, by rule), `Recovering` → at the transition to `Charging`, and
+      `Downed`/`Dead`/`Withdrawn` → **recorded and survives a revive**. The two edges the rules turn on
+      (`Recovering → Charging`, `Downed → Charging`) are asserted against `TurnTransitions.IsLegal`,
+      not against the doc. ⛔ **There is no enforcement code and that is deliberate** — there is nothing
+      to enforce until mid-match equip exists, and a policy reaching into the kernel now would be
+      inventing the coupling invariant 3 forbids. The four FSM tests **skip against
+      `ItemGrantLandedFlags.MidRunEquipLanded`**, never silently absent
+- [x] **The two free wins are asserted rather than assumed.** A granted action creates **no binding**
+      (a grep proves no file in the module names `effect_binding` or `BindingRow`), so the
+      apply/revert lifecycle does not apply; and `CooldownSlot` carries exactly `{ActorKey, Slot}`, so
+      unequip-then-re-equip does not reset a cooldown — **the classic swap exploit is closed for free
+      by a key shape that shipped for an unrelated reason, and nobody should "fix" it**
+- [x] **No new member of the closed code list.** §6.3 proposes **four** (`UnknownAction`,
+      `ActionNotGrantable`, `DefaultAttackNotAllowed`, `TooManyGrantedActions`, *"33 to 37"*); this
+      module mints **none** — the same call modules 11, 17 and 18 made. `AtomRejectionReason` stays at
+      **35**, asserted, and all **twelve** rules are `ContentRuleViolated{grant.*}` under a registered
+      namespace, checked by reflection over the rule-id constants so a rule added without registration
+      is a red test. ⚠ The action program's own `ActionRejectionReason` already ships
+      `ActionNotGrantable` / `ActionNotDefaultAttackEligible`; those are the **write path's** refusals
+      and are reused verbatim, never duplicated
+- [x] **Two rule ids exist with NO raiser, on purpose, so each gap has a name a report can carry** —
+      `grant.action-corpus-absent` (X3) and `grant.too-many-granted` (the cap G1 closed). A test
+      asserts neither appears in the validator, so neither can be deleted as dead code nor quietly
+      wired to a refusal
+- [x] **`audit-magic-numbers.py --summary` reports `M1 = 0`, `M2 = 0`, `M4 = 0`, exit 0**, with no
+      `grants` domain in the table and **zero** `Items/Grants/` entries in M3;
+      `audit-overflow.py` reports **0 critical**, 57 findings, **zero** under `Items/Grants/`.
+      ⚠ One structural const (`MaxDefaultAttacksPerContainer`) matched `MAGNITUDE` on the substring
+      "attack" and `percontainer` was added to the audit's **`NOT_MAGNITUDE`** suffix list with the
+      documented-reason discipline that list already uses — the established mechanism, and the exact
+      precedent the file's own comment records for `peractor` (`MaxShieldsPerActor`, a slot count).
+      **Not** a rename to dodge the check
+
+**⛔ Real defects found, named, not silently fixed:**
+
+- [x] ⛔ ⭐ **The grant seam's required scope is the SESSION-SCOPED one, and the owner already ruled
+      against it for durable per-specimen state.** `OwnerScope.IsSessionScoped` is true for exactly
+      `OwnerKind.Entity`, and its own doc says why: *"`entity:` bindings are session-scoped and never
+      durable — the pointer is reused."* `rpg_action_grant` is a **durable** table. And the owner
+      approved `OwnerKind.UniqueActor` on **2026-09-02** for durable per-specimen state
+      (`RpgStore.UniqueActors.cs:697`, `ReconcileUniqueEquipmentAtomBindings`) *"specifically because
+      `OwnerKind.Entity` is session-scoped and would silently drop equipped-item bonuses on the next
+      session boundary."* ⚠ **It works today only by coincidence**: `CreateUniqueActor` mints
+      `Guid.NewGuid().ToString("N")` — 32 lowercase hex — which is exactly what `Entity`'s grammar
+      requires, so `OwnerScope.Validate` passes and the mismatch is invisible. (A readable placeholder
+      like `"spec-1"` is `BadOwnerKey`; the tests use a real 32-hex id and assert both facts, because
+      testing with a placeholder would have proven the opposite of what they claim.) **This module
+      writes where the shipped reader reads** — the spec's Boundaries are explicit, and writing
+      elsewhere would produce rows nothing sees. **Owner: the server/loadout lane** —
+      `rpg_actor_loadout` is read at the identical scope by the same method
+      (`GetLoadoutOrAutoEquip`), so the question is one decision covering both, not two. Pinned by
+      `The_grant_scope_is_the_session_scoped_one_and_that_conflicts_with_a_durable_table`
+- [x] ⛔ **Module 9's R2 read shipped with `Over` hard-coded to `false` and a parsed-but-unread
+      tunable.** `GrantedActionPrice` computed a share and then always returned `Over: false`, while
+      `ItemPowerTuning.GrantedActionShareCapMilli` was parsed at boot and read by nothing — so the read
+      could report a number but could never say it was too big, and the tunable was a row no code
+      consumed (SC7, from the inside). Fixed here by the optional-tuning parameter above, which is the
+      shape module 9's own doc comment already described. **Cross-referenced into P2.4.**
+- [x] ⛔ **`ssot-granted-actions.md` §4.3's "344 hand-authored actions" is wrong by 7×** (G5) — the
+      figure is **48**, because the rule it prices applies only to `armament-primary`. The mitigation
+      still pays and its own number (6) is exact; the comparator was borrowed from I3's whole-catalogue
+      count. Corrected in the lane doc's own §3.6/§5.6 blocks is G3/G4; this one is recorded here and
+      left in place, because §4.3's cost paragraph is argument text rather than a normative table
+
+**⏸ Deferred, each with its owner named — none silently skipped:**
+
+- [ ] ⏸ ⛔ **X3 — an ordinary external dependency, and NOTHING is filed against `action-corpus`
+      (D36).** Re-verified 2026-09-05 by a test that walks every `.cs` file under `src/` and `tools/`:
+      **no production call to `ActionSeeder.Generate` exists** (the grep is for the call shape,
+      `ActionSeeder.Generate(`, so a refusal MESSAGE naming the method is not mistaken for a use of
+      it). `ItemGrantLandedFlags.ActionCorpusProducerLanded = false` carries it, and a second test
+      asserts this module builds no producer of its own — no `ActionSeeder`, no `new ActionRow`.
+      **We consume a production caller the day one ships. We do not build one, amend their map, file a
+      row in their program, or infer their schedule from their documents**
+- [ ] ⏸ **Gates GA3 and GA4 — both blocked on X3, and neither is faked.** GA3 needs one weapon base
+      type with a real action driven through a battle; GA4 needs the `granted` role's first real
+      exercise. With no `rpg_action` row, both would be a fixture pretending to be a proof. **GA2 is
+      what ships**, and the module says so rather than authoring rows that point at an empty table
+- [ ] ⏸ **`ApplyEquippedGrants` has no equip ENDPOINT calling it — and neither does module 4's own
+      write.** Verified, not assumed: `RpgStore.SaveAssignment` / `RemoveAssignment` (module 4's whole
+      equip road) also have **zero** callers outside `tests/`. The projection is wired to exactly the
+      depth module 4's own equip write is wired — store level — and the missing caller is the same
+      missing endpoint (module 2's entry already records *"Core + DAL; endpoints deferred"*).
+      ⛔ **Deliberately NOT called from inside `SaveAssignment`:** module 1's R1 keeps unequip as *"one
+      row deleted, no second writer"*, and `EquipProjector` is likewise a separate projection the
+      caller runs rather than a side effect of the assignment write. `ApplyEquippedGrants` mirrors it
+      exactly. **Owner: module 20 / the server's equip endpoint.**
+      ⚠ **Re-checked 2026-09-05 and still open — module 20 landed the item program's first server
+      surface and it is deliberately READ-ONLY.** `ItemSurfaceEndpoints.cs` carries three `MapGet`
+      routes and **no `MapPost` at all**, because equipping, socketing and salvaging already have
+      owners (modules 4, 16, 14) and a write path through the presentation layer is the "second
+      surface" that module exists to prevent. So the equip WRITE endpoint is still unbuilt, and its
+      real owner is **module 4's own server surface**, not module 20's. Corrected here rather than left
+      pointing at a module that has now shipped without it. See P5.4
+- [ ] ⏸ **`item_granted_action.container_id` carries no FK — the identical wiring gap module 17
+      recorded for `item_unique.derived_from`.** §5.2 wants `FK → item_base_type(container_id)`;
+      module 6 shipped the 740-row corpus and the Core readers, **not a table**, so the FK has nothing
+      to point at. The reference is checked by `ItemGrantValidator` against caller-supplied base-type
+      facts (the shape `EquipItemFacts` already uses for the same reason). **Owner: module 6**; the
+      column is ready the day the table exists
+- [ ] ⏸ **§9 item 9's content-hash registration — effect-atom's (E8), and NO item table is registered
+      today.** `ContentHashRegistry` is at V7 and carries `rpg_action`, `rpg_action_cost` and
+      `rpg_action_effect_scope` but **no** `item_unique`, `consumable_def`, `item_set` or
+      `item_display_template` — so this is the program's standing position, not a one-off omission.
+      Registering `item_granted_action` means a V8 and a moved stamp. **Owner: effect-atom, as one
+      amendment covering every item table**
+- [ ] ⏸ **Handshake item 9 and the §5.6 `decisions.md` row — both doc changes with no code, and both
+      the owner's.** *"Record that the item side of an action grant is a reference and a role, never a
+      definition"* (so `A1` starts against a settled seam instead of negotiating one mid-build), and
+      the timeline program's written refusal that an inventory event may become an `InterruptCause`
+      (§9.10). This module **requests** both and enforces the second from its own side by a guard on
+      the shipped enum; neither is a row this program may write into `decisions.md`
+- [ ] ⏸ **Amending I2's *"legal on both armament roles"* (§9.3) is R4's.** §4.3 option (C) narrows
+      `default-attack` to `armament-primary`, which is a tightening of `ssot-equip-slots.md:205`'s
+      assertion, not a contradiction of its principle. This module implements the tightening and does
+      not edit I2
+- [ ] ⏸ **§6.3's anti-silence import warning — needs a resolvable action to inspect.** The check
+      (*"a granted action whose container holds no atom the battle runtime can execute must warn at
+      import"*, reusing `RuntimeUnsupported`) resolves `action_id` → `rpg_action.container_id` → its
+      atoms. With X3 unresolved there is no action and therefore no container, so the check would be
+      vacuous on every row. ⚠ Its urgency also **dropped by G3**: five kinds now execute in battle, not
+      one. **Owner: this module, once a production action producer exists**
+- [ ] ⏸ **The `battle-only` presentation tag is module 20's to render.** §3.6's option (b) pick
+      includes the display requirement, and failure mode 7 (*the tooltip lie*) is a UI failure, not a
+      schema one. Nothing here can render it; the six-column row deliberately carries no display field
+      (§5.3), so the tag is derived from *"this base type has a grant row"* rather than stored
+- [ ] ⏸ **Mid-run equip stays unlanded and the FSM contract stays inert.** Re-verified: equipment
+      cannot change mid-run — `UniqueActorService.PutEquipment` refuses unless the actor's phase is
+      `Roster` (`phase.not_roster`) and `ClearEquipment` routes through the same method. The shipping
+      rule is unchanged: **the granted-action set is assembled at run start and is immutable for the
+      run** (`FrozenActionSet.FreezeAtRunStart`). `MidRunEquipLanded = false` is the single line that
+      flips
+- [ ] ⏸ **§9.5's third `grant_role` (`on-use`) is NOT added, and module 18 already answered it
+      differently.** The lane floats *"the cheap answer is a third `grant_role` value rather than a
+      second table"* for consumables; what shipped 2026-09-05 is `consumable_def.grants_action_id` +
+      `cooldown_key`, two nullable columns on module 18's own table. Two mechanisms for one concept is
+      what §5.3 exists to prevent, so this module keeps the closed two and `TryParse("on-use")`
+      returns **false**, asserted. If the seam ever unifies, it unifies onto one of the two — a
+      decision, never a drift
+- [ ] ⏸ **§9.11's *"is a granted action rolled"* (I12) needs no work and is recorded as satisfied.**
+      The grant lives on the base type (§4.4), so nothing about this seam is rolled and there is no
+      generator surface to forbid — SC5 is satisfied by having none, which is the third of §4.4's own
+      three reasons
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.ItemGrantedActionTests"` | **50 passed / 0 failed** (new) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemGrantStore"` | **14 passed / 0 failed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **666 passed / 0 failed** — the whole item program, modules 1–18's own suites included, green under this module's `ItemPowerReads` edit |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **131 passed / 0 failed** — the item program's whole DAL half, green under the new `item_granted_action` schema |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6872 passed / 8 failed** — **zero** in `Items.*`. All 8 are `Battle.BattleStatComposerTests`, `Expeditions.ExpeditionResolverTests`, `ClassSystem.ProveAptitudeJsonEmitTests` ×3, `Demons.DemonSpeciesGenExplainTests`, and the two allocation benchmarks `Atoms.ValueSpecTests.Resolving_allocates_nothing` / `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing` — ⭐ **both of which PASS when run in isolation** (2/2), so they are the order-sensitive allocation family module 18 already recorded flapping, not a regression |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **816 passed / 2 failed** — both `DemonSpeciesImportCliTests` (the demon stream's own process-spawning tests, which host-crashed at module 17's run and were excluded at module 18's); **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **203 passed / 1 failed** — `ClassSystemBaselineRegenTests.EveryBaselineParsesAndCarriesMeta`, reading the four `docs/research/class-system/_baseline-*.json` files `git status` shows mid-edit by the concurrent stream |
+| `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to modules 17 and 18's baseline.** Zero new findings: this module authors no seed content, which is gate GA2's definition |
+| `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, `M4 = 0`, exit 0**; no `grants` domain in the table, and no `Items/Grants/` entry in M3's 13 |
+| `python scripts\audit-overflow.py` | **0 critical**, 57 findings (the module-17/18 baseline number), **zero** under `Items/Grants/` |
+| `python -m pytest tools/seedsmith` | **1608 passed, 1 skipped, 288 subtests** — identical to module 18. This module wrote no `tools/seedsmith/**` and no `data/seed/**` file; the only Python it touched is `scripts/audit-overflow.py`'s suffix list, which seedsmith does not import |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer` / `guard-funnel-delta` / `guard-secondary-no-unity` | all four **OK** |
+| `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | **succeeds** — the new schema step does not break boot, and no new tuning parse was added (module 9's `item-power.v1.json` is already read at `Program.cs:164`). ⚠ Built to a scratch `OutDir`, as module 18 did |
+
+⚠ **Baseline re-measured fresh at the start of this module, not inherited, and it moved during the
+build.** At session start `Core` was **9 failed / 6801 passed** (`Battle.*` ×2,
+`Expeditions.ExpeditionResolverTests`, `Actions.ActionsPurityGuardTests`,
+`Battle.Timeline.TimelinePurityGuardTests`, `Demons.DemonQualityReportTests`,
+`ClassSystem.ProveAptitudeJsonEmitTests` ×3). By the end **four of those nine had gone green** and
+three different ones had gone red — the two allocation benchmarks above and
+`Demons.DemonSpeciesGenExplainTests`. Every failing name in the final runs was checked against
+`git status`: their sources (`World/`, `Battle/`, `Battle/Ai/`, `ClassSystem` baselines, the demon
+species tree) are all mid-edit or brand-new in the concurrent stream and **none is touched by this
+module.**
+
+⚠ **Three transient build breaks from the concurrent stream, all resolved by waiting, none in a file
+this module touched** — `World/StructureCatalog.cs` (`CS0103`, calling a `StructurePolicy` whose file
+had not landed yet; it appeared as an untracked file minutes later), both test projects'
+`ContractTuningTestBootstrap.cs` (`CS7036`, `SiegeTuning` grew a required eighth `Structure`
+parameter and the two bootstrap copies had not caught up), and `Battle/Ai/ZombossAdaptiveTuning.cs`
+(`CS0111`, a duplicate `PositiveLong`). The same pattern P3.1, P4.1 and P5.2 recorded — the second
+one blocked all test execution for several minutes.
+
+**Files:** `src/FusionRpg.Core/Items/Grants/{ItemGrantedActionRow.cs, ItemGrantValidator.cs,
+EquippedGrantProjection.cs, GrantRemovalPolicy.cs}` (new — the row + the three closed vocabularies +
+the structural limits + the landed flags + the rule namespace, the import/cross-row/R2 validator, the
+equip→grant projection, and handshake item 7's table);
+`src/FusionRpg.Core/Items/Power/ItemPowerReads.cs` (EDIT — `GrantedActionPrice` takes an optional
+`ItemPowerTuning` and sets `Over`, turning module 9's read from reportable into gating);
+`src/FusionRpg.Data/Sqlite/RpgStore.ItemGrants.cs` (new — the `item_granted_action` DDL,
+upsert/list/reverse-index/remove, and `ApplyEquippedGrants` / `WithdrawEquippedGrants`,
+`UpsertGrant`'s first `src/` caller); `src/FusionRpg.Data/Sqlite/RpgStore.cs` (EDIT —
+`EnsureItemGrantSchemaUnlocked` in `Init`, after the action schema whose `rpg_action_grant` the
+projection writes into); `docs/architecture/item/ssot-granted-actions.md` (EDIT — the §3.6 runtime
+matrix and §5.6 reasons corrected in the lane, per the spec's own success criterion);
+`docs/architecture/item-map.md` (EDIT — module 19 row 155 gains `6`, and the reconciliation note gains
+its sixth row); `scripts/audit-overflow.py` (EDIT — `percontainer` added to `NOT_MAGNITUDE` with a
+documented reason, the `peractor` precedent);
+`tests/FusionRpg.Core.Tests/Items/ItemGrantedActionTests.cs` (new),
+`tests/FusionRpg.Data.Tests/Items/ItemGrantStoreTests.cs` (new).
+
+⚠ **One deviation from the spec's Project structure, stated rather than silent:** it lists a separate
+`ItemGrantLandedFlags.cs`; the flags ship inside `ItemGrantedActionRow.cs` alongside `ItemGrantLimits`
+and `ItemGrantRules`, because all three are the module's constant surface and splitting a two-const
+class into its own file would make the "what does this module refuse and why" answer live in three
+places. Same directory, same type names, same content. No `data/tuning/granted-actions.v1.json` was
+created either — deliberately: the one balance number this module needs already exists as module 9's
+`grantedActionShareCapMilli`, and a second file holding a copy of it is the drift this program keeps
+naming.
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.ItemGrantedActionTests"`;
+`dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemGrantStore"`;
+`dotnet run --project tools\ItemSeedValidator`
+
+### ✅ P5.4 — Module 20 `item-surfaces` ⭐ — THE DECIDING HALF BUILT AND VERIFIED 2026-09-05 (the eight `.tsx` render files, the `docs/web/spec.md` amendment and the gap board explicitly deferred — one of the three is genuinely this module's own and is named as such, not laundered onto someone else)
+
+⭐ **Three of this module's pieces already existed and were ADOPTED rather than rebuilt — the same
+"authored but never wired" pattern half this program's modules have hit.** Verified by reading the
+live files before writing a line:
+
+| Claimed by the spec | Real state, checked |
+|---|---|
+| *"the home already exists and is already built"* | ✅ True. `web/fusion-rpg-web/src/layers/relics/RelicsLayer.tsx` is a `PanelShell` with three tabs fed by `useRelics()` → `/api/relics` (`RelicEndpoints.cs:15`), and the `storage` tab's `EmptyState` is a designed state, not a fake. **No route added, none needed** |
+| *"the contract type already exists, with nine of eleven blocks stubbed"* | ✅ True. `contract/types.ts:135-149`'s `ContainerView` carries the eleven blocks and `Pending<T>`; `adaptRelic` (`adapt.ts:124-144`) returns `absent()` for seven and `pendingWithReason` for the implicit |
+| module 16's write-free preview | ✅ Already shipped. `CombinationEvaluator.Preview` / `PreviewWithOneMore` — **this module calls them and wrote no second pass** |
+| ⭐ module 7's deferred **light-theme palette + deuteranope transform** | ✅ **ALREADY BUILT — by module 10 on 2026-09-04, not owed here at all.** `RarityPalette.cs` ships sRGB → CIE L\*, WCAG 2 contrast, the Machado/Oliveira/Fonseca (2009) deuteranope **and** protanope matrices, and the constructed light palette. **P2.1's note is struck and its addendum written.** This module built no second palette |
+
+⛔ **THE DEFECT THIS MODULE FOUND, and it is in its own spec: the near-miss algorithm
+`spec-item-surfaces.md` specifies is STALE BY ONE DAY, and the spec that supersedes it names this
+module by name.**
+
+The spec (2026-09-03) devotes a whole section — *"⭐ How the swap hint stays tractable — decide by
+multiset, then count cycles"* — to an INSERT/SWAP split whose swap leg computes
+`distance = n − cycles(σ)` over an **ordered** recipe, with a worked `Code style` block. **D41
+(2026-09-04, the owner, `spec-sockets.md:320`) made recipes unordered:** *"unordered — we only need
+collect enough type of socket and put it to the item, if the item match condition, it will got bonus,
+no need order."* D41's own consequence table has a row that reads, verbatim:
+
+> | Module 20's swap-distance | sized against unordered — `distance` counts *missing kinds*, never positions |
+
+And module 16 shipped it that way: `ComboIngredient` carries **no position field**, the DDL has **no
+`position` column**, `MultisetSatisfied` counts and claims, and `bind_ordinal` carries a comment
+saying a matcher that reads it is a bug (P4.3's own four-way proof). **So the swap leg is not an
+optimisation this module declined — over an unordered recipe a swap distance is always zero and the
+hint would be a lie.** Implemented unordered, and pinned so it cannot come back:
+`D41_made_recipes_unordered_so_every_arrangement_of_one_fill_reports_the_same_distance` walks **all 24
+permutations** of a four-insert fill and asserts one signature, plus asserts by reflection that
+`CombinationDisplayState` has no `Swap` member and `MissingIngredient` no position/ordinal field.
+**Cross-referenced into P4.3 (module 16).** The spec's *tractability* claim survives intact and is
+asserted as data rather than prose (`DistanceDiagnostics.PermutationsEnumerated == 0`,
+`ActiveSetEvaluations == 1`, `MultisetComparisons ≤ catalog.Count`).
+
+⛔ **A SECOND spec-vs-code divergence, smaller and decided the same way — by the shipped evaluator.**
+The spec's affinity note says *"affinity never changes a `distance` — it changes the result."* That is
+true of a Strain (attunement moves the granted **tier**) and **false of Pure**: the shipped
+`CombinationEvaluator` Pure arm adds `attunedEffectiveCountBonus` to the **contributor count**, which
+is the exact quantity the threshold is compared against (`sockets.v1.json`'s own note documents the
+two-arm split). A distance that ignored it would report *"one more"* about a resonance already firing
+— the same-evaluator rule's failure mode, inverted. **Distance follows the evaluator**, and both arms
+are pinned: `A_matched_affinity_changes_a_strains_result_not_its_distance` and
+`Pure_distance_follows_the_shipped_evaluator_including_attunements_effective_count`.
+
+**Built:**
+
+- [x] ⭐ **`CombinationDistance` — the near-miss evaluator, one call to module 16's own `Evaluate`.**
+      Four closed states (`Active` / `OneAway` / `KnownInactive` / `Undiscovered`), G3 §4.3's `∞` rule
+      as `Distance == null` (a **nullable, not a sentinel**, so an arithmetic use site cannot treat ∞
+      as a large number), and per-shape arms each reading off the arm its evaluator uses. Reachability
+      is three permanent facts about the ITEM — too few sockets, wrong host role/frame, and D21's
+      set-piece exclusivity — never about the fill, so *"a set piece is one insert from a Strain"* is
+      unreachable by construction
+- [x] **`CompendiumReveal` — the held-ledger reveal rule and the display cap.** A Strain/Splice
+      reveals when every ingredient FAMILY has been held; a generated resonance names no families, so
+      its condition is **derived from its shape** (Pure wants its element, Ring/Eclipse both of theirs,
+      Diversity `threshold` distinct elements) rather than authored as a second reveal table — a
+      seventh element needs no content edit. Render is active → one-away → known-inactive-by-name, in
+      that order, stable within a band, and ⛔ **the row cap touches only the name-only tail**, so it
+      can never hide a combination the player is about to earn
+- [x] **`LootFilterView` + `LootFilterRule` — a client-side VIEW rule, and D26 is enforced by
+      construction.** Every method takes an already-materialised row list and returns a subset. A guard
+      test strips the comments and asserts the source names no `LootPipeline`, `DropTable`, `LootPity`,
+      `DropEnvelope` or `RpgStore` at all. ⛔ **A `Locked` row is never hidden** — the exemption is
+      first in the predicate, and it is written as one predicate rather than a union so the caller's
+      sort order survives. The inbox counts over the WHOLE armoury, never the filtered view
+- [x] **I12's `40/day` restated on the axis the game has.** `reviewPressurePerContentEvent` (60,
+      ssot-inventory.md) and `inflowWatchPerContentEvent` (40, ssot-generation.md's tripwire) are
+      **per content event**, per §2f.2 — and this file **never reads a clock**: it has no parameter
+      that could carry one. Both are watch numbers; `Review_pressure_is_a_warning_and_never_a_refusal`
+      asserts every row survives the flag firing
+- [x] **`CollectionStrategy` — GG-50 at 10 / 100 / 1,000, as a function rather than a paragraph.**
+      `RenderAll ≤ 100 < Virtualize ≤ 2,000 < SearchFirst`, from ssot-inventory.md:534-541's measured
+      numbers. ⛔ **No band refuses a row** — asserted at 0 and at 1,000,000 — which is what keeps it a
+      layout call and not the bag cap §2.5 forbids. `RpgStore.InventoryCeiling` stays module 2's own
+      structural abuse guard and is named as a different thing
+- [x] **`SurfaceCatalog` — the six surfaces × four designed states (GG-17), with GG-44 mechanical.**
+      Precedence is **locked → loading → error → empty**, each with its reason: a locked surface must
+      not spin (the player cannot make the spinner finish), and an errored one must not read as empty
+      (*"you own nothing"* and *"we could not read what you own"* are different sentences). A locked
+      surface can always say what unlocks it because `UnlockKeyFor` is **total over the six**, and
+      `ItemSurfaceTuning.Parse` refuses at LOAD a `surfaceUnlocks` table missing any of them — so a
+      seventh surface cannot be added without declaring its unlock
+- [x] **`DominancePresentation` — GG-27 and SC4.** All four verdicts are a **word and a shape**
+      (`▲ ▼ ◆ ◇`), all distinct, and `VerdictBadge` is asserted by reflection to carry **no colour
+      property at all**, so a renderer cannot fall back to hue. `GroupByUnitClass` puts the unit in the
+      GROUP HEADER and never in the column, over module 10's `ChannelUnits` facade — and an
+      unresolvable channel gets **its own `null` group**, never folded into `GameUnits`, because
+      guessing a unit is the lie the rule exists to prevent. ⛔ **The no-single-score footnote has no
+      dismiss API**, asserted by reflection over every public member of the namespace
+- [x] ⭐ **`SetDisclosure` — module 12's cross-referenced tooltip requirement, picked up.** P3.2 filed
+      it here by name: the 30 shipped sets declare **154** distinct `(role, base type)` member pairs
+      and **25** belong to more than one set, one to three, so a card that renders one *"3 / 4"* has
+      rendered a third of the truth. `SharedMembers` re-measures all three numbers against the real
+      corpus and `ForWearer` reports per piece which sets it advances and which it is **redundant** in
+      — the *"say why the fourth did not count"* half of ssot-sets.md §4.5, and a **disclosure, never a
+      refusal**: equipping the duplicate stays legal. It counts nothing of its own; the `(set, role)`
+      dedupe is `SetEvaluator.Hits`' discipline re-expressed, and a test asserts the two agree
+- [x] **`data/tuning/item-surfaces.v1.json` + `ItemSurfaceTuning` — the balance surface is config.**
+      Five sections, every one carrying a note saying it is a PRESENTATION threshold and not a meter.
+      No key has a default; the parser refuses an unordered render band, a zero one-away distance
+      (which would name the active set), a negative cap, a zero watch number and a missing surface
+      unlock — each with its own message
+- [x] ⭐ **`ItemSurfaceEndpoints.cs` — the item program's first server surface, READ-ONLY.**
+      `GET /api/items/surfaces/{playerId}` (the six states, derived from real ownership + real socket
+      rows), `GET /api/items/armoury/{playerId}` (keyset page via module 2's `ArmouryQuery`, plus the
+      inbox count and the render strategy), `GET /api/items/{instanceId}/combinations` (the four-state
+      list for one item). ⛔ **There is no `MapPost` in the file, deliberately** — equipping, socketing
+      and salvaging already have owners (modules 4, 16, 14) and a second write path through the
+      presentation layer is the *"second surface"* this module exists to prevent. Wired in `Program.cs`
+      beside the other eight item tuning loads
+
+**⏸ Deferred, with the owner named — and the FIRST one is this module's own, said plainly:**
+
+- [ ] ⏸ ⛔ **The eight `.tsx` files ARE THIS MODULE'S OWN WORK AND THEY ARE NOT BUILT.** `ArmouryList`,
+      `ArmouryFilter`, `Paperdoll`, `ItemCard`, `CompareView`, `SocketBench`, `Compendium` and the
+      `RelicsLayer` body swap, plus `contract/types.ts`'s `SocketsView`/`SetView` and `adaptRelic`.
+      **Not laundered onto another module:** the reason is that the web tree is being actively
+      refactored by the concurrent world-stage stream right now — `git status` shows
+      `stages/world/WorldStage.tsx` and `targeting/QueuedOrders.tsx` modified and
+      `stages/world/playback/` + `stages/world/turn/` untracked mid-edit — and the owner's own memory
+      note records *"map FE frozen pre-refactor — do not add UI to it."* Composing eight new files
+      against a kit whose shell files are moving is how a merge conflict eats a day's work.
+      ⭐ **What is now READY for that pass, so it is a composition and not a design:** every number it
+      renders comes from module 10's `DisplayModel`; every combination state and distance from
+      `GET /api/items/{instanceId}/combinations`; the four surface states from
+      `GET /api/items/surfaces/{playerId}`; the render strategy and inbox from
+      `GET /api/items/armoury/{playerId}`; the verdict word/shape, the sidegrade trade, the unit-class
+      grouping and the footnote key from `DominancePresentation`; the per-piece set disclosure from
+      `SetDisclosure`. **No layout decision in the spec was re-litigated** — comparison stacks at
+      640px, the bench and compendium are band-3, identity blocks 1–6 above the fold
+- [ ] ⏸ **`docs/web/spec.md` §399's success criterion 7 is NOT amended — the spec puts it under
+      "Ask first" and it is another program's document.** The collision is real and re-verified
+      today: `ssot-presentation.md` §1 cedes component code to the web spec, `docs/web/spec.md:137-144`
+      says *"that seam is unclaimed from this side"*, and `:399` nonetheless **claims** *"the item
+      card's eleven blocks"* as web-program work. **Owner: the owner**, one sentence: the eleven blocks
+      are item module 20's, delivered against the web kit
+- [ ] ⏸ **The compendium is 25 rows today, not 127 — module 21's 102 Strains and Splices do not
+      exist yet.** `P4.4` above is the model-call work that authors them. Everything here is sized for
+      127 and measured against 25: the distance pass is O(k) per recipe with no allocation and no
+      permutation, so the catalog tripling changes the row count and nothing else.
+      **Owner: module 21**. ⭐ **Addendum 2026-09-05 — module 21 built the generator and confirmed
+      the sizing, and it hands one requirement back.** Its `catalogue.report()` prints
+      **127 against ssot-sockets §4.4's ~45 bar (2822‰, 2.8×)** and carries this module's two
+      mitigations as REQUIREMENTS with `owner: module 20 (item-surfaces)` — so a run cannot print 127
+      without printing who owes them. ⚠ **Only half of the pair exists:** the socket-UI preview and
+      the swap-distance hint landed here (P5.4), the **compendium REVEAL rule** — *"a combination is
+      revealed once the player has held every ingredient at least once"* — has no owner-side state and
+      is **not built**. The 102 rows are still module 21's; the reveal rule is this module's. See P4.4
+- [ ] ⏸ **An armoury row's `role` and `frame` come back empty, and role/frame filtering is not
+      offered.** They live on the item's BASE TYPE, and module 6 shipped the 740-row corpus and the
+      Core readers but **not a table** — the identical wiring gap P5.1 recorded for
+      `item_unique.derived_from` and P5.3 for `item_granted_action.container_id`. ⛔ Deliberately **not**
+      answered from the container's `slot`, which is a different axis and would be a plausible wrong
+      answer. **Owner: module 6**; the field is ready the day the table exists
+- [ ] ⏸ **The gap board (48 × 15 = 720 cells, server-computed and memoised) is not built** — it needs
+      exactly the role join above, because a "gap" is a role with no strict improvement available.
+      Blocked on the same table. **Owner: this module, once module 6's table lands**
+- [ ] ⏸ **The held ledger is approximated by current stock, and the endpoint says so.** The reveal
+      rule wants *"has ever held"*; the shipped schema has `rpg_item_stock` (what you hold **now**) and
+      no ever-held table. A ledger that decayed when the player spent a gem would **un-teach** a recipe,
+      which is worse than never teaching it — so the Core rule takes a `HeldLedger` and the server
+      fills it from stock as the honest approximation available today. **Owner: inventory (I13's own
+      table set)**; `CompendiumReveal` needs no change when it lands
+- [ ] ⏸ ⚠ **D3 `frame-mix` still has no player surface, and this is the record the stub asked for.**
+      It appears in modules 3, 6 and 12 (`FrameMixPredicate`, `item-frame-mix.v1.json`, the hybrid core
+      at 800‰) and in **none of the six surfaces**. Recorded as an omission rather than added: the
+      six surfaces are the spec's own closed list, `ItemSurface` is a closed enum, and a seventh
+      surface is a spec change, not an implementation detail. ⛔ The cheap half — *showing a frame
+      badge on the item card* — is already in `ContainerHeader.frameBadge` (`types.ts:139`) and is the
+      `.tsx` pass's, not a new surface
+- [ ] ⏸ **The `battle-only` presentation tag (module 19's P5.3 hand-off) and a unique's flavour text
+      (module 17's P5.1) are `.tsx` work**, not Core work — both are *"render this string"* with no
+      deterministic rule to test. They ride the deferred render pass above rather than being claimed as
+      done here
+- [ ] ⏸ **Module 15's `Restore` admin surface (P4.2's hand-off, *"when an admin surface exists (module
+      20)"*) is NOT built.** It is an administrative rollback to a recorded `op_seq` — **a write**, and
+      this module's server file is read-only by design. An admin console is not one of the six player
+      surfaces. **Owner: module 15, on an admin surface that is not this one**
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemSurfaceTests` | **32 passed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6,951 passed / 7 failed** — `ActorHub.SpecChannelClaimTests`, `Atoms.PredicateCompilerTests.Evaluating_allocates_nothing`, `Battle.BattleStatComposerTests`, 3 × `ClassSystem.ProveAptitudeJsonEmitTests`, `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`. **Zero in `Items.*`**, and every one of the seven traces to a file the concurrent stream has mid-edit (`git status`: `Effects/Atoms/PredicateNode.cs`, `Stats/Aptitudes/RespecPolicy.cs`, `Server/ExpeditionEndpoints.cs`, `Data/Sqlite/RpgStore.Aptitudes.cs`) |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | ✅ **823 passed / 0 failed** — fully green, first time in this build. The three reds every module from P2.1 onward carried (2 × `DemonSpeciesImportCliTests`, 1 × `AtomStoreTests`) have been fixed by the streams that owned them. **This module touched no `src/FusionRpg.Data` file at all** |
+| `dotnet test tests\FusionRpg.Guard.Tests` | **203 passed / 1 failed** — `ClassSystemBaselineRegenTests.RegeneratingTwiceReproducesIdenticalPayloads`, the same concurrent class-system red P2.5 recorded |
+| `.\scripts\guard-dal.ps1` · `guard-single-writer.ps1` · `guard-secondary-no-unity.ps1` · `guard-funnel-delta.ps1` | ✅ **all four OK** — the new server file reads through `RpgStore` and writes no SQL |
+| `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to modules 17, 18 and 19's baseline.** Zero new findings: this module authors no seed content |
+| `dotnet msbuild src\FusionRpg.Server\FusionRpg.Server.csproj -t:Compile` | ✅ **0 errors** — the boot parse of `item-surfaces.v1.json` and the three routes compile. ⚠ Compile target rather than Build because the owner's server is running and holds a lock on `bin\Debug\net8.0` (`MSB3027 … locked by "FusionRpg Server"`) — a machine state, not a code failure |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0, M2 = 0** (13 M3 total, none under `Items/Surfaces`) |
+| `python scripts\audit-overflow.py` | **0 critical**; zero findings under `Items/Surfaces` |
+
+⚠ **Baseline note, re-measured at the START of this pass rather than carried:** `Core.Tests` was
+**6 failed / 6,909 passed** before a line of this module was written, and is **7 failed / 6,951
+passed** after — a different SET, not a growing one (`PatronAuraOverlayTests` went green; `ActorHub`
+and `PredicateCompilerTests` went red) and every move belongs to the concurrent stream, which was
+visibly mid-edit throughout: `FusionRpg.Core` itself failed to compile **twice** during this pass on
+`Battle/Board/SiegeTuning.cs` and `Battle/BattleEngine.cs`, and `Core.Tests` failed to compile on the
+stream's own untracked `Battle/Board/SiegePositionsTests.cs` — each resolved on its own within
+minutes, exactly the retry case. ⭐ **`Data.Tests` moved the other way and is now zero**, so the
+"14 and 2" bar this program set on 2026-09-04 is now **7 and 0**, both of them other streams'.
+
+⛔ **One process note, recorded because it changes how a red is read here.** While `Core.Tests` was
+uncompilable on another stream's file, this module's 32 tests were run against a **throwaway project
+in the scratchpad** that globbed only `tests/FusionRpg.Core.Tests/Items/**` — and then **re-run in the
+real project the moment it compiled again, twice, both times 32/32.** The scratch run is not the
+evidence; the real one is. Named so nobody reads the scratch harness as a way around a red suite.
+
+**Files:** `data/tuning/item-surfaces.v1.json` (new — render bands, the compendium's four-state
+boundary and tail cap, the loot filter's default and its two per-content-event watch numbers, the six
+GG-44 unlock keys); `src/FusionRpg.Core/Items/Surfaces/{ItemSurfaceTuning.cs, SurfaceCatalog.cs,
+CollectionStrategy.cs, CombinationDistance.cs, CompendiumReveal.cs, LootFilterRule.cs,
+DominancePresentation.cs, SetDisclosure.cs}` (new);
+`src/FusionRpg.Server/ItemSurfaceEndpoints.cs` (new — three read-only routes);
+`src/FusionRpg.Server/Program.cs` (EDIT — parses `item-surfaces.v1.json` at boot, maps the three
+routes); `tests/FusionRpg.Core.Tests/Items/ItemSurfaceTests.cs` (new — 32 tests).
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemSurfaceTests`
+
+### ✅ P5.5 — Module 22 `charm-carry` — BUILT AND VERIFIED 2026-09-05 (D40's split closed; ⛔ one spec-vs-ruling divergence found and resolved against the ruling)
+
+**⛔ THE FINDING THAT SHAPED THIS MODULE, stated first because the stub above is wrong about it.**
+The stub says the snapshot binds at `player:{id}` and *"`source` is the only difference between the
+two"*. **That is stale by D33(a)**, and it was checked rather than assumed:
+
+| Source | Says | Dated |
+|---|---|---|
+| `ssot-charms.md` §3.8 | run start binds "one `effect_binding` per charm at `player:{id}`" | lane text, 2026-08-22 |
+| `ssot-consumables.md` §9 item 10 | mirrors §3.8, citing `ssot-charms.md:319-328` | lane text |
+| The stub above (written by module 18) | mirrors the mirror | 2026-09-05 |
+| **`item-ideal.md:1388` — D33** | ⭐ ***"(a) Charms bind at **actor** scope, not `player:`"*** | **owner ruling, 2026-09-04** |
+| `ssot-charms.md` §3.1 banner | *"SETTLED 2026-09-04 by owner ruling D33(a) — the answer is B, not C… Option C's `player:{id}` is **withdrawn**"* | same |
+
+**The ruling wins, and the reason is a correctness bug rather than taste** — the one module 12 already
+refuses in code: `StatApplyScope.Matches` returns `true` unconditionally for a `player:` owner
+(*"stub → match-wide apply"*) and `match` matches **both sides** before it looks at `side`, so a
+`player:`-scoped `+atk` charm **buffs the zombies**. So this module binds at
+**`unique-actor:{specimenId}`, one binding per deployed actor**, and `bindingOwnerKind` is refused **by
+name** at tuning load for `player` / `match` / `entity`
+(`charm.binding-owner-kind-not-actor`), so a balance edit cannot reintroduce the withdrawn option C.
+**Everything else about the shared lifecycle is adopted unchanged**, which is what §9 item 10 actually
+asks for. ⚠ **Cross-referenced into P5.3 (module 18)** — its own `draughtBindingPriority` note says
+*"`source` is the only difference between the two"*, and that sentence is now one difference short.
+
+- [x] **The five tables, ssot-charms.md §4.2 verbatim, and zero columns added to any atom table.**
+      `charm_def` · `charm_pouch` · `charm_run_hold` · `charm_resonance` · `charm_attunement`, wired
+      into `Init()` after `EnsureConsumableSchemaUnlocked`. `The_five_tables_exist_and_none_of_them_added_a_column_to_an_atom_table`
+      asserts all five against `sqlite_master` **and** that `effect_container` gained none of
+      `axis`/`ap_cost`/`unique_carry`/`frame_hint` — §4.2's own reason for side tables ("repeating
+      `slot`/`rarity`'s precedent for a fifth kind is how a shared table becomes a union of every kind's
+      private fields")
+- [x] ⭐ **The partial unique index IS the exclusivity rule, and it is proven from OUTSIDE the store.**
+      `CREATE UNIQUE INDEX … ON charm_run_hold(instance_id) WHERE active = 1`, mirroring
+      `ix_rpg_expedition_members_active` exactly. `OpenCharmRunHold` **does not check then insert** — it
+      inserts and translates SQLite error 19 into `CharmInUse`, because a read-then-write check has a
+      window and an index does not. `A_raw_insert_that_bypasses_every_C_sharp_check_still_cannot_double_hold_a_charm`
+      opens its own connection, goes around the store's method entirely, and asserts the constraint
+      violation; `The_partial_unique_index_is_what_enforces_exclusivity_and_a_second_run_rolls_back_whole`
+      adds the all-or-nothing half — the clashing run leaves **zero** rows, never a half-sealed run
+- [x] ⛔ **No new reason code, and the five §5.2 asked for all still exist by name.** definitions.md
+      §10's list is closed at 33 + `ContentRuleViolated`, and §5.2 itself called five *"a large ask"*.
+      This module takes **none**. The split follows the program's own two answers: an **authoring**
+      failure is `ContentRuleViolated{charm.*}` under a registered namespace (modules 1/7/11/12/17/18's
+      device), and a **player-action** refusal is a module-local enum — `CharmCarryRefusalReason`,
+      exactly module 4's `EquipRefusalReason` precedent, because *"may this player attune this charm?"*
+      is not an atom rejection at all. `CharmBudgetExceeded`, `CharmAxisOverflow`, `CharmInUse` and
+      `CharmNotCarryable` survive verbatim as enum members; `CharmAtomNotPermitted` survives as the rule
+      id `charm.atom-not-permitted`. `This_module_mints_no_new_reason_code_and_registers_a_namespace_instead`
+      asserts both halves — the four names are **absent** from `AtomRejectionReason` and **present**
+      in the local enum
+- [x] ⛔ **The carry LIMIT is a soft, configurable ladder — there is no hard ceiling anywhere, and the
+      parser refuses one BY NAME.** §3.3 says *"6 AP at start, 20 AP at cap"*; AGENTS.md forbids a hard
+      progression ceiling. So `capacityLadder` in `data/tuning/charm-attunement.v1.json` is
+      `[6,8,10,12,14,16,18,20]` and **20 is the last AUTHORED rung, not a maximum**: `CapacityAtRung`
+      past the end returns the last rung (content exhaustion, and the comment says so),
+      `CharmPouchGate.Explain` takes whatever capacity it is handed, `SetCharmCapacity` writes 10,000
+      without complaint, and the DDL carries no `CHECK` and no ceiling column.
+      `A_capacity_ceiling_key_is_refused_at_load_by_name_rather_than_ignored` appends `maxCapacityAp` to
+      the **real file** and asserts `charm.capacity-ceiling-not-permitted` — the device module 18 used
+      for its withdrawn `carryLimit` key, because a ceiling key that parses and does nothing is worse
+      than one that works. `The_gate_carries_no_max_charms_parameter` sweeps the whole public surface by
+      reflection for `maxCharms` / `charmSlots` / `maxCapacity` / `capacityCap`
+- [x] ⚠ **The axis cap (3) and copy cap (2) are NOT progression ceilings, and the distinction is
+      written down rather than assumed.** They bound **loadout composition**, never a magnitude — nothing
+      here caps how strong a charm may be. They are therefore ordinary tunables in
+      `charm-attunement.v1.json` (a balance pass moves them with a file save), and §3.3's own reason for
+      making the axis cap a **rejection** rather than a soft cap is quoted beside it: *"a fourth
+      same-axis charm contributing nothing is a silent no-op, which is exactly what this program exists
+      to remove"*
+- [x] **Nine structural invariants are checked at tuning load, each with its own rule id**, so a balance
+      pass reads which one it broke: `charm.ap-domain-empty` / `-not-positive` / `-unordered`,
+      `charm.capacity-ladder-empty` / `-unordered`, ⭐ **`charm.starting-capacity-below-largest-charm`**
+      (a start below 5 AP makes every signet dead content on day one — §6.1's *"a signet is 5 of 6"*),
+      `charm.unique-carry-cap-not-tighter` (inverted, "unique" would silently **loosen** the class it
+      restrains), `charm.binding-priority-not-below-equipment`, and
+      `charm.binding-source-collides-with-draught`. **No key has a default**: a gate silently running on
+      a defaulted capacity is an unreviewed number reaching every pouch in the game
+- [x] ⭐ **"One snapshot mechanism, two sources" is now CHECKABLE, not a sentence.**
+      `The_run_start_binding_priority_mirrors_module_18s_draught_priority_value_for_value` reads **both
+      real tuning files** and asserts `charm-attunement.v1.json`'s `bindingPriority` equals
+      `consumables.v1.json`'s `draughtBindingPriority` (−100). A balance pass that reorders one
+      run-start layer and forgets the other is a red test instead of a silent split.
+      `Withdrawal_is_by_source_…` asserts the two keys differ, and the parser refuses
+      `bindingSource: "draught"` by name — sharing the tag would make one run-end withdrawal take both
+      layers down
+- [x] ⛔ **No second snapshot mechanism was built, asserted by reflection.**
+      `There_is_no_second_snapshot_mechanism_and_the_binder_declares_no_clock` scans `CharmRunBinder`'s
+      whole public surface for `Expire` / `Duration` / `Tick` / `Until` / `Ttl`. `effect_binding` carries
+      no expiry, duration or until-tick, so a timed buff is a status and a run-scoped one is a
+      lifecycle — module 18's finding, re-asserted here rather than re-derived
+- [x] ⭐ **Resonance counts nothing of its own — module 12's evaluator, driven, not forked.**
+      `CharmRunBinder.ResonanceTiers` builds `CharmResonance.Consumer(axis, table)` per axis and calls
+      `ThresholdEvaluator.Grant`. Cumulativeness comes free and is asserted from that direction: three
+      survivability charms hold **both** the 2-tier and the 3-tier
+      (`Resonance_tiers_come_from_module_12s_evaluator_and_are_cumulative`), and
+      `The_binder_counts_nothing_of_its_own_and_agrees_with_the_evaluator_directly_driven` runs the
+      evaluator by hand over the same snapshot and demands the identical list
+- [x] **The seal: bindings read the snapshot, never the live pouch.**
+      `Bindings_apply_from_the_run_start_snapshot_not_the_live_pouch` edits the pouch after
+      `Snapshot(...)` and shows the new charm reaching **no** binding.
+      `The_snapshot_seq_is_stable_across_input_orderings` pins `seq` as a determinism input — ordinal by
+      instance id, so two replays cannot disagree about row order (module 18's own reason for `seq` on
+      `rpg_run_draught`, adopted)
+- [x] **Refuse, never silently hold — at both ends of the lifecycle.** `Unattune` on a held charm
+      refuses `CharmInUse` **and names the run** (`expedition#1`), the pouch row survives, and closing
+      the run frees it (`Un_attuning_a_held_charm_refuses_CharmInUse_and_the_row_survives`). Attuning a
+      held instance into a *second* player's pouch refuses the same way. ⭐ **And the pouch stays
+      editable**: `The_pouch_stays_editable_while_a_run_holds_only_some_of_it` holds one of three charms
+      and un-attunes another successfully — §3.8's *"freezing the whole pouch while any run is live
+      would be miserable once expeditions run 20 hours in parallel"*
+- [x] **Run end leaves the audit trail.** `CloseCharmRunHold` sets `active = 0`; the rows **stay**
+      (`An_inactive_hold_frees_the_charm_for_the_next_run_and_stays_for_audit` asserts all three still
+      readable, all inactive, and the next run sealing cleanly). Deleting them would take the replay
+      input with them
+- [x] **The gate returns EVERY refusal, never first-fail** (module 17's rule, kept): a pouch reported one
+      problem at a time is one round trip per mistake and the player is holding all of them at once.
+      `The_gate_returns_every_refusal_rather_than_first_fail` drives five distinct failures through one
+      call. `Ap_budget_axis_cap_and_copy_cap_each_refuse_with_their_own_reason` reproduces
+      **§6.3's own loadouts C and D** as fixtures — 9 AP against 8 is `CharmBudgetExceeded`; a fourth
+      offense charm is `CharmAxisOverflow` **and** `DuplicateKey`, which is exactly §5.2's argument for
+      keeping the axis code separate ("drop *this* charm, not any charm")
+- [x] **§6.3's wide and tall loadouts both still fit the same 8 AP**
+      (`The_wide_and_tall_loadouts_of_section_6_3_both_fit_the_same_eight_AP`). If either stops fitting,
+      the packing decision the whole mechanic exists for is gone and nothing else would have said so
+- [x] **The `unique_carry` tighter cap is real** — two copies of an ordinary charm pass, two signets
+      refuse with a detail naming `unique_carry`. And it is **class-shaped in the corpus**: exactly the
+      7 signets carry it and nothing else does, measured
+      (`Exactly_the_seven_signets_are_unique_carry_so_the_tighter_copy_cap_is_class_shaped`)
+- [x] ⭐ **Resonance containers can never enter the pouch — in BOTH shipped spellings.** §4.2's device is
+      *"a `charm.` container with no `charm_def` row is not attunable"*, and the corpus ships all ten
+      resonance ids **unpadded** (module 12 measured that divergence rather than renaming it — four
+      moving parts, one a frozen registry). So the gate's predicate accepts 1–2 digits, or all ten walk
+      straight in. `All_ten_shipped_resonance_containers_are_refused_by_the_pouch_gate` refuses each by
+      its **authored** id; `No_shipped_charm_id_is_mistaken_for_a_resonance_container` checks the false
+      positive, which is the invisible half of the same bug. At the DAL,
+      `The_resonance_table_never_becomes_attunable` shows the ten going into `charm_resonance` and into
+      nothing else, then refuses `Attune` on every one
+- [x] ⛔ **`long` for every magnitude, `checked` throughout, and the overflow is asserted.** `ap_cost`
+      and every AP total are `long`; `CharmPouchGate.TotalAp` sums inside `checked` and
+      `An_AP_total_overflows_by_throwing_never_by_wrapping` asserts the `OverflowException` — a wrapped
+      AP sum is a pouch that fits everything, the budget silently gone, with a green suite. A negative
+      capacity **throws** at both the gate and the store rather than clamping to zero (a clamp would
+      silently empty the pouch)
+- [x] **Server boot wired** — `Program.cs` parses `charm-attunement.v1.json` at startup (so a ceiling
+      key, an inverted cap or a `player` owner kind fails there, not at the first dispatch) and imports
+      the charm corpus after `store.Init()`, non-fatally, matching modules 11/12's own rule.
+      `resonance.json` is routed to `charm_resonance` **only**, which is what keeps §4.2's device true
+      at boot as well as in a test
+
+**⛔ Defects and divergences found while building, all named rather than absorbed:**
+
+1. ⛔ **The P5.5 stub's own `player:{id}` claim is stale against D33(a)** — see the table at the top of
+   this section. Not a defect in module 18's code (its draughts really do bind at `player:`, which is
+   ssot-consumables' own ruling); a defect in the **inherited sentence** that `source` is the only
+   difference. **Cross-referenced into P5.2 (module 18).** ⚠ It is also live in two lane docs:
+   `ssot-charms.md` §3.8's run-start row and `ssot-consumables.md` §9 item 10 both still say
+   `player:{id}` while `ssot-charms.md` §3.1's own banner says the opposite. **Not edited from here** —
+   a lane doc's prose is its owner's, and the banner already carries the ruling; recorded so the next
+   reader of §3.8 does not build against the withdrawn option C.
+2. ⛔ **`CharmAttunementTuningRejection` first registered the wrong namespace, and the closed-vocabulary
+   guard caught it.** It copied module 12's `ThresholdEvaluator.EnsureRegistered()` while raising
+   `charm.*` rule ids, and `AtomRejection.ContentRule` **throws** on an unregistered prefix rather than
+   accepting an unknown vocabulary — so the first run of
+   `A_capacity_ceiling_key_is_refused_at_load_by_name_rather_than_ignored` failed with
+   `InvalidOperationException` instead of the rejection. Fixed to `CharmCarryRules.EnsureRegistered()`.
+   Named because it is the guard working exactly as designed: a copied registration is the most likely
+   way a new lane's namespace goes wrong, and it cost one test run instead of a mystery at boot.
+3. ⚠ **`ListCharmDefs` round-trips `CharmDef` only PARTIALLY, deliberately, and the code says why.**
+   `charm_def` holds no `prefix_rolls` / `suffix_rolls` / negative-atom flag, because those are the
+   **corpus's** facts and module 12's `CharmCorpus.ValidateClassRules` already enforces them at parse
+   time. Storing them here would be a second, weaker source for a rule that already has one. The
+   reconstructed record therefore reports `0/0` rolls and derives the drawback flag from the class; a
+   caller that needs the roll shape reads the corpus, not the table.
+4. ⚠ **`players` still has no level column** — `(id, name, created_utc, world_seed)`, checked against
+   the live DDL, not the doc (which still says three columns). `ssot-charms.md` §8 item 6's question is
+   therefore **still open**, and the gate does not paper over it: a charm with a `level_req` and no
+   supplied player level refuses `PlayerLevelUnavailable` rather than passing a check it cannot make
+   (SC6). ⏸ Inert today —
+   `No_shipped_charm_declares_a_level_req_so_the_player_level_gap_is_inert_today` reads all four corpus
+   files and shows the key absent from every one. Not this module's to answer.
+
+**Three corpus facts measured here for the first time, each pinned as a test:**
+
+- ⚠ **The axis distribution is 20 / 10 / 10 / 10 / 10 — `economy` ships twice as many charms as every
+  other axis.** Not a defect: §3.5's axes are **open categories**, not quotas, and every axis still
+  clears the cap of 3 comfortably, so the cap binds on the player's packing rather than on what the
+  corpus can supply. Pinned in `No_axis_can_be_starved_by_the_axis_cap_and_economy_is_the_deepest_pool`
+  so a balance pass can see it move.
+- ✅ **Every axis can actually reach its top resonance tier** — a 3-tier on an axis with two charms
+  would be unreachable and invisibly so
+  (`Every_axis_has_enough_shipped_charms_to_reach_its_top_resonance_tier`, driven off both real files).
+  And the two sets of axes are **equal**: no charm axis lacks a ladder, no ladder lacks charms.
+- ⚠ **All 60 charms declare `frameHint: any`, so §3.7's frame check is structurally present and inert.**
+  Written anyway, and measured
+  (`Every_shipped_charm_declares_frame_hint_any_so_section_3_7s_check_is_inert_and_that_is_measured`),
+  because §3.7's whole point is that the **first** frame-restricted charm must not ship as a silent
+  dud. Named so a later session does not read the observation as "the check is dead code".
+
+**⏸ Deferred, each with a named owner and a reason:**
+
+- [ ] ⏸ **X7 again — nothing this module binds has a legal `ContainerKind` yet, and that is the same
+      wiring gap modules 11, 12, 13, 16, 18 and 21 all carry.** `ContainerRow.cs` ships six values
+      (`Item · Trait · Skill · SpeciesPassive · Patron · WorldBuff`) and D27's `charm` is not one of
+      them, so `charm_def.container_id` carries **no FK** and `CharmRunBinder.Bindings` produces binding
+      **rows** rather than writing them. The grammar row in `definitions.md` §1 is the SSOT the id regex
+      mirrors and it wins over any spec — **an ask, owned by effect-atom, not an edit from here.**
+- [ ] ⏸ **No production caller seals a run yet, and the missing caller is expedition dispatch — the
+      SAME gap module 18 left.** Verified rather than assumed: `TrySpendDraughts` has no production
+      caller either (grep over `src/`), so neither run-start layer is wired to dispatch. Both halves of
+      this module's seam ship and are tested — `ListPouch` / `OpenCharmRunHold` / `HeldByLiveRun` on one
+      side, `Snapshot` / `Bindings` / `RefuseUnsupportedScope` on the other. **A wiring gap with a named
+      trigger (the dispatch transaction, plus X7 before a binding can be written), not a design gap.**
+      Wiring both layers in one change is the right shape, because they must seal in one transaction.
+- [ ] ⏸ **I13's sinks do not yet consult `charm_pouch` / `charm_run_hold`.** ssot-charms §8 item 2(b)
+      asks that an attuned or held charm cannot be salvaged, sold or destroyed. That is a check inside
+      **module 2/14's** salvage and transfer paths (`RpgStore.Items.cs`, `SalvageGuards`), and it is
+      shaped exactly like the `rpg_delve_pack_lock` row the party-dungeon program filed into
+      `item-map.md` §9 — so the two should land as one arm, not two. `HeldByLiveRun` is the read those
+      paths need and it ships here.
+- [ ] ⏸ **Capacity GROWTH is progression's, not this module's** (§8 item 11). `SetCharmCapacity` is the
+      write and nothing calls it in production; whether 6 → 20 competes with expedition slots (2 → 5) is
+      the owner's open question 11 and is deliberately not answered by a ladder that only lists rungs.
+- [ ] ⏸ **`CharmCarryRules.AtomNotPermitted` is declared and not yet raised.** §5.2 code 5 is an
+      **import-time** check on a charm container's ATOMS (`op = Increased`/`More`, or a
+      `board.*`/`grid.*`/`box.*`/`spawn.*` kind) — and the corpus holds **seeds**, which carry a
+      `family` and a `powerBand` and no atom rows at all (seed-contract.md §3). There is nothing to
+      check until the runtime generator rolls a seed into a concrete container, which is the binding
+      seed-to-concrete rule. The rule id and its doc comment ship so the check has a home; raising it is
+      the generator's, not this module's. Same disposition module 18 gave its own atom-level rules.
+- [ ] ⏸ **`ssot-charms.md` §9's eight owner questions stay open and none of them blocks this build.**
+      Cross-run exclusivity's harshness (q1), the 6→20 / {1,2,3,5} shape (q2), commander interaction
+      (q3), tradeability (q4), lawn-only charms (q5), the five-code ask (q6 — **answered in practice
+      here: none minted**), resonance scaling with deployed count (q7 — built **flat**, which is the
+      lane's own recommendation), and whether the axis cap should exist at all (q8). Every one is a
+      tunable or a content question, and each is a file save away.
+- [ ] ⏸ **The module still has no spec file of its own** — `item-map.md` row 22 points at
+      `spec-threshold-grants.md`, whose *"Charm carry runtime"* section is the spec this module was
+      built from and is complete enough that nothing was guessed. ⚠ Its **Project structure** block
+      names `src/FusionRpg.Core/Items/CharmPouchGate.cs`; the files landed under
+      `Items/Thresholds/` beside module 12's, because that is where the machinery this module extends
+      lives and a sibling directory would have split one mechanism across two. Recorded as a knowing
+      deviation, not a drift.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter CharmCarry` | **48 passed** (new — `CharmCarryTests` 33, `CharmCarryCorpusTests` 15) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter CharmCarry` | **19 passed** (new — `CharmCarryStoreTests`) |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7096 passed / 6 failed / 7102 total.** ⚠ Five are the session baseline's own (`ActorHub.SpecChannelClaimTests`, `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`, 3 × `ClassSystem.ProveAptitudeJsonEmitTests`) — all the concurrent class-system / world streams'. The sixth, `Demons.DemonQualityReportTests.A_perfectly_even_split_reports_entropy_1_00`, is **build contention, not a failure**: it shells out to `dotnet run` and got *"Error writing to source link file … used by another process"* while the other stream was rebuilding `FusionRpg.Core`. **Re-run in isolation: 1 passed.** **Zero** failures in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **842 passed / 0 failed / 842 total.** ⭐ Better than the recorded baseline of 3 red — the `AtomStoreTests` and `DemonSpeciesImportCliTests` failures earlier modules carried are gone, and this run did **not** hit the intermittent host crash P3.2 recorded |
+| `dotnet test tests\FusionRpg.Guard.Tests` | **204 / 204**, up from 184 at P3.2 |
+| `dotnet run --project tools\ItemSeedValidator` | **170 errors across 120 partitions — identical to modules 17, 18, 19 and 20's baseline.** Zero new findings; the four `charms/*` partitions carry only the two pre-existing `MetaRegistryVersion{Mismatch,Behind}` notices every partition carries. This module authors **no** seed content |
+| `python scripts\audit-overflow.py` | **0 critical**, 59 findings — **zero** under `Items/Thresholds/` and zero naming a charm path |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0, M2 = 0**, 13 M3 total across 8 domains; **zero** under `Items/Thresholds/` and zero in the `items` domain from this module |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer.ps1` / `guard-funnel-delta.ps1` / `guard-secondary-no-unity.ps1` | **all four OK** — the five charm tables' SQL stays inside `FusionRpg.Data` |
+| `dotnet build src\FusionRpg.Server` | **Build succeeded** — boot parses the tuning and imports the corpus |
+| `python -m pytest` (seedsmith, full) | **1678 passed, 1 skipped**, 288 subtests — unaffected; **no Python content was touched** (this module reads the charm corpus and writes none of it) |
+
+⚠ **Two transient build failures from the concurrent stream, both waited out rather than worked around**
+(`SiegeTuning.SiegeTuning` gained a required `Economy` parameter mid-session and both test projects'
+`ContractTuningTestBootstrap` lagged it by a few minutes; and a `data/tuning/loopwarntest*.json` fixture
+appeared and vanished under the server's copy step). Neither touches a file this module owns, and both
+cleared on retry. Recorded so a later reader does not mistake the retries for flakiness here.
+
+**Files:** `data/tuning/charm-attunement.v1.json` (new — the AP domain, the capacity **ladder**, the
+axis/copy/unique caps, and the run-start binding shape including D33(a)'s owner kind);
+`src/FusionRpg.Core/Items/Thresholds/{CharmAttunementTuning.cs, CharmPouchGate.cs, CharmRunBinder.cs}`
+(new); `src/FusionRpg.Data/Sqlite/RpgStore.Charms.cs` (new — ssot-charms §4.2's five tables,
+`ImportCharmCorpus`, `ListCharmDefs`, `ListCharmResonance`, `Get`/`SetCharmCapacity`, `Attune`,
+`Unattune`, `ListPouch`, `HeldByLiveRun`, `OpenCharmRunHold`, `CloseCharmRunHold`, `ListCharmRunHold`);
+`src/FusionRpg.Data/Sqlite/RpgStore.cs` (EDIT — `EnsureCharmSchemaUnlocked` in `Init`);
+`src/FusionRpg.Server/Program.cs` (EDIT — parses `charm-attunement.v1.json` at boot, imports the charm
+corpus after `store.Init()`); `tests/FusionRpg.Core.Tests/Items/{CharmCarryTests.cs,
+CharmCarryCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/CharmCarryStoreTests.cs` (new — 67 tests).
+
+**Depends on:** module 12. **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter CharmCarry`; `dotnet test tests\FusionRpg.Data.Tests --filter CharmCarry`; `.\scripts\guard-dal.ps1`
 
 > ### ✅ CHECKPOINT 5
 > A player can see, compare, equip, socket and craft an item in the web control room without reading a

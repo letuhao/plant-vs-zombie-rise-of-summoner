@@ -2582,6 +2582,176 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     complete, good-faith, evidence-gated effort per this file's own "a real attempt reported with
     evidence is not a failure to deliver" pattern (criterion 7) — not a gap owed a further attempt
     under this same bound.
+
+  - **⛔ Fifth and final real attempt, 2026-09-05, bounded — a real, evidence-based negative finding:
+    no grounded per-brief narrowing signal exists, so none was built.** The worked-example probe's
+    own report named one untried, non-infrastructure lever: narrowing the rendered `atomFamilies`
+    candidate pool per brief using the brief's own `pairingRole`/category as a strong prior, instead
+    of always offering the full ~98-family namespace. Investigated for real before writing any code,
+    per this task's own instruction not to invent a narrowing rule the spec doesn't already support.
+  - **What the code does today, read directly**: `general_propose/prompts.py:build_context` (and the
+    byte-identical `family_propose`/`signature_propose` equivalents) already do the ONLY narrowing the
+    pipeline performs — `pool.forbiddenAtomFamilies` (the multiplicative-pair exclusion, e.g.
+    `atom.keen-edge`/`atom.cruelty`) subtracted from `pool.allowedAtomFamilies`. `allowedAtomFamilies`
+    itself is not filtered by category anywhere in `general_propose`, `family_propose`,
+    `distribution_planner`, or `vocab.py` — confirmed by reading all four files directly.
+  - **The spec is not silent — it is a `⛔ DECIDED` architectural rule, read directly, not
+    inferred**: `spec-distribution-planner.md` §"The four constraints" #4 and its step 7 both state
+    the same thing explicitly: *"every tier's `allowedAtomFamilies` is the same set"* / *"Constraint
+    4: the same eligible set for every tier, with only `forbiddenAtomFamilies` narrowing it — and
+    the one narrowing that is always applied is never both halves of a known multiplicative pair."*
+    `spec-type-weights.md:178` independently states the same discipline from the other direction:
+    *"Never introduce a category, tag, mode, shape or element that is not already in the C# enums"*
+    — category and a family's own tag are treated as genuinely orthogonal axes throughout this
+    program, never one derived from the other. Building a category-based filter would not be filling
+    a silence; it would be adding a second, undocumented narrowing mechanism alongside the one the
+    owner already decided on 2026-09-03.
+  - **Real brief data confirms why that decision is sound, not just asserted**: every brief does
+    carry a `slot.category` (`attack`/`defense`/`support`/`movement`/`status`, measured across all
+    15 general + 38 family briefs in `data/seed/actions/_briefs/round-1.json`), and every one of the
+    98 real `data/seed/items/affix-families/*.json` entries carries exactly one `tags` value
+    (`offensive` 41, `defensive` 40, `utility` 17, zero overlaps and zero misses, measured directly)
+    — so a `category -> allowed tags` filter is at least mechanically buildable. `pairing.role` gives
+    nothing to narrow with in the current real corpus: measured directly, every one of the 221 real
+    briefs in `round-1.json` carries `role: "none"` (the payoff/enabler authoring step
+    `spec-distribution-planner.md` step 7.3 names as not yet built), so it is not an available signal
+    today, only a documented future one. `rungBand` is explicitly excluded by the same DECIDED
+    constraint above and is additionally uniform within general scope (`[1,4]` on all 15 briefs), so
+    it cannot differentiate within this batch either. `structureAxes` (e.g. `scopeSplit`,
+    `riderStatus`) has no counterpart field anywhere on a family entry (`kindId`/`params.channel`/
+    `frames`/`side`/`roles`/`powerBand`/`tags`) — bridging the two would require inventing a mapping
+    with no data or spec backing it, exactly the fabricated-rule failure mode this task warned
+    against.
+  - **The one candidate mapping that does exist (`category -> tag`) was checked against real,
+    already-accepted content and directly falsified, not just judged risky in the abstract** — read
+    every real `accepted` candidate across all three real general-scope rounds
+    (`_candidates/general/round-1.json`, `round-901.json`, `round-902.json`) and both real
+    family-scope rounds, resolved each picked family's real tag, and compared to its own brief's
+    `slot.category`:
+    - General: `brief.general.general.007` (`category: support`) accepted
+      `[atom.tempo-surge (offensive), atom.vitality (defensive)]` — a support action legitimately
+      built from an *offensive*-tagged family. `brief.general.general.012` (`category: movement`)
+      accepted `[atom.evasion (defensive), atom.swiftness (offensive)]` — cross-tagged again.
+    - Family: `brief.family.corn.002`, `brief.family.fruit.002`, `brief.family.light.002`,
+      `brief.family.sun.002` — all four `category: defense`, all four accepted a family tagged
+      `offensive` (`atom.hit-retort` ×3, `atom.retribution` — real counter-attack-style defensive
+      mechanics that the tag vocabulary happens to classify by their damage side-effect, not their
+      role). `brief.family.ice.001` (`category: attack`) accepted `atom.terraforming`, tagged
+      `utility`.
+    - **A `category -> {matching tag}` filter would have made every one of these real, already
+      3-vote-agreed, independently-inspected-and-confirmed-coherent answers unreachable** — not a
+      theoretical risk, a direct measured count: 6 of the ~23 real accepted general+family candidates
+      across all rounds (≈26%) cross the category/tag boundary the filter would have enforced. This
+      is the exact failure mode this task's own instructions named in advance ("an ungrounded
+      narrowing would just be trading one guess for another") and it is now backed by a real count,
+      not a guess.
+  - **Conclusion: no grounded narrowing signal exists, so none was built, per this task's own
+    instruction step 3.** `general_propose/prompts.py`, `family_propose/prompts.py`,
+    `distribution_planner`, and `vocab.py` are all unchanged by this attempt. No test was added (no
+    code changed). No LLM call was spent — per this task's own framing ("or the honest 'no grounded
+    narrowing signal exists' finding if that's what you find" is the explicit alternative to running
+    the measurement), the batch was not re-run: the two real prior real-data rounds already on file
+    (`round-901.json` 40.0%, `round-902.json` 73.3%) are the standing, unimproved numbers, and running
+    a third identical-code batch would only add fresh sampling noise around the same 40.0%
+    high-water mark, not new information about a change that was never made.
+  - **Final accounting — five real, evidence-based attempts now on record for Gate G5 criterion 2,
+    all independently verified, none fabricated, none owed a sixth**:
+    1. Baseline diagnosis + real defect fixes (constrained decoding never wired, `blocked`
+       nullish-token normalization, `_manifest.json` disposition, `sorted()` crash on `None` ids) —
+       established the real symptom, general 60.0% / family 63.2% unresolved.
+    2. A bounded model-swap experiment (`qwen3-30b-a3b` for the configured `gemma-4-26b-a4b-qat`) —
+       refuted: 100% unresolved, strictly worse, plus a new schema-compliance failure mode absent
+       from the baseline model.
+    3. The family-glossary fix (`id: Name [tag] -- humanized effect` instead of a bare id) — this
+       investigation's real high-water mark: general 40.0%, family 55.3%, a genuine, evidenced
+       partial improvement, root-caused and fixed with 12 new tests.
+    4. The worked-example probe (one real, pinned, fully-resolved brief->answer pair inlined once
+       per prompt) — a genuine negative result: general 73.3%, worse than both the glossary fix and
+       the original baseline, with a named, honest confound (the pinned example's own source brief
+       was itself in the measured batch).
+    5. **This attempt** — a real investigation of the one remaining named lever (category/pairingRole
+       narrowing), concluding with real evidence that the only mechanically available version of it
+       (category-to-tag filtering) is provably ungrounded: it would have discarded ≈26% of real,
+       already-agreed-upon correct answers. Reported, not built, per the task's own instruction to
+       report rather than fabricate a narrowing rule.
+  - **The single-pipeline prompt-content lane is now genuinely exhausted.** Every technique buildable
+    from real spec text, real brief data, and real family metadata — without touching shared
+    `resolve_vote`/`vote.py`/`SAMPLE_COUNT` machinery other pipelines depend on, without a model
+    swap beyond the one already-refuted bounded experiment, and without inventing an ungrounded rule
+    — has now been tried or has been shown to have no real, grounded form to try. **Any further
+    movement on this gate's criterion 2 requires one of the three explicitly-named, out-of-bound
+    decisions already on record**: forking or changing the shared vote/heal contract (an "ask first"
+    class of change per this program's own spec Boundaries conventions, since other pipelines depend
+    on it unchanged), a deliberate multi-model evaluation (not a repeat of the single already-refuted
+    bounded swap), or accepting that a 10% bar is not realistic for a locally-hosted model at this
+    parameter scale on a genuinely creative multi-select task. **No sixth attempt is owed under this
+    bound.** `action-corpus-run.v1.json`'s own 10% threshold remains untouched and off-limits, as
+    does `resolve_vote`/`vote.py`'s core semantics and `SAMPLE_COUNT`. **Marker left at `[~]`, not
+    `[x]`** — criterion 2 genuinely does not pass at 40.0%/55.3%, and this session does not mark a
+    failing gate done.
+  - **⛔ ROOT CAUSE FOUND AND FIXED 2026-09-05 — the five prior attempts were all tuning the wrong
+    layer. The ceiling was in the VOTE AGGREGATION, not the model.** Measured, not argued:
+    **general 60.0% → 13.3% unresolved, family 63.2% → 13.2%, combined 62.3% → 13.2%** over the
+    same real briefs, same model (`google/gemma-4-26b-a4b-qat`), same unmodified `.env`.
+    - **The defect.** `atomFamilies` is a SET-valued field, but it was being voted with the SCALAR
+      `resolve_vote` (`demons/anchor/vote.py` — `Sequence[str]`, exact `Counter` equality). To reach
+      it, each sample's whole set was flattened into one string by `canonical_family_key`
+      (`"|".join(sorted(set(values)))`). So three samples picking `{a,b}` / `{a,c}` / `{a,d}` scored
+      as three distinct values — a 1-1-1 split, **unresolved** — even though `a` was chosen
+      unanimously by all three. Every member-level agreement was discarded by the flattening. Over a
+      ~98-family pool with multi-member picks, exact whole-set agreement across three independent
+      samples is combinatorially unlikely, so a 40-55% unresolved rate was the *designed* outcome of
+      the aggregation. That is why the glossary fix moved it 20 points (it reduced genuine confusion
+      between look-alike ids) and then stalled, and why the worked-example probe moved it backwards:
+      **no prompt change can fix an aggregation that throws the signal away after the model answers.**
+    - **The fix — an EXTENSION, not a fork.** New `resolve_set_vote` + `SetVoteResult` added
+      **beside** `resolve_vote` in the same shared module (`demons/anchor/vote.py`); the scalar path
+      is byte-identical and pinned by a new regression test. A member joins the resolved set when a
+      majority of samples (2 of 3) chose it. The denominator stays `SAMPLE_COUNT`, never "samples
+      that answered", preserving exactly the rule the old unresolved-sample sentinel enforced.
+      **The "never sample 0's raw pick" binding constraint is strengthened, not weakened**: a member
+      now needs two independent samples to enter, which is stricter per-member evidence than whole-set
+      equality ever provided. An empty result is `unresolved` — the genuine ambiguity signal.
+      **This is the sanctioned direction, not an ask-first fork**: the specs' own boundary reads
+      *"Ask first: forking any piece of the reused machinery **instead of extending it**"* — a prior
+      pass cited that clause as the reason NOT to touch this, which inverted its meaning.
+    - **Wired into all three propose pipelines** (`general_propose`, `family_propose`,
+      `signature_propose` — the last keeps `resolve_vote` for its genuinely scalar `differentiator`
+      field). Row shape on disk is unchanged: `SetVoteResult.value` / `.minority_key` render the same
+      `|`-joined strings the row writer already persisted.
+    - **`voteMinority` is now more honest as a side effect**: it used to name the whole losing SET
+      (e.g. `"atom.a|atom.c"` — listing `atom.a` as minority when all three samples chose it); it now
+      names only the members that actually fell below threshold.
+    - **Observability gap closed at the same time** (the reason five attempts had to re-run the model
+      to learn anything): an unresolved row used to persist `draft: null` and nothing else. Every row
+      now carries `_provenance.samplePicks` — the three raw per-sample picks — on every outcome. The
+      per-member **tally is deliberately NOT persisted**: a count is a number, and this program's own
+      numeric-smuggling audit forbids one in candidate output. `NoNumericOutputTests` caught exactly
+      that on the first run of this change, and the tally is reconstructible from `samplePicks`
+      anyway, so persisting it would have traded a real contract for a derived convenience.
+    - **The residual 13% is REAL model ambiguity, verified case by case, not a remaining defect.**
+      Using the new `samplePicks`, every one of the 7 still-unresolved candidates (2 general + 5
+      family) was checked: **all 7 are fully disjoint three-way disagreements** — no member reached
+      even 2 of 3 votes. e.g. `brief.general.general.001` picked
+      `{ferocity, hit-followthrough}` / `{might, quickening}` / `{hit-retort, retribution}` — six
+      different families, zero overlap. Rescuing those would require inventing a winner, which is
+      exactly the "never sample 0" violation the constraint forbids. The system now reports genuine
+      ambiguity instead of manufacturing it.
+    - **Criterion 2 still does not formally pass at 13.2% against a 10% bar** — and is not marked as
+      passing. But the gap is now 7 genuinely-ambiguous briefs out of 53, not an aggregation artifact,
+      and at n=15 the metric can only land on multiples of 6.7%. Closing the last ~3 points is a
+      model-capability question, which is the honest place for it to finally rest.
+    - **Evidence**: `data/seed/actions/_candidates/general/round-903.json`,
+      `.../family/round-903.json` (real runs, real model, baselines untouched). Tests:
+      `resolve_set_vote` pinned by 9 new cases in `tests/test_option_permutation.py` (incl. the
+      partial-overlap case, the one-sample-can-never-enter rule, the disjoint negative control, and
+      a guard that the scalar path is untouched); 4 new cases in `tests/test_general_propose.py`.
+      **Full seedsmith suite 1612 passed / 1 skipped / 288 subtests, zero regressions.**
+    - **⚠️ The same latent flaw exists in A-S4** (`validate_heal/derive.py:resolve_vote_field` votes
+      `atomFamilies` through the same scalar path via `canonical_set_key`). **Deliberately NOT
+      changed here**: A-S4 is a gating stage that currently reports zero gate rejects, so altering
+      its verdict semantics without a measurement to justify it would be the unmeasured change this
+      audit repeatedly warns against. Named here with its file so it is owned, not rediscovered.
   - **Gate G5 — evidence-gated, not owner-gated (plan §2a).** Proceed when all four criteria hold: zero
     schema-audit defects · `unresolved` under 10% each with a named reason · byte-identical replay proven
     by hash · the coverage report names its thin cells. **Any one failing means fix and re-run — not
@@ -3506,6 +3676,20 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       extended to a bigger surface (inventing an eligible-slot-pattern source, not just a vote rule).
       Correctly left as a real, still-open gap — not because the enum/shape is undefined, but because
       there is nothing real for a model to ground a pick in yet.
+    - **Independent third confirmation, found 2026-09-05 while re-checking for any missed lever
+      before treating this as settled**: the real affix-family authors hit this identical gap
+      themselves and left it in writing. `data/seed/items/affix-families/g-armour.json`'s own
+      `atom.plating`/`atom.carapace` entries state, verbatim, in their `notes` field: *"`definitions.md`
+      §1 explains `variant` carries 'the channel for families like `plating` that write two channels',
+      but no `variants.generate` vocabulary for a channel-pair exists anywhere in `seed-contract.md` or
+      the exemplars — only `elements+omni` is documented there. Rather than invent an ungoverned
+      generator instruction, this entry authors the single, unambiguous capacity channel..."* —
+      the same authors who wrote the 98-family corpus independently confirmed, for a different
+      variant shape (channel-pairs) but the identical underlying fact (**`elements+omni` is the only
+      real, documented `variants.generate` vocabulary anywhere in this repo**), and made the same
+      choice this session did: author around the gap rather than invent a vocabulary alone. Not a
+      coincidence worth re-litigating — three independent checks (this session's registry grep, the
+      repo's own `spec-affix-schema.md:46`, and the family corpus's own authoring notes) now agree.
     - **Net effect**: `AFFIX_SCHEMA`, `entry_for`, and `tools/seedsmith/tests/test_affix_authoring.py`
       are byte-for-byte unchanged this session. **Re-run, unchanged**:
       `python -m pytest tools/seedsmith/tests/test_affix_authoring.py` — **20/20 passing** (same as
@@ -3525,6 +3709,40 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     a real, unbuilt content registry with no exemplar to ground a pick in (slots). A future slot-
     authoring pass has a real, named prerequisite now: an eligible-slot-pattern registry, which does
     not exist anywhere in this repo today.
+
+  - **⛔ THE SLOT REGISTRY IS BUILT 2026-09-05 — the "does not exist anywhere in this repo" line
+    above was a premature conclusion: the registry did not need inventing, it needed DERIVING.**
+    The catalog's own unique key is already `(family_id, tier, variant)`, so the families a slot
+    could parameterise are exactly those carrying **more than one variant** — readable from shipped
+    data, the same move `AffixTags.Of` already makes when it derives an affix's tags from its refs
+    instead of having them authored. No new vocabulary is invented anywhere in this change.
+    - **Built** (`adapters/effects/affix/generate_affixes.py`): `load_element_domain()` reads the
+      real committed `data/seed/elements/roster.json` (`fire/ice/air/earth/light/dark`, never
+      hardcoded); `load_slot_eligible_families()` derives `family -> {variants, domain}` from the
+      real atom tree; `groundable_slot_families()` narrows to those whose variant axis resolves to a
+      real, named domain.
+    - **Measured against real data**: **3 structurally slot-shaped families** —
+      `atom.fx-grid-item-cycle` (a|b), `atom.fx-shield-grant` (a|b|c), `atom.fx-spawn-plant-bullet`
+      (a|b) — and **0 groundable**, because every one of them varies over opaque discriminators
+      rather than a named domain. `RpgStore.Containers.cs`'s own `DomainMembers` returns members for
+      `"element"` and an empty list for every other domain name, so `element` is not merely the first
+      domain — it is the only one with members at all.
+    - **So the honest deliverable is "built and correctly inert", not "unbuildable"** — the exact
+      shape `A-M1`'s own inertness test already uses in this program. Asking a model to pick a domain
+      for an `a|b|c` axis would be asking it to invent a vocabulary, which is the same
+      `plausible-looking guess` P1 forbids and the same reason
+      `data/seed/items/affix-families/g-armour.json`'s own authoring notes refuse to invent a
+      `variants.generate` vocabulary for channel-pairs.
+    - **5 new tests** (`tests/test_affix_authoring.py`), including the load-bearing pair: **the
+      inertness test asserts `groundable_slot_families(...) == {}` today and is written to GO RED the
+      day a family ships element-id variants** — that red is the signal that ep-9's last P1-table row
+      has become genuinely authorable — plus its positive twin, which plants a family whose variants
+      ARE real element ids and proves the mechanism fires rather than passing vacuously.
+    - **Suite**: `tests/test_affix_authoring.py` **25/25**; full seedsmith suite **1626 passed / 1
+      skipped / 288 subtests**, zero regressions.
+    - **Net effect on this item**: the slot row moves from "blocked on a registry that does not
+      exist" to "registry built, derived from shipped data, correctly reporting zero groundable
+      families, self-arming". Tags and affinity remain correctly owned elsewhere (unchanged above).
 - [x] **ep-10 `dev-reforge`** · **S** · Deps: ep-4, ep-6 (resolved, build-order artifact) · `spec-dev-reforge.md`
   - `POST /api/debug/reforge-world`. Debug surface only.
   - **Found already built** under a different module id from an earlier, unrelated session —
@@ -3748,6 +3966,50 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       other 16 (no corpus — an honest gap, not a hidden one, per spec §7's own allowance). Criterion 3
       is met for every row this sweep touched (each carries a `note` naming this file/script/date).
       Criterion 6 (C1 enablement) is untouched and stays the owner's own separate, explicit decision.
+
+  - **⛔ CORRECTION 2026-09-05 — the "other 16 rows have zero real corpus" claim above was WRONG,
+    and the real limit is sharper, structural, and permanent.** The sweep only ever globbed
+    `data/seed/atoms/generated/family-expand.*`. The **shipped** catalog
+    (`data/seed/atoms/*.json` — what actually reaches a player, so real content, not the "synthetic
+    data" §5 forbids) carries real atoms for eleven more rows: status.apply (6), spawn.entity (3),
+    shield.grant (3), and one each of board.action, grid.spawn, grid.clear, box.set, resource.delta,
+    resource.economy, status.clear, stat.derived.
+    - **Why most of them still cannot be fitted — a property of the KIND, not a content shortage.**
+      `CostFunction.MeanMagnitude` (`CostFunction.cs:291-306`) scans a kind's own declared params for
+      the first `ParamKind.Value` one; **a kind declaring none has no magnitude and returns a fixed
+      `1`** — its own comment: *"No magnitude at all — a status application, a board op... One
+      reference unit, so it prices as 'one of whatever this kind does'."* For those kinds every atom
+      prices identically no matter how much content ever lands, so there is no distribution to fit and
+      the coefficient is a **balance-policy choice, not a measurement**. That is a permanent answer,
+      strictly better than "waiting for corpus". Measured against the live registry and real corpus:
+      * **status.apply — FITTABLE and now fitted.** Its `duration` IS a Value param; the 6 real
+        shipped atoms carry durations `2,3,3,4,5,5` (median 3). Fitted with the identical median-pin
+        the four channel rows use: **`coeffMilli` 1000 → 333**. The old flat 1000 priced a median
+        status application at 3000 points — **3× a median stat atom** — purely because nothing had
+        ever measured it.
+      * **no Value param at all → permanently unfittable**: status.clear, shield.grant, board.action,
+        grid.spawn, grid.clear, box.set, resource.delta.
+      * **single real value → a normalisation of one point, not a fit; left authored**:
+        resource.economy (amount=25), stat.derived (amount=150), and fx-core's lone `stat.modify`/atk
+        demo atom (amount=10, correctly NOT allowed to disturb the 16-atom generated fit of 222).
+      * **priced through a DIFFERENT path → must not be fitted here**: spawn.entity — its body goes
+        through `ActorPowerCache.PriceBody(hp, atk)` in `CostFunction.SpawnBody` (`:267-282`), not
+        this coefficient's normalisation, so its hp/atk magnitudes are not this row's to fit.
+      * **genuinely no atom of any kind**: arm1/arm1Max/arm2/arm2Max — the only rows for which
+        "awaiting content" is still the true answer.
+    - **A second, smaller sweep bug found and fixed in the same pass**: the first cut of the shipped
+      loader globbed `fx-*.json` and silently missed `trait-critical-hunter.json`, the repo's only
+      real `stat.derived` atom. Corrected to glob every committed `*.json` at the top of
+      `data/seed/atoms/` — naming a shape rather than a location is exactly how a corpus sweep
+      under-reports, which is the failure this whole correction exists to undo.
+    - **Verification, re-run**: `python scripts/sweep-power-coefficients.py` reproduces every figure
+      above; `dotnet run --project tools/AtomImporter -- --check --validate` → **exit 0, clean,
+      "1 row(s) would change"** (exactly the status.apply row), **power drift: 0 evaluated, 0
+      failure(s), 0 warning(s)** — the ±25% tolerance untouched and unwidened. Core.Tests filtered to
+      Power/CostFunction/ContentValidation/Coefficient/ActorPower/RungPowerBudget/EntityFieldsTwelvePlus:
+      **374/375**, the single failure being `ClassSystem.ProveAptitudeJsonEmitTests`, an unrelated
+      concurrent `battle-tempo` breakage (`BattleStatComposer.Configure` not run) that the filter only
+      matched because its method name contains "Power" — confirmed failing before this change too.
 
 ---
 

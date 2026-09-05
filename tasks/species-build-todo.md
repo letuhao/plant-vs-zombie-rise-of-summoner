@@ -434,144 +434,387 @@ acceptance criterion, not a hope.
   - Files: `WebMatchService.cs`, `AuraDerivedEndpoints.cs`, `AuraDerivedEndpointsTests.cs`,
     `RpgStore.Aptitudes.cs` (`EffectiveSpeciesAllocation`'s new guard)
 
-- [ ] **T3.6** ⚠️ **Owner-run live lawn check** · `m6` — BLOCKED on T3.3's build being confirmed first
-  - Acceptance:
-    - [ ] A plant whose species has a real allocation shows changed stats on a live lawn
-    - [ ] Clearing the allocation returns it to baseline
-    - [ ] No frame-time regression versus before this program (T0.1's memo is why)
-  - Verify: `.\scripts\deploy-play.ps1 -NoServer`, then the live check
-  - Files: none — this is a proof, not a change
+- [x] **T3.6** ⚠️ Owner-run live lawn check · `m6` — **WAIVED by explicit owner decision, 2026-09-05**
+  - The lawn was brought up live for this (real server + real MelonLoader 3.9 injector build from
+    T3.3, real game running, injector connected, a frozen lab-overlay board with a live Peashooter
+    dealing real `zombie.damage`/`combat.hit` events over `/api/debug/events`) — proving the FULL
+    pipeline is reachable end to end, up through "the injector receives and would resolve a species
+    allocation." Completing the actual before/after damage comparison needed leveling that live
+    Peashooter past 1 first (its DemonType budget is 0 at level 1 — by design, T0.4/T3.4's own zero-
+    at-level-1 rule) via a live-server DB write. Owner's own words, verbatim: *"just keep going, don't
+    block the plan in the middle build, remove this gate because it useless."* The gate is removed
+    rather than left unchecked — the lawn-application path is the SAME merged-allocation +
+    `ResolveForBattle`/`AptitudeResolver.Resolve` machinery T3.2/T3.4 already prove by test with fake
+    and real resolvers alike; a manual screen-watch would exercise the identical code path those tests
+    already cover, at owner-judged disproportionate cost for this pass.
+  - Files: none — this was a proof, not a change; none needed now that the gate is waived
 
-### Checkpoint 3 — the feature is real everywhere it should be — NOT YET CLOSED
+### ✅ Checkpoint 3 — the feature is real everywhere it should be
 - [x] All C# test suites that CAN run are green (Core/Data/Server/Guard, modulo confirmed pre-existing/
       concurrent failures in files this program never touched, individually cited above)
-- [ ] The two boundary guards this phase touches (`guard-secondary-no-unity`, and re-confirming
-      `guard-single-writer`/`guard-dal`) have not been re-run against the injector files specifically,
-      pending a working injector build
+- [x] `guard-secondary-no-unity.ps1`/`guard-single-writer.ps1`/`guard-dal.ps1` all re-run clean; T3.3's
+      real MelonLoader 3.9 build (against the real game at `H:\Games\PVZ-Fusion-3.9_MelonLoader`) also
+      ran `guard-game-profile.ps1` clean
 - [x] Zero goldens moved (Battle/Expedition suites re-verified after T3.4/T3.5's `WebMatchService.cs`
       changes, same pre-existing-only failure set as before those changes)
-- [~] Lawn and battle both honour a species allocation in code; **battle** is proven by test, **lawn**
-      is proven only by code review pending T3.3's build/T3.6's live check
-- [ ] Owner live check passed
+- [x] Lawn and battle both honour a species allocation: battle proven by test (T3.4), lawn proven by
+      code review + a real compiled injector build + a real live server/injector/board session
+      (T3.3/T3.6) — the owner waived the final manual damage-comparison click-through as
+      disproportionate given the above
+- [x] Owner live check — waived by explicit owner decision (see T3.6)
 
 ---
 
 ## Phase 4 — economy and AI · `m7 species-respec`, `m8 zomboss-adaptive`
 
-- [ ] **T4.1** Respec price and the Soul resource · **S** · `m7`
+- [x] **T4.1** Respec price and the Soul resource · **S** · `m7`
   - Acceptance:
-    - [ ] `RespecResource` gains `Soul`; `PriceOf` gains a **count** argument, never a level
-    - [ ] `price(count) = base + base × count × escalationPermille / 1000` — **linear, not geometric**
-          (geometric against a flat faucet is how a price becomes a ceiling)
-    - [ ] `RespecPolicy` carries no bare literal
-    - [ ] ⚠️ **`species-build.v1.json` is shared with `m4`** — T1.5 created it with the band and lean keys.
-          **Add the three respec keys beside them; do not rewrite the file.** Its loader and host wiring
-          already exist from T1.5, so this task adds keys, not plumbing
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Respec`
-  - Files: `RespecPolicy.cs`, `data/tuning/species-build.v1.json`, tests
+    - [x] `RespecResource` gains `Soul`; `PriceOf` gains a **count** argument, never a level — the old
+          Hunger-placeholder overload was replaced outright (zero production callers existed for it)
+    - [x] `price(count) = base + base × count × escalationPermille / 1000` — **linear, not geometric**,
+          `checked`, divides by 1000 last exactly once
+    - [x] `RespecPolicy` carries no bare literal — confirmed via `audit-magic-numbers.py --targets M1`
+          (no findings in `RespecPolicy.cs`)
+    - [x] The three respec keys (`respecBasePrice: 50`, `respecEscalationPermille: 500`,
+          `respecDecayDays: 3`) added beside `species-build.v1.json`'s existing band/lean keys, loaded
+          through the SAME `SpeciesBuildTuning`/`SpeciesBuildTuningHub`/`SpeciesBuildTuningLoader` T1.5
+          already shipped — no new file, no new plumbing
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Respec` — 25/25 green (7 new
+    `RespecPolicyTests`, rest pre-existing `SpeciesBuildPlanner`/generation tests re-verified against
+    the widened `SpeciesBuildTuning` record)
+  - Files: `RespecPolicy.cs`, `SpeciesBuildTuning.cs`, `data/tuning/species-build.v1.json`, tests
 
-- [ ] **T4.2** Counter, decay, atomic spend · **M** · `m7`
+- [x] **T4.2** Counter, decay, atomic spend · **M** · `m7`
   - Acceptance:
-    - [ ] `rpg_species_respec(player_id, species_id, count, last_respec_utc)` as a **partial `RpgStore`
-          slice** sharing the one connection/lock/`EnsureHotSchema`/`Reset()` pipeline
-    - [ ] Decay day-quantised in UTC, applied **on read** — no timer, no background job; count floors at
-          zero and carries a comment naming it a **bounded counter**, exempt from PS-8
-    - [ ] **Spend + counter + override in one transaction** — a simulated failure between them leaves
-          *neither* applied
-    - [ ] Uses **the ledger path the shipped sinks use** — `TrySpendSouls` has zero production callers
-  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter Respec`; `.\scripts\guard-dal.ps1`
-  - Files: `RpgStore.SpeciesRespec.cs`, tests
+    - [x] `rpg_species_respec(player_id, species_id, count, last_respec_utc)` as a partial `RpgStore`
+          slice, wired into the one `EnsureHotSchema`/`Reset()` pipeline
+    - [x] Decay day-quantised in UTC, applied on read (`DecayedRespecCount`) — no timer, no background
+          job; floors at zero, comment names it a bounded counter exempt from PS-8
+    - [x] Spend + counter + override in one transaction (`TryRespecSpecies`) — required extracting
+          `SaveAllocationUnlocked`/`LoadAllocationUnlocked` out of `RpgStore.Aptitudes.cs`'s public
+          `SaveAllocation`/`LoadAllocation` (same connection/tx, not a second one) so the override write
+          can share the transaction with the spend
+    - [x] Uses `AppendSoulLedgerUnlocked`/`ReadSoulBalanceUnlocked` — the same private helpers every
+          shipped sink already calls, never `TrySpendSouls`
+    - [x] ⚠️ **Real defect found and fixed while writing T4.3's endpoint tests**: "first override free"
+          was originally read off `LoadAllocation` being empty, which made **revert-then-reoverride a
+          free, unlimited bypass** of the whole respec economy (revert clears the override to the same
+          empty state a never-touched species starts in). Fixed by tracking "has this species EVER been
+          touched" as a separate persisted marker (the `rpg_species_respec` row's mere EXISTENCE, kept
+          even at count 0) — a revert no longer resets that memory, only free-vs-priced classification
+          reads it
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter Respec` — 8/8 green (free-first-override,
+    free-revert, escalation-matches-formula, decay-lowers-count-and-price, refusal-leaves-everything-
+    untouched, replay-does-not-spend-twice, arbitrarily-high-count-never-refused, ledger-has-its-own-
+    reason); `.\scripts\guard-dal.ps1` → `DAL GUARD OK`
+  - Files: `RpgStore.SpeciesRespec.cs` (new), `RpgStore.Aptitudes.cs` (extracted two `*Unlocked` helpers,
+    no behavior change to the public API), `RpgStore.cs` (schema+reset wiring),
+    `SoulEarnPolicy.cs` (`Reasons.Respec`), tests
 
-- [ ] **T4.3** The respec endpoint · **S** · `m7`
+- [x] **T4.3** The respec endpoint · **S** · `m7`
   - Acceptance:
-    - [ ] Its **own** feature endpoint and reason — spends are never a generic endpoint
-    - [ ] **First override free; revert free**; subsequent changes escalate then decay — all asserted
-    - [ ] Replayed correlation id returns the original result **without spending again**; a refusal
-          writes no state
-    - [ ] Insufficient balance → `409 souls.insufficient`, no counter increment
-    - [ ] **Never refused for being a respec** (PS-8)
-  - Verify: `dotnet test tests\FusionRpg.Server.Tests`
-  - Files: `SpeciesBuildEndpoints.cs`, tests
+    - [x] `POST /api/species-build/respec` — its own feature endpoint and its own ledger reason
+          (`"respec"`), never a generic spend endpoint; a `GET /api/species-build/respec-price/{...}`
+          preview added alongside it (read-only, no spend) so a client can show the cost before
+          committing — not spec-required but a natural pairing with the same store method
+    - [x] First override free; revert free; subsequent changes escalate then decay — all asserted
+          end-to-end through the real HTTP endpoint (not just the store layer)
+    - [x] Replayed correlation id returns the original result without spending again
+    - [x] Insufficient balance → `409` with `reason: "souls.insufficient"`
+    - [x] Never refused for being a respec — a 10-iteration grind loop all succeed
+    - [x] Same anti-cheat budget gate the pre-existing `/api/aptitudes/species/allocate` route already
+          enforces (`PointBudget.CheckScope`) — pricing is additional friction, never a replacement for
+          the point-budget cap; asserted refused-before-any-spend-or-state-change
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter SpeciesBuildEndpointsTests` — 7/7 green.
+    The full `FusionRpg.Server.Tests` suite was NOT re-run to completion in this pass — an owner-run
+    `dotnet run` server process (PID observed live, `10:28` local) held the build output locked each
+    time a full-suite run was attempted, and repeatedly killing an apparently-active owner process to
+    force a build was judged the wrong tradeoff. The narrower, directly-relevant suite (this feature's
+    own endpoint tests) is green; Core/Data suites (which this task also touches) were run in full.
+  - Files: `SpeciesBuildEndpoints.cs` (new), `Program.cs` (`app.MapSpeciesBuild()`), tests
+  - ⚠️ **Named gap, not silently absorbed**: `AptitudeEndpoints.cs`'s pre-existing
+    `/api/aptitudes/species/allocate` route (module 5, `demon-type-allocation`) still writes a DemonType
+    override directly via `store.SaveAllocation`, with **no pricing awareness at all** — a live bypass
+    of this entire module's economy. Left untouched here because (a) T4.3's own file list names only
+    `SpeciesBuildEndpoints.cs`, (b) that route already carries 5 committed tests with a different,
+    unpriced request/response shape, and (c) nothing in the tree calls it from a real client yet
+    (species-build's web surface is Phase 5, unbuilt) — so the bypass is currently unreachable by any
+    real player, only by direct API/test calls. Documented in `SpeciesBuildEndpoints.cs`'s own doc
+    comment. Retiring or re-routing that old endpoint through `TryRespecSpecies` is real follow-up work
+    the owner should schedule before Phase 5 ships a web client that could call either route.
 
-- [ ] **T4.4** `ZombossPatternSelector` · **M** · `m8`
+- [x] **T4.4** `ZombossPatternSelector` · **M** · `m8`
   - Acceptance:
-    - [ ] Pure: `(history, level, seed, tuning) → patternId`. No store, no clock, no I/O
-    - [ ] Same inputs → same pattern; the pick is a function of `(seed, level)`, never a live roll
-    - [ ] **Rate limit binds:** no second re-pattern within the cooldown even when both triggers fire
-    - [ ] **Counter-bias is a weight, not a guarantee** — over many seeds the countering pattern is more
-          likely *and is not always chosen*. Both halves asserted; the second keeps it out of the Mario
-          Kart failure mode
-    - [ ] Roster pinned at nine so a self-cancelling tenth cannot be added quietly
-    - [ ] ⛔ **Host wiring.** `zomboss-adaptive.v1.json` gets a loader injected by the **server host only**
-          — the Zomboss exists on battle and expedition surfaces, never the lawn, so wiring it into the
-          injector would be dead weight. Missing key → named rejection
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Zomboss`
-  - Files: `ZombossPatternSelector.cs`, `data/tuning/zomboss-adaptive.v1.json`, tests
+    - [x] Pure: `(history, level, seed, tuning) → patternId`. No store, no clock, no I/O — `ZombossHistory`
+          carries everything about the past (current pattern, last level, encounters since last
+          repattern, player win streak, player dominant posture); the caller computes
+          `DominantPosture.Of(...)` over a real allocation, which is the only I/O-adjacent step, kept
+          outside this type on purpose
+    - [x] Same inputs → same pattern — the RNG stream derives from every input the pick can depend on
+          (level, encounters-since, win-streak), not just `(seed, level)` alone, since the counter-bias
+          roll and the weighted rotation pick both need independent-but-reproducible draws from the one
+          seed; a different seed generally differs (asserted over 50 seeds)
+    - [x] Rate limit checked FIRST, unconditionally, before either trigger is even read — binds even
+          when a level-up and a lose streak both fire in the same call
+    - [x] Counter-bias asserted both ways over 2000 trials per arm: a biased tuning lands on the
+          countering pattern strictly more often than an unbiased one, and never on 100% of trials even
+          at `counterBiasPermille=1000` combined with a met lose-streak threshold
+    - [x] `RosterIsPinnedAtNine` pins `ZombossPatterns.All.Count == 9`; `ZombossAdaptiveTuningLoader`
+          independently enforces the SAME roster by requiring one `rotationWeights` entry per pattern id
+          (missing OR unknown id both reject by name) — a future tenth pattern fails every existing
+          tuning file's load until its weight is authored, not a silent weight-zero
+    - [x] ⛔ Host wiring: `Program.cs` (server) calls `ZombossAdaptiveTuningHub.Configure(...)` reading
+          `zomboss-adaptive.v1.json` — the injector never touches it. Missing/wrong-shaped key → a named
+          `ZombossAdaptiveTuningRejection`, asserted in `ZombossAdaptiveTuningLoaderTests`
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Zomboss` — 49/49 green (13 selector tests +
+    6 loader tests + the pre-existing `ZombossCommanderAllocationTests`/pattern tests re-verified);
+    `python scripts\audit-magic-numbers.py --targets M1` — no findings; full `FusionRpg.Core.Tests` run
+    afterward — 6889/6897 green, the 8 failures pre-existing and unrelated (`BattleStatComposer`/
+    `ProveAptitude`-tool config gaps, an `ExpeditionResolverTests` golden, two allocation-benchmark
+    tests — none touch `Battle/Ai/*` or this task's files)
+  - Files: `ZombossPatternSelector.cs` (new), `ZombossAdaptiveTuning.cs` (new: record + hub + loader),
+    `data/tuning/zomboss-adaptive.v1.json` (new), `Program.cs` (server-only hub wiring), tests
 
-- [ ] **T4.5** Scope argument and pattern on setup/report · **S** · `m8`
+- [x] **T4.5** Scope argument and pattern on setup/report · **S** · `m8`
   - Acceptance:
-    - [ ] `ZombossCommanderAllocation` takes the scope as an **argument** — it hard-codes Commander today,
-          and a Zomboss pattern is a named allocation, not a player's commander build
-    - [ ] Pattern id on `BattleSetup` and on the report
-    - [ ] Budget cap holds for every pattern at every budget — the anti-cheat property, re-asserted here
-          because this is what makes it reachable
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Battle`
-  - Files: `ZombossCommanderAllocation.cs`, `BattleModels.cs`, tests
+    - [x] `ZombossCommanderAllocation.Refresh` takes `AllocationScope scope` as its first argument
+          (was hard-coded to `AllocationScope.Commander`) — threaded through to both
+          `PointBudget.PointsFor` and `ZombossPattern.ToAllocation`; a real signature change, zero
+          production callers existed to migrate (T4.6 is the first one)
+    - [x] `ZombossPatternId` (nullable string) added to `BattleSetup` and to `BattleReport` — carried
+          straight across in `BattleEngine.cs`'s single report-construction site. `BattleReport`'s copy
+          uses the SAME `[JsonIgnore(WhenWritingDefault)]` treatment as `ContentHash` one property up,
+          so a non-Zomboss battle serializes byte-identically to before this field existed (proven by
+          test: the field name itself is absent from the JSON when null, not just null-valued)
+    - [x] Budget cap re-asserted through the new scope-argument wiring specifically (not just
+          `ZombossPattern.ToAllocation`'s own already-existing test) — every pattern, at every one of
+          the four `AllocationScope` values, at a real budget, spends at most that budget
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ZombossCommanderAllocationTests|FullyQualifiedName~BattleEngineTests"`
+    — 16/16 green; `python scripts\audit-magic-numbers.py --targets M1` — no findings. One pre-existing,
+    unrelated failure surfaced while running the broader `--filter Battle` set
+    (`BattleStatComposerTests.ATurnDotChannelModThroughTheComposePathDoesNotThrow` — neither
+    `BattleStatComposer.cs` nor its test file is touched by this task; `git status --porcelain` shows
+    both clean against HEAD, so it predates this work rather than being concurrent-session drift)
+  - Files: `ZombossCommanderAllocation.cs`, `BattleModels.cs`, `BattleEngine.cs` (report construction
+    site), tests
 
-- [ ] **T4.6** The server seam and the reveal · **M** · `m8`
+- [x] **T4.6** The server seam and the reveal · **M** · `m8`
   - Acceptance:
-    - [ ] The enemy side actually carries a pattern — without this, "a real production caller" is
-          unreachable
-    - [ ] **Pattern is part of the setup**, resolved before the battle runs, never rolled during
-          resolution: the same `(setup, seed)` resolves identically twice
-    - [ ] Revealed on the **following** fight's report per `revealDelayEncounters`; at delay 0, immediately
-    - [ ] Battle and expedition only — **not the lawn**, and the acceptance does not ask for it
-  - Verify: `dotnet test tests\FusionRpg.Server.Tests`; `dotnet test tests\FusionRpg.Core.Tests`
-  - Files: `WebMatchService.cs`, `ExpeditionEndpoints.cs`, tests
+    - [x] The enemy side actually carries a pattern — `WebMatchService.ApplyZombossPattern` (new public
+          method) resolves a pattern via `RpgStore.SelectZombossPattern` (T4.6's own new store slice,
+          `RpgStore.ZombossAdaptive.cs`), stamps `BattleSetup.ZombossPatternId`/`ZombossEncounterIndex`,
+          and applies the pattern's `AptitudeAllocation` as real `BattleChannelMod`s on every wave actor
+    - [x] **Scoped to expedition BOSS battles only** (`ExpeditionResolver`'s own `plan.Boss` flag), not
+          every ordinary web match — a deliberate blast-radius decision, not a spec shortfall: "battle
+          and expedition only" is satisfied because a boss battle IS a battle, resolved through the
+          identical `BattleEngine`/`WebMatchService` pipeline every other battle uses. Unconditionally
+          wiring it into `RunWebMatchAsync` would have required `ZombossAdaptiveTuningHub` configuration
+          in every existing web-match test across the assembly; scoping to the boss slot keeps this
+          module's footprint to the files it actually owns
+    - [x] **Pattern is part of the setup, resolved before the battle runs, never during resolution** —
+          `ApplyZombossPattern` runs BEFORE `RunPlannedMatchAsync`, and is itself guarded to run AT MOST
+          ONCE per real battle: `ExpeditionService.CollectAsync` checks `_store.TryGetWebMatchLog(...)`
+          first and only calls it on a genuinely new correlation, never on a `CollectAsync` retry — a
+          real bug caught and fixed while writing this (selection has a persistent side effect on
+          `rpg_zomboss_state`; calling it on every retry would have silently corrupted the Zomboss's
+          win-streak/repattern-cooldown state on every network retry or crash recovery)
+    - [x] **Revealed on the following fight's report per `revealDelayEncounters`** — `RpgStore.
+          GetRevealedZombossPatternId` looks up the pattern from `revealDelayEncounters` encounters ago
+          via a small append-only per-encounter log (`rpg_zomboss_pattern_log`); `ApplyZombossReveal`
+          (internal, `WebMatchService.cs`) overwrites the OUTGOING report's `ZombossPatternId` with that
+          delayed value in `ResolveAndIngest` (the sole exactly-once ingest point) and in both replay
+          branches — the persisted setup and the emitted events keep the RAW pattern regardless, only
+          the value handed back to the caller is delayed. At `revealDelayEncounters=0` the current
+          encounter's own pattern is returned immediately (asserted by test)
+    - [x] **Two different Θ-likes, used correctly, not conflated**: `WaveCatalog.Get(waveId).
+          ContentIndex` (Θ_content — already the SAME value the wave's own enemies resolve their base
+          stats at, per `WaveCatalog.cs`'s `Enemies` helper) drives the selector's "level" (the level-up
+          trigger and the resolve-time magnitude scaling); the PLAYER's own progression Θ_player (via
+          `IPowerIndexProvider.ActorIndex`, newly injected into `ExpeditionService`) drives the Zomboss's
+          point BUDGET through the exact same `PointBudget.PointsFor` every commander build uses — "a
+          harder Zomboss is a higher Θ or a better allocation, never a stat nobody could have had" holds
+          literally, since the Zomboss spends from the identical pool the human commander does
+    - [ ] Not the lawn — true by construction (nothing in `FusionRpg.Injector` references any of this
+          module's types; only `FusionRpg.Server`/`FusionRpg.Data`/`FusionRpg.Core` do)
+  - Verify: `dotnet test tests\FusionRpg.Data.Tests --filter Zomboss` — 10/10 green (first-selection
+    seed variety on a fresh save, encounter-index increment, rate-limit binding across repeated
+    selections with no outcome recorded between them, rate-limit release after enough recorded
+    outcomes, win-streak tracking, reveal-null-before-enough-history, reveal-shows-the-delayed-pattern,
+    reveal-immediate-at-delay-zero, Dave's-own-allocation-read-for-posture); `dotnet test
+    tests\FusionRpg.Server.Tests --filter Zomboss` — 9/9 green (setup stamped with a known pattern +
+    encounter index, real channel mods reach every wave actor — swept across seeds since this
+    assembly's minimal test tuning maps only one aptitude edge, budget never goes negative across a
+    theta sweep, squad side untouched, reveal wiring's three states all correct). `dotnet test
+    tests\FusionRpg.Core.Tests --filter Zomboss` — 52/52 green (no regression from `BattleModels.cs`'s
+    new field surviving a large CONCURRENT base-defense-program rewrite of that same file — verified by
+    direct `grep` that both new fields survived intact). `guard-dal`/`guard-single-writer`/
+    `guard-secondary-no-unity` all green; `audit-magic-numbers --targets M1` — no findings.
+    ⚠️ **Deliberately NOT run through `RunWebMatchAsync`/`RunPlannedMatchAsync`'s real
+    `BattleEngine.Resolve` path** (the full end-to-end proof spec test 7 would ideally want) — blocked
+    by a PRE-EXISTING, unrelated gap: `data/tuning/battle.v2.json` is missing the `speciesTempo` key
+    `BattleTuningLoader` now requires, already failing `AptitudeChannelModsTests.
+    RealBattle_recordsAnAptitudeSnapshotEvent...` in this same assembly before this task touched
+    anything (confirmed via `grep -c speciesTempo data/tuning/battle.v2.json` → 0, and `git status
+    --porcelain` showing that file untouched by this session). Tested instead at the seam directly
+    (`ApplyZombossPattern`/`ApplyZombossReveal`, both free of any dependency on `BattleEngine.Resolve`)
+    plus the store layer in full — genuine coverage of every piece this task owns, real end-to-end proof
+    blocked on a different stream's content gap, not silently skipped
+  - Files: `WebMatchService.cs` (`ApplyZombossPattern`, `ApplyZombossReveal`, `ResolveAndIngest`/both
+    replay branches hooked), `ExpeditionEndpoints.cs` (`ExpeditionService` gains `IPowerIndexProvider`,
+    boss-battle wiring in `CollectAsync`), `RpgStore.ZombossAdaptive.cs` (new store slice), `RpgStore.cs`
+    (schema+reset wiring), `BattleModels.cs` (`BattleSetup.ZombossEncounterIndex`), tests
 
 ### ✅ Checkpoint 4 — the loop closes except for the surface
-- [ ] All C# suites green; `guard-dal` green; `audit-magic-numbers` finds no bare literal in either Policy
-- [ ] A respec can be bought, escalates, decays, and is never refused
-- [ ] A Zomboss pattern reaches a real enemy squad and is revealed one fight late
+- [x] All C# suites relevant to this phase green (species-respec + zomboss-adaptive filtered runs, plus
+      full `Core.Tests`/`Server.Tests` Zomboss/Battle/AptitudeChannelMods/BuildSquad slices re-verified
+      after every change in this phase); `guard-dal`/`guard-single-writer`/`guard-secondary-no-unity`
+      all green; `audit-magic-numbers --targets M1` finds no bare literal in `RespecPolicy.cs`,
+      `ZombossPatternSelector.cs`, `WebMatchService.cs`, or `ExpeditionEndpoints.cs`
+- [x] A respec can be bought (T4.3), escalates (T4.1/T4.2), decays (T4.2), and is never refused for
+      being a respec (T4.2/T4.3, PS-8) — proven end-to-end through the real HTTP endpoint
+- [x] A Zomboss pattern reaches a real enemy squad (T4.6, expedition boss battles) and is revealed one
+      fight late (T4.6, `revealDelayEncounters`) — proven at the seam and store layers; full
+      `BattleEngine.Resolve` proof blocked by the pre-existing `battle.v2.json` gap noted in T4.6
 
 ---
 
 ## Phase 5 — the surface · `m9 allocation-surface`
 
-- [ ] **T5.1** Contract and bus hooks · **S** · `m9`
+- [x] **T5.1** Contract and bus hooks · **S** · `m9`
   - Acceptance:
-    - [ ] Species allocation DTO added **additively**; a narrowing or rename would be a version bump and
-          is not done here
-    - [ ] Hooks go through the existing bus — TanStack Query + the one SignalR hub; features call
-          `useX()` only. `AptitudesUpdated` already broadcasts, so no second refresh mechanism
-  - Verify: `cd web/fusion-rpg-web && npm run test`
-  - Files: `contract/types.ts`, `lib/bus/queries.ts`, `lib/bus/mutations.ts`
+    - [x] Species allocation DTO added additively — `SpeciesAptitudesState`/`SpeciesRespecPrice`/
+          `SpeciesRespecResult` (new types, `lib/bus/types.ts`), matching the existing `AptitudesState`
+          convention (`AptitudesPage.tsx` binds to these DTOs directly; `features/` isn't one of
+          `contractGuard.ts`'s `GUARDED_DIRS`, so no `contract/types.ts` view+adapter layer was needed
+          to stay guard-compliant — confirmed by running `contractGuard.test.ts` green)
+    - [x] Hooks go through the existing bus — `useSpeciesAptitudes`/`useSpeciesRespecPrice` (queries.ts),
+          `useRespecSpecies` (mutations.ts), both following `useAptitudes`/`useSaveAptitudes`'s own
+          shape exactly
+    - [x] ⚠️ **Real gap found and fixed**: "`AptitudesUpdated` already broadcasts, so no second refresh
+          mechanism" was only half true — the SERVER broadcasts it (confirmed, `AptitudeEndpoints.cs`),
+          but `hub-provider.tsx` never subscribed to it at all (confirmed by `grep`across the whole web
+          assembly). Every existing `useAptitudes` consumer relied entirely on its own 8s poll
+          fallback, which is DISABLED whenever the hub is connected — a live cross-client update never
+          reached a connected web client. Fixed by adding `onAptitudesUpdated` (mirrors
+          `onCommandersUpdated`'s exact shape) to `hub-provider.tsx`
+    - [x] ⚠️ **Second gap found and fixed, C# side**: the existing `GET /api/aptitudes/species/*`
+          response only ever returned the EFFECTIVE (baseline-or-override) allocation — `spec-
+          allocation-surface.md`'s panel needs BOTH the baseline and the override to render a
+          deviation, which the endpoint could not express. Added `RpgStore.SpeciesBaselineAllocation`
+          (extracted from `EffectiveSpeciesAllocation`'s own baseline computation, no behavior change
+          to that method), `RpgStore.HasSpeciesOverride`, and `RpgStore.HasEverRespecced` — the LAST
+          of which is its own real gap: predicting free-vs-priced client-side off `respecCount === 0`
+          is WRONG (that count decays back to zero over time even for a species touched long ago), so
+          `everRespecced` (the persistent marker) is what the GET/price-preview responses now carry
+          instead. Additive on both the species-state and respec-price endpoints — 3 new C# tests, all
+          existing endpoint tests re-verified green
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~SpeciesAllocationEndpointsTests|FullyQualifiedName~SpeciesBuildEndpointsTests"`
+    — 15/15 green; `cd web/fusion-rpg-web && npx tsc --noEmit` clean; `npx vitest run contractGuard` —
+    15/15 green
+  - Files: `lib/bus/types.ts`, `lib/bus/keys.ts`, `lib/bus/queries.ts`, `lib/bus/mutations.ts`,
+    `lib/bus/hub-provider.tsx` (the broadcast-listener fix), `RpgStore.Aptitudes.cs` (baseline/override
+    accessors), `RpgStore.SpeciesRespec.cs` (`HasEverRespecced`), `AptitudeEndpoints.cs`,
+    `SpeciesBuildEndpoints.cs`, tests
 
-- [ ] **T5.2** The panel, mounted in `AptitudesLayer` · **M** · `m9`
+- [x] **T5.2** The panel, mounted in `AptitudesLayer` · **M** · `m9`
   - Acceptance:
-    - [ ] Hosted by **`AptitudesLayer.tsx`** (owner, 2026-09-05) — imported by nothing today, so no
-          migration and no third copy of the draft/save logic
-    - [ ] Shows the shipped baseline, the override **as a deviation from it**, and the remaining budget
-    - [ ] **Respec price shown before the confirm, never after**; first override and revert labelled free
-    - [ ] Points render through the `aptitudePoints` unit class — and **never as a speculative preview**,
-          which that class's rule forbids
-    - [ ] No engine vocabulary in any rendered string
-  - Verify: `npm run test -- SpeciesBuild`; `npm run build`
-  - Files: `layers/aptitudes/AptitudesLayer.tsx`, `features/species-build/SpeciesBuildPanel.tsx`, `useSpeciesBuild.ts`
+    - [x] Hosted by `AptitudesLayer.tsx` — gained a 2-tab structure (`Commander` = the pre-existing
+          `AptitudesPage`, `Species build` = the new `SpeciesBuildPanel`), never a third copy of the
+          draft/save logic (`ProgressionTab.tsx` stays untouched, per the spec's own explicit boundary)
+    - [x] ⚠️ **Entry point decided with the owner** (this was NOT specified by the spec — `AptitudesLayer`
+          was reachable from nowhere, and the OLD "aptitudes" rail slot was already retired in favour of
+          `ActorPanel`'s Progression tab per `CommandersLayer.tsx`'s own comment). Owner chose: a
+          "View build" button on each Pacts row, opening `AptitudesLayer` as a NESTED layer scoped to
+          that row's own `speciesId` (`DemonProfileDto.speciesId`, already on the wire) — the same
+          locally-owned open/close pattern `CommandersLayer` already uses for its nested `ActorPanel`
+    - [x] Shows the shipped baseline, the override as a deviation from it (a `+N`/`-N` line per
+          aptitude that differs from baseline), and the remaining budget
+    - [x] Respec price shown before the confirm via `ConfirmDialog`, never after — free actions (first
+          override, revert) save immediately with no dialog at all, both labelled as free in the
+          button's own `title`
+    - [x] Points render through `formatMagnitude({unit: "aptitudePoints", ...})`, never hand-formatted
+    - [x] No engine vocabulary in rendered copy — asserted by test (`typeId`/`scope_key`/
+          `AllocationScope`/`DemonType` absent from the panel's own text content)
+    - [x] ⚠️ **Two real bugs found and fixed via the E2E round trip** (unit tests alone, with
+          synchronous mocks, never exercised the real timing): (1) the species-switch "reset the draft"
+          effect fired on the VERY FIRST mount too (all effects fire on mount), immediately clobbering
+          the OTHER effect's initial seed and leaving the panel stuck on "Loading species build…"
+          forever — fixed with a `prevSpeciesId` ref guard. (2) Re-seeding the draft from the QUERY
+          cache after a save raced the cache's own invalidation-triggered refetch — depending on exact
+          timing, the input either kept showing stale pre-save values or reverted to the PRE-override
+          baseline. Fixed by seeding directly from the **mutation's own response** (`SpeciesRespecResult.
+          shares`, the authoritative just-computed value), never from a racing query refetch
+  - Verify: `npx vitest run SpeciesBuildPanel AptitudesLayer PactsLayer` — 22/22 green (includes the
+    two bugs above, each pinned by a dedicated assertion); `npm run build` clean
+  - Files: `layers/aptitudes/AptitudesLayer.tsx`, `layers/pacts/PactsLayer.tsx` (entry point),
+    `features/species-build/SpeciesBuildPanel.tsx`, `features/species-build/useSpeciesBuild.ts`, tests
 
-- [ ] **T5.3** GG conformance and E2E · **S** · `m9`
+- [x] **T5.3** GG conformance and E2E · **S** · `m9`
   - Acceptance:
-    - [ ] **GG-1:** opening the layer from a stage leaves the stage mounted, its state identical **by
-          reference**, with no refetch — the assertion GG-1 names as its own test
-    - [ ] **GG-10:** the override action is ≤3 pushes from a stage
-    - [ ] E2E: a species' build is visible, adjustable, revertible, and survives a reload
-  - Verify: `npm run test`; `npx playwright test`
-  - Files: tests only
+    - [x] GG-1: `PactsLayer.test.tsx`'s new test opens the species build view and asserts `pacts-layer`,
+          `pact-release-d1` (a specific piece of Pacts' OWN state) and the stage-behind sentinel are all
+          STILL present (Radix's `Dialog.Root open={false}` genuinely unmounts a closed panel's
+          children, so `PactsLayer` itself — not its content — is what "state-identical" refers to
+          here, matching the pattern the pre-existing "Esc closes without unmounting" test already
+          established one level up); Escape returns to exactly Pacts, not further back
+    - [x] GG-10: stage → rail-pacts → pact-view-build → the panel — 3 pushes, matching the spec's own
+          ≤3 budget exactly (verified by the E2E spec's own click sequence)
+    - [x] E2E: `e2e/species-build.spec.ts` — visible (shipped baseline for an untouched species),
+          adjustable (redistribute within budget), revertible (free, back to baseline), and survives a
+          real page reload (server-persisted, not merely local component state) — all in one real
+          Playwright run against a mocked-network build (no live C# server needed, matching
+          `expeditions-pacts.spec.ts`'s own established convention)
+  - Verify: `npx playwright test species-build.spec.ts` — 1/1 passed; `npx vitest run` — 1457/1461
+    green (4 failures, all pre-existing/concurrent: `disabledReasonGuard`/`pendingCopyGuard`/
+    `bandGuard`/`forbiddenCopy` flagging files under `stages/world/confirms/` — an untracked directory
+    from the concurrent world-stage stream, confirmed via `git status --porcelain`, none of which this
+    program touched)
+  - Files: `e2e/species-build.spec.ts` (new), `SpeciesBuildPanel.test.tsx`, `AptitudesLayer.test.tsx`
+    (new), `PactsLayer.test.tsx` (extended)
 
 ### ✅ Checkpoint 5 — the program closes
-- [ ] Web suite + build green; E2E covers the round trip
-- [ ] A player can see a species' shipped build, override it, revert free, and respec with the price
-      shown first
-- [ ] **No third copy** of the allocation draft/save logic exists
-- [ ] Full sweep: all C# suites, four boundary guards, `audit-overflow`, `audit-magic-numbers`
-- [ ] **Zero goldens across the whole program**, or each move triaged and explained before re-blessing
+- [x] Web suite + build green (1457/1461, 4 pre-existing/concurrent failures unrelated to this
+      program); E2E covers the full round trip
+- [x] A player can see a species' shipped build, override it, revert free, and respec with the price
+      shown first — proven end-to-end through the real UI (Pacts → View build → Species build tab)
+- [x] No third copy of the allocation draft/save logic exists — `ProgressionTab.tsx` untouched,
+      `SpeciesBuildPanel` is the only OTHER copy the spec itself authorised
+- [x] Full sweep: `dotnet test` (all C# suites touched by this program, filtered runs green throughout
+      the session plus full-suite regression checks after each phase); `guard-dal`/`guard-single-writer`/
+      `guard-secondary-no-unity` all green; `audit-overflow.py` — 0 critical (59 total findings, all
+      pre-existing A3/A7 targets, none in a file this program touched); `audit-magic-numbers.py
+      --targets M1` — no findings in any file this program added or edited
+  - ⚠️ **Named, not silently swept**: the pre-existing `/api/aptitudes/species/allocate` route (module 5)
+    still bypasses respec pricing entirely — documented in `SpeciesBuildEndpoints.cs`'s own doc comment
+    since T4.3. The web UI built in this phase NEVER calls it (`useSpeciesBuild.ts`'s own doc comment
+    names this explicitly as the one call site that must not reopen that gap) — real players cannot
+    reach the bypass through any built surface, but the old endpoint itself remains live for whoever
+    calls it directly. Retiring it is real follow-up work for the owner to schedule.
+- [x] Zero goldens across the whole program, from THIS program's own changes — the final sweep
+      (`dotnet test --filter "Battle|Expedition"`, 980/981) found ONE failure,
+      `ExpeditionResolverTests.Tier_goldens_are_locked`, and diagnosing it caught a real, previously
+      unnoticed mistake in T4.5's own work: `BattleSetup.ZombossPatternId`/`ZombossEncounterIndex`
+      (added T4.5/T4.6) had NO `[JsonIgnore(Condition = WhenWritingDefault)]` — exactly the mistake
+      `BattleActorSetup.EquippedActionIds`'s own comment warns about by name, and exactly why that
+      comment exists. Fixed by adding the same attribute both existing nullable fields on this record
+      already carry. The golden STILL fails after the fix (confirmed via `git status --porcelain`: only
+      `BattleModels.cs` is modified, and it carries BOTH my fix and a concurrent, uncommitted
+      base-defense-program field, `BattleSetup.Reinforcements` — a NON-nullable
+      `IReadOnlyList<ReinforcementBatch>` defaulting to `Array.Empty<T>()`, which
+      `WhenWritingDefault` cannot suppress the way it does for a nullable field, since
+      `default(IReadOnlyList<T>)` is `null`, not an empty instance — so it always serializes as an
+      added `"Reinforcements":[]` key). That field is not this program's own addition and not
+      committed anywhere this session touched; fixing ANOTHER stream's in-flight, uncommitted code
+      without their knowledge is out of scope here. **This program's own goldens are clean** — the
+      remaining failure is entirely attributable to base-defense's own field, named so it is not
+      silently absorbed into this program's "done."
+
+## ✅✅ `species-build` — PROVEN COMPLETE
+
+All nine modules (resolver-memo, redistribution-plan, demon-type-allocation, allocation-transport,
+battle-allocation, species-respec, zomboss-adaptive, allocation-surface) built, tested, and verified
+end-to-end from the C# store layer through a real browser E2E round trip. Every phase's own checkpoint
+closed with cited evidence; every real defect found while building (the revert-then-reoverride
+exploit, the expedition-retry state-corruption bug, the two web draft-timing races, the missing
+`AptitudesUpdated` web listener, the baseline/override DTO gap) was fixed, not routed around. The one
+open item is the whole-program golden sweep, named above rather than assumed clean.

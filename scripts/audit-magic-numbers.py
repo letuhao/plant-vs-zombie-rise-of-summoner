@@ -130,6 +130,20 @@ EXEMPT_NAMES = {
     # it non-zero, which would weight a draw that does not exist. Its own doc comment says exactly
     # this, and ssot-uniques.md requires the comment to exist.
     "AeScale", "FixedCoreChannelWeightMilli",
+    # 2026-09-05, item module 18 (consumables). Two structural constants that match BALANCE_WORD only
+    # through a substring, both already carrying the AGENTS.md justification T2 requires:
+    #
+    # `ConsumableLimits.MinManifestCost = 1` matches "cost". It is not a price -- it is the FLOOR that
+    # makes the belt limit a limit at all: a consumable occupying zero manifest places is free, so any
+    # number of them fit in any belt and the carry rule refuses nothing. There is deliberately no
+    # matching maximum, because a strong draught costing several places is what the column is for.
+    #
+    # `ConsumableLimits.UnbeltedSlots = 0` matches "slot". D37 is explicit that with no girdle equipped
+    # the count is 0 and "not a default" -- an unequipped slot grants nothing, exactly as every other
+    # role behaves. Making it configurable would reintroduce the global carry limit D37 withdrew, which
+    # is the one thing data/tuning/consumables.v1.json refuses BY NAME. The number a balance pass
+    # actually moves is the girdle base type's own `consumableSlots`, which is content, not config.
+    "MinManifestCost", "UnbeltedSlots",
 }
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}

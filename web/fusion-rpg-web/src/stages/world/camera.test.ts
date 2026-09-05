@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { MAX_SCALE, MIN_SCALE, fitToExtent, panBy, zoomAbout, type Camera, type Extent } from "./camera";
+import { MAX_SCALE, MIN_SCALE, centreOn, fitToExtent, panBy, zoomAbout, type Camera, type Extent } from "./camera";
 
 const camera: Camera = { x: -200, y: -100, w: 1000, h: 600 };
 
@@ -74,6 +74,16 @@ describe("fitToExtent", () => {
     // And the viewBox itself must match the viewport's aspect ratio, or the map would letterbox
     // or crop instead of actually filling the screen.
     expect(fitted.w / fitted.h).toBeCloseTo(viewportW / viewportH, 6);
+  });
+});
+
+describe("centreOn — the select-and-centre dispatch's own primitive (world-stage W93)", () => {
+  it("puts the given world point at the centre of the viewport, keeping scale unchanged", () => {
+    const centred = centreOn(camera, 500, 300);
+    expect(centred.w).toBe(camera.w);
+    expect(centred.h).toBe(camera.h);
+    expect(centred.x + centred.w / 2).toBeCloseTo(500, 6);
+    expect(centred.y + centred.h / 2).toBeCloseTo(300, 6);
   });
 });
 

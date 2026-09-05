@@ -169,10 +169,38 @@ public static partial class BattleEngine
     /// legal exactly when nothing in the loadout carries a real container, which is every caller
     /// today (`A20`'s own job is a clean harness for real content).
     /// </param>
+    /// <param name="board">
+    /// base-defense `siege-positions` §1: the tactical board, if this battle has one. Optional and
+    /// trailing, matching every other collaborator above — `null` for every caller until a siege
+    /// wires one in (`siege-resolver`, a later module), which is byte-identical to today's behaviour
+    /// for every existing caller. The caller is responsible for having placed actors onto it before
+    /// calling <see cref="Resolve"/> — this method does not place them (see
+    /// <see cref="Board.Placement"/>'s own doc comment for why).
+    /// </param>
+    /// <summary>
+    /// base-defense `siege-waves` §3: the SAME checks <see cref="Resolve"/> has always applied to every
+    /// setup actor, extracted so <c>BattleRunState.AddActor</c> (a mid-battle reinforcement) can run
+    /// them too — not a re-implementation. A mid-battle actor that bypassed these would be silently
+    /// unhittable at the shield gate (mixed-case key), would shadow an existing actor (duplicate key),
+    /// or would spawn a corpse that never gets its own die event (`MaxHp &lt; 1`) — the exact failure
+    /// this check has always existed to prevent at setup time.
+    /// </summary>
+    static void ValidateActorKey(BattleActorSetup a, HashSet<string> seenKeys)
+    {
+        if (string.IsNullOrWhiteSpace(a.Key) || a.Key != a.Key.Trim().ToLowerInvariant())
+            throw new ArgumentException($"Actor key '{a.Key}' must be non-empty lower-case (funnel keys normalize).");
+        if (a.Key.StartsWith("entity:", StringComparison.Ordinal) || a.Key.StartsWith("0x", StringComparison.Ordinal))
+            throw new ArgumentException($"Actor key '{a.Key}' must not start with 'entity:' or '0x' (ptr-space prefixes).");
+        if (!seenKeys.Add(a.Key))
+            throw new ArgumentException($"Duplicate actor key '{a.Key}'.");
+        if (a.MaxHp < 1)
+            throw new ArgumentException($"Actor '{a.Key}' must have MaxHp >= 1.");
+    }
+
     public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null,
         Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null,
         ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null,
-        Timeline.IIntentSource? intentSource = null)
+        Timeline.IIntentSource? intentSource = null, Board.BoardState? board = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -183,25 +211,19 @@ public static partial class BattleEngine
         // corpse that never gets its die event. battle-adoption adds the prefix ban: keys
         // starting "entity:" or "0x" would be mangled by CombatPtr.Normalize at the shield
         // gate while the actor map keeps the original.
+        //
+        // base-defense `siege-waves` §3: extracted into ValidateActorKey (below) so a mid-battle
+        // reinforcement (BattleRunState.AddActor) runs the identical checks — not a re-implementation.
         var seenKeys = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in setup.Squad.Concat(setup.Wave))
-        {
-            if (string.IsNullOrWhiteSpace(a.Key) || a.Key != a.Key.Trim().ToLowerInvariant())
-                throw new ArgumentException($"Actor key '{a.Key}' must be non-empty lower-case (funnel keys normalize).");
-            if (a.Key.StartsWith("entity:", StringComparison.Ordinal) || a.Key.StartsWith("0x", StringComparison.Ordinal))
-                throw new ArgumentException($"Actor key '{a.Key}' must not start with 'entity:' or '0x' (ptr-space prefixes).");
-            if (!seenKeys.Add(a.Key))
-                throw new ArgumentException($"Duplicate actor key '{a.Key}'.");
-            if (a.MaxHp < 1)
-                throw new ArgumentException($"Actor '{a.Key}' must have MaxHp >= 1.");
-        }
+            ValidateActorKey(a, seenKeys);
 
         // B13 (spec-kernel-adoption.md): every local this method used to hold — actors, byKey,
         // host, shields, gate, sink, events, RNG streams — plus the eight closures over them, now
         // live on BattleRunState (BattleRunState.cs, nested in this partial class). Zero behavior
         // change: every line below is the same statement sequence as before extraction, reading
         // through `state.` instead of a captured local.
-        var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver);
+        var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver, board);
 
         // B14: the round boundary runs on the kernel's own EventQueue/SimulationClock — the same
         // primitives every other Timeline module uses — instead of a raw integer counter. `Resolve`
@@ -222,6 +244,18 @@ public static partial class BattleEngine
         // economy holds mutable per-key budget state, so sharing one across concurrent battles
         // starves actors of turns. See BattleModeProfile.NewEconomy for the reproduction.
         var battleEconomy = activeProfile.NewEconomy();
+        // `battle-tempo` `reaction-lane` RL2: one lane per BATTLE, same reasoning as `battleEconomy` —
+        // its `Depth`/slot state must persist across the whole battle's reactions, not reset per round.
+        // `WReact = 0` (every shipped profile) makes this byte-identical to no lane at all
+        // (ReactionLane's own doc), so constructing it unconditionally here is inert until a caller
+        // exists — `RunTimelineActionPhase` is that caller, reached only when `UsesTimelineDispatch`.
+        var reactionLane = new Timeline.ReactionLane(activeProfile.WReact, activeProfile.WScope);
+        // `battle-tempo` `timeline-dispatch` (found via `LAND1`'s own staged sweep against real
+        // content, 2026-09-05): one clock per BATTLE, matching `Cooldowns`/`ResourcePools`/
+        // `reactionLane`'s own "persists across rounds" lifetime -- both of those assume monotonically
+        // increasing ticks, and a per-round-fresh clock fed them a tick sequence that goes backwards
+        // every round boundary. Unused (and harmless to construct) unless `UsesTimelineDispatch`.
+        var actionClock = new Timeline.SimulationClock();
 
         var roundQueue = new Timeline.EventQueue(expectedEvents: 4);
         var roundClock = new Timeline.SimulationClock();
@@ -251,10 +285,59 @@ public static partial class BattleEngine
             roundQueue.Schedule(Math.Max(tick, roundClock.Now), StatusPulseEventOwnerKey, StatusPulseEventKind, 0);
         }
 
+        // base-defense `siege-waves` §1-2,4-5: batches from BOTH sides flow through ONE flattened,
+        // pre-sorted queue -- `Side` is data on each entry, never a second code path. Sorted by
+        // (AtTick, actor key ordinal) so same-tick arrivals -- including two different sides' batches
+        // sharing a tick, decision 6's "both sides enter together" -- land in a replay-stable order.
+        // Empty for every existing caller (`BattleSetup.Reinforcements` defaults empty), so this list
+        // is empty, `ScheduleNextReinforcement` below is never called, and the reinforcement event
+        // kind is NEVER scheduled -- a never-scheduled event kind cannot change a tick sequence, the
+        // structural half of this module's byte-identity argument.
+        const int ReinforcementEventKind = 2;
+        const string ReinforcementEventOwnerKey = "reinforcement";
+        var reinforcementQueue = setup.Reinforcements
+            .SelectMany(b => b.Actors.Select(a => (b.AtTick, b.Side, b.Edge, Actor: a)))
+            .OrderBy(x => x.AtTick).ThenBy(x => x.Actor.Key, StringComparer.Ordinal)
+            .ToList();
+        var reinforcementCursor = 0;
+        Timeline.EventHandle? reinforcementHandle = null;
+
+        // F8's hybrid trigger, the actual verdict (not a pure clock, the first draft's mistake):
+        // `due = Math.Min(nextScheduledTick, fieldClearedTick ?? long.MaxValue)`. Null means "clock
+        // only so far" -- set the instant the field actually clears, which is what lets that side of
+        // the race win when it comes first.
+        long? fieldClearedTick = null;
+
+        void ScheduleNextReinforcement(long earliestTick)
+        {
+            if (reinforcementCursor >= reinforcementQueue.Count) { reinforcementHandle = null; return; }
+            var nextScheduledTick = reinforcementQueue[reinforcementCursor].AtTick;
+            var due = Math.Max(earliestTick, Math.Min(nextScheduledTick, fieldClearedTick ?? long.MaxValue));
+            // Bounded by `maxBattleTick`, like every other scheduled event -- the same
+            // `if (tick > maxBattleTick) return;` guard `ScheduleNextStatusPulse` already applies.
+            if (due > maxBattleTick) { reinforcementHandle = null; return; }
+            reinforcementHandle = roundQueue.Schedule(due, ReinforcementEventOwnerKey, ReinforcementEventKind, 0);
+        }
+
+        // F8's state half: whenever the currently-arrived field (everyone already in the roster, not
+        // future reinforcements) drops to the configured threshold, pull the pending batch forward to
+        // right now instead of waiting for its clock tick. Checked once per round boundary (below) —
+        // matching `SiegeObjective`'s own "evaluated at round boundaries, never per action" discipline.
+        void CheckFieldCleared()
+        {
+            if (reinforcementCursor >= reinforcementQueue.Count || fieldClearedTick is not null) return;
+            var livingAnimate = state.Actors.Count(a => a.Active && a.Setup.Kind == CombatantKind.Animate);
+            if (livingAnimate > Board.SiegeTuningPolicy.Waves.FieldClearedThreshold) return;
+            fieldClearedTick = roundClock.Now;
+            if (reinforcementHandle is { } h) roundQueue.Cancel(h);
+            ScheduleNextReinforcement(roundClock.Now);
+        }
+
         var rounds = 0;
         if (rounds < activeProfile.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
             roundQueue.Schedule(activeProfile.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
         ScheduleNextStatusPulse();   // initial statuses may already carry a due pulse in flight
+        if (reinforcementQueue.Count > 0) ScheduleNextReinforcement(0);
 
         // Belt-and-suspenders on top of `maxBattleTick`, the same shape the kernel's own test rigs
         // already use (e.g. TurnFsmActionEnvelopeTests.Rig.Pump's `guard < 10_000`): `maxBattleTick`
@@ -293,11 +376,57 @@ public static partial class BattleEngine
                 if (ev.Kind == StatusPulseEventKind)
                 {
                     trace?.Phase(rounds, "status-pulse");
-                    state.Status.Tick(now, state.PulseSink, board: null, spreadRng: state.StatusRng);
+                    // base-defense `siege-positions` §3: the board is an optional trailing parameter,
+                    // exactly like `trace`/`actionCatalog`/`containerResolver`/`intentSource` above —
+                    // null for every existing caller (no `_board` supplied), which is byte-identical to
+                    // this line's own prior literal `board: null`.
+                    state.Status.Tick(now, state.PulseSink, board: state.CombatBoardSnapshot, spreadRng: state.StatusRng);
                     state.Host.Flush();
                     state.PostFlush(rounds);
                     if (state.AnyActive("squad") && state.AnyActive("wave"))
                         ScheduleNextStatusPulse();
+                    continue;
+                }
+
+                if (ev.Kind == ReinforcementEventKind)
+                {
+                    // base-defense `siege-waves` §4 (F9/C7): bounded, resumable drain -- at most
+                    // MaxArrivalsPerRound actors join per firing. Arrivals beyond the cap are NOT
+                    // dropped: `reinforcementCursor` keeps its place and the loop below re-schedules
+                    // the rest one full round later, so a large batch lands over several rounds rather
+                    // than spiking one. FIFO order with ordinal tie-break was already established when
+                    // `reinforcementQueue` was built (sorted once, up front).
+                    trace?.Phase(rounds, "reinforcement");
+                    reinforcementHandle = null; // it just fired; PopDue already removed it from roundQueue
+                    var arrivalsThisFiring = 0;
+                    while (reinforcementCursor < reinforcementQueue.Count
+                           && arrivalsThisFiring < Board.SiegeTuningPolicy.Waves.MaxArrivalsPerRound
+                           && reinforcementQueue[reinforcementCursor].AtTick <= roundClock.Now)
+                    {
+                        var next = reinforcementQueue[reinforcementCursor];
+                        state.AddActor(next.Actor, position: null, rounds);
+                        reinforcementCursor++;
+                        arrivalsThisFiring++;
+                    }
+
+                    // A clearing that happened to land exactly on this same firing already consumed
+                    // its own pulled-forward batch above -- reset so the NEXT clearing (for whatever
+                    // remains queued) can pull forward again too, matching decision 6's "the field
+                    // resolves, THEN the next batch enters" as a repeating cycle, not a one-time event.
+                    fieldClearedTick = null;
+
+                    if (reinforcementCursor < reinforcementQueue.Count)
+                    {
+                        // Carry-over continuation: one full round later, never immediately, so a
+                        // large batch visibly lands over several rounds. If the NEXT queued arrival's
+                        // own clock tick is later still, ScheduleNextReinforcement's own Math.Max/Min
+                        // resolves the real due tick from there -- this floor only matters for the
+                        // over-cap-at-one-tick case.
+                        ScheduleNextReinforcement(roundClock.Now + activeProfile.RoundDurationMs);
+                    }
+
+                    state.Host.Flush();
+                    state.PostFlush(rounds);
                     continue;
                 }
 
@@ -323,7 +452,11 @@ public static partial class BattleEngine
                 var jittered = new List<(ActorState Actor, int Jitter)>();
                 foreach (var a in state.Actors)
                 {
-                    if (!a.Active) continue;
+                    // base-defense `combatant-kind` §3: a structure never enters initiative — filtered
+                    // at selection, before it can draw from the initiative stream or occupy a queue
+                    // slot, rather than special-cased inside the turn machine. Byte-identical for every
+                    // existing battle (every actor there is Animate, so this clause is always true).
+                    if (!a.Active || a.Setup.Kind != CombatantKind.Animate) continue;
                     var roll = state.InitiativeRng.NextInt(1000);
                     trace?.Draw("initiative", roll);
                     jittered.Add((a, roll - (a.Has("swift") ? TraitBattleCatalog.Get("swift").InitiativeBonusMilli : 0)));
@@ -366,7 +499,7 @@ public static partial class BattleEngine
                 // hybrid-atb -- this branch is reached only by a synthetic, never-shipped test profile.
                 if (activeProfile.UsesTimelineDispatch)
                 {
-                    RunTimelineActionPhase(state, activeProfile, order, economy, EconomyKey, roundClock, rounds, trace, intentSource);
+                    RunTimelineActionPhase(state, activeProfile, order, economy, EconomyKey, now, rounds, trace, intentSource, reactionLane, actionClock);
                 }
                 else
                 {
@@ -494,6 +627,13 @@ public static partial class BattleEngine
                 // just finished.
                 if (rounds < activeProfile.MaxRounds && state.AnyActive("squad") && state.AnyActive("wave"))
                     roundQueue.Schedule(roundClock.Now + activeProfile.RoundDurationMs, RoundEventOwnerKey, RoundEventKind, 0);
+
+                // base-defense `siege-waves` §1 (F8's state half): checked once per round boundary,
+                // the same cadence `SiegeObjective.Evaluate` is specced to use and for the same
+                // reason -- checking mid-round would let the order of two simultaneous deaths decide
+                // whether a clearing pulled a batch forward. No-op (returns immediately) whenever no
+                // reinforcement is queued, which is every existing battle.
+                CheckFieldCleared();
             }
         }
 
@@ -514,6 +654,7 @@ public static partial class BattleEngine
             WaveId = setup.WaveId,
             Outcome = outcome,
             Rounds = rounds,
+            ZombossPatternId = setup.ZombossPatternId,
             SoulLootMilli = 1000 + greedyDef.SoulLootBonusMilli * greedySurvivors,
             Warnings = state.Warnings.Count > 0 ? state.Warnings : null,
             Events = state.Events,
@@ -543,8 +684,15 @@ public static partial class BattleEngine
         return false;
     }
 
+    /// <summary>
+    /// base-defense `combatant-kind` §2: structures do not count. Otherwise an indestructible fence on
+    /// the defender's side keeps every siege alive to `MaxRounds` and turns every victory into a
+    /// stalemate — a wall is a fact of the ground, not an enemy that must be beaten. Byte-identical for
+    /// every existing battle: every actor built before this module defaults to
+    /// <see cref="CombatantKind.Animate"/>, so the added clause is always true there.
+    /// </summary>
     static bool AnyActive(List<ActorState> actors, string side) =>
-        actors.Any(a => a.Active && a.Setup.Side == side);
+        actors.Any(a => a.Active && a.Setup.Side == side && a.Setup.Kind == CombatantKind.Animate);
 
     /// <summary>
     /// **B39** — how many ticks this actor needs to be ready for one turn: the readiness kernel's own

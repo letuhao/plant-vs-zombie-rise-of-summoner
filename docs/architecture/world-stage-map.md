@@ -258,3 +258,9 @@ one of these unbounded, its row is where that becomes visible** — which is wha
 **None.** All sixteen decisions are recorded in the ideal doc's §8/§8b/§8d/§8e, and the four
 questions this map would otherwise have raised — the right-edge collision, the guard fix, the legion
 target, and the spec order — were answered on 2026-09-03 before it was written.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| The map door issues the delve request | `party-dungeon/spec-domain-catalog.md` §6 (R10) | a `world-inspector` action + `world-commands` order posts the same `POST /api/delve/start` body the Sanctum picker sends, with `domainId` and `parentWorldId`; no legion leaves the map; the response `{delveId, worldId}` bootstraps the delve stage |

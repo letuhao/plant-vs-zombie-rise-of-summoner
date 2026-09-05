@@ -98,6 +98,36 @@ public static class WorldCanonical
                 Row(sb, "faction-scope", f.FactionId, f.ScopeModifierMilli);
         }
 
+        // base-defense `structure-state`: the SAME conditional-row shape as `faction-scope` above,
+        // applied twice more. A separate row emitted only when the value is off its default, NOT a
+        // column appended to the existing `slot` row — appending would move every prior hash for a
+        // value that did not change, the exact failure `faction-scope`'s own comment records finding
+        // live. `s.Slots` is already documented as ordered by SlotIndex, contiguous from zero, so no
+        // explicit sort is needed here either — the same invariant the existing `slot` loop above
+        // already relies on without re-asserting it.
+        foreach (var s in w.Sectors)
+        {
+            foreach (var sl in s.Slots)
+            {
+                if (sl.StructureHp is { } hp)
+                    Row(sb, "slot-hp", s.SectorId, sl.SlotIndex, hp);
+                if (sl.SlotDepletionMilli != 0)
+                    Row(sb, "slot-depletion", s.SectorId, sl.SlotIndex, sl.SlotDepletionMilli);
+            }
+        }
+
+        // base-defense `siege-construction`: same conditional-row shape again — RubbleStock/
+        // IronworkStock are new fields on `WorldSector`, and every world before this task holds both
+        // at zero, so a separate off-default row (not a column appended to the existing "sector" row
+        // above) keeps every prior hash byte-identical.
+        foreach (var s in w.Sectors)
+        {
+            if (s.RubbleStock != 0)
+                Row(sb, "sector-rubble", s.SectorId, s.RubbleStock);
+            if (s.IronworkStock != 0)
+                Row(sb, "sector-ironwork", s.SectorId, s.IronworkStock);
+        }
+
         return sb.ToString();
     }
 

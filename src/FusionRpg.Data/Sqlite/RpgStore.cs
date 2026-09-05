@@ -645,6 +645,16 @@ public sealed partial class RpgStore : IRpgDb
         // item_unique — ssot-uniques.md §5.2, uniques (module 17). Must run AFTER the container schema
         // it keys on, and it is read alongside item_set_member for §3.8's mutual exclusion.
         EnsureItemUniqueSchemaUnlocked(db);
+        // consumable_def / rpg_run_draught — ssot-consumables.md §5.2–5.3, consumables (module 18).
+        // Must run AFTER EnsureRpgItemSchemaUnlocked, whose rpg_item_stock the dispatch spend
+        // decrements in the same transaction that writes the draught rows.
+        EnsureConsumableSchemaUnlocked(db);
+        // charm_def / charm_pouch / charm_run_hold / charm_resonance / charm_attunement —
+        // ssot-charms.md §4.2's five tables, charm-carry (module 22, split out of 12 by D40). Must run
+        // AFTER EnsureItemSetSchemaUnlocked only in the sense that both feed module 12's evaluator;
+        // there is no FK between them. charm_run_hold's partial unique index IS the cross-run
+        // exclusivity rule, mirroring ix_rpg_expedition_members_active.
+        EnsureCharmSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).
@@ -658,6 +668,9 @@ public sealed partial class RpgStore : IRpgDb
         EnsureAptitudeAllocationSchemaUnlocked(db);
         // rpg_action + cost/scope/grant/species-basics (spec-action-model.md, A1).
         EnsureActionSchemaUnlocked(db);
+        // item_granted_action — ssot-granted-actions.md §5.2, granted-actions (module 19). Must run
+        // AFTER EnsureActionSchemaUnlocked, whose rpg_action_grant this table's projection writes into.
+        EnsureItemGrantSchemaUnlocked(db);
         // rpg_run_pool — persisted resource pools across a run's encounter boundaries (spec-action-costs.md §9, T18).
         EnsureRunPoolSchemaUnlocked(db);
         // rpg_actor_loadout — the equipped-skill set (spec-loadout.md §1, T21).
@@ -670,6 +683,11 @@ public sealed partial class RpgStore : IRpgDb
         // player_species — the rolled roster per player, append-only (spec-player-materialise.md,
         // demon-seed module 16, T5.6).
         EnsurePlayerSpeciesSchemaUnlocked(db);
+        // rpg_species_respec — species-build-todo.md T4.2, spec-species-respec.md. Per-species churn
+        // counter + decay clock; decayed on read, never a timer.
+        EnsureSpeciesRespecSchemaUnlocked(db);
+        // rpg_zomboss_state + rpg_zomboss_pattern_log — species-build-todo.md T4.6, spec-zomboss-adaptive.md.
+        EnsureZombossAdaptiveSchemaUnlocked(db);
     }
 
     void EnsureMediaSchema(SqliteConnection db)
@@ -740,6 +758,8 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM rpg_aptitude_allocation;",
+                             "DELETE FROM rpg_species_respec;",
+                             "DELETE FROM rpg_zomboss_state;", "DELETE FROM rpg_zomboss_pattern_log;",
                              "DELETE FROM archive_catalog;",
                              // world-stage W21: found missing here while building an E2E fixture
                              // test — a world created in one test class outlived every later

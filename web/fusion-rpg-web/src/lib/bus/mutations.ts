@@ -13,7 +13,8 @@ import type {
   UniqueActorDeployResultDto,
   UniqueActorDto,
   UniqueEquipmentListDto,
-  AptitudesState
+  AptitudesState,
+  SpeciesRespecResult
 } from "./types";
 
 /**
@@ -250,6 +251,28 @@ export function useSaveAptitudes() {
       sendJson<AptitudesState>("/api/aptitudes/allocate", "POST", body),
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(vars.playerId) });
+    }
+  });
+}
+
+/**
+ * spec-species-respec.md — the ONE save path for a species' build: a first override, a revert (empty
+ * `shares`), and a priced change all go through this single endpoint, which decides for itself which
+ * of the three applies. **Never** `/api/aptitudes/species/allocate` here — that older route (module 5)
+ * still writes a DemonType override with no pricing at all; routing this panel's saves through it
+ * would be the exact bypass `SpeciesBuildEndpoints.cs`'s own doc comment names as a real, deliberately
+ * un-retired gap. This mutation is what makes that gap reachable by a real player if it were ever
+ * used here, so it is the one call site this module must get right.
+ */
+export function useRespecSpecies() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "SpeciesRespec" },
+    mutationFn: (body: { playerId: number; speciesId: string; shares: Record<string, number>; correlationId: string }) =>
+      sendJson<SpeciesRespecResult>("/api/species-build/respec", "POST", body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.speciesAptitudes(vars.playerId, vars.speciesId) });
+      void qc.invalidateQueries({ queryKey: queryKeys.speciesRespecPrice(vars.playerId, vars.speciesId) });
     }
   });
 }

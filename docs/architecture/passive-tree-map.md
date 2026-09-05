@@ -1,7 +1,6 @@
 # Passive tree — capability map
 
-**Status:** proposed 2026-09-05, awaiting owner approval. **No module spec written until this map is
-approved.** Source: [passive-tree-ideal.md](passive-tree-ideal.md) — 36 owner decisions, 16 research
+**Status:** in use, 2026-09-05. All eleven module specs written against it — see `passive-tree/spec-*.md`. Source: [passive-tree-ideal.md](passive-tree-ideal.md) — 36 owner decisions, 16 research
 documents in [../research/passive-tree/](../research/passive-tree/).
 
 This is the index of what exists for this program. **Never guess which spec is active from a
@@ -15,15 +14,15 @@ filename** — read this table.
 |---|---|---|
 | `squad-harness` | Six-vs-wave balance measurement. Answers D33's scope mismatch: every existing number is a 1v1 duel, the game fields six | — |
 | `mechanism-wiring` | The four inert lines that make mechanism nodes executable and *scorable*. §3.5 proved these are the only node class that rescues a focus build | — |
-| `tree-plan` | Stage 1, deterministic. Topology, tier ladder, budgets, shape archetypes, potency ceiling, the property vocabulary, and the plan schema handed downstream | — |
+| `tree-plan` | Stage 1, deterministic. Topology (10 tiers × 2 branches, 40 nodes, **rootless**), tier ladder, budgets, shape archetypes, potency ceiling (**91‰**, derived), the property vocabulary, and the plan schema handed downstream | — |
 | `tree-catalog` | The baked artifact. Node record shape, id stability, catalog versioning, the freeze line, the load path | `tree-plan` |
 | `tree-language` | Stage 2. What the language stage may choose, from which closed vocabularies, under which quotas, behind which validation gates | `tree-plan` |
 | `tree-binder` | Stage 3, deterministic. Budget share → stored coefficient, atom composition, channel legality, conversion refusal | `tree-plan`, `tree-language`, `tree-catalog` |
-| `tree-review` | Making 35,200 nodes reviewable: sampling design, the tree-card artifact, escalation, incremental re-review | `tree-catalog` |
+| `tree-review` | Making ~35,160 nodes across 879 trees reviewable: sampling design, the tree-card artifact, escalation, incremental re-review | `tree-catalog` |
 | `tree-state` | Per-actor allocation and soul levels. Sparse storage, rising unlock cost, respec, the migration boundary | `tree-catalog` |
 | `tree-resolve` | How tree power reaches combat. Tier gates, cross-unlock, the concentration index, the soul→Θ read | `tree-state`, `mechanism-wiring` |
 | `tree-surface` | The player surface. Browse, plan-before-spend, printed exclusions, per-actor management | `tree-state`, `tree-catalog` |
-| `species-tree` | D23/D30's unique per-species trees and their own generation pipeline | `tree-language`, `tree-binder`, `tree-review` |
+| `species-tree` | D23/D30's unique per-species trees (**840 species × 40 nodes = 33,600**) and their own generation pipeline | `tree-language`, `tree-binder`, `tree-review` |
 
 **No cycles.** Every arrow points one way. `tree-resolve` reads `tree-state`; `tree-state` never
 reads `tree-resolve`.
@@ -37,6 +36,27 @@ wave 2   tree-binder · tree-state
 wave 3   tree-resolve · tree-review · tree-surface
 wave 4   species-tree
 ```
+
+## Two gates the audit round added (2026-09-05)
+
+**A10 gates `tree-language --write`, not `tree-plan --emit`.** The plan is cheap and mints no ids, so
+being wrong there costs one regeneration. The irreversible step is the next one: ~4,680 model calls
+for the generic corpus, ~105,840 for species, and ~34 human hours per review pass. Committing that
+against an unmeasured premise is how the program buys 35,160 nodes and discovers in wave 3 that the
+deep tiers do nothing. **Corrected 2026-09-05 after `spec-mechanism-wiring.md` split A10 against code — "after G1 and G3" was wrong in both directions:**
+
+- **A10a**, the static-snapshot difference, needs **no wiring at all**. `BattleActorSetup.ChannelMods` already carries `(ChannelId, long)`, the composer folds it and **throws** on an unknown id, and the resolver reads all eight defensive families off the defender's snapshot. It runs over `BattleEngine` in **wave 0**.
+- **A10b**, the shipped vehicle, needs G1 **and G2** — which this map never named — **plus a Battle status→`DerivedLedger` producer that does not exist and is in no module's modified-files table.** `BattleStatusSpec` carries no `StatMods` at all, and `BattleDerivedModifierLedger.Add` has one caller: the construction-time aura loop.
+
+So: **run A10a now, gate `tree-language --write` on it, and treat A10b as a separate item with an unowned prerequisite.**
+
+**A tree's gate quantity must exist before that tree's content is generated** (§13.4). Today only
+the 12 primary trees have one. `element_mastery` belongs to the demon program's `aspect-scope`
+module; `status_applied` belongs to nobody yet. Generating the elemental and status corpus first
+buys **1,080 nodes at tier 0**.
+
+So the corpus order is: **primary trees (480 nodes) → then one category per gate quantity as it
+lands**, never the whole 1,560 at once.
 
 **Wave 0 is parallel by construction** — the harness is a `tools/` project, the wiring is four named
 lines in `Core`, and the planner is new code with no shipped caller. Nothing in wave 0 touches

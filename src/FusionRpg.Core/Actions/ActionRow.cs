@@ -48,6 +48,11 @@ public sealed record ActionRow
 
     public bool RequiresLineOfSight { get; init; }
 
+    /// <summary>base-defense `siege-cover` decision 35: which shooting penalties (range, obstruction,
+    /// melee lock) this action pays. Default `All` — an ordinary shot pays everything, and an
+    /// exemption is authored content, never an oversight.</summary>
+    public ProjectilePenalties ProjectilePenalties { get; init; } = ProjectilePenalties.All;
+
     // ---- usability -----------------------------------------------------------------------------
     /// <summary>Raw predicate JSON — compiled through E3, not here (A4).</summary>
     public string? ConditionsJson { get; init; }

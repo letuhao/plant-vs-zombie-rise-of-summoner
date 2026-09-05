@@ -50,7 +50,7 @@ public class ZombossCommanderAllocationTests
     {
         var tuning = CommanderRateOneTuning();
         var source = new ZombossCommanderAllocation("force-pure");
-        source.Refresh(theta: 1000, tuning); // budget = PointsFor(Commander, 1000, tuning) = 1000*1 = 1000
+        source.Refresh(AllocationScope.Commander, theta: 1000, tuning); // budget = PointsFor(Commander, 1000, tuning) = 1000*1 = 1000
 
         var result = source.Resolve(new StatContext());
 
@@ -67,11 +67,11 @@ public class ZombossCommanderAllocationTests
     {
         var tuning = CommanderRateOneTuning();
         var source = new ZombossCommanderAllocation("force-pure");
-        source.Refresh(theta: 1000, tuning);
+        source.Refresh(AllocationScope.Commander, theta: 1000, tuning);
         var forcePureMight = source.Resolve(new StatContext()).PointsAt(AllocationScope.Commander, "Might");
 
         source.SetActivePattern("bastion-pure");
-        source.Refresh(theta: 1000, tuning);
+        source.Refresh(AllocationScope.Commander, theta: 1000, tuning);
         var bastionPureMight = source.Resolve(new StatContext()).PointsAt(AllocationScope.Commander, "Might");
         var bastionPureFerocity = source.Resolve(new StatContext()).PointsAt(AllocationScope.Commander, "Ferocity");
 
@@ -87,8 +87,39 @@ public class ZombossCommanderAllocationTests
         foreach (var patternId in ZombossPatterns.All)
         {
             var source = new ZombossCommanderAllocation(patternId);
-            var exception = Record.Exception(() => source.Refresh(theta: 5000, tuning));
+            var exception = Record.Exception(() => source.Refresh(AllocationScope.Commander, theta: 5000, tuning));
             Assert.Null(exception);
+        }
+    }
+
+    [Fact]
+    public void Refresh_takesTheScopeAsAnArgument_notAHardCodedCommanderConstant()
+    {
+        // species-build-todo.md T4.5: a Zomboss pattern is a named allocation, not a player's commander
+        // build -- resolving under DemonType must land in the DemonType scope bucket, not Commander's.
+        var tuning = CommanderRateOneTuning(); // demonType rate = 4 (vs commander's 1) -- budget = 1000*4 = 4000
+        var source = new ZombossCommanderAllocation("force-pure");
+        source.Refresh(AllocationScope.DemonType, theta: 1000, tuning);
+
+        var result = source.Resolve(new StatContext());
+        Assert.Equal(1584, result.PointsAt(AllocationScope.DemonType, "Might")); // 4000 * 396 / 1000
+        Assert.Equal(0, result.PointsAt(AllocationScope.Commander, "Might")); // never leaks into Commander
+    }
+
+    [Fact]
+    public void BudgetCap_holdsForEveryPatternThroughTheScopeArgumentWiring()
+    {
+        // Spec test 5, re-asserted at the wiring layer (ZombossPatternTests.cs already proves the math
+        // on ZombossPattern.ToAllocation directly) -- this is what makes that property REACHABLE.
+        var tuning = CommanderRateOneTuning();
+        foreach (var scope in new[] { AllocationScope.Commander, AllocationScope.DemonType, AllocationScope.Aspect, AllocationScope.UniqueDemon })
+        foreach (var patternId in ZombossPatterns.All)
+        {
+            var source = new ZombossCommanderAllocation(patternId);
+            source.Refresh(scope, theta: 7777, tuning);
+            var budget = PointBudget.PointsFor(scope, 7777, tuning);
+            var spent = source.Resolve(new StatContext()).TotalForScope(scope);
+            Assert.True(spent <= budget, $"{patternId}@{scope}: spent {spent} against a budget of {budget}");
         }
     }
 }

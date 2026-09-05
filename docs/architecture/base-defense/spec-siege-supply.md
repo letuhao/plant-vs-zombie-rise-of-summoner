@@ -86,8 +86,16 @@ bool Source(string sectorId) => Owned(sectorId);
 ```
 
 `seats` selects on `Source`; `SupplyReach.From` traverses on `Traversable`. **A besieged Seat is still
-a source, and still supplies itself** — `SupplyReach.From` includes its own start nodes, so the
-besieged sector is in `connected` even though nothing can route *through* it.
+a source, and still supplies itself.**
+
+> **Corrected during implementation (base-defense-todo.md task 2.1, 2026-09-05) — do not trust the
+> claim above at face value.** `SupplyReach.From` does **not** include its seed nodes regardless of
+> the usable predicate; its seeds are gated by the SAME predicate as traversal, so a besieged (hence
+> non-`Traversable`) Seat drops out of `connected` exactly like before this fix, not "automatically" as
+> this section originally implied. The actual fix explicitly unions every besieged **owned** sector
+> into the result *after* the BFS, in `SupplyGraph.ConnectedSectors`, rather than relying on the seed
+> behaviour described above. The net effect is the same (a besieged sector is `connected`, feeds from
+> its own stock, does not starve) — the mechanism is not what this paragraph says.
 
 That single change is the whole of F1's fix for the sector. The garrison standing in a besieged Seat
 is `InSupply` again, tops up from its own `LoamStock`, and does not starve.

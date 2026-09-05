@@ -63,6 +63,9 @@ public static class SoulEarnPolicy
         public const string ContractRitual = "contract-ritual";
         /// <summary>Test/dev bankrolls only — keeps the discovery namespace clean for analytics.</summary>
         public const string Seed = "seed";
+        /// <summary>species-build-todo.md T4.2 — a priced species respec (spec-species-respec.md
+        /// decision 15). Never appears for the free cases (first override, revert to baseline).</summary>
+        public const string Respec = "respec";
     }
 
     /// <summary>

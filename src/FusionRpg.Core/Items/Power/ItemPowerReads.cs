@@ -52,8 +52,16 @@ public static class ItemPowerReads
     /// bundle's price come from different pricing shapes, so a uniform error does not cancel) —
     /// report as a share with a band, never as a threshold. `qPowerMilli: null` (no resolvable rung)
     /// is refused, never priced at zero — G4's own dominance fear.
+    ///
+    /// <para>⭐ <paramref name="tuning"/> is what turns this read from REPORTABLE into GATING, which is
+    /// this method's own documented lifecycle ("reportable today and gating only when module 19
+    /// `granted-actions` lands"). With no tuning the <c>Over</c> flag stays <c>false</c> and the caller
+    /// gets a bare share — the behaviour every pre-module-19 caller already has. With one, the share is
+    /// measured against <c>grantedActionShareCapMilli</c> when a balance pass has set one, else against
+    /// the whole ceiling (1000‰ — the per-mille identity, a bounded ratio, not an invented number).
+    /// Module 19's <c>ItemGrantValidator</c> is the first caller to pass it.</para>
     /// </summary>
-    public static PowerShareRead GrantedActionPrice(int? qPowerMilli, int? rarityCeiling)
+    public static PowerShareRead GrantedActionPrice(int? qPowerMilli, int? rarityCeiling, ItemPowerTuning? tuning = null)
     {
         if (qPowerMilli is not { } q)
             return PowerShareRead.AsUnpriced("action has no resolvable rung", coefficientSensitive: true);
@@ -61,8 +69,12 @@ public static class ItemPowerReads
             return PowerShareRead.AsUnpriced("rarity has no seeded budget ceiling", coefficientSensitive: true);
 
         var priced = GrantedActionReference.ScaleMilli(q).Total;
+        // Widen before multiplying, divide by 1000 last, exactly once (AGENTS.md numeric rules).
         var shareMilli = checked((long)priced * 1000L) / ceiling;
-        return new PowerShareRead(shareMilli, Over: false, null, CoefficientSensitive: true);
+
+        var over = tuning is { } t
+            && shareMilli > (t.GrantedActionShareCapMilli ?? Grants.ItemGrantLimits.WholeCeilingShareMilli);
+        return new PowerShareRead(shareMilli, over, null, CoefficientSensitive: true);
     }
 
     /// <summary>R3 — the card's power number, Rule P: two significant figures with its band, never

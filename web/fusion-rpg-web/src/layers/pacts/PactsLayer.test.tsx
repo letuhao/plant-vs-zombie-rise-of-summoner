@@ -28,7 +28,32 @@ const mockBuySlotMutateAsync = vi.fn();
 vi.mock("@/lib/bus", () => ({
   usePlayers: () => mockUsePlayers(),
   useDemonRoster: () => mockUseDemonRoster(),
-  useSpeciesIndex: () => mockUseSpeciesIndex()
+  useSpeciesIndex: () => mockUseSpeciesIndex(),
+  // AptitudesLayer (opened by this layer's own "View build" button) mounts AptitudesPage/
+  // SpeciesBuildPanel, both of which read from this same module -- stubbed here so opening the
+  // nested layer in a test doesn't crash on an undefined hook, matching AptitudesLayer.test.tsx's
+  // own fixture shape.
+  useAptitudes: () => ({ data: { theta: 100, budget: 300, spent: 0, withinBudget: true, shares: { Might: 0 } } }),
+  useSaveAptitudes: () => ({ mutateAsync: vi.fn(), isPending: false }),
+  useSpeciesAptitudes: () => ({
+    data: {
+      speciesId: "sp-imp",
+      level: 20,
+      budget: 1000,
+      spent: 1000,
+      withinBudget: true,
+      hasOverride: false,
+      shares: { Might: 500 },
+      baseline: { Might: 500 }
+    },
+    isLoading: false,
+    isError: false,
+    refetch: vi.fn()
+  }),
+  useSpeciesRespecPrice: () => ({
+    data: { speciesId: "sp-imp", respecCount: 0, priceResource: "Soul", priceAmount: 50, everRespecced: false }
+  }),
+  useRespecSpecies: () => ({ mutateAsync: vi.fn(), isPending: false })
 }));
 
 vi.mock("@/lib/bus/demons", () => ({
@@ -189,5 +214,45 @@ describe("PactsLayer (T17)", () => {
     expect(portraits[0]).toHaveClass("border-rarity-4");
     expect(portraits[1]).toHaveClass("border-rarity-3");
     expect(portraits[0]).toHaveTextContent("I"); // first letter of the real display name
+  });
+
+  // spec-allocation-surface.md — the chosen entry point (owner, 2026-09-05): "View build" opens
+  // AptitudesLayer scoped to THAT row's own species, never a route.
+  it("View build opens AptitudesLayer on the Species tab, scoped to that row's own speciesId", async () => {
+    setup();
+    const user = userEvent.setup();
+    renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
+
+    await user.click(screen.getByTestId("pact-view-build-d1"));
+
+    expect(screen.getByTestId("aptitudes-layer")).toBeInTheDocument();
+    expect(screen.getByTestId("species-build-panel")).toBeInTheDocument();
+    expect(screen.getByTestId("tab-species")).toHaveAttribute("aria-selected", "true");
+  });
+
+  // GG-1: opening a nested layer from this one must leave the ORIGINAL stage/layer mounted, its
+  // state undisturbed — mirrors the existing "Esc closes without unmounting whatever is behind it"
+  // test's own `stage-behind` harness one level up.
+  it("GG-1: opening the species build view leaves Pacts (and the stage behind it) mounted, state-identical", async () => {
+    setup();
+    const user = userEvent.setup();
+    renderWithProviders(<ControlledPactsLayer />, { withGlobalKeys: true });
+
+    expect(screen.getByTestId("pacts-layer")).toBeInTheDocument();
+    expect(screen.getByTestId("stage-behind")).toBeInTheDocument();
+
+    await user.click(screen.getByTestId("pact-view-build-d1"));
+    expect(screen.getByTestId("aptitudes-layer")).toBeInTheDocument();
+    // Pacts itself, and the stage behind it, are both still exactly where they were —
+    // opening a nested layer never re-routes or unmounts either.
+    expect(screen.getByTestId("pacts-layer")).toBeInTheDocument();
+    expect(screen.getByTestId("pact-release-d1")).toBeInTheDocument();
+    expect(screen.getByTestId("stage-behind")).toBeInTheDocument();
+
+    await user.keyboard("{Escape}");
+    await waitFor(() => expect(screen.queryByTestId("aptitudes-layer")).not.toBeInTheDocument());
+    // Closing the nested layer returns exactly to Pacts, not further back.
+    expect(screen.getByTestId("pacts-layer")).toBeInTheDocument();
+    expect(screen.getByTestId("stage-behind")).toBeInTheDocument();
   });
 });

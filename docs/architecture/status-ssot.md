@@ -226,6 +226,11 @@ Status **pulses** never bypass Funnel for HP.
 
 ## 9. Locked status catalog (21 named ids)
 
+> **Growth queued 2026-09-05** (ADR: `decisions.md` row "Status SSOT + Resource model — nerve"): the party-dungeon
+> `delve-attrition` module adds `nerve.unsettled`, `nerve.shaken`, `nerve.afflicted` (Debuff, family `nerve`,
+> `Replace`, `ModifyStat`) — 21 → 24 when it lands. The stack counter lives in party state; the status is its
+> projection. Spec: `party-dungeon/spec-delve-attrition.md` §4.
+
 Magnitudes stay in grant overlay. This table is id + kind + host + notes only.
 
 ### 9.1 Families (mutex)

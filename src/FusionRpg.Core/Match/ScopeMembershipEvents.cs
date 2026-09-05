@@ -17,6 +17,20 @@ public enum ScopeMembershipTransition
     /// from this file; `MindControlledNow` is the only field meaningful for this transition.
     /// </summary>
     MindControlToggled,
+
+    /// <summary>
+    /// base-defense `siege-obstacles`: an actor entered a board cell. The program's ONE reviewed
+    /// vocabulary change, spent on a real mechanic — a Mine on that cell triggers. `siege-cover`
+    /// originally introduced this pair and released it (decision 35 replaced terrain cover with
+    /// per-shot shooting math, needing no membership change); this module is the one real consumer.
+    /// Existing consumers of this enum (e.g. <see cref="Battle.BattlefieldOwnSideReactor"/>) have no
+    /// `case` for it and no `default`, so it falls through harmlessly — verified, not assumed.
+    /// </summary>
+    CellEntered,
+
+    /// <summary>Left a board cell. Paired with <see cref="CellEntered"/> — emitted on move, death and
+    /// withdrawal, so an entry can never be left dangling (the leak this pairing exists to prevent).</summary>
+    CellExited,
 }
 
 /// <summary>

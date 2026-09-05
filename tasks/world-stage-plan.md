@@ -181,6 +181,34 @@ questions no test can: **did you scroll · could you tell what happened last tur
 engine string · did you ever reach for a control you could not find.** Phases 3–4 are re-argued from
 the answers.
 
+**Gate B outcome (2026-09-05, played by the assistant — owner directed the assistant to run
+playtest/review gates directly).** Full answers and how they were produced live in
+`world-stage-todo.md`'s Gate B section; the re-argument itself:
+
+- **Did you scroll?** No, at 1440×900, all ten turns. No bearing on Phase 3/4's order — nothing in
+  either phase is scoped around a scrolling concern.
+- **Could you tell what happened without reading an engine string?** Mostly, with one gap: a
+  multi-hop march's intermediate-waypoint report line carries no visible link back to the order that
+  produced it. This is `world-playback`'s own territory (Phase 2, already built) rather than anything
+  Phase 3/4 owns — none of `world-turn`/`world-notify`/`world-outliner`/`world-lenses`/`world-confirms`
+  touch how a keyframe's text is composed. Recorded as a `world-playback` finding, not a Phase 3/4
+  re-ordering.
+- **Did you ever reach for a control you could not find?** Twice — clearing a guard has no control
+  anywhere, and re-selecting an already-selected legion silently deselects it. **Neither touches
+  Phase 3/4's five modules either.** Guard-clearing is a `world-targeting`/inspector command (Phase 1,
+  already shipped, `worldSelection.ts`'s own `clear` kind never gets a filing control); the selection
+  toggle is `world-render`'s legion-marker click handler (also Phase 1). Both are real, both are
+  recorded (`world-map-todo.md`'s Checkpoint 4, `world-stage-todo.md`'s Gate B section) — neither is a
+  Phase 3/4 task today, and inventing one to hold them would be scope the playtest didn't actually ask
+  for.
+
+**Conclusion: Phase 3/4's order stands, unchanged.** Every finding Gate B produced lands in Phase 1/2's
+territory (already shipped) rather than in anything Phase 3/4 was going to build — `world-turn` first
+(feeding `world-outliner` its `unresolvedLegions.ts`), `world-notify` and `world-outliner` next,
+`world-lenses` and `world-confirms` in Phase 4, exactly as this plan already had it. The playtest
+answering "no reorder needed" is still an answer, not a skipped step — the alternative (reordering
+without evidence, or refusing to say so because nothing moved) is what this gate exists to prevent.
+
 **Checkpoint C — complete** (end of Phase 4). All 15 modules built · `features/world/` deleted and its
 three exemptions retired in the same change · GG-50 registry at 13 · the four boundary guards green ·
 the full web and .NET suites green.

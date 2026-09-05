@@ -9,18 +9,24 @@ import {
   worldUiReducer,
   type PendingOrder
 } from "@/features/world/worldSelection";
-import { toGraph } from "@/features/world/worldViewModel";
+import { toGraph, summarizeLoam } from "@/features/world/worldViewModel";
 import { sectorLabel } from "@/features/world/labels";
 import { usePlayers } from "@/lib/bus";
 import { useWorldHeader, useWorldState } from "@/lib/bus/world";
-import { adaptWorldState } from "@/contract/adapt";
+import { adaptWorldState, adaptWorldLegion } from "@/contract/adapt";
 import type { SectorView } from "@/contract/types";
+import { pendingWithReason } from "@/contract/pending";
 import firstLight from "@/features/world/fixtures/first-light.json";
 import { fitToExtent, type Extent } from "./camera";
 import { WorldScene, GRID_X, GRID_Y } from "./render/WorldScene";
 import { SectorInspector } from "./inspector/SectorInspector";
 import { CEDE_ORDER_AVAILABLE } from "./inspector/cedeCapability";
 import { QueuedOrders } from "./targeting/QueuedOrders";
+import { WorldHud } from "./hud/WorldHud";
+import { TopStrip } from "./hud/TopStrip";
+import { TurnCluster } from "./turn/TurnCluster";
+import { UnresolvedCount } from "./turn/UnresolvedCount";
+import { PlaybackPanel } from "./playback/PlaybackPanel";
 
 /** Before any real world state has loaded — an empty, centred extent `fitToExtent` still resolves
  * sanely against, so the very first render has a valid `viewBox` rather than a `NaN` one. */
@@ -88,6 +94,18 @@ export function WorldStage() {
    * only the already-adapted `AdaptedWorldState` and the plain sector-id/hop-count pairs below.
    */
   const graph = useMemo(() => toGraph(dto), [dto]);
+  const loamSummary = useMemo(() => summarizeLoam(graph.nodes.map((n) => n.data)), [graph]);
+  const myLegions = useMemo(
+    () =>
+      dto.entities
+        .filter((e) => e.kind === "Legion" && e.ownerFactionId === playerFactionId)
+        .map(adaptWorldLegion),
+    [dto, playerFactionId]
+  );
+  const myLegionDisplayNames = useMemo(
+    () => Object.fromEntries(dto.entities.map((e) => [e.entityId, e.displayName])),
+    [dto]
+  );
   const selectedLegion = useMemo(
     () => (ui.selectedEntityId ? dto.entities.find((e) => e.entityId === ui.selectedEntityId) ?? null : null),
     [dto, ui.selectedEntityId]
@@ -142,31 +160,69 @@ export function WorldStage() {
 
   return (
     <StageHost>
-      <svg
-        data-testid="world-stage-svg"
-        data-selected-sector={ui.selectedSectorId ?? ""}
-        viewBox={`${camera.x} ${camera.y} ${camera.w} ${camera.h}`}
-        className="h-full w-full"
-        role="img"
-        aria-label="World map"
-        onContextMenu={(event) => {
-          event.preventDefault();
-          handleEscape();
-        }}
+      <WorldHud
+        topStrip={
+          <TopStrip
+            turn={dto.currentTurn}
+            calendar={dto.calendar}
+            income={{ unit: "loamUnits", value: loamSummary.production }}
+            upkeep={{ unit: "loamUnits", value: loamSummary.upkeep }}
+            net={{ unit: "loamUnits", value: loamSummary.net }}
+            stock={{ unit: "loamUnits", value: loamSummary.stock }}
+            stockCapacity={pendingWithReason("capacity not yet exposed by the server")}
+          />
+        }
+        bottomRight={
+          worldId ? (
+            <div className="flex flex-col items-end gap-2">
+              <UnresolvedCount
+                legions={myLegions}
+                pending={ui.pending}
+                displayNames={myLegionDisplayNames}
+                onFocus={(entityId) => dispatch({ type: "select-entity", entityId })}
+              />
+              <TurnCluster
+                worldId={worldId}
+                currentTurn={dto.currentTurn}
+                commanderId={playerFactionId ?? ""}
+                legions={myLegions}
+                pending={ui.pending}
+                onOrdersFiled={() => dispatch({ type: "clear-queue" })}
+              />
+            </div>
+          ) : null
+        }
+        bottomLeft={
+          <QueuedOrders orders={ui.pending} onTakeBack={(commandId) => dispatch({ type: "unqueue", commandId })} />
+        }
+        rightEdge={worldId ? <PlaybackPanel worldId={worldId} turn={dto.currentTurn - 1} /> : null}
       >
-        <WorldScene
-          world={world}
-          playerFactionId={playerFactionId}
-          selectedSectorId={ui.selectedSectorId}
-          onSelectSector={handleSelectSector}
-          zoom="map"
-          selectedEntityId={ui.selectedEntityId}
-          onSelectEntity={handleSelectEntity}
-          reachableSectors={reachableSectors}
-          pendingOrders={ui.pending}
-          blockedTarget={blockedTarget}
-        />
-      </svg>
+        <svg
+          data-testid="world-stage-svg"
+          data-selected-sector={ui.selectedSectorId ?? ""}
+          viewBox={`${camera.x} ${camera.y} ${camera.w} ${camera.h}`}
+          className="h-full w-full"
+          role="img"
+          aria-label="World map"
+          onContextMenu={(event) => {
+            event.preventDefault();
+            handleEscape();
+          }}
+        >
+          <WorldScene
+            world={world}
+            playerFactionId={playerFactionId}
+            selectedSectorId={ui.selectedSectorId}
+            onSelectSector={handleSelectSector}
+            zoom="map"
+            selectedEntityId={ui.selectedEntityId}
+            onSelectEntity={handleSelectEntity}
+            reachableSectors={reachableSectors}
+            pendingOrders={ui.pending}
+            blockedTarget={blockedTarget}
+          />
+        </svg>
+      </WorldHud>
 
       {selectedSector ? (
         <SectorInspector
@@ -181,17 +237,6 @@ export function WorldStage() {
           prospected={prospectedSectorIds.includes(selectedSector.sectorId)}
         />
       ) : null}
-
-      {/* The queued-order list (world-stage W71) — no HUD-anchor shell mounts here yet (that is
-          `WorldHud`'s own still-deferred wiring, out of this task's scope), so this is a small,
-          self-contained panel, the same minimal-chrome choice `SectorInspector`'s own direct mount
-          above already makes. */}
-      <div
-        data-testid="queued-orders-panel"
-        className="band-hud pointer-events-auto fixed bottom-4 left-4 w-72 rounded-md border border-border bg-panel p-3"
-      >
-        <QueuedOrders orders={ui.pending} onTakeBack={(commandId) => dispatch({ type: "unqueue", commandId })} />
-      </div>
     </StageHost>
   );
 }

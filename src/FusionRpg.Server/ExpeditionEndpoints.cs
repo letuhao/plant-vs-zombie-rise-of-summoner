@@ -20,12 +20,15 @@ public sealed class ExpeditionService
     readonly RpgStore _store;
     readonly WebMatchService _webMatch;
     readonly IHubContext<RpgHub> _hub;
+    readonly FusionRpg.Core.Power.IPowerIndexProvider _powerIndex;
 
-    public ExpeditionService(RpgStore store, WebMatchService webMatch, IHubContext<RpgHub> hub)
+    public ExpeditionService(RpgStore store, WebMatchService webMatch, IHubContext<RpgHub> hub,
+        FusionRpg.Core.Power.IPowerIndexProvider powerIndex)
     {
         _store = store;
         _webMatch = webMatch;
         _hub = hub;
+        _powerIndex = powerIndex;
     }
 
     public async Task<(bool Ok, string Reason, ExpeditionRow? Row)> DispatchAsync(
@@ -113,11 +116,25 @@ public sealed class ExpeditionService
         // that is then persisted (progression-shape-audit-2026-09-04.md §4.1).
         var specimenXpMilli = new Dictionary<string, long>(StringComparer.Ordinal);
         var victories = 0;
+        // species-build-todo.md T4.6, spec-zomboss-adaptive.md's own ⛔ seam: the enemy side actually
+        // carries a pattern only for the expedition's BOSS battle — the Zomboss's own real production
+        // caller. Resolved BEFORE RunPlannedMatchAsync (never during resolution), so `(setup, seed)`
+        // stays reproducible from that point on, matching every other planned-battle setup here.
+        var theta = (long)_powerIndex.ActorIndex(new FusionRpg.Core.Stats.StatContext { PlayerId = playerId });
         foreach (var plan in resolution.Battles)
         {
+            var correlation = BattleCorrelation(row.Id, plan.BattleIndex);
+            // Selection has a REAL side effect (advances rpg_zomboss_state) -- it must run exactly
+            // once per battle, never once per CollectAsync retry. A battle already logged under this
+            // correlation is a replay: RunPlannedMatchAsync's own replay branch ignores the setup
+            // BODY it is handed and returns the stored (already-enriched) one, so the plain plan.Setup
+            // below is only ever a placeholder for that call, never what actually resolves.
+            var setup = plan.Boss && _store.TryGetWebMatchLog(playerId, correlation) is null
+                ? _webMatch.ApplyZombossPattern(playerId, plan.Setup, theta, plan.BattleSeed)
+                : plan.Setup;
             var (ok, reason, outcome) = await _webMatch
-                .RunPlannedMatchAsync(playerId, BattleCorrelation(row.Id, plan.BattleIndex),
-                    BattleMatchKey(row.Id, plan.BattleIndex), plan.Setup, plan.BattleSeed)
+                .RunPlannedMatchAsync(playerId, correlation,
+                    BattleMatchKey(row.Id, plan.BattleIndex), setup, plan.BattleSeed)
                 .ConfigureAwait(false);
             if (!ok) return (false, "battle." + reason, null);
 

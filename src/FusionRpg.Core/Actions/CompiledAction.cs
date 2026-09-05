@@ -38,4 +38,5 @@ public sealed record CompiledAction(
     ICompiledPredicate Condition,
     IReadOnlyList<CompiledActionCost> Costs,
     IReadOnlyList<ActionScopeRow> Scopes,
-    ActionCategory? Category = null);
+    ActionCategory? Category = null,
+    ProjectilePenalties ProjectilePenalties = ProjectilePenalties.All);

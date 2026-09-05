@@ -13,7 +13,8 @@ public class SpeciesBuildPlannerTests
         ParityFloorPermille: 50, ParityCeilingPermille: 200,
         LeanMinPermille: 350, LeanMaxPermille: 600,
         CrowdingFactor: 633, SecondarySharePermille: 300,
-        MaxAptitudesPerSpecies: 5, MinAptitudesPerSpecies: 2);
+        MaxAptitudesPerSpecies: 5, MinAptitudesPerSpecies: 2,
+        RespecBasePrice: 50, RespecEscalationPermille: 500, RespecDecayDays: 3);
 
     static AnchorRow Anchor(
         string speciesId, string primary, string? secondary = null, bool pure = true,

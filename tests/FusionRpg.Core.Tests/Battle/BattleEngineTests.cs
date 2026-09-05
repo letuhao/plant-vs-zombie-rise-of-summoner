@@ -40,6 +40,21 @@ public class BattleEngineTests
     }
 
     [Fact]
+    public void ZombossPatternId_travelsFromSetupToTheReport_andIsAbsentWhenNull()
+    {
+        // species-build-todo.md T4.5: "pattern id on BattleSetup and on the report" -- proven by the
+        // real BattleEngine, not just record-shape inspection. Absent-by-default (null) also asserted:
+        // a non-Zomboss battle must not gain a field in its serialized report.
+        var withPattern = Setup() with { ZombossPatternId = "force-pure" };
+        var report = BattleEngine.Resolve(withPattern, 5);
+        Assert.Equal("force-pure", report.ZombossPatternId);
+
+        var withoutPattern = BattleEngine.Resolve(Setup(), 5);
+        Assert.Null(withoutPattern.ZombossPatternId);
+        Assert.DoesNotContain("ZombossPatternId", JsonSerializer.Serialize(withoutPattern));
+    }
+
+    [Fact]
     public void Different_seeds_diverge()
     {
         var a = JsonSerializer.Serialize(BattleEngine.Resolve(Setup(), 1));

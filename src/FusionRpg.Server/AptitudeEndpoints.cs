@@ -158,6 +158,11 @@ public static class AptitudeEndpoints
         var allocation = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
         var source = PointBudget.DemonTypeSourceFromLevel(level);
         var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
+
+        // species-build-todo.md T5.1 — additive: `spec-allocation-surface.md`'s panel needs the
+        // shipped baseline SEPARATELY from the effective (baseline-or-override) value in `shares`, to
+        // render an override "as a deviation from it" rather than as a standalone build.
+        var baseline = store.SpeciesBaselineAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
         return new
         {
             speciesId,
@@ -165,8 +170,11 @@ public static class AptitudeEndpoints
             budget = check.Budget,
             spent = check.Spent,
             withinBudget = check.WithinBudget,
+            hasOverride = store.HasSpeciesOverride(playerId, speciesId),
             shares = AptitudeCatalog.All.ToDictionary(
-                a => a.Id, a => allocation.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal)
+                a => a.Id, a => allocation.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal),
+            baseline = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => baseline.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal)
         };
     }
 

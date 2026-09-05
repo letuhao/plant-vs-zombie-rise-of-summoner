@@ -42,12 +42,17 @@ public sealed class ZombossCommanderAllocation
 
     /// <summary>Recomputes the cached allocation from the active pattern, a Θ value, and the loaded
     /// tuning — called on a pattern change or a Θ revision, never on the hot path (mirrors
-    /// `CommanderAllocationSource.Refresh`'s own contract exactly).</summary>
-    public void Refresh(long theta, AptitudeTuning tuning)
+    /// `CommanderAllocationSource.Refresh`'s own contract exactly).
+    ///
+    /// <para><b><paramref name="scope"/> is an argument, never a hard-coded Commander constant</b>
+    /// (species-build-todo.md T4.5, spec-zomboss-adaptive.md's own ⛔): a Zomboss pattern is a NAMED
+    /// allocation, not a player's commander build, so whichever <see cref="AllocationScope"/> the
+    /// battle seam resolves the enemy side under is the caller's call, not this type's.</para></summary>
+    public void Refresh(AllocationScope scope, long theta, AptitudeTuning tuning)
     {
         var pattern = ZombossPatterns.Resolve(_activePatternId);
-        var budget = PointBudget.PointsFor(AllocationScope.Commander, theta, tuning);
-        _cached = pattern.ToAllocation(AllocationScope.Commander, budget);
+        var budget = PointBudget.PointsFor(scope, theta, tuning);
+        _cached = pattern.ToAllocation(scope, budget);
     }
 
     /// <summary>The hot-path delegate shape — a bare field read, never a pattern lookup or a

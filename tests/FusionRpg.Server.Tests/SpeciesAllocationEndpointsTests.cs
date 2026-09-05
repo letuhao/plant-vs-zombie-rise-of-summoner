@@ -154,6 +154,29 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
     }
 
     [Fact]
+    public async Task Get_exposesTheShippedBaselineSeparately_soAnOverrideRendersAsADeviation()
+    {
+        var before = await (await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom"))
+            .Content.ReadFromJsonAsync<SpeciesStateDto>();
+        Assert.False(before!.HasOverride);
+        Assert.Equal(before.Shares["Might"], before.Baseline["Might"]); // no override yet: effective == baseline
+
+        await _http.PostAsJsonAsync("/api/aptitudes/species/allocate", new
+        {
+            playerId = _playerId,
+            speciesId = "fumeshroom",
+            shares = new Dictionary<string, long> { ["Ferocity"] = before.Budget }
+        });
+
+        var after = await (await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom"))
+            .Content.ReadFromJsonAsync<SpeciesStateDto>();
+        Assert.True(after!.HasOverride);
+        Assert.Equal(before.Budget, after.Shares["Ferocity"]); // effective now reflects the override
+        Assert.Equal(before.Baseline["Might"], after.Baseline["Might"]); // baseline itself never moves
+        Assert.NotEqual(after.Baseline["Might"], after.Shares["Might"]); // deviation is now visible
+    }
+
+    [Fact]
     public async Task Allocate_overspending_isRefused_scopeLocally()
     {
         var baseline = await (await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom"))
@@ -228,7 +251,9 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
         public long Budget { get; set; }
         public long Spent { get; set; }
         public bool WithinBudget { get; set; }
+        public bool HasOverride { get; set; }
         public Dictionary<string, long> Shares { get; set; } = new();
+        public Dictionary<string, long> Baseline { get; set; } = new();
     }
 
     static string RepoTuningDir() => Path.Combine(FindRepoRoot(), "data", "tuning");

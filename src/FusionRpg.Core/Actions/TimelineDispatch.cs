@@ -40,13 +40,22 @@ public static partial class BattleEngine
     /// </summary>
     static void RunTimelineActionPhase(
         BattleRunState state, Timeline.BattleModeProfile activeProfile, List<ActorState> order,
-        Timeline.ITurnEconomy economy, Func<ActorState, string> economyKey, Timeline.SimulationClock roundClock,
-        int rounds, Timeline.BattleTrace? trace, Timeline.IIntentSource? intentSource)
+        Timeline.ITurnEconomy economy, Func<ActorState, string> economyKey, DateTimeOffset now,
+        int rounds, Timeline.BattleTrace? trace, Timeline.IIntentSource? intentSource,
+        Timeline.ReactionLane reactionLane, Timeline.SimulationClock localClock)
     {
-        // A private, round-scoped timeline — ticks here are "since this round's action phase began",
-        // never compared against roundClock.Now. Kept off roundQueue on purpose (see the type doc).
+        // `localClock` is a PER-BATTLE clock (constructed once in `BattleEngine.Resolve`, alongside
+        // `Cooldowns`/`ResourcePools`/`reactionLane`) that never resets between calls — a real bug,
+        // found by LAND1's own staged sweep against real content (not caught by any synthetic probe
+        // this session): `Cooldowns` and `ResourcePools` are BOTH per-battle-persistent state that
+        // assumes monotonically increasing ticks, but a per-ROUND-fresh clock would hand them a tick
+        // sequence that goes backwards every round boundary (`ResourcePoolState.Resolve` threw
+        // "nowTick precedes LastTick" the moment a real multi-round battle exercised a reaction).
+        // `localQueue`/`slots`/`runner` stay round-scoped below (safe: the drain loop always empties
+        // the queue completely before this method returns, every call, so nothing outlives one round
+        // regardless of whether the queue itself is fresh or persistent) — only the clock feeding
+        // per-battle state needed to stop resetting.
         var localQueue = new Timeline.EventQueue(expectedEvents: Math.Max(4, order.Count * 2));
-        var localClock = new Timeline.SimulationClock();
         var localAdvance = new Timeline.NextEventAdvance();
         var slots = new Timeline.ActionSlots(activeProfile.W, activeProfile.WScope);
 
@@ -83,7 +92,7 @@ public static partial class BattleEngine
             trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Charging, Timeline.TurnState.Ready);
 
             var (outcome, target, envelope) = DeclareBasicAttack(
-                attacker, state, state.T0.AddMilliseconds((double)roundClock.Now), localClock.Now, trace, rounds, intentSource);
+                attacker, state, now, localClock.Now, trace, rounds, intentSource);
 
             if (outcome != AttackStepOutcome.Proceed)
             {
@@ -144,9 +153,40 @@ public static partial class BattleEngine
                     {
                         var targetKey = runner.CurrentTarget(ev.OwnerKey)!;
                         var target = state.ByKey[targetKey];
+
+                        // `battle-tempo` `reaction-lane` RL2: the defender reacts to the triggering
+                        // RESOLUTION itself — independent of whether the ensuing hit below actually
+                        // lands — matching ReactionLane's own doc ("can still react to a triggering
+                        // resolution... resolves INSIDE the triggering resolution"). Decision 12: the
+                        // counter does not negate the incoming hit, it retaliates alongside it — no
+                        // branch here skips ApplyBasicAttack below. `WReact = 0` (every shipped
+                        // profile) makes TryEnter always refuse with NoLane, so this is inert wherever
+                        // it is inert today.
+                        if (target.Active && reactionLane.TryEnter(target.Setup.Key, target.Setup.Side, trace) == Timeline.ReactionOutcome.Entered)
+                        {
+                            var pools = state.ResourcePools.GetOrCreate(target.Setup.Key, target.Derived, localClock.Now);
+                            var (committed, damage) = Timeline.ReactionCounter.TryCounter(
+                                pools, Timeline.ReactionLanePolicy.Tuning.PoiseSpend,
+                                Timeline.ReactionLanePolicy.Tuning.RiposteShareCapMilli, localClock.Now, target.Derived);
+                            if (committed && damage > 0)
+                            {
+                                state.ApplyHp(actor, -damage, "battle.reaction.counter", attacker: target);
+                                trace?.Apply(rounds, actor.Setup.Key, -damage);
+                            }
+                            reactionLane.Exit(target.Setup.Key);
+                        }
+
+                        // A counter above (or, in principle, anything else resolving earlier in this
+                        // SAME tick's batch) may have already killed the attacker -- a dead actor must
+                        // not still land a hit, matching DeclareBasicAttack's own `!attacker.Active`
+                        // early return at commit time. Correctness fix surfaced by building RL2, not
+                        // specific to it: the SAME gap exists for any concurrently-resolving kill under
+                        // W > 1, reaction lane or not.
+                        if (!actor.Active) continue;
+
                         var step = ApplyBasicAttack(
                             actor, target, state.BasicAttackEnvelopeCompiled, state,
-                            state.T0.AddMilliseconds((double)roundClock.Now), localClock.Now, state.Calculator, state.CritRng);
+                            now, localClock.Now, state.Calculator, state.CritRng);
                         if (step.Outcome == AttackStepOutcome.Proceed)
                         {
                             state.DispatchHit(actor, step.Target!, step.SignedDelta, rounds);

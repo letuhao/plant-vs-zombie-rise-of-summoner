@@ -41,3 +41,9 @@ The stack was built game-agnostic from day one: server and web already speak onl
 2. **One economy:** web mode and PvZ mode write the same ledgers through the same ingest; source-tagged (`source=web|injector`), never forked.
 3. **Server-authoritative play:** all web-mode outcomes (rolls, battles, expeditions) resolve server-side with recorded seeds; correlation-idempotent commands.
 4. **Existing locks unbroken:** injector Hot-path invariants, Funnel/Writer, DAL boundary, and guard scripts are untouched by this program.
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| `ExpeditionTickKinds.FoundDomain` | `party-dungeon/spec-domain-catalog.md` §5b | a new tick kind (`ExpeditionResolver.cs:7-14` has none) with its own band ceiling; `ApplyExpeditionRewards` (`RpgStore.Expeditions.cs:276`) writes the `rpg_domain_progress` discovery row through `RecordFoundUnlocked`; the pick is `WeightedChoice` over unfound `shallow` domains on the tick's seed |

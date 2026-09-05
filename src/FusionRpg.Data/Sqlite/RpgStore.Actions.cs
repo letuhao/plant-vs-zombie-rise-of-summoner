@@ -111,6 +111,11 @@ public sealed partial class RpgStore
         EnsureColumn(db, "rpg_action", "structure_axes_json", "TEXT NOT NULL DEFAULT '[]'");
         EnsureColumn(db, "rpg_action", "atom_families_json", "TEXT NOT NULL DEFAULT '[]'");
         EnsureColumn(db, "rpg_action", "rung_band_json", "TEXT");
+        // base-defense siege-cover, decision 35, the fifth of the five plumbing sites
+        // RequiresLineOfSight already occupies. Default 7 = ProjectilePenalties.All (Range|Obstruction|
+        // MeleeLock) -- an ordinary shot pays everything, matching the enum's own default and every
+        // existing row's correct behavior (no exemption authored, none applied).
+        EnsureColumn(db, "rpg_action", "projectile_penalties", "INTEGER NOT NULL DEFAULT 7");
         Exec(db, "CREATE INDEX IF NOT EXISTS ix_rpg_action_scope ON rpg_action(scope, scope_key);");
     }
 
@@ -159,7 +164,7 @@ public sealed partial class RpgStore
                    interrupt_cooldown_milli, target_spec_json, min_range, max_range,
                    range_channel, requires_line_of_sight, conditions_json,
                    scope, scope_key, category, pairing_role, structure_axes_json, atom_families_json,
-                   rung_band_json)
+                   rung_band_json, projectile_penalties)
                 VALUES
                   ($id, $name, $kind, $rung, $tags, $enabled, coalesce((SELECT revision FROM rpg_action WHERE action_id = $id), 0) + 1,
                    $grantable, $dae, $container,
@@ -169,7 +174,7 @@ public sealed partial class RpgStore
                    $interruptCd, $tspec, $minRange, $maxRange,
                    $rangeCh, $los, $conditions,
                    $scope, $scopeKey, $category, $pairingRole, $structureAxes, $atomFamilies,
-                   $rungBand)
+                   $rungBand, $projectilePenalties)
                 -- The update is SKIPPED when nothing differs, so `revision` counts how many times
                 -- this row CHANGED rather than how many times it was written -- the same fix
                 -- `effect_atom`'s own UpsertAtom already carries (E14a: import twice, hash
@@ -196,7 +201,8 @@ public sealed partial class RpgStore
                   requires_line_of_sight = excluded.requires_line_of_sight, conditions_json = excluded.conditions_json,
                   scope = excluded.scope, scope_key = excluded.scope_key, category = excluded.category,
                   pairing_role = excluded.pairing_role, structure_axes_json = excluded.structure_axes_json,
-                  atom_families_json = excluded.atom_families_json, rung_band_json = excluded.rung_band_json
+                  atom_families_json = excluded.atom_families_json, rung_band_json = excluded.rung_band_json,
+                  projectile_penalties = excluded.projectile_penalties
                 WHERE rpg_action.name IS NOT excluded.name
                   OR rpg_action.kind IS NOT excluded.kind
                   OR rpg_action.rung IS NOT excluded.rung
@@ -233,7 +239,8 @@ public sealed partial class RpgStore
                   OR rpg_action.pairing_role IS NOT excluded.pairing_role
                   OR rpg_action.structure_axes_json IS NOT excluded.structure_axes_json
                   OR rpg_action.atom_families_json IS NOT excluded.atom_families_json
-                  OR rpg_action.rung_band_json IS NOT excluded.rung_band_json;
+                  OR rpg_action.rung_band_json IS NOT excluded.rung_band_json
+                  OR rpg_action.projectile_penalties IS NOT excluded.projectile_penalties;
                 """,
                 ("$id", row.ActionId), ("$name", row.Name), ("$kind", ActionKinds.Name(row.Kind)),
                 ("$rung", row.Rung),
@@ -266,7 +273,8 @@ public sealed partial class RpgStore
                 ("$atomFamilies", JsonSerializer.Serialize(row.AtomFamilies)),
                 ("$rungBand", row.RungBand is { } band
                     ? JsonSerializer.Serialize(new[] { band.Floor, band.Ceiling })
-                    : (object)DBNull.Value));
+                    : (object)DBNull.Value),
+                ("$projectilePenalties", (int)row.ProjectilePenalties));
 
             return ActionRejection.Ok;
         }
@@ -287,7 +295,7 @@ public sealed partial class RpgStore
                        target_spec_json, min_range, max_range,
                        range_channel, requires_line_of_sight, conditions_json,
                        scope, scope_key, category, pairing_role, structure_axes_json, atom_families_json,
-                       rung_band_json
+                       rung_band_json, projectile_penalties
                 FROM rpg_action WHERE action_id = $id;
                 """;
             cmd.Parameters.AddWithValue("$id", actionId);
@@ -382,6 +390,7 @@ public sealed partial class RpgStore
             StructureAxes = structureAxes,
             AtomFamilies = atomFamilies,
             RungBand = rungBand,
+            ProjectilePenalties = (ProjectilePenalties)r.GetInt32(38),
         };
     }
 

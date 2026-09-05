@@ -167,6 +167,39 @@ public class WorldTurnCommitTests : IDisposable
     }
 
     /// <summary>
+    /// world-stage — found by actually watching a turn play back through `PlaybackRail`, not by a
+    /// test: only `Entries` was ever persisted, never `Phases` (`TurnReport.Phases`, the locked order
+    /// `BeginPhase` records live), so a phase that ran with zero entries (`Growth`'s own named
+    /// no-op, most turns) silently vanished the moment a stored report was reloaded — exactly the
+    /// silent gap `PlaybackRail`'s own GG-17 discipline exists to prevent, just one layer lower than
+    /// where that discipline could see it. This is the direct regression: reload a freshly-committed,
+    /// still-hot (never trimmed) report and prove every phase the live engine ran survives, in order
+    /// — not only the ones an entry happened to land in.
+    /// </summary>
+    [Fact]
+    public void A_reloaded_report_keeps_every_phase_the_engine_ran_even_one_with_no_entries()
+    {
+        var header = _store.GetWorldHeader("w")!;
+        var live = TurnEngine.Step(
+            WorldTemplateCatalog.Build(header.TemplateId, header.Seed, "w"),
+            new[] { new WorldCommand { CommanderId = "dave", CommandId = "c1", Kind = WorldCommandKinds.StandFast } },
+            header.Seed);
+        // Sanity: this fixture actually exercises the bug — at least one phase the live engine ran
+        // carries no entry of its own, so a reconstruction from entries alone would have to drop it.
+        Assert.Contains(live.Report.Phases, p => live.Report.Entries.All(e => e.Phase != p));
+
+        _store.SubmitWorldCommand("w", new WorldCommand
+        {
+            CommanderId = "dave", CommandId = "c1", Kind = WorldCommandKinds.StandFast
+        });
+        CommitAll();
+
+        var reloaded = _store.GetWorldTurnReport("w", 0);
+        Assert.NotNull(reloaded);
+        Assert.Equal(live.Report.Phases, reloaded!.Phases);
+    }
+
+    /// <summary>
     /// world-map W58's own acceptance: "a test asserts the stored-versus-engine replay refuses across
     /// the [RulesetVersion] bump rather than fabricating a report." `GetWorldTurnReport`'s own doc
     /// comment already states the contract ("Re-derivation refuses across a version change rather

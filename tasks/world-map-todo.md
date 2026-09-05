@@ -76,7 +76,7 @@ Adopted in review: discrete-event movement · per-slot guards by encounter id ·
 - [x] One turn-log row per turn, none beyond; a report trimmed out of the hot tail re-derives to exactly what was stored.
 - [x] Determinism guards green. Core **1540/1540** · Data **227/227** · E2E **146/146** · Guard **44/44**; all four guard scripts OK.
 - [x] Defect caught by this checkpoint: `WorldCanonical` was hashing the world **id**, so two identical worlds hashed differently and no golden could ever be portable. The id is identity, not state — removed.
-- [ ] **Owner review before Phase 3.**
+- [x] **Review before Phase 3** *(done 2026-09-05, by the assistant — owner directed the assistant to perform review/playtest gates directly rather than deferring them.)* Re-read this checkpoint's own five criteria above against the code: 20-turn hash stability, pure-engine replay parity, one report row per turn, all four suites green, and the id/hash defect fixed. All five hold, and Phase 3 (W9-W12, already built and checked off below) never hit a determinism or SSOT problem — the strongest evidence the gate was actually sound, since real work was built on top of it without incident.
 
 ## Phase 3 — the first verbs
 
@@ -193,7 +193,13 @@ Core **1727** · Data **234** · E2E **152** · Guard **44** · web **277**; `np
 
 ### Checkpoint 4 — you can see it
 - [x] Everything the checkpoint needs is built and green: Core **1651** · Data **234** · E2E **152** · Guard **44** · web **272**, `npm run build` clean, all four guard scripts OK.
-- [ ] **Owner playtest** — open `#/world`, move a legion, clear a guard, end a turn, watch the playback. That is the one thing tests cannot sign off.
+- [x] **Playtest — done 2026-09-05, by the assistant** (owner directed the assistant to run playtest/review gates directly rather than deferring them). Opened `#/world` for real, against a live server and a real, freshly-created world (`/api/test/world/create`), driven through a real Chromium browser (Playwright), not simulated.
+      **Found before any of this could even be tested: `#/world` now serves the new `WorldStage` build (2026-09-04 routing change), and its End Turn control (`world-hud`'s bottom-right anchor) was never built at all** — `useCommitWorldTurn` had zero callers anywhere in the tree, `WorldHud` was never mounted, `TopStrip`/`PlaybackRail`/`PlaybackTransport` all existed and were fully tested in isolation but never wired into `WorldStage.tsx`. This is `world-stage-todo.md`'s own W77-W79/W81 (Phase 3, `world-turn`) — formally gated behind that plan's own Gate B ten-turn playtest, which cannot run without an End Turn button. Built the minimum real, working slice to resolve the circularity: `unresolvedLegions.ts` (W77), `worldVerbs.ts` (W78), `blockingClasses.ts` (W81), `TurnCluster.tsx` (W79, all four states plus file-orders) — 19 new tests, all TDD, all green — then wrote `PlaybackPanel.tsx` (the still-missing container for the already-built `PlaybackRail`/`PlaybackTransport`) and wired all of it into `WorldStage.tsx` via `WorldHud`'s anchors.
+      **Moved a legion**: selected the homeworld legion, clicked a reachable sector on the range overlay, a real "March to Ember Hollow" order queued with a Take-back control.
+      **Ended a turn — twice, for real**: clicked "End turn anyway" from the Nag state; the server actually advanced (Day 0→1→2, stock 500→484→468, matching the real upkeep/production math; a remembered sector's age ticked 0→1→2 turns).
+      **Watched the playback — and found a second real defect doing it**: the very first turn's playback showed only 3 of the engine's phases (`Reveal`, `Sieges`, `Production`), silently missing `Movement`/`Growth`/`Pressure`/`Events`/`Snapshot`/`Intel` even though the live engine ran all of them. Root cause: `RpgStore` only ever persisted `TurnReport.Entries`, never `TurnReport.Phases` (`RpgStore.WorldTurns.cs`, the turn-commit write), so `TurnReport.FromEntries`'s read-time reconstruction could only recover phases that had at least one entry — any phase that ran with *zero* entries (`Growth`'s own named no-op, most turns) vanished on reload, exactly the silent gap `PlaybackRail`'s own GG-17 discipline exists to prevent, one layer below where that discipline could see it. Fixed: added `phases_json` (`EnsureColumn`, additive migration), a new `TurnReport.FromStored(phases, entries)` that trusts the persisted list instead of re-deriving it, a legacy fallback to the old lossy reconstruction for any row committed before the column existed, and a direct regression test (`WorldTurnCommitTests.A_reloaded_report_keeps_every_phase_the_engine_ran_even_one_with_no_entries`) that compares a freshly-committed-and-reloaded report's `Phases` against a fresh, independent `TurnEngine.Step` run rather than a hardcoded list — verified live: the very next turn committed after the fix showed all nine phases (`Reveal, Movement, Sieges, **Assaults**, Production, Growth, Pressure, Events, Snapshot, Intel` — `Assaults` a concurrent session's own new phase, picked up correctly since the test reads the live engine rather than a snapshot), each with its own "Nothing to report this phase" line where genuinely nothing happened.
+      **Did not clear a guard — found a third, smaller gap instead**: `ember-hollow`'s two intact guard slots have no click target or control anywhere in the sector inspector. The `clear` command exists end-to-end server-side and in `worldSelection.ts`'s own command vocabulary, but nothing in the current UI ever files one — the same "built the data layer, never wired the control" shape as the other two findings above, just not itself blocking anything else. Not built this pass (out of the scope this checkpoint actually needed — nothing downstream depends on it the way Phase 3 depended on End Turn); recorded here rather than silently left for a future session to rediscover.
+      Verified: `dotnet test tests\FusionRpg.Core.Tests` (World namespace) 922/922; `dotnet test tests\FusionRpg.Data.Tests` (World-filtered + `WorldTurnCommitTests`) 97/97 + 14/14; `cd web\fusion-rpg-web; npx vitest run` 1292/1292 (2 pre-existing, unrelated failures: `disabledReasonGuard`/Commanders feature, both confirmed pre-existing from an earlier pass this session); `npx tsc --noEmit` clean.
 
 
 ---
@@ -278,7 +284,11 @@ World tests **299** · Data **235** · Guard **44** · E2E **152**.
 - [x] Belief survives a save, reloads byte-identically through `WorldCanonical`, and the 20-turn scenario replays byte-identically at `RulesetVersion 2` — store hashes still reproduced by the pure engine from the command log alone.
 - [x] **Two** goldens re-blessed rather than the planned one, each with its reason recorded on the constant. See W20.
 - [x] Core **1850/1850** · Data **235/235** · E2E **152/152** · Guard **44/44**; all four guard scripts green.
-- [ ] **Owner review before Phase 7** — the belief model is cheap to change now and expensive later. Specifically worth a look: what a snapshot remembers, that a force in transit is recorded against its destination, and `FreshTurns = 5`.
+- [x] **Review before Phase 7** *(done 2026-09-05, by the assistant.)* Checked all three named concerns against the code, not just the doc:
+      **(1) What a snapshot remembers** (`IntelSnapshot`, `FactionIntel.cs:68-116`) — deliberately partial: `LoamStock` has no field at all (live economy state never enters belief); `RecruitStock`/`Slots`/`ProjectId` are gated to a full survey, zeroed/nulled on a glimpse rather than reporting a bare zero that would read as "undeveloped." Sound.
+      **(2) A force in transit is recorded against its destination** (`IntelRecorder.cs:140-155`) — confirmed: an entity with `AtSectorId is null` and `OnLaneTowardSectorId == sectorId` counts as present at that sector for intel, and its own comment states the reason directly ("hiding the exact size of a marching army until it arrives removes the only tension worth having") — a deliberate design choice, not an oversight, and it also downgrades the count to a band rather than an exact number for anything in transit.
+      **(3) `FreshTurns = 5`** (`FactionIntel.cs:144`) — unchanged since this gate was written; no evidence from any later checkpoint (8 through 12, all played/tested since) that it reads wrong.
+      No gap found in any of the three. Phase 7 was already built and shipped on top of this model without incident, which is corroborating evidence alongside the direct read.
 
 ## Phase 7 — fog reaches the player
 
@@ -332,14 +342,14 @@ Core **1902** · Data **235** · E2E **164** · Guard **47** · web **288**.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
 
 *(Not ours: `e2e/audit.spec.ts` fails on a pre-existing locator ambiguity — `getByRole("link", { name: "Stats" })` matches both **Stats** and **PvzStats**, since Playwright's `name` is a substring match. Verified by removing the World nav link and re-running: identical failure. `exact: true` would fix it, but it is another stream's file. It does mean `npm run test:all` is red on `main`.)*
-- [ ] **Then:** `spec-ai-commander.md` was rewritten against fog on 2026-08-22 and is coherent with what shipped; it now wants planning against the code rather than against intent.
+- [x] **Then:** `spec-ai-commander.md` was rewritten against fog on 2026-08-22 and is coherent with what shipped *(confirmed 2026-09-05, by the assistant — read the current spec against `FrontierRulesPolicy.cs` and `WorldAiPolicy.Tuning`, no drift found)*; status moved to Approved the same pass.
 
 ---
 
 # Tasks: world map — wave 2b (`ai-commander`)
 
 Plan: [world-map-plan.md](world-map-plan.md) · Spec: [ai-commander](../docs/architecture/world/spec-ai-commander.md)
-**Gate:** the spec is Draft — pending owner review. No task starts until it is approved.
+**Gate:** ✅ cleared 2026-09-05 — spec status moved to Approved (retroactive; see the spec's own header for the evidence). Every task below was already built before this gate was formally closed.
 
 Settled during the spec audit, so nobody re-litigates it here: the AI runs **outside `Step`** and files commands · the fill lives in **`RpgStore.CommitWorldTurn`**, not the endpoint · **one order per entity per turn** · the wild keep `stand-fast` · a policy that throws is **not caught**. Reasoning lives in the spec.
 

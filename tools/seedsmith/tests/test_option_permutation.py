@@ -5,9 +5,11 @@ from __future__ import annotations
 from seedsmith.adapters.demons.anchor.permute import order_for
 from seedsmith.adapters.demons.anchor.vote import (
     VOTED_FIELDS,
+    SetVoteResult,
     VoteRecord,
     VoteResult,
     disagreement_rate,
+    resolve_set_vote,
     resolve_vote,
 )
 
@@ -102,3 +104,72 @@ def test_disagreement_rate_zero_when_everything_unanimous():
     ]
     rates = disagreement_rate(records)
     assert rates["rarity"]["plant"] == 0.0
+
+
+# ---------------------------------------------------------------------------------------------
+# resolve_set_vote -- per-MEMBER majority for set-valued fields (added 2026-09-05, SMOKE BATCH
+# criterion 2). `resolve_vote` stays the scalar path and is unchanged; these pin the extension.
+# ---------------------------------------------------------------------------------------------
+
+def test_set_vote_unanimous_is_high_and_keeps_every_member():
+    r = resolve_set_vote([["a", "b"], ["b", "a"], ["a", "b"]])
+    assert r.values == ("a", "b")
+    assert r.confidence == "high"
+    assert r.minority == ()
+
+
+def test_set_vote_partial_overlap_resolves_instead_of_discarding_a_unanimous_member():
+    # THE case the scalar path could not express: flattened to "a|b"/"a|c"/"a|d" this was a
+    # 1-1-1 unresolved, throwing away a 3/3 agreement on `a`.
+    r = resolve_set_vote([["a", "b"], ["a", "c"], ["a", "d"]])
+    assert r.values == ("a",)
+    assert r.confidence == "split"
+    assert r.minority == ("b", "c", "d")
+    assert r.tally["a"] == 3
+
+
+def test_set_vote_needs_two_samples_for_a_member_never_one():
+    r = resolve_set_vote([["a", "solo"], ["a", "b"], ["a", "b"]])
+    assert r.values == ("a", "b")
+    assert "solo" not in r.values
+
+
+def test_set_vote_fully_disjoint_is_unresolved_and_value_is_none():
+    r = resolve_set_vote([["a"], ["b"], ["c"]])
+    assert r.values == ()
+    assert r.confidence == "unresolved"
+    assert r.value is None
+
+
+def test_set_vote_a_failed_sample_still_counts_against_the_threshold():
+    # Two real samples agreeing out of three is a majority (2 >= 2) -- but the denominator stays
+    # three, so it is a `split`, never `high`.
+    r = resolve_set_vote([["a"], ["a"], None])
+    assert r.values == ("a",)
+    assert r.confidence == "split"
+
+
+def test_set_vote_two_failed_samples_cannot_resolve():
+    r = resolve_set_vote([["a"], None, None])
+    assert r.confidence == "unresolved"
+    assert r.value is None
+
+
+def test_set_vote_value_and_minority_key_read_like_the_scalar_result():
+    r = resolve_set_vote([["b", "a"], ["a", "b"], ["a", "c"]])
+    assert r.value == "a|b"
+    assert r.minority_key == "c"
+
+
+def test_set_vote_requires_exactly_the_declared_sample_count():
+    try:
+        resolve_set_vote([["a"], ["a"]])
+    except ValueError:
+        return
+    raise AssertionError("resolve_set_vote must refuse a wrong sample count")
+
+
+def test_scalar_resolve_vote_is_untouched_by_the_extension():
+    # The extension must not change the scalar path any existing caller depends on.
+    assert resolve_vote(["x", "x", "x"]) == VoteResult(value="x", confidence="high", minority=None)
+    assert resolve_vote(["x", "y", "z"]).confidence == "unresolved"

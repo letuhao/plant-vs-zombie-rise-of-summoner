@@ -6,12 +6,20 @@ namespace FusionRpg.Core.Demons.Generation;
 /// tunables-ssot.md T1) — the parity band, the per-species lean range and its crowding sensitivity,
 /// and the shape limits (`min`/`maxAptitudesPerSpecies`). Server-only host wiring, mirroring every
 /// other generation-tool tuning file (`DemonShapeTuning`) — the injector never plans a build.</summary>
+/// <summary><see cref="RespecBasePrice"/>/<see cref="RespecEscalationPermille"/>/
+/// <see cref="RespecDecayDays"/> — species-build-todo.md T4.1, spec-species-respec.md's own decision
+/// 15: the price rises with the respec COUNT on that species and decays over time (churn, not
+/// investment; never species level — that was decision 9, withdrawn by audit finding A2). Added
+/// beside this file's existing redistribution-plan keys per the spec's own instruction ("shared with
+/// m4 — add the three respec keys beside them; do not rewrite the file"), not a second tuning file, so
+/// <see cref="RespecPolicy"/> reads the same hub every other species-build consumer already reads.</summary>
 public sealed record SpeciesBuildTuning(
     int SchemaVersion, int Version,
     long ParityFloorPermille, long ParityCeilingPermille,
     long LeanMinPermille, long LeanMaxPermille,
     long CrowdingFactor, long SecondarySharePermille,
-    int MaxAptitudesPerSpecies, int MinAptitudesPerSpecies);
+    int MaxAptitudesPerSpecies, int MinAptitudesPerSpecies,
+    long RespecBasePrice, long RespecEscalationPermille, int RespecDecayDays);
 
 public sealed class SpeciesBuildTuningRejection : Exception
 {
@@ -62,7 +70,10 @@ public static class SpeciesBuildTuningLoader
                 CrowdingFactor: Long(root, "crowdingFactor"),
                 SecondarySharePermille: Long(root, "secondarySharePermille"),
                 MaxAptitudesPerSpecies: Int(root, "maxAptitudesPerSpecies"),
-                MinAptitudesPerSpecies: Int(root, "minAptitudesPerSpecies"));
+                MinAptitudesPerSpecies: Int(root, "minAptitudesPerSpecies"),
+                RespecBasePrice: Long(root, "respecBasePrice"),
+                RespecEscalationPermille: Long(root, "respecEscalationPermille"),
+                RespecDecayDays: Int(root, "respecDecayDays"));
         }
     }
 

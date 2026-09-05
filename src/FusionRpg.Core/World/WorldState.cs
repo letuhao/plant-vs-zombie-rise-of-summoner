@@ -124,6 +124,25 @@ public sealed record WorldSlot
     /// lands now so it hashes and persists before that module needs it.
     /// </summary>
     public int? ConstructionTurnsRemaining { get; init; }
+
+    /// <summary>
+    /// base-defense `structure-state`: current structure HP. **Null means undamaged** — not zero, and
+    /// not "no structure." Null is the default on every slot in every existing world, which is what
+    /// keeps <see cref="WorldCanonical"/>'s conditional `slot-hp` row silent and every golden unmoved.
+    /// </summary>
+    public long? StructureHp { get; init; }
+
+    /// <summary>
+    /// base-defense `structure-state`, audit F10: slot-level resource depletion, per-mille, 0 =
+    /// untouched. Deliberately NOT <see cref="WorldSector.DepletionMilli"/> — that field is
+    /// sector-scoped and already claimed by the loam program, and the owner's decision ("stop mining
+    /// and product, because the resource can exhausted") is per-mine. Two consumers of one field would
+    /// make each one's changes look like the other's bug.
+    ///
+    /// <para>Bounded ratio, 0..1000 — exempt from AGENTS.md's no-hard-ceilings rule, which names
+    /// "bounded ratios (per-mille, 0..1)" explicitly.</para>
+    /// </summary>
+    public int SlotDepletionMilli { get; init; }
 }
 
 public sealed record WorldSector
@@ -152,6 +171,20 @@ public sealed record WorldSector
     /// none to forget; the `int` version silently overflowed into negative upkeep at legal inputs.
     /// </summary>
     public long LoamStock { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-construction` decision 27/28: raw material drawn from a working
+    /// <see cref="StructureKind.Extractor"/>-adjacent slot, refined into <see cref="IronworkStock"/>
+    /// by a <see cref="StructureKind.Refinery"/>. `long`, matching `LoamStock`'s own precedent above
+    /// — the same int-overflow incident applies to any stockpile field.
+    /// </summary>
+    public long RubbleStock { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-construction` decision 28: the refined output of <see cref="RubbleStock"/>
+    /// via <see cref="SiegeConstruction.Refine"/> — a lossy, gated conversion, not a 1:1 exchange.
+    /// </summary>
+    public long IronworkStock { get; init; }
 
     /// <summary>
     /// The local strength of the Fracture, per-mille, 1000 = baseline (spec-loam-model.md). The
