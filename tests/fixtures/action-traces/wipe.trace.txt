@@ -5,10 +5,13 @@ draw initiative 789
 draw initiative 30
 draw initiative 181
 draw initiative 431
+reaction wave:0 no-lane
 draw crit 813044
+reaction squad:0 no-lane
 draw crit 487145
 draw crit 14872
 draw essence 243
+reaction squad:0 no-lane
 draw crit 267241
 draw crit 301443
 phase 1 shield-upkeep
@@ -21,11 +24,14 @@ phase 2 initiative
 draw initiative 851
 draw initiative 284
 draw initiative 285
+reaction squad:1 no-lane
 draw crit 393446
 draw crit 665111
 draw essence 987
+reaction squad:1 no-lane
 draw crit 845643
 draw crit 565761
+reaction wave:0 no-lane
 draw crit 82159
 draw crit 634634
 phase 2 shield-upkeep
@@ -38,6 +44,7 @@ phase 3 initiative
 draw initiative 899
 draw initiative 678
 draw initiative 891
+reaction squad:1 no-lane
 draw crit 314465
 draw crit 605919
 draw essence 36

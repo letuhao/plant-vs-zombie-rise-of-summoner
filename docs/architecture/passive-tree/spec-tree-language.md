@@ -70,7 +70,7 @@ moved and why, so a reader who remembers the old names is not left guessing.
 | `elementSlot` | **VALIDATED** | CHOSEN | From `omni` + the 6 roster elements, filtered by the cell — and **forced** for an elemental tree |
 | `statusId` | **VALIDATED** | CHOSEN | From the 21, filtered by the cell |
 | `trigger` | **VALIDATED** | CHOSEN | From the **11 authorable** of 13 (§3). `OnGranted`/`OnRemoved` are omitted from the enum, not allow-listed |
-| `exclusion.form` (`none` \| `reroute` \| `precedence`) | **VALIDATED** | CHOSEN | D14's ladder minus `nullification` — §5 |
+| `exclusion.form` (`none` \| `reroute` \| `precedence` \| `nullification`) | **VALIDATED** | CHOSEN | **D14's full ladder. `nullification` is back in the enum (D40)** — §5 |
 | `exclusion.propertyKeys[]` | **VALIDATED** | CHOSEN | Keys must come from the plan's `propertyVocabulary`. **Never a node id** |
 | `name`, `nameKey` | **AUTHORED** | FREE | Bounded by grammar and length, deduplicated corpus-wide |
 | `flavor` | **AUTHORED** | FREE | ≤140 chars, no mechanics, no numbers — `family_propose/prompts.py:88-96`'s own rule |
@@ -176,7 +176,8 @@ INPUT   trees[]        from the plan's roster (D9/D27) — read, never hardcoded
        # HARD CONSTRAINTS OVERRIDE THE DRAW, and they narrow, never widen:
        cell.element   := t.element   if t is an elemental tree
        cell.aptitude  := t.aptitude  if t is a primary tree
-       cell.nodeClass := "mechanism" if tier >= t.mechanismFloor
+       cell.nodeClass := "mechanism" for exactly mechNodes[tier] of this tier's slots,
+                         # an EXACT PER-TIER COUNT from archetypes[].mechNodes[] — never a threshold
 
 5  # REBALANCE: a slot whose draw was overridden returns its drawn value to the pool, and the
    # pool is re-apportioned over the REMAINING slots.
@@ -196,6 +197,16 @@ already uses — enums shipped empty in the constant and filled at call time, `d
 must go back to the pool. Skip it and the forced trees consume their quota twice — once by force, once
 by draw — and the free trees inherit the deficit. That is the original defect wearing a planner's
 uniform.
+
+> **Step 4's mechanism constraint is a COUNT, not a floor — reconciled against the frozen plan
+> schema.** `archetypes[].mechNodes[]` is an `int[10]` of per-tier mechanism counts, and
+> `spec-tree-plan.md` §4 retires the name `mechanismFloor` *"everywhere — field, tunable and gate"*.
+> No threshold reproduces the emitted ramp: `broad-and-flat` puts **one of two** nodes at tiers 4–7 in
+> the mechanism class and `gated-deep` **one of three** at tier 3, so there is no tier `f` for which
+> *"tier ≥ f ⇒ mechanism"* is the same rule — pick `f = 8` and five mechanism nodes per branch sit
+> below it unexplained; pick `f = 3` and the check fails a plan that is correct by construction. The
+> deep-tier requirement survives as `mechNodes[tierCount] == w[tierCount]` (the plan's `R-M1`), which
+> is an exact count too.
 
 #### 4.3 The target file
 
@@ -220,21 +231,15 @@ The ladder, applied in order. Both sides print the rule and name the same winner
 |---|---|---|
 | **Reroute** | *"if the damage is converted, this node instead amplifies the converted type"* — no conflict ever occurs | **Ask for this first.** Fall through only if the effect genuinely cannot reroute |
 | **Precedence** | the conflict is *defined*, not forbidden: *"applies before conversion"* | the common case |
-| **Nullification** | a named node declared inoperative | ⛔ **Absent from the schema enum.** It is the only form that names a node, so a generated corpus cannot maintain it. Target: zero. A genuine case arrives as a review-queue escalation, never as a generated field |
+| **Nullification** | a node declared inoperative while the property it conflicts with holds | ✅ **In the enum, and printed loudly (D40).** The last rung, taken only when the pair can be neither rerouted nor ordered. It keys on a **property**, never on a node id — §5.2 |
 
 **Target rarity ~2% of nodes** (D14). At 1,560 generic nodes that is ~31 exclusions — small enough to
 review by hand, which is the honest reason the ladder works.
 
-⚠️ Reroute and Precedence are **printed runtime no-ops, not allocation blocks.** Both nodes stay
-allocatable and the concentration index still counts the points spent on the nullified one. Refunding
-points would make the focus multiplier depend on which other trees you took, which is exactly what
-§3.2's two-index blend was written to avoid.
-
-The predicate mechanism is shipped and needs no new type: `EligibilityRule` (`EligibilityRule.cs:20-24`)
-carries `RequireTags` (bare keys) and `AnyOfTags` (`key:value` pairs), evaluated by `IsEligible`
-(`:36`), with `Validate` (`:74-95`) refusing a rule that selects zero eligible affixes against a
-non-zero budget (`UnsatisfiablePool`, `:89`, `:93`). Tags are derived from the affix's own atoms by
-`AffixTags.Of` (`AffixTags.cs:41`) — **derived, so the stage cannot game them.**
+⚠️ All three forms are **printed runtime no-ops, not allocation blocks.** Every node stays
+allocatable and the concentration index still counts the nodes bought, including a nullified one.
+Refunding points would make the focus multiplier depend on which other trees you took, which is
+exactly what §3.2's two-index blend was written to avoid.
 
 #### 5.1 The honest finding: the property vocabulary comes from `tree-plan`, not from the corpus
 
@@ -254,6 +259,40 @@ and `AtomRowValidator.cs:184` becomes a membership check, a predicate can key on
 else, and this module's exclusion gate must report that as a `NOT_MEASURED` rather than a pass.
 
 Stating it now costs a paragraph. Discovering it after 1,560 nodes are generated costs the run.
+
+#### 5.2 Nullification stays, and the "reads like a bug" risk is answered by presentation (D40)
+
+The case against nullification was never that it is unbalanced — it is that a node the player bought
+and which then does nothing **reads as a bug**. **D40's answer is presentation, not removal**, and it
+comes with a reason: dropping the rung would force the generator to refuse a pair it can neither
+reroute nor order, and a generator that can refuse is a generator that stalls a 4,680-call run on a
+content problem nobody is awake to fix.
+
+Three requirements travel with the form. All three are checkable, and a nullification that misses any
+of them is a defect, not a style note:
+
+1. **Both sides print the rule, and both name the same winner.** `printedText` is
+   template-composed for exactly this (§2's table), so the losing node says what beats it and the
+   winning node says what it beats. One-sided text is the version that reads as a bug.
+2. **The surface renders the node INERT, not un-unlocked.** Those are different states: un-unlocked is
+   *you have not bought this*, inert is *you own this and something you also own switches it off*.
+   Rendering the second as the first is what makes a correct rule look like a broken one.
+   `tree-resolve` contributes zero for it and reports **why** (its §13 and test 17); `tree-surface`
+   renders that distinction.
+3. **It keys on a property, never on a node id.** Unchanged from D14 and non-negotiable — a generated
+   corpus cannot maintain named pairs, and `exclusion.propertyKeys[]` is checked against the plan's
+   `propertyVocabulary` (gate `PassiveTree/ExclusionResolvable`).
+
+**Rarity is the fourth requirement and it is the same ~2% (D14)** — the target is on exclusions as a
+whole, not a separate budget for this rung, and reroute stays the first thing the brief asks for.
+`tree-review` censuses every nullification, and under D40 that census **may enforce**: the earlier
+demotion to a warning is lifted.
+
+The predicate mechanism is shipped and needs no new type: `EligibilityRule` (`EligibilityRule.cs:20-24`)
+carries `RequireTags` (bare keys) and `AnyOfTags` (`key:value` pairs), evaluated by `IsEligible`
+(`:36`), with `Validate` (`:74-95`) refusing a rule that selects zero eligible affixes against a
+non-zero budget (`UnsatisfiablePool`, `:89`, `:93`). Tags are derived from the affix's own atoms by
+`AffixTags.Of` (`AffixTags.cs:41`) — **derived, so the stage cannot game them.**
 
 ### 6. The request / response contract
 
@@ -315,7 +354,9 @@ USER
     1. `affixIds`  — {1..3} from the list below. They are this node's whole effect.
     2. `affinity`  — how central each is: core | likely | occasional.
     3. `exclusion` — only if this node's effect genuinely conflicts with a PROPERTY below.
-                     Prefer `reroute`. Most nodes have none.
+                     Prefer `reroute`. Most nodes have none. `nullification` is the last
+                     resort — use it only when the pair can be neither rerouted nor ordered,
+                     and say plainly which side wins.
     4. `name`, `nameKey`, `flavor`.
 
   Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.
@@ -358,10 +399,11 @@ Four repo rules this obeys:
     "exclusion": { "type": "object", "additionalProperties": false,
       "required": ["form", "propertyKeys"],
       "properties": {
-        "form": { "type": "string", "enum": ["none", "reroute", "precedence"] },
+        "form": { "type": "string", "enum": ["none", "reroute", "precedence", "nullification"] },
         "propertyKeys": { "type": "array", "items": { "type": "string", "enum": [] } } },
       "description": "Only when this node's effect genuinely conflicts with a listed property.
-                      It is NOT a way to make the node stronger, and it never names another node." },
+                      It is NOT a way to make the node stronger, and it never names another node.
+                      `nullification` is the last resort and must say which side wins." },
     "name":    { "type": "string", "description": "The node's own name. It is NOT the tree's name." },
     "nameKey": { "type": "string", "pattern": "^tree\\.node\\.[a-z0-9-]+$",
                  "description": "Lowercase-kebab key. It is NOT free text." },
@@ -377,8 +419,11 @@ Four repo rules this obeys:
 
 Three notes, each earned by a measured defect:
 
-- **`nullification` is absent from the `form` enum, not discouraged.** An option that cannot be
-  sampled is a validator nobody has to write.
+- **`nullification` is in the `form` enum (D40), and the discipline moved from the enum to the
+  print.** The enum keeps the *shape* closed — a form outside the four is still unsampleable — while
+  the rung that used to be removed is now carried with three checkable requirements on how it reads
+  (§5.2). What is still unsampleable is the thing that actually cannot be maintained: a predicate that
+  names a node, because `propertyKeys` draws its enum from the plan's `propertyVocabulary`.
 - **`blocked` is an empty-string sentinel, not a boolean**, per `anchor/prompts.py:61-83`'s live
   finding: a boolean let a real local model fill the field with something plausible-but-wrong rather
   than leaving it empty.
@@ -424,9 +469,9 @@ seed → concrete → per-player principle stops at the second arrow, on the sam
 | 13 | **Persist-time re-gate** | `pipeline/run.py:122-127` — the gate runs **twice** | `escalated[key] = "failed the gate at persist time"` |
 | 14 | **Idempotence** | `should_generate` (`provenance.py:77-95`); `ProvenanceLedger.record` raises on a duplicate row (`:109-118`) | `SkipReason.ALREADY_GENERATED` |
 | 15 | **`PassiveTree/QuotaDrift`** | emitted per-axis counts vs target, **re-derived independently**, per `coverage_report/derive.py:257-282` | `abs(count − quota) > toleranceUnits`, **in either direction** |
-| 16 | **`PassiveTree/MechanismFloor`** | `nodeClass` at tiers ≥ the archetype's floor | any deep-tier `magnitude` node — ideal §3.5: *a magnitude-only deep tier is measurably worthless to a focused build* |
+| 16 | **`PassiveTree/MechanismRamp`** ~~`MechanismFloor`~~ | per-tier `mechanism` count against `archetypes[].mechNodes[t]` | any tier whose count differs — **exact, in either direction** — and any tree failing `mechNodes[tierCount] == w[tierCount]`. Renamed with the plan's own retirement of `mechanismFloor` (`spec-tree-plan.md` §4); the targets file's `gates.mechanismFloor.*` is `gates.mechanismRamp.deepestTierShareMilli`. ideal §3.5: *a magnitude-only deep tier is measurably worthless to a focused build* |
 | 17 | **`PassiveTree/CellOccupancy`** | `(channelFamily, sorted trigger+element multiset)` per node, the `cells.py:56-68` key adapted | median > 2 |
-| 18 | **`PassiveTree/ExclusionRate`** | exclusion count / node count, and the form split | rate over target, **any** `nullification`, or a predicate naming a node id |
+| 18 | **`PassiveTree/ExclusionRate`** | exclusion count / node count, and the form split across all four values | rate over target, a predicate naming a node id, or a `nullification` missing any of §5.2's three requirements — **the form itself is legal (D40); what fails is an unprinted or one-sided one** |
 | 19 | **`PassiveTree/ExclusionResolvable`** | every predicate key against the plan's `propertyVocabulary`, then `EligibilityRule.Validate` (`:74-95`) | unknown key, or `UnsatisfiablePool` |
 | 20 | **`PassiveTree/NearDuplicate`** | `setgen/dedup.py`'s local exact Jaccard, deliberately **not** the shared MinHash | the shared MinHash over-reports 7× on real pairs (`dedup.py:6-16`) — gating on it would fail every run for the wrong reason |
 | 21 | **`PassiveTree/NameCollision`** | `name_collision` (`validators/field_echo.py:69-94`) against `takenNames`, plus `dedup.dedup_report` | measured: **83 of 83** commander effects were once named identically to their demon, caught by a corpus metric and not by any per-item check |
@@ -527,8 +572,9 @@ def permitted(axis: str, cell: "Mapping[str, str]", vocab: Vocabulary) -> "list[
 | `overrides_return_their_draw_to_the_pool` | force every elemental tree's element; assert the residual marginals still match target within tolerance |
 | `quota_drift_is_re_derived_not_read` | mutate the stored brief; the drift metric still catches the corpus |
 | `permutation_is_verified_not_trusted` | `verify_permutation` raises on a rendered order that does not reproduce `order_for` |
-| `mechanism_floor_holds_at_deep_tiers` | no tier ≥ floor carries `nodeClass: magnitude` |
-| `nullification_is_unsampleable` | `"nullification"` is absent from the `form` enum |
+| `mechanism_count_matches_the_plans_ramp_at_every_tier` | per-tier `mechanism` count `==` `archetypes[].mechNodes[t]`, exact and in both directions, plus `mechNodes[10] == w[10]`. A threshold implementation fails it on `broad-and-flat` tiers 4–7 |
+| `nullification_is_sampleable_and_prints_both_sides` | D40 — `"nullification"` is in the `form` enum, and a nullification whose `printedText` is missing on either side, or which names a different winner on the two sides, is a defect |
+| `a_nullified_node_is_marked_inert_not_unbuyable` | the node stays allocatable and the seed carries the inert state, so the surface can render *owned but switched off* rather than *not bought* (§5.2 requirement 2) |
 | `exclusion_predicate_never_names_a_node` | no `propertyKeys` entry matches the node-id grammar |
 | `exclusion_keys_resolve_against_the_plan` | every key is in `propertyVocabulary`; `EligibilityRule.Validate` reports no `UnsatisfiablePool` |
 | `unresolved_count_is_the_only_gating_metric` | `GATING_METRICS` has exactly one entry |
@@ -550,7 +596,9 @@ changing the unit of work away from one node.
 **Never:** put a number in a model schema — not a magnitude, not a coefficient, not a tier, not a
 duration, not a chance; hardcode a roster size (twelve aptitudes is a *measured outcome*, read from
 `AptitudeCatalog`/its mirror); let the stage name a `channel`, a `kindId`, an `attachPoint` or another
-node; emit `nullification`; widen the atom vocabulary (7/16/13 is a reviewed `decisions.md` change);
+node; emit a `nullification` that prints on one side only, names a different winner on the two sides,
+or keys on anything but a property (D40 kept the rung and put the discipline on the print — §5.2);
+widen the atom vocabulary (7/16/13 is a reviewed `decisions.md` change);
 write to `SPEC.md`, `tasks/plan.md` or `tasks/todo.md`; write outside
 `data/seed/passive-tree/nodes/` and `data/tuning/passive-tree-targets.v1.json`.
 
@@ -561,8 +609,10 @@ write to `SPEC.md`, `tasks/plan.md` or `tasks/todo.md`; write outside
       that **re-derives** the quota instead of reading the brief.
 - [ ] The 166:1 aptitude skew is not reproduced: no axis value exceeds its target by more than
       `toleranceUnits`, in either direction.
-- [ ] No deep-tier node carries `nodeClass: magnitude`.
-- [ ] Exclusions land at the target rate with zero `nullification` and zero node-id predicates.
+- [ ] The per-tier `mechanism` count equals `archetypes[].mechNodes[t]` for every tree and every tier,
+      and the deepest tier is 100% mechanism.
+- [ ] Exclusions land at the target rate with zero node-id predicates, and **every `nullification`
+      prints on both sides and names one winner** (D40, §5.2).
 - [ ] Exactly one metric is `gates=True`, and it is `PassiveTree/UnresolvedCount`.
 - [ ] A rerun over unchanged inputs is byte-identical, proven by hash.
 - [ ] The full generic run is ~4,680 calls, and the dry-run prints that figure before spending any.
@@ -573,20 +623,32 @@ write to `SPEC.md`, `tasks/plan.md` or `tasks/todo.md`; write outside
 Only questions nobody has answered. A recommendation nobody disputed is a decision; an answerable
 question is a task.
 
-1. **Is `nullification` allowed to exist at all?** §5 removes it from the schema because it is the
-   only form that names a node. D14 lists it as the ladder's last rung. **Recommendation: keep it out
-   of the generated corpus and reachable only through a hand-authored `allow`/`deny` override**, which
-   `EligibilityRule` already has. This narrows a locked decision, so it needs an owner ruling.
+1. ~~**Is `nullification` allowed to exist at all?**~~ **Closed 2026-09-05 by D40: yes.** All three
+   exclusion forms are kept, so the generator is never forced to refuse a pair it can neither reroute
+   nor order. The *"reads like a bug"* objection is answered by **presentation, not removal** — both
+   sides print the rule and name the same winner, the node renders **inert rather than un-unlocked**,
+   the predicate still keys on a property and never a node id, and the ~2% exclusion target is
+   unchanged. `tree-review` censuses every one and **may enforce**; the demotion to a warning is
+   lifted. §5.2 carries the requirements, and the earlier recommendation (keep it out of the corpus,
+   reachable only by hand-authored override) is superseded.
 2. **What goes in `legitimateSkew`?** The ideal's §7 item 2, still owed. This spec gives it a home and
    a shape; it does not answer it. `earth` at roughly 1.5× uniform is D32's own worked example, not a
    decided row.
 
 **Blocked on other work, tracked not open:** the atom-tag registry (§5.1) — until it lands, exclusion
-predicates key on `posture` and nothing else, and gate 19 reports `NOT_MEASURED`.
+predicates key on `posture` and nothing else, and gate `PassiveTree/ExclusionResolvable` reports
+`NOT_MEASURED` (cited by name per R8, never by ordinal).
 
-**Interface not yet frozen:** `tree-plan` is wave 0 and unspecced. Every plan field this module reads
-(`quotaCell`, `requiredProperties`, `propertyVocabulary`, `mechanismFloor`, `budgetShareMilli`) is the
-interface this module *requires*; the names must be reconciled when `spec-tree-plan.md` lands.
+~~**Interface not yet frozen:**~~ **Closed 2026-09-05 — the interface is frozen and reconciled.**
+`spec-tree-plan.md` exists and its emitted schema is marked FROZEN, with a per-field reconciliation
+table against this module by name. Of the five fields this module reads, four are unchanged
+(`quotaCell` → `nodes[].quotaCell`, `requiredProperties` → `nodes[].requiredProperties[]`,
+`propertyVocabulary` → `propertyVocabulary.<axis>[]`, `budgetShareMilli` → `nodes[].budgetShareMilli`,
+whose denominator is fixed at **one branch**), and the fifth — `mechanismFloor` — **does not exist**:
+it is `archetypes[].mechNodes[]`, a per-tier count, and the name is retired in field, tunable and gate
+alike. §4.2 step 4 and gate `PassiveTree/MechanismRamp` are corrected to the count; §2.2 already
+recorded the shape change. There is nothing left here to reconcile later, which is the point of
+freezing a schema at its first consumer rather than at first build.
 
 ## Decisions implemented
 
@@ -595,7 +657,8 @@ interface this module *requires*; the names must be reconciled when `spec-tree-p
 | **D9 / D27** | The roster is read from the shipped mirrors and its size is emitted, never typed. Categories can land in any order |
 | **D10** | `branch` is GENERATED — two branches everywhere, never a choice |
 | **D13** | This *is* stage 2. The plan runs first and this module fills vocabulary, categories, atom pools and bonuses inside it |
-| **D14** | §5 — property-keyed exclusion, Reroute → Precedence → Nullification, ~2% target, printed no-op, `nullification` unsampleable |
+| **D14** | §5 — property-keyed exclusion, Reroute → Precedence → Nullification, ~2% target, printed runtime no-op |
+| **D40** | §5.2 — all three forms kept and `nullification` restored to the schema enum; both sides print the rule and name the same winner, the node renders **inert rather than un-unlocked**, the predicate still keys on a property, and gate `PassiveTree/ExclusionRate` may enforce it. Closes this spec's open question 1 |
 | **D15** | The archetype and per-node budget are GENERATED; this module inherits them and cannot make two trees the same shape or the same value |
 | **D16** | The stage cannot author a conversion node: no kind writes an element payload, so no affix in the permitted set can be one. `tree-binder` owns the budget refusal |
 | **D20 / D26 / D29** | `tier`, `tierRequirement` and the 10×2 skeleton are GENERATED from `req(t) = 5·t(t+1)/2`; the stage never sees a tier number, only `shallow\|mid\|deep` |
@@ -606,8 +669,9 @@ interface this module *requires*; the names must be reconciled when `spec-tree-p
 | ideal §3.5 | `nodeClass` is GENERATED and `PassiveTree/MechanismFloor` gates it, because a generator left to choose will choose `magnitude` |
 
 **Decisions this module does not touch**, and where they live: D1, D2, D4–D8, D11, D12, D18, D21,
-D25, D28, D33–D36 (`tree-state`, `tree-resolve`, `squad-harness`); D3 (`tree-binder`, `tree-state`);
-D17, D23 (`species-tree`); D19 and D31 are superseded by D35.
+D25, D28, D33–D36, D38, D39 (`tree-state`, `tree-resolve`, `squad-harness`); D3 (`tree-binder`,
+`tree-state`); D37 (`gate-counters`); D17, D23, D41 (`species-tree`); D19 and D31 are superseded by
+D35.
 
 ---
 

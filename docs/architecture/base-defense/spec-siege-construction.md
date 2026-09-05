@@ -37,7 +37,7 @@ a besieging force that can meaningfully fortify.
 - `WorldSlot.ConstructionTurnsRemaining` — *"a positive count means a structure was just built and is
   not yet active"*. **Declared, and this module is among its first real users.**
 - `LoamPolicy.WellCost` etc. — the costed-build path, already working for loam structures (renamed off `*CostMilli` world-map W57 — every one is a whole loam unit, never a per-mille).
-- **Five actor resources**: `hp`, `stamina`, `hunger`, `spirit`, `qi` (resource hub). Paths 3 and 4
+- **Six actor resources**: `hp`, `stamina`, `hunger`, `spirit`, `qi`, `poise` (resource hub). Paths 3 and 4
   spend these, and they are already modelled, already persisted, already regenerating.
 - The action system — `ActionCatalog`, `CompiledAction`, `ActionValidator`, container binding. Paths
   2, 3 and 4 are **ordinary actions**.

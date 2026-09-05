@@ -1,3 +1,5 @@
+using FusionRpg.Core.World.District;
+
 namespace FusionRpg.Core.World.Turn;
 
 /// <summary>
@@ -9,11 +11,12 @@ namespace FusionRpg.Core.World.Turn;
 /// whichever hostile force holds it), not one slot's guard. `SiegePhase.cs` is untouched by this
 /// file's existence.
 ///
-/// <para><b>This phase does not generate a board.</b> That is `district-layout`'s job, wired in by a
-/// later module (`siege-resolver`/`siege-positions`) once a request actually needs one —
-/// <see cref="BattleRequest.Board"/> stays null here, exactly the same default-is-today's-behaviour
-/// discipline every other field `siege-seam` added takes. This phase only proves the command, the
-/// kind, and the phase itself exist and are wired correctly.</para>
+/// <para><b>This phase projects the sector, it does not generate a board.</b> Deriving a
+/// `GridSpec` from the projection below is `district-layout`'s job
+/// (<see cref="DistrictLayout.Build"/>), called by `siege-resolver`'s own
+/// <c>DistrictAssaultResolver</c> — this phase only builds the plain-data <see cref="BoardProjection"/>
+/// the seam already declares, from the sector it has already loaded locally, so the world module still
+/// never learns anything about rounds, decks, or damage.</para>
 /// </summary>
 public static class DistrictAssaultPhase
 {
@@ -83,6 +86,25 @@ public static class DistrictAssaultPhase
                 AttackerEntityId = entity.EntityId,
                 DefenderEntityId = defender?.EntityId,
                 DefenderStationary = defender is not null,
+                Board = new BoardProjection
+                {
+                    SectorId = sector.SectorId,
+                    WorldSeed = seed,
+                    SectorTypeId = sector.TypeId,
+                    DevelopmentLevel = sector.DevelopmentLevel,
+                    AttackerEdge = DistrictLayout.EntryEdgeFor(next, entity, sector.SectorId),
+                    Slots = sector.Slots
+                        .Select(slot => new SlotProjection
+                        {
+                            SlotIndex = slot.SlotIndex,
+                            SlotTypeId = slot.SlotTypeId,
+                            StructureId = slot.StructureId,
+                            OwnerFactionId = slot.OwnerFactionId,
+                            State = slot.State,
+                            StructureHp = slot.StructureHp,
+                        })
+                        .ToList(),
+                },
             };
 
             next = BattleReporting.Fight(next, request, resolver, report, phase, seed);

@@ -3,7 +3,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import type { WorldStateDto } from "@/lib/bus/world";
-import fixture from "@/features/world/fixtures/first-light.json";
+import fixture from "@/stages/world/fixtures/first-light.json";
 import { useLensData } from "./useLensData";
 
 function wrapper(client: QueryClient) {

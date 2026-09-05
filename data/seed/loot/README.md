@@ -62,14 +62,23 @@ It is also the **first shipped container to name a rarity at all** (`data/seed/r
 records that none did), so it is the first live exercise of the `effect_container.rarity` FK module 7
 wired into `RpgStore.UpsertContainer` and the `ImportContent` batch path.
 
-## Two things deliberately not authored
+## Two things deliberately not authored here
 
 - **No `pvz-run` `loot_source`.** Item level for a PvZ run is **undesigned** — `mappedRunLevel` was
   never implemented anywhere, and §11 Q8 names two candidates (the player's own level, or a flat
   session level the PvZ side reports) and picks neither. Such a source is **refused by name**, never
   defaulted to 1. `drop.pvz.run` the *table* exists because Correction 1 calibrates it; wiring it is
   whoever owns standalone-first PvZ drops.
-- **No `world-sector` `loot_source`.** `sectorLevel(danger_band)` is owed by the world program (X5).
+- **No `world-sector` `loot_source` *row* — because it is resolved at runtime, not because it is
+  owed.** Corrected 2026-09-05. `sectorLevel(danger_band)` is **closed**:
+  `mapLevel(M) = Wm · DangerBand(M)` with `Wm = 5`, owner decision 2026-08-23
+  (`ssot-power-scale.md` §5.3/§10.3), confirmed for this exact `contentLevel` row by
+  `spec-content-authoring.md` §2.1. It ships as `PowerIndexComposer.MapLevel` and the loot lane reads
+  it through `WorldSectorLootSource.TryResolve`. The row cannot live in this file: the correlation id
+  derives from `source_id`, so the **sector's own id** has to be the key — one static row per sector
+  *type* would make the second `boss-lair` a player clears replay the first and mint nothing. Sector
+  ids are generated per world; the danger band is live state. A band-0 sector (safe ground) is
+  refused by name — `drop.sector-band-safe` — never floored to level 1.
 
 ## No cap, anywhere
 

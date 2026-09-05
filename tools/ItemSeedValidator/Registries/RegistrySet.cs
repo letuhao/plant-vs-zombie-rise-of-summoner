@@ -33,6 +33,19 @@ public sealed class RegistrySet
     /// <summary>Optional ledger of ids retired by earlier runs (see seed-contract.md §7.2).</summary>
     public JsonObject? RetiredIds { get; private init; }
 
+    /// <summary>
+    /// D3's role-override table (item module 8, `affix-legality`): a role-wide tier cap or family
+    /// removal. Optional on the same "absence degrades, never blocks" rule every other registry
+    /// here follows — a scoped validation run over a handful of hand-built entries has no reason to
+    /// carry this file, and `RoleFamilyCheck` reports rather than errors when it is absent.
+    /// </summary>
+    public JsonObject? FamilyOverrides { get; private init; }
+
+    /// <summary>D3's relocation table (item module 8): a family dropped from `ward-array`/
+    /// `head-guard`/`sense` re-legalised on a surviving hybrid-core host, at a reduced tier. Same
+    /// optionality rule as <see cref="FamilyOverrides"/>.</summary>
+    public JsonObject? RoleRelocation { get; private init; }
+
     // --- core.v1.json -------------------------------------------------------------------
     public IReadOnlyList<string> RoleIds { get; private set; } = Array.Empty<string>();
     public IReadOnlyList<string> WaveOneRoleIds { get; private set; } = Array.Empty<string>();
@@ -180,6 +193,8 @@ public sealed class RegistrySet
             BuildThemes = ReadOptional("build-themes.v1.json"),
             Words = ReadOptional("words.v1.json"),
             RetiredIds = ReadOptional("retired-ids.json"),
+            FamilyOverrides = ReadOptional("family-overrides.v1.json"),
+            RoleRelocation = ReadOptional("role-relocation.v1.json"),
         };
         set.Index();
         return set;
@@ -189,14 +204,14 @@ public sealed class RegistrySet
     public static RegistrySet FromNodes(
         JsonObject core, JsonObject bands, JsonObject tags, JsonObject themes,
         JsonObject classes, JsonObject naming, JsonObject? words = null, JsonObject? retired = null,
-        JsonObject? buildThemes = null)
+        JsonObject? buildThemes = null, JsonObject? familyOverrides = null, JsonObject? roleRelocation = null)
     {
         var set = new RegistrySet
         {
             RegistryDir = "(in-memory)",
             Core = core, Bands = bands, Tags = tags, Themes = themes,
             Classes = classes, Naming = naming, Words = words, RetiredIds = retired,
-            BuildThemes = buildThemes,
+            BuildThemes = buildThemes, FamilyOverrides = familyOverrides, RoleRelocation = roleRelocation,
         };
         set.Index();
         return set;

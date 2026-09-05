@@ -213,7 +213,7 @@ implements; anything missing from here is missing from the kit by definition.
 | **Status** | atom-catalog-ssot.md §5 (21 declared, 13 functional) | Token · Chip · Row |
 | **Element** | [element-hub-ssot.md](../architecture/element-hub-ssot.md) — 6 concrete + `omni` | Token · Chip |
 | **Channel** | atom-catalog-ssot.md §4 — 8 primary (→11), 99 derived | Token · Chip · Row |
-| **Resource** | [resource-hub-ssot.md](../architecture/resource-hub-ssot.md) — five locked ids, registry shape (§5) | Token · Meter · Row |
+| **Resource** | [resource-hub-ssot.md](../architecture/resource-hub-ssot.md) — six locked ids (incl. `poise`), registry shape (§5) | Token · Meter · Row |
 | **Power vector** | definitions.md §7 — 5 categories + scalar | Token · Chip · Card |
 | **Sector / lane / legion** | [world-map-program.md](../architecture/world-map-program.md) | Token · Chip · Card · Panel |
 | **Demon + contract** | [demon-system-map.md](../architecture/demon-system-map.md) | Chip · Row · Card · Panel |
@@ -227,14 +227,14 @@ list. **There was no conflict.** The ideal doc's own §10.2a already carried the
 [resource-hub-ssot.md](../architecture/resource-hub-ssot.md), which states at `:9` that the ideal's §2,
 its header bullet and its §10.2 are **not authoritative**.
 
-**The locked model:** five ids — `hp` · `stamina` · `hunger` · `spirit` · `qi` — **one shared set, both
+**The locked model:** six ids — `hp` · `stamina` · `hunger` · `spirit` · `qi` · `poise` — **one shared set, both
 factions, no branch anywhere.** The only faction difference is a display label (§3): `hunger` reads
 "Sun" on a plant and "Hunger" on a zombie; `qi` reads "Yang" and "Yin". Labels are content, never a key.
 
 Two consequences the foundation plate has **not** yet absorbed (Class-B defect B8 in
 [gap-audit-2026-08-22.md](gap-audit-2026-08-22.md)):
 
-1. **All five resources are `asset`** (SSOT §6) — full is good, including `hunger`, which is an ordinary
+1. **All six resources are `asset`** (SSOT §6) — full is good, including `hunger`, which is an ordinary
    fed/starving gauge. The plate's `burden` visual branch ("burdens fill red and full is bad") has **no
    member** in the locked set. The field is retained for a future resource, not for a current one.
 2. **Two different things are called "Sun"** (SSOT §4) — the match-scoped `pvz.*` lawn bank and the

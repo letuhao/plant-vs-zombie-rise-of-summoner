@@ -130,4 +130,19 @@ describe("scanForRestDtoImports — fixtures", () => {
     );
     expect(scanForRestDtoImports(fixtureDir)).toEqual([]);
   });
+
+  // world-stage (2026-09-05): the six-file legacy exemption is a fixed allowlist, not a path
+  // prefix or a softening of the rule — a same-shaped import from any other file, even one
+  // sitting right next to an exempted file, must still be caught.
+  it("the legacy world-model exemption is a specific allowlist, not a directory-wide softening", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "contract-guard-"));
+    mkdirSync(join(fixtureDir, "stages", "world"), { recursive: true });
+    writeFileSync(
+      join(fixtureDir, "stages", "world", "Rogue.tsx"),
+      'import type { WorldStateDto } from "@/lib/bus/world";\n'
+    );
+    const violations = scanForRestDtoImports(fixtureDir);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]?.file).toBe("stages/world/Rogue.tsx");
+  });
 });

@@ -242,6 +242,16 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "demon anchor contract has a numeric-smuggling finding — see output above" }
         working-directory: tools/seedsmith
 
+      - name: Structure anchor contract audits clean (base-defense structure-schema, module 23)
+        shell: pwsh
+        run: |
+          # Mechanical, per spec-structure-schema.md §4: the module's whole point is that this audit
+          # fails the build rather than warning, so it gates CI unconditionally, the same way the
+          # demon anchor contract step above does for its own schema.
+          python -m seedsmith structures contract --audit
+          if ($LASTEXITCODE -ne 0) { throw "structure anchor contract has a numeric-smuggling finding — see output above" }
+        working-directory: tools/seedsmith
+
       - name: Demon corpus-coverage metrics (seed-to-concrete T1.10)
         shell: pwsh
         run: |

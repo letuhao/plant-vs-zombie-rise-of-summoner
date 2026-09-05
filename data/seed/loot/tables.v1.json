@@ -726,7 +726,7 @@
         "web"
       ],
       "revision": 1,
-      "note": "Correction 1: 1.50, 'scaled by danger_band'. The scaling is X5's -- sectorLevel(danger_band) is owed by the world program -- so NO loot_source row is authored for this table yet. The table is the calibration, not a promise that the world map is wired.",
+      "note": "Correction 1: 1.50, 'scaled by danger_band'. The scaling is NO LONGER owed (2026-09-05): sectorLevel(danger_band) = mapLevel(M) = Wm * DangerBand(M), Wm = 5, closed by owner decision 2026-08-23 in ssot-power-scale.md 5.3/10.3 and confirmed for this exact contentLevel row by spec-content-authoring.md 2.1. It is shipped as PowerIndexComposer.MapLevel and read by WorldSectorLootSource. No loot_source row is authored HERE, and that is now a deliberate shape rather than a gap: the correlation id derives from source_id, so the SECTOR's own id has to be the key -- one static row per sector TYPE would make the second boss-lair a player clears replay the first and mint nothing. Sector ids are generated per world, so the row is resolved at runtime from the sector's live danger band.",
       "groups": [
         {
           "groupKey": "sector",

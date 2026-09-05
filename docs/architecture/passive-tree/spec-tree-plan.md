@@ -1,8 +1,10 @@
 # Spec: `tree-plan`
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. Module of
+[passive-tree](../passive-tree-map.md). No build authorized.
 
 **Module id:** `tree-plan` · **Wave:** 0 · **Depends on:** nothing · **Model calls:** none.
+**Wave-0 siblings:** `squad-harness`, `mechanism-wiring`, `gate-counters` (D37).
 **Consumed by:** [`tree-language`](spec-tree-language.md), [`tree-binder`](spec-tree-binder.md),
 [`tree-catalog`](spec-tree-catalog.md).
 
@@ -708,7 +710,7 @@ subset. That is what makes D14's predicate `O(1)`.
 | `atomTrigger` | 13 (11 authorable) | same mirror |
 | `channelFamily` | 53 | `entries` of `data/seed/derived-stats/catalog.json`, counted at load |
 | `conversionState` | 2 | `converted` \| `unconverted` (D16/R8) |
-| `exclusionForm` | 3 | `reroute` \| `precedence` \| `nullification` (D14's ladder) |
+| `exclusionForm` | 3 | `reroute` \| `precedence` \| `nullification` (D14's ladder, **all three kept — D40**) |
 
 **Two rules on the vocabulary, both refusals:**
 
@@ -757,33 +759,47 @@ points allocated to that tree's gate quantity**; nodes are bought with **skill p
 touches only the first.
 
 **The plan emits `gateQuantity` as an opaque id and never resolves it.** That is the correct
-boundary, and it is what lets a complete plan be emitted for 27 trees whose gate source does not
-exist yet:
+boundary, and it is what lets a complete plan be emitted for the 27 trees whose gate source has not
+been built yet:
 
-| Category (R7) | `gateQuantity` | State in code, verified this session |
-|---|---|---|
-| `primary` (12) | `aptitude.<Id>@Commander` | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` |
-| `elemental` (6) | `element_mastery.<id>@Aspect` | ⛔ **comments only.** The scope exists (`AllocationScope.Aspect`, `AptitudeAllocation.cs:8`); the source does not. All four `src/` hits for `element_mastery` are XML doc comments, and `PointBudget.cs:15` says so outright: *"owned by the demon program's `aspect-scope` module and does not exist yet"* |
-| `status` (21) | `status_applied.<id>` — **outside `AllocationScope`** (D35) | ⛔ **zero `src/` hits.** D35 correctly removed the `AllocationScope` dependency, and removed the only place the counter was going to live with nothing replacing it |
-| `family` (`F`) | `species_level@DemonType` | ✅ rate shipped, source via `PointBudget.DemonTypeSourceFromLevel` |
+| Category (R7) | `gateQuantity` | State in code, verified this session | Owner |
+|---|---|---|---|
+| `primary` (12) | `aptitude.<Id>@Commander` | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` | shipped |
+| `elemental` (6) | `element_mastery.<id>@Aspect` | ⛔ **comments only today.** The scope exists (`AllocationScope.Aspect`, `AptitudeAllocation.cs:8`); the source does not. All four `src/` hits for `element_mastery` are XML doc comments, and `PointBudget.cs:15` records the old ownership: *"owned by the demon program's `aspect-scope` module and does not exist yet"* | **`gate-counters`, wave 0 (D37)** — the comment's attribution to the demon program is superseded |
+| `status` (21) | `status_applied.<id>` — **outside `AllocationScope`** (D35) | ⛔ **zero `src/` hits today.** D35 correctly removed the `AllocationScope` dependency, and removed the only place the counter was going to live with nothing replacing it | **`gate-counters`, wave 0 (D37)** |
+| `family` (`F`) | `species_level@DemonType` | ✅ rate shipped, source via `PointBudget.DemonTypeSourceFromLevel` | shipped |
 
 #### 7.1 ⛔ A tree's gate quantity must EXIST before that tree's content is generated
 
-**Ideal §13.4, verified in code above: the gate quantity does not exist for 27 of the 39 trees.**
+> ### D37 (2026-09-05): the two missing quantities have an owner and a schedule. All 39 trees are reachable.
+>
+> `status_applied.<id>` and `element_mastery` are built by **`gate-counters`, a wave-0 module of this
+> program** — the counters, their persistence, and the `PointBudget` binding. The rule below is
+> unchanged and still binding: **content waits for its gate.** What changed is that the wait is now
+> **bounded and owned**, so this is a *sequencing* rule, not a permanent hole.
+>
+> ~~*"1,080 nodes ship permanently at tier 0"*~~ and ~~*"only the 12 primary trees are reachable"*~~
+> are superseded. **The plan plans all 39 trees; all 39 are reachable once wave 0 completes.** The
+> generation order below is a schedule, and `gateState` is what advances it.
+
+**Ideal §13.4, verified in code above: the gate quantity is not built yet for 27 of the 39 trees.**
 
 ```text
-  12 primary trees × 40 =   480 nodes   reachable today          31%
-   6 elemental      × 40 =   240 nodes   permanently at tier 0
-  21 status         × 40 =   840 nodes   permanently at tier 0
+  12 primary trees × 40 =   480 nodes   generable today            31%
+   6 elemental      × 40 =   240 nodes   generable when gate-counters lands element_mastery
+  21 status         × 40 =   840 nodes   generable when gate-counters lands status_applied
   ------------------------------------------------------------------
-  27 trees          × 40 = 1,080 of 1,560 generic nodes — 69% — would ship
-                           authored, reviewed, committed and unreachable
+  27 trees          × 40 = 1,080 of 1,560 generic nodes — 69% — wait for wave 0,
+                           and would be authored, reviewed and committed unreachable
+                           if generated ahead of it
 ```
 
-A node behind a tier whose `req(t)` reads a quantity nothing can ever produce is not a wiring gap
-that resolves itself later; until the carrier lands, `req(1) = 5` is a threshold on a number that is
+A node behind a tier whose `req(t)` reads a quantity nothing produces yet is not a wiring gap that
+resolves itself; until the carrier lands, `req(1) = 5` is a threshold on a number that is
 structurally zero. **Nothing is broken by the plan — the plan is cheap, mints no content and makes no
-model call — but 1,080 nodes of authored content behind it would be bought and not delivered.**
+model call — but 1,080 nodes of authored content generated ahead of the counters would be bought
+before they could be delivered.** That is a scheduling defect with a known fix date, and `R-G1` is
+what keeps the schedule honest.
 
 **R-G1 — the generation gate.** A tree's `gateQuantity` must have a **production carrier in `src/`**
 before that tree's content is generated. This module emits a `gateState` per tree
@@ -799,13 +815,14 @@ matches the ideal's own build order — *"one wave per gate quantity as it lands
 | Wave | Trees | Nodes | Unblocked by |
 |---:|---|---:|---|
 | 0 | 12 `primary` | 480 | nothing — shipped today |
-| 1 | 6 `elemental` | 240 | the demon program's `aspect-scope` module landing `element_mastery` |
-| 2 | 21 `status` | 840 | a `status_applied.<id>` counter, which D35 left without a home |
+| 1 | 6 `elemental` | 240 | **`gate-counters`** landing `element_mastery` (D37) — a wave-0 sibling of this module, not an unscheduled dependency on another program |
+| 2 | 21 `status` | 840 | **`gate-counters`** landing the `status_applied.<id>` counter (D37). D35 left it without a home; D37 gave it one |
 | 3 | `F` `family` | 40·`F` | a closed demon-family roster (§9 item 5) |
 
 The wave a tree sits in is **derived from `gateState`, never hand-assigned** — so the day
 `element_mastery` gets a carrier, one evidence row moves and 240 nodes become generable without a
-spec edit.
+spec edit. Under D37 that day is scheduled rather than hoped for, and the same is true of the 840
+status nodes.
 
 **Four incommensurable quantities at one threshold is a known, half-closed finding**, and it is
 **`tree-resolve`'s** to close, not this module's: *"Gate on ONE index; the other three convert INTO
@@ -1346,7 +1363,7 @@ section so nobody copies one up here.
 | `mechanism.rampStartMilli` | ‰ of a tier's nodes, at tier 1 | 0 | Tier 1 is pure magnitude. ~~`mechanism.floorMilli`~~ superseded: the old name read as a threshold and this is a **ramp** (§4), and a consumer reading `0` from a key called *floor* would have concluded every tier is a mechanism tier |
 | `mechanism.rampEndMilli` | ‰ of a tier's nodes, at `tierCount` | 1000 | ⚠ Lowering it contradicts §3.5's measured conclusion and violates `R-M1`. Tunable, but the `_note` must record the owner decision beside the value. ~~`mechanism.capMilli`~~ superseded |
 | `archetype.rewardSpreadMaxRatioMilli` | ‰ ratio, `max_a r_a(t) / min_a r_a(t)` | **6000** | **`R-A1`** (§3.1). The measured maximum of the shipped three — 6.0× at tier 2 — so the shipped set passes at equality and a fourth archetype that widens the gradient is refused, naming the tier and the two archetypes. Tightening it is a one-line change with a visible, named failure |
-| `exclusion.targetShareMilli` | ‰ of all nodes carrying an exclusion | 20 | D14's ~2% target |
+| `exclusion.targetShareMilli` | ‰ of all nodes carrying an exclusion | 20 | D14's ~2% target, restated by **D40**. `tree-review` censuses every one of them and enforces the presentation contract — both sides print the rule and name the same winner |
 | `archetypeAssignment` | closed enum | `"ordinal-round-robin"` | |
 | `designTarget.thetaAllIn` | `Θ` | 92 | The `s = 1` reading of `req(tierCount)/3`. `_note` carries D29's `s = 0.542` reading (`Θ ≈ 170`) so the two conventions are never confused (A15) |
 
@@ -1359,7 +1376,7 @@ section so nobody copies one up here.
 | `quotas.element.weightsMilli` | ‰ over `omni` + the roster elements |
 | `quotas.status.weightsMilli` | ‰ over the status roster |
 | `quotas.channelFamily.weightsMilli` | ‰ over the derived-stat families |
-| `quotas.exclusionForm.weightsMilli` | ‰ over `{reroute, precedence, nullification}`; `nullification: 0` |
+| `quotas.exclusionForm.weightsMilli` | ‰ over `{reroute, precedence, nullification}`. **All three are reachable (D40)** — ~~`nullification: 0`~~ is superseded. The rung ships **small and non-zero**, calibrated on `tree-review`'s pilot, because a generator that cannot reach it is forced to refuse a pair it can neither reroute nor order |
 | `legitimateSkew.rows[]` | — | **empty for generic trees** (§8); `species-tree` owns the argument |
 | `gates.cellOccupancy.medianMax` | count | 2 |
 | `gates.quotaDrift.toleranceUnits` | count | 1, symmetric |
@@ -1389,7 +1406,9 @@ The disagreement is named here rather than resolved silently.
 `concentration.fmaxMilli` (1200), `concentration.wMilli` (500), `unlockCost.firstPoints` (5),
 `unlockCost.stepPoints` (2), `soulTrack.thetaPerSoulLevelMilli` (unmeasured) and
 `pointEconomy.respecPrice` belong to `tree-resolve` and `tree-state`;
-`grant.skillPointsPerThetaMilliByScope` belongs to `aptitudes.v5.json`, its own domain. This module
+`grant.skillPointsPerThetaMilliByScope` belongs to `aptitudes.v5.json`, its own domain — **its
+commander value is settled at 11 and is a tunable (D38), so `squad-harness` can move it without
+reopening a spec; the other three scope values are still open.** This module
 reads none of them and must not restate a value for one — a copied number is what this repo already
 calls *"a future drift bug with a delay fuse"*.
 
@@ -1413,7 +1432,7 @@ yields `F = 1.0012` and passes every test either spec currently writes.
 | D10 | Same shape everywhere | §1 topology — one archetype family, `2 × tierCount` lattice |
 | D11 · D12 | Items grant points; gates read base allocation | Not here. `tree-state` |
 | D13 | Deterministic-first generation | The whole module. No RNG, no model call, holes for stage 2 |
-| D14 | Property-based exclusion | §6 — the plan **defines** the vocabulary; `exclusionForm` is a closed enum with `nullification` at 0 |
+| D14 | Property-based exclusion | §6 — the plan **defines** the vocabulary; `exclusionForm` is a closed enum of three, **all three reachable under D40**, with the rung's weight small and non-zero |
 | D15 | Equal expected value, not equal shape | §3 — proved as an identity, asserted by `C1`, and its inverse guarded by `archetype_shapes_actually_differ` |
 | D16 | Conversion rewrites payload tags | §6 — axis emitted, **zero budget allocated** until a reviewed 17th kind |
 | D17 | Species build-favour triple | `species-tree`. The quota mechanism it needs is §8's |
@@ -1436,6 +1455,11 @@ yields `F = 1.0012` and passes every test either spec currently writes.
 | D34 | `skillPointsPerTheta` becomes per-scope | Not here. `tree-state` |
 | D35 | Status trees gate on their own quantity | §7 — `gateQuantity: "status_applied.<id>"`, deliberately outside `AllocationScope` |
 | D36 | The unlock-cost curve | Not here. `tree-state` |
+| D37 | The two missing gate quantities are built inside this program | §7, §7.1, `R-G2`'s wave table and §9 item 7 — `gate-counters` owns them, the corpus order is a schedule, and all 39 trees are reachable |
+| D38 | `g = 11` at commander scope, tunable | Not here. `aptitudes.v5.json` owns the key; this module names it in §Tunables and states no value for it |
+| D39 | `H` reads the final allocation, self-spent only | Not here. `tree-resolve`. Nothing in the plan is order-sensitive, so nothing here changes |
+| D40 | All three exclusion forms kept; nullification printed loudly | §6's `exclusionForm` axis and §Tunables — the rung is reachable, the ~2% target stands, and `tree-review` censuses and enforces the presentation |
+| D41 | `speciesUniqueAffixMin = 8`, tunable | Not here. `species-tree`. The deepest-mechanism-first marking it relies on reads this module's `mechNodes[]` and `nodeKey` (§4, §Node ids) |
 
 **Ids I could not place as a requirement anywhere in stage 1:** **D19** and **D31**, and in both
 cases because they are superseded by D35 rather than because they have no home. Every other id lands
@@ -1453,6 +1477,7 @@ either as a requirement above or as a named other module's.
 | 4 | A **§11.10 content-breadth row** for the ten authored tiers | the caps register | shipping. The honest verdict: nothing is refused, and past `Θ ≈ 300` growth moves to the uncapped soul track — but §11.10a is explicit that a breadth verdict expires when its premise does, and generated content is exactly that premise |
 | 5 | A closed demon-family roster, or D27's curation sequenced | owner / build order | `F > 0`. Not a blocker on emitting a plan for the 39 closed-roster trees |
 | 6 | `mechanism-wiring`'s four inert lines | wave 0 sibling | nothing here, but without them the mechanism budget buys nodes nothing can score (§4) |
+| 7 | `gate-counters`' two quantities — `element_mastery` and `status_applied.<id>` (D37) | wave 0 sibling | nothing here — `--emit` plans a `pending` tree for free. It gates **generation waves 1 and 2**, i.e. 1,080 of the 1,560 generic nodes (§7.1) |
 
 Items 1 and 2 are this module's own work. Items 3 and 4 are reviewed changes to another document and
 must land before this module ships — `guard-power.ps1` cannot catch either absence, because its
@@ -1504,6 +1529,8 @@ G2/G3 checks key on a parameter named `level`/`lvl`/`index` and `req(t)`'s param
 ## Open questions
 
 Only questions a **decision** can close. Everything else below the line is a task with an owner.
+**One is open.** The second is kept below with its answer, because a closed question that vanishes
+gets re-asked.
 
 1. **`budget.treeTotalPoints` — the one number nobody can measure yet.** It is `PowerVector.Total`
    points per tree, and no measurement can produce it until trees actually carry power in the
@@ -1512,12 +1539,19 @@ Only questions a **decision** can close. Everything else below the line is a tas
    *"shipping a guess is fine; calling it balance is not"* — and re-measure once `mechanism-wiring`
    and `squad-harness` land. **This needs an owner nod on the posture, not on the number.**
 
-2. **Does `tree-review`'s deep-tier behavioural sample gate, or report?** §4's known weakness is that
-   the mechanism quota is structural while the value is behavioural. A sampled `CombatSim` score over
-   deep-tier mechanism nodes is the only check that reaches the real question, and whether a
-   below-threshold sample **blocks the catalog** or **files a review finding** is a decision, not a
-   measurement. It belongs to `tree-review`, but it is raised here because it is this module's quota
-   that the sample would be judging.
+### Closed 2026-09-05
+
+2. ~~**Does `tree-review`'s deep-tier behavioural sample gate, or report?**~~ **Closed: it reports.**
+   §4's known weakness is real — the mechanism quota is structural while the value is behavioural —
+   and a sampled `CombatSim` score over deep-tier mechanism nodes is the only check that reaches it.
+   **A below-threshold sample files a review finding; it does not block the catalog.** One line of
+   justification: a sampled behavioural score is a *proxy for a proxy* (a win-share delta at one
+   scope, over a sample, of a quota that is itself a stand-in for interestingness), and this program
+   has already ruled twice that a measurement that thin presents rather than refuses — D40 answers
+   the *"reads like a bug"* risk with presentation instead of removal, and `tree-review`'s own ladder
+   escalates a systemic finding to a **prompt fix** (rung 4) rather than to a shipping block.
+   `tree-review` §4.2 carries the rule; the sample still stops a lot the moment it is *systemic*,
+   through that ladder rather than through a gate on this module's quota.
 
 **Not open — tasks with owners, listed so they are not mistaken for questions:** the two roster
 mirrors (§9 items 1–2, this module's own work); the `ssot-power-scale.md` rows (items 3–4, reviewed
@@ -1566,4 +1600,10 @@ doc 02 §9.1 (resolved in §Tunables, with the reason).
     tree-language dropping `mechanismFloor`, tree-catalog's `affixId` becoming `affixIds[]`, and
     tree-binder dropping `tierWeight`/`weightTotal` -- are being made in the same fold, and each is
     named at the point in this spec that relies on it.
+[x] D37-D41 folded 2026-09-05. D37 rewrote 7.1 from a permanent hole into a schedule owned by
+    `gate-counters` and moved R-G2's "unblocked by" column onto it; D38's commander value is named
+    in Tunables as another domain's settled tunable; D40 made the `nullification` rung reachable
+    (its quota weight is no longer pinned at 0); D41 is named as `species-tree`'s and its
+    dependency on `mechNodes[]`/`nodeKey` is recorded. Open question 2 is closed -- the deep-tier
+    behavioural sample REPORTS -- and question 1 is left open, because nobody has answered it.
 ```

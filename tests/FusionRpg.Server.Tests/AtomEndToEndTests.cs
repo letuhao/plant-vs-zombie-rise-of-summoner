@@ -50,7 +50,7 @@ public class AtomEndToEndTests : IDisposable
         var r = _store.UpsertAtom(new AtomRow
         {
             AtomId = "atom.searing.t1", KindId = "resource.delta",
-            FamilyId = "atom.searing", Variant = "", Tier = 1,
+            FamilyId = "atom.searing", Variant = "", Tier = 1, Name = "Searing",
             ParamsJson = """{"amount":{"min":-120,"max":-80,"roll":"onApply"},"element":"fire"}""",
             WhenJson = """{"trigger":"OnDamageDealt","chance":1000}""",
         });

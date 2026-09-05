@@ -1,8 +1,26 @@
 # Implementation Plan: `battle-tempo`
 
-Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-map.md) · seven module specs
-under [docs/architecture/battle-tempo/](../docs/architecture/battle-tempo/).
+Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-map.md) · **eight** module
+specs under [docs/architecture/battle-tempo/](../docs/architecture/battle-tempo/).
 Task list: [battle-tempo-todo.md](battle-tempo-todo.md).
+
+**Task count, corrected 2026-09-05:** **31 tasks across eight modules** — 23 complete, 1 partial
+(`RL2`), 3 open (`LAND1`, `LAND2`, `RL3`), 4 newly added (`BR1`–`BR4`, below). ⚠️ This header
+previously read *"27 of 28 tasks complete or correctly partial; 2 blocked; 1 owner-only"* — arithmetic
+that summed to 30 against a real total of 27, and a module count that called `timeline-dispatch` an
+"8th module" when it was the 7th. Both corrected by counting.
+
+**New module, 2026-09-05: `battle-resources`**
+([spec-battle-resources.md](../docs/architecture/battle-tempo/spec-battle-resources.md)) — the module
+that finally gives a battle actor something to spend. `TD4` found that
+`BattleStatComposer.cs:120-128` seeds **no `resource.*` channel at all**, so every battle actor holds
+all six pools at max 0 and `reaction-lane`'s counter declines every time by correct logic on empty
+input. Scope is forced wider than `poise` alone by `resource-hub-ssot.md` §8's own normative
+six-coverage rule (*"a family that covers a subset is a defect, never a feature"*), so the module
+seeds all six by looping `ResourceIds`. **This unblocks `RL2` (partial → complete) and `RL3` (blocked
+→ measurable) without an owner decision** — per the 2026-09-05 gate rule, the poise question failed
+both gate bars (it is reversible, and no default was ever named), so it ships behind a tunable marked
+`unmeasured` rather than stalling the plan.
 
 **Status, 2026-09-05: 27 of 28 tasks complete or correctly partial; 2 tasks genuinely blocked on named,
 external gates; 1 owner-only.** Built: `poise-unification` (all 4), `action-timing` (all 4),
@@ -180,10 +198,26 @@ modules**, with every spec's §6/§8 items mapped.
 
 ## Open questions
 
-**None.** Thirteen decisions are settled across the map's two review rounds; the eleven findings are
-folded into the module specs. The only numbers still open are **tunables for the balance pass**
-(wind-up coefficient, the relative cap, `referenceIntervalMs`, the counter's poise spend range), which
-are Phase 1 and Phase 4 outputs rather than blockers.
+⚠️ **This section read "None" until 2026-09-05 and that was wrong** — `TD4` had already surfaced a real
+one, and the claim that "the only numbers still open are tunables… rather than blockers" was the
+specific sentence that hid it. Recorded honestly now:
+
+1. ⛔ **What gives a battle actor its resource pools.** Not a tunable — a wiring gap.
+   `BattleStatComposer` seeds no `resource.*` channel, so all six pools are max 0 for every battle
+   actor and no action in a battle can cost anything. Specced as `battle-resources`; the coefficients
+   ship marked `unmeasured` and the sizing is a later balance pass. **Not a gate** (2026-09-05 gate
+   rule: reversible, and it now has a named default).
+2. ⚠️ **Whether Phase 2 is still worth landing as scoped.** `LAND1`'s sweep measured **zero** win-rate
+   movement on the existing golden shape — so the attribution risk the whole phase structure was built
+   around does not arise for today's goldens. `LAND2` is therefore a smaller decision than this plan
+   originally implied: not *"approve this shift"* but *"approve a change that provably moves nothing
+   today and will matter on volatile content later."* Owner's call, and it should be made against that
+   framing rather than the original one.
+
+Thirteen decisions remain settled across the map's two review rounds; the eleven findings are folded
+into the module specs. The remaining **balance numbers** (wind-up coefficient, the relative cap,
+`referenceIntervalMs`, the counter's poise spend range, and now the resource baselines) are Phase 1 /
+Phase 4 / `battle-resources` outputs rather than blockers.
 
 ⛔ **One owner gate is real and must not be self-approved:** the Phase 2 win-rate sweep sign-off, on the
 `combat-unification-plan.md:76` precedent.

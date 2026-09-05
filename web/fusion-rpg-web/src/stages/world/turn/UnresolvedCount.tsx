@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
-import { legionLabel } from "@/features/world/labels";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import { legionLabel } from "@/stages/world/labels";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 import type { LegionView } from "@/contract/types";
 import { PerMilleFigure } from "@/ui/world/PerMilleFigure";
 import { unresolvedLegions } from "./unresolvedLegions";

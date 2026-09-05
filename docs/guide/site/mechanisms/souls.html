@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Souls are the currency you earn by playing and spend to call new demons and keep them bound." />
+    <title>Souls — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/souls.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Stocks and economy · summon and fusion
+        </p>
+        <h1 class="teach-title">Souls</h1>
+        <p class="teach-hook"><strong>Souls</strong> are the currency you earn by playing and spend to call new demons and keep them bound.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Soul</dt>
+              <dd>A <strong>currency number</strong> in your save. Not a demon, not a life bar, not something you lose on death.</dd>
+            </div>
+            <div>
+              <dt>Spend</dt>
+              <dd>Souls leave your bank the moment you confirm at the <a href="summoning-altar.html">altar</a>. There is no refund.</dd>
+            </div>
+            <div>
+              <dt>Bank</dt>
+              <dd>One shared pool for the whole save. It is not per demon and not per world.</dd>
+            </div>
+            <div>
+              <dt>Earn</dt>
+              <dd>Play pays. Waiting does not — there is no idle soul trickle.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Souls are one of three stocks. The others are <a href="essence.html">essence</a> and <a href="loam.html">loam</a>, and they do not convert into each other.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>One bank, shown in the HUD wherever you are.</p>
+          <p>You watch it climb while you play and drop when you summon.</p>
+          <p class="teach-note">Souls bank across worlds — see <a href="new-world-prestige.html">New world</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Three things touch the number:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  play  -&gt;  souls  -&gt;  altar  -&gt;  demons
+                       +-&gt;  pacts
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Faucets</strong>
+              <p>Lawn matches, expedition returns, and map work pay souls.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Sinks</strong>
+              <p>Altar pulls and pact upkeep spend them.</p>
+            </li>
+          </ol>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Where</th>
+                <th scope="col">What you get</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Lawn match</td>
+                <td>Souls on a win, scaled by what you fought</td>
+              </tr>
+              <tr>
+                <td>Expedition</td>
+                <td>Souls in the return report</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>In the HUD</h3>
+            <p>The stock strip is always on screen.</p>
+            <ol>
+              <li>Look at the top strip.</li>
+              <li>Souls sit beside essence.</li>
+            </ol>
+            <p class="teach-note">It updates without a refresh.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Play a lawn match to the end.</li>
+            <li>Open the <a href="summoning-altar.html">altar</a>.</li>
+            <li>Spend once, and read what the pull cost.</li>
+          </ol>
+          <p class="teach-note">Stop here. Pacts come next.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Do I lose souls when a demon dies?</dt>
+              <dd>No. Souls are a bank, not a health pool.</dd>
+            </div>
+            <div>
+              <dt>Can I buy souls?</dt>
+              <dd>No. There is no store — this build is local and has no payments.</dd>
+            </div>
+            <div>
+              <dt>Do souls decay?</dt>
+              <dd>No. Only <a href="loam.html">loam</a> fades if you neglect ground.</dd>
+            </div>
+            <div>
+              <dt>Is this the same as essence?</dt>
+              <dd>No. See <a href="essence.html">essence</a>.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="summoning-altar.html">Summoning altar</a>
+          </p>
+          <p>
+            Related:
+            <a href="essence.html">Essence</a> ·
+            <a href="loam.html">Loam and the Fracture</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/souls.md">Markdown (editable SSOT)</a> ·
+            <a href="../../creatures.md">Creatures</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/souls.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

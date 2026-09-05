@@ -2741,17 +2741,60 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       passing. But the gap is now 7 genuinely-ambiguous briefs out of 53, not an aggregation artifact,
       and at n=15 the metric can only land on multiples of 6.7%. Closing the last ~3 points is a
       model-capability question, which is the honest place for it to finally rest.
+    - **A-P3 re-measured too: 66.7% → 46.7%** (15-brief bounded slice, same briefs). It improves far
+      less than P1/P2 **for a structural reason worth recording**: signature briefs mostly pick a
+      SINGLE family, and on 1-member sets per-member voting degenerates to exact matching — there is
+      no partial overlap left to recover. All 7 of its remaining unresolved cases were checked from
+      `samplePicks` and are genuinely disjoint. Combined across all three propose stages:
+      **43/68 = 63.2% → 14/68 = 20.6%.**
+    - **⛔ THE HEADLINE NUMBER IS REAL BUT INCOMPLETE — measured downstream the same day, and it
+      materially qualifies the win.** Pushing the new accepted rows through
+      `candidate_assembly` → `dedup_select` exposed what per-member voting actually does to the
+      CONTENT, not just the rate:
+      * assembled 53 (vs 20 in the pre-fix round), **0 gate rejects** — good; but
+      * `dedup_select` then rejected **32 of 53** (9 tier-1 exact duplicates, 23 tier-2 near
+        duplicates), leaving **21 survivors — against 19 survivors pre-fix.**
+      * The cause is visible in the resolved-set sizes. Pre-fix: **19 of 20 candidates were
+        2-member bundles**. Post-fix: **36 of 53 are 1-member**, 16 are 2, 1 is 3. Per-member
+        majority keeps only what ≥2 samples agreed on, which **systematically strips the
+        distinguishing member and collapses candidates onto their common core** — hence
+        `atom.retribution` ×4 and `atom.elpw-overflow` ×4 colliding at dedup.
+      * **So the fix converts a large share of "unresolved" into "duplicate".** The gate measures the
+        former and not the latter, so the unresolved-rate improvement overstates the content gain:
+        **net unique survivors moved 19 → 21, not 20 → 53.** Recorded here rather than left for a
+        later session to discover, because the rate number alone reads as a much bigger win than the
+        corpus actually received.
+      * **The real design question this surfaces, NOT decided here**: when all three samples picked a
+        2-member bundle and the majority core is a single family, they agreed on an *ingredient*, not
+        on a *bundle*. Whether that should resolve (today's behaviour), or be held as unresolved by a
+        minimum-cardinality rule, is a genuine judgement about what agreement means for a bundle —
+        with a real cost either way (today: duplicate-heavy accepted content; the alternative: a
+        higher unresolved rate again). It needs the owner's call, not a unilateral one, and the
+        numbers above are what that call should be made on.
     - **Evidence**: `data/seed/actions/_candidates/general/round-903.json`,
       `.../family/round-903.json` (real runs, real model, baselines untouched). Tests:
       `resolve_set_vote` pinned by 9 new cases in `tests/test_option_permutation.py` (incl. the
       partial-overlap case, the one-sample-can-never-enter rule, the disjoint negative control, and
       a guard that the scalar path is untouched); 4 new cases in `tests/test_general_propose.py`.
       **Full seedsmith suite 1612 passed / 1 skipped / 288 subtests, zero regressions.**
-    - **⚠️ The same latent flaw exists in A-S4** (`validate_heal/derive.py:resolve_vote_field` votes
-      `atomFamilies` through the same scalar path via `canonical_set_key`). **Deliberately NOT
-      changed here**: A-S4 is a gating stage that currently reports zero gate rejects, so altering
-      its verdict semantics without a measurement to justify it would be the unmeasured change this
-      audit repeatedly warns against. Named here with its file so it is owned, not rediscovered.
+    - **⛔ A-S4 CARRIED THE SAME FLAW — now fixed too, 2026-09-05.** It was first recorded here as
+      "deliberately not changed, no measurement to justify it". **That deferral no longer held once
+      the propose-side fix was measured**: A-S4's `resolve_vote_field` votes the *same* field
+      (`atomFamilies`) the *same* wrong way, flattening a whole set to one `canonical_set_key`
+      string before a scalar `Counter` compare. Leaving a known-bad aggregation in place behind a
+      currently-passing gate is exactly how this defect survived five attempts in the first place.
+      New `resolve_set_vote_field` (`validate_heal/derive.py`) keeps the permutation verification
+      and the exactly-three-samples rule byte-for-byte, splits each `chosen_value` back into its
+      members, and routes **only** `atomFamilies` per-member — every other voted field
+      (`differentiator`, a genuinely closed six-value enum) stays on the unchanged scalar path.
+      `_finalize_atom_families` needed no change: `SetVoteResult.value` renders the same joined key.
+      **2 new tests** in `tests/test_validate_heal.py` (the partial-overlap case that used to score
+      1-1-1, plus the disjoint negative control). `test_validate_heal.py` **64→66 passing**.
+    - **One speculation checked and found WRONG, recorded so it is not repeated**: A-P3's
+      `differentiator` was suspected of the same class of defect (a free-text field voted by exact
+      string equality would be near-guaranteed to split 1-1-1). It is not free text — it is a
+      **closed six-value enum** (`signature_propose/prompts.py`, `differentiator.enum` filled per
+      call), so scalar exact-equality voting is the correct aggregation for it and it was left alone.
   - **Gate G5 — evidence-gated, not owner-gated (plan §2a).** Proceed when all four criteria hold: zero
     schema-audit defects · `unresolved` under 10% each with a named reason · byte-identical replay proven
     by hash · the coverage report names its thin cells. **Any one failing means fix and re-run — not
@@ -4002,6 +4045,30 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
       real `stat.derived` atom. Corrected to glob every committed `*.json` at the top of
       `data/seed/atoms/` — naming a shape rather than a location is exactly how a corpus sweep
       under-reports, which is the failure this whole correction exists to undo.
+    - **⛔ MADE BULK-EDITABLE 2026-09-05, on the owner's own instruction** (*"make them tunable and
+      we will rebalance in our deterministic engine later, can be bulk edit at one"*). Every row in
+      `coefficients.v1.json` now carries a **`tuningClass`**, derived programmatically from the live
+      registry and the real corpus (never hand-typed), plus a `_meta` block naming the classes and
+      stating the rebalance procedure. Counts: **policy 7 · fitted 5 · authored-zero 1 ·
+      separate-path 1 · pending-content 20.**
+      * **`policy` is the balance surface — the 7 rows a rebalance edits**, filterable in one pass:
+        `resource.economy`, `status.clear`, `shield.grant`, `board.action`, `grid.spawn`,
+        `grid.clear`, `box.set`. Real atoms of these kinds exist but price as ONE reference unit
+        (the kind declares no magnitude param, or its amount rides the overlay at runtime), so no
+        measurement can ever set them — the number answers a design question, which is a judgement.
+      * `fitted` (5) traces to a sweep run and should be re-measured, not hand-edited.
+        `authored-zero` (1, `ui.present`) is deliberate. `separate-path` (1, `spawn.entity`) is
+        priced by `ActorPowerCache.PriceBody`, so rebalancing a spawn means touching body pricing,
+        not this row. `pending-content` (20) has no atom yet — nothing to measure or balance.
+      * **Deliberately NOT moved to `data/tuning/`** despite being "tunable": `power_coefficient` is
+        content-hashed (registry V3), and `data/tuning/*.json` is not hashed by anything — moving
+        them there would reproduce the exact defect `CoefficientTable.cs:17-20` exists to prevent (a
+        number that moves every golden while the content stamp stands still). The seed path IS the
+        tunable home for these; the `tuningClass` grouping is what makes a bulk edit one filter.
+      * Verified: `AtomImporter --check --validate` still **clean, exit 0** with the new field (the
+        reader is field-by-field, not strict-schema — the pre-existing `note` field already proved
+        extra keys are tolerated). Core.Tests pricing filter **380/381**, the one failure the known
+        unrelated `battle-tempo` breakage.
     - **Verification, re-run**: `python scripts/sweep-power-coefficients.py` reproduces every figure
       above; `dotnet run --project tools/AtomImporter -- --check --validate` → **exit 0, clean,
       "1 row(s) would change"** (exactly the status.apply row), **power drift: 0 evaluated, 0

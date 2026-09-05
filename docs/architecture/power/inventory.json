@@ -160,8 +160,9 @@
       "id": 23,
       "scale": "mapLevel(M) = Wm * DangerBand(M)",
       "shape": "linear",
-      "location": "docs/architecture/power/ssot-power-scale.md §10.3",
-      "verdict": "closed-Wm-5"
+      "location": "src/FusionRpg.Core/Power/PowerIndexComposer.cs",
+      "verdict": "closed-Wm-5",
+      "locationNote": "Repointed 2026-09-05 from ssot-power-scale.md 10.3 to the shipped code. The formula was closed by owner decision 2026-08-23 and nothing implemented it until item module 11 needed it for the world-sector loot source; PowerIndexComposer.MapLevel(dangerBand, tuning) is now the one implementation, and WorldSectorLootSource its first caller. Wm = 5 still comes from data/tuning/power-scale.v{n}.json, never a literal."
     },
     {
       "id": 24,

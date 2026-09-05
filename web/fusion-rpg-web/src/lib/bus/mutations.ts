@@ -258,11 +258,9 @@ export function useSaveAptitudes() {
 /**
  * spec-species-respec.md — the ONE save path for a species' build: a first override, a revert (empty
  * `shares`), and a priced change all go through this single endpoint, which decides for itself which
- * of the three applies. **Never** `/api/aptitudes/species/allocate` here — that older route (module 5)
- * still writes a DemonType override with no pricing at all; routing this panel's saves through it
- * would be the exact bypass `SpeciesBuildEndpoints.cs`'s own doc comment names as a real, deliberately
- * un-retired gap. This mutation is what makes that gap reachable by a real player if it were ever
- * used here, so it is the one call site this module must get right.
+ * of the three applies. The older, unpriced `/api/aptitudes/species/allocate` route (module 5) this
+ * mutation was written to avoid was retired server-side (species-build-todo.md T4.3, 2026-09-05) — this
+ * is now the only write path for a species aptitude override.
  */
 export function useRespecSpecies() {
   const qc = useQueryClient();

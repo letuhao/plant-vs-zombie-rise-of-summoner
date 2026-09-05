@@ -771,6 +771,10 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_world_faction_intel;", "DELETE FROM rpg_world_entities;",
                              "DELETE FROM rpg_world_lanes;", "DELETE FROM rpg_world_slots;",
                              "DELETE FROM rpg_world_sectors;", "DELETE FROM rpg_world_factions;",
+                             // party-dungeon delve-scope: the same orphan reason as the W21 rows
+                             // above — a delve world outliving a reset would leave rpg_delves
+                             // pointing at a deleted rpg_worlds row. Ahead of rpg_worlds itself.
+                             "DELETE FROM rpg_delve_rooms;", "DELETE FROM rpg_delves;",
                              "DELETE FROM rpg_worlds;",
                              "DELETE FROM players;"
                          })

@@ -171,7 +171,16 @@ public sealed partial class RpgStore
         // column existed — the same field-only-addition precedent as recruit_stock/project_id above.
         EnsureColumn(db, "rpg_world_faction_intel", "development_level", "INTEGER NOT NULL DEFAULT 0");
 
+        // party-dungeon delve-scope (2026-09-05, decisions.md:114): a delve is a `WorldState` row
+        // of kind='delve' beside the map's kind='map' rows. `mode` (:25) stays the clock axis and
+        // is never read for scope — an existing saved world reads `kind` back as 'map', which is
+        // exactly what it always was.
+        EnsureColumn(db, "rpg_worlds", "kind", "TEXT NOT NULL DEFAULT 'map'");
+        EnsureColumn(db, "rpg_worlds", "parent_world_id", "TEXT");
+        Exec(db, "CREATE INDEX IF NOT EXISTS ix_rpg_worlds_player_kind ON rpg_worlds(player_id, kind, state);");
+
         EnsureWorldTurnSchemaUnlocked(db);
+        EnsureDelveSchemaUnlocked(db);
     }
 
     /// <summary>
@@ -382,8 +391,8 @@ public sealed partial class RpgStore
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT world_id, player_id, template_id, seed, current_turn, state, created_utc, revision
-                FROM rpg_worlds WHERE player_id = $p AND state = 'active'
+                SELECT world_id, player_id, template_id, seed, current_turn, state, created_utc, revision, kind, parent_world_id
+                FROM rpg_worlds WHERE player_id = $p AND state = 'active' AND kind = 'map'
                 ORDER BY world_id LIMIT 1;
                 """;
             cmd.Parameters.AddWithValue("$p", playerId);
@@ -661,7 +670,7 @@ public sealed partial class RpgStore
     {
         using var cmd = db.CreateCommand();
         cmd.CommandText = """
-            SELECT world_id, player_id, template_id, seed, current_turn, state, created_utc, revision
+            SELECT world_id, player_id, template_id, seed, current_turn, state, created_utc, revision, kind, parent_world_id
             FROM rpg_worlds WHERE world_id = $w;
             """;
         cmd.Parameters.AddWithValue("$w", worldId);
@@ -672,7 +681,8 @@ public sealed partial class RpgStore
     static WorldHeaderRow ReadHeader(SqliteDataReader r) => new(
         r.GetString(0), r.GetInt64(1), r.GetString(2),
         ulong.TryParse(r.GetString(3), out var seed) ? seed : 0UL,
-        r.GetInt32(4), r.GetString(5), r.GetString(6), r.GetInt64(7));
+        r.GetInt32(4), r.GetString(5), r.GetString(6), r.GetInt64(7),
+        r.IsDBNull(8) ? "map" : r.GetString(8), r.IsDBNull(9) ? null : r.GetString(9));
 
     static void Insert(SqliteConnection db, SqliteTransaction tx, string sql,
         params (string Name, object? Value)[] parameters)
@@ -686,7 +696,10 @@ public sealed partial class RpgStore
     }
 }
 
-/// <summary>World header without the graph — enough to list, resume, or route a turn.</summary>
+/// <summary>World header without the graph — enough to list, resume, or route a turn. `Kind` is
+/// 'map' or 'delve' (party-dungeon delve-scope, 2026-09-05); `ParentWorldId` is reserved for the
+/// world program's later `delving` design (R10) and unread by anything today.</summary>
 public sealed record WorldHeaderRow(
     string WorldId, long PlayerId, string TemplateId, ulong Seed,
-    int CurrentTurn, string State, string CreatedUtc, long Revision);
+    int CurrentTurn, string State, string CreatedUtc, long Revision,
+    string Kind = "map", string? ParentWorldId = null);

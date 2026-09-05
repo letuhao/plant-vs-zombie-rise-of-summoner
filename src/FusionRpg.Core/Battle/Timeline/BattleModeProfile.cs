@@ -203,14 +203,25 @@ public static class BattleModeProfileCatalog
     /// turn — the profile every existing battle and expedition golden implicitly runs under.</summary>
     public static BattleModeProfile ClassicRound => _classicRound ??= Build(
         ClassicRoundId, AdvancePolicyKind.NextEvent, WScope.Global, Commitment.LateBound, points: false,
-        forecast: ForecastExactness.Exact);
+        forecast: ForecastExactness.Exact) with { UsesTimelineDispatch = true };
+        // `battle-tempo` `LAND1` LANDED 2026-09-05, in a SECOND pass after the first deliberately
+        // excluded this row. The exclusion was correct at the time: dispatch starved actors at
+        // `W = 1` (this profile's width), turning a `Victory` into a `Stalemate`. That defect is fixed
+        // (TimelineDispatch.TryCommitReady now checks for a free slot BEFORE spending the actor's
+        // economy), and this profile now measures 89.58% under dispatch -- EXACTLY its atomic win
+        // rate, with every outcome golden green. Only the internal event TRACE differs, which is what
+        // the 11 re-blessed adoption/pre-adoption fixtures record.
 
     /// <summary>Turn-based but concurrent — two actors per side may be mid-action at once. This IS
     /// the contrast case B12's own acceptance line names: `W=2` here provably overlaps where
     /// `classic-round`'s `W=1` provably cannot, in the same test file.</summary>
     public static BattleModeProfile GalaxySync => _galaxySync ??= Build(
         GalaxySyncId, AdvancePolicyKind.NextEvent, WScope.PerSide, Commitment.LateBound, points: false,
-        forecast: ForecastExactness.Exact);
+        forecast: ForecastExactness.Exact) with { UsesTimelineDispatch = true };
+        // `battle-tempo` `LAND1` LANDED 2026-09-05 (decisions.md "Battle timeline dispatch — landed on
+        // two profiles"): the wind-up/commitment machinery is ON here. Measured, not assumed: the full
+        // Core.Tests suite moves ZERO tests under this scope, because every shipped golden and
+        // expedition fixture resolves under `classic-round` — so no re-bless and no RulesetVersion bump.
 
     /// <summary>Real-time-flavored: fixed-increment advance, a wider concurrency width, and an
     /// Action-Points economy rather than one-action-per-turn — genuinely exercises the OTHER half
@@ -222,12 +233,13 @@ public static class BattleModeProfileCatalog
         forecast: ForecastExactness.SoftBounded,
         // B39: the profile whose turn order `turn.speed`/`turn.haste` actually decide. An
         // Active-Time-Battle mode that ignored speed would be one in name only.
-        ordersBySpeed: true);
-        // `battle-tempo` `LAND1` (2026-09-05): staged for the Phase 2 sweep by temporarily appending
-        // `with { UsesTimelineDispatch = true }` here, measured (see spec-timeline-dispatch.md §12 /
-        // battle-tempo-todo.md's own LAND1 evidence), then REVERTED — this row stays byte-identical to
-        // every other shipped profile until the owner actually lands Phase 2. To reproduce the sweep,
-        // re-add `with { UsesTimelineDispatch = true }` to this property.
+        ordersBySpeed: true) with { UsesTimelineDispatch = true };
+        // `battle-tempo` `LAND1` LANDED 2026-09-05 (decisions.md "Battle timeline dispatch — landed on
+        // two profiles"). This is the profile the reaction lane actually reaches (`wReact = 1`), so the
+        // poise counter now fires for real: wave HpRemaining 10346 -> 8855, measured through the real
+        // BattleEngine.Resolve. This profile's own win rate moves 87.92% -> 77.08% and NO golden
+        // asserts it — the full suite still moves zero tests, which is why this landed without a
+        // RulesetVersion bump or a re-bless.
 
     /// <summary>The district board (base-defense-ideal.md §5.11/§5.16). Turn-based like
     /// <c>classic-round</c>, but speed-ordered and interactive — movement precedes contact on a

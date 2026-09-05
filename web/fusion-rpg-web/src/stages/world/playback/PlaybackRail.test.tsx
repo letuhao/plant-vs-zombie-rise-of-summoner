@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
-import { foldTurnReport } from "@/features/world/playbackKeyframes";
-import type { WorldTurnEntryDto, WorldTurnReportDto } from "@/features/world/worldTypes";
+import { foldTurnReport } from "@/stages/world/playbackKeyframes";
+import type { WorldTurnEntryDto, WorldTurnReportDto } from "@/lib/bus/world";
 import { PlaybackRail } from "./PlaybackRail";
 
 const entry = (

@@ -96,7 +96,13 @@ the reveal → **Checkpoint 4**
 
 ### Phase 5 — the surface (module 9)
 `T5.1` contract + bus hooks · `T5.2` panel in `AptitudesLayer` · `T5.3` GG-1/GG-10 conformance + E2E
-→ **Checkpoint 5, program closes**
+→ **Checkpoint 5, the build closes**
+
+### Phase 6 — playability gaps (modules 4, 9) — *added by the playability audit, §4b*
+`G1` plan keyed by runtime `speciesId` · `G2` unresolvable key fails loud · `G3` plan coverage for the
+17 uncovered species · `G4` a real door to contract binding · `G5` honest empty state at budget 0 ·
+`G6` error branch precedence · `G7` confirm gated on the price having loaded
+→ **Checkpoint 6, the program is actually playable**
 
 ---
 
@@ -119,6 +125,41 @@ later task adds keys rather than rewriting the file (`T4.1`).
 
 **The pattern worth remembering:** every gap was a thing *between* modules rather than *inside* one. A
 per-module spec review cannot find them, because each spec is individually complete.
+
+---
+
+## 4b. Playability audit, 2026-09-05 — five findings, and again none of them inside a module
+
+Run **after** Checkpoint 5 declared the program complete, against a **live server and four real save
+databases** rather than the test suite, from four perspectives: cold-start wiring, combat effect, the
+XP and soul economy, and the player's own click path. It retracted this program's "PROVEN COMPLETE"
+claim. Three of the five findings are **silent** — they render a plausible-looking screen instead of an
+error — which is precisely why every suite stayed green.
+
+| Finding | Why it was invisible | Closed by |
+|---|---|---|
+| ⛔ **Every species baseline is empty.** The generated plan is keyed in seedsmith anchor PascalCase (`FumeShroom`); every runtime lookup asks the compiled catalog's lowercase id (`fumeshroom`) through an **ordinal** dictionary. Exact overlap across 829 plan keys and 84 live species: **0** | `SharesFor` returns `EmptyShares` on a miss by design — no throw, no log. Both suites `Configure` a hand-built plan keyed `"fumeshroom"`, the *lookup* id, so no test ever loaded the shipped file's `"FumeShroom"` against the real roster | `G1` (write the real `speciesId`, per `spec-redistribution-plan.md` §"Shape") and `G2` (fail loud, per that same spec's §"Tuning" rule for a missing key) |
+| ⛔ **No door to the feature.** Pacts is gated on `hasAnyContract`; the only binding UI is `/demons`, which nothing in the app links to. Pacts' empty state names a page the player cannot reach | Each surface is individually correct. The missing thing is a **link between two of them**, which no module owns | `G4` — named as crossing into the shell/rail rather than absorbed as this program's code |
+| ⛔ **An unlevelled species renders as an unexplained zero panel** — twelve zeroes under the copy "You're running the shipped build", which is false, with the disabled-Save reason hidden in a `title=` tooltip | Budget `max(0, level-1) x 4` is correct math; the *copy* assumes a build exists. Compounds the first finding — two independent causes, one identical broken-looking screen | `G5` |
+| **A failed load renders as "Loading..." forever** — `!state.data` is tested before `isError`, so the error branch and its retry button are unreachable dead code | No test covers the failure path | `G6` |
+| **A priced respec can spend souls with no confirm** — `isFree` falls back to `true` while the price query is pending or errored | The happy path is covered; the pending-price path is not | `G7` |
+
+**What the audit confirmed as genuinely working**, and what the fixes must not regress: species XP does
+accrue from real lawn play (real `plant_place` -> `peashooter` and `zombie_spawn` -> `normalzombie`
+rows in a live save — evidence static reading could not produce); species points do reach lawn,
+web-match and expedition combat via the scope-blind allocation sum; one completed match (104 XP) clears
+the 60-XP threshold to a 4-point budget; every tuning hub is configured at real cold start with its
+files deployed to `dist/`.
+
+**§4a's closing line predicted this exactly:** *"every gap was a thing between modules rather than
+inside one."* It happened again, one layer out — plan file to catalog, roster UI to binding UI, species
+level to budget copy. The durable fix is `G1`'s last acceptance criterion and `G2`: **test the real
+artifact against the real roster**, rather than a fixture that agrees with the code under test.
+
+**Ordering:** `G1` first — it is XS and buys back 67 of 84 species immediately. `G2` next, so the class
+of defect cannot silently return. Then `G4`, which is what makes the feature reachable at all, and the
+three XS surface-honesty fixes (`G5`–`G7`) which are independent of each other. `G3` is content work
+and last, because `G2` makes its absence visible rather than silent in the meantime.
 
 ---
 
@@ -155,3 +196,9 @@ re-decided (§12), and the two product questions the specs deferred — the XP f
 surface host — were answered on 2026-09-05 and are recorded in their own specs.
 
 The only things deliberately left unset are **tunable values**, which a balance pass owns by rule.
+
+**Phase 6 adds no open question either.** `G4` needs one product call — where the door to contract
+binding lives — and it ships with a named default rather than a gate: **put it on the Pacts empty
+state that already names the Demons roster**, the smallest fix that invents no new information
+architecture. A Demons rail entry is the alternative if the owner wants it discoverable before a first
+contract exists; it is a one-line difference and does not block the task from starting.

@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import fixture from "@/features/world/fixtures/first-light.json";
+import fixture from "@/stages/world/fixtures/first-light.json";
 import type { WorldStateDto } from "@/lib/bus/world";
 import { adaptWorldState } from "@/contract/adapt";
 import { WorldScene } from "./WorldScene";

@@ -6,6 +6,7 @@ from __future__ import annotations
 from ._stub import StubAdapter
 from .actions import ActionsAdapter
 from .demons import DemonsAdapter
+from .dungeon import DungeonAdapter
 from .items import ItemsAdapter
 
 ADAPTERS: "dict[str, type]" = {
@@ -13,6 +14,7 @@ ADAPTERS: "dict[str, type]" = {
     "items": ItemsAdapter,
     "demons": DemonsAdapter,
     "actions": ActionsAdapter,
+    "dungeon": DungeonAdapter,
 }
 
 

@@ -1,4 +1,4 @@
-import { describePlaybackEntry } from "@/features/world/playbackTable";
+import { describePlaybackEntry } from "@/stages/world/playbackTable";
 
 /**
  * The action cluster's own refusal reasons (world-stage W64) read through the exact same one table

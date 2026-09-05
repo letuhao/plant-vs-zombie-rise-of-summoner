@@ -9,6 +9,11 @@ namespace FusionRpg.Core.Items.Mutation;
 /// <c>Instantiator.Draw</c> runs its budget draw twice, each with its own RNG stream. The
 /// algebra restates per budget and the hazard I7 handed to module 1 (two sources of truth for
 /// <c>pool_rolls</c>) no longer exists.
+///
+/// <para>⚠ The two passes are <b>separately streamed, not independent</b> (A1, wired 2026-09-05): a
+/// <see cref="AffixClass.Mixed"/> affix spends one roll of each budget simultaneously, so it is one
+/// target in <see cref="TargetPrefix"/> <i>and</i> one in <see cref="TargetSuffix"/>. Derive both
+/// with <see cref="RerollPolicy.TargetsFor"/> rather than counting targets by hand.</para>
 /// </summary>
 public readonly record struct BudgetTargets(int PrefixRolls, int SuffixRolls, int TargetPrefix, int TargetSuffix)
 {
@@ -79,25 +84,66 @@ public static class RerollPolicy
     }
 
     /// <summary>
-    /// ⚠ §2's <c>Mixed</c> hazard, <b>decided rather than discovered.</b> A <c>Mixed</c> affix
+    /// ⭐ §2's <c>Mixed</c> hazard is <b>BUILT, not refused</b> (2026-09-05). A <c>Mixed</c> affix
     /// consumes one prefix roll AND one suffix roll simultaneously, so rerolling one frees a slot in
-    /// both budgets and must redraw into both. <c>Instantiator.Draw</c>'s own comment calls
-    /// today's two-independent-draws model "an interim, honestly-documented simplification", and this
-    /// module must not build a second simplification on top of it: until module 2
-    /// <c>resolution-order</c> lands the real semantics, a reroll targeting a <c>Mixed</c> affix is
-    /// refused by name.
+    /// both budgets and must redraw into both. That is now exactly what
+    /// <c>Instantiator.DrawBudget</c> does: the prefix pass carries the suffix budget, a <c>Mixed</c>
+    /// pick spends one of each, and the suffix pass excludes it — <c>Resolver</c>'s own A1 semantics,
+    /// threaded into the atom-id draw the same day. <c>reroll.mixed-affix-undefined</c> is gone with
+    /// its reason: it named module 2 (`resolution-order`), which landed 2026-09-02.
+    ///
+    /// <para><b>What is still refused, narrowed to the case that genuinely remains:</b> a target whose
+    /// affix carries a <b>slot</b> ref. <c>Instantiator.DrawBudget</c> returns bare atom ids and rolls
+    /// no domain member, no tier and no value, so it cannot redraw into a slot-bearing pool;
+    /// <see cref="Resolver.Resolve"/> can, but has no <c>count</c>/<c>excludeGroups</c> seam for a
+    /// partial redraw. ⚠ <b>This is class-agnostic on purpose</b> — a slot-bearing <c>Prefix</c> affix
+    /// is exactly as un-redrawable as a slot-bearing <c>Mixed</c> one, so refusing only <c>Mixed</c>
+    /// would name the wrong thing and let a real failure through.</para>
     /// </summary>
-    public static AtomRejection ValidateRerollable(IEnumerable<DrawnAffix> targets, bool resolutionOrderLanded)
+    /// <param name="lookupAffix">Reads the target's own refs. <see cref="DrawnAffix"/> carries the
+    /// class, not the bundle, and the residual case is about the refs — so the catalog is asked rather
+    /// than the class guessed from.</param>
+    public static AtomRejection ValidateRerollable(
+        IEnumerable<DrawnAffix> targets, Func<string, AffixRow?> lookupAffix)
     {
-        if (resolutionOrderLanded) return AtomRejection.Ok;
+        foreach (var target in targets)
+        {
+            var affix = lookupAffix(target.AffixId);
+            // Distinct from `reroll.affix-outside-pool` (ValidatePostOp's, about the CONTAINER's pool):
+            // this is a target the affix catalog no longer knows at all, which a catalog revision can
+            // produce for an already-owned item.
+            if (affix is null)
+                return MutationRules.Violated("reroll.affix-unknown",
+                    $"target affix '{target.AffixId}' at seq {target.Seq} is not in the affix catalog — " +
+                    "a reroll cannot redraw a bundle it cannot read");
 
-        foreach (var target in targets.Where(a => a.Class == AffixClass.Mixed))
-            return MutationRules.Violated("reroll.mixed-affix-undefined",
-                $"affix '{target.AffixId}' at seq {target.Seq} is Mixed — it consumes a prefix AND a suffix roll " +
-                "simultaneously, and redrawing into both budgets needs module 2 (resolution-order). Refused rather " +
-                "than guessed at");
+            var slot = affix.Refs.FirstOrDefault(r => r.IsSlot);
+            if (slot is not null)
+                return MutationRules.Violated("reroll.slot-affix-undefined",
+                    $"affix '{target.AffixId}' at seq {target.Seq} has a slot ref ('{slot.SlotName}' over domain " +
+                    $"'{slot.SlotDomain}') — a redraw runs through Instantiator.DrawBudget, which returns bare atom " +
+                    "ids and rolls no domain member or tier. Resolver.Resolve does, but has no partial-redraw seam " +
+                    "yet. Refused rather than guessed at");
+        }
 
         return AtomRejection.Ok;
+    }
+
+    /// <summary>
+    /// §2's target counts, derived rather than trusted: <b>a <c>Mixed</c> target counts against BOTH
+    /// budgets</b>, because rerolling it frees a slot in each. Getting this wrong is silent — the op
+    /// would validate, and <see cref="AnchorMultiplier"/> would price a freed suffix roll as an anchor
+    /// — so it is computed here from the drawn list rather than left to a caller to remember.
+    /// </summary>
+    public static BudgetTargets TargetsFor(
+        ContainerRow container, IEnumerable<DrawnAffix> drawn, IEnumerable<int> targetSeqs)
+    {
+        var targets = new HashSet<int>(targetSeqs);
+        var picked = drawn.Where(a => targets.Contains(a.Seq)).ToList();
+        return new BudgetTargets(
+            container.PrefixRolls, container.SuffixRolls,
+            picked.Count(a => Eligible(a.Class, AffixClass.Prefix)),
+            picked.Count(a => Eligible(a.Class, AffixClass.Suffix)));
     }
 
     /// <summary>

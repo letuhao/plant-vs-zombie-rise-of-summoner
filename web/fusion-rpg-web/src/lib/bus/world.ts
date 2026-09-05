@@ -9,9 +9,10 @@ import { getJson, sendJson, tryGetJson } from "./rest";
  * **world-stage W2 (2026-09-04):** the wire DTOs used to live in `features/world/worldTypes.ts` and
  * this file imported them from there — so `contractGuard` (matching only `from "@/lib/bus`) would
  * pass a `stages/world/` component binding straight to a REST DTO. They live here now, where every
- * other domain's DTOs already do; `features/world/worldTypes.ts` re-exports them so the legacy page
- * and its tests keep compiling unchanged until Phase 4 retires that tree. This is a move, not an
- * edit — no field was renamed or narrowed.
+ * other domain's DTOs already do; `features/world/worldTypes.ts` re-exported them so the legacy page
+ * and its tests kept compiling unchanged until Phase 4 retired that tree — done 2026-09-05, the
+ * whole `features/world/` directory is gone, and every former consumer imports straight from here.
+ * This was a move, not an edit — no field was renamed or narrowed.
  */
 
 export type WorldFactionDto = {
@@ -211,7 +212,7 @@ export type WorldEntityDto = {
    * Found missing (world-stage, same drift class as `calendar`/`structureId`/`fractureIntensityMilli`
    * above): projected since `WorldDtos.cs:301` (world-stage W8, `EntityNaming.DisplayName`), never
    * added to this hand-written mirror. Never null on the wire (defaults to `""` for a legion the
-   * viewer cannot name — a genuinely absent name, not a gap) — `features/world/labels.ts`'s own
+   * viewer cannot name — a genuinely absent name, not a gap) — `stages/world/labels.ts`'s own
    * `legionLabel` already treats an empty string as "no name on record" for exactly this reason.
    */
   displayName: string;

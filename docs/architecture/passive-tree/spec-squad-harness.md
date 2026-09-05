@@ -749,14 +749,20 @@ changes what "a squad" means.
 Three. All are owner decisions this module may not make for itself; everything else in this spec is
 answerable from code and has been answered.
 
-1. **Is the primary verdict scored against mirror squads, or against authored waves?** Both run
-   (§2). Mirror squads are the direct analogue of the dominance matrix and need no content; authored
-   waves are what a player actually faces. The two can disagree, because §3.5's causal story — *"a
-   corner maxes one axis and floors eleven, so every opponent finds an open one"* — depends on the
-   opponent being a *build*. A wave is not. **Recommendation on the record: mirror squads decide the
-   verdict, waves are reported beside it.** The wave path additionally needs a Θ-parameterised wave
-   roster (`WaveCatalog.cs:116-119` pins Levels at 1/3/6/10), which is `src/` work this module cannot
-   do and nothing currently schedules.
+1. ~~**Is the primary verdict scored against mirror squads, or against authored waves?**~~
+   ✅ **CLOSED 2026-09-05 by D46 — mirror squads decide.** This spec argued it from measurement
+   validity: §3.5's causal story needs the opponent to be a *build*, and a wave is not. The owner
+   closed it from design intent instead, which is the stronger reason — **the AI is a build.**
+   `decisions.md:104` keeps classes alive only as Zomboss AI patterns, and `world-map-program.md:30`
+   specs `ai-commander` as factions *"committing through the same command interface"*. An
+   adversarial, counter-building AI is a mirror squad chosen to beat you — the strictest case this
+   harness can score, not a stand-in for one.
+
+   **Consequence worth carrying:** the Θ-parameterised wave roster this question needed
+   (`WaveCatalog` pins levels at 1/3/6/10) is **no longer a prerequisite for the verdict**. Waves
+   may still be reported beside it as content telemetry, but nothing in this program blocks on
+   `src/` work nobody scheduled.
+
 2. **Should the harness also measure the shipped allocation shape, not just D21's?** Today a squad
    differentiates per *species*, not per *actor* (§1.1), and the commander allocation replicates
    across the whole roster (`decisions.md:103`). D33's arbitrage needs per-actor build state, which

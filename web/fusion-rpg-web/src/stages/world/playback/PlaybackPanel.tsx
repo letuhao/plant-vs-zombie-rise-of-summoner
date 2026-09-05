@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useWorldTurnReport } from "@/lib/bus/world";
-import { foldTurnReport, flattenKeyframes, stepKeyframe } from "@/features/world/playbackKeyframes";
+import { foldTurnReport, flattenKeyframes, stepKeyframe } from "@/stages/world/playbackKeyframes";
 import { PlaybackRail } from "./PlaybackRail";
 import { PlaybackTransport } from "./PlaybackTransport";
 

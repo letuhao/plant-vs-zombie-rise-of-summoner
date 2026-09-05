@@ -679,6 +679,29 @@ Three properties this refusal must have, each for a stated reason:
 owes a flag that suppresses conversion nodes at plan time, so the refusal is a zero-count assertion in
 a healthy run rather than a per-run event.
 
+#### 7.3 What the binder does NOT refuse: an excluded node, nullification included (D40)
+
+D40 keeps all three of D14's exclusion forms and restores `nullification` to `tree-language`'s schema.
+**None of them is a bind-time refusal, and this section exists so nobody adds one by analogy with
+§7.1.** The two cases are different in kind:
+
+| | Conversion node (§7) | Excluded node, any form (D14/D40) |
+|---|---|---|
+| What is missing | a **capability** — no kind writes an element payload | nothing; the atoms compose and price normally |
+| When it is known | at bake time, for every player | at **resolve** time, per actor, depending on what else that actor owns |
+| This module | **refuses**, names the unspent budget, fails the run | **binds it normally** — same affixes, same `kMicro`, same budget |
+
+A nullified node is a **runtime no-op, not an unpriced slot.** It keeps its coefficient because
+whether it fires is a property of one actor's build, and the catalog is static and shared (D24) — a
+bake-time refusal would make one player's build decide another player's catalog. `tree-resolve`
+contributes zero for it and reports the winner (its §13, test 17); `tree-surface` renders it **inert
+rather than un-unlocked**. The binder's whole obligation here is to leave the arithmetic alone and not
+invent a fourth verdict.
+
+**One thing does travel with the form:** the load path branches on it, so the form must survive the
+bake. It rides `NodeRecord` beside `excludeProps` ([`tree-catalog`](spec-tree-catalog.md) §2.2) —
+carried through, never re-derived, exactly like `budgetShareMilli`.
+
 ---
 
 ## Commands
@@ -773,6 +796,7 @@ static long CoefficientMicro(long treeShareMilli, long treeBudgetMilli, long bud
 | `ladder_index_and_aptitude_points_refuse` | writing `progression.power` or an aptitude id is refused at bind, before load |
 | `no_more_op_on_a_derived_channel` | derived ops are `Flat\|Increased\|Replace\|Flag` |
 | `conversion_node_is_refused_with_the_rule_named` | the §7.2 refusal text, including the unspent budget line |
+| `an_excluded_node_binds_normally_including_nullification` | §7.3 / D40 — same affixes, same `kMicro`, same budget as the identical node with no exclusion, and the form is carried through to the record. The failure this catches is a bake-time refusal added by analogy with the conversion one |
 | `refused_slot_budget_is_reported_not_absorbed` | the run report names every unspent share |
 | `soul_level_offsets_theta_never_the_coefficient` | `kMicro` is byte-identical at soul level 0 and 50; only `Θ_node` moves |
 | `theta_per_soul_level_is_read_as_per_mille` | `thetaPerSoulLevelMilli = 1000` gives one `Θ` per level. Writing `1` must give a *thousandth*, not one — the exact failure R2 was written after |
@@ -814,7 +838,10 @@ bounded ratio must say in a comment that it is one); use `float` for a magnitude
 `P(Θ)`; write `progression.power`, `progression.realm` or an aptitude id; allocate budget to a
 conversion node before a 17th kind is reviewed; widen the atom vocabulary (7/16/13 is a reviewed
 `decisions.md` change); invent a third channel classification beside `UnitClass` and the render
-states; let a model near this module.
+states; **refuse, unprice or discount a node because it carries an exclusion** — `nullification`
+included: that is a per-actor runtime no-op, not a bake-time capability gap, and treating it like §7's
+conversion refusal would let one player's build change a shared catalog (§7.3); let a model near this
+module.
 
 ## Success criteria
 
@@ -850,10 +877,14 @@ states; let a model near this module.
    Whether it lands on `Board` or `Stat` is that spec's call, not this one's. Until then this module
    refuses, and `tree-plan` should suppress the slot rather than let the refusal fire per run.
 
-**Named, small and mechanical — not open, just unscheduled:** a sim consumer for `stat.derived`
-(`AtomKindRegistry.cs:533`), without which the re-measurement ideal §3.5 schedules cannot see the
-mechanism nodes it is scheduled to measure. It belongs to `mechanism-wiring` (wave 0), and this module
-depends on it only for *scoring*, never for *binding*.
+**Named, small, mechanical — and now scheduled, so it is not listed as open at all.** The sim consumer
+for `stat.derived` (`AtomKindRegistry.cs:534`'s Sim cell) is **`mechanism-wiring`'s G3**, in wave 0,
+with its modified files already named: the fold onto the pinned snapshot in `SimEffectHost.cs` **and**
+`FoundationHarness.cs` (which is what `tools/CombatSim` actually drives), the registry cell flipped
+`None → Full` as *the last edit of G3, never the first*, and the three tests that move with the cell.
+Without it the re-measurement ideal §3.5 schedules cannot see the mechanism nodes it is scheduled to
+measure. This module depends on it only for **scoring**, never for **binding** — a node binds and
+ships whether or not Sim can score it.
 
 ## Decisions implemented
 
@@ -866,13 +897,16 @@ depends on it only for *scoring*, never for *binding*.
 | **D20 / D26** | Honoured by **deferring to `tree-plan`**, which is where the linear tier column is emitted and asserted. This module multiplies the emitted share by an anchor and does not re-derive the ladder — the old `tierWeight(t) = t` reconstruction was a second copy of that arithmetic and disagreed with the first (§3.3, R4) |
 | **D22** | Every node composes from the shipped 16 kinds and 13 triggers. No passive-specific effect vocabulary exists here |
 | **D24** | The catalog stores a **coefficient, not a magnitude** — the single choice that makes one static, byte-identical, shared catalog correct for every player at every `Θ` |
+| **D40** | §7.3 — all three exclusion forms bind normally. Nullification is a per-actor runtime no-op that keeps its coefficient; the **form** is carried through to `NodeRecord` because the load path and the surface branch on it, and the *only* bake-time refusal in this module remains D16's conversion node |
 | **D29** | 10 tiers × 2 branches is why the denominator carries `branches = 2`. §3.5's re-derivation against the shipped archetypes' real shares shows the per-mille defect is not a rounding complaint at all: it stores `0` |
 | **ideal §8** | One ladder (`PowerLadder`, never a private `f(level)`); no caps on magnitudes; `long` everywhere; balance numbers in `data/tuning/passive-tree.v1.json` |
 | **§10.2 row** | Exactly one new row, for `soulTrack.thetaPerSoulLevelMilli`, by row 18's precedent; none for the magnitude function, by row 16's |
 
 **Decisions this module does not touch**, and where they live: D1, D2, D4–D8, D11, D12, D18, D21,
-D25, D28, D33–D36 (`tree-state`, `tree-resolve`, `squad-harness`); D9, D10, D14, D27, D30, D32
-(`tree-plan`, `tree-language`); D17, D23 (`species-tree`); D19 and D31 are superseded by D35.
+D25, D28, D33–D36, D38, D39 (`tree-state`, `tree-resolve`, `squad-harness`); D9, D10, D27, D30, D32
+(`tree-plan`, `tree-language`); D37 (`gate-counters`); D17, D23, D41 (`species-tree`); D19 and D31 are
+superseded by D35. **D14 is authored elsewhere but lands here as a non-event** — §7.3 states what this
+module does about an exclusion, which is nothing, and says so because the neighbouring §7 does refuse.
 
 ---
 

@@ -15,7 +15,7 @@ spec, plan, proposal, or ADR — and read the documents its §1 row names for yo
 |---|---|
 | **Before any design work** | **[DESIGN-GATE.md](DESIGN-GATE.md)** — mandatory reading gate + topic index |
 | **Anyone new** | [architecture/software-architecture.md](architecture/software-architecture.md) (whole system, one page) · [architecture/data-architecture.md](architecture/data-architecture.md) (all data, one page) |
-| **Players** | [runbook/players.md](runbook/players.md) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
+| **Players** | **[guide/](guide/)** (**product vision SSOT** — [vision site](guide/site/), [brief feature list](guide/features.md), loops, catalog) · [runbook/players.md](runbook/players.md) (install) · [SUPPORT.md](../SUPPORT.md) · [Releases](https://github.com/letuhao/plant-vs-zombie-rise-of-summoner/releases) |
 | **Contributors** | [../CONTRIBUTING.md](../CONTRIBUTING.md) · [contributing/dev-setup.md](contributing/dev-setup.md) · [contributing/architecture-map.md](contributing/architecture-map.md) |
 
 Then architecture → protocol → module specs → [local-dev runbook](runbook/local-dev.md).
@@ -57,8 +57,8 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/data-architecture.md](architecture/data-architecture.md) | **Start here (data)** — physical stores, table inventory, SSOT map, lifecycle, DAL boundary |
 | [architecture/overview.md](architecture/overview.md) | Four modules (Launcher + Injector + Server + Web), v1 scope |
 | [architecture/stat-system.md](architecture/stat-system.md) | Modifier bag, compose, EntityApply / single writer |
-| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | **Derived-stat SSOT** — derived snapshot, progression.power, dynamic ApplyScale; 99 registered channels (84 combat **shipped**, not reserved); `resource.*` proposed in §3.G |
-| [architecture/resource-hub-ssot.md](architecture/resource-hub-ssot.md) | **Resource SSOT** — five actor resources in one shared set (`hp` `stamina` `hunger` `spirit` `qi`), faction differences are display labels only; scope/polarity/accrual registry, the two-suns rule, exhaustion-as-status, lazy regen |
+| [architecture/actor-hub-ssot.md](architecture/actor-hub-ssot.md) | **Derived-stat SSOT** — derived snapshot, progression.power, dynamic ApplyScale; 99 registered channels (84 combat **shipped**, not reserved); `resource.*` §3.G **registered and shipped** 2026-08-25, covering all six ids incl. `poise` |
+| [architecture/resource-hub-ssot.md](architecture/resource-hub-ssot.md) | **Resource SSOT** — **six** actor resources in one shared set (`hp` `stamina` `hunger` `spirit` `qi` `poise`), faction differences are display labels only; scope/polarity/accrual registry, the two-suns rule, exhaustion-as-status, lazy regen. All six are legal action costs; `poise` pays for guarding |
 | [architecture/resource-hub-ideal.md](architecture/resource-hub-ideal.md) | **Superseded — reasoning trail only.** Was the ideal capture — the five resources (`hp` `stamina` `hunger` `spirit` `qi`) with per-faction display labels, the exhaustion-debuff mechanic, lazy regen, and the scope/class/polarity registry shape |
 | [architecture/status-ssot.md](architecture/status-ssot.md) | StatusRuntime actor instances, ICD, resistance, contagion catalog — **shipped** |
 | [architecture/element-hub-ssot.md](architecture/element-hub-ssot.md) | Element typing, ring-cycle matchup matrix (§8.5), combat derived channels — **design locked** |
@@ -87,7 +87,7 @@ Observation only. No product design here. Paths under `H:\Games\...` in research
 | [architecture/action/spec-targeting.md](architecture/action/spec-targeting.md) | **Spec A2** — typed closed targeting contract compiling to the shipped `TargetResolver`; caster-relative `Relation` (one action serves both factions) and Chebyshev range that passes with no board |
 | [architecture/action/spec-usability-conditions.md](architecture/action/spec-usability-conditions.md) | **Spec A4** — the five ordered usability gates with typed refusals; reuses `E3`'s predicate compiler and asks it for two resource leaves |
 | [architecture/action/spec-basic-attack-adoption.md](architecture/action/spec-basic-attack-adoption.md) | **Spec A5** — the seam proof: the shipped basic attack as a declared action, eight goldens byte-identical; seven hazard fixtures and the `SourceOrder`/`OrdinalPtr` finding |
-| [architecture/action/spec-action-costs.md](architecture/action/spec-action-costs.md) | **Spec A3** — the five resources, lazy regen, exhaustion-as-status with hysteresis, atomic cost rollback, run lifetime and rest |
+| [architecture/action/spec-action-costs.md](architecture/action/spec-action-costs.md) | **Spec A3** — the **six** resources, lazy regen, exhaustion-as-status with hysteresis, atomic cost rollback, run lifetime and rest. ⚠️ That spec's own §1 still says "five" (`action-ideal.md:877` records the errata) |
 | [architecture/action/spec-action-catalog.md](architecture/action/spec-action-catalog.md) | **Spec A6** — load, compile, cache. Server-side only: actions are battle-mode, so the injector never sees one and there is no push |
 | [architecture/action/spec-action-selection.md](architecture/action/spec-action-selection.md) | **Spec A7** — the stub AI and the game's first AI layer: pursue nearest, act to kill, read through `IBattleView` so deferred fog is a swap |
 | [architecture/action/spec-defence-actions.md](architecture/action/spec-defence-actions.md) | **Spec A8** — block/guard/brace as actions; stance vs reaction, separate `WReact` pool, bounded nesting, `WReact=0` byte-identical |

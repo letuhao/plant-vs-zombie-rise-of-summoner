@@ -7,7 +7,7 @@ export type PlaybackTransportProps = {
 /**
  * The four-control transport (world-stage W75) — jump to start, step back, step forward, jump to
  * end. Never re-sorts or re-derives anything itself: every step is a plain `delta` handed to the
- * caller's own `stepKeyframe` (`features/world/playbackKeyframes.ts`), which is the one place the
+ * caller's own `stepKeyframe` (`stages/world/playbackKeyframes.ts`), which is the one place the
  * clamp-at-both-ends rule lives.
  */
 export function PlaybackTransport({ current, total, onStep }: PlaybackTransportProps) {

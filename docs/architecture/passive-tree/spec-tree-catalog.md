@@ -63,7 +63,7 @@ Two record types ship. Both are content; neither carries a magnitude.
 |---|---|---|
 | `treeId` | `string` | authored, allocated once from the roster (D9/D27). Never a position |
 | `category` | `enum { Primary, Elemental, Status, Family, Species }` | which roster it came from. **Five, confirmed by ruling R7** — species is a category, not a variant, and the map gives it its own module. `tree-plan` emits only the first four and uses different tokens for two of them (`aptitude` → `Primary`, `demonFamily` → `Family`); that rename is a straight enum mismatch that would surface as a failed check at import, so **the importer maps the plan's tokens onto these five and refuses any token outside the map, naming it** |
-| `gateQuantity` | `string` | the ONE index this tree's tier gate reads. Never four incommensurable quantities at one threshold |
+| `gateQuantity` | `string` | the ONE index this tree's tier gate reads. Never four incommensurable quantities at one threshold. **Two of the quantities the roster needs do not exist in code yet** — `element_mastery` and `status_applied.<id>` — and as of **D37** they are built by the wave-0 module [`gate-counters`](spec-gate-counters.md), so a tree naming one is **waiting, not orphaned**. The catalog stores the name either way and never disables a tree for it; `tree-resolve` §3.3 reports *which kind of zero* a tier-0 tree is |
 | `shapeArchetype` | `string` | D15 — the plan's archetype id (broad-flat, spiked, gated-deep …) |
 | `tiers` | `int` | 10 (D29). **Structural**, not tunable — it is what the tree *is* |
 | `branches` | `int` | 2 (D10). Structural |
@@ -87,6 +87,7 @@ Two record types ship. Both are content; neither carries a magnitude.
 | `budgetShareMilli` | `int` | the plan's own share for this node, **‰ of ONE BRANCH**, copied through verbatim and never recomputed (R4: the plan's value is authoritative). This is the number the potency ceiling is checked against — §2.5. Added by ruling; it widens the record, and §Boundaries' *ask first* is noted rather than skipped |
 | `atoms` | `NodeAtom[]` | §2.3 |
 | `excludeProps` | `string[]` | D14's property keys, drawn from the plan's frozen property vocabulary |
+| `exclusionForm` | `enum { None, Reroute, Precedence, Nullification }` | **Added 2026-09-05 under D40**, which keeps all three forms and restores `Nullification` to `tree-language`'s schema. The form is **mechanical, not flavour**: the load path validates it, `tree-resolve` decides whether the node contributes, and `tree-surface` must render a nullified node **inert rather than un-unlocked** — three consumers that all branch on it, so it cannot live only in the authored text. `tree-binder` binds such a node normally and never refuses it ([`tree-binder`](spec-tree-binder.md) §7.3). `None` with a non-empty `excludeProps`, or a non-`None` form with empty `excludeProps`, is a refusal. The player-facing sentence is authored text (`printedText`) riding the same seed → generated path as `name` and `flavor`, which this table does not enumerate |
 | `tagsJson` | object | D22's payoff — the exclusion property space is atom tags, which already ship |
 | `enabled` | `bool` | a retired node keeps its id and renders greyed; §4 |
 | `retiredAtRevision` | `int?` | set once, when `enabled` flips false. Printed to the player |
@@ -371,6 +372,8 @@ offending row. Never a repair, never a default.
 | `kMicro <= 0` | reject |
 | `budgetShareMilli > potency.maxNodeShareMilli` (both ‰ of **one branch**) | reject — §2.5. ~~`kMicro` above the plan's `nodePotencyCeiling`~~: no such key, and a per-million post-anchor coefficient is not comparable to a per-mille share |
 | `affixIds` empty, or longer than 3 | reject (R6) |
+| `exclusionForm` outside the four, or disagreeing with `excludeProps` (a form with no keys, or keys with form `None`) | reject naming the node (D40) |
+| an `excludeProps` entry that parses as a node id rather than a property key | reject — the rule is property-keyed, and a generated corpus cannot maintain named pairs |
 | a `prereqNodeId` resolving to nothing, or to another tree | reject |
 | a duplicate `nodeId` anywhere in the corpus | reject |
 | an authored `nodeId` disagreeing with its coordinates | `IdMismatch`, kept as authored |
@@ -469,6 +472,8 @@ already share — nothing new is invented.
 | `a_refused_unit_class_with_a_nonzero_coefficient_is_rejected` | `Flag`, `Count`, `LadderIndex` … |
 | `a_dangling_prereq_is_rejected_naming_the_node` | never repaired |
 | `a_node_carries_between_one_and_three_affix_ids` | R6 — zero is a refusal, four is a refusal |
+| `an_exclusion_form_and_its_property_keys_agree` | D40 — all four forms load, and a form without keys (or keys without a form) is refused naming the node |
+| `a_nullified_node_survives_the_bake_with_its_coefficient` | D40 — the record keeps `kMicro` and the form; inertness is a resolve-time state, never a missing number |
 | `a_reflect_node_ships_its_two_atoms_under_one_affix` | why the roll unit is an affix and one is not enough |
 | `a_node_share_above_the_ceiling_is_refused` | §2.5, driven by a **synthetic** over-budget row. There is deliberately no test asserting the shipped corpus proves the ceiling binds — it cannot, and saying so is the point |
 | `the_ceiling_and_the_share_use_the_same_denominator` | ‰ of one branch on both sides; the 2× the old `budgetTotal` form hid |
@@ -487,11 +492,12 @@ already share — nothing new is invented.
 output; refuse at load naming the offending id; keep `data/seed/` and `data/generated/` in the shape
 the demon program already uses.
 
-**Ask first:** adding a field to `NodeRecord` — it widens a contract four modules read. ⚠ **Two such
-changes were made on 2026-09-05 under the cross-spec rulings and are called out rather than slipped in:**
-`affixId` (string) became `affixIds` (1..3 strings) per R6, and `budgetShareMilli` was added per R4/R5
-because without it the potency ceiling has nothing dimensionally valid to compare against.
-`weightTotal` came *off* `TreeRecord` in the same pass. Also ask before: allowing a
+**Ask first:** adding a field to `NodeRecord` — it widens a contract four modules read. ⚠ **Three such
+changes were made on 2026-09-05 and are called out rather than slipped in:** `affixId` (string) became
+`affixIds` (1..3 strings) per R6; `budgetShareMilli` was added per R4/R5 because without it the potency
+ceiling has nothing dimensionally valid to compare against; and **`exclusionForm` was added under D40**,
+because restoring `Nullification` gives three consumers something to branch on and none of them can
+read it out of authored prose. `weightTotal` came *off* `TreeRecord` in the same pass. Also ask before: allowing a
 node to author a **bake-time-resolved slot** (open question 3); changing the id format after the first
 corpus is authored, because a reused or reshaped id repoints every reference that already resolved.
 
@@ -556,6 +562,8 @@ Three, all genuine; none blocks the module's own structure.
 | §1 (c) is empty; `skill` containers use the fixed core alone | **D24**, on `spec-container-schema.md:50-56` |
 | §2.2 `nodeClass` distinguishes mechanism from magnitude nodes | **D13** as extended by ideal §3.5 |
 | §2.2 `excludeProps` + `tagsJson` — property-keyed exclusion, never a named-pair list | **D14**, **D22** |
+| §2.2 `exclusionForm` carries all three forms, `Nullification` included, so the runtime can render inert rather than un-unlocked | **D40** |
+| §2.1 `gateQuantity` names a quantity that may not be built yet, and the tree still ships | **D37** |
 | §2.2 `branch` is two; `tier` is 1..10; **40** nodes per tree | **D10**, **D29** |
 | §2.1 `shapeArchetype` — equal expected value, not equal shape | **D15** |
 | §2.3 `soulCurveId` — souls are a curve read, never a roll | **D3** |

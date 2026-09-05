@@ -16,13 +16,41 @@ owner decision 2026-09-03: *"one combined plan for all the work."*
 ## 1. What this builds, in one paragraph
 
 An **atom effect pool** that a model can draw from, an **action corpus** generated from it, and the
-seam that makes either reach a running game. **48 modules.** Today the machine is built and the content
-is 21 demo atoms; and **a player install never imports anything at all**.
+seam that makes either reach a running game. **48 modules.** ~~Today the machine is built and the
+content is 21 demo atoms; and **a player install never imports anything at all**.~~
+
+> **⛔ Both halves of that sentence are now out of date — corrected 2026-09-05, measured.** The atom
+> corpus is **66** (20 shipped `fx-*`/trait atoms + E43's 45 generated family rows), confirmed by a
+> real `AtomImporter --check --validate` run. And a player install **does** import now: `E46`
+> `player-content-boot` shipped, so a clean install self-heals on first launch when
+> `catalog_revision` is 0. Real generated ACTION content exists too (45 accepted candidates across
+> the general and family scopes as of the 2026-09-05 runs). Recount rather than quote.
 
 > **⛔ One claim in this paragraph was false and is corrected 2026-09-03:** it read *"`effect_binding` has
 > zero rows"*. It does not — `ProduceAndBind` is called in production at `RpgStore.UniqueActors.cs:756`.
 > **That error is the plan's most serious**, because Gate G2 and the whole of Phase 1 were sequenced
 > around it. See §2 G2 and §3 Phase 1. Found by the plan-coverage audit, not by me.
+
+---
+
+## 1a. Where this actually stands — measured 2026-09-05
+
+**44 of 48 modules are closed and independently re-verified.** Four items remain open, and the
+distinction between them matters more than the count: three are blocked by something real in the
+world, one is blocked by a machine.
+
+| Open item | State | What would actually close it |
+|---|---|---|
+| **SMOKE BATCH** (G5 crit. 2) | `unresolved` **13.2%**, was 62.3% | A model that agrees with itself more often. The aggregation bug that caused the other 49 points is fixed; what is left is 7 briefs out of 53 where three samples picked six different families with zero overlap |
+| **E44** `power-sweep` | 5 of 20 coefficient rows fitted | Content for `arm1/arm2`, or an owner **balance decision** for the rows whose kinds have no magnitude param at all — for those, no amount of data can ever produce a fit (see the todo's own per-row table) |
+| **ep-9** `affix-authoring` | slot registry built, correctly inert | An atom family whose variants are real element ids. The registry derives itself and its inertness test goes red automatically the day one ships |
+| **Live check → Fix-bug** | not started | A lawn session on the owner's machine (§5). Fix-bug is sequenced behind it by the owner's own instruction |
+
+**The lesson worth keeping** (it cost five attempts on one gate): each of the first three had
+previously been written off with a *scoping conclusion* — "no corpus exists", "that would be a
+fork", "no vocabulary exists". All three read as airtight prose and all three dissolved on one grep
+of the real code. A conclusion that closes off work is exactly the kind that has to be tested
+against the tree, not reasoned about.
 
 ---
 
@@ -146,11 +174,19 @@ it.**
 
 **`A-P3` waits on `A-P2`** — it must differ from its family's output, which is a dependency, not a flag.
 
-**Ends at the smoke batch.** Metrics, defects found, defects fixed — **the evidence for the owner's
-decision on whether a full run happens. The plan does not schedule past this point.**
+**Ends at the smoke batch.** Metrics, defects found, defects fixed — the evidence a full run
+proceeds on. **⛔ CORRECTED 2026-09-05: this used to read "the evidence for the OWNER'S decision",
+which contradicted §2a on the same page.** Per the owner's own 2026-09-03 instruction (*"i don't
+want to join the gate — if the gate needs me, remove them"*) G5 is **evidence-gated**: it proceeds
+when the four §2a criteria hold, and nobody has to say yes. The plan still does not schedule past
+this point.
 
-⚠️ **The roster is 84 species** (53 with family assignments, 28 in the classified tree, **8 with a
-complete four-way anchor**). Eight fully-anchored species is the right size for a first batch.
+⚠️ ~~**The roster is 84 species** (53 with family assignments, 28 in the classified tree, **8 with a
+complete four-way anchor**). Eight fully-anchored species is the right size for a first batch.~~
+**⛔ SUPERSEDED by measurement 2026-09-04.** The "8 fully anchored" figure was already stale when the
+first real batch ran: the anchor tree grew throughout (28→68→87→764 rows, measured minutes apart).
+Recomputed at run time from the real four-way join: **24 species across 12 families**, which is what
+the real smoke batches actually used. Recompute it, never quote it.
 
 ### Phase 5 — movement and capability
 
@@ -190,7 +226,7 @@ constraint asserted without being tested.
 | **C3 — one row, many outcomes** | `E30`. A pooled atom resolves to different channels across two seeds and **identically on replay** |
 | **C4 — content reaches a player** | `E46`. A clean install has a non-zero `catalog_revision`, and fallback mode is **reported** |
 | **C5 — the plan is reviewable with no model** | Phase 3, against the real 84-species roster |
-| **⛔ C6 — quality is proven** | The smoke batch. **Owner decides on the evidence whether a full run happens** |
+| **C6 — quality is proven** | The smoke batch meets all four §2a criteria. **Evidence-gated, not owner-gated** (corrected 2026-09-05 — this row used to say "Owner decides", contradicting §2a). **Status 2026-09-05: 3 of 4 criteria met.** Criterion 2 (`unresolved` under 10%) measures **13.2%** after the vote-aggregation fix took it from 62.3%; the residual is 7 genuinely-disjoint three-way model disagreements out of 53 real briefs, verified individually from the per-sample records |
 | **C7 — live** | Owner-run lawn check, after the build. **A fix-bug phase follows it** |
 
 ---

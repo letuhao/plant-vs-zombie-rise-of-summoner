@@ -868,13 +868,26 @@ three-verdict table.
 
 Two, both genuinely open. Neither is a template slot.
 
-1. **Does the L2b resist path get to read status-granted resist channels on the first landing?**
-   After G1, `InjectorStatusBridge.ResolveDerived` → `ActorHub.ResolveDerived` composes the host's live
-   statuses, so a status raising `status.resist.dot` makes the *next* status apply roll harder. It
-   terminates (`ForHost` is a dictionary read) and it is arguably what a resist status *means* — but it
-   is a behaviour change no golden covers, and it makes status application order-sensitive in a way it
-   is not today. **Recommendation: contribute everything, including `status.resist.*`, and add a
-   dedicated test for the feedback path.** Owner call, because it changes shipped resist math.
+1. ~~**Does the L2b resist path get to read status-granted resist channels on the first landing?**~~
+   ✅ **CLOSED 2026-09-05 by the owner: yes — a status contributes everything it writes, resist
+   included.** Two facts found while answering narrowed this from a combat-math risk to a content
+   rule, and both were verified in code:
+
+   - **Resistance and potency derived stats already work.** `ResistanceEvaluator` already reads
+     `ActorDerivedSnapshot` for attacker and defender and already keys on
+     `DerivedStatChannels.StatusImmune(tag)` / `StatusImmuneReduction(tag)`. Aptitudes, items,
+     traits and auras all reach the roll correctly today. **Nothing about that path is broken.**
+   - **No shipped status writes a derived stat at all** — `grep '"stat"' data/seed/` returns
+     nothing. The capability exists, has never been authored against, and composes nothing.
+
+   So G1 changes the behaviour of **zero shipped content**. The order-sensitivity it introduces
+   (`warding` then `wither` ≠ `wither` then `warding`) only becomes reachable when a tree node
+   authors such a status — content this program has not written. That makes it a **design
+   constraint on authoring**, not a regression risk, and the alternative (compose everything
+   *except* resist) was rejected because it would make the subsystem lie about what it composes.
+
+   **Required by this closure:** a dedicated feedback-path test, and a note in `tree-language`'s
+   authoring rules that a status raising `status.resist.*` makes application order significant.
 
 2. **Does this module take `aura-skill` T13's job?** `BattleRunState`'s own comment names T13 as the
    owner of the live mid-match toggle. This module needs less than that — a per-round recompose — and

@@ -55,9 +55,7 @@ public static class MarchResolver
             if (next is null) return new MarchRefusal("path.not-contiguous");
 
             var type = LaneTypeCatalog.Get(lane.TypeId);
-            if (type.OneWay && !string.Equals(lane.FromSectorId, at, StringComparison.Ordinal))
-                return new MarchRefusal("lane.one-way");
-            if (type.Gated && lane.GateKeyId != null) return new MarchRefusal("lane.gated");
+            if (LaneGate.Refusal(type, lane, at) is { } refusal) return refusal;
 
             at = next;
         }

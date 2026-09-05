@@ -586,6 +586,43 @@ def _cmd_demons_contract(args: argparse.Namespace) -> int:
     return EXIT_GAP
 
 
+def cmd_structures(args: argparse.Namespace) -> int:
+    """`seedsmith structures <contract>` — base-defense structure corpus entrypoints. Mirrors
+    `cmd_demons`'s own dispatch shape exactly (module 23+, spec-structure-schema.md)."""
+    if args.structures_command == "contract":
+        return _cmd_structures_contract(args)
+
+    print(f"unknown structures command {args.structures_command!r}")
+    return EXIT_CANNOT_RUN
+
+
+def _cmd_structures_contract(args: argparse.Namespace) -> int:
+    """`seedsmith structures contract --print|--audit` (base-defense module 23,
+    spec-structure-schema.md). No model calls: prints or numerically audits the resolved structure
+    anchor schema — a line-for-line copy of `_cmd_demons_contract` pointed at
+    `adapters.structures.anchor.{schema,audit}` instead of `adapters.demons.anchor.{schema,audit}`.
+    """
+    from ..adapters.structures.anchor.audit import numeric_audit
+    from ..adapters.structures.anchor.schema import build_structure_anchor_schema
+
+    schema = build_structure_anchor_schema()
+
+    if args.print_schema:
+        print(json.dumps(schema, indent=2, ensure_ascii=False))
+        return EXIT_CLEAN
+
+    # --audit (also the default when neither flag is passed)
+    defects = numeric_audit(schema)
+    if not defects:
+        print(f"contract --audit: clean — {len(schema['properties'])} fields, "
+              f"0 numeric-smuggling findings")
+        return EXIT_CLEAN
+    for d in defects:
+        print(f"[FINDING] {d}")
+    print(f"\n{len(defects)} numeric-smuggling finding(s)")
+    return EXIT_GAP
+
+
 def _cmd_demons_preflight(args: argparse.Namespace) -> int:
     """`seedsmith demons preflight [--json] [--skip-model]` (demon-seed module 5,
     spec-dump-preflight.md). Refuses to start a run unless every prerequisite is present.
@@ -1065,6 +1102,16 @@ def build_parser() -> argparse.ArgumentParser:
     gen.add_argument("--endpoint", default="")
     gen.add_argument("--model", default="")
     effects.set_defaults(func=cmd_effects)
+
+    structures = sub.add_parser("structures", help="base-defense structure corpus entrypoints (module 23+)")
+    structures_sub = structures.add_subparsers(dest="structures_command", required=True)
+    structures_contract = structures_sub.add_parser(
+        "contract", help="the structure anchor JSON Schema — print or numerically audit it")
+    structures_contract.add_argument("--print", dest="print_schema", action="store_true",
+                                     help="print the resolved JSON Schema")
+    structures_contract.add_argument("--audit", action="store_true",
+                                     help="run the numeric-smuggling audit, exit 1 on a finding (default)")
+    structures.set_defaults(func=cmd_structures)
 
     return parser
 

@@ -1,5 +1,5 @@
 import type { LegionView } from "@/contract/types";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 
 /**
  * world-stage W77 (spec-world-turn.md §3) — THE derivation: a legion of yours with movement

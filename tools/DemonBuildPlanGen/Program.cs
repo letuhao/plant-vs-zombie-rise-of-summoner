@@ -89,6 +89,69 @@ if (resolved.Count == 0)
     return 2;
 }
 
+// G1 fix (species-build casing bug): the committed plan must be keyed by the RUNTIME speciesId
+// that `DemonSpeciesCatalog`/`SpeciesBuildPlanCatalog.SharesFor` actually look up, not the
+// seedsmith-anchor's own `SpeciesId` text. Two independent, unrelated pipelines mint that text:
+// this reader takes it straight from the raw anchor's `speciesId` field (seedsmith-anchor
+// PascalCase, e.g. "FumeShroom"), while the shipped roster's id comes from a totally separate
+// generator (`DemonSpeciesGenerator`'s `KebabId`, over the game's own captured type name, e.g.
+// "fumeshroom") — no shared casing convention, no guaranteed textual relationship at all. The one
+// identity both sides carry straight from the game itself is (Side, GameTypeId); joining on that,
+// instead of guessing a text transform (case-insensitive compare, kebab-casing, etc.), is the only
+// correct way to find "which shipped species does this anchor describe, if any."
+FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+
+var catalogIdByKey = new Dictionary<(string Side, int GameTypeId), string>();
+foreach (var def in FusionRpg.Core.Demons.DemonSpeciesCatalog.All)
+    catalogIdByKey[(def.Side, def.GameTypeId)] = def.SpeciesId;
+
+// A real anchor-authoring duplicate — two anchors claiming the same (Side, GameTypeId) — would
+// silently collide on the same runtime speciesId below and corrupt the plan (last one written
+// wins, with no signal). Surface it instead, matching this CLI's existing exit-code convention
+// (2 = "could not start / malformed", same as the missing-seed-root and bad-tuning checks above).
+var duplicateAnchorKeys = resolved
+    .GroupBy(a => (a.Side, a.GameTypeId))
+    .Where(g => g.Count() > 1)
+    .ToList();
+if (duplicateAnchorKeys.Count > 0)
+{
+    foreach (var dup in duplicateAnchorKeys)
+    {
+        var names = string.Join(", ", dup.Select(a => a.SpeciesId));
+        Console.Error.WriteLine(
+            $"anchor authoring duplicate: side='{dup.Key.Side}' gameTypeId={dup.Key.GameTypeId} is " +
+            $"claimed by {dup.Count()} resolved anchors ({names}) — (side, gameTypeId) must be unique");
+    }
+    return 2;
+}
+
+// Most anchors describe species that have never been assigned a shipped game-type slot (829
+// resolved anchors vs. 84 shipped species today — the corpus deliberately covers unshipped/future
+// content). Those are excluded from the plan entirely rather than written under their own
+// unjoinable anchor text, which is exactly the bug this fixes.
+var unmatchedCount = 0;
+var joined = new List<AnchorRow>(resolved.Count);
+foreach (var anchor in resolved)
+{
+    if (catalogIdByKey.TryGetValue((anchor.Side, anchor.GameTypeId), out var realSpeciesId))
+        joined.Add(anchor with { SpeciesId = realSpeciesId });
+    else
+        unmatchedCount++;
+}
+
+Console.WriteLine(
+    $"{joined.Count} resolved anchor(s) matched a shipped species by (side, gameTypeId); " +
+    $"{unmatchedCount} resolved anchor(s) describe a species not in the shipped roster and were " +
+    "excluded from the plan");
+
+resolved = joined;
+
+if (resolved.Count == 0)
+{
+    Console.Error.WriteLine("no resolved anchor matched a shipped species — nothing written");
+    return 2;
+}
+
 SpeciesBuildResult result;
 try
 {

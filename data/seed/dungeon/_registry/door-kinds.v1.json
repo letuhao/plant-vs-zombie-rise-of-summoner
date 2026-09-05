@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "doorKinds": {
+    "passage": { "gated": false, "oneWay": false, "hidden": false },
+    "gated": { "gated": true, "oneWay": false, "hidden": false },
+    "one-way": { "gated": false, "oneWay": true, "hidden": false },
+    "secret": { "gated": false, "oneWay": false, "hidden": true }
+  }
+}

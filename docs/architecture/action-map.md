@@ -558,7 +558,7 @@ Seven modules specced, three deliberately not. Specs live at `docs/architecture/
 | **A2** `targeting` | ✅ | Typed contract; gained `Ordering` after `A5` found the two orders disagree |
 | **A4** `usability-conditions` | ✅ | Five ordered gates, typed refusals; asks `E3` for two resource leaves |
 | **A5** `basic-attack-adoption` | ✅ | The byte-identity gate; seven hazard fixtures |
-| **A3** `action-costs` | ✅ | Five resources, lazy regen, exhaustion-as-status, run lifetime |
+| **A3** `action-costs` | ✅ | **Six** resources, lazy regen, exhaustion-as-status, run lifetime. Guard pays `poise`, not `stamina` |
 | **A6** `action-catalog` | ✅ | **Shrank in the writing** — actions are server-side, so there is no push |
 | **A7** `action-selection` | ✅ | The stub AI, and the game's first AI layer |
 | **A8** `defence-actions` | ✅ | Stance vs reaction; **builds** after timeline **B6** |

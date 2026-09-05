@@ -57,6 +57,16 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
                 ["Might"] = 500, ["Vigor"] = 300, ["Fortitude"] = 200
             }
         });
+        // The one remaining test here that mutates state now does so via `POST /api/species-build/respec`
+        // (the old `/api/aptitudes/species/allocate` bypass was retired) -- needs the same tuning that
+        // endpoint's own SpeciesBuildEndpointsTests.cs configures.
+        FusionRpg.Core.Demons.Generation.SpeciesBuildTuningHub.Configure(new FusionRpg.Core.Demons.Generation.SpeciesBuildTuning(
+            SchemaVersion: 1, Version: 1,
+            ParityFloorPermille: 50, ParityCeilingPermille: 200,
+            LeanMinPermille: 350, LeanMaxPermille: 600,
+            CrowdingFactor: 633, SecondarySharePermille: 300,
+            MaxAptitudesPerSpecies: 5, MinAptitudesPerSpecies: 2,
+            RespecBasePrice: 50, RespecEscalationPermille: 500, RespecDecayDays: 3));
 
         SeedSpeciesLevel(_playerId, FumeshroomDemonTypeId, level: 21, "fumeshroom"); // source = 20
 
@@ -83,6 +93,7 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
         _app.UseDeveloperExceptionPage();
         _app.MapHub<RpgHub>("/hub/rpg");
         _app.MapAptitudes();
+        _app.MapSpeciesBuild();
         await _app.StartAsync();
 
         _http = new HttpClient { BaseAddress = new Uri(_baseUrl) };
@@ -132,26 +143,14 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
         Assert.Equal(System.Net.HttpStatusCode.BadRequest, resp.StatusCode);
     }
 
-    [Fact]
-    public async Task Allocate_overridesTheBaseline_androundTripsThroughGet()
-    {
-        var baseline = await (await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom"))
-            .Content.ReadFromJsonAsync<SpeciesStateDto>();
-        var budget = baseline!.Budget;
-
-        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/species/allocate", new
-        {
-            playerId = _playerId,
-            speciesId = "fumeshroom",
-            shares = new Dictionary<string, long> { ["Ferocity"] = budget }
-        });
-        if (!postResp.IsSuccessStatusCode) throw new Exception(await postResp.Content.ReadAsStringAsync());
-
-        var getResp = await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom");
-        var body = await getResp.Content.ReadFromJsonAsync<SpeciesStateDto>();
-        Assert.Equal(budget, body!.Shares["Ferocity"]);
-        Assert.Equal(0, body.Shares["Might"]); // replaced wholesale, not layered
-    }
+    // Allocate_overridesTheBaseline_androundTripsThroughGet, Allocate_overspending_isRefused_scopeLocally,
+    // Allocate_notifies_a_client_joined_as_injector_not_just_web and Allocate_still_notifies_a_client_joined_as_web
+    // all POSTed to `/api/aptitudes/species/allocate`, RETIRED by species-build-todo.md T4.3/Checkpoint 5's own
+    // named follow-up (owner decision, 2026-09-05: "retire it now") — it wrote a DemonType override with zero
+    // pricing awareness, a live bypass of the `species-respec` economy. Their coverage (override round-trips,
+    // scope-local budget refusal, both-groups broadcast) now lives on `POST /api/species-build/respec` in
+    // `SpeciesBuildEndpointsTests.cs`, which exercises the same real write path through the priced/free surface
+    // that replaced this one.
 
     [Fact]
     public async Task Get_exposesTheShippedBaselineSeparately_soAnOverrideRendersAsADeviation()
@@ -161,12 +160,14 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
         Assert.False(before!.HasOverride);
         Assert.Equal(before.Shares["Might"], before.Baseline["Might"]); // no override yet: effective == baseline
 
-        await _http.PostAsJsonAsync("/api/aptitudes/species/allocate", new
+        var respecResp = await _http.PostAsJsonAsync("/api/species-build/respec", new
         {
             playerId = _playerId,
             speciesId = "fumeshroom",
-            shares = new Dictionary<string, long> { ["Ferocity"] = before.Budget }
+            shares = new Dictionary<string, long> { ["Ferocity"] = before.Budget },
+            correlationId = Guid.NewGuid().ToString("N")
         });
+        if (!respecResp.IsSuccessStatusCode) throw new Exception(await respecResp.Content.ReadAsStringAsync());
 
         var after = await (await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom"))
             .Content.ReadFromJsonAsync<SpeciesStateDto>();
@@ -174,74 +175,6 @@ public class SpeciesAllocationEndpointsTests : IAsyncLifetime
         Assert.Equal(before.Budget, after.Shares["Ferocity"]); // effective now reflects the override
         Assert.Equal(before.Baseline["Might"], after.Baseline["Might"]); // baseline itself never moves
         Assert.NotEqual(after.Baseline["Might"], after.Shares["Might"]); // deviation is now visible
-    }
-
-    [Fact]
-    public async Task Allocate_overspending_isRefused_scopeLocally()
-    {
-        var baseline = await (await _http.GetAsync($"/api/aptitudes/species/{_playerId}/fumeshroom"))
-            .Content.ReadFromJsonAsync<SpeciesStateDto>();
-        var overspend = baseline!.Budget + 1;
-
-        // A huge Commander allocation must NOT fund this DemonType overspend (scope-local budgets).
-        await _http.PostAsJsonAsync("/api/aptitudes/allocate", new
-        {
-            playerId = _playerId,
-            shares = new Dictionary<string, long> { ["Might"] = 1_000_000 }
-        });
-
-        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/species/allocate", new
-        {
-            playerId = _playerId,
-            speciesId = "fumeshroom",
-            shares = new Dictionary<string, long> { ["Ferocity"] = overspend }
-        });
-        Assert.Equal(System.Net.HttpStatusCode.Conflict, postResp.StatusCode);
-    }
-
-    [Fact]
-    public async Task Allocate_notifies_a_client_joined_as_injector_not_just_web()
-    {
-        var received = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var hub = new HubConnectionBuilder().WithUrl($"{_baseUrl}/hub/rpg").Build();
-        hub.On<object>("AptitudesUpdated", _ => received.TrySetResult(true));
-        await hub.StartAsync();
-        await hub.InvokeAsync("Join", RpgConstants.InjectorGroup);
-
-        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/species/allocate", new
-        {
-            playerId = _playerId,
-            speciesId = "fumeshroom",
-            shares = new Dictionary<string, long> { ["Might"] = 1 }
-        });
-        postResp.EnsureSuccessStatusCode();
-
-        var got = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
-        Assert.True(got, "a species allocate never reached an injector-group connection " +
-            "(the exact WebGroup-only defect this module's spec calls out by name)");
-        await hub.DisposeAsync();
-    }
-
-    [Fact]
-    public async Task Allocate_still_notifies_a_client_joined_as_web()
-    {
-        var received = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-        var hub = new HubConnectionBuilder().WithUrl($"{_baseUrl}/hub/rpg").Build();
-        hub.On<object>("AptitudesUpdated", _ => received.TrySetResult(true));
-        await hub.StartAsync();
-        await hub.InvokeAsync("Join", RpgConstants.WebGroup);
-
-        var postResp = await _http.PostAsJsonAsync("/api/aptitudes/species/allocate", new
-        {
-            playerId = _playerId,
-            speciesId = "fumeshroom",
-            shares = new Dictionary<string, long> { ["Might"] = 1 }
-        });
-        postResp.EnsureSuccessStatusCode();
-
-        var got = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
-        Assert.True(got, "regression: the web-group notification broke for the species route");
-        await hub.DisposeAsync();
     }
 
     sealed class SpeciesStateDto

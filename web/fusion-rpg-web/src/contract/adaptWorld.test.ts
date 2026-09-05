@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import fixture from "@/features/world/fixtures/first-light.json";
+import fixture from "@/stages/world/fixtures/first-light.json";
 import type { WorldStateDto } from "@/lib/bus/world";
 import {
   adaptWorldForce,

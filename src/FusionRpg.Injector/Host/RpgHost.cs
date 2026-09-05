@@ -99,6 +99,18 @@ public static class RpgHost
         FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
             FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "expeditions.v1.json"))));
+        // party-dungeon D1.4 -- same ordering as Server/Program.cs: registries load first (pure),
+        // DungeonTuningHub/EncounterTuningHub configure next (cross-checked against them at parse
+        // time), DungeonRegistryHub last (RoomKindDef joins DungeonTuningHub at first read).
+        var dungeonRegistryDir = System.IO.Path.Combine(_pluginDir, "data", "seed", "dungeon", "_registry");
+        var dungeonRegistries = FusionRpg.Core.Dungeon.Registry.DungeonRegistryLoader.LoadAll(dungeonRegistryDir);
+        FusionRpg.Core.Dungeon.Tuning.DungeonTuningHub.Configure(
+            FusionRpg.Core.Dungeon.Tuning.DungeonTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "dungeon.v1.json")), dungeonRegistries));
+        FusionRpg.Core.Dungeon.Tuning.EncounterTuningHub.Configure(
+            FusionRpg.Core.Dungeon.Tuning.EncounterTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "encounter.v1.json")), dungeonRegistries));
+        FusionRpg.Core.Dungeon.Registry.DungeonRegistryHub.Configure(dungeonRegistries);
         FusionRpg.Core.Match.MatchTuningPolicy.Configure(
             FusionRpg.Core.Match.MatchTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "match.v1.json"))));

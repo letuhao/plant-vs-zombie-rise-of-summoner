@@ -348,11 +348,21 @@ is a **different question with a different answer**, and the gap between them is
 - **19.2** answers *"what grant clears the gate for a build putting its whole allocation in one
   tree"* — share 1.0, which no measured build has.
 
-So the open question is not arithmetic, it is **which build the wallet should be sized against**, and
-that is a real owner decision this spec should carry rather than resolve. Under 10.40 a corner build
-is funded to its measured shape and a hypothetical pure-single-tree build is under-funded; under 19.2
-the reverse. **`g = 11` stands** until that is decided; republishing it is not blocked on an
-arithmetic fix, because there was none.
+> ### ✅ D38, 2026-09-05 — `g = 11` stands, sized against the MEASURED corner build, and it is a tunable
+>
+> **The wallet is sized against the build we have measured, not against one nobody plays.** 10.40 is
+> the corner-share form (`3 · 0.54163 · 2 · 16 / 5 = 10.40`), `11` is that rounded up, and every sweep
+> this program cites ran on exactly that build. 19.2 remains the correct answer to a different
+> question — a share-1.0 build — and is recorded above so nobody re-derives it and reports a
+> contradiction. **There is no arithmetic defect and no unreconciled number.**
+>
+> **And it is a tunable, which is what keeps this closed.**
+> `pointEconomy.skillPointsPerThetaMilliByScope.commander` lives in `aptitudes.v{n+1}.json`, so
+> `squad-harness` can move it on measurement **without reopening this spec or any other**. That is the
+> whole point of §8: the spec names the key and the unit; the harness settles the value.
+>
+> **What stays open is the other three scope values** (`demonType`, `aspect`, `uniqueDemon`), which
+> are unmeasured exactly as the sibling table's own `_weightsWhy` says of its `{3,4,4,6}`.
 
 **And `g ∝ k²` is what carries the archetype defect into the grant.** Width enters *squared*, so the
 two non-uniform archetypes are mis-funded in opposite directions by the same `k = 4` calibration.
@@ -366,10 +376,9 @@ Substituting an effective width is not exact — the shipped `first = 5` makes t
 | `gated-deep` | 3 | wallet 192 against a bill of `18·22 = 396` — **2.06× under-funded** | `b/66` vs `b/32` |
 | `late-crown` | 2 | wallet 96 against a bill of `4·8 = 32` — **3.0× over-funded** | `b/10.7` vs `b/32` |
 
-**What this module does about it.** The recalibration is a balance decision, not a spec edit: `g` is
-one global tunable and moving it moves every wallet in the game, so it is an **Ask first** item, not
-something this fold changes. `11` stays in §8's table, flagged, until the owner republishes it. Two
-things that do *not* change: §2.1's breadth argument survives the recalibration (at `g = 19.2` the
+**What this module does about it.** `11` stays in §8's table, and under D38 it stays there **settled**
+rather than flagged. A later move is a tuning change on measurement, not a spec reopening. Two
+things that do *not* change either way: §2.1's breadth argument survives a recalibration (at `g = 19.2` the
 `Θ = 100` wallet affords 41 nodes against 39 trees × tier 1 = 156, so a per-tree count would still
 hand a spread build several times the breadth), and §7's `long` conclusion strengthens, because a
 larger `g` makes the budget larger.
@@ -386,9 +395,11 @@ the_skill_wallet_clears_the_tier_it_just_opened_for_every_shipped_archetype
 ```
 
 It is the same band, read from the other side — the price test walks the reward ratio, this one walks
-the wallet-to-bill ratio, and a `g` that does not reproduce from its own formula fails both. **The
-existing derivation had no test at all**, which is why a formula that cannot produce its own stated
-value survived in a spec.
+the wallet-to-bill ratio. Under D38 its fixture is the **corner-share** form,
+`g = a · corner · step · k² / s`, which reproduces 10.40 and therefore the shipped `11`; the
+share-1.0 form (19.2) is not the sizing and is not what the test asserts. **The existing derivation
+had no test at all**, which is why one number under two sizings survived in a spec as though it were
+an arithmetic error.
 
 #### 2.3 It is a soft bound, provably — not a ceiling
 
@@ -413,6 +424,63 @@ catalog is `≈ (step/2)·N²`, so doubling the content quadruples the price of 
 *ship the roster whole* and D30's **33,600** species nodes (840 species × 40) cannot reopen the
 breadth hole, with no balance pass required. A flat price has the opposite property.
 
+#### 2.4 The `selfSpent` projection (D8/D39) — this module supplies it, `tree-resolve` reads it
+
+`tree-resolve` computes the concentration index `H` and the focus multiplier `F`. **It never infers
+provenance and never sees a purchase order.** It reads one projection, which this module derives from
+the stored node set:
+
+```text
+selfSpent(actor) → per tree i:   n_i   self-bought node count    long, ≥ 0
+                                 s_i   self-spent soul levels    long, ≥ 0
+```
+
+**D39 fixes what the quantity is: the FINAL ALLOCATION the actor holds, self-spent only.** Not points
+paid, not the sequence they were paid in. That is what this store already holds — a set of node ids
+and a soul level each (§1.1) — so the projection is a count over rows, and it is order-free for the
+same reason §2's lemma is: the row set is a property of the build, not of the route to it. **Two
+players who follow the same build guide therefore read the same `F`.**
+
+Four rules, and `tree-resolve` §5.2 states the same four so neither module can drift:
+
+1. **A node enters `n_i` if and only if this module marks the unlock self-bought.** Membership is
+   decided here, once.
+2. **A node counts once, at 1** — never weighted by what it cost. Weighting by price would reintroduce
+   the order dependence D39 closed.
+3. **A tree with no self-bought node is absent from the vector**, never present at zero — the
+   `AptitudeAllocation.cs:19-22` rule again: *"treating 'nothing chosen' as 'chose evenly' would
+   silently invent a default nobody set."*
+4. **Membership is: skill points the actor spent directly, and soul levels the actor bought
+   directly.** Item-granted, aptitude-threshold and demon-aspect unlocks are **excluded**, and a named
+   test asserts the exclusion is a stated rule rather than an accident.
+
+> **This is deliberately not the same question §2.1 answers, and the two tables must not be read
+> against each other.** §2.1 asks *what you PAY for* — an item-granted node counts, because the item
+> paid for the node it is pricing (D11). §2.4 asks *what counts as FOCUS* — the same node does not,
+> because a good off-build drop must never lower your multiplier (D8). Price and focus are different
+> questions about the same row, and the D39 fold is the moment to say so out loud: a single
+> `selfBought` flag serves both only if it is read as *provenance*, never as *counts toward the bill*.
+
+**What the projection is today, said exactly, because "self-bought" needs a source of grants to be a
+distinction at all.** D11's points are **fungible** — that is its stated advantage, *"points flow
+through the tree's own rules… no special case to define, enforce or test"* — so "which node did the
+item's points buy" has no per-node answer, and §2.1 refuses to invent one for the price. It follows
+that `selfSpent` is only a *filter* once some source other than the player's own spend can add a
+point, and **no such source ships**: `SkillPointsPerThetaMilli` has zero production consumers (§3),
+and aptitude-threshold and demon-aspect grants of skill points exist in D2's list and nowhere in
+`src/`. **So today `selfSpent(actor)` is the whole owned set, and rule 4 is a rule with nothing yet
+to exclude.**
+
+That is a fact worth writing down rather than a hole: it means **the first source that grants skill
+points ships the provenance rule with itself** — and, if that rule cannot be derived from the wallet,
+the column to persist it. No column is added now, because a column that is always `1` is not
+information (§1.1). What the fold buys is that the question is asked at the right moment by the right
+change, instead of being discovered when `F` first reads a wrong vector.
+
+**The F4 breadth exploit that follows from rule 4 is parked deliberately by D39**, with the revisit
+trigger stated in `tree-resolve` §5.2. This module's obligation under that parking is exactly the
+paragraph above.
+
 ### 3. `skillPointsPerThetaMilliByScope` (D34) — required, not optional
 
 **FACT.** `AptitudeGrant` carries `SkillPointsPerThetaMilli` as a **single scalar**
@@ -428,10 +496,10 @@ then each get a full commander budget on its own fresh price ladder: **50 × 31 
 1,550 — effectively the whole 1,560-node generic catalog, owned across the roster at the calibration
 point.** D25's bound does not survive that.
 
-**The conclusion does not depend on which `g` ships.** 31 is the count at the shipped `g = 11`; at
-§2.2d's alternative sizing of 19.2 (an open owner question, not a correction) it is 41 nodes each, so fifty actors reach 2,050 and the hole gets
-*wider*. This paragraph is the one place a `g` recalibration was worth re-checking, and it survives
-it.
+**The conclusion does not depend on which `g` ships.** 31 is the count at the shipped `g = 11` (D38);
+at §2.2d's share-1.0 sizing of 19.2 it is 41 nodes each, so fifty actors reach 2,050 and the hole gets
+*wider*. This paragraph is the one place a `g` move was worth re-checking, and it survives any value
+the harness could reasonably land on.
 
 **Requirement:** `pointEconomy` gains `skillPointsPerThetaMilliByScope`, mirroring the sibling field
 one line above it. The argument was already made once, for that sibling — `spec-point-economy.md`
@@ -453,6 +521,13 @@ public static long SkillPointsFor(AllocationScope scope, long sourceValue, Aptit
 level now reads the shared arithmetic curve; species level is an index
 (`PointBudget.DemonTypeSourceFromLevel`, `:40`); `element_mastery` and almanac XP have **zero `src/`
 hits**. This module needs whichever scopes actually ship trees, not all four.
+
+**And `element_mastery` now has an owner (D37).** It is one of the two quantities the new wave-0
+module [`gate-counters`](spec-gate-counters.md) builds, together with `status_applied.<id>` and
+their `PointBudget` binding ([passive-tree-map.md](../passive-tree-map.md) §Modules). The state of
+the code is unchanged — both were re-grepped this session and still have no implementation — but the wait is bounded and owned
+rather than parked on another program's unscheduled `aspect-scope` tier. `PointBudget`'s own comment
+naming `aspect-scope` (`PointBudget.cs:15`) is amended by that module's change, not by this one.
 
 ### 4. The migration boundary — reject once, never per actor load
 
@@ -628,7 +703,7 @@ The struck names are superseded and must not appear in code, config or a sibling
 | `unlockCost.firstPoints` ~~`unlockCost.first`~~ | skill **points** | 5 | `data/tuning/passive-tree.v1.json` (**new** — does not exist as of 2026-09-05) |
 | `unlockCost.stepPoints` ~~`unlockCost.step`~~ | skill **points** | 2 | same |
 | `soulTrack.thetaPerSoulLevelMilli` ~~`soulThetaWeight` (`Ws`)~~ | `Θ` per soul level, **per-mille** | **unmeasured** | same |
-| `pointEconomy.skillPointsPerThetaMilliByScope.commander` | skill points per `Θ` | 11, **and it does not reproduce from its own stated derivation — §2.2d** | `data/tuning/aptitudes.v{n+1}.json` |
+| `pointEconomy.skillPointsPerThetaMilliByScope.commander` | skill points per `Θ` | **11 — settled (D38).** `10.40` from the corner-share derivation, rounded up; §2.2d carries the working and the 19.2 alternative it is not | `data/tuning/aptitudes.v{n+1}.json` |
 | `pointEconomy.skillPointsPerThetaMilliByScope.{demonType,aspect,uniqueDemon}` | skill points per that scope's own source unit | **unmeasured** | same |
 | `pointEconomy.respecPrice` | **souls** (§5.1 — settled, not unresolved) | 10 today (`aptitudes.v5.json:30`) | same |
 
@@ -787,6 +862,9 @@ public static long CostOfNextNode(long nodesOwned, PassiveTreeTuning tuning)
 | `reward_per_skill_point_is_within_band_over_every_shipped_archetype_and_every_tier` | §2.2c — reads `tree-plan`'s actual width vectors, asserts at every tier, against `archetype.rewardSpreadMaxRatioMilli`. Green at equality by design |
 | `the_skill_wallet_clears_the_tier_it_just_opened_for_every_shipped_archetype` | §2.2d — the same band read from the wallet side; a `g` that does not reproduce from `a·step·k²/s` fails it |
 | `an_item_swap_does_not_change_the_next_node_price_net` | §2.1's ratchet, closed |
+| `self_spent_projection_is_the_final_allocation_not_the_purchase_order` | §2.4 / D39 — build the same node set two ways, assert one identical `(n_i, s_i)` vector. It is the store-side half of `tree-resolve`'s test 6c, and the one that would catch a projection that quietly counted price |
+| `a_tree_with_no_self_bought_node_is_absent_from_the_vector` | §2.4 rule 3 — absent, never present at zero; `AptitudeAllocation.cs:19-22`'s rule one layer over |
+| `exclusion_of_granted_unlocks_from_self_spent_is_a_stated_rule` | §2.4 rule 4 — asserts the rule exists and is exercised, so widening it when D39's revisit trigger fires moves a golden instead of starting an investigation |
 | `soul_levels_never_count_toward_the_unlock_price` | D3; the two tracks stay separate |
 | `an_invalid_red_node_costs_nothing_to_hold` | D8's trap shape, avoided |
 | `the_count_is_across_all_trees_never_per_tree` | §2.1's last row |
@@ -813,14 +891,13 @@ comparison; widen before multiplying; `checked` on every product; derive budget 
 batch the read; reject an unknown node id **once**, at the import boundary, naming every offender;
 keep every SQL statement inside `FusionRpg.Data`; keep the `RpgStore` partial-class convention.
 
-**Ask first:** **republishing `g` = `skillPointsPerThetaMilliByScope.commander`** — the shipped `11`
-is sized against the measured corner share; §2.2d records an alternative sizing of 19.2 as an open owner question; it is one global
-tunable that moves every wallet, so it is the owner's number, not this fold's; the four values of
-`skillPointsPerThetaMilliByScope` — the table is required (§3), but
-the rates are a balance question residual-fit owns, and *shipping a guess is fine; calling it balance
-is not*; ~~**which resource respec costs**~~ **— closed, it is souls (§5.1)** — but **whether a tree
-respec shares the species respec counter or carries its own**; whether a respec may ever be
-roster-wide rather than per actor.
+**Ask first:** ~~**republishing `g`**~~ **— closed by D38 (§2.2d): `11`, sized against the measured
+corner build, and a tunable `squad-harness` may move on measurement without reopening a spec**; the
+**other three** values of `skillPointsPerThetaMilliByScope` (`demonType`, `aspect`, `uniqueDemon`) —
+the table is required (§3), but those rates are a balance question residual-fit owns, and *shipping a
+guess is fine; calling it balance is not*; ~~**which resource respec costs**~~ **— closed, it is
+souls (§5.1)** — but **whether a tree respec shares the species respec counter or carries its own**;
+whether a respec may ever be roster-wide rather than per actor.
 
 **Never:** store a price, a spent total, a remaining budget, or any resolved magnitude — that is a
 second SSOT that goes stale the moment a coefficient moves; clamp the price or the budget; add a
@@ -840,8 +917,9 @@ regression, not a slot; join tree state onto the unpaged `ListDemonRoster`; mult
       provably not flat for `first = step`.
 - [ ] Across `tree-plan`'s shipped archetypes the reward-per-skill-point spread stays inside
       `archetype.rewardSpreadMaxRatioMilli` at every tier and is exactly 1000‰ at tier 10 (§2.2c).
-- [ ] `skillPointsPerThetaMilliByScope.commander` reproduces from `g = a·step·k²/s` — **red today at
-      `11`, and deliberately so** (§2.2d). It closes when the owner republishes `g`, not before.
+- [ ] `skillPointsPerThetaMilliByScope.commander` reproduces from the **corner-share** derivation
+      `g = a·corner·step·k²/s` = 10.40, rounded up to the shipped `11` (§2.2d, D38). The share-1.0
+      form (19.2) is recorded, not asserted.
 - [ ] Every actor's budget reads its **own** scope rate; a demon reading `Θ_player` fails a test.
 - [ ] One unknown node id fails the import with a report and leaves every actor loadable.
 - [ ] A six-actor squad's tree state loads in **one** query, one lock acquisition, one connection.
@@ -869,24 +947,25 @@ Three, all real; two of them are owner decisions this module may not make.
    complete? §2.2's calibration assumes **complete**, at the uniform archetype's `k = 4`: the
    conservative, most expensive reading and the only one exact flatness is a property of. The cheaper
    reading roughly halves the effective width, and since `g ∝ k²` (§2.2d) that moves the wallet by
-   about **4×**, not 2× — so it is worth deciding **before `firstPoints` and `g` are published**, and
-   it is the second input to the same recalibration Open question 3 names.
+   about **4×**, not 2× — so it is worth deciding **before `firstPoints` is published**. It does not
+   reopen `g`: D38 settled the commander value at `11` against the measured corner build **and made it
+   a tunable**, so a change of reading here changes what the harness measures and moves one number in
+   `aptitudes.v{n+1}.json`. It would move `firstPoints`, which is not a tunable a sweep can retune
+   quietly, and that is why this one is still owed an answer.
    Recommendation on the record: at least one node in the tier below **of the same branch** — it
    preserves D10's two-branch identity and rewards a single-branch dive, whose reward-per-point
    gradient already points the right way.
-3. **All four values of `skillPointsPerThetaMilliByScope` — and the commander one is no longer
-   "derived".** ~~The commander value (11) is derived (`g = 3·s·step·k²/5 = 10.40`, rounded up so the
-   wallet clears the gate with a small surplus).~~ **Corrected 2026-09-05, §2.2d:** the correct form
-   is `g = a·step·k²/s` under a **share-1.0** build, giving 19.2, while the shipped 10.40 sizes
-   the same wallet against the **measured corner share 0.54163** — the two differ by exactly
-   `1/0.54163`. **`11` is 10.40 rounded up and is reconciled**; what is open is which build the
-   wallet should be sized against, which is an owner call, not an arithmetic fix.
-   rounded derivation. At `11` the uniform archetype reaches tier 3 with 57% of the skill points the
-   gate it just opened costs to fill. **Republishing `g` is an owner decision** (it moves every
-   wallet in the game) and it is the one thing in this spec that must be settled before `first` and
-   `step` are published, because the three numbers are calibrated against each other. The other three
-   scopes remain unmeasured, exactly as the sibling table's own `_weightsWhy` says of its `{3,4,4,6}`.
-   Shipping a guess is fine; calling it balance is not.
+3. **The other three values of `skillPointsPerThetaMilliByScope` — `demonType`, `aspect`,
+   `uniqueDemon`.** ~~All four, and the commander one is no longer "derived".~~ **The commander value
+   is closed: D38, 2026-09-05 — `g = 11`, sized against the MEASURED corner build (10.40 rounded up),
+   and a tunable `squad-harness` may move without reopening a spec** (§2.2d carries the working, and
+   the share-1.0 alternative of 19.2 is recorded there as the answer to a different question, not as a
+   correction). At `11` the uniform archetype reaches tier 3 with 57% of the skill points the gate it
+   just opened costs to fill — a pacing fact, now measurable rather than disputed.
+
+   The three remaining scopes are unmeasured, exactly as the sibling table's own `_weightsWhy` says of
+   its `{3,4,4,6}`. Each multiplies a different source unit, so one cannot be inferred from another,
+   and none of them has a sweep behind it. Shipping a guess is fine; calling it balance is not.
 
 ## Decisions implemented
 
@@ -908,8 +987,12 @@ Three, all real; two of them are owner decisions this module may not make.
 | §8 every balance number is a tunable key with a unit | ideal **§14** |
 | Boundaries — no fifth `AllocationScope` member | **D35** (superseding **D19**/**D31**) |
 | Boundaries — tier gates read base allocation, not item bonuses | **D12** |
+| §2.4 the `selfSpent` projection is the final allocation, self-spent only | **D39** (amending **D8**) |
+| §2.2d `g = 11`, sized against the measured corner build, and tunable | **D38** |
+| §3 `element_mastery` and `status_applied` have an owner and a wave | **D37** |
 
-**Belongs to a sibling module, not here:** D4/D5/D6/D7/D8's `H` and `F`, D28's cross-unlock, and every
+**Belongs to a sibling module, not here:** D4/D5/D6/D7/D8's `H` and `F` — this module supplies the
+`selfSpent` projection they read (§2.4) and computes neither — D28's cross-unlock, and every
 `P(Θ)` multiply including the `Ws` §10 row (`tree-resolve`) · the record, ids and versioning
 ([`tree-catalog`](spec-tree-catalog.md)) · D13/D15/D20/D26/D29/D32/D35's gate quantity (`tree-plan`) ·
 D14/D16/D22's vocabularies (`tree-language`, `tree-binder`) · D9/D27's roster (`tree-plan`) ·

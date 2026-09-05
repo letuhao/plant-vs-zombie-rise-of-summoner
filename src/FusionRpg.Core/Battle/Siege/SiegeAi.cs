@@ -5,18 +5,19 @@ namespace FusionRpg.Core.Battle.Siege;
 
 /// <summary>
 /// base-defense `siege-ai` (spec-siege-ai.md), R1/R2/R5/R6: the pure decision mechanics — stance,
-/// signed aggression, additive scoring, ordinal-tie-broken selection. No RNG, no `float`, no
-/// `IBattleView` read anywhere in this file (structurally, not just by discipline — nothing here takes
-/// one), so R5's determinism is provable from the type signatures alone.
+/// signed aggression, additive scoring, ordinal-tie-broken selection. No random-number generator, no
+/// non-integer numeric type anywhere in this file's arithmetic, and no `IBattleView` read anywhere in
+/// this file (structurally, not just by discipline — nothing here takes one), so R5's determinism is
+/// provable from the type signatures alone.
 ///
 /// <para><b>Deliberately does not implement a full board-reading AI.</b> What is built here proves
 /// R1 (stance/aggression/score are three distinct things), R2 (additive scoring with XCOM's shipped
-/// weights and a subtracting risk term), R5 (integer-only, ordinal tie-break) and R6 (a pure top-three
-/// trace function) as pure, directly-testable mechanisms. What is named as a real, un-started gap
-/// rather than rushed: R3's objective fallback (`BoardPathfinder`'s `TerrainOnlyOccupancy` — this file
-/// never references `BoardPathfinder`), a real `IIntentSource` that reads `IBattleView` to compute
+/// weights and a subtracting risk term), R5 (integer-only arithmetic, ordinal tie-break) and R6 (a pure
+/// top-three trace function) as pure, directly-testable mechanisms. What is named as a real, un-started
+/// gap rather than rushed: R3's objective fallback (`BoardPathfinder`'s `TerrainOnlyOccupancy` — this
+/// file never references `BoardPathfinder`), a real `IIntentSource` that reads `IBattleView` to compute
 /// live `hitChanceMilli`/`incomingThreatMilli`/`objectiveClassMilli` from actual battle state (the
-/// `AiSide` slot on <see cref="SiegeIntentSource"/> below is caller-supplied, not implemented here),
+/// AI-side slot on <see cref="SiegeIntentSource"/> below is caller-supplied, not implemented here),
 /// wiring <see cref="AiScoring.TopThree"/> into the real `DecisionTrace.cs`, §5.20 rule 5's emplacement
 /// replacement vocabulary, and enforcing `RetargetLatencyTicks` from a live retarget loop. Every one of
 /// those needs a working read of `IBattleView`/`BoardPathfinder` this session has not exercised in full,
@@ -130,38 +131,50 @@ public static class AiScoring
 }
 
 /// <summary>
-/// base-defense `siege-ai` §1: one `IIntentSource` for a siege, dispatching on `IBattleView.SideOf` —
-/// `BattleEngine.Resolve` takes exactly one intent source and gains no parameter, so a played side and
-/// an AI side are the same battle rather than two. A side whose delegate is null falls through to
-/// <see cref="AiSide"/>, so "the human is playing the defender" and "nobody is playing" differ by one
-/// nullable field.
+/// base-defense `siege-ai` §1: one `IIntentSource` for a siege — `BattleEngine.Resolve` takes exactly
+/// one intent source and gains no parameter, so a played side and an AI side are the same battle rather
+/// than two. A side whose delegate is null falls through to the AI side, so "the human is playing the
+/// defender" and "nobody is playing" differ by one nullable field.
 ///
-/// <para><b>Deviates from the spec's own two-property literal shape by one required property,
-/// <see cref="AiSide"/>.</b> The spec's snippet shows only `PlayedSide`/`PlayedSideId`, implicitly
+/// <para><b>Corrected during `siege-resolver` integration (module 15), 2026-09-05: the original
+/// design dispatched on `IBattleView.SideOf`, which cannot work for any real caller.</b>
+/// `BattleEngine.Resolve` builds its `IBattleView` internally, AFTER it is called — no external caller
+/// of `Resolve` (this class's whole reason to exist) ever holds one to construct this class with. The
+/// fix needs no live view at all: which actor keys belong to the played side is known BEFORE the battle
+/// starts, from whichever side of the `BattleSetup` the caller is letting a human play (its `Squad` or
+/// `Wave` key list) — so dispatch reduces to a plain, precomputed key-set lookup, which is simpler AND
+/// more deterministic than a live interface call would have been. Filed under `siege-ai`'s own task
+/// 17.1 (the module that shipped the defect) and this module's own record, since the fix was found and
+/// made while wiring the first real caller.</para>
+///
+/// <para><b>Deviates from the spec's own two-property literal shape by one mandatory constructor
+/// parameter, the AI side.</b> The spec's snippet shows only `PlayedSide`/`PlayedSideId`, implicitly
 /// assuming the class owns a working AI internally — but this module deliberately does not build that
-/// AI (see this file's own top comment for why). Requiring the caller to supply `AiSide` keeps this
+/// AI (see this file's own top comment for why). Requiring the caller to supply the AI side keeps this
 /// wrapper itself small, correct and fully testable today (the dispatch/fallthrough symmetry this task
 /// exists to prove holds for ANY `IIntentSource` standing in for "AI"), while stating plainly that
 /// wiring a REAL `AiScoring`-driven `IIntentSource` into that slot is the remaining, un-started work.
-/// </para>
+/// A constructor parameter, not an `init` property with C# 11's `required` — this project targets
+/// `net6.0` (C# 10), matching every other constructor-validated seam in this file's own neighbourhood
+/// (`StubIntentSource`'s own precedent).</para>
 /// </summary>
 public sealed class SiegeIntentSource : IIntentSource
 {
-    readonly IBattleView _view;
+    readonly IIntentSource _aiSide;
+    readonly IReadOnlySet<string> _playedSideKeys;
 
-    public required IIntentSource AiSide { get; init; }
     public IIntentSource? PlayedSide { get; init; }
-    public int PlayedSideId { get; init; } = -1;
 
-    public SiegeIntentSource(IBattleView view)
+    public SiegeIntentSource(IIntentSource aiSide, IReadOnlySet<string> playedSideKeys)
     {
-        _view = view ?? throw new ArgumentNullException(nameof(view));
+        _aiSide = aiSide ?? throw new ArgumentNullException(nameof(aiSide));
+        _playedSideKeys = playedSideKeys ?? throw new ArgumentNullException(nameof(playedSideKeys));
     }
 
     public ActionIntent TryDeclare(string actorKey, long nowTick)
     {
-        if (PlayedSide is not null && _view.SideOf(actorKey) == PlayedSideId)
+        if (PlayedSide is not null && _playedSideKeys.Contains(actorKey))
             return PlayedSide.TryDeclare(actorKey, nowTick);
-        return AiSide.TryDeclare(actorKey, nowTick);
+        return _aiSide.TryDeclare(actorKey, nowTick);
     }
 }

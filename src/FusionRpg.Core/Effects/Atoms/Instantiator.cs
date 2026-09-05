@@ -158,32 +158,51 @@ public static class Instantiator
     }
 
     /// <summary>
+    /// What one budget's draw spent and produced. <see cref="CrossBudgetSpent"/> is the A1 state a
+    /// <see cref="AffixClass.Mixed"/> pick creates: the number of the <b>paired</b> budget's rolls this
+    /// pass consumed, which the paired pass must subtract from its own count before drawing.
+    /// </summary>
+    /// <param name="AffixIds">The affix ids drawn, in draw order — what the paired pass excludes so a
+    /// <c>Mixed</c> bundle already spent here can never be drawn a second time.</param>
+    /// <param name="AtomIds">Those affixes' concrete refs, flat and in bundle <c>seq</c> order.</param>
+    public sealed record BudgetDraw(
+        IReadOnlyList<string> AffixIds, IReadOnlyList<string> AtomIds, int CrossBudgetSpent)
+    {
+        public static readonly BudgetDraw Empty =
+            new(Array.Empty<string>(), Array.Empty<string>(), 0);
+    }
+
+    /// <summary>
     /// Weighted draw, <b>at most one affix per group</b>, <c>prefix_rolls</c> + <c>suffix_rolls</c>
-    /// times across two separately-budgeted draws, then each drawn affix expands to its concrete
-    /// atom id(s) — returned flat, matching every existing caller's atom-id-list contract.
+    /// times across two budgets, then each drawn affix expands to its concrete atom id(s) — returned
+    /// flat, matching every existing caller's atom-id-list contract.
     ///
     /// <para><b>Public since T31 (action program, A13):</b> "the generator already exists" — a
     /// container's own weighted pool-plus-group-exclusion roll is exactly what the action-seeding
     /// runtime generator needs for "which atoms", and it must not be reinvented. Visibility widened,
     /// no behavior changed at the time.</para>
     ///
-    /// <para><b>T3.1 (affix-schema):</b> the pool now draws affix ids, not bare atom ids
+    /// <para><b>T3.1 (affix-schema):</b> the pool draws affix ids, not bare atom ids
     /// (`definitions.md` §4a). This method still returns atom ids — expansion happens inside it — so
-    /// <c>ActionSeeder</c> and every other existing caller are unaffected. <b>Only single-concrete-
-    /// ref affixes expand here.</b> A multi-ref or slot-bearing bundle needs the full five-step
-    /// resolver (`resolution-order`, module 2, not yet built) to correlate its refs and resolve its
-    /// slots — drawing one throws rather than silently returning a partial or wrong expansion.</para>
+    /// <c>ActionSeeder</c> and every other existing caller are unaffected. A <b>slot-bearing</b>
+    /// bundle still throws: resolving a slot needs a domain member and a tier draw, which is
+    /// <see cref="Resolver.Resolve"/>'s five-step order, not this atom-id-list entry point.</para>
     ///
-    /// <para><b>T3.2 (prefix/suffix split):</b> the single <c>pool_rolls</c> budget is now two —
+    /// <para><b>T3.2 (prefix/suffix split):</b> the single <c>pool_rolls</c> budget is two —
     /// <c>Prefix</c>-eligible rows (class <see cref="AffixClass.Prefix"/> or <see cref="AffixClass.Mixed"/>)
     /// draw against <c>prefix_rolls</c>; <c>Suffix</c>-eligible rows (<see cref="AffixClass.Suffix"/> or
-    /// <see cref="AffixClass.Mixed"/>) draw against <c>suffix_rolls</c> — each its own independent
-    /// weighted draw with its own group-exclusion and its own named RNG stream, so one budget's rolls
-    /// never shift the other's. A <see cref="AffixClass.Mixed"/> affix is eligible in both draws, and
-    /// today's two-independent-draws model can therefore pick it in one, both, or neither — the exact
-    /// "one draw consumes both budgets simultaneously" semantics A1 describes belongs to the full
-    /// resolver (module 2, not yet built); this is an interim, honestly-documented simplification, not
-    /// the final resolution order.</para>
+    /// <see cref="AffixClass.Mixed"/>) draw against <c>suffix_rolls</c> — each with its own
+    /// group-exclusion and its own named RNG stream, so one budget's rolls never shift the other's.</para>
+    ///
+    /// <para><b>⭐ A1 `Mixed` semantics, wired 2026-09-05 (item module 15's follow-up).</b> The two
+    /// budgets are no longer <i>independent</i>: state is carried from the prefix pass to the suffix
+    /// pass exactly as <see cref="Resolver"/> already does it, so a <see cref="AffixClass.Mixed"/>
+    /// affix spends <b>one of each budget simultaneously</b> — never doubling either, never drawn
+    /// twice, and never picked at all once the paired budget is exhausted. This replaces the
+    /// "interim, honestly-documented simplification" this comment used to describe, which could pick
+    /// the same <c>Mixed</c> affix in one pass, both, or neither. <b>A pool with no <c>Mixed</c> affix
+    /// draws byte-identically to before</b>: the extra eligibility filter and the paired-pass
+    /// exclusion are both no-ops there, and the two RNG stream names are unchanged.</para>
     /// </summary>
     public static List<string> Draw(
         ContainerRow container, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix,
@@ -192,38 +211,103 @@ public static class Instantiator
         var picked = new List<string>();
         if (container.Pool.Count == 0) return picked;
 
-        if (container.PrefixRolls > 0)
-            DrawBudget(container, lookupAtom, lookupAffix, rollSeed, "prefix", container.PrefixRolls,
-                a => a.Class is AffixClass.Prefix or AffixClass.Mixed, picked);
-        if (container.SuffixRolls > 0)
-            DrawBudget(container, lookupAtom, lookupAffix, rollSeed, "suffix", container.SuffixRolls,
-                a => a.Class is AffixClass.Suffix or AffixClass.Mixed, picked);
+        var prefix = container.PrefixRolls > 0
+            ? DrawBudget(container, lookupAtom, lookupAffix, rollSeed, AffixClass.Prefix,
+                container.PrefixRolls, crossBudget: container.SuffixRolls)
+            : BudgetDraw.Empty;
 
+        // Each `Mixed` affix the prefix pass drew already spent one suffix roll — the suffix pass
+        // rolls for what is left, and never for the bundle that spent it.
+        var suffixRolls = container.SuffixRolls - prefix.CrossBudgetSpent;
+        var suffix = suffixRolls > 0
+            ? DrawBudget(container, lookupAtom, lookupAffix, rollSeed, AffixClass.Suffix, suffixRolls,
+                excludeAffixIds: new HashSet<string>(prefix.AffixIds, StringComparer.Ordinal))
+            : BudgetDraw.Empty;
+
+        picked.AddRange(prefix.AtomIds);
+        picked.AddRange(suffix.AtomIds);
         return picked;
     }
 
-    static void DrawBudget(
+    /// <summary>
+    /// One budget's weighted draw, one affix per group, on that budget's own named RNG stream.
+    ///
+    /// <para><b>Public since item module 15 (`enhance-reroll`, spec-enhance-reroll.md §2):</b> a
+    /// partial reroll spends <paramref name="count"/> rolls rather than the whole budget, and seeds
+    /// <paramref name="excludeGroups"/> with the groups of that budget's <i>retained</i> affixes
+    /// (<c>RerollPolicy.RetainedGroups</c> computes exactly that set) — which is what makes
+    /// one-per-group survive a partial redraw. <see cref="Draw"/> passes the full counts and no
+    /// exclusions, so instantiation is unchanged.</para>
+    /// </summary>
+    /// <param name="budget">Which budget is being spent — <see cref="AffixClass.Prefix"/> or
+    /// <see cref="AffixClass.Suffix"/>. Never <see cref="AffixClass.Mixed"/>: that is an affix's
+    /// class, not a budget a container authors.</param>
+    /// <param name="count">How many rolls to spend. The whole budget at instantiation; <c>T</c> for a
+    /// partial reroll. Structural, not a magnitude — it is bounded by the container's own authored
+    /// budget and indexes a loop, so it is an <c>int</c> like <see cref="ContainerRow.PrefixRolls"/>.</param>
+    /// <param name="excludeGroups">Groups already spoken for — seeded before the first roll, so a
+    /// retained affix's group can never be drawn into again.</param>
+    /// <param name="crossBudget">A1: how many of the <b>paired</b> budget's rolls are still available
+    /// for a <see cref="AffixClass.Mixed"/> pick to spend. <c>0</c> makes every <c>Mixed</c> row
+    /// ineligible for this pass — picking one would spend a roll the container never had.</param>
+    /// <param name="excludeAffixIds">A1: affix ids the paired pass already drew. A <c>Mixed</c> bundle
+    /// spends one roll of each budget, so it must not be offered again to the second pass.</param>
+    public static BudgetDraw DrawBudget(
         ContainerRow container, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix,
-        long rollSeed, string budgetName, int rolls, Func<AffixRow, bool> eligible, List<string> picked)
+        long rollSeed, AffixClass budget, int count,
+        IReadOnlySet<string>? excludeGroups = null,
+        int crossBudget = 0,
+        IReadOnlySet<string>? excludeAffixIds = null)
     {
+        if (budget is not (AffixClass.Prefix or AffixClass.Suffix))
+            throw new ArgumentOutOfRangeException(nameof(budget), budget,
+                "Mixed is an affix's class, never a budget — a container authors a prefix budget and a suffix budget");
+        if (count < 0)
+            throw new ArgumentOutOfRangeException(nameof(count), count, "a budget cannot spend a negative number of rolls");
+        if (crossBudget < 0)
+            throw new ArgumentOutOfRangeException(nameof(crossBudget), crossBudget,
+                "the paired budget cannot hold a negative number of rolls");
+        if (count == 0) return BudgetDraw.Empty;
+
         // A stream named for the container AND the budget so the prefix draw and the suffix draw
         // never share a sequence, and the same container always replays identically.
         var rng = new AtomRandom(unchecked((ulong)rollSeed),
-            AtomStreams.Pool + "." + budgetName + "." + container.ContainerId);
+            AtomStreams.Pool + "." + StreamNameOf(budget) + "." + container.ContainerId);
 
-        var remaining = container.Pool
-            .Where(p => p.Weight > 0 && eligible(lookupAffix(p.AffixId)!))
-            .Select(p => (Row: p, Group: GroupOf(p, lookupAffix(p.AffixId)!, lookupAtom)))
-            .ToList();
+        var skipGroups = excludeGroups ?? EmptyIds;
+        var skipAffixes = excludeAffixIds ?? EmptyIds;
 
-        for (var roll = 0; roll < rolls && remaining.Count > 0; roll++)
+        var remaining = new List<BudgetCandidate>();
+        foreach (var row in container.Pool)
         {
-            var total = remaining.Sum(c => c.Row.Weight);
+            if (row.Weight <= 0 || skipAffixes.Contains(row.AffixId)) continue;
+            var affix = lookupAffix(row.AffixId)!;
+            if (!EligibleFor(affix.Class, budget)) continue;
+            var group = GroupOf(row, affix, lookupAtom);
+            if (skipGroups.Contains(group)) continue;
+            remaining.Add(new BudgetCandidate(row, affix, group));
+        }
+
+        var affixIds = new List<string>();
+        var atomIds = new List<string>();
+        var crossSpent = 0;
+
+        for (var roll = 0; roll < count; roll++)
+        {
+            // A1: once the paired budget is spent, a further `Mixed` pick would spend a roll the
+            // container never had, so it drops out of eligibility for the REST of this pass — never
+            // re-added, even if nothing else remains. Identical to Resolver.DrawPrefixPass.
+            var eligible = crossSpent < crossBudget
+                ? remaining
+                : remaining.Where(c => c.Affix.Class != AffixClass.Mixed).ToList();
+            if (eligible.Count == 0) break;
+
+            var total = eligible.Sum(c => c.Row.Weight);
             var target = rng.NextInclusive(1, total);
 
             var running = 0;
-            var chosen = remaining[^1];
-            foreach (var candidate in remaining)
+            var chosen = eligible[^1];
+            foreach (var candidate in eligible)
             {
                 running += candidate.Row.Weight;
                 if (running < target) continue;
@@ -231,25 +315,58 @@ public static class Instantiator
                 break;
             }
 
-            picked.AddRange(ExpandSingleRefAffix(chosen.Row.AffixId, lookupAffix));
+            affixIds.Add(chosen.Row.AffixId);
+            atomIds.AddRange(ExpandConcreteRefs(chosen.Affix));
+            if (chosen.Affix.Class == AffixClass.Mixed) crossSpent++;
             // One per group: drop the whole group, not just the row, or a second tier of the same
             // variant could still come up.
             remaining.RemoveAll(c => string.Equals(c.Group, chosen.Group, StringComparison.Ordinal));
         }
+
+        return new BudgetDraw(affixIds, atomIds, crossSpent);
     }
 
-    /// <summary>The T3.1-scoped expansion: a bundle of exactly one concrete ref resolves to that one
-    /// atom id. Anything else — a slot ref, or more than one ref — is not expressible without the
-    /// resolver `resolution-order` (module 2) is building, and this throws rather than guessing.</summary>
-    static IEnumerable<string> ExpandSingleRefAffix(string affixId, Func<string, AffixRow?> lookupAffix)
+    /// <summary>One pool row with its affix and group pre-resolved — mirrors
+    /// <c>Resolver.DrawCandidate</c>, so the weighted pick never re-derives either.</summary>
+    readonly record struct BudgetCandidate(ContainerPoolRow Row, AffixRow Affix, string Group);
+
+    static readonly IReadOnlySet<string> EmptyIds = new HashSet<string>(StringComparer.Ordinal);
+
+    /// <summary>The stream-name segment for a budget. The two literals are the RNG stream's identity —
+    /// changing either re-rolls every already-owned item — so they are structural, never tunable.</summary>
+    static string StreamNameOf(AffixClass budget) => budget == AffixClass.Prefix ? "prefix" : "suffix";
+
+    /// <summary>Which budget an affix class draws against — <c>Mixed</c> is eligible in both. A
+    /// <c>null</c> class (E32's "not authored, derive it") is eligible for neither: every consumer
+    /// downstream of the import path sees an already-resolved class, so a <c>null</c> reaching here is
+    /// an unimported row, not a wildcard.</summary>
+    static bool EligibleFor(AffixClass? affixClass, AffixClass budget) => budget == AffixClass.Prefix
+        ? affixClass is AffixClass.Prefix or AffixClass.Mixed
+        : affixClass is AffixClass.Suffix or AffixClass.Mixed;
+
+    /// <summary>Every concrete ref of a bundle, in authoring <c>seq</c> order — a single-ref affix
+    /// yields its one atom, a multi-concrete-ref bundle (which is what a <see cref="AffixClass.Mixed"/>
+    /// affix always is, since <c>AffixValidator</c> derives <c>Mixed</c> only from refs of two
+    /// different kinds) yields all of them together.
+    ///
+    /// <para>A <b>slot</b> ref still throws. That is not an unbuilt module any more — module 2
+    /// (`resolution-order`) landed 2026-09-02 — it is this entry point's own shape: <see cref="Draw"/>
+    /// returns bare atom ids and rolls no domain member, no tier and no value, which is exactly what a
+    /// slot needs. <see cref="Resolver.Resolve"/> (via <see cref="InstanceProducer.Compose"/>) is the
+    /// path for a slot-bearing pool.</para></summary>
+    static List<string> ExpandConcreteRefs(AffixRow affix)
     {
-        var affix = lookupAffix(affixId)
-            ?? throw new InvalidOperationException($"drawn affix '{affixId}' is not in the catalog — validation should have caught this");
-        if (affix.Refs.Count != 1 || affix.Refs[0].AtomId is null)
-            throw new NotSupportedException(
-                $"affix '{affixId}' is a multi-ref or slot-bearing bundle — expanding it needs the " +
-                "resolution-order resolver (module 2), not yet built. Draw() only expands single-ref affixes.");
-        yield return affix.Refs[0].AtomId!;
+        var atomIds = new List<string>(affix.Refs.Count);
+        foreach (var r in affix.Refs.OrderBy(r => r.Seq))
+        {
+            if (r.AtomId is null)
+                throw new NotSupportedException(
+                    $"affix '{affix.AffixId}' ref {r.Seq} is a slot ('{r.SlotName}' over domain " +
+                    $"'{r.SlotDomain}') — resolving it needs a domain member and a tier draw, which " +
+                    "Draw() does not roll. Use Resolver.Resolve / InstanceProducer.Compose instead.");
+            atomIds.Add(r.AtomId);
+        }
+        return atomIds;
     }
 
     /// <summary>Group for a drawn affix: a single-ref affix defaults to that atom's own

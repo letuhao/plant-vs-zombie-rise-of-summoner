@@ -10,13 +10,34 @@ Level 3 (`structure-state`, `combatant-kind`, `siege-objective` — the golden-l
 `siege-positions`, `siege-waves` (one task, 12.4, deliberately deferred — see its own evidence), and
 `siege-obstacles` (Mine's live-battle wiring deliberately deferred — see 13.3's own evidence), and
 `siege-cover` are all done and evidenced below, and so is `siege-economy` (Level 6, built against
-`siege-construction`'s data-model half only — verified safe before starting). 15 of 29 modules closed.
-`siege-construction` is **PARTIAL** (data model + shared placement gate done; the four acquisition
-paths' action-system wiring, the new `WorldCommandKinds.Assault` order kind, and the module's own
-headline economic test are a named, un-started gap — see its own section) and is not counted toward
-the 15. Next up: `siege-ai` (Level 6, does not depend on `siege-construction`'s deferred half either),
-or return to close `siege-construction`'s gap. No gate anywhere in this program is currently blocking
-(`base-defense-plan.md` §7).
+`siege-construction`'s data-model half only — verified safe before starting), and so is `siege-resolver`
+(Level 7, the ⭐ playable-with-no-FE milestone — a real district assault now runs a real board through a
+real `BattleEngine.Resolve` call, wired at both `RpgStore.WorldTurns.cs` call sites, full-suite and
+golden verified with zero regressions), and so is `siege-engagement` (Level 7b — the `EngagementExit`
+vocabulary, derived `IsUnderSiege`, and the per-engagement report line, all full-suite verified).
+**17 of 29 modules closed.** `siege-construction` and `siege-ai` are both **PARTIAL** (see their own
+sections for exactly what's built vs deferred — in both cases the pure/data-model mechanism is done and
+the live board/turn-engine integration is the named, un-started remainder) and neither is counted
+toward the 17. `siege-ai`'s `SiegeIntentSource` also had a real, since-fixed design bug — it dispatched
+on a live `IBattleView` no caller of `BattleEngine.Resolve` can ever supply; found and corrected while
+building `siege-resolver`, see 17.1's own evidence. **⚠️ A real, named, cross-module gap survives both
+closures**: decision 24's "a siege spans turns" does not hold end to end — `siege-engagement`'s own
+section explains why (a Sector-vs-District battle-kind dispatch gap in `MovementPhase`/`ContactResolver`
+that neither module's task list owns) — CP4/Gate B is met on its own literal wording (a siege plays and
+resolves in CI with no FE) but not on that stronger claim. Two research sweeps (12 modules, one retry
+pass for 3 that returned degenerate output) produced grounded, file:line-verified implementation plans
+for every remaining module — `board-render`, `siege-stage`, `battle-stage`, and all six content-family
+modules — each already sorted into safe-to-build-now vs real, named deferred gaps; several other real
+cross-module findings surfaced (a `WorldCommandKinds.Assault` naming collision blocking
+`siege-construction`'s own remaining paths, two competing stage-count rows in `decisions.md`,
+`StructureKind` needing a 4th value the content family's own schema will need). This session also saw
+repeated, unrelated concurrent edits elsewhere in the repo (party-dungeon's `Dungeon/Registry/*.cs` and
+`RpgStore.World.cs` delve-schema work, live-saved by a different session) intermittently break the
+shared build mid-verification — each time confirmed unrelated and resolved on its own; none touched any
+file this program owns. Next up: `board-render` (Level 8, the largest module in the whole program,
+depends only on the already-built `siege-board`) or `structure-schema` (root of the six-module
+content-family track, zero dependencies, pure Python, fully scoped and ready). No gate anywhere in this
+program is currently blocking (`base-defense-plan.md` §7).
 
 **Every task names acceptance, verification and files.** A task touching more than ~5 files should
 have been two. Each module's spec carries the full test list — the tasks below name the *load-bearing*
@@ -674,43 +695,145 @@ the deferred `WorldCommandKinds.Assault` half. Safe to build despite `siege-cons
   - **Module verify**: `dotnet test --filter "FullyQualifiedName~SiegeEconomyTests"` → 21/21 green. Full `FusionRpg.Core.Tests`: 7118/7123 (same 5 confirmed-external failures as every prior module this session). `DATA` `WorldWaveOneAcceptanceTests`: 6/6 green. `NUM`: 0 critical. `BOUND`: all four guards green. `audit-magic-numbers.py`: unchanged at 13.
 
 ### `siege-ai` (6) — [spec](../docs/architecture/base-defense/spec-siege-ai.md)
-- [ ] **17.1** `SiegeIntentSource` wrapper dispatching on `SideOf`; **no signature change** to `Resolve` · Verify: played delegate overrides, null falls through · Files: `Siege/SiegeIntentSource.cs`
-- [ ] **17.2** Three axes — **stance** (`Hold`/`Guard`/`Engage`, on the actor) · **signed aggression** (−2..+2, on the target) · **additive score** · Verify: a `Hold` garrison does **not** chase bait; a taunt cannot pull it off the objective · Files: `Siege/SiegeAi.cs`
-- [ ] **17.3** XCOM's **shipped** weights — hit-chance **70**, objective 50, kill **15**, low-HP 10, cannot-counter 10, **+ round** (anti-turtle), **− risk** · Verify: `Hit_chance_outweighs_lethality_seventy_to_fifteen`; `long` sums, `checked` · Files: `SiegeAiPolicy.cs`, tuning
-- [ ] **17.4** Objective fallback via `TerrainOnlyOccupancy`; **frozen acting order**; ordinal tie-break · Verify: a unit boxed in by allies still advances; killing an actor mid-round does not reorder · Files: `Siege/SiegeAi.cs`
-- [ ] **17.5** Determinism + readability · Acceptance: **no RNG and no `float` reachable** (source scan); top-3 with term breakdown to `DecisionTrace`; **read `Consideration.cs` first** — its `Weakest()` gives R6 free · Verify: identical over 10,000 runs · Files: `Siege/SiegeAi.cs`
-- [ ] **17.6** ⛔ **No hidden difficulty thumb**, no score on `ActionTargetOrdering`, no targeting UI · Verify: source scans · Files: —
-- [ ] **17.7 · §5.20 rule 2 — a NAMED, player-visible validity filter**
-  - Acceptance: every filter carries a `DisplayKey` shown verbatim in the UI, not a debug string. CoC's `Favourite Target`: **the player can say why it did not shoot before they watch it not shoot** — which is what turns a documented miss into a feature instead of a bug report
-  - Verify: `CORE` — no filter exists without a display key
-  - Files: `Siege/TargetFilter.cs`
-- [ ] **17.8 · §5.20 rule 3 — a retarget trigger with a STATED latency**
-  - Acceptance: `ai.retargetLatencyTicks`, authored. *"Instant is not required; **specified** is."* The value matters less than it being stated — a unit that keeps swinging at a target which just moved is then following a rule the player can be told
-  - Verify: `CORE`
-  - Files: `SiegeAiPolicy.cs`, tuning
-- [ ] **17.9 · §5.20 rule 5 — a replacement vocabulary for the garrisoned emplacement**
-  - Acceptance: an emplacement cannot move, so R3's objective fallback is **meaningless for it**. It gets its own two-entry vocabulary (*Hold fire* / *Fire at will*) rather than a fallback it can never execute. **Every vocabulary still resolves to a total order** — a replacement set, never a rule that returns "no preference"
-  - Verify: `CORE` — an emplacement never attempts to path
-  - Files: `Siege/SiegeAi.cs`
-- [ ] **17.10 · §7c — the auto-versus-played dial, a tunable from line one**
-  - Acceptance: `ai.autoResolveHandicapMilli` exists from the first commit. The tension is real and unavoidable: *"playing it yourself should be **meaningfully better, never mandatory**"* — and with one kernel **both are set by the same dial**. ⛔ It selects **policy depth** (how many candidates scored, how far it looks), **never a stat bonus** — §7b's rule is *"difficulty is which policy, not a stat bonus"*
-  - Verify: `CORE` — the dial changes decisions without changing any actor's numbers
-  - Files: `SiegeAiPolicy.cs`, tuning
-  - Note: fheroes2 hit the other failure — their maintainers openly debated making auto-battle **dumber**
 
-### `siege-resolver` (7) — [spec](../docs/architecture/base-defense/spec-siege-resolver.md)
-- [ ] **18.1** `DistrictAssaultResolver` — **delegate every non-district kind** to the placeholder (the early return **is** the feature-absence guarantee) · Verify: sector/lane/guard outcomes reference-equal to the placeholder's · Files: `World/Turn/DistrictAssaultResolver.cs`
-- [ ] **18.2** The six steps; seed from `SeededRng.Mix(seed, HashOrdinal(BattleId))` — **never a new hash, never the turn alone** · Verify: two assaults in one turn get different seeds · Files: `DistrictAssaultResolver.cs`
-- [ ] **18.3** ⛔ **Supply the resolver at BOTH `RpgStore.WorldTurns.cs:509` AND `:603`** · Acceptance: constructible **from statics only**, or `:603` cannot build it · Verify: **a re-derived turn report is byte-identical to the original**; a source scan asserts no `TurnEngine.Step(` omits a resolver · Files: `RpgStore.WorldTurns.cs`
-- [ ] **18.4** §2 rule 8 — stamp every resolution `(engineVersion, rulesetVersion, seed)` · Verify: a version mismatch between original and re-derived is **detectable** · Files: `DistrictAssaultResolver.cs`
+**⚠️ Module status: PARTIAL, not closed.** R1/R2/R5/R6's pure decision mechanics and the
+`SiegeIntentSource` dispatch wrapper are built and evidenced below. **R3 (objective-path fallback via
+`BoardPathfinder`), a real `IBattleView`-reading AI that computes live scoring inputs from actual
+battle state, decision-trace wiring, the emplacement's replacement vocabulary (rule 5), and enforcing
+`RetargetLatencyTicks` from a live retarget loop are named, real, un-started gaps** — every one needs a
+working read of `IBattleView`/`BoardPathfinder` this session has not exercised in full, and the spec's
+own §5.20 addendum on Relic's five-patch cover-seeking regression is a direct, spec-stated warning
+against shipping an unverified live decision-maker under time pressure. Not counted toward the closed-
+module count.
+
+- [x] **17.1 · `SiegeIntentSource` wrapper dispatching on `SideOf`; no signature change to `Resolve`** — IMPLEMENTED 2026-09-05, **CORRECTED 2026-09-05 during `siege-resolver` integration**
+  - Evidence: new `Battle/Siege/SiegeAi.cs` — `SiegeIntentSource : IIntentSource`. **Original design was broken and has been fixed.** The first pass took `(IBattleView view, IIntentSource aiSide)` in its constructor and dispatched on `view.SideOf(actorKey) == PlayedSideId` — but no real caller of `BattleEngine.Resolve` can ever supply an `IBattleView`, since the engine builds one internally, INSIDE `Resolve`, from state a caller doesn't have before calling it (confirmed by reading `BattleEngine.Resolve`'s own signature and `TimelineDispatch.cs:65-70`'s real `StubIntentSource` construction site, which builds its `view` from the engine's own internal `state`). This was found while wiring `siege-resolver`, the first real caller, and is exactly the kind of defect an isolated unit test (this module's own `SiegeAiTests.cs`, which supplied a hand-built fake view) cannot catch. **Fix**: dispatch no longer needs any live view at all — which actor keys belong to the played side is knowable BEFORE the battle starts, from whichever side of the `BattleSetup` a human is playing. `SiegeIntentSource` now takes `(IIntentSource aiSide, IReadOnlySet<string> playedSideKeys)` and dispatches on plain set membership — simpler, and more deterministic than a live interface call would have been. `PlayedSideId` is removed (no longer meaningful). Also unrelated but found the same pass: the spec's snippet used C# 11 `required init`, which does not compile under this project's `net6.0`/C#10 target — used a constructor parameter instead, matching this project's other constructor-validated seams.
+  - Verify: `CORE` — `Played_side_delegate_overrides_the_ai`, `Null_played_side_falls_through_to_the_ai`, `Played_side_does_not_leak_to_the_other_side`, `Constructor_rejects_null_ai_side_and_null_played_side_keys` (all four rewritten against the corrected constructor; `Constructor_rejects_null_view_and_null_ai_side` from the first pass no longer exists, and the `FakeBattleView` test fixture was deleted along with it).
+  - Files: `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`, `tests/FusionRpg.Core.Tests/Battle/Siege/SiegeAiTests.cs`
+
+- [x] **17.2 · Three axes — stance, signed aggression, additive score** — IMPLEMENTED 2026-09-05
+  - Evidence: `Stance` enum (`Hold`/`Guard`/`Engage`, three values and no more). `AiScoring.EffectiveTier(baseTier, aggression, aggressionRange)` applies signed aggression (−2‥+2, bounds-checked against the authored `AggressionRange`) INSIDE the tier computation (`checked(baseTier - aggression)`) — Isla's rule, a retarget hook goes inside the priority order, never on top of it — so a taunt is absolute within its tier and irrelevant outside it. `AiScoring.Score` is the separate, additive third axis, applied only WITHIN the best tier.
+  - Verify: `CORE` — `Taunt_dominates_within_its_tier_and_not_outside`, `Stealth_demotes_and_taunt_promotes_through_the_same_field`, `Aggression_is_applied_inside_the_tier_not_on_top_of_the_score`, `Aggression_range_is_bounded_and_the_bound_is_authored`.
+  - Files: `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`
+  - **Deferred**: the ⭐ acceptance test named in the spec (*"a `Hold` stance garrison does not chase bait"*) needs a live actor-position/stance-gated candidate FILTER built from real board state before a candidate ever reaches `ChooseTarget` — this module proves the tier/score MECHANISM the filter would feed into, but does not build the filter itself, since that requires the same `IBattleView` integration named as deferred above.
+
+- [x] **17.3 · XCOM's shipped weights** — IMPLEMENTED 2026-09-05
+  - Evidence: `AiTuning` record + `data/tuning/siege.v1.json`'s new `ai` block — `weightHitChance: 70`, `weightObjective: 50`, `weightKill: 15`, `weightLowHp: 10`, `weightCannotCounter: 10`, `weightRound: 1`, `weightRisk: 120` (a balance value, decision 31's one-row rollback), `stanceDefault: "Guard"`, `autoResolveHandicapMilli: 1000`, `retargetLatencyTicks: 0`, `aggressionRange: 2` (structural), `maxCandidatesScored: 32` (structural). Parsed in `SiegeTuning.cs` (`SiegeTuningPolicy.Ai`), threaded through all three test bootstraps. `AiScoring.Score` sums all seven terms as `long`, `checked`, no literal in the method — every weight comes from `AiTuning`.
+  - Verify: `CORE` — `Hit_chance_outweighs_lethality_seventy_to_fifteen` (a guaranteed-hit non-kill beats a low-chance kill, XCOM's own ordering).
+  - Files: `data/tuning/siege.v1.json`, `src/FusionRpg.Core/Battle/Board/SiegeTuning.cs`, `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`, all three `ContractTuningTestBootstrap.cs`
+
+- [ ] **17.4 · Objective fallback via `TerrainOnlyOccupancy`; frozen acting order** — **DEFERRED, real gap**
+  - What's missing: R3's path-toward-objective fallback needs `BoardPathfinder`'s `TerrainOnlyOccupancy` view, which this module's files never reference. "Frozen acting order" is a `BattleEngine`/`BattleRunState` round-loop property (`OrdersBySpeed`), not something `AiScoring`'s pure functions can prove on their own — `ChooseTarget`'s own ordinal tie-break IS proven (see 17.5), but the round loop's own order-freezing is unverified by this module's tests.
+  - Files not yet touched: wiring into `BoardPathfinder.cs`, `BattleEngine.cs`'s round loop
+
+- [x] **17.5 · Determinism + readability (R5/R6)** — IMPLEMENTED 2026-09-05, scoped to the pure functions
+  - Acceptance: no RNG and no non-integer numeric type reachable (source scan); top-3 with term breakdown — **MET for the pure scoring/selection functions**; **NOT MET for a live `DecisionTrace.cs` wiring** (deferred, see module header)
+  - Evidence: `AiScoring.ChooseTarget`/`Score`/`EffectiveTier`/`TopThree` are pure, integer-only (`int`/`long` exclusively), `checked` throughout. `Consideration.cs` was NOT adopted as a base — confirmed still uncalled by a direct grep before starting (its product-of-considerations shape conflicts with R2's additive requirement, exactly the caution the spec's own §7 names), so this module's `Score` is a fresh additive implementation rather than importing the product form.
+  - Verify: `CORE` — `Same_board_same_decisions_10000_times`, `No_rng_is_reachable_from_the_ai` (source scan for `Random`), `No_float_in_the_scoring_path` (source scan for non-integer numeric type names), `Ties_break_by_ordinal_key`, `Score_overflow_throws`, `Decision_trace_names_the_top_three_with_scores`.
+  - Files: `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`
+
+- [x] **17.6 · ⛔ No hidden difficulty thumb, no score on `ActionTargetOrdering`, no targeting UI** — IMPLEMENTED 2026-09-05
+  - Evidence: source-scan tests over `SiegeAi.cs`'s literal content confirm the absence of all three forbidden patterns.
+  - Verify: `CORE` — `No_stat_bonus_difficulty_exists`, `Score_is_not_on_ActionTargetOrdering`, `No_targeting_ui_is_specced`.
+  - Files: `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`
+
+- [x] **17.7 · §5.20 rule 2 — a NAMED, player-visible validity filter** — IMPLEMENTED 2026-09-05
+  - Evidence: `TargetFilter` record with `DisplayKey`, shown in the UI verbatim per the spec — no filter LOGIC is implemented (no live targeting pipeline exists to filter yet), but the named-filter VOCABULARY exists and is tested.
+  - Verify: `CORE` — `Every_target_filter_has_a_display_key`.
+  - Files: `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`
+
+- [ ] **17.8 · §5.20 rule 3 — a retarget trigger with a STATED latency** — **PARTIAL**: `ai.retargetLatencyTicks` is authored in tuning (see 17.3) but **not enforced** — no live retarget loop exists to enforce it against. Deferred alongside 17.4.
+
+- [ ] **17.9 · §5.20 rule 5 — a replacement vocabulary for the garrisoned emplacement** — **DEFERRED, real gap**, needs the same live-board integration as 17.4; an emplacement's "cannot path" property is meaningless to assert without a real pathing caller to assert it against.
+
+- [x] **17.10 · §7c — the auto-versus-played dial, a tunable from line one** — IMPLEMENTED 2026-09-05 (authored, not yet load-bearing)
+  - Evidence: `ai.autoResolveHandicapMilli` exists in `AiTuning` from this module's first line of code, per-mille, validated `>= 0`. **Honest limit**: nothing yet reads it to actually vary candidate depth (that consumer is `siege-resolver`'s eventual job), so the acceptance test ("the dial changes decisions without changing any actor's numbers") cannot be written meaningfully yet — the field exists and is wired through tuning/bootstraps, but is inert until a real caller consumes it. Naming this rather than writing a vacuous test for an unread field.
+  - Files: `data/tuning/siege.v1.json`, `src/FusionRpg.Core/Battle/Board/SiegeTuning.cs`
+
+- **Module verify (partial, 17.1/17.2/17.3/17.5/17.6/17.7/17.10 only; re-verified 2026-09-05 after the `SiegeIntentSource` fix)**: `dotnet test --filter "FullyQualifiedName~SiegeAiTests"` → 24/24 green. Full `FusionRpg.Core.Tests`: 7150/7155 (same 5 confirmed-external failures as every prior module this session). `DATA` `WorldWaveOneAcceptanceTests`: 6/6 green. `NUM`: 0 critical (overflow findings count moved 59→60, all in the non-critical A3 bucket, expected from new source files). `BOUND`: all four guards green. `audit-magic-numbers.py`: unchanged at 13.
+
+### `siege-resolver` (7) — [spec](../docs/architecture/base-defense/spec-siege-resolver.md) ⭐
+
+**Module status: CLOSED 2026-09-05 — the playable-with-no-FE milestone.** A real district assault now
+runs a real board through a real `BattleEngine.Resolve` call and comes back as a real `BattleOutcome`,
+wired at both `RpgStore.WorldTurns.cs` call sites, full-suite and golden verified with zero regressions.
+Two genuine design questions surfaced during research and were resolved with stated, reversible
+defaults rather than guessed through silently or left blocking — see 18.2's own entry for both, with
+the reasoning recorded so a later pass can revisit either without re-deriving the investigation. The
+only scope this module explicitly does not cover — a played side (needs `siege-stage`'s live input
+channel) and a player specimen's real loadout/aptitude stats (needs a live `RpgStore` this Core-only
+resolver cannot reach) — are named, real, and owned by later modules, not silently dropped.
+
+- [x] **18.pre-a · Widen the seam for what `DistrictLayout.Build` actually needs** — IMPLEMENTED 2026-09-05
+  - Evidence: verified directly against `DistrictLayout.Build` (`World/District/DistrictLayout.cs:200-258`) that it reads a real `WorldSector`'s `DevelopmentLevel` (board side, via `SideFor`), `TypeId` (the Fortress rampart-bonus check via `SectorTypeCatalog`), and each slot's `State` (Ruined/Depleted → Rough terrain) — none of which `BoardProjection`/`SlotProjection` carried, and the spec's own plan only named `DevelopmentLevel`, missing `TypeId`. Also added (found while writing the resolver itself, not during the original research pass): `SlotProjection.StructureHp` (mirrors `WorldSlot.StructureHp`) — without it, a damaged structure would silently re-enter every engagement at full health. `BattleSeam.cs`'s `BoardProjection` gained `DevelopmentLevel` (int) and `SectorTypeId` (string); `SlotProjection` gained `State` (`SlotState`, default `Intact`) and `StructureHp` (`long?`, default null); `BattleOutcome` gained `EngineVersion`/`RulesetVersion`/`Seed` (§2 rule 8's version stamp — task 18.4). All six fields default to values that leave every existing (non-district, or district-with-null-Board) caller constructing the identical record it always did — the same discipline every prior `siege-seam` field addition used. `WorldCanonical.cs` was checked directly and contains zero references to any of `BoardProjection`/`SlotProjection`/`BattleOutcome` — these types are never canonical-hashed, so this widening carries zero golden risk by construction, not just by argument. Also widened `DistrictLayout.CoreSideCells` from `private` to `internal` (same assembly only) so `DistrictAssaultResolver` can place a structure at the EXACT cell `Build` itself uses for a ruined slot, rather than re-deriving a private, drifting second curve for board-side-to-Core-cell-count.
+  - Verify: `CORE` full suite unmoved. `DATA` `WorldWaveOneAcceptanceTests`: 6/6 green.
+  - Files: `src/FusionRpg.Core/World/Turn/BattleSeam.cs`, `src/FusionRpg.Core/World/District/DistrictLayout.cs`
+
+- [x] **18.pre-b · `DistrictAssaultPhase` projects a real board from the sector it already loads** — IMPLEMENTED 2026-09-05
+  - Evidence: `DistrictAssaultPhase.Run` (`World/Turn/DistrictAssaultPhase.cs`) now builds a `BoardProjection` (`SectorId`, `WorldSeed = seed`, `SectorTypeId = sector.TypeId`, `DevelopmentLevel = sector.DevelopmentLevel`, `AttackerEdge` via the already-shipped `DistrictLayout.EntryEdgeFor(next, entity, sector.SectorId)`, `Slots` mapped 1:1 from `sector.Slots` including `StructureHp`) and attaches it to the `BattleRequest`, replacing the phase's own prior doc comment ("this phase does not generate a board... stays null here"). `seed` here is confirmed (by reading `TurnEngine.Step`'s body) to be the SAME single `ulong` threaded unchanged through every phase in one turn — i.e. the world's own seed, not yet battle-unique; per-battle uniqueness is `DistrictAssaultResolver`'s own job (18.2), the same way `DistrictLayout.DistrictSeed` mixes it with a sector id downstream.
+  - Files: `src/FusionRpg.Core/World/Turn/DistrictAssaultPhase.cs`
+
+- [x] **18.1 · `DistrictAssaultResolver` — delegate every non-district kind, and every district request with no board, to the placeholder** — IMPLEMENTED 2026-09-05
+  - Evidence: `DistrictAssaultResolver.Resolve`'s FIRST line is `if (request.Kind != BattleKinds.District || request.Board is null) return PlaceholderBattleResolver.Instance.Resolve(...)` — the early return IS the feature-absence guarantee, provable by construction. Also falls back to the placeholder when the attacker has no living members, or when the board is too small for the forces standing on it (rather than throwing mid-turn).
+  - Verify: `CORE` — `Non_district_kinds_delegate_to_the_placeholder_unchanged`, `District_kind_with_no_board_delegates_to_the_placeholder_unchanged`.
+  - Files: `src/FusionRpg.Core/World/Turn/DistrictAssaultResolver.cs` (new)
+
+- [x] **18.2 · The real fight — board, actor setup, `BattleEngine.Resolve`, objective evaluation** — IMPLEMENTED 2026-09-05, both design questions resolved with a stated default
+  - **Design question 1, resolved**: a structure's `BattleActorSetup.Side` is one fixed, reversible convention — every structure enters on the DEFENDER's side, so the attacker's own units may target and destroy it while the defender's own units never attack their own wall. A single line, not a deep rule; named in `DistrictAssaultResolver.cs`'s own top comment as a convention rather than a guessed architecture commitment.
+  - **Design question 2, resolved**: `SiegeObjective.SiegeCombatant.InCore` is passed as `true` for every living combatant — `SiegeObjective.Evaluate` never reads the ATTACKER's own `InCore` at all (confirmed by re-reading `SiegeObjective.cs`), so this only actually matters for the defender: a defender who survives the fight is treated as still holding the Core regardless of final board position, since `BattleReport`/`BattleActorResult` carry no position data for any battle kind to check against (verified directly, `BattleModels.cs:352-471` read in full — the same finding `battle-stage`'s own independent research made). Stated as a named simplification in the resolver's own doc comment, not hidden.
+  - **The animate-side `WorldEntityMember` → `BattleActorSetup` translation** (the single largest gap the original research pass found) is real, tested code: `BuildAnimateSetups` reuses `Battle/WaveCatalog.cs:125-153`'s own shipped pattern (species-derived Element/Traits/AttackInterval, magnitudes from `BattleRuleset.BaseHp/BaseAtk/BaseDefense(level)`) and `PlaceholderBattleResolver.Strength()`'s own effective-HP formula (`Math.Max(0, member.Hp - member.Wounds)`) — composing two already-shipped mechanisms, no new one invented. **Deferred, real, and named**: a player-owned specimen's real loadout/aptitude/equipment bonuses (`WebMatchService.BuildSquad`'s own richer path) are NOT read here — that mechanism needs a live `RpgStore` this Core-only, statics-constructible resolver cannot reach; every legion member fights with flat, level-derived stats regardless of `WorldEntityMember.InstanceId`.
+  - **No `IIntentSource` is ever constructed.** `BattleEngine.Resolve`'s own internal fallback (confirmed by reading `TimelineDispatch.cs`/`BasicAttack.cs`: `intentSource ?? new StubIntentSource(view, state.Cooldowns, ...)`) already drives every actor with the shipped nearest-enemy stub AI the moment `intentSource` is left null — which is exactly what "playable with no FE" needs. Wiring a played side through `SiegeIntentSource` is `siege-stage`'s job, once a live human-input channel exists to plug into it — attempting it here would have meant constructing a `StubIntentSource` outside the engine, which needs an `IBattleView` no external caller has (the same class of bug 17.1's own fix just corrected).
+  - Structures are placed at the exact cell `DistrictLayout.Build` itself derives for that slot index (`DistrictLayout.CellForSlot`, same `districtSeed`/`coreCenter`/`coreSideCells` inputs) — never through `ConstructionPlacement`, which gates NEW construction, not a structure the world already recorded standing.
+  - Seed derivation: `SeededRng.DeriveStream(seed, request.BattleId).NextULong()` — reuses the real, existing, already-precedented mixer `DistrictLayout.DistrictSeed` itself uses, never a new hash (the spec's own `SeededRng.Mix`/`HashOrdinal` snippet names methods that do not exist in the real SDK, confirmed by reading the whole file).
+  - Verify: `CORE` — `Resolver_is_constructible_from_statics_only`, `An_unopposed_assault_resolves_as_core_taken_with_no_battle_engine_call`, `A_real_fight_produces_two_sides_and_a_version_stamp`, `Same_seed_same_siege_10000_times`, `Two_assaults_in_one_turn_get_different_seeds`, `Structure_hp_survives_the_round_trip_as_long`, `No_battle_engine_call_when_the_defender_has_no_living_members` — 9/9 green.
+  - Files: `src/FusionRpg.Core/World/Turn/DistrictAssaultResolver.cs`, `tests/FusionRpg.Core.Tests/World/Turn/DistrictAssaultResolverTests.cs` (new)
+
+- [x] **18.3 · Supply the resolver at BOTH `RpgStore.WorldTurns.cs` call sites** — IMPLEMENTED 2026-09-05
+  - Evidence: both call sites (confirmed at `:518` and `:627`, drifted from the spec's own cited `:509`/`:603` — content and prior omission identical) now pass `DistrictAssaultResolver.Instance` as the fourth argument to `TurnEngine.Step`. A repo-wide grep confirms these are the ONLY two `TurnEngine.Step(` call sites in `src/` — no third site was missed.
+  - Files: `src/FusionRpg.Data/Sqlite/RpgStore.WorldTurns.cs`
+
+- [x] **18.4 · §2 rule 8 — stamp every resolution `(engineVersion, rulesetVersion, seed)`** — IMPLEMENTED 2026-09-05
+  - Evidence: `BattleOutcome.EngineVersion`/`RulesetVersion`/`Seed` (added in 18.pre-a) are populated on every district resolution from `BattleRuleset.EngineVersion`/`RulesetVersion` and the resolver's own mixed `battleSeed`.
+  - Verify: `CORE` — `A_real_fight_produces_two_sides_and_a_version_stamp` asserts all three are non-default.
+  - Files: `src/FusionRpg.Core/World/Turn/DistrictAssaultResolver.cs`
+
+- **Module verify — COMPLETE 2026-09-05**: `dotnet test --filter "FullyQualifiedName~DistrictAssaultResolverTests"` → 9/9 green, including a 10,000-run determinism sweep. Full `FusionRpg.Core.Tests`: **7162/7167**, same 5 confirmed-external failures as every prior module this session (a 6th, `PredicateCompilerTests.Evaluating_allocates_nothing`, failed once under concurrent build load and passed cleanly on an isolated re-run — a resource-contention flake, not a regression; this module touches nothing under `Atoms/`). `DATA` **full suite**: 842/842 passing, 0 failures — including every existing world-turn-commit/world-AI-commit test, none of which broke despite both `RpgStore.WorldTurns.cs` call sites now routing every district assault through a real fight instead of the placeholder (the worry named in the prior draft of this line). The suite hit the same benign post-completion "test host process crashed" shutdown pattern already documented earlier this session — the full pass/fail summary prints before the crash, and is valid. `BOUND`: all four guards green. `NUM`: 0 critical (overflow findings count unchanged at 60 in the non-critical A3 bucket); `audit-magic-numbers.py`: unchanged at 13. An unrelated, actively-in-progress concurrent edit elsewhere in the repo (`src/FusionRpg.Core/Dungeon/Registry/*.cs`, the party-dungeon program's own `dungeon-registries` module, saved live by a different session mid-verification) intermittently left the whole `FusionRpg.Core` project uncompilable for a few minutes — confirmed unrelated (that directory is untracked and outside every file this module touched) and resolved on its own before this final verification pass ran.
 
 ### `siege-engagement` (7b) — [spec](../docs/architecture/base-defense/spec-siege-engagement.md)
-- [ ] **19.1** `EngagementExit` with **`Spent`** as the normal outcome · Verify: a spent engagement leaves the siege ongoing and the world advances one turn · Files: `World/Turn/SiegeEngagement.cs`
-- [ ] **19.2** The persistence split · Acceptance: structure damage persists; **board positions provably do not** · Verify: scan `WorldState` for cell data after an engagement · Files: `SiegeEngagement.cs`
-- [ ] **19.3** `IsUnderSiege` **derived, never stored**; marching away ends it with no cleanup; **no engagement cap** · Verify: source scan for an `IsBesieged` field; run 200 engagements · Files: `SiegeEngagement.cs`
-- [ ] **19.4** One report line per engagement, through `BattleReporting.Fight` · Verify: a six-turn siege produces six lines; rounds never reported as turns · Files: `BattleReporting.cs`
 
-- [ ] **CP4 · GATE B** — ⭐ **a siege plays and resolves in CI with no FE**; both call sites wired; determinism over 10,000 runs; `NUM` clean; `BOUND` green
+**Module status: CLOSED 2026-09-05 for what this module itself owns** (the `EngagementExit`
+vocabulary, `IsUnderSiege`'s derivation, the persistence split, the per-engagement report line — all
+built and full-suite verified with zero regressions). **⚠️ But decision 24's own headline claim ("a
+siege spans turns because engagements repeat") does NOT hold end to end yet, and closing this module
+does not fix that** — a real, cross-cutting gap sitting between this module's territory and
+`MovementPhase`/`ContactResolver`'s, named rather than silently accepted as done: `DistrictAssaultPhase`
+only ever fires on an explicit `assault` command, so a CONTINUING siege (turn 2+, no fresh order) falls
+to `ContactResolver.SectorContacts`, which always builds a `BattleKinds.Sector` request — never
+`District` — so `DistrictAssaultResolver`'s own (correct) delegation guard sends it to the placeholder
+instead of continuing the real fight. Fixing it needs `MovementPhase`/`ContactResolver` changes neither
+this module's nor `siege-resolver`'s task list currently names — a real follow-up task, not implied by
+either module being "closed."
+
+- [x] **19.1 · `EngagementExit` with `Spent` as the normal outcome** — IMPLEMENTED 2026-09-05
+  - Evidence: `EngagementExit` enum (`CoreTaken`/`AssaultBroken`/`Spent`/`Withdrawn`) plus `SiegeEngagement.ExitFor(SiegeOutcomeKind, IReadOnlyList<BattleSideOutcome>, attackerEntityId)`, mapping `Inconclusive → Spent` and splitting `AssaultBroken` into `AssaultBroken`/`Withdrawn` by the attacker's own `Withdrawn` flag. Wired into `DistrictAssaultResolver.Resolve`'s own returned `BattleOutcome.Exit`.
+  - Files: `src/FusionRpg.Core/World/Turn/SiegeEngagement.cs` (new), `src/FusionRpg.Core/World/Turn/DistrictAssaultResolver.cs`
+
+- [x] **19.2 · The persistence split — structure damage persists, board positions provably do not** — ALREADY TRUE, asserted directly
+  - Evidence: no new code needed — `WorldEntity`/`WorldSector` have never carried a cell/grid-position field (confirmed by reflecting over `WorldEntity`'s own properties), and structure HP persistence was already built and evidenced by `structure-state`/`siege-seam` (`BattleApplication.ApplySlotResults`). This task is a regression-pinning assertion, not new mechanism.
+  - Files: `tests/FusionRpg.Core.Tests/World/Turn/SiegeEngagementTests.cs` (new) — `Board_positions_do_not_persist`
+
+- [x] **19.3 · `IsUnderSiege` derived, never stored; no engagement cap** — IMPLEMENTED 2026-09-05
+  - Evidence: `SiegeEngagement.IsUnderSiege(world, sectorId)` is a thin wrapper resolving the sector's own `OwnerFactionId` and delegating to the already-shipped `SupplyGraph.IsBesieged` — zero new derivation logic, zero new state. No `Besieged`/`UnderSiege` field exists anywhere on `WorldSector` (asserted directly, not just argued) — confirmed by reflecting over its properties. No `engagement.maxPerSiege`-shaped tunable was added anywhere in `data/tuning/siege.v1.json`.
+  - Verify: `CORE` — `IsUnderSiege_is_false_for_an_unowned_sector`, `IsUnderSiege_is_false_for_an_unknown_sector`, `Is_under_siege_is_never_stored`.
+  - Files: `src/FusionRpg.Core/World/Turn/SiegeEngagement.cs`
+
+- [x] **19.4 · One report line per engagement, through `BattleReporting.Fight`** — IMPLEMENTED 2026-09-05
+  - Evidence: `BattleReporting.Fight` now branches on `request.Kind == BattleKinds.District && outcome.Exit is {} exit` to write `district:{locationId}:{exit}` instead of the generic `{kind}:{location}:{winner}` line — scoped to District only, so every other kind's report text is byte-for-byte unchanged. Verified directly (not just argued) that report text is never part of the hashed state: `TurnEngine.Step`'s own return line is `StateHasher.Hash(next)` where `next` is the `WorldState`, never the `TurnReport` — so this change is golden-safe by construction.
+  - Files: `src/FusionRpg.Core/World/Turn/BattleReporting.cs`
+
+- **Module verify — COMPLETE 2026-09-05**: `dotnet test --filter "FullyQualifiedName~SiegeEngagementTests"` → 8/8 green. Full `FusionRpg.Core.Tests`: **7238/7242** — only **4** confirmed-external failures now, down from the 5 that held all session (`ActorHub.SpecChannelClaimTests.NoSpecClaimsAnUnregisteredChannel` now passes, fixed by concurrent passive-tree work elsewhere in the repo, unrelated to this module). `DATA` **full suite**: 855/855 passing, 0 failures (up from 842 — concurrent party-dungeon work added its own tests too; same benign post-completion shutdown-crash pattern already documented, results print and are valid before the crash). `BOUND`: all four guards green. `NUM`: 0 critical, unchanged at 60 non-critical A3 findings. `audit-magic-numbers.py`: 14 total, but the +1 is a `delve`-domain finding from concurrent, unrelated work — base-defense's own count is unchanged at 13. This verification pass hit a SECOND, separate, unrelated concurrent-edit compile break mid-way (`src/FusionRpg.Data/Sqlite/RpgStore.World.cs` referencing `EnsureDelveSchemaUnlocked`, the same party-dungeon "delve" program live-saving elsewhere) — confirmed unrelated (this session has only ever touched `RpgStore.WorldTurns.cs`, a different file) and resolved on its own before this pass completed, the same transient pattern the `Dungeon/Registry/*.cs` break showed earlier.
+
+- [x] **CP4 · GATE B — ⭐ MET, with the named caveat above** — a siege plays and resolves in CI with no FE; both call sites wired; determinism over 10,000 runs (`DistrictAssaultResolverTests.Same_seed_same_siege_10000_times`); `NUM` clean; `BOUND` green. **Caveat**: this is proven for a SINGLE engagement (one `assault` command, one resolved district battle) — a MULTI-turn siege that repeats without a fresh order every turn does not yet reach `DistrictAssaultResolver` at all, per this module's own named Sector-vs-District dispatch gap above. Gate B's literal wording ("a siege plays and resolves") is met; decision 24's stronger claim ("a siege spans turns") is not yet.
 
 ---
 

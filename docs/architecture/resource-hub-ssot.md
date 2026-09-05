@@ -1,7 +1,13 @@
 # Resource Hub SSOT — actor pools, scope, accrual, exhaustion
 
-**Status:** Design locked (docs). **Not built** — no `resource.*` channel family exists yet.
-**Parent:** [decisions.md](decisions.md) (ADR row **Resource model**, 2026-08-22).
+**Status:** Design locked. **Channels BUILT and registered** — `resource.max.*` / `resource.regen.*` /
+`resource.efficiency.*` ship and are proven live by `tests/FusionRpg.Core.Tests/Stats/ActorChannelsTests.cs`
+(§8). ⚠️ **This header read *"Not built — no `resource.* ` channel family exists yet"* until 2026-09-05,
+contradicting §8 in its own file**; the channels landed 2026-08-25 (F8, `spec-actor-channels.md`).
+⛔ **Still unseeded for battle actors** — `BattleStatComposer.cs:120-128` sets no `resource.*` channel,
+so every battle actor's six pools sit at max 0 and no action in a battle can cost anything. That gap is
+specced as [battle-tempo/spec-battle-resources.md](battle-tempo/spec-battle-resources.md).
+**Parent:** [decisions.md](decisions.md) (ADR row **Resource model**, 2026-08-22; **six** 2026-08-26).
 **Channels:** [actor-hub-ssot.md](actor-hub-ssot.md) §3.G. **Exhaustion vehicle:**
 [status-ssot.md](status-ssot.md). **Consumers:** [action-map.md](action-map.md),
 [battle-timeline-map.md](battle-timeline-map.md), [effect-atom-map.md](effect-atom-map.md).
@@ -135,23 +141,24 @@ Every resource declares:
 | `visibility` | which UI surfaces show it | Not every pool is a bar |
 | `labels` | per-faction display strings | §3 — content, never a key |
 
-**The registry is data.** Adding a sixth resource costs a row, not a system. That property is the
-reason this file exists before any of it is built.
+**The registry is data.** Adding a **seventh** resource costs a row, not a system. That property is the
+reason this file exists — and it has now been paid off once for real: `poise` became the sixth on
+2026-08-26 and cost a row here, a row in `ResourceIds`, and nothing structural.
 
 ---
 
-## 6. Polarity — all five are assets today
+## 6. Polarity — all six are assets today
 
 `polarity` decides what every generic operation means. Without it, the moment a shared path says
 `Regenerate(resource, amount)`, half the resources would heal and half would get worse.
 
-**Under the locked set, all five resources are `asset`:** they fill up, you spend them, empty is bad.
+**Under the locked set, all six resources are `asset`:** they fill up, you spend them, empty is bad.
 `hunger` is a fed/starving gauge in the ordinary survival-game sense — **full is good** — not a
 rising affliction.
 
 The field is retained rather than dropped because it is free now and a rewrite later, and because
 `burden` remains available if a future resource genuinely needs it. **No resource in the locked set
-uses it.** A proposal to add a burden is an ADR, not a content edit, because it changes what every
+uses it** — `poise` included, checked when it was added rather than assumed. A proposal to add a burden is an ADR, not a content edit, because it changes what every
 generic operation means.
 
 ---
@@ -201,18 +208,27 @@ resource.max.{id}      resource.regen.{id}
 > `DerivedStatRegistry` already loops `ResourceIds` and is correct by construction. The drift is
 > everywhere a list was typed by hand.
 >
-> **Open defects as of 2026-09-02** — see
-> [`../research/resource-symmetry-audit-2026-09-02.md`](../research/resource-symmetry-audit-2026-09-02.md):
+> **Status as of 2026-09-05 — the 2026-09-02 defects are CLOSED; re-verified by reading the shipped
+> files, not by trusting this table's own previous row** (original audit:
+> [`../research/resource-symmetry-audit-2026-09-02.md`](../research/resource-symmetry-audit-2026-09-02.md)):
 >
 > | Layer | max | regen | efficiency |
 > |---|---|---|---|
 > | Registered channels (loops `ResourceIds`) | 6/6 ✅ | 6/6 ✅ | 6/6 ✅ |
-> | **Aptitude edges** (`aptitudes.v2.json`) | 5/6 — no `poise` | 5/6 — no `poise` | **3/6 — no `hp`, `spirit`, `poise`** |
-> | **`DominanceGuard.ReservedFamilies`** (hand-listed) | 4/6 | 4/6 | 3/6 |
+> | **Aptitude edges** (`aptitudes.v5.json`) | **6/6 ✅** | **6/6 ✅** | includes `poise` ✅ |
+> | **`DominanceGuard.ReservedFamilies`** | **6/6 ✅ — now DERIVED from `ResourceIds`** | ✅ | ✅ |
 >
-> **`poise` has zero aptitude edges of any kind**, which is why `guard-economy` is blocked
-> (`class-system/spec-poise-resource.md` §1; tracked as P7.2). **`resource.efficiency` has only four
-> edges in the whole game** — Agility→stamina, Focus→{hunger, qi, stamina}.
+> **⚠️ What this table said before, and why it mattered:** *"`poise` has zero aptitude edges of any
+> kind, which is why `guard-economy` is blocked."* **Both halves are now false.**
+> `data/tuning/aptitudes.v5.json:2570-2762` gives `resource.max.poise` and `resource.regen.poise`
+> twelve aptitude sources each, plus `resource.efficiency.poise` and `resource.restore.poise`
+> (Bulwark, Focus). `DominanceGuard.BuildReservedFamilies()` was rewritten to loop `ResourceIds`
+> (`DominanceGuard.cs:101-108`, Phase 0 2026-09-02) precisely so a hand-listed omission cannot recur.
+> The table above cited `aptitudes.v2.json`; the shipped file is **v5**.
+>
+> ⛔ **The remaining `poise` gap is somewhere else entirely** — not the stat layer but the battle
+> composer: `BattleStatComposer.cs:120-128` seeds no `resource.*` channel, so all six pools are max 0
+> for a battle actor. See [battle-tempo/spec-battle-resources.md](battle-tempo/spec-battle-resources.md).
 >
 > **Fix direction: derive, never hand-list.** Any code or data that enumerates resources should loop
 > `ResourceIds` so a seventh resource is covered by construction, the way registration already is. All three form **their own family list and do not join
@@ -283,12 +299,12 @@ Pools **persist across a run and refill at rest.** They are not per-encounter.
 
 ## 13. Cost, stated honestly
 
-Five resources is not five numbers. Each is a max channel, a regen channel, an accrual rule, a
+Six resources is not six numbers. Each is a max channel, a regen channel, an accrual rule, a
 serialization field, a UI element, a balance axis, and — once it appears in a battle report — a
 **golden-visible number that moves `RulesetVersion`**.
 
 Two mitigations, both already the plan: the registry is data (§5), and resource channels are their
-own family list that never joins the 84 (§8).
+own family list that never joins `CombatChannelFamilies` (§8).
 
 ---
 
@@ -301,7 +317,8 @@ The GUI binds to the **registry shape**, never to the id list:
 ```
 
 `label` is resolved from the actor's faction at the display layer (§3). A resource meter therefore
-has no knowledge of which resources exist, and adding a sixth changes no component.
+has no knowledge of which resources exist, and adding a **seventh** would change no component —
+adding the sixth (`poise`, 2026-08-26) is the proof, and it changed none.
 
 Design reference: [design/00-foundation.html](../design/00-foundation.html) §C.5 (resource meter),
 [design/07-flows.html](../design/07-flows.html) and the actor panel in §D.2.
@@ -311,4 +328,12 @@ Design reference: [design/00-foundation.html](../design/00-foundation.html) §C.
 ## 15. Open — genuinely undecided
 
 1. **Whether `burden` is ever used.** The field exists and nothing uses it (§6).
-2. **`resource.*` channel registration.** Designed, not registered — [actor-hub-ssot.md](actor-hub-ssot.md) §3.G.
+2. ⛔ **How much of each pool a battle actor starts with.** The channels are registered and the
+   aptitude edges exist, but `BattleStatComposer` seeds none of them, so every battle actor holds six
+   empty pools and no action in a battle can cost anything. Specced as
+   [battle-tempo/spec-battle-resources.md](battle-tempo/spec-battle-resources.md); the coefficients
+   themselves ship marked `unmeasured` and are a balance pass's job.
+
+> ~~2. **`resource.*` channel registration.** Designed, not registered.~~ **Closed** — registered and
+> shipped 2026-08-25 (§8, `ActorChannelsTests.cs`). This entry outlived its own resolution by eleven
+> days, which is how the file's header came to contradict its own §8.

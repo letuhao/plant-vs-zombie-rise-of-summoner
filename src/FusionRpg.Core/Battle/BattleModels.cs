@@ -241,6 +241,57 @@ public static class BattleRuleset
     public static int BaseCritRate(int theta) => 10 * theta;
     public static int BaseCritResist(int theta) => 10 * theta + 250;
 
+    static BattleResourceTuning? _resourceTuning;
+
+    public static void ConfigureResources(BattleResourceTuning tuning) =>
+        _resourceTuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
+
+    static BattleResourceTuning ResourceTuning => _resourceTuning ?? throw new InvalidOperationException(
+        "BattleRuleset.ConfigureResources(...) has not run. The pool shares read " +
+        "data/tuning/battle-resources.v1.json (spec-battle-resources.md §2.2a) — there is no built-in " +
+        "default to fall back to.");
+
+    /// <summary>
+    /// `battle-tempo` `battle-resources` — one actor resource pool's maximum, as a per-mille share of
+    /// the shipped HP ladder: <c>BaseHp(theta) × poolShareMilli[id] / 1000</c>.
+    ///
+    /// <para>A PROJECTION of <see cref="BaseHp"/>, never a second curve (spec §2.2, and the same
+    /// argument <see cref="SpeciesTempoProjection"/> makes for `turn.speed`): magnitudes read `P(Θ)`
+    /// per `ssot-power-scale.md`, and a constant share of an existing scale is that scale read through
+    /// a ratio — not a new power-shaped scale, so no §10 inventory row is owed.</para>
+    ///
+    /// <para><c>hp</c> does not derive here — the caller passes <c>BattleActorSetup.MaxHp</c> through
+    /// <paramref name="setupMaxHp"/> so the channel mirrors the actor's real maximum instead of
+    /// inventing a second, disagreeing one (spec §2.6).</para>
+    ///
+    /// <para>⚠️ Overflow discipline: both operands are already <c>long</c> (widen before multiply) and
+    /// the single <c>/1000</c> happens last. <c>checked</c> so an absurd share throws rather than
+    /// wrapping — PS-8 exempt as an arithmetic guard, not a progression ceiling.</para>
+    /// </summary>
+    public static long BaseResourceMax(int theta, string resourceId, long setupMaxHp)
+    {
+        if (resourceId == "hp") return setupMaxHp;
+        return checked(BaseHp(theta) * ResourceTuning.ShareOf(resourceId)) / 1000;
+    }
+
+    /// <summary>
+    /// `battle-tempo` `battle-resources` — in-battle regen, which is <b>0 for every resource</b>, and
+    /// that is a design position rather than an unset placeholder (spec §2.5).
+    ///
+    /// <para>Two independent reasons. (1) <see cref="Stats.Derived.ResourceChannelReader.RegenPerTick"/>
+    /// rounds the channel to a whole <c>long</c>, and a round runs several hundred ticks
+    /// (`action-timing.v1.json`: the basic attack alone is 150 wind-up + 50 recovery), so the smallest
+    /// expressible non-zero rate accrues ~300 poise per round against `reaction-lane.v1.json`'s spend
+    /// of 100 — three counters a round, which erases the scarcity the pool exists to create. There is
+    /// no representable value between "nothing" and that. (2) `resource-hub-ssot.md` §11: pools
+    /// "persist across a run and refill <b>at rest</b>" — a battle is not a rest, and a pool that
+    /// refills mid-battle is the per-encounter model the hub explicitly rejects.</para>
+    ///
+    /// <para>A method rather than an inlined literal so the reasoning has somewhere to live and a
+    /// future sub-tick unit (spec §10.1) has one place to change.</para>
+    /// </summary>
+    public static long BaseResourceRegen(int theta, string resourceId) => 0;
+
     // The v1 per-mille Hit*/Crit* constants are retired (combat-unification ban test);
     // the SSOT resolver's sigmoid + CombatProbabilityPolicy own hit/crit math now.
 }

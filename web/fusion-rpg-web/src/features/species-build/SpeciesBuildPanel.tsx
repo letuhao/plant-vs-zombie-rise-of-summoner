@@ -45,10 +45,10 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
     setConfirmOpen(false);
   }, [speciesId]);
 
-  if (state.isLoading || !state.data || draft === null) {
-    return <EmptyState title="Loading species build…" testId="species-build-loading" />;
-  }
-
+  // spec-allocation-surface.md "States" -- Failed must be checked BEFORE the "no data yet" loading
+  // fallback below: a failed query also has `data === undefined`, so if the loading check ran first
+  // it would swallow every error behind a permanent "Loading…" placeholder and this retry button
+  // would be dead, unreachable code.
   if (state.isError) {
     return (
       <Banner tone="error" data-testid="species-build-error">
@@ -60,14 +60,33 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
     );
   }
 
+  // Genuinely pending (query in flight), OR the query just succeeded and the seed effect above
+  // hasn't derived `draft` from it yet -- both are real, non-error reasons to show the same
+  // placeholder; `state.isError` above has already ruled out the failed case.
+  if (state.isLoading || !state.data || draft === null) {
+    return <EmptyState title="Loading species build…" testId="species-build-loading" />;
+  }
+
   const data = state.data;
+  // spec-allocation-surface.md "States", "No budget yet": budget is `max(0, level-1) * rate`, so a
+  // species that has never left level 1 has exactly zero to spend. Rendered as its own honest state
+  // below rather than through the same copy a real shipped build uses -- that copy asserts a build
+  // that does not exist yet.
+  const noBudgetYet = data.budget === 0 && !data.hasOverride;
   const spent = Object.values(draft).reduce((sum, v) => sum + (Number.isFinite(v) ? v : 0), 0);
   const withinBudget = spent <= data.budget;
   const dirty = JSON.stringify(draft) !== JSON.stringify(data.shares);
   const isRevert = dirty && Object.values(draft).every((v) => v === 0);
-  // Predicts what the server will actually decide (spec-species-respec.md's own free/priced rule) —
-  // `everRespecced`, never `respecCount === 0` (that decays over time; `everRespecced` never resets).
-  const isFree = isRevert || !(price.data?.everRespecced ?? false);
+  // spec-allocation-surface.md "States", "Price unknown": `price.data` is undefined BOTH while the
+  // query is pending and after it errors, so it must never read as "no charge" by default -- only an
+  // ACTUALLY loaded reply that confirms `everRespecced === false` makes a change free. Predicts what
+  // the server will decide (spec-species-respec.md's free/priced rule) using `everRespecced`, never
+  // `respecCount === 0` (that decays over time; `everRespecced` never resets).
+  const isFree = isRevert || (price.data !== undefined && !price.data.everRespecced);
+  // Not a revert, and the price that would gate a real spend hasn't resolved either way -- Save must
+  // wait rather than guess (below), the same way the overbudget case already refuses rather than
+  // clamping.
+  const priceUnresolved = !isRevert && price.data === undefined;
 
   async function commit() {
     setError(null);
@@ -98,17 +117,24 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
   }
 
   const saveLabel = isRevert ? "Reset to default" : isFree ? "Save build" : "Respec…";
-  const saveTitle = !withinBudget
-    ? `Over this species' budget by ${points(spent - data.budget)}`
-    : !dirty
-      ? "No changes to save"
-      : isRevert
-        ? "Reset to the shipped baseline — free"
-        : isFree
-          ? "First override — free"
-          : price.data
-            ? `Costs ${price.data.priceAmount.toLocaleString()} ${price.data.priceResource.toLowerCase()}`
-            : "Loading price…";
+  const saveTitle = noBudgetYet && !dirty
+    ? "This species hasn't earned any aptitude points yet — nothing to save."
+    : !withinBudget
+      ? `Over this species' budget by ${points(spent - data.budget)}`
+      : !dirty
+        ? "No changes to save"
+        : isRevert
+          ? "Reset to the shipped baseline — free"
+          : isFree
+            ? "First override — free"
+            : price.data
+              ? `Costs ${price.data.priceAmount.toLocaleString()} ${price.data.priceResource.toLowerCase()}`
+              : price.isError
+                ? "Couldn't load the respec price — try again shortly"
+                : "Waiting for the respec price…";
+  // Reuses the SAME mechanism the overbudget case already relies on (a boolean folded into the
+  // Button's `disabled`) rather than adding a second way to block Save -- see `priceUnresolved` above.
+  const saveDisabled = !dirty || !withinBudget || respec.isPending || priceUnresolved;
 
   return (
     <div className="flex flex-col gap-4" data-testid="species-build-panel">
@@ -116,7 +142,11 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
 
       <Panel title="Shipped build" testId="species-build-baseline">
         <p className="text-sm text-muted" data-testid="species-build-status">
-          {data.hasOverride ? "You've overridden the shipped build below." : "You're running the shipped build."}
+          {noBudgetYet
+            ? "This species hasn't grown a build yet — field it in a real match to earn aptitude points."
+            : data.hasOverride
+              ? "You've overridden the shipped build below."
+              : "You're running the shipped build."}
         </p>
         <StatBar
           label={`${points(spent)} / ${points(data.budget)} spent`}
@@ -155,12 +185,20 @@ export function SpeciesBuildPanel({ playerId, speciesId }: { playerId: number; s
 
       <Button
         onClick={onSaveClick}
-        disabled={!dirty || !withinBudget || respec.isPending}
+        disabled={saveDisabled}
         title={saveTitle}
         data-testid="species-build-save"
       >
         {respec.isPending ? "Saving…" : saveLabel}
       </Button>
+      {saveDisabled ? (
+        // spec-allocation-surface.md "States": the disabled-Save reason must be visible text, not
+        // only the `title` tooltip above -- nobody hovers a button to discover why it's inert, and a
+        // degenerate state rendered only in a tooltip is not rendered honestly.
+        <p className="text-xs text-muted" data-testid="species-build-save-reason">
+          {saveTitle}
+        </p>
+      ) : null}
 
       <ConfirmDialog
         open={confirmOpen}

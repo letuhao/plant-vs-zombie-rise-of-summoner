@@ -58,48 +58,18 @@ public static class AptitudeEndpoints
         });
 
         // `demon-type-allocation` (module 5, spec-demon-type-allocation.md §"Commands") — the
-        // player-facing surface over EffectiveSpeciesAllocation. Mirrors the Commander pair above
-        // exactly: GET projects the effective (baseline-or-override) state, POST replaces the whole
-        // vector, both broadcast AptitudesUpdated to BOTH groups (T2.2's own ⛔ callout — a WebGroup-
-        // only send is the exact defect a live probe already found once for Commander).
+        // player-facing surface over EffectiveSpeciesAllocation. GET only: the POST twin
+        // (`/species/allocate`) was RETIRED by species-build-todo.md T4.3/Checkpoint 5's own named
+        // follow-up — it wrote a DemonType override with zero pricing awareness, a live bypass of the
+        // whole `species-respec` economy (owner decision, 2026-09-05: "retire it now"). Every real
+        // write now goes through `SpeciesBuildEndpoints.cs`'s `POST /api/species-build/respec`, which
+        // decides free-vs-priced for itself; this GET keeps serving reads unchanged.
         g.MapGet("/species/{playerId:long}/{speciesId}", (long playerId, string speciesId, RpgStore store) =>
         {
             if (!store.PlayerExists(playerId)) return Results.NotFound();
             if (!DemonSpeciesCatalog.IsKnown(speciesId))
                 return Results.BadRequest(new { reason = "species.unknown" });
             return Results.Ok(ProjectSpeciesState(store, playerId, speciesId));
-        });
-
-        g.MapPost("/species/allocate", (AllocateSpeciesAptitudesRequest body, RpgStore store, IHubContext<RpgHub> hub) =>
-        {
-            var pid = body.PlayerId ?? store.GetCurrentPlayerId();
-            if (!store.PlayerExists(pid)) return Results.NotFound();
-            if (string.IsNullOrWhiteSpace(body.SpeciesId) || !DemonSpeciesCatalog.IsKnown(body.SpeciesId))
-                return Results.BadRequest(new { reason = "species.unknown" });
-            if (body.Shares is null) return Results.BadRequest(new { reason = "shares.missing" });
-
-            AptitudeAllocation allocation;
-            try
-            {
-                allocation = body.Shares.Aggregate(AptitudeAllocation.Empty,
-                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.DemonType, kv.Key, kv.Value));
-            }
-            catch (ArgumentException ex)
-            {
-                return Results.BadRequest(new { reason = "aptitudes.unknownid", detail = ex.Message });
-            }
-
-            var demonTypeId = DemonSpeciesCatalog.Get(body.SpeciesId).DemonTypeId;
-            var level = store.GetRpgActor(pid, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
-            var source = PointBudget.DemonTypeSourceFromLevel(level);
-            var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
-            if (!check.WithinBudget)
-                return Results.Conflict(new { reason = "aptitudes.overbudget", spent = check.Spent, budget = check.Budget });
-
-            store.SaveAllocation(AllocationScope.DemonType, SpeciesAllocation.ScopeKey(pid, body.SpeciesId), allocation);
-
-            _ = BroadcastBestEffort(hub, pid);
-            return Results.Ok(ProjectSpeciesState(store, pid, body.SpeciesId));
         });
     }
 
@@ -181,13 +151,6 @@ public static class AptitudeEndpoints
     public sealed class AllocateAptitudesRequest
     {
         public long? PlayerId { get; set; }
-        public Dictionary<string, long>? Shares { get; set; }
-    }
-
-    public sealed class AllocateSpeciesAptitudesRequest
-    {
-        public long? PlayerId { get; set; }
-        public string? SpeciesId { get; set; }
         public Dictionary<string, long>? Shares { get; set; }
     }
 }

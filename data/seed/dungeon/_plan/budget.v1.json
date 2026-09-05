@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "version": 1,
+  "rows": [
+    {
+      "corpus": "dungeon-room", "cells": 53, "target": 190, "perCell": 3.6, "tolerance": { "under": 0, "over": 0.5 },
+      "firstShip": 106, "firstShipPerCell": 2,
+      "dimension": ["kind", "climate"],
+      "rationale": "3.6 per cell is the measured safe-zone density (Genshin/FGO); Fire Emblem Heroes' 12.6/cell is the failure reference (docs/research/game-design §1).",
+      "loop": "closed"
+    },
+    {
+      "corpus": "dungeon-domain", "cells": 24, "target": 60, "perCell": 2.5, "tolerance": { "under": 0, "over": 0.5 },
+      "firstShip": 6, "firstShipPerCell": 0.25,
+      "dimension": ["climate", "dangerBand"],
+      "rationale": "First ship is six many-domains at shallow, one per climate (map Assumption 4) -- full target follows once the world-generator can place once-entry domains.",
+      "loop": "closed"
+    },
+    {
+      "corpus": "dungeon-event", "cells": 48, "target": 170, "perCell": 3.5, "tolerance": { "under": 0, "over": 0.5 },
+      "firstShip": 60, "firstShipPerCell": 1.25,
+      "dimension": ["kind", "theme"],
+      "rationale": "48 cells = 6 event kinds x 8 planner-fixed theme subset (of 84).",
+      "loop": "closed"
+    },
+    {
+      "corpus": "dungeon-encounter", "cells": 9, "target": 81, "perCell": null, "tolerance": { "under": 0, "over": 1 },
+      "firstShip": 40, "firstShipPerCell": null,
+      "dimension": ["formation", "elementSpread"],
+      "rationale": "Density measured as distinct (postureMultiset, spread, formation) shapes reached, not raw entries per cell (ideal SS11.4) -- perCell is null by design.",
+      "loop": "closed"
+    },
+    {
+      "corpus": "dungeon-quest", "cells": 27, "target": 54, "perCell": 2, "tolerance": { "under": 0, "over": 0.5 },
+      "firstShip": 15, "firstShipPerCell": 0.55,
+      "dimension": ["objectiveTemplate", "scope"],
+      "rationale": "27 cells = 9 objective templates x 3 scopes.",
+      "loop": "closed"
+    },
+    {
+      "corpus": "dungeon-layout", "cells": 0, "target": 0, "perCell": 0, "tolerance": { "under": 0, "over": 0 },
+      "firstShip": 0, "firstShipPerCell": 0,
+      "dimension": [],
+      "rationale": "Model-free, planner-emitted directly from dungeon.v1.json bands -- no call, no budget row needed beyond this placeholder for the audit's actual-vs-declared pass.",
+      "loop": "open"
+    },
+    {
+      "corpus": "dungeon-supply-ext", "cells": 0, "target": 0, "perCell": 0, "tolerance": { "under": 0, "over": 0 },
+      "firstShip": 0, "firstShipPerCell": 0,
+      "dimension": [],
+      "rationale": "One extension record per override-tagged consumable that needs dungeon-only context -- sized by the consumable corpus, not a dungeon-owned cell grid.",
+      "loop": "open"
+    }
+  ]
+}

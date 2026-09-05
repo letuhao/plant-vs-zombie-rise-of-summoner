@@ -168,8 +168,9 @@ Each rule throws `InvalidOperationException` naming the rule and the id, as `Rul
 ### 4. Gates, keys, secrets, one-way
 
 A gate is a `gated` lane with `GateKeyId` set — the shape `MarchResolver.cs:58-60` refuses and `delve-scope`'s
-`LaneGate.Refusal` lifts (`spec-delve-scope.md:183-187`). The delve resolver (a later module) is the only
-writer that nulls `GateKeyId`; this module writes shut gates and never opens one. The key is an item
+`LaneGate.Refusal` lifts (`spec-delve-scope.md:183-187`). **`supplies-and-objects` owns the only writer that nulls `GateKeyId`** — its `open` verb on an `obstacle`,
+through `LaneGate`, consuming the key as a `pack.drop` (`spec-supplies-and-objects.md` §5, named here 2026-09-05
+so the opening verb has exactly one owner). This module writes shut gates and never opens one. The key is an item
 `dungeon-loot` mints into the key room's drop (it reads `keyForLaneId`); the key room sits above the gate on
 another route, so the first party at a gate has a choice, never a dead run. Secrets reuse the Gungeon
 numbers as tunables (ideal §11.1 C) and the Isaac placement rule (dead ends are a resource); `one-way` doors

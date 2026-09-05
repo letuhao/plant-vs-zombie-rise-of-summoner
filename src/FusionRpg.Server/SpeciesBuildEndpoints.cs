@@ -16,14 +16,11 @@ namespace FusionRpg.Server;
 /// (`PointBudget.CheckScope`) — a respec still cannot buy more points than the level allows, pricing
 /// is an ADDITIONAL friction, never a replacement for the anti-cheat budget cap.
 ///
-/// <para><b>⚠️ Known gap, named rather than silently left</b> — <c>AptitudeEndpoints.cs</c>'s own
-/// <c>/api/aptitudes/species/allocate</c> route (module 5, `demon-type-allocation`, predates this
-/// module) still writes a DemonType override directly via <c>store.SaveAllocation</c>, with no pricing
-/// awareness at all. It is untouched here (T4.3's own file list names only this file) because it
-/// already carries five committed tests with no correlationId/soul-cost shape, and nothing in the
-/// tree calls it from a real client yet (species-build's web surface is Phase 5, unbuilt). Retiring or
-/// re-routing that endpoint through this one is real follow-up work, not something this task's scope
-/// covers — recorded in species-build-todo.md's T4.3 evidence, not silently absorbed.</para>
+/// <para>The sibling bypass this module's own T4.3 evidence once named — <c>AptitudeEndpoints.cs</c>'s
+/// <c>POST /api/aptitudes/species/allocate</c> (module 5, `demon-type-allocation`), which wrote a
+/// DemonType override directly via <c>store.SaveAllocation</c> with zero pricing awareness — was
+/// RETIRED (owner decision, 2026-09-05: "retire it now"), not just documented. This endpoint is now the
+/// only write path for a species aptitude override; that route's GET twin still serves reads.</para>
 /// </summary>
 public static class SpeciesBuildEndpoints
 {

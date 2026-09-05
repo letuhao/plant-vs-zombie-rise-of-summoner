@@ -148,7 +148,7 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
 .meter .fill { display: block; height: 100%; background: var(--lawn-hot); border-radius: var(--r-pill);
        transition: width var(--dur-layer) var(--ease-out); }
 /* NO MEMBER IN THE LOCKED SET — deliberately kept, deliberately unused.
-   All five resources (hp/stamina/hunger/spirit/qi) are `asset`: full is good, hunger
+   All six resources (hp/stamina/hunger/spirit/qi/poise) are `asset`: full is good, hunger
    included (it is a fed/starving gauge, not a rising affliction). The class survives only
    so a future resource could declare `burden`, which would be an ADR — adding one changes
    what every generic operation on a resource means. Applying it to hunger was the bug this

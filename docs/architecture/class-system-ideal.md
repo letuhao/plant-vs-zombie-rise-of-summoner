@@ -580,10 +580,18 @@ Each posture holds **one pool it *is* and one pool it *spends*** — confirmed a
 > exactly right for a bastion, or it may be the reason BASTION needs a riposte that converts spent
 > `poise` into damage. **Undecided; §8.9.**
 
-**`poise` is blocked, not merely unbuilt.** `DerivedStatChannels.ResourceIds` is the locked five —
-`hp`, `stamina`, `hunger`, `spirit`, `qi` — so there is no `resource.max` channel for **poise**, and
-the config cannot author it. It needs the `decisions.md` **Resource model** amendment (five → six)
-this document has owed since it was written.
+> ### ✅ Resolved 2026-08-26 — this paragraph is the reasoning trail, not open work
+>
+> ~~**`poise` is blocked, not merely unbuilt.** `DerivedStatChannels.ResourceIds` is the locked five —
+> `hp`, `stamina`, `hunger`, `spirit`, `qi` — so there is no `resource.max` channel for **poise**, and
+> the config cannot author it. It needs the `decisions.md` **Resource model** amendment (five → six)
+> this document has owed since it was written.~~
+>
+> The amendment landed: `decisions.md` *Resource model* reads **six** as of 2026-08-26, `poise` is the
+> sixth id in `DerivedStatChannels.cs:521`, and `resource.max.poise`/`resource.regen.poise` each carry
+> twelve aptitude edges in `data/tuning/aptitudes.v5.json:2570-2762`. What remains is **not** this
+> blocker: `BattleStatComposer` seeds no `resource.*` channel for a battle actor, so the pools exist
+> and sit at zero — see [battle-tempo/spec-battle-resources.md](battle-tempo/spec-battle-resources.md).
 
 ### 5a.2 How general is a resource? As general as the actions it pays for
 

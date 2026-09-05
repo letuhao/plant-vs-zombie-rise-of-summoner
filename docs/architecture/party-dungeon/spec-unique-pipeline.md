@@ -1,6 +1,6 @@
 # Spec: unique-pipeline
 
-Status: **DRAFTED 2026-09-05 (wave 4) — unbuilt, not yet approved.** Written against shipped code the same day; every
+Status: **APPROVED by the owner 2026-09-05 (wave 4) — unbuilt.** Written against shipped code the same day; every
 `file:line` was opened this session; drift against the brief, map and earlier specs is reported in the checklist, never
 silently fixed. Every number is a starting shape, never a balance decision.
 

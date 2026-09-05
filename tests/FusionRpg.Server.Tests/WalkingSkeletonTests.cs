@@ -140,7 +140,7 @@ public class WalkingSkeletonTests : IDisposable
         var atomResult = _store.UpsertAtom(new AtomRow
         {
             AtomId = atomId, KindId = "stat.modify", FamilyId = "atom.walking-skeleton-vitality",
-            Tier = 1,
+            Tier = 1, Name = "Walking Skeleton Vitality",
             // Derived from the real basis/rung above, not an arbitrary number: a low-threat, tank-
             // leaning species gets a modest flat defensive bonus.
             ParamsJson = $$"""{"channel":"maxHp","op":"flat","amount":{{dump.Armor / 10}}}""",

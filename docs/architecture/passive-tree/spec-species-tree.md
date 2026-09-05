@@ -1,6 +1,7 @@
 # Spec: `species-tree`
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. Module of
+[passive-tree](../passive-tree-map.md). No build authorized.
 
 **Module id:** `species-tree` · **Wave:** 4 · **Depends on:** `tree-language`, `tree-binder`,
 `tree-review`
@@ -261,25 +262,32 @@ So U3 at `k` unique affixes per species costs **840 × k authored affixes**, on 
 generation. At k = 40 (every node bespoke at the affix level) that is 33,600 new affixes — more than
 340× the entire shipped affix library, and an authoring problem larger than this whole program.
 
-**Recommendation, and it is a recommendation because nobody has disputed it:** `speciesUniqueAffixMin`
-defaults to **4** — a small unique core at the deep tiers where a mechanism node actually rescues a
-focus build — with the other 36 nodes unique by U1 + U2 over the shared library. 840 × 4 = **3,360**
-authored affixes, which is the same order as one of the demon corpus's own reprompt passes. The number
-is a **tunable** in `data/tuning/passive-tree-targets.v1.json`, so a later decision to raise it is a
-file save and a regeneration of one lot, not a spec change.
+**Settled by D41: `speciesUniqueAffixMin = 8`, and it stays a tunable.** ~~4~~ was this spec's
+recommendation; the owner raised it, with the reason stated as *"a quarter of each species tree is
+provably its own."* The exact arithmetic, since a spec should print it rather than round it: **8 of
+40 nodes is a fifth of the tree**, and — because the marked nodes are always **mechanism** nodes
+(§5.3 rule 3) — it is **between a third and a half of the tree's mechanism nodes**, since an
+archetype carries 16 to 24 of those (`spec-tree-plan.md` §4: `gated-deep` 16, `broad-and-flat` 20,
+`late-crown` 24, both branches). Eight is reachable for every archetype with room to spare.
+
+**The bill, stated in the same terms as before:** 840 × 8 = **6,720** authored affixes against a
+shipped authored corpus of **two**, and against a shared library of 98 affix families. That is about
+**2.6× one of the demon corpus's own reprompt passes** (2,584 calls, ~106 min) — larger than the 4
+this spec proposed, and still an order of magnitude below the 33,600 that k = 40 would demand. The
+number is a **tunable** in `data/tuning/passive-tree-targets.v1.json`, so a later move is a file save
+and a regeneration of one lot, not a spec change.
 
 ⚠ **This does not reduce D30's node count and does not reduce the call budget.** All 40 nodes are
 authored per species — that is what §7's 100,800 calls buy. `speciesUniqueAffixMin` governs how many
 of them carry an *affix* nobody else can reach, which is a different question from how many are
 *written for this creature*.
 
-#### 5.3 Building U3 while the ruling is open
+#### 5.3 Building U3 — the value is settled, and the design still holds at any value
 
-**4 is a narrowing of D23's *"nodes no other tree has"*, and narrowing a locked decision is the
-owner's call** — so it stays open (open question 1). That is not a reason to leave the gate
-unspecified: **the ruling changes one integer and nothing else.** Not the schema, not the id grammar,
-not the review protocol, not the call budget. Build to this, and the owner's answer is a tuning edit
-plus one lot's regeneration.
+**The ruling landed: D41 sets `speciesUniqueAffixMin` to 8 and keeps it tunable.** The property this
+section was written for is unchanged and is now what makes a *future* move cheap: **the value changes
+one integer and nothing else.** Not the schema, not the id grammar, not the review protocol, not the
+call budget. The five rules below are what buy that.
 
 1. **The threshold is a tunable, read every run.** `speciesUniqueAffixMin`, an integer in
    `data/tuning/passive-tree-targets.v1.json`. `PassiveTree/SpeciesUniqueness` reads it and never
@@ -295,6 +303,20 @@ plus one lot's regeneration.
    actually rescues a focused build. **Deterministic and bottom-anchored is what makes a later
    increase cheap:** raising the number adds marks at the shallow end and never moves, renames or
    re-owns a node that already has one, so a re-review costs `O(diff)` and not a corpus.
+
+   > **D41 confirmed this and relies on it.** The selection rule is *"deepest mechanism first"*, and
+   > it is a **prefix** of a total order that does not depend on `k` — so the set at `k = 8` strictly
+   > contains the set at `k = 4`, and a set at `k = 12` would strictly contain the set at 8. Raising
+   > the number never re-owns an existing node, so a future change is an `O(diff)` re-review of the
+   > newly-marked shallow end plus its authored affixes, and nothing else. That property is asserted
+   > by `raising_species_unique_affix_min_never_unmarks_a_marked_node`, and it is the reason the
+   > owner could raise the value at spec time without buying a migration.
+   >
+   > It holds for every shipped archetype at 8: the smallest mechanism pool is `gated-deep`'s 16
+   > (`spec-tree-plan.md` §4), so the prefix is well-defined with eight nodes to spare. A value above
+   > **16** would make the mark set archetype-dependent — `gated-deep` would run out of mechanism
+   > nodes while `late-crown` still had eight — and that is the first value where this rule would
+   > need re-deriving rather than re-reading.
 4. **The namespace is `affix.species.<speciesId>.*`, and its ids are minted once and read back on
    regeneration** — the same rule `tree-catalog` applies to `nodeKey`. Recomputing an affix id from a
    node's position would make every archetype change a full re-authoring.
@@ -302,8 +324,9 @@ plus one lot's regeneration.
    calibrates**, per §5.1's shipped posture: promote one gate at a time, and only after a real run has
    been measured against it.
 
-**What the ruling would change, exhaustively:** the integer, and therefore the authored-affix bill
-(840 × `k`). Nothing above depends on its value.
+**What the ruling changed, exhaustively:** the integer, 4 → **8**, and therefore the authored-affix
+bill, 3,360 → **6,720** (840 × `k`). Nothing above depends on its value, which is why the change cost
+one edit in two places rather than a redesign.
 
 ### 6. The Codex summary sentence
 
@@ -433,11 +456,16 @@ Named here so they are raised at task start rather than discovered mid-run.
 
 #### 8.1 The gate quantity — this module is not in the ideal's §13.4 position
 
-The ideal's §13.4 finding is real and it is alarming at a glance: **27 of the 39 generic trees have no
-gate quantity in code**, so 1,080 of the 1,560 generic nodes would ship authored, reviewed, committed
-and permanently at tier 0. Verified again this session: `element_mastery` exists only in comments
-(`PointBudget.cs:13,15`, `AptitudeTuning.cs:20`, which says outright that its source *"does not exist
-yet"*), and `status_applied` has **zero hits in `src/`**.
+The ideal's §13.4 finding is real: **27 of the 39 generic trees have no gate quantity in code today**,
+so 1,080 of the 1,560 generic nodes would ship authored, reviewed, committed and at tier 0 if they
+were generated ahead of their counters. Verified again this session: `element_mastery` exists only in
+comments (`PointBudget.cs:13,15`, `AptitudeTuning.cs:20`, which says outright that its source *"does
+not exist yet"*), and `status_applied` has **zero hits in `src/`**.
+
+**D37 (2026-09-05) bounds that finding:** both quantities are built by **`gate-counters`, a wave-0
+module of this program** — counters, persistence and the `PointBudget` binding — so the generic
+corpus's wait is a schedule, not a permanent hole, and all 39 generic trees are reachable. The
+sequencing rule is unchanged: content still waits for its gate.
 
 **A reader who has just read that number will ask whether the 840 species trees are in the same
 position. They are not, and the difference is worth stating precisely rather than asserting.**
@@ -450,8 +478,11 @@ position. They are not, and the difference is worth stating precisely rather tha
 
 **The position, stated plainly: this is a wiring gap, and it is a different kind of thing from
 §13.4's two.** `element_mastery` and `status_applied` have no quantity anywhere — nothing counts them,
-nothing stores them, and no amount of wiring produces one; somebody has to design a counter first.
-Specimen level is counted, stored and levelled in production today. What is missing is the binding
+nothing stores them, and no amount of wiring produces one; **a counter has to be designed and built
+first, which is exactly what D37 commissioned `gate-counters` to do.** Specimen level is counted,
+stored and levelled in production today, so this module's gap is one step shorter: the two are now
+both owned and scheduled, and they remain different *kinds* of work — a counter to build there, a
+binding to write here. What is missing here is the binding
 from that index to an aptitude budget, and its twin already ships: `SpeciesAllocation.cs:35,62` does
 exactly this for `DemonType`, including the index transform (`PointBudget.DemonTypeSourceFromLevel`,
 `PointBudget.cs:40`) that a `UniqueDemon` source would mirror — *"species level is an index, so it is
@@ -462,13 +493,14 @@ Two consequences follow, and they point in opposite directions, so both are stat
 
 1. **Generating the species corpus early does not strand it** the way generating the elemental and
    status corpora early would. When the binding lands, 33,600 nodes become reachable; they are not
-   waiting on a quantity nobody has designed.
+   waiting on a counter that has to be designed and built (`gate-counters`' work, D37) — only on a
+   binding whose twin already ships.
 2. **The binding should still land before the census.** A reviewer judging 840 tree cards against a
    ladder that reads zero everywhere is judging the writing and not the tree. That is `tree-state`'s
    work, it is small, and it belongs in the build order ahead of §7.2's 33-hour pass.
 
 Whether specimen level is a *sufficient* gate for D26's ladder is a separate question and still
-`tree-state`'s call — open question 2, unchanged by any of the above.
+`tree-state`'s call — the one open question this spec still carries, unchanged by any of the above.
 
 ---
 
@@ -601,8 +633,8 @@ fields; read the roster from `_index.json` and walk every file without the `_` s
 `codexSummary` per species; vote exactly one field and say which; check the emitted distribution
 against a declared target, symmetric; resume rather than restart; refuse with the rule named.
 
-**Ask first:** raising `speciesUniqueAffixMin` above 4 (it multiplies the affix-authoring cost by
-840 per unit, and the value is the owner's ruling — §5.3 builds to any of them); adding a second
+**Ask first:** moving `speciesUniqueAffixMin` off **8** (D41's value; each unit costs 840 authored
+affixes, and above 16 the mark set stops being archetype-independent — §5.3 rule 3); adding a second
 voted field (it moves the call budget by roughly a third of the run); adding a quota axis; shipping a
 lot whose census is incomplete; adding family trees to the roster before a closed family taxonomy
 exists.
@@ -624,7 +656,9 @@ chooser; leave an entry parked in a `_`-prefixed file.
 - [ ] The emitted `mechanicalFavour` distribution is inside D32's band on every axis, proven by
       `FavourDrift` against a declared target and re-derived independently.
 - [ ] `unresolved` favour is below 50‰, and every unresolved species is named in the review queue.
-- [ ] U1, U2 and U3 are all green, with `speciesUniqueAffixMin` read from tuning.
+- [ ] U1, U2 and U3 are all green, with `speciesUniqueAffixMin` read from tuning and shipping at
+      **8** (D41) — 8 of every tree's 40 nodes carry an affix in that species' own namespace, and no
+      other tree references one.
 - [ ] Every species carries exactly one `codexSummary`, ≤ 140 chars, with no number in it.
 - [ ] No response schema contains a numeric field — proven at `Pipeline.__post_init__`, before a call.
 - [ ] The plan regenerates byte-identically from an unchanged roster; so does the concrete catalog
@@ -636,16 +670,12 @@ chooser; leave an entry parked in a `_`-prefixed file.
 
 ## Open questions
 
-Three. Everything else in this document is a recommendation nobody has disputed, which makes it a
-decision, or an answerable question, which makes it a task.
+**One.** Everything else in this document is a recommendation nobody has disputed, which makes it a
+decision, or an answerable question, which makes it a task. Two of the three questions this spec
+carried were answered by the owner on 2026-09-05 and are recorded below with their answers, because a
+closed question that vanishes gets re-asked.
 
-1. **How many of a species tree's 40 nodes must carry a species-namespace affix (`speciesUniqueAffixMin`)?**
-   §5.2 recommends 4 and shows the cost curve: `k` costs 840 × `k` authored affixes against a shipped
-   authored corpus of **two**. At 40 it is 33,600 affixes and the module does not ship. It is a
-   tunable, so a later change is a file save — but the first run bakes a corpus, and the honest place
-   to decide is before it. **§5.3 specifies U3 well enough to build at any value**, so this question
-   blocks the first *lot*, never the module.
-2. **Does a species tree gate on `UniqueDemon` specimen level, and does that satisfy D26's ladder?**
+1. **Does a species tree gate on `UniqueDemon` specimen level, and does that satisfy D26's ladder?**
    `AllocationScope.UniqueDemon` ships (`AptitudeAllocation.cs:8`), and **counted this session it has
    exactly three references in `src/`** — the tuning table's own row (`AptitudeTuning.cs:204`) and the
    store's scope-key round-trip (`RpgStore.Aptitudes.cs:58,67`). **No production code ever saves or
@@ -660,12 +690,25 @@ decision, or an answerable question, which makes it a task.
    before its tier ladder means anything. **§8.1 separates the two halves of this**: the gate
    *quantity* exists and is live, so the species corpus is not in the ideal's §13.4 position; only the
    binding from specimen level to an aptitude budget is unwritten, and that is a wiring gap.
-3. **Is `nullification` reachable at all for a species tree?** The generic schema removes it — it is
-   the only exclusion form that names a node, and a generated corpus cannot maintain one. A species
-   tree is the most plausible place a genuine nullification would arise (a bloodline that *refuses* a
-   mechanic is good content). Recommendation: keep it out of the generated schema and reachable only
-   through the hand-authored `allow`/`deny` escape hatch the eligibility rule already has. **Needs an
-   owner ruling, because it narrows D14's locked ladder.**
+
+### Closed by the owner, 2026-09-05
+
+- ~~**How many of a species tree's 40 nodes must carry a species-namespace affix?**~~
+  **Closed by D41: `speciesUniqueAffixMin = 8`, and it stays a tunable.** §5.2 carries the arithmetic
+  — 6,720 authored affixes, a fifth of every tree, a third to a half of its mechanism nodes — and
+  §5.3 rule 3 carries the property that makes a future move an `O(diff)` re-review rather than a
+  migration. Nothing else in this module changed.
+- ~~**Is `nullification` reachable at all for a species tree?**~~ **Closed by D40: yes.** All three
+  exclusion forms are kept, so the generator is never forced to refuse a pair it can neither reroute
+  nor order, and a bloodline that *refuses* a mechanic is authorable content rather than an escape
+  hatch. The *"reads like a bug"* risk is answered by **presentation, not removal**: both sides print
+  the rule and name the same winner, and the player surface renders the node **inert rather than
+  un-unlocked** (`spec-tree-surface.md` §8). The target stays ~2% of nodes,
+  [`tree-review`](spec-tree-review.md) censuses every exclusion and **enforces** that presentation —
+  it is no longer demoted to a warning. This module's consequence is small and concrete: the
+  `exclusionForm` axis is a real three-way choice for a species tree, and an authored nullification
+  goes through the census like any other exclusion rather than through the hand-authored
+  `allow`/`deny` override this spec previously recommended.
 
 ## Decisions implemented
 
@@ -687,7 +730,10 @@ decision, or an answerable question, which makes it a task.
 | §7.3 — the roster ships whole; families wait for a closed taxonomy | **D27**, **D9** |
 | §8 — no budget for conversion nodes until a 17th atom kind lands | **D16** |
 | §8 — property-keyed exclusion, keyed on properties the plan named | **D14** |
-| Open question 2 — the status axis of the favour triple is content, not a gate | **D35** (replacing D19/D31) |
+| The open question above — the status axis of the favour triple is content, not a gate | **D35** (replacing D19/D31) |
+| §8.1 — the generic corpus's two missing gate quantities are owned and scheduled, and this module's own gap is a binding rather than a missing counter | **D37** |
+| §5, §5.2, §5.3 — `speciesUniqueAffixMin` ships at 8, tunable, marked deepest-mechanism-first so a later move stays `O(diff)` | **D41** |
+| §5, the closed question above — all three exclusion forms are reachable for a species tree; nullification is printed loudly and censused, never removed | **D40** (which keeps **D14**'s ladder whole) |
 
 **Belongs to a sibling module, not here:** D1–D8, D11, D12, D18, D25, D26, D28, D33, D34, D36 —
 `tree-plan` (the ladder and the archetypes), `tree-catalog` (the record and id stability), `tree-state`

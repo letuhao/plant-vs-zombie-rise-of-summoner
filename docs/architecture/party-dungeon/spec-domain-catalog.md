@@ -1,6 +1,7 @@
 # Spec: domain-catalog
 
-Status: **DRAFTED 2026-09-05 (wave 4) — written against shipped code and the twelve approved specs; unbuilt.** Every
+Status: **APPROVED by the owner 2026-09-05 (wave 4) — written against shipped code and the twelve approved specs;
+unbuilt.** Every
 `file:line` below was opened this session; drift is reported in §Drift. Every number is a starting shape.
 
 Module id `domain-catalog`, row 15 of the [party-dungeon map](../party-dungeon-map.md) (wave 4). Depends on
@@ -138,7 +139,10 @@ gains `staleDomains: n` beside `ContentSource`/`ContentImportError` (`RpgStore.C
 ```text
 DomainOfferDto { domainId, name, flavor, climate, entranceLabel, entryKey: "standing" | "single-descent", sealed,
                  resume?: { delveId }, rungs: [{ rungId, label, bandName, oathOffered, permadeath }],
-                 tailSteps: [{ n, label, bandName }], raidModes: [id], bossName, cleared: [rungId] }
+                 tailSteps: [{ n, label, bandName }], raidModes: [id], bossName, cleared: [rungId],
+                 provisionable: [{ containerId, label, price, cells }] }   // added by spec-delve-stage.md §18 ask 6
+                                                                          // (2026-09-05) so the picker's provisioning
+                                                                          // step prices nothing itself
 ```
 
 `once`/`many`, `Θ`, `bandDelta`, `dangerBand`, `PartyIndex` never appear as values; the stage's `BANNED_WORDS` lint

@@ -35,7 +35,7 @@ thirteen-lane enrichment round left unowned.
 | The action layer — envelopes, targeting, usability conditions, action costs. **I declare a seam and stop** | **action program** ([action-map.md](../action-map.md)) |
 | Bags, stacking, stack caps, salvage safety, the item event log | **I13** ([ssot-inventory.md](ssot-inventory.md)) |
 | Recipe pricing, the cost vocabulary, salvage yield. **I say what a consumable *is*; I9 prices it** | **I9** ([ssot-materials-crafting.md](ssot-materials-crafting.md)) |
-| The five locked actor resources (`hp` · `stamina` · `hunger` · `spirit` · `qi`). **I refill them; I do not redesign them** | Resource model, locked ([decisions.md](../decisions.md) row *Resource model (2026-08-22)*) |
+| The **six** locked actor resources (`hp` · `stamina` · `hunger` · `spirit` · `qi` · `poise`). **I refill them; I do not redesign them** | Resource model, locked ([decisions.md](../decisions.md) row *Resource model (2026-08-22, **six** 2026-08-26)*) |
 | The category taxonomy and the `item_category` row for `consumable` | **I3** ([ssot-item-categories.md](ssot-item-categories.md)) |
 | Equip slots and roles, including `girdle` | **I2** ([ssot-equip-slots.md](ssot-equip-slots.md)) |
 | The rarity ladder. **Consumables never enter it** — §4.6 | **I1** |

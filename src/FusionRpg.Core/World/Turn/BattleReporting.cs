@@ -49,8 +49,16 @@ public static class BattleReporting
         // battle must not put a lane id in the sector slot, which is exactly the class of bug
         // world-stage W13 exists to fix elsewhere in `MovementPhase.cs`; this line does not
         // reintroduce it for the one battle kind that can carry a lane id here.
-        report.Add(phase, TurnReportKinds.Battle, request.BattleId,
-            $"{request.Kind}:{request.LocationId}:{outcome.WinnerEntityId ?? "none"}",
+        //
+        // base-defense `siege-engagement` (module 20): a district assault names its own exit instead
+        // of the generic winner-only line — "one report line per engagement, exit named" — scoped to
+        // District only so every other kind's report text is byte-for-byte unchanged. Report text is
+        // never part of `StateHasher.Hash` (confirmed via `TurnEngine.Step`'s own return line), so this
+        // is golden-safe regardless, but the District-only guard keeps the change minimal anyway.
+        var detail = request.Kind == BattleKinds.District && outcome.Exit is { } exit
+            ? $"district:{request.LocationId}:{exit}"
+            : $"{request.Kind}:{request.LocationId}:{outcome.WinnerEntityId ?? "none"}";
+        report.Add(phase, TurnReportKinds.Battle, request.BattleId, detail,
             sectorId: request.Kind == BattleKinds.Lane ? null : request.LocationId);
 
         return next;

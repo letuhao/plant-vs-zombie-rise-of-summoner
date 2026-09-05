@@ -68,6 +68,12 @@ internal static class ContractTuningTestBootstrap
         ProgressionTuningHub.Configure(DefaultProgression);
         SpeciesProgressionTuningHub.Configure(DefaultSpeciesProgression);
         BattleTuningHub.Configure(DefaultBattle);
+        // battle-tempo battle-resources (2026-09-05): every battle actor held all six resource pools
+        // at max 0 until this landed, because BattleStatComposer seeded no resource.* channel. Same
+        // bootstrap shape (and same "one more Configure every harness must remember") as
+        // ActionTimingPolicy below -- values transcribed from the real, shipped
+        // data/tuning/battle-resources.v1.json, not invented.
+        FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(DefaultBattleResources);
         // base-defense siege-board (2026-09-05): values transcribed from the real, shipped
         // data/tuning/siege.v1.json, matching this file's own stated convention.
         SiegeTuningPolicy.Configure(DefaultSiege);
@@ -408,7 +414,13 @@ internal static class ContractTuningTestBootstrap
             RefineRubblePerIronwork: 4, RefineYieldMilli: 600, RefinePerTurnCap: -1),
         Economy: new EconomyTuning(
             NodeYieldPerRoundLoam: 5, NodeYieldPerRoundIronwork: 3,
-            DepotSeedMilli: 1000, CaptureRecoveryMilli: 1000));
+            DepotSeedMilli: 1000, CaptureRecoveryMilli: 1000),
+        Ai: new FusionRpg.Core.Battle.Siege.AiTuning(
+            WeightHitChance: 70, WeightObjective: 50, WeightKill: 15, WeightLowHp: 10,
+            WeightCannotCounter: 10, WeightRound: 1, WeightRisk: 120,
+            StanceDefault: FusionRpg.Core.Battle.Siege.Stance.Guard,
+            AutoResolveHandicapMilli: 1000, RetargetLatencyTicks: 0, AggressionRange: 2,
+            MaxCandidatesScored: 32));
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,
@@ -446,6 +458,19 @@ internal static class ContractTuningTestBootstrap
         // battle-tempo tempo-content (2026-09-05): matches data/tuning/battle.v3.json's shipped
         // speciesTempo.referenceIntervalMs exactly (1500ms = the shipped "steady" attack tempo).
         SpeciesTempoReferenceIntervalMs: 1500);
+
+    /// <summary>Transcribed from the shipped data/tuning/battle-resources.v1.json. `hp` is absent on
+    /// purpose -- its max mirrors BattleActorSetup.MaxHp (spec-battle-resources.md S2.6).</summary>
+    public static readonly FusionRpg.Core.Battle.BattleResourceTuning DefaultBattleResources = new(
+        SchemaVersion: 1, Version: 1,
+        PoolShareMilli: new Dictionary<string, int>(StringComparer.Ordinal)
+        {
+            ["stamina"] = 500,
+            ["hunger"] = 500,
+            ["spirit"] = 500,
+            ["qi"] = 500,
+            ["poise"] = 500,
+        });
 
     public static readonly FusionRpg.Core.Actions.ActionTimingTuning DefaultActionTiming = new(
         WindupPerPowerMilli: 20,

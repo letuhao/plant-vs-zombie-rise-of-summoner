@@ -38,12 +38,14 @@ from typing import Callable, Mapping, Sequence
 from ....pipeline.llm_caller import LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
 from ...demons.anchor.permute import order_for
-from ...demons.anchor.vote import VoteRecord, VoteResult, disagreement_rate, resolve_vote
+from ...demons.anchor.vote import (SetVoteResult, VoteRecord, VoteResult, disagreement_rate,
+                                   resolve_set_vote, resolve_vote)
 from .gates import BriefContext, run_g1, run_g2, run_g3
 from .schemas import SCHEMAS_BY_PIPELINE, VOTED_FIELDS_BY_PIPELINE
 
 __all__ = [
     "canonical_set_key", "VoteSample", "verify_permutation", "resolve_vote_field",
+    "resolve_set_vote_field",
     "build_verify_fn", "default_for_none", "build_heal_user", "run_self_heal",
     "CandidateVerdict", "validate_candidate", "validate_round", "RoundReport",
     "build_envelope", "canonical_dump", "candidate_set_hash",
@@ -103,6 +105,28 @@ def resolve_vote_field(brief_id: str, field_name: str, options: Sequence[str],
     for s in samples:
         verify_permutation(brief_id, field_name, options, s)
     return resolve_vote([s.chosen_value for s in samples])
+
+
+def resolve_set_vote_field(brief_id: str, field_name: str, options: Sequence[str],
+                           samples: Sequence[VoteSample]) -> SetVoteResult:
+    """The SET-valued twin of `resolve_vote_field`, for `atomFamilies` (added 2026-09-05).
+
+    Same permutation verification, same "three samples exactly" rule — only the aggregation
+    differs, and it has to. `chosen_value` here is a `canonical_set_key`, i.e. a whole SET flattened
+    to one `|`-joined string, so voting it with the scalar `resolve_vote` scored `{a,b}`/`{a,c}`/
+    `{a,d}` as a 1-1-1 split and discarded a unanimous 3/3 agreement on `a`. That is the identical
+    defect measured and fixed on the three propose stages the same day, where it was holding the
+    real unresolved rate at 40-55%; A-S4 votes the same field the same wrong way, so it gets the
+    same correction rather than being left as a known-bad path behind a passing gate.
+
+    An empty `chosen_value` means the sample produced no usable pick; it is passed as `None` and
+    still counts against the majority threshold, exactly as on the propose side."""
+    if len(samples) != 3:
+        raise ValueError(f"{brief_id}/{field_name}: expected exactly 3 vote samples, got {len(samples)}")
+    for s in samples:
+        verify_permutation(brief_id, field_name, options, s)
+    picks = [(s.chosen_value.split("|") if s.chosen_value else None) for s in samples]
+    return resolve_set_vote(picks)
 
 
 # ---------------------------------------------------------------------------------------------
@@ -291,7 +315,11 @@ def validate_candidate(*, candidate_id: str, brief_id: str, pipeline_id: str, sc
         options = vote_options.get(field_name)
         if samples is None or options is None:
             continue                       # no sample supplied -- gate defects alone decide
-        result = resolve_vote_field(brief_id, field_name, options, samples)
+        # `atomFamilies` is set-valued -> per-member majority; every other voted field is a
+        # genuine scalar and keeps the unchanged scalar path.
+        result = (resolve_set_vote_field(brief_id, field_name, options, samples)
+                  if field_name == "atomFamilies"
+                  else resolve_vote_field(brief_id, field_name, options, samples))
         vote_results[field_name] = result
         if result.confidence == "unresolved":
             gate_defects[field_name] = "1-1-1 vote -- unresolved, value is None"

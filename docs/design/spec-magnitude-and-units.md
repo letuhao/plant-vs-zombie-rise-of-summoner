@@ -435,3 +435,11 @@ Six Class-B defects from the audit close here. Applied in the same commit as thi
     web/spec.md:177 are corrected by it and are edited in the same pass. ValueSpec.cs:24-26 is
     the atom program's file and is FLAGGED, not edited.
 ```
+
+## Filed by the party-dungeon program (2026-09-05)
+
+| Ask | Filed by | Shape | Until it lands |
+|---|---|---|---|
+| `Magnitude.exact?: string` | `party-dungeon/spec-delve-stage.md` §6, §13 | an **optional** field carrying the exact decimal for a `long` figure past `Number.MAX_SAFE_INTEGER`, which the power ladder reaches in normal play; `formatMagnitude` prefers it, rendering through `Intl.NumberFormat` on a `BigInt`, and falls back to `number`. Additive, so free under the extension rule (`game-gui-map.md:135-142`) — no `CONTRACT_VERSION` bump and no ADR | a soul balance or a price above 2^53 renders with silently wrong low digits |
+| A `UnitClass` member for a resource **stock**, if `count` reads wrong | `spec-delve-stage.md` §6, §18 ask 9 | souls, pool current/max and prices render as `count` (unsigned whole numbers) rather than `gameUnits`, which always signs. Raised only because the reading is a judgement, not a defect | `count`, as that spec's §6 table specifies |
+

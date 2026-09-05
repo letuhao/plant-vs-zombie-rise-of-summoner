@@ -344,8 +344,10 @@ the Data suite. 3. Map FE boots onto the map with a delve present. 4. `guard-dal
 - **`loot-pack`, `event-deck`, `wild-room`** read and update per-party `route`/`pity`/`haul` in
   `parties_json` and `rpg_delve_rooms.floor_json` through `RpgStore.Delve.cs` only; **`delve-battle-profile`**
   appends to `decisions_json` beside T10's trace; **`domain-catalog`** reads `rpg_delves(player_id,
-  domain_id, state)` for sealing and discovery; **`delve-stage`** reads one Server-assembled projection:
-  `LoadWorldState` + the two delve tables + `Visibility.SeenBy` + `DelveSight.ForParty`.
+  domain_id, state)` for sealing and discovery; **`delve-stage`** reads one Server-assembled projection
+  through a single named member — `DelveProjection.For(delveId, playerId)` (added by `spec-delve-stage.md` §18 ask 1,
+  2026-09-05), composed of `LoadWorldState` + the two delve tables + `Visibility.SeenBy` + `DelveSight.ForParty` and
+  nothing else. One member so the client has one query key and no second source.
 - **`world-map-program.md` row owed** (drafted; the world program appends it): *"`delve-scope` — jointly
   owned with the party-dungeon program: `rpg_worlds.kind`/`parent_world_id`, the `Validate(world, profile)`
   overload, the `GetActiveWorld` `kind='map'` filter, the `world.not-a-map` refusals, `LaneGate`. Depends on

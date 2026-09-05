@@ -85,6 +85,30 @@ public static partial class BattleEngine
             var machine = machines[attacker.Setup.Key];
             if (!attacker.Active) return false;
             if (machine.State != Timeline.TurnState.Charging) return false;
+
+            // ⛔ SLOT AVAILABILITY IS CHECKED BEFORE THE ECONOMY GATE. This ordering is the fix for a
+            // real starvation defect, measured 2026-09-05 while sweeping `classic-round` for `LAND1`:
+            //
+            // The economy gate below SPENDS the actor's action for the turn, and the no-slot branch
+            // further down deliberately does not refund it. At `W = 4` (hybrid-atb) there are usually
+            // enough slots that everyone commits on the first pass, so it almost never bit. At
+            // `W = 1` (classic-round) it bit every round: actor A takes the only slot, actor B spends
+            // its whole turn's economy, fails to commit, returns to Charging -- and when the slot
+            // frees, `economy.TryAcquire` now refuses because B already spent this turn. B starves.
+            //
+            // Symptoms that traced back here, all three fixed by this one line: a battle that should
+            // end `Victory` ended `Stalemate` (starved actors deal no damage, so the chip floor never
+            // got the chance to prevent a zero-damage stall), an actor never reached
+            // `Ready->Committed` and bounced `Ready->Charging`, and the crit RNG stream stopped
+            // advancing on every swing (there were fewer swings).
+            //
+            // The old comment justified spending unconditionally by pointing at the atomic path doing
+            // the same. That justification does not hold: the atomic path has NO slot contention --
+            // `RunBasicAttackStep` always proceeds once the economy is taken -- so it never reaches
+            // the "paid but could not commit" state this path can. Checking first costs nothing and
+            // keeps a slot-starved actor's turn intact so it can contend again when a slot frees.
+            if (!slots.HasFreeSlot(attacker.Setup.Side)) return false;
+
             // B38's own discipline, unchanged: the economy gate comes before any resource is taken.
             if (!economy.TryAcquire(economyKey(attacker), 1, localClock.Now)) return false;
 

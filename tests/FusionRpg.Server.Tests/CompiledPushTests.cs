@@ -58,7 +58,7 @@ public class CompiledPushTests : IDisposable
             {
                 AtomId = AtomRow.DeriveId(family, "", 1),
                 KindId = kind, FamilyId = family, Variant = "", Tier = 1,
-                ParamsJson = paramsJson, WhenJson = whenJson,
+                Name = family, ParamsJson = paramsJson, WhenJson = whenJson,
             });
             // The reason, not just the id: a seed rejected for an unrelated schema change should
             // say so rather than fail every test in the class with a bare family name.

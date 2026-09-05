@@ -54,6 +54,24 @@ const BANNED_WORDS = [
 
 const BANNED_WORD_PATTERN = new RegExp(`\\b(${BANNED_WORDS.map((w) => w.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|")})\\b`);
 
+// GG-23's other half: engine SYMBOLS. `\b` is a word-character boundary and neither the power
+// index's letter nor the per-mille sign is a word character, so putting either in BANNED_WORDS
+// above is a silent no-op — the guard reports green over a page that shows them. They need their
+// own list, matched with no boundaries at all.
+//
+// The copy-vs-code narrowing BANNED_WORDS needs (string literals and JSX text only) is deliberately
+// NOT applied here, and the asymmetry is the point: `typeId` is a legitimate identifier, so the word
+// list has to tell copy from code. These symbols are legitimate in neither — nothing in this tree
+// names an identifier with them, and a per-mille value is `perMilleRatio` on the wire and a `%` on
+// screen. So ANY occurrence outside a comment is a violation. That also closes the case both
+// scanners miss: JSX text on its own line, with no tag beside it to bound it.
+const BANNED_SYMBOLS = [
+  "\u0398", // the power index — `ladderIndex` on the wire, a name on screen, never this letter
+  "\u2030"  // per-mille — rendered as a percentage by formatPerMille; the raw sign is engine vocabulary
+];
+
+const BANNED_SYMBOL_PATTERN = new RegExp(`(${BANNED_SYMBOLS.join("|")})`);
+
 // A banned word only counts when it could plausibly be rendered as text: inside a quoted string
 // literal or JSX text content. A code identifier (`actor.typeId`, `const ptr = ...`, `type: string`)
 // is fine — GG-23 forbids the *word appearing as copy*, not the field existing.
@@ -101,6 +119,13 @@ export function scanForBannedVocabulary(srcDir: string): GuardViolation[] {
       if (line.includes("data-testid") || line.includes("data-test-id")) return;
       if (/^\s*import\s/.test(line) || /\bfrom\s+["']/.test(line)) return;
       if (GENERIC_TYPE_ARGS_PATTERN.test(line)) return;
+
+      // Engine symbols are checked against the whole line, for the reason given at BANNED_SYMBOLS:
+      // never legitimate in source, so no copy-vs-code narrowing applies.
+      if (BANNED_SYMBOL_PATTERN.test(line)) {
+        violations.push({ file: relPath, line: index + 1, text: line.trim() });
+        return;
+      }
 
       // JSX text content: strip tags, check what's left between them.
       const jsxTextSegments = line.match(/>[^<>{]*</g) ?? [];

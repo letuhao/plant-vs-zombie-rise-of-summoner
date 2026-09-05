@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { LegionView } from "@/contract/types";
-import { toRequests, type PendingOrder } from "@/features/world/worldSelection";
+import { toRequests, type PendingOrder } from "@/stages/world/worldSelection";
 import { useCommitWorldTurn, useSubmitWorldCommands } from "@/lib/bus/world";
 import { unresolvedLegions } from "./unresolvedLegions";
 import { FORCE_END_KEYBOARD_BLOCKED_REASON } from "./forceEnd";

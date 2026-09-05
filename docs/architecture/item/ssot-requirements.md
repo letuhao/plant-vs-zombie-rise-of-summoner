@@ -31,7 +31,7 @@
 | Thing | Lane |
 |---|---|
 | Equip slots, roles, and how many exist per frame | **I2** |
-| The five actor resources — **LOCKED**, see [decisions.md](../decisions.md) "Resource model (2026-08-22)" | resource hub; not an item lane at all |
+| The six actor resources — **LOCKED**, see [decisions.md](../decisions.md) "Resource model (2026-08-22, **six** 2026-08-26)" | resource hub; not an item lane at all |
 | Base types, implicits, and which frame a base type declares | **I3** |
 | The rarity ladder and its ordinals | **I1** |
 | Rolled affixes and tier bands, including any `+attribute` affix | **I8** |
@@ -253,7 +253,7 @@ at all.
 
 ## 3. Attributes are not resources — the line, held explicitly
 
-Before proposing anything, the constraint. **Five actor resources are LOCKED** — `hp` · `stamina` ·
+Before proposing anything, the constraint. **Six actor resources are LOCKED** — `hp` · `stamina` ·
 `hunger` · `spirit` · `qi`, one shared set, faction differences are display labels only, magnitudes are
 Actor-Hub derived channels `resource.max.{id}` / `resource.regen.{id}`, current values are lazy per-actor
 runtime state ([decisions.md](../decisions.md), Resource model row). Nothing below redesigns any of it.

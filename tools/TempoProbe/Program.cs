@@ -17,6 +17,11 @@ string Load(string rel) => File.ReadAllText(Path.Combine(dir.FullName, "data", "
 
 DerivedStatPolicy.Configure(DerivedStatTuningLoader.Parse(Load("derived-stats.v2.json")));
 BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v4.json")));
+// battle-tempo battle-resources (2026-09-05): the pool-share projection BattleStatComposer's own
+// resource seeding reads. Its own file rather than a battle.v{n}.json section because publish.py's
+// `set` path refuses to invent keys (spec-battle-resources.md S2.2a) -- and its own Configure, which
+// every host must remember, exactly like ActionTimingPolicy already needs.
+BattleRuleset.ConfigureResources(BattleResourceTuningLoader.Parse(Load("battle-resources.v1.json")));
 
 var failures = 0;
 void Check(string name, bool condition)

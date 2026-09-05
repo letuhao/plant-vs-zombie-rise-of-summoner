@@ -1,4 +1,30 @@
+using FusionRpg.Core.Delve;
+
 namespace FusionRpg.Core.World;
+
+/// <summary>
+/// Which rules apply and which catalogs answer rules 1 and 6 (party-dungeon delve-scope,
+/// 2026-09-05). <see cref="Map"/> is today's behaviour exactly — every lookup is the same
+/// <see cref="SectorTypeCatalog"/>/<see cref="LaneTypeCatalog"/> call <see cref="WorldValidation"/>
+/// always made. <see cref="Delve"/> swaps in a room/door catalog pair
+/// (<see cref="RoomTypeCatalog"/>/<see cref="DoorTypeCatalog"/>, not served on
+/// <c>/api/world/catalog</c>) and skips rules 4/5/11/13, none of which mean anything for a room
+/// graph with no Home, no Seat and no map size tier.
+/// </summary>
+public sealed record WorldValidationProfile(
+    string Name,
+    Func<string?, bool> SectorTypeKnown, Func<string, SectorTypeDef> SectorType,
+    Func<string?, bool> LaneTypeKnown,
+    bool RequireHomeworld /* rules 4, 11 */, bool RequireSeatCounts /* rule 5 */, bool RequireTemplateSize /* rule 13 */)
+{
+    public static readonly WorldValidationProfile Map = new(
+        "map", SectorTypeCatalog.IsKnown, SectorTypeCatalog.Get, LaneTypeCatalog.IsKnown,
+        RequireHomeworld: true, RequireSeatCounts: true, RequireTemplateSize: true);
+
+    public static WorldValidationProfile Delve(RoomTypeCatalog rooms, DoorTypeCatalog doors) => new(
+        "delve", rooms.IsKnown, rooms.Get, doors.IsKnown,
+        RequireHomeworld: false, RequireSeatCounts: false, RequireTemplateSize: false);
+}
 
 /// <summary>
 /// The sixteen creation rules (spec-world-model.md §Creation and validation; 15-16 added
@@ -20,22 +46,32 @@ public static class WorldValidation
     /// <summary>Same ceiling reasoning as <see cref="MaxIntensityMilli"/> — generous until `loam-calc`'s harness has an opinion.</summary>
     public const int MaxHandicapMilli = 3000;
 
-    public static WorldState Validate(WorldState world)
+    public static WorldState Validate(WorldState world) => Validate(world, WorldValidationProfile.Map);
+
+    /// <summary>
+    /// party-dungeon delve-scope (2026-09-05, decisions.md:114): a delve world validates under
+    /// <see cref="WorldValidationProfile.Delve"/>, which skips rules 4/5/11/13 (a delve has no
+    /// Home, no Seat, no capital, and its TemplateId is a layout id, not a map size tier) and
+    /// reads rules 1/6's catalog lookups through the profile instead of the hard-coded map
+    /// catalogs — a room kind is not a <see cref="SectorTypeCatalog"/> row and must not become
+    /// one. <see cref="WorldValidationProfile.Map"/> is byte-for-byte today's behaviour.
+    /// </summary>
+    public static WorldState Validate(WorldState world, WorldValidationProfile profile)
     {
         RequireStableOrder(world);
-        Rule1CatalogIdsExist(world);
+        Rule1CatalogIdsExist(world, profile);
         Rule2LaneShape(world);
         Rule3Connected(world);
-        Rule4Homeworld(world);
-        Rule5SeatCounts(world);
-        Rule6SlotShape(world);
+        if (profile.RequireHomeworld) Rule4Homeworld(world);
+        if (profile.RequireSeatCounts) Rule5SeatCounts(world);
+        Rule6SlotShape(world, profile);
         Rule7EntityPlacement(world);
         Rule8BeliefReferences(world);
         Rule9FractureIntensityBounded(world);
         Rule10LoamStockNonNegative(world);
-        Rule11HomeworldHasARootbed(world);
+        if (profile.RequireHomeworld) Rule11HomeworldHasARootbed(world);
         Rule12HandicapBounded(world);
-        Rule13TemplateSizeMatchesItsDeclaredTier(world);
+        if (profile.RequireTemplateSize) Rule13TemplateSizeMatchesItsDeclaredTier(world);
         Rule14StructureSlotKindMatches(world);
         Rule15RecruitStockNonNegative(world);
         Rule16ProjectTurnsRemainingNeedsAProjectId(world);
@@ -68,7 +104,7 @@ public static class WorldValidation
         }
     }
 
-    static void Rule1CatalogIdsExist(WorldState w)
+    static void Rule1CatalogIdsExist(WorldState w, WorldValidationProfile profile)
     {
         var factionIds = w.Factions.Select(f => f.FactionId).ToHashSet(StringComparer.Ordinal);
 
@@ -99,7 +135,7 @@ public static class WorldValidation
 
         foreach (var s in w.Sectors)
         {
-            if (!SectorTypeCatalog.IsKnown(s.TypeId))
+            if (!profile.SectorTypeKnown(s.TypeId))
                 throw new InvalidOperationException($"Sector '{s.SectorId}' has unknown sector type '{s.TypeId}'.");
             foreach (var slot in s.Slots)
                 if (!SlotTypeCatalog.IsKnown(slot.SlotTypeId))
@@ -107,7 +143,7 @@ public static class WorldValidation
         }
 
         foreach (var l in w.Lanes)
-            if (!LaneTypeCatalog.IsKnown(l.TypeId))
+            if (!profile.LaneTypeKnown(l.TypeId))
                 throw new InvalidOperationException($"Lane '{l.LaneId}' has unknown lane type '{l.TypeId}'.");
     }
 
@@ -195,11 +231,11 @@ public static class WorldValidation
         }
     }
 
-    static void Rule6SlotShape(WorldState w)
+    static void Rule6SlotShape(WorldState w, WorldValidationProfile profile)
     {
         foreach (var s in w.Sectors)
         {
-            var type = SectorTypeCatalog.Get(s.TypeId);
+            var type = profile.SectorType(s.TypeId);
             for (var i = 0; i < s.Slots.Count; i++)
                 if (s.Slots[i].SlotIndex != i)
                     throw new InvalidOperationException(

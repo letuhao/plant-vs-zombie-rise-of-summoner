@@ -39,8 +39,30 @@ public sealed class AtomPushService
         string? matchKey = null,
         long? receiverRevision = null,
         int? ownerLevel = null,
+        int? receiverEmitterVersion = null) =>
+        Build(new[] { owner }, ctx, matchSeed, matchKey, receiverRevision, ownerLevel, receiverEmitterVersion);
+
+    /// <summary>
+    /// The same build, over several owner scopes at once — the shape module 5 (`equip-runtime`)
+    /// named as the missing half of the live lawn push: a player's own grants plus every
+    /// <see cref="OwnerKind.UniqueActor"/> specimen currently deployed with them. One compile over
+    /// the UNION of every scope's atoms, not one push per owner — two owners sharing an atom (a
+    /// player-side buff and an equipped item both touching the same channel) must compile it once,
+    /// identically, or the runner would hold two "identical" entries that only accidentally agree.
+    /// <see cref="RunnerBinding"/> already carries its own <c>OwnerKey</c> per binding, which is what
+    /// makes merging safe: the wire shape was never owner-singular, only this call site was.
+    /// </summary>
+    public AtomPushDto Build(
+        IReadOnlyList<OwnerScope> owners,
+        BindContext ctx,
+        ulong matchSeed,
+        string? matchKey = null,
+        long? receiverRevision = null,
+        int? ownerLevel = null,
         int? receiverEmitterVersion = null)
     {
+        if (owners is null || owners.Count == 0) throw new ArgumentException("at least one owner scope is required", nameof(owners));
+
         var revision = _store.GetCatalogRevision();
 
         // The hash is carried even when nothing else is, so a mismatch stays visible in telemetry on
@@ -62,15 +84,27 @@ public sealed class AtomPushService
                 EmitterVersion = AtomPushCodec.EmitterVersion,
             };
 
-        var resolution = _store.ResolveBindings(owner, ctx, ownerLevel);
-
-        // One compile over the distinct atoms behind every accepted binding. Compiling per binding
-        // would redo the whole classify/bake pass for each one, and two bindings sharing an atom
-        // would disagree about nothing at real cost.
+        // One compile over the distinct atoms behind every accepted binding, across every owner. A
+        // per-owner compile would redo the whole classify/bake pass per owner, and two owners sharing
+        // an atom would disagree about nothing at real cost — so the union is built first, compiled
+        // once, and each owner's bindings are wired against that one shared catalog below.
         var distinct = new Dictionary<string, AtomRow>(StringComparer.Ordinal);
-        foreach (var rows in resolution.AtomsByBinding?.Values ?? Enumerable.Empty<IReadOnlyList<AtomRow>>())
-            foreach (var row in rows)
-                distinct[row.AtomId] = row;
+        var acceptedBindings = new List<(BindingRow Binding, IReadOnlyList<AtomRow> Rows)>();
+
+        foreach (var owner in owners)
+        {
+            var resolution = _store.ResolveBindings(owner, ctx, ownerLevel);
+            foreach (var binding in resolution.Bindings)
+            {
+                if (resolution.AtomsByBinding is null ||
+                    !resolution.AtomsByBinding.TryGetValue(binding.BindingId, out var rows))
+                    continue;
+
+                acceptedBindings.Add((binding, rows));
+                foreach (var row in rows)
+                    distinct[row.AtomId] = row;
+            }
+        }
 
         var catalog = AtomCompiler.Compile(
             distinct.Values.OrderBy(a => a.AtomId, StringComparer.Ordinal).ToList(),
@@ -82,12 +116,8 @@ public sealed class AtomPushService
         var byAtomId = catalog.Runtime.ToDictionary(e => e.AtomId, StringComparer.Ordinal);
         var bindings = new List<RunnerBinding>();
 
-        foreach (var binding in resolution.Bindings)
+        foreach (var (binding, rows) in acceptedBindings)
         {
-            if (resolution.AtomsByBinding is null ||
-                !resolution.AtomsByBinding.TryGetValue(binding.BindingId, out var rows))
-                continue;
-
             foreach (var row in rows)
             {
                 if (!byAtomId.TryGetValue(row.AtomId, out var entry)) continue;
@@ -95,7 +125,8 @@ public sealed class AtomPushService
                 // The id is (binding, atom), not the binding alone. A container carrying three
                 // runner atoms needs three independent ICD clocks and three independent caps — and
                 // a shared id would also tie the evaluation sort, making order depend on how the
-                // rows happened to arrive.
+                // rows happened to arrive. Binding ids are unique per effect_binding row regardless
+                // of owner, so merging owners here cannot collide two different owners' entries.
                 bindings.Add(new RunnerBinding(
                     binding.BindingId + "#" + row.AtomId,
                     binding.Priority,
@@ -107,5 +138,4 @@ public sealed class AtomPushService
         return AtomPushCodec.BuildPayload(
             catalog, bindings, matchSeed, matchKey, contentHash, receiverRevision, receiverEmitterVersion);
     }
-
 }

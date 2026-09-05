@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { LegionMemberView, LegionView } from "@/contract/types";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 import { pendingWithReason } from "@/contract/pending";
 import { unresolvedLegions } from "./unresolvedLegions";
 

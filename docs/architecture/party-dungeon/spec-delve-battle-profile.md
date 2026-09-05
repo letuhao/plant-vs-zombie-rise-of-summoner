@@ -169,7 +169,7 @@ with `FromJson` (`:86`).
 | `BattleActorResult.CarryOut` | `DelveCarryOut?` (`Statuses`, `Shield`, `Retreated`) | same, init | the four battle hashes | populated only when the setup carried `PartyIndex` — a data condition, not a profile branch; null for every golden |
 
 **Carry-in** for the next room: `CurrentHp` from the previous `HpRemaining` — **the one hp seat**; the other
-five pools ride `CarryInPools` (`delve-attrition` §2 asserts `pools["hp"] == HpRemaining` at carry-out); `InitialStatuses`
+six pools ride `CarryInPools` (`delve-attrition` §2 asserts `pools["hp"] == HpRemaining` at carry-out); `InitialStatuses`
 (`BattleModels.cs:67`) and `InnateShield` (`:71`) already carry — the host maps `CarryOut.Statuses` →
 `InitialStatuses` and the remaining shield → `InnateShield`. **Carry-out** lands in `parties_json`
 (`spec-delve-scope.md:72`) per member: `hp`, `statuses[]`, `shield`, `downedOnce` (`delve-attrition` owns the
@@ -293,7 +293,10 @@ src/FusionRpg.Core/Delve/Battle/RaidIntentSource.cs       → one IIntentSource 
 src/FusionRpg.Core/Delve/Battle/DelveCarry.cs             → CarryIn/CarryOut records and the setup mapping
 src/FusionRpg.Core/Delve/Battle/DelveDecision.cs          → delve-level log entry kinds
 src/FusionRpg.Data/Sqlite/RpgStore.WebMatches.cs          → WriteWebMatchDecisions; profile_id column + SelectLog
-src/FusionRpg.Server/DelveBattleEndpoints.cs, RpgHub      → steer / declare / freeze / resume over SignalR
+src/FusionRpg.Server/DelveBattleEndpoints.cs, RpgHub      → steer / declare / freeze / resume over SignalR;
+                                                           plus DelveUpdated{delveId, revision} — the one
+                                                           invalidation broadcast delve-stage refetches on
+                                                           (spec-delve-stage.md §5, §18 ask 2)
 tests/FusionRpg.Core.Tests/Delve/Battle/, tests/FusionRpg.Data.Tests/Delve/
 UNTOUCHED: WaveCatalog.cs, ExpeditionResolver.cs, WebMatchService.BuildSquad, BattleSetup
 ```

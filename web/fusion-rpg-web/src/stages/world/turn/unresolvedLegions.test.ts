@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 import { unresolvedLegions } from "./unresolvedLegions";
 import { TEN_LEGIONS } from "./fixtures/legions";
 

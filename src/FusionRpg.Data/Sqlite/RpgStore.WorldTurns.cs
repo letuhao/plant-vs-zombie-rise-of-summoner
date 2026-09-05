@@ -92,6 +92,16 @@ public sealed partial class RpgStore
                 .Select(c => new WorldCommandOutcome(c.CommandId, false, "world.unknown", false))
                 .ToList();
 
+        // party-dungeon delve-scope (2026-09-05): a delve world is never iterated by the map's
+        // turn — rooms are moved through by RpgStore.Delve.MoveParty, never TurnEngine.Step.
+        // WorldState itself carries no Kind field on purpose (WorldCanonical hashing is untouched),
+        // so the check reads the header, refusing BEFORE any write.
+        var header = GetWorldHeader(worldId);
+        if (header != null && header.Kind != "map")
+            return commands
+                .Select(c => new WorldCommandOutcome(c.CommandId, false, "world.not-a-map", false))
+                .ToList();
+
         var turn = world.CurrentTurn;
         var now = (utcNow ?? DateTimeOffset.UtcNow).ToString("o");
         var outcomes = new List<WorldCommandOutcome>(commands.Count);
@@ -485,6 +495,9 @@ public sealed partial class RpgStore
                 return new WorldTurnCommitResult(false, "commander.unknown", false, null);
 
             var header = GetWorldHeader(worldId)!;
+            // party-dungeon delve-scope: refused before MarkCommittedUnlocked's first write.
+            if (header.Kind != "map") return new WorldTurnCommitResult(false, "world.not-a-map", false, null);
+
             var turn = world.CurrentTurn;
 
             // Checked after "who are you", so a stranger cannot learn which turn is open, and
@@ -515,7 +528,7 @@ public sealed partial class RpgStore
             // Everyone is in: resolve. The seed is per world; each turn derives its own stream so
             // one turn's rolls never shift another's.
             var commands = ListWorldCommandsUnlocked(db, tx, worldId, turn);
-            var result = TurnEngine.Step(world, commands, header.Seed);
+            var result = TurnEngine.Step(world, commands, header.Seed, DistrictAssaultResolver.Instance);
 
             // base-defense world-graph-diff 3.2/3.3: turn commit writes only what changed, not the
             // whole graph — `world` (pre-step) and `result.World` (post-step) are exactly `previous`
@@ -619,12 +632,16 @@ public sealed partial class RpgStore
 
         var header = GetWorldHeader(worldId);
         if (header is null) return null;
+        // party-dungeon delve-scope: a delve's TemplateId is a layout id, not a map size tier —
+        // WorldTemplateCatalog.Build would throw on it. Refuse on purpose rather than fail loudly
+        // by accident (replay is never meaningful for a delve: TurnEngine.Step never runs on one).
+        if (header.Kind != "map") return null;
 
         var world = WorldTemplateCatalog.Build(header.TemplateId, header.Seed, worldId);
         TurnReport? replayed = null;
         for (var t = 0; t <= turn; t++)
         {
-            var result = TurnEngine.Step(world, ListWorldCommands(worldId, t), header.Seed);
+            var result = TurnEngine.Step(world, ListWorldCommands(worldId, t), header.Seed, DistrictAssaultResolver.Instance);
             world = result.World;
             replayed = result.Report;
         }

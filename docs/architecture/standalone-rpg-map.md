@@ -2,6 +2,8 @@
 
 Program goal: **invert the architecture's center of gravity** — the RPG (demons, souls, progression, battles) becomes a complete game playable in the web FE with the PvZ game closed; PvZ play becomes an optional *extension* mode. Status: **wave 1 + expeditions SHIPPED 2026-08-21** — charter, pipeline adaptations, match-source-core (BattleEngine + WebMatchService, goldens locked), and expeditions (the announced ship gate: dispatch→collect playable in the web FE) are implemented with all suites green; module boundaries were approved via owner decisions 2026-08-21. Module specs live in [demons/](demons/) (existing program) and [standalone/](standalone/) (this program).
 
+> **Product-vision reconcile (2026-09-05).** *"Web core / PvZ extension"* in this map means **capability and CI** — gameless-first, one economy, four enrich roles — not the player pitch. Genre and named loops live in [../guide/the-game.md](../guide/the-game.md) + [../guide/the-loops.md](../guide/the-loops.md). The lawn is a first-class place loop and the intended first session; that does not authorize a permanent Fusion gate. See `decisions.md` Standalone-first (qualified) and Product vision rows.
+
 ## Why this is an inversion, not a rewrite
 
 The stack was built game-agnostic from day one: server and web already speak only `game` + `kind` + JSON; `FusionRpg.Core` (StatSystem, ActorHub, StatusRuntime, ElementHub, OverlayCombatMath, EffectBag, MatchRuntime) is Unity-free; `SimEngine` + `FUSIONRPG_SIM=1` already drive the full pipeline without the game; the demon V1 slice is entirely Cold-plane. What changes: a **playable gameplay source** joins the injector as a peer producer of matches and facts, and the docs/decisions flip which mode is "core".

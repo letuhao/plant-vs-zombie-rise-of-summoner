@@ -155,7 +155,7 @@ public class SeedScannerTests : IDisposable
     // ---- the real repo: curves/ and rarity/ (completeness-audit.md C3) -------------------------------
 
     [Fact]
-    public void The_real_curves_and_rarity_folders_exist_and_document_why_they_are_empty()
+    public void The_real_curves_and_rarity_folders_exist_and_document_why_they_are_empty_or_seeded()
     {
         // C3: two owned folders declared with no content looked identical to two forgotten ones.
         // The README in each is the distinction — a real, checked-in file, not a synthetic fixture.
@@ -168,14 +168,27 @@ public class SeedScannerTests : IDisposable
     }
 
     [Fact]
-    public void The_real_sweep_finds_zero_json_in_curves_and_rarity_the_readmes_do_not_count()
+    public void The_real_sweep_finds_zero_json_in_curves_still_empty_on_purpose()
     {
         var root = RepoRoot();
         var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
         var files = SeedScanner.Files(roots);
 
         Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/curves/", StringComparison.Ordinal));
-        Assert.DoesNotContain(files, f => f.Replace('\\', '/').Contains("/rarity/", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_real_sweep_finds_ratitys_seeded_ladder_item_ideal_rarity_bands_module_7()
+    {
+        // item-ideal.md, rarity-bands (module 7, 2026-09-04): rarity/ stopped being "empty on
+        // purpose" once the ten-rung ladder was seeded -- data/seed/rarity/README.md says so, and
+        // this is the sweep-level pin that a future regression can't silently re-empty the folder
+        // and have this suite stay green either way.
+        var root = RepoRoot();
+        var roots = SeedScanner.Roots(Path.Combine(root, "data", "seed"), explicitRoot: false, Directory.Exists);
+        var files = SeedScanner.Files(roots);
+
+        Assert.Contains(files, f => f.Replace('\\', '/').EndsWith("/rarity/ladder.v1.json", StringComparison.Ordinal));
     }
 
     // ---- E32 test 9: the two halves of the affix write path ------------------------------------

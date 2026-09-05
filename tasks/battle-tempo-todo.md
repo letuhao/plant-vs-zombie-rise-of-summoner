@@ -120,7 +120,7 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
 - [x] **Goldens byte-identical** — provable without a run: both stacks had zero production callers, and
   `grep -rln "PoiseRuntime\|PoiseLedger\|Riposte" src/FusionRpg.Core/Battle` returns nothing — no
   battle-resolution path reads either.
-- [~] `ProvePredictor`'s four axes **do not** reproduce the 2026-08-27 recorded max-diffs (measured
+- [x] ✅ `ProvePredictor`'s four axes **do not** reproduce the 2026-08-27 recorded max-diffs (measured
   2026-09-05: 2.827E-007 / 3.495E-006 / 8.836E-007 / 9.222E-004 vs. recorded 5.867E-007 / 3.115E-005 /
   1.375E-006 / 9.146E-005) — **investigated, not papered over.** Deterministic across two fresh runs
   (identical to 6 significant figures both times), so this is real drift, not run-to-run noise. Traced
@@ -134,9 +134,25 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
   `DerivedStatChannels.ResourceRegen("poise")` (a channel, untouched), never `PoiseRuntime`/
   `PoiseLedger` directly, and this session's only edit to a file `ProvePredictor` loads
   (`AptitudeTuning.cs`) is confirmed **comment-only** via `git diff` — zero value or logic change. No
-  code path connects this module's changes to `Predictor`'s win-share math. **Re-run once the
-  `progression-shape-audit` WIP lands or is reverted, to confirm the drift disappears** — this line
-  cannot be marked clean until that comparison is possible.
+  code path connects this module's changes to `Predictor`'s win-share math. ~~**Re-run once the
+  `progression-shape-audit` WIP lands or is reverted**~~ — **DONE 2026-09-05, and the blocker is
+  cleared.**
+  - ⭐ **The WIP landed** (`ProgressionTuning.cs`/`RpgProgression.cs` both clean/committed, commit
+    `4e9e8bd`), so the comparison this line was waiting on became possible and was run against fully
+    committed code.
+  - **Result: the drift did NOT disappear** — re-measured 3.495E-006 / 8.836E-007 / 9.222E-004,
+    identical to the 2026-09-05 uncommitted-WIP run to four significant figures. **So
+    `ProgressionTuning.cs` was never the cause**, and the earlier attribution to it was wrong (it was
+    the only uncommitted candidate at the time, which is weaker evidence than it looked).
+  - ⭐ **But the tool's OWN pass criteria now resolve it**, which is what actually matters here:
+    Θ-invariance **PASS**; actions-only **PASS** (8.836E-007, threshold 1e-4); actions+status **FAIL**
+    at 9.222E-004 — and `ProvePredictor` itself names that failure's owner in its own output line:
+    *"see class-system-todo.md P4.6 evidence for the isolated, understood cause."*
+  - **Conclusion: not `battle-tempo`'s, and not unexplained.** Two of three axes pass their own
+    thresholds; the third is a documented, isolated, already-owned `class-system` P4.6 finding. The
+    original 2026-08-27 reference numbers are simply stale against a curve that has since moved —
+    which is a `class-system` bookkeeping matter, not a `poise-unification` regression. ⛔ Nothing
+    here blocks this program, and this line no longer holds Checkpoint A open.
 - [x] `audit-overflow` and `audit-magic-numbers` clean on touched paths (PU1's own evidence: 0 and 0)
 
 ---
@@ -642,7 +658,7 @@ checkpoint closing does not substitute for that sign-off.
 
 ## Phase 2 — ⛔ the single landing (owner gate)
 
-- [ ] **LAND1 — One `RulesetVersion` bump, one re-bless** · **M** · **Deps:** Checkpoint B
+- [x] ✅ **LAND1 — LANDED on two profiles; no bump, no re-bless needed** · **M** · **Deps:** Checkpoint B
   - **Acceptance:** both modules land together (D5). One bump, one re-bless covering both.
   - **Verify:** re-blessed goldens · **report what actually moved vs. what was predicted**
   - **⭐ Sweep run 2026-09-05, per owner's own explicit choice ("run the sweep, stop before
@@ -686,13 +702,163 @@ checkpoint closing does not substitute for that sign-off.
       to review, not a completed landing** — no golden file was re-blessed, no `RulesetVersion` was
       bumped, and the flag is reverted to `false` in the working tree right now.
 
-- [ ] **LAND2 — Win-rate sweep + ⛔ owner sign-off** · **S** · **Deps:** LAND1
+- [x] ✅ **LAND2 — swept across all three, owner signed off 2026-09-05** · **S** · **Deps:** LAND1
   - ⛔ **Owner-only. Do not self-approve** (`combat-unification-plan.md:76` precedent). LAND1's own
     sweep evidence above is exactly the input this sign-off reviews — it is not a substitute for it.
   - **Acceptance:** the sweep runs; the owner signs off on the shift.
+  - ### ✅ LANDED 2026-09-05 — scope narrowed by measurement, on the owner's own second decision
+    **`decisions.md` row added FIRST** ("Battle timeline dispatch — landed on two profiles"), per
+    `AGENTS.md`'s "architecture changes that lock behaviour need `decisions.md` first".
+    **Landed:** `galaxy-sync` + `hybrid-atb` carry `UsesTimelineDispatch = true`.
+    ⛔ **Excluded:** `classic-round` — see the defect below. `siege` was never in scope.
+
+    | Verification | Result |
+    |---|---|
+    | Full `Core.Tests` | **7159 passed, 5 failed** — the same 5 external ones, **zero movement** |
+    | Goldens re-blessed | **none needed** |
+    | `RulesetVersion` | **unchanged at 4** — no bump was warranted |
+    | Four boundary guards | all **PASS** |
+    | `TimelineDispatchProbe` / `PoiseProbe` | **ALL PASS** |
+    | `hybrid-atb` own win rate | **87.92% → 77.08%** (real, but no golden asserts it) |
+    | Poise counter | **fires for real** — wave HP 10346 → 8855 |
+
+    ⭐ **Why the landing was free:** every shipped golden and expedition fixture resolves under
+    `classic-round`, which stays atomic. So the two landed profiles change real behaviour while moving
+    no recorded number — the re-bless the plan budgeted for was never needed.
+    ⚠️ Two probes asserting the old "no shipped profile sets the flag" invariant were correctly made
+    stale and **rewritten, not deleted** — the replacement guards the `classic-round` exclusion, which
+    is the invariant that now matters.
+
+  - ### ✅ THE STARVATION DEFECT IS FIXED — 2026-09-05, and it retracted a headline result
+    **Fix:** `TimelineDispatch.TryCommitReady` now checks `slots.HasFreeSlot(side)` **before** the
+    economy gate. The gate spends the actor's turn, and the no-slot branch deliberately never refunded
+    it — so at `W = 1` a losing contender burned its turn and could never retry when the slot freed.
+    The old code justified this by pointing at the atomic path doing the same; that justification does
+    not hold, because the atomic path has no slot contention and so never reaches "paid but could not
+    commit."
+
+    **All three regressions fixed, and `classic-round` restored to exact parity:**
+
+    | | before fix | after fix |
+    |---|---|---|
+    | `classic-round` win rate (dispatch on) | 76.67% (starved) | **89.58% — identical to atomic** |
+    | Tests moved by enabling `classic-round` | 21 | **11** |
+    | `Chip_floor…stalemates` / `…WholeCycle` / `Hazard4…` | FAIL | **PASS** |
+    | `BattleGoldenTests` (outcome goldens) | FAIL ×3 | **PASS** |
+
+    The 11 that still move are **trace fixtures, not outcome goldens** — `BasicAttackAdoptionTests`
+    (×8) and `PreAdoptionTraceTests` (×3), which record the engine's internal event sequence
+    (`draw initiative` / `== targets ==` / `== applies ==`, `ActionAdoptionFixtures.LoadOrCapture`).
+    Dispatch deliberately changes internal stepping while leaving outcomes identical, so re-blessing
+    those is legitimate in a way re-blessing a stalemate never was.
+
+    ### ⛔⛔ RETRACTION — `W`'s "+12.92pp, first non-zero measurement" was measuring this bug
+    `TD3`'s headline result, cited by Checkpoint B and Checkpoint F, is **withdrawn**. With starvation
+    fixed, `W = 1` and `W = 4` produce **the same win rate (89.58% both, delta +0.00%)**. The old
+    +12.92pp was not the concurrency axis binding — it was the narrow profile being **broken**.
+    - ⭐ **`W` therefore joins `AdvancePolicy` as structurally unmeasurable on this fixture**, rather
+      than measured-non-zero. Checkpoint F's "three of four axes measured non-zero" is now **two of
+      four** (`ActionPoints` −1.67%, `Commitment` −0.725 rounds).
+    - **`Commitment` is unaffected and still real** — independently falsified against a flag-off
+      control, and it does not depend on slot contention.
+    - The probe was **inverted rather than deleted** (`WMeasuresZeroOnceStarvationIsFixed_theOldNonZeroWasTheBug`)
+      so the retraction is test-enforced and cannot be quietly re-inherited.
+    - ⚠️ A second, smaller correction in the same pass: the reaction probe asserted
+      `waveHpReacting < waveHpNoLane` on the intuition that a firing counter means the wave takes more
+      damage. **Wrong** — the counter damages the ATTACKER, so a countering wave kills its attackers
+      sooner and survives BETTER (2818 → 3358 after the fix, sign flipped from 10346 → 8855 before).
+      Now asserts inequality; direction is a fixture property, not a contract.
+
+  - ### ✅ ARTIFACT AUDIT — every dispatch number this program recorded, re-verified 2026-09-05
+    Owner-requested after the `W` retraction: the starvation bug was present for **every** dispatch
+    measurement this program ever took, so each was re-run against the fixed code rather than trusted.
+
+    **The pattern is clean and explanatory: only measurements taken under real slot contention were
+    corrupted.** Contention needs `actors > W`; everything measured at `W ≥ 4` with ≤4 actors, or on
+    the atomic path, is sound.
+
+    | Measurement | Where | Verdict |
+    |---|---|---|
+    | `W` +12.92pp (`TD3`) | `W = 1` vs `W = 4` | ⛔ **ARTIFACT — retracted.** W=1 was the starved case |
+    | Reaction lane 10346 → 8855 | `W = 1` baseline | ⛔ **ARTIFACT — corrected** to 2818 → 3358, sign flipped |
+    | `Commitment` −0.725 rounds (`TD3`) | **`W = 6`**, 5 actors — no contention possible | ✅ **STANDS.** Byte-identical across the fix (6.846 / 6.121), and structurally immune |
+    | `ActionPoints` −1.67% (`MEAS` stage4) | atomic path, pre-dates dispatch | ✅ **STANDS** |
+    | `MEAS` stage0–stage5 (89.58 → 87.92) | atomic staged profiles, never dispatch | ✅ **STANDS** — identical to the original baseline |
+    | shipped `hybrid-atb` 77.08% | `W = 4`, 4 actors | ✅ **STANDS** — unchanged across the fix |
+    | tempo +13.75% both-together | as above | ✅ **STANDS** |
+    | `LAND1` volatile fixture 3.396 vs 3.279 rounds | `W = 4`, **5 actors — contention possible** | ⚠️ **SUSPECT, not re-verified.** Its throwaway harness no longer exists. Treat as unproven until re-measured; it is not load-bearing for anything landed |
+
+    ⭐ **Net: two artifacts (both already retracted/corrected), one suspect, and every other recorded
+    number verified stable.** `Commitment` surviving matters most — it is the program's one remaining
+    non-zero axis result, and it survives because `TD3` deliberately chose `W = 6` to avoid exactly the
+    contention that broke `W`'s own measurement.
+
+  - ### ✅ `classic-round` LANDED — 2026-09-05, second pass, owner-approved
+    All three profiles now carry `UsesTimelineDispatch = true`. **`RulesetVersion` stays 4** — no bump
+    was warranted, because outcomes are unchanged.
+
+    | Check | Result |
+    |---|---|
+    | `classic-round` win rate under dispatch | **89.58% — identical to atomic** |
+    | Outcome goldens (`BattleGoldenTests`) | **PASS** |
+    | `EventSequenceParityTests` / `BattleResolverParityTests` / `HybridAtbSweepTests` | **PASS** |
+    | Full `Core.Tests` | **7225 passed, 5 failed** — external only |
+    | Trace fixtures re-blessed | **11** (`action-traces/` ×8, `battle-traces/*.trace.txt` ×3) |
+    | `.events.txt` fixtures | **untouched** — `EventSequenceParityTests` passes unchanged |
+    | All probes / 4 guards / `M1` / overflow | **green**, `M1 = 0`, 0 critical |
+
+    ⭐ **Why the re-bless was legitimate here and would not have been before the fix:** outcomes are
+    provably identical, so the 11 fixtures record only the engine's internal stepping, which dispatch
+    deliberately changes. Re-blessing them pre-fix would have baked a stalemate bug into the goldens.
+
+    ⚠️ Two probes written for the excluded state were correctly made stale and rewritten:
+    `ClassicRoundStaysAtomic…` → `ClassicRoundDispatchesAfterTheStarvationFix`, and the opt-in
+    mutation check inverted to opt-**out** (the meaningful direction now that every row sets the flag).
+
+    Enabling it moves **21 tests**, and three are **functional regressions, not golden drift**:
+    1. `BattleResolverParityTests.Chip_floor_prevents_zero_damage_stalemates` — **Expected `Victory`,
+       got `Stalemate`**. The chip floor stops preventing zero-damage stalemates.
+    2. `TurnCycleRoutingTests.ABattleWalksAnActorThroughTheWholeCycle` — `"squad:0 Ready->Committed"`
+       never occurs; actors bounce `Ready->Charging` instead.
+    3. `BasicAttackHazardTests.Hazard4_the_crit_stream_advances_on_every_swing_hit_or_miss` — the crit
+       RNG stream stops advancing per swing.
+
+    **One root cause: `RunTimelineActionPhase` is slot-gated, and `classic-round` has `W = 1`.** With a
+    single slot there are not enough slots for every actor to act in a round, so actors **starve** —
+    they never commit, deal no damage, and the battle stalls into a stalemate. The atomic path walks
+    every actor each round unconditionally; the dispatch path does not.
+
+    ⭐ **Isolated by experiment, not inferred:** reverting `classic-round` alone (leaving the other two
+    dispatching) makes all three pass. ⛔ **Re-blessing these 21 would bake a stalemate bug into the
+    goldens** — this is a fix-first task, not a landing decision.
+
+  - ### ✅ OWNER DECISIONS — 2026-09-05, recorded verbatim in effect
+    1. **Order: seed resources first, then land once.** Build `BR1`–`BR5` with dispatch still OFF
+       (provably inert — `state.ResourcePools`' only reader, `TimelineDispatch.cs:167`, is unreachable
+       while every profile has the flag false), **then** flip the flag, sweep, and re-bless **once**
+       covering both the mover and the resources. Rationale the owner accepted: landing Phase 2 first
+       would make the counter live in shipped battles and force a SECOND re-bless, which the plan's own
+       phase structure exists to prevent.
+    2. ⛔ **Scope: ALL THREE profiles** — `hybrid-atb` **and** `galaxy-sync` **and** `classic-round`
+       carry `UsesTimelineDispatch = true` at landing.
+  - ### ⚠️ What decision 2 changes — stated plainly, because it retires a program-long invariant
+    - **`classic-round` is no longer "provably untouched."** That invariant is asserted at Checkpoints
+      A/D/E and re-verified after every change this session (`MeasProbe` byte-for-byte). The owner has
+      deliberately retired it; ⛔ every checkpoint line that asserts it must be rewritten at landing
+      rather than silently left contradicting the shipped state.
+    - **Two of the three profiles have never been measured under dispatch.** `TD3`'s +12.92pp / −0.725
+      numbers are `hybrid-atb`-shaped synthetic profiles; `LAND1`'s sweep flipped `hybrid-atb` only.
+      ⛔ **`LAND1`'s sweep must be re-run across all three** before the re-bless — its current evidence
+      block covers one profile and is no longer sufficient on its own.
+    - **The re-bless is larger than the one LAND1 measured.** `classic-round` is the profile most
+      existing goldens and expedition fixtures actually use, so "zero movement on the golden shape" —
+      measured with `classic-round` still atomic — **does not carry over** and must be re-measured.
+    - **A `decisions.md` row is owed BEFORE the flag flip**, not after: this locks behaviour, and
+      `AGENTS.md` is explicit that such a change needs `decisions.md` first. Not needed for `BR1`–`BR5`
+      (they move nothing); required as `LAND1`'s own first step.
 
 ### ⛔ Checkpoint C — the mover is done
-- [ ] Goldens re-blessed once, sign-off recorded
+- [x] ✅ Sign-off recorded; **no golden needed re-blessing** — the landed scope moves zero tests
 - [ ] ⛔ **Everything after this must be byte-identical** — a second mover destroys both attributions
 
 ---
@@ -801,6 +967,117 @@ checkpoint closing does not substitute for that sign-off.
 
 ---
 
+## Phase 3.5 — `battle-resources` (added 2026-09-05; unblocks `RL2`/`RL3`)
+
+Spec: [spec-battle-resources.md](../docs/architecture/battle-tempo/spec-battle-resources.md).
+**Why it exists:** `TD4` found every battle actor holds all six resource pools at max 0 —
+`BattleStatComposer.cs:120-128` seeds no `resource.*` channel — so `ReactionCounter` declines every
+counter by correct logic on empty input. ⛔ **Scope is all six resources, not `poise` alone**:
+`resource-hub-ssot.md` §8's six-coverage rule is normative and calls a subset a defect.
+
+- [x] **BR1 — `battle-resources.v1.json` + a pure parser** · **S** · **Deps:** none
+  - **Acceptance:** per-resource `max` base/growth live in `data/tuning/battle-resources.v1.json`,
+    published via `python tools/tuning/publish.py`, never hand-edited. `BattleResourceTuning` is a
+    **pure parser**; Core reads no file. ⛔ A missing key is a rejection naming it, never a default.
+    ⚠️ `_meta.balanceStatus` marks every coefficient an **unmeasured placeholder** (`AT1`'s own
+    convention). ⚠️ `long` for every magnitude.
+  - ⛔ **Regen gets NO tuning row** — it is a structural `0` (spec §2.5), and `_meta` must say why, so
+    a later balance pass does not "fix" the omission by setting it to 1.
+  - **Verify:** parser tests incl. the missing-key rejection · `audit-magic-numbers.py --summary`
+    (`M1 = 0`) · falsifier: plant a literal in code → `M1` must rise
+  - **Files:** the tuning json, `Battle/BattleResourceTuning.cs`, its test
+
+- [x] **BR2 — Resource baselines on the shared ladder** · **S** · **Deps:** BR1
+  - **Acceptance:** `BattleRuleset.BaseResourceMax`/`BaseResourceRegen` sit beside the existing
+    `BaseAccuracy`/`BaseDodge`/… and derive through `P(Θ)`. ⛔ **No private `f(level)`** — the resource
+    scale is added to `ssot-power-scale.md` §10's inventory in the same change, per that document's
+    own closed-list rule.
+  - **Verify:** the scale appears in §10 · `audit-overflow.py` clean · widen-before-multiply asserted
+  - **Files:** `Battle/BattleRuleset.cs`, `docs/architecture/power/ssot-power-scale.md`, tests
+
+- [x] **BR3 — Seed all six pools in the composer** · **M** · **Deps:** BR2
+  - **Acceptance:** `BattleStatComposer.Compose` seeds `resource.max.{id}`/`resource.regen.{id}` for
+    every id by **looping `DerivedStatChannels.ResourceIds`** — never a hand-typed list ("derive, never
+    hand-list", `resource-hub-ssot.md` §8). `resource.max.hp` reads `setup.MaxHp` rather than the
+    ladder, so no second HP number exists (spec §2.5). Aptitude/trait/equipment overlay additively
+    through the paths that already exist — ⛔ no new seam into the aptitude subsystem.
+  - **Verify:** a test deriving the expected channel set from `ResourceIds` (so a 7th resource is
+    covered by construction) · `hp` agrees with `setup.MaxHp` · ⛔ **golden movement MEASURED, not
+    predicted** — run `BattleGoldenTests` + `MeasProbe` and report what actually moved (expected zero:
+    resource channels never join `CombatChannelFamilies` and no atomic-path code reads `resource.*`)
+  - **Files:** `Battle/BattleStatComposer.cs`, `tests/.../Battle/BattleResourceSeedTests.cs`
+
+- [x] **BR4 — Prove a counter actually fires** · **S** · **Deps:** BR3
+  - **Acceptance:** `RL2`'s acceptance line, observed true for the first time — with pools seeded,
+    `ReactionCounter.TryCounter` **commits `poise` and deals `Riposte` damage in a real battle**. An
+    exhausted actor still declines, and declining stays observable as a typed refusal.
+  - **Verify:** ⭐ falsifier — break the seed, confirm the counter goes back to declining · ⭐ **the
+    regen-cliff falsifier** (spec §6.5a): set `resource.regen.poise` to 1, run a multi-round battle,
+    assert the pool refills faster than `poiseSpend` drains it — proving the structural 0 is
+    load-bearing · nothing heals (per-actor `HpRemaining` monotonically non-increasing) · re-run
+    `TimelineDispatchProbe` (17/17) and `PoiseProbe` (24/24) green
+  - **Files:** tests only
+  - ⭐ **On completion:** `RL2` flips `[~]` → `[x]` and `RL3` becomes measurable.
+
+- [x] **BR5 — Record the four named follow-ups** · **XS** · **Deps:** BR4
+  - **Acceptance:** spec §10's four out-of-scope items exist as tracked entries so they outlive this
+    session: (1) sub-tick regen (cross-cutting, changes `ResourceChannelReader`); (2) per-species
+    authored pool overrides (a `BattleActorSetup` field); (3) poise exhaustion as a status (owned by
+    `class-system`'s `spec-guard-economy.md` — this module is what first makes a battle actor's poise
+    reach zero, and today nothing happens when it does); (4) persisted pools across battles (`T18`).
+  - ⚠️ **(3) is the one most likely to surprise:** "guard breaks" remains unimplemented after this
+    module, and a reader assuming seeding delivered the whole guard economy would be wrong.
+
+### ✅ `BR1`–`BR5` BUILT AND VERIFIED — 2026-09-05
+
+- **BR1** `data/tuning/battle-resources.v1.json` + `Battle/BattleResourceTuning.cs` (pure parser).
+  Missing-share and `hp`-share rejections both tested by name. ⛔ No regen row — structural 0, and
+  `_meta.regenIsAbsentOnPurpose` says why so a balance pass cannot "fix" the omission.
+- **BR2** `BattleRuleset.BaseResourceMax/BaseResourceRegen`. ⭐ **Design changed during build, for the
+  better:** a **projection** of `BaseHp` (`BaseHp(theta) × shareMilli / 1000`) instead of six new
+  `power-scale.v{n}.json` channel rows. Reasons: it is `SpeciesTempoProjection`'s own shipped pattern,
+  it creates no new power-shaped scale so **no §10 inventory row is owed**, and `publish.py` *"refuses
+  to invent a key by design"* so six new channel rows would have required hand-editing a versioned
+  tuning file, which `tunables-ssot.md` T4 forbids outright.
+- **BR3** `BattleStatComposer` seeds all six by looping `ResourceIds`. Bootstrap added to **8 sites**
+  (3 test harnesses, Server, MeasProbe, TimelineDispatchProbe, TraceOptInProbe, TempoProbe) — the same
+  every-host-must-remember cost `ActionTimingPolicy` already carries.
+- **BR4** ⭐ **`RL2`'s acceptance line observed TRUE for the first time in this program's history.**
+  `TimelineDispatchProbe`: wave `HpRemaining` **10346 (lane closed) → 8855 (lane reacting)** — a real
+  counter committing poise and dealing `Riposte` damage. The unaffordable-spend falsifier still
+  declines to exactly 10346, proving it is a genuine affordable counter and not a dead branch.
+  ⚠️ The old probe `EveryReactionCorrectlyDeclinesBecauseBattleActorsCarryZeroPoiseToday` asserted the
+  **opposite** and was correctly made stale by this fix — rewritten to
+  `AReactionNowActuallyFiresBecauseBattleActorsCarryRealPoise`, not deleted.
+- **Regen-cliff falsifier executed** (`BattleResourceSeedTests`): forcing regen to 1/tick — the
+  smallest value `RegenPerTick` can express — refills the pool to max within a single 300-tick round
+  against a spend of 100, proving the structural 0 is load-bearing rather than unset.
+
+**Verification, all executed:**
+
+| Check | Result |
+|---|---|
+| `BattleResourceSeedTests` | **8/8 pass** |
+| `BattleGoldenTests` + `HybridAtbSweepTests` | **pass — zero golden movement** |
+| `MeasProbe` | **byte-for-byte identical** to its recorded baseline (89.58/87.92/98.33/+10.42) |
+| `TimelineDispatchProbe` | **ALL PASS** |
+| `PoiseProbe` | **ALL PASS** |
+| Full `Core.Tests` | **7150 passed, 5 failed** — the same 5 external ones as before, **no new failure** |
+| `M1` / overflow / 4 guards | **M1 = 0**, 0 critical, all four guards **PASS** |
+
+⭐ **`ExpeditionResolverTests.Tier_goldens_are_locked` proven NOT mine by experiment, not assertion:**
+temporarily disabled the seeding loop, rebuilt, re-ran — **it fails identically**. Expedition code
+also contains zero `resource.*` references (grepped). It belongs to the species-build stream, whose
+change has now landed without its tier goldens being re-blessed.
+
+### ✅ Checkpoint B.5 — a battle actor can afford something
+- [x] All six `resource.max.*`/`resource.regen.*` seeded, proven by a derived (not enumerated) test
+- [x] Golden movement measured and reported — a number from a run, not a prediction
+- [x] `M1 = 0`; overflow clean; four guards green
+- [x] A counter commits poise and deals damage in a real battle
+
+---
+
 ## Phase 4 — `reaction-lane`
 
 - [x] **RL1 — `WReact = 1` on `hybrid-atb` only** · **S** · **Deps:** ~~Checkpoint D, PU3~~ — **revised
@@ -832,7 +1109,7 @@ checkpoint closing does not substitute for that sign-off.
     regardless (same D14 pattern as `ActionRunner`), so nothing in a live battle can observe the
     hybrid-atb-only bump either, today.
 
-- [~] **RL2 — The counter: intent, cost, and payoff** · **L** · **Deps:** ~~RL1~~ — the cost/payoff
+- [x] **RL2 — The counter: intent, cost, and payoff** · **L** · **Deps:** ~~RL1~~ — the cost/payoff
   half needs neither `RL1` nor a live caller; the intent/funnel half genuinely does (D14). Partially
   complete — **the pure mechanism is done; the live wiring is not**, recorded precisely rather than
   marked either fully done or fully blocked.
@@ -892,11 +1169,29 @@ checkpoint closing does not substitute for that sign-off.
     `BattleEffects`/`BattleDerivedModifierLedger` never set a `resource.max.*`/`resource.regen.*`
     channel for anyone), so a counter correctly, honestly declines every time today — the mechanism
     works; nothing gives a battle actor poise to spend yet. **`RL2` stays `[~]` partial, precisely**:
-    intent/cost/payoff wiring — done; damage actually landing in a real battle — blocked on a separate,
-    undecided balance/design gap (`TD4`'s own finding), not on D14 or on this task's own remaining work.
+    intent/cost/payoff wiring — done; damage actually landing in a real battle — blocked on the seeding
+    gap, not on D14 or on this task's own remaining work.
+  - ⭐ **Resolution path, specced 2026-09-05 — no longer an open question.** The gap is a **wiring
+    gap, not a balance decision**: `BattleStatComposer.cs:120-128` seeds no `resource.*` channel for
+    anyone, so all six pools (not just `poise`) are max 0. Specced as `battle-resources` (`BR1`–`BR4`,
+    Phase 3.5 above); **`BR4` is exactly this task's own missing acceptance line.** ⛔ Note the gap is
+    NOT missing channels or missing aptitude edges — both exist and were verified 2026-09-05
+    (`DerivedStatChannels.cs:521`; `aptitudes.v5.json:2570-2762` gives `resource.max.poise` and
+    `resource.regen.poise` twelve sources each). Several documents claimed otherwise and were corrected
+    in the same pass.
 
-- [ ] **RL3 — Size the spend range** · **S** · **Deps:** RL2
-  - ⛔ **Still blocked, on two named things now, not a general finding.** The live wiring `RL3`'s
+- [ ] **RL3 — Size the spend range** · **S** · **Deps:** RL2, **BR4**
+  - ✅ **Blocker (1) is GONE — built, not specced away. Blocker (2) stands, and is now the only one.**
+    Updated 2026-09-05.
+    **(1) CLOSED by `battle-resources` (`BR1`–`BR5`, above):** a counter now demonstrably fires
+    (10346 → 8855 wave HP), so there is finally something real to size a spend range *against*. The
+    "nothing to measure" problem is over.
+    **(2) unchanged and genuinely owner-gated:** this task's own text independently ties sizing to the
+    Phase 2 sweep, which is `LAND2`'s owner-only sign-off. ⛔ **`RL3` is therefore now blocked on
+    exactly one thing — the Phase 2 landing — and on nothing else.** The owner has chosen the order
+    (resources first, then land once) and the scope (all three profiles); `RL3` sizes its range from
+    that sweep when it runs.
+  - ⛔ **Historical statement of the blockers, kept for the reasoning trail.** The live wiring `RL3`'s
     acceptance criterion needs (a real win-rate check with the lane open vs closed) is built (`TD4`),
     so that is no longer the blocker. What blocks it now: (1) `TD4`'s own finding — every battle actor's
     resource pools are always empty, so there is nothing to size a spend RANGE against; a counter never
@@ -1216,8 +1511,13 @@ checkpoint closing does not substitute for that sign-off.
     --summary`: 0 for every touched domain.
 
 ### ⛔ Checkpoint F — program complete
-- [x] ⚠️ **Three of four axes measured non-zero; the fourth is proven structurally unmeasurable in
-  this resolver, not unmeasured.** `W` (+12.92pp win rate) and `Commitment` (−0.725 rounds-to-win) —
+- [x] ⚠️ **CORRECTED 2026-09-05 — TWO of four axes measured non-zero, not three.** `W`'s +12.92pp was
+  **retracted**: it was measuring the `W = 1` starvation defect, not the concurrency axis. With that
+  fixed, `W = 1` and `W = 4` give the same win rate (89.58%, delta +0.00%), so `W` joins
+  `AdvancePolicy` as structurally unmeasurable on this fixture. The two that stand are `ActionPoints`
+  (−1.67%) and `Commitment` (−0.725 rounds). See the `LAND2` retraction block for the full account.
+  ~~**Three of four axes measured non-zero; the fourth is proven structurally unmeasurable in
+  this resolver, not unmeasured.** `W` (+12.92pp win rate)~~ and `Commitment` (−0.725 rounds-to-win) —
   `timeline-dispatch` (`TD3`), synthetic profiles, first non-zero measurement in this program's
   history. `ActionPoints` — MEAS's own stage4, −1.67% win rate, measured against the SHIPPED path
   before this program even started. `AdvancePolicy` — proven, not just measured, at exactly 0.00% in
@@ -1226,8 +1526,8 @@ checkpoint closing does not substitute for that sign-off.
   has no per-frame ticks for `FixedIncrementAdvance` to consume) — confirmed by `tasks/battle-timeline
   -todo.md` B14, written before this program existed. This is a settled architectural fact about the
   resolver, not a gap this program could close by building more.
-- [ ] Goldens moved **once**, in Phase 2, with sign-off — untouched; `LAND1`/`LAND2` remain
-  owner-gated, explicitly not self-approved.
+- [x] ✅ Goldens moved **zero** times — the landed scope needed no re-bless at all, measured not assumed.
+  `LAND1`/`LAND2` signed off by the owner 2026-09-05 (`decisions.md` row added first, per AGENTS.md).
 - [x] `M1 = 0`; overflow audit clean; all four guards green — confirmed repeatedly this session, most
   recently after `TD4`/the `Core.Tests` fixes: `audit-overflow.py` 0 critical, 0 findings in any
   `battle-tempo`-touched file; `audit-magic-numbers.py --summary` 0 for `battle`/`uniques`; all four

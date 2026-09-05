@@ -35,13 +35,26 @@ never runs out is the termination defect wearing a different hat.
 
 ---
 
-## 2. ⛔ Blocked on an ADR, and it is a real block
+## 2. ~~⛔ Blocked on an ADR~~ — ✅ UNBLOCKED 2026-08-26, re-verified 2026-09-05
 
-`DerivedStatChannels.ResourceIds` is the **locked five** — **verified in code 2026-08-26**:
-[DerivedStatChannels.cs:475](../../../src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs) is
-literally `new[] { "hp", "stamina", "hunger", "spirit", "qi" }`, not merely asserted from
-[decisions.md](../decisions.md)'s *Resource model* row: *"Five actor resources, one shared set: `hp` · `stamina` · `hunger` · `spirit` · `qi`"*,
-and [resource-hub-ssot.md](../resource-hub-ssot.md) §5: *"Closed set; **adding one is an ADR**."*
+> **The block below was real when written and is now resolved.** The ADR it was waiting for landed the
+> same day: `decisions.md` *Resource model* reads **six** (2026-08-26), and
+> [DerivedStatChannels.cs:521](../../../src/FusionRpg.Core/Stats/Derived/DerivedStatChannels.cs) is now
+> literally `new[] { "hp", "stamina", "hunger", "spirit", "qi", "poise" }` — verified by reading the
+> line, not by trusting this paragraph. `resource.max.poise` and `resource.regen.poise` each carry
+> twelve aptitude edges (`data/tuning/aptitudes.v5.json:2570-2762`), so the *"`poise` has zero aptitude
+> edges"* claim that also appeared here is false too.
+>
+> ⛔ **One real gap survives, and it is a different one:** `BattleStatComposer.cs:120-128` seeds no
+> `resource.*` channel, so a battle actor's pools are all max 0 — a guard cannot be paid for in a
+> battle because nothing gives the actor poise, not because the channel is missing. Specced as
+> [battle-tempo/spec-battle-resources.md](../battle-tempo/spec-battle-resources.md).
+
+~~`DerivedStatChannels.ResourceIds` is the **locked five** — **verified in code 2026-08-26**:
+`DerivedStatChannels.cs:475` is literally `new[] { "hp", "stamina", "hunger", "spirit", "qi" }`, not
+merely asserted from [decisions.md](../decisions.md)'s *Resource model* row: *"Five actor resources,
+one shared set"*, and [resource-hub-ssot.md](../resource-hub-ssot.md) §5: *"Closed set; **adding one
+is an ADR**."*~~
 
 So there is no `resource.max` channel for **poise**, `SpecChannelClaimTests` refuses a spec that claims
 it, and **none of this is testable** until the five → six amendment lands.

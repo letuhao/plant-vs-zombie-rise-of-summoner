@@ -1,6 +1,11 @@
 # Plan: world stage
 
-**Status: proposed 2026-09-03, pending owner review. No build authorized by this document.**
+**Status: built and closed.** Proposed 2026-09-03; the owner authorized building it directly (Gate B's
+own outcome section below records "owner directed the assistant to run playtest/review gates
+directly," 2026-09-05), and [world-stage-todo.md](world-stage-todo.md) shows all 15 modules, both
+gates, and the closing Checkpoint C done as of 2026-09-05. *(Corrected 2026-09-05, assistant, caught
+by an adversarial completeness audit — this line had never been updated after the build actually
+happened.)*
 
 **Specs:** [world-stage-map.md](../docs/architecture/world-stage-map.md) (15 modules, 5 levels, and
 the **arbitration section** that wins when a module spec disagrees) · the 15 module specs in
@@ -51,7 +56,7 @@ Recorded here so a task never re-argues one. Each is settled in the map's arbitr
 | Decision | Consequence for this plan |
 |---|---|
 | **`world-commands` takes `RulesetVersion` 5 → 6; `sector-development` takes 6 → 7** | A hard ordering between two programs. Phase 0 must land before `world-map` Phase 12's engine work, or the second bumper reads the wrong current value |
-| **The pure layer moves, it does not die** | `worldSelection.ts`, `worldViewModel.ts`, `turnPlayback.ts`, `commanderIntent.ts` and both fixtures move to `stages/world/` at their consuming phase. `features/world/` is deleted in **Phase 4**, not Phase 1 |
+| **The pure layer moves, it does not die** | `worldSelection.ts`, `worldViewModel.ts`, `turnPlayback.ts`, `commanderIntent.ts` and both fixtures move to `stages/world/` at their consuming phase. `features/world/` is deleted in **Phase 4**, not Phase 1. **✅ Done 2026-09-05** — moved in one pass at Phase 4's own close rather than incrementally per-level; `features/world/` is gone |
 | **`bind-warden` (sector) and `ward` (lane) are two kinds** | The naming collision was repaired once in plate 11; it must not return through a task title |
 | **Arrows pan; `W` cycles** | `WASD` was removed for this exact collision. No task reintroduces it |
 | **Do not wrap a `registerGlobalVerb` throw** | Collisions are prevented at source — `keybindings.ts` refuses a rebind onto `1`–`9` |
@@ -209,14 +214,26 @@ territory (already shipped) rather than in anything Phase 3/4 was going to build
 answering "no reorder needed" is still an answer, not a skipped step — the alternative (reordering
 without evidence, or refusing to say so because nothing moved) is what this gate exists to prevent.
 
-**Checkpoint C — complete** (end of Phase 4). All 15 modules built · `features/world/` deleted and its
-three exemptions retired in the same change · GG-50 registry at 13 · the four boundary guards green ·
-the full web and .NET suites green.
+**Checkpoint C — complete** (end of Phase 4). All 15 modules built · `features/world/` **actually
+deleted** — its three exemptions retired, six dead legacy files removed, and (2026-09-05, the
+architecture decision this bullet twice wrongly claimed already done) the eight remaining live
+modules moved to `stages/world/` with the `worldTypes.ts` shim retired and every consumer repointed
+— see `world-stage-todo.md`'s Checkpoint C for the full account, including the one real consequence
+(a small, dated `contractGuard.ts` exemption for six files that already touched the raw wire shape
+before the move) · GG-50 registry at 13 · the four boundary guards green · the full web and .NET
+suites green.
 
 ## Open questions
 
-**One, and it is `world-turn`'s, recorded rather than resolved:** `useGlobalKeys.ts:25` passes only
-`event.key` to `dispatchGlobalVerb`, with no modifier state, so `Shift+Enter` is indistinguishable
-from `Enter` and the force-end shortcut is **not expressible as drawn**. Two resolutions are costed in
-that spec; the pointer path ships either way, so this constrains the shortcut and not the feature.
-It needs an answer before Phase 3, not before Phase 0.
+**Decided, not yet built.** *(Corrected 2026-09-05, assistant, caught by an adversarial completeness
+audit — this section previously presented the question below as unresolved, when the todo file
+records it as decided the day before this plan's own Gate B section was written.)* `useGlobalKeys.ts:25`
+passes only `event.key` to `dispatchGlobalVerb`, with no modifier state, so `Shift+Enter` is
+indistinguishable from `Enter` and the force-end shortcut is **not expressible as drawn**. Two
+resolutions were costed in `spec-world-turn.md` §4; **the owner decided option (a) — teach the keymap
+a canonical modified-key form — on 2026-09-04, via `AskUserQuestion`** (`world-stage-todo.md`'s W40
+entry). **The keymap-wide code change itself is still unbuilt** — it touches every stage's keymap and
+was explicitly deferred as its own, separately-scoped, ask-first follow-up; W83 (the force-end hatch)
+shipped pointer-only in the meantime, exactly as its own acceptance criteria allowed. So: not an open
+question any more, but a real, named, unscoped piece of work for whoever picks up keymap modifier
+support next.

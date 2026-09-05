@@ -71,6 +71,19 @@ FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
 FusionRpg.Core.Expeditions.ExpeditionTuningHub.Configure(
     FusionRpg.Core.Expeditions.ExpeditionTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "expeditions.v1.json"))));
+// party-dungeon D1.4: registries load first (pure, no tuning needed); DungeonTuningHub and
+// EncounterTuningHub configure next, cross-checked against those registries at parse time; then
+// DungeonRegistryHub last -- RoomKindDef.WeightMilli joins DungeonTuningHub at first property
+// read, so the tuning hub must already be configured by the time any catalog row is touched.
+var dungeonRegistryDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "dungeon", "_registry");
+var dungeonRegistries = FusionRpg.Core.Dungeon.Registry.DungeonRegistryLoader.LoadAll(dungeonRegistryDir);
+FusionRpg.Core.Dungeon.Tuning.DungeonTuningHub.Configure(
+    FusionRpg.Core.Dungeon.Tuning.DungeonTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "dungeon.v1.json")), dungeonRegistries));
+FusionRpg.Core.Dungeon.Tuning.EncounterTuningHub.Configure(
+    FusionRpg.Core.Dungeon.Tuning.EncounterTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "encounter.v1.json")), dungeonRegistries));
+FusionRpg.Core.Dungeon.Registry.DungeonRegistryHub.Configure(dungeonRegistries);
 FusionRpg.Core.SimDefaults.Configure(
     FusionRpg.Core.SimTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "sim.v1.json"))));
@@ -112,6 +125,15 @@ FusionRpg.Core.Battle.BattleTuningHub.Configure(
         // this is a tuning row change with no observable effect until a caller exists, matching the
         // module's own "buy the option, don't pay for the feature" framing.
         File.ReadAllText(Path.Combine(tuningDir, "battle.v4.json"))));
+// battle-tempo battle-resources (2026-09-05): the per-resource share of BaseHp that
+// BattleStatComposer seeds every actor's six pools from. Before this, every battle actor held all
+// six pools at max 0, so no action in a battle could cost anything and reaction-lane's counter
+// declined every time. Its own file rather than a battle.v{n}.json section because publish.py's
+// `set` path refuses to invent keys, and the file forbids hand-editing
+// (spec-battle-resources.md §2.2a).
+FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
+    FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "battle-resources.v1.json"))));
 FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
     FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));

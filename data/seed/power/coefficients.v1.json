@@ -1,244 +1,297 @@
 {
   "schemaVersion": 1,
   "kind": "power-coefficient",
+  "_meta": {
+    "owner": "docs/architecture/effect-atom/spec-power-sweep.md §4.1",
+    "whatThisIs": "Power-pricing coefficients. An effect's price is magnitude x coefficient; these are the coefficient half. They live here, in the SEED path, and not in data/tuning/, because power_coefficient is a content-hashed table since registry V3 -- a value moved here moves the content stamp, which is exactly what data/tuning/ cannot do (CoefficientTable.cs's own design note).",
+    "howToRebalance": "Bulk-edit by `tuningClass`. The `policy` rows are the balance surface: filter on that value, set them together, done. Leave `fitted` rows alone unless you re-run scripts/sweep-power-coefficients.py -- each traces to a measurement and its `note` says which.",
+    "tuningClasses": {
+      "fitted": "Measured from the real corpus by scripts/sweep-power-coefficients.py. Re-run the sweep rather than hand-editing; the note on each row records the sample it was pinned to.",
+      "policy": "⛔ THE BALANCE SURFACE -- edit these. Real atoms of this kind exist, but they price as ONE reference unit: either the kind declares no magnitude param at all, or its amount rides the overlay at runtime rather than being authored. So no measurement can ever set these -- the number answers a design question ('what is a freeze worth against +1 attack?'), which is a judgement.",
+      "authored-zero": "A deliberate zero, not a placeholder. Do not 'fix' it -- see the row's own note for why zero is the correct price.",
+      "pending-content": "No real atom uses this (kind, channel) yet, so there is nothing to measure and nothing yet to balance. Left at the neutral 1000. These become `fitted` or `policy` on their own once content lands.",
+      "separate-path": "This row's kind is priced somewhere else and this coefficient governs only a small part of it. spawn.entity's real cost comes from ActorPowerCache.PriceBody(hp, atk) inside CostFunction.SpawnBody -- so its hp/atk magnitudes must NOT be fitted into this row, and rebalancing a spawn means touching the body pricing, not this number."
+    },
+    "counts": {
+      "authored-zero": 1,
+      "fitted": 5,
+      "pending-content": 20,
+      "policy": 7,
+      "separate-path": 1
+    }
+  },
   "entries": [
     {
       "kindId": "stat.modify",
       "channel": "plantShield",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "E38 (spec-entity-fields-12plus.md), first-pass -- NOT a fitted sweep result. plantShield is a long magnitude like arm1/arm2 (extra hit points ahead of the entity's real health pool), so it is priced on the same reference scale those already use: one shield point costs the same as one armor point until a sweep says otherwise."
+      "note": "E38 (spec-entity-fields-12plus.md), first-pass -- NOT a fitted sweep result. plantShield is a long magnitude like arm1/arm2 (extra hit points ahead of the entity's real health pool), so it is priced on the same reference scale those already use: one shield point costs the same as one armor point until a sweep says otherwise.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "attackCountdown",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. LowerIsBetter timer (structural floor, same reason attackInterval has one); referenceScale 1 mirrors stat.derived's own 'one resolver point' scale rather than arm1's, because a countdown in seconds is a much smaller natural range than a hit-point pool."
+      "note": "E38, first-pass -- NOT a fitted sweep result. LowerIsBetter timer (structural floor, same reason attackInterval has one); referenceScale 1 mirrors stat.derived's own 'one resolver point' scale rather than arm1's, because a countdown in seconds is a much smaller natural range than a hit-point pool.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "attackSpeedAdder",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. A signed delta with no floor (unguarded by design, spec §2b) -- small numbers matter here, so referenceScale 1 keeps a modest adder from pricing as noise."
+      "note": "E38, first-pass -- NOT a fitted sweep result. A signed delta with no floor (unguarded by design, spec §2b) -- small numbers matter here, so referenceScale 1 keeps a modest adder from pricing as noise.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "produceCountdown",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as attackCountdown: LowerIsBetter timer, structural floor, small natural range."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as attackCountdown: LowerIsBetter timer, structural floor, small natural range.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "plantSpeed",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Most plants never move, so a baseline of zero is ordinary (see StatComposer's own Real() note) -- when it does apply, movement speed is a small natural range, referenceScale 1."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Most plants never move, so a baseline of zero is ordinary (see StatComposer's own Real() note) -- when it does apply, movement speed is a small natural range, referenceScale 1.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "plantMoveSpeed",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as plantSpeed."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as plantSpeed.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "plantLevel",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "E38, first-pass -- NOT a fitted sweep result. A long magnitude, priced on arm1/maxHp's own reference scale -- a level-up is a meaningful, discrete magnitude change, not a fractional ratio."
+      "note": "E38, first-pass -- NOT a fitted sweep result. A long magnitude, priced on arm1/maxHp's own reference scale -- a level-up is a meaningful, discrete magnitude change, not a fractional ratio.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "shootingLevel",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as plantLevel."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as plantLevel.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "armorFlat",
       "coeffMilli": 1000,
       "referenceScale": 2,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Conceptually the same family as the existing 'defense' channel (a flat mitigation stat), so it is priced on defense's own reference scale rather than arm1's hit-point scale."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Conceptually the same family as the existing 'defense' channel (a flat mitigation stat), so it is priced on defense's own reference scale rather than arm1's hit-point scale.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "takeDmgMultiplier",
       "coeffMilli": 1000,
       "referenceScale": 2,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Bearer frame (decided 2026-09-03, spec-entity-fields-12plus.md sec 2c): this channel stays LowerIsBetter, so a RAISE on your OWN takeDmgMultiplier prices as a penalty and a REDUCTION prices as a benefit -- both correct under the bearer frame. takeDmgMultiplier is NOT the authoring surface for 'enemies take more damage': that debuff is a status.apply payload, priced by its own coefficient/trigger/uptime, never a stat.modify on this channel. Reference scale mirrors 'defense' (same damage-mitigation family)."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Bearer frame (decided 2026-09-03, spec-entity-fields-12plus.md sec 2c): this channel stays LowerIsBetter, so a RAISE on your OWN takeDmgMultiplier prices as a penalty and a REDUCTION prices as a benefit -- both correct under the bearer frame. takeDmgMultiplier is NOT the authoring surface for 'enemies take more damage': that debuff is a status.apply payload, priced by its own coefficient/trigger/uptime, never a stat.modify on this channel. Reference scale mirrors 'defense' (same damage-mitigation family).",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "zombieSpeedCurrent",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Mirrors the existing zombieSpeed (uniqueSpeed) channel's own small natural range."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Mirrors the existing zombieSpeed (uniqueSpeed) channel's own small natural range.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "zombieOriginSpeed",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as zombieSpeedCurrent."
+      "note": "E38, first-pass -- NOT a fitted sweep result. Same reasoning as zombieSpeedCurrent.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "ui.present",
       "channel": "",
       "coeffMilli": 0,
       "referenceScale": 1,
-      "note": "E41 (spec-ui-attach-point.md sec 2c), authored -- not a fitted sweep result, and never will be. A present is read-only: it never writes stat/resource/status/shield/board/currency state, so it is worth exactly zero power, deliberately, in both directions -- a UI atom must not become a free rider that inflates a container's apparent budget, and it must not tax one either. This row exists so CoefficientTable.Find returns an AUTHORED zero (verdict Priced) rather than falling through to the channel-less-row-missing case (verdict unpriced) -- an authored zero and a missing row are different claims, and this row is what keeps them different. Do not delete this row to 'simplify' -- ui.present has PowerCategory.None (AtomKindRegistryTests.cs's own cosmetic exemption), and a missing coefficient here is the exact PLANTED_VIOLATION this module's own pricing test guards against."
+      "note": "E41 (spec-ui-attach-point.md sec 2c), authored -- not a fitted sweep result, and never will be. A present is read-only: it never writes stat/resource/status/shield/board/currency state, so it is worth exactly zero power, deliberately, in both directions -- a UI atom must not become a free rider that inflates a container's apparent budget, and it must not tax one either. This row exists so CoefficientTable.Find returns an AUTHORED zero (verdict Priced) rather than falling through to the channel-less-row-missing case (verdict unpriced) -- an authored zero and a missing row are different claims, and this row is what keeps them different. Do not delete this row to 'simplify' -- ui.present has PowerCategory.None (AtomKindRegistryTests.cs's own cosmetic exemption), and a missing coefficient here is the exact PLANTED_VIOLATION this module's own pricing test guards against.",
+      "tuningClass": "authored-zero"
     },
     {
       "kindId": "bullet.modify",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 2,
-      "note": "E37 (spec-projectile-control.md sec 2c), first-pass -- NOT a fitted sweep result, closing E37's own open criterion 7. bullet.modify has no 'channel' param (its params are op/amount/bulletType/moveWay), so CostFunction reads no channel for it and CoefficientTable.Find is keyed on the channel-less row -- this is that row, not a per-channel one. Reference scale mirrors stat.modify/atk's own precedent (E37's spec cites (\"stat.modify\", \"atk\", 1000, 2) as the reference: raw damage is the same unit atk already prices on). op:scale prices off CostFunction.MeanMagnitude's own per-mille mean, same as every other magnitude in this layer -- deliberately under-prices a multiplier over a large base, a known, documented limitation, not this row's to fix."
+      "note": "E37 (spec-projectile-control.md sec 2c), first-pass -- NOT a fitted sweep result, closing E37's own open criterion 7. bullet.modify has no 'channel' param (its params are op/amount/bulletType/moveWay), so CostFunction reads no channel for it and CoefficientTable.Find is keyed on the channel-less row -- this is that row, not a per-channel one. Reference scale mirrors stat.modify/atk's own precedent (E37's spec cites (\"stat.modify\", \"atk\", 1000, 2) as the reference: raw damage is the same unit atk already prices on). op:scale prices off CostFunction.MeanMagnitude's own per-mille mean, same as every other magnitude in this layer -- deliberately under-prices a multiplier over a large base, a known, documented limitation, not this row's to fix.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "hp",
       "coeffMilli": 135,
       "referenceScale": 10,
-      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.*.json (45 atoms). CoeffMilli = round(1,000,000 / normalizedMilli(medianFlatMagnitude)) over the atom.mending family's 5 tiers (flat op only -- referenceScale's own contract is 'what one RAW unit means', and 'flat' is the one op whose magnitude is a raw unit; 'increased'/'more' on this same channel are percentage magnitudes this table's (kind,channel) key cannot separately price -- see the script's own FINDING 2, reported not fixed). Result: atom.mending T3 (median tier, mag=74) now prices to 999 instead of 7400, matching atom.might/atom.warding/atom.vitality's own T3 price (999-1000) within rounding -- a measured 3.7x cross-channel spread collapsed to under 0.1%, reproducible by re-running the script. referenceScale (10) is UNCHANGED from the prior authored value -- only CoeffMilli, the dial spec-power-sweep.md names as 'the flat 1000s', was fitted."
+      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.*.json (45 atoms). CoeffMilli = round(1,000,000 / normalizedMilli(medianFlatMagnitude)) over the atom.mending family's 5 tiers (flat op only -- referenceScale's own contract is 'what one RAW unit means', and 'flat' is the one op whose magnitude is a raw unit; 'increased'/'more' on this same channel are percentage magnitudes this table's (kind,channel) key cannot separately price -- see the script's own FINDING 2, reported not fixed). Result: atom.mending T3 (median tier, mag=74) now prices to 999 instead of 7400, matching atom.might/atom.warding/atom.vitality's own T3 price (999-1000) within rounding -- a measured 3.7x cross-channel spread collapsed to under 0.1%, reproducible by re-running the script. referenceScale (10) is UNCHANGED from the prior authored value -- only CoeffMilli, the dial spec-power-sweep.md names as 'the flat 1000s', was fitted.",
+      "tuningClass": "fitted"
     },
     {
       "kindId": "stat.modify",
       "channel": "maxHp",
       "coeffMilli": 135,
       "referenceScale": 10,
-      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.*.json (45 atoms). Same fit and same value as the 'hp' row above -- atom.vitality's flat-op magnitudes (24/42/74/130/228) are identical to atom.mending's (hp), so the two channels fit to the same CoeffMilli by construction, not by copy-paste. referenceScale (10) unchanged from the prior authored value."
+      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.*.json (45 atoms). Same fit and same value as the 'hp' row above -- atom.vitality's flat-op magnitudes (24/42/74/130/228) are identical to atom.mending's (hp), so the two channels fit to the same CoeffMilli by construction, not by copy-paste. referenceScale (10) unchanged from the prior authored value.",
+      "tuningClass": "fitted"
     },
     {
       "kindId": "stat.modify",
       "channel": "atk",
       "coeffMilli": 222,
       "referenceScale": 2,
-      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.g-attack.json. CoeffMilli fitted from atom.might's flat-op median (tier 3, mag=9): round(1,000,000 / normalizedMilli(9 at referenceScale 2)) = 222. atom.might T3 now prices to 999, matching the hp/maxHp/defense rows' own T3 price (999-1000) within rounding. atom.ferocity (increased) and atom.savagery (more) share this same channel and coefficient but carry percentage magnitudes (23-435), not raw atk points -- their price is UNCHANGED in ratio terms relative to atom.might (scale-invariant, see the script's FINDING 2); reconciling that needs an `op` axis on this table's key, out of E44's data-only scope. referenceScale (2) unchanged from the prior authored value."
+      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.g-attack.json. CoeffMilli fitted from atom.might's flat-op median (tier 3, mag=9): round(1,000,000 / normalizedMilli(9 at referenceScale 2)) = 222. atom.might T3 now prices to 999, matching the hp/maxHp/defense rows' own T3 price (999-1000) within rounding. atom.ferocity (increased) and atom.savagery (more) share this same channel and coefficient but carry percentage magnitudes (23-435), not raw atk points -- their price is UNCHANGED in ratio terms relative to atom.might (scale-invariant, see the script's FINDING 2); reconciling that needs an `op` axis on this table's key, out of E44's data-only scope. referenceScale (2) unchanged from the prior authored value.",
+      "tuningClass": "fitted"
     },
     {
       "kindId": "stat.modify",
       "channel": "defense",
       "coeffMilli": 500,
       "referenceScale": 2,
-      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.g-armour.json. CoeffMilli fitted from atom.warding's flat-op median (tier 3, mag=4): round(1,000,000 / normalizedMilli(4 at referenceScale 2)) = 500. atom.warding T3 now prices to 1000, matching the atk/hp/maxHp rows' own T3 price (999-1000) within rounding. atom.resilience (increased) shares this channel and carries a percentage magnitude, same FINDING 2 caveat as atk above. referenceScale (2) unchanged from the prior authored value."
+      "note": "E44 (spec-power-sweep.md sec 4.1), SWEEP-FITTED 2026-09-05 -- scripts/sweep-power-coefficients.py, corpus data/seed/atoms/generated/family-expand.g-armour.json. CoeffMilli fitted from atom.warding's flat-op median (tier 3, mag=4): round(1,000,000 / normalizedMilli(4 at referenceScale 2)) = 500. atom.warding T3 now prices to 1000, matching the atk/hp/maxHp rows' own T3 price (999-1000) within rounding. atom.resilience (increased) shares this channel and carries a percentage magnitude, same FINDING 2 caveat as atk above. referenceScale (2) unchanged from the prior authored value.",
+      "tuningClass": "fitted"
     },
     {
       "kindId": "stat.modify",
       "channel": "arm1",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted (no real generated content under data/seed/atoms/ touches arm1 yet; E44's corpus, family-expand, covers only atk/defense/hp/maxHp). Added 2026-09-05 to close a real, independently-verified gap found while fitting the four rows above: RpgStore.GetPowerTables (RpgStore.Power.cs:61-72) falls back to PowerTables.Authored() ONLY when power_coefficient has ZERO rows -- the live dist DB already carries 14 rows from this file's earlier E37/E38/E41 entries, none of which are among Authored()'s original 20, so every one of those 20 (including this one) was SILENTLY UNPRICED in any DB-backed pricing path (ActorPowerCache.Compose skips a missing coefficient rather than pricing it at a flagged zero) the moment this file was first imported -- confirmed live: `SELECT * FROM power_coefficient` against dist/FusionRpg.Server/data/rpg-hot.sqlite returned exactly the 14 rows, none of the 20. This row (and the 15 below) restore the missing 16 as an explicit, unfitted pass-through of the exact value CoefficientTable.Authored() already ships, so importing this file no longer silently drops coverage for channels the sweep had no corpus to fit."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted (no real generated content under data/seed/atoms/ touches arm1 yet; E44's corpus, family-expand, covers only atk/defense/hp/maxHp). Added 2026-09-05 to close a real, independently-verified gap found while fitting the four rows above: RpgStore.GetPowerTables (RpgStore.Power.cs:61-72) falls back to PowerTables.Authored() ONLY when power_coefficient has ZERO rows -- the live dist DB already carries 14 rows from this file's earlier E37/E38/E41 entries, none of which are among Authored()'s original 20, so every one of those 20 (including this one) was SILENTLY UNPRICED in any DB-backed pricing path (ActorPowerCache.Compose skips a missing coefficient rather than pricing it at a flagged zero) the moment this file was first imported -- confirmed live: `SELECT * FROM power_coefficient` against dist/FusionRpg.Server/data/rpg-hot.sqlite returned exactly the 14 rows, none of the 20. This row (and the 15 below) restore the missing 16 as an explicit, unfitted pass-through of the exact value CoefficientTable.Authored() already ships, so importing this file no longer silently drops coverage for channels the sweep had no corpus to fit.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "arm1Max",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "arm2",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "arm2Max",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.modify",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing generic stat.modify fallback row (channel-less -- CoefficientTable.Find's own fallback for any stat.modify channel with no dedicated row). NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing generic stat.modify fallback row (channel-less -- CoefficientTable.Find's own fallback for any stat.modify channel with no dedicated row). NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "stat.derived",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted (no real generated content on any stat.derived channel; the D2 interaction correction for crit/shield pairs is a separate table, power_interaction, already closed and untouched by this row). Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted (no real generated content on any stat.derived channel; the D2 interaction correction for crit/shield pairs is a separate table, power_interaction, already closed and untouched by this row). Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "resource.delta",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "pending-content"
     },
     {
       "kindId": "resource.economy",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 25,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     },
     {
       "kindId": "status.apply",
       "channel": "",
       "coeffMilli": 333,
       "referenceScale": 1,
-      "note": "SWEEP-FITTED 2026-09-05 by scripts/sweep-power-coefficients.py against the real SHIPPED catalog (data/seed/atoms/*.json), median of the 6 real status.apply atoms' own `duration` Value param (2,3,3,4,5,5 -> median 3), pinned to the same 1000-point reference the four stat.modify channel rows use. Was a flat 1000 pass-through, which priced a median status application at 3000 points -- 3x a median stat atom -- purely because nothing had ever measured it. Corrects an earlier claim in this file that status.apply had 'no real corpus': it does, in the shipped catalog; only the GENERATED tree was ever globbed."
+      "note": "SWEEP-FITTED 2026-09-05 by scripts/sweep-power-coefficients.py against the real SHIPPED catalog (data/seed/atoms/*.json), median of the 6 real status.apply atoms' own `duration` Value param (2,3,3,4,5,5 -> median 3), pinned to the same 1000-point reference the four stat.modify channel rows use. Was a flat 1000 pass-through, which priced a median status application at 3000 points -- 3x a median stat atom -- purely because nothing had ever measured it. Corrects an earlier claim in this file that status.apply had 'no real corpus': it does, in the shipped catalog; only the GENERATED tree was ever globbed.",
+      "tuningClass": "fitted"
     },
     {
       "kindId": "status.clear",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     },
     {
       "kindId": "shield.grant",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 10,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     },
     {
       "kindId": "spawn.entity",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "separate-path"
     },
     {
       "kindId": "board.action",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     },
     {
       "kindId": "grid.spawn",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     },
     {
       "kindId": "grid.clear",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     },
     {
       "kindId": "box.set",
       "channel": "",
       "coeffMilli": 1000,
       "referenceScale": 1,
-      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning."
+      "note": "Pass-through of CoefficientTable.Authored()'s existing value -- NOT sweep-fitted, no real corpus. Same DB-fallback-bypass fix as the arm1 row's note above; see it for the full reasoning.",
+      "tuningClass": "policy"
     }
   ]
 }

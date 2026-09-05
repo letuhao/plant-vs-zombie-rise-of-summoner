@@ -28,6 +28,77 @@ public class RerollPolicyTests
             Pool = pool.Select(p => new ContainerPoolRow(p, 100, "grp." + p)).ToList(),
         };
 
+    // ---- the real-draw fixture (2026-09-05, the Mixed reroll) ---------------------------------------
+    // Atoms and affixes shaped the way `affix-library` emits them: single-concrete-ref affixes 1:1
+    // over the atom catalog, plus one hand-authored multi-ref bundle (the only shape `AffixValidator`
+    // ever derives `Mixed` from) and two slot-bearing bundles for the residual refusal.
+
+    static readonly Dictionary<string, AtomRow> AtomCatalog = new(StringComparer.Ordinal);
+    static readonly Dictionary<string, AffixRow> AffixCatalog = new(StringComparer.Ordinal);
+
+    static RerollPolicyTests()
+    {
+        void Atom(string family)
+        {
+            var id = AtomRow.DeriveId(family, "", 1);
+            AtomCatalog[id] = new AtomRow
+            {
+                AtomId = id, KindId = "stat.modify", FamilyId = family, Variant = "", Tier = 1,
+                ParamsJson = "{\"channel\":\"atk\",\"op\":\"flat\",\"amount\":10}",
+            };
+        }
+
+        foreach (var f in new[] { "atom.vitality", "atom.thorns", "atom.might", "atom.guard" }) Atom(f);
+
+        AffixCatalog["affix.mixed"] = new AffixRow("affix.mixed", AffixClass.Mixed, new[]
+        {
+            new AffixRefRow(1, "atom.vitality.t1"), new AffixRefRow(2, "atom.thorns.t1"),
+        });
+        AffixCatalog["affix.p1"] = new AffixRow("affix.p1", AffixClass.Prefix, new[] { new AffixRefRow(1, "atom.might.t1") });
+        AffixCatalog["affix.s1"] = new AffixRow("affix.s1", AffixClass.Suffix, new[] { new AffixRefRow(1, "atom.guard.t1") });
+        AffixCatalog["affix.slotted"] = new AffixRow("affix.slotted", AffixClass.Prefix, new[]
+        {
+            new AffixRefRow(1, null, "E1", "element", 1, "atom.ember-power.$E1"),
+        });
+        AffixCatalog["affix.slotted-mixed"] = new AffixRow("affix.slotted-mixed", AffixClass.Mixed, new[]
+        {
+            new AffixRefRow(1, "atom.vitality.t1"),
+            new AffixRefRow(2, null, "E1", "element", 1, "atom.ember-power.$E1"),
+        });
+    }
+
+    static AtomRow? LookupAtom(string id) => AtomCatalog.TryGetValue(id, out var a) ? a : null;
+    static AffixRow? LookupAffix(string id) => AffixCatalog.TryGetValue(id, out var a) ? a : null;
+
+    /// <summary>One prefix roll and one suffix roll, over a pool that can satisfy them either as one
+    /// `Mixed` bundle or as a plain prefix plus a plain suffix — the shape a Mixed reroll has to
+    /// handle both ways round.</summary>
+    static ContainerRow MixedRerollContainer() => new()
+    {
+        ContainerId = "item.mixed-reroll",
+        Kind = ContainerKind.Item,
+        Rarity = "almanac",
+        PrefixRolls = 1,
+        SuffixRolls = 1,
+        MinTier = 1,
+        MaxTier = 1,
+        Pool = new[]
+        {
+            new ContainerPoolRow("affix.mixed", 50, "grp.mixed"),
+            new ContainerPoolRow("affix.p1", 50, "grp.p1"),
+            new ContainerPoolRow("affix.s1", 100, "grp.s1"),
+        },
+    };
+
+    /// <summary>A drawn affix id, read back into the record `ValidatePostOp` checks — class from the
+    /// catalog, group from the container's own pool row, tier from the affix's first concrete ref.</summary>
+    static DrawnAffix AsDrawn(int seq, string affixId)
+    {
+        var affix = LookupAffix(affixId)!;
+        var tier = LookupAtom(affix.Refs.First(r => r.AtomId is not null).AtomId!)!.Tier;
+        return new DrawnAffix(seq, affixId, "grp." + affixId["affix.".Length..], affix.Class!.Value, tier);
+    }
+
     // ---- §2, the platform correction ----------------------------------------------------------------
 
     [Fact]
@@ -83,21 +154,140 @@ public class RerollPolicyTests
         Assert.Throws<OverflowException>(() => RerollPolicy.AnchorMultiplier(new BudgetTargets(64, 0, 1, 0)));
     }
 
-    [Fact]
-    public void Rerolling_a_mixed_affix_redraws_into_both_budgets_or_is_refused()
-    {
-        // §2's Mixed hazard, DECIDED rather than discovered: until module 2 (resolution-order) lands
-        // the real "one draw consumes both budgets" semantics, a reroll targeting a Mixed affix is
-        // refused by name instead of building a second simplification on top of the first.
-        var mixed = new DrawnAffix(3, "affix.mixed", "grp.mixed", AffixClass.Mixed, 4);
-        var refusal = RerollPolicy.ValidateRerollable(new[] { mixed }, resolutionOrderLanded: false);
-        Assert.Equal(AtomRejectionReason.ContentRuleViolated, refusal.Reason);
-        Assert.Contains("reroll.mixed-affix-undefined", refusal.Detail);
-        Assert.Contains("module 2", refusal.Detail);
+    // ---- §2's Mixed hazard: BUILT 2026-09-05, no longer refused ------------------------------------
 
-        // And it stops being a refusal the day that module lands — the gate is a parameter, not a
-        // permanent wall.
-        Assert.True(RerollPolicy.ValidateRerollable(new[] { mixed }, resolutionOrderLanded: true).IsOk);
+    [Fact]
+    public void Rerolling_a_mixed_affix_is_no_longer_refused_now_that_the_draw_carries_A1_semantics()
+    {
+        // ⭐ `reroll.mixed-affix-undefined` is GONE with its reason. It named module 2
+        // (`resolution-order`) as the blocker; that module landed 2026-09-02, and its A1 semantics —
+        // one prefix roll AND one suffix roll, spent simultaneously — are now threaded into
+        // `Instantiator.DrawBudget`, which is what a redraw runs through.
+        var mixed = new DrawnAffix(3, "affix.mixed", "grp.mixed", AffixClass.Mixed, 1);
+
+        Assert.True(RerollPolicy.ValidateRerollable(new[] { mixed }, LookupAffix).IsOk);
+    }
+
+    [Fact]
+    public void Rerolling_a_slot_bearing_affix_is_refused_by_name_and_the_refusal_is_class_agnostic()
+    {
+        // The residual, narrowed to what genuinely remains: `Instantiator.DrawBudget` returns bare
+        // atom ids and rolls no domain member, tier or value, so it cannot redraw into a slot. ⚠ A
+        // slot-bearing PREFIX affix is exactly as un-redrawable as a slot-bearing MIXED one — refusing
+        // only Mixed would name the wrong thing and let a real failure through.
+        var slotPrefix = new DrawnAffix(1, "affix.slotted", "grp.slotted", AffixClass.Prefix, 1);
+        var refusal = RerollPolicy.ValidateRerollable(new[] { slotPrefix }, LookupAffix);
+        Assert.Equal(AtomRejectionReason.ContentRuleViolated, refusal.Reason);
+        Assert.Contains("reroll.slot-affix-undefined", refusal.Detail);
+        Assert.Contains("Resolver.Resolve", refusal.Detail);
+
+        var slotMixed = new DrawnAffix(2, "affix.slotted-mixed", "grp.slotted-mixed", AffixClass.Mixed, 1);
+        Assert.Contains("reroll.slot-affix-undefined",
+            RerollPolicy.ValidateRerollable(new[] { slotMixed }, LookupAffix).Detail);
+
+        // A target the affix catalog no longer knows is refused before its refs are read — its own
+        // rule id, not ValidatePostOp's `reroll.affix-outside-pool`, which is about the container.
+        var ghost = new DrawnAffix(9, "affix.ghost", "grp.ghost", AffixClass.Prefix, 1);
+        Assert.Contains("reroll.affix-unknown",
+            RerollPolicy.ValidateRerollable(new[] { ghost }, LookupAffix).Detail);
+    }
+
+    [Fact]
+    public void A_mixed_target_counts_against_both_budgets()
+    {
+        // Rerolling a Mixed affix frees a slot in EACH budget, so it is one target in each. Getting
+        // this wrong is silent: the op would validate and AnchorMultiplier would price a freed suffix
+        // roll as an anchor, which is why the counts are derived here rather than left to a caller.
+        var container = Container(2, 2, 1, 1, "affix.p1", "affix.s1", "affix.mixed");
+        var drawn = new[]
+        {
+            new DrawnAffix(1, "affix.p1", "grp.p1", AffixClass.Prefix, 1),
+            new DrawnAffix(2, "affix.s1", "grp.s1", AffixClass.Suffix, 1),
+            new DrawnAffix(3, "affix.mixed", "grp.mixed", AffixClass.Mixed, 1),
+        };
+
+        var mixedOnly = RerollPolicy.TargetsFor(container, drawn, new[] { 3 });
+        Assert.Equal(1, mixedOnly.TargetPrefix);
+        Assert.Equal(1, mixedOnly.TargetSuffix);
+        // K = (2−1) + (2−1) = 2 anchors, so ANCHOR_MULT = 2^2. Counting the Mixed target in one budget
+        // only would price K = 3 and charge the player for an anchor the redraw actually freed.
+        Assert.Equal(4L, RerollPolicy.AnchorMultiplier(mixedOnly));
+
+        var prefixOnly = RerollPolicy.TargetsFor(container, drawn, new[] { 1 });
+        Assert.Equal(1, prefixOnly.TargetPrefix);
+        Assert.Equal(0, prefixOnly.TargetSuffix);
+        Assert.Equal(8L, RerollPolicy.AnchorMultiplier(prefixOnly)); // K = 1 + 2 = 3
+    }
+
+    [Fact]
+    public void A_partial_reroll_of_a_mixed_affix_redraws_into_both_budgets_and_validates_as_freshly_instantiated()
+    {
+        // ⭐ End to end, through the real draw. The container authors one prefix roll and one suffix
+        // roll; the item currently holds a Mixed affix (which occupies BOTH). Rerolling it must
+        // produce either another Mixed bundle, or one plain prefix plus one plain suffix — and either
+        // way `ValidatePostOp` must accept the result as something the generator could have dropped.
+        var container = MixedRerollContainer();
+        var drawn = new[] { new DrawnAffix(1, "affix.mixed", "grp.mixed", AffixClass.Mixed, 1) };
+        var targets = RerollPolicy.TargetsFor(container, drawn, new[] { 1 });
+
+        Assert.True(RerollPolicy.ValidateTargets(targets).IsOk);
+        Assert.True(RerollPolicy.ValidateRerollable(drawn, LookupAffix).IsOk);
+        Assert.Equal(1, targets.TargetPrefix);
+        Assert.Equal(1, targets.TargetSuffix);
+
+        var retainedPrefix = RerollPolicy.RetainedGroups(drawn, new[] { 1 }, AffixClass.Prefix);
+        var retainedSuffix = RerollPolicy.RetainedGroups(drawn, new[] { 1 }, AffixClass.Suffix);
+        Assert.Empty(retainedPrefix); // the only affix was the target
+        Assert.Empty(retainedSuffix);
+
+        var sawMixedRedraw = false;
+        var sawSplitRedraw = false;
+        for (long seed = 0; seed < 40; seed++)
+        {
+            var prefixPass = Instantiator.DrawBudget(
+                container, LookupAtom, LookupAffix, seed, AffixClass.Prefix,
+                targets.TargetPrefix, retainedPrefix, crossBudget: targets.TargetSuffix);
+            var suffixPass = Instantiator.DrawBudget(
+                container, LookupAtom, LookupAffix, seed, AffixClass.Suffix,
+                targets.TargetSuffix - prefixPass.CrossBudgetSpent, retainedSuffix,
+                excludeAffixIds: new HashSet<string>(prefixPass.AffixIds, StringComparer.Ordinal));
+
+            var after = prefixPass.AffixIds.Concat(suffixPass.AffixIds)
+                .Select((affixId, i) => AsDrawn(i + 1, affixId))
+                .ToList();
+
+            if (after.Any(a => a.Class == AffixClass.Mixed))
+            {
+                sawMixedRedraw = true;
+                Assert.Single(after); // one bundle covering both budgets, never two
+            }
+            else
+            {
+                sawSplitRedraw = true;
+                Assert.Equal(2, after.Count); // one prefix + one suffix
+            }
+
+            var postOp = RerollPolicy.ValidatePostOp(container, after);
+            Assert.True(postOp.IsOk, $"seed {seed}: {postOp}");
+        }
+
+        Assert.True(sawMixedRedraw, "no seed redrew a Mixed bundle — the fixture proves nothing");
+        Assert.True(sawSplitRedraw, "every seed redrew a Mixed bundle — the fixture proves nothing");
+    }
+
+    [Fact]
+    public void A_retained_mixed_affix_blocks_its_group_in_both_budgets()
+    {
+        // The other half of the Mixed rule: an affix that consumes both budgets must be excluded from
+        // both when it is RETAINED, or a redraw could pick its group again on the other side.
+        var drawn = new[]
+        {
+            new DrawnAffix(1, "affix.mixed", "grp.mixed", AffixClass.Mixed, 1),
+            new DrawnAffix(2, "affix.p1", "grp.p1", AffixClass.Prefix, 1),
+        };
+
+        Assert.Contains("grp.mixed", RerollPolicy.RetainedGroups(drawn, new[] { 2 }, AffixClass.Prefix));
+        Assert.Contains("grp.mixed", RerollPolicy.RetainedGroups(drawn, new[] { 2 }, AffixClass.Suffix));
     }
 
     [Fact]

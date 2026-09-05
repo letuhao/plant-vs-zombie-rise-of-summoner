@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 import { dispatchGlobalVerb } from "@/shell/keymap";
 import { UnresolvedCount } from "./UnresolvedCount";
 import { TEN_LEGIONS } from "./fixtures/legions";

@@ -227,9 +227,9 @@ was added alongside `max`/`regen` (H.5 supersedes the original §3G's count of 1
 
 | Family | Ids |
 |---|---|
-| `resource.max.{id}` | `hp` · `stamina` · `hunger` · `spirit` · `qi` |
-| `resource.regen.{id}` | same five |
-| `resource.efficiency.{id}` | same five — bounded `0..1`, `SumIncreased` + `Cap: DerivedStatPolicy.ResourceEfficiencyCap` (T4.4: `FlatSum` never applies a Cap) |
+| `resource.max.{id}` | `hp` · `stamina` · `hunger` · `spirit` · `qi` · **`poise`** |
+| `resource.regen.{id}` | same six |
+| `resource.efficiency.{id}` | same six — bounded `0..1`, `SumIncreased` + `Cap: DerivedStatPolicy.ResourceEfficiencyCap` (T4.4: `FlatSum` never applies a Cap) |
 | `move.range` | one channel, `Pool`, `hp`/faction-independent |
 
 Four properties, now proven rather than merely required:
@@ -424,7 +424,7 @@ own design.
 
 #### H.5 Resource — **15** (supersedes §3G's 10)
 
-`resource.max.{id}` · `resource.regen.{id}` · `resource.efficiency.{id}` over the five ids.
+`resource.max.{id}` · `resource.regen.{id}` · `resource.efficiency.{id}` over the six ids (incl. `poise`).
 `max`/`regen` are magnitudes (`long`); `efficiency` is a bounded ratio.
 
 §3G's four properties all still hold unchanged. `resource.efficiency` is the new third family —
@@ -862,7 +862,7 @@ Separate ADR:         P2 progression.bonus.* combat flats
 - [stat-system.md](stat-system.md) — primary Y0 + compose (unchanged ownership)
 - [rpg-progression.md](rpg-progression.md) — type actor grain, power stub vs XP scale
 - [pvz-stats.md](pvz-stats.md) — may contribute catalog channels; not progression power SSOT
-- [resource-hub-ideal.md](resource-hub-ideal.md) — the five resources and their exhaustion mechanic; source for the **proposed** `resource.*` families in §3.G
+- [resource-hub-ssot.md](resource-hub-ssot.md) — the **six** resources (`hp` `stamina` `hunger` `spirit` `qi` `poise`) and their exhaustion mechanic. The `resource.*` families in §3.G are **registered and shipped** (2026-08-25), no longer proposed. ⚠️ `resource-hub-ideal.md` is superseded — reasoning trail only, and it predates `poise`
 - [shield-system-spec.md](shield-system-spec.md) — the four `combat.shield.*` families counted in §3.E
 - [battle-timeline-map.md](battle-timeline-map.md) — owner of `turn.speed` / `turn.haste` and the readiness model in §11.4–5
 - [../research/actor-core-chaos-mapping.md](../research/actor-core-chaos-mapping.md) — level/realm borrow

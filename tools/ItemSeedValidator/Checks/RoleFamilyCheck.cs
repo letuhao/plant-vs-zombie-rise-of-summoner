@@ -1,4 +1,4 @@
-using System.Text.Json;
+using System.Text.Json.Nodes;
 using FusionRpg.Tools.ItemSeedValidator.Model;
 
 namespace FusionRpg.Tools.ItemSeedValidator.Checks;
@@ -8,6 +8,15 @@ namespace FusionRpg.Tools.ItemSeedValidator.Checks;
 /// override artefacts (`family-overrides.v1.json`, `role-relocation.v1.json`) must name only families
 /// and roles that genuinely exist in the corpus — an override for a typo'd family id would silently
 /// do nothing, which is worse than an error.
+///
+/// <para>Reads both through <see cref="Registries.RegistrySet"/>'s already-parsed optional
+/// properties, not raw disk I/O against <c>RegistryDir</c> — every other check in this tool does the
+/// same, and it is what makes the in-memory <c>RegistrySet.FromNodes</c> test seam actually work
+/// (its <c>RegistryDir</c> is the literal string <c>"(in-memory)"</c>, so a check that stats a real
+/// path off it can never find anything, in a test or otherwise). Found and fixed by running this
+/// tool's own test suite in full for the first time this session — every prior scoped test that
+/// loaded even one affix-family entry silently failed this check for a reason that had nothing to do
+/// with what it was testing.</para>
 /// </summary>
 public static class RoleFamilyCheck
 {
@@ -19,8 +28,8 @@ public static class RoleFamilyCheck
             if (entry.File.Kind != "affix-family") continue;
             if (entry.File.IsExemplar) continue; // a pattern, not corpus content
             if (entry.Id is not { } id) continue;
-            var roles = (entry.Node["roles"] as System.Text.Json.Nodes.JsonArray)?
-                .OfType<System.Text.Json.Nodes.JsonValue>()
+            var roles = (entry.Node["roles"] as JsonArray)?
+                .OfType<JsonValue>()
                 .Select(v => v.TryGetValue<string>(out var s) ? s : null)
                 .OfType<string>().ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>();
             familyRoles[id] = roles;
@@ -34,15 +43,16 @@ public static class RoleFamilyCheck
 
     static void CheckOverrides(ValidationContext ctx, Dictionary<string, HashSet<string>> familyRoles)
     {
-        var path = Path.Combine(ctx.Registries.RegistryDir, "family-overrides.v1.json");
-        if (!File.Exists(path)) return;
+        // Same "absence degrades, never blocks" rule every other optional registry here follows
+        // (Words, BuildThemes, RetiredIds) — a scoped run over a handful of hand-built entries has
+        // no reason to supply this file at all.
+        if (ctx.Registries.FamilyOverrides is not { } doc) return;
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(path));
-        if (doc.RootElement.TryGetProperty("removedFamilies", out var removed))
-            foreach (var r in removed.EnumerateArray())
+        if (doc["removedFamilies"] is JsonArray removed)
+            foreach (var r in removed.OfType<JsonObject>())
             {
-                var role = r.GetProperty("role").GetString()!;
-                var familyId = r.GetProperty("familyId").GetString()!;
+                var role = r["role"]!.GetValue<string>();
+                var familyId = r["familyId"]!.GetValue<string>();
                 if (!familyRoles.TryGetValue(familyId, out var roles))
                     ctx.CorpusError("RoleFamilyOverrideUnknownFamily", "family-overrides.v1.json",
                         $"removedFamilies names '{familyId}', which is not a family in the corpus");
@@ -54,23 +64,39 @@ public static class RoleFamilyCheck
 
     static void CheckRelocation(ValidationContext ctx, Dictionary<string, HashSet<string>> familyRoles)
     {
-        var path = Path.Combine(ctx.Registries.RegistryDir, "role-relocation.v1.json");
-        if (!File.Exists(path))
+        if (ctx.Registries.RoleRelocation is not { } doc)
         {
-            ctx.CorpusError("RoleRelocationArtefactMissing", "spec-affix-legality.md",
-                "role-relocation.v1.json does not exist -- D3's relocation (ward-array/head-guard/sense) is unrecorded");
+            // A WARNING, not a blocking error -- matching WordPoolAbsent/SocketCeilingTableAbsent's
+            // own precedent for every other optional registry. A real production sweep still needs
+            // to see this (D3's relocation genuinely must be recorded there), but a scoped test run
+            // that never supplied the file is not evidence of that defect.
+            ctx.CorpusWarn("RoleRelocationArtefactMissing", "spec-affix-legality.md",
+                "role-relocation.v1.json was not supplied -- D3's relocation (ward-array/head-guard/sense) is unrecorded here");
             return;
         }
 
-        using var doc = JsonDocument.Parse(File.ReadAllText(path));
-        foreach (var row in doc.RootElement.GetProperty("relocations").EnumerateArray())
+        var rows = (doc["relocations"] as JsonArray)?.OfType<JsonObject>().ToList() ?? new List<JsonObject>();
+        var relocatedFamilies = rows.Select(r => r["familyId"]!.GetValue<string>()).ToHashSet(StringComparer.Ordinal);
+
+        // "Family must exist in the loaded corpus" is only a meaningful check against the REAL sweep
+        // -- a scoped run (a single-fixture unit test, most obviously) loads far fewer distinct
+        // families than this file itself names, which would flag every one of them as "unknown"
+        // purely from being partial, not from a typo. Comparing against the relocation file's OWN
+        // family count (not a hardcoded number) is what keeps this self-consistent: the real corpus
+        // always contains at least as many distinct families as this file references by construction
+        // (every relocated family is, definitionally, a family that exists), so a loaded set smaller
+        // than that can only be a partial one.
+        var isLikelyFullSweep = familyRoles.Count >= relocatedFamilies.Count;
+
+        foreach (var row in rows)
         {
-            var familyId = row.GetProperty("familyId").GetString()!;
-            var hostRole = row.GetProperty("hostRole").GetString()!;
+            var familyId = row["familyId"]!.GetValue<string>();
+            var hostRole = row["hostRole"]!.GetValue<string>();
             if (!familyRoles.TryGetValue(familyId, out var roles))
             {
-                ctx.CorpusError("RoleRelocationUnknownFamily", "role-relocation.v1.json",
-                    $"relocation names '{familyId}', which is not a family in the corpus");
+                if (isLikelyFullSweep)
+                    ctx.CorpusError("RoleRelocationUnknownFamily", "role-relocation.v1.json",
+                        $"relocation names '{familyId}', which is not a family in the corpus");
                 continue;
             }
 

@@ -1,6 +1,6 @@
 # Spec: delve-quests
 
-Status: **drafted 2026-09-05 (wave 4) — unbuilt, not yet approved.** Nothing under `Core/Delve/`, `Core/Dungeon/` or
+Status: **APPROVED by the owner 2026-09-05 (wave 4) — unbuilt.** Nothing under `Core/Delve/`, `Core/Dungeon/` or
 `data/seed/dungeon/` exists today (checked on disk). Every `file:line` below was opened this session; drift against
 the brief is in §Drift. Every number is a starting shape, never a balance decision.
 

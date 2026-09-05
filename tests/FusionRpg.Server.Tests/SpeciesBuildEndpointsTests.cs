@@ -10,6 +10,7 @@ using FusionRpg.Data.Sqlite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Xunit;
@@ -246,6 +247,61 @@ public class SpeciesBuildEndpointsTests : IAsyncLifetime
         var body = await resp.Content.ReadFromJsonAsync<System.Text.Json.JsonElement>();
         Assert.Equal("aptitudes.overbudget", body.GetProperty("reason").GetString());
         Assert.Equal(balanceBefore, _store.GetSoulBalance(_playerId).Balance); // refused before any spend
+    }
+
+    [Fact]
+    public async Task Respec_notifies_a_client_joined_as_injector_not_just_web()
+    {
+        // Same ⛔ this session already found and fixed once for the Commander/species allocation
+        // endpoints (AptitudeEndpoints.cs) -- an injector connection only ever joins InjectorGroup, so
+        // a WebGroup-only send would leave the injector's own CheatState.SpeciesAllocation stale.
+        // Ported from the now-retired `/api/aptitudes/species/allocate` route's own coverage
+        // (species-build-todo.md's bypass retirement) so this regression stays covered on the surface
+        // that actually writes species overrides now.
+        var received = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var hub = new HubConnectionBuilder()
+            .WithUrl($"{_http.BaseAddress}hub/rpg").Build();
+        hub.On<object>("AptitudesUpdated", _ => received.TrySetResult(true));
+        await hub.StartAsync();
+        await hub.InvokeAsync("Join", RpgConstants.InjectorGroup);
+
+        var resp = await _http.PostAsJsonAsync("/api/species-build/respec", new
+        {
+            playerId = _playerId,
+            speciesId = "fumeshroom",
+            shares = new Dictionary<string, long> { ["Ferocity"] = 1 },
+            correlationId = "notify-injector"
+        });
+        resp.EnsureSuccessStatusCode();
+
+        var got = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.True(got, "a species respec never reached an injector-group connection " +
+            "(the exact WebGroup-only defect this module's spec calls out by name)");
+        await hub.DisposeAsync();
+    }
+
+    [Fact]
+    public async Task Respec_still_notifies_a_client_joined_as_web()
+    {
+        var received = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        var hub = new HubConnectionBuilder()
+            .WithUrl($"{_http.BaseAddress}hub/rpg").Build();
+        hub.On<object>("AptitudesUpdated", _ => received.TrySetResult(true));
+        await hub.StartAsync();
+        await hub.InvokeAsync("Join", RpgConstants.WebGroup);
+
+        var resp = await _http.PostAsJsonAsync("/api/species-build/respec", new
+        {
+            playerId = _playerId,
+            speciesId = "fumeshroom",
+            shares = new Dictionary<string, long> { ["Ferocity"] = 1 },
+            correlationId = "notify-web"
+        });
+        resp.EnsureSuccessStatusCode();
+
+        var got = await received.Task.WaitAsync(TimeSpan.FromSeconds(5));
+        Assert.True(got, "regression: the web-group notification broke for the respec route");
+        await hub.DisposeAsync();
     }
 
     [Fact]

@@ -96,6 +96,23 @@ public sealed record BoardProjection
     public ulong WorldSeed { get; init; }
     public BoardEdge AttackerEdge { get; init; }
 
+    /// <summary>
+    /// base-defense `siege-resolver` (module 15): the sector's own development level, additive and
+    /// defaulted to 0 (every battle kind that predates this field constructs the identical record it
+    /// always did). `DistrictLayout.Build` reads a sector's `DevelopmentLevel` for board side (via
+    /// `SideFor`) and `StructurePolicy.MaxHpOf` reads it for structure HP — the resolver needs this
+    /// number to reconstruct a board without holding a live `WorldSector` reference across the seam.
+    /// </summary>
+    public int DevelopmentLevel { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-resolver`: the sector's own type id, additive and defaulted to `""`.
+    /// `DistrictLayout.Build` reads it (via `SectorTypeCatalog`) to decide the Fortress rampart bonus —
+    /// omitting it would silently drop that bonus for every district assault, which is a worse defect
+    /// than the field looking redundant next to `SectorId`.
+    /// </summary>
+    public string SectorTypeId { get; init; } = "";
+
     /// <summary>Slot index → what stands there. Empty is legal — a district with no structures.</summary>
     public IReadOnlyList<SlotProjection> Slots { get; init; } = Array.Empty<SlotProjection>();
 }
@@ -108,6 +125,22 @@ public sealed record SlotProjection
     public string SlotTypeId { get; init; } = "";
     public string? StructureId { get; init; }
     public string? OwnerFactionId { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-resolver`: additive, defaulted to <see cref="SlotState.Intact"/> — every
+    /// battle kind that predates this field constructs the identical record it always did.
+    /// `DistrictLayout.Build` reads a slot's state to render a Ruined/Depleted slot as Rough terrain
+    /// (rubble, no structure) rather than Open ground.
+    /// </summary>
+    public SlotState State { get; init; } = SlotState.Intact;
+
+    /// <summary>
+    /// base-defense `siege-resolver`: mirrors <see cref="WorldSlot.StructureHp"/> — null means
+    /// undamaged (full `StructureDef.MaxHpOf`), additive and defaulted to null so every existing
+    /// caller constructs the identical record it always did. Without this, a structure entering a
+    /// second engagement would silently re-enter at full health regardless of prior damage.
+    /// </summary>
+    public long? StructureHp { get; init; }
 }
 
 /// <summary>
@@ -169,6 +202,24 @@ public sealed record BattleOutcome
     /// <summary>What happened to each slot on the board. Empty for every battle that has no board —
     /// the same default-is-today's-behaviour discipline as <see cref="BattleRequest.Board"/>.</summary>
     public IReadOnlyList<SlotOutcome> SlotResults { get; init; } = Array.Empty<SlotOutcome>();
+
+    /// <summary>
+    /// base-defense `siege-resolver` §2 rule 8: stamp every resolution so a version mismatch between
+    /// an original and a re-derived report is detectable rather than silently accepted. All three
+    /// default to 0/null — every battle kind that predates this field, and every district assault
+    /// resolved before this landed, constructs the identical outcome it always did.
+    /// </summary>
+    public int EngineVersion { get; init; }
+    public int RulesetVersion { get; init; }
+    public ulong? Seed { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-engagement` (module 20, decision 24): how this engagement ended, for a
+    /// `BattleKinds.District` battle only. Null for every other kind, and for every district battle
+    /// resolved before this landed — the same default-is-today's-behaviour discipline every prior
+    /// `siege-seam` field addition used.
+    /// </summary>
+    public EngagementExit? Exit { get; init; }
 }
 
 /// <summary>One board slot's result at the end of a district assault.</summary>

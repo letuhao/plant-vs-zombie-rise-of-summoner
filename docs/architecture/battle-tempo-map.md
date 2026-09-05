@@ -125,8 +125,14 @@ combat runs on, and every dormant capability below hangs off it:
 | `forecast-rail` | A player surface consuming `TurnOrderForecast` — the ideal's §7 "free read-model", built with zero consumers. | `action-timing`, `tempo-content` |
 | `timeline-dispatch` | ✅ **D14's fix — BUILT and MEASURED.** [spec-timeline-dispatch.md](battle-tempo/spec-timeline-dispatch.md). A local, per-round discrete-event dispatch (`RunTimelineActionPhase`) behind `BattleModeProfile.UsesTimelineDispatch` (default `false`, unset by every catalog row) proves `W` (+12.92pp win rate) and `Commitment` (−0.725 rounds-to-win) both non-zero through the real `BattleEngine.Resolve`, on synthetic profiles only. Every shipped profile byte-identical. Also live-wires `reaction-lane`'s `RL2` counter mechanism, surfacing a separate composer gap (see D14's own entry). | `action-timing`, `commitment-binding` |
 
+| `battle-resources` | 📋 **Specced 2026-09-05, unbuilt.** [spec-battle-resources.md](battle-tempo/spec-battle-resources.md). Closes the gap `TD4` surfaced: `BattleStatComposer.cs:120-128` seeds **no `resource.*` channel**, so every battle actor holds all six pools at max 0 and no action in a battle can cost anything — `reaction-lane`'s counter declines every time by correct logic on empty input. ⛔ Seeds **all six** ids by looping `ResourceIds`, not `poise` alone: `resource-hub-ssot.md` §8's six-coverage rule is normative and calls a subset a defect. Baselines derive through `P(Θ)` via `BattleRuleset` (no private curve); coefficients ship in `battle-resources.v1.json` marked `unmeasured`. **Unblocks `RL2` → complete and `RL3` → measurable.** | `reaction-lane` (`RL2`), `timeline-dispatch` |
+
 **Build order:** `action-timing` · `tempo-content` · `poise-unification` (parallel roots) →
-`commitment-binding` → `reaction-lane` · `forecast-rail`
+`commitment-binding` → `timeline-dispatch` → `reaction-lane` · `forecast-rail` → `battle-resources`
+
+⚠️ `timeline-dispatch` was added mid-program (D14's fix) and is a real dependency of `reaction-lane`'s
+live wiring (`TD4`), but the graph above omitted it until 2026-09-05. `battle-resources` is the newest
+module and sits last because it needs `RL2`'s mechanism to exist before it has anything to feed.
 
 ⭐ **`poise-unification` is a root and can be built first, alone.** It touches no battle path, moves no
 golden, and is the only module that can land before the `action-timing` re-bless without waiting on

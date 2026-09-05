@@ -98,12 +98,42 @@ const BUS_TYPE_IMPORT_PATTERN = /from\s+["']@\/lib\/bus/;
 const DTO_IDENTIFIER_PATTERN = /\b[A-Z]\w*Dto\b/;
 const CONTRACT_IMPORT_PATTERN = /from\s+["'](?:@\/)?(?:\.\.?\/)*contract\//;
 
+/**
+ * world-stage (2026-09-05): six files carrying forward a **pre-existing** exception, not new debt.
+ * `worldSelection.ts`, `worldViewModel.ts`, `turnPlayback.ts`, `commanderIntent.ts`, `labels.ts` and
+ * `playbackKeyframes.ts` touched the raw wire shape directly from the day they were written — the
+ * same already-sanctioned reason `WorldStage.tsx`'s own doc comment gives for `dto.factions.find(...)`
+ * and `toGraph(dto)`: nothing has adapted a legion's route-relevant fields, a faction, a turn report's
+ * container, or a submitted command's own shape into the view contract yet, because no `stages/`
+ * component has ever needed a simplified *view* of any of them — every caller of these files wants
+ * the wire shape exactly as it is. They lived outside every guarded directory (`features/world/`)
+ * until this pass moved them under `stages/world/` to retire that directory per the plan's own
+ * architecture decision; the move is real, the exception on these six files is not — only
+ * `contract/adapt.ts` had the actual, narrower adapters (`adaptWorldLegion`, `adaptWorldForce`,
+ * `adaptWorldSector`, `adaptWorldState`, `adaptWorldTurnEvent`) these files could have borrowed types
+ * from structurally, and even those cover only some of what these six need (nothing adapts a whole
+ * `WorldTurnReportDto`, a `WorldFactionDto`, or `WorldCommandRequest` today, and inventing that now
+ * would be a new View type with no renderer asking for one). **Not a precedent** — any other file
+ * under `stages/`, `layers/` or `ui/` still may never import a REST DTO type; this list exists so the
+ * six specific files that already had this exception keep it, named and dated, rather than silently
+ * reopening the hole `W3`'s own history above already tells the story of closing.
+ */
+const LEGACY_WORLD_MODEL_ALLOWED_PATHS = new Set([
+  "stages/world/worldSelection.ts",
+  "stages/world/worldViewModel.ts",
+  "stages/world/turnPlayback.ts",
+  "stages/world/commanderIntent.ts",
+  "stages/world/labels.ts",
+  "stages/world/playbackKeyframes.ts"
+]);
+
 function isTypeImportLine(line: string): boolean {
   return /^\s*import\s+type\s+\{/.test(line) || /\{\s*[^}]*\btype\s+[A-Z]\w*/.test(line);
 }
 
-function isForbiddenDtoImport(line: string): boolean {
+function isForbiddenDtoImport(line: string, relPath: string): boolean {
   if (!isTypeImportLine(line)) return false;
+  if (LEGACY_WORLD_MODEL_ALLOWED_PATHS.has(relPath)) return false;
   if (BUS_TYPE_IMPORT_PATTERN.test(line)) return true;
   if (CONTRACT_IMPORT_PATTERN.test(line)) return false; // src/contract/ is the one exempt place
   return DTO_IDENTIFIER_PATTERN.test(line);
@@ -116,7 +146,7 @@ export function scanForRestDtoImports(srcDir: string): GuardViolation[] {
       const relPath = relative(srcDir, filePath).split("\\").join("/");
       const lines = readFileSync(filePath, "utf8").split(/\r?\n/);
       lines.forEach((line, index) => {
-        if (isForbiddenDtoImport(line)) {
+        if (isForbiddenDtoImport(line, relPath)) {
           violations.push({ file: relPath, line: index + 1, text: line.trim() });
         }
       });

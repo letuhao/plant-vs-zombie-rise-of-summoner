@@ -9,14 +9,16 @@ in-game UI the injector draws. It does **not** govern developer tooling — see 
 **Read with:** [DESIGN-GATE.md](../DESIGN-GATE.md) · [web/spec.md](../web/spec.md) (current FE
 contract) · [fe-game-foundation.md](fe-game-foundation.md) (DPLP plane locks) ·
 [launcher/overlay-spec.md](../launcher/overlay-spec.md) (the native overlay layer) ·
-[decisions.md](decisions.md) rows *Standalone-first* and *Game / web overlay*.
+[decisions.md](decisions.md) rows *Standalone-first*, *Product vision*, and *Game / web overlay*.
 
 **Why this file exists.** The FE was specified as an *audit UI* — `web/spec.md` still calls it
 "Dark Lawn Almanac audit UI" and the sidebar component is literally `AuditNav` with the heading
-`AUDIT`. Then `decisions.md` locked **standalone-first: "The web RPG is the core game; PvZ is
-extension gameplay."** The product became a game; the interface stayed a diagnostic tool. Every
-symptom named in review — "doesn't feel like a game menu", "not friendly" — comes from that one
-unpaid migration. This file is the target the FE refactor is measured against.
+`AUDIT`. Then `decisions.md` locked **standalone-first** as a **capability** rule (web/SIM must
+always work; injector enriches, never permanently gates). The product vision is RPG + empire with
+the lawn as a first core loop — see [../guide/the-game.md](../guide/the-game.md). The product became
+a game; the interface stayed a diagnostic tool. Every symptom named in review — "doesn't feel like
+a game menu", "not friendly" — comes from that unpaid migration. This file is the target the FE
+refactor is measured against.
 
 ---
 
@@ -535,7 +537,10 @@ never gates them.
 
 **Why.** This is `decisions.md`'s standalone-first lock restated at the UI layer, because the UI is
 where it is easiest to break by accident — an empty state that says "start the game to see this" is
-a gate.
+a gate. That lock is **capability**: unlocked surfaces stay usable with Fusion closed. It is not a
+claim that the product is "web-only until you bother with Fusion." Player pitch is lawn-first RPG +
+empire ([../guide/the-game.md](../guide/the-game.md)); GG-39 forbids gating a shipped surface on the
+injector being present.
 
 ---
 
@@ -979,7 +984,7 @@ can overturn one without unpicking the rest. Full detail and consequences:
 
 ### 20.3 Resource model — settled, and the GUI takes no position anyway
 
-**Settled 2026-08-22:** five actor resources in one shared set — `hp` · `stamina` · `hunger` ·
+**Settled 2026-08-22:** six actor resources in one shared set (`poise` added 2026-08-26) — `hp` · `stamina` · `hunger` ·
 `spirit` · `qi` — with **faction differences as display labels only** (plant shows `hunger` as
 *Sun* and `qi` as *Yang*; zombie shows `qi` as *Yin*). No branch, no faction-specific ids.
 SSOT: [resource-hub-ssot.md](resource-hub-ssot.md).

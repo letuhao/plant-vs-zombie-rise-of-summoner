@@ -986,7 +986,7 @@ a squad battle's, and vice versa. That is a real benefit and it is not free. Fro
 | `app/AppShell.tsx:15` `NON_SCROLLING_ROUTES` | A camera-owning stage must add its path or the outlet grows the page |
 | `shell/railState.ts:31` `currentStageId` | If the stage renders the `<Rail>`. **Note: `"battle"` is already in this union with no stage behind it** — after this decision there will be *two* declared-but-unbuilt ids unless `#/battle` lands first |
 | `shell/bandGuard.ts:97-111` | If it renders `DialogShell` / `band-dialog` |
-| `i18n/vocabularyGuard.ts:16-33` | If any engine vocabulary reaches the surface — GG-23 is a Tier-1 gate |
+| `i18n/vocabularyGuard.ts:16-37` | If any engine vocabulary reaches the surface — GG-23 is a Tier-1 gate |
 | `scripts/check-bundle.mjs:49` | A Phaser stage must stay lazy or the build fails |
 | `theme/hexGuard.ts:25` | No hex colour literals in `stages/` — only `game/` is exempt |
 

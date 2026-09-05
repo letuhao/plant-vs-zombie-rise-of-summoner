@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDemonRoster, usePlayers, useSpeciesIndex } from "@/lib/bus";
 import { newCorrelationId } from "@/lib/bus/demons";
 import { usePatron, useSetPatron } from "@/lib/bus/patron";
@@ -50,6 +51,7 @@ function PactPortrait({ rarity, initial }: { rarity: string; initial: string }) 
  * pure benefit, no downside term) — shown honestly as a benefit only, not invented.
  */
 export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  const navigate = useNavigate();
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 0;
   const roster = useDemonRoster(playerId);
@@ -117,7 +119,19 @@ export function PactsLayer({ open, onOpenChange }: { open: boolean; onOpenChange
           </Button>
         </Banner>
       ) : rows.length === 0 ? (
-        <EmptyState title="No pacts yet" hint="Bind a demon's contract from the Demons roster to see it here." />
+        // G4 (species-build-todo.md): Pacts stays locked until a first contract exists
+        // (railState.ts's hasAnyContract), and the only UI that binds one lives on `/demons` —
+        // which nothing else in the app links to. This hint already named "the Demons roster";
+        // now it's a real link there instead of just text that mentions it.
+        <EmptyState
+          title="No pacts yet"
+          hint="Bind a demon's contract from the Demons roster to see it here."
+          action={
+            <Button size="sm" onClick={() => navigate("/demons")} data-testid="pacts-empty-open-demons">
+              Open Demons roster
+            </Button>
+          }
+        />
       ) : (
         <div className="grid grid-cols-2 gap-3" data-testid="pacts-grid">
           {rows.map((c) => {

@@ -1,4 +1,4 @@
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 
 export type QueuedOrdersProps = {
   orders: PendingOrder[];

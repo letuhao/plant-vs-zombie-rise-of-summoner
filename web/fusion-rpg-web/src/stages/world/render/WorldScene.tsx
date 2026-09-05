@@ -1,7 +1,7 @@
 import "./scene.css";
 import type { AdaptedWorldState } from "@/contract/adapt";
 import type { SlotView } from "@/contract/types";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 import { RangeOverlay, type RangeTarget } from "@/stages/world/targeting/RangeOverlay";
 import { BlockedTarget } from "@/stages/world/targeting/BlockedTarget";
 import { placementFor } from "@/stages/world/targeting/blockedPlacement";

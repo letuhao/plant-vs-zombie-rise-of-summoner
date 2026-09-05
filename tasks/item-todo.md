@@ -16,8 +16,18 @@ No task is done until its verification command is green.
       `consumable` D27 did not mint). `ContainerRow.cs:7-14` ships six values and none of them.
       Owner: **effect-atom**. ⛔ Gates modules **12, 13, 16, 18, 21**
 - [ ] **X4** — L0 pool composition (`effect-pipeline/spec-affix-channel-weights.md`, specced/unbuilt).
-      Owner: **effect-pipeline**. Gates **11, 13, 15, 16, 17**
-- [ ] **X6** — `E44 power-sweep`; the 20 coefficients are flat at `CoeffMilli = 1000`.
+      Owner: **effect-pipeline**. Gates **11, 13, 15, ~~16~~, 17**. ✅ **Re-scoped 2026-09-05: it does
+      NOT gate module 16.** P4.3 (`sockets`, BUILT AND VERIFIED) has no dependency on L0 pool
+      composition or `affix_channel` weighting — `ResonanceGenerator`/`CombinationEvaluator` grant off
+      recipes and inserted atoms, a mechanism X4 never touches, and `spec-sockets.md` never names X4 or
+      `affix_channel`. Landing X4 remains effect-pipeline's, still gating **11, 13, 15, 17**
+- [ ] **X6** — `E44 power-sweep`; ⚠ **Partially landed 2026-09-05** (`scripts/sweep-power-coefficients.py`,
+      `docs/research/power/sweep-power-coefficients-2026-09-05.md`): 5 of the 20 `CoefficientTable.Authored()`
+      channels are now fitted in `data/seed/power/coefficients.v1.json` (`hp`/`maxHp`=135, `atk`=222,
+      `defense`=500, `status.apply`=333), replacing their flat `CoeffMilli = 1000`. The remaining 15 stay
+      flat at 1000, honestly marked `pending-content`/`policy` for lack of a real corpus — and
+      `CoefficientTable.Authored()`'s own code fallback is unchanged. §4.2's non-additive D2 correction is
+      untouched by this sweep.
       Owner: **effect-atom**. Gates module **9**
 - [ ] **D28 / E43** — family tags stamped into `AtomRow.TagsJson`. Owner: **effect-atom**.
       Gates module **8** (every tag-gated rule is inert without it)
@@ -27,8 +37,11 @@ No task is done until its verification command is green.
       (`SocketOperations.BindOrdinalFor(i) = i + 1`, content-derived); the column and the comparer arm
       stay effect-atom's, and the comparer **has no implementation anywhere yet**, so nothing is broken
       today. Landing it later is a wiring change, not a design one
-- [x] **X3** — ✅ **D36: nothing to do.** `action-corpus` owns `ActionSeeder.Generate` and is under
-      active construction by another owner. We consume a production caller when one ships. ⛔ **Do not
+- [x] **X3** — ✅ **D36: nothing to do.** `action-corpus` owns the production caller `ActionSeeder.Generate`
+      still lacks — the method itself already shipped under the (closed) `action` program (`ActionSeeder.cs`,
+      spec-action-seeding.md A13), and `action-corpus`'s own map explicitly disclaims building it.
+      `action-corpus` is under active construction by another owner. We consume that caller when one
+      ships. ⛔ **Do not
       file a request against their map, propose amendments to their scope, or read their documents to
       infer their schedule.** Gates module **19** only; module 19 ships GA2 standalone meanwhile
 - [ ] **X2 residue** — `E42 units-correction` closed its gate 2026-09-03, but **`ssot-affixes.md` was
@@ -55,8 +68,9 @@ today: 292 + 94).~~
 denominator, and the Verify line above would have certified a still-broken registry as complete.**
 The files under `data/seed/demons/species/{plant,zombie}/` are **family** files, each holding many
 species; `_index.json` is a flat `{speciesId: "plant/family.json"}` map and it is the species list.
-Measured: **840 species across 495 family files** (both move — the concurrent stream is rewriting the
-tree). So the gap `theme-refresh` closes is **84 of 840 — 772 uncovered**, not 84 of 386.
+Measured: **840 species across 503 family files** (both move — the concurrent stream is rewriting the
+tree; family-file count alone already moved from 495 on 2026-09-04 to 503 on 2026-09-05, species count
+held). So the gap `theme-refresh` closes is **84 of 840 — 772 uncovered**, not 84 of 386.
 
 ⛔ **And 16 published themes are ORPHANS** — they name a `speciesId` the anchor tree no longer ships
 (`cherrygatling`, `cherrypaperzombie`, `cornpot`, `dancepolzombie`, `dolldiamond`, …). A republish
@@ -119,7 +133,7 @@ with plant **bodies**).
 **`classes.v1.json` → registryVersion 4 (D35):**
 
 - [ ] Lift the **32-family** global exclusion — its stated reason (*"quarantined None/None/None (D6);
-      no executor until E12"*) expired when `AtomKindRegistry.cs:255` shipped `Full/Full/None`
+      no executor until E12"*) expired when `AtomKindRegistry.cs:534` shipped `Full/Full/None`
 - [ ] Refill the **five** stopgap slates from each role's real §2.3 cluster: `ward-array` (2),
       `head-guard` (2), `sense` (2), `footing` (2), `mantle` (3). ⚠ **Five, not four** — the registry's
       own `_meta.designNotes` misses `footing`
@@ -149,8 +163,11 @@ field exists.
 **Verify:** `python -m pytest tools/seedsmith` green (**1497 passed** — code correctness); the gating
 metrics carry one **named, ruling-anticipated** red (`SetCompletability`'s 18) until module 13 runs.
 
-> ### ✅ CHECKPOINT 0
-> Every external dependency accepted, declined or built. Both registries bumped in **one** pass.
+> ### ⚠ CHECKPOINT 0 — partially met, named honestly
+> Every external dependency accepted, declined or built. **`core.v1.json` bumped to v2 (D30) — met, by
+> module 3 at P1.3. `classes.v1.json` NOT bumped to v4 (D35) — still `registryVersion: 3`, `frozen:
+> true`, re-measured 2026-09-05 in the P0.5 status table above.** "Both registries bumped in one pass"
+> does not hold; that half of the regeneration pass stays open, tracked in the table above, not here.
 > Seedsmith's `pytest` suite green. ⚠ **Amended 2026-09-04:** the gating *content* metrics carry one
 > named exception — `Linkage/SetCompletability`'s 18 `SetRoleNotHybridCore` findings, which D30 itself
 > anticipated and accepted ("silently leaving the gate blind is the only expensive answer") and which
@@ -176,7 +193,7 @@ metrics carry one **named, ruling-anticipated** red (`SetCompletability`'s 18) u
       fingerprint, never at bind. Evidence: `A_content_import_leaves_untouched_items_bindable`,
       `An_atom_whose_kind_changed_since_rolling_is_refused_and_only_it`,
       `A_disabled_atom_refuses_only_the_instances_carrying_it` (`BindResolutionTests.cs`)
-- [x] `effect_binding` FK with `ON DELETE CASCADE`, matching `definitions.md:316`'s promise. ⚠
+- [x] `effect_binding` FK with `ON DELETE CASCADE`, matching `definitions.md:323`'s promise. ⚠
       **Corrected while building module 2**: this is a REAL, enforced constraint, not documentation —
       `Microsoft.Data.Sqlite` enables `PRAGMA foreign_keys` by default per connection (unlike the raw
       SQLite C API), verified empirically (a fabricated `instance_id` in a new armoury test threw
@@ -264,9 +281,15 @@ SalvageGuards.cs}` (new); `tests/FusionRpg.Data.Tests/Items/ArmouryTests.cs` (ne
 `tests/FusionRpg.Core.Tests/Items/{ArmouryQueryTests.cs, ArmouryCompareTests.cs, ArmouryGuardsTests.cs}`
 (new, 18 tests).
 
-⚠ Same two flaky, pre-existing, unrelated tests observed intermittently under parallel execution
+⚠ Two flaky, pre-existing, unrelated tests observed intermittently under parallel execution
 (`Battle.Timeline.TimelinePurityGuardTests`, plus this run added `ClassSystem.CombatSimJsonEmitTests`,
-also 100% green in isolation) — noted, not fixed, out of scope.
+also 100% green in isolation) — noted, out of item-program scope. **Superseded same day:**
+`CombatSimJsonEmitTests`'s flake was root-caused and fixed by the battle-timeline stream
+(`battle-timeline-todo.md` Phase 7/T14 baseline note — a `dotnet run` subprocess without `-c Release
+--no-build` raced the parent `dotnet test`'s held Core compiler lock, CS2012; fixed with that one
+argument, confirmed live in `CombatSimJsonEmitTests.cs`, and absent from every full-suite run recorded
+here since, e.g. P2.4's 2026-09-05 addendum). `TimelinePurityGuardTests` remains open and
+unfixed — still recurring as late as that same P2.4 run.
 
 ### ✅ P1.3 — Module 3 `slot-roles` — BUILT AND VERIFIED 2026-09-04 (schema populated in full; X1 species-lookup still pending)
 
@@ -295,7 +318,7 @@ also 100% green in isolation) — noted, not fixed, out of scope.
 
 ⛔ **Real, evidenced consequence found while fixing the registry — not a defect in this module's own
 work, but it must be said plainly.** Correcting `core.v1.json` makes `seedsmith`'s
-`Linkage/SetCompletability` metric (`gates = True`, wired into CI at `ci.yml:220`) report its
+`Linkage/SetCompletability` metric (`gates = True`, wired into CI at `ci.yml:231`) report its
 previously-blind **18 findings** — one per legacy set using `head-guard`/`sense`. Measured directly:
 
 | Command | Before this module | After |
@@ -384,6 +407,12 @@ code** — the spec marks minting a 15th code an Ask-first against a closed *spe
 clearly-named value in this module's own (non-spec) result enum is a different, smaller thing and
 does not require that sign-off. Ratifying it as an official code is still open.
 
+⚠ **Cross-referenced from P3.2 (module 12).** `ApplyEquipProjection` tags every equip binding
+`equip-assign`; `ssot-sets.md` §4.5's recount SQL names `equip`. Examined here and left as shipped —
+renaming the tag would be a schema-wide rename this module never made, and module 12's
+`CountSetPieces` already defaults to the shipped `equip-assign` spelling and keeps `equip` as a named
+parameter, so no wearer's set silently fails to complete. **Cross-referenced back into P3.2.**
+
 ### ✅ P1.5 — Module 5 `equip-runtime` ⭐⭐ THE PAYOFF — BATTLE HALF PROVEN 2026-09-04; LAWN PUSH + CORNER RUN DEFERRED, NAMED
 
 - [x] `EquipAtomSource` — mirrors the shipped `TraitAtomSource` (E12) exactly: only `stat.derived`
@@ -398,22 +427,82 @@ does not require that sign-off. Ratifying it as an official code is still open.
       touches neither for one already correct (never a delta relative to the OLD binding state, always
       recomputed from the live assignments). Proven: `ResolveBindings(UniqueActor)` genuinely surfaces
       the atom a production `EquipAtomSource.FromResolver` caller would read
-- [ ] ⏸ **Deferred, explicit — the live lawn push.** `RpgHub.cs`/`AtomPushService.Build` still resolve
-      only `OwnerKind.Player`; pushing `UniqueActor` scopes too needs `AtomPushService` extended to
-      merge multiple owner scopes into one `AtomPushDto` (its wire shape already supports this — every
-      `EffectGrantDto`/`RunnerBindingDto` carries its own `ownerKey`) and `RpgHub` to enumerate a
-      player's deployed specimens. **Verified, not assumed, that no Injector edit is needed for this**:
-      `GrantedDerivedAtomReader.Read` (the lawn read side) is already scope-generic — no `OwnerKind`
-      branching anywhere in it — so once the push carries `unique-actor:` grants, the existing reader
-      picks them up. This is genuinely server-side C#, testable via `FusionRpg.Server.Tests` without a
-      live game; not attempted this pass, named as the next concrete step
-- [ ] ⏸ **Deferred, explicit — the first geared corner run.** `tools\CombatSim` has no `--corners`
-      flag today (checked, not assumed), and the SHIPPED corner-matrix tool
-      (`tools/DominanceBaseline`, backing `DominanceBaselineTests`) resolves purely over aptitude
-      builds via class-system's own `DominanceGuard`/`TerminationGuard` — neither tool has a concept of
-      equipped gear. Adding one is a real extension to either a standalone balance tool or
-      class-system's own shipped guards, not a wiring gap inside the item program. Not attempted
-      blind; named for whoever owns that tool's roadmap next
+- [x] ⭐ **The live lawn push, wire-capacity half — BUILT AND VERIFIED 2026-09-05.**
+      `AtomPushService.Build` gained a multi-owner overload (`IReadOnlyList<OwnerScope>`) that
+      resolves every owner's bindings, compiles the UNION of their atoms once (never once per owner —
+      two owners sharing an atom must compile to one catalog entry, proven), and wires each
+      `RunnerBinding` to its own binding's `OwnerKey` — the single-owner overload now forwards to it
+      and is pinned byte-identical by regression test. `RpgHub.BuildApplyCommand` now enumerates
+      every `UniqueActorPhases.ActiveBound` specimen via `ListUniqueActors` and pushes each one
+      alongside the player's own scope. 7 new tests, `tests/FusionRpg.Server.Tests/MultiOwnerPushTests.cs`.
+      **The earlier claim that "no Injector edit is needed" is CORRECT for this half** — runner-path
+      atoms (triggered effects) already carry per-owner identity end-to-end, proven by a real test.
+- [ ] ⛔ **A deeper, more precise gap found while building the above — the compiled-grant half is
+      NOT scoped, and this predates this session's work.** `AtomCompiler.EmitDefAndGrant`
+      (`AtomCompiler.cs`) never stamps an `EffectGrantDto.OwnerKey` at all — every COMPILED (passive,
+      non-runner) grant defaults to `EffectOwnerKeys.Match` regardless of which owner's binding
+      produced it. Harmless for `Player` scope (a player has no single live entity to scope a passive
+      buff to, so match-wide is correct there — measured: this is true of the pre-existing,
+      already-shipped Player-only push too, not a regression this pass introduced). **Genuinely wrong
+      for a `UniqueActor` specimen** — a specific live entity on the lawn — whose passive
+      `stat.derived`/`stat.modify` gear (no trigger, so it compiles rather than routing to the
+      runner) would silently apply match-wide instead of to that one specimen.
+      `FINDING_a_specimens_compiled_grant_is_not_scoped_to_it_it_reaches_match_scope` pins the
+      current (wrong-for-this-case) behavior exactly, with the full mechanism explained inline.
+      **The fix exists in shipped code but has never been wired to equipment**: `UniqueOwnerBinder`
+      (`src/FusionRpg.Core/Match/UniqueOwnerBinder.cs`) rewrites a durable `instance:{guid}` owner key
+      to a live `entity:{ptr}` one — a whole-repo grep confirms `UniqueOwnerBinder.BindGrant` is only
+      ever called from `UniqueLoadoutSpec.cs:91` (a specimen's own innate-kit grants, bound at spawn) —
+      never from anything equip-runtime related. (The only other `"instance:"` construction in `src/` is
+      the legacy non-atom grant blob's placeholder `OwnerKey = "instance:pending"` in
+      `UniqueEquipmentCatalog.Grant` / `RelicCatalog.TryGetGrant` — a deploy-time template marker per
+      `decision-d1-durable-ownership.md` §5.1, itself never passed through `BindGrant` either, and on the
+      legacy grant-blob path non-atom-backed items take, not the `AtomCompiler.EmitDefAndGrant` compiled-
+      grant path this finding is about, which constructs no owner key of any kind.) Closing this for real
+      needs: (1) this push to stamp
+      `"instance:" + specimenId` on a `UniqueActor`-sourced compiled grant (a genuinely new design
+      question, since `AtomCompiler.Compile` groups atoms by ICD key across ALL owners for the
+      catalog union, so two owners sharing one compiled atom cannot both be given distinct keys on
+      the SAME grant — compiling per-owner-group rather than globally-merged is the real shape), and
+      (2) an **Injector-side** call to `UniqueOwnerBinder.BindGrant` at the moment a specimen's live
+      `ptr` becomes known, mirroring `UniqueLoadoutSpec`'s own pattern. That second half is an
+      Injector change `GrantedDerivedAtomReader`'s own doc comment says cannot be verified by any
+      test CI runs (net6.0 + BepInEx/Il2Cpp interop, needs a real PVZ Fusion install) — **so the
+      earlier claim "no Injector edit is needed" does NOT hold for this half**, corrected here rather
+      than left standing. Named as the real next concrete step, not "not attempted."
+- [ ] ⏸ **Deferred, explicit — the first geared corner run. Re-investigated 2026-09-05, in depth, and
+      the original deferral CONFIRMED CORRECT rather than found to be a shortcut — the exact
+      integration point is now identified, not vague.** `tools/DominanceBaseline/Program.cs` (backing
+      `DominanceBaselineTests`) builds its 12 corners as bare `AptitudeAllocation`s and resolves them
+      via `TerminationGuard.ToActor` → `ActorHubBootstrap.CreateDefault(...).ResolveDerived(ctx)` —
+      the `ActorHub`/`IActorStatSubsystem` **primary/derived pipeline**, never `BattleStatComposer`.
+      Module 5's own payoff (`EquipAtomSource`/`BattleStatComposer.Equipment`) folds equipment on the
+      **other** side — the battle/`ChannelMods` pipeline. These two composers are not merely
+      currently-separate by omission: **`class-system-map.md` §2a.0 records an explicit 2026-08-26
+      owner decision, "the composers stay separate,"** made for the identical cross-boundary problem
+      one layer over (aptitudes reaching battle) — *"the battle-side seam is `ChannelMods`, the way
+      `StarPolicy` already feeds progression stats in."* The same section's evidence table separately
+      quotes `StarPolicy.cs:6`: *"ChannelMods — never engine changes (battle goldens stay
+      byte-identical)."* By the same logic in reverse, making a corner run "geared" correctly means
+      teaching the `ActorHub` **primary/derived side** about equipment — a new `IActorStatSubsystem`
+      implementation reading a specimen's real `ResolveBindings(OwnerScope.UniqueActor)` atoms, wired
+      into `ActorHubBootstrap` the same way `AptitudeSubsystem` already is — **not** grafting
+      `BattleStatComposer`'s battle-side fold logic into `TerminationGuard.ToActor`, which would
+      quietly cross the exact seam that decision drew. That subsystem does not exist yet, would live
+      in and be tested by **class-system's own framework** (`DominanceGuardTests.cs`/
+      `DominanceBaselineTests.cs` — self-declared class-system-todo.md checkpoints P5.2/Checkpoint 8,
+      extensively tested, actively developed by a concurrent stream this whole session — confirmed live
+      right now: `_baseline-dominance.json` sits uncommitted with today's mtime) **plus** `ActorHub`/
+      `ActorHubTests.cs`, which the new subsystem would also have to touch but which are NOT
+      class-system's own property — they are the shared derived-stat SSOT `actor-hub-ssot.md` governs
+      under its own `decisions.md` ADR row, predating class-system by 8 days (shipped 2026-08-19 vs.
+      class-system's 2026-08-27) and never one of `class-system-map.md`'s 14 modules; class-system's own
+      `aptitude-resolve` module is only ever described as "wired into" it, the identical relationship a
+      new equip subsystem would have, and per this repo's own
+      rule ("architecture changes that lock behavior need `decisions.md` first") is an ask-first
+      cross-program change, not a same-pass wiring fix. **Confirmed, not assumed, by reading the
+      actual composer code and the actual decision text** — the deferral stands, now for a reason
+      that is checkable rather than a placeholder.
 - [x] ⚠ **`Sim` stays `None`** deliberately, asserted not assumed —
       `Sim_runtime_stays_None_and_the_spec_says_why` checks `AtomKindRegistry.Get("stat.derived")`'s
       support matrix directly (`None`/`Full`/`Full` for Sim/Battle/Lawn)
@@ -429,10 +518,13 @@ in this same pass. Recorded so no later module copies the wrong type from this o
 ⚠ **Also found: `BattleActorSetup.SpecimenId` (a genuine new field, not an alias) moved
 `ExpeditionResolverTests.Tier_goldens_are_locked`'s hash** — System.Text.Json serializes a new `init`
 property by default, and expedition tier resolution serializes this record into its own golden hash.
-Fixed with `[JsonIgnore]`, matching the exact precedent `BattleActorSetup.Index` already documents for
-this identical class of problem (a specimen id is always null in an expedition context, since
-expeditions build actors from wave/species data, never a real owned demon — not semantically part of
-what that hash locks).
+Fixed with `[JsonIgnore]`, matching the golden-hash-safety pattern `BattleActorSetup.Index` already
+establishes (any newly-serialized member perturbs `ExpeditionResolverTests.Tier_goldens_are_locked`'s
+hash unless suppressed) — though the underlying reason differs by field: `Index`'s own comment cites a
+redundant computed alias (`Index => Level`, serialized by default like any get-only property), while
+`SpecimenId`'s own comment gives the field-specific reason (a specimen id is always null in an
+expedition context, since expeditions build actors from wave/species data, never a real owned demon —
+not semantically part of what that hash locks).
 
 **Verification, run and green:**
 
@@ -447,6 +539,88 @@ what that hash locks).
 | `.\scripts\guard-funnel-delta.ps1` | `FUNNEL DELTA GUARD OK` |
 | `.\scripts\guard-dal.ps1` | `DAL GUARD OK` |
 
+⛔ **2026-09-05 — a real methodology gap, found and closed, not merely noted.** Every module in this
+program was verified against `Core.Tests`/`Data.Tests`/`Guard.Tests` only. **`FusionRpg.Server.Tests`
+(and five other test projects) were never run once, by any module, across this entire effort** —
+discovered only while building the live lawn push above, since that is the first item-program change
+to touch `FusionRpg.Server` at all. Running it cold surfaced **21 real, pre-existing failures**, all
+traced to this same module's own C3 fix (`AtomRowValidator`'s empty-name check, `AtomRejection.cs`,
+P1.1) landing on day one of this session — five Server.Tests fixture files construct an `AtomRow`
+with no `Name` and have been silently broken since, unnoticed because nothing ever ran that suite:
+
+| File | Fixed |
+|---|---|
+| `CompiledPushTests.cs` | 15 tests — the pre-existing `AtomPushService` suite this pass extends |
+| `AtomEndToEndTests.cs` | 1 test |
+| `WalkingSkeletonTests.cs` | 1 test |
+| `BuildSquadEquippedActionsTests.cs` | 3 tests |
+| `LoadoutEndpointsTests.cs` | 1 test |
+
+All five: added `Name = ...` to the offending `AtomRow` construction. Re-verified: **`Server.Tests`
+158/158 minus 23 remaining failures, all in `World*`/`District*`/`AptitudeChannelModsTests` — zero
+item-related, but NOT a "some other stream's mid-edit file" story: `git status --porcelain` shows
+every implicated file clean, already committed. 22 throw the identical `SiegeTuningPolicy.Configure(...)
+has not run` (`SiegeTuning.cs:424`, reached via `StructurePolicy.CapacityGrowthFor`/`LoamPhases.
+EffectiveCapacity`/`DistrictLayout.SideFor`) because this assembly's own `WorldPolicyTestBootstrap.cs`
+was never given that call — base-defense's own `tasks/base-defense-todo.md` records wiring
+`SiegeTuningPolicy` into "all three test bootstraps (Core/Data/E2E.Tests)" and never Server.Tests, and
+its "`LoamPhases.EffectiveCapacity` addition is inert (adds 0)" claim is true of the value, not of
+whether the unconfigured call throws first. `AptitudeChannelModsTests`'s one failure is the separate,
+already-tracked `data/tuning/battle.v2.json`-missing-`speciesTempo` gap `tasks/species-build-todo.md`
+(Checkpoint 4) independently confirms via the identical `git status --porcelain` check, reaching the
+opposite conclusion — the file is untouched, not mid-edit. Both are standing, already-committed gaps
+in other streams' shipped work, not in-flight edits that resolve on their own once committed.** Zero
+item-related failures remain.
+
+⛔ **Two more, smaller, found the same way (running every previously-unrun test project once).**
+- `FusionRpg.AtomImporter.Tests`: `SeedScannerTests` asserted `data/seed/rarity/` sweeps to **zero**
+  JSON files — true when written, false since P2.1 (module 7) seeded `ladder.v1.json` there on
+  purpose, the module's own entire deliverable. Split into two tests: `curves/` (never touched, still
+  asserted empty) and a new test pinning that `rarity/ladder.v1.json` **is** swept — a regression that
+  silently re-empties the folder now fails loudly either way it goes wrong.
+- `tools/ItemSeedValidator`'s own test suite: `RoleFamilyCheck.cs` (P2.3, module 8) read
+  `family-overrides.v1.json`/`role-relocation.v1.json` via raw `File.Exists`/`Path.Combine` against
+  `ctx.Registries.RegistryDir` — the ONLY check in the whole tool that bypasses the `RegistrySet`
+  abstraction every other check and the ENTIRE test suite uses. `RegistrySet.FromNodes` (the in-memory
+  test seam) sets `RegistryDir = "(in-memory)"`, so this check silently failed **every scoped test
+  that loads even one affix-family entry**, for a reason unrelated to what any of them tested — caught
+  by running the suite in full for the first time, not by a targeted look at this file. Fixed
+  properly, not papered over: added `FamilyOverrides`/`RoleRelocation` as proper optional
+  `JsonObject?` properties on `RegistrySet` (mirroring `Words`/`BuildThemes`/`RetiredIds`'s own
+  established pattern exactly), rewired both `Load` and `FromNodes`, and downgraded
+  `RoleRelocationArtefactMissing` from a blocking `CorpusError` to a `CorpusWarn` — matching
+  `WordPoolAbsent`/`SocketCeilingTableAbsent`'s own precedent for every other optional registry in
+  this tool (absence is reported, never blocking). **Verified as a pure plumbing fix, not a behavior
+  change**: the real sweep (`dotnet run --project tools/ItemSeedValidator`) still reports exactly
+  **170 errors across 120 partitions** before and after, zero `RoleRelocation`/`RoleFamilyOverride`
+  findings either way — the real `role-relocation.v1.json` was always internally consistent (module
+  8's own "0 orphans" claim), only the test seam was broken.
+
+**Final regression, all previously-unrun projects, this session's first full pass over each:**
+
+| Suite | Result |
+|---|---|
+| `FusionRpg.Server.Tests` | 135/158 → **158/158 minus the 23 confirmed concurrent-stream failures** (0 item-related) |
+| `FusionRpg.AtomImporter.Tests` | **28/28** |
+| `FusionRpg.CheatCore.Tests` | **40/40** |
+| `FusionRpg.ElementEnumGen.Tests` | **14/14** |
+| `FusionRpg.Launcher.Tests` | **162/162** |
+| `FusionRpg.ItemSeedValidator.Tests` | **71/71** |
+| `dotnet test tests\FusionRpg.Core.Tests` (full, re-verified after all fixes) | **7150 passed / 5 failed** — all `ClassSystem.*` (concurrent stream) |
+| `dotnet test tests\FusionRpg.Data.Tests` (full, re-verified) | **842 passed / 0 failed** |
+
+`FusionRpg.Injector.Tests` and `FusionRpg.E2E.Tests` not run — the former needs a real PVZ Fusion
+install to build at all (net6.0 + BepInEx/Il2Cpp interop), the latter's scope was not investigated
+this pass; named rather than silently skipped.
+
+**Files (this addendum):** `src/FusionRpg.Server/{AtomPushService.cs, RpgHub.cs}` (EDIT — multi-owner
+push); `tests/FusionRpg.Server.Tests/MultiOwnerPushTests.cs` (new);
+`tests/FusionRpg.Server.Tests/{CompiledPushTests.cs, AtomEndToEndTests.cs, WalkingSkeletonTests.cs,
+BuildSquadEquippedActionsTests.cs, LoadoutEndpointsTests.cs}` (EDIT — C3 `Name` fixes);
+`tests/FusionRpg.AtomImporter.Tests/SeedScannerTests.cs` (EDIT);
+`tools/ItemSeedValidator/Registries/RegistrySet.cs`,
+`tools/ItemSeedValidator/Checks/RoleFamilyCheck.cs` (EDIT).
+
 ⚠ **Mid-build, another stream's concurrent uncommitted edit (`DerivedTurnChannels.cs`,
 `DerivedStatTuning.cs`) briefly broke the shared `FusionRpg.Core.Tests` assembly build** (8 compile
 errors, none in item files). Per standing instruction this is expected, sanctioned, concurrent work —
@@ -457,14 +631,23 @@ not touched; the build was rechecked after their edit settled and came back clea
 `tests/FusionRpg.Core.Tests/Battle/EquipRuntimeTests.cs`,
 `tests/FusionRpg.Data.Tests/Items/EquipRuntimeStoreTests.cs` (new).
 
-> ### ⭐ CHECKPOINT 1 — THE PAYOFF: **partially met, named precisely**
+> ### ⭐ CHECKPOINT 1 — THE PAYOFF: **partially met, named precisely (revisited 2026-09-05)**
 > ✅ **A real item changes a real number in a real fight** — proven, deterministic, in Core.Tests.
 > ✅ The DB half of "on the lawn" (bindings actually created and resolvable at `unique-actor:` scope)
-> is proven. ⏸ The live push to a running lawn match and the geared corner run are the two named,
-> deferred items above — both scoped, neither attempted blind. Guards green; termination/dominance
-> corner run is blocked on the corner-run deferral, not run this pass.
-> **Phase 2 may proceed** — nothing in Phase 2 (the content model: base types, rarity, affix legality,
-> power reads, item card) depends on the lawn push or the corner run; both remain open, tracked items.
+> is proven. ✅ **The wire-capacity half of the live push is now built and tested** — a player's own
+> grants and every deployed specimen's RUNNER-path (triggered) atoms travel correctly, each with its
+> own owner key, proven against a real `AtomPushService.Build` call, not assumed. ⛔ **A deeper gap
+> found while proving that**: the COMPILED (passive) grant path has never carried per-owner identity
+> at all, for either scope kind — real, pre-existing, not a regression — and closing it for a specific
+> live entity needs an Injector-side change unverifiable without a real game install (see the finding
+> above). ⏸ **The geared corner run's deferral is now re-verified rather than merely restated** — its
+> exact integration point (a new `IActorStatSubsystem` on class-system's `ActorHub`, governed by
+> `class-system-map.md` §2a.0's explicit "composers stay separate" decision) is identified and cited,
+> confirming this is a genuine cross-program, ask-first change rather than an item-program shortcut.
+> **Phase 2 through 5
+> already proceeded and are complete** (per the rest of this file) — nothing in them depended on
+> either open item here, matching this checkpoint's own original reasoning; both remain open, tracked,
+> and now more precisely scoped than when this checkpoint was first written.
 
 ---
 
@@ -576,7 +759,8 @@ invariant now has a real threshold.** This section built `RarityOverlapSimulator
 (`uniques`, P5.1 below) is that consumer, and it did not build one: `UniqueParityMetric` calls this
 harness — same `Seed`, same `RollsPerRung`, same `UpsetRate` paired comparison — with the unique's own
 magnitude as the fixed side, which is `ssot-uniques.md` §9.2's ask word for word (*"the same
-measurement with a fixed-value item on one side, run on the same code with the same seed"*). A test
+measurement with a fixed-value item on one side, and it should be run on the same code with the same
+seed"*). A test
 walks every file under `Items/Uniques/` and asserts none names `SeededRng` or `new Random`.
 
 **So `W ∈ [25%, 75%]` — *"stated, never measured"* since the lane was drafted, and an open question to
@@ -620,7 +804,7 @@ exist yet."* Module 10 (`item-card`, P2.5 below) shipped both on 2026-09-04:
 `src/FusionRpg.Core/Items/Display/RarityPalette.cs` implements sRGB → CIE L\*, WCAG 2 contrast and the
 **Machado/Oliveira/Fonseca (2009) deuteranope *and* protanope** simulation matrices, cross-checked
 against this section's own documented figures (`ssot-rarity.md` §3.3's L\* 42.1 → 91.9 reproduced to
-one decimal), **and** the light-theme palette itself — L\* DECREASING 48.0 → 4.5, monotone under both
+one decimal), **and** the light-theme palette itself — L\* DECREASING 46.9 → 4.5, monotone under both
 colour-blindness transforms, WCAG AA 4.5:1 against white on every rung, with a negative-control test
 proving `Validate()` rejects a flat palette rather than always passing. ⛔ **Module 20 verified this
 before writing a line and deliberately built no second palette or transform** (G3 §8.6's
@@ -687,8 +871,10 @@ draft this list was written from:**
       from `classes.v1.json`'s frozen designNotes (D35).** `classes.v1.json` → `classes.v2.json`
       (new file, v1 stays frozen and on disk): 15 families carrying the stale *"stat.derived —
       quarantined None/None/None (D6)"* reason are lifted (verified against
-      `AtomKindRegistry.cs:287`'s live `RuntimeSupportMatrix(Full, Full, None)` and
-      `atom-family-library.md` §3.2's own *"the D6 quarantine is OVER"* banner) — from the global list
+      `AtomKindRegistry.cs:534`'s live `RuntimeSupportMatrix(Full, Full, None)` on the `stat.derived`
+      kind itself — not `:287`, which today is E30's unrelated channel-pool-object skip inside
+      `Validate` — and `atom-family-library.md` §3.2's own *"the D6 quarantine is OVER"* banner, which
+      itself cites the same matrix at its own stale `AtomKindRegistry.cs:160`) — from the global list
       **and** from every role's `excludedForRole`, with the family added back to that role's
       `legalFamilies`. `atom.susceptibility` stays excluded (zero readers, unrelated reason)
 - [x] **All eight roles the fix actually touches, not just the five named** — re-reading the registry
@@ -771,11 +957,15 @@ draft this list was written from:**
       flavor}`, scratch JSON from the migration run) but wiring it into `ItemSeedValidator` as a
       standing warning, and handing the list to the authoring fleet, is not yet done — real remaining
       work, not scope creep to invent
-- [ ] ⏸ **`ContentValidation.cs:71`'s null-ceiling skip — not this module's to fix.** Named in the old
-      todo wording as this module's; re-reading `spec-base-types.md` places it at module 9 (`power_ceiling`
-      wiring) and module 6 (D11's own dominance lint) as two SEPARATE consumers of a seeded
-      `power_ceiling`, neither of which is this module's `channel-split` obligation. Left exactly where
-      module 7's own todo entry already named it as deferred to module 9
+- [ ] ⏸ **`ContentValidation.cs:73`'s null-ceiling skip — not this module's to fix.** Named in the old
+      todo wording as this module's; re-reading `spec-base-types.md` in fact names **module 9 alone**
+      as owner of the `power_ceiling`-gated `corner-matrix` mode (`spec-base-types.md:228`: *"module 9.
+      Owed there..."*; `:426`: *"module 9's, not this module's"*) — `channel-split`, this module's own
+      obligation, needs nothing beyond `frame-lean.v1.json` per `spec-base-types.md:227` and never
+      touches `power_ceiling` at all. The "module 6 also consumes the seeded row" framing comes from
+      module 7's own todo entry (P2.1) and from `spec-rarity-bands.md`'s downstream chain (*"module 9 R1
+      returns Unpriced → module 6's D11 dominance lint has no `score`"*), not from `spec-base-types.md`
+      itself. Left exactly where module 7's own todo entry already named it as deferred to module 9
 
 **Verification, run and green:**
 
@@ -786,7 +976,7 @@ draft this list was written from:**
 | Standalone Python cross-check: every live entry's `implicit.family` against `classes.v2.json`'s `legalFamilies` | **0 illegal assignments** across 740 entries |
 | Standalone Python cross-check: humanoid ∩ plant implicit families, per role | **0 violations** across all 15 live roles |
 | `python -m pytest` (seedsmith, full suite) | **1498 passed, 1 skipped** — unaffected; seedsmith's `registries.py` reads `classLadders` from `classes.v1.json` only, which v2 never touches (purely additive to `excludedFamilies`/`implicitSlates`) |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **5657 passed / 2 failed** — both `ClassSystem.UnitClassContractParityTests`, the concurrent stream's own in-flight work; **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **5657 passed / 2 failed** — both `ClassSystem.UnitClassContractParityTests` — **world-stage**'s `world-numbers` module landing `loamUnits` mid-flight (W37/W38, same day), not class-system (its own `UnitClass` P1.4 closed 2026-08-26); **zero** in `Items.*` |
 | `dotnet test tests\FusionRpg.Data.Tests` (full) | **682 passed / 3 failed** — same baseline as P2.1's snapshot (2 `DemonSpeciesImportCliTests` + 1 pre-existing `AtomStoreTests` trigger-reason mismatch), unrelated; **zero** in `Items.*` |
 | `dotnet test tests\FusionRpg.Guard.Tests` | **170 / 171** — 1 pre-existing `ClassSystemBaselineRegenTests` failure against uncommitted class-system tuning drift (already on file as a known, unrelated issue), not this module's |
 
@@ -950,7 +1140,7 @@ ItemNameComposerTests.cs}` (new, the last file carrying both `AffixNameTableTest
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter Items.RoleFamilyTableTests\|Items.ItemNameComposerTests`; `dotnet run --project tools\ItemSeedValidator`
 
-### ✅ P2.4 — Module 9 `item-power-reads` — BUILT AND VERIFIED 2026-09-04 (R2/R10-card wiring left for module 10/19's own production callers; the chaff-chassis watch explicitly carried forward, unanswerable before module 21 exists)
+### ✅ P2.4 — Module 9 `item-power-reads` — BUILT AND VERIFIED 2026-09-04 (R2/R3-card wiring left for module 19/10's own production callers; the chaff-chassis watch explicitly carried forward, unanswerable before module 21 exists)
 
 - [x] **All four reads call E9/E10, no vector/coefficient/cost-function declared under `Items/Power/`.**
       `ItemPowerReads.cs` (R1 `ImplicitShare`, R2 `GrantedActionPrice`, R3 `CardPower`) and
@@ -1033,9 +1223,10 @@ validates `item-power.v1.json` at boot); `tests/FusionRpg.Core.Tests/Items/ItemP
 ⭐ **The template authoring (N1) was already done — a fourth instance of the same pattern** (after
 `item_role_family`, `nameWords`, `displayTemplate`'s own existence): `data/seed/items/display-templates/
 *.json` already carries all 98 rows (`{name, runtimeFamily, groupId, status}`, authored 2026-08-22),
-and **`UnitClass` (N3) was already shipped too** — a real, fully-built 11-member enum at
-`Stats/Derived/StatClass.cs` with per-channel data in `DerivedStatRegistry`, exceeding this spec's own
-9-member proposal. Neither needed rebuilding; both needed a real consumer, which is what this module
+and **`UnitClass` (N3) was already shipped too** — a real, fully-built enum at
+`Stats/Derived/StatClass.cs` — 11 members when this module shipped, now 13 (`ReciprocalPoints`
+2026-08-26, `LoamUnits` 2026-09-04) — with per-channel data in `DerivedStatRegistry`, exceeding this
+spec's own 9-member proposal by an even wider margin today. Neither needed rebuilding; both needed a real consumer, which is what this module
 actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/8's own discoveries.
 
 - [x] **N1 wired.** `DisplayTemplates.Parse`/`Render` (Core, pure) reads the already-authored corpus;
@@ -1066,7 +1257,7 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
       §3.3's L* 42.1 → 91.9 reproduced to one decimal by this exact implementation — the math is
       verified correct against already-validated data, not merely internally consistent)
 - [x] **The light-theme palette ships**, constructed (not eyeballed) to satisfy every rule: `L*`
-      DECREASING 48.0 → 4.5 (adjacent Δ ≥ 2.5, distance-2 Δ ≥ 7), monotone under both colour-blindness
+      DECREASING 46.9 → 4.5 (adjacent Δ ≥ 2.5, distance-2 Δ ≥ 7), monotone under both colour-blindness
       transforms, and — the one new rule light theme adds — **WCAG AA 4.5:1 against white for every
       rung**, which the shipped DARK palette's own top end (`almanac`, L* 91.9) would fail outright
       against a white ground, confirming the spec's own stated reason the direction must flip. A
@@ -1118,7 +1309,7 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
 - [ ] ⏸ **`patronView.ts`'s own call site — not updated.** `FormatPerMille` is the shared conversion
       module 20/the web layer are meant to call instead of owning a second copy; the TypeScript side
       of that wiring is explicitly module 20 `item-surfaces`' work, out of this module's (Core-only)
-      scope
+      scope. **Cross-referenced into P5.4 (module 20).**
 
 **Verification, run and green:**
 
@@ -1143,7 +1334,8 @@ seeds `item_display_template` at boot); `tests/FusionRpg.Core.Tests/Items/ItemDi
 > The dominance lint runs in its **real** form (`power_ceiling` seeded), so D11 stops degrading
 > silently — **met** (module 6). Every role has a build where each frame's base is correct — **met**
 > (module 6). `ContentValidation.cs:71` fixed, so a green Budget means something — **still owed to
-> module 9/6's own consumers**, per module 9's todo entry; not flipped by this pass. An item card
+> module 9/6's own consumers**, per module 6's todo entry (P2.2), tracing back to module 7's (P2.1); not
+> flipped by this pass. An item card
 > renders a real item — **the projection exists and is tested at the Line level against the real 98
 > row corpus; it does not yet render a full real instance end to end** (Card/Compare levels, the DAL
 > read path, and the reason-code validator are the named remaining pieces above). Recorded as
@@ -1282,7 +1474,11 @@ seeds `item_display_template` at boot); `tests/FusionRpg.Core.Tests/Items/ItemDi
    asserts every count against the real files): **144 `unique`** (module 17), **70 `charm`** and
    **41 `insert`** (both gated on **X7** — re-verified 2026-09-04 that `ContainerRow.cs`'s
    `ContainerKind` ships six values and none of D27's `gem`/`set`/`charm`/`combo`), **60 `consumable`**
-   (module 18; `ssot-generation.md` §5.4 keeps it deliberately absent until the action layer exists).
+   (module 18; `ssot-generation.md` §5.4's "wait for the action layer" reasoning is now stale —
+   item-ideal §7 was refined by `ssot-consumables.md` to skip the action layer via a menu-spend design,
+   and module 18 shipped exactly that 2026-09-05; the entry-kind stays refused for a narrower reason
+   instead: X7 has not minted the `consumable` `container_kind`, and the 60 are seeds with no
+   `effect_container` row yet — see the ⭐ note below).
    Each is refused **by name** with `ContentRuleViolated{drop.entry-kind-unavailable}` naming the
    module that lands it — a build order, not a defect, and never a silent drop. **Not this module's to
    fix**, and cross-referenced into the owning modules' sections below.
@@ -1375,9 +1571,25 @@ so the honest explanation is not the thing that fails.
       `curves.json` holds the quantity points. Turning those 40 tables into `drop_table_entry` rows is
       a real, separate piece of work. Named so the two corpora are not mistaken for a duplication:
       `data/seed/loot/` is the **generated** shape, `data/seed/items/drop-tables/` the **authored** one
-- [ ] ⏸ **No `world-sector` `loot_source`** — `sectorLevel(danger_band)` is owed by the world program
-      (**X5**). The `drop.world.sector-clear` table ships (Correction 1 calibrates it at 1.50) with no
-      source pointing at it, so the table is the calibration and not a claim that the world map is wired
+- [x] ⭐ **`world-sector` `loot_source` — BUILT 2026-09-05. Before: the formula was decided and nothing
+      implemented it, so `drop.world.sector-clear` shipped with no source. After:
+      `PowerIndexComposer.MapLevel` is the decided formula in code, and `WorldSectorLootSource` wires
+      the table to it.** The blocker had already moved once — `sectorLevel(danger_band)` was
+      **resolved, not owed**: `ssot-power-scale.md` §5.3/§10.3 (owner decision 2026-08-23) closes it as
+      `mapLevel(M) = Wm · DangerBand(M)`, `Wm = 5` derived from the shipped `SectorTypeCatalog` bands,
+      and states the world program **"no longer owes an unknown"**; `spec-content-authoring.md` §2.1
+      (owner approved 2026-08-24) confirms the identical formula for this exact `contentLevel` row.
+      What was left was **unbuilt, not undecided** — a grep found no `MapLevel`/`SectorLevel` anywhere
+      in `src/`, `web/`, `tools/` or `tests/`. It exists now, in `Core/Power` where the one ladder
+      lives, reading `WmMilli` from `data/tuning/power-scale.v{n}.json` and never a literal `5`
+      (`Map_level_reads_the_weight_and_never_a_literal_five` moves the weight and the level moves).
+      ⛔ **No new §10 row was needed and none was added** — `mapLevel(M)` is **row 23**, already closed
+      and already mirrored; a level derived from a *world state* is still that row, not a new
+      power-shaped scale. What the row needed was its `location` repointed from prose to the code, in
+      §10.2, §10.3 and `inventory.json` alike. X5 (content ladder past level 10) still bounds what a
+      boss-lair's `contentLevel = 30` has *authored enemy content* to draw from; it never gated the
+      formula, and it does not gate the loot lane — the shared 24-row slate is ilvl-band-free, so a
+      band-6 clear resolves end to end today
 - [ ] ⏸ **No `pvz-run` `loot_source`, by refusal rather than omission.** `mappedRunLevel` was never
       implemented anywhere and §11 Q8 names two candidates (the player's own level, or a flat session
       level the PvZ side reports) and picks **neither**, so such a source is refused **by name** with
@@ -1524,8 +1736,10 @@ boot, imports the loot corpus after `store.Init()`);
 
    ⏸ **Answered at P3.3 2026-09-04: examined, and deliberately not renamed — it is FOUR moving parts,
    one of them a frozen registry.** `NamespaceAllocation.cs:219-231` scrapes the breakpoints out of
-   `naming.v1.json`'s `resonanceNote` **prose** and rebuilds the id unpadded through `int.Parse`, so
-   padding the corpus alone makes the allocation mismatch; `naming.v1.json` is
+   `naming.v1.json`'s `resonanceNote` **prose** and splices that raw regex-captured digit-string straight
+   into `charm.res-{axis}-{breakpoint}` — no `int.Parse`, no reformatting, so whatever width the prose
+   spells passes through verbatim — so padding the corpus alone makes the allocation mismatch;
+   `naming.v1.json` is
    `registryVersion 4, "frozen": true`, which makes the note edit an **Ask first**; and
    `All_ten_shipped_resonance_ids_are_unpadded_…` pins the current spelling on purpose. Module 13
    generates the 60 authored charms, not the 10 resonance containers.
@@ -1631,7 +1845,12 @@ own measured test.
       Same shape — count inserts in one item, grant at breakpoints — at the **host item's** scope
       rather than the actor's. Deliberately not folded in: merging them would make the scope a
       parameter of a thing whose whole identity is its scope. `ThresholdConsumer<T>` is generic in the
-      held-thing type precisely so module 16 can instantiate it over an insert
+      held-thing type precisely so module 16 can instantiate it over an insert.
+      ⚠ **Re-checked 2026-09-05 during the module-22 consistency pass: P4.3 never engages this ask.**
+      `ResonanceGenerator`/`CombinationEvaluator` count inserts and grant at breakpoints — the same
+      shape this bullet describes — but P4.3's build list, files and deferred items never mention
+      `ThresholdEvaluator` or `ThresholdConsumer<T>`, so whether this was a deliberate decline or an
+      unnoticed miss is still open. **Cross-referenced into P4.3; not resolved there.**
 - [ ] ⏸ **Nothing calls the evaluator from a production path yet, and the missing caller is the equip
       transaction.** `ApplyEquipProjection` binds items; the recount → reconcile → bind-tiers steps
       (ssot-sets §4.5 steps 2–6) need a caller that owns the whole transaction, and it cannot bind
@@ -1928,8 +2147,12 @@ rather than loosened to `>= 13`.
       **This blocks persisting species sets, not generating them.**
 - [ ] ⏸ **`Distribution/CellOccupancy` promotion to `gates = True`** — trigger recorded in
       `PROMOTION_TRIGGER` and asserted by a test. It flips with the generation run, not before.
-- [ ] ⏸ **X4 / L0 channel registration — sets and charms SUPPLY the `set` and `charm` channels to
-      effect-pipeline's pool composition, and L0 is unspecced and unbuilt.** Generation can proceed
+- [ ] ⏸ **X4 / L0 channel registration — sets SUPPLY the `set` channel to effect-pipeline's pool
+      composition (charms ride the same channel; the enum is closed at six —
+      `drop`/`boss`/`set`/`socket`/`unique`/`craft` — there is no separate `charm` channel, per
+      `spec-affix-channel-weights.md`'s own table), and L0 is **SPECCED**
+      (`spec-affix-power-class.md`, `spec-affix-channel-weights.md`) **and unbuilt** — matching X4's own
+      re-scoped entry above, not contradicting it.** Generation can proceed
       (channels are a weighting layer over an already-legal pool) but **the run's value is not
       provable until L0 lands**, which the spec itself says should be stated before tokens are spent.
       Restated here so it is said twice.
@@ -1941,9 +2164,12 @@ rather than loosened to `>= 13`.
       Module 12 forwarded it to this module. Traced end to end: the ids live in
       `data/seed/items/charms/resonance.json` (`charm.res-offense-2`), the allocation is derived by
       `tools/ItemSeedValidator/Registries/NamespaceAllocation.cs:219-231`, which regex-scrapes the
-      breakpoints out of **`naming.v1.json`'s `resonanceNote` prose** and rebuilds
-      `charm.res-{axis}-{breakpoint}` **unpadded via `int.Parse`** — so padding the corpus alone
-      makes the allocation mismatch. `naming.v1.json` is `registryVersion 4, "frozen": true`, which
+      breakpoints out of **`naming.v1.json`'s `resonanceNote` prose**
+      (`Regex.Matches(note, @"charm\.res-[a-z]+-(\d+)")`) and rebuilds `charm.res-{axis}-{breakpoint}`
+      **as a raw string splice — no `int.Parse` anywhere in the file — unpadded only because the
+      prose's own worked examples (`charm.res-offense-2`, `-3`) are already unpadded** — so padding
+      the corpus alone (without also repadding the prose's worked examples) makes the allocation
+      mismatch. `naming.v1.json` is `registryVersion 4, "frozen": true`, which
       puts the note edit under the same **Ask first** as the set `partitionCount` bump. And
       `ThresholdGrantCorpusTests.All_ten_shipped_resonance_ids_are_unpadded_and_the_divergence_is_measured_not_normalised_away`
       asserts the current spelling on purpose. **Four things move together or none do**; this module
@@ -2046,7 +2272,7 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
       **throws**, it does not wrap. ⚠ `ContentScale.Apply`'s `int` return (the A3 target the spec
       warns about) is **not** copied onto the cost path: nothing in `Items/Materials/` calls it
 - [x] ⭐ **The band→quantity resolution is the seed contract working, and it is asserted against the
-      FROZEN registry.** `seed-contract.md` §1 forbids an author typing a magnitude, so the 30
+      FROZEN registry.** `seed-contract.md` §3 forbids an author typing a magnitude, so the 30
       shipped recipes author a `costBand` and this module resolves it:
       `resolvedQty = max(1, ceil(baseQty × multiplierPerMille / 1000))`, bands.v1.json's own formula.
       The multiplier table is mirrored into `materials.v1.json` (Core never reads a file) and
@@ -2239,12 +2465,17 @@ throws.
 
 - [ ] ⏸ **The `rpg_demon_materials` → `rpg_materials` rename is RULED but deliberately NOT in this
       module's task list**, exactly as the spec's Success criteria require. This module ships against
-      the shipped name. ⛔ **The site list, re-measured today and corrected — EIGHT SQL sites in FOUR
-      files, not the spec's "nine across five":**
-      `src/FusionRpg.Data/Sqlite/RpgStore.cs` **573** (DDL), **714** (reset — *not* `:697`);
-      `RpgStore.Expeditions.cs` **232**, **252**; `RpgStore.Fusion.cs` **395**;
-      `Migrations/ShardRungs.cs` **48**, **71**, **89** (plus doc-comment mentions at `11`, `16`, `18`).
-      Nothing outside `src/FusionRpg.Data/` references the table. Recorded for the day the owner says go.
+      the shipped name. ⛔ **The site list drifted again during this same build — re-measured
+      2026-09-05: ELEVEN SQL sites in FIVE files, not the eight-in-four this note claimed on
+      2026-09-04 (itself a correction of the spec's stale "nine across five"):**
+      `src/FusionRpg.Data/Sqlite/RpgStore.cs` **575** (DDL, was `:573`), **754** (reset, was `:714`,
+      itself corrected from the spec's `:697`); `RpgStore.Expeditions.cs` **233**, **253** (was `232`,
+      `252`); `RpgStore.Fusion.cs` **395** (unchanged); `Migrations/ShardRungs.cs` **48**, **71**, **89**
+      (unchanged; doc-comment mentions at `11`, `16`, `18`); and **this module's own new file**,
+      `RpgStore.Materials.cs` **153**, **175**, **293** (doc-comment mentions at `18`, `19`) — omitted
+      from the prior count even though this same P4.1 entry's "files touched" list (below) names
+      `RpgStore.Materials.cs` as built here. `src/FusionRpg.Data/` remains the complete boundary —
+      nothing outside it references the table. Recorded for the day the owner says go.
 - [ ] ⏸ ⛔ **The shipped materials DISPLAY corpus is 21 rows for a 27-id vocabulary, and its four
       shard rows point at ids that are never minted.** `data/seed/items/materials/materials.json`
       authors `shard.common` / `rare` / `epic` / `legendary` — the retired band ids — and **zero** of
@@ -2312,7 +2543,7 @@ live under `src/FusionRpg.Core/Items/Materials/` rather than flat in `Items/`, m
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.MaterialVocabularyTests|FullyQualifiedName~Items.MaterialCorpusTests|FullyQualifiedName~Items.SalvagePolicyTests"`; `dotnet test tests\FusionRpg.Data.Tests --filter MaterialSpendTests`; `dotnet run --project tools\ItemSeedValidator`
 
-### ✅ P4.2 — Module 15 `enhance-reroll` — BUILT AND VERIFIED 2026-09-05 (the `Mixed`-affix reroll, the workbench executor and module 1's two §9 defects explicitly handled — two closed already, one refused by name, one named below)
+### ✅ P4.2 — Module 15 `enhance-reroll` — BUILT AND VERIFIED 2026-09-05 (the `Mixed`-affix reroll **now BUILT** — see the 2026-09-05 addendum — the workbench executor and module 1's two §9 defects explicitly handled)
 
 ⛔ **The four things module 14 filed here are all answered.** Each is resolved or carried with its
 reason, in the order P4.1 filed them:
@@ -2395,13 +2626,14 @@ reason, in the order P4.1 filed them:
       `ValidatePostOp` restates the post-op invariant per budget. Proven both ways the success
       criterion asks for: by test, and by a test that greps the module's own non-comment source for
       `PoolRolls`
-- [x] ⚠ **The `Mixed` hazard is DECIDED, not discovered.** A `Mixed` affix consumes a prefix roll
-      **and** a suffix roll simultaneously, and `Instantiator.Draw`'s own comment calls today's
-      two-independent-draws model *"an interim, honestly-documented simplification"*. This module
-      refuses to build a second one on top of it: a reroll targeting a `Mixed` affix is refused
-      `ContentRuleViolated{reroll.mixed-affix-undefined}` naming module 2 (`resolution-order`), and
-      the gate is a **parameter** — the day that module lands, the refusal stops firing without a code
-      change here
+- [x] ⚠ **The `Mixed` hazard was DECIDED, not discovered — and it is now BUILT.** A `Mixed` affix
+      consumes a prefix roll **and** a suffix roll simultaneously, and `Instantiator.Draw`'s own
+      comment called its two-independent-draws model *"an interim, honestly-documented
+      simplification"*. This module refused to build a second one on top of it: a reroll targeting a
+      `Mixed` affix was refused `ContentRuleViolated{reroll.mixed-affix-undefined}` naming module 2
+      (`resolution-order`). ✅ **Superseded 2026-09-05** — module 2 had already landed, so this module
+      threaded its A1 semantics into `Instantiator.DrawBudget` itself and deleted the refusal. See the
+      addendum below
 - [x] **Transfer ships** (§6a) — both `op_kind`s, the 700‰ ratio and the ±8 window in tuning, role
       equality on module 3's stable id, the donor emptied to `+0`, the grant clamped to the
       *recipient's own* item-level cap, and a hybrid frame refused by name until module 3 settles
@@ -2518,13 +2750,15 @@ caller's, because it is D4's content decision. `--targets M1` reports nothing in
       `perform` delegate and writes the head — the same **wiring gap** P4.1 named at its own step 5,
       with the same owner. Nothing here is inert by design: every piece has a test driving it, and the
       seam module 14 built is the one it plugs into.
-- [ ] ⏸ **A reroll does not call `Instantiator.DrawBudget` with an exclusion set yet.** The spec's one
-      behavioural ask of the instantiator — `count` and `excludeGroups` parameters on `DrawBudget` —
-      is **not** made here. `RerollPolicy.RetainedGroups` computes exactly what those parameters take
-      and `ValidatePostOp` checks the result, so the contract is specified and tested from this side;
-      threading it through `Instantiator` touches the shared instantiation path every other module
-      draws from, and doing that *without* module 2's `Mixed` semantics would bake in the second
-      simplification §2 forbids. **Owner: this module, once `resolution-order` (module 2) lands.**
+- [x] ✅ **A reroll calls `Instantiator.DrawBudget` with a count and an exclusion set, and the `Mixed`
+      refusal is gone with its reason. RESOLVED 2026-09-05 — see the addendum below.**
+      **Before:** the spec's one behavioural ask of the instantiator (`count` and `excludeGroups` on
+      `DrawBudget`) was *not* made here, and `ContentRuleViolated{reroll.mixed-affix-undefined}`
+      refused every `Mixed` reroll, naming module 2 (`resolution-order`) — tracked as a
+      **cross-program blocker**.
+      **After:** both parameters exist, `Resolver`'s A1 `Mixed` semantics are threaded into
+      `DrawBudget` itself, and the refusal is deleted — a **same-module wiring gap, closed in the
+      module that owned it.** The residual is named and narrowed rather than left implicit.
 - [ ] ⏸ **`Restore` is in the namespace and has no implementation.** It is an administrative rollback
       to a recorded `op_seq`; the ledger it needs is built and dense, so it is a small addition, but no
       surface asks for it and shipping an untriggered rollback path is how a destructive operation
@@ -2540,6 +2774,103 @@ caller's, because it is D4's content decision. `--targets M1` reports nothing in
 - [ ] ⏸ **No endpoint, no wire DTO, no UI.** Consistent with modules 2/4/5/10–14: the item program's
       server surface is **module 20 `item-surfaces`**, and adding an ad-hoc endpoint here would be the
       second surface that module exists to prevent.
+
+---
+
+#### ⭐ Addendum 2026-09-05 — the `Mixed`-affix reroll is BUILT, and `reroll.mixed-affix-undefined` is deleted with its reason
+
+**Why this was reopened.** A rigor pass re-checked this module's one tracked *"blocked on another
+program"* claim against real code and found it stale: the refusal named module 2
+(`resolution-order`) as the blocker, and that module **had already landed 2026-09-02**
+(`Resolver.cs` + `ResolverTests.cs`), with module 4's `InstanceProducer.Compose` consuming its
+`Mixed` semantics the same day. What had *not* happened is the last hop —
+`Instantiator.Draw`/`DrawBudget`, the atom-id entry point a reroll actually redraws through, was
+deliberately left on the old two-independent-draws model. **A same-module wiring gap wearing a
+cross-program label**, which is exactly the mis-frame `CLAUDE.md`'s RPG-layer rule exists to catch.
+
+**Before → after, stated plainly:**
+
+| | Before | After |
+|---|---|---|
+| `Mixed` budget accounting | two **independent** draws; a `Mixed` affix could be picked in one pass, both, or neither | one pass carries the paired budget: a `Mixed` pick spends **one prefix roll AND one suffix roll simultaneously**, is never drawn twice, and is ineligible once the paired budget is spent |
+| `DrawBudget` surface | `private static void`, whole-budget only, no exclusions | `public static BudgetDraw`, with the spec's **`count`** and **`excludeGroups`** (§2's one behavioural ask), plus the `crossBudget` / `excludeAffixIds` state A1 needs |
+| Multi-ref bundles | `ExpandSingleRefAffix` threw for **any** bundle with >1 ref | `ExpandConcreteRefs` expands every concrete ref in `seq` order. ⚠ **Not a widening for its own sake:** `AffixValidator` derives `Mixed` only from refs of two different kinds, so a `Mixed` affix is multi-ref *by construction* — without this the new semantics were unreachable through `Draw` |
+| Reroll refusal | `ContentRuleViolated{reroll.mixed-affix-undefined}` on every `Mixed` target, gated by a `resolutionOrderLanded` bool parameter | **deleted.** `ValidateRerollable(targets, lookupAffix)` now refuses `reroll.slot-affix-undefined` instead |
+| Target counting | caller had to remember that a `Mixed` target frees a slot in *both* budgets — nothing enforced it | `RerollPolicy.TargetsFor(container, drawn, targetSeqs)` derives `BudgetTargets`, counting a `Mixed` target in **both** |
+
+⛔ **The residual is narrowed, not hand-waved — and it is deliberately class-agnostic.**
+`Instantiator.DrawBudget` returns bare atom ids and rolls no domain member, tier or value, so it
+cannot redraw into a **slot-bearing** pool; `Resolver.Resolve` can, but has no
+`count`/`excludeGroups` seam for a partial redraw. A slot-bearing **`Prefix`** affix is exactly as
+un-redrawable as a slot-bearing `Mixed` one, so refusing only `Mixed` would name the wrong thing and
+let a real failure through. **Owner: this module, if and when a slot-bearing affix reaches a
+container a workbench can reroll** — no shipped affix seed authors one today
+(`data/seed/effects/affixes/all.json` carries two rows, both `suffix`, both all-concrete).
+
+⛔ **One real latent defect found while doing this, named rather than silently absorbed: the shipped
+affix corpus could not be drawn at all.** Both rows in `data/seed/effects/affixes/all.json`
+(`affix.authored.affix-draw-000/001`, the `affix-authoring` pipeline's output) carry **two concrete
+refs**, and the old `ExpandSingleRefAffix` threw `NotSupportedException` for *any* bundle with
+`Refs.Count != 1` — so a container pooling either one crashed `Instantiator.Draw` rather than rolling
+it. It went unnoticed because `Draw`'s live callers (`ActionSeeder`, `TryInstantiate`) are fed
+single-ref affixes generated 1:1 from the atom catalog, and nothing wires the authored corpus into a
+container pool yet. `ExpandConcreteRefs` closes it as a side effect of the work this addendum
+describes; `A_multi_concrete_ref_bundle_expands_to_every_ref_in_seq_order` pins it.
+
+⭐ **The safety claim is proven, not asserted.** `Draw` is the shared instantiation path every module
+draws from (`ActionSeeder`, `TryInstantiate`, `AffixImportPathTests`), so
+`Every_mixed_free_pool_draws_exactly_what_the_two_independent_draws_model_drew` runs the **verbatim
+pre-change implementation** as an oracle over 16 container shapes × 25 seeds and asserts the new code
+agrees on every draw. A golden recorded from the *new* code could not tell a preserved sequence from a
+shifted one — that is why the oracle is the old algorithm and not a captured string. The two RNG
+stream names (`atom.pool.prefix.{id}`, `atom.pool.suffix.{id}`) are byte-unchanged, and
+`StreamNameOf`'s two literals carry a comment saying they are structural, never tunable.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "…InstantiatorDrawBudgetTests\|…Items.RerollPolicyTests"` | **39 passed / 0 failed** — 12 new in `InstantiatorDrawBudgetTests`, `RerollPolicyTests` 23 → 27 |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7267 passed / 4 failed** against a **freshly measured** same-session baseline of **7238 / 4** — the *same four*, none in `Items.*` or `Atoms.*`. All four are the concurrent class-system / expeditions stream's: three `ProveAptitudeJsonEmitTests` throwing `BattleStatComposer.Configure(...) has not run`, and `ExpeditionResolverTests.Tier_goldens_are_locked`; `git status` shows `src/FusionRpg.Core/Battle/BattleStatComposer.cs` and the class-system tuning/baselines mid-edit |
+| `dotnet test tests\FusionRpg.Guard.Tests` | **204 passed / 0 failed — fully green** |
+| `.\scripts\guard-single-writer.ps1` · `guard-funnel-delta` · `guard-dal` · `guard-secondary-no-unity` | all four **OK** |
+| `python scripts\audit-overflow.py` | **0 critical**, 60 findings, **none** in `Effects/Atoms/Instantiator.cs` or `Items/Mutation/` |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0.** The one M2 is `Delve/DoorTypeCatalog.cs`, the party-dungeon stream's untracked new tree |
+
+⚠ **One flake seen once and dismissed with evidence, not by assumption.**
+`ActionCatalogTests.NoJsonIsParsedAfterLoadEvaluatingTheCompiledConditionAllocatesZeroBytes` failed on
+one full-suite run (2280 bytes against an expected 0) and passed on the next full run plus three
+isolated runs. It measures `GC.GetAllocatedBytesForCurrentThread()` across a 100k-iteration loop, so a
+tier-1 re-JIT on the same thread lands inside the window; nothing on that path
+(`ActionCompiler`, `PredicateCompiler`, `FactReader`) is touched here.
+
+⚠ **A second concurrent-stream artifact, named rather than absorbed:** a mid-run
+`dotnet test tests\FusionRpg.Data.Tests` from the other stream held
+`tests/FusionRpg.Data.Tests/bin/**/FusionRpg.{Core,Data}.dll` open for ~20 minutes, failing this
+session's Data build with `MSB3027`. Re-running with `-p:BaseOutputPath=<scratch>` dodges the lock but
+**invalidates the result** — 77 broad seed/read failures, because those tests resolve `data/` relative
+to the assembly directory. Recorded so the number is not mistaken for a regression.
+
+**Files (addendum):** `src/FusionRpg.Core/Effects/Atoms/Instantiator.cs` (EDIT — `BudgetDraw`,
+`DrawBudget` public with `count`/`excludeGroups`/`crossBudget`/`excludeAffixIds`, A1 state threaded
+through `Draw`, `ExpandSingleRefAffix` → `ExpandConcreteRefs`, `EligibleFor`/`StreamNameOf`/
+`BudgetCandidate` helpers, the stale *"module 2, not yet built"* comments corrected);
+`src/FusionRpg.Core/Items/Mutation/RerollPolicy.cs` (EDIT — `reroll.mixed-affix-undefined` deleted,
+`reroll.slot-affix-undefined` added, `ValidateRerollable` takes a `lookupAffix` instead of a
+`resolutionOrderLanded` bool, `TargetsFor` added, `BudgetTargets`' doc corrected);
+`tests/FusionRpg.Core.Tests/Atoms/InstantiatorDrawBudgetTests.cs` (new — 12 facts, including the
+legacy-algorithm equivalence oracle); `tests/FusionRpg.Core.Tests/Items/RerollPolicyTests.cs`
+(EDIT — the Mixed refusal test replaced by five: no-longer-refused, the slot residual, `TargetsFor`'s
+both-budget counting, a retained `Mixed` blocking both exclusion sets, and an end-to-end partial
+reroll of a `Mixed` affix through the real `DrawBudget` that `ValidatePostOp` accepts on all 40 seeds).
+
+⚠ **`docs/architecture/item/spec-enhance-reroll.md` §2 is now describing a satisfied condition**
+(*"If module 2 `resolution-order` has not landed the real semantics, a reroll targeting a `Mixed`
+affix is refused with `NotRerollable` until it has"*). Left as authored — it is a conditional whose
+antecedent is false, not a wrong statement — but flagged here so a later reader does not take it as
+current state.
+
+---
 
 **Files:** `data/tuning/enhancement.v1.json` (new — the gain asymptote's `K`, the three risk bands,
 the `ilvl_cap` floor, the milestone stride, the craft-pity threshold, the transfer ratio and window,
@@ -2667,7 +2998,7 @@ this module's favour rather than left open.
       one on the same family. Fixed by matching most-specific-first and spending the lowest qualifying
       tier; pinned as `A_min_tier_ingredient_is_not_starved_by_a_lower_one_claiming_the_high_insert`
 - [x] ⭐ **`socket_min` / `socket_max` have a decided shape and are registered** — the two keys
-      `ssot-rarity.md` §5 recorded as *"awaiting I4"*, and the **last two** undecided rows in
+      `ssot-rarity.md` §4.4 recorded as *"awaiting I4"*, and the **last two** undecided rows in
       `RarityBudgetKeys`' closed list. **The shape:** two integers per rung, the **inclusive window a
       drop's socket count is rolled from**, before the base type's own `socketMax` clamps it.
       Transcribed from ssot-sockets.md §4.1's five ordinal **bands** onto the shipped ten rungs (two
@@ -2797,15 +3128,20 @@ live rather than hypothetical.
       this module's claim was exactly right:** `combogen/migrate.py`'s `legality_report()` measures all
       25 against the new rules and finds **0 legal, 25 illegal**, naming every reason per entry (25 at
       2 or 3 ingredients, 25 carrying `position`, 25 on `gem.word-*`, 25 with a non-derived
-      `minSockets`, 1 hosted on `ward-array`). ⏸ Still not migrated: the retirement is one of five
+      `minSockets`, 4 hosted on a role whose ceiling can't reach four (`footing`×1,
+      `armament-secondary`×2, `ward-array`×1)). ⏸ Still not migrated: the retirement is one of five
       sites in a rename bundle whose other four include a **frozen registry** and the 102 model calls
       that replace them. The standing test above is left untouched and still green. See P4.4
 - [ ] ⏸ **Wave-1 insert authoring — held, deliberately (ssot §9.13).** A `+armour` insert is
-      `ScopeUnsupported` at any per-actor scope (G8) and most element gems are `stat.derived`,
-      quarantined until E12. Authoring them now produces *"a row no code consumes, which is a lie in a
-      table"*. The restriction itself **cannot be enforced here** because no `gem` container can exist
-      yet (X7, above); it becomes enforceable the moment one can. Owner: whoever authors the first
-      `gem` container after X7
+      `ScopeUnsupported` at any per-actor scope (G8) — unchanged. Most element gems are `stat.derived`,
+      and D6's quarantine on that kind is already lifted on both real runtimes: E12 reopened Battle
+      2026-08-23, and the Derived-write lawn executor reopened Lawn 2026-08-30 —
+      `AtomKindRegistry.cs:534` ships `Full/Full/None` (Lawn/Battle/Sim), wired at the live-lawn
+      `ActorHub` (`CheatState.cs:59`). A `stat.derived` element gem would bind and execute today.
+      Authoring one now still produces *"a row no code consumes, which is a lie in a
+      table"*, for a narrower reason than before: it **cannot be enforced here** because no `gem`
+      container can exist yet (X7, above) — the atom kind is no longer why. It becomes enforceable the
+      moment X7 lands. Owner: whoever authors the first `gem` container after X7
 - [ ] ⏸ **Socket-combination budget versus set budget on one item — module 9's (`item-power-reads`).**
       §2g's surviving half of D21. It is a budget question and cannot be answered before the power
       reads run. Named in `SetExclusivityValidator`'s own doc comment so a reader finds it in the code
@@ -2832,6 +3168,13 @@ live rather than hypothetical.
       `AppendMutationOp` and `TrySpendRecipe` are both shipped too, so the call site that joins them to
       `SetSockets` is a composition rather than a design — the same carry module 15 recorded for its
       own executor, deliberately not duplicated here
+- [ ] ⏸ **P3.2's ask that this module reuse `ThresholdEvaluator`/`ThresholdConsumer<T>` for resonance
+      counting — found unaddressed during the module-22 consistency pass, not during this build.**
+      `ResonanceGenerator`/`CombinationEvaluator` count inserts and grant at breakpoints at the host
+      item's scope, independently of that mechanism. Whether that should be reconciled with module 12's
+      evaluator, or is correctly separate because folding scope into the evaluator is the exact merge
+      module 12's own bullet argues against, is an open question for the owner — named here rather than
+      left silent. **Cross-referenced from P3.2.**
 
 **Verification, run and green:**
 
@@ -3073,8 +3416,11 @@ against real shipped data.
       the 25 legacy socket-words is a legal combination today.** `legality_report()` names every
       reason per entry — 25 take 2 or 3 ingredients instead of D20's 4, 25 carry `position` (D41), 25
       use the retired `gem.word-*` runtime prefix, 25 declare a `minSockets` that is not the derived
-      value, and **1 is hosted on `ward-array`**, whose ceiling cannot reach four *and* which is
-      outside the twelve-role hybrid core. Module 16's standing test
+      value, and **4 are hosted on a role whose ceiling cannot reach four** (`footing`×1,
+      `armament-secondary`×2, `ward-array`×1) — only one of which is `ward-array` outside the
+      twelve-role hybrid core; the other three roles are inside the hybrid core but still below the
+      4-ceiling `{armament-primary, core-guard}` set `legality_report()` checks against. Module 16's
+      standing test
       (`The_legacy_socket_word_corpus_is_ordered_and_awaits_module_21s_retirement`) is left untouched
       and still green — this is its measured companion, not its replacement.
 - [ ] ⏸ **The generation graph is not wired, and `--write` says so instead of writing nothing.** A
@@ -3090,8 +3436,10 @@ against real shipped data.
 - [ ] ⏸ **The per-actor cap is TUNED but not ENFORCED — module 12's evaluator, at assignment time.**
       `maxCombosPerActor: 3` ships in `sockets.v1.json` (module 16) and this module asserts it stays a
       **non-binding backstop above the geometric ceiling of 2**. Nothing counts combinations across
-      *equipped items* yet; item-ideal.md §2g #8 places that in the threshold evaluator, and the spec
-      says **"named here; not built here."** Restated so it stays named.
+      *equipped items* yet; the spec places that in the threshold evaluator — citing item-ideal.md §2g #8
+      only for the raw per-actor-cap number, and that citation itself quotes §2g #8's pre-2026-09-04
+      wording, not its corrected "ceiling is 2, backstop 3" text — and the spec says **"named here; not
+      built here."** Restated so it stays named.
 - [ ] ⏸ **Module 20's compendium reveal and socket-UI preview are REQUIREMENTS, not niceties — and
       only half of the pair exists.** P5.4 built `CombinationDistance` on module 16's write-free
       `Preview`, with the four display states and the multiset swap distance D41 forced. The
@@ -3134,7 +3482,7 @@ against real shipped data.
 | `dotnet test tests\FusionRpg.Core.Tests --filter StrainSplice` | **22 passed / 0 failed** (new) |
 | `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **720 passed / 0 failed** — the whole item program, modules 1–20's own suites included, green under this module's Core additions (698 before) |
 | `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **131 passed / 0 failed** — the item program's whole DAL half |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7004 passed / 6 failed** — `Expeditions.ExpeditionResolverTests` (1), `Atoms.PredicateCompilerTests` (1), `ActorHub.SpecChannelClaimTests` (1) and `ClassSystem.ProveAptitudeJsonEmitTests` (3). Every one traced by name to a file the concurrent stream has mid-edit in `git status` — `PredicateNode.cs`, `RespecPolicy.cs`, `RpgStore.Aptitudes.cs`, `AptitudeEndpoints.cs`, `ExpeditionEndpoints.cs`. **Zero in `Items.*`**, and this module added only two new Core files |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7004 passed / 6 failed** — ⛔ **Re-checked 2026-09-05 after commit `20743ba` landed the concurrent stream's edits: only half the attribution holds.** `Atoms.PredicateCompilerTests` (21/21) and `ActorHub.SpecChannelClaimTests` (2/2) now pass — confirms they were `PredicateNode.cs`/`RespecPolicy.cs` mid-edit, now resolved. But `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked` and all 3 `ClassSystem.ProveAptitudeJsonEmitTests` **still fail** after `RpgStore.Aptitudes.cs`/`AptitudeEndpoints.cs`/`ExpeditionEndpoints.cs` are already committed — not those files. Root cause is the battle-tempo/battle-resources stream, still mid-edit: `Squad()`'s golden hash reads `BattleRuleset.BaseHp/Atk/Defense`, and `ProveAptitude`'s tool process hits `BattleStatComposer.Configure(...) has not run` — both trace to `BattleModels.cs`/`BattleStatComposer.cs`/`ContractTuningTestBootstrap.cs`, not to this claim's five files. **Zero in `Items.*`**, and this module added only two new Core files |
 | `dotnet test tests\FusionRpg.Data.Tests` (full) | **823 passed / 0 failed** — identical to the baseline measured at the start of this session, with the same intermittent *"Test host process crashed"* after the last test |
 | `dotnet test tests\FusionRpg.Guard.Tests` (full) | **203 passed / 1 failed** — `ClassSystemBaselineRegenTests.DominanceBaseline_coverageNamesEveryAxisHonestly`, which measured **204 / 0** at the start of this session and went red **while it ran**, on the concurrent stream's class-system tuning drift (`docs/research/class-system/_baseline-dominance.json` is mid-edit in `git status`). Not this module's: nothing here touches class-system, and the failure is the already-recorded dominance-baseline drift |
 | `dotnet build src\FusionRpg.Server` | **0 warnings, 0 errors**; `strain-splice.v1.json` copies to the output tree |
@@ -3218,7 +3566,7 @@ validators**, not a from-scratch build — checked before assuming, exactly as m
 | **U2** | `spec-uniques.md`: *"`AtomRejectionReason` has 34 members and `ContentRuleViolated` is not one of them"*, and adding it is an **Ask first** | **35, and `ContentRuleViolated` IS one of them** — added by an earlier item module under item-ideal §2b.1. `ContentRuleNamespaces` is the registration mechanism | The ask is already granted. All **nine** `unique.*` rule ids raise that one code; the enum stays **35**, asserted. No member minted |
 | **U3** | `ssot-uniques.md` §3.6 / §5.1: a unique's shape is `pool_rolls ≤ 1` | **`pool_rolls` no longer exists** — `PrefixRolls`/`SuffixRolls` replaced it (T3.2), confirmed by reflection over the shipped `ContainerRow` | The rule is `PrefixRolls + SuffixRolls ≤ 1` (`UniqueLimits.MaxTotalRolls`), and a test asserts **no `PoolRolls` property exists** so no code path can read one |
 | **U4** | `naming.v1.json idNamespaces.uniques`: `partitionCount: 20`, `totalCombinations: "20 (matches authoring-fleet-plan.md's 20 agents exactly)"`, `agentsEach: "~15 uniques"`, `themeSource: "themes.v1.json (15 themes)"` | **All four stale.** The file's own `bandAssignment` table lists **18** rows (5 + 5 + 3 + 5), the corpus ships **18** partitions × 8 = **144**, and `themes.v1.json` holds **13** — which the same block's own `themeCountNote` already says | Not edited (another lane's registry). Named as a defect below and cross-referenced into **P2.3** |
-| **U5** | `spec-uniques.md` §3.2's own ⚠: the lane quotes a comment at `ContainerValidator.cs:87` that is not in the file | **Confirmed still true** — `:87` is the negative-weight rejection; the *behaviour* is real and is proven here from the loop structure instead | The premise is asserted against the shipped validator, not against a comment (`a_fixed_core_atom_out_of_band_loads_clean` plus its negative twin) |
+| **U5** | `spec-uniques.md` §3.2's own ⚠: the lane quotes a comment at `ContainerValidator.cs:87` that is not in the file | **Stale — the line moved in the same commit.** The rarity-bands wiring (the static-constructor registration plus the `rarityExists` `<param>` doc) landed just above the pool loop and pushed everything down ~12 lines: `:87` is now the T3.2 mixed-class-group comment, and the negative-weight rejection sits at `:95-97`. The *behaviour* is still real and still proven here from the loop structure | The premise is asserted against the shipped validator, not against a comment (`a_fixed_core_atom_out_of_band_loads_clean` plus its negative twin) |
 
 **What was built:**
 
@@ -3647,16 +3995,16 @@ from-scratch build — checked before assuming, exactly as modules 6/7/8/10/17 w
       family the corpus does not have. ⚠ `atom.elemental-defense` **is** real and is what the other two
       element-bearing consumables use; the near-miss is part of why this went unnoticed.
       **Cross-referenced into P2.5 above**
-- [x] ⛔ **Two shipped comments now assert something false about `rpg_item_stock`.**
-      `PredicateNode.cs:10-12` (*"The underlying inventory/stock SYSTEM (`rpg_item_stock`,
-      item/ssot-consumables.md) is unbuilt — confirmed absent by search, not assumed"*) and
-      `CrossProgramLandedFlags.cs:37` (*"INVENTORY SYSTEM (`rpg_item_stock`) remains unbuilt, by design"*)
-      were true when written and are not now: module 2 `armoury` shipped the table
-      (`RpgStore.Items.cs:96`) with `AdjustStock`/`ListStock`, and this module adds `StockQty`. So
-      `LeafId.HoldsStock` is answerable from a store today and still reads a caller-supplied quantity —
-      a **wiring gap**, not a wall. **Not edited from here:** both files are the **action program's**,
-      and the leaf's own contract (which quantity it reads, and when) is `A4`'s to change. Named so the
-      day someone greps for "is the stock system built" they find this instead of the comment
+- [x] ⛔ **One shipped comment still asserts something false about `rpg_item_stock`; the other was
+      already corrected 2026-09-05.** `PredicateNode.cs:10-12` now reads *"the table... EXISTS —
+      `RpgStore.Items.cs:96` creates it and `:302` upserts it (this comment said "unbuilt" until
+      2026-09-05...)"* — fixed in place, no longer the stale claim quoted in earlier passes of this
+      doc. `CrossProgramLandedFlags.cs:37` (*"INVENTORY SYSTEM (`rpg_item_stock`) remains unbuilt, by
+      design"*) is the one still false: module 2 `armoury` shipped the table (`RpgStore.Items.cs:96`)
+      with `AdjustStock`/`ListStock`, and this module adds `StockQty`. So `LeafId.HoldsStock` is
+      answerable from a store today and still reads a caller-supplied quantity — a **wiring gap**, not a
+      wall. **Not edited from here:** the file is the **action program's**, and the leaf's own contract
+      (which quantity it reads, and when) is `A4`'s to change.
 
 **Three decisions this module had to make that the spec does not state, all named:**
 
@@ -3784,10 +4132,15 @@ the one row that is neither.
       `data/tuning/consumables.v1.json` is the whole change the day one lands
 - [ ] ⏸ **`use_context = battle` / `lawn` likewise stay refused**, and widening `contextsAuthored` is one
       line. ⛔ The **reason** for keeping battle out is now the use SITE, not the runtime — `resource.delta`
-      is Battle `Full` (C3 above) — and the real remaining blocker is the one the lane itself names in
-      §9.5(b) and the action side has not answered: **`rpg_action_cost` is priced against the five actor
-      resources, and a consumable's cost is an item, which is not a resource.** `A3` must either widen
-      `resource_id` or state that consuming the item is a precondition (`A4`) rather than a cost
+      is Battle `Full` (C3 above) — and the blocker the lane names in §9.5(b) is **stale, not open**:
+      `A3` (`spec-action-costs.md` §8) recommends, and `A4` (`spec-usability-conditions.md` §3a, locked)
+      already states, *"consuming the item is a precondition… rather than a cost"* — both REVISED
+      2026-08-27, a week before this module — shipped as `LeafId.HoldsStock` (`action-todo.md` T10, done
+      2026-08-28), the very leaf this entry already cites above as closing the lawn half.
+      `ssot-consumables.md` §9.5(b) was never annotated with the answer, which is what let this entry
+      restate it as open. What is genuinely still unresolved, narrower than the lane's original ask:
+      `HoldsStock` only reads a quantity (previous bullet), so nothing yet decrements the stock when a
+      `battle` action gated on it actually fires.
 - [ ] ⏸ **`rpg_run_draught` has no production writer yet.** `TrySpendDraughts` takes the run's own
       creation as a `seal` delegate so the store stays free of expedition knowledge, and the tests drive
       the seam including the forced-throw rollback. The dispatch endpoint that calls it is the
@@ -4045,11 +4398,12 @@ was still worth it, because it found handshake item 8 already closed (G1 below).
       facts (the shape `EquipItemFacts` already uses for the same reason). **Owner: module 6**; the
       column is ready the day the table exists
 - [ ] ⏸ **§9 item 9's content-hash registration — effect-atom's (E8), and NO item table is registered
-      today.** `ContentHashRegistry` is at V7 and carries `rpg_action`, `rpg_action_cost` and
-      `rpg_action_effect_scope` but **no** `item_unique`, `consumable_def`, `item_set` or
-      `item_display_template` — so this is the program's standing position, not a one-off omission.
-      Registering `item_granted_action` means a V8 and a moved stamp. **Owner: effect-atom, as one
-      amendment covering every item table**
+      today.** `ContentHashRegistry` is at **V9** (V8/V9 landed via effect-pipeline's affix-schema
+      (T3.1) and prefix/suffix split (T3.2) — unrelated to items) and carries `rpg_action`,
+      `rpg_action_cost` and `rpg_action_effect_scope` but **no** `item_unique`, `consumable_def`,
+      `item_set` or `item_display_template` — so this is the program's standing position, not a one-off
+      omission. Registering `item_granted_action` means a **V10** and a moved stamp. **Owner:
+      effect-atom, as one amendment covering every item table**
 - [ ] ⏸ **Handshake item 9 and the §5.6 `decisions.md` row — both doc changes with no code, and both
       the owner's.** *"Record that the item side of an action grant is a reference and a role, never a
       definition"* (so `A1` starts against a settled seam instead of negotiating one mid-build), and
@@ -4279,8 +4633,12 @@ are pinned: `A_matched_affinity_changes_a_strains_result_not_its_distance` and
       `RelicsLayer` body swap, plus `contract/types.ts`'s `SocketsView`/`SetView` and `adaptRelic`.
       **Not laundered onto another module:** the reason is that the web tree is being actively
       refactored by the concurrent world-stage stream right now — `git status` shows
-      `stages/world/WorldStage.tsx` and `targeting/QueuedOrders.tsx` modified and
-      `stages/world/playback/` + `stages/world/turn/` untracked mid-edit — and the owner's own memory
+      `stages/world/WorldStage.tsx`, `targeting/QueuedOrders.tsx`, and the whole
+      `stages/world/playback/` + `stages/world/turn/` subtrees modified — already tracked, not
+      untracked; the untracked half of the churn is `stages/world/`'s own root (`commanderIntent.ts`,
+      `labels.ts`, `playbackKeyframes.ts`, `playbackTable.ts`, `turnPlayback.ts`, `worldSelection.ts`,
+      `worldViewModel.ts`, `fixtures/`), moving in as `features/world/`'s matching files show
+      `deleted:` mid-edit — and the owner's own memory
       note records *"map FE frozen pre-refactor — do not add UI to it."* Composing eight new files
       against a kit whose shell files are moving is how a merge conflict eats a day's work.
       ⭐ **What is now READY for that pass, so it is a composition and not a design:** every number it
@@ -4291,6 +4649,12 @@ are pinned: `A_matched_affinity_changes_a_strains_result_not_its_distance` and
       grouping and the footnote key from `DominancePresentation`; the per-piece set disclosure from
       `SetDisclosure`. **No layout decision in the spec was re-litigated** — comparison stacks at
       640px, the bench and compendium are band-3, identity blocks 1–6 above the fold
+- [ ] ⏸ **`patronView.ts`'s own call site — module 10's cross-referenced hand-off, NOT picked up here.**
+      P2.5 filed it by name: `FormatPerMille` is the shared conversion this module (or the web layer)
+      is meant to call instead of `patronView.ts` owning a second `pct` closure. Not one of the eight
+      `.tsx` files above — `patronView.ts` lives in `features/demons/`, not `layers/relics/` — and this
+      pass touched no TypeScript file, so the call site is unchanged. **Owner: this module, on the same
+      web pass as the eight `.tsx` files above.**
 - [ ] ⏸ **`docs/web/spec.md` §399's success criterion 7 is NOT amended — the spec puts it under
       "Ask first" and it is another program's document.** The collision is real and re-verified
       today: `ssot-presentation.md` §1 cedes component code to the web spec, `docs/web/spec.md:137-144`
@@ -4403,7 +4767,7 @@ refuses in code: `StatApplyScope.Matches` returns `true` unconditionally for a `
 name** at tuning load for `player` / `match` / `entity`
 (`charm.binding-owner-kind-not-actor`), so a balance edit cannot reintroduce the withdrawn option C.
 **Everything else about the shared lifecycle is adopted unchanged**, which is what §9 item 10 actually
-asks for. ⚠ **Cross-referenced into P5.3 (module 18)** — its own `draughtBindingPriority` note says
+asks for. ⚠ **Cross-referenced into P5.2 (module 18)** — its own `draughtBindingPriority` note says
 *"`source` is the only difference between the two"*, and that sentence is now one difference short.
 
 - [x] **The five tables, ssot-charms.md §4.2 verbatim, and zero columns added to any atom table.**

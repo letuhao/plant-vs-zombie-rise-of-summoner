@@ -1,6 +1,7 @@
 # Spec: `tree-review`
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. Module of
+[passive-tree](../passive-tree-map.md). No build authorized.
 
 **Module id:** `tree-review` · **Wave:** 3 · **Depends on:** `tree-catalog` · **Depended on by:**
 `species-tree`
@@ -78,7 +79,7 @@ Three levers, and the second is worth more than the other two combined.
 
 | Line | Hours | Basis |
 |---|---:|---|
-| Tree census, 879 cards @ 90 s | **22.0** | §5's card; 14.7 h at 60 s, 44.0 h at 3 min |
+| Tree census, 879 cards @ 90 s | **22.0** | §5's card; 14.7 h at 60 s, 44.0 h at 3 min. **All 879 — the 39 shared trees included**, ~58 min of the total (closed question 4) |
 | Tier 1 census — exclusion nodes, ~1,055 @ 30 s | **8.8** | 30‰ of 35,160, the `exclusionRate` cap |
 | Tier 2 — 60 tree cards @ 90 s | **1.5** | §3 |
 | Tier 3 — 200 nodes @ 30 s | **1.7** | §3 |
@@ -137,7 +138,7 @@ at node scale and material at tree scale, which is itself an argument for the tr
 
 | Population | Expected size | Why census, not sample |
 |---|---:|---|
-| Nodes carrying an **exclusion** | ≤ 1,055 (the 30‰ `exclusionRate` cap) | D14's whole mechanism. A wrong predicate is a silent no-op the player never sees fire |
+| Nodes carrying an **exclusion** | ≤ 1,055 (the 30‰ `exclusionRate` cap; D40's target is ~2%, i.e. ~703 — the budget is sized on the cap) | D14's whole mechanism, and **all three forms including `nullification`** (D40). A wrong predicate is a silent no-op the player never sees fire |
 | Nodes the run **escalated** — `FAILED:<reason>` after bounded repair | small | Already known-bad; the machine asked for a person |
 | Nodes with an **unresolved vote** (a 1-1-1 split) | ≤ 50‰ by gate | The demon run's **695** two-to-one splits were resolved by majority and no human adjudicated one. Do not repeat that |
 | Every entry in the **review queue** | should be zero | §7 — a queue nobody counts is a hiding place |
@@ -225,8 +226,25 @@ construction, and *consequential* balance by simulation over a corpus of exactly
 |---|---|---|
 | **Motif / theme adherence** | token presence, anti-motif tokens, the **Brief conformance** gate | A node that uses every motif word and means none of them |
 | **Diversity** | normalized Shannon entropy per vocabulary | Entropy is high when 879 trees use all 12 aptitudes evenly **and are all one tree wearing 12 hats** |
-| **Mechanism floor** | is `nodeClass` `mechanism` at deep tiers — **`PassiveTree/MechanismFloor`** | Whether the mechanism *does* anything. `nodeClass` is a plan-side label, so the gate checks the plan against itself |
+| **Mechanism floor** | is `nodeClass` `mechanism` at deep tiers — **`PassiveTree/MechanismFloor`** | Whether the mechanism *does* anything. `nodeClass` is a plan-side label, so the gate checks the plan against itself. **The behavioural half REPORTS — see below** |
 | **Near-duplication** | lexical Jaccard over 5-gram shingles — **`PassiveTree/NearDuplicate`** | **Semantic** sameness. `metrics/dedup.py:12-17` states this as a deliberate documented gap — conceptual clustering ships only once `axis` reaches the adjective entries |
+
+✅ **The deep-tier behavioural sample REPORTS; it does not gate — settled 2026-09-05.**
+[`tree-plan`](spec-tree-plan.md) §4 owns the mechanism quota and raised the question in its own open
+list: does a `CombatSim` score over a sample of deep-tier mechanism nodes **block the catalog** or
+**file a finding**? **It files a finding**, and the reason is one line: the score is a proxy for a
+proxy — a win-share delta at one scope, over a *sample*, of a quota that is itself a stand-in for
+*"is this interesting"* — and this module does not let an instrument that thin deny a lot a pass. It
+is the same posture D40 takes on nullification: answer a reading risk with presentation, not with
+removal.
+
+**It is not toothless.** The finding lands on the corpus sheet and in the verdict queue, and a
+*systemic* result — a whole quota cell scoring at zero — is a rung-3 or rung-4 trigger (§6.2), which
+fixes the plan or the prompt corpus-wide. The escalation ladder is where a behavioural finding gets
+its force, not §6.4's unshippable list. `PassiveTree/DeepMechanismValue` registers with
+`gates = False`. **That is a choice, not a registry requirement** — the simulated half of H3 is
+CLOSED-loop and could legally gate, unlike the OPEN-loop metrics §4.3 covers. It does not, for the
+reason above, and saying so keeps the two arguments apart.
 
 #### 4.3 No machine answer at all — this is the review
 
@@ -412,7 +430,7 @@ have been rejected.
 | **2. Tree reject** | ≥ 2 nodes rejected in one tree, **or** the tree fails H4 | Regenerate the **whole tree**. A tree-level defect is nearly always a brief-level defect | 40 base + 80 vote calls |
 | **3. Cell reject** | the tier-3 sample shows a quota cell is systematically weak | Fix the cell's permitted subset or its motif set **in the plan**, regenerate every node in the cell | cell size |
 | **4. Batch reject → REPROMPT** | the tier-2 reject count reaches the acceptance number, **or** any tier-1 census finding is systemic | **Stop. Fix the prompt.** Redeploy corpus-wide at pipeline scope | ~1 call per unit |
-| **5. Owner escalation** | a `nullification` exclusion appears; a decision the plan cannot make; a `legitimateSkew` question | Queue it. Do not resolve it inside the run | — |
+| **5. Owner escalation** | a decision the plan cannot make; a `legitimateSkew` question. ~~a `nullification` exclusion appears~~ — **withdrawn 2026-09-05 (D40)**: the form is sanctioned, so its mere existence escalates nothing. A nullification whose **presentation** fails (§6.4 rule 2) is a reject, not an escalation | Queue it. Do not resolve it inside the run | — |
 
 **Rung 4 is not hypothetical — it is what the demon corpus actually did, three times**
 (`tasks/demon-corpus-self-heal-todo.md:270-370`). It costs about one call per unit at pipeline scope,
@@ -440,8 +458,15 @@ Copy `RunReport.verdict`'s discipline (`setgen/verdict.py:83-96`): **`FAIL` beat
 a single held partition denies a pass.** A tree lot is unshippable when any of:
 
 1. A gating metric **failed or did not run.** An absent check is never a pass (`metrics/registry.py:34-52`).
-2. ~~Any `nullification` exclusion exists.~~ **Withdrawn 2026-09-05 — see the note below.** The
-   number is kept so that rules 8 and 9, which §7 and the Decisions table cite by number, do not move.
+2. **An exclusion fails its presentation contract** (D40). ~~*Any `nullification` exclusion exists.*~~
+   was the wrong rule and is not restored; **this is the rule the owner's decision does license, and
+   this module may now enforce it.** Every exclusion — all three forms — must satisfy all three:
+   **(a)** both sides print the rule; **(b)** both name the **same** winner, in the same words;
+   **(c)** the catalog marks the loser **inert**, never un-unlocked, so
+   [`tree-surface`](spec-tree-surface.md) §8 can render a trait the player still owns. A pair that
+   prints on one side only, names two different winners, or asks the surface to hide the node is a
+   **hard finding, and it denies the lot a pass.** `PassiveTree/ExclusionRate` reports the rate; the
+   presentation check is `PassiveTree/ExclusionPresentation`, and unlike the rate it gates.
 3. `PassiveTree/UnresolvedCount` exceeds 50‰ — the one metric promoted to `gates=True`, for
    `demon_roster.py:357-370`'s stated reason: gating the *rate* stops a full run early.
 4. Any tier-1 census population is **unread**. A census is not a sample; partial is failure.
@@ -454,22 +479,26 @@ a single held partition denies a pass.** A tree lot is unshippable when any of:
    nothing; exit 1 if anything differs."* Without it, *"identical for every player"* is a claim about
    one build machine.
 
-⚠ **Why rule 2 was withdrawn: this module was enforcing a ruling the owner has not made.** D14 locks
-the exclusion ladder as Reroute → Precedence → Nullification.
-[`tree-language`](spec-tree-language.md) removes `nullification` from the generated schema and files
-that removal as **pending an owner ruling**, and [`species-tree`](spec-species-tree.md) open question 3
-agrees. **Narrowing a locked decision is the owner's call, and a spec may not make it by listing the
-consequence as an unshippable condition.**
+✅ **The owner ruled, 2026-09-05 (D40): the narrowing is OUT and all three forms stay.** Reroute →
+Precedence → **Nullification** all survive, *"so the generator is never forced to refuse a pair it
+cannot reroute or order."* The previous fold was right to withdraw the old rule 2 — a spec may not
+narrow a locked decision by listing the consequence as an unshippable condition — and it was right
+that a warning is not a decision. **What it could not do was enforce anything. That is now lifted:**
+the owner answered the *"reads like a bug"* risk with **presentation, not removal**, and a
+presentation requirement is precisely the kind of thing this module is built to enforce.
 
-So a `nullification` exclusion **reports** and does not deny a lot a pass:
-`PassiveTree/ExclusionRate` names every instance with its tree and its predicate, the corpus sheet
-lists them under the exclusion census, and tier 1 reads every one of them — the same treatment every
-other exclusion gets. §6.2 rung 5 already routes it correctly: **queue it for the owner, do not
-resolve it inside the run.**
+So the treatment of an exclusion is now:
 
-**If the owner rules the narrowing in, this becomes an unshippable condition again** and rule 2 is
-restored verbatim. That is one edit, named here so the next session does not re-derive it, and so
-nobody reads today's warning as a decision that `nullification` is fine.
+| | Reports | Gates |
+|---|---|---|
+| **How many** exclusions exist, and of which form | `PassiveTree/ExclusionRate`, against `exclusion.targetShareMilli` (~2% — D14, restated by D40) | no — a rate above target is a finding, and the corpus sheet's exclusion census carries it |
+| **Whether each one is presentable** | — | **yes** — `PassiveTree/ExclusionPresentation`, §6.4 rule 2 |
+| **Whether each one is any good** | tier 1 reads **every** exclusion — census, not sample, unchanged | the reviewer's verdict, through the ladder |
+
+**`nullification` gets no special-case treatment in any row of that table.** It is the rung the
+generator reaches when it can neither reroute nor order a pair, it is censused like every other
+exclusion, and it is judged on the same three questions. The one thing it must not be is *quiet* —
+which is what the presentation gate is for.
 
 ### 7. The `_`-prefix blind spot — a named gate
 
@@ -579,7 +608,9 @@ spending them is a flag someone eventually forgets."*
 tools/seedsmith/seedsmith/adapters/trees/review/sample.py     the three tiers, over sampling/
 tools/seedsmith/seedsmith/adapters/trees/review/fingerprint.py tree fingerprint + nearest siblings
 tools/seedsmith/seedsmith/adapters/trees/review/verdict.py    acceptance numbers, the ladder
-tools/seedsmith/seedsmith/metrics/passive_tree.py             PassiveTree/* incl. HiddenFileCount
+tools/seedsmith/seedsmith/metrics/passive_tree.py             PassiveTree/* incl. HiddenFileCount,
+                                                              ExclusionPresentation (gates, D40) and
+                                                              DeepMechanismValue (reports, S4.2)
 web/fusion-rpg-web/scripts/render-tree-cards.mjs              the card + corpus sheet (S5.4)
 data/tuning/passive-tree-targets.v1.json                      acceptance numbers, sample sizes
 data/seed/passive-tree/_review/<lot>.json                     the verdict queue - COMMITTED
@@ -665,10 +696,16 @@ class HiddenFileCountMetric(Metric):
 | `hidden_file_count_reports_the_number_of_files_it_visited` | §7 — a green with `visitedFileCount` 0 is a walk that looked at nothing |
 | `a_canary_parked_entry_is_a_finding_in_the_same_run` | the fixture root carries one parked entry every run, so "green" can never mean "the walk never ran" |
 | `a_census_refuses_to_start_without_a_matching_sheet_read_row` | §5.5 — missing row, and a row naming a stale `sheetRevision` |
+| `an_exclusion_printed_on_one_side_only_denies_the_lot_a_pass` | §6.4 rule 2 (a), D40 |
+| `an_exclusion_naming_two_different_winners_denies_the_lot_a_pass` | §6.4 rule 2 (b) — the failure that makes an exclusion read as a bug |
+| `a_loser_marked_unlocked_rather_than_inert_denies_the_lot_a_pass` | §6.4 rule 2 (c) — the catalog must let `tree-surface` render a trait the player still owns |
+| `a_well_presented_nullification_ships` | D40, stated as a test so the withdrawn rule cannot creep back: a nullification that satisfies (a)–(c) is censused, reported and **passes** |
+| `the_deep_mechanism_value_metric_never_gates` | §4.2 — a below-threshold behavioural sample files a finding; only the ladder stops a lot |
+| `the_shared_corpus_lot_requires_a_completed_census` | closed question 4 — 39 trees, same protocol, its own sheet and verdict queue |
 
 Fixtures are synthetic lots with a deliberately injected defect — a duplicated name across 300 trees,
-an empty tier, a `nullification` exclusion, a parked `_` entry. **That is the only way to prove a
-check would notice.**
+an empty tier, an exclusion pair whose two sides name different winners, a parked `_` entry.
+**That is the only way to prove a check would notice.**
 
 ## Boundaries
 
@@ -676,14 +713,16 @@ check would notice.**
 `sampling.stratified_sample`; keep every acceptance number in `data/tuning/`; render effects through
 `formatMagnitude`; count `_`-prefixed files **and report how many were visited**; write a `sheetRead`
 row before a census starts; write every verdict as data; name the rule when rejecting; census the
-exclusion nodes.
+exclusion nodes — **all three forms, `nullification` included** — and enforce their presentation
+contract (§6.4 rule 2); census the shared corpus as its own lot, exactly as a species lot.
 
 **Ask first:** changing an acceptance number (it is a judgement about how much risk ships, and the
 whole point is that it is explicit); adding a second reviewer for an agreement pass; skipping the
 census for a lot; committing per-tree cards after all.
 
 **Never:** let an OPEN-loop metric contribute to a pass; enforce a narrowing of a locked decision
-the owner has not ruled on (§6.4's note); call a lot reviewed when a census population is unread;
+the owner has not ruled on (§6.4 rule 2's note records what that cost once, and what the owner
+actually ruled); call a lot reviewed when a census population is unread;
 report a sampled result as a claim about a named tree; write *"the catalog was reviewed"*
 without the qualification in §2; repair a rejected node by hand without a `manualCorrection` stamp;
 build an interactive tree editor; add a second implementation of the magnitude contract; sample a
@@ -716,11 +755,17 @@ property the machine already closes completely.
       `sheetRevision` — `{lot, sheetRevision, by, utc}`, written when the sheet is dismissed (§5.5).
       A census run against a missing or stale row refuses, proven by test.
 - [ ] The card renders no raw channel id anywhere, proven by test.
+- [ ] Every exclusion in the lot is censused and passes the presentation contract — both sides print
+      the rule, both name the same winner, and the loser is marked **inert** rather than un-unlocked
+      (§6.4 rule 2, D40). A `nullification` that satisfies it ships; one that does not denies the lot
+      a pass.
+- [ ] The 39 shared trees complete a census as their own lot, with their own corpus sheet and
+      `sheetRead` row — about **58 minutes** at 90 s a card (closed question 4).
 
 ## Open questions
 
-Four, all genuine. A recommendation nobody has disputed is a decision, and an answerable question is a
-task — neither is listed here.
+**Three**, all genuine. A recommendation nobody has disputed is a decision, and an answerable question
+is a task — neither is listed here. The fourth was answerable and is answered below.
 
 1. **What is the real per-tree review rate?** Every hour figure above rests on 60–90 s and it is
    **unmeasured**. A 20-tree pilot answers it in half an hour and should gate the full run. The pilot
@@ -731,10 +776,26 @@ task — neither is listed here.
 3. **What manual-correction rate is acceptable?** §6.1 makes hand correction legal and stamped; above
    some rate it means the prompt is wrong. The demon corpus's rate was 3 entries in 840 — but that was
    a floor set by how little was reviewed, not a ceiling set by quality.
-4. **Does the shared corpus get a census too, or only the species lots?** 39 trees is 1 hour at 90 s,
-   so cost is not the argument either way. The argument for a census is that the shared corpus is the
-   whole learnable vocabulary of the game and every build guide refers to it; the argument against is
-   that tiers 1–3 already cover 39 trees densely.
+### Closed 2026-09-05
+
+4. ~~**Does the shared corpus get a census too, or only the species lots?**~~ **Closed: yes, it gets a
+   census.** 39 trees × 90 s is **58 minutes** — and this spec was already pricing it, since §1.3's
+   census line is *879* cards, not 840. The argument settles itself on cost: **an hour is cheaper
+   than the argument about whether an hour is worth it.** What that hour buys is not marginal either
+   — the shared corpus is the whole learnable vocabulary of the game (`tree-surface` §1: 1,560 nodes,
+   4.4% of the corpus, and the only part a build guide can be written about), so a defect there is
+   read by every player rather than by the owners of one bloodline.
+
+   **Specified, so it is not re-derived:** the 39 shared trees are **one census lot**, run under the
+   same protocol as a species lot — its own corpus sheet, its own `sheetRead` row, its own verdict
+   queue, every card judged, and the acceptance record saying *"every tree was judged."* It is a
+   separate lot from the species corpus because the two land at different times and a lot is the unit
+   that ships. Tiers 1–3 still run over it; the census does not replace them, and it is what makes
+   the claim about the shared corpus a **C**-type claim (§2) rather than a **B**-type one.
+
+   ⚠ Under D37 the shared corpus arrives in **category waves** as `gate-counters` lands each gate
+   quantity, so in practice this is up to three census lots — 12 primary trees now, 6 elemental and
+   21 status as they become generable. The per-lot cost is proportional and the total is unchanged.
 
 ## Decisions implemented
 
@@ -746,7 +807,7 @@ task — neither is listed here.
 | §3.2 — the favour triple is the first stratum axis | **D17**, and §9's measured 166× skew |
 | §3.2, §5.5 — the quota grid is checked against a declared target, not against the corpus | **D32** |
 | §4.1 — budgets and per-tree equal value are machine-checked, so humans do not sample them | **D13**, **D15** |
-| §3.2, §6.4 — the exclusion census; `nullification` **reports and escalates**, pending the owner's ruling on the narrowing | **D14** |
+| §3.2, §6.4 — the exclusion census over all three forms; `nullification` ships, and the **presentation contract is enforced** (both sides print, same winner named, loser marked inert) | **D14**, as settled by **D40** |
 | §4.2 — the mechanism floor is proxied by a plan-side label, so deep tiers are sampled | **D13** as extended by ideal §3.5 |
 | §5.2 rule 3 — effects render through the shipped magnitude contract | **D24**'s learnability criterion (ideal §10.2) |
 | §5.2 rule 2 — a fixed 2 × 10 lattice, one card shape for every tree | **D10**, **D29** |
@@ -755,7 +816,8 @@ task — neither is listed here.
 | §8 — a retired node is displayed, never silently repaired; the escape hatch is a full respec | **D11**, **D18** |
 | §6.2 rung 3 — a systematically weak cell is fixed **in the plan**, not per node | **D13** |
 | Boundaries — no exclusion budget where the mechanism is a real gap | **D16** |
-| §1.1, §7 — the roster ships whole, and a category can land as its own lot | **D27**, **D9** |
+| §1.1, §7, closed question 4 — the roster ships whole, and a category lands as its own lot: the shared corpus is censused in category waves as `gate-counters` unblocks each one | **D27**, **D9**, **D37** |
+| §4.2 — the deep-tier behavioural sample **reports**; a systemic result escalates through the ladder rather than denying a lot a pass | closes [`tree-plan`](spec-tree-plan.md)'s open question 2 |
 
 **Belongs to a sibling module, not here:** D1–D8, D12, D19–D22, D25, D26, D28, D31, D33–D36 —
 `tree-plan` (the ladder, the archetypes, the property vocabulary, the targets), `tree-state` (the

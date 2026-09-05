@@ -116,7 +116,9 @@ The sixth stage, approved 2026-09-05. **Not designed here** — the room graph, 
 wild-talk layers, the extraction result and the band-4 reports are specified in
 [party-dungeon-map.md](../architecture/party-dungeon-map.md) and its module specs; the decisions.md row
 *"Game GUI — sixth stage `delve`"* fixes the band assignments. This entry exists so the catalog's count
-matches the approved stages; it fills in when that program reaches its GUI module.
+matches the approved stages; the surface itself is specified in
+[party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) (drafted 2026-09-05) — §4 for the
+route and the six shell rows, §7 for the band of every surface, §8 for the player vocabulary.
 
 ### 2.5 Shell — band −1
 
@@ -163,9 +165,9 @@ rather than opening a layer, and it is therefore the only one that can confirm b
 | Band | Surfaces |
 |---|---|
 | −1 Shell | Boot · title · save select · fatal error |
-| 0 Stage | Sanctum · World map · Lawn · Battle |
+| 0 Stage | Sanctum · World map · Lawn · Battle · **Siege** · **Delve** — six declared (§1's 2026-09-05 amendment); `siege` and `delve` are declared and unbuilt, and the count assertion names the two sets separately |
 | 1 HUD | Per-stage HUD clusters · the layer rail · connection status |
-| 2 Panel | The ten layers in §3 (nine player + sector inspector) |
+| 2 Panel | The ten layers in §3 (nine player + sector inspector), plus the Delve's own stage-local panels — pack · wild talk · event · object prompt · supply bag · fight input · descent picker ([party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) §7) |
 | 3 Dialog | Confirm (release, fuse, release-tribute) · **run result** · level-up · contract offer |
 | 4 Toast | Mutation results · drops · tribute due · connection warnings · expedition returns |
 | 5 System | Settings · quit · unrecoverable connection failure |
@@ -182,7 +184,7 @@ Declared once. No surface reassigns a global verb (GG-20).
 | `F10` | Toggle the overlay window | **Reserved** — owned by launcher/injector, never handled by the app |
 | `C` `K` `R` `F` `P` `E` `A` `H` | Open Creatures / Commanders / Relics / Fusion / Pacts / Expeditions / Almanac / Chronicle | Pressing an open layer's key closes it |
 | `M` | Travel to the world map | A stage change, so it confirms if something would be abandoned |
-| `Space` | Stage transport pause/resume | Lawn and battle only; inert elsewhere |
+| `Space` | Stage transport pause/resume | Lawn and battle only; inert elsewhere — and **deliberately inert on `delve`**, which has no clock to pause (`party-dungeon-map.md`: no stamina, no daily limit, no real-time recovery) |
 | `Tab` | Cycle focus within the top layer | Never escapes it (GG-19) |
 | `` ` `` | Developer tree | Only when developer mode is on |
 | `1`–`9` | Stage-specific hotbar | Owned by the current stage |

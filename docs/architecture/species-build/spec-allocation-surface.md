@@ -79,6 +79,26 @@ config."* So — **"Sunflower's build"**, not "DemonType allocation scope"; **"R
 "delete override row". Engine vocabulary (`typeId`, `scope_key`, `AllocationScope`) never reaches this
 surface.
 
+### States — what renders when there is no build, no data, or no answer yet
+
+**Added 2026-09-05 by the playability audit.** This section did not exist, and its absence is why the
+shipped panel invented one: it renders *"You're running the shipped build"* over twelve zeroes for a
+species that has no build, keeps a failed request on a loading spinner forever, and treats a
+not-yet-loaded price as free. A surface spec that names only the happy path gets the rest improvised.
+
+Four states are real and each must be distinguishable from the others and from success:
+
+| State | Reachable when | What renders |
+|---|---|---|
+| **Loading** | the species query is in flight | the loading placeholder — and **only** while genuinely pending |
+| **Failed** | the species query errored | an error with the real reason and a retry. It is checked **before** any "no data yet" fallback, or it is unreachable — a failed query has no data, so an `!data` test that runs first swallows it |
+| **No budget yet** | the species has never levelled: budget is `max(0, level-1) x rate`, so level 1 is exactly zero | a distinct state naming the **remedy** — field this species on the lawn — never the shipped-build copy, which asserts a build that does not exist. The disabled-save reason is visible text, not only a `title=` tooltip |
+| **Price unknown** | the respec price query is pending or errored | the save path **waits or refuses**; it never falls back to treating the change as free. Spending souls without showing the price is the exact failure §"Testing strategy" criterion 5 guards, and a defaulted `isFree` walks straight around it |
+
+The rule behind all four: **a degenerate state is rendered honestly, never as a plausible-looking
+success.** An empty build and a broken build must not look the same to the player, and neither may
+borrow the copy of a working one.
+
 ## Commands
 
 ```powershell
@@ -128,6 +148,14 @@ and `AptitudesUpdated` already broadcasts, so the panel refreshes without a seco
 7. **GG-10:** reaching the override action takes ≤3 pushes from a stage.
 8. **No engine vocabulary** in any rendered string — a lint-style test over the panel's copy.
 9. **E2E:** a species' build is visible, adjustable, revertible, and the change survives a reload.
+10. **The real plan resolves for the real roster** — asserted against the committed
+    `_species-build-plan.json` and the compiled `DemonSpeciesCatalog`, never a hand-built fixture keyed
+    to agree with the code under test. Criterion 1 is unfalsifiable without this: a fixture-fed baseline
+    passes while every shipped species renders zero. *(Added 2026-09-05 — this is exactly what shipped.)*
+11. **Each state in §"States" is covered**, the failure and pending-price paths included — the two that
+    had no test and were therefore both wrong.
+12. **No door is assumed.** A test or a manual step proves the surface is reachable **by clicking** from
+    a cold start, not by navigating directly to a route a player has no link to.
 
 ## Boundaries
 

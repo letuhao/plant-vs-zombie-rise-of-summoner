@@ -71,7 +71,7 @@ why `AptitudeSubsystem.Order` says so in its own comment at `AptitudeSubsystem.c
 order band would be an entry `actor-hub-ssot.md` §6's registry does not have.
 
 **There is no collision with `mechanism-wiring`, and this is stated so a builder does not
-re-litigate it.** That module registers a genuinely new subsystem, `status.derived`
+re-litigate it.** That module registers a genuinely new subsystem, `l2b.derived`
 (`spec-mechanism-wiring.md` §5) — a live status's `StatMods` are not atoms, so it cannot be a fan-in
 and correctly takes its own id. Because `Register` matches on `SubsystemId` and nothing else
 (`ActorHub.cs:34`), the two coexist by construction: `mechanism-wiring` adds a fourth id,
@@ -160,7 +160,14 @@ Half-closed since — specimen level now reads the shared arithmetic curve
 (`ssot-power-scale.md` §10.2 row 27), so it and aptitude points finally share a shape.
 **`element_mastery` is comments only** (`PointBudget.cs:13,15,22`, which says outright that it *"is
 owned by the demon program's `aspect-scope` module and does not exist yet"*) and **`status_applied`
-has zero `src/` hits** — both grepped this session.
+has zero `src/` hits** — both re-grepped this session, and neither fact moved.
+
+**What did move is ownership. D37 gives both quantities to a new wave-0 module,
+[`gate-counters`](spec-gate-counters.md)** ([passive-tree-map.md](../passive-tree-map.md) §Modules):
+the counters themselves, their persistence, and the `PointBudget` binding. `PointBudget`'s comment
+naming `aspect-scope` is amended by that module's own change, not by this one. So this module still
+reads whatever the gate quantity resolves to and still owns none of them — but there is no longer a
+quantity with nobody's name on it.
 
 **Rule: `tree-resolve` gates on ONE index — APTITUDE POINTS allocated to this tree's gate
 quantity.** Nodes are *bought* with skill points; tiers are *opened* by aptitude allocation. They are
@@ -182,9 +189,17 @@ resolver never sees a specimen level or a mastery count. A tree whose gate quant
 yet is not blocked here either: it resolves to zero aptitude points, which resolves to tier 0, which
 resolves to no contribution. **Inert, not broken.**
 
-**But "inert" is the state of 27 of the 39 shared trees today** — 6 elemental and 21 status, 1,080 of
-the 1,560 shared nodes (ideal §13.4). A permanently-tier-0 tree is arithmetically fine here and
-disastrous on a player surface, where it reads as a wall the player failed to climb. This module's
+**"Inert" is the state 27 of the 39 shared trees would resolve in today** — 6 elemental and 21
+status, 1,080 of the 1,560 shared nodes (ideal §13.4), because their gate quantity has no counter
+yet. ~~A permanently-tier-0 tree~~ **A tier-0 tree is now a sequencing state, not a permanent one
+(D37):** [`gate-counters`](spec-gate-counters.md) ships those counters in wave 0, so **all 39 trees
+are reachable rather than 12**, and the wait is bounded by a module in this program instead of by
+unscheduled work in another one. The rule it waits on is unchanged — a tree's gate quantity exists
+before that tree's content is generated.
+
+A tier-0 tree is still arithmetically fine here and still disastrous on a player surface, where it
+reads as a wall the player failed to climb. That is true of a tree waiting for its counter as much as
+of one nobody has invested in, so the reporting below stands as written. This module's
 part of the fix is one field: `TreeResolveReport` carries **why** a tree is at tier 0 —
 *no aptitude allocated yet* versus *this tree's gate quantity has no producer* — as a value read from
 the catalog, never inferred from the zero. Inferring it from a zero would swallow a real bug in the
@@ -270,6 +285,16 @@ Both `w` and `Fmax` are **tunables with units**, never values in code (§8).
 > many* rather than *which* — the same reason `tree-state` §2.2 can prove the total cost is order-free.
 > Souls were never affected: `s_i` is a depth count, not a price.
 
+> ✅ **Settled by D39, 2026-09-05: `H` reads the FINAL ALLOCATION — self-spent only.** The quantity is
+> the build the actor **holds**, never the sequence they bought it in. Self-bought node count and
+> self-spent soul levels are exactly that projection; `tree-state` §2.4 defines it and this module
+> reads it.
+>
+> **Said plainly, because it is the property a player will actually notice: two players who follow the
+> same build guide end with the same `F`.** Click order, respec history and which tree they filled
+> first change nothing. Test 6c keeps that true, and the hand-written mutant that reads *points paid*
+> instead of *nodes held* exists to make sure test 6c is doing the work.
+
 **Count, not budget share.** The plan also emits `budgetShareMilli` per node, which is equally
 order-free and would weight a capstone above a tier-1 node. Count is the choice here because `F` is a
 *shape* function over how commitment is spread, and because the readout `tree-surface` §6 prints is
@@ -300,12 +325,13 @@ combination of two values in `[0,1]`, so `H ∈ [0,1]`; therefore `F ∈ [1, Fma
 arithmetically impossible rather than merely unlikely** — which is why a bounded multiplier is where
 the design puts its convexity (ideal §3.1).
 
-### 5.2 `H` reads self-spent only (D8) — and that is exploitable
+### 5.2 `H` reads self-spent only (D8/D39) — and the F4 breadth exploit is parked deliberately
 
 D8 as amended: *"`H` reads spent points + souls — self-spent only. Gear-granted points add power,
 never focus."* The stated reason is sound: a good off-build drop must never lower your multiplier.
+D39 keeps that rule and fixes what the quantity is: **the allocation the actor holds** (§5.1).
 
-**The red team's F4 finding is not solved, and this spec does not pretend it is.**
+**The red team's F4 finding is real, the owner has looked at it, and it is parked on purpose.**
 [06-red-team.md](../../research/passive-tree/06-red-team.md) §5: D2 lists four acquisition sources —
 skill points, aptitude thresholds, items/affixes, demon aspect — and the amendment names **only
 gear**. So:
@@ -319,12 +345,23 @@ unnamed sources than on gear — an aptitude-threshold grant is **self-directed*
 where the aptitude points went, so "not self-spent" is a fiction), and a demon-aspect grant is
 per-actor under D21, so *whose `H` it enters* has never been asked.
 
-**What this module builds today.** `H` reads a `selfSpent` projection that `tree-state` supplies,
-and the resolver never infers provenance itself. **The set that projection contains is an owner
-ruling, not an implementation detail** — §15.1.
+> ### ✅ D39, 2026-09-05 — parked, with the condition written down
+>
+> **The exploit stands, and it is acceptable only while `F` measures as doing little.** `Fmax` sits in
+> D5's 1.15–1.25 band, §3.5 found no `Fmax` that reverses the concentration ordering, and the whole
+> term is provisional (§5.4). Buying a four-source provenance rule — which needs a defined meaning for
+> "self-spent" on an aptitude *threshold* grant, and an answer to whose `H` a demon-aspect grant enters
+> — to close a ≤25% edge on a term that may be withdrawn is work in the wrong order.
+>
+> **Revisit trigger, stated so it is not rediscovered: if `F` ever gets teeth.** Concretely — `Fmax`
+> raised out of D5's band, or `squad-harness` measuring concentration as decisive at squad scope —
+> **the rule is rewritten over all four D2 sources before that change ships.** This is a decision with
+> a condition attached, not an oversight, and §15.1 is closed on it rather than left listed.
 
-The projection's *shape* is fixed even while its *membership* is open, which is exactly what lets the
-module be built while the ruling waits:
+**What this module builds.** `H` reads a `selfSpent` projection that
+[`tree-state`](spec-tree-state.md) §2.4 supplies, and the resolver never infers provenance itself.
+
+The projection's shape and its membership are both settled now, so nothing here waits on anything:
 
 ```text
 selfSpent(actor) → per tree i:   n_i   self-bought node count    long, ≥ 0
@@ -335,16 +372,16 @@ Four rules on it, all buildable and testable today:
 
 1. **`tree-state` decides membership; the resolver decides nothing.** A node enters `n_i` if and only
    if `tree-state` marks that unlock self-bought. The resolver carries no provenance rule of its own
-   and therefore cannot drift away from whatever the ruling settles.
+   and therefore cannot drift away from the settled one.
 2. **A node counts once, at 1** — never weighted by what it cost. That is the property that makes `H`
-   order-free (§5.1), and the ruling must not break it.
+   order-free (§5.1), and a later widening of membership must not break it.
 3. **A tree with no self-bought node is absent from the vector**, not present at zero — the same rule
    §5.1 states for empty denominators. Membership never invents a row.
-4. **Until the ruling lands, membership is: nodes bought with skill points the actor spent directly,
-   and soul levels the actor bought directly.** Item-granted, aptitude-threshold and demon-aspect
-   unlocks are excluded, and a test asserts that exclusion is a **stated rule** rather than an
-   accident — so widening it later is a one-line change in `tree-state` with a golden that moves,
-   not an archaeology exercise.
+4. **Membership, settled under D39: nodes bought with skill points the actor spent directly, and soul
+   levels the actor bought directly.** Item-granted, aptitude-threshold and demon-aspect unlocks are
+   excluded, and a test asserts that exclusion is a **stated rule** rather than an accident — so
+   widening it when the revisit trigger fires is a one-line change in `tree-state` with a golden that
+   moves, not an archaeology exercise.
 
 `n_i` and `s_i` are `long` under §7.2 rule 1, even though neither plausibly nears `int`'s ceiling: a
 count on a PS-8 track does not get a narrower type because today's numbers are small.
@@ -626,7 +663,7 @@ D21 gives every actor its own state, so the memo is not optional.
 | 14 | `Divide_happens_once_and_last` | A per-mille-first implementation is measurably wrong at tier 1 by more than one tier step |
 | 15 | `Lawn_and_battle_resolve_to_the_same_totals` | The two adapters over one resolver. The parity shape `TraitAtomSource` already proves for traits |
 | 16 | `Every_contribution_carries_its_node_source_id` | `tree.{treeId}.{nodeId}`, so GG-49 attribution is not a later retrofit |
-| 17 | `An_excluded_node_contributes_zero_and_is_reported` | Nothing refunded, nothing silently repaired, winner named. D14 |
+| 17 | `An_excluded_node_contributes_zero_and_is_reported` | Nothing refunded, nothing silently repaired, winner named. D14, and D40 for all three forms — a **nullified** node reports as **inert**, never as merely un-unlocked, because those are different states and only one of them is the player's fault |
 | 18 | `A_gate_that_closed_invalidates_rather_than_repairing` | Points withdrawn → the node reports invalid and contributes zero. D11 |
 | 19 | `Missing_tunable_is_a_load_rejection_naming_the_key` | T5. No built-in default |
 | 20 | `Memo_self_corrects_on_a_changed_state_reference` | No external bump. `AptitudeSubsystem.cs:32-52`'s lesson |
@@ -652,14 +689,16 @@ hypothetical).
 - Carry a `SourceId` per node on every contribution.
 - Read `stanceGroup` and the authored depth from the catalog.
 - Gate on **aptitude points** in the tree's gate quantity, and never on the skill-point wallet (§3.3).
-- Read `H` from an order-free projection — node count and soul levels, never points paid (§5.1).
+- Read `H` from the final allocation the actor holds — self-bought node count and self-spent soul
+  levels, never points paid, never a purchase order (§5.1, D39).
 
 **Ask first**
 
-- **Which acquisition sources `H` counts as "self-spent"** (§5.2, §15.1). This is an owner ruling and
-  it changes what a build is worth.
 - **`Ws`'s value**, and its `ssot-power-scale.md` §10.2 row — the row is a reviewed change to that
   document, not something this module writes.
+- **Widening `H`'s membership beyond self-spent** — settled by D39 as *not now*, with a stated
+  revisit trigger (§5.2). If the trigger fires, the rewrite is over all four D2 sources at once, and
+  that is an owner change, not a refactor.
 - Applying `F` to anything that is not tree-derived. The answer is expected to be no.
 
 **Never**
@@ -703,16 +742,16 @@ hypothetical).
 
 ## 15. Open questions
 
-### 15.1 D8's self-spent rule is exploitable, and it is not this spec's call
+### 15.1 ~~D8's self-spent rule is exploitable, and it is not this spec's call~~ — **closed 2026-09-05 by D39**
 
-Stated in full in §5.2. `H` should arguably read every point the player *chose* and exclude only
-points they did not — gear is chosen, so letting it move `F` is a trade-off rather than a trap, and
-the off-build-drop objection dissolves because nobody is forced to equip it. **If gear stays excluded,
-the rule must be written over all four D2 sources explicitly**, because "self-spent" has no defined
-meaning for a threshold grant.
+**Answer: `H` reads the final allocation, self-spent only, and the F4 breadth exploit is parked
+deliberately with a revisit trigger.** Stated in full in §5.1 and §5.2. Membership is settled — skill
+points the actor spent directly and soul levels the actor bought directly; item-granted,
+aptitude-threshold and demon-aspect unlocks are out — so nothing in this module is waiting on a
+ruling, and the four rules on the projection are all buildable today.
 
-Owner ruling needed. Everything else in this module is buildable while it is open, because the
-resolver reads a projection rather than inferring provenance.
+Kept as a numbered entry rather than deleted because the *condition* is the useful part: the parking
+is valid only while `F` measures as doing little, and §5.2 names what would end that.
 
 ### 15.2 `w`'s value cannot be measured by the shipped model
 
@@ -740,11 +779,11 @@ cheaper to answer once the harness can measure it.
 | **D5** `Fmax` a small nudge, tunable | §8; and `1000‰` is a legal configuration (§5.4) |
 | **D6** the multiplier applies to all trees equally | §5.3 — and to both read modes, for the `Θ`-invariance reason |
 | **D7** hybrids stay Neutral | Nothing in this module penalises a hybrid; `F` compensates focus, it does not tax breadth |
-| **D8** `H` reads self-spent points **and** souls | §5.1's blend over **node count** and soul levels — points *paid* are order-dependent under D25 and cannot carry `H`; §5.2's projection, and §15.1's open ruling on its membership |
+| **D8** `H` reads self-spent points **and** souls | §5.1's blend over **node count** and soul levels — points *paid* are order-dependent under D25 and cannot carry `H` |
 | **D11** items grant points, not node unlocks | §3.2 — the points are **skill** points, so they buy nodes and never move a gate; withdrawn points invalidate rather than repair (test 18) |
 | **D12** tier gates read base allocation | §3.2 — true by construction, with the construction named, and §3.3 is why the construction actually holds: the gate reads an aptitude, which no item can write |
 | **D13** deterministic plan first | This module consumes the plan's ladder; it decides no shape |
-| **D14** printed exclusion as a runtime no-op | §13, test 17. Contribute zero, name the winner, refund nothing |
+| **D14** printed exclusion as a runtime no-op | §13, test 17. Contribute zero, name the winner, refund nothing — for reroute, precedence and nullification alike (D40) |
 | **D18** respec is a full reset | No **unlock** here is order-sensitive, so no orphaned-unlock case exists to handle. ~~Nothing here is order-sensitive.~~ That was too wide: D25 made the *point-share* vector order-dependent, which is why `H` reads node count instead (§5.1) |
 | **D21** every actor carries its own tree state | The resolver is per-actor and memoized per actor; nothing is global |
 | **D22** passives compose from the shipped atom catalog | §2.1 — `stat.derived` and the mechanism kinds, no passive-specific vocabulary |
@@ -756,6 +795,9 @@ cheaper to answer once the harness can measure it.
 | **D33** squad scope | Not this module's to answer; every number it reads is a tunable the harness can move |
 | **D34** `skillPointsPerTheta` becomes per-scope | It prices the **purchase wallet** in `tree-state`. This module never reads it, because the gate is aptitude points (§3.3) |
 | **D36** the D25 curve is specified | Its `ssot-power-scale.md` row is `tree-state`'s to add, not this module's |
+| **D37** the two missing gate quantities get `gate-counters` | §3.3 — a tree whose counter has not shipped resolves inert and **says which kind of zero it is**; the wait is now bounded and owned, and all 39 trees are reachable |
+| **D39** `H` reads the final allocation, self-spent only | §5.1 — the build you hold, not the route you took, so two players following one guide get the same `F`. §5.2 parks the F4 breadth exploit with a stated revisit trigger, which closes §15.1 |
+| **D40** all three exclusion forms kept; nullification printed loudly | §13 and test 17 — a nullified node is **inert, not unlocked**: it contributes zero, both sides print the rule, and the winner is named. The forms are `tree-language`'s to author; this module only stops the contribution |
 | **PS-3** contests read `Θ`, magnitudes read `P(Θ)` | §6.1, line by line |
 | **PS-8** endless grind | No cap on any magnitude; the authored depth is a content bound and says so |
 

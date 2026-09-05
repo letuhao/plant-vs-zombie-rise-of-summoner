@@ -8,15 +8,15 @@ import {
   routeForLegion,
   worldUiReducer,
   type PendingOrder
-} from "@/features/world/worldSelection";
-import { toGraph, summarizeLoam } from "@/features/world/worldViewModel";
-import { sectorLabel } from "@/features/world/labels";
+} from "@/stages/world/worldSelection";
+import { toGraph, summarizeLoam } from "@/stages/world/worldViewModel";
+import { sectorLabel } from "@/stages/world/labels";
 import { usePlayers } from "@/lib/bus";
 import { useWorldHeader, useWorldState } from "@/lib/bus/world";
 import { adaptWorldState, adaptWorldLegion } from "@/contract/adapt";
 import type { SectorView } from "@/contract/types";
 import { pendingWithReason } from "@/contract/pending";
-import firstLight from "@/features/world/fixtures/first-light.json";
+import firstLight from "@/stages/world/fixtures/first-light.json";
 import { fitToExtent, type Extent } from "./camera";
 import { WorldScene, GRID_X, GRID_Y } from "./render/WorldScene";
 import { SectorInspector } from "./inspector/SectorInspector";

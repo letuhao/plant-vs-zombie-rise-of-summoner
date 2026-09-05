@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "candidateSetHash": "9aec4cbf676c0c750e8ffef0a84da5917c51969fa0a51847ae543951d1fca89b",
+    "corpusHash": "a7edb0036ec3578ea771fa1e30f90b68904467ba37a13c47811bc3287333b713",
+    "partition": "rounds",
+    "round": 903,
+    "semanticEnabled": true,
+    "similarityFunctionId": "token-overlap-jaccard-milli",
+    "similarityFunctionVersion": 1,
+    "tuningVersion": 1
+  },
+  "entries": [
+    {
+      "candidateA": "action.family.cactus.003",
+      "candidateB": "action.family.light.001",
+      "id": "review.round-903.0001",
+      "similarityMilli": 1000
+    }
+  ],
+  "kind": "action-review",
+  "schemaVersion": 1
+}

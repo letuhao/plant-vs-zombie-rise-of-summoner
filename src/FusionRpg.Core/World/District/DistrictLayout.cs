@@ -257,7 +257,11 @@ public static class DistrictLayout
         return new GridSpec(side, side, cells);
     }
 
-    static int CoreSideCells(int boardSide, int coreSideMilli) => Math.Max(1, checked(coreSideMilli * boardSide) / 1000);
+    /// <summary>Widened from `private` to `internal` for `siege-resolver`'s own
+    /// `DistrictAssaultResolver` (same assembly), which must place a structure at the SAME cell
+    /// <see cref="Build"/> itself uses for a ruined slot — re-deriving this independently rather than
+    /// exposing it would risk a private, drifting second curve for board-side-to-Core-cell-count.</summary>
+    internal static int CoreSideCells(int boardSide, int coreSideMilli) => Math.Max(1, checked(coreSideMilli * boardSide) / 1000);
 
     static GridPos CardinalMidpoint(BoardEdge edge, int side) => edge switch
     {

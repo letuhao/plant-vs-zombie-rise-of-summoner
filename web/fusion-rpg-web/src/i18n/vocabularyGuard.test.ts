@@ -71,6 +71,42 @@ describe("vocabularyGuard — fixtures", () => {
     expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
   });
 
+  // The symbol half of GG-23. Both of these passed the guard before 2026-09-05: every BANNED_WORDS
+  // entry is wrapped in `\b...\b`, and neither symbol is a word character, so listing them there
+  // matched nothing at all. Written as fixtures rather than as a list assertion so the test fails
+  // if the *matching* regresses, not merely if the list is edited.
+  it("flags the power index letter rendered as JSX text on its own line", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
+    mkdirSync(join(fixtureDir, "layers"));
+    writeFileSync(
+      join(fixtureDir, "layers", "Rogue.tsx"),
+      "export const Rogue = ({ theta }: { theta: number }) => (\n  <p>\n    spent (\u0398={theta})\n  </p>\n);\n"
+    );
+    const violations = scanForBannedVocabulary(fixtureDir);
+    expect(violations).toHaveLength(1);
+    expect(violations[0]).toMatchObject({ file: "layers/Rogue.tsx", line: 3 });
+  });
+
+  it("flags the per-mille sign inside a rendered string literal", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
+    mkdirSync(join(fixtureDir, "layers"));
+    writeFileSync(
+      join(fixtureDir, "layers", "Rogue.tsx"),
+      'export const label = "carrying 610\u2030 of the load";\n'
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toHaveLength(1);
+  });
+
+  it("does not flag an engine symbol inside a comment", () => {
+    fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
+    mkdirSync(join(fixtureDir, "layers"));
+    writeFileSync(
+      join(fixtureDir, "layers", "Clean.tsx"),
+      "// a stat modifier's own \"+400\u2030 more\" reading\nexport const x = 1;\n"
+    );
+    expect(scanForBannedVocabulary(fixtureDir)).toEqual([]);
+  });
+
   it("does not flag an unrelated word that merely contains a banned substring", () => {
     fixtureDir = mkdtempSync(join(tmpdir(), "vocab-guard-"));
     mkdirSync(join(fixtureDir, "layers"));

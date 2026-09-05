@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "registryVersion": 1,
+  "objectiveTemplates": {
+    "explore-rooms": { "targetKind": "room-kind", "sinkAvoidance": false },
+    "cleanse-fights": { "targetKind": "room-kind", "sinkAvoidance": false },
+    "gather-curio-kind": { "targetKind": "curio-kind", "sinkAvoidance": false },
+    "kill-boss": { "targetKind": "boss", "sinkAvoidance": false },
+    "extract-with-item-kind": { "targetKind": "item-kind", "sinkAvoidance": false },
+    "bring-demon-home-alive": { "targetKind": "none", "sinkAvoidance": false },
+    "finish-under-hunger": { "targetKind": "none", "sinkAvoidance": true },
+    "survive-no-downed": { "targetKind": "none", "sinkAvoidance": true },
+    "spend-no-provision": { "targetKind": "none", "sinkAvoidance": true }
+  }
+}

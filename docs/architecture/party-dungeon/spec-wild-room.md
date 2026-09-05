@@ -1,7 +1,7 @@
 # Spec: wild-room
 
-Status: **DRAFTED 2026-09-05 (wave 4) — written against the working tree and the twelve approved specs; unbuilt, not yet
-approved.** Every `file:line` below was opened this session; drift is named in place and collected in §Drift. Every number
+Status: **APPROVED by the owner 2026-09-05 (wave 4) — written against the working tree and the twelve approved specs;
+unbuilt.** Every `file:line` below was opened this session; drift is named in place and collected in §Drift. Every number
 is a starting shape so the system runs, never a balance decision.
 
 Module id `wild-room`, row 13 of the [party-dungeon map](../party-dungeon-map.md) (`:123`; wave 4, `:140`). Depends on

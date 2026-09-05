@@ -1,6 +1,7 @@
 # Spec: `tree-surface` — the player surface
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. Module of
+[passive-tree](../passive-tree-map.md). No build authorized.
 
 **Module id:** `tree-surface` · **Wave 3** · **Depends on:** `tree-state`, `tree-catalog` ·
 **Reads:** `tree-resolve`'s `TreeResolveReport` · **Blocks:** nothing
@@ -102,8 +103,9 @@ the 39 are irrelevant to any given build. Default order:
    does not know it (§5.4),
 3. paths matching this creature's element and status,
 4. everything else,
-5. **paths whose gate quantity does not exist yet**, collapsed behind one row (§9.1). Today that is 27
-   of the 39, which is why the bucket is a rule rather than an edge case.
+5. **paths whose gate quantity has not been built yet**, collapsed behind one row (§9.1). Today that
+   is 27 of the 39, which is why the bucket is a rule rather than an edge case — and under D37 the
+   bucket **empties as `gate-counters` lands**, one category at a time, with no FE change.
 
 Then search and category filters. **Categories are five** — `primary | elemental | status | family |
 species` (R7) — and species never enters this browse (§3), so the filter offers four here. Query state belongs to the layer and survives closing it (GG-51).
@@ -375,6 +377,20 @@ reading, the **effective number** of paths. Exact, not a metaphor.
 
 > **Focus** — your commitment sits across about **2 paths**. Path bonuses ×1.10.
 
+**`F` reads the build you hold, not the order you bought it in (D39).** `H` is a function of the
+final allocation, self-spent only, so the Focus line has the same order-independence §5.2 promises
+for price: **two players following the same guide read the same Focus**, and a player who reaches a
+build by a different route is never quietly worth less. It also means a good off-build drop can
+never lower your multiplier (D8), which is the sentence the surface is allowed to make to the
+player.
+
+⚠ **One consequence is parked deliberately, and this spec says so rather than leaving it to be
+found.** Because `H` reads the final allocation, a player can hold a broad build and still read a
+high Focus by the shape of what they end on — D39 calls this the **F4 breadth exploit**, and it is
+acceptable **only while `F` measures as doing little**. If `squad-harness` or a later tuning pass
+gives `F` teeth, this is revisited. It is not unnoticed, and the surface must not be redesigned
+around hiding it.
+
 **And it moves while you edit.** That is what turns a formula into a felt rule — the player moves
 points between two paths and watches both halves of the line move together. The motion vocabulary
 already declares **M8** for exactly this (`information-architecture.md` §10: *"a number the player
@@ -484,6 +500,18 @@ putting its consequence in front of them.
 **D14 is a printed runtime no-op, not an allocation block.** The trait stays allocatable and simply
 stops working; both sides print the rule and both name the same winner. Target rarity ~2% of nodes.
 
+**D40 keeps all three forms — reroute, precedence and nullification — and answers the *"reads like a
+bug"* risk with presentation rather than removal.** Two requirements land on this surface, and they
+are what the decision bought:
+
+1. **Both sides print the rule and name the same winner**, in the same words, whichever trait the
+   player is looking at. A pair that names two different winners is a content defect and
+   `tree-review` censuses every exclusion for exactly this.
+2. **A nullified trait renders INERT, never un-unlocked.** It keeps its marks, keeps its place in the
+   lattice, and carries the *Not working* state below — the player spent for it and it is theirs.
+   Rendering it as locked, missing, or refunded would be the surface telling a lie about what the
+   player owns, and it is the failure this rule exists to stop.
+
 **Before you spend — printed on both traits, always, whether or not it is currently firing:**
 
 > **Ashen Root** · +40 fire power
@@ -553,21 +581,35 @@ The repo ships three presentations of out-of-reach content, and they say differe
 - **Silhouette exactly one thing:** a bloodline the player has not discovered. The Codex pattern
   already works there.
 
-### 9.1 A path whose gate quantity does not exist yet — **answered, not deferred**
+### 9.1 A path whose gate quantity has not been built yet — **a transitional state, answered**
+
+> ### ⛔ D37 (2026-09-05): this is a WAIT, not a permanent hole. Everything below is still needed.
+>
+> `status_applied.<id>` and `element_mastery` are built by **`gate-counters`, a wave-0 module of this
+> program**. So the 27 paths are **not** gateless forever — they are gateless *until wave 0 lands*,
+> one category at a time. ~~*"at tier 0 for every player, forever"*~~ is superseded.
+>
+> **The design below does not change, and it is not softened.** It is needed for exactly as long as
+> the wait lasts, and the wait is real: generating a path's content before its counter exists is what
+> `tree-plan` `R-G1` refuses, so a player who reaches this surface during wave 0 sees paths in the
+> catalog whose gate reads a number nothing produces yet. What changes is the **framing** — this is
+> the surface's rendering of a scheduled gap, and the bucket empties as the schedule runs. The
+> **acceptance test is the same test either way** (§14 tests 29–32): flipping `gateState` flips the
+> render and nothing else, which is precisely what makes a transitional state cheap to leave.
 
 **The state, verified in code this session.** A tier gate reads a *gate quantity*. Of the 39 shared
-paths, **27 gate on a quantity with no producer in `src/`**:
+paths, **27 gate on a quantity with no producer in `src/` today**:
 
-| Category | Paths | Gate quantity | State |
+| Category | Paths | Gate quantity | State, and who lands it |
 |---|---:|---|---|
 | Primary | 12 | aptitude points, `Commander` scope | ✅ shipped and wired |
-| Elemental | 6 | `element_mastery` | ⛔ comments only — `PointBudget.cs:15` says outright it *"is owned by the demon program's `aspect-scope` module and does not exist yet"* |
-| Status | 21 | `status_applied.<id>` | ⛔ **zero hits in `src/`** — D35 removed the `AllocationScope` dependency and, with it, the only place the counter was going to live |
+| Elemental | 6 | `element_mastery` | ⛔ comments only today — `PointBudget.cs:15` still attributes it to *"the demon program's `aspect-scope` module"*, which **D37 supersedes**: `gate-counters` owns it, in wave 0 |
+| Status | 21 | `status_applied.<id>` | ⛔ **zero hits in `src/`** today — D35 removed the `AllocationScope` dependency and, with it, the only place the counter was going to live. **D37 gave it one:** `gate-counters` |
 
 `tree-resolve` §3.3 resolves those paths to zero aptitude points, therefore tier 0, therefore no
-contribution — *"inert, not broken"*, and arithmetically it is fine. **On a player surface it is the
-single worst thing this module can render: 1,080 of the 1,560 shared traits, 69% of the corpus, at
-tier 0 for every player, forever.**
+contribution — *"inert, not broken"*, and arithmetically it is fine. **On a player surface it is
+still the worst thing this module can render while the wait lasts: 1,080 of the 1,560 shared traits,
+69% of the corpus, at tier 0 for every player until their counter ships.**
 
 **Applied naively, §9's own rule causes the damage.** *"Give an out-of-reach thing a distance"*
 produces *"Tier 1 · 5 aptitude points · you have 0"* on 1,080 traits. That is a gap the player cannot
@@ -593,8 +635,11 @@ Five rules, each with its reason:
 > **Ashen Path** — *nothing in the world teaches this yet.*
 
 Not *"locked"* (the player did not fail), not *"you need…"* (there is nothing to need), and **not
-*"coming soon"*** — that is a delivery promise this module cannot keep, and the sentence has to stay
-true whether the gate lands next month or never.
+*"coming soon"*** — that is a delivery promise this module cannot keep. **D37 does not change this
+sentence**, and the reason is worth stating: a schedule the program holds is not a date the player
+was given, and a build order can move. The sentence stays true the day the gate lands and the day it
+slips, which is exactly the property that made it the right sentence before there was a schedule at
+all.
 
 **2. The lattice still opens, and still shows its traits.** §9's *show the traits* rule holds here for
 exactly the reason it was written: content nobody can see cannot be planned toward, and this content
@@ -612,7 +657,10 @@ cell renders:
 > **27 paths aren't open to anyone yet** — *expand*
 
 At this scale ordering is the mitigation that actually works (the same argument §7.3 makes): a
-player's first screen is the 12 paths that function, and 27 inert cards never sit between them.
+player's first screen is the paths that function, and the inert cards never sit between them.
+**The count in that row is read, never typed** — it is however many paths carry `gateState:
+unproduced`, so it falls to 21 when `element_mastery` lands and the row disappears when the last
+counter does. 27 is today's number, not a constant.
 
 **4. It is counted in nothing.** Never in the *not working* count (§8) — that state means a trait that
 **was** working and stopped, and folding a content gap into it would make a real regression
@@ -635,6 +683,12 @@ yours"* idiom for species; this is the same idiom for a gate the world has not g
 `wired`, the condition row becomes a tier row with a real requirement, and the path leaves the
 collapsed bucket. **That is the acceptance test** (§14 tests 29–32), and it is why the answer is a
 render rule rather than a content decision this module is not entitled to make.
+
+**Under D37 that flip is scheduled work, and it happens twice** — once when `gate-counters` lands
+`element_mastery` (6 paths, 240 traits) and once for `status_applied` (21 paths, 840 traits). Both
+are FE no-ops. This section is therefore a **transitional design with a known end**: it earns its
+build cost during wave 0 and stays afterwards as the render rule for any future category that
+arrives ahead of its counter.
 
 ---
 
@@ -802,6 +856,9 @@ leak, because every trait is a channel underneath.
 | 31 | `A_gateless_path_is_counted_in_nothing` | Absent from the not-working count, from any locked total, from the Focus denominator and from Level 0. §9.1 rule 4 |
 | 32 | `gateState_comes_from_the_report_never_from_a_zero` | A **wired** path with zero allocation renders a distance; an **unproduced** path renders a condition. Flipping only the field flips only the render, and no path id appears anywhere in this module. §9.1 rule 5 |
 | 33 | `The_gate_row_names_aptitude_points_and_the_cell_names_skill_points` | `vocabularyGuard`-adjacent string assertion over `TierRow` and `TraitCell`: neither ever renders the bare word *points*. §4.1, R1 |
+| 34 | `Both_sides_of_an_exclusion_print_the_rule_and_name_the_same_winner` | Render both traits of a pair, in either order: the rule sentence appears on each and the named winner is the same string. All three forms, `nullification` included. §8, D40 |
+| 35 | `A_nullified_trait_renders_inert_not_unlocked` | A trait switched off by a `nullification` keeps its marks, keeps its cell, and carries the *Not working* state — it never renders as locked, missing or refunded. §8, D40 |
+| 36 | `The_gateless_bucket_count_is_read_never_typed` | Flip one path's `gateState` to `wired`: the collapsed row's count drops by one and the path moves into the ordered list, with no other change. §9.1 rule 3, D37 |
 
 **E2E volume fixtures** at 10 / 100 / 1000 for the path browse, plus the 40-cell lattice at the
 1280×720 floor — assert rendered node count and that the body, not the page, scrolls.
@@ -815,7 +872,8 @@ leak, because every trait is a channel underneath.
 - Render inside the Passives tab of the actor sheet.
 - Treat a path's lattice as GG-61 (one entity's own content), the path browse as GG-50.
 - Name exactly one lender, always singular.
-- Print an exclusion on both traits, before the player spends.
+- Print an exclusion on both traits, before the player spends, with the same winner named on each —
+  all three forms, `nullification` included (D40).
 - Give an out-of-reach thing a **distance** — *except* a path whose gate quantity does not exist,
   which gets a **condition** (§9.1). Those are the only two, and which one applies is read from
   `gateState`.
@@ -850,6 +908,9 @@ leak, because every trait is a channel underneath.
 - Use the bare word *points* anywhere a number is shown (§4.1).
 - Render a *sum* of same-stance credit (§7.2 part 3).
 - Silently repair or refund a trait that stopped working (D14, D11).
+- Render a nullified trait as locked, missing or refunded. It is **inert and still owned** (D40).
+- Hardcode the size of the gateless bucket, or treat it as permanent — it is read from `gateState`
+  and it empties as `gate-counters` lands (§9.1, D37).
 - Use a slider for the deepen track, or a raw `NumberInput` under a raw-id label.
 - Open at band 3 for anything that is not a run-ending result (GG-53).
 - Gate any of this on the injector being attached (GG-39).
@@ -871,9 +932,10 @@ leak, because every trait is a channel underneath.
 6. Focus is visible, moves while the draft is edited, and adds **no fourteenth unit class**.
 7. A plan prices itself against the actor it is applied to, and a shared plan carries no price.
 8. Every surface renders correctly with the game closed.
-9. A path whose gate quantity has no producer renders a **condition**, is counted in nothing, sorts
-   into one collapsed bucket, and is identified from `TreeResolveReport.gateState` rather than from
-   any list this module holds — so the day a gate lands, no FE change is needed.
+9. A path whose gate quantity has no producer **yet** renders a **condition**, is counted in nothing,
+   sorts into one collapsed bucket, and is identified from `TreeResolveReport.gateState` rather than
+   from any list this module holds — so the day a gate lands, no FE change is needed. Under D37 that
+   day is scheduled work in `gate-counters`, and the bucket's count is read, never typed.
 
 ---
 
@@ -882,14 +944,22 @@ leak, because every trait is a channel underneath.
 1. **Naming** (see §15). *paths* / *traits* / *Focus* / *Plan* / *bloodline* / *stance* — plus
    *aptitude points* and *skill points* from §4.1, which are the two the player must be able to tell
    apart — are this spec's working vocabulary and need an owner call before player text is authored.
-2. **One summary sentence per species tree.** The Codex answers *"which creature should I bind
-   next?"* at its own resolution given one line per bloodline saying what it is for. 840 sentences —
-   **cheap if booked into the D30 pipeline now, expensive as a second pass over 840 artifacts.** It
-   is `species-tree`'s generator contract, not this module's, but this module is what needs it.
-3. **Comparing two plans side by side.** GG-47 makes comparison first-class wherever a player
+2. **Comparing two plans side by side.** GG-47 makes comparison first-class wherever a player
    chooses, and a plan is chosen. A comparison across 1,560 traits has no shipped shape and is not
    designed here — §14 test 26 accepts a stated reason in place of a diff state, which is the honest
    interim.
+
+**No longer open, and why:**
+
+- ~~*"A path whose gate quantity does not exist"* has no owner.~~ **D37** gives both quantities to
+  `gate-counters` in wave 0. §9.1's design stands as the render rule for the wait, reframed as
+  transitional.
+- ~~*"One summary sentence per species tree"*~~ — **booked, not open.** `species-tree` §6 makes
+  `codexSummary` a first-class emitted field with its call budget costed into the D30 run
+  (840 base + 1,680 vote ≈ 2,520 calls). It is a task with an owner; this module consumes it.
+- ~~*"Is `nullification` reachable, and does it read as a bug?"*~~ — **D40** keeps all three forms and
+  answers the reading risk with presentation: both sides print the rule and name the same winner, and
+  the node renders **inert rather than un-unlocked** (§8).
 
 ---
 
@@ -900,11 +970,11 @@ leak, because every trait is a channel underneath.
 | **D3** two tracks per trait | §4 — one verb on the cell, the deepen stepper in the detail. Split by cadence |
 | **D4/D5** the focus multiplier | §6 — Focus line, `1/H` prose, `perMilleRatio`/`absolute` for `F` |
 | **D7** hybrids are Neutral | *"Spreading is a real choice, not a mistake"* is stated to the player, not discovered |
-| **D8** `H` reads self-spent | Focus renders what `tree-resolve` computes; the surface never re-derives the rule |
+| **D8 / D39** `H` reads the final allocation, self-spent only | §6 — Focus renders what `tree-resolve` computes and never re-derives it; the line is order-independent, and the F4 breadth exploit is named as parked rather than left to be found |
 | **D9/D27** the roster ships whole | Level 1 holds 39 shared paths, and grows without re-scaling — the browse tier is the constraint, not the roster |
 | **D11** items grant points | §8's second sentence — *"needs 3 more points; the gear that gave them is off"* |
-| **D14** printed exclusion, runtime no-op | §8 in full |
-| **D17** species favour triple | The Codex line and the starter-plan question (§17.2, §15) |
+| **D14 / D40** printed exclusion, runtime no-op; all three forms kept | §8 in full — both sides print the rule and name the same winner, and a nullified trait renders **inert rather than un-unlocked**. Tests 34–35 |
+| **D17** species favour triple | The Codex line — booked as `codexSummary` in [`species-tree`](spec-species-tree.md) §6 — and the starter-plan question (§15, ask first) |
 | **D18** respec is a full reset | §5.1 — the reason planning is worth building, and why there is no orphaned-unlock trap to teach |
 | **D21** every actor has its own tree state | The sheet is already per-actor; a Plan is the object, an actor is where it is applied |
 | **D23/D30** unique species trees | §3 — level 0b, Codex reference, never in a browse. L7 splits into two printed promises |
@@ -913,7 +983,7 @@ leak, because every trait is a channel underneath.
 | **D26** one tier ladder | §2.2 — both branches share one ladder down the middle, which teaches D26's rule by layout |
 | **D28** cross-unlock, one lender | §7 in full — five parts, and §7.3's ordering mitigation for the case with no home |
 | **D29** 10 tiers × 2 branches | §2.3 — 40 cells is GG-61, not GG-50; §9 — the tenth tier gets a distance |
-| **ideal §13.4** 27 of 39 gates have no producer | §9.1 — the condition presentation, the collapsed bucket, and `gateState` read from the report. Not a decision this module takes; a render rule for the state the decision leaves behind |
+| **ideal §13.4, as amended by D37** 27 of 39 gates have no producer *yet*; `gate-counters` owns both quantities in wave 0 | §9.1 — the condition presentation, the collapsed bucket, and `gateState` read from the report. **A transitional design with a known end:** it renders the wait, and the bucket empties as the counters land, with no FE change |
 | **D32** near-uniform target distribution | Not rendered. It is a generation-side property with no player surface |
 | **PS-8** endless grind | §4 rule 1 — a stepper, never a slider, because a slider needs a maximum |
 
@@ -967,6 +1037,13 @@ whenever the property exists; the surface does not depend on it existing.
     §10. No cap is proposed (§4 rule 1 rejects a slider for exactly that reason).
     No new power-shaped scale. NO FOURTEENTH UNIT CLASS — §6 checks the union and
     finds nothing must grow.
+[x] D37-D41 folded 2026-09-05. D37 reframed 9.1 from a permanent hole into a transitional render
+    rule with an owner (`gate-counters`, wave 0) and a bucket count that is read, never typed; D39
+    is stated in 6, including the F4 breadth exploit as deliberately parked; D40 added the two
+    presentation requirements to 8 (same winner named on both sides, and a nullified trait renders
+    INERT, never un-unlocked) with tests 34-35. Two questions left the open list -- gate ownership
+    (D37) and nullification (D40) -- and one moved to "booked" because `species-tree` 6 owns it.
+    Naming and plan comparison are still open.
 [~] Corrections propagated. PARTIAL: §2.1 and §3 name two files that need fixing
     (PassivesTab.tsx:12's comment, DemonsPage.tsx:367-388's volume defect); this
     is a spec and does not edit them. Both are booked — one as this module's own

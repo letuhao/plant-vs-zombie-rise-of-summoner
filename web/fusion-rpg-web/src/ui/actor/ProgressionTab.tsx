@@ -100,7 +100,7 @@ function ProgressionAptitudes({
     <>
       {error && <Banner tone="error">{error}</Banner>}
       <p className="text-xs text-muted">
-        {spent} / {budget} spent (Θ={theta})
+        {spent} / {budget} spent · power {theta}
       </p>
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         {Object.entries(draft).map(([id, value]) => (

@@ -373,6 +373,32 @@ class TestVoteResolution:
         assert result.confidence == "unresolved"
         assert result.value is None  # never the first sample
 
+    def test_set_valued_partial_overlap_resolves_on_the_unanimous_member(self):
+        """⛔ 2026-09-05. `chosen_value` for `atomFamilies` is a whole SET flattened to one
+        `|`-joined key, so the scalar path scored these three as 1-1-1 -- unresolved -- while `a`
+        was in fact chosen by all three samples. Per-member voting keeps that agreement. Same
+        defect, same fix, as the three propose stages measured the same day."""
+        from seedsmith.adapters.actions.validate_heal.derive import resolve_set_vote_field
+        options = ["a", "b", "c", "d"]
+        values = ["a|b", "a|c", "a|d"]
+        samples = [VoteSample(i, tuple(order_for(BRIEF_ID, "atomFamilies", i, options)), v)
+                  for i, v in enumerate(values)]
+        result = resolve_set_vote_field(BRIEF_ID, "atomFamilies", options, samples)
+        assert result.confidence == "split"
+        assert result.value == "a"
+        assert result.minority == ("b", "c", "d")
+
+    def test_set_valued_fully_disjoint_is_still_unresolved(self):
+        """The negative control: per-member voting must not rescue a genuine disagreement."""
+        from seedsmith.adapters.actions.validate_heal.derive import resolve_set_vote_field
+        options = ["a", "b", "c", "d", "e", "f"]
+        values = ["a|b", "c|d", "e|f"]
+        samples = [VoteSample(i, tuple(order_for(BRIEF_ID, "atomFamilies", i, options)), v)
+                  for i, v in enumerate(values)]
+        result = resolve_set_vote_field(BRIEF_ID, "atomFamilies", options, samples)
+        assert result.confidence == "unresolved"
+        assert result.value is None
+
     def test_confidence_is_never_read_from_a_model_field_it_is_computed_here(self):
         # The draft never carries a `confidence` key anywhere in this module's own schemas --
         # structural proof there is no field for a model to write one into.

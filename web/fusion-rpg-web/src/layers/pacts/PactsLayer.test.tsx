@@ -72,6 +72,15 @@ vi.mock("@/lib/bus/contracts", () => ({
   useBuyContractSlot: () => ({ mutateAsync: mockBuySlotMutateAsync })
 }));
 
+// Same mocking convention as CommandersLayer.test.tsx / CreaturesLayer.test.tsx's own
+// navigate-to-a-route assertions: keep everything else react-router-dom really provides
+// (renderWithProviders' MemoryRouter included), stub only useNavigate.
+const mockNavigate = vi.fn();
+vi.mock("react-router-dom", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("react-router-dom")>();
+  return { ...actual, useNavigate: () => mockNavigate };
+});
+
 const contentDemon = {
   instanceId: "d1",
   bound: true,
@@ -161,6 +170,21 @@ describe("PactsLayer (T17)", () => {
     setup({ contracts: [] });
     renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
     expect(screen.getByText("No pacts yet")).toBeInTheDocument();
+  });
+
+  // G4 (species-build-todo.md): the empty-state hint already named "the Demons roster" — the
+  // only place a first contract can be bound — but nothing made it reachable. This asserts the
+  // action is a real, working link there, not just more specific copy.
+  it("G4: the empty state's action navigates to the Demons roster, where a contract is actually bound", async () => {
+    setup({ contracts: [] });
+    const user = userEvent.setup();
+    renderWithProviders(<PactsLayer open onOpenChange={() => {}} />);
+
+    const openDemons = screen.getByTestId("pacts-empty-open-demons");
+    expect(openDemons).toBeInTheDocument();
+
+    await user.click(openDemons);
+    expect(mockNavigate).toHaveBeenCalledWith("/demons");
   });
 
   it("a content pact offers Release, an overdue pact disables Renegotiate with its reason inline and offers Ritual instead", () => {

@@ -24,6 +24,11 @@ ShieldPolicy.Configure(ShieldTuningLoader.Parse(Load("shield.v1.json")));
 CombatPolicy.Configure(CombatTuningLoader.Parse(Load("combat.v1.json")));
 StatusPolicy.Configure(StatusTuningLoader.Parse(Load("status.v1.json")));
 BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v4.json")));
+// battle-tempo battle-resources (2026-09-05): the pool-share projection BattleStatComposer's own
+// resource seeding reads. Its own file rather than a battle.v{n}.json section because publish.py's
+// `set` path refuses to invent keys (spec-battle-resources.md S2.2a) -- and its own Configure, which
+// every host must remember, exactly like ActionTimingPolicy already needs.
+BattleRuleset.ConfigureResources(BattleResourceTuningLoader.Parse(Load("battle-resources.v1.json")));
 FusionRpg.Core.Actions.ActionTimingPolicy.Configure(FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(Load("action-timing.v1.json")));
 
 var failures = 0;

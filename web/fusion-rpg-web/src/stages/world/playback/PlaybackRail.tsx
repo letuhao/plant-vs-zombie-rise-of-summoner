@@ -1,4 +1,4 @@
-import type { PlaybackPhase } from "@/features/world/playbackKeyframes";
+import type { PlaybackPhase } from "@/stages/world/playbackKeyframes";
 
 export type PlaybackRailProps = {
   phases: readonly PlaybackPhase[];
@@ -25,7 +25,7 @@ function emptyPhaseCopy(phase: string): string {
  * happened" line, never a silent gap.
  *
  * Purely presentational: this component reads `activeIndex`, it does not own it — `PlaybackTransport`
- * is what advances it, and `foldTurnReport`/`flattenKeyframes` (`features/world/playbackKeyframes.ts`)
+ * is what advances it, and `foldTurnReport`/`flattenKeyframes` (`stages/world/playbackKeyframes.ts`)
  * already did all the folding, so this file never touches a `*Dto` type at all.
  */
 export function PlaybackRail({ phases, activeIndex }: PlaybackRailProps) {

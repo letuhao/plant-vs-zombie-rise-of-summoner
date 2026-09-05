@@ -1,5 +1,5 @@
 import type { LegionView, SectorView } from "@/contract/types";
-import type { PendingOrder } from "@/features/world/worldSelection";
+import type { PendingOrder } from "@/stages/world/worldSelection";
 import { unresolvedLegions } from "@/stages/world/turn/unresolvedLegions";
 
 export type OutlinerRowKind = "legion" | "sector";

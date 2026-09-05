@@ -15,6 +15,7 @@ filename** — read this table.
 | `squad-harness` | Six-vs-wave balance measurement. Answers D33's scope mismatch: every existing number is a 1v1 duel, the game fields six | — |
 | `mechanism-wiring` | The four inert lines that make mechanism nodes executable and *scorable*. §3.5 proved these are the only node class that rescues a focus build | — |
 | `tree-plan` | Stage 1, deterministic. Topology (10 tiers × 2 branches, 40 nodes, **rootless**), tier ladder, budgets, shape archetypes, potency ceiling (**91‰**, derived), the property vocabulary, and the plan schema handed downstream | — |
+| `gate-counters` | **Added 2026-09-05 (D37).** The two gate quantities that did not exist: `status_applied.<id>` (owned by nobody) and `element_mastery` (owned by a module the demon program never scheduled). Counters, their persistence, and the `PointBudget` binding. **Unblocks 27 of 39 trees — 1,080 nodes that would otherwise ship at tier 0** | — |
 | `tree-catalog` | The baked artifact. Node record shape, id stability, catalog versioning, the freeze line, the load path | `tree-plan` |
 | `tree-language` | Stage 2. What the language stage may choose, from which closed vocabularies, under which quotas, behind which validation gates | `tree-plan` |
 | `tree-binder` | Stage 3, deterministic. Budget share → stored coefficient, atom composition, channel legality, conversion refusal | `tree-plan`, `tree-language`, `tree-catalog` |
@@ -30,14 +31,19 @@ reads `tree-resolve`.
 ## Build order
 
 ```
-wave 0   squad-harness · mechanism-wiring · tree-plan        (fully parallel, no shared files)
+wave 0   squad-harness · mechanism-wiring · tree-plan · gate-counters   (parallel, no shared files)
 wave 1   tree-catalog · tree-language
 wave 2   tree-binder · tree-state
 wave 3   tree-resolve · tree-review · tree-surface
 wave 4   species-tree
 ```
 
-## Two gates the audit round added (2026-09-05)
+## Two SEQUENCING RULES the audit round added (2026-09-05)
+
+> **Reclassified 2026-09-05 during planning.** These were written as *gates* — hard stops blocking a phase from starting. Tested against the two questions a gate must survive, **neither is one.** Generating a corpus against a wrong premise is **expensive and detectable and redoable**; nothing is minted into a player's save, so it is recoverable. Both become **checkpoints with a reversible default**: generate the small primary corpus first, measure, then decide on the rest.
+
+**The one genuinely irreversible point in this program is the first catalog shipped to players** — after that, a node id change is a migration (D24). That is the only hard gate, and it is already a decision rather than a plan artifact.
+
 
 **A10 gates `tree-language --write`, not `tree-plan --emit`.** The plan is cheap and mints no ids, so
 being wrong there costs one regeneration. The irreversible step is the next one: ~4,680 model calls
@@ -57,6 +63,8 @@ buys **1,080 nodes at tier 0**.
 
 So the corpus order is: **primary trees (480 nodes) → then one category per gate quantity as it
 lands**, never the whole 1,560 at once.
+
+**Amended 2026-09-05 (D37).** `gate-counters` is now in wave 0, so the two missing quantities have an owner and a schedule rather than a dependency on unscheduled work. The rule is unchanged — content still waits for its gate — but the wait is now bounded, and all 39 trees are reachable rather than 12.
 
 **Wave 0 is parallel by construction** — the harness is a `tools/` project, the wiring is four named
 lines in `Core`, and the planner is new code with no shipped caller. Nothing in wave 0 touches

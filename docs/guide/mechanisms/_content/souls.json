@@ -1,0 +1,52 @@
+{
+  "slug": "souls",
+  "title": "Souls",
+  "status": "Shipped",
+  "kicker": "Stocks and economy · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion · Level up and power",
+  "hook": "**Souls** are the currency you earn by playing and spend to call new demons and keep them bound.",
+  "blindSpots": [
+    {"term": "Soul", "meaning": "A **currency number** in your save. Not a demon, not a life bar, not something you lose on death."},
+    {"term": "Spend", "meaning": "Souls leave your bank the moment you confirm at the [altar](summoning-altar). There is no refund."},
+    {"term": "Bank", "meaning": "One shared pool for the whole save. It is not per demon and not per world."},
+    {"term": "Earn", "meaning": "Play pays. Waiting does not — there is no idle soul trickle."}
+  ],
+  "alsoTrue": ["Souls are one of three stocks. The others are [essence](essence) and [loam](loam), and they do not convert into each other."],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": ["One bank, shown in the HUD wherever you are.", "You watch it climb while you play and drop when you summon."],
+      "note": "Souls bank across worlds — see [New world](new-world-prestige)."
+    },
+    {
+      "title": "How it works",
+      "intro": "Three things touch the number:",
+      "cards": [
+        {"name": "Faucets", "body": "Lawn matches, expedition returns, and map work pay souls."},
+        {"name": "Sinks", "body": "Altar pulls and pact upkeep spend them."}
+      ],
+      "cardCols": ["Side", "What it does"],
+      "table": {"cols": ["Where", "What you get"], "rows": [["Lawn match", "Souls on a win, scaled by what you fought"], ["Expedition", "Souls in the return report"]]},
+      "diagram": ["  play  ->  souls  ->  altar  ->  demons", "                       +->  pacts"]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {"title": "In the HUD", "intro": "The stock strip is always on screen.", "steps": ["Look at the top strip.", "Souls sit beside essence."], "note": "It updates without a refresh."}
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": ["Play a lawn match to the end.", "Open the [altar](summoning-altar).", "Spend once, and read what the pull cost."],
+  "doNote": "Stop here. Pacts come next.",
+  "mixUps": [
+    {"q": "Do I lose souls when a demon dies?", "a": "No. Souls are a bank, not a health pool."},
+    {"q": "Can I buy souls?", "a": "No. There is no store — this build is local and has no payments."},
+    {"q": "Do souls decay?", "a": "No. Only [loam](loam) fades if you neglect ground."},
+    {"q": "Is this the same as essence?", "a": "No. See [essence](essence)."}
+  ],
+  "next": ["summoning-altar"],
+  "related": ["essence", "loam"],
+  "sources": ["docs/architecture/demons/spec-soul-economy.md", "docs/guide/creatures.md"]
+}

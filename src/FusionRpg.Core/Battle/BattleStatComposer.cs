@@ -117,15 +117,36 @@ public static class BattleStatComposer
         var turnSpeed = SpeciesTempoProjection.SpeedFor(
             setup.AttackIntervalMs, Tuning.SpeciesTempoReferenceIntervalMs, DerivedStatPolicy.TurnDefaultSpeed);
 
-        var snap = ActorDerivedSnapshot.FromValues(new[]
+        // battle-tempo `battle-resources` -- every battle actor held all six resource pools at max 0,
+        // because nothing here ever set a resource.* channel. ActorResourcePools.CreateFull reads
+        // ResourceChannelReader.Max off this snapshot, so an absent channel made the pool 0-capacity
+        // and ReactionCounter.TryCounter declined every counter it was ever offered (TD4's finding).
+        // Loops ResourceIds rather than listing ids: resource-hub-ssot.md §8's six-coverage rule is
+        // normative ("a family covering a subset is a defect, never a feature") and "derive, never
+        // hand-list" is its own stated fix direction -- so a seventh resource is covered here for free.
+        var seeds = new List<KeyValuePair<string, double>>
         {
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatDefenseOmni, setup.Defense),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(theta)),
-            new KeyValuePair<string, double>(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta)),
-            new KeyValuePair<string, double>(Timeline.DerivedTurnChannels.Speed, turnSpeed)
-        });
+            new(DerivedStatChannels.CombatDefenseOmni, setup.Defense),
+            new(DerivedStatChannels.CombatAccuracyOmni, BattleRuleset.BaseAccuracy(theta)),
+            new(DerivedStatChannels.CombatDodgeOmni, BattleRuleset.BaseDodge(theta)),
+            new(DerivedStatChannels.CombatCritRateOmni, BattleRuleset.BaseCritRate(theta)),
+            new(DerivedStatChannels.CombatCritResistOmni, BattleRuleset.BaseCritResist(theta)),
+            new(Timeline.DerivedTurnChannels.Speed, turnSpeed)
+        };
+
+        foreach (var resourceId in DerivedStatChannels.ResourceIds)
+        {
+            seeds.Add(new(DerivedStatChannels.ResourceMax(resourceId),
+                BattleRuleset.BaseResourceMax(theta, resourceId, setup.MaxHp)));
+
+            // Always 0 -- see BattleRuleset.BaseResourceRegen for why that is a decision and not an
+            // unset value. Seeded explicitly rather than left absent so the family is complete and so
+            // the zero is visible to anyone reading a composed snapshot.
+            seeds.Add(new(DerivedStatChannels.ResourceRegen(resourceId),
+                BattleRuleset.BaseResourceRegen(theta, resourceId)));
+        }
+
+        var snap = ActorDerivedSnapshot.FromValues(seeds);
 
         if (setup.ElementPrimary is { } primary)
             AddAffinity(snap, primary, setup, PrimaryAffinityDivisor);

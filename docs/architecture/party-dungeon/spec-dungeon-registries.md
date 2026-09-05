@@ -79,6 +79,12 @@ Owner decisions this module implements, quoted from the ideal's boxes and the re
 | `raid-modes.v1.json` | `solo · pair · quad` | — |
 | `bands.v1.json` | the ordinal vocabularies the anchors write: `dangerBand`, `depthBand`, `widthBand`, `branchiness`, `density`, `hazardBand`, `sightBand`, `countBand`, `elementSpread`, `formation`, `eventKind`, `outcomeOrdinal`, `repeatScope`, `entry`, `phasing`, `questScope`, `rewardBand`, `deltaBand`, `hpBand`, `nerveStage` (`unsettled · shaken · afflicted`, added by `delve-attrition`) | one `enum[]` per band, the shape of `data/seed/items/_registry/bands.v1.json:451-460` |
 
+**Added by `delve-stage` (wave 5, 2026-09-05):** `bands.v1.json` carries a **display name per member** beside each
+ordinal — the composed-band names `EffectiveBandName` resolves (`spec-difficulty-ladder.md` §174-176) and the three
+`nerve` stage names. Names, never numbers: the stage renders the name and never receives the ordinal it came from, which
+is what keeps `Θ` and `bandDelta` off the wire entirely (`spec-delve-stage.md` §8). Until the rows land, the stage's own
+`labels.ts` maps the ordinal — the stated default of that spec's §18 asks 3 and 4.
+
 `bands.v1.json` is the one file beyond the map row's list: every `bands.<band>.<member>` tuning key
 needs a required-member list, and a C# loader hardcoding `shallow · mid · deep · abyssal` beside a
 seedsmith schema listing them too is G20 with a different noun. Two rules every registry enforces on

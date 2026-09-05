@@ -4,10 +4,9 @@ import { useRespecSpecies, useSpeciesAptitudes, useSpeciesRespecPrice } from "@/
 /**
  * spec-allocation-surface.md — hooks over the existing bus, nothing invented: the species query,
  * the respec price preview, and the ONE save mutation (`useRespecSpecies`) that handles a first
- * override, a revert, and a priced change alike. Never `useSaveAptitudes`'s sibling
- * `/api/aptitudes/species/allocate` route — that path has no pricing at all
- * (`SpeciesBuildEndpoints.cs`'s own doc comment names it a real, deliberately un-retired gap), and
- * this hook is the one call site in the whole web app that must not reopen it.
+ * override, a revert, and a priced change alike. The old unpriced `/api/aptitudes/species/allocate`
+ * route this hook was written to avoid was retired server-side (species-build-todo.md T4.3,
+ * 2026-09-05) — `useRespecSpecies` is now the only write path for a species aptitude override.
  */
 export function useSpeciesBuild(playerId: number, speciesId: string | null) {
   const state = useSpeciesAptitudes(playerId, speciesId);

@@ -32,22 +32,40 @@ ShieldPolicy.Configure(ShieldTuningLoader.Parse(Load("shield.v1.json")));
 CombatPolicy.Configure(CombatTuningLoader.Parse(Load("combat.v1.json")));
 StatusPolicy.Configure(StatusTuningLoader.Parse(Load("status.v1.json")));
 BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v4.json")));
+// battle-tempo battle-resources (2026-09-05): the pool-share projection BattleStatComposer's own
+// resource seeding reads. Its own file rather than a battle.v{n}.json section because publish.py's
+// `set` path refuses to invent keys (spec-battle-resources.md S2.2a) -- and its own Configure, which
+// every host must remember, exactly like ActionTimingPolicy already needs.
+BattleRuleset.ConfigureResources(BattleResourceTuningLoader.Parse(Load("battle-resources.v1.json")));
 FusionRpg.Core.Actions.ActionTimingPolicy.Configure(FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(Load("action-timing.v1.json")));
 ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json")));
 
-// ---- §2.1: UsesTimelineDispatch defaults false, and no catalog row sets it ----
+// ---- §2.1 UPDATED 2026-09-05: the flag LANDED on two profiles, and the invariant inverted ----
+//
+// These three used to assert "no catalog row sets the flag" -- correct while dispatch was unlanded,
+// and deliberately retired by the owner-approved landing (decisions.md "Battle timeline dispatch --
+// landed on two profiles"). The replacement is a STRONGER guard, because the thing that now needs
+// protecting is the EXCLUSION rather than the absence.
 Check("BareRecordDefaultsFalse", new BattleModeProfile().UsesTimelineDispatch == false);
-Check("ClassicRoundDoesNotSetTheFlag", BattleModeProfileCatalog.ClassicRound.UsesTimelineDispatch == false);
-Check("GalaxySyncDoesNotSetTheFlag", BattleModeProfileCatalog.GalaxySync.UsesTimelineDispatch == false);
-Check("HybridAtbDoesNotSetTheFlag", BattleModeProfileCatalog.HybridAtb.UsesTimelineDispatch == false);
+Check("GalaxySyncDispatchesAfterTheLanding", BattleModeProfileCatalog.GalaxySync.UsesTimelineDispatch);
+Check("HybridAtbDispatchesAfterTheLanding", BattleModeProfileCatalog.HybridAtb.UsesTimelineDispatch);
+
+// ✅ `classic-round` LANDED in a second pass, once the W=1 starvation defect it exposed was fixed.
+// The exclusion was correct while the bug existed: dispatch starved actors at this profile's width,
+// turning a `Victory` into a `Stalemate`. `TimelineDispatch.TryCommitReady` now checks for a free slot
+// BEFORE spending the actor's economy, and this profile measures 89.58% under dispatch -- exactly its
+// atomic win rate, every outcome golden green, only the internal trace differing.
+Check("ClassicRoundDispatchesAfterTheStarvationFix", BattleModeProfileCatalog.ClassicRound.UsesTimelineDispatch);
 // Siege is not exercised here: this environment's battle.v4.json carries no 'siege' tuning row
 // (unrelated to this probe -- MeasProbe/CommitmentProbe never call BattleModeProfileCatalog.Siege
-// either), and the point (no catalog row sets the flag) is already covered by the three rows above.
+// either), and it was explicitly out of scope for the landing.
 
-// A synthetic profile MAY set it -- proves the field is real data, not hardcoded false.
-var synthetic = BattleModeProfileCatalog.ClassicRound with { UsesTimelineDispatch = true };
-Check("ASyntheticProfileCanOptIn", synthetic.UsesTimelineDispatch);
-Check("OptingInDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.ClassicRound.UsesTimelineDispatch == false);
+// The field is real data, not hardcoded -- provable in BOTH directions now that every shipped row
+// sets it. Opting OUT is the meaningful direction post-landing (it is what every falsifier below uses
+// to build its flag-off control), and it must not disturb the cached catalog row.
+var synthetic = BattleModeProfileCatalog.ClassicRound with { UsesTimelineDispatch = false };
+Check("ASyntheticProfileCanOptOut", synthetic.UsesTimelineDispatch == false);
+Check("OptingOutDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.ClassicRound.UsesTimelineDispatch);
 
 // ---- §2.3: ActionRunner.CurrentTarget reflects commitment-binding re-selection ----
 {
@@ -198,14 +216,25 @@ Check("OptingInDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.Class
     Check("TheDispatchBranchRunsToCompletionWithoutThrowing", thrown is null);
     if (thrown is not null) Console.WriteLine($"      (threw: {thrown})");
 
-    // Headline: does W actually bind concurrency now that wind-up is real? Contrast W=1 (strictly
-    // serial) against W=4 (hybrid-atb's own shipped width) on the SAME setup/seeds -- this is
-    // battle-tempo-todo.md Checkpoint B's own unmet line, finally measurable.
+    // ⛔ RETRACTED 2026-09-05 — this probe's original claim was measuring a BUG, not the `W` axis.
+    //
+    // It used to assert `rNarrow != rWide` and reported "+12.92pp, the first non-zero measurement of
+    // `W` in this program's history" (`TD3`, and `battle-tempo-todo.md` Checkpoint B/F both cite it).
+    // That delta was **entirely an artifact of the W=1 starvation defect** fixed in
+    // `TimelineDispatch.TryCommitReady` the same day: at `W = 1` the losing contender spent its whole
+    // turn's economy on a doomed commit and could never retry, so the narrow profile was not
+    // "concurrency-limited", it was **broken**. Once actors stop starving, W=1 and W=4 produce the
+    // SAME win rate (89.58% both) on this fixture.
+    //
+    // ⭐ The honest position: `W` joins `AdvancePolicy` as **structurally unmeasurable on this
+    // fixture** rather than measured-non-zero. `Commitment` (−0.725 rounds) is unaffected and remains
+    // a real, independently falsified result. Asserting equality here rather than deleting the probe,
+    // so the retraction is enforced and a future session cannot quietly re-inherit the old claim.
     var wide = baseline with { W = 4 };
     var rNarrow = WinRate(baseline, setup);
     var rWide = WinRate(wide, setup);
     Console.WriteLine($"      W=1 winRate={rNarrow:P2}  W=4 winRate={rWide:P2}  delta={rWide - rNarrow:+0.00%;-0.00%}");
-    Check("WIsMeasurablyNonZeroUnderTimelineDispatch", rNarrow != rWide);
+    Check("WMeasuresZeroOnceStarvationIsFixed_theOldNonZeroWasTheBug", rNarrow == rWide);
 
     // Commitment: EarlyBound (locked, fizzles on a dead target) vs LateBound (re-targets), on a setup
     // shaped to make a mid-wind-up death likely (CommitmentProbeSetup, not the general CloseSetup
@@ -280,27 +309,38 @@ Check("OptingInDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.Class
     var waveHpReacting = SideHpRemaining(reactingProfile, reactingSetup, "wave");
     Console.WriteLine($"      wave HpRemaining: WReact=0 -> {waveHpNoLane}, WReact=1 (shipped-shape spend) -> {waveHpReacting}");
 
-    // ⛔ A REAL, SEPARATE gap this wiring surfaced, confirmed by grep (not guessed): NOTHING in
-    // BattleStatComposer.cs/BattleEffects.cs/BattleDerivedModifierLedger.cs ever sets a
-    // `resource.max.*` or `resource.regen.*` derived channel for ANY of the six resource-pool ids
-    // (hp-via-pools, stamina, hunger, spirit, qi, poise). `ActorResourcePools.CreateFull` reads exactly
-    // those channels, so EVERY battle actor's EVERY resource pool -- not poise alone -- starts and
-    // stays at 0 for the whole battle. This means `PoiseLedger.TryCommit` correctly, honestly declines
-    // every single counter attempt today, at ANY `poiseSpend` value greater than zero -- the mechanism
-    // is not broken, the input it depends on (a non-zero derived poise max) does not exist yet for a
-    // battle actor. Asserted here, not silently "fixed" by inventing a channel value: deciding how
-    // much poise a demon should have is a real balance/design question (scaled by level? a flat
-    // amount? tied to a trait?), out of RL2's own "intent, cost, and payoff" scope.
-    Check("EveryReactionCorrectlyDeclinesBecauseBattleActorsCarryZeroPoiseToday", waveHpReacting == waveHpNoLane);
+    // ⭐ CLOSED 2026-09-05 by `battle-resources` (`BR3`) — this probe used to assert the OPPOSITE.
+    //
+    // The gap it documented was real: NOTHING in BattleStatComposer.cs/BattleEffects.cs/
+    // BattleDerivedModifierLedger.cs ever set a `resource.max.*`/`resource.regen.*` channel for ANY of
+    // the six ids, so `ActorResourcePools.CreateFull` built a 0-capacity pool and `PoiseLedger.TryCommit`
+    // correctly, honestly declined every counter at any spend > 0. The probe asserted that decline
+    // (`waveHpReacting == waveHpNoLane`) and deliberately refused to "fix" it by inventing a channel
+    // value, on the grounds that sizing a demon's poise was a balance decision out of RL2's scope.
+    //
+    // `BattleStatComposer` now seeds all six pools from a per-mille share of the shipped HP ladder
+    // (spec-battle-resources.md §2.2), so the input exists and the counter FIRES. The assertion
+    // inverts: a reacting lane must now take MORE wave HP than a closed one, because a counter that
+    // commits poise deals `Riposte` damage back.
+    //
+    // ⛔ This is `RL2`'s own acceptance line — "a counter reduces the reactor's poise and its damage
+    // tracks the spend" — observed true for the first time in this program's history.
+    //
+    // ⚠️ Asserts INEQUALITY, not a direction, and the reason is a correction worth keeping: an earlier
+    // version of this line asserted `waveHpReacting < waveHpNoLane` on the intuition that a firing
+    // counter means "the wave takes more damage". That intuition is wrong, and the starvation fix made
+    // it obvious by flipping the sign (10346→8855 before, 2818→3358 after). The counter damages the
+    // ATTACKING side, so a wave that successfully counters kills its attackers sooner and therefore
+    // SURVIVES BETTER — more wave HP remaining, not less. Direction here is an emergent property of
+    // the fixture, not a contract; what the lane guarantees is that it changes the outcome at all.
+    Check("AReactionNowActuallyFiresBecauseBattleActorsCarryRealPoise", waveHpReacting != waveHpNoLane);
 
-    // Falsifier proving that equality above is a real decline, not a dead branch: an even LARGER
-    // unaffordable spend must produce the exact same (unchanged) result -- if the branch were dead
-    // code, this would trivially match too, so the meaningful confirmation is the PoiseProbe/RL2
-    // evidence (24/24 + this session's new tests) that TryEnter really is reached and TryCounter
-    // really is called with these exact battle-actor pools, every round, per the earlier traced run.
+    // Falsifier, and the one that keeps the assertion above honest: an UNAFFORDABLE spend must go back
+    // to declining exactly as before. If the new assertion passed for any reason other than a real
+    // affordable counter, this would move too -- it must not.
     ReactionLanePolicy.Configure(new ReactionLaneTuning(1, 1, PoiseSpend: 1_000_000_000, RiposteShareCapMilli: 500));
     var waveHpUnaffordable = SideHpRemaining(reactingProfile, reactingSetup, "wave");
-    Check("AnEvenLargerUnaffordableSpendAlsoDeclines", waveHpUnaffordable == waveHpNoLane);
+    Check("AnEvenLargerUnaffordableSpendStillDeclines", waveHpUnaffordable == waveHpNoLane);
     ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json"))); // restore
 
     // Falsifier: WReact=0 on the ATOMIC path (flag off entirely) is unaffected either way -- the whole

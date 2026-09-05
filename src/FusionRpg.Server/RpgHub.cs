@@ -98,12 +98,27 @@ public sealed class RpgHub : Hub
         try
         {
             var playerId = _store.GetCurrentPlayerId();
+
+            // item-ideal.md, equip-runtime (module 5): the live lawn push, previously Player-scope
+            // only. Every ActiveBound specimen (UniqueActorPhases.ActiveBound — deployed AND bound,
+            // not merely rostered) contributes its own equipped-item atoms at
+            // OwnerKind.UniqueActor(instanceId), the same scope ResolveBindings already resolves in
+            // Data.Tests. GrantedDerivedAtomReader (the injector's read side) is already
+            // scope-generic, so no Injector change is needed for this half — verified in P1.5.
+            var owners = new List<OwnerScope>
+            {
+                new(OwnerKind.Player, playerId.ToString(CultureInfo.InvariantCulture)),
+            };
+            foreach (var specimen in _store.ListUniqueActors(playerId).Items)
+                if (string.Equals(specimen.Phase, UniqueActorPhases.ActiveBound, StringComparison.Ordinal))
+                    owners.Add(new OwnerScope(OwnerKind.UniqueActor, specimen.InstanceId));
+
             // No seed at Hello: the lawn match key is born in the injector's board.start capture,
             // so the server has none here. The receiver derives the seed itself from that key with
             // MatchSeed.For — the same pure function the server uses when replaying, which is what
             // D5 actually needs. The wire field stays, so a stored seed can override it later.
             atoms = new AtomPushService(_store).Build(
-                new OwnerScope(OwnerKind.Player, playerId.ToString(CultureInfo.InvariantCulture)),
+                owners,
                 new BindContext(RuntimeId.Lawn),
                 matchSeed: 0);
         }

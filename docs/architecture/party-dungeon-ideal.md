@@ -857,7 +857,8 @@ of `{firstRowFights, midCache, restBeforeBoss}`, `none` illegal), `raidModes`.
 
 **Grid density.** Room kind (11) × climate (7) = 77 cells, but four kinds are climate-neutral (`rest`,
 `merchant`, `boss`, `unknown`): **53 honest cells → ~190 rooms at 3.6 per cell; ~106 (two per cell)
-is the hand-authored floor.** Domains: (climate × danger band) = 24 cells → 48–72 domains; the first
+is the hand-authored floor** *(superseded by decision 6, 2026-09-05: corpora come from the seedsmith
+pipelines, not a hand-written floor — the counts below stay as the grid-density target the planner aims at).* Domains: (climate × danger band) = 24 cells → 48–72 domains; the first
 ship is six, one per climate at `shallow`. The cheap axis to widen later is climate; kind is the
 expensive one (every kind has catalog rules, bans, tunables and a HUD affordance). Danger is **not**
 a distinctness axis.
@@ -1412,7 +1413,9 @@ the fallback); on success the target leaves the fight alive — the `Retreated` 
 — and the report carries a `captured` row the room-close mints from; **no die event, so no
 `KillEarn`** — a captured demon pays no kill souls, the trade that keeps fighting worth doing. **Roll
 shape — Pokémon's, as prior art only:** pret/pokeemerald `a = ((3·maxHP − 2·HP)·catchRate·ball·status)
-/ (3·maxHP)`, `a ≥ 255` guarantees, else four shakes at `b = 65536 / (255/a)^(3/16)`; status ×2.5 /
+/ (3·maxHP)`, `a ≥ 255` guarantees, else four shakes — **Gen III/IV is a fourth root, `b = 1048560 / √√(16711680 / a)`,
+with status ×2 / ×1.5; the `3/16` exponent and ×2.5 below are Gen V+** (audit §6). Only the shape is used here.
+Status ×2.5 /
 ×1.5; Great ×1.5, Ultra ×2. Here only the shape survives: hp term → an **hp band** ordinal; level term →
 the same **Δ band** as recruit; status → a **count band**; `‰ = capture.chanceMilli[hpBand][ΔBand] +
 statusBonusMilli[countBand] + sealTierShift` — a table lookup, integer per-mille, one draw on
