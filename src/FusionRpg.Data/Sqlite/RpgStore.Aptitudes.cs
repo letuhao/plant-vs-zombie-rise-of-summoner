@@ -1,3 +1,6 @@
+using FusionRpg.Core.Demons;
+using FusionRpg.Core.Demons.Generation;
+using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats.Aptitudes;
 using Microsoft.Data.Sqlite;
 
@@ -129,5 +132,50 @@ public sealed partial class RpgStore
                 allocation += AptitudeAllocation.Single(scope, r.GetString(0), r.GetInt64(1));
             return allocation;
         }
+    }
+
+    /// <summary>
+    /// `demon-type-allocation` (module 5) — THE named entry point for a species' effective allocation
+    /// (spec-demon-type-allocation.md: "composition lives behind a single named entry point... and
+    /// `LoadAllocation` is not called directly by any consumer of species allocation" —
+    /// `SpeciesAllocationSeamTests` guards this). Override REPLACES the baseline wholesale, never
+    /// layers (spec's own "Override semantics"): a nonzero DemonType override wins outright; otherwise
+    /// the baseline is computed fresh from the committed plan and the species' CURRENT level — never
+    /// persisted (audit finding A9). A species the player has never overridden reads its baseline, not
+    /// zero — the exact silent-zero risk this module's own design section calls out by name.
+    ///
+    /// <para>An override whose OWN total happens to be zero is indistinguishable from "no override" —
+    /// not a new gap: `SaveAllocation`'s delete-then-insert-nonzero-only shape already gives Commander
+    /// this same property (an all-zero save leaves no rows, identical to never having allocated), so
+    /// DemonType inherits it rather than inventing a new "explicitly zero" state nothing else in this
+    /// codebase tracks.</para>
+    ///
+    /// <para><b>Best-effort on the committed plan</b> (found running the real `battle-allocation`
+    /// call site for real, `AuraDerivedEndpointsTests`): callers reached from `SpeciesAllocationSource`
+    /// — battle setup, the derived-stat inspection endpoint — resolve species for EVERY actor, some of
+    /// which have no reason to expect `SpeciesBuildPlanCatalog` configured (test fixtures that predate
+    /// this module, matching the exact shape `RpgXpAwardMap.WithSpeciesPlacement` already treats as
+    /// optional enrichment for the same reason). An un-configured plan catalog here returns
+    /// <see cref="AptitudeAllocation.Empty"/> for the baseline half — an existing override still wins —
+    /// rather than throwing and taking the WHOLE resolve down with it. The real server always
+    /// configures this at startup (`Program.cs`), so production never reaches this fallback.</para>
+    /// </summary>
+    public AptitudeAllocation EffectiveSpeciesAllocation(long playerId, string speciesId, AptitudeTuning tuning)
+    {
+        if (string.IsNullOrWhiteSpace(speciesId))
+            throw new ArgumentException("speciesId must not be empty", nameof(speciesId));
+
+        var scopeKey = Core.Stats.Aptitudes.SpeciesAllocation.ScopeKey(playerId, speciesId);
+        var overrideAllocation = LoadAllocation(AllocationScope.DemonType, scopeKey);
+        if (overrideAllocation.TotalForScope(AllocationScope.DemonType) > 0)
+            return overrideAllocation;
+
+        if (!SpeciesBuildPlanCatalog.IsConfigured)
+            return AptitudeAllocation.Empty;
+
+        var demonTypeId = DemonSpeciesCatalog.Get(speciesId).DemonTypeId;
+        var level = GetRpgActor(playerId, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
+        var shares = SpeciesBuildPlanCatalog.SharesFor(speciesId);
+        return Core.Stats.Aptitudes.SpeciesAllocation.Baseline(shares, level, tuning);
     }
 }

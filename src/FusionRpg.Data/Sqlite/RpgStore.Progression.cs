@@ -412,6 +412,33 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>`species-build` T3.1 (module 6, `allocation-transport`) — every species this player has
+    /// EVER fielded (a `kind='species'` row exists the first time a placement or expedition win awards
+    /// it any XP, `EnsureActorRowUnlocked`) — the small, levelled subset the aptitude payload actually
+    /// sends, never the full 829-row corpus. Reads `scope_key` (T1.1's own human-readable column)
+    /// rather than reconstructing speciesId from `type_id` (`DemonTypeId`), which would need a reverse
+    /// catalog lookup this store has no reason to own.</summary>
+    public IReadOnlyList<string> ListLevelledSpeciesIds(long playerId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT scope_key FROM rpg_actor_progression
+                WHERE player_id=$p AND kind=$k AND scope_key IS NOT NULL
+                ORDER BY scope_key;
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$k", RpgActorKinds.Species);
+            using var r = cmd.ExecuteReader();
+            var ids = new List<string>();
+            while (r.Read())
+                ids.Add(r.GetString(0));
+            return ids;
+        }
+    }
+
     public RpgXpLedgerPageDto? ListRpgXpLedger(
         long playerId, string? kind, int? typeId, string? reason, int limit = 100, long? afterId = null)
     {

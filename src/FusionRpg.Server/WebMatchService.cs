@@ -294,15 +294,32 @@ public sealed class WebMatchService
         // AptitudeChannelMods already read to build this same squad (BuildSquad, above) — not
         // re-derived from a different assumption, and never affects combat math or goldens (a pure
         // additional event, not a resolver input).
+        //
+        // species-build `battle-allocation` (module 10, path 3 of its own "four read paths" table):
+        // this event used to hard-code `scope="commander"` and omit every species contribution — a
+        // battle report missing the term that actually decided the battle. Extended, not replaced:
+        // `shares` still names the commander-only shares (still meaningful — one per player, not per
+        // actor), and `species` adds each fielded species' own EFFECTIVE shares alongside it.
         var aptitudeShares = _store.LoadAllocation(
             FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId)).Shares();
+        var speciesShares = new Dictionary<string, IReadOnlyDictionary<string, double>>(StringComparer.Ordinal);
+        foreach (var speciesId in setup.Squad.Select(a => a.SpeciesId).Where(id => !string.IsNullOrEmpty(id)).Distinct(StringComparer.Ordinal))
+        {
+            speciesShares[speciesId] = _store.EffectiveSpeciesAllocation(
+                playerId, speciesId, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning).Shares();
+        }
         events.Add(new EventEnvelope
         {
             T = "",
             Game = RpgConstants.GameIdWebRpg,
             Kind = "aptitude.snapshot",
             MatchKey = matchKey,
-            Payload = new Dictionary<string, object?> { ["scope"] = "commander", ["shares"] = aptitudeShares }
+            Payload = new Dictionary<string, object?>
+            {
+                ["scope"] = "commander+species",
+                ["shares"] = aptitudeShares,
+                ["species"] = speciesShares
+            }
         });
 
         // The engine is clockless — stamp strictly monotonic t here, at ingest.
@@ -364,6 +381,13 @@ public sealed class WebMatchService
             return (true, "", Enumerable.Range(0, 2).Select(i => Synthetic(i)).ToList(), none);
         }
 
+        // species-build `battle-allocation` (module 10): the commander allocation is the SAME for
+        // every actor this player fields, so it is loaded ONCE per squad build here, not once per
+        // actor inside the loop below (a squad of N used to do N identical commander reads) — the
+        // species read stays per-actor, since two squad members can be different species.
+        var commanderAllocation = _store.LoadAllocation(
+            FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
+
         var squad = new List<BattleActorSetup>(picked.Count);
         for (var i = 0; i < picked.Count; i++)
         {
@@ -386,7 +410,7 @@ public sealed class WebMatchService
                 ChannelMods = StarChannelMods(s.Profile.Star, level)
                     .Concat(LoyaltyChannelMods(
                         contracts.TryGetValue(s.Profile.InstanceId, out var c) ? c.Loyalty : 0, level))
-                    .Concat(AptitudeChannelMods(level, playerId, _store))
+                    .Concat(AptitudeChannelMods(level, playerId, _store, species.SpeciesId, commanderAllocation))
                     .ToList(),
                 EquippedActionIds = EquippedActionIdsFor(s.Profile.InstanceId, _store),
             });
@@ -446,14 +470,33 @@ public sealed class WebMatchService
     /// — `point-economy`'s `AllocationStore` is the real per-actor source; a player who has never
     /// allocated still resolves against `AptitudeAllocation.Empty` (`LoadAllocation`'s own contract on
     /// an unset key), so this stays exactly as inert as before for every squad it already served.
+    ///
+    /// <para><b>species-build `battle-allocation` (module 10).</b> <paramref name="speciesId"/> and
+    /// <paramref name="commanderAllocation"/> are both optional and trailing — every existing call site
+    /// (4 in `AptitudeChannelModsTests`) keeps compiling and behaving identically, resolving Commander
+    /// alone. When a species is supplied, its EFFECTIVE DemonType allocation
+    /// (`RpgStore.EffectiveSpeciesAllocation`) is merged with the commander allocation into ONE
+    /// `AptitudeAllocation` via `operator+` and resolved with a SINGLE `ResolveForBattle` call — never
+    /// resolved per scope and concatenated (`AptitudeAllocation.cs`'s own "scopes sum before share,
+    /// never the reverse": two per-scope resolves, later combined, is a different and wrong number).
+    /// <paramref name="commanderAllocation"/> lets `BuildSquad` load the commander row ONCE per squad
+    /// (it is the same for every actor) rather than once per actor — the species read alone stays
+    /// per-actor, since two squad members can be different species.</para>
     /// </summary>
-    public static IReadOnlyList<BattleChannelMod> AptitudeChannelMods(int level, long playerId, RpgStore store)
+    public static IReadOnlyList<BattleChannelMod> AptitudeChannelMods(
+        int level, long playerId, RpgStore store,
+        string? speciesId = null,
+        FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation? commanderAllocation = null)
     {
-        var allocation = store.LoadAllocation(
+        var commander = commanderAllocation ?? store.LoadAllocation(
             FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, AptitudeEndpoints.ScopeKey(playerId));
+        var species = string.IsNullOrEmpty(speciesId)
+            ? FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty
+            : store.EffectiveSpeciesAllocation(playerId, speciesId, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning);
+        var merged = commander + species;
         var ladder = new FusionRpg.Core.Power.PowerLadder(FusionRpg.Core.Power.PowerTuningHub.Tuning);
         return FusionRpg.Core.Stats.Aptitudes.AptitudeResolver.ResolveForBattle(
-            allocation, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
+            merged, FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning, ladder, level,
             FusionRpg.Core.Stats.Derived.DerivedStatRegistry.CreateDefault());
     }
 

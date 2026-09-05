@@ -35,12 +35,21 @@ just removed it."* `demon-seed`'s `classify-pipelines` (module 7) already built 
 
 ### What the model picks — and what it must never pick (P1, restated)
 
-| The model picks | The tables pick |
+**⛔ CORRECTED 2026-09-05 — the table below understated how far the other two modules had already
+settled this.** The original table named four model-picked rows. Read against the real, later, binding
+decisions in modules 1 and 8 (re-verified against live code during `content-stack-todo.md`'s ep-9
+pass), rows 2-4 are not open picks this module still owes — each is decided, and decided to a specific
+home that is *not* this module's own output:
+
+| The model picks | Why not |
 |---|---|
-| the affix's **name** and which atom refs it bundles | `affix_class` — derived from the bundle's refs (module 1) |
-| which slots the bundle declares, and their domain | the tier window — from the container's rarity |
-| an ordinal affinity per candidate affix: `core` / `likely` / `occasional` | the weight each affinity maps to (module 1, A2) |
-| eligibility TAGS to attach (module 8 consumes them) | every magnitude, from tier bands and value specs |
+| the affix's **name** and which atom refs it bundles | *(this module's own scope — unchanged, shipped)* |
+| ~~which slots the bundle declares, and their domain~~ | the runtime shape is real (`AffixRefRow`, `Resolver.ResolveSlots`), but the only real domain vocabulary (`RpgStore.Containers.cs`'s `DomainMembers`) is hardcoded to `element` alone, and zero shipped content anywhere uses a slot — a model would be inventing a pattern string with no exemplar, exactly the guess P1 forbids. Genuinely unbuilt; needs an eligible-slot-pattern registry that does not exist yet, not a pick from this module |
+| ~~an ordinal affinity per candidate affix: `core` / `likely` / `occasional`~~ | shipped, but as a property of a **(container, affix) pairing**, owned by whichever feature pipeline draws a shared affix (`demon-seed`'s `species-effects`, `tools/seedsmith/seedsmith/adapters/demons/effects/schema.py`) — not a property of the affix entity this module produces container-agnostically. Attaching one hardcoded affinity here would fight every feature's own per-container affinity for the same shared bundle |
+| ~~eligibility TAGS to attach (module 8 consumes them)~~ | **module 8 decided the opposite direction** (`spec-eligibility-tags.md` §"tags are DERIVED from the affix's refs... no schema change, no new authoring field") — shipped as `AffixTags.Of`. An authored `tags` field here would contradict that binding decision |
+
+`affix_class` and every magnitude remain table-derived exactly as the original row 1 said; the removed
+rows never needed a "the tables pick" counterpart because there is no authored counterpart to pick.
 
 Seedsmith's founding P1 binds exactly as hard here as everywhere else in this repo's seed pipelines: *"a
 model has no calibrated sense of scale, so a number it picks is a plausible-looking guess that survives

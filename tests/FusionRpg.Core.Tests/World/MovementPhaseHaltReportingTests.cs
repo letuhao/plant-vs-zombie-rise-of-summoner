@@ -54,7 +54,11 @@ public class MovementPhaseHaltReportingTests
     public void A_halt_line_reaches_its_owner_and_carries_the_real_sector_it_stopped_in()
     {
         // s2 is held against Dave by a hostile Legion — walking into it during this march halts the
-        // legion right there (ZoneOfControl.IsHeldAgainst, MarchResolver.cs:120-126).
+        // legion right there (ZoneOfControl.IsHeldAgainst, MarchResolver.cs:120-126). The same arrival
+        // also triggers a Sector-kind contact fight against the stationary, entrenched blocker; Dave
+        // loses it and falls back down `l-s1-s2` to s1 (world-map, 2026-09-05) — a later effect the
+        // halt line itself predates, since it is written from `moved[entity]`'s position before any
+        // battle resolves.
         var mover = Legion("e-dave", Dave, "s1");
         var blocker = Legion("e-zomboss", Zomboss, "s2");
         var world = World(mover, blocker);
@@ -64,10 +68,13 @@ public class MovementPhaseHaltReportingTests
             world, new[] { Move("e-dave", "l-s1-s2") }, report, Phase, turn: 1,
             resolver: PlaceholderBattleResolver.Instance, seed: 1);
 
-        Assert.Equal("s2", result.World.Entities.Single(e => e.EntityId == "e-dave").AtSectorId);
+        var legion = result.World.Entities.Single(e => e.EntityId == "e-dave");
+        Assert.True(legion.Routed);
+        Assert.Equal("s1", legion.AtSectorId);
 
         // `TurnEventKinds.Halt` is the queue's own internal kind, folded into `Detail` as
         // "halt:zoc:<sectorId>" — the report entry's own `Kind` is always `TurnReportKinds.Event`.
+        // Its `s2` is the halt itself, timestamped before the fall-back that follows it.
         var halt = Assert.Single(report.Entries, e => e.Detail.StartsWith(TurnEventKinds.Halt + ":"));
         Assert.Equal("s2", halt.SectorId);
         Assert.Equal(Dave, halt.Audience);

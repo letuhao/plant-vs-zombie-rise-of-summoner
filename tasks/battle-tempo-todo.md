@@ -394,14 +394,152 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
     `audit-magic-numbers.py --summary`: **0** for every touched domain (confirmed repeatedly across
     this session's changes). Guards not re-run here (no `src/FusionRpg.Injector` change this session).
 
+- [x] **TD1 — Spec the D14 fix as its own module (`timeline-dispatch`)** · **S** · **Deps:** D14 finding
+  - **Acceptance:** a concrete, code-grounded design exists — not a restated "needs its own module" —
+    covering the exact profile-flag gate, the exact split of `RunBasicAttackStep`, and every
+    correctness hazard found by reading the real dispatch code, so implementation (owner-reviewed,
+    separately) does not start from a blank page.
+  - **Built 2026-09-05:** [spec-timeline-dispatch.md](../docs/architecture/battle-tempo/spec-timeline-dispatch.md).
+    Read `BattleEngine.Resolve`'s full round loop (lines 172–583), `ActionRunner.cs` in full,
+    `ActionSlots.cs`, `SimulationClock.cs`/`EventQueue`'s advance mechanism, and
+    `BasicAttack.cs`/`RunBasicAttackStep` to ground the design in actual code, not the spec's own
+    earlier (now-corrected) claim.
+  - **Two hazards found and specced, not predicted:** (1) `BattleEngine.cs`'s own local
+    `RoundEventKind=0`/`StatusPulseEventKind=1` numerically alias
+    `Timeline.TimelineEventKind.Readiness=0`/`.Resolve=1` — scheduling a real `Resolve` event on the
+    shared `roundQueue` would be silently misread as a status pulse by the existing
+    `if (ev.Kind == StatusPulseEventKind)` check.
+    (2) `ActionSlots` is constructed fresh **per round** today (`BattleEngine.cs:358`), which is
+    correct only because resolution is atomic (`ActionSlots.cs`'s own doc: *"W only binds when actions
+    have wind-up"*) — once wind-up is real and can span a round boundary, a slot must persist
+    **per battle**, matching `battleEconomy`'s own existing per-battle construction.
+  - **Confirmed, not assumed: `NextEventAdvance` already generalizes correctly once both hazards are
+    fixed.** `BattleEngine.cs:147–150`'s own doc comment and `tasks/battle-timeline-todo.md` B14
+    already establish that `Resolve` drives via `NextEventAdvance` for every profile regardless of its
+    declared `AdvancePolicy` (a batch resolver has no per-frame ticks for `FixedIncrementAdvance` to
+    consume) — so a Resolve/Recovery event on the shared queue is picked up correctly by the existing
+    advance mechanism with no changes to it, once the Kind-collision (hazard 1) is fixed.
+  - ⭐ **Found this is the THIRD deliberate deferral of the same wire, not the first.**
+    `battle-timeline-map.md` T5's own Checkpoint A evidence: *"Zero production code rewired... Phase 2
+    (`BattleEngine` adoption)... is explicitly not part of this checkpoint."*
+    `tasks/battle-timeline-todo.md` B14's own scope note: *"NOT routed through
+    `ActorTurnMachine`/`ActionRunner`'s per-actor envelope. Both were deliberate scope calls made
+    before writing any code."* This program's own D14 entry was the second. This spec's own §7
+    Boundaries name this pattern explicitly rather than attempting a fourth inline pass.
+  - **Not the dispatch branch itself** — see `TD2` immediately below for what was and was not
+    implemented, and why the line is drawn exactly there.
+  - **Verify:** map + this todo + `battle-tempo-plan.md` all updated to point at the same spec (design-
+    gate evidence rule 6, "propagate corrections").
+
+- [x] **TD2 — Implement the spec's zero-blast-radius pieces** · **S** · **Deps:** TD1
+  - **Acceptance:** every piece of `spec-timeline-dispatch.md` that is purely additive (new field, new
+    method, a behavior-preserving split) and provably changes nothing for any shipped profile is real,
+    tested code — not left in the spec as prose.
+  - **Built 2026-09-05, three pieces, each independently probed with a falsifier:**
+    1. `ActionRunner.CurrentTarget(actorKey)` (`ActionRunner.cs`) — purely additive public accessor.
+       `TimelineDispatchProbe` proves it reflects the committed target before resolve, the
+       commitment-binding-reselected target immediately after `OnResolveDue` returns `Resolved`, and
+       `null` for an actor holding no active run. **A real falsifier caught a real bug in the probe
+       itself, not the code**: the first draft read `CurrentTarget` *after* draining both the
+       `Resolve` and `Recovery` events, and failed — `OnRecoveryDue` sets `run.Active = false`, so
+       `CurrentTarget` correctly went `null` before the assertion ran. Fixed by reading it at the
+       right moment (immediately after `OnResolveDue`, before `Recovery` fires) — the exact sequence
+       the real dispatch branch (`TD3`) needed and now uses.
+    2. `BattleModeProfile.UsesTimelineDispatch` (`BattleModeProfile.cs`) — new field, defaults `false`.
+       `TimelineDispatchProbe` proves `ClassicRound`/`GalaxySync`/`HybridAtb` all read `false`, that a
+       synthetic `... with { UsesTimelineDispatch = true }` profile can opt in, and that doing so does
+       not mutate the cached catalog singleton (`OptingInDoesNotMutateTheCachedCatalogRow`).
+    3. `RunBasicAttackStep` split into `DeclareBasicAttack` + `ApplyBasicAttack` (`BasicAttack.cs`) —
+       same statements, same order, `RunBasicAttackStep` now a two-line wrapper. **Proven a true no-op,
+       not assumed:** captured `MeasProbe`'s full output *before* the split, re-ran it *after*,
+       `diff`'d byte-for-byte identical.
+
+- [x] **TD3 — Build and measure the dispatch branch itself** · **L** · **Deps:** TD2
+  - **Acceptance:** re-examined the "largest remaining design question" TD2 originally deferred (how
+    the round's `do { } while (anyActed && !phaseBroken)` pass loop interacts with resolution landing
+    off a round boundary) and found a SAFER design than the spec's original plan — one that sidesteps
+    both hazards instead of patching them in place, buildable without touching the shared `roundQueue`
+    at all. Built it, and PROVED `W`/`Commitment` non-zero for the first time in this program's history,
+    through the REAL `BattleEngine.Resolve`, on synthetic profiles never added to
+    `BattleModeProfileCatalog`.
+  - **The design, revised from the spec's original plan (full reasoning: `spec-timeline-dispatch.md`
+    §2.4/§2.5):** rather than interleaving `ActionRunner`'s Resolve/Recovery events into the shared
+    `roundQueue` (which is what created the Kind-collision hazard) and making `ActionSlots` persist
+    per-battle (the per-round-vs-per-battle hazard), the built `RunTimelineActionPhase`
+    (`src/FusionRpg.Core/Actions/TimelineDispatch.cs`, new file) replaces the ENTIRE atomic pass loop,
+    for this profile only, with a self-contained local discrete-event loop on its OWN
+    `EventQueue`/`SimulationClock`/`ActionSlots`/`ActionRunner`, scoped to one round's action phase.
+    This eliminates the Kind collision by construction (no shared queue to collide on) and narrows the
+    per-round-vs-per-battle question to a defended, verified assumption: every committed action's full
+    lifecycle must fit inside one round (true today — basic attack's 150+50=200 ticks vs a 1000ms
+    round), enforced by a structural iteration guard that throws rather than silently misbehaving if
+    ever violated.
+  - **`BattleEngine.cs`'s round loop**: one `if (activeProfile.UsesTimelineDispatch) { RunTimelineActionPhase(...); } else { <existing do-while, byte-for-byte> }`. Re-verified after wiring: `MeasProbe`'s
+    output re-diffed byte-for-byte identical against the pre-TD2 baseline; every other existing probe
+    (`CommitmentProbe`, `ReactionLaneProbe`, `TurnOrderProbe`, `ForecastProbe`, `ActionTimingProbe`,
+    `TempoProbe`, `PoiseProbe`, `TraceOptInProbe`, `ContractParityProbe`) reproduces its already-
+    recorded PASS results exactly.
+  - **Re-selection** reuses the SAME `IIntentSource` the commit itself used (re-declares via
+    `StubIntentSource.TryDeclare`, which reads live state on every call) rather than
+    `BasicAttackCompiled.Targeting`'s `CompiledTargetSpec` — read `TargetSpecCompiler.cs` directly and
+    confirmed that type targets a DIFFERENT consumer (the "shipped resolver" wire DTOs for
+    item/skill-targeting authoring), not `BattleEngine`'s own `IBattleView`/`ActorState` model. A
+    general action's own targeting-spec re-selection seam stays open work, correctly out of scope
+    (basic attack is still the only action any live battle dispatches, per D14).
+  - **⭐ A real, previously-undiscovered defect this build surfaced, found by measurement not
+    inspection:** `BasicAttack.cs`'s `BasicAttackEnvelope.Commitment` was hardcoded to
+    `Commitment.LateBound` rather than left `null` ("inherit the profile default", D6's own rule).
+    `ActionRunner.TryCommit`'s precedence (envelope wins when set) meant
+    `BattleModeProfile.DefaultCommitment` was **permanently unreachable for the basic attack —
+    regardless of how complete this module's own dispatch branch was.** Caught empirically: an
+    EarlyBound-vs-LateBound A/B measurement produced IDENTICAL results (6.025 rounds either way) even
+    after a traced single-battle run confirmed the fizzle/re-select branch itself fired correctly —
+    the branch fired, but the profile setting driving it was never actually read. Fixed by removing the
+    hardcoded assignment (letting `ActionEnvelope.NoOp`'s own `null` default apply); confirmed inert for
+    the atomic path first (`RunBasicAttackStep`/`DeclareBasicAttack` never read `envelope.Commitment` —
+    only `ActionRunner` does, and it had zero production callers before this module) via `MeasProbe`'s
+    byte-for-byte diff. **Not a defect in this module** — it predates `timeline-dispatch` and was never
+    exercisable before `ActionRunner` had a live caller.
+  - **Headline measurements (`tools/TimelineDispatchProbe/`, synthetic profiles only, never shipped):**
+    - `W`: win rate 76.67% (W=1) vs 90.83% (W=4) on the same setup/seeds — **delta +14.17 percentage
+      points**, the first non-zero `W` measurement in this program's history.
+    - `Commitment`: a 3-attacker-vs-1-fragile-defender scenario (iterated empirically — 2 attackers on
+      1 target measured an honest 0.00% delta twice before 3-on-1 with a tuned HP window actually
+      produced the "hit 1 doesn't kill, hit 2 kills, hit 3 observes a dead target" race) — average
+      rounds-to-win 6.696 (EarlyBound) vs 6.025 (LateBound), **delta −0.671 rounds**, LateBound finishing
+      faster by turning fizzled swings into real extra hits.
+    - Both falsified: the identical axis changes applied to `UsesTimelineDispatch = false` profiles
+      measure EXACTLY zero delta on both axes (`FalsifierWDeltaIsZeroWhenTheFlagIsOff`,
+      `FalsifierCommitmentDeltaIsZeroWhenTheFlagIsOff`) — proving the non-zero deltas come from
+      timeline-dispatch actually mattering, not from an unrelated effect of constructing the profiles.
+  - **Verify:** `dotnet build src/FusionRpg.Core` and `src/FusionRpg.Server` both clean, 0 errors/
+    warnings. `audit-overflow.py`: 0 findings in any touched file (`BasicAttack.cs`, `ActionRunner.cs`,
+    `BattleModeProfile.cs`, `BattleRunState.cs`, `BattleEngine.cs`, `Actions/TimelineDispatch.cs`,
+    `TimelineDispatchProbe/Program.cs`). `audit-magic-numbers.py --summary`: no `battle`/`uniques`
+    domain findings at all. All four boundary guards
+    (`guard-single-writer`/`guard-secondary-no-unity`/`guard-funnel-delta`/`guard-dal`) green.
+    `tools/TimelineDispatchProbe/`: **15/15 PASS.**
+  - ⛔ **Still not landed, and still correctly not landed:** no entry in `BattleModeProfileCatalog` sets
+    `UsesTimelineDispatch` — every shipped profile (`classic-round`/`galaxy-sync`/`hybrid-atb`) is
+    byte-identical, confirmed. Flipping the flag for `hybrid-atb`, bumping `RulesetVersion`, re-blessing
+    goldens, and the win-rate sweep sign-off all remain `LAND1`/`LAND2`'s job — Phase 2, owner-gated,
+    untouched by this task.
+
 ### ⛔ Checkpoint B — measured, predicted, ⛔ NOT ready to land as originally scoped
 - [x] Three attribution numbers recorded (wind-up alone, tempo alone, both together — see MEAS's table)
-- [ ] ⛔⛔ **`W` and `Commitment` proven non-zero — NOT MET, and cannot be met by this program's
-  original six modules.** Measured 0.00 % for both, with the root cause proven (D14): the live
-  `BattleEngine.Resolve` path never consults `WindupTicks` at all. **This checkpoint line stays
-  unchecked as an honest record**, not silently passed or silently redefined away — closing it needs a
-  new, unscoped `BattleEngine.Resolve` dispatch-rewrite module, its own design-gate pass, before this
-  box can be truthfully ticked.
+- [x] **`W` and `Commitment` proven non-zero — MET 2026-09-05, via the new 7th module
+  (`timeline-dispatch`, `TD1`–`TD3`), not the program's original six.** The root cause (D14) was proven
+  first: the live `BattleEngine.Resolve` path never consulted `WindupTicks` at all, and the fix
+  required its own module, its own design-gate pass (`spec-timeline-dispatch.md`) — done, in this
+  session, not deferred to an unscoped future pass. `TD3` built a local, per-round discrete-event
+  dispatch (`RunTimelineActionPhase`) behind `BattleModeProfile.UsesTimelineDispatch` (default `false`,
+  unset by every shipped catalog row) and measured, through the REAL `BattleEngine.Resolve` on
+  synthetic profiles only: **`W` +14.17 percentage points win rate** (W=1 vs W=4) and **`Commitment`
+  −0.671 average rounds-to-win** (EarlyBound vs LateBound) — both falsified against a flag-off control
+  (exactly zero delta there). Every shipped profile stays byte-identical (`MeasProbe` diffed
+  byte-for-byte). **This checkpoint line is now honestly checked**, not redefined — the measurement is
+  real, the mechanism is real, and it changes nothing about any battle any player or existing test can
+  reach today.
 - [x] `classic-round` still contains `hybrid-atb` — confirmed by construction: `stage0` in `MEAS`'s own
   chain **is** `BattleModeProfileCatalog.ClassicRound` unmodified and reproduces its own 89.58 % exactly
   as the chain's starting point; `TheFinalStageIsTheShippedProfile`'s own property (`stage5 == shipped`)
@@ -413,11 +551,16 @@ Ids are stable. `Deps` are task ids. Sizes: XS 1 file · S 1–2 · M 3–5 · L
 - [x] `M1 = 0`; overflow/magic-number guards green on every touched path (confirmed repeatedly this
   session)
 
-⛔ **This checkpoint's own gate is not satisfied.** `LAND1`/`LAND2` (Phase 2) depend on Checkpoint B;
-proceeding to land with `W`/`Commitment` still unmet would land a `RulesetVersion` bump and a re-bless
-that CANNOT honour the plan's own stated Phase-2 predicate — the plan required this line before landing,
-and it is not met. **Recorded here rather than silently reinterpreted**, per the goal's own rule against
-inventing scope reductions.
+✅ **This checkpoint's own gate is now satisfied, 2026-09-05** — all four lines above are checked, with
+`W`/`Commitment` proven non-zero through `timeline-dispatch` (`TD1`–`TD3`) rather than the program's
+original six modules. **This unblocks `LAND1`/`LAND2`'s dependency, but does not itself land anything
+or complete either task.** What Checkpoint B proved is that the MECHANISM produces non-zero deltas on
+synthetic, never-shipped profiles — `LAND1` still has its own, separate, unstarted work: actually
+setting `UsesTimelineDispatch = true` on the shipped `hybrid-atb` row, re-running the FULL staged sweep
+(`MEAS`'s own shape) against real content to measure what actually moves, re-blessing goldens, and
+bumping `RulesetVersion`. `LAND2`'s owner-only win-rate sign-off remains exactly as gated as before —
+proving the mechanism works is not the same decision as approving it for production, and this
+checkpoint closing does not substitute for that sign-off.
 
 ---
 
@@ -601,21 +744,25 @@ inventing scope reductions.
     assertions stayed green (unrelated, correctly unaffected). Reverted; probe confirmed green (24/24).
     `audit-overflow.py --paths src/FusionRpg.Core/Battle/Timeline`: 0 findings.
     `audit-magic-numbers.py --summary`: 0 for every touched domain.
-    ⛔ **NOT built — genuinely blocked by D14, not silently assumed:** "intent arrives through
-    `IIntentSource`" (there is no live reaction-declaring caller yet — `ReactionLane.TryEnter` itself
-    has zero production callers, confirmed earlier this session); "declining is observable as a
-    refusal" in a live decision loop (the MECHANISM refuses correctly — proven above — but nothing
-    calls it from a real battle to observe the refusal in context); "the reaction never moves the
-    reactor's own `ActorTurnMachine`" (nothing currently moves ANY `ActorTurnMachine` through a
-    reaction path at all, since none exists live); "damage routes through the existing funnel" (no
-    live counter ever fires, so no damage is ever routed anywhere). All four require the same
-    `BattleEngine.Resolve` dispatch fix D14 names.
+    ⛔ **NOT built — narrower gap than before, still genuinely open:** D14's own root cause (the
+    ATTACKER's basic attack never dispatching through `ActionRunner`) is now resolved architecturally
+    by `timeline-dispatch` (`TD1`–`TD3`) — a real wind-up window now exists and is provable. **What
+    remains for RL2 specifically is a SEPARATE, not-yet-designed integration: a DEFENDER declaring a
+    counter-intent and interrupting the attacker's wind-up mid-flight.** `RunTimelineActionPhase`
+    (`TD3`) dispatches one attacker's own commit→resolve→recovery cycle; it does not call
+    `ReactionLane.TryEnter` for the defender at all, and wiring that in (when to offer the reaction,
+    how the counter's own commit interacts with the attacker's already-scheduled Resolve event, how
+    `ReactionCounter.TryCounter`'s output feeds back into the attacker's outcome) is genuinely new
+    design, not a mechanical extension of TD3. "Intent arrives through `IIntentSource`", "declining is
+    observable", "the reaction never moves the reactor's own `ActorTurnMachine`", and "damage routes
+    through the existing funnel" all still need this specific wiring, which TD3 does not provide.
 
 - [ ] **RL3 — Size the spend range** · **S** · **Deps:** RL2
-  - ⛔ **Genuinely blocked by D14, not revised** — unlike `CB1`/`RL1`/`RL4`, this task's own acceptance
-    criterion IS a live win-rate measurement ("a win-rate check with the lane open vs closed"), which
-    needs `ReactionLane`/`ReactionCounter` wired into a real, resolvable battle. No mechanism-level
-    substitute is honest here the way it was for the others.
+  - ⛔ **Still blocked — same narrower reason as RL2's own remaining gap**, not the general D14 finding
+    anymore: this task's own acceptance criterion IS a live win-rate measurement ("a win-rate check with
+    the lane open vs closed"), which needs `ReactionLane`/`ReactionCounter` wired into a real,
+    resolvable battle — RL2's own unbuilt half, not something `timeline-dispatch` (`TD1`–`TD3`) provides
+    on its own. No mechanism-level substitute is honest here the way it was for the others.
   - **Acceptance:** the counter's poise cost and the hold-vs-spend threshold are **tunables**, sized
     against the Phase 2 sweep. ⚠️ The lane must not read as a flat power increase — countering must
     visibly compete with absorbing.

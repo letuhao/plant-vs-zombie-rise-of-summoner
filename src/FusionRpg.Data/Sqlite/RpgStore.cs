@@ -642,6 +642,9 @@ public sealed partial class RpgStore : IRpgDb
         EnsureSocketSchemaUnlocked(db);
         // item_set / item_set_member / item_set_tier — ssot-sets.md §4.2, threshold-grants (module 12).
         EnsureItemSetSchemaUnlocked(db);
+        // item_unique — ssot-uniques.md §5.2, uniques (module 17). Must run AFTER the container schema
+        // it keys on, and it is read alongside item_set_member for §3.8's mutual exclusion.
+        EnsureItemUniqueSchemaUnlocked(db);
         // effect_element + both matchup matrices (spec-element-roster-data.md, E18).
         EnsureElementSchemaUnlocked(db);
         // power_coefficient + power_trigger_frequency + the sweep's proposal table (E9).

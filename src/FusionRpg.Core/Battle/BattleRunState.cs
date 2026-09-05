@@ -75,6 +75,13 @@ public static partial class BattleEngine
             Costs: Array.Empty<CompiledActionCost>(),
             Scopes: Array.Empty<ActionScopeRow>());
 
+        /// <summary>`battle-tempo` `timeline-dispatch` (D14): the one field of
+        /// <see cref="BasicAttackCompiled"/> the timeline-dispatch action phase needs (the derived
+        /// wind-up/recovery envelope) — exposed narrowly rather than widening the whole field's
+        /// visibility, since nothing else outside this class needs the rest of it (targeting, costs,
+        /// scopes) today.</summary>
+        public Timeline.ActionEnvelope BasicAttackEnvelopeCompiled => BasicAttackCompiled.Envelope;
+
         public readonly List<ActorState> Actors;
         public readonly Dictionary<string, ActorState> ByKey;
         public readonly BattleEffectHost Host;

@@ -371,7 +371,11 @@ internal static class ContractTuningTestBootstrap
 
     public static readonly SiegeTuning DefaultSiege = new(
         SchemaVersion: 1, Version: 1,
-        MoveCostOpen: 10, MoveCostRough: 20, DiagonalSurcharge: 0, MaxCells: 4096);
+        MoveCostOpen: 10, MoveCostRough: 20, DiagonalSurcharge: 0, MaxCells: 4096,
+        District: new DistrictTuning(
+            SideByBaseTier: new Dictionary<int, int> { [0] = 18, [1] = 24, [2] = 30 },
+            CoreSideMilli: 400, GateCount: 2, RampartThickness: 1, FortressRampartBonus: 1,
+            ApproachDepth: 4, ApproachDepthPerWardLevel: 1));
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,

@@ -19,15 +19,18 @@ field here (three permuted samples, spec SS2 "Which fields are voted"), so `buil
 from __future__ import annotations
 
 import copy
+import json
 from typing import Any, Mapping, Sequence
 
 from ....pipeline.model import BLOCKED_FIELD
 from ...demons.anchor.permute import order_for
+from ..vocab import REPO_ROOT
 
 __all__ = [
     "SYSTEM_PROMPT", "GENERAL_ACTION_SCHEMA", "schema_for_call",
     "build_context", "build_brief", "entry_for",
     "atom_families_are_allowed", "atom_families_not_forbidden",
+    "render_worked_example",
 ]
 
 # ---------------------------------------------------------------------------------------------
@@ -220,7 +223,9 @@ def _rung_band_label(rung_band: Any) -> str:
 
 
 def build_context(brief: Mapping[str, Any], *, sample_index: int,
-                  pairing_table: "Mapping[str, Sequence[str]] | None" = None) -> "dict[str, Any]":
+                  pairing_table: "Mapping[str, Sequence[str]] | None" = None,
+                  family_glossary: "Mapping[str, str] | None" = None,
+                  worked_example: "str | None" = None) -> "dict[str, Any]":
     """Read-only inputs `build_brief` renders from and the validators check against -- exactly as
     `affix/prompts.py:49-56` does, so a validator always reads the SAME object the brief was
     rendered from. Raises per `_assert_no_anchor`/`_require_slot` (acceptance #4) before reading
@@ -228,7 +233,24 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
 
     `sample_index` is IN this call, never bolted on after -- three votes over three identical
     orders is one sample with extra steps (`adapters/demons/anchor/permute.py`'s own module
-    docstring)."""
+    docstring).
+
+    `family_glossary` (SMOKE BATCH criterion-2 fix, 2026-09-05): an optional `id -> one-line gloss`
+    mapping (`vocab.load_family_glossary()`), read-only and never required -- omitted or empty, the
+    rendered brief is byte-identical to before this fix (every existing test passes a fixture pool
+    of fake ids with no real glossary entry, so this stays additive, not a behavior change for
+    them). When given, `build_brief` below renders each eligible/forbidden/enabler family as
+    `id: gloss` instead of a bare id, closing the real ambiguity named in `vocab.py`'s own
+    module-level comment: a bare id like `atom.swiftness` gives the model nothing to judge fit by
+    beyond guessing at a hyphenated slug's meaning.
+
+    `worked_example` (SMOKE BATCH criterion-2 PROBE, 2026-09-05): an optional, already-rendered
+    string (see `render_worked_example` below) -- read-only, never required, and NOT itself
+    permuted by `sample_index` (it is one fixed illustration, the same text for all three samples
+    of a brief, per the probe's own bound: "the worked example itself does not need permutation").
+    Omitted or empty (the default for every existing test and every pre-probe call site), the
+    rendered brief is byte-identical to before this probe -- same additive discipline as
+    `family_glossary` above."""
     _assert_no_anchor(brief)
     slot = _require_slot(brief)
 
@@ -256,6 +278,8 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
         "rungBandLabel": _rung_band_label(slot.get("rungBand")),
         "allowedAtomFamilies": permuted_allowed,
         "forbiddenAtomFamilies": forbidden,
+        "atomFamilyGlossary": dict(family_glossary) if family_glossary else {},
+        "workedExample": worked_example or "",
         "pairingRole": role,
         "pairedPayoffFamily": paired_payoff_family,
         "avoidNeighbours": [
@@ -271,6 +295,19 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
     return context
 
 
+def _render_eligible_family_lines(family_ids: Sequence[str], glossary: Mapping[str, str]) -> "list[str]":
+    """SMOKE BATCH criterion-2 fix, 2026-09-05: one bullet per eligible family, `id: gloss` when
+    the glossary has an entry for it (the real, 98-family production case) or a bare `id` when it
+    does not (every existing test's own fake-id fixture pool, e.g. `atom.a`/`atom.b`/`atom.c`,
+    which carries no real glossary entry and falls back safely here). Never raises on a miss -- a
+    glossary gap is "nothing extra to show", not a defect."""
+    lines: "list[str]" = []
+    for family_id in family_ids:
+        gloss = glossary.get(family_id)
+        lines.append(f"  - {family_id}: {gloss}" if gloss else f"  - {family_id}")
+    return lines
+
+
 def build_brief(context: Mapping[str, Any]) -> str:
     """Inlines literal values and CITES NO FILE -- the same discipline `affix/prompts.py:60-61`
     states a reason for. Nothing here is an anchor: no family, no element, no motifs, no species
@@ -280,6 +317,12 @@ def build_brief(context: Mapping[str, Any]) -> str:
         "anchor -- this action belongs to everyone, never a single creature, family, element or "
         "species.",
         "",
+    ]
+    worked_example = context.get("workedExample")
+    if worked_example:
+        lines.append(worked_example)
+        lines.append("")
+    lines.extend([
         f"Category: {context['category'] or 'unspecified'}",
         f"Target mode: {context['targetMode'] or 'unspecified'}",
         f"Area shape: {context['areaShape'] or 'unspecified'}",
@@ -287,9 +330,21 @@ def build_brief(context: Mapping[str, Any]) -> str:
         f"Kind: {context['kind'] or 'unspecified'}",
         f"Power tier: {context['rungBandLabel']}",
         "",
-        "Eligible atom families -- choose one or more from this list, in this order: "
-        + ", ".join(context["allowedAtomFamilies"]),
-    ]
+    ])
+    glossary = context.get("atomFamilyGlossary") or {}
+    if glossary:
+        lines.append(
+            "Eligible atom families -- choose one or more from this list, in this order. Each is "
+            "shown as `id: name [tag] -- what it does`, given only so you can judge which ids "
+            "actually fit this role; you must still answer with the id alone, never the name or "
+            "the description text:"
+        )
+        lines.extend(_render_eligible_family_lines(context["allowedAtomFamilies"], glossary))
+    else:
+        lines.append(
+            "Eligible atom families -- choose one or more from this list, in this order: "
+            + ", ".join(context["allowedAtomFamilies"])
+        )
     if context["forbiddenAtomFamilies"]:
         lines.append(
             "Forbidden atom families -- never pick any of these, they would make a knowingly "
@@ -312,6 +367,98 @@ def build_brief(context: Mapping[str, Any]) -> str:
             + "; ".join(context["avoidNeighbours"])
         )
     return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------------------------
+# Worked-example probe (SMOKE BATCH criterion-2, 2026-09-05). The family-glossary fix above
+# closed "a bare id carries zero semantic signal" and materially cut the unresolved rate (60.0% ->
+# 40.0% on this exact scope, 2026-09-05 measurement) but did not close it -- the residual gap is a
+# modest local model not reliably converging across 3 independent samples even with full semantic
+# grounding per family. That fix's own report named one specific, untried next step: a single
+# fully-resolved brief->answer pair in the prompt, so the model sees the expected shape once
+# instead of only reading field descriptions. This section is that probe, and nothing more --
+# schema and vote mechanism are unchanged (binding constraint: this is prompt CONTENT only).
+#
+# The pair is READ, never transcribed into a literal -- this repo's own `vocab.py` states the
+# identical discipline ("a registry fact is read, never re-typed") and it applies just as much to
+# a real historical example as to a live vocabulary: hand-copying a 96-id pool and a multi-field
+# answer into a Python literal is exactly the kind of silent-drift risk that discipline exists to
+# avoid. Both files are already real, committed, unmodified content (`git status` on this session's
+# own working tree shows neither with a pending change) -- pinned by id, not by round number alone,
+# so a later, unrelated regeneration of either file cannot silently swap the illustration:
+#   brief:  data/seed/actions/_briefs/round-1.json, briefId "brief.general.general.004"
+#   answer: data/seed/actions/_candidates/general/round-1.json, candidateId
+#           "candidate.general.003" -- outcome "accepted", confidence "high" (3/3 real-sample
+#           agreement, `healNotes: [{},{},{}]` on every sample -- independently re-read
+#           2026-09-05, a clean, well-formed accepted answer, not a borderline one).
+# ---------------------------------------------------------------------------------------------
+
+_WORKED_EXAMPLE_BRIEFS_PATH = REPO_ROOT / "data" / "seed" / "actions" / "_briefs" / "round-1.json"
+_WORKED_EXAMPLE_CANDIDATES_PATH = (
+    REPO_ROOT / "data" / "seed" / "actions" / "_candidates" / "general" / "round-1.json"
+)
+_WORKED_EXAMPLE_BRIEF_ID = "brief.general.general.004"
+_WORKED_EXAMPLE_CANDIDATE_ID = "candidate.general.003"
+
+#: The answer fields actually shown to the model -- the real draft's own five schema-required
+#: keys, never its `_provenance`/`briefId`/`candidateId`/`scope` wrapper fields (those describe
+#: pipeline plumbing the model never sees on any real call, worked example included).
+_WORKED_EXAMPLE_ANSWER_KEYS: "tuple[str, ...]" = ("name", "flavor", "atomFamilies", "rationale", BLOCKED_FIELD)
+
+
+def _load_worked_example_pair() -> "tuple[dict, dict] | None":
+    """Reads the one pinned real brief + its real accepted answer fresh from the two real files
+    named above. Returns `None` -- never raises -- on any miss (file absent, id not found in it,
+    or the candidate not actually `accepted`): this is a single fixed illustration a probe adds,
+    not a required input, and a checkout without today's exact committed rounds must still be able
+    to run every other real code path."""
+    try:
+        briefs_doc = json.loads(_WORKED_EXAMPLE_BRIEFS_PATH.read_text(encoding="utf-8"))
+        candidates_doc = json.loads(_WORKED_EXAMPLE_CANDIDATES_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return None
+    brief = next(
+        (e for e in briefs_doc.get("entries", ()) if e.get("briefId") == _WORKED_EXAMPLE_BRIEF_ID), None
+    )
+    candidate = next(
+        (e for e in candidates_doc.get("entries", ())
+         if e.get("candidateId") == _WORKED_EXAMPLE_CANDIDATE_ID), None
+    )
+    if not isinstance(brief, Mapping) or not isinstance(candidate, Mapping):
+        return None
+    if candidate.get("outcome") != "accepted" or not isinstance(candidate.get("draft"), Mapping):
+        return None
+    return dict(brief), dict(candidate["draft"])
+
+
+def render_worked_example(family_glossary: "Mapping[str, str] | None" = None) -> str:
+    """Render the one pinned worked example through the SAME `build_context`/`build_brief` this
+    module renders every real brief through -- never a second, hand-written rendering path -- so
+    the illustration matches exactly what a real brief looks like (glossed, when `family_glossary`
+    is given, the same as every other real call today). `sample_index=0` is pinned unconditionally:
+    this is ONE fixed illustration and must never itself be permuted per sample.
+
+    Returns `""` (never raises) when the pinned pair cannot be found -- see
+    `_load_worked_example_pair`'s own docstring; `build_context`'s `worked_example=""` already
+    renders as "no worked example" (falsy), so this composes with the rest of the module with no
+    extra branching at the call site."""
+    pair = _load_worked_example_pair()
+    if not pair:
+        return ""
+    brief, answer = pair
+    context = build_context(brief, sample_index=0, family_glossary=family_glossary)
+    example_brief_text = build_brief(context)
+    answer_payload = {k: answer[k] for k in _WORKED_EXAMPLE_ANSWER_KEYS if k in answer}
+    answer_text = json.dumps(answer_payload, ensure_ascii=False, sort_keys=True)
+    return (
+        "Worked example -- a REAL brief and the REAL answer that was accepted for it (three "
+        "independent samples agreed on it), shown once so you can see the expected shape and "
+        "level of detail. This is illustration only: the role below is a DIFFERENT brief -- do "
+        "not reuse this name, this flavour, or copy these same atom families into your own "
+        "answer.\n\n"
+        f"{example_brief_text}\n\n"
+        f"Answer that was accepted for the example above:\n{answer_text}"
+    )
 
 
 # ---------------------------------------------------------------------------------------------

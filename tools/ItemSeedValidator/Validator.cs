@@ -73,6 +73,7 @@ public static class Validator
         FrameDirectionCheck.Run(ctx);
         SocketMaxCheck.Run(ctx);
         GemAffinityCheck.Run(ctx);
+        UniqueFrameCheck.Run(ctx);
         RoleFamilyCheck.Run(ctx);
         NameWordCheck.Run(ctx);
         LintCheck.Run(ctx);

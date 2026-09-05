@@ -1,5 +1,7 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Power;
+using FusionRpg.Core.Progression;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
@@ -54,6 +56,51 @@ public static class AptitudeEndpoints
             _ = BroadcastBestEffort(hub, pid);
             return Results.Ok(ProjectState(store, powerIndex, pid));
         });
+
+        // `demon-type-allocation` (module 5, spec-demon-type-allocation.md §"Commands") — the
+        // player-facing surface over EffectiveSpeciesAllocation. Mirrors the Commander pair above
+        // exactly: GET projects the effective (baseline-or-override) state, POST replaces the whole
+        // vector, both broadcast AptitudesUpdated to BOTH groups (T2.2's own ⛔ callout — a WebGroup-
+        // only send is the exact defect a live probe already found once for Commander).
+        g.MapGet("/species/{playerId:long}/{speciesId}", (long playerId, string speciesId, RpgStore store) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            if (!DemonSpeciesCatalog.IsKnown(speciesId))
+                return Results.BadRequest(new { reason = "species.unknown" });
+            return Results.Ok(ProjectSpeciesState(store, playerId, speciesId));
+        });
+
+        g.MapPost("/species/allocate", (AllocateSpeciesAptitudesRequest body, RpgStore store, IHubContext<RpgHub> hub) =>
+        {
+            var pid = body.PlayerId ?? store.GetCurrentPlayerId();
+            if (!store.PlayerExists(pid)) return Results.NotFound();
+            if (string.IsNullOrWhiteSpace(body.SpeciesId) || !DemonSpeciesCatalog.IsKnown(body.SpeciesId))
+                return Results.BadRequest(new { reason = "species.unknown" });
+            if (body.Shares is null) return Results.BadRequest(new { reason = "shares.missing" });
+
+            AptitudeAllocation allocation;
+            try
+            {
+                allocation = body.Shares.Aggregate(AptitudeAllocation.Empty,
+                    (acc, kv) => acc + AptitudeAllocation.Single(AllocationScope.DemonType, kv.Key, kv.Value));
+            }
+            catch (ArgumentException ex)
+            {
+                return Results.BadRequest(new { reason = "aptitudes.unknownid", detail = ex.Message });
+            }
+
+            var demonTypeId = DemonSpeciesCatalog.Get(body.SpeciesId).DemonTypeId;
+            var level = store.GetRpgActor(pid, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
+            var source = PointBudget.DemonTypeSourceFromLevel(level);
+            var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
+            if (!check.WithinBudget)
+                return Results.Conflict(new { reason = "aptitudes.overbudget", spent = check.Spent, budget = check.Budget });
+
+            store.SaveAllocation(AllocationScope.DemonType, SpeciesAllocation.ScopeKey(pid, body.SpeciesId), allocation);
+
+            _ = BroadcastBestEffort(hub, pid);
+            return Results.Ok(ProjectSpeciesState(store, pid, body.SpeciesId));
+        });
     }
 
     static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)
@@ -80,19 +127,59 @@ public static class AptitudeEndpoints
         var allocation = store.LoadAllocation(AllocationScope.Commander, ScopeKey(playerId));
         var theta = (long)powerIndex.ActorIndex(new StatContext { PlayerId = playerId });
         var check = PointBudget.CheckScope(AllocationScope.Commander, allocation, theta, AptitudeTuningHub.Tuning);
+
+        // species-build T3.1 (module 6, allocation-transport): additive only — `shares` below is
+        // byte-unchanged for a player with no species allocations (spec's own ⛔ callout: RpgClient.cs
+        // hard-requires the literal key "shares", a rename would silently stop every allocation
+        // applying). Only species this player has actually levelled are sent, never the full corpus.
+        var species = new Dictionary<string, Dictionary<string, long>>(StringComparer.Ordinal);
+        foreach (var speciesId in store.ListLevelledSpeciesIds(playerId))
+        {
+            var effective = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
+            species[speciesId] = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => effective.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal);
+        }
+
         return new
         {
             theta,
             budget = check.Budget,
             spent = check.Spent,
             withinBudget = check.WithinBudget,
-            shares = AptitudeCatalog.All.ToDictionary(a => a.Id, a => allocation.PointsAt(AllocationScope.Commander, a.Id), StringComparer.Ordinal)
+            shares = AptitudeCatalog.All.ToDictionary(a => a.Id, a => allocation.PointsAt(AllocationScope.Commander, a.Id), StringComparer.Ordinal),
+            species
+        };
+    }
+
+    static object ProjectSpeciesState(RpgStore store, long playerId, string speciesId)
+    {
+        var demonTypeId = DemonSpeciesCatalog.Get(speciesId).DemonTypeId;
+        var level = store.GetRpgActor(playerId, RpgActorKinds.Species, demonTypeId)?.Level ?? 1;
+        var allocation = store.EffectiveSpeciesAllocation(playerId, speciesId, AptitudeTuningHub.Tuning);
+        var source = PointBudget.DemonTypeSourceFromLevel(level);
+        var check = PointBudget.CheckScope(AllocationScope.DemonType, allocation, source, AptitudeTuningHub.Tuning);
+        return new
+        {
+            speciesId,
+            level,
+            budget = check.Budget,
+            spent = check.Spent,
+            withinBudget = check.WithinBudget,
+            shares = AptitudeCatalog.All.ToDictionary(
+                a => a.Id, a => allocation.PointsAt(AllocationScope.DemonType, a.Id), StringComparer.Ordinal)
         };
     }
 
     public sealed class AllocateAptitudesRequest
     {
         public long? PlayerId { get; set; }
+        public Dictionary<string, long>? Shares { get; set; }
+    }
+
+    public sealed class AllocateSpeciesAptitudesRequest
+    {
+        public long? PlayerId { get; set; }
+        public string? SpeciesId { get; set; }
         public Dictionary<string, long>? Shares { get; set; }
     }
 }

@@ -96,6 +96,58 @@ def load_pairing_keys() -> "frozenset[str]":
     return frozenset(doc.keys())
 
 
+#: SMOKE BATCH criterion-2 investigation, 2026-09-05: the three propose pipelines' own briefs list
+#: `allowedAtomFamilies` as bare ids only (e.g. `atom.swiftness`), with no other signal -- measured
+#: directly against real affix-family data, `atom.swiftness` is tagged `offensive` and writes the
+#: `zombieSpeed` channel ("faster zombie advance"), which a model reading only the id string cannot
+#: tell apart from `atom.evasion` (a `combat.dodge` channel) or `atom.quickening` (`attackInterval`)
+#: -- three genuinely different mechanics that all read as "something about speed" from the id
+#: alone. A real 2026-09-04 candidate ("Shift", a general repositioning action) picked
+#: `{atom.swiftness, atom.tempo-surge}` in one sample and `{atom.evasion, atom.quickening}` in
+#: another -- the exact ambiguity this glossary exists to close, not a hypothetical. `{value}` is
+#: replaced with the literal word "X" below, never a number -- this is prose grounding read by the
+#: model, not a schema change (the schema's own `enum` still lists ids only, unchanged).
+_GLOSSARY_PLACEHOLDER_SUBS: "tuple[tuple[str, str], ...]" = (
+    ("{value}", "X"), ("{element}", "an element"), ("{variant}", "a kind"),
+)
+
+
+def _humanize_display_template(template: "str | None") -> str:
+    if not template:
+        return ""
+    text = template
+    for token, replacement in _GLOSSARY_PLACEHOLDER_SUBS:
+        text = text.replace(token, replacement)
+    return text
+
+
+def load_family_glossary() -> "dict[str, str]":
+    """One-line, magnitude-free gloss per atom family id -- `name` + `tags` + a humanized
+    `displayTemplate` -- read fresh from the identical source `load_family_ids` reads
+    (`data/seed/items/affix-families/*.json`), never cached or transcribed. Exists so a propose
+    pipeline's own brief can show `atom.swiftness: Swiftness [offensive] -- X faster zombie
+    advance` instead of the bare id `atom.swiftness` -- see the module-level comment above for the
+    real-call evidence this closes. Every one of the 98 real entries carries `name`/`tags`/
+    `displayTemplate` (measured 2026-09-05: zero missing across all 15 files), so this returns one
+    entry per id with no fallback path needed for a real file; a synthetic/test fixture id simply
+    has no key here, and callers must treat a miss as "no gloss available", never as a defect."""
+    families_dir = REPO_ROOT / "data" / "seed" / "items" / "affix-families"
+    glossary: "dict[str, str]" = {}
+    for path in sorted(families_dir.glob("*.json")):
+        doc = _load_json(path)
+        for row in doc.get("entries", []):
+            if not isinstance(row, dict) or not row.get("id"):
+                continue
+            name = row.get("name") or row["id"]
+            tags = ", ".join(row.get("tags") or ()) or "unlabeled"
+            effect = _humanize_display_template(row.get("displayTemplate"))
+            gloss = f"{name} [{tags}]"
+            if effect:
+                gloss += f" -- {effect}"
+            glossary[row["id"]] = gloss
+    return glossary
+
+
 def load_family_map_keys() -> "frozenset[str]":
     """The family ids a `family`-scoped entry's `scopeKey` may name — the VALUES of
     `data/seed/actions/_generated/family-map.json` (species -> family id), A-S0's projection and

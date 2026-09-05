@@ -42,6 +42,34 @@ public static class RarityOverlapSimulator
         (10, 12), (20, 25), (40, 50), (85, 100), (170, 205),
     };
 
+    /// <summary>How many tiers the band table carries — five, matching the atom layer's `.t1`..`.t5`.</summary>
+    public static int TierCount => TierBands.Length;
+
+    /// <summary>
+    /// One tier's inclusive magnitude band, in the same `vitality`/`maxHp` hp units every roll above
+    /// uses. <b>Exposed, rather than copied</b>, because module 17's parity metric prices a unique's
+    /// FIXED side against the rolled side and the two must be the same units by construction — a
+    /// second copy of this table is how a comparison starts measuring nothing (spec-uniques.md's
+    /// "never write a second parity simulator", applied to the data as well as the code).
+    /// </summary>
+    public static (int Min, int Max) TierBand(int tier)
+    {
+        if (tier < 1 || tier > TierBands.Length)
+            throw new ArgumentOutOfRangeException(nameof(tier), $"tier {tier} is outside t1-t{TierBands.Length}");
+        return TierBands[tier - 1];
+    }
+
+    /// <summary>
+    /// A tier's band midpoint, rounded down. This is the "one rolled affix at the middle of the
+    /// window" that the AE unit is defined against (ssot-sets.md §3.5, adopted by ssot-uniques.md
+    /// §3.7), so it lives here beside the band it is the middle of.
+    /// </summary>
+    public static long TierMidpoint(int tier)
+    {
+        var (min, max) = TierBand(tier);
+        return ((long)min + max) / 2;
+    }
+
     /// <summary>
     /// Rolls <see cref="RollsPerRung"/> independent total magnitudes for one rung: the rung's
     /// <see cref="RarityRungWindow.AffixCount"/> (`PrefixRolls + SuffixRolls`, the count-band floor)

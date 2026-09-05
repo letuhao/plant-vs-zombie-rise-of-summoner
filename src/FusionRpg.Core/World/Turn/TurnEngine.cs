@@ -62,6 +62,16 @@ public static class TurnEngine
         public const string Reveal = "Reveal";
         public const string Movement = "Movement";
         public const string Sieges = "Sieges";
+
+        /// <summary>
+        /// base-defense siege-seam (2026-09-05): district assaults, distinct from `Sieges` (guard
+        /// fights) — decision 26's ground-level fight, driven by `WorldCommandKinds.Assault`. A
+        /// brand-new command kind, so no existing command log can ever populate it: this phase is
+        /// provably a no-op for every world that predates it, the same "field/command-only addition"
+        /// precedent `RulesetVersion`'s own history above already establishes for several other
+        /// additions — no bump needed.
+        /// </summary>
+        public const string Assaults = "Assaults";
         public const string Production = "Production";
         public const string Growth = "Growth";
         public const string Pressure = "Pressure";
@@ -110,6 +120,7 @@ public static class TurnEngine
         var movement = Movement(opening, revealed, report, turn, battles, seed);
         var next = movement.World;
         next = Sieges(next, revealed, report, turn, battles, seed);
+        next = Assaults(next, revealed, report, turn, battles, seed);
         next = Production(next, report);
         next = Growth(next, report, turn, seed);
         next = Pressure(next, revealed, report, turn, seed);
@@ -200,6 +211,16 @@ public static class TurnEngine
     {
         report.BeginPhase(Phases.Sieges);
         return SiegePhase.Run(world, commands, report, Phases.Sieges, turn, resolver, seed);
+    }
+
+    /// <summary>Deliberate assaults on a hostile district's core — never a consequence of walking
+    /// past one, the same distinction `Sieges` draws for a slot's guard.</summary>
+    static WorldState Assaults(
+        WorldState world, IReadOnlyList<WorldCommand> commands, TurnReport report,
+        int turn, IBattleResolver resolver, ulong seed)
+    {
+        report.BeginPhase(Phases.Assaults);
+        return DistrictAssaultPhase.Run(world, commands, report, Phases.Assaults, turn, resolver, seed);
     }
 
     /// <summary>A sector earns before it pays — `LoamPhases.Production` (spec-loam-turn.md).</summary>

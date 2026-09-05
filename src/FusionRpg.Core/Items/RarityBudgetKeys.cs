@@ -65,6 +65,18 @@ public static class RarityBudgetKeys
         new RarityBudgetKeyDef("socket_min", "sockets (16)", HasDecidedShape: true),
         new RarityBudgetKeyDef("socket_max", "sockets (16)", HasDecidedShape: true),
 
+        // ⭐ ADDED 2026-09-05 by module 17 (uniques). ssot-uniques.md §5.3 proposed exactly one new key
+        // — "may a unique carry this rung", 0 at ordinals 10-20 and 1 at 30-100 — and named this
+        // registry as its home, mirroring the `set_eligible` slot. The shape: ONE 0/1 integer per rung,
+        // DERIVED from the ordinal against `uniques.v1.json`'s `rungFloorOrdinal` rather than authored
+        // as a second per-rung table beside the seeded ladder (UniqueTuning.IsRungEligible), and seeded
+        // by RpgStore.SeedUniqueEligible. Read by UniqueValidator/UniqueCorpusValidator, which raise
+        // ContentRuleViolated{unique.rung-ineligible} on a 0. Ordinals 10 `chaff` and 20 `sprout` are
+        // DEFINED as the absence of design ("husks, clippings"; "it works, that is all it does") and a
+        // unique is the presence of it — §10.7 leaves the owner one number to move if a `sprout`-rung
+        // joke unique is ever wanted, and moving it re-seeds the column with no code change.
+        new RarityBudgetKeyDef("unique_eligible", "uniques (17)", HasDecidedShape: true),
+
         // set_eligible and charm_potency are deliberately ABSENT, not merely undecided: D15 makes the
         // former vacuous (a set has no rarity) and spec-set-charm-gen.md never reads the latter. Never
         // re-add either without a spec that actually consumes it.

@@ -79,6 +79,14 @@ public static class MovementPhase
         var queue = new TurnEventQueue();
         var requests = new Dictionary<string, BattleRequest>(StringComparer.Ordinal);
         var moved = new Dictionary<string, WorldEntity>(StringComparer.Ordinal);
+
+        // A force that fully arrives this turn has its `OnLaneId` cleared the instant it lands, so if
+        // a Sector-kind contact fight right there routs it, `BattleApplication` would otherwise find
+        // "nothing to fall back from" and treat a freshly-arrived attacker exactly like a genuine
+        // long-standing garrison. This is movement-phase-local (never a `WorldEntity` field, never
+        // hashed) precisely because it only needs to survive from here down to `BattleReporting.Fight`
+        // within this same call.
+        var arrivedViaLane = new Dictionary<string, string>(StringComparer.Ordinal);
         // Concrete on the way in, read-only on the way out. Declaring this as the interface and
         // casting back to mutate it would be a runtime failure waiting for someone to change the
         // collection type.
@@ -122,6 +130,9 @@ public static class MovementPhase
                 LaneProgressMilli = outcome.LaneProgressMilli,
                 MovementRemaining = outcome.MovementRemaining
             };
+
+            if (outcome.ArrivedAtSectorId is not null && outcome.ArrivedViaLaneId is { } arrivalLane)
+                arrivedViaLane[entity.EntityId] = arrivalLane;
 
             queue.Schedule(outcome.TimeMilli, entity.EntityId, TurnEventKinds.Arrival,
                 outcome.ArrivedAtSectorId ?? outcome.OnLaneId ?? "");
@@ -190,7 +201,7 @@ public static class MovementPhase
             if (evt.Kind is TurnEventKinds.Contact or TurnEventKinds.Crossing
                 && requests.TryGetValue(evt.Detail, out var request))
             {
-                next = BattleReporting.Fight(next, request, resolver, report, phase, seed);
+                next = BattleReporting.Fight(next, request, resolver, report, phase, seed, arrivedViaLane);
                 continue;
             }
 

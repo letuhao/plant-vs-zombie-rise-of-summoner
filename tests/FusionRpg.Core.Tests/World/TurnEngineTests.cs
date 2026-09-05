@@ -98,8 +98,13 @@ public class TurnEngineTests
         // finished happening: a claim settles in `Snapshot`, so recording belief before it left a
         // faction unable to see that its own claim had worked. Changing this list is changing the
         // ruleset, which is why it is spelled out rather than derived.
+        //
+        // `Assaults` joined 2026-09-05 (base-defense siege-seam) right after `Sieges` — a brand-new
+        // phase driven by a brand-new command kind (`WorldCommandKinds.Assault`), so no existing
+        // command log can ever populate it and no `RulesetVersion` bump was needed; the PHASE LIST
+        // itself changed regardless, which is exactly what this test exists to catch.
         Assert.Equal(
-            new[] { "Reveal", "Movement", "Sieges", "Production", "Growth", "Pressure", "Events", "Snapshot", "Intel" },
+            new[] { "Reveal", "Movement", "Sieges", "Assaults", "Production", "Growth", "Pressure", "Events", "Snapshot", "Intel" },
             result.Report.Phases);
     }
 

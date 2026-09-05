@@ -154,7 +154,12 @@ public class ClaimTests
     /// <summary>
     /// Two factions cannot both claim one sector, and there is no separate tie-break for it: while
     /// both are standing there each blocks the other, and the fight that put them in the same place
-    /// is what eventually decides it. That is the contest, and it is worth having a test that says so.
+    /// is what decides it. Amended 2026-09-05: the loser of that fight now falls back down the lane
+    /// it marched in on rather than staying to contest ground it just lost, so — for this shape,
+    /// an attacker beaten the same turn it arrives — the winner's claim settles that same turn
+    /// instead of needing a second turn to finish the loser off first (`ContactAndClearTests`'s own
+    /// `A_routed_force_with_nowhere_to_fall_back_to_is_finished_off_next_turn` still proves the older,
+    /// two-turn shape for a defender that never moved and truly has nothing to fall back to).
     /// </summary>
     [Fact]
     public void Two_factions_claiming_one_sector_settle_it_by_fighting_over_it()
@@ -162,23 +167,22 @@ public class ClaimTests
         var world = AllGuardsCleared(World(), "ember-hollow");
         world = Place(world, "e-wild-pack-1", "ember-hollow", movement: 0);
 
-        var first = TurnEngine.Step(world, new[]
+        var result = TurnEngine.Step(world, new[]
         {
             Move("dave", "e-dave-legion-1", "l-home-ember"),
             Claim("dave", "e-dave-legion-1", "ember-hollow"),
             Claim("wild", "e-wild-pack-1", "ember-hollow")
         }, seed: 1);
 
-        // Nobody holds it while both are still on it.
-        Assert.Null(Sector(first.World, "ember-hollow").OwnerFactionId);
-        Assert.Contains(first.Report.Dropped, e => e.Subject == "k-e-wild-pack-1" && e.Detail == "claim.contested");
+        // Dave's legion routs and falls back to homeworld before Snapshot's claim check runs — his
+        // own claim is dropped for being routed, not for the ground being contested.
+        Assert.Contains(result.Report.Dropped, e => e.Subject == "k-e-dave-legion-1" && e.Detail == "entity.routed");
+        var legion = result.World.Entities.Single(e => e.EntityId == "e-dave-legion-1");
+        Assert.True(legion.Routed);
+        Assert.Equal("homeworld", legion.AtSectorId);
 
-        // The next turn finishes the routed legion, and the survivor takes the ground.
-        var second = TurnEngine.Step(first.World,
-            new[] { Claim("wild", "e-wild-pack-1", "ember-hollow") }, seed: 1);
-
-        Assert.Null(second.World.Entities.FirstOrDefault(e => e.EntityId == "e-dave-legion-1"));
-        Assert.Equal("wild", Sector(second.World, "ember-hollow").OwnerFactionId);
+        // Nothing hostile is left standing in ember-hollow by the time wild's claim is checked.
+        Assert.Equal("wild", Sector(result.World, "ember-hollow").OwnerFactionId);
     }
 
     [Fact]

@@ -7,9 +7,17 @@ namespace FusionRpg.Core.World.Turn;
 /// </summary>
 public static class BattleReporting
 {
+    /// <param name="arrivedViaLane">
+    /// Entity id to lane id, for any force that fully arrived at a sector earlier in this same
+    /// <see cref="Movement.MovementPhase"/> call — only <see cref="Movement.MovementPhase"/> ever
+    /// populates it. Lets <see cref="BattleApplication"/> fall a freshly-arrived attacker back down
+    /// the lane it just used if this fight routs it, the same way a mid-crossing rout already falls
+    /// back down the lane it was on.
+    /// </param>
     public static WorldState Fight(
         WorldState world, BattleRequest request, IBattleResolver resolver,
-        TurnReport report, string phase, ulong seed)
+        TurnReport report, string phase, ulong seed,
+        IReadOnlyDictionary<string, string>? arrivedViaLane = null)
     {
         var attacker = world.Entities.FirstOrDefault(e =>
             string.Equals(e.EntityId, request.AttackerEntityId, StringComparison.Ordinal));
@@ -28,10 +36,14 @@ public static class BattleReporting
         }
 
         var outcome = resolver.Resolve(request, combatants, seed);
-        var next = BattleApplication.Apply(world, outcome);
+        var next = BattleApplication.Apply(world, outcome, arrivedViaLane);
 
         if (outcome.GuardCleared && request.SlotIndex is { } slotIndex)
             next = BattleApplication.ClearGuard(next, request.LocationId, slotIndex);
+
+        // New, and empty for every existing kind — so every existing battle takes the identical path.
+        if (outcome.SlotResults.Count > 0)
+            next = BattleApplication.ApplySlotResults(next, request.LocationId, outcome.SlotResults);
 
         // `LocationId` is "sector id, or lane id for a crossing" (`BattleSeam.cs:34`) — a lane-kind
         // battle must not put a lane id in the sector slot, which is exactly the class of bug

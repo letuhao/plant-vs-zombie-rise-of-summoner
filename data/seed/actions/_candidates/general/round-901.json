@@ -1,0 +1,569 @@
+{
+  "_meta": {
+    "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+    "candidateSetHash": "95149d252062a3ea6e41a7957bd0385a70cd0b5bb861e5b8feaf4b5fcc213ff7",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "partition": "general",
+    "promptVersion": "general-propose/1",
+    "round": 901
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "511ae2dce91a1766eba49f65469a64980faae06961d8efedcb1d89af6d94e343",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.001",
+      "candidateId": "candidate.general.000",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "511ae2dce91a1766eba49f65469a64980faae06961d8efedcb1d89af6d94e343",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.general.general.001",
+        "candidateId": "candidate.general.000",
+        "flavor": "A bitter strike that feeds the soul of the attacker.",
+        "name": "Vengeful Spite",
+        "rationale": "The user requested an attack that targets an enemy but is applied to 'self' (meaning the effect is applied to the user based on the interaction). This design captures the essence of a retaliatory strike that heals the user, fitting the early-tier requirement for a general combat role.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.lifesteal|atom.retribution"
+    },
+    {
+      "_provenance": {
+        "briefHash": "8d9ef95b4f67ffb915cb7ad7925238c49f36b69a69b1bfa39cead0da6d2cda7b",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.002",
+      "candidateId": "candidate.general.001",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "8d9ef95b4f67ffb915cb7ad7925238c49f36b69a69b1bfa39cead0da6d2cda7b",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.ferocity",
+          "atom.retribution"
+        ],
+        "briefId": "brief.general.general.002",
+        "candidateId": "candidate.general.001",
+        "flavor": "Pain is merely fuel for the next strike.",
+        "name": "Vengeful Surge",
+        "rationale": "The action is a self-targeted attack (targeting self to trigger effects) that uses early-tier offensive and defensive atoms to create a cycle of damage and recovery.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.hit-followthrough|atom.hit-mend"
+    },
+    {
+      "_provenance": {
+        "briefHash": "86d26345a36c998cbb88295dbed8090a695fbe82bc101de85fb3f169c079864c",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.003",
+      "candidateId": "candidate.general.002",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "86d26345a36c998cbb88295dbed8090a695fbe82bc101de85fb3f169c079864c",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.general.general.003",
+        "candidateId": "candidate.general.002",
+        "flavor": "A sudden, violent outburst of self-inflicted agony to fuel a counter-strike.",
+        "name": "Spiteful Surge",
+        "rationale": "The target mode is 'self' and the relation is 'enemy'. This implies a self-sacrificial or self-harming mechanism that affects the enemy (retribution) or uses the self as a conduit for an offensive effect (lifesteal/vengeance).",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.lifesteal|atom.retribution"
+    },
+    {
+      "_provenance": {
+        "briefHash": "a7170f7d6ae53daa36f5b5a613b307fe828148f1549065d000698e97074d7177",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.004",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "d9b24e04d8ee2fad9bad4232730a97088fe9999e8edde0649cafccaca597b266",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.005",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "686b6e5f25aa252dd358c6111cc33b178765dcc20e8c5ac7a4ef292f98355b71",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.006",
+      "candidateId": "candidate.general.005",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "686b6e5f25aa252dd358c6111cc33b178765dcc20e8c5ac7a4ef292f98355b71",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.fortitude"
+        ],
+        "briefId": "brief.general.general.006",
+        "candidateId": "candidate.general.005",
+        "flavor": "A sudden tightening of the core to meet the coming impact.",
+        "name": "Brace",
+        "rationale": "The action is a self-applied defensive posture (Brace) that provides immediate physical protection (Plating) to the user, fitting the early-tier, single-target, self-relation requirement.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.plating"
+    },
+    {
+      "_provenance": {
+        "briefHash": "5e2fd8b3c227d7a40d8b702bbc40a48a60481cdb1bd24737859ac7a709f02eb1",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.007",
+      "candidateId": "candidate.general.006",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "5e2fd8b3c227d7a40d8b702bbc40a48a60481cdb1bd24737859ac7a709f02eb1",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.life-surge",
+          "atom.mending"
+        ],
+        "briefId": "brief.general.general.007",
+        "candidateId": "candidate.general.006",
+        "flavor": "A pulse of warmth that ripples through the ranks.",
+        "name": "Shared Vitality",
+        "rationale": "The action is a support role targeting allies (multi) to provide healing (mending/life-graft) at an early tier.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.life-graft|atom.mending"
+    },
+    {
+      "_provenance": {
+        "briefHash": "b187248fcb074e6f8d71ed5eec0e815fab9809c3a22245f7a5eb3503bcc78f32",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.008",
+      "candidateId": "candidate.general.007",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "b187248fcb074e6f8d71ed5eec0e815fab9809c3a22245f7a5eb3503bcc78f32",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.life-surge",
+          "atom.mending"
+        ],
+        "briefId": "brief.general.general.008",
+        "candidateId": "candidate.general.007",
+        "flavor": "A pulse of life shared among those who stand together.",
+        "name": "Shared Vitality",
+        "rationale": "The action is a support role targeting allies (multi) to provide healing (life-surge/mending) upon deployment or grant.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.resilience"
+    },
+    {
+      "_provenance": {
+        "briefHash": "95b77ca194c200e0e8cfa4f5ccd993efca1a78f8ac700980b04ff5f0c136320a",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.009",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "43e2fab60881f2807ad80431f4e5b77ce816dc82d526859b1dab3ed481003f71",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.010",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "2c667385acc04542ced9ee81bb6d181b4e9e1eceae98ed785fcb22d07cfdaf4a",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.011",
+      "candidateId": "candidate.general.010",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2c667385acc04542ced9ee81bb6d181b4e9e1eceae98ed785fcb22d07cfdaf4a",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.swiftness"
+        ],
+        "briefId": "brief.general.general.011",
+        "candidateId": "candidate.general.010",
+        "flavor": "A momentary lapse in momentum, followed by a burst of repositioning.",
+        "name": "Sudden Shift",
+        "rationale": "The action is a movement-based role that applies a speed-based utility to the self, fitting the early-tier requirement for a general movement action.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.quickening"
+    },
+    {
+      "_provenance": {
+        "briefHash": "2ead8046d6a12c4f67ee8c1ef2beab66ca2898c2bbf7f00b8ba6706f971a23f0",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.012",
+      "candidateId": "candidate.general.011",
+      "confidence": "high",
+      "draft": {
+        "_provenance": {
+          "briefHash": "2ead8046d6a12c4f67ee8c1ef2beab66ca2898c2bbf7f00b8ba6706f971a23f0",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.swiftness"
+        ],
+        "briefId": "brief.general.general.012",
+        "candidateId": "candidate.general.011",
+        "flavor": "A momentary lapse in momentum, followed by a burst of repositioning.",
+        "name": "Sudden Shift",
+        "rationale": "The action provides movement (swiftness) for any creature, fitting the early-tier requirement of a simple repositioning or advance.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "f1911e4b274320fe53d41d4c5de0b6cecb14add2d24de43cf45a152df1de6563",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.013",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "86c67a25de08b3c3513f1158dbfc879bf76ca791039e9fcdcd2bcf58d9dc74d5",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.014",
+      "candidateId": null,
+      "confidence": "unresolved",
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": null
+    },
+    {
+      "_provenance": {
+        "briefHash": "e0cddbd2fee85c6e2b5779f475cf0d7a1c18128e207c0f6d5680b32a345c946f",
+        "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+        "generatedUtc": "2026-09-04T22:57:23+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "pipeline": "general-propose",
+        "promptVersion": "general-propose/1"
+      },
+      "briefId": "brief.general.general.015",
+      "candidateId": "candidate.general.014",
+      "confidence": "split",
+      "draft": {
+        "_provenance": {
+          "briefHash": "e0cddbd2fee85c6e2b5779f475cf0d7a1c18128e207c0f6d5680b32a345c946f",
+          "briefsCorpusHash": "280a8c87c2da0b4ac721733f24071487d49ae5909fec306206c941d2dad91366",
+          "generatedUtc": "2026-09-04T22:57:23+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "pipeline": "general-propose",
+          "promptVersion": "general-propose/1"
+        },
+        "atomFamilies": [
+          "atom.withering"
+        ],
+        "briefId": "brief.general.general.015",
+        "candidateId": "candidate.general.014",
+        "flavor": "A shadow that refuses to fade, clinging to the very essence of the foe.",
+        "name": "Lingering Blight",
+        "rationale": "The action targets a column of enemies to inflict a status. By combining venomous (poison) and withering (wither), it creates a potent area-of-effect status effect suitable for early-tier gameplay.",
+        "scope": "general"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P1",
+      "scope": "general",
+      "voteMinority": "atom.venomous|atom.withering"
+    }
+  ],
+  "kind": "action-candidate",
+  "schemaVersion": 1
+}

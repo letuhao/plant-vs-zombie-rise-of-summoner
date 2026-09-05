@@ -1,6 +1,6 @@
 # Passive skill trees — the ideal
 
-**Status:** idea phase, 2026-09-04. **Not a spec. No build authorized.** This is the "later discuss"
+**Status:** idea phase, opened 2026-09-04. **Not a spec. No build authorized.** 36 owner decisions, 16 research documents (`../research/passive-tree/`), four measured results. §11 and §12 record the enrichment and strengthening rounds; **§11.4 is the live open list**. **Idea phase CLOSED 2026-09-05**; `/spec` opened the same day. D33 is no longer a gate — the squad harness is the first module built, and the numbers it settles are tunables (§14), not spec preconditions.
 conversation that [class-system-map.md](class-system-map.md) §5 reserved by name: *"there are many sub
 features for class system, includes passive skills, will be added later"* (owner, 2026-08-26).
 
@@ -26,7 +26,7 @@ the skill/item layer** (class-system-ideal §4.1). Trees are what spend that res
 
 ---
 
-## 2. Decisions locked by the owner (2026-09-04)
+## 2. Decisions locked by the owner (2026-09-04 → 2026-09-05)
 
 | # | Decision | Consequence |
 |---|---|---|
@@ -34,7 +34,7 @@ the skill/item layer** (class-system-ideal §4.1). Trees are what spend that res
 | D2 | **All four acquisition sources**: skill points · aptitude thresholds · items/affixes · demon aspect | The `skillPointsPerTheta: 1` grant, minted since 2026-08-26 with **zero consumers**, finally has a spender |
 | D3 | **Every skill has two unlock tracks**: skill points unlock *new bonuses* (discrete); souls scale *bonus power* (unlimited, arithmetic cost) | Matches the shipped two-ladder economy exactly — see §4 |
 | D4 | **Concentration is rewarded by a bounded Herfindahl multiplier** | `F = 1 + (Fmax−1)·H`, `H = Σ(shareᵢ)²` — see §3 |
-| D5 | ~~`Fmax = 1.5`~~ → **revised 2026-09-04 to a small nudge, `Fmax` 1.15–1.25, tunable** | §3.5's sweep showed no `Fmax` reverses the concentration penalty, so the multiplier is not the lever — deep-tier MECHANISM nodes are. Keeping it small stops focus being strictly worse on average without pretending it fixes the gap |
+| D5 | ~~`Fmax = 1.5`~~ → **revised 2026-09-04 to a small nudge, `Fmax` 1.15–1.25, tunable** | §3.5's sweep showed no `Fmax` reverses the concentration penalty, so the multiplier is not the lever — deep-tier MECHANISM nodes are. Keeping it small stops focus being strictly worse on average without pretending it fixes the gap **2026-09-05: retained provisionally, pending a D25-inclusive sweep.** [11](../research/passive-tree/11-adversarial-debate.md) argues `F` is machinery §3.5 measured as doing nothing, carried at the cost of two tunables, a UI acceptance criterion and D8's exploitable self-spent rule. But **every measurement of `F` ran without D25**, which is now the one mechanism shown to move the ordering (2.3×). Whether they compose or `F` is redundant beside it is unmeasured |
 | D6 | **The multiplier applies to all trees equally** | Offensive and defensive commitment are equally valid; symmetric and explainable |
 | D7 | **Hybrids stay Neutral, not Penalized** | A 2–3 way build sits 18–24% behind pure — behind, but alive. Spreading across everything is deliberately weak |
 | D8 | **`H` reads spent points + souls** — **amended 2026-09-04 (R2): self-spent only.** Gear-granted points add power, never focus | Both currencies are commitment. Requires the two-index blend of §3.2. The self-spent qualifier closes the trap D11's amendment would otherwise reopen: a good off-build drop must never lower your multiplier |
@@ -53,7 +53,15 @@ the skill/item layer** (class-system-ideal §4.1). Trees are what spend that res
 | D21 | **Every actor carries its own tree state** — Commander and each demon alike (owner, 2026-09-04) | Maximum build expression: each demon is genuinely built, not a stat block. **This promotes sparse storage from a nicety to a hard requirement** — ~50 trees × ~29 skills is ~1,450 possible per-skill soul levels *per actor*, so only non-zero entries may ever be persisted (§7.9). A dense row per actor is not an option at this scope |
 | D22 | **Passives compose from the shipped atom catalog** — no passive-specific effect vocabulary | Avoids the exact defect the atom program exists to prevent (*"inventing a third vocabulary"*), and hands D14's property-keyed exclusions an existing property space: atom tags |
 | D23 | **A demon species tree's reward is a UNIQUE tree** — nodes no other tree has, with **its own generation pipeline** (owner: *"better to spend effort for it now, maybe deploy agent to enrich it"*) | The strongest identity/collection pull, and the honest price for D17's lock: you give up build freedom and receive something unobtainable elsewhere. Cost is real — per-species authored content at 841-entry scale — which is why it gets a pipeline of its own rather than riding the generic tree generator |
-| D28 | **Cross-unlock credits ONE tree — your largest posture-mate — never a sum** (measured, 2026-09-05) | The sweep (`--crossunlock`, [09](../research/passive-tree/09-crossunlock-sweep.md)) is the first result in this program where **a corner beats spread**: 49.9% vs 47.7%, against 43.4% vs 54.4% with cross-unlock off. Crediting the full sum also flips the ordering but compresses every build into 48.6–51.8% — a rule that gives everyone everything stops discriminating. One mate is O(1), explainable, and **bounded by construction**: no k-way build can compound it |
+| D28 | **Cross-unlock credits ONE tree — your largest posture-mate — never a sum** (measured, 2026-09-05) | The sweep (`--crossunlock`, [09](../research/passive-tree/09-crossunlock-sweep.md)) is the first result in this program where **a corner beats spread**: 49.9% vs 47.7%, against 43.4% vs 54.4% with cross-unlock off. Crediting the full sum also flips the ordering but compresses every build into 48.6–51.8% — a rule that gives everyone everything stops discriminating. One mate is O(1), explainable, and **bounded by construction**: no k-way build can compound it **Bounded 2026-09-05 by re-measurement under D26+D29** ([16](../research/passive-tree/16-depth-exhaustion.md)): the concentration reward holds to `Θ ≈ 300` and **inverts above it**, because every build saturates D29's 10 authored tiers and tree power equalises at 1.00×. The original sweep ran at `Θ=100`, where the cap is inert, so it could not have seen this |
+| D33 | ~~Squad-scope re-measurement **gates** every further balance decision~~ → **amended 2026-09-05: NOT a gate.** The harness is the first module built (`squad-harness`), and the balance numbers it settles are **tunables**, resolved after the spec rather than before it (owner: *"we make spec and build, tunable later, remove this gate"*). The finding stands and is what the module exists to answer | ⛔ **Every balance number in this program is a 1v1 duel.** `DominanceGuard` predicts per ordered pair (`DominanceGuard.cs:55`); the game fields six (`WebMatchService.cs:339`, `const int maxSquad = 6`); D21 gives each its own tree, share vector and `F`. **"Squad" appeared zero times in this document.** Six pure corners collect 6× `Fmax` while the SQUAD covers every layer breadth was meant to buy — the risk half of *"become stronger but become weaker too"* is paid by the actor and absorbed by the squad. Generalises red-team F4 one level up: **`H` measures commitment in a scope narrower than the scope at which power is delivered, and any such gap is arbitrage** |
+| D34 | **`skillPointsPerTheta` becomes per-scope** | Required by D25, not optional: it is a single scalar (`AptitudeTuning.cs:13`) while aptitude points already ship a four-scope table. If every actor reads `Θ_player`, **50 demons × 31 nodes at Θ=100 is 1,550 — the whole catalog — and D25's bound breaks outright** |
+| D35 | **Status trees gate on their OWN quantity, outside `AllocationScope`** (owner, 2026-09-05, replacing D31) | `AllocationScope` is the set whose members are summed into aptitude shares (`AptitudeAllocation.cs:51-57`). Status mastery is not aptitude points, so it does not belong in that enum at any slot number. Gate on times-the-status-was-applied. **No shipped code changes**, and the unowned slot-5 dependency disappears |
+| D36 | **D25's curve is specified**: the Nth node costs `first + (N−1)·step`, `first = 5`, `step = 2`, with `skillPointsPerTheta` 1 → 11 | Derived, not guessed (`first = step·(k+1)/2`, `g = 3·s·step·k²/5`), and it reproduces D29's own two calibration points exactly. **Measured 2.3× concentration reversal — larger than anything `Fmax` or `b` achieved** — and it does NOT break D26's flatness, because it prices a different currency. Needs one new §10.2 row, which `guard-power.ps1` **cannot catch the absence of** (G2/G3 key on a `level`-named parameter; `nodesOwned` sits in `DropVolume`'s blind spot). [12](../research/passive-tree/12-rising-unlock-cost.md) |
+| D29 | **Tree shape is 10 tiers × 2 branches, ~40 nodes per tree** (owner, 2026-09-05) | Deeper than Last Epoch's ~29. Extends D26's ladder to `req(t) = 5·t(t+1)/2` → 5 · 15 · 30 · 50 · 75 · 105 · 140 · 180 · 225 · 275. Tier 7 is where an all-in build sits at `Θ=100`; **tier 10 lands at `Θ≈170`** (computed: an all-in build holds ~0.542 of the share vector at 3 points/Θ, so `1.626·Θ ≥ 275`), so the deepest tiers are late-game targets rather than dead content — which is the correct shape under PS-8 (endless grind), where content must keep existing above the current ceiling. Generic corpus: **39 × 40 = 1,560 nodes**. It also rhymes with the two other ten-step ladders now shipped, the rarity rungs and D-star's ten stars |
+| D30 | **Every species gets a FULL 29-node unique tree** (owner, 2026-09-05) | The maximum-identity reading of D23. **~24,389 generation calls and ~24,000 nodes across 841 species** — larger than the entire demon classification run, and the largest single content commitment in the program. **The generation is not the cost; the REVIEW is**, because D24 requires the catalog be reviewed before it ships. This is why D23 already gives it a pipeline of its own: it needs batching, sampling gates and a distribution check that a human can audit without reading 24,000 nodes **Amended 2026-09-05: a species tree is 40 nodes too, not 29** — D10's one-shape rule wins. Corpus becomes **35,200 nodes / ~100,800 calls**, a 38% machine-time increase that costs **nothing in review**, because [13](../research/passive-tree/13-review-pipeline.md) measured review as scaling with TREES, not nodes (a 40-node card and a 29-node card are the same look). Three agents found the 29-vs-40 contradiction independently |
+| D31 | **`status_mastery` takes `AllocationScope` slot 6, after the item program takes 5** (owner, 2026-09-05) | Keeps D19's shape and accepts the dependency rather than working around it. Two things follow and must be tracked: the status tree **cannot be built until the item program lands its fifth scope** (`item-ideal.md:1443`), and `AptitudeAllocation.Single` (`:38`) still rejects any id that is not one of the twelve aptitudes — so it needs a second, separate change before a scope can name a status. `AptitudeAffixPrice.cs:32`'s `> 4` branch resolves itself once slot 5 exists ⛔ **SUPERSEDED 2026-09-05 by D35.** Both premises I gave for it were false: nothing reads the enum ordinal (`scope_key` is TEXT), and slot 5 is scheduled by no program — `item-ideal.md:1443` sits under *"Needs another program"* and names a different owner than `item-todo.md:2857` files it under. The real collision is `AptitudeAllocation.Total()` summing **every** enum member into the aptitude share denominator `decisions.md:103` locks, so slot 5 and slot 6 are identically broken |
+| D32 | **Target distribution is near-uniform with a NAMED theme allowance** (owner, 2026-09-05) | Uniform is the target (8.3% per aptitude, 16.7% per element); a small explicit per-axis exception is declared as data — `earth` may run to roughly 1.5× uniform because plants really are earthy — with everything else held inside a stated band. The judgement §9 demanded gets **argued once, in a file**, instead of re-litigated per species. Lives in `data/tuning/passive-tree-targets.v1.json`; the check gate fails loudly on drift |
 | D25 | **Unlock cost rises with the number of nodes an actor already owns** — arithmetic, per actor (owner, 2026-09-05) | Closes the unbounded-breadth hole: at `skillPointsPerTheta: 1` with `Θ` uncapped, the whole catalog unlocked at `Θ≈1,450` and the tree stopped being a choice. This is a **soft economic bound, not a ceiling**, so PS-8 is satisfied — nothing is refused, breadth just prices itself. **It is also the concentration-reward-on-the-cost-side that cross-unlock was meant to be, with the sign pointing the right way.** Same arithmetic-cost shape the soul track already uses (§4), so it adds no new ladder |
 | D26 | **The tier requirement is reconciled to the power index: `req(t) = 5·t·(t+1)/2`** → 5 · 15 · 30 · 50 · 75 · 105 · 140 (owner, 2026-09-05: *"our power ladder and effort spent is scattered, maybe we need reconcile them for balance and persistency"*) | D20's *"flat reward-per-point at every depth"* was **false at tier 1** — `W/req` was `0.100·b` against a `0.200·b` asymptote, a **2× worse deal**, because the requirement indexed `t(t−1)/2` while power indexed `t(t+1)/2`. Sharing one index makes it exact: `W(t) = b·t(t+1)/2` over `req(t) = 5·t(t+1)/2` is **`b/5` at every tier, by construction** — not flat within 11%, flat identically. The owner's original sequence was a correct instinct expressed on a mismatched index |
 | D27 | **The roster ships whole** — 12 primary + 6 elemental + 21 status + demon family + species (owner, 2026-09-05: *"ship everything, we will make spec and plan to build one by one later"*) | D9 is **not descoped**. `family`'s 699 open tokens are a **build-order task, not an idea-phase blocker** — the curation gets tracked and sequenced when planning starts. §3.1's dropped `1/n` term is what makes this safe: *"the roster can grow forever without re-scaling anybody's existing build"*, so categories can land in any order without invalidating one another |
@@ -265,6 +273,9 @@ satisfy a tier requirement. This is a *second* concentration reward, on the cost
 
 ## 5. What this lands on that already exists
 
+> **§13 is the full three-bucket inventory** (Built / wiring gap / real gap) with `file:line`.
+> This section is the shorter *"nothing here needs a new vocabulary"* argument.
+
 Nothing here needs a new vocabulary; four systems already carry the load.
 
 | Need | Already shipped |
@@ -312,7 +323,11 @@ principles and the failure modes this repo has already paid for.
 
 ---
 
-## 7. Open — for the next rounds
+## 7. Open — for the next rounds *(SUPERSEDED — see §11.4)*
+
+> **Superseded 2026-09-05.** Every item below was answered or reclassified across the two
+> rounds. **§11.4 is the live list.** Kept for the reasoning trail, per this repo's habit of marking
+> superseded rather than deleting.
 
 **Closed since the first draft:** respec dependency (D18 — full reset dissolves it), status gate (D19),
 tier threshold shape (D20), exclusion mechanism (D14).
@@ -497,13 +512,212 @@ RECALL marking. This section is the index and the verdict; the detail is in the 
 | ⚠ | **D18 contradicts `decisions.md:103`** (souls are a fighting *faucet*), and respec is free today — `RespecPolicy` has zero callers | Re-price |
 | ✅ | ~~**D20's tier 1 is a 2× worse deal**~~ — **CLOSED by D26.** The cause was two ladders indexed differently: `req` on `t(t−1)/2`, power on `t(t+1)/2`. Sharing one index makes reward-per-point `b/5` at **every** tier, exactly rather than approximately | **Done (D26)** — 5 · 15 · 30 · 50 · 75 · 105 · 140 |
 
-### 11.3 Owner decisions this round created
+### 11.3 Owner decisions this round created — all closed 2026-09-05
 
-1. **Cross-unlock** — remove it, bound it, or fold it into the closed form and re-sweep. It is
-   currently the single largest unmeasured term, and it pushes against D4–D7.
-2. **The family roster** — curate 699 tokens to a closed set, or drop demon-family trees from D9.
-3. **Tier-1 entry tax** — deliberate, or corrected to constant reward-per-point.
-4. **Content volume** — 29 nodes/tree × D23 at 841 species is ~45,800 authored nodes. 4 unique nodes
-   per species is ~5,046 generation calls (~4.3 h); 29 is ~24,389, larger than the whole demon
-   classification run. This is a cost decision, not a technical one.
-5. **Breadth bound** — what stops the catalog fully unlocking, given PS-8 forbids a cap.
+| # | Question | Answer |
+|---|---|---|
+| 1 | Cross-unlock | **Measured, not argued.** It rewards concentration after all; credit one mate (D28) |
+| 2 | The family roster | Ship the roster whole; curation is a build-order task (D27) |
+| 3 | Tier-1 entry tax | Reconcile the indices instead — reward-per-point is now exactly flat (D26) |
+| 4 | Content volume | Full 29-node unique tree per species (D30) |
+| 5 | Breadth bound | Rising unlock cost per node owned (D25) |
+| 6 | Tree size | 10 tiers × 2 branches, ~40 nodes (D29) |
+| 7 | Status tree gate | `AllocationScope` slot 6, after items (D31) |
+| 8 | Target distribution | Near-uniform with a named theme allowance (D32) |
+
+**Total authored corpus: ~1,560 generic nodes + ~24,389 species nodes ≈ 25,900.** That is the number
+the generation pipeline and the review gate both have to survive, and it is now a decided figure
+rather than an open range.
+
+### 11.4 What is still genuinely open
+
+Only two, and neither blocks specification:
+
+1. **`w`** — the points/souls blend weight in `H` (§3.2). **Promoted 2026-09-05 from a minor measurement to a PRIMARY design parameter** ([16](../research/passive-tree/16-depth-exhaustion.md)). Past `Θ≈300` the point track is exhausted for every build, so `H_points` is identical for everyone and only `(1−w)·H_souls` can still tell builds apart. **At `w = 1` the design has no late game.** The default of 0.5 was chosen when this was thought to be a tuning nicety.
+
+2. **Node potency ceiling** — the figure the plan enforces so no node forces a build (R7). Falls out
+   of the budget math once tree size is fixed, which D29 just did.
+
+**Blocked on other programs, tracked not open:** D14 needs `spec-eligibility-tags.md`'s derived-tag
+registry before property-keyed exclusion can key on anything but posture. D16 needs a 17th atom kind
+(a reviewed `decisions.md` change) before conversion nodes can carry budget. D31 needs the item
+program's fifth `AllocationScope`.
+
+---
+
+## 12. Strengthening round, 2026-09-05
+
+Six parallel investigations against the locked decision set, plus one re-measurement. Findings in
+[../research/passive-tree/](../research/passive-tree/) docs 10–16, all `file:line` cited.
+
+| # | File | What it did |
+|---|---|---|
+| 10 | [decision-consistency-audit](../research/passive-tree/10-decision-consistency-audit.md) | 18 findings across D1–D32; refuted 6 of my 8 suspicions |
+| 11 | [adversarial-debate](../research/passive-tree/11-adversarial-debate.md) | Six theses attacked; **found the squad-scope defect (D33)** |
+| 12 | [rising-unlock-cost](../research/passive-tree/12-rising-unlock-cost.md) | Specified D25 → D36; measured a 2.3× reversal |
+| 13 | [review-pipeline](../research/passive-tree/13-review-pipeline.md) | Review scales with trees, not nodes; D30 is affordable |
+| 14 | [learnability-at-scale](../research/passive-tree/14-learnability-at-scale.md) | A species tree is not a choice, so it needs no chooser |
+| 15 | [dependency-map](../research/passive-tree/15-dependency-map.md) | Build order; **three pieces of required work are UNOWNED** |
+| 16 | [depth-exhaustion](../research/passive-tree/16-depth-exhaustion.md) | The concentration reward expires at `Θ ≈ 300` |
+
+### 12.1 The two findings that outrank the rest
+
+**Scope mismatch (D33).** Every number in this program is 1v1; the game is six-a-side. This is not a
+refinement — it is the possibility that `F`, `Fmax`, hybrid neutrality, D28 and *"magnitude cannot
+rescue focus"* all rest on the wrong unit of analysis. Measuring it is cheap and it gates the rest.
+
+**Depth exhaustion (§16).** Any finite authored depth saturates under PS-8's endless `Θ`. Ten tiers
+only decides *when* — measured at `Θ ≈ 300`. Past it the point track is identical for every build, so
+**all late-game differentiation must come from the soul track**, which promotes `w` from a tuning
+nicety to the parameter the whole late game hangs on.
+
+Both share one shape, and it is worth naming because it will recur:
+
+> **A measurement is only as good as the scope it was taken in.** One found a scope too narrow in
+> *space* (one actor, six deployed); the other a scope too narrow in *range* (`Θ=100`, endless
+> ladder). Neither was a wrong calculation.
+
+### 12.2 Corrected by this round
+
+- **My own framing was wrong** on doc 09: it did *not* run on D20's superseded ladder, and never
+  assumed 7 tiers. D26 supplies four of its eight rows and both tier functions are unbounded loops.
+  D29's cap is provably inert at `Θ=100` (`req(10)=275 ≤ 300 < 330`). What doc 09 lacked was
+  **high-`Θ` coverage** — corrected in place in §16.
+- **What actually unsupports doc 09 is D25**, not the ladder: every sweep sets `W = b·T(T+1)/2`,
+  assuming you own every node up to your tier, while D25 makes you own `O(√Θ)` of them. D28 reads
+  *measured, pending a D25 re-run* — not closed.
+- **D14 is a SOFT blocker, not hard.** `ep-8 eligibility-tags` is complete and `AffixTags.cs` ships
+  (124 lines, tested). Missing: a call site and a vocabulary — the corpus carries exactly **3**
+  semantic values.
+- **Battle does fire `OnDamageDealt`** (`BasicAttack.cs:176`) — it is `partial class BattleEngine` in
+  another folder, so doc 05's Battle-folder grep missed it. **On-hit mechanism nodes are measurable
+  today.**
+- **The unlock-everything threshold is 1,560, not `Θ≈1,450`** — the old figure was 50 trees × 29.
+- **840 species are indexed, not 841.** The 841st is a stale duplicate of `SnorkleZombie` in
+  `zombie/_needs-review.json`, hidden from the quality tool by its `_`-prefix skip
+  (`DemonQualityReport/Program.cs:77`) — the same defect class Phase A2 fixed 217 times, surviving
+  inside the blind spot of the tool that then reported "0 duplicates".
+
+### 12.3 Unowned work — nothing schedules these
+
+1. **The fifth `AllocationScope`.** Three programs each point at a different owner. **D35 removes this
+   dependency entirely**, which is the main reason it was worth taking.
+2. **Three `ssot-power-scale.md` §10 rows** (`req(t)`, `W(T)`, soul→`Ws`), against a program with zero
+   open tasks. D36 adds a fourth.
+3. **ep-11 / ep-12** (`affix-power-class`, `affix-channel-weights`) — specced 2026-09-03, in no task
+   list, and the only named call site for the `AffixTags` code that already shipped.
+
+### 12.4 Build order
+
+**Wave 0** — three §10 rows · `PowerLadderKMicro` (per-mille rounds a tier-1 node with **17%** error,
+larger than one tier step) · the import-boundary migration fix · **the squad-scope harness (D33)**.
+**Wave 1** — the four mechanism wirings, critical path first: **B4a, a fourth `IActorStatSubsystem`**,
+~90 lines by the shipped `AtomDerivedSubsystem` precedent, which unblocks Erosion, layer parity and
+conditional scaling at once.
+**Then** the twelve primary trees, then one wave per gate quantity as it lands.
+
+---
+
+## 13. What already exists — the three buckets
+
+The idea phase's most valuable output, and the one this document was missing until 2026-09-05. Sorted
+by the only distinction that matters when planning: **can it run today, is it inert, or does it not
+exist.**
+
+> **A wiring gap is not a wall.** An inert path — a default-off toggle, a null delegate, a debug-only
+> entry, a built API with no production caller — is unfinished wiring, not an architectural limit.
+> This repo has already paid for that confusion once: an aura design read the injector's Unity write
+> surface, found four inert paths, and concluded the feature could reach 5 of 12 aptitudes. The real
+> answer was 11 of 12, and every one of the four was wiring.
+
+### 13.1 Built — works end to end today
+
+| Capability | Evidence |
+|---|---|
+| The power ladder `P(Θ)` and its exact-integer read | `PowerLadder.ValueMilli`; `AtomCompiler.cs:463-464` already widens before multiplying, divides once, throws on overflow |
+| 12 aptitudes in 3 postures | `Aptitude.cs:36-51` — the count is *computed* (`PostureCount × PerPosture`), never typed |
+| 6 elements · 21 statuses | `ElementTable.cs:125-130` · `StatusCatalogBootstrap.cs:16-58` |
+| The share vector `H` reads | `AptitudeAllocation.Share`, summed over scopes at `:51-57` |
+| Balance is *measurable*, not arguable | `DominanceGuard.Measure` accepts an arbitrary build list — `tools/HybridViability` needed no guard change |
+| Per-scope point budgets, uncapped | `PointBudget.PointsFor` |
+| The soul track reads a **curve**, not a formula | `CurveTable.cs:4-9` — *"scaling is a curve reference, never a formula"*. This is what lets a player see level 9's value before buying level 1 |
+| The atom vocabulary | `AtomKindRegistry.cs:21,31,36` — **7** attach points, **16** kinds, **13** triggers |
+| The rising-cost precedent, already in player words | `ContractPolicy.NextSlotPrice:176-177`, rendered at `contractView.ts:50-54`. **D25 is not a new mechanic to the player** |
+| A `skill` container does not roll | `spec-container-schema.md:50-56` — the 2026-09-01 amendment made `species-passive` roll and **deliberately left `skill` on the core alone**. D24 is the shipped contract, not a new ask |
+| Shared-deterministic generated content, on disk | `data/generated/demons/` — 830 committed concrete files |
+| Reflect, with its production caller wired | `EffectRuntime.cs:491` |
+| Threshold triggers | `PredicateNode.cs:24` + `FactReader.cs:71`, with `OnDamageTaken` firing on the lawn |
+| Battle fires `OnDamageDealt` | `BasicAttack.cs:176` — it is `partial class BattleEngine` in another folder, which is why a Battle-folder grep misses it. **On-hit mechanism nodes are measurable today** |
+| A simulator on the real dispatcher | `tools/CombatSim/Simulator.cs:59` |
+| Eligibility tags | `AffixTags.cs` — 124 lines, tested; `ep-8` complete |
+| The player surface's reserved slot | `PassivesTab.tsx:12-20`, a locked placeholder |
+| A grant with no spender, waiting for this program | `grant.skillPointsPerTheta: 1`, parsed, zero consumers since 2026-08-26 |
+
+### 13.2 Wiring gap — the machinery exists and is inert
+
+Each row names the **specific inert line**. None of these is a wall.
+
+| Gap | The inert line | Size |
+|---|---|---|
+| **A status's derived-channel write never composes** — the critical path for mechanism nodes | `ActorHub.cs:145,148,155` registers exactly three subsystems; status mods are upserted to the *primary* bag at `EffectRuntime.cs:81`, which none of the three reads | ~90 lines, by the shipped `AtomDerivedSubsystem` precedent |
+| `stat.derived` cannot re-evaluate per hit | `AtomKindRegistry.cs:535` — `AtomTriggers.None` | M |
+| `stat.derived` is unscored in Sim, so the sweep cannot see the node class §3.5 prescribes | `AtomKindRegistry.cs:534` — `RuntimeState.None` | M |
+| Battle's derived recompose runs once, at construction | `BattleRunState.cs:313` | S |
+| `AffixTags` has no production call site | `EligibilityRule.cs:30-95`, callers = its own tests | S |
+| `Instantiator` / `TryInstantiate` built but unreached | awaiting `effect-pipeline` module 4 | — |
+| `PowerLadderKMilli` is **per-mille**, so a tier-1 node rounds with 17% error — larger than one tier step | `ValueSpec.cs:92` | 3 lines |
+| Three of four `AllocationScope`s unreached — every caller passes `Commander` | `AllocationStore` has 7 production callers, all at one scope | S |
+| `RespecPolicy.PriceOf` returns Hunger against D18's souls | zero callers | S |
+| Battle raises no `OnDamageTaken` / `OnSpawn` / `OnDeath` (it *does* raise `OnDamageDealt`) | `src/FusionRpg.Core/Battle/` | M |
+| Two of the four gate quantities do not exist | `element_mastery` and almanac XP have **zero `src/` hits** | M |
+
+### 13.3 Real gap — no mechanism exists anywhere
+
+| Gap | Why it is real, not wiring |
+|---|---|
+| **Element-payload conversion (D16)** | **No kind among the 16 writes an element payload**, and the failure is silent — `OverlayCombatCalculator.cs:128-172` loops the payload's own components, so an ice affix on a payload with no ice component contributes zero forever, with no error. Needs a 17th kind, a reviewed `decisions.md` change. **Allocate no budget to conversion nodes until it lands** |
+| **Layer denial / bypass** | Every shipped "break their X" is a saturating contest that provably never reaches zero — `PierceFactor` bounded (0,1], shield pen capped, parry/block shred clamped. Dials, no switches |
+| **Squad-scope balance measurement (D33)** | `DominanceGuard` is pairwise *by type signature*, not merely by coverage |
+| **The soul track in the balance model** | `tools/HybridViability` models tier power only. Above `Θ≈300` that is precisely the half that has stopped growing (§16) |
+| **A closed `family` roster** | `family` is an OPEN axis (`spec-anchor-contract.md:58`); 699 distinct tokens across 841 entries |
+| **An atom-tag vocabulary** | Tags are free-form JSON (`AtomRow.cs:40`); the corpus carries exactly 3 semantic values. Until this exists, D14's property-keyed exclusion can key on posture and nothing else |
+
+---
+
+## 14. Tunables — every number this introduces
+
+`tunables-ssot.md` is binding: **a number a balance pass would change lives in
+`data/tuning/<domain>.v{n}.json`, never as a `const`.** A structural constant stays in code *and says
+why it is not tunable*. The test is one question — *would a balance pass ever want to change this?*
+
+**Proposed home for this program's own numbers: `data/tuning/passive-tree.v1.json`.**
+
+| Number | Unit | Value / default | Home | Status |
+|---|---|---|---|---|
+| `concentration.fmax` | multiplier | 1.15–1.25 (D5) | `passive-tree.v1.json` | **Tunable.** Retained provisionally — every measurement of it predates D25 |
+| `concentration.w` | 0..1 weight | 0.5 | `passive-tree.v1.json` | **Tunable, and PRIMARY** — above `Θ≈300` it is the only thing separating builds (§16) |
+| `unlockCost.first` | skill points | 5 | `passive-tree.v1.json` | **Tunable.** Derived as `step·(k+1)/2`, not guessed (D36) |
+| `unlockCost.step` | skill points | 2 | `passive-tree.v1.json` | **Tunable** (D36) |
+| `grant.skillPointsPerThetaMilliByScope` | points per Θ, per scope | 11 at Commander | `aptitudes.v{n}.json` | **Tunable.** A single scalar today; **per-scope is required, not optional** — at one scalar, 50 demons unlock the whole catalog (D34) |
+| `tierLadder.k` | scalar in `req(t) = k·t(t+1)/2` | 5 | `passive-tree.v1.json` | **Tunable.** Its pairing with linear per-tier power is what makes reward-per-point exactly `b/5` (D26) |
+| `nodePotencyCeiling` | ‰ of a tree's budget | **unmeasured** | `passive-tree.v1.json` | **Tunable.** Falls out of the budget math now that D29 fixed tree size |
+| `soulThetaWeight` (`Ws`) | Θ per soul level | **unmeasured** | `passive-tree.v1.json` | **Tunable.** Needs its own `ssot-power-scale.md` §10.2 row, by row 18's precedent |
+| target distribution | shares per aptitude / element | near-uniform + named theme allowance (D32) | `passive-tree-targets.v1.json` | **Tunable.** Shaped like `demon-roster-targets.v1.json` |
+| `pointEconomy.respecPrice` | souls | exists today | `aptitudes.v{n}.json` | **Tunable.** D18 re-prices it; the `decisions.md:103` contradiction is unresolved |
+| `b` — aptitude-point-equivalents per tier | scalar | — | — | **NOT a balance dial.** §3.5 swept it and no value works; it is a content-density choice |
+| tiers = 10 · branches = 2 | count | D29 | code | **Structural** — the tree's own shape, like `SacrificesForStar`'s range. The per-tier node counts (`w[t]`, the shape archetype) *are* generated data |
+
+⚠️ **`guard-power.ps1` cannot catch a missing §10 row for `unlockCost`.** Its G2/G3 checks key on a
+parameter named `level` / `lvl` / `index`; `nodesOwned` lands in the same blind spot `DropVolume`'s
+`thetaActor` already sits in. The row has to be added deliberately — the guard stays green without it.
+
+## 15. What this deliberately does not decide
+
+- **The species-tree generation pipeline's internals** (D23/D30) — it gets its own spec round.
+- **Whether `F` survives.** Kept provisionally, pending a D25-inclusive, squad-scope sweep (D33).
+- **How the injector renders any of this.** Standalone-first: the surface is web, and the injector may
+  enrich it, never gate it.
+- **The `family` taxonomy.** D27 ships the roster whole; curating 699 tokens is a tracked build-order
+  task, sequenced when planning starts.
+- **Any node's text, name or flavour.** That is the language stage's job, inside the plan's budget,
+  potency ceiling and property vocabulary (§6).

@@ -32,6 +32,14 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- species-build T2.1: `demon-type-allocation`'s runtime plan reader (SpeciesBuildPlanCatalog)
+         needs the committed, generated plan next to the exe — the same copy pattern as data/tuning/
+         above, but for one specific generated file rather than a whole authored tree. -->
+    <Content Include="..\..\data\generated\demons\_species-build-plan.json">
+      <Link>data\generated\demons\_species-build-plan.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <!-- aura-skill-todo.md Phase 5: DebugEndpoints.FindLatestLiveBoardStart carries the stale-board

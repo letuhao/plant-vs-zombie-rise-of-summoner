@@ -1,8 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
+using FusionRpg.Core.Demons;
+using FusionRpg.Core.Demons.Generation;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Data;
+using FusionRpg.Data.Sqlite;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -127,6 +130,65 @@ public class AptitudeEndpointsTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.BadRequest, postResp.StatusCode);
     }
 
+    // ---- species-build T3.1 (allocation-transport): the additive `species` field --------------
+
+    [Fact]
+    public async Task Get_forAPlayerWithNoSpecies_hasAnEmptySpeciesMap_commanderHalfUnaffected()
+    {
+        var resp = await _http.GetAsync($"/api/aptitudes/{_playerId}");
+        var raw = await resp.Content.ReadAsStringAsync();
+        using var doc = System.Text.Json.JsonDocument.Parse(raw);
+
+        // The commander half's own keys are exactly what shipped before this task -- `species` is
+        // additive, not a replacement shape (spec's own ⛔ callout).
+        Assert.True(doc.RootElement.TryGetProperty("theta", out _));
+        Assert.True(doc.RootElement.TryGetProperty("budget", out _));
+        Assert.True(doc.RootElement.TryGetProperty("spent", out _));
+        Assert.True(doc.RootElement.TryGetProperty("withinBudget", out _));
+        Assert.True(doc.RootElement.TryGetProperty("shares", out var shares));
+        Assert.Equal(12, shares.EnumerateObject().Count());
+
+        Assert.True(doc.RootElement.TryGetProperty("species", out var species));
+        Assert.Empty(species.EnumerateObject());
+    }
+
+    [Fact]
+    public async Task Get_sendsOnlyTheSpeciesThePlayerHasActuallyLevelled()
+    {
+        const int fumeshroomDemonTypeId = 60007;
+        DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        SpeciesBuildPlanCatalog.Configure(new Dictionary<string, IReadOnlyDictionary<string, long>>(StringComparer.Ordinal)
+        {
+            ["fumeshroom"] = new Dictionary<string, long>(StringComparer.Ordinal) { ["Might"] = 700, ["Vigor"] = 300 }
+        });
+        FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
+            FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
+
+        using (var db = SqliteConnectionFactory.Open(_store.HotPath))
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = """
+                INSERT INTO rpg_actor_progression(
+                  player_id, kind, type_id, level, xp, highest_level, demotion_count, revision, updated_utc, scope_key)
+                VALUES ($p, 'species', $tid, 21, 0, 21, 0, 0, $now, 'fumeshroom');
+                """;
+            cmd.Parameters.AddWithValue("$p", _playerId);
+            cmd.Parameters.AddWithValue("$tid", fumeshroomDemonTypeId);
+            cmd.Parameters.AddWithValue("$now", DateTime.UtcNow.ToString("o"));
+            cmd.ExecuteNonQuery();
+        }
+
+        var body = await (await _http.GetAsync($"/api/aptitudes/{_playerId}"))
+            .Content.ReadFromJsonAsync<AptitudesStateDto>();
+
+        Assert.NotNull(body);
+        var fumeshroom = Assert.Single(body!.Species);
+        Assert.Equal("fumeshroom", fumeshroom.Key);
+        Assert.True(fumeshroom.Value["Might"] > fumeshroom.Value["Vigor"]);
+        Assert.True(fumeshroom.Value["Might"] > 0); // NOT the silent-zero this program keeps naming
+    }
+
     sealed class AptitudesStateDto
     {
         public long Theta { get; set; }
@@ -134,6 +196,7 @@ public class AptitudeEndpointsTests : IAsyncLifetime
         public long Spent { get; set; }
         public bool WithinBudget { get; set; }
         public Dictionary<string, long> Shares { get; set; } = new();
+        public Dictionary<string, Dictionary<string, long>> Species { get; set; } = new();
     }
 
     static string RepoTuningDir() => Path.Combine(FindRepoRoot(), "data", "tuning");

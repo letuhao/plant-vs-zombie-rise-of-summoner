@@ -1,22 +1,35 @@
 # Implementation Plan: `battle-tempo`
 
-Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-map.md) · six module specs
+Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-map.md) · seven module specs
 under [docs/architecture/battle-tempo/](../docs/architecture/battle-tempo/).
 Task list: [battle-tempo-todo.md](battle-tempo-todo.md).
 
-**Status, 2026-09-05: 21 of 23 tasks complete, 1 partial, 2 genuinely blocked.** Built:
-`poise-unification` (all 4), `action-timing` (all 4), `tempo-content` (both), `MEAS`,
-`commitment-binding` (both), `reaction-lane` (RL1/RL4 complete, RL2 partial), `forecast-rail` (all 4).
-Every completed task is probed against real compiled code with an executed falsifier (`Core.Tests`
-itself stays blocked by pre-existing, unrelated WIP in other streams — see PU1's own evidence).
+**Status, 2026-09-05: 25 of 26 tasks complete, 2 genuinely blocked on a narrower gap, 1 owner-only.**
+Built: `poise-unification` (all 4), `action-timing` (all 4), `tempo-content` (both), `MEAS`,
+`commitment-binding` (both), `reaction-lane` (RL1/RL4 complete), `forecast-rail` (all 4), and a 7th
+module, `timeline-dispatch` (D14's fix, all three tasks): **`TD1`** specs it
+([spec-timeline-dispatch.md](../docs/architecture/battle-tempo/spec-timeline-dispatch.md)), **`TD2`**
+lands its additive pieces, and **`TD3`** builds and measures the dispatch branch itself — `W` and
+`Commitment` both proven non-zero for the first time in this program's history, through the real
+`BattleEngine.Resolve`, on synthetic profiles only (every shipped profile stays byte-identical). Every
+completed task is probed against real compiled code with an executed falsifier (`Core.Tests` itself
+stays blocked by pre-existing, unrelated WIP in other streams — see PU1's own evidence).
 
-**⛔⛔ D14 is the reason anything remains open.** Measured, not assumed: `BattleEngine.Resolve`'s live
-combat path reads none of `WindupTicks`/`RecoveryTicks`/`TimeCostTicks` — the kernel that would
-(`ActionRunner`) has zero production callers. This blocks `RL2`'s remaining live-wiring half, all of
-`RL3` (its own acceptance criterion IS a live win-rate measurement), and Checkpoint B/`LAND1`/`LAND2`.
-`LAND2` is additionally **owner-only by the plan's own original design** — not a gate discovered
-after the fact. See the map's own D14 entry and `MEAS`'s evidence block in the todo for the full
-reasoning and the precise root cause.
+**D14 is resolved — built and measured, not just specced.** `spec-timeline-dispatch.md` gives the
+built design: a local, per-round discrete-event dispatch (`RunTimelineActionPhase`) behind an opt-in
+profile flag defaulting `false` for every shipped profile, so it moves no golden by construction.
+Measured: `W` +14.17 percentage points win rate (W=1 vs W=4), `Commitment` −0.671 average rounds-to-win
+(EarlyBound vs LateBound), both falsified against a flag-off control. A real, previously-undiscovered
+defect surfaced and was fixed along the way (`BasicAttackEnvelope.Commitment` was hardcoded, making
+`DefaultCommitment` unreachable regardless of dispatch completeness — confirmed inert for the atomic
+path before fixing). This closes `battle-tempo-todo.md` Checkpoint B and unblocks `LAND1`/`LAND2`'s
+dependency — but does not itself land anything: `LAND1` (flip the flag for `hybrid-atb`, re-run the
+full staged sweep, re-bless goldens, bump `RulesetVersion`) and `LAND2` (the win-rate sweep sign-off,
+**owner-only by the plan's own original design**, not a gate discovered after the fact) remain
+separate, unstarted, and correctly gated. `RL2`/`RL3` remain blocked too, on a now-narrower and
+separate gap: a defender's own counter-intent interrupting an attacker's wind-up is a not-yet-designed
+integration `timeline-dispatch` does not provide. See the map's own D14 entry and the todo's `TD1`–
+`TD3` evidence for the full reasoning.
 
 ---
 

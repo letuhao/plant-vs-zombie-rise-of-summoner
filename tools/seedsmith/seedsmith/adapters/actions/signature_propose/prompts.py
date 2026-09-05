@@ -293,11 +293,15 @@ def _rung_band_label(rung_band: Any) -> str:
 
 
 def build_context(brief: Mapping[str, Any], *, sample_index: int,
-                  pairing_table: "Mapping[str, Sequence[str]] | None" = None) -> "dict[str, Any]":
+                  pairing_table: "Mapping[str, Sequence[str]] | None" = None,
+                  family_glossary: "Mapping[str, str] | None" = None) -> "dict[str, Any]":
     """Read-only inputs `build_brief` renders from and the validators check against -- exactly as
     `family_propose/prompts.py:254-315` does, so a validator always reads the SAME object the
     brief was rendered from. Raises per `_require_species_anchor`/`_require_family_actions`/
     `_require_slot` (acceptance #5) before reading anything else off `brief`.
+
+    `family_glossary` (SMOKE BATCH criterion-2 fix, 2026-09-05): optional `id -> one-line gloss`
+    mapping, identical contract to `general_propose/prompts.py`'s own parameter of the same name.
 
     `sample_index` is IN this call, never bolted on after (`adapters/demons/anchor/permute.py`'s
     own module docstring) -- and it seeds THREE independent permutations here, one per enum field
@@ -357,6 +361,7 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
         "rungBandLabel": _rung_band_label(slot.get("rungBand")),
         "allowedAtomFamilies": permuted_allowed,
         "forbiddenAtomFamilies": forbidden,
+        "atomFamilyGlossary": dict(family_glossary) if family_glossary else {},
         "speciesAntiMotifs": species_anti_motifs,
         "motifsExpressedEnum": motifs_enum,
         "differentiatorEnum": differentiator_enum,
@@ -431,9 +436,26 @@ def build_brief(context: Mapping[str, Any]) -> str:
         f"Kind: {context['kind'] or 'unspecified'}",
         f"Power tier: {context['rungBandLabel']}",
         "",
-        "Eligible atom families -- choose one or more from this list, in this order: "
-        + ", ".join(context["allowedAtomFamilies"]),
     ]
+    glossary = context.get("atomFamilyGlossary") or {}
+    if glossary:
+        # SMOKE BATCH criterion-2 fix, 2026-09-05 -- identical technique to
+        # `general_propose/prompts.py`'s own `_render_eligible_family_lines`, kept local per this
+        # pipeline family's own self-containment discipline.
+        lines.append(
+            "Eligible atom families -- choose one or more from this list, in this order. Each is "
+            "shown as `id: name [tag] -- what it does`, given only so you can judge which ids "
+            "actually fit this creature; you must still answer with the id alone, never the name "
+            "or the description text:"
+        )
+        for family_id in context["allowedAtomFamilies"]:
+            gloss = glossary.get(family_id)
+            lines.append(f"  - {family_id}: {gloss}" if gloss else f"  - {family_id}")
+    else:
+        lines.append(
+            "Eligible atom families -- choose one or more from this list, in this order: "
+            + ", ".join(context["allowedAtomFamilies"])
+        )
     if context["forbiddenAtomFamilies"]:
         lines.append(
             "Forbidden atom families -- never pick any of these, they would make a knowingly "

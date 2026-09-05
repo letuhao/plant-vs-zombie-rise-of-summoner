@@ -24,7 +24,15 @@ public static partial class BattleEngine
     public static readonly ActionEnvelope BasicAttackEnvelope = ActionEnvelope.NoOp with
     {
         ActionId = "act.attack",
-        Commitment = Commitment.LateBound,
+        // `battle-tempo` `timeline-dispatch` (D14, found 2026-09-05): Commitment is left UNSET
+        // (null = "inherit the active profile's DefaultCommitment", D6) rather than hardcoded to
+        // `Commitment.LateBound` as an earlier draft had it. `ActionRunner.TryCommit`'s own precedence
+        // (`envelope.Commitment ?? _defaultCommitment`) means a hardcoded value here would make EVERY
+        // profile's own `DefaultCommitment` permanently unreachable for the basic attack -- the ONLY
+        // action any live battle dispatches today -- regardless of how complete a future dispatch
+        // branch is. Confirmed inert for the atomic path: `RunBasicAttackStep`/`DeclareBasicAttack`
+        // never read `envelope.Commitment` at all (grep-confirmed) -- only `ActionRunner` does, and it
+        // has no production caller yet, so this changes nothing observable until one exists.
         // S2/S3 (species-skills): the basic attack opts BOTH readers in, so the two channels are live
         // in every battle rather than sitting behind content that does not exist yet. Byte-identical
         // today because both channels register with a default of 0, which is neutral for each: 0%
@@ -69,14 +77,37 @@ public static partial class BattleEngine
     /// <see cref="BloodthirstyViewFor"/> to steer it exactly where the old bloodthirsty branch did,
     /// without teaching it the trait. Everything from the berserker ramp onward is `EngineBehavior`
     /// trait logic and stays in the loop.
+    ///
+    /// <para>`battle-tempo` `timeline-dispatch` (D14, spec-timeline-dispatch.md §2.2): split into
+    /// <see cref="DeclareBasicAttack"/> (who, with what envelope) and <see cref="ApplyBasicAttack"/>
+    /// (the hit itself) so a future timeline-dispatch path can commit at one tick and apply at a
+    /// later one. This method is now a two-line wrapper calling both in sequence — same statements,
+    /// same order, same early-return conditions as before the split. The atomic dispatch call site
+    /// (`BattleEngine.cs`'s round loop) is unchanged by this split.</para>
     /// </summary>
     static AttackStep RunBasicAttackStep(
         ActorState attacker, BattleRunState state, DateTimeOffset now, long nowTick,
         OverlayCombatCalculator calculator, ICombatRng critRng, BattleTrace? trace, int round,
         IIntentSource? intentSource = null)
     {
-        if (!attacker.Active) return new AttackStep(AttackStepOutcome.Continue, null, 0);
-        if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return new AttackStep(AttackStepOutcome.Continue, null, 0);
+        var (outcome, target, envelope) = DeclareBasicAttack(attacker, state, now, nowTick, trace, round, intentSource);
+        return outcome == AttackStepOutcome.Proceed
+            ? ApplyBasicAttack(attacker, target!, envelope, state, now, nowTick, calculator, critRng)
+            : new AttackStep(outcome, target, 0);
+    }
+
+    /// <summary>
+    /// `timeline-dispatch` (D14) front half: active check → CC-lock → declare → bodyguard redirect →
+    /// `OnActivate` → trace. Everything `RunBasicAttackStep` did before calling `calculator.Compute`,
+    /// verbatim — the only change from the pre-split code is returning the resolved target and
+    /// envelope instead of falling through to the hit computation inline.
+    /// </summary>
+    static (AttackStepOutcome Outcome, ActorState? Target, ActionEnvelope Envelope) DeclareBasicAttack(
+        ActorState attacker, BattleRunState state, DateTimeOffset now, long nowTick,
+        BattleTrace? trace, int round, IIntentSource? intentSource = null)
+    {
+        if (!attacker.Active) return (AttackStepOutcome.Continue, null, ActionEnvelope.NoOp);
+        if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return (AttackStepOutcome.Continue, null, ActionEnvelope.NoOp);
 
         var view = BloodthirstyViewFor(state, attacker);
         // T6/B20: an injected source is how an interactive battle occupies the `Ready` dwell, and how a
@@ -85,7 +116,7 @@ public static partial class BattleEngine
         var source = intentSource
             ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
         var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
-        if (intent.IsNone) return new AttackStep(AttackStepOutcome.Break, null, 0); // hazard 3: round breaks
+        if (intent.IsNone) return (AttackStepOutcome.Break, null, ActionEnvelope.NoOp); // hazard 3: round breaks
 
         var target = state.ByKey[intent.TargetKey!];
         var bodyguard = FindAdjacentWithTrait(state.Actors, target, "loyal");
@@ -108,6 +139,20 @@ public static partial class BattleEngine
 
         trace?.Target(round, attacker.Setup.Key, target.Setup.Key);
 
+        return (AttackStepOutcome.Proceed, target, intent.Envelope);
+    }
+
+    /// <summary>
+    /// `timeline-dispatch` (D14) back half: `calculator.Compute` → `OnDamageDealt` → cooldown arm.
+    /// Everything `RunBasicAttackStep` did after resolving the target, verbatim, against a target
+    /// that is now a parameter (already resolved — by <see cref="DeclareBasicAttack"/> on the atomic
+    /// path, or by <c>ActionRunner.CurrentTarget</c> after commitment-binding re-selection on the
+    /// timeline-dispatch path).
+    /// </summary>
+    static AttackStep ApplyBasicAttack(
+        ActorState attacker, ActorState target, ActionEnvelope envelope, BattleRunState state,
+        DateTimeOffset now, long nowTick, OverlayCombatCalculator calculator, ICombatRng critRng)
+    {
         var (signedDelta, breakdown) = calculator.Compute(new OverlayCombatRequest
         {
             // A18e (spec-battle-live-stat-modifiers.md §2): the one production read-site this module
@@ -122,7 +167,7 @@ public static partial class BattleEngine
             // would put combat math outside the SSOT and trip the parity tests by design). 0 is
             // neutral and yields exactly 1.0, so an envelope that names no channel is byte-identical.
             EffectivenessMultiplier =
-                OverlayCombatRequest.MultiplierFromPerMille(SkillEffectivenessPm(attacker, intent.Envelope)),
+                OverlayCombatRequest.MultiplierFromPerMille(SkillEffectivenessPm(attacker, envelope)),
             Profile = CombatProfile.BattleSim
         }, critRng);
 
@@ -150,8 +195,8 @@ public static partial class BattleEngine
         // arming site, because CooldownLedger stores an absolute tick. An envelope with no
         // CooldownChannel reads nothing and arms at base ticks; that is the neutral path and it stays
         // allocation-free. Inert for Class.None, as before.
-        state.Cooldowns.Start(attacker.Setup.Key, intent.Envelope, nowTick,
-            SkillCooldownReductionPm(attacker, intent.Envelope));
+        state.Cooldowns.Start(attacker.Setup.Key, envelope, nowTick,
+            SkillCooldownReductionPm(attacker, envelope));
         return new AttackStep(AttackStepOutcome.Proceed, target, signedDelta);
     }
 

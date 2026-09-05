@@ -106,6 +106,30 @@ EXEMPT_NAMES = {
     # buffers by name; STRUCTURAL_WORD just does not happen to carry "token". Changing it does not
     # change how the game feels, it changes how many renderers the pool allocates.
     "MaxStatusTokens",
+    # 2026-09-05: the star system's own RANGE and the anchor its reward curve is normalised around.
+    # Both match BALANCE_WORD only through "star". fusion.v1.json's own _meta already records the
+    # bound as structural ("SacrificesForStar's 1..5 bound and StarCap's rarity->cap shape stay
+    # structural (the star system's own range), only the numbers a balance pass would tune moved"),
+    # and the per-rarity cap that IS tunable lives in that file. ReferenceStar is the same kind of
+    # thing as the already-exempt ReferenceLevel: move it and you redefine the curve rather than
+    # retune it -- the knob a balance pass actually turns is perStarPowerMilli, which is config.
+    "MaxStar", "ReferenceStar",
+    # 2026-09-05, item module 17 (uniques). Two structural constants that match BALANCE_WORD only
+    # through a substring, both already carrying the justification T2 requires:
+    #
+    # `UniqueBudget.AeScale = 100` matches "scale". It is not a scale a balance pass turns -- it is
+    # the INTEGER ENCODING of the affix-equivalent unit. `item_unique.budget_ae` stores AE x 100
+    # because SC4 forbids floats in content, so changing this changes what the column MEANS, not how
+    # strong a unique is. The number a balance pass actually turns is budgetPremiumAeHundredths, which
+    # is in data/tuning/uniques.v1.json. Same kind of thing as the already-exempt ReferenceLevel.
+    #
+    # `UniqueLimits.FixedCoreChannelWeightMilli = 0` matches "weight". It is the one value in this
+    # program that is zero BY CONSTRUCTION rather than by tuning: effect-pipeline L0 turns a power
+    # class into a POOL RATE, and a unique's identity atoms are fixed-core rows that are never drawn,
+    # so there is no draw for a weight to modify. Making it configurable would invite someone to set
+    # it non-zero, which would weight a draw that does not exist. Its own doc comment says exactly
+    # this, and ssot-uniques.md requires the comment to exist.
+    "AeScale", "FixedCoreChannelWeightMilli",
 }
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}

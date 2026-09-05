@@ -46,7 +46,11 @@ public static class CheatState
     /// touches ActorHub.</summary>
     public static ActorHub ActorHub => _actorHub ??= ActorHubBootstrap.CreateDefault(
         Stats, powerIndex: PowerIndex, aptitudeTuning: FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Tuning,
-        aptitudeAllocation: CommanderAllocation.Resolve,
+        // species-build `allocation-transport` (module 6): was CommanderAllocation.Resolve directly;
+        // now routed through SpeciesAllocation, which merges the SAME cached commander allocation with
+        // whichever species this ctx's (Side, TypeId) resolves to — one merged AptitudeAllocation, one
+        // resolve, never two scopes resolved separately and concatenated.
+        aptitudeAllocation: SpeciesAllocation.Resolve,
         // The lawn's `stat.derived` consumer (decisions.md "Derived-write lawn executor", 2026-08-30).
         // Registering it here is what lets the AtomKindRegistry Lawn cell be `Full` without recreating
         // D6's "binds accepted, nothing applied" state.
@@ -94,6 +98,76 @@ public static class CheatState
     /// design was wrong: it could not cover a Core-only caller that never goes through
     /// `CheatState`).</para></summary>
     internal static void RefreshCommanderAllocationCache() => CommanderAllocation.Refresh();
+
+    // ---- species-build `allocation-transport` (module 6) --------------------------------------
+
+    /// <summary>The injector-side cache `spec-allocation-transport.md`'s own "Injector side" section
+    /// describes: keyed by speciesId, holding each species' EFFECTIVE allocation exactly as the server
+    /// computed it (baseline composed with any override — this cache never needs the plan, the level,
+    /// or the budget rule, matching the spec's own "it receives points" framing). Replaced wholesale on
+    /// each refresh, at exactly the existing commander-cache cadence (StartAsync, reconnect,
+    /// AptitudesUpdated, match edges) — never a per-entity fetch, never a poll of its own.</summary>
+    static IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> _speciesAllocations =
+        new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+
+    /// <summary>`(Side, GameTypeId) → speciesId`, lazily built from <c>DemonSpeciesCatalog.All</c> and
+    /// cached for the process lifetime (`catalog-runtime`'s own "loaded once, immutable" rule — the
+    /// SAME precedent <c>LawnElementResolverHost</c> already established for the element-resolve case).
+    /// <see cref="FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured"/> is checked FIRST, non-
+    /// throwing, so an un-configured catalog is a distinguishable <see cref="FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured"/>
+    /// answer rather than an exception or a silent empty-index miss (the exact bootstrap-window hazard
+    /// spec-allocation-transport.md calls out by name).</summary>
+    static readonly object SpeciesIndexGate = new();
+    static FusionRpg.Core.Demons.LawnElementIndex? _speciesIndex;
+
+    static FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult ResolveSpeciesLookup(StatSide side, int typeId)
+    {
+        if (!FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured)
+            return FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NotConfigured;
+
+        FusionRpg.Core.Demons.LawnElementIndex index;
+        lock (SpeciesIndexGate)
+            index = _speciesIndex ??= new FusionRpg.Core.Demons.LawnElementIndex(FusionRpg.Core.Demons.DemonSpeciesCatalog.All);
+
+        var sideText = side == StatSide.Zombie ? "zombie" : "plant";
+        return index.TryGet(sideText, typeId, out var species)
+            ? FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.Hit(species.SpeciesId)
+            : FusionRpg.Core.Stats.Aptitudes.SpeciesLookupResult.NoSpecies;
+    }
+
+    /// <summary><see cref="FusionRpg.Core.Stats.Aptitudes.CommanderAllocationSource.Resolve"/> ignores
+    /// its parameter entirely (it is scoped to the local injector's one active commander, not per-ctx)
+    /// — this shared instance avoids allocating a throwaway <see cref="StatContext"/> on every read.
+    /// Declared BEFORE <see cref="SpeciesAllocation"/> below purely to satisfy the nullable analyzer's
+    /// linear, declaration-order view of static field initializers (a real build surfaced the warning:
+    /// runtime behavior was always correct either way, since a lambda captures a field by reference
+    /// and every static field finishes initializing before ANY of them is first used — see the
+    /// reordering's own point, it's a warning fix, not a behavior fix).</summary>
+    static readonly StatContext DummyStatContextForCommanderRead = new();
+
+    /// <summary>Commander merged with whichever species this ctx resolves to — the ONE place
+    /// `ActorHub`'s `aptitudeAllocation` delegate reads. A `LawnElementIndex` not yet configured is
+    /// reported once per call (via <c>RpgHost.Log.Warning</c>, matching <c>LawnElementResolverHost</c>'s
+    /// own reporting convention) rather than silently resolving commander-only forever.</summary>
+    public static readonly FusionRpg.Core.Stats.Aptitudes.SpeciesAllocationSource SpeciesAllocation = new(
+        resolveSpeciesId: ResolveSpeciesLookup,
+        resolveSpeciesAllocation: speciesId => _speciesAllocations.TryGetValue(speciesId, out var a)
+            ? a : FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty,
+        resolveCommanderAllocation: _ => CommanderAllocation.Resolve(DummyStatContextForCommanderRead),
+        reportUnconfigured: msg => RpgHost.Log.Warning(msg));
+
+    /// <summary>Called from the transport (`RpgClient.RefreshCommanderAllocationAsync`, extended to
+    /// parse the SAME response's new `species` map alongside `shares` — one fetch, both caches, never
+    /// a second HTTP round trip) after a successful fetch. Replaces the whole cache — never an
+    /// incremental merge, so a species the player no longer has levelled (impossible today, since a
+    /// species row is never deleted, but matching the commander cache's own "wholesale replace"
+    /// contract) cannot leave a stale entry behind.</summary>
+    public static void ApplySpeciesAllocations(
+        IReadOnlyDictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation> bySpeciesId)
+    {
+        _speciesAllocations = bySpeciesId ?? throw new ArgumentNullException(nameof(bySpeciesId));
+        Stats.Invalidate();
+    }
     static FusionRpg.Core.Power.IPowerIndexProvider? _powerIndex;
     /// <summary>Θ ladder index. Lazy: PowerTuningHub.Configure runs in RpgHost.Initialize, which this
     /// must not race — <c>PowerTuningHub.Tuning</c> throws (not a stale default) before Configure runs,

@@ -67,17 +67,25 @@ public class ContactAndClearTests
     [Fact]
     public void Entering_a_hostile_held_sector_halts_the_march()
     {
-        // Same order, but now a wild warband stands in ember-hollow.
+        // Same order, but now a wild warband stands in ember-hollow — strong enough (entrenched, per
+        // `A_routed_force_loses_the_next_turns_orders_and_then_recovers`'s own fixture) to also rout
+        // Dave in the Sector-kind contact fight this same arrival triggers. Zone-of-control still
+        // halted the march exactly at ember-hollow rather than letting it continue onto
+        // `l-ember-ash` — the "zoc" report line is written from the halt itself, before any battle
+        // resolves — but the fall-back that rout then applies is a later, separate effect
+        // (world-map, 2026-09-05) and is what the final position below now reflects.
         var world = Place(World(), "e-wild-pack-1", "ember-hollow", movement: 0);
 
         var result = TurnEngine.Step(world,
             new[] { Move("dave", "e-dave-legion-1", "l-home-ember", "l-ember-ash") }, seed: 1);
 
+        Assert.Contains(result.Report.Entries, e => e.Detail.Contains("zoc") && e.Detail.Contains("ember-hollow"));
+
         var legion = Find(result.World, "e-dave-legion-1");
         Assert.NotNull(legion);
-        Assert.Equal("ember-hollow", legion!.AtSectorId);
+        Assert.True(legion!.Routed);
+        Assert.Equal("homeworld", legion.AtSectorId);
         Assert.Null(legion.OnLaneId);
-        Assert.Contains(result.Report.Entries, e => e.Detail.Contains("zoc"));
     }
 
     [Fact]
@@ -162,7 +170,8 @@ public class ContactAndClearTests
     [Fact]
     public void A_routed_force_loses_the_next_turns_orders_and_then_recovers()
     {
-        // The wild pack (2 x 140 HP at level 2) outweighs the starting legion, which routs.
+        // The wild pack (2 x 140 HP at level 2), entrenched, outweighs the starting legion, which
+        // routs and falls back to homeworld — the lane it marched in on (world-map, 2026-09-05).
         var world = Place(World(), "e-wild-pack-1", "ember-hollow", movement: 0);
         var first = TurnEngine.Step(world,
             new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1);
@@ -170,6 +179,7 @@ public class ContactAndClearTests
         var beaten = Find(first.World, "e-dave-legion-1");
         Assert.NotNull(beaten);
         Assert.True(beaten!.Routed, "the losing side should be routed, not merely wounded");
+        Assert.Equal("homeworld", beaten.AtSectorId);
 
         // The victor moves on, so the next turn is about the rout and nothing else.
         var after = Place(first.World, "e-wild-pack-1", "ash-waste", movement: 0);
@@ -177,27 +187,36 @@ public class ContactAndClearTests
         var second = TurnEngine.Step(after,
             new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1);
         Assert.Contains(second.Report.Dropped, e => e.Detail == "entity.routed");
-        Assert.Equal("ember-hollow", Find(second.World, "e-dave-legion-1")!.AtSectorId);
+        Assert.Equal("homeworld", Find(second.World, "e-dave-legion-1")!.AtSectorId);
         Assert.False(Find(second.World, "e-dave-legion-1")!.Routed, "rout costs exactly one turn");
 
-        // ...and the turn after that, it marches again.
+        // ...and the turn after that, it marches again — unopposed this time (the wild pack left for
+        // ash-waste above), so it actually arrives.
         var third = TurnEngine.Step(second.World,
             new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1);
-        Assert.Equal("homeworld", Find(third.World, "e-dave-legion-1")!.AtSectorId);
+        Assert.Equal("ember-hollow", Find(third.World, "e-dave-legion-1")!.AtSectorId);
     }
 
     /// <summary>
-    /// Wave 1 has no fallback: a routed force keeps the ground it lost on and cannot order itself
-    /// away, so the winner finishes it next turn. That is a consequence of the rout rule, not an
-    /// accident, and it is pinned here so changing it is a decision rather than a surprise.
+    /// A routed force with nowhere to fall back to — it never moved this turn, so it has no lane to
+    /// retreat down — keeps the ground it lost on and cannot order itself away, and the winner
+    /// finishes it next turn. That is a consequence of the rout rule for a genuine standing defender,
+    /// not an accident, and it is pinned here so changing it is a decision rather than a surprise.
+    /// A legion that marched in and lost instead falls back (see the fixtures above) — this test used
+    /// to reuse that same shape, which the fix now makes escape rather than getting finished off, so
+    /// it moved to the one shape that genuinely never had anywhere to go (world-map, 2026-09-05).
     /// </summary>
     [Fact]
     public void A_routed_force_the_winner_stands_over_is_finished_off()
     {
-        var world = Place(World(), "e-wild-pack-1", "ember-hollow", movement: 0);
-        var first = TurnEngine.Step(world,
-            new[] { Move("dave", "e-dave-legion-1", "l-home-ember") }, seed: 1);
-        Assert.True(Find(first.World, "e-dave-legion-1")!.Routed);
+        // Both forces already stand in ash-waste before the turn starts and neither files an order —
+        // no lane was ever touched, so `BattleApplication.FallBack` finds nothing to reverse.
+        var world = Place(World(), "e-dave-legion-1", "ash-waste");
+        var first = TurnEngine.Step(world, Array.Empty<WorldCommand>(), seed: 1);
+        var routed = Find(first.World, "e-dave-legion-1");
+        Assert.NotNull(routed);
+        Assert.True(routed!.Routed);
+        Assert.Equal("ash-waste", routed.AtSectorId);
 
         var second = TurnEngine.Step(first.World, Array.Empty<WorldCommand>(), seed: 1);
         Assert.Null(Find(second.World, "e-dave-legion-1"));

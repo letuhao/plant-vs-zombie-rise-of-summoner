@@ -70,8 +70,18 @@ public static class WorldCommandKinds
     /// </summary>
     public const string Develop = "develop";
 
+    /// <summary>
+    /// Attack the district around a hostile sector's Seat (base-defense-ideal.md decision 26;
+    /// spec-siege-seam.md §5). Distinct from <see cref="Clear"/>: `clear` defends one slot's guard,
+    /// `assault` fights for the legions standing in the district's core. Needs an entity (who is
+    /// attacking) and a sector (which district) — the legality that can change between filing and
+    /// resolving (is the legion still there, is the sector still hostile) is reveal-time, the same
+    /// discipline `clear`'s own admission rule already states.
+    /// </summary>
+    public const string Assault = "assault";
+
     public static readonly IReadOnlyList<string> All =
-        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build, Cede, BindWarden, Raise, Develop };
+        new[] { StandFast, Move, Clear, Claim, Stance, Sustain, Build, Cede, BindWarden, Raise, Develop, Assault };
 
     public static bool IsKnown(string? kind) =>
         kind != null && All.Contains(kind, StringComparer.Ordinal);

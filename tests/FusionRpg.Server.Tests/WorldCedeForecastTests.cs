@@ -34,7 +34,7 @@ public class WorldCedeForecastTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        ConfigureWorldTuningOnce();
+        WorldPolicyTestBootstrap.EnsureConfigured();
 
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-w26-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
@@ -164,38 +164,4 @@ public class WorldCedeForecastTests : IAsyncLifetime
         return port;
     }
 
-    static bool _tuningConfigured;
-
-    static void ConfigureWorldTuningOnce()
-    {
-        if (_tuningConfigured) return;
-        var tuningDir = Path.Combine(FindRepoRoot(), "data", "tuning");
-        string Read(string name) => File.ReadAllText(Path.Combine(tuningDir, name));
-        FusionRpg.Core.World.Loam.LoamPolicy.Configure(
-            FusionRpg.Core.World.Loam.LoamTuningLoader.Parse(Read("loam.v4.json")));
-        var worldTuning = FusionRpg.Core.World.WorldTuningLoader.Parse(Read("world.v5.json"));
-        FusionRpg.Core.World.WorldTuningHub.Configure(worldTuning);
-        // world-map W42/W50 (pre-existing gap, found and fixed here rather than left): committing a
-        // turn now always runs `Growth`, which reads `RecruitPolicy` — this bootstrap predates that
-        // phase and never configured it, so any commit through this test's own `/turn` route threw
-        // "RecruitPolicy.Configure(...) has not run" the moment `Growth` stopped being a no-op,
-        // unrelated to this task's own change but only ever exercised by actually running this file.
-        FusionRpg.Core.World.Growth.RecruitPolicy.Configure(worldTuning.Growth);
-        // Committing "dave" alone runs Zomboss's FrontierRulesPolicy too (two-hearths' AI auto-fill),
-        // which reads this the same way AptitudeChannelModsTests.cs's own bootstrap already does.
-        FusionRpg.Core.World.Ai.WorldAiPolicy.Configure(
-            FusionRpg.Core.World.Ai.WorldAiTuningLoader.Parse(Read("ai.v2.json")));
-        _tuningConfigured = true;
-    }
-
-    static string FindRepoRoot()
-    {
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            if (Directory.Exists(Path.Combine(dir.FullName, "src", "FusionRpg.Injector"))) return dir.FullName;
-            dir = dir.Parent;
-        }
-        throw new InvalidOperationException("could not find repo root above " + AppContext.BaseDirectory);
-    }
 }

@@ -309,6 +309,12 @@ if (args.Contains("--crossunlock"))
     // D20 as written: req(t) = 10 + 2.5*t*(t-1).  D26 reconciled: req(t) = 5*t*(t+1)/2.
     static int TierD20(double p) { var t = 0; while (10 + 2.5 * (t + 1) * t <= p) t++; return t; }
     static int TierD26(double p) { var t = 0; while (5.0 * (t + 1) * (t + 2) / 2.0 <= p) t++; return t; }
+    // D29 caps the AUTHORED depth at 10 tiers. The ladder itself keeps going (PS-8), but there are
+    // no nodes above tier 10 to buy, so power stops accruing there. The uncapped readings above are
+    // kept so the sweep can show what the cap is worth.
+    const int D29MaxTier = 10;
+    static int TierD26Capped(double p) => Math.Min(TierD26(p), D29MaxTier);
+    static int TierD20Capped(double p) => Math.Min(TierD20(p), D29MaxTier);
 
     // Build set aimed at the exact claim: pure vs concentrated-inside-one-posture vs spread.
     var xLabels = new List<string>(); var xKinds = new List<string>(); var xBuilds = new List<AptitudeAllocation>();
@@ -337,7 +343,8 @@ if (args.Contains("--crossunlock"))
     Console.WriteLine();
     Console.WriteLine($"{"ladder",6} {"credit rule",-12} {"corner",8} {"inPos2",8} {"inPos4",8} {"xPos2",8} {"spread",8}  {"treePwr in4/pure",16}");
 
-    foreach (var (ladderName, tierFor) in new (string, Func<double, int>)[] { ("D20", TierD20), ("D26", TierD26) })
+    foreach (var (ladderName, tierFor) in new (string, Func<double, int>)[]
+        { ("D20", TierD20), ("D26", TierD26), ("D26@10", TierD26Capped), ("D20@10", TierD20Capped) })
     foreach (var rule in new[] { "none", "largest", "quarter", "full" })
     {
         var effective = new List<AptitudeAllocation>(xBuilds.Count);

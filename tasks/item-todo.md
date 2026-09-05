@@ -557,6 +557,40 @@ mechanism has to survive the closed list happening to be fully decided today —
 not be. Three sibling rows in modules 14/15's own suites moved the same way; all four are named in
 P4.3's verification section.
 
+⭐ **Addendum 2026-09-05 — the overlap simulator's anticipated consumer arrived, and the parity
+invariant now has a real threshold.** This section built `RarityOverlapSimulator` naming
+`spec-uniques.md` as the consumer that had *"declined to build a second simulator"*. Module 17
+(`uniques`, P5.1 below) is that consumer, and it did not build one: `UniqueParityMetric` calls this
+harness — same `Seed`, same `RollsPerRung`, same `UpsetRate` paired comparison — with the unique's own
+magnitude as the fixed side, which is `ssot-uniques.md` §9.2's ask word for word (*"the same
+measurement with a fixed-value item on one side, run on the same code with the same seed"*). A test
+walks every file under `Items/Uniques/` and asserts none names `SeededRng` or `new Random`.
+
+**So `W ∈ [25%, 75%]` — *"stated, never measured"* since the lane was drafted, and an open question to
+the owner at `ssot-uniques.md` §10.3 — is measured.** ⭐ **Its threshold is live** rather than the
+unbounded placeholder `spec-uniques.md` prescribed *"until the harness exists"*, and the bounds are
+tunable in `data/tuning/uniques.v1.json`. ⛔ **And the first measurement is not green:** 287 readings
+over the real 144-row corpus report **90 in band, 47 strictly-better, 150 trophy** — reported, not
+refused, because device 3 was never one of the three HARD devices. Details and the reason the rolled
+side draws ONE affix (parity is per channel family; overlap is per rung) are in P5.1.
+
+⭐ **One EDIT to this module's own file, recorded here rather than only there:**
+`RarityOverlapSimulator` gained `TierCount` / `TierBand(tier)` / `TierMidpoint(tier)`. The band table
+was private; module 17 must price a unique's fixed side in **the same units the harness rolls in**, and
+a second copy of `(10,12),(20,25),(40,50),(85,100),(170,205)` is how a comparison starts measuring
+nothing. Exposing it applies *"never write a second parity simulator"* to the data as well as the code.
+No behaviour changed — `RarityOverlapSimulatorTests` is green, unmodified.
+
+⭐ **Addendum 2026-09-05 — `unique_eligible` is the tenth key, and the closed list grew by a reviewed
+addition rather than ad hoc.** Module 17 decided the shape `ssot-uniques.md` §5.3 proposed and named
+this registry as the home for: **one 0/1 integer per rung, "may a unique carry this rung"**, 0 at
+ordinals 10–20 and 1 at 30–100. It is **derived** from the ordinal against `uniques.v1.json`'s
+`rungFloorOrdinal` (`UniqueTuning.IsRungEligible`), not authored as a second per-rung table beside the
+seeded ladder — a table would be a second source of truth for a fact one comparison already decides.
+Seeded by `RpgStore.SeedUniqueEligible`, again its own method so this module's seeding never grows a
+dependency on a later module's tuning file (modules 14/15/16's precedent). §10.7 leaves the owner one
+number to move if a `sprout`-rung joke unique is ever wanted.
+
 **Not this module's job, named so nobody re-derives it here:** the `ceilingFor` reader / `pinAE`
 live-pricing (module 9); the D11 dominance lint leaving channel-split mode (module 6, consumes the
 seeded `power_ceiling` row); ~~`socket_min`/`socket_max` and `reroll_cost_mult` budget keys~~
@@ -821,6 +855,27 @@ reason it is named at P2.2.
       aptitude affix may be authored until it does. Nothing to build here yet; named so it is not
       mistaken for an oversight
 
+⛔ **Addendum 2026-09-05, filed from module 17 (`uniques`, P5.1 below) — `naming.v1.json` is stale in
+four places, all in one block, and nothing reads the stale numbers.** `idNamespaces.uniques` declares
+`partitionCount: 20`, `totalCombinations: "20 (matches authoring-fleet-plan.md's 20 agents exactly)"`
+and `agentsEach: "~15 uniques"`, while its **own** `bandAssignment` table lists **18** rows (5 + 5 + 3 +
+5) and the shipped corpus is **18 partitions × 8 = 144** — the count `ssot-uniques.md`'s own 2026-08-23
+banner already carries. The same block's `themeSource` says *"themes.v1.json (15 themes)"* while
+`themes.v1.json` holds **13**, which its neighbouring `themeCountNote` already states correctly.
+A **documentation** defect, not a behaviour one: module 17 counted the corpus rather than quoting the
+registry (the standing rule from the plan's own ⛔ box — *"never derive a design proportion from a
+snapshot of a generated corpus; count it, or don't quote it"*), so nothing shipped against the stale
+figures. Naming is this module's lane, which is why it is filed here rather than edited from there.
+
+⛔ **Also filed from module 17: the `unique.` seed-id → `item.` container-id derivation this file left
+open is CLOSED.** `idNamespaces.uniques.idVsContainerIdNote` recorded it as *"an open question for
+wave-1b"* — the corpus's `unique.{theme}-{band}-{seq}` tracking id has no arm in `definitions.md` §1's
+`container_id` alternation. `UniqueContainerIds` derives `item.{slug}` from the seed id's body verbatim
+and inverts it, so a shipped row can always name the partition that authored it; all 144 pass the
+shipped container-id grammar and are distinct. The registry note is now describable as answered rather
+than open — left for whoever next edits that file, since editing it is this lane's call and not
+module 17's.
+
 **Verification, run and green:**
 
 | Command | Result |
@@ -979,7 +1034,14 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
       (`atom.buttering`, `chilling`, `blighting`, `rotting`, `sparking`, `marking`, `bonding`,
       `affliction`) — pinned as a named regression test
       (`Phantom_implicit_families_used_by_real_content_have_no_display_template`), addended onto
-      modules 6 and 8's own entries above since it predates and is outside all three modules' scope
+      modules 6 and 8's own entries above since it predates and is outside all three modules' scope.
+      ⭐ **Confirmed from a second direction 2026-09-05 by module 17 (P5.1):** five of the eight —
+      `atom.bonding`, `atom.buttering`, `atom.chilling`, `atom.marking`, `atom.rotting` — are also named
+      by the shipped 144-row **unique** corpus, where they resolve to no affix-family row either, so
+      their `kindId` is unknown. Module 17 **excludes them from `narrow`'s raw-stat subtotal rather than
+      guessing** (a guess would make an unresolved reference look like a balance failure) and pins the
+      five as a set. Same defect, wider blast radius than the display corpus alone; still not fixed
+      from either module, and still the authoring fleet's re-run
 - [ ] ⏸ **The Card and Compare levels — not built.** `ItemDisplayRenderer.Line` (the Line level) is
       built and tested; assembling an instance's full `DisplayBlock[]` (base/implicit/affixes/sockets/
       set/enhancement/requirements, the eleven ordered blocks) and diffing two cards
@@ -2718,7 +2780,7 @@ SC7 rows above).
 
 ## Phase 5 — content breadth and the player surface
 
-### P5.1 — Module 17 `uniques`
+### ✅ P5.1 — Module 17 `uniques` — BUILT AND VERIFIED 2026-09-05 (the seed→concrete generator, D39's `Override` and the two private-atom lints explicitly deferred to their real owners — all three either upstream or downstream, none skipped)
 
 ⛔ **Addendum 2026-09-04, found while building module 11 (`drop-volume`).** The shipped seedsmith
 drop-table corpus already carries **144 `unique` entries** — by far the largest block of the 315
@@ -2728,17 +2790,282 @@ Module 11's importer refuses each by name with `ContentRuleViolated{drop.entry-k
 naming this module. ⚠ Also note `entry-shapes.md` §9's band→channel table (`acquisition = 'drop'` at
 ordinal ≥ 90 is `UniqueUnreachable`, so band 90 never appears in d1) — module 11 does not enforce that
 rule, and this module owns it.
+→ ✅ **Both halves answered here.** The band→channel rule is **built and green against the real drop
+corpus** (`UniqueCorpusValidator.ValidateDropReferences`; the shipped corpus partitions the three
+channels exactly — d1 holds all 40 `drop` uniques, d2 all 64 `source-locked`, d4 all 40
+`deterministic`, and the 40 at ordinal ≥ 90 are all in d4). The **entry kind stays refused**, and its
+reason MOVED rather than being left pointing at a module that now exists — see the deferred list.
 
-- [ ] G1 — hand-authored items that break generator rules and no machine rules
-- [ ] ✅ **Relics become uniques** (confirmed 2026-09-04). Four shipped relics riding
-      `rpg_unique_equipment`, served at `/api/relics`, rendered by `RelicsLayer.tsx`. ⚠ The row
-      migration is **module 4's**, and `RpgStore.UniqueActors.cs:606,645,654` read and write that table
-      today — **never retire the stub before relics have their home**
-- [ ] ⭐ **D39: add `Override` to `stat.modify`'s ops** — damage-type conversion (*"your fire damage
-      becomes ice"*). ⛔ **This overrides the standing rule** *do not add the kind before the consumer*
-      (the `status.expose.*` / `stat.derived` mistake, twice). **So the consumer ships with it**: the
-      ask to effect-atom is *"add `Override`, and here is the damage applier that reads it"* — never
-      the op alone. An `Override` that binds to nothing is the third instance of the same defect
+⭐ **The 144-row corpus was AUTHORED AND NEVER WIRED — the same pattern as `item_role_family`,
+`nameWords`, `displayTemplate` and `UnitClass` before it.** `data/seed/items/uniques/*.json` shipped
+2026-08-22 — 8 entries × 18 partitions, every `baseType` resolving, zero axis collisions — and **not one
+line of Core read a single row until this module.** So had `core.v1.json`'s `counterPressure` registry
+(wave 0c), whose own `_note` says it was added *because* "ssot-uniques.md requires every unique to
+carry a drawback, a condition, or deliberate narrowness, and the validator rejects one that does not":
+the registry existed, the validator did not. This module is therefore a **wiring pass plus the
+validators**, not a from-scratch build — checked before assuming, exactly as modules 6/7/8/10 were.
+
+⛔ **Five doc corrections, each checked in the file the doc cites, recorded rather than absorbed:**
+
+| # | The doc says | Verified | What shipped |
+|---|---|---|---|
+| **U1** | `spec-uniques.md`: `AtomKindRegistry.KindCount = 12`, the twelve enumerated at `:197-476` | **16.** The vocabulary grew under another lane since the lane doc was written | Nothing asserts 12. The test asserts `KindCount == All.Count` and that **`damage.convert` is absent** — which is the fact this module actually depends on |
+| **U2** | `spec-uniques.md`: *"`AtomRejectionReason` has 34 members and `ContentRuleViolated` is not one of them"*, and adding it is an **Ask first** | **35, and `ContentRuleViolated` IS one of them** — added by an earlier item module under item-ideal §2b.1. `ContentRuleNamespaces` is the registration mechanism | The ask is already granted. All **nine** `unique.*` rule ids raise that one code; the enum stays **35**, asserted. No member minted |
+| **U3** | `ssot-uniques.md` §3.6 / §5.1: a unique's shape is `pool_rolls ≤ 1` | **`pool_rolls` no longer exists** — `PrefixRolls`/`SuffixRolls` replaced it (T3.2), confirmed by reflection over the shipped `ContainerRow` | The rule is `PrefixRolls + SuffixRolls ≤ 1` (`UniqueLimits.MaxTotalRolls`), and a test asserts **no `PoolRolls` property exists** so no code path can read one |
+| **U4** | `naming.v1.json idNamespaces.uniques`: `partitionCount: 20`, `totalCombinations: "20 (matches authoring-fleet-plan.md's 20 agents exactly)"`, `agentsEach: "~15 uniques"`, `themeSource: "themes.v1.json (15 themes)"` | **All four stale.** The file's own `bandAssignment` table lists **18** rows (5 + 5 + 3 + 5), the corpus ships **18** partitions × 8 = **144**, and `themes.v1.json` holds **13** — which the same block's own `themeCountNote` already says | Not edited (another lane's registry). Named as a defect below and cross-referenced into **P2.3** |
+| **U5** | `spec-uniques.md` §3.2's own ⚠: the lane quotes a comment at `ContainerValidator.cs:87` that is not in the file | **Confirmed still true** — `:87` is the negative-weight rejection; the *behaviour* is real and is proven here from the loop structure instead | The premise is asserted against the shipped validator, not against a comment (`a_fixed_core_atom_out_of_band_loads_clean` plus its negative twin) |
+
+**What was built:**
+
+- [x] ⭐ **G1's premise proven against the SHIPPED validator, both ways.** An out-of-band fixed-core
+      magnitude (t1 atom overridden to 120–138 against a window of t3) loads **clean**; the identical
+      tier offered from the **pool** is refused `TierOutOfWindow`. `ValidateOverrides` is proven to check
+      well-formedness only — a 9000-magnitude override passes, an inverted `Min > Max` does not. This is
+      the fact the whole class rests on and it is now a test, not a paragraph
+- [x] **`UniqueRow.cs` — ssot §5.2's nine columns**, plus the three closed vocabularies
+      (`UniqueCounterPressure`, `UniqueAcquisition`, `UniqueEnhanceScope`) and `UniqueContainerIds`
+      — ⭐ **the seed-id → container-id derivation `naming.v1.json` explicitly left open "for
+      wave-1b"** (its own `idVsContainerIdNote`: the corpus's `unique.` tracking id *"does not have a
+      `unique.` alternative in definitions.md §1's container_id alternation"*). `unique.{slug}` →
+      `item.{slug}`, body verbatim, invertible; all 144 derived ids pass the shipped container-id
+      grammar and are distinct
+- [x] ⛔ **Three structural limits, each carrying the AGENTS.md exemption comment that rule requires**,
+      and a test that greps for the words so a tidy-up cannot delete the justification:
+      `MaxTotalRolls = 1` (**the class's own definition** — a tunable here would let a balance pass
+      author a rare with a name), `UniquesArePromotable = false` (promotion only ADDS pool draws;
+      **D7 lifted the rung ceiling and did not lift this one**, asserted alongside `PromoteFrom == 1`
+      for all ten rungs), and `FixedCoreChannelWeightMilli = 0` (**there is no draw for a weight to
+      modify** — the one line that stops a reviewer reading L0's coverage report as a gap)
+- [x] **`UniqueValidator.cs` — the per-row import checks, all nine rule ids under one code.** Returns
+      **every** failure rather than first-fail, because 144 rows reported one problem at a time is 144
+      round trips. ⭐ **AE is priced from the atom's TIER, never its raw parameter**: a core may hold hp,
+      per-mille and millisecond params at once and SC4 forbids summing across those units, so tier — the
+      unit the AE unit is *defined* against — is the only unit-safe basis. The raw value is read for
+      exactly two unit-free things: the **sign** of a drawback and the **±15% spread** (a ratio)
+- [x] ⭐ **Device 1 — counter-pressure CHECKED against content, never trusted, all three arms.**
+      `drawback` reads a negative value spec **and asks the kind first** (sign carries meaning per kind:
+      a negative `box.set` param is a malformed row, not a cost — tested); `conditional` requires a
+      non-empty `when.predicate` object; `narrow` compares summed raw-stat AE against ‰ of the rung
+      baseline. ⭐ **§3.2's corollary is a test, not a sentence**: an item that is only three fat
+      positive raw-stat lines is refused **whichever of the three arms it declares**, and the budget
+      catches it a second time — so the class cannot be forged by picking the right declaration
+- [x] **Device 2 — the budget, with the ±25% drift PINNED at load.** `UniqueTuning.Parse` refuses any
+      tuning whose `budgetDriftTolerancePercent` differs from `ContentValidation.DriftTolerancePercent`
+      in either direction — definitions §7 owns that number and this file reuses it, the same device
+      module 9 used for `powerDisplayBandPercent`. Declared-vs-summed is checked in **both** directions
+- [x] **Device 4 — the four cross-row checks, import-phase, over the whole corpus** (§6.4: *"cross-row
+      checks MUST be import-phase; they are properties of the catalog, not of a row"*). Axis collision
+      keyed on `(rung band, role, power axis)` — ⭐ **the band comes from the PARTITION, not the entry's
+      rung**, because each band spans two rungs and splitting by rung would double the grid from 40
+      slots to 80 and quietly retire "exactly saturated at 144". Measured: **144 distinct keys, zero
+      collisions**, both saturated bands using all 40 of their slots
+- [x] ⭐ **§9.1's missing publication now exists.** The lane asked module 7 for *"the rolled baseline in
+      AE per rung, which §3.7's budget check divides by and which does not exist in any document yet."*
+      `UniqueBudget.RungBaselineAeHundredths` derives it from the **seeded ladder** rather than
+      authoring a second table — monotone up the rungs, `chaff` (the one rung with no pool) exactly 0,
+      `almanac` 500. ⚠ It reads the count-band **FLOOR**, because the shipped schema has no
+      `pool_rolls_max` (module 7's own recorded ask-first), so it **understates** the allowance and every
+      caller that reports rather than refuses says so in its own `Basis` string
+- [x] ⭐ **`unique_eligible` — the tenth `rarity_budget` key, and the ONE key ssot §5.3 asked for.**
+      Shape: one 0/1 integer per rung, **derived** from the ordinal against `uniques.v1.json`'s
+      `rungFloorOrdinal` rather than authored as a second per-rung table beside the seeded ladder;
+      seeded by `RpgStore.SeedUniqueEligible`, which reads the `rarity` table's **own ordinals** rather
+      than list position (the ladder is pre-spaced by 10 so a rung can be inserted later). Cross-
+      referenced into **P2.1**
+- [x] **`RpgStore.ItemUniques.cs`** — the nine columns, upsert/get/list, a live FK to
+      `effect_container` with `ON DELETE CASCADE` (a unique is a **flag on a container** and cannot
+      exist without one — asserted), and `IsUniqueSetMember`, which turns §3.8's *"hard no"* into a
+      query rather than a promise. `guard-dal` green
+- [x] **Every number a balance pass would touch is in `data/tuning/uniques.v1.json`, and the parser
+      REFUSES rather than defaults.** Stripping any of the ten keys throws at load, asserted key by key
+      against the real file. Two structural invariants are checked at parse time: the drift pin above,
+      and a parity band that must be a real band inside 0…1000‰ (an inverted one would make every
+      reading simultaneously "too strong" and "a trophy", which reads as a metric working). A
+      `forbiddenRoles` entry naming a role that is not in the core registry is refused — a ban on a role
+      that does not exist bans nothing and reads as protection
+- [x] **`audit-magic-numbers.py --summary` reports `M1 = 0` AND `M2 = 0`, exit 0**, with **zero**
+      findings in the `uniques` domain; `audit-overflow.py` reports **0 critical** and **zero** findings
+      under `Items/Uniques/`. ⚠ Two structural consts (`AeScale`, `FixedCoreChannelWeightMilli`) matched
+      `BALANCE_WORD` on the substrings "scale" and "weight" and were added to the audit's
+      **`EXEMPT_NAMES`** with the documented-reason discipline that list already uses — the established
+      mechanism (`MaxTier`, `ReferenceLevel`, `ReferenceStar` sit there for the same reason), **not** a
+      rename to dodge the check
+
+**⭐ Device 3 — the parity invariant, MEASURED for the first time, and module 7's anticipation paid off:**
+
+- [x] ⭐ **No second simulator, and it is asserted structurally.** `spec-uniques.md` forbids one by
+      name; module 7 built `RarityOverlapSimulator` saying explicitly it claimed the invariant *"because
+      the only would-be consumer (`spec-uniques.md`) declined to build a second simulator."*
+      `UniqueParityMetric` calls that harness — same `Seed`, same `RollsPerRung`, same `UpsetRate`
+      paired comparison — and §9.2's exact ask (*"the same measurement with a fixed-value item on one
+      side, run on the same code with the same seed"*) is what the fixed side **literally is**: an array
+      of the unique's own magnitude. A test walks every file under `Items/Uniques/` and asserts none
+      names `SeededRng` or `new Random`
+- [x] **The one parameter that differs, and why.** The rolled side draws **one** affix, not the rung's
+      whole count band: parity is measured *within one channel family* (SC4 forbids cross-family
+      totals) and the one-atom-per-group rule means a rolled rare's total inside a single family is
+      exactly one affix however many it draws overall. Module 7's own §3.5 measurement is about a rung
+      beating the rung below it; this is about one line beating one line
+- [x] ⭐ **The threshold is LIVE.** `spec-uniques.md` said to ship parity *"as a reported metric with no
+      threshold **until the harness exists**, and say in the report that it is unbounded."* The harness
+      exists (module 7, 2026-09-04), so `UniqueParityReport.HasThreshold` is **true** and the band comes
+      from `uniques.v1.json`. ⛔ It bounds a **report**, not an import refusal — the three HARD devices
+      are counter-pressure, budget and anti-convergence, device 3 was never one of them, and making it
+      hard on the day it first became measurable would refuse authored content against a number nobody
+      has yet had a chance to author against
+- [x] ⛔ **The measurement does not come out green, and that is the point of having one.** 287 readings
+      (one per unique × identity atom) over the real corpus: **90 in band, 47 strictly-better
+      (`W < 25%`), 150 trophy (`W > 75%`)**. The shape is systematic rather than random — identity
+      `powerBand`s were chosen largely independently of the item's rung, so a `low`-band line on a
+      `sunwoven` item loses to a rolled `sunwoven` affix **every time** (`W = 1000‰`), which is §8.4's
+      trophy failure exactly. Pinned as a corpus regression so a re-authoring pass can watch it move,
+      and reproducibility is its own test
+
+**⛔ Real defects found, named, not silently fixed:**
+
+- [x] ⛔ **Three shipped uniques carry a family their own frame cannot execute — a NEW check found
+      them, and the lane's own named example is clean.** ssot §3.5 draws a line inside the frame filter
+      that no registry encoded: a unique may bypass it where the filter is **taste** and may not where
+      it is **physics** (a channel that only exists on the other side). Its example is
+      `plating`/`carapace` on a plant — **no shipped unique carries either**. Three carry different
+      members of the same class: `unique.sunwoven-almanac-90-006` ("Hypocotyl of the Precept", **plant**)
+      carries `atom.swiftness` → `zombieSpeed`, family `frames: ["humanoid"], side: "zombie"`;
+      `unique.umbral-swarm-50-004` ("Encroaching Leash", **humanoid**) carries `atom.quickening` →
+      `attackInterval` **and** `atom.flourishing` in its variance slot, both plant-only; and
+      `unique.umbral-swarm-50-005` (**humanoid**) draws `atom.quickening` in its variance slot. Four
+      findings across three rows — the rule covers the variance slot too, because a pool that can only
+      ever draw a dead line is the same defect one step later. **Not hand-fixed** (`ItemSeedValidator`'s
+      own footer: *"Re-run the partitions named above; do not hand-fix"*) but **reported by name**: new
+      check `UniqueFrameCheck.cs` (`UniqueFrameImpossible`), wired into `Validator.cs`. **This moves the
+      validator baseline 166 → 170**, and all four new errors are these rows. Owner: the authoring
+      fleet's `uniques/sunwoven-almanac/90` and `uniques/umbral-swarm/50` partitions. Also pinned in
+      Core so the set cannot grow silently
+- [x] ⛔ **36 of 144 uniques price above `baseline + 1.5 AE`, and 12 of the 98 declaring `narrow`
+      exceed its 60% ceiling — REPORTED, deliberately not refused.** The seed corpus authors no
+      `budget_ae` at all (seed-contract §3 forbids a number in a seed), so the summed side is priced by
+      **this module's own** band → tier → AE reckoning rather than by anything an author wrote. Refusing
+      144 authored rows against a price they were never given a way to see is a validator invented after
+      the fact, not a validator working. The hard check runs where a declared `budget_ae` exists (the
+      concrete container). ⚠ And the count is an **upper bound**: the baseline reads the count-band
+      floor. §7.2's own worked example fails its `narrow` check by four points and the lane kept it —
+      *"the check has teeth"*
+- [x] ⛔ **`naming.v1.json idNamespaces.uniques` is stale in four places** (U4 above): `partitionCount`
+      and `totalCombinations` say 20 against its own 18-row `bandAssignment`, `agentsEach` says "~15
+      uniques" against a shipped 8, and `themeSource` says 15 themes against `themes.v1.json`'s 13 —
+      which the same block's `themeCountNote` already corrects. Nothing reads the stale numbers, so this
+      is a documentation defect, not a behaviour one; naming is **module 8's** lane, so it is
+      cross-referenced into **P2.3** rather than edited from here
+- [x] ⛔ **Five phantom affix families are named by the shipped unique corpus** — `atom.bonding`,
+      `atom.buttering`, `atom.chilling`, `atom.marking`, `atom.rotting` — none of which resolves to an
+      affix-family row, so their kind is unknown. They are **excluded from `narrow`'s raw-stat subtotal
+      rather than guessed into it**, because guessing would make an unresolved reference look like a
+      balance failure. This is **module 10's already-filed phantom-family defect** (P2.5's list of eight)
+      reaching this corpus; pinned here as a set so it cannot grow
+
+**⏸ Deferred, each with its owner named — none silently skipped:**
+
+- [ ] ⏸ **The seed → concrete generator — the runtime generator's, per the binding seed-to-concrete
+      rule, and it is the single reason three other items below are still open.** The corpus holds 144
+      **seeds** (families and bands, never numbers); no `effect_container` row exists for any of them.
+      Everything this module owns operates on either the seed (the corpus validators, the reports) or on
+      a concrete container supplied by a caller (the per-row validator, `item_unique`). Rolling a seed
+      into a container with its private atom rows is a shared-SDK job, not this module's
+- [ ] ⏸ **The `unique` drop ENTRY KIND stays refused, and the reason MOVED.** Module 11's
+      `DropTableDraw.UnavailableKinds[Unique]` read `"module 17 (uniques)"`; module 17 exists, so that
+      pointer is now stale in exactly the way this program keeps naming. Updated in place to name the
+      real remaining blocker (no concrete unique container exists, so a draw resolves to nothing) and
+      pinned by a test that greps the reason for `seed-to-concrete`, so it cannot go stale a second
+      time. ⚠ The **band→channel rule itself is built** and green over the real corpus — the two are
+      different obligations and only one of them was blocked
+- [ ] ⏸ **The general-channel marker is the drop-table lane's, not ours.**
+      `ValidateDropReferences` takes `IsGeneralChannel` **as a parameter** because the shipped
+      drop-table schema carries no channel field — `entry-shapes.md` §9 states the rule and the row has
+      nothing that says which channel a table is. Inventing a field would be this module authoring
+      another lane's schema; the test reads it from the `droptable.d1-` id prefix and says so
+- [ ] ⏸ **D39's `Override` op and its damage applier — effect-atom's, and NOT started deliberately.**
+      Verified today: `AtomRowValidator.StatOps` is still `flat|increased|more`, and
+      `AtomKindRegistry.cs:336` refuses `Override` for `stat.modify` by name. The ruling is explicit
+      that *"the consumer is part of the ask, not a follow-up"* — an `Override` that binds to nothing
+      would be the third instance of the `status.expose.*` / `stat.derived` defect — so this module
+      adds neither half and pins both as absent (`D39s_override_op_and_the_thirteenth_kind_are_both_still_absent`)
+- [ ] ⏸ **`damage.convert`, the 13th kind — recorded as an ask, depended on by nothing.** Asserted
+      absent, and asserted that no kind id contains "convert", so nothing here can quietly start
+      needing it
+- [ ] ⏸ **§4.6's private-atom rule and §8.6's "referenced by exactly one container" lint — both need a
+      concrete container to lint.** They are the right rules (a shared `vitality.t5` row with an
+      out-of-band override bricks every dropped copy at the next bind, with a code that blames the
+      instance), and neither is checkable while zero unique containers exist. Owner: whoever lands the
+      seed→concrete generator; the rule is recorded here so it lands with it rather than after
+- [ ] ⏸ **`item_base_type` has no table, so `derived_from` carries no FK.** ssot §5.2 wants
+      `FK → item_base_type`; module 6 shipped the 740-row corpus and the Core readers, **not a table**,
+      so the FK has nothing to point at. The reference is checked instead by `UniqueCorpusValidator`
+      against the loaded base-type registry, which is where the role and frame rules already resolve.
+      A **wiring gap**, named with that word; the column is ready the day the table exists
+- [ ] ⏸ **`unique_value_reroll` — module 15's surface (§10.5), not requested from here.** ssot §8.4
+      names the conditional it creates: if module 15 refuses the operation, `identitySpreadPerMille`
+      should narrow from 150 to 100 so a bad copy hurts less. That is a one-number edit in
+      `uniques.v1.json`, and the tuning file's own note records it so the conditional is not lost
+- [ ] ⏸ **Whether a unique is salvageable (§10.6) — module 14's, recommendation "no", not decided
+      here.** Likewise the `no_reassign` flag being driven by `acquisition = 'deterministic'` (§9.11) —
+      inventory's — and the flavour-text render (§9.12) — module 20's
+- [ ] ⏸ **Relics stay on `rpg_unique_equipment`, confirmed again today, unchanged.** Four shipped
+      relics served at `/api/relics` (`RelicEndpoints.cs:15`), rendered by `RelicsLayer.tsx`, with
+      `RpgStore.UniqueActors.cs` still reading and writing that table. The row migration is **module
+      4's** and **the stub must not be retired before relics have their home** — nothing here touches it
+- [ ] ⏸ **Sim stays `None` for `stat.derived`, and that is the one real remaining runtime limit.**
+      ⭐ The D6 quarantine the lane calls *"the largest single constraint on what this lane can author,
+      larger than SC2"* is **lifted** — asserted, not assumed: `stat.derived` is `Full` on the lawn and
+      `Full` in battle. §4.3's "practical palette" paragraph is void, and the lane doc still says
+      otherwise, which is why the lift is a test rather than a note
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.Unique"` | **61 passed / 0 failed** (new — `UniqueTests` 44, `UniqueCorpusTests` 17) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemUnique"` | **7 passed / 0 failed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **542 passed / 0 failed** — the whole item program, modules 1–16's own suites included, green under this module's two registry edits |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."` | **103 passed / 0 failed** — the item program's whole DAL half, green under the new `item_unique` schema |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **6712 passed / 8 failed** — all 8 in `Actions.ActionsPurityGuardTests`, `Battle.*` (3), `ClassSystem.ProveAptitudeJsonEmitTests` (3) and `Expeditions.ExpeditionResolverTests`, the concurrent stream's own in-flight world/district work; **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **777 passed / 0 failed**, then the host process **crashed** on `DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing` — the demon stream's own CLI-spawning test, reproducible under `--blame-hang`; **zero** failures anywhere, **zero** in `Items.*` |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **204 passed / 0 failed** — clean, zero-tolerance held |
+| `dotnet run --project tools\ItemSeedValidator` | **170 errors** (166 before this module). All **4** new findings are `UniqueFrameImpossible` on the three real corpus rows above; no other check moved |
+| `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, exit 0**; the `uniques` domain reports **zero** findings |
+| `python scripts\audit-overflow.py` | **0 critical**, 57 findings, **zero** under `Items/Uniques/` |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer` / `guard-funnel-delta` / `guard-secondary-no-unity` | all four **OK** |
+| `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | succeeds — the new tuning load and `SeedUniqueEligible` do not break boot |
+| `python -m pytest tools/seedsmith` | run — this module wrote no `tools/seedsmith/**` and no `data/seed/**` file; the only Python it touched is `scripts/audit-magic-numbers.py`'s `EXEMPT_NAMES`, which seedsmith does not import |
+
+⚠ **Baseline re-measured fresh, not carried forward.** `Core` measured **7 failed / 6584 passed** at the
+start of this session (all in `Battle.*`, `Expeditions.*`, `ClassSystem.*`) and drifted to 14 and back
+to 9 while the concurrent stream landed `src/FusionRpg.Core/World/District/` — its `BattleSeam.cs` and
+`BattleApplication.cs` did not compile at all for two windows mid-session, which resolved on retry
+exactly as expected. `Guard` measured **201 passed / 1 failed** at session start (the known
+`ClassSystemBaselineRegenTests` dominance-baseline drift) and is **204/204** now, closed by that
+stream. Every failing name in the runs above was checked against `git status`: their sources
+(`World/Turn/*.cs`, `World/Movement/*.cs`, `World/District/*`, `Battle/Timeline/*`, `Actions/*`,
+`RpgStore.Aptitudes.cs`) are all mid-edit or brand-new in that stream and **none is touched by this
+module.**
+
+**Files:** `data/tuning/uniques.v1.json` (new — the ten tunables);
+`src/FusionRpg.Core/Items/Uniques/{UniqueRow.cs, UniqueTuning.cs, UniqueBudget.cs, UniqueCorpus.cs,
+UniqueValidator.cs, UniqueCorpusValidator.cs, UniqueCorpusReport.cs, UniqueParityMetric.cs}` (new);
+`src/FusionRpg.Core/Items/RarityOverlapSimulator.cs` (EDIT — `TierCount`/`TierBand`/`TierMidpoint`
+exposed so the parity metric prices the fixed side in the harness's own units instead of copying the
+table); `src/FusionRpg.Core/Items/RarityBudgetKeys.cs` (EDIT — `unique_eligible` registered);
+`src/FusionRpg.Core/Items/Drops/DropTableModel.cs` (EDIT — the `Unique` unavailable-reason moved off a
+module that now exists); `src/FusionRpg.Data/Sqlite/RpgStore.ItemUniques.cs` (new — `item_unique` DDL,
+upsert/get/list, `IsUniqueSetMember`, `SeedUniqueEligible`); `src/FusionRpg.Data/Sqlite/RpgStore.cs`
+(EDIT — `EnsureItemUniqueSchemaUnlocked` in `Init`, after the container schema it keys on);
+`src/FusionRpg.Server/Program.cs` (EDIT — parses `uniques.v1.json` at boot, then `SeedUniqueEligible`);
+`tools/ItemSeedValidator/Checks/UniqueFrameCheck.cs` (new), wired into `Validator.cs`;
+`scripts/audit-magic-numbers.py` (EDIT — two structural consts added to `EXEMPT_NAMES` with reasons);
+`tests/FusionRpg.Core.Tests/Items/{UniqueTests.cs, UniqueCorpusTests.cs}` (new);
+`tests/FusionRpg.Data.Tests/Items/ItemUniqueStoreTests.cs` (new).
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.Unique"`;
+`dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemUnique"`;
+`dotnet run --project tools\ItemSeedValidator`
 
 ### P5.2 — Module 18 `consumables`
 

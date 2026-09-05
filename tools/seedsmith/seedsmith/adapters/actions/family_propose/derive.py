@@ -142,11 +142,16 @@ def _normalize_blocked(out: Mapping[str, Any]) -> dict:
 
 def sample_draft(brief: Mapping[str, Any], *, sample_index: int,
                  pairing_table: "Mapping[str, Sequence[str]] | None" = None,
+                 family_glossary: "Mapping[str, str] | None" = None,
                  config: "LlmCallerConfig | None" = None) -> "tuple[dict, dict]":
     """The ONE function in this module that calls a model -- one of `SAMPLE_COUNT` samples for one
     brief. `max_heal=MAX_HEAL` is passed EXPLICITLY (acceptance #11). Returns `(out, soft)`; `soft`
-    carries a `FAILED:<reason>` entry for any key `default_for_none` fell back on."""
-    context = build_context(brief, sample_index=sample_index, pairing_table=pairing_table)
+    carries a `FAILED:<reason>` entry for any key `default_for_none` fell back on.
+
+    `family_glossary` (SMOKE BATCH criterion-2 fix, 2026-09-05): threaded straight to
+    `build_context`, optional and defaulted to `None`."""
+    context = build_context(brief, sample_index=sample_index, pairing_table=pairing_table,
+                            family_glossary=family_glossary)
     brief_text = build_brief(context)
     out, soft = call_with_self_heal(
         dict(context), SYSTEM_PROMPT, lambda _items: brief_text, build_verify_fn(context),
@@ -213,18 +218,22 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
 
 def propose_family_action(brief: Mapping[str, Any], *, candidate_id: str,
                           pairing_table: "Mapping[str, Sequence[str]] | None" = None,
+                          family_glossary: "Mapping[str, str] | None" = None,
                           config: "LlmCallerConfig | None" = None,
                           provenance: "Mapping[str, Any] | None" = None) -> Candidate:
     """The live, one-brief-in-one-candidate-out entry point (spec SS3: "Never carry state between
     calls"). Calls a real model up to `SAMPLE_COUNT * (MAX_HEAL + 1)` times. Never exercised
     directly by this module's own test suite (binding constraint 8) -- every test instead drives
     `sample_draft`'s pure ingredients (`build_context`/`build_brief`) and `finalize_candidate`
-    (which makes zero calls) separately."""
+    (which makes zero calls) separately.
+
+    `family_glossary` (SMOKE BATCH criterion-2 fix, 2026-09-05): threaded straight to
+    `sample_draft` for every one of the `SAMPLE_COUNT` samples -- optional, defaults to `None`."""
     drafts: "list[dict]" = []
     heal_notes: "list[dict]" = []
     for sample_index in range(SAMPLE_COUNT):
         draft, soft = sample_draft(brief, sample_index=sample_index, pairing_table=pairing_table,
-                                   config=config)
+                                   family_glossary=family_glossary, config=config)
         drafts.append(draft)
         heal_notes.append(soft)
 

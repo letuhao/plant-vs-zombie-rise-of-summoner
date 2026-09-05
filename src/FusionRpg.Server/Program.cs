@@ -87,6 +87,14 @@ FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
 FusionRpg.Core.Demons.Generation.SpeciesBuildTuningHub.Configure(
     FusionRpg.Core.Demons.Generation.SpeciesBuildTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "species-build.v1.json"))));
+// species-build T2.1: the committed, generated plan (tools/DemonBuildPlanGen owns writing it) —
+// `SpeciesBuildPlanCatalog` is `demon-type-allocation`'s runtime reader for it. `tuningDir`'s parent is
+// ".../data", so "generated/demons" (not "data/generated/demons") — same relative shape Program.cs
+// already uses for the generated-tree convention.
+FusionRpg.Core.Demons.Generation.SpeciesBuildPlanCatalog.Configure(
+    FusionRpg.Core.Demons.Generation.SpeciesBuildPlanReader.Parse(
+        File.ReadAllText(Path.Combine(
+            Directory.GetParent(tuningDir)!.FullName, "generated", "demons", "_species-build-plan.json"))));
 FusionRpg.Core.Battle.BattleTuningHub.Configure(
     FusionRpg.Core.Battle.BattleTuningLoader.Parse(
         // v2 -> v3 (battle-tempo tempo-content, 2026-09-05): adds speciesTempo.referenceIntervalMs.
@@ -179,6 +187,13 @@ var enhancementTuning = FusionRpg.Core.Items.Mutation.EnhancementTuning.Parse(
 // ever hold. Consumed by SeedSocketGrants and SeedComboRecipes below.
 var socketTuning = FusionRpg.Core.Items.Sockets.SocketTuning.Parse(
     File.ReadAllText(Path.Combine(tuningDir, "sockets.v1.json")));
+// item-ideal.md, uniques (module 17): the rung floor, the identity spread, the shared 1.5 AE premium,
+// `narrow`'s ceiling, the role quota and the parity band. Parsed at boot for the same reason as the
+// six above — the parser refuses an inverted parity band, a forbiddenRoles entry naming a role that
+// does not exist, and a budget drift tolerance that has drifted from definitions §7's shared number,
+// so a bad edit fails here rather than at the first imported unique. Consumed by SeedUniqueEligible.
+var uniqueTuning = FusionRpg.Core.Items.Uniques.UniqueTuning.Parse(
+    File.ReadAllText(Path.Combine(tuningDir, "uniques.v1.json")));
 
 // Default: {ServerExeDir}/data/{rpg-hot,rpg-media}.sqlite — override with FUSIONRPG_DATA only for tests/special runs.
 var dataDir = Environment.GetEnvironmentVariable("FUSIONRPG_DATA");
@@ -228,6 +243,11 @@ store.SeedRerollCostMult(enhancementTuning);
 // `rarity_budget` keys, whose shape ssot-rarity.md §5 recorded as "awaiting I4" until this module
 // decided it. Same placement rule as the two above.
 store.SeedSocketGrants(socketTuning);
+// item-ideal.md, uniques (module 17): `unique_eligible`, the tenth `rarity_budget` key and the ONE key
+// ssot-uniques.md §5.3 asked for. Derived from each rung's ordinal against the tuning floor rather
+// than authored as a second per-rung table, and seeded here under the same placement rule as the three
+// above — a later module's tuning never reaches module 7's own seeding.
+store.SeedUniqueEligible(uniqueTuning);
 // The 25 resonance combinations, GENERATED from the element roster rather than authored
 // (ssot-sockets.md §4.4). Module 21's 102 Strains and Splices land in the same table beside them;
 // this seed never deletes a row it did not write.

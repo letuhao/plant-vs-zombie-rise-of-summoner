@@ -352,6 +352,25 @@ class BuildBriefContentTests(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------------------------
+# SMOKE BATCH criterion-2 fix, 2026-09-05 -- same technique and same byte-identical-when-absent
+# guarantee as `general_propose`'s own `AtomFamilyGlossaryTests` (`test_general_propose.py`).
+# ---------------------------------------------------------------------------------------------
+
+class AtomFamilyGlossaryTests(unittest.TestCase):
+    def test_no_glossary_is_byte_identical_to_the_bare_id_rendering(self):
+        context_without = build_context(make_brief(), sample_index=0)
+        context_with_empty = build_context(make_brief(), sample_index=0, family_glossary={})
+        self.assertEqual(build_brief(context_without), build_brief(context_with_empty))
+
+    def test_glossed_family_renders_id_and_gloss_together(self):
+        glossary = {"atom.a": "Iron Wall [defensive] -- X more defense"}
+        context = build_context(make_brief(), sample_index=0, family_glossary=glossary)
+        text = build_brief(context)
+        self.assertIn("atom.a: Iron Wall [defensive] -- X more defense", text)
+        self.assertIn("atom.b", text)  # ungossed sibling stays bare, never dropped
+
+
+# ---------------------------------------------------------------------------------------------
 # Determinism / permutation (spec SS4.2) -- BOTH enums.
 # ---------------------------------------------------------------------------------------------
 
@@ -674,7 +693,8 @@ class DryRunEntrypointTests(unittest.TestCase):
         self.assertNotEqual(gen_mod._brief_hash(b1), gen_mod._brief_hash(b3))
 
     def test_real_run_writes_provenance_with_model_prompt_version_brief_hash_and_candidate_set_hash(self):
-        def fake_propose(brief, *, candidate_id, pairing_table=None, config=None, provenance=None):
+        def fake_propose(brief, *, candidate_id, pairing_table=None, family_glossary=None,
+                        config=None, provenance=None):
             return Candidate(
                 brief_id=brief["briefId"], outcome="accepted",
                 entry=entry_for(make_draft(), candidate_id=candidate_id, brief_id=brief["briefId"],

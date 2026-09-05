@@ -28,7 +28,8 @@ from pathlib import Path
 from ...pipeline.llm_caller import LlmCallerConfig
 from .distribution_planner.derive import load_pairing_table
 from .general_propose.derive import candidate_row, candidate_set_hash, canonical_dump, propose_general_action
-from .general_propose.prompts import build_brief, build_context
+from .general_propose.prompts import build_brief, build_context, render_worked_example
+from .vocab import load_family_glossary
 
 __all__ = ["run", "regenerate", "load_general_briefs", "ACTIONS_ROOT", "BRIEFS_PATH"]
 
@@ -76,11 +77,20 @@ def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRING
     selected = general_briefs[:max(0, count)]
 
     pairing_table = load_pairing_table(pairings_path) if pairings_path.is_file() else {}
+    #: SMOKE BATCH criterion-2 fix, 2026-09-05: read fresh every call, never cached (matches
+    #: `load_family_ids`'s own discipline) -- see `vocab.load_family_glossary`'s own docstring.
+    family_glossary = load_family_glossary()
+    #: SMOKE BATCH criterion-2 PROBE, 2026-09-05: rendered once per run (not once per brief, and
+    #: never per sample -- it is one fixed illustration, the same text everywhere it is used) --
+    #: see `general_propose.prompts.render_worked_example`'s own docstring. `""` when the pinned
+    #: pair cannot be found, which `build_context` already treats as "no worked example".
+    worked_example = render_worked_example(family_glossary)
 
     if dry_run:
         sample_brief_text = ""
         if selected:
-            context = build_context(selected[0], sample_index=0, pairing_table=pairing_table)
+            context = build_context(selected[0], sample_index=0, pairing_table=pairing_table,
+                                    family_glossary=family_glossary, worked_example=worked_example)
             sample_brief_text = build_brief(context)
         return {
             "dryRun": True,
@@ -104,8 +114,9 @@ def regenerate(*, briefs_path: Path = BRIEFS_PATH, pairings_path: Path = PAIRING
         prov = dict(base_provenance)
         prov["briefHash"] = _brief_hash(brief)
         candidate = propose_general_action(
-            brief, candidate_id=candidate_id, pairing_table=pairing_table, config=config,
-            provenance=prov,
+            brief, candidate_id=candidate_id, pairing_table=pairing_table,
+            family_glossary=family_glossary, worked_example=worked_example,
+            config=config, provenance=prov,
         )
         row = candidate_row(candidate)
         rows.append(row)

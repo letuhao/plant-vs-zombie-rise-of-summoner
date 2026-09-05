@@ -115,8 +115,53 @@ Adopted in review: discrete-event movement · per-slot guards by encounter id ·
 - [x] Core **1651/1651** · Data **234/234** · E2E **146/146** · Guard **44/44**; all four guard scripts OK.
 - [ ] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
 - [x] **Owner decision:** should a routed force retreat instead of being finished off where it stands?
-      **✅ Decided 2026-09-05 (asked directly via `AskUserQuestion`): "Retreat (build it)."** Tracked
-      as a new task below (this checkpoint's own item, built same session).
+      **✅ Decided 2026-09-05 (asked directly via `AskUserQuestion`): "Retreat (build it)."**
+      **Built same session** — `spec-world-movement.md`'s own line 22 already specced this
+      ("`routed` — routed legions fall back and skip a turn's orders") but only the "skip orders"
+      half had ever been wired; "fall back" was dead prose until now.
+      `BattleApplication.Apply` (`src/FusionRpg.Core/World/Turn/BattleApplication.cs`, whose own doc
+      comment already claimed to be the one place that decides "what a rout... means to the map") now
+      calls a new `FallBack` helper for any side it finds **newly** routed this fight (`side.Routed &&
+      !entity.Routed` — an already-routed force sits out its recovery turn where it already fell back
+      to). No new stored state: a legion mid-crossing a lane already carries `OnLaneId`/
+      `OnLaneTowardSectorId`, so "the way it came" is simply that lane's other endpoint — turning
+      around, not pathing anywhere new. A force that was already standing at a sector when it routed
+      (a garrison losing a Contact/Siege fight on its own ground) has nothing to fall back *from* and
+      stays put, the same distinction `PlaceholderBattleResolver.DefenderBonusMilli` already draws
+      between a legion caught marching and one dug in.
+      New test file `tests/FusionRpg.Core.Tests/World/RoutFallBackTests.cs` (3 facts): a legion routed
+      mid-crossing `l-home-ember` falls back to the sector it started that crossing from; the
+      non-routed side's own lane position is untouched; an already-routed force fed a second fight
+      does not fall back twice. `RoutLifecycleTests` (stationary-standoff rout, the pre-existing
+      shape) still 21/21 unaffected — the new code path never triggers when neither side is mid-lane.
+      Zero golden re-bless: `WorldWaveOneAcceptanceTests` still 6/6 (its own scripted rout, if any,
+      never lands a force mid-lane at the moment it breaks). Verified: Core.Tests World 883/883,
+      Data.Tests World 97/97, Guard.Tests (incl. determinism) 202/202+10/10, E2E.Tests 206/207 (the
+      one failure is `RpgProgressionE2ETests`, a pre-existing, unrelated concurrent-stream XP defect),
+      `python scripts\audit-overflow.py` clean for `BattleApplication.cs`.
+
+      **Completeness audit, same day, found a real gap in the above:** `MarchResolver` clears
+      `OnLaneId` the instant a march fully completes, so an attacker that marches all the way into a
+      sector this turn and *then* loses the Sector-kind contact fight that follows was
+      indistinguishable in code from a genuine long-standing garrison — it stood entrenched in the
+      sector it just failed to take instead of falling back, even though it did use a lane to get
+      there this same turn. Traced through `ContactResolver.SectorContacts` (builds exactly this
+      attacker-arrived/defender-stationary pairing) and `PlaceholderBattleResolver.ResolveForces`
+      (routs whichever side loses, attacker included) to confirm this was live and reachable, not
+      theoretical — then asked the owner directly rather than silently deciding: **"extend spec and
+      solve it now."** Closed by threading which lane an attacker used to arrive (entity id → lane id)
+      as movement-phase-local data — `MarchOutcome.ArrivedViaLaneId` → a local dict built in
+      `MovementPhase.Run` → `BattleReporting.Fight`'s new optional `arrivedViaLane` parameter →
+      `BattleApplication.Apply`/`FallBack`. Never a `WorldEntity` field, never hashed — it cannot
+      outlive the single `MovementPhase.Run` call that produced it, so nothing new is actually
+      remembered about the world and no golden re-bless is needed. `FallBack` itself unified into one
+      formula covering both shapes (mid-crossing via `OnLaneTowardSectorId`, arrived-this-turn via
+      `AtSectorId` — both are just "the destination end of a known lane"). Two new facts in
+      `RoutFallBackTests.cs`: a legion that fully arrives via `l-home-ember` and then loses falls back
+      to `homeworld`; a genuine stationary garrison (never moved) still has nowhere to fall back to.
+      Spec amended: `spec-world-movement.md` §"What `routed` falls back to" (new). Verified: Core.Tests
+      World 7/7 (`RoutFallBackTests` + `RoutLifecycleTests` together) green; full-suite re-run pending
+      at time of writing.
 
 ## Phase 4 — FE (parallel from day one)
 
@@ -1500,13 +1545,34 @@ bit-identical. Two golden re-blesses total, both budgeted here rather than disco
 
 ### Checkpoint 12 — an army that grows, a year that changes, ground worth improving
 
-- [ ] A forty-turn `first-light` run ends with the player commanding a legion count inside `growth.legionTarget`, raised by their own orders.
-- [ ] The season is derived, hashed, replayed and visible in the turn report, and the HUD's season slot has a real field behind it.
-- [ ] The A8 invariant passes across the **full authored level range** — development raises yield faster than upkeep, or nobody develops.
-- [ ] Every kind in `WorldCommandKinds.All` survives the store round trip with every payload field intact — `sustain`, `build`, `raise` and `develop` included.
-- [ ] **Exactly two golden re-blesses**, both triaged in advance, and `RulesetVersion` advanced **exactly once**.
-- [ ] `DevelopmentLevel` has a producer; `SectorPhase.Developed` is gone.
-- [ ] All suites and the four boundary guards green: `dotnet test tests\FusionRpg.Core.Tests`, `...\FusionRpg.Data.Tests`, `...\FusionRpg.Guard.Tests`, `...\FusionRpg.E2E.Tests`; `cd web\fusion-rpg-web; npm test`.
+- [x] A forty-turn `first-light` run ends with the player commanding a legion count inside `growth.legionTarget`, raised by their own orders. Verified by W59's own acceptance test.
+- [x] The season is derived, hashed, replayed and visible in the turn report, and the HUD's season slot has a real field behind it.
+      **Derived/hashed/replayed/report-visible**: verified via W59's own acceptance test
+      (`A_season_boundary_is_visible_inside_the_forty_turns`) and the W-F1 fog fix below.
+      **The HUD field was the one real gap** — `web/fusion-rpg-web/src/stages/world/hud/
+      calendarLabel.ts`/`TopStrip.tsx` still followed `spec-world-hud.md` §8b.7 ("a calendar, never a
+      season"), a decision made when no season concept existed in the engine. **Asked the owner
+      directly (2026-09-05, `AskUserQuestion`): "Wire the season into the HUD" vs. "leave it
+      calendar-only" — answered "Wire the season into the HUD."** Built same session:
+      `WorldCalendarDto.Season` (`WorldDtos.cs`, `WorldEndpoints.cs`) reaches the wire (never fogged,
+      unlike the boundary flags beside it); `CalendarRollView`/`CalendarLabel` carry it through;
+      `formatCalendarLabel` renders `"... · Season N"` (1-indexed for display, the wire's own value is
+      0-indexed) — no season-name catalog exists anywhere in the engine or `data/tuning/world.v5.json`,
+      so no flavour text was invented, matching §8b.7's own "no 'Long Wither'" half, which still
+      stands. `spec-world-hud.md` §3 updated to record the supersession rather than silently
+      contradicting a documented decision. Re-blessed the three checked-in state fixtures
+      (`first-light.json`/`two-hearths.json`/`eighteen-ten.json`) via
+      `FUSIONRPG_BLESS_WORLD_FIXTURE=1`, diffed before/after — only `"season": 0` added, nothing
+      else. Verified: `calendarLabel.test.ts`/`TopStrip.test.tsx` rewritten (23 tests, including the
+      old "never mentions season" case flipped to its opposite plus a still-live "never invents Long
+      Wither" case); full web suite 1273/1274 (the one failure is `disabledReasonGuard`'s pre-existing
+      GG-55 gap in an unrelated `Commanders` feature); E2E.Tests full suite 206/207 (the one failure is
+      the same pre-existing `RpgProgressionE2ETests` defect noted below).
+- [x] The A8 invariant passes across the **full authored level range** — development raises yield faster than upkeep, or nobody develops. `DevelopmentYieldTests.A8_holds_for_every_level_across_a_generous_authored_range_marginal_yield_beats_marginal_upkeep` — 5/5.
+- [x] Every kind in `WorldCommandKinds.All` survives the store round trip with every payload field intact — `sustain`, `build`, `raise` and `develop` included. `WorldCommandRoundTripPropertyTests` iterates `WorldCommandKinds.All` directly — confirmed passing as part of the full 743/752 Data.Tests run (the 752's own 9 failures are all pre-existing, unrelated `Items`-namespace defects, none in this test).
+- [x] **Exactly two golden re-blesses**, both triaged in advance, and `RulesetVersion` advanced **exactly once**. `RulesetVersion` confirmed at 7 (was 6, per `decisions.md`'s own row). The phase's two re-blesses: W44's field-batch addition (`RulesetVersion` unchanged) and W58's real bump (`RulesetVersion` 6→7) — **found the second one was missing its own numbered history entry** in `WorldWaveOneAcceptanceTests.cs` despite genuinely moving the golden (homeworld/ember-hollow both accrue `RecruitStock` at this scenario's week boundaries); added entry #15 recording it, retroactively, this pass.
+- [x] `DevelopmentLevel` has a producer; `SectorPhase.Developed` is gone. `GrowthPhases.AdvanceProject` raises `DevelopmentLevel` on project completion (W53); `grep -rn "SectorPhase.Developed" src/` returns nothing.
+- [x] All suites and the four boundary guards green: `dotnet test tests\FusionRpg.Core.Tests` (883/883), `...\FusionRpg.Data.Tests` (743/752 — 9 pre-existing, unrelated `Items`-namespace failures, none in World), `...\FusionRpg.Guard.Tests` (202/202), `...\FusionRpg.E2E.Tests` (206/207 — 1 pre-existing, unrelated `RpgProgressionE2ETests` failure); `cd web\fusion-rpg-web; npm test` (1273/1274 — 1 pre-existing, unrelated `disabledReasonGuard`/GG-55 failure in the `Commanders` feature). All four boundary guards (`guard-single-writer`, `guard-secondary-no-unity`, `guard-funnel-delta`, `guard-dal`) OK.
 - [ ] **Owner playtest** — the only thing tests cannot sign: play forty turns and say whether raising a legion feels like a decision or a formality, and whether a season change is legible without reading the report.
 - [x] Commit message draft and touched paths handed to the owner (**git hands-off — never commit**).
       — handed over 2026-09-04 for the work actually done so far (W42-W51 only — this checkpoint's

@@ -137,7 +137,18 @@ public static class DropTableDraw
             [DropEntryKind.Insert] = "X7 must land the 'gem' container_kind, then module 16 (sockets)",
             [DropEntryKind.Charm] = "X7 must land the 'charm' container_kind, then module 13 (set-charm-gen)",
             [DropEntryKind.Consumable] = "module 18 (consumables); ssot-generation.md §5.4 keeps it deliberately absent until the action layer exists",
-            [DropEntryKind.Unique] = "module 17 (uniques)",
+            // ⚠ Module 17 SHIPPED 2026-09-05 — the class, its eight rule ids, the cross-row checks,
+            // `item_unique` and the parity metric are all live, and the 144 refs below all resolve
+            // against its corpus. The kind stays unavailable because what is missing is now one step
+            // further on: a CONCRETE unique CONTAINER. The corpus holds 144 seeds (bands and families,
+            // per seed-contract.md §3's no-numbers rule) and no `effect_container` row exists for any
+            // of them, so a draw would resolve to nothing. Rolling a seed into a container is the
+            // runtime generator's, per the seed-to-concrete rule. Reason updated rather than left
+            // pointing at a module that now exists.
+            [DropEntryKind.Unique] =
+                "module 17 (uniques) shipped the class and item_unique, but no CONCRETE unique container " +
+                "exists yet — the 144 are seeds, and rolling one into an effect_container is the runtime " +
+                "generator's (seed-to-concrete)",
         };
 
     public static bool IsAvailable(DropEntryKind kind) => !UnavailableKinds.ContainsKey(kind);

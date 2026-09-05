@@ -455,7 +455,7 @@ Owner instruction: work the whole ordered list. Eight of ten landed; two are hel
 | 5 | `inventory.json` resynced to §10 (both now **27 rows**), stale paths repointed, `power-map.md`'s "14" corrected | ✅ done |
 | 6 | **XP ledger migrated.** `xp_before`/`xp_after` REAL → INTEGER; three reads moved to the storage-class-tolerant `ReadXp`, so legacy databases keep working; four DTO fields widened to `long` | ✅ done |
 | 7 | One index for the tier gate — **half-closed** by fix 1. Specimen levels and aptitude points now share a shape; `element_mastery` and almanac XP still do not exist | ◐ partial |
-| 8 | Star-merge reward pairing · promotion-vs-recipe pricing | ⏸ **held — needs an owner anchor**, see below |
+| 8 | Star-merge reward pairing · promotion-vs-recipe pricing | ✅ done — owner chose **10 stars + hold the cap**, see below |
 | 9 | `ContentScale.Apply` widened to `long` in and out; `SoulEarnPolicy.KillEarn`/`MatchEndEarn` follow | ✅ done |
 | 10 | `DropVolume` §10 row | ✅ done |
 
@@ -464,17 +464,34 @@ a missed defect: it is a rebuildable per-reason **cache** serialized as JSON in 
 live rows already hold `12.0`, which a `long` property would refuse to deserialize. The SSOT value it
 summarizes — `rpg_xp_ledger.delta` — is `long` end to end. The comment now says so in place.
 
-### Why fix 8 is held
+### Fix 8, as decided (owner, 2026-09-05)
 
-Both halves are real, and both are **balance changes with a free parameter nobody has chosen**:
+Two halves, both landed.
 
-- **Star merge.** Cumulative sacrifices to star `n` are `n(n+3)/2` (triangular) against a reward of
-  `30‰ × n` (linear), so reward-per-sacrifice is `60/(n+3)` — star 5 is a **2× worse deal** than star
-  1. Pairing them fixes the ratio, but only after picking which end stays put: hold star 5's total
-  (early stars get weaker) or hold star 1's (the cap roughly doubles). Those are different games.
-- **Promotion.** `promotionCost` is a flat 200 souls at every rung while `recipeCost` escalates
-  150 → 1000 in the same file.
+**Star merge — the reward is now indexed on the cost, and the ladder runs to 10.**
 
-`StarPolicy.cs` says its numbers are **spec-locked and ask-first (a balance boundary)**, and
-`SacrificesForStar`'s `n+1` curve is a 2026-08-21 owner lock. So the shape is a design call, not a
-defect to be quietly patched — recorded here rather than guessed at.
+The defect: cumulative sacrifices to star `n` are `C(n) = n(n+3)/2` (triangular) while the reward was
+`perStar × n` (linear), so reward-per-sacrifice was `60/(n+3)` — star 5 was an **exactly 2× worse deal**
+than star 1. Same shape as the passive tree's tier-ladder defect, and the same fix.
+
+`StarPolicy.StarPowerMilli(n) = perStar · n(n+3) / (ReferenceStar + 3)`, anchored at star 5 so **no
+demon at or below the old cap changes value**. That divisor is derived from the anchor, not tuned.
+
+| star | 1 | 2 | 3 | 4 | **5** | 6 | 7 | 8 | 9 | 10 |
+|---|---|---|---|---|---|---|---|---|---|---|
+| reward (‰) | 15 | 38 | 68 | 105 | **150** | 203 | 263 | 330 | 405 | 488 |
+| cumulative sacrifices | 2 | 5 | 9 | 14 | **20** | 27 | 35 | 44 | 54 | 65 |
+| **reward per sacrifice** | 7.5 | 7.6 | 7.56 | 7.5 | **7.5** | 7.52 | 7.51 | 7.5 | 7.5 | 7.51 |
+
+Flat to within integer rounding, against a 2× spread before. `MaxStar` 5 → 10 and per-rarity caps
+doubled (3/4/5 → 6/8/10), preserving the rarity shape exactly. `SacrificesForStar`'s `n+1` curve — a
+2026-08-21 owner lock — is **untouched**; the reward moved onto it instead.
+
+`StarPolicyTests.Star_reward_is_paired_to_the_triangular_sacrifice_cost` pins the property by
+*computing* reward-per-sacrifice across the whole ladder rather than asserting copied numbers, so a
+future tuning change that breaks flatness fails loudly.
+
+**Promotion — per-rung pricing.** `promotionCostByRarity` replaces the flat 200 souls, shaped like
+`recipeCost`'s own 150 → 1000 escalation (Chaff 150 … Firstseed+ 1000). Promotion is once per
+specimen, so it cannot compound. The flat `promotionCost` row stays as the fallback for a rung the
+table does not name.

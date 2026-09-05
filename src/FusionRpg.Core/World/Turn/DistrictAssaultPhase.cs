@@ -1,0 +1,96 @@
+namespace FusionRpg.Core.World.Turn;
+
+/// <summary>
+/// The Assaults phase: fighting for the legions standing in a hostile district's core
+/// (base-defense-ideal.md decision 26; spec-siege-seam.md §5). Modelled on <see cref="SiegePhase"/>'s
+/// own structure deliberately — same command loop, same `Drop` reason-string shape,
+/// <see cref="BattleReporting.Fight"/> at the end — but a district assault is a DIFFERENT thing from
+/// a guard fight: `assault` targets the ground itself (a `BattleKinds.District` fight against
+/// whichever hostile force holds it), not one slot's guard. `SiegePhase.cs` is untouched by this
+/// file's existence.
+///
+/// <para><b>This phase does not generate a board.</b> That is `district-layout`'s job, wired in by a
+/// later module (`siege-resolver`/`siege-positions`) once a request actually needs one —
+/// <see cref="BattleRequest.Board"/> stays null here, exactly the same default-is-today's-behaviour
+/// discipline every other field `siege-seam` added takes. This phase only proves the command, the
+/// kind, and the phase itself exist and are wired correctly.</para>
+/// </summary>
+public static class DistrictAssaultPhase
+{
+    public static WorldState Run(
+        WorldState world,
+        IReadOnlyList<WorldCommand> commands,
+        TurnReport report,
+        string phase,
+        int turn,
+        IBattleResolver resolver,
+        ulong seed)
+    {
+        var next = world;
+
+        foreach (var command in commands)
+        {
+            if (command.Kind != WorldCommandKinds.Assault) continue;
+
+            var entity = next.Entities.FirstOrDefault(e =>
+                string.Equals(e.EntityId, command.EntityId, StringComparison.Ordinal));
+            if (entity is null)
+            {
+                Drop(report, phase, command, "entity.unknown");
+                continue;
+            }
+
+            // Standing in the sector is the whole cost of admission — the same discipline
+            // SiegePhase's own `clear` order takes for a slot's guard.
+            if (entity.AtSectorId is null
+                || !string.Equals(entity.AtSectorId, command.SectorId, StringComparison.Ordinal))
+            {
+                Drop(report, phase, command, "sector.elsewhere");
+                continue;
+            }
+
+            var sector = next.Sectors.FirstOrDefault(s =>
+                string.Equals(s.SectorId, entity.AtSectorId, StringComparison.Ordinal));
+            if (sector is null)
+            {
+                Drop(report, phase, command, "sector.unknown");
+                continue;
+            }
+
+            // Assaulting ground this faction already holds is not a battle — "the attacker cannot
+            // reach the defender" is not a difficulty setting, and neither is "there is no defender
+            // to reach."
+            if (string.Equals(sector.OwnerFactionId, entity.OwnerFactionId, StringComparison.Ordinal))
+            {
+                Drop(report, phase, command, "sector.already-yours");
+                continue;
+            }
+
+            // The defender, if any: a hostile force standing in the same sector. An unopposed
+            // assault (nobody defending) still fights — BattleReporting.Fight already resolves a
+            // one-sided combatant list without a defender entity, the same way a Sector-kind contact
+            // battle does when the other side has already died earlier in the turn.
+            var defender = next.Entities.FirstOrDefault(e =>
+                string.Equals(e.AtSectorId, sector.SectorId, StringComparison.Ordinal)
+                && !string.Equals(e.OwnerFactionId, entity.OwnerFactionId, StringComparison.Ordinal));
+
+            var request = new BattleRequest
+            {
+                BattleId = BattleKinds.IdFor(turn, BattleKinds.District, sector.SectorId, entity.EntityId, defender?.EntityId),
+                Kind = BattleKinds.District,
+                LocationId = sector.SectorId,
+                TimeMilli = TurnEventQueue.TurnEndMilli,
+                AttackerEntityId = entity.EntityId,
+                DefenderEntityId = defender?.EntityId,
+                DefenderStationary = defender is not null,
+            };
+
+            next = BattleReporting.Fight(next, request, resolver, report, phase, seed);
+        }
+
+        return next;
+    }
+
+    static void Drop(TurnReport report, string phase, WorldCommand command, string reason) =>
+        report.Add(phase, TurnReportKinds.CommandDropped, command.CommandId, reason);
+}

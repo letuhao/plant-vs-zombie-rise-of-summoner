@@ -1,3 +1,5 @@
+using FusionRpg.Core.World.District;
+
 namespace FusionRpg.Core.World.Turn;
 
 /// <summary>What a battle is being fought over.</summary>
@@ -11,6 +13,13 @@ public static class BattleKinds
 
     /// <summary>A deliberate attack on a slot's guard — never a consequence of walking past it.</summary>
     public const string Guard = "guard";
+
+    /// <summary>
+    /// An assault on the district around a Seat (base-defense-ideal.md decision 26). Distinct from
+    /// <see cref="Guard"/>: a guard defends one slot and is cleared by a `clear` order; a district
+    /// assault is fought on a board for the legions standing in its core.
+    /// </summary>
+    public const string District = "district";
 
     /// <summary>
     /// A battle's id: deterministic, unique within a turn, and readable in a report. It lives here
@@ -53,6 +62,66 @@ public sealed record BattleRequest
 
     public string? GuardWaveId { get; init; }
     public int? SlotIndex { get; init; }
+
+    /// <summary>
+    /// The board this is fought on, or null for every battle kind that has none — which is all
+    /// three kinds that predate `siege-seam`. Null is the default and the existing path, so a
+    /// sector fight, a lane meeting and a guard clear construct exactly the record they construct
+    /// today.
+    /// </summary>
+    public BoardProjection? Board { get; init; }
+
+    /// <summary>
+    /// What each side may spend during this battle. Null for every battle kind without a board.
+    ///
+    /// <para><b>An in-battle build may NOT debit `WorldSector.LoamStock` or `WorldEntity.CarriedLoam`
+    /// directly</b> — combat never writes world state; it does not claim sectors, spend shards, or
+    /// move legions. The budget crosses in, the SPEND crosses back, and only the world debits.
+    /// `siege-economy` owns the reconciliation.</para>
+    /// </summary>
+    public IReadOnlyList<SideBudget>? Budgets { get; init; }
+}
+
+/// <summary>
+/// What the world hands the combat module about the ground (spec-siege-seam.md §1). Deliberately a
+/// PROJECTION rather than a materialised <see cref="GridSpec"/>: the world says which sector and
+/// which edge, and the combat side derives the grid from `district-layout` itself. Passing a
+/// materialised grid across the seam would make the world module own a board representation, which
+/// is the coupling this file's own header refuses — the world module never learns anything about
+/// rounds, decks, or damage.
+/// </summary>
+public sealed record BoardProjection
+{
+    public string SectorId { get; init; } = "";
+    public ulong WorldSeed { get; init; }
+    public BoardEdge AttackerEdge { get; init; }
+
+    /// <summary>Slot index → what stands there. Empty is legal — a district with no structures.</summary>
+    public IReadOnlyList<SlotProjection> Slots { get; init; } = Array.Empty<SlotProjection>();
+}
+
+/// <summary>One slot's state as the world hands it across the seam — enough for the combat side to
+/// place a structure on the board it derives, without the world knowing what "placing" means.</summary>
+public sealed record SlotProjection
+{
+    public int SlotIndex { get; init; }
+    public string SlotTypeId { get; init; } = "";
+    public string? StructureId { get; init; }
+    public string? OwnerFactionId { get; init; }
+}
+
+/// <summary>
+/// One side's spend budget for a battle with a board. The asymmetry is authored here, not invented
+/// downstream: a defender draws from the sector's own stock (at home, supplied — blockading
+/// production is how an attacker stops them rebuilding); an attacker draws from what the legion
+/// marched in with (finite).
+/// </summary>
+public sealed record SideBudget
+{
+    public string EntityId { get; init; } = "";
+
+    /// <summary>What this side may spend. `long` — a magnitude `contentScale` touches.</summary>
+    public long Amount { get; init; }
 }
 
 /// <summary>What one side has left when the dust settles.</summary>
@@ -63,11 +132,27 @@ public sealed record BattleSideOutcome
     /// <summary>Members still alive, in their original order, carrying their new wounds.</summary>
     public IReadOnlyList<WorldEntityMember> Survivors { get; init; } = Array.Empty<WorldEntityMember>();
 
-    /// <summary>Beaten but alive: it keeps the field it is on and loses next turn's orders.</summary>
+    /// <summary>
+    /// Beaten but alive: falls back down the lane it was on, whether it was still mid-crossing or had
+    /// fully arrived this same turn (<see cref="BattleApplication"/>'s own fall-back logic), or holds
+    /// the ground it was standing on if it had no lane this turn to fall back down — and loses next
+    /// turn's orders either way.
+    /// </summary>
     public bool Routed { get; init; }
 
     /// <summary>Nothing walked away — the entity leaves the map.</summary>
     public bool Destroyed { get; init; }
+
+    /// <summary>
+    /// Left the field deliberately, whole (audit F5). **Distinct from <see cref="Routed"/>**, which
+    /// is "beaten but alive and loses next turn's orders", and from <see cref="Destroyed"/>. A raid
+    /// that achieves its objective and withdraws has not been beaten and must not be penalised as
+    /// though it had — that penalty is precisely what would make raiding a dominated strategy nobody
+    /// ever picks. Mutually exclusive with <see cref="Destroyed"/> — <see cref="BattleApplication.Apply"/>
+    /// throws rather than silently picking one, since a resolver producing both has a bug that would
+    /// otherwise show up as a ghost army.
+    /// </summary>
+    public bool Withdrawn { get; init; }
 }
 
 public sealed record BattleOutcome
@@ -80,6 +165,26 @@ public sealed record BattleOutcome
     public bool GuardCleared { get; init; }
 
     public IReadOnlyList<BattleSideOutcome> Sides { get; init; } = Array.Empty<BattleSideOutcome>();
+
+    /// <summary>What happened to each slot on the board. Empty for every battle that has no board —
+    /// the same default-is-today's-behaviour discipline as <see cref="BattleRequest.Board"/>.</summary>
+    public IReadOnlyList<SlotOutcome> SlotResults { get; init; } = Array.Empty<SlotOutcome>();
+}
+
+/// <summary>One board slot's result at the end of a district assault.</summary>
+public sealed record SlotOutcome
+{
+    public int SlotIndex { get; init; }
+
+    /// <summary>Remaining structure HP. **long** — a structure's HP is a magnitude `contentScale`
+    /// touches, and CLAUDE.md's rule 1 is unconditional for those.</summary>
+    public long StructureHp { get; init; }
+
+    public bool StructureDestroyed { get; init; }
+
+    /// <summary>Who ended the battle occupying it — possession is by occupation (decision 4:
+    /// buildings have no ownership). Null means nobody.</summary>
+    public string? HeldByFactionId { get; init; }
 }
 
 /// <summary>

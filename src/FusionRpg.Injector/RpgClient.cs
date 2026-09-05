@@ -349,7 +349,13 @@ public sealed class RpgClient
     /// <c>shares</c> map) rather than adding a new server endpoint. Called at session start
     /// (<see cref="StartAsync"/>) and on the same <c>"AptitudesUpdated"</c> SignalR broadcast
     /// <c>AptitudeEndpoints.BroadcastBestEffort</c> already sends on every save — never on a per-hit
-    /// poll.</summary>
+    /// poll.
+    ///
+    /// <para><b>species-build `allocation-transport` (module 6).</b> The same response now also
+    /// carries a `species` map (`{ speciesId: { aptitudeId: points } }`) alongside the unchanged
+    /// `shares` — parsed here too, in the SAME fetch, at the SAME cadence, rather than a second HTTP
+    /// round trip: `species` is additive on the wire, so it is additive here as well.</para>
+    /// </summary>
     public async Task RefreshCommanderAllocationAsync()
     {
         try
@@ -373,6 +379,24 @@ public sealed class RpgClient
                     FusionRpg.Core.Stats.Aptitudes.AllocationScope.Commander, share.Name, points);
             }
             CheatState.ApplyCommanderAllocation(allocation);
+
+            var speciesAllocations = new Dictionary<string, FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation>(StringComparer.Ordinal);
+            if (doc.RootElement.TryGetProperty("species", out var speciesEl) && speciesEl.ValueKind == JsonValueKind.Object)
+            {
+                foreach (var speciesEntry in speciesEl.EnumerateObject())
+                {
+                    if (speciesEntry.Value.ValueKind != JsonValueKind.Object) continue;
+                    var speciesAllocation = FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Empty;
+                    foreach (var share in speciesEntry.Value.EnumerateObject())
+                    {
+                        if (!share.Value.TryGetInt64(out var points) || points == 0) continue;
+                        speciesAllocation += FusionRpg.Core.Stats.Aptitudes.AptitudeAllocation.Single(
+                            FusionRpg.Core.Stats.Aptitudes.AllocationScope.DemonType, share.Name, points);
+                    }
+                    speciesAllocations[speciesEntry.Name] = speciesAllocation;
+                }
+            }
+            CheatState.ApplySpeciesAllocations(speciesAllocations);
         }
         catch (Exception ex)
         {

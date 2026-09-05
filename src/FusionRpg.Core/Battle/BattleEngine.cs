@@ -355,13 +355,22 @@ public static partial class BattleEngine
                 // releases around each sequential action and can never refuse, because with atomic
                 // resolution a battle is already serialised regardless of W (ActionSlots' own doc).
                 var economy = battleEconomy;
-                var slots = new Timeline.ActionSlots(activeProfile.W, activeProfile.WScope);
                 string EconomyKey(ActorState a) =>
                     economy.Scope == Timeline.TurnEconomyScope.PerSide ? "side:" + a.Setup.Side : a.Setup.Key;
 
                 foreach (var a in order) economy.ResetForNewTurn(EconomyKey(a), roundClock.Now);
 
-
+                // `battle-tempo` `timeline-dispatch` (D14, spec-timeline-dispatch.md §2.5): a declared
+                // capability, never a branch on ProfileId/AdvancePolicyKind (the same discipline
+                // OrdersBySpeed already established). False for every catalog row today, including
+                // hybrid-atb -- this branch is reached only by a synthetic, never-shipped test profile.
+                if (activeProfile.UsesTimelineDispatch)
+                {
+                    RunTimelineActionPhase(state, activeProfile, order, economy, EconomyKey, roundClock, rounds, trace, intentSource);
+                }
+                else
+                {
+                var slots = new Timeline.ActionSlots(activeProfile.W, activeProfile.WScope);
                 var phaseBroken = false;
                 bool anyActed;
                 do
@@ -439,6 +448,7 @@ public static partial class BattleEngine
                     }
                 }
                 while (anyActed && !phaseBroken);
+                }
 
                 // B38: anyone still Ready never got a turn this round (no budget, no slot, or the phase
                 // broke). `Ready -> Charging` is the kernel's own "passed turn" edge — it must be taken

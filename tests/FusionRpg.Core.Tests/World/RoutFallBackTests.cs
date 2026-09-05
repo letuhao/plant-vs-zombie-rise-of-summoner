@@ -10,8 +10,11 @@ namespace FusionRpg.Core.Tests.World;
 /// specced but never wired — the owner confirmed directly, 2026-09-05, that it should be).
 ///
 /// <see cref="RoutLifecycleTests"/> already proves the turn-cost bookkeeping using a stationary
-/// Contact standoff (both forces `AtSectorId`, never mid-lane) — this file is the lane-crossing
-/// counterpart, the one shape that actually has somewhere to fall back *to*.
+/// Contact standoff (both forces `AtSectorId` since before the turn started, neither mid-lane) — this
+/// file covers the two shapes that actually have somewhere to fall back *to*: a lane-crossing rout,
+/// and (amended 2026-09-05, closing a real completeness gap the owner confirmed rather than an
+/// intended scope line) an attacker that fully marches into a sector this same turn and then loses
+/// the Sector-kind contact fight that follows.
 /// </summary>
 public class RoutFallBackTests
 {
@@ -70,6 +73,25 @@ public class RoutFallBackTests
             }
             : throw new InvalidOperationException());
 
+    /// <summary>Dave's legion starts at `homeworld` with a generous budget and marches the whole of
+    /// `l-home-ember` to `ember-hollow` in one turn — the wild pack sits there already, `hold`ing
+    /// since before the turn started (the template's own default position and stance), so it is the
+    /// stationary defender and Dave is the one arriving fresh, not the one mid-crossing.</summary>
+    static WorldState ArrivingAttacker() =>
+        WorldValidation.Validate(WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 1) is var world
+            ? world with
+            {
+                Entities = world.Entities
+                    .Select(e => e.EntityId switch
+                    {
+                        "e-dave-legion-1" => e with { MovementRemaining = 5000 },
+                        "e-wild-pack-1" => e with { AtSectorId = "ember-hollow" },
+                        _ => e
+                    })
+                    .ToList()
+            }
+            : throw new InvalidOperationException());
+
     static WorldEntity Legion(WorldState w) => w.Entities.Single(e => e.EntityId == "e-dave-legion-1");
 
     static WorldCommand March(string commander, string entityId) => new()
@@ -109,7 +131,10 @@ public class RoutFallBackTests
     {
         // The defender in this fixture never routs — its own lane position must be untouched by
         // BattleApplication's fall-back logic, proving the reversal is scoped to the routed side only.
-        var result = TurnEngine.Step(MidCrossing(), Array.Empty<WorldCommand>(), seed: 1, new AttackerAlwaysRouts());
+        var result = TurnEngine.Step(
+            MidCrossing(),
+            new[] { March("dave", "e-dave-legion-1"), March("wild", "e-wild-pack-1") },
+            seed: 1, new AttackerAlwaysRouts());
 
         var wildPack = result.World.Entities.Single(e => e.EntityId == "e-wild-pack-1");
         Assert.False(wildPack.Routed);
@@ -118,12 +143,60 @@ public class RoutFallBackTests
     }
 
     [Fact]
+    public void A_legion_that_fully_arrives_and_is_then_routed_falls_back_down_the_lane_it_just_used()
+    {
+        // Dave never stops mid-lane here — the march fully completes, `AtSectorId` is set and
+        // `OnLaneId` is cleared, exactly like any ordinary arrival — before the Sector-kind contact
+        // fight against the wild pack's standing garrison ever fires.
+        var result = TurnEngine.Step(
+            ArrivingAttacker(), new[] { March("dave", "e-dave-legion-1") }, seed: 1, new AttackerAlwaysRouts());
+
+        Assert.Contains(result.Report.Entries, e => e.Kind == TurnReportKinds.Battle); // sanity: they fought
+
+        var legion = Legion(result.World);
+        Assert.True(legion.Routed);
+        // `l-home-ember`'s ends are homeworld/ember-hollow; Dave arrived at ember-hollow, so "the way
+        // it came" is homeworld — the same lane it just marched, reversed.
+        Assert.Equal("homeworld", legion.AtSectorId);
+        Assert.Null(legion.OnLaneId);
+        Assert.Null(legion.OnLaneTowardSectorId);
+        Assert.Equal(0, legion.LaneProgressMilli);
+    }
+
+    [Fact]
+    public void An_entrenched_defender_that_never_moved_this_turn_has_nowhere_to_fall_back_to()
+    {
+        // The wild pack never moved and never had a lane to fall back to in the first place — this is
+        // the genuine "already standing at a sector when it routed" case FallBack's own doc comment
+        // describes, still real after the arrival-lane fix landed alongside it.
+        var outcome = new BattleOutcome
+        {
+            BattleId = "b-garrison",
+            Sides = new[]
+            {
+                new BattleSideOutcome { EntityId = "e-wild-pack-1", Survivors = Array.Empty<WorldEntityMember>(), Routed = true }
+            }
+        };
+
+        var world = ArrivingAttacker();
+        var next = FusionRpg.Core.World.Turn.BattleApplication.Apply(world, outcome);
+        var wildPack = next.Entities.Single(e => e.EntityId == "e-wild-pack-1");
+
+        Assert.True(wildPack.Routed);
+        Assert.Equal("ember-hollow", wildPack.AtSectorId);
+        Assert.Null(wildPack.OnLaneId);
+    }
+
+    [Fact]
     public void A_force_already_routed_this_turn_does_not_fall_back_a_second_time()
     {
         // Route it once (falls back to homeworld), then feed the same already-routed world straight
         // back into a second fight naming the same entity — BattleApplication must not reverse a
         // force that arrived at this fight already routed (Apply's own `newlyRouted` gate).
-        var first = TurnEngine.Step(MidCrossing(), Array.Empty<WorldCommand>(), seed: 1, new AttackerAlwaysRouts());
+        var first = TurnEngine.Step(
+            MidCrossing(),
+            new[] { March("dave", "e-dave-legion-1"), March("wild", "e-wild-pack-1") },
+            seed: 1, new AttackerAlwaysRouts());
         var routedAtHomeworld = Legion(first.World);
         Assert.Equal("homeworld", routedAtHomeworld.AtSectorId);
 

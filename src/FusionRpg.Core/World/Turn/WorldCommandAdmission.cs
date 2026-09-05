@@ -123,6 +123,16 @@ public static class WorldCommandAdmission
                 return (false, "slot.unknown");
         }
 
+        if (command.Kind == WorldCommandKinds.Assault)
+        {
+            // `assault` names its target outright — entity, sector. Whether the legion is actually
+            // standing there, and whether the sector is still hostile, is legality at reveal: both
+            // can change between filing the order and the turn resolving, the same discipline
+            // `clear`'s own admission rule already states.
+            if (command.EntityId is null) return (false, "entity.missing");
+            if (namedSector is null) return (false, "sector.missing");
+        }
+
         foreach (var laneId in command.LanePath)
             if (world.Lanes.All(l => !string.Equals(l.LaneId, laneId, StringComparison.Ordinal)))
                 return (false, "lane.unknown");

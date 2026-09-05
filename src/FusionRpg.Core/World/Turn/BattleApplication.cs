@@ -7,7 +7,9 @@ namespace FusionRpg.Core.World.Turn;
 /// </summary>
 public static class BattleApplication
 {
-    public static WorldState Apply(WorldState world, BattleOutcome outcome)
+    public static WorldState Apply(
+        WorldState world, BattleOutcome outcome,
+        IReadOnlyDictionary<string, string>? arrivedViaLane = null)
     {
         if (outcome.Sides.Count == 0) return world;
 
@@ -22,17 +24,27 @@ public static class BattleApplication
                 continue;
             }
 
+            // Incoherent outcome: a resolver bug here would otherwise show up as a ghost army --
+            // loud, at the seam, rather than silently picked one way.
+            if (side.Withdrawn && side.Destroyed)
+                throw new InvalidOperationException(
+                    $"BattleApplication.Apply: side '{side.EntityId}' is both Withdrawn and Destroyed -- incoherent outcome.");
+
             // Destroyed forces leave the map entirely. Keeping an empty husk around would let it
             // hold ground, project zone of control, and block a claim with nothing in it.
             if (side.Destroyed) continue;
 
-            var newlyRouted = side.Routed && !entity.Routed;
-            var placed = newlyRouted ? FallBack(entity, world.Lanes) : entity;
+            // Withdrawn is NOT routed (audit F5) -- this line is the whole feature: a withdrawing
+            // force keeps its orders. A newly-routed force that is NOT withdrawing still falls back.
+            var newlyRouted = side.Routed && !entity.Routed && !side.Withdrawn;
+            string? arrivalLane = null;
+            arrivedViaLane?.TryGetValue(entity.EntityId, out arrivalLane);
+            var placed = newlyRouted ? FallBack(entity, world.Lanes, arrivalLane) : entity;
 
             entities.Add(placed with
             {
                 Members = side.Survivors,
-                Routed = entity.Routed || side.Routed
+                Routed = entity.Routed || (side.Routed && !side.Withdrawn)
             });
         }
 
@@ -48,24 +60,41 @@ public static class BattleApplication
     /// second reversal even without that caller-side check, since a routed entity's next battle would
     /// have already cleared its lane fields below).
     ///
-    /// No new stored state: a legion mid-crossing a lane already carries
-    /// <see cref="WorldEntity.OnLaneId"/> and <see cref="WorldEntity.OnLaneTowardSectorId"/>, so "the
-    /// way it came" is simply the lane's other endpoint — turning around, not pathing anywhere new.
+    /// Covers two shapes, unified by one formula (amended 2026-09-05 — the first cut only handled the
+    /// first shape, silently treating the second exactly like a genuine long-standing garrison,
+    /// which the owner confirmed was a real gap, not an intended scope line):
     ///
-    /// A force that was already standing at a sector when it routed (a garrison losing a Contact or
-    /// Siege fight on its own ground, or the entrenched-bonus defender) has nothing to fall back
-    /// *from* — it stays exactly where entrenched combat already left the map, which is the same
-    /// distinction `PlaceholderBattleResolver`'s own `DefenderBonusMilli` already draws between a
-    /// legion caught marching and one dug in.
+    /// <list type="bullet">
+    /// <item>Mid-crossing: the entity still carries <see cref="WorldEntity.OnLaneId"/> and
+    /// <see cref="WorldEntity.OnLaneTowardSectorId"/> — "the way it came" is simply the lane's other
+    /// endpoint, no new stored state needed.</item>
+    /// <item>Arrived this turn: a march that fully completed already cleared <c>OnLaneId</c>, so
+    /// <paramref name="arrivedViaLaneId"/> (movement-phase-local, from <see cref="BattleReporting.Fight"/>'s
+    /// own parameter — never a <see cref="WorldEntity"/> field, never hashed, since it cannot survive
+    /// past the <see cref="Movement.MovementPhase"/> call that produced it) stands in for it instead.</item>
+    /// </list>
+    ///
+    /// Either way the "destination" side of the lane is known (the sector it was heading toward, or
+    /// the sector it now stands in) and the origin is simply the lane's *other* end.
+    ///
+    /// A force with neither — a genuine garrison losing a Contact or Siege fight on ground it already
+    /// held at turn start, or the entrenched-bonus defender — has nothing to fall back *from* and
+    /// stays exactly where entrenched combat already left the map, the same distinction
+    /// `PlaceholderBattleResolver`'s own `DefenderBonusMilli` already draws between a legion caught
+    /// marching and one dug in.
     /// </summary>
-    static WorldEntity FallBack(WorldEntity entity, IReadOnlyList<WorldLane> lanes)
+    static WorldEntity FallBack(WorldEntity entity, IReadOnlyList<WorldLane> lanes, string? arrivedViaLaneId)
     {
-        if (entity.OnLaneId is not { } laneId || entity.OnLaneTowardSectorId is not { } toward) return entity;
+        var laneId = entity.OnLaneId ?? arrivedViaLaneId;
+        if (laneId is null) return entity;
 
         var lane = lanes.FirstOrDefault(l => string.Equals(l.LaneId, laneId, StringComparison.Ordinal));
         if (lane is null) return entity; // defensive: a vanished lane id falls through unmoved
 
-        var origin = string.Equals(lane.ToSectorId, toward, StringComparison.Ordinal)
+        var destination = entity.OnLaneTowardSectorId ?? entity.AtSectorId;
+        if (destination is null) return entity; // defensive: no destination end to retreat away from
+
+        var origin = string.Equals(lane.ToSectorId, destination, StringComparison.Ordinal)
             ? lane.FromSectorId
             : lane.ToSectorId;
 
@@ -94,4 +123,38 @@ public static class BattleApplication
                 : s)
             .ToList()
     };
+
+    /// <summary>
+    /// A district assault's third application step (spec-siege-seam.md §4) — empty for every
+    /// existing battle kind, so every existing battle takes the identical path. Applies only what
+    /// this module owns: who ended the battle occupying a slot (possession is by occupation,
+    /// decision 4 — buildings have no ownership) and whether a destroyed structure's identity is
+    /// cleared. It does NOT persist remaining structure HP — `WorldSlot` has no HP field yet, and
+    /// wiring one is `structure-state`'s job, not this seam-widening module's.
+    /// </summary>
+    public static WorldState ApplySlotResults(WorldState world, string sectorId, IReadOnlyList<SlotOutcome> slotResults)
+    {
+        if (slotResults.Count == 0) return world;
+
+        var bySlot = slotResults.ToDictionary(r => r.SlotIndex);
+        return world with
+        {
+            Sectors = world.Sectors
+                .Select(s => string.Equals(s.SectorId, sectorId, StringComparison.Ordinal)
+                    ? s with
+                    {
+                        Slots = s.Slots
+                            .Select(sl => bySlot.TryGetValue(sl.SlotIndex, out var result)
+                                ? sl with
+                                {
+                                    OwnerFactionId = result.HeldByFactionId,
+                                    StructureId = result.StructureDestroyed ? null : sl.StructureId
+                                }
+                                : sl)
+                            .ToList()
+                    }
+                    : s)
+                .ToList()
+        };
+    }
 }

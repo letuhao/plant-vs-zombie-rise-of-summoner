@@ -2333,6 +2333,255 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     decision this session has deliberately not made), or accepting that a 10% bar may not be
     realistic for a locally-hosted model at this parameter scale — all further, separate decisions.
     **Still `[~]`, not `[x]`.**
+
+  - **⛔ Prompt/context fix, 2026-09-05, evidence-gated per this gate's own rule ("any one failing
+    means fix and re-run — not escalate") — a real, root-cause fix, re-run against the SAME real
+    briefs, measured, not guessed.** Diagnosed by reading the real unresolved candidates directly
+    (`data/seed/actions/_candidates/general/round-1.json`, `.../family/round-1.json`) rather than
+    re-guessing: every unresolved case is a genuine 1-1-1 vote split with clean JSON and empty
+    `healNotes` (`[{},{},{}]` on every one, confirmed by direct read) — the model produces three
+    valid, schema-conforming samples that simply disagree on `atomFamilies`, never a
+    conformance failure. Read the real briefs
+    (`data/seed/actions/_briefs/round-1.json`) to find why: `pool.allowedAtomFamilies` carries the
+    **full 98-family namespace on every general AND family brief** (measured directly — all 15
+    general and all 38 family briefs show exactly 98), and `general_propose/prompts.py`'s
+    `build_brief` (mirrored byte-for-byte in `family_propose`/`signature_propose`) rendered that
+    pool as **bare hyphenated ids only** — `atom.swiftness`, `atom.evd-brace`, `atom.sust-grit` —
+    with zero semantic signal beyond the id string itself.
+  - **A real, previously-undiagnosed content-quality bug found underneath the vote-disagreement
+    symptom, not just an ambiguity statistic**: two SEPARATE real accepted candidates, both
+    independently named "Shift" by the model (`_candidates/general/round-1.json`,
+    `brief.general.general.011` and `.012` — two different briefs, not one candidate's own split)
+    each resolved from the identical four-way confusable pool: `.011` won on
+    `{atom.swiftness, atom.tempo-surge}` with minority `{atom.evasion, atom.quickening}`; `.012`
+    won on `{atom.evasion, atom.swiftness}` with minority `{atom.swiftness, atom.tempo-surge}` —
+    the SAME four ids recombining differently across two independent briefs. Read against the real
+    source data (`data/seed/items/affix-families/*.json`), `atom.swiftness` and `atom.tempo-surge`
+    write the `zombieSpeed` channel ("faster zombie advance", a **zombie-only** lane-advance
+    mechanic), while `atom.evasion` writes `combat.dodge` and `atom.quickening` writes
+    `attackInterval` — three mechanically unrelated effects that all read as "something about
+    speed" from the bare id alone, one of which cannot legally belong to a **general**, side-
+    agnostic action at all. The model was never conformance-broken; it was picking blind among
+    near-synonym-sounding ids with no way to judge fit.
+  - **Precedent identified and reused, not invented**: `adapters/demons/anchor/descriptions.py` (the
+    demon-seed classification pipeline's own module, cited by name in this task's own brief) already
+    solves the identical problem for `resolve_vote`'s other real callers (`elementPrimary`,
+    `aptitudePrimary`, `rarity`, `threatBand`, `deployMode`, `attackTempo`) with a rich, per-value
+    prose description stating what each value means and — critically — what it is **not**, so the
+    model can tell it apart from its nearest neighbour. `atomFamilies` never had an equivalent
+    because its pool is 98-wide and built per-brief, not a small fixed enum — but the real source
+    data already carries everything needed to build one: every one of the 98 real
+    `data/seed/items/affix-families/*.json` entries has a `name` (e.g. "Bastion"), `tags`
+    (`defensive`/`offensive`/`utility`), and a **magnitude-free** `displayTemplate`
+    (`"{value}% more defense for the whole army"`) — measured 2026-09-05: 98/98 entries carry all
+    three, zero missing.
+  - **The fix**: `vocab.py` gained `load_family_glossary()` (new, next to the existing
+    `load_family_ids()` it shares its file-reading loop with) — reads the same 98-family source
+    fresh every call and returns `id -> "Name [tag] -- humanized template"`
+    (e.g. `atom.swiftness: Swiftness [offensive] -- X faster zombie advance`), with `{value}`/
+    `{element}`/`{variant}` replaced by the literal words `X`/`"an element"`/`"a kind"` — never a
+    number, matching binding constraint 1 ("no model picks a number") because this is brief PROSE,
+    not a schema change; the schema's own `atomFamilies.items.enum` still lists ids only, audited
+    exactly as before. All three propose pipelines' `build_context`/`build_brief`
+    (`general_propose/prompts.py`, `family_propose/prompts.py`, `signature_propose/prompts.py`)
+    gained an optional `family_glossary` parameter, threaded through `sample_draft`/
+    `propose_*_action` (`derive.py` in each) down to each `generate_*_actions.py` entrypoint, which
+    now calls `load_family_glossary()` once per run and passes it through. **Additive, not a
+    rewrite**: omitted or empty, `build_brief`'s output is asserted byte-identical to the pre-fix
+    rendering (`AtomFamilyGlossaryTests.test_no_glossary_is_byte_identical_to_the_bare_id_rendering`
+    in all three test files) — every pre-existing test's own fixture pool (`atom.a`/`atom.b`/
+    `atom.c`) has no real glossary entry and was never touched.
+  - **12 new tests** (`test_general_propose.py`, `test_family_propose.py`, `test_signature_propose.py`
+    — `AtomFamilyGlossaryTests` + `RealFamilyGlossaryTests`), covering: byte-identical fallback,
+    glossed-vs-bare rendering side by side, validators reading ids only (never the glossary) so the
+    schema-audit gate stays untouched, the real 98-family source covering every real brief's own
+    pool with zero misses, no raw `{value}`/`{element}`/`{variant}` token ever leaking into a real
+    gloss, and the exact real "Shift" confusable trio above (`atom.swiftness`/`atom.evasion`/
+    `atom.quickening`) genuinely carrying distinguishing text in the real glossary, not just
+    non-empty strings. **Full suite independently re-run twice, identically: 1597 passed, 1
+    skipped, 288 subtests passed both times** — up from the 1493 this file's own prior entry
+    recorded on 2026-09-04, a gap not fully reconciled here (this fix's own 12 new tests account
+    for only part of it; the remainder is most likely other concurrent, unrelated work already
+    landed in this fast-moving repo between that entry and this pass, consistent with this file's
+    own repeated concurrent-session findings elsewhere, but that specific attribution was not
+    independently confirmed and is stated as a plausible reading, not a checked fact) — 3
+    pre-existing entrypoint tests
+    (`test_real_run_writes_provenance_with_..._candidate_set_hash[_extra_field]` in all three files)
+    needed their own `fake_propose` stub widened to accept the new `family_glossary=None` keyword
+    (a mechanical signature update, not a behavior change) — fixed in place.
+  - **Real re-run, SAME real briefs this session already generated, no regeneration**: reused
+    `data/seed/actions/_briefs/round-1.json` verbatim (the committed 15 general / 38 family briefs
+    run 2 already used) through the real, unmodified LM Studio server
+    (`google/gemma-4-26b-a4b-qat`, `.env` read and confirmed unchanged:
+    `SEEDSMITH_LLM_ENDPOINT=http://localhost:1234/v1/chat/completions`,
+    `SEEDSMITH_LLM_TIMEOUT=420` — server reachability independently confirmed via `GET /v1/models`
+    before spending any call budget). Written to **new, distinct round numbers** so the real
+    baselines stay untouched — **independently re-verified**: `git status --short` on both baseline
+    files (`_candidates/general/round-1.json`, `_candidates/family/round-1.json`) shows no `M`,
+    only the two new files (`_candidates/general/round-901.json`,
+    `_candidates/family/round-901.json`) show as `??`.
+  - **General (A-P1), all 15 real briefs, real model calls**: baseline (no glossary,
+    `_candidates/general/round-1.json`) **9/15 unresolved = 60.0%** → fix (`.../round-901.json`)
+    **6/15 unresolved = 40.0%** — independently recomputed directly from both real files. A **20
+    percentage-point real improvement** on the identical briefs, identical model, identical vote
+    mechanism.
+  - **Family (A-P2), all 38 real briefs, real model calls**: baseline (`_candidates/family/round-1
+    .json`) **24/38 unresolved = 63.2%** → fix (`.../round-901.json`) **21/38 unresolved = 55.3%** —
+    independently recomputed directly from both real files. A smaller but still real **7.9
+    percentage-point improvement**. Combined P1+P2 (the two scopes actually re-tested): baseline
+    **33/53 = 62.3%** → fix **27/53 = 50.9%**. Signature (A-P3, 168 briefs) was **not** re-run for
+    real this pass — a full re-run would cost roughly 4-5× the general pipeline's own call count,
+    judged out of proportion for a bounded fix-and-measure pass; the fix is wired and dry-run-proven
+    against A-P3's own real briefs (`_rounds/round-1/p3-briefs.json`,
+    `generate_signature_actions.py --dry-run` renders glossed families correctly for a real
+    `allpeater` brief) but not exercised with real calls.
+  - **Honest reading of the result: a real, evidence-based, root-cause fix — genuinely smaller
+    residual gap, still far short of the 10% gate on both re-tested scopes.** The fix closes the
+    diagnosed defect (bare ids carrying zero semantic signal) completely — every real gloss is
+    confirmed present, magnitude-free, and disambiguating (`RealFamilyGlossaryTests`) — and the
+    real unresolved rate dropped materially on both scopes tested, not marginally. What remains
+    is a **different, smaller-magnitude version of the same underlying fact stated after the
+    model-swap experiment above**: a modest local model, sampled 3 independent times even with
+    full semantic grounding per family, still does not reliably converge on one identical
+    `atomFamilies` set for every brief — spot-checked directly against the real fix output
+    (`_candidates/family/round-901.json`): several briefs (`brief.family.cactus.001/.002`,
+    `brief.family.cherry.001/.002`, `brief.family.chomper.002`) are still genuine 1-1-1 splits with
+    clean JSON, same signature as before the fix, just fewer of them.
+  - **What is genuinely untried vs. genuinely owner-gated, stated precisely rather than blurred**:
+    untried and in-scope for a future bounded session — few-shot worked examples in the system
+    prompt (one fully-resolved brief->answer pair, a technique this fix did not attempt), or
+    narrowing the rendered pool further when a brief's `pairingRole`/category gives a strong prior.
+    Genuinely needing a further scope decision, unchanged from the assessment above and NOT
+    re-litigated by this fix: raising `SAMPLE_COUNT` above 3 or changing how `resolve_vote` counts a
+    split (a vote/heal-contract change, explicitly out of this fix's bounds and shared
+    infrastructure other pipelines depend on), a deliberate multi-model evaluation (not a repeat of
+    the already-refuted single bounded swap), or accepting that 10% is not a realistic bar for a
+    locally-hosted model at this parameter scale on a genuinely creative multi-select task. Moving
+    `action-corpus-run.v1.json`'s own 10% threshold was not done and remains explicitly off-limits.
+  - **Files changed**: `tools/seedsmith/seedsmith/adapters/actions/vocab.py` (new
+    `load_family_glossary`); `general_propose/prompts.py`, `general_propose/derive.py`,
+    `family_propose/prompts.py`, `family_propose/derive.py`, `signature_propose/prompts.py`,
+    `signature_propose/derive.py` (the `family_glossary` parameter and glossed rendering);
+    `generate_general_actions.py`, `generate_family_actions.py`, `generate_signature_actions.py`
+    (load once per run, thread through); `tests/test_general_propose.py`,
+    `tests/test_family_propose.py`, `tests/test_signature_propose.py` (12 new tests + 3 fixed
+    `fake_propose` stubs). No git write command run; nothing staged or committed by this pass; the
+    two `round-901.json` experiment files are real output kept for evidence, same convention as the
+    model-swap experiment's own `round-1-model-experiment.json`.
+  - **Net effect on Gate G5**: criterion 2 (`unresolved` under 10%) **still FAILS** — 40.0% (general)
+    and 55.3% (family) are both far above 10%, so this is reported as a real, partial, evidenced
+    improvement per this session's own "a real attempt reported with evidence is not a failure to
+    deliver" pattern, not as a closed gate. Criteria 1/3/4 are unaffected by this pass (already MET
+    per the 2026-09-04 run-2 measurement above; this pass touched only prompt content, not
+    candidate-assembly, replay hashing, or coverage reporting). **Still not marked `[x]`** — left at
+    `[~]`, with this evidence, pending either the further scope decision named above or acceptance
+    that the current numbers are the real ceiling for this model/technique combination.
+
+  - **⛔ Worked-example probe, 2026-09-05, bounded, general scope only — a real, honest negative
+    result, the third real attempt on this gate's criterion 2 and the last one taken in this
+    session.** The glossary fix's own report named one specific, untried, in-scope next step: a
+    single fully-resolved brief->answer pair in the system/prompt construction, so the model sees
+    the expected shape once instead of only reading field descriptions. Tried exactly that, once,
+    on general scope only, per the bound given.
+  - **The fix, mirroring the glossary fix's own threading shape exactly, additive throughout**:
+    `general_propose/prompts.py` gained `render_worked_example(family_glossary=None)`, which reads
+    ONE real, already-committed, pinned brief/answer pair fresh from disk every call (never
+    transcribed into a literal — the same "a registry fact is read, never re-typed" discipline
+    `vocab.py` states for `load_family_ids`/`load_family_glossary`) —
+    `data/seed/actions/_briefs/round-1.json` briefId `brief.general.general.004` paired with
+    `data/seed/actions/_candidates/general/round-1.json` candidateId `candidate.general.003`
+    (outcome `accepted`, confidence `high`, the real "Brace" defensive-posture action, independently
+    re-verified as a clean, well-formed, non-borderline accept — `healNotes: [{},{},{}]` on every
+    sample). Rendered through the SAME `build_context`/`build_brief` every real brief uses (never a
+    second hand-written path), with `sample_index` pinned to `0` unconditionally so the illustration
+    is never itself permuted per sample. `build_context` gained an optional `worked_example: str |
+    None = None` parameter, stored in the context dict and rendered by `build_brief` only when
+    truthy — omitted or empty, output is byte-identical to before this probe
+    (`WorkedExampleTests.test_no_worked_example_is_byte_identical_to_without_it`, same discipline as
+    the glossary fix's own equivalent test). Threaded straight through `sample_draft` ->
+    `propose_general_action` -> `generate_general_actions.regenerate()`, which now calls
+    `render_worked_example(family_glossary)` once per run (mirroring `load_family_glossary()`'s own
+    "load once per run" convention) and passes the identical rendered string to every one of the 15
+    briefs' 3 samples each. Schema and vote mechanism genuinely untouched — this is prompt CONTENT
+    only, matching the discipline the glossary fix already established. **General scope only** —
+    family/signature `prompts.py`/`derive.py` were not touched by this probe, per the bound given.
+  - **11 new tests** (`WorkedExampleTests` + `RealWorkedExampleTests` in `test_general_propose.py`):
+    byte-identical omission, the example text inlining verbatim, non-permutation across all three
+    sample indices, composing correctly alongside a live `family_glossary` at the same time,
+    validators reading `allowedAtomFamilies` only (never the example) so the schema-audit gate
+    stays untouched, the real pinned pair resolving to genuine non-empty content carrying the real
+    "Brace"/`atom.evd-brace`/`atom.sust-grit` fields, the real answer itself carrying no numeric
+    magnitude (this pipeline's own acceptance #10 applied to the illustration, not just live
+    output), determinism across repeated calls, and the real dry-run entrypoint actually inlining
+    the worked example into its own rendered sample brief. **Full seedsmith suite independently
+    re-run: 1608 passed, 1 skipped, 288 subtests passed** (up from the glossary fix's own
+    1597/1/288 — the 11-test delta matches exactly, zero unrelated regressions).
+  - **Real re-run, general scope only, SAME real 15 briefs, real model calls, server reachability
+    confirmed via `GET /v1/models` before spending call budget, `.env` read and confirmed
+    unchanged** (`SEEDSMITH_LLM_MODEL=google/gemma-4-26b-a4b-qat`, endpoint/timeout unchanged).
+    Written to a new, distinct round number so both real baselines stay untouched —
+    **independently re-verified**: `git status --short` on `_candidates/general/` shows no `M` on
+    either `round-1.json` or `round-901.json`, only the new `round-902.json` as `??`.
+  - **Result: worse, not better — 11/15 unresolved = 73.3%**, independently recomputed directly
+    from the real output file (`data/seed/actions/_candidates/general/round-902.json`:
+    `{"unresolved": 11, "accepted": 3, "blocked": 1}`). This is worse than BOTH real prior
+    baselines on the identical 15 briefs: the glossary-only fix (`round-901.json`, 6/15 = 40.0%)
+    and even the original pre-glossary baseline (`round-1.json`, 9/15 = 60.0%). Every one of the 11
+    unresolved cases carries clean, empty `healNotes` on all 3 samples (`[{},{},{}]`, confirmed by
+    direct read) — the model produced three valid, schema-conforming samples every time; this
+    probe did not introduce a conformance regression, only a genuine, real increase in cross-sample
+    disagreement (and, newly, one outright decline: `brief.general.general.015` came back
+    `blocked`, an outcome that did not occur at all in either prior real run on this scope).
+  - **A real, honest confound named, not hidden**: the pinned worked example's own source brief,
+    `brief.general.general.004`, is itself one of the 15 briefs in this exact batch — the model was
+    shown "Brace" as the accepted answer for that brief's own role and then asked, later in the
+    same run, to solve that identical brief again while being told not to reuse the name/flavour/
+    families it had just seen accepted for it. That brief resolved `unresolved` in this run (it had
+    resolved `accepted` in both prior real runs) — a real, visible, if small (1/15), self-referential
+    side effect of picking today's example from inside the same batch being measured, worth naming
+    for any future attempt at this technique even though it does not by itself explain the other 10
+    regressions.
+  - **Honest reading, no hedging**: this is a genuine negative result, the same honest-negative
+    class as the earlier model-swap experiment, not a wiring defect — the mechanism is real, tested,
+    additive, and byte-identical when omitted, and it still made the real measured outcome worse on
+    the one real batch tried. A plausible (not proven, not chased further under this bound)
+    explanation: the worked example roughly doubles the per-call prompt length (a second full
+    ~90-family glossed pool plus the answer, on top of the brief's own), which may dilute the
+    model's attention on the specific brief at hand rather than sharpen its judgement — but
+    confirming that would need a further, separate investigation (e.g. a condensed example that
+    does not repeat the full family pool), explicitly out of this bounded probe's own scope.
+  - **Per this task's own instruction, this closes the line of investigation for this session — a
+    complete, final accounting, not a fourth attempt owed.** Four real, evidence-based attempts now
+    exist on Gate G5 criterion 2, all independently verified, none fabricated: (1) baseline
+    diagnosis + defect fixes (76% -> established the real symptom); (2) a bounded model-swap
+    experiment, refuted (100%, worse); (3) the family-glossary fix, a genuine, evidenced partial
+    improvement (60.0% -> 40.0% general, 63.2% -> 55.3% family); (4) this worked-example probe, a
+    genuine, evidenced negative result (40.0% -> 73.3% general). The realistic reading, stated
+    plainly: **the family-glossary fix is this investigation's real high-water mark** (40.0%
+    general / 55.3% family, still far above the 10% gate), and closing the remaining gap for real
+    needs one of the explicitly-named further, separate scope decisions already on record — a
+    deliberate multi-model evaluation (not a repeated bounded swap), a vote/heal-contract change
+    (`SAMPLE_COUNT`/`resolve_vote`, shared infrastructure other pipelines depend on, explicitly
+    off-limits to this pass), or accepting that a 10% bar is not realistic for a locally-hosted
+    model at this parameter scale on a genuinely creative multi-select task — none of which this
+    session decides unilaterally. Moving `action-corpus-run.v1.json`'s own 10% threshold remains
+    explicitly off-limits and was not touched.
+  - **Files changed**: `tools/seedsmith/seedsmith/adapters/actions/general_propose/prompts.py`
+    (new `render_worked_example`, `_load_worked_example_pair`, `worked_example` parameter on
+    `build_context`, rendering in `build_brief`); `general_propose/derive.py` (`worked_example`
+    threaded through `sample_draft`/`propose_general_action`); `generate_general_actions.py` (loads
+    once per run, threads through both the dry-run and real-run paths); `tests/test_general_propose
+    .py` (11 new tests + the pre-existing `fake_propose` stub widened for the new keyword, the same
+    mechanical update the glossary fix made to 3 stubs). Family/signature pipelines untouched — out
+    of this probe's bound. `round-902.json` is real output kept for evidence, same convention as
+    `round-901.json` and the model-swap experiment's own `round-1-model-experiment.json`. No git
+    write command run; nothing staged or committed by this pass.
+  - **Marker left at `[~]`, not `[x]`** — Gate G5 criterion 2 remains open. This is the final state
+    of this line of investigation for this session: three real, evidenced technique attempts (model
+    swap, family glossary, worked example) plus the original diagnosis-and-fix pass constitute a
+    complete, good-faith, evidence-gated effort per this file's own "a real attempt reported with
+    evidence is not a failure to deliver" pattern (criterion 7) — not a gap owed a further attempt
+    under this same bound.
   - **Gate G5 — evidence-gated, not owner-gated (plan §2a).** Proceed when all four criteria hold: zero
     schema-audit defects · `unresolved` under 10% each with a named reason · byte-identical replay proven
     by hash · the coverage report names its thin cells. **Any one failing means fix and re-run — not
@@ -3187,6 +3436,95 @@ Size: **S** ≤ half a day · **M** ~a day · **L** more than a day.
     this session: **"Botanical Spore Burst"** = `atom.fx-poison-on-hit.t1` +
     `atom.fx-spawn-plant-bullet.a.t1`, `affixClass: "suffix"` — coherent and correctly derived, for
     the scope that is actually built.
+  - **⛔ The three remaining P1-table rows (slot domain, ordinal affinity, eligibility tags) —
+    re-investigated 2026-09-05 against the real code, not the doc summary a prior pass read.** A
+    later delegation asserted all three are "closed, concrete domains with real consumers" and
+    directed this session to build them into `AFFIX_SCHEMA`/`entry_for` exactly like `name`/`refs`.
+    Read directly against the real source: **each of the three is genuinely closed, but every one
+    of them closes to "does not belong on `affix-authoring`'s own output," for three different,
+    specific reasons — not to "build it here."** This is a sharper, code-grounded correction of
+    both the original delegate's vague "would be new schema design" hand-wave AND the later
+    delegation's assumption that closed automatically meant buildable-here. Nothing was added to
+    `AFFIX_SCHEMA`, `entry_for`, or the test file — adding any of the three would have been the
+    active mistake, not the cautious one, per the evidence below.
+    - **Tags — CLOSED, and decided the opposite direction, 2026-09-03, binding.**
+      `docs/architecture/effect-pipeline/spec-eligibility-tags.md:32-64` (module 8, build order 8,
+      one before this module): *"an affix's tags are DERIVED from its refs' atoms... **No schema
+      change, no new authoring field.**"* Shipped as `AffixTags.Of`/`AffixTags.ProductionSupplier`
+      (`src/FusionRpg.Core/Effects/Atoms/AffixTags.cs:8-11`, its own doc comment: *"never authored on
+      the affix itself, and no new `effect_affix.tags_json` column"*) — confirmed by direct read,
+      not by the doc alone. `AffixRow` (`ContainerRow.cs:90`) has no tags field; `AtomSeedFile.ReadAffix`
+      (`AtomSeedFile.cs:322-365`) reads no `tags` key. Adding an authored `tags` field to
+      `AFFIX_SCHEMA` would **directly contradict a dated, binding decision** — the exact
+      duplicate-vocabulary hazard that spec explicitly names as the reason not to (*"a second home
+      for a fact the atom layer already owns"*). Spec-affix-authoring.md's own P1-table row
+      (*"eligibility TAGS to attach (module 8 consumes them)"*) predates that decision and is now
+      **stale**, not a live requirement — module 8 is the later, more specific, binding source per
+      this repo's own doc-precedence rule, and it settled tags the other way.
+    - **Affinity — CLOSED, fully built, proven end-to-end — as a property of a (container, affix)
+      PAIRING, owned by whichever feature pipeline draws a shared affix, never a property of the
+      affix entity `affix-authoring` itself produces.** The exact `core`/`likely`/`occasional`
+      vocabulary already ships, verbatim, in a sibling program: `demon-seed`'s `species-effects`
+      (T5.3) — `tools/seedsmith/seedsmith/adapters/demons/effects/schema.py:13` (`AFFINITIES = ("core",
+      "likely", "occasional")`), consumed by `entry_for` (`prompts.py:114-152` in that adapter) to
+      split picks into a container's fixed core (`core`) vs. its weighted pool (`likely`/`occasional`,
+      weighted via `data/tuning/demon-species-effects.v1.json`'s `poolAffinityWeightMilli: {likely:
+      700, occasional: 300}` and bounded by `fixedCoreBandByRarity`). Read in full — this is a real,
+      shipped, tested pattern, not a stub. But its own schema (`schema.py:18-28`) pairs affinity with
+      an `affixId` **the species is drawing from the shared library**, not with a bundle it is itself
+      authoring — affinity answers "how should THIS container treat an existing shared affix,"
+      which `affix-authoring` (this module) cannot answer because it produces the affix
+      container-agnostically, before any container has chosen to draw it. `spec-affix-schema.md`'s
+      own A2 section names the budget table as "module 9's concern" — literally effect-pipeline's own
+      module 9, i.e. this module — but the actual precedent that got built lives under a *different*
+      program's own module numbering (`demon-seed` T5.3) and answers a per-feature question, not a
+      per-shared-affix one. That line in `spec-affix-schema.md` is what's stale, not the built
+      pattern: attaching `affinity` to this module's output would mean one shared, cross-feature
+      bundle carries ONE hardcoded affinity for every container that ever draws it — the same
+      "one fact, wrong home" defect tags was just closed against, and it would fight
+      `species-effects`'s own real per-species affinity for the same affix the moment two features
+      shared one bundle (Q6's whole reason `eligibility-tags` is a separate module).
+    - **Slots — the runtime SHAPE is closed and concrete; the CONTENT a model would need to ground a
+      pick in is not, and building it here would mean the model inventing a pattern string with zero
+      real exemplar — exactly the "plausible-looking guess" P1 forbids, just for a string instead of
+      a number.** `AffixRefRow` (`ContainerRow.cs:68-73`) and `Resolver.ResolveSlots`
+      (`Resolver.cs:113-` / `AffixValidator.Validate`, `AffixValidator.cs`) are real, shipped, and
+      already consumed by `AtomSeedFile.ReadAffix`'s own `refs[]` reader (`AtomSeedFile.cs:354-359`
+      reads `slotName`/`slotDomain`/`slotPick`/`slotAtomPattern` off each ref object already — no
+      C# change would even be needed to round-trip one). But the domain vocabulary a model would
+      pick from is, in the only real production wiring, exactly **one** legal value:
+      `RpgStore.Containers.cs:492-493`'s `DomainMembers` returns `ElementRoster.Concrete` for
+      `"element"` and an empty list for anything else — hardcoded, not configurable. Worse: **zero**
+      real seed content anywhere uses a slot — grepped the whole `data/` tree for
+      `slotAtomPattern`/`slotDomain`/`slotName`/`slotPick`, zero files — confirming
+      `spec-affix-schema.md:46`'s own "no shipped container has a pool at all" is still true today.
+      There is no analogue anywhere in this repo (C# or seedsmith) to the `eligibleAtoms` list this
+      module already uses for refs — no registry of "which atom families carry a `$`-placeholder
+      variant a slot could target." Building one would be inventing, from scratch, a new closed
+      vocabulary this session has no spec or decision to ground it in — the exact unilateral design
+      call the delegation's own boundaries section forbids ("Do NOT invent voting... scope creep")
+      extended to a bigger surface (inventing an eligible-slot-pattern source, not just a vote rule).
+      Correctly left as a real, still-open gap — not because the enum/shape is undefined, but because
+      there is nothing real for a model to ground a pick in yet.
+    - **Net effect**: `AFFIX_SCHEMA`, `entry_for`, and `tools/seedsmith/tests/test_affix_authoring.py`
+      are byte-for-byte unchanged this session. **Re-run, unchanged**:
+      `python -m pytest tools/seedsmith/tests/test_affix_authoring.py` — **20/20 passing** (same as
+      the prior pass — no regressions, nothing added). Full suite re-run for the same reason —
+      `python -m pytest tools/seedsmith/tests/` — **1585 passed, 1 skipped, 288 subtests passed**,
+      zero failures.
+    - **Recommendation, not acted on unilaterally**: `spec-affix-authoring.md`'s own P1 table (its
+      "eligibility TAGS" and "ordinal affinity" rows) should be corrected to point at the modules
+      that actually own those decisions now (`eligibility-tags`/module 8 for tags — derived, not
+      picked; whichever per-feature pipeline draws a shared affix, e.g. `species-effects`, for
+      affinity) rather than implying `affix-authoring` itself picks them. Left as a recommendation,
+      not a doc edit, since correcting a spec's own binding table is a design decision this pass
+      was not asked to make.
+  - **Still genuinely `[~]`**: name+refs (row 1) is the only P1-table row this module's own output
+    correctly owns and has always implemented; rows 2-4 are not a build backlog for this module —
+    they are either decided elsewhere (tags), owned by a different pipeline (affinity), or blocked on
+    a real, unbuilt content registry with no exemplar to ground a pick in (slots). A future slot-
+    authoring pass has a real, named prerequisite now: an eligible-slot-pattern registry, which does
+    not exist anywhere in this repo today.
 - [x] **ep-10 `dev-reforge`** · **S** · Deps: ep-4, ep-6 (resolved, build-order artifact) · `spec-dev-reforge.md`
   - `POST /api/debug/reforge-world`. Debug surface only.
   - **Found already built** under a different module id from an earlier, unrelated session —

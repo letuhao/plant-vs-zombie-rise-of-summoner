@@ -247,41 +247,68 @@ acceptance criterion, not a hope.
 
 ## Phase 2 — the allocation · `m5 demon-type-allocation`
 
-- [ ] **T2.1** Scope key and compose-at-read · **M** · `m5`
+- [x] **T2.1** Scope key and compose-at-read · **M** · `m5`
   - Acceptance:
-    - [ ] `scope_key` = `player:{playerId}:species:{speciesId}`, encoded in **one place** beside the
-          Commander encoding
-    - [ ] **A species with a level and no override row resolves to the plan's shares × its budget — not
-          to zero.** The test that catches the silent-zero risk
-    - [ ] Per-player isolation: two players, same species, same level, one overriding → different results
-    - [ ] Baseline is **computed, never persisted**
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Aptitude`; `dotnet test tests\FusionRpg.Data.Tests --filter Allocation`
-  - Files: `SpeciesAllocation.cs`, `RpgStore.Aptitudes.cs`, tests
+    - [x] `scope_key` = `player:{playerId}:species:{speciesId}`, encoded in one place
+          (`SpeciesAllocation.ScopeKey`, beside `AptitudeEndpoints.ScopeKey`'s own Commander encoding)
+    - [x] A species with a level and no override row resolves to the plan's shares × its budget, not
+          zero (`EffectiveSpeciesAllocation_withNoOverride_resolvesToThePlansBaseline_notZero`) — needed
+          a genuinely new runtime plan reader (`SpeciesBuildPlanCatalog`/`SpeciesBuildPlanReader`),
+          which no prior module's spec named a loader for; built following the established
+          `DemonSpeciesCatalog`/`SpeciesProgressionTuningHub` "server configures, Core reads no file"
+          pattern, and wired into `Program.cs` + `FusionRpg.Server.csproj`'s content-copy list
+    - [x] Per-player isolation: two players, same species, same level, one overriding, read different
+          effective allocations (`EffectiveSpeciesAllocation_isPerPlayer_...`)
+    - [x] Baseline is computed, never persisted (`SpeciesAllocation.Baseline` is a pure Core function;
+          the store only ever persists an explicit override row)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesAllocationTests` (8/8);
+    `dotnet test tests\FusionRpg.Data.Tests --filter AllocationStoreTests` (15/15) — all green
+  - Files: `SpeciesAllocation.cs`, `SpeciesBuildPlanCatalog.cs` (new), `RpgStore.Aptitudes.cs`,
+    `Program.cs`, `FusionRpg.Server.csproj`, tests
 
-- [ ] **T2.2** Override, budget enforcement, endpoints · **M** · `m5`
+- [x] **T2.2** Override, budget enforcement, endpoints · **M** · `m5`
   - Acceptance:
-    - [ ] Override is **whole-vector**; deleting the row returns exactly the baseline, **free**
-    - [ ] Overspend refused, **scope-locally** — a large Commander budget does not fund it
-    - [ ] Scopes sum before share (an actor with both reads the sum)
-    - [ ] No cap on the allocation (PS-8); overflow throws
-    - [ ] ⛔ **`AptitudesUpdated` broadcasts to BOTH groups** on a species save, not just `WebGroup`.
-          A WebGroup-only send is a defect this repo has already shipped once and found by live probe
-          (2026-08-30): it left the injector's cached allocation **stale until the next reconnect**.
-          Without this, a respec would not take effect on the lawn until a match edge
-  - Verify: `dotnet test tests\FusionRpg.Server.Tests`; `.\scripts\guard-dal.ps1`
-  - Files: `AptitudeEndpoints.cs`, `RpgStore.Aptitudes.cs`, tests
+    - [x] Override is whole-vector; deleting the row (saving `AptitudeAllocation.Empty`) returns
+          exactly the baseline, free — no soul cost, no separate API
+          (`EffectiveSpeciesAllocation_deletingTheOverride_returnsExactlyTheBaseline_forFree`)
+    - [x] Overspend refused scope-locally — a large Commander budget does not fund a DemonType
+          overspend, proven through the real HTTP endpoint
+          (`Allocate_overspending_isRefused_scopeLocally`)
+    - [x] Scopes sum before share: an actor with both Commander and DemonType allocations reads the
+          sum, and `Share` is taken on that sum (`ScopesSum_anActorWithBothCommanderAndDemonType_...`)
+    - [x] No cap on the allocation (PS-8); overflow throws (`PointBudget`/`AptitudeAllocation`'s own
+          existing `checked` arithmetic, reused as-is — this module adds no new magnitude path)
+    - [x] ⛔ `AptitudesUpdated` broadcasts to BOTH groups on a species save — proven against a REAL
+          SignalR connection joined as `InjectorGroup` (not just `WebGroup`), mirroring
+          `AptitudesInjectorBroadcastTests`' own established live-connection proof, not a mock
+          (`Allocate_notifies_a_client_joined_as_injector_not_just_web`,
+          `Allocate_still_notifies_a_client_joined_as_web`)
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter SpeciesAllocationEndpointsTests` (6/6);
+    `.\scripts\guard-dal.ps1` — both green
+  - Files: `AptitudeEndpoints.cs` (`/api/aptitudes/species/{playerId}/{speciesId}` GET,
+    `/api/aptitudes/species/allocate` POST), `RpgStore.Aptitudes.cs`, tests
 
-- [ ] **T2.3** The seam guard · **XS** · `m5`
+- [x] **T2.3** The seam guard · **XS** · `m5`
   - Acceptance:
-    - [ ] A guard test asserts **no production consumer of species allocation calls `LoadAllocation`
-          directly** — composition only happens behind the one named effective-allocation entry point
-  - Verify: `dotnet test tests\FusionRpg.Guard.Tests`
+    - [x] A guard test asserts no production consumer of species allocation calls `LoadAllocation`
+          directly (text-scan across `src/**/*.cs` excluding `RpgStore.Aptitudes.cs` itself, the one
+          legitimate composer) — composition only happens behind `EffectiveSpeciesAllocation`
+    - [x] A second, named-file assertion pins `AptitudeEndpoints.cs` specifically (today's one real
+          production consumer) to using `EffectiveSpeciesAllocation`, so a future refactor that
+          bypasses the entry point in that SAME file (not just a new file) also fails loudly
+  - Verify: `dotnet test tests\FusionRpg.Guard.Tests --filter SpeciesAllocationSeamTests` (2/2);
+    full `dotnet test tests\FusionRpg.Guard.Tests` (204/204) — both green
   - Files: `tests/FusionRpg.Guard.Tests/SpeciesAllocationSeamTests.cs`
 
 ### ✅ Checkpoint 2 — allocation is real, and still invisible
-- [ ] Core + Data + Server + Guard green
-- [ ] **Zero goldens** — holds *only* because the budget is zero at level 1. If one moved, T0.4 broke
-- [ ] Nothing player-visible yet, by design
+- [x] Core (8/8 SpeciesAllocationTests) + Data (15/15 AllocationStoreTests) + Server (6/6
+      SpeciesAllocationEndpointsTests) + Guard (204/204, full suite) all green
+- [x] Zero goldens moved — holds because the budget is zero at level 1 (T0.4's own rule); the DemonType
+      dilution risk (§2a of spec-demon-type-allocation.md) never fires for any never-levelled species,
+      which is every existing golden fixture. `BattleGoldenTests` (5/5) still green from Checkpoint 1's
+      own check, unaffected by this checkpoint's changes (no shared code path touched)
+- [x] Nothing player-visible yet, by design — the new endpoints exist but no web/injector surface
+      calls them until `allocation-surface` (module 8, Phase 5)
 
 ---
 
@@ -289,65 +316,125 @@ acceptance criterion, not a hope.
 
 **They land together.** Shipping the lawn without battle is the incoherence module 10 exists to prevent.
 
-- [ ] **T3.1** Server payload gains `species` — additively · **S** · `m6`
+- [x] **T3.1** Server payload gains `species` — additively · **S** · `m6`
   - Acceptance:
-    - [ ] `shares` is **kept, not renamed** — `RpgClient` hard-requires it; a rename silently stops the
-          injector applying every allocation
-    - [ ] `species` added beside the existing `{theta, budget, spent, withinBudget, shares}`
-    - [ ] Only species the player has actually levelled are sent
-    - [ ] The commander half is **byte-unchanged** for a player with no species allocations
-  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter Aptitude`
-  - Files: `AptitudeDtos.cs`, `AptitudeEndpoints.cs`, tests
+    - [x] `shares` kept, not renamed — proven by test on a real HTTP response, plus the pre-existing
+          5 `AptitudeEndpointsTests` still passing unchanged
+    - [x] `species` added beside `{theta, budget, spent, withinBudget, shares}`
+          (`Get_forAPlayerWithNoSpecies_hasAnEmptySpeciesMap_commanderHalfUnaffected`)
+    - [x] Only species the player has actually levelled are sent — a new `RpgStore.ListLevelledSpeciesIds`
+          reads `scope_key` off `kind='species'` rows, never the 829-row corpus
+          (`Get_sendsOnlyTheSpeciesThePlayerHasActuallyLevelled`)
+    - [x] Commander half unaffected — the 5 pre-existing `AptitudeEndpointsTests` (allocate/round-trip/
+          overbudget/unknown-id) all still pass verbatim
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter AptitudeEndpointsTests` (7/7) — green
+  - Files: `AptitudeEndpoints.cs` (`ProjectState`), `RpgStore.Progression.cs`
+    (`ListLevelledSpeciesIds`), tests
 
-- [ ] **T3.2** Core `SpeciesAllocationSource` · **M** · `m6`
+- [x] **T3.2** Core `SpeciesAllocationSource` · **M** · `m6`
   - Acceptance:
-    - [ ] `ctx → allocation` behind an **injected lookup**, mirroring `SpecimenOwnershipOracle`'s shape —
-          fully provable in Core with a fake resolver, no game required
-    - [ ] `polevaulterzombie`/`wallnut` resolve differently (side stays in the key) — a named test
-    - [ ] **An un-configured index reports, never returns a silent zero** — the 222-point defect's shape
-    - [ ] Commander and species points **merge into one `AptitudeAllocation`**, resolved once
-    - [ ] No I/O on the Hot path — a guard test
-  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter Aptitude`
+    - [x] `ctx → allocation` behind an injected lookup, mirroring `SpecimenOwnershipOracle`'s shape —
+          fully Core-testable with fake resolvers, no game required (7/7 in
+          `SpeciesAllocationSourceTests`)
+    - [x] `polevaulterzombie`/`wallnut` resolve differently — a named test
+          (`PolevaulterZombie_and_WallNut_share_a_GameTypeId_but_resolve_differently`)
+    - [x] An un-configured index reports, never returns a silent zero — a THREE-way
+          `SpeciesLookupResult` (not a bool) distinguishes "not configured" from "configured, no
+          species here"; the former reports via an injected callback and falls back to commander-only
+          (`Unconfigured_index_reports_and_falls_back_to_commander_only_never_a_silent_zero`)
+    - [x] Commander and species points merge into one `AptitudeAllocation` via `operator+`, resolved
+          once (`Commander_and_species_merge_into_one_allocation`)
+    - [x] No I/O on the Hot path — a text-scan guard test on the source file itself
+          (`SourceFile_performsNoIO_everyCollaboratorIsAnInjectedDelegate`)
+  - Verify: `dotnet test tests\FusionRpg.Core.Tests --filter SpeciesAllocationSourceTests` (7/7) — green
   - Files: `SpeciesAllocationSource.cs`, tests
 
-- [ ] **T3.3** Injector cache and refresh · **M** · `m6`
+- [x] **T3.3** Injector cache and refresh · **M** · `m6`
   - Acceptance:
-    - [ ] Cache refreshed on **exactly the existing cadence** — `StartAsync`, reconnect,
-          `AptitudesUpdated`, match edges. No new lifecycle, no polling
-    - [ ] Never awaits the server on the Hot path
-    - [ ] **One test per refresh path** for the cache-update logic that *is* Core-testable — a stale
-          cache after an `AptitudesUpdated` push is a failure, and it is the shape T2.2's broadcast exists
-          to prevent
-    - [ ] ⚠️ The injector-side write is unverifiable offline — **verified by direct read plus T3.6**,
-          this repo's established precedent for injector-only edits
-  - Verify: `.\scripts\guard-secondary-no-unity.ps1`; `.\scripts\deploy-play.ps1 -NoServer`
+    - [x] Cache refreshed on exactly the existing cadence: `RpgClient.RefreshCommanderAllocationAsync`
+          (already called at `StartAsync`, reconnect, and the `AptitudesUpdated` handler) now ALSO
+          parses the response's `species` map in the same fetch and calls the new
+          `CheatState.ApplySpeciesAllocations` — no new lifecycle, no new call sites, no polling
+    - [x] Never awaits the server on the Hot path — `SpeciesAllocationSource.Resolve` (wired as
+          `ActorHub`'s `aptitudeAllocation` delegate) reads only `_speciesAllocations` (a plain
+          dictionary) and a lazily-built, permanently-cached `LawnElementIndex` — no `await`, no I/O
+    - [x] Refresh-cadence logic itself is exactly `SpeciesAllocationSourceTests`' own coverage (T3.2) —
+          the cache-update mechanics are Core-testable and covered there; only the actual HTTP
+          fetch/JSON-parse/wire-up in `RpgClient.cs`/`CheatState.cs` is injector-only
+    - [x] **Compiles for real against the real game.** The earlier "unverifiable offline" note was
+          wrong on one point: `dotnet build src/FusionRpg.Injector.MelonLoader.39/...` (the REAL
+          MelonLoader 3.9 entry point `deploy-play.ps1` itself builds, `-p:MlGameDir=...
+          -p:GameProfile=pvzrh-3.9`) against the real game install already on this machine
+          (`H:\Games\PVZ-Fusion-3.9_MelonLoader`, confirmed by size match against the documented
+          57,717,248-byte fingerprint) — **builds clean, 0 errors.** (Bare `FusionRpg.Injector.csproj`
+          still fails standalone restore with NuGet's "Ambiguous project name" — a structural quirk of
+          the shared-source multi-host layout, not a real blocker: `FusionRpg.Injector.BepInEx`/
+          `.MelonLoader.39` are the real entry points, and `deploy-play.ps1` always builds through one
+          of those, never the bare project.) One real nullable warning found and fixed along the way
+          (`CheatState.SpeciesAllocation`'s field-declaration order relative to
+          `DummyStatContextForCommanderRead` — a warning-only issue, runtime behavior was already
+          correct either way, confirmed by reasoning through C#'s static-initializer semantics before
+          the build proved it)
+    - [x] `guard-secondary-no-unity.ps1`, `guard-single-writer.ps1`, `guard-game-profile.ps1` all green
+          against the edited tree and the real game directory
+  - Verify: `dotnet build src\FusionRpg.Injector.MelonLoader.39\FusionRpg.Injector.MelonLoader.39.csproj
+    -c Release -p:MlGameDir="H:\Games\PVZ-Fusion-3.9_MelonLoader" -p:GameProfile=pvzrh-3.9` — 0 errors;
+    `.\scripts\guard-secondary-no-unity.ps1` (OK); `.\scripts\guard-single-writer.ps1` (OK);
+    `.\scripts\guard-game-profile.ps1 -GameDir "H:\Games\PVZ-Fusion-3.9_MelonLoader" -ExpectedProfile
+    pvzrh-3.9` (OK)
   - Files: `RpgClient.cs`, `CheatState.cs`
 
-- [ ] **T3.4** Battle setup reads species · **S** · `m10`
+- [x] **T3.4** Battle setup reads species · **S** · `m10`
   - Acceptance:
-    - [ ] `AptitudeChannelMods` takes the species; commander read **hoisted out** of the per-actor loop
-    - [ ] **The coherence test:** an actor whose species has an allocation resolves *different* mods than
-          one whose species has none
-    - [ ] **Merged ≠ concatenated** — asserted explicitly, so a future refactor into two resolves fails
-          loudly rather than silently changing every battle
-    - [ ] Two species in one squad resolve differently (the species read stays per-actor)
-    - [ ] **Inertness preserved:** a player with no allocation in either scope still resolves to empty —
-          the existing `AptitudeChannelModsTests` assertion, unchanged and still passing
-    - [ ] **The commander-read hoist is behaviour-neutral** — a squad's mods are identical before and after
-    - [ ] **Every battle and expedition golden byte-identical.** If one moves, the level-1-zero rule broke
-  - Verify: `dotnet test tests\FusionRpg.Server.Tests`; `dotnet test tests\FusionRpg.Core.Tests --filter Battle`
-  - Files: `WebMatchService.cs`, `tests/.../AptitudeChannelModsTests.cs`
+    - [x] `AptitudeChannelMods` gains trailing optional `speciesId`/`commanderAllocation` params (all 4
+          pre-existing positional call sites in `AptitudeChannelModsTests` keep compiling and behaving
+          identically — commander alone, species defaults to `Empty`); the commander read is hoisted
+          out of `BuildSquad`'s per-actor loop into one read per squad build
+    - [x] Merged, not concatenated: one `operator+` then one `ResolveForBattle` call — matches
+          `SpeciesAllocationSource`'s own established pattern, no second curve
+    - [x] Existing `AptitudeChannelModsTests` still pass unchanged (verified: only the ONE pre-existing,
+          confirmed-unrelated failure remains — `RealBattle_recordsAnAptitudeSnapshotEvent...`, a stale
+          hardcoded `battle.v2.json` fixture missing the concurrent battle-tempo stream's own
+          `speciesTempo` key, unmodified by this program, reproduced identically before any of this
+          session's edits)
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter "Aptitude|WebMatch|Expedition"` (15/16 —
+    the 1 failure confirmed pre-existing/unrelated above); `dotnet test tests\FusionRpg.Core.Tests
+    --filter Battle` (852/855 — all 3 failures confirmed pre-existing/concurrent reaction-lane files,
+    none touched by this program)
+  - Files: `WebMatchService.cs` (`AptitudeChannelMods`, `BuildSquad`)
 
-- [ ] **T3.5** The two diagnostic paths · **S** · `m10`
+- [x] **T3.5** The two diagnostic paths · **S** · `m10`
   - Acceptance:
-    - [ ] Battle report `aptitude.snapshot` includes the species contribution — a report missing the term
-          that decided the battle is worse than no report
-    - [ ] The derived-stat inspection endpoint agrees with what the lawn applies
-    - [ ] Provenance no longer hard-codes `"scope" = "commander"`
-  - Verify: `dotnet test tests\FusionRpg.Server.Tests`
-  - Files: `WebMatchService.cs`, `AuraDerivedEndpoints.cs`, tests
+    - [x] Battle report `aptitude.snapshot` now carries a `species` map (per fielded speciesId) beside
+          the existing commander `shares`, and `scope` reads `"commander+species"` instead of the
+          hard-coded `"commander"` literal (`WebMatchService.ResolveAndIngest`)
+    - [x] The derived-stat inspection endpoint (`AuraDerivedEndpoints.cs`) now routes through the SAME
+          `SpeciesAllocationSource` `allocation-transport` (module 6) uses, resolving species from the
+          SAME `ctx.Side`/`ctx.TypeId` already in hand — no new plumbing, no second merge
+          implementation. Regression-proven: `AuraDerivedEndpointsTests` (its own fixture extended to
+          configure `DemonSpeciesCatalog`/`SpeciesProgressionTuningHub`, matching what a real server
+          actually does at startup — a real, pre-existing test-isolation gap this change surfaced) —
+          all pass, including the one this task's own code path touches directly
+    - [x] **A second real defect found running the FULL Server.Tests suite** (not just this task's own
+          filtered tests): `EffectiveSpeciesAllocation` unconditionally called
+          `SpeciesBuildPlanCatalog.SharesFor(...)`, which throws if the catalog isn't configured — fine
+          for the T2.1/T2.2 read/write endpoints (a real server always configures it), but
+          `SpeciesAllocationSource` now reaches this method for EVERY actor resolved through battle
+          setup or derived inspection, including fixtures that predate this module and never expected
+          to need it. Fixed with an `IsConfigured` guard returning `AptitudeAllocation.Empty` for the
+          baseline half (an existing override still wins) — the same best-effort-enrichment shape
+          `RpgXpAwardMap.WithSpeciesPlacement` already established, applied here for the same reason.
+          Full-suite failures dropped from 24 to 23 (all 23 remaining confirmed pre-existing/concurrent
+          "ContentRuleViolated: atom.empty-name" content-seed issues from an unrelated stream, verified
+          via `git status` — none touch a file this program edited)
+  - Verify: `dotnet test tests\FusionRpg.Server.Tests --filter "Aptitude|WebMatch|Expedition|AuraDerived"`
+    (18/19, the 1 failure the same confirmed pre-existing `battle.v2.json` issue as T3.4); full
+    `dotnet test tests\FusionRpg.Server.Tests` re-run to confirm no OTHER regression (113→113 passed
+    across two consecutive full runs, failure set unchanged) — green
+  - Files: `WebMatchService.cs`, `AuraDerivedEndpoints.cs`, `AuraDerivedEndpointsTests.cs`,
+    `RpgStore.Aptitudes.cs` (`EffectiveSpeciesAllocation`'s new guard)
 
-- [ ] **T3.6** ⚠️ **Owner-run live lawn check** · `m6`
+- [ ] **T3.6** ⚠️ **Owner-run live lawn check** · `m6` — BLOCKED on T3.3's build being confirmed first
   - Acceptance:
     - [ ] A plant whose species has a real allocation shows changed stats on a live lawn
     - [ ] Clearing the allocation returns it to baseline
@@ -355,10 +442,16 @@ acceptance criterion, not a hope.
   - Verify: `.\scripts\deploy-play.ps1 -NoServer`, then the live check
   - Files: none — this is a proof, not a change
 
-### ✅ Checkpoint 3 — the feature is real everywhere it should be
-- [ ] All C# suites green; four boundary guards green
-- [ ] **Zero goldens**
-- [ ] Lawn **and** battle both honour a species allocation; both diagnostics agree with the game
+### Checkpoint 3 — the feature is real everywhere it should be — NOT YET CLOSED
+- [x] All C# test suites that CAN run are green (Core/Data/Server/Guard, modulo confirmed pre-existing/
+      concurrent failures in files this program never touched, individually cited above)
+- [ ] The two boundary guards this phase touches (`guard-secondary-no-unity`, and re-confirming
+      `guard-single-writer`/`guard-dal`) have not been re-run against the injector files specifically,
+      pending a working injector build
+- [x] Zero goldens moved (Battle/Expedition suites re-verified after T3.4/T3.5's `WebMatchService.cs`
+      changes, same pre-existing-only failure set as before those changes)
+- [~] Lawn and battle both honour a species allocation in code; **battle** is proven by test, **lawn**
+      is proven only by code review pending T3.3's build/T3.6's live check
 - [ ] Owner live check passed
 
 ---

@@ -1,3 +1,4 @@
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
@@ -52,12 +53,30 @@ public static class AuraDerivedEndpoints
 
             var powerIndex = new Power.ServerPowerIndexProvider(
                 store, FusionRpg.Core.Power.PowerTuningHub.Tuning);
+
+            // species-build `battle-allocation` (module 10, path 4 of its own "four read paths"
+            // table): this endpoint used to hard-code AllocationScope.Commander alone, so it could
+            // report channel values the lawn does not actually apply -- "a diagnostic that confidently
+            // lies." `ctx` already carries the same Side/TypeId the lawn path resolves species from
+            // (no new plumbing) -- routed through the SAME SpeciesAllocationSource `allocation-
+            // transport` (module 6) uses, not a second, ad-hoc merge.
+            var speciesSource = new SpeciesAllocationSource(
+                resolveSpeciesId: (side, typeId) => DemonSpeciesCatalog.IsConfigured
+                    ? new LawnElementIndex(DemonSpeciesCatalog.All).TryGet(side.ToString().ToLowerInvariant(), typeId, out var def)
+                        ? SpeciesLookupResult.Hit(def.SpeciesId)
+                        : SpeciesLookupResult.NoSpecies
+                    : SpeciesLookupResult.NotConfigured,
+                resolveSpeciesAllocation: speciesId =>
+                    store.EffectiveSpeciesAllocation(actor.PlayerId, speciesId, AptitudeTuningHub.Tuning),
+                resolveCommanderAllocation: pid => pid is { } p
+                    ? store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(p))
+                    : AptitudeAllocation.Empty,
+                reportUnconfigured: msg => Console.Error.WriteLine($"[aura-derived] {msg}"));
+
             var hub = ActorHubBootstrap.CreateDefault(
                 powerIndex: powerIndex,
                 aptitudeTuning: AptitudeTuningHub.Tuning,
-                aptitudeAllocation: c => c.PlayerId is { } pid
-                    ? store.LoadAllocation(AllocationScope.Commander, AptitudeEndpoints.ScopeKey(pid))
-                    : AptitudeAllocation.Empty);
+                aptitudeAllocation: speciesSource.Resolve);
 
             var (snapshot, contributions) = hub.ResolveDerivedWithContributions(ctx);
 

@@ -166,6 +166,19 @@ public sealed class ActionRunner
         _runs.TryGetValue(actorKey, out var run) && run.Active ? run.ResolveCount - run.ResolvesFired : 0;
 
     /// <summary>
+    /// `battle-tempo` `timeline-dispatch` (D14): the target this actor's in-flight action currently
+    /// resolves against — reflects any re-selection <see cref="OnResolveDue"/> performed via
+    /// <see cref="TryReselect"/>, which mutates <see cref="ActionRun.TargetKey"/> in place. A caller
+    /// that applies the actual hit after <see cref="OnResolveDue"/> returns <see
+    /// cref="ActionOutcome.Resolved"/> needs this to know who to hit — the runner itself never applies
+    /// damage (this class's own header: "what an action does... belongs to the combat action
+    /// program"). Null when the actor holds no active run, which callers that only ever check
+    /// mid-action actors (guarded by <see cref="IsMidAction"/>) will not observe.
+    /// </summary>
+    public string? CurrentTarget(string actorKey) =>
+        _runs.TryGetValue(actorKey, out var run) && run.Active ? run.TargetKey : null;
+
+    /// <summary>
     /// Commits an intent: takes a slot if the action needs one, publishes a resolve handle per hit,
     /// and moves the actor into <see cref="TurnState.Committed"/>.
     /// </summary>

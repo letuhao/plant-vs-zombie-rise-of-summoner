@@ -11,7 +11,20 @@ namespace FusionRpg.Core.Battle.Board;
 /// </summary>
 public sealed record SiegeTuning(
     int SchemaVersion, int Version,
-    int MoveCostOpen, int MoveCostRough, int DiagonalSurcharge, int MaxCells);
+    int MoveCostOpen, int MoveCostRough, int DiagonalSurcharge, int MaxCells,
+    DistrictTuning District);
+
+/// <summary>
+/// base-defense `district-layout` (spec-district-layout.md §2/§3). <see cref="SideByBaseTier"/> is a
+/// LOOKUP keyed by <c>WorldSector.DevelopmentLevel</c> (base-defense-ideal.md: "Seat / tier ...
+/// DevelopmentLevel is exactly this"), never a formula — a DevelopmentLevel past the highest
+/// authored key plateaus at that key's side. <see cref="CoreSideMilli"/> is a per-mille RATIO
+/// (0..1000), exempt from the progression-ceiling rule for the same reason any ratio is.
+/// </summary>
+public sealed record DistrictTuning(
+    IReadOnlyDictionary<int, int> SideByBaseTier,
+    int CoreSideMilli, int GateCount, int RampartThickness, int FortressRampartBonus,
+    int ApproachDepth, int ApproachDepthPerWardLevel);
 
 public sealed class SiegeTuningRejection : Exception
 {
@@ -52,13 +65,59 @@ public static class SiegeTuningLoader
             if (maxCells <= 0)
                 throw new SiegeTuningRejection($"siege tuning: board.maxCells must be > 0; got {maxCells}");
 
+            var district = Obj(root, "district");
+
+            var sideByBaseTier = new Dictionary<int, int>();
+            foreach (var prop in Obj(district, "sideByBaseTier").EnumerateObject())
+            {
+                if (!int.TryParse(prop.Name, out var tier) || tier < 0)
+                    throw new SiegeTuningRejection($"siege tuning: district.sideByBaseTier key '{prop.Name}' is not a non-negative integer");
+                if (prop.Value.ValueKind != JsonValueKind.Number || !prop.Value.TryGetInt32(out var side) || side <= 0)
+                    throw new SiegeTuningRejection($"siege tuning: district.sideByBaseTier.{prop.Name} must be a positive integer");
+                sideByBaseTier[tier] = side;
+            }
+            if (sideByBaseTier.Count == 0)
+                throw new SiegeTuningRejection("siege tuning: district.sideByBaseTier must name at least one tier");
+
+            var coreSideMilli = Int(district, "coreSideMilli");
+            if (coreSideMilli is <= 0 or > 1000)
+                throw new SiegeTuningRejection($"siege tuning: district.coreSideMilli must be in (0, 1000]; got {coreSideMilli}");
+
+            var gateCount = Int(district, "gateCount");
+            if (gateCount <= 0)
+                throw new SiegeTuningRejection($"siege tuning: district.gateCount must be > 0; got {gateCount}");
+
+            var rampartThickness = Int(district, "rampartThickness");
+            if (rampartThickness <= 0)
+                throw new SiegeTuningRejection($"siege tuning: district.rampartThickness must be > 0; got {rampartThickness}");
+
+            var fortressBonus = Int(district, "fortressRampartBonus");
+            if (fortressBonus < 0)
+                throw new SiegeTuningRejection($"siege tuning: district.fortressRampartBonus must be >= 0; got {fortressBonus}");
+
+            var approachDepth = Int(district, "approachDepth");
+            if (approachDepth < 0)
+                throw new SiegeTuningRejection($"siege tuning: district.approachDepth must be >= 0; got {approachDepth}");
+
+            var approachPerWard = Int(district, "approachDepthPerWardLevel");
+            if (approachPerWard < 0)
+                throw new SiegeTuningRejection($"siege tuning: district.approachDepthPerWardLevel must be >= 0; got {approachPerWard}");
+
             return new SiegeTuning(
                 SchemaVersion: Int(root, "schemaVersion"),
                 Version: Int(root, "version"),
                 MoveCostOpen: open,
                 MoveCostRough: rough,
                 DiagonalSurcharge: diagonal,
-                MaxCells: maxCells);
+                MaxCells: maxCells,
+                District: new DistrictTuning(
+                    SideByBaseTier: sideByBaseTier,
+                    CoreSideMilli: coreSideMilli,
+                    GateCount: gateCount,
+                    RampartThickness: rampartThickness,
+                    FortressRampartBonus: fortressBonus,
+                    ApproachDepth: approachDepth,
+                    ApproachDepthPerWardLevel: approachPerWard));
         }
     }
 
@@ -96,4 +155,6 @@ public static class SiegeTuningPolicy
     /// <summary>Structural, not balance — see <see cref="SiegeTuning"/>'s own doc comment. Enforced
     /// loudly at <see cref="GridSpec"/> construction, never at render.</summary>
     public static int MaxCells => Tuning.MaxCells;
+
+    public static DistrictTuning District => Tuning.District;
 }

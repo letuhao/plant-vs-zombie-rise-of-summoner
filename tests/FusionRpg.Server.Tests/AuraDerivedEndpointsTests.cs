@@ -41,6 +41,14 @@ public class AuraDerivedEndpointsTests : IAsyncLifetime
             FusionRpg.Core.Status.StatusTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "status.v1.json"))));
         FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
             FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(File.ReadAllText(Path.Combine(RepoTuningDir(), "stats.v1.json"))));
+        // species-build `battle-allocation` (module 10, path 4): this endpoint now resolves a species
+        // allocation too (SpeciesAllocationSource), so its own fixture needs the same roster/tuning a
+        // real server configures at startup -- brought in line here rather than relying on another
+        // test class in the same process happening to have configured DemonSpeciesCatalog first.
+        FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
+            FusionRpg.Core.Progression.SpeciesProgressionTuningLoader.Parse(
+                File.ReadAllText(Path.Combine(RepoTuningDir(), "species-progression.v1.json"))));
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";

@@ -116,6 +116,25 @@ public sealed record BattleModeProfile
     public bool RequiresLiveInput { get; init; }
 
     /// <summary>
+    /// `battle-tempo` `timeline-dispatch` (D14, spec-timeline-dispatch.md §2.1) — whether `Resolve`
+    /// dispatches this profile's actors through `ActionRunner` (commit → wind-up → resolve →
+    /// recovery, honouring `WindupTicks`) instead of the atomic `Ready→Committed→Resolving` path
+    /// every profile uses today. Declared per row, never a branch on <c>ProfileId</c> or
+    /// <see cref="AdvancePolicyKind"/> — the same discipline <see cref="OrdersBySpeed"/> already
+    /// established.
+    ///
+    /// <para><b>False for every row in <see cref="BattleModeProfileCatalog"/>, including
+    /// <c>hybrid-atb</c>, and that is load-bearing.</b> `BattleEngine.Resolve` does not yet drain
+    /// `ActionRunner`'s scheduled events off the round queue for any profile — the branch this field
+    /// would gate is unbuilt (spec-timeline-dispatch.md §2.5's own open question: how the round loop's
+    /// pass structure interacts with resolution that can land off a round boundary). Flipping this to
+    /// `true` for a shipped profile without that branch existing would silently strand every commit
+    /// (no resolve ever drains), so until the branch lands, this field is exercised only by
+    /// `timeline-dispatch`'s own synthetic, never-catalogued test profiles.</para>
+    /// </summary>
+    public bool UsesTimelineDispatch { get; init; }
+
+    /// <summary>
     /// base-defense F2 — the battle's absolute round horizon, moved here from the engine-global
     /// <see cref="BattleRuleset.MaxRounds"/>. A siege needs a longer horizon than a squad fight, and
     /// with the value global, giving one gives all.
