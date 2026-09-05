@@ -104,6 +104,80 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// `demon-seed` module 13 (`catalog-runtime`) precondition: a fresh database's `almanac_seed`
+    /// table is empty until a player has manually browsed hundreds of live in-game almanac entries
+    /// (`RebuildAlmanacSeed`'s own source, `type_almanac_dump`, only grows from that live capture) —
+    /// which is why `species-import`'s own name resolution (`GetAlmanacSeed(side, gameTypeId)`)
+    /// silently fell back to a placeholder ("Demon 918") for every species on a database that has
+    /// never had that manual browsing happen. The committed corpus dump
+    /// (`data/seed/demons/_dump/almanac/{plant,zombie}.json`, `corpus-dump`/module 1) already carries
+    /// the SAME final, already-parsed shape `almanac_seed` stores — it is not raw capture text needing
+    /// <see cref="RebuildAlmanacSeed"/>'s regex parsing, it is that parsing's own OUTPUT, captured
+    /// once elsewhere and committed. This is the direct, one-transaction bulk load of that committed
+    /// snapshot, bypassing the raw <c>type_almanac_dump</c>/regex layer entirely because there is
+    /// nothing left to parse.
+    /// </summary>
+    public int UpsertAlmanacSeedBulk(IReadOnlyList<AlmanacSeedDto> rows)
+    {
+        if (rows is null) throw new ArgumentNullException(nameof(rows));
+        var nowUtc = DateTime.UtcNow.ToString("o");
+
+        lock (_gate)
+        {
+            using var hot = OpenUnlocked();
+            using var tx = hot.BeginTransaction();
+            var written = 0;
+            foreach (var r in rows)
+            {
+                using var cmd = hot.CreateCommand();
+                cmd.Transaction = tx;
+                cmd.CommandText = """
+                    INSERT INTO almanac_seed(
+                      side, type_id, type_name, display_name, flavor_info, flavor_introduce,
+                      sun_cost, cooldown_sec, cost_status, hp, attack, armor, armor_max,
+                      stats_observed, stats_sample_utc, almanac_captured_utc, contract_version, rebuilt_utc)
+                    VALUES(
+                      $side,$type,$tn,$dn,$fi,$fintro,
+                      $sc,$cd,$cs,$hp,$atk,$arm,$armMax,
+                      $so,$ssu,$acu,$cv,$ru)
+                    ON CONFLICT(side, type_id) DO UPDATE SET
+                      type_name=excluded.type_name, display_name=excluded.display_name,
+                      flavor_info=excluded.flavor_info, flavor_introduce=excluded.flavor_introduce,
+                      sun_cost=excluded.sun_cost, cooldown_sec=excluded.cooldown_sec, cost_status=excluded.cost_status,
+                      hp=excluded.hp, attack=excluded.attack, armor=excluded.armor, armor_max=excluded.armor_max,
+                      stats_observed=excluded.stats_observed, stats_sample_utc=excluded.stats_sample_utc,
+                      almanac_captured_utc=excluded.almanac_captured_utc,
+                      contract_version=excluded.contract_version, rebuilt_utc=excluded.rebuilt_utc;
+                    """;
+                cmd.Parameters.AddWithValue("$side", r.Side);
+                cmd.Parameters.AddWithValue("$type", r.TypeId);
+                cmd.Parameters.AddWithValue("$tn", (object?)r.TypeName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$dn", (object?)r.DisplayName ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$fi", (object?)r.FlavorInfo ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$fintro", (object?)r.FlavorIntroduce ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$sc", (object?)r.SunCost ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$cd", (object?)r.CooldownSec ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$cs", r.CostStatus);
+                cmd.Parameters.AddWithValue("$hp", (object?)r.Hp ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$atk", (object?)r.Attack ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$arm", (object?)r.Armor ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$armMax", (object?)r.ArmorMax ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$so", r.StatsObserved ? 1 : 0);
+                // The dump's own `rebuiltUtc` is the sample stamp here — there is no separate
+                // spawn_stats row to point at, since this bulk load skips that table entirely.
+                cmd.Parameters.AddWithValue("$ssu", r.StatsObserved ? (object)r.RebuiltUtc : DBNull.Value);
+                cmd.Parameters.AddWithValue("$acu", (object?)r.RebuiltUtc ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("$cv", r.ContractVersion > 0 ? r.ContractVersion : AlmanacSeedContractVersion);
+                cmd.Parameters.AddWithValue("$ru", nowUtc);
+                cmd.ExecuteNonQuery();
+                written++;
+            }
+            tx.Commit();
+            return written;
+        }
+    }
+
     void UpsertOneAlmanacSeedRowUnlocked(
         SqliteConnection hot, SqliteTransaction tx,
         string side, int typeId, string fieldsJson, string almanacCapturedUtc, string nowUtc,

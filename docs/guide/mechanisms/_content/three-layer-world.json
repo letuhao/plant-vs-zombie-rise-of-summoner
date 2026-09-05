@@ -1,0 +1,70 @@
+{
+  "slug": "three-layer-world",
+  "title": "Three-layer world",
+  "status": "Vision",
+  "kicker": "World and empire · presentation of the war",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure · World-stage empire",
+  "hook": "**Vision:** the war presented in three layers — rift graph, sector board, lane board. Not finished / not playable yet as that full stack.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Locked design. You play the graph today — not the finished three-layer presentation."},
+    {"term": "Rift graph", "meaning": "Sectors and lanes — adventure. What you play today."},
+    {"term": "Sector board", "meaning": "Inside one sector: slots, construction, your base — empire stage depth."},
+    {"term": "Lane board", "meaning": "Five-lane combat when a fight is tested — the battle presentation layer."}
+  ],
+  "alsoTrue": [
+    "Map→battle handoff is the WIP bridge into fights; lane board is the Vision presentation of that fight.",
+    "Do not invent a fourth layer or a diary clock to glue them."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "The graph is live. Sector board and lane board as a finished three-layer fantasy are not.",
+        "Play [world map](world-map) now; treat missing boards as Vision."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "intro": "Three layers of the war:",
+      "table": {
+        "cols": ["Layer", "Job"],
+        "rows": [
+          ["Rift graph", "Sectors and lanes — where you go (adventure)"],
+          ["Sector board", "Inside one sector — slots, construction, base (empire)"],
+          ["Lane board", "Five-lane combat when a fight is tested"]
+        ]
+      },
+      "diagram": [
+        "  [ rift graph ]  ->  [ sector board ]  ->  [ lane board ]",
+        "   adventure           empire stage           fight test"
+      ]
+    },
+    {
+      "title": "How it hangs on live work",
+      "paras": [
+        "Graph + End Turn + fog ship today.",
+        "Buildings and map→battle handoff harden the middle and the fight bridge as WIP."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Learn the three names so later UI does not feel like three different games.",
+    "Play the shipped graph without waiting on sector/lane boards.",
+    "When fights you play appear, expect them to feed back to the graph — see [map battle handoff](map-battle-handoff)."
+  ],
+  "doNote": "Stop when three layers ≠ three unrelated modes. Related: [world stage](world-stage).",
+  "mixUps": [
+    {"q": "Can I open the sector board today?", "a": "Not as the finished Vision board. Thin graph play is what you have."},
+    {"q": "Is lane board the lawn?", "a": "No. Lawn is its own first core loop. Lane board is map/battle presentation."},
+    {"q": "Do I need all three to win?", "a": "Win/lose hang on fortress and homeworld. Layers are how the war is shown, not three win conditions."},
+    {"q": "Is the generator required for three layers?", "a": "Related Vision work — see [world generator](world-generator) — but layers are a presentation idea of their own."}
+  ],
+  "next": ["world-generator"],
+  "related": ["world-map", "world-stage", "map-battle-handoff"],
+  "sources": [
+    "docs/guide/the-rift.md §Layers of the war",
+    "docs/guide/mechanisms/three-layer-world.md (prior stub)"
+  ]
+}

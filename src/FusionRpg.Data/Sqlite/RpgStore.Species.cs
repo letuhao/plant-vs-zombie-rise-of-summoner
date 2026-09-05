@@ -228,7 +228,15 @@ public sealed partial class RpgStore
                 Name = s.Name ?? s.SpeciesId,
                 Side = s.Side,
                 GameTypeId = s.GameTypeId,
-                DemonTypeId = s.GameTypeId + Core.Demons.DemonSpeciesCatalog.DemonTypeIdFloor,
+                // Found running the real flip 2026-09-05: GameTypeId is independently numbered per
+                // side in the source game, so a plant and a zombie can share the same raw id (real
+                // example: BigWallNut/plant and BlackTrainZombie/zombie both carry GameTypeId 255) —
+                // without a side split this collided on the same DemonTypeId and
+                // DemonSpeciesCatalog.Validate correctly refused to start. The old generator
+                // (DemonSpeciesGenerator.cs) already carries the fix for this exact hazard — the same
+                // "zombie 10000+, plant 60000+" wide split, reproduced here rather than invented anew.
+                DemonTypeId = Core.Demons.DemonSpeciesCatalog.DemonTypeIdFloor
+                    + (s.Side == "plant" ? 50_000 : 0) + s.GameTypeId,
                 ElementPrimary = s.ElementPrimary,
                 ElementSecondary = s.ElementSecondary,
                 BaseRarity = s.Rarity,

@@ -1,0 +1,84 @@
+{
+  "slug": "lawn-deploy",
+  "title": "Bound demon deploy",
+  "status": "Shipped",
+  "kicker": "Lawn · first core · summon and fusion",
+  "pillar": {"text": "The lawn", "href": "the-lawn.md"},
+  "loopLine": "Lawn — first core · Summon and fusion",
+  "hook": "**Deploy** bound roster demons into a lawn run — usually as plant-side avatars, sometimes as designated hypno-zombie allies.",
+  "blindSpots": [
+    {"term": "Deploy", "meaning": "Send a bound specimen onto the live lawn board for this match — not an altar pull and not an expedition dispatch."},
+    {"term": "Plant-side avatar", "meaning": "Most demons appear as empowered plant-side uniques carrying that specimen’s traits and element."},
+    {"term": "Hypno-zombie ally", "meaning": "Designated boss-class species can deploy as hypno-zombie allies instead of plant avatars."},
+    {"term": "Soft-lock", "meaning": "A specimen already out on an expedition cannot lawn-deploy (and the reverse). No double-dipping."},
+    {"term": "Bound", "meaning": "Pacts keep demons on your roster ready to field — see [pacts and loyalty](pacts-loyalty)."}
+  ],
+  "alsoTrue": [
+    "They fight with the traits and element you gave them — combat language still applies.",
+    "Specimens themselves: [specimens](specimens)."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Your raised demons come back onto the board as deployable presence.",
+        "Most arrive as plant-side avatars. A smaller set of boss-class designations can arrive as hypno-zombie allies."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "Bind first, then field when free:",
+      "cards": [
+        {"name": "Bind", "body": "Keep demons on pacts so they are roster-ready."},
+        {"name": "Check locks", "body": "Expedition soft-locks block lawn deploy until the idle job is clear."},
+        {"name": "Deploy", "body": "During a match, send an eligible specimen onto the lawn."}
+      ],
+      "diagram": [
+        "  pact-bound specimen  ->  (not on expedition?)  ->  deploy into lawn match",
+        "                         plant avatar  or  hypno-zombie ally (designated)"
+      ],
+      "table": {
+        "cols": ["Form", "Who"],
+        "rows": [
+          ["Plant-side avatar", "Most demons"],
+          ["Hypno-zombie ally", "Designated boss-class species"]
+        ]
+      }
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "During a match",
+          "steps": [
+            "Bind demons on pacts in the control room.",
+            "Start a lawn match and open Lawn.",
+            "Deploy specimens that are not locked on an expedition."
+          ],
+          "note": "If a name is greyed or blocked, check expeditions before assuming a bug."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Confirm at least one specimen is bound on a pact.",
+    "Make sure it is not out on an expedition.",
+    "During a match, deploy it and watch it appear on the mirror."
+  ],
+  "doNote": "Parent loop: [lawn match](lawn-match). Soft-locks also protect expedition integrity — see [expeditions](expeditions).",
+  "mixUps": [
+    {"q": "Why can’t I deploy this demon?", "a": "Often soft-locked on an expedition — or not bound. Check both."},
+    {"q": "Is deploy the same as summoning at the altar?", "a": "No. Altar creates/binds. Deploy fields someone you already have into a match."},
+    {"q": "Do all demons become plants?", "a": "Most do as plant-side avatars. Designated boss-class species can be hypno-zombie allies."},
+    {"q": "Can one specimen be on lawn and expedition at once?", "a": "No. Soft-lock prevents double-dipping."},
+    {"q": "Do deployed demons ignore elements?", "a": "No. They carry the traits and element you gave them."}
+  ],
+  "next": ["lawn-blessing"],
+  "related": ["pacts-loyalty", "specimens", "lawn-match", "expeditions"],
+  "sources": [
+    "docs/guide/the-lawn.md §Deploying demons",
+    "docs/guide/mechanisms/lawn-deploy.md (prior stub)",
+    "docs/guide/the-loops.md §Lawn — first core"
+  ]
+}

@@ -2,14 +2,14 @@
 
 **Status:** Implemented (2026-08-30)  
 **Parent:** [vfx-ssot.md](../vfx-ssot.md) §9.1  
-**Consumers:** `UnitFrameResolver`, `ShieldBarPool`, `VfxDirector` sustained/floaters/bursts
+**Consumers:** `UnitFrameResolver`, `ActorHudPool` (Body + worldYOffset), `VfxDirector` sustained/floaters/bursts
 
 ## Problem
 
 World VFX duplicated three incompatible anchor paths:
 
 - `LawnCoords.BodyWorld` — pivot X + lane Y
-- `ShieldBarPool.BarAnchorWorld` — bounds X only (private)
+- Retired `ShieldBarPool.BarAnchorWorld` — bounds X only (private); HUD now uses UnitFrame Body
 - `VfxDirector.EstimateCellSize` — cell span only
 
 New primitives would copy one path and drift. Sustained auras read small and bottom-left because pivot X and cell span were used without sprite bounds.

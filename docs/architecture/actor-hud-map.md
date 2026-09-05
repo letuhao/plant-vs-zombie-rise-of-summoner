@@ -5,7 +5,9 @@ Source: [actor-hud-ideal.md](actor-hud-ideal.md) (strengthened 2026-08-30) ·
 [actor-hud-data-pipeline-audit-2026-08-30.md](../research/actor-hud-data-pipeline-audit-2026-08-30.md) ·
 [10-actor-hud.html](../design/10-actor-hud.html) · [vfx/spec-unit-frame.md](vfx/spec-unit-frame.md).
 
-**Status: implemented 2026-08-31** — all six modules shipped. Specs signed off in [actor-hud-todo.md](../../tasks/actor-hud-todo.md). Optional LIVE eyeball remains.
+**Status: implemented 2026-08-31** — all six modules shipped. Specs signed off in [actor-hud-todo.md](../../tasks/actor-hud-todo.md).
+**Placement SSOT (reconciled 2026-09-05):** Unity Band B = UnitFrame **Body** + `worldYOffset` (center-bottom,
+like old shield bar). Visual correction (glyphs, pips, Body root) tracked on todo.
 
 Module specs live in [actor-hud/](actor-hud/), one per module id, written in dependency order once this
 map is approved.
@@ -14,9 +16,9 @@ map is approved.
 
 ## What this program is
 
-**Band B per-unit HUD** — compact readout above each lawn unit (plant or zombie): identity row, resource
-row (shield slot subsumes today's bar), status strip. One **`Occupant.hud`** snapshot from the injector
-feeds **Unity world render**, **Phaser canvas**, and **web Inspector expansion**.
+**Band B per-unit HUD** — compact readout on each lawn unit (plant or zombie): identity row, resource
+row (shield slot at the familiar Body+offset position), status strip. One **`Occupant.hud`** snapshot
+from the injector feeds **Unity world render**, **Phaser canvas**, and **web Inspector expansion**.
 
 **Dual-render is a v1 gate** — Phaser parity is required for program done, not a follow-up phase.
 

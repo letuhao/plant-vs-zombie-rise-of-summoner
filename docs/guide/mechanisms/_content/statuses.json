@@ -1,0 +1,76 @@
+{
+  "slug": "statuses",
+  "title": "Statuses",
+  "status": "Shipped",
+  "kicker": "Combat language · every place",
+  "pillar": {"text": "Combat", "href": "combat.md"},
+  "loopLine": "Combat (every place)",
+  "hook": "**Statuses** are timed conditions — butter, freeze, chill, poison, hypno, wither, contagions, and more — that actually resolve in combat.",
+  "blindSpots": [
+    {"term": "Status", "meaning": "A timed condition on a unit. Not a permanent class, not a stock, not an element on the ring."},
+    {"term": "Apply / cleanse", "meaning": "Statuses go on and come off through play. You do not buy them from a shop tab."},
+    {"term": "Catalog vs reach", "meaning": "The catalog is real; not every status is common in every mode yet. Missing one in a mode is reachability, not a fake row."},
+    {"term": "Contagion", "meaning": "Statuses that spread or mark (blight, rot, spark, and kin) — still statuses, not a second combat system."},
+    {"term": "Delve nerve ladder", "meaning": "Unsettled → Shaken → Afflicted is Vision for delve pressure — not something every lawn already runs."}
+  ],
+  "alsoTrue": [
+    "You read icons on the [lawn unit HUD](lawn-mirror-hud) under pressure.",
+    "How hard a status sticks ties to [resistance](shields-crit-resist)."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Conditions with a clock. They change what a unit can do or how the next hits feel.",
+        "Familiar lawn wraps sit beside overlay pressure and contagion — one status language."
+      ]
+    },
+    {
+      "title": "Families you will see",
+      "intro": "Names from the combat pillar — not an exhaustive move list:",
+      "cards": [
+        {"name": "Crowd control and lawn wraps", "body": "Butter, Freeze, Chill, Poison, Hypno, Ember, Jala, Kelp."},
+        {"name": "Extra pressure", "body": "Wither, Bond, Rally, Leech, Expose, Command, Shatter, Charm Pulse."},
+        {"name": "Contagion", "body": "Blight, Rot, Spark, Pact Mark, Spore."},
+        {"name": "Vision (delve nerve)", "body": "Unsettled → Shaken → Afflicted — locked as design for delve, not everyday lawn soup."}
+      ],
+      "note": "Exact durations and stacks are balance surface. Trust icons and tooltips in the build you have."
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "On the lawn today",
+          "steps": [
+            "Open Lawn during a match.",
+            "Read status chips on the unit HUD above units.",
+            "Apply and cleanse through ordinary play — plants, zombies, skills when they land."
+          ],
+          "note": "Battle-stage UI for the same icons is still catching up with [interactive battles](interactive-battles)."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Run a lawn match with Lawn open in the control room.",
+    "Point at one status icon and name it (butter, freeze, chill, poison — whatever appears).",
+    "Watch whether it sticks, fades, or fails — that is apply, cleanse, and resist in one glance."
+  ],
+  "doNote": "Element matchups: [six elements and omni](element-ring). Named combo recipes on top stay Vision — [named reactions](named-reactions).",
+  "mixUps": [
+    {"q": "Is a status the same as an element?", "a": "No. Elements are types on the ring. Statuses are timed conditions."},
+    {"q": "Why don’t I see every name from the list?", "a": "The catalog is real; reachability grows with content. Absence in a mode is not a broken row."},
+    {"q": "Do statuses only exist on the lawn?", "a": "No. They are combat language everywhere — lawn reach is just the first place you read them."},
+    {"q": "Is Unsettled / Shaken / Afflicted live everywhere?", "a": "That ladder is Vision for delve nerve. Do not expect it as daily lawn soup yet."},
+    {"q": "Can I buy statuses with souls?", "a": "No. They apply through play, skills, and content — not a stock spend."}
+  ],
+  "next": ["actor-meters"],
+  "related": ["element-ring", "named-reactions", "skills-loadouts", "lawn-mirror-hud", "shields-crit-resist"],
+  "sources": [
+    "docs/guide/combat.md §Statuses",
+    "docs/guide/glossary.md §Status",
+    "docs/guide/the-lawn.md §What you see",
+    "docs/guide/mechanisms/statuses.md (prior stub)"
+  ]
+}

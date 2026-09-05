@@ -26,9 +26,10 @@ coefficients, and the resolver folds them into combat as ordinary channel contri
 35,160 nodes across 879 trees when complete — but the plan reaches a playable single tree long before
 that, deliberately.
 
-**78 tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
-more than about five files. (E1b — the L2b resist feedback path, D closed 2026-09-05 — was added after
-this count was first written.)
+**79 tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
+more than about five files. (E1b — the L2b resist feedback path — and F1b — squad-harness's own OQ2,
+measuring the shipped commander-replicated allocation shape alongside D21's — were added after this
+count was first written, both closing a coverage-audit gap rather than changing scope.)
 
 | Phase | What it lands | Tasks |
 |---|---|---|
@@ -136,6 +137,12 @@ wrong (PS-3, `F`'s scope, `Fmax = 1000‰`, memoisation).
 
 Tasks D1–D8. **Checkpoint D: both progression tracks resolve, and lawn and battle agree.**
 
+Phase D is scheduled before Phase E even though the map lists `tree-resolve depends on: tree-state,
+mechanism-wiring`. This is not a hard block: the dependency is for **scoring** mechanism atoms (Sim
+reading a live value), not for binding or gating — a node binds and ships whether or not Sim can score
+it yet. None of D1–D8's tests resolve over `stat.derived`/mechanism atoms; all run over primary and
+contest channels. Checkpoint E is where the two tracks actually meet.
+
 ### Phase E — mechanism wiring
 
 The node class §3.5 proved is the only one that rescues a focused build. G1 is the critical path — one
@@ -152,7 +159,8 @@ differential, concentration and cross-unlock, the soul track, and S4's budget ev
 not optional* — no other module is scoped to produce it, and it is the only thing that can re-derive
 D42's two dials.
 
-Tasks F1–F6. **Checkpoint F: A10a produces `D` with a half-width, and D42's two dials are republished.**
+Tasks F1, F1b, F2–F6. **Checkpoint F: A10a produces `D` with a half-width, and D42's two dials are
+republished.**
 
 ### Phase G — the gate quantities
 

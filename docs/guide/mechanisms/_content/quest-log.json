@@ -1,0 +1,68 @@
+{
+  "slug": "quest-log",
+  "title": "Quest log",
+  "status": "Vision",
+  "kicker": "Quests, failure, memory · story clock layer",
+  "pillar": {"text": "How you play", "href": "how-you-play.md"},
+  "loopLine": "Quests and events",
+  "hook": "**Vision:** a layer you can open to track **quests** and **events** — a story clock, not only loot. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Named so it cannot stay invisible — but you cannot open a finished quest log layer today."},
+    {"term": "Quest log", "meaning": "A player-facing layer for tracked quests and events — not the chronicle XP ledger."},
+    {"term": "Story clock", "meaning": "Narrative beats from expeditions, delves, and world events — opposite of a pure loot clock."},
+    {"term": "Layer", "meaning": "Opens over where you already are (like Almanac), not a travel stage like Delve."}
+  ],
+  "alsoTrue": [
+    "Expedition ticks that feed quests are Vision — see [expedition event ticks](expedition-event-ticks).",
+    "Failure that opens a new questline hangs here and on farm / hunt / defend."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "There is no finished player quest log layer in the current loop.",
+        "The catalog names it anyway so the story clock cannot be “forgotten” into loot-only design."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "Track quests and events in one place you can open.",
+        "Feeds from delve quests, expedition ticks, world events, and turn reports as those systems ship."
+      ],
+      "diagram": [
+        "  expedition ticks / delve / world events",
+        "                    |",
+        "                    v",
+        "              quest log layer (Vision)"
+      ]
+    },
+    {
+      "title": "What is not the quest log",
+      "cards": [
+        {"name": "Chronicle", "body": "History and XP ledgers — ships as memory, not quest tracking."},
+        {"name": "Almanac", "body": "Dossiers and recipes from discovery — reference, not active quests."}
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Play without waiting on a quest checklist UI — it is Vision.",
+    "Use Almanac and Chronicle for shipped memory surfaces.",
+    "When the log appears, treat it as a layer, not a new travel stage."
+  ],
+  "doNote": "Stop when quest log ≠ chronicle. Related: [world events](world-events), [failure branches](failure-branches).",
+  "mixUps": [
+    {"q": "Where is my quest log?", "a": "Vision — not finished / not playable yet."},
+    {"q": "Is Chronicle the quest log?", "a": "No. Chronicle is history and progression ledgers."},
+    {"q": "Do expeditions open quests today?", "a": "Full quest handoff from ticks is Vision."},
+    {"q": "Is this a stage I travel to?", "a": "No. Design is a layer you open over where you are."}
+  ],
+  "next": ["world-events"],
+  "related": ["world-events", "expedition-event-ticks", "failure-branches", "chronicle"],
+  "sources": [
+    "docs/guide/the-loops.md §Quests and events",
+    "docs/guide/mechanisms/quest-log.md (prior stub)",
+    "docs/guide/glossary.md §Quest log"
+  ]
+}

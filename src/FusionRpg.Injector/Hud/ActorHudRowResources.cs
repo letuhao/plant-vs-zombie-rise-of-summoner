@@ -4,18 +4,24 @@ using UnityEngine;
 
 namespace FusionRpg.Injector.Hud;
 
-/// <summary>Row 1 — element-colored shield segments from snapshot stacks (no runtime reads).</summary>
+/// <summary>Row 1 — element-colored shield segments + stack pips (no runtime reads).</summary>
 static class ActorHudRowResources
 {
     static readonly List<(string? ElementId, long Hp)> ScratchStacks = new(4);
     static readonly List<ShieldBarColor.Stop> ScratchStops = new(4);
+
+    // Structural pip spacing/size — legacy shield-bar presentation, not balance dials (tunables-ssot §1).
+    const float PipGap = 0.12f;
+    const float PipSize = 0.08f;
 
     public static bool Sync(
         ActorHudPool.HudSlot slot,
         ActorHudShield? shield,
         Material mat,
         float barWidth,
-        float barHeight)
+        float barHeight,
+        float rowY,
+        int maxStackPips)
     {
         if (!OverlaySettings.ShieldBarEnabled)
         {
@@ -72,6 +78,36 @@ static class ActorHudRowResources
             x += w;
         }
 
+        // Stack pips above the bar (legacy shield-bar presentation pattern).
+        var pipCap = Math.Clamp(maxStackPips, 0, slot.StackPips.Length);
+        var pipN = Math.Clamp(ScratchStacks.Count, 0, pipCap);
+        var pipY = rowY + barHeight * 0.9f;
+        var pipStart = -((pipN - 1) * PipGap) * 0.5f;
+        for (var i = 0; i < slot.StackPips.Length; i++)
+        {
+            var mr = slot.StackPips[i];
+            if (mr == null) continue;
+            if (i >= pipN)
+            {
+                SetActive(mr, false);
+                continue;
+            }
+
+            try
+            {
+                mr.gameObject.SetActive(true);
+                mr.transform.localPosition = new Vector3(pipStart + i * PipGap, pipY, 0f);
+                mr.transform.localScale = new Vector3(PipSize, PipSize, 1f);
+                if (ScratchStops.Count > 0)
+                {
+                    var stop = ScratchStops[Math.Min(i, ScratchStops.Count - 1)];
+                    ActorHudPool.ApplyTint(mr, mat,
+                        new Color(stop.R / 255f, stop.G / 255f, stop.B / 255f, 0.95f));
+                }
+            }
+            catch { }
+        }
+
         return true;
     }
 
@@ -80,6 +116,8 @@ static class ActorHudRowResources
         SetActive(slot.ShieldTrack, false);
         for (var i = 0; i < slot.ShieldSegments.Length; i++)
             SetActive(slot.ShieldSegments[i], false);
+        for (var i = 0; i < slot.StackPips.Length; i++)
+            SetActive(slot.StackPips[i], false);
     }
 
     static void SetActive(MeshRenderer? mr, bool on)

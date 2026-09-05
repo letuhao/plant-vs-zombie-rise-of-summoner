@@ -144,6 +144,14 @@ EXEMPT_NAMES = {
     # is the one thing data/tuning/consumables.v1.json refuses BY NAME. The number a balance pass
     # actually moves is the girdle base type's own `consumableSlots`, which is content, not config.
     "MinManifestCost", "UnbeltedSlots",
+    # 2026-09-05, party-dungeon difficulty-ladder wave. `DoorTypeCatalog.InertCostMultiplierMilli`
+    # (Core/Delve) matches "cost" and "multiplier". It is not a march-cost balance dial -- nothing
+    # marches in a delve (spec-dungeon-registries.md), so LaneTypeDef.CostMultiplierMilli is
+    # completely inert there and this constant exists ONLY to satisfy LaneTypeCatalog's own unrelated
+    # "a lane type must cost something to march" validator with a positive placeholder. Any positive
+    # value produces an identical game outcome (none), which is exactly what T1's own test ("would a
+    # balance pass ever want to change this number?") answers no to.
+    "InertCostMultiplierMilli",
 }
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}

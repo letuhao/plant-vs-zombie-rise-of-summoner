@@ -37,8 +37,8 @@ public enum ConsumableClass
 
 /// <summary>
 /// ssot-consumables.md §5.2's closed <c>use_context</c> set, comma-joined on the wire. v1 authors
-/// <c>menu</c> and <c>dispatch</c>; widening is additive and never invalidates a row, which is the
-/// whole no-migration proof (§4.1).
+/// <c>menu</c>, <c>dispatch</c> and — since 2026-09-05 — <c>battle</c>; widening is additive and never
+/// invalidates a row, which is the whole no-migration proof (§4.1).
 /// </summary>
 public enum UseContext
 {
@@ -48,10 +48,17 @@ public enum UseContext
     /// <summary>Named in the pre-dispatch draught manifest; an input to the sealed run.</summary>
     Dispatch,
 
-    /// <summary>Used mid-battle. Refused today: the action layer is unbuilt.</summary>
+    /// <summary>Used mid-battle, through an action gated on <c>LeafId.HoldsStock</c>. <b>Authored
+    /// since 2026-09-05</b>: the leaf reads the precondition (T10) and
+    /// <c>IStockLedger</c>/<c>RpgStore.TrySpendStock</c> take the stack at commit. §6.2 code 4's
+    /// "battle before the action layer" no longer holds.</summary>
     Battle,
 
-    /// <summary>Used on the lawn through the intent/command road. Refused today: no use affordance.</summary>
+    /// <summary>Used on the lawn through the intent/command road. ⛔ Still refused, and for two
+    /// independent reasons: spec-usability-conditions.md §3a's mode matrix makes a <c>holdsStock</c>
+    /// action NOT BINDABLE in lawn mode (the overlay is a stateless observer and never reads current
+    /// inventory — <c>ActionCompiler</c> refuses it by name), and <c>capPerMatch</c> (G4) is
+    /// unimplemented.</summary>
     Lawn,
 }
 

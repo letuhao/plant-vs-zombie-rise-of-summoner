@@ -1,8 +1,10 @@
 # Implementation plan: `seed-to-concrete`
 
-**Spans two capability maps** — [demon-seed-map.md](../docs/architecture/demon-seed-map.md) (16 modules)
-and [effect-pipeline-map.md](../docs/architecture/effect-pipeline-map.md) (10 modules). 26 modules,
-**62 tasks, 9 phases, 9 checkpoints.**
+**Spans two capability maps** — [demon-seed-map.md](../docs/architecture/demon-seed-map.md) (18 modules,
+2026-09-05: modules 17-18 added §3b after the real `catalog-runtime` flip found fusion recipes could not
+scale past 84 species)
+and [effect-pipeline-map.md](../docs/architecture/effect-pipeline-map.md) (10 modules). 28 modules,
+**67 tasks, 10 phases, 11 checkpoints.**
 
 > **Why one plan and not two.** Both maps say it in their own words: *"neither program can finish
 > alone."* `demon-seed` 15-16 gate on `effect-pipeline` 1-4 and 7-8, and the phases genuinely
@@ -60,6 +62,7 @@ calling a model.
 | **5** | ⭐ **A demon does something, and two players' demons differ** | ep 7-8, ds 15-16 |
 | **6** | The two legacy effect paths are absorbed; one path remains | ep 5-6 |
 | **7** | Named multi-atom affixes exist | ep 9-10 |
+| **8** | ⭐ Fusion recipes scale past the real 829-species roster — `DemonRecipeCatalog`'s old crash-prone live algorithm is gone from the running game | ds 17-18 |
 
 **Phase 3 does not depend on Phases 1-2** — it needs no anchors, only a fixture container. If two
 streams are ever available, that is the split.
@@ -92,6 +95,18 @@ highest-information task in this plan, and it can fail in ways no amount of desi
 **Phase 6 is late and parallel.** Both absorptions migrate shipped, save-affecting data. They wait until
 the new path is proven, because two risks in one change is how a proof becomes a post-mortem.
 
+**Phase 8 was not planned up front — it exists because Phase 4's own `catalog-runtime` flip found a
+real defect the original 26-module scope never anticipated.** `DemonRecipeCatalog.Build()`'s
+deterministic, same-rung-below fusion assignment held at the old compiled 84-species roster (no rarity
+rung ever had more outputs than its input rung's pairing capacity) and stopped holding at 829: 21
+top-rarity species need unique pairs from just 4 candidates one rung down, a hard `C(4,2)=6` ceiling.
+Two narrower fixes were tried and rejected (one didn't solve the math; one solved it but silently broke
+a tested game-design invariant) before the owner directed a proper seedsmith pipeline — the same
+deterministic-first, LLM-for-the-gap, deterministic-reconciler shape every other module in this program
+already uses, just never applied to recipes until this defect forced the question. Modules 17-18 depend
+only on module 11 (`species-generator`, already built in Phase 4), so Phase 8 does not reopen or wait on
+anything else in this plan — it is purely additive at the end.
+
 ---
 
 ## Risks
@@ -107,6 +122,8 @@ the new path is proven, because two risks in one change is how a proof becomes a
 | The walking skeleton's stubs hide a real seam defect | Medium | Its stub count is **printed**, so the remaining gap is visible rather than assumed; Checkpoint 5 requires zero stubs left |
 | A metric ships with no declared target and becomes an opinion | Medium | Each metrics task asserts its targets live in tuning — the item corpus once ran three waves with nine empty partitions and green validators |
 | Impure input reaches the materialiser, so rosters differ per machine | High, silent | A guard test over the materialiser's source; an enumeration-order shuffle test |
+| Per-member voting (Phase 8) still leaves some `Almanac` deficits unresolved after a real run | Medium, named not hidden | The module's own success criteria accept partial convergence by design; an unresolved output ships with no recipe, named in the run's report — a real result to react to, not a silent gap |
+| `fusion-recipe-generator`'s vote mechanism copies the wrong existing precedent (`option-permutation`'s whole-value voting, which this repo already measured a 40-55% unresolved rate from at a smaller option-pool width) | High if uncaught | Spec fixed after adversarial review to reuse `resolve_set_vote`'s per-member majority instead, with pair canonicalization before tallying — cited by name in T8.2 |
 
 ---
 
@@ -134,13 +151,22 @@ python scripts\audit-magic-numbers.py --summary
 
 ## Open questions
 
-**None.** Sixteen were raised across the two ideal docs and this plan's audit; all sixteen are answered.
-The audit itself found two defects in this plan — a missing amendment (the `seed-contract.md` status
-line, which forbids the authoring Phases 1-2 do) and an ordering error (the shared authoring shape was
-asserted in T7.2 *after* T5.3 had already built one). Both are fixed above. What remains are
-balance numbers — the variant-shift table, the affinity→weight mapping, the ten-rung summon-rate spread
-— and those follow `ssot-power-scale.md` §5.3's own precedent: **pick starting values, tune from play**,
-with a comment saying they are starting values. They are tasks, not decisions held open.
+**One, added with Phase 8, deliberately non-blocking.** Does a `crossRungGapFill` fusion recipe (an
+input drawn from more than one rarity rung below its output, only possible for the real corpus's
+`Almanac` deficits) need its own cost-table adjustment, or does the existing fixed per-rarity price
+stand as-is? `spec-fusion-recipe-generator.md` §4a names this "Ask first: game balance" per
+`spec-demon-fusion.md`'s own boundaries, and ships with "no change, exposure accepted as negligible
+(≤15 recipes)" as its default — tracked here so it is decided once, not discovered by a player finding
+the cheapest gap-fill recipe first. Not a gate on T8.3 or Checkpoint 8.
+
+Everything else: **none.** Sixteen were raised across the two ideal docs and this plan's audit; all
+sixteen are answered. The audit itself found two defects in this plan — a missing amendment (the
+`seed-contract.md` status line, which forbids the authoring Phases 1-2 do) and an ordering error (the
+shared authoring shape was asserted in T7.2 *after* T5.3 had already built one). Both are fixed above.
+What remains are balance numbers — the variant-shift table, the affinity→weight mapping, the ten-rung
+summon-rate spread — and those follow `ssot-power-scale.md` §5.3's own precedent: **pick starting
+values, tune from play**, with a comment saying they are starting values. They are tasks, not decisions
+held open.
 
 ---
 
@@ -152,3 +178,6 @@ message. Two further steps are the owner's alone:
 - **The full classification run** (T2.11) — it is ~14 h against the local model on the owner's machine.
 - **The live lawn check** (CP4) — `deploy-play.ps1 -RestartServer` from the owner's own terminal, per
   the server-lifetime rule.
+- **The real `fusion-recipe-propose` run** (Checkpoint 8a) — a local-model call against the ≤15 real
+  `Almanac` deficits, the same class of step as T2.11.
+- **The live-lawn fusion check** (T8.5) — a real server restart, per the same server-lifetime rule.

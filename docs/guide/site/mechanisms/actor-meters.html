@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="WIP: actors share six pools — HP, stamina, sun/hunger, spirit, yang/yin, poise — the fuels skills and stances will spend. Not finished yet." />
+    <title>Actor meters — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/actor-meters.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--wip">WIP</span>
+          Combat language · every place
+        </p>
+        <h1 class="teach-title">Actor meters</h1>
+        <p class="teach-hook"><strong>WIP:</strong> actors share six pools — HP, stamina, sun/hunger, spirit, yang/yin, poise — the fuels skills and stances will spend. Not finished yet.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>WIP</dt>
+              <dd>Designed and partly built. Poise and the full skill-cost loop are not finished — do not expect every pool as a live spend UI yet.</dd>
+            </div>
+            <div>
+              <dt>Meter</dt>
+              <dd>A shared actor pool. Faction difference is a <strong>label</strong> (plant vs zombie wording), not a different system.</dd>
+            </div>
+            <div>
+              <dt>Sun (two meanings)</dt>
+              <dd>The <strong>lawn sun bank</strong> in a match, and the plant <strong>label</strong> for the hunger meter. Different scopes — do not mix them.</dd>
+            </div>
+            <div>
+              <dt>Yang / Yin</dt>
+              <dd>Plant / zombie labels for stance and buff fuel — not a morality meter.</dd>
+            </div>
+            <div>
+              <dt>Poise</dt>
+              <dd>The guard pool. When it lands, guard is a real stance — not a free shrug.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Health already matters everywhere; the unfinished part is spending the other pools on skills.</li>
+            <li>Skills that cost these meters are <a href="../../mechanisms/skills-loadouts.md">skills and loadouts</a> — also WIP.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="not-finished-yet-title">
+          <h2 id="not-finished-yet-title">Not finished yet</h2>
+          <p>When meters land, skills cost something you can see, and guard is a real stance.</p>
+          <p>Until then, treat missing spend UI as unfinished work — not a broken save.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="the-six-pools-title">
+          <h2 id="the-six-pools-title">The six pools</h2>
+          <p>Same system; plant and zombie only rename some rows:</p>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Pool</th>
+                <th scope="col">Plant label</th>
+                <th scope="col">Zombie label</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Health</td>
+                <td>HP</td>
+                <td>HP</td>
+              </tr>
+              <tr>
+                <td>Body fuel</td>
+                <td>Stamina</td>
+                <td>Stamina</td>
+              </tr>
+              <tr>
+                <td>Hunger</td>
+                <td>Sun</td>
+                <td>Hunger</td>
+              </tr>
+              <tr>
+                <td>Nerve</td>
+                <td>Spirit</td>
+                <td>Spirit</td>
+              </tr>
+              <tr>
+                <td>Stance / buff fuel</td>
+                <td>Yang</td>
+                <td>Yin</td>
+              </tr>
+              <tr>
+                <td>Guard</td>
+                <td>Poise</td>
+                <td>Poise</td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="teach-note">Do not confuse plant “Sun” on this table with the match’s lawn sun bank.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-you-do-today-title">
+          <h2 id="what-you-do-today-title">What you do today</h2>
+          <p>Play with HP and the combat language that already ships — elements, shields, statuses.</p>
+          <p>Read this page as the map of fuels coming with skills and interactive battles.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do while it is WIP</h2>
+          <ol class="steps-plain">
+            <li>Keep playing lawn and roster loops — meters are not a gate to start.</li>
+            <li>When meter UI appears, learn the six names and which label your side uses.</li>
+            <li>Separate lawn sun (match bank) from the plant hunger label named Sun.</li>
+          </ol>
+          <p class="teach-note">Paired WIP: <a href="../../mechanisms/skills-loadouts.md">skills and loadouts</a> · <a href="../../mechanisms/interactive-battles.md">interactive battles</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Where do I spend yang or poise?</dt>
+              <dd>Not finished yet. Poise and the skill-cost loop are WIP.</dd>
+            </div>
+            <div>
+              <dt>Is plant “Sun” the same as match sun?</dt>
+              <dd>No. Match sun is the lawn bank. Sun on the meter table is the plant hunger label.</dd>
+            </div>
+            <div>
+              <dt>Do plants and zombies use different meter systems?</dt>
+              <dd>No. Same six pools — labels differ.</dd>
+            </div>
+            <div>
+              <dt>Is this a stamina gate on the whole game?</dt>
+              <dd>No. Design forbids a player stamina gate. These are actor combat pools.</dd>
+            </div>
+            <div>
+              <dt>Do I need meters to finish a lawn match?</dt>
+              <dd>No. Lawn play and shipped combat language already work.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/skills-loadouts.md">Skills and loadouts</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/skills-loadouts.md">Skills and loadouts</a> ·
+            <a href="../../mechanisms/interactive-battles.md">Interactive battles</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/actor-meters.md">Markdown (editable SSOT)</a> ·
+            <a href="../../combat.md">Combat</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/actor-meters.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

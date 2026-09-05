@@ -1,0 +1,79 @@
+{
+  "slug": "world-map",
+  "title": "Rift world map",
+  "status": "Shipped",
+  "kicker": "World and empire · adventure graph",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure · Farm / hunt / defend",
+  "hook": "The **rift world map** is where you go — sectors joined by lanes, legions you march, ground you claim, and fog you push through.",
+  "blindSpots": [
+    {"term": "Rift / world map", "meaning": "The adventure stage: a network of sectors and lanes. Not the lawn, and not the finished empire stage HUD."},
+    {"term": "Sector", "meaning": "A node of ground you can claim, hold, or lose. Your capital sector is the homeworld."},
+    {"term": "Legion", "meaning": "A force you march along lanes. Movement and fights hang on legions, not on a free camera fly-to."},
+    {"term": "End Turn", "meaning": "The world clock. Orders wait until you press it — see [virtual turns](virtual-turns)."}
+  ],
+  "alsoTrue": [
+    "You are Dave. Find Zomboss’s fortress and take it before your homeworld falls.",
+    "Buildings, richer map tools, and map→battle handoff are still WIP. Three-layer presentation and the generator stay Vision."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "A graph of sectors joined by lanes. You scout through fog, march legions, claim ground, and read Zomboss as a real opponent.",
+        "Holding a sector grants full sight of it — standing on your own land is never a guessing game."
+      ],
+      "note": "Win and lose live on [The game](^the-game.md): take Zomboss’s fortress, or lose the homeworld."
+    },
+    {
+      "title": "How it works",
+      "intro": "Adventure verbs on the graph:",
+      "cards": [
+        {"name": "March and claim", "body": "Move legions along lanes; claim sectors; watch supply and contact."},
+        {"name": "Hold", "body": "Ground is not free to keep — [loam](loam) and neglect make holdings real."},
+        {"name": "Opponent", "body": "[Zomboss](zomboss-commander) runs his own war from his own fog."}
+      ],
+      "diagram": [
+        "  Sanctum  ->  World map  ->  march / claim / End Turn",
+        "                    |",
+        "                    +->  fog, loam, Zomboss"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "Travel to World",
+          "intro": "Open the World stage from the Sanctum when travel is available.",
+          "steps": [
+            "Travel to World.",
+            "Select a legion and move along lanes.",
+            "Claim when contact allows, then press End Turn when orders are set."
+          ],
+          "note": "Later doors into delves, cede, dowse, lenses, and the outliner are WIP / Vision — see [map orders](map-orders)."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Travel to World from the Sanctum.",
+    "Move one legion one step and notice fog vs clear ground.",
+    "Press End Turn once so you see everyone’s orders resolve."
+  ],
+  "doNote": "Stop when map ≠ lawn and End Turn ≠ a diary clock. Next: [virtual turns](virtual-turns) and [fog of war](fog-of-war).",
+  "mixUps": [
+    {"q": "Is this real-time?", "a": "No. Time is virtual turns — you press End Turn."},
+    {"q": "Is the full empire HUD here?", "a": "Thin map surface is playable. Finished world-stage place is Vision — see [world stage](world-stage)."},
+    {"q": "Does Zomboss see my whole save?", "a": "No. He evaluates from his fog — see [Zomboss](zomboss-commander)."},
+    {"q": "Can I enter a delve from a sector today?", "a": "Delve doors are Vision. Map play today is march, claim, End Turn, fog, Zomboss."}
+  ],
+  "next": ["virtual-turns"],
+  "related": ["virtual-turns", "fog-of-war", "loam", "zomboss-commander", "farm-hunt-defend"],
+  "sources": [
+    "docs/guide/the-rift.md §World map — adventure",
+    "docs/guide/the-rift.md §In this build",
+    "docs/guide/the-loops.md §World map — adventure",
+    "docs/guide/mechanisms/world-map.md (prior stub)"
+  ]
+}

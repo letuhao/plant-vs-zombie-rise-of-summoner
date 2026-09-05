@@ -1,0 +1,51 @@
+{
+  "slug": "build-presets",
+  "title": "Build presets",
+  "status": "Vision",
+  "kicker": "Power and builds · item and power loops",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Item collection · Level up and power",
+  "hook": "**Vision:** save a synergy loadout — patron, relics, aptitudes, who you field — so a lean is something you keep.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not playable as a preset system yet."},
+    {"term": "Preset", "meaning": "A named saved loadout you can swap — not five independent clicks every time."},
+    {"term": "Synergy loadout", "meaning": "Patron + relics + aptitudes + field list together."},
+    {"term": "Lean", "meaning": "A build direction (for example fire) you want to reuse."}
+  ],
+  "alsoTrue": [
+    "Until presets ship, change pieces by hand on the rail.",
+    "Hangs on item and power loops — see [The loops](^the-loops.md)."
+  ],
+  "sections": [
+    {
+      "title": "Fantasy",
+      "paras": [
+        "Save “Fire lean” once.",
+        "Swap to it later without redoing every panel."
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Set commanders, aptitudes, and gear as each surface allows.",
+        "Treat missing preset UI as Vision, not corruption."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Ignore absent preset buttons.",
+    "Build with live aptitudes and roster tools.",
+    "Return here when presets ship."
+  ],
+  "doNote": "Leaders next: [commanders](commanders).",
+  "mixUps": [
+    {"q": "Can I save presets now?", "a": "No — Vision."},
+    {"q": "Is this the same as species builds?", "a": "No. Presets store a whole synergy loadout."},
+    {"q": "Does it include lawn plants?", "a": "Fantasy is RPG loadout (patron, relics, aptitudes, field list)."},
+    {"q": "Broken save?", "a": "No — feature not shipped."}
+  ],
+  "next": ["commanders"],
+  "related": ["aptitudes", "relics-armoury", "patron"],
+  "sources": ["docs/guide/relics-and-builds.md §Build presets", "docs/guide/the-loops.md"]
+}

@@ -1,4 +1,6 @@
-# One-shot generator for mechanism stubs. Not part of CI.
+# Historical one-shot generator for short mechanism stubs. Not part of CI.
+# Do NOT re-run over teach pages (local-control-room, souls, or any _content/*.json output).
+# New teach content goes through _content/ + _render.py. See _content/README.md.
 $ErrorActionPreference = "Stop"
 $root = $PSScriptRoot
 

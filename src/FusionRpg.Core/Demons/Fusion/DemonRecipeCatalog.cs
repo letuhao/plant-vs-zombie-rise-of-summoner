@@ -86,23 +86,57 @@ public static class DemonRecipeCatalog
                     $"Recipe pool below {output.BaseRarity} has {pool.Count} species (searched down to "
                     + $"{DemonRarity.Chaff}) — catalog cannot support fusion.");
 
-            var a = pool.FirstOrDefault(p => p.ElementPrimary == output.ElementPrimary) ?? pool[0];
+            // Found running the real flip 2026-09-05: at 84 species, exactly one `a` candidate ever
+            // existed per output's element (the primary-match, or pool[0]) and pairs never ran out
+            // below it. At 829 species, many outputs share the same primary element and therefore
+            // the same greedy `a` — once every unused-pair slot for that specific `a` is claimed by
+            // an earlier output, the old single-`a` attempt had nowhere left to go and threw. The
+            // preference order itself (A: primary-element match first; B: secondary-element donor,
+            // then ring-related, then catalog order) is untouched — this only adds backtracking
+            // across the SAME ordered `a` candidates the design already prefers, within the SAME
+            // single rung `InputPoolBelow` returns (never mixes rungs — DemonRecipeCatalogTests'
+            // own `Inputs_are_distinct_band_below_and_never_capture_only` pins both inputs to the
+            // exact same nearest-populated rung, an invariant this fix does not touch).
+            var (chosenA, chosenB) = TryFindPair(pool, output, usedPairs);
 
-            // B preference: secondary-element donor → ring-related primary → catalog order;
-            // then advance until the orderless pair is unused (pairs identify recipes).
-            var candidates = pool
-                .Where(p => !ReferenceEquals(p, a))
-                .OrderBy(p => BRank(p, output))
-                .ThenBy(p => p.SpeciesId, StringComparer.Ordinal)
-                .ToList();
-            var b = candidates.FirstOrDefault(p => usedPairs.Add(PairKey(a.SpeciesId, p.SpeciesId)))
-                ?? throw new InvalidOperationException(
-                    $"No unused input pair available for '{output.SpeciesId}'.");
+            // ⛔ TEMPORARY, until `fusion-recipe-generator`/`fusion-recipe-runtime` ship
+            // (docs/architecture/demon-seed-map.md §3b, modules 17-18, specced 2026-09-05): a genuine
+            // capacity ceiling — {pool.Count} species below a rung support at most C(n,2) distinct
+            // pairs, and 829 species can need more outputs at one rung than that. Was a hard throw
+            // (crashed server startup, found live running the real catalog-runtime flip). This SKIPS
+            // the unresolvable output rather than fabricating a cross-rung or reused pair on its own
+            // authority — exactly the "an unresolved deficit ships with no recipe, never a guessed
+            // one" rule the new pipeline's own spec already commits to as its FINAL behavior, not a
+            // shortcut invented to unblock this session. Once module 17 ships, this loop is replaced
+            // by a `Configure` read of its committed, LLM-gap-filled, deterministically-reconciled
+            // seed (module 18) and this skip path is deleted, not extended.
+            if (chosenA is null || chosenB is null) continue;
 
-            recipes.Add(new DemonRecipeDef("recipe." + output.SpeciesId, output.SpeciesId, a.SpeciesId, b.SpeciesId));
+            recipes.Add(new DemonRecipeDef("recipe." + output.SpeciesId, output.SpeciesId, chosenA.SpeciesId, chosenB.SpeciesId));
         }
 
         return recipes;
+    }
+
+    /// <summary>Tries every `a` candidate in the design's own preference order (primary-element match
+    /// first) against every `b` candidate in ITS preference order, stopping at the first unused pair.
+    /// Returns (null, null) if the pool cannot support one more distinct pair at all.</summary>
+    static (DemonSpeciesDef? A, DemonSpeciesDef? B) TryFindPair(
+        List<DemonSpeciesDef> pool, DemonSpeciesDef output, HashSet<string> usedPairs)
+    {
+        var aCandidates = pool
+            .OrderByDescending(p => p.ElementPrimary == output.ElementPrimary)
+            .ThenBy(p => p.SpeciesId, StringComparer.Ordinal);
+        foreach (var a in aCandidates)
+        {
+            var bCandidates = pool
+                .Where(p => !ReferenceEquals(p, a))
+                .OrderBy(p => BRank(p, output))
+                .ThenBy(p => p.SpeciesId, StringComparer.Ordinal);
+            var b = bCandidates.FirstOrDefault(p => usedPairs.Add(PairKey(a.SpeciesId, p.SpeciesId)));
+            if (b is not null) return (a, b);
+        }
+        return (null, null);
     }
 
     /// <summary>

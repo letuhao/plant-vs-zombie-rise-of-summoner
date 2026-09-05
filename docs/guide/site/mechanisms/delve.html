@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Vision: a party crawl through seeded rooms toward a boss — haul out or fail trying. Not finished / not playable yet." />
+    <title>The Delve — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/delve.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--vision">Vision</span>
+          Delve, siege, party · dungeon crawler
+        </p>
+        <h1 class="teach-title">The Delve</h1>
+        <p class="teach-hook"><strong>Vision:</strong> a party crawl through seeded rooms toward a boss — haul out or fail trying. Not finished / not playable yet.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Vision</dt>
+              <dd>Locked fiction. You cannot enter a delve in the current loop.</dd>
+            </div>
+            <div>
+              <dt>Delve</dt>
+              <dd>A stage you travel to — room graph, pack, extract — not an expedition and not a lawn match.</dd>
+            </div>
+            <div>
+              <dt>Domain</dt>
+              <dd>A named place you find in the world, then enter from the Sanctum.</dd>
+            </div>
+            <div>
+              <dt>Stage vs layer</dt>
+              <dd>Delve is a stage (you go there to act). Almanac is a layer (opens over where you already are).</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Expeditions stay the idle sibling — delves do not replace them.</li>
+            <li>Interactive battles you play yourself are WIP shared with delves; formations and oaths are Vision depth.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="not-finished-not-playable-yet-title">
+          <h2 id="not-finished-not-playable-yet-title">Not finished / not playable yet</h2>
+          <p>Sanctum, Lawn, World, and expeditions are where play lives today.</p>
+          <p>This page keeps the dungeon-crawler fantasy in the catalog until it ships.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-it-is-design-title">
+          <h2 id="what-it-is-design-title">What it is (design)</h2>
+          <p>You find domains out in the world (expedition discoveries are part of that story). From the Sanctum you pick a found domain and enter.</p>
+          <p>Inside: a room graph — fights, elites, caches, shrines, merchants, traps, wild talk. You manage a pack. You extract with a haul — or you wipe.</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  find domain  -&gt;  Sanctum enter  -&gt;  room graph
+                                      |
+                                      +-&gt;  extract with haul
+                                      +-&gt;  wipe / fail
+</pre>
+          <p class="teach-note">Unlock (when it ships): first domain found on an expedition.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-sits-beside-it-title">
+          <h2 id="what-sits-beside-it-title">What sits beside it</h2>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Pack / extract / oaths</strong>
+              <p>How you provision and stake the run — see <a href="../../mechanisms/pack-extract-oaths.md">pack, extract, oaths</a>.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Formations</strong>
+              <p>How the pack stands and combo skills — see <a href="../../mechanisms/party-formations.md">party formations</a>.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Failure branches</strong>
+              <p>A wipe can open different ground — see <a href="../../mechanisms/failure-branches.md">failure branches</a>.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do with this page</h2>
+          <ol class="steps-plain">
+            <li>Do not hunt for a Delve button on the live rail — it is Vision.</li>
+            <li>Keep expeditions as the async crawl-adjacent loop that ships today.</li>
+            <li>When domains appear later, enter from the Sanctum and expect a return there when the run resolves.</li>
+          </ol>
+          <p class="teach-note">Stop when delve ≠ expedition. Related: <a href="../../mechanisms/pack-extract-oaths.md">pack, extract, oaths</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Can I enter a delve today?</dt>
+              <dd>No. Not finished / not playable yet.</dd>
+            </div>
+            <div>
+              <dt>Is this just a long expedition?</dt>
+              <dd>No. Expeditions auto-resolve idle. Delves are a presence stage with rooms and extract.</dd>
+            </div>
+            <div>
+              <dt>Where do I start one?</dt>
+              <dd>Design: find a domain, then enter from the Sanctum — when it ships.</dd>
+            </div>
+            <div>
+              <dt>Do delves replace expeditions?</dt>
+              <dd>No. They are siblings.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/pack-extract-oaths.md">Pack, extract, oaths, domains</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/pack-extract-oaths.md">Pack, extract, oaths, domains</a> ·
+            <a href="../../mechanisms/party-formations.md">Party formations and combo skills</a> ·
+            <a href="../../mechanisms/interactive-battles.md">Interactive battles</a> ·
+            <a href="../../mechanisms/failure-branches.md">Failure branches</a> ·
+            <a href="../../mechanisms/expeditions.md">Expeditions</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/delve.md">Markdown (editable SSOT)</a> ·
+            <a href="../../delves-and-sieges.md">Delves and sieges</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/delve.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

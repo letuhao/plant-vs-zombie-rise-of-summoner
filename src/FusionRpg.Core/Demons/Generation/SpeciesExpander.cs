@@ -143,7 +143,16 @@ public static class SpeciesExpander
             if (!ElementRoster.TryParse(secEl, out var parsedSec))
                 throw new InvalidOperationException(
                     $"'{anchor.SpeciesId}': elementSecondary '{secEl}' is not a known element");
-            elementSecondary = parsedSec;
+            // Found running the real flip 2026-09-05: DemonSpeciesCatalog.Validate refused
+            // 'tower_peapuff' for "primary == secondary element" — its real anchor independently
+            // voted "fire" for BOTH fields (two separate classification passes agreeing on the same
+            // value rather than one of them saying "none"), a real LLM voting artifact, not a code
+            // bug. SpeciesBuildPlanner.cs already carries the identical defense for the sibling
+            // AptitudeSecondary field ("trusting AptitudeSecondary is not null alone would silently
+            // corrupt the vector... defense in depth against the same corruption from any other
+            // bad-data shape") — applying that same established principle here rather than inventing
+            // a new one: a stated secondary that equals the primary is not a hybrid, it is "none".
+            if (parsedSec != elementPrimary) elementSecondary = parsedSec;
         }
         if (!Enum.TryParse<DemonDeployMode>(anchor.DeployMode, ignoreCase: false, out var deployMode))
             throw new InvalidOperationException(

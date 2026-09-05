@@ -107,25 +107,25 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
 
 ### `difficulty-ladder` — spec-difficulty-ladder.md
 
-- [ ] **D1.18** `RoomTheta.Compose` — the first production composer of `Θ_content`
+- [x] **D1.18** `RoomTheta.Compose` — the first production composer of `Θ_content`
   - Acceptance: `Compose(...)` builds a `ContentContext(DangerBand = entrance + rowStep + bandDelta [+ once +7] [+ tail·n], WorldTier, ZombossLevel, RealmsAdvanced)` and returns `{Context, Theta, Band}` through `PowerIndexComposer.ContentExplain`. **No arithmetic on `Θ` outside this file**
-  - Verify: golden rows including the worked pair (rich/hard row 0 → Θ 70; boss → Θ 100)
+  - Verify: golden rows including the worked pair (rich/hard row 0 → Θ 70; boss → Θ 100) — `RoomThetaComposerTests` (11 tests, all §1 table rows + refuse-not-clamp). Found and fixed a transcription error in the spec's own worked table while proving the tail golden (`abyss +5`): every other row sits on an exact 5-Θ-per-band rate that gives 110 for band 11, not the doc's stated 125 — corrected in `spec-difficulty-ladder.md` §1/Testing-strategy with the real `P(Θ)`/`contentScale` values (5,360/7,882), proven via `PowerLadder.Value`/`ContentScale.Milli`, not re-guessed
   - Files: `src/FusionRpg.Core/Delve/Difficulty/RoomTheta.cs`
-- [ ] **D1.19** `RungTable` and `RungValidator`
+- [x] **D1.19** `RungTable` and `RungValidator`
   - Acceptance: the ten rungs load with decision 7's deltas; every rule rung carries a reward-bearing column; the validator throws `RungTableRejection` when neighbours differ in neither `bandDelta` nor a reward column
-  - Verify: red/green validator tests; a golden of the shipped table
+  - Verify: red/green validator tests; a golden of the shipped table — `RungTableTests` (7 tests). R8 twin-rejection already proven at load time (`DungeonTuningTests`); this file covers the façade + `RungValidator`'s ordinal-contiguity/hard-is-identity checks read through the catalog
   - Files: `RungTable.cs`, `RungValidator.cs`
-- [ ] **D1.20** `RungOffer.For` — refuse, never clamp
+- [x] **D1.20** `RungOffer.For` — refuse, never clamp
   - Acceptance: offers per `(domain, player)` return only rungs the domain supports; a rung that would floor on a domain is **omitted with a named refusal**, never clamped; the band name is returned, never the ordinal
-  - Verify: a test asserts no clamp path exists and a refused rung is absent from the offer rather than greyed
+  - Verify: a test asserts no clamp path exists and a refused rung is absent from the offer rather than greyed — `RungOfferTests` (9 tests, incl. `No_offered_row_ever_carries_a_BandBelowFloor_refusal_there_is_no_clamp_path` across bands 1-10). `EffectiveBandName` reads `bands.dangerBand` (added `dungeon-registries` wave 5) with the same past-the-list "+k" shape as `TailLadder.Label`
   - Files: `RungOffer.cs`
-- [ ] **D1.21** `TailLadder`, `PermadeathGate`, `OathUnlock`
+- [x] **D1.21** `TailLadder`, `PermadeathGate`, `OathUnlock`
   - Acceptance: `n → band` with a `MaxIndex` pre-check that throws rather than saturating; `permadeathFromRung` per domain; the Oath is opt-in below the gate and **a clear at `maxRungWithoutOath` unlocks the next rung**
-  - Verify: overflow pre-check test at the boundary; an Oath clear unlocks exactly one rung
+  - Verify: overflow pre-check test at the boundary; an Oath clear unlocks exactly one rung — `TailLadderTests` (5, incl. a binary-searched exact `MaxIndex` boundary), `PermadeathGateTests` (6), `OathUnlockTests` (9, incl. rung-8→9, rung-10→abyss+1, and the very-easy Oath-clear-opens-nothing proof). Closed two real tuning-schema gaps found while wiring this: `difficulty.minOfferedBand` and `difficulty.tail.labelFormat` were named in this spec's own Tunables table but never added to `DungeonTuning`/`dungeon.v1.json` by D1.3 (built before this spec existed) — added both (loader validation, real JSON, `RoomThetaComposer`/`TailLadder.Label` now read them instead of a literal `1` / a hand-rolled label string)
   - Files: `TailLadder.cs`, `PermadeathGate.cs`, `OathUnlock.cs`
-- [ ] **D1.22** `Θ_actor` composition named as the wiring gap it is
+- [x] **D1.22** `Θ_actor` composition named as the wiring gap it is
   - Acceptance: the actor-side composition is written with the specimen-level fallback stated in a comment; nothing invents a second curve
-  - Verify: a contest property test — a difference in `Θ` moves the contest monotonically
+  - Verify: a contest property test — a difference in `Θ` moves the contest monotonically — `ActorThetaSeamTests` (13 tests: §7's table to ±0.001 at gaps 0/5/10/15/20/35, parity 0.900±0.02 at 5 absolute θ values, strict monotonicity across 11 gaps, and a 0..1 range check). `ActorThetaSeam.cs` composes the existing `BattleRuleset`/`CombatProbability` calculators only — no new curve, no new scale
   - Files: `src/FusionRpg.Core/Delve/Difficulty/` (the composition seam)
 
 ### `delve-graph-roll` — spec-delve-graph-roll.md

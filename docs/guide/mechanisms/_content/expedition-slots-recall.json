@@ -1,0 +1,77 @@
+{
+  "slug": "expedition-slots-recall",
+  "title": "Expedition slots and recall",
+  "status": "Shipped",
+  "kicker": "Idle expeditions · parallelism and early return",
+  "pillar": {"text": "Expeditions", "href": "expeditions.md"},
+  "loopLine": "Idle expeditions",
+  "hook": "**Slots** let you run more than one expedition at once; **recall** brings a squad home early for what you have earned so far.",
+  "blindSpots": [
+    {"term": "Slot", "meaning": "A parallel expedition berth. You start with a few and grow into more as the system allows — not infinite dispatches."},
+    {"term": "Recall", "meaning": "Pull an expedition home before the timer ends. Rewards pro-rate to completed ticks."},
+    {"term": "Pro-rate", "meaning": "You take what completed so far — not a full payout and not a wipe of the run."},
+    {"term": "Live task", "meaning": "A demon already out on an expedition (or another live assignment) cannot be double-booked."}
+  ],
+  "alsoTrue": [
+    "Recall anytime is intentional — leave early, take earned so far. Nothing expires if you forget to collect.",
+    "How many slots you have grows with progression; trust the UI for the current count."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Parallelism is gated by expedition slots — you grow from a few to more as you progress.",
+        "Recall is the escape hatch when you need those demons back before the timer ends."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "Two controls around the same dispatch loop:",
+      "cards": [
+        {"name": "Slots", "body": "Each free slot can hold one expedition. Fill what you have; unlock more when the system allows."},
+        {"name": "Recall", "body": "End early. Rewards scale to completed ticks — you keep progress earned so far, not the full end payout."}
+      ],
+      "diagram": [
+        "  free slot  ->  dispatch  ->  wait",
+        "                    |",
+        "                    +->  collect (full timer)",
+        "                    +->  recall  ->  pro-rated return"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "On the Expeditions layer",
+          "intro": "Open Expeditions (`E`) after you have a bound demon.",
+          "steps": [
+            "Look at how many slots are free versus filled.",
+            "Dispatch into an empty slot.",
+            "If you need the squad back early, use recall and read the pro-rated report."
+          ],
+          "note": "Exact slot counts change with progression — read the live UI, not a remembered number."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Open Expeditions and note how many slots you have.",
+    "Fill one slot with a short dispatch.",
+    "Try recall once on a later run so you see a pro-rated report — then decide whether early return was worth it."
+  ],
+  "doNote": "Stop when slot ≠ infinite and recall ≠ full payout. Core loop: [expeditions](expeditions).",
+  "mixUps": [
+    {"q": "Can I run unlimited expeditions at once?", "a": "No. Slots gate parallelism. You grow into more over time."},
+    {"q": "Does recall give the full reward?", "a": "No. You get what completed ticks earned — leave early, take less."},
+    {"q": "Do unfinished rewards expire?", "a": "No. Collect when ready; nothing times out from neglect."},
+    {"q": "Can I put the same demon on two slots?", "a": "No. Demons on a live task are not free to dispatch again."}
+  ],
+  "next": ["expeditions"],
+  "related": ["expeditions", "specimens", "wild-joins"],
+  "sources": [
+    "docs/guide/expeditions.md §Recall and slots",
+    "docs/guide/mechanisms/expedition-slots-recall.md (prior stub)",
+    "docs/guide/glossary.md §Verbs"
+  ]
+}

@@ -12,7 +12,7 @@ You raise demons, grow Dave’s power, run idle expeditions, and fight for groun
 
 ## Play the lawn
 
-- Keep playing **lawn matches** — kills become [souls](creatures.md), encounters fill the [almanac](almanac.md), and demons you raised [deploy](the-lawn.md) back onto the board
+- Keep playing **lawn matches** — kills become [souls](site/mechanisms/souls.html), encounters fill the [almanac](almanac.md), and demons you raised [deploy](the-lawn.md) back onto the board
 - Watch the live board in the control room while a match runs
 - After the first chapter, unlocked features stay playable with the **lawn game** closed
 
@@ -64,7 +64,7 @@ You raise demons, grow Dave’s power, run idle expeditions, and fight for groun
 | | |
 |---|---|
 | [Vision site (HTML)](site/) | Tabbed skim — open in a browser |
-| [Mechanisms](mechanisms/) | Every gameplay system by category — detail stubs |
+| [Mechanisms](mechanisms/) | Every gameplay system by category — stubs plus teach pages ([Souls](site/mechanisms/souls.html), [Local control room](site/mechanisms/local-control-room.html)) |
 | [The game](the-game.md) | What this is — lore, win and lose |
 | [The loops](the-loops.md) | Ten named loops every feature hangs on |
 | [How you play](how-you-play.md) | First session and unlock ladder |

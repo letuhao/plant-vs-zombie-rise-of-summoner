@@ -158,6 +158,31 @@ public class InstantiatorDrawBudgetTests
         }
     }
 
+    [Fact]
+    public void A_mixed_affix_is_never_drawn_by_the_suffix_pass_once_a_plain_prefix_spent_the_prefix_budget()
+    {
+        // The other direction of "one of each, simultaneously": a `Mixed` bundle costs a prefix roll
+        // too, so it can only ever be picked by the pass that still HAS one. Here the prefix budget is
+        // one and the pool offers a plain prefix, so a `Mixed` pick in the suffix pass would push the
+        // item to two prefix-eligible affixes against `PrefixRolls = 1` — the exact post-op invariant
+        // `RerollPolicy.ValidatePostOp` refuses.
+        Seed(
+            Single("affix.p", AffixClass.Prefix, "atom.might.t1"),
+            Mixed("affix.mixed", "atom.vitality.t1", "atom.thorns.t1"));
+        var c = Container("item.prefix-spent", 1, 1,
+            new ContainerPoolRow("affix.p", 100, "g.p"),
+            new ContainerPoolRow("affix.mixed", 100, "g.mixed"));
+
+        for (long seed = 0; seed < 60; seed++)
+        {
+            var drawn = Draw(c, seed);
+            var tookPlainPrefix = drawn.Contains("atom.might.t1");
+            var tookMixed = drawn.Contains("atom.vitality.t1");
+            Assert.False(tookPlainPrefix && tookMixed,
+                $"seed {seed}: a plain prefix AND a mixed bundle — two prefix-eligible affixes against PrefixRolls=1");
+        }
+    }
+
     // ---- the regression claim: byte-identical wherever no Mixed affix exists -------------------------
 
     [Fact]

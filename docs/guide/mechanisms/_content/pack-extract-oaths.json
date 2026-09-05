@@ -1,0 +1,73 @@
+{
+  "slug": "pack-extract-oaths",
+  "title": "Pack, extract, oaths, domains",
+  "status": "Vision",
+  "kicker": "Delve, siege, party · provision and stakes",
+  "pillar": {"text": "Delves and sieges", "href": "delves-and-sieges.md"},
+  "loopLine": "Dungeon crawler — the Delve",
+  "hook": "**Vision:** provision a **pack**, enter a found **domain**, **extract** with a haul or wipe — optional hard **oaths** on difficulty rungs. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not playable yet. These pieces exist as locked design for the Delve."},
+    {"term": "Pack", "meaning": "The party you take into the room graph — not an expedition squad timer slot by another name."},
+    {"term": "Extract", "meaning": "Leave with the haul — success path opposite a wipe."},
+    {"term": "Oath", "meaning": "Optional hard stakes / permadeath-style pressure on difficulty rungs — not a pact tribute payment."}
+  ],
+  "alsoTrue": [
+    "Nerve and spirit pressure belong here — Unsettled → Shaken → Afflicted as the delve gets under your skin.",
+    "Wild talk can open recruit or capture paths inside the crawl."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "You cannot provision a delve pack or swear an oath on a live domain today.",
+        "Read the table so the words stay honest when the stage ships."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "table": {
+        "cols": ["Piece", "What it means"],
+        "rows": [
+          ["Domains", "Named places you find, then enter from the Sanctum"],
+          ["Pack", "The party you take into the room graph"],
+          ["Extract", "Leave with the haul — or fail trying"],
+          ["Oaths / permadeath", "Optional hard stakes on difficulty rungs"]
+        ]
+      },
+      "diagram": [
+        "  find domain  ->  provision pack  ->  enter",
+        "                                      |",
+        "                                      +->  extract (+ haul)",
+        "                                      +->  wipe (oaths may bite harder)"
+      ]
+    },
+    {
+      "title": "How it hangs on failure",
+      "paras": [
+        "A failed extract is not only a dead run when [failure branches](failure-branches) ship — it can open different ground.",
+        "Formations are a second axis beside who is in the pack — see [party formations](party-formations)."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Learn the four words: domain, pack, extract, oath.",
+    "Do not map them onto expedition recall — different stage, different stakes.",
+    "When delves ship, provision deliberately before you enter."
+  ],
+  "doNote": "Stop when oath ≠ pact tribute. Parent stage: [the Delve](delve).",
+  "mixUps": [
+    {"q": "Is a pack an expedition slot?", "a": "No. Packs are for the Delve room graph. Expeditions stay idle dispatch."},
+    {"q": "Are oaths the same as pacts?", "a": "No. Pacts are roster loyalty. Oaths are optional hard delve stakes."},
+    {"q": "Can I extract today?", "a": "No. Not finished / not playable yet."},
+    {"q": "Does wipe always mean nothing happens?", "a": "Vision failure branches can open new content from loss — see [failure branches](failure-branches)."}
+  ],
+  "next": ["party-formations"],
+  "related": ["delve", "failure-branches", "party-formations"],
+  "sources": [
+    "docs/guide/delves-and-sieges.md §Pack, extract, oaths, domains",
+    "docs/guide/mechanisms/pack-extract-oaths.md (prior stub)",
+    "docs/guide/glossary.md §Extract · Domain"
+  ]
+}

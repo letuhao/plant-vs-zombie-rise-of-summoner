@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { createGame } from "./createGame";
 import { BootScene } from "./scenes/BootScene";
 import { LawnWorldScene } from "./scenes/LawnWorldScene";
 import { lawnBusEmit } from "./EventBus";
@@ -13,28 +14,13 @@ export type CreateLawnGameOptions = {
 /**
  * Facade: create Phaser.Game and destroy checklist (RT-07).
  * Order: tweens → FxPool/registry (via shutdown) → pick unsub → bus offs → destroy(true)
+ *
+ * base-defense `board-render`: a thin wrapper over the generic `createGame` factory, supplying the
+ * lawn's own scene list — byte-identical to this function's own pre-extraction body (same width/
+ * height defaults, same "#16120e" background, same scene array, same preBoot generation write).
  */
 export function createLawnGame(opts: CreateLawnGameOptions): Phaser.Game {
-  const width = opts.width ?? (opts.parent.clientWidth || 640);
-  const height = opts.height ?? (opts.parent.clientHeight || 480);
-
-  return new Phaser.Game({
-    type: Phaser.AUTO,
-    width,
-    height,
-    parent: opts.parent,
-    backgroundColor: "#16120e",
-    scene: [BootScene, LawnWorldScene],
-    scale: {
-      mode: Phaser.Scale.RESIZE,
-      autoCenter: Phaser.Scale.NO_CENTER
-    },
-    callbacks: {
-      preBoot: (g) => {
-        g.registry.set("generation", opts.generation);
-      }
-    }
-  });
+  return createGame({ ...opts, scenes: [BootScene, LawnWorldScene] });
 }
 
 export function destroyLawnGame(

@@ -13,31 +13,39 @@ Level 3 (`structure-state`, `combatant-kind`, `siege-objective` — the golden-l
 `siege-construction`'s data-model half only — verified safe before starting), and so is `siege-resolver`
 (Level 7, the ⭐ playable-with-no-FE milestone — a real district assault now runs a real board through a
 real `BattleEngine.Resolve` call, wired at both `RpgStore.WorldTurns.cs` call sites, full-suite and
-golden verified with zero regressions), and so is `siege-engagement` (Level 7b — the `EngagementExit`
-vocabulary, derived `IsUnderSiege`, and the per-engagement report line, all full-suite verified).
-**17 of 29 modules closed.** `siege-construction` and `siege-ai` are both **PARTIAL** (see their own
+golden verified with zero regressions), so is `siege-engagement` (Level 7b — the `EngagementExit`
+vocabulary, derived `IsUnderSiege`, and the per-engagement report line, all full-suite verified), and so
+is `structure-schema` (Level c0 — the 21-key structure anchor contract, its numeric-smuggling audit, and
+the `role`→`StructureKind` mapping, pure Python, zero model calls, CI-gated, root of the six-module
+content-family track). **18 of 29 modules closed.** `siege-construction` and `siege-ai` are both **PARTIAL** (see their own
 sections for exactly what's built vs deferred — in both cases the pure/data-model mechanism is done and
 the live board/turn-engine integration is the named, un-started remainder) and neither is counted
 toward the 17. `siege-ai`'s `SiegeIntentSource` also had a real, since-fixed design bug — it dispatched
 on a live `IBattleView` no caller of `BattleEngine.Resolve` can ever supply; found and corrected while
-building `siege-resolver`, see 17.1's own evidence. **⚠️ A real, named, cross-module gap survives both
-closures**: decision 24's "a siege spans turns" does not hold end to end — `siege-engagement`'s own
-section explains why (a Sector-vs-District battle-kind dispatch gap in `MovementPhase`/`ContactResolver`
-that neither module's task list owns) — CP4/Gate B is met on its own literal wording (a siege plays and
-resolves in CI with no FE) but not on that stronger claim. Two research sweeps (12 modules, one retry
-pass for 3 that returned degenerate output) produced grounded, file:line-verified implementation plans
-for every remaining module — `board-render`, `siege-stage`, `battle-stage`, and all six content-family
-modules — each already sorted into safe-to-build-now vs real, named deferred gaps; several other real
-cross-module findings surfaced (a `WorldCommandKinds.Assault` naming collision blocking
-`siege-construction`'s own remaining paths, two competing stage-count rows in `decisions.md`,
-`StructureKind` needing a 4th value the content family's own schema will need). This session also saw
-repeated, unrelated concurrent edits elsewhere in the repo (party-dungeon's `Dungeon/Registry/*.cs` and
-`RpgStore.World.cs` delve-schema work, live-saved by a different session) intermittently break the
-shared build mid-verification — each time confirmed unrelated and resolved on its own; none touched any
-file this program owns. Next up: `board-render` (Level 8, the largest module in the whole program,
-depends only on the already-built `siege-board`) or `structure-schema` (root of the six-module
-content-family track, zero dependencies, pure Python, fully scoped and ready). No gate anywhere in this
-program is currently blocking (`base-defense-plan.md` §7).
+building `siege-resolver`, see 17.1's own evidence. `structure-schema`'s own research also surfaced a
+real, previously-undocumented gap: `StructureKind` (3 C# values) has no mapping for 5 of the seed's 10
+roles — named as `structure-catalog-import`'s (c2) own job, not guessed at. **⚠️ A real, named,
+cross-module gap survives every closure above**: decision 24's "a siege spans turns" does not hold end
+to end — `siege-engagement`'s own section explains why (a Sector-vs-District battle-kind dispatch gap in
+`MovementPhase`/`ContactResolver` that neither module's task list owns) — CP4/Gate B is met on its own
+literal wording (a siege plays and resolves in CI with no FE) but not on that stronger claim. Two
+research sweeps (12 modules, one retry pass for 3 that returned degenerate output) produced grounded,
+file:line-verified implementation plans for every remaining module — `board-render`, `siege-stage`,
+`battle-stage`, and the five other content-family modules — each already sorted into safe-to-build-now
+vs real, named deferred gaps; other real cross-module findings surfaced (a `WorldCommandKinds.Assault`
+naming collision blocking `siege-construction`'s own remaining paths, two competing stage-count rows in
+`decisions.md`). This session also saw repeated, unrelated concurrent edits elsewhere in the repo
+(party-dungeon's `Dungeon/Registry/*.cs` and `RpgStore.World.cs` delve-schema work, live-saved by a
+different session) intermittently break the shared build mid-verification — each time confirmed
+unrelated and resolved on its own; none touched any file this program owns. `board-render` (Level 8, the
+largest module in the whole program) is now IN PROGRESS — 2 of its 7 extractions done (`createGame`
+generalized from `createLawnGame`; `GridSpec.ts`, a plain-TS mirror of the C# board shape with zero
+lawn dependency, import-scan verified), both full-suite tested with zero regressions to the FE's own
+1462-test suite. Next up: continue `board-render` (20.3 `EntityRegistry<TKey>`, 20.4 `pickCell`, 20.5
+camera bridge, 20.6 layer order + terrain caching, 20.7 accessibility + bundle budget) or
+`structure-corpus` (Level c1, now genuinely unblocked — dump the four shipped structures + hand-author
+~36 rows against the schema just closed). No gate anywhere in this program is currently blocking
+(`base-defense-plan.md` §7).
 
 **Every task names acceptance, verification and files.** A task touching more than ~5 files should
 have been two. Each module's spec carries the full test list — the tasks below name the *load-bearing*
@@ -841,9 +849,18 @@ either module being "closed."
 
 ### `board-render` (8) — [spec](../docs/architecture/base-defense/spec-board-render.md)
 > ⚠️ **The largest module in the program.** Five extractions, **each landing with the lawn rendering byte-identically.**
+> **Module status: IN PROGRESS — 2 of 7 tasks done.** Started 2026-09-05, tasks 20.1-20.2.
 
-- [ ] **20.1** `createGame({scenes})` — scenes injected, not imported · Verify: `WEB`; lawn byte-identical · Files: `src/game/createGame.ts`, `createLawnGame.ts`
-- [ ] **20.2** `GridSpec` **passed**, not imported · Verify: import scan — the generic layer imports **no lawn module** · Files: `src/game/scenes/`
+- [x] **20.1 · `createGame({scenes})` — scenes injected, not imported** — IMPLEMENTED 2026-09-05
+  - Evidence: new `src/game/createGame.ts` — `buildGameConfig(opts)` (pure: builds the `Phaser.Types.Core.GameConfig` object, never constructs a real `Phaser.Game`, kept separate specifically so it stays unit-testable under jsdom — see this task's own note on why) and `createGame(opts)` (the thin `new Phaser.Game(buildGameConfig(opts))` wrapper). `createLawnGame.ts` is now a one-line call — `createGame({ ...opts, scenes: [BootScene, LawnWorldScene] })` — producing the byte-identical config the old inline body built (same width/height-from-parent defaults, same `"#16120e"` background, same scene array, same `preBoot` generation write). `destroyLawnGame` (lawn-specific teardown) is untouched — this task only extracts creation.
+  - **A real, non-obvious blocker found and worked around**: importing the real `phaser` package at module load time — even without ever constructing a `Phaser.Game` — throws under this project's jsdom test environment (`checkInverseAlpha` in Phaser's own init code touches a Canvas 2D context jsdom doesn't provide without the `canvas` npm package). Confirmed this is a KNOWN, already-handled constraint, not a new problem: `src/game/systems/syncOccupantBandB.test.ts` already works around it with `vi.mock("phaser", () => ({...}))`, mocking only the specific members the code under test touches. `createGame.test.ts` follows the identical pattern (mocking `Phaser.AUTO`/`Phaser.Scale.RESIZE`/`Phaser.Scale.NO_CENTER` — the only three runtime members `buildGameConfig` reads).
+  - Verify: `WEB` — `npx vitest run src/game/createGame.test.ts` → 9/9 green (scenes pass through unchanged; generation reaches the registry via `preBoot`; width/height default from the parent element and fall back to 640×480 at zero size; explicit width/height/backgroundColor override the defaults; scale mode/type match the lawn's own pre-extraction config exactly). `npx tsc --noEmit` clean. Full project suite: **1461/1462** (`src/game`'s own 36 tests all green) — the one failure (`disabledReasonGuard.test.ts`, three `<Button>` elements in `CommandersLayer.tsx`/`CommanderSheetFooter.tsx` missing an accessible disabled-reason) is confirmed pre-existing and unrelated: both files are untouched by this session (`git status` clean against them) and last changed in an already-committed, unrelated commit (`7d73ecc`, lawn commander-sheet work). `npm run build`: clean, 7.5s. `npm run check:bundle`: entry chunk 133.3 KB gz (budget 180 KB) — OK; Phaser still absent from the entry chunk — OK (this extraction moved code WITHIN the same lazy `LawnStage` chunk, never touching what loads eagerly).
+  - Files: `web/fusion-rpg-web/src/game/createGame.ts` (new), `createGame.test.ts` (new), `createLawnGame.ts`
+
+- [x] **20.2 · `GridSpec` passed, not imported** — IMPLEMENTED 2026-09-05
+  - Evidence: new `src/game/board/GridSpec.ts` — a plain-TS mirror of the C# board shape (`FusionRpg.Core/Battle/Board/GridSpec.cs`): `CellTerrain` (`"open"|"rough"|"blocking"|"gap"`, matching the C# enum's own 4 values and `Open` default), `GridPos`, `GridSpec` (`rows`/`cols`/`cells`), and `makeGridSpec`/`contains`/`indexOf`/`terrainAt` as free functions over plain data — matching this codebase's own existing `gridMath.ts` style (free functions, not a ported C# class), never importing `gridMath.ts` or any other lawn module. `makeGridSpec` validates at construction (positive integer rows/cols, `cells.length === rows*cols` when supplied) and defaults every cell to `"open"` when `cells` is omitted, mirroring the C# constructor's own two behaviors exactly.
+  - Verify: `WEB` — `npx vitest run src/game/board/GridSpec.test.ts` → 10/10 green, including a real import-scan test (`GridSpec.ts has zero import statements naming a lawn-specific path`) — scans actual `import` statements only, not the whole file's prose, after an early draft's whole-file substring scan false-positived on this file's OWN doc comment discussing "the lawn" in English (the identical class of self-referential false-positive this session already hit twice on the C# side). `npx tsc --noEmit` clean. Full `src/game` suite: 46/46 green (up from 36).
+  - Files: `web/fusion-rpg-web/src/game/board/GridSpec.ts` (new), `GridSpec.test.ts` (new)
 - [ ] **20.3** `EntityRegistry<TKey>` generic; caller-supplied kind→visual map · Verify: ptr keys and actor keys both · Files: `src/game/entities/`
 - [ ] **20.4** `pickCell(spec, pointer)` pure · Verify: out-of-bounds → null · Files: `src/game/systems/PickSystem.ts`
 - [ ] **20.5** Camera bridge — **model authoritative, Phaser write-only**; unbind returns a disposer · Verify: drive the model, assert **exactly one** Phaser write; unbind removes every listener · Files: `src/game/camera/bindCamera.ts`
@@ -875,9 +892,28 @@ either module being "closed."
 ## CONTENT FAMILY — parallel with everything above
 
 ### `structure-schema` (c0) — [spec](../docs/architecture/base-defense/spec-structure-schema.md)
-- [ ] **23.1** The anchor: 17 fields, **four** ownership levels (`AUTHORED`/`DERIVED`/`GENERATED`/`VALIDATED`) · Acceptance: `strengthBand` is decision 32's material tier — **no `materialTier` beside it**; `acquisitionPaths` **replaces** `acquisition`; **no `side` field** · Files: `data/seed/structures/`, schema
-- [ ] **23.2** The audit — **no field holds a number**, fails the **build** not a lint; `none` is a value and a missing key is a defect; every description has a **negative clause** · Verify: over every committed row · Files: `tools/` validator
-- [ ] **23.3** `StructureKind` **derived from `role`**, never authored beside it; unmapped role throws at load · Files: schema + mapping table
+
+**Module status: CLOSED 2026-09-05.** Pure Python, zero model calls, mirrors the already-shipped demon
+anchor-contract module (`adapters/demons/anchor/`) exactly per the spec's own precedent citation.
+
+- [x] **23.1 · The anchor — 21 keys (17 design variables + bookkeeping), four ownership levels** — IMPLEMENTED 2026-09-05
+  - Evidence: `build_structure_anchor_schema()` (`adapters/structures/anchor/schema.py`) declares 21 properties (`structureId`, `family`, `role`, `roleSecondary`, `requiredSlotKind`, `elementPrimary`, `elementSecondary`, `tempo`, `reach`, `strengthBand`, `rarity`, `traits`, `costProfile`, `targetPreference`, `variants`, `acquisitionPaths`, `footprint`, `coverTier`, `controlPoint`, `obstacleVerbs`, `reason`) — the same "N keys for M design variables" shape the demon anchor's own schema.py top comment already documents (its own 21-keys-for-18-variables count). `strengthBand` is the ONLY magnitude ordinal (no `materialTier` beside it — decision 32's own material tier, verified by a dedicated test); `acquisitionPaths` replaces `acquisition` (VALIDATED, `none` illegal — decision 35); no `side` field exists anywhere (decision 12). `OWNERSHIP` covers all 21 fields from the four-level set `{AUTHORED, DERIVED, GENERATED, VALIDATED}` — `GENERATED` is a per-ROW fact (`_provenance.source`), never a per-field ownership entry, matching the spec's own prose exactly ("a row produced by structure-pipeline is GENERATED; a row in structure-corpus is AUTHORED").
+  - `REQUIRED_SLOT_KIND` (14 values) transcribed from `SlotTypeCatalog.cs:7-28`; `ACQUISITION_PATH` (4 values, lowercase per the spec's own literal casing) transcribed from `World/Siege/Obstacles.cs:48-61`; `REACH`/`TEMPO` reused VERBATIM from the demon anchor's own tuples (Law 1 — no duplicate vocabulary where one already exists). `ROLE`/`STRENGTH_BAND`/`COST_PROFILE`/`FOOTPRINT`/`COVER_TIER`/`TARGET_PREFERENCE` are fresh vocabularies this module authors, each cited to its spec source or stated as this module's own first-pass, defensible choice (`STRENGTH_BAND` starts at the exact 3 rungs `siege.v1.json`'s `structure.tierMultiplierMilli` already prices, so `structure-planner`, c3, extends a real ladder rather than inventing a second one).
+  - **Named, deferred gap** (not this module's own success criteria, stated so it is not silently assumed done): the ACTUAL derivation formula for `controlPoint`/`obstacleVerbs` ("from role + slot kind") is not implemented — only the schema CONTRACT (that these are real, typed, DERIVED fields) is. Inventing a formula with no stated source (`structure-seed-ideal.md`'s own worked examples were not re-read in full this pass) would be exactly the kind of private, ungrounded design guess this session's discipline avoids; `structure-corpus`'s (c1) own import tooling is the natural place for a real `derive.py`, mirroring `adapters/demons/anchor/derive.py`'s own file-split convention.
+  - Verify: `python -m pytest tests/test_structure_anchor_contract.py` → 25/25 green.
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/anchor/schema.py` (new), `descriptions.py` (new), `tools/seedsmith/tests/test_structure_anchor_contract.py` (new)
+
+- [x] **23.2 · The audit — no field holds a number, fails the build, a negative clause per description** — IMPLEMENTED 2026-09-05
+  - Evidence: `numeric_audit()` (`adapters/structures/anchor/audit.py`) is a per-domain copy of the demon precedent's own five-case scan (bare numeric type, a pattern admitting a bare digit string, an enum of numeric strings, a deny-listed field name, `*Milli` suffix) — kept as a separate copy per that module's own stated reason (independent testability), not centralized. Wired into `seedsmith structures contract --audit` (new CLI subcommand, mirroring `demons contract` exactly) and gated in CI (`.github/workflows/ci.yml`, a new step immediately after the demon anchor contract step, same throw-on-nonzero-exit pattern). Every one of the 21 field descriptions carries an explicit negative clause (`Every_field_description_has_a_negative_clause`, asserted directly against the real schema, not a sample).
+  - Verify: `python -m seedsmith structures contract --audit` → "clean — 21 fields, 0 numeric-smuggling findings", exit 0. `python -m pytest tools/seedsmith/tests/` (full suite): **1771/1772 passing** — the one failure (`test_general_propose.py`'s `DryRunEntrypointTests`) is a confirmed, pre-existing test-isolation flake, verified by direct isolated re-run (passes cleanly alone) and confirmed unrelated to anything this module touches.
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/anchor/audit.py` (new), `tools/seedsmith/seedsmith/report/cli.py`, `.github/workflows/ci.yml`
+
+- [x] **23.3 · `StructureKind` derived from `role`, never authored beside it; unmapped role throws at load** — IMPLEMENTED 2026-09-05
+  - Evidence: `ROLE_TO_STRUCTURE_KIND` (a total mapping over all ten roles) + `structure_kind_for(role)`, which raises `NoStructureKindMapping` — never a silent default — both when a role is unknown and when a role's own mapped value is `None` (the five roles `Move`/`Enable`/`Defend`/`See`/`Deny`, which have no real `StructureKind` yet). This is a REAL, previously-undocumented C# gap this module surfaces rather than works around: `StructureKind` (`StructureCatalog.cs:9-30`) has only 3 values (`LoamSource`, `Storage`, `Refinery`) against the seed's 10 roles — closing it is named as `structure-catalog-import`'s (c2) own job, not guessed at here. `structureKind`/`kind` is never a schema property (asserted directly) — it is always re-derived from `role`, never stored as a second source of truth.
+  - Verify: `python -m pytest` — `test_structure_kind_is_derived_from_role`, `test_a_role_with_no_kind_mapping_throws_at_load`, `test_a_role_with_a_real_kind_mapping_resolves`, `test_an_unknown_role_also_throws`.
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/anchor/schema.py`
+
+- **Module verify**: `python -m pytest tools/seedsmith/tests/test_structure_anchor_contract.py` → 25/25 green. Full seedsmith suite: 1771/1772 (one confirmed-unrelated pre-existing flake, verified by isolated re-run). CLI: `python -m seedsmith structures contract --print` and `--audit` both work end to end. CI: a new gate step added, mirroring the demon anchor contract step's own pattern exactly. Zero model calls anywhere in this module (spec success criterion 5) — verified directly, not just argued (`test_transport_stub_raises_if_a_test_calls_a_model` scans both new source files for any reference to the model-calling machinery).
 
 ### `structure-corpus` (c1) — [spec](../docs/architecture/base-defense/spec-structure-corpus.md)
 - [ ] **24.1** Dump the four shipped rows — the **importer proof** against content already tested · Files: `data/seed/structures/`

@@ -1609,6 +1609,94 @@ so the honest explanation is not the thing that fails.
       open-by-design; I12's *"no unique pity, deliberately"* is the standing answer and nothing here
       contradicts it
 
+⭐ **Addendum 2026-09-05 — the `world-sector` `loot_source`, BUILT. A tracked "blocked on another
+program" claim that had stopped being true.**
+
+**Before:** `drop.world.sector-clear` shipped with **no `loot_source`**, on the recorded ground that
+the world program owed `sectorLevel(danger_band)`. **After:** the formula is code and the table has a
+source. The claim was stale in two separate ways, and a rigor pass over the tracked blockers found
+both — this is the failure mode the pass exists for, since neither shows up in a test run.
+
+1. **The decision was already made and the todo still called it owed.** `ssot-power-scale.md`
+   §5.3/§10.3 closed it **2026-08-23** — `mapLevel(M) = Wm · DangerBand(M)`, `Wm = 5` derived from the
+   shipped `SectorTypeCatalog` bands — and says in as many words that the world program *"no longer
+   owes an unknown."* `spec-content-authoring.md` §2.1 (owner approved **2026-08-24**) restates the
+   identical formula for this exact `contentLevel` row.
+2. **Nothing had implemented it.** `MapLevel` / `SectorLevel` / `mapLevel` / `sectorLevel` appear
+   **nowhere** in `src/`, `web/`, `tools/` or `tests/` — the decision existed only as prose, which is
+   why `inventory.json` row 23's `location` pointed at a §-reference instead of a file.
+
+⛔ **The row is resolved at runtime, and that is forced, not a shortcut.** The obvious move — author
+eight static rows in `tables.v1.json`, one per sector TYPE, matching the other eight sources — is
+**wrong**, and the pipeline says why: `LootCorrelation.Derive` is `loot:sector:{sourceId}` and step 1
+keys idempotency on `(player_id, correlation_id)`, so every sector of a type would share one id and
+the **second `boss-lair` a player cleared would replay the first and mint nothing**. The sector's own
+id has to be the key; sector ids are generated per world, and `SectorState.DangerBand` is live state,
+not authored content. So `WorldSectorLootSource.TryResolve(sectorId, dangerBand, tuning, out row)` is
+the shape, and it is the only new production surface.
+
+⛔ **Band 0 is refused BY NAME, never floored.** `mapLevel(0) = 0`, `SectorTypeCatalog`'s homeworld is
+band 0 ("0 = safe ground"), and `DropTableValidator` already refuses `content_level < 1`. Flooring to
+1 would invent a level the owner decision does not contain — the same defect the `pvz-run` refusal
+exists to prevent — so a band-0 clear returns `ContentRuleViolated{drop.sector-band-safe}`.
+
+⛔ **No new power-ladder row, and that was checked rather than assumed.** `mapLevel(M)` is **§10.2 row
+23**, already closed and already mirrored; a level derived from a *world state* is still that row. It
+needed its `location` repointed from prose to code in §10.2, §10.3 and `inventory.json` — three
+one-line edits, no new scale. `MapLevel` also declares no private curve: it reads `WmMilli` from
+`data/tuning/power-scale.v{n}.json` (`Map_level_reads_the_weight_and_never_a_literal_five` moves the
+weight and watches the level move), lives in `Core/Power` beside the one ladder, throws
+`PowerWeightMissing` rather than defaulting when `Wm` is absent, widens to `long` before multiplying
+and divides by 1000 once at the end. A level is an **index**, so the return is `int` — matching Θ
+itself and `LootSourceRow.ContentLevel` — and it is `checked`, so an absurd weight throws.
+
+⏸ **Still a wiring gap, said plainly:** nothing in production *raises* a sector-clear loot event yet,
+because **nothing in production calls `LootPipeline.Resolve` for any source** — the same gap the
+`Instantiator` seam above records. What changed is that the world lane no longer has a missing
+formula in front of it. X5 (content ladder past level 10) bounds what a band-6 sector's `contentLevel
+= 30` has *authored enemy content* to draw from; it does not bound the loot lane, since the shared
+24-row slate carries no ilvl band and a band-6 clear resolves end to end today.
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~WorldSectorLootSource"` | **13 / 13 passed** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | ⚠ **The baseline moved twice while this ran** — a concurrent stream is editing battle/delve/class-system code in the same tree, so all three runs are recorded rather than the flattering one. **Baseline 21:41: 4 failed / 7242.** **After the build, 22:15: 7 failed / 7318** — the 3 extra were all `Delve.Difficulty.*` (`RoomThetaComposerTests` ×2, `TailLadderTests` ×1), whose source and tests were written at **22:06 / 22:10**, *after* the baseline. **Final re-run 23:5x: 5 failed / 7336 passed / 7341** — those 3 Delve failures had gone green on their own (that stream finished them), and one different failure appeared: `Battle.BattleGoldenTests.Golden_battles_are_locked`, a moved hash whose cause is `src/FusionRpg.Core/Battle/BattleStatModifierLedger.cs`, **written at 23:47**. The other 4 are the baseline's own. **"Not mine" is proven structurally, not by ownership guess:** `MapLevel` has exactly one caller (`WorldSectorLootSource`), which has none outside its own test, so nothing on the battle or delve path can reach either file; the `PowerIndexComposer` edit is purely additive (`git diff` shows no removed line), leaving `ContentExplain` — the only member `RoomTheta.cs` touches — byte-identical. **Zero failures in `Items.*` or `Power.*` in all three runs** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **858 passed / 1 failed** — the same single pre-existing failure as the fresh baseline (`DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing`, the demon stream's, and the reason the suite takes 23 minutes). No Data code was touched |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **204 / 204**, identical to the fresh baseline. Run twice — once after the code landed and once after the doc edits, because `PowerGuardTests` reads `inventory.json` |
+| `dotnet run --project tools\AtomImporter -- --check --validate` | **exit 0, clean** — 18 files, 66 atoms, 7 containers, 10 rarity bands. It reports *"1 row would change"* against P3.1's *"nothing would change"*; that drift is **not this work's** — `SeedScanner.OwnedFolders` is `atoms, containers, curves, rarity, elements, channel-policy, channel-pools, effects/affixes, power`, and `data/seed/loot/` is not among them, so the only file this task edited under `data/seed/` is invisible to the importer. The changed row tracks the concurrent stream's `data/seed/power/coefficients.v1.json`. Named, not absorbed |
+| `.\scripts\guard-single-writer.ps1` · `guard-secondary-no-unity` · `guard-funnel-delta` · `guard-dal` | **all OK** |
+| `.\scripts\guard-power.ps1` | **OK** — one ladder, pin holds, no private `f(level)`. Run because this task touched `Core/Power` and `inventory.json` |
+| `python scripts\audit-overflow.py` | **0 critical**; **zero** findings in either new file |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0**; **zero** rows under `Items/Drops/` or `Core/Power/` |
+
+⚠ **One environment note worth recording, same pattern P3.1 already carries.** The first Data-suite
+attempt failed to *build* (`MSB3027`) on an orphaned `testhost` holding
+`tests/FusionRpg.Data.Tests/bin/**/FusionRpg.Core.dll`; killing it and re-running was clean. A second
+`CS2012` came from running Core and Data concurrently — they share `src/FusionRpg.Core/obj`. Run the
+suites one at a time.
+
+**Files (addendum):** `src/FusionRpg.Core/Power/PowerIndexComposer.cs` (EDIT — `MapLevel`, purely
+additive); `src/FusionRpg.Core/Items/Drops/WorldSectorLootSource.cs` (new — the runtime source and the
+band-0 refusal); `tests/FusionRpg.Core.Tests/Items/WorldSectorLootSourceTests.cs` (new — 13 tests over
+the real `SectorTypeCatalog`, the real power weight and the real loot corpus, including a full
+twelve-step sector clear and the import-validator check);
+`docs/architecture/power/ssot-power-scale.md` (EDIT — §10.2 row 23 and §10.3 repointed to the code);
+`docs/architecture/power/inventory.json` (EDIT — row 23 `location` + `locationNote`);
+`data/seed/loot/tables.v1.json` (EDIT — the table's `note` now states the resolved position);
+`data/seed/loot/README.md` (EDIT — the "deliberately not authored" bullet corrected);
+`docs/architecture/item/spec-drop-volume.md` (EDIT — the §4.1 `world sector` row still said *"owed by
+the world program (X5)"* **thirteen days after the owner closed it**; corrected, with the dates);
+`docs/architecture/item/ssot-generation.md` (EDIT — same stale row in §4.1, plus **§10.10's open
+question** *"danger_band → content level … §4.1 has a hole until it is published"* marked answered).
+
+⛔ **Two further real defects found while doing this, named rather than absorbed.** Both are the same
+defect in two files: `spec-drop-volume.md` §4.1 and `ssot-generation.md` §4.1 each still described the
+world-sector `contentLevel` as **owed by the world program**, and `ssot-generation.md` §10.10 still
+carried it as an **open question for the owner** — all three written before the 2026-08-23 decision and
+never revisited after it. They are corrected above. This is the "a comment is not evidence" failure at
+document scale: a decision that lands in the SSOT does not propagate to the specs that were waiting on
+it, and the *waiting* text is what the next session reads.
+
 **Files:** `data/tuning/item-drop-volume.v1.json` (new — Θ pin/base/slope/floor, D38's kill rate,
 Correction 5's re-solved pity thresholds, the ilvl jitter, the nesting bound, the retention horizon);
 `data/seed/loot/{tables.v1.json, README.md}` (new — 10 tables, 8 loot sources, the whole Correction-1
@@ -1623,7 +1711,7 @@ boot, imports the loot corpus after `store.Init()`);
 `tests/FusionRpg.Core.Tests/Items/{DropVolumeTests.cs, DropVolumeCorpusTests.cs, LootPipelineTests.cs}`,
 `tests/FusionRpg.Data.Tests/Items/DropTableStoreTests.cs` (new).
 
-**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~DropVolume|FullyQualifiedName~LootPipeline"`; `dotnet test tests\FusionRpg.Data.Tests --filter DropTableStoreTests`; `dotnet run --project tools\AtomImporter -- --check --validate`
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~DropVolume|FullyQualifiedName~LootPipeline|FullyQualifiedName~WorldSectorLootSource"`; `dotnet test tests\FusionRpg.Data.Tests --filter DropTableStoreTests`; `.\scripts\guard-power.ps1`; `dotnet run --project tools\AtomImporter -- --check --validate`
 
 ### ✅ P3.2 — Module 12 `threshold-grants` — BUILT AND VERIFIED 2026-09-04 (D40's module-22 split, X7's container kinds, and module 13's distinctness gate explicitly deferred with owners named)
 
@@ -2812,10 +2900,29 @@ affix corpus could not be drawn at all.** Both rows in `data/seed/effects/affixe
 (`affix.authored.affix-draw-000/001`, the `affix-authoring` pipeline's output) carry **two concrete
 refs**, and the old `ExpandSingleRefAffix` threw `NotSupportedException` for *any* bundle with
 `Refs.Count != 1` — so a container pooling either one crashed `Instantiator.Draw` rather than rolling
-it. It went unnoticed because `Draw`'s live callers (`ActionSeeder`, `TryInstantiate`) are fed
-single-ref affixes generated 1:1 from the atom catalog, and nothing wires the authored corpus into a
-container pool yet. `ExpandConcreteRefs` closes it as a side effect of the work this addendum
-describes; `A_multi_concrete_ref_bundle_expands_to_every_ref_in_seq_order` pins it.
+it. It stayed latent because `Draw`'s live callers (`ActionSeeder`, `TryInstantiate`) are fed
+single-ref affixes generated 1:1 from the atom catalog, and **not one of the seven shipped containers
+declares a pool at all** (`data/seed/containers/*.json`, counted) — so no drop path has ever asked
+`Draw` for one of these bundles. `ExpandConcreteRefs` closes it as a side effect of the work this
+addendum describes; `A_multi_concrete_ref_bundle_expands_to_every_ref_in_seq_order` pins it.
+
+⛔ **A SECOND real defect found while doing this — in `Resolver` itself, measured not guessed, and
+NOT fixed here because it belongs to another program's module.** `Resolver.DrawSuffixPass` filters to
+`Suffix or Mixed` with **no paired-budget gate at all** — only the prefix pass carries A1 state. So
+once the prefix pass spends the prefix budget on a *plain* `Prefix` affix, the suffix pass can still
+draw a `Mixed` bundle, which costs a prefix roll that no longer exists. **Measured with a throwaway
+probe against the shipped `Resolver`:** container `PrefixRolls = 1, SuffixRolls = 1`, pool
+`{one Prefix, one Mixed}` — it over-draws on **31 of 60 seeds**, producing two prefix-eligible affixes
+against `PrefixRolls = 1`, exactly the post-op invariant `RerollPolicy.ValidatePostOp` refuses. The
+mirror case is symmetric: with `PrefixRolls = 0` and any `Mixed` row, the suffix pass draws it
+unconditionally. `Instantiator.DrawBudget` does **not** have this — a `Mixed` affix is only ever
+offered to the pass that still holds a paired roll — and
+`A_mixed_affix_is_never_drawn_by_the_suffix_pass_once_a_plain_prefix_spent_the_prefix_budget` pins
+that. **Owner: effect-pipeline module 2 (`resolution-order`), `Resolver.cs`.** Named rather than
+fixed: `Resolver` is that program's, its draw sequence is what `InstanceProducer.Compose` →
+`RpgStore.ProduceAndBind` reproduces instances from, and changing it is a reviewed change there, not a
+side effect of an item-module follow-up. (Reachable today only in theory — no shipped container
+declares a pool — but it is a live logic defect, not a wiring gap.)
 
 ⭐ **The safety claim is proven, not asserted.** `Draw` is the shared instantiation path every module
 draws from (`ActionSeeder`, `TryInstantiate`, `AffixImportPathTests`), so
@@ -2830,12 +2937,13 @@ stream names (`atom.pool.prefix.{id}`, `atom.pool.suffix.{id}`) are byte-unchang
 
 | Command | Result |
 |---|---|
-| `dotnet test tests\FusionRpg.Core.Tests --filter "…InstantiatorDrawBudgetTests\|…Items.RerollPolicyTests"` | **39 passed / 0 failed** — 12 new in `InstantiatorDrawBudgetTests`, `RerollPolicyTests` 23 → 27 |
-| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7267 passed / 4 failed** against a **freshly measured** same-session baseline of **7238 / 4** — the *same four*, none in `Items.*` or `Atoms.*`. All four are the concurrent class-system / expeditions stream's: three `ProveAptitudeJsonEmitTests` throwing `BattleStatComposer.Configure(...) has not run`, and `ExpeditionResolverTests.Tier_goldens_are_locked`; `git status` shows `src/FusionRpg.Core/Battle/BattleStatComposer.cs` and the class-system tuning/baselines mid-edit |
-| `dotnet test tests\FusionRpg.Guard.Tests` | **204 passed / 0 failed — fully green** |
+| `dotnet test tests\FusionRpg.Core.Tests --filter` over **every class that touches the changed path** — `Atoms.InstantiatorDrawBudgetTests`, `Items.RerollPolicyTests`, `Atoms.ResolverTests`, `Atoms.InstantiatorTests`, `Atoms.InstanceProducerTests`, `Actions.ActionSeedingTests` | **102 passed / 0 failed.** `InstantiatorDrawBudgetTests` is **13 new facts**; `RerollPolicyTests` went **23 → 27** |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7287 passed / 7 failed**, against a **freshly measured** same-session baseline of **7238 / 4**. ⛔ **Zero in `Items.*` or `Atoms.*`** (grepped, count 0). The baseline four are the class-system / expeditions stream's — three `ProveAptitudeJsonEmitTests` throwing `BattleStatComposer.Configure(...) has not run` (`git status`: `src/FusionRpg.Core/Battle/BattleStatComposer.cs` mid-edit) and `ExpeditionResolverTests.Tier_goldens_are_locked`. The three that appeared **during** this session are `Delve.Difficulty.{RoomThetaComposerTests ×2, TailLadderTests}` — the party-dungeon stream's brand-new tree, **untracked** (`??`) in `git status` under `src/FusionRpg.Core/Delve/` and `tests/FusionRpg.Core.Tests/Delve/`, which is also why the suite total moved 7242 → 7294 mid-session |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **858 passed / 1 failed** — **zero in `Items.*`** (grepped, count 0). The one failure is `DemonSpeciesImportCliTests.A_stale_committed_file_refuses_the_whole_import_and_writes_nothing`, which shells out to a CLI and returned **exit −1 instead of 1 after 16 m 44 s** — a killed subprocess, not a wrong answer, under three concurrent test hosts from the other streams. ⛔ **And it is squarely the demon stream's:** the test copies *every* file in `data/generated/demons/*.json` before shelling out, and commit `8a82cf0 "update demon species"` — made **during this session** — rewrote `_species-build-plan.json` by −6126 lines. `tools/DemonSpeciesImport` never references `Instantiator` (grep: source hits 0, only the linked `FusionRpg.Core.dll` matches). ✅ **Settled by re-running that one test alone: it passes in 3 seconds** (1/0). `AffixImportPathTests`, the one Data test that *does* call `Instantiator.Draw` against store-loaded containers, is green |
+| `dotnet test tests\FusionRpg.Guard.Tests` | **204 passed / 0 failed — fully green** (twice) |
 | `.\scripts\guard-single-writer.ps1` · `guard-funnel-delta` · `guard-dal` · `guard-secondary-no-unity` | all four **OK** |
-| `python scripts\audit-overflow.py` | **0 critical**, 60 findings, **none** in `Effects/Atoms/Instantiator.cs` or `Items/Mutation/` |
-| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0.** The one M2 is `Delve/DoorTypeCatalog.cs`, the party-dungeon stream's untracked new tree |
+| `python scripts\audit-overflow.py` | **0 critical** (62 A3/A7 informational findings across the repo, drifting with the other streams) — **zero in `Effects/Atoms/Instantiator.cs` or `Items/Mutation/`** |
+| `python scripts\audit-magic-numbers.py --summary` / `--targets M1` / `--targets M2` | **M1 = 0, M2 = 0** — and **zero rows in either touched file**. The counts a draw spends (`count`, `crossBudget`) are structural, bounded by the container's own authored budget, and say so in the doc comment; `StreamNameOf`'s two literals are the RNG stream's identity and say that too |
 
 ⚠ **One flake seen once and dismissed with evidence, not by assumption.**
 `ActionCatalogTests.NoJsonIsParsedAfterLoadEvaluatingTheCompiledConditionAllocatesZeroBytes` failed on
@@ -2848,17 +2956,23 @@ tier-1 re-JIT on the same thread lands inside the window; nothing on that path
 `dotnet test tests\FusionRpg.Data.Tests` from the other stream held
 `tests/FusionRpg.Data.Tests/bin/**/FusionRpg.{Core,Data}.dll` open for ~20 minutes, failing this
 session's Data build with `MSB3027`. Re-running with `-p:BaseOutputPath=<scratch>` dodges the lock but
-**invalidates the result** — 77 broad seed/read failures, because those tests resolve `data/` relative
-to the assembly directory. Recorded so the number is not mistaken for a regression.
+**invalidates the result** — 77 broad seed/read failures, because `MaterialCorpusTests.RepoRoot()`
+walks up from `AppContext.BaseDirectory` looking for `src/FusionRpg.Injector`, which a scratch output
+directory never reaches. Recorded so the number is not mistaken for a regression. ⚠ Related and also
+not ours: `DemonSpeciesImportCliTests`'s *other* fact still **crashes the test host** when run alone
+(`"The active test run was aborted. Reason: Test host process crashed"`) — the same Data.Tests
+host-crash P4.2's original evidence block already recorded, in the demon stream's lane.
 
 **Files (addendum):** `src/FusionRpg.Core/Effects/Atoms/Instantiator.cs` (EDIT — `BudgetDraw`,
 `DrawBudget` public with `count`/`excludeGroups`/`crossBudget`/`excludeAffixIds`, A1 state threaded
 through `Draw`, `ExpandSingleRefAffix` → `ExpandConcreteRefs`, `EligibleFor`/`StreamNameOf`/
 `BudgetCandidate` helpers, the stale *"module 2, not yet built"* comments corrected);
-`src/FusionRpg.Core/Items/Mutation/RerollPolicy.cs` (EDIT — `reroll.mixed-affix-undefined` deleted,
-`reroll.slot-affix-undefined` added, `ValidateRerollable` takes a `lookupAffix` instead of a
-`resolutionOrderLanded` bool, `TargetsFor` added, `BudgetTargets`' doc corrected);
-`tests/FusionRpg.Core.Tests/Atoms/InstantiatorDrawBudgetTests.cs` (new — 12 facts, including the
+`src/FusionRpg.Core/Items/Mutation/RerollPolicy.cs` (EDIT — `reroll.mixed-affix-undefined` deleted;
+`reroll.slot-affix-undefined` and `reroll.affix-unknown` added (the latter kept distinct from
+`ValidatePostOp`'s `reroll.affix-outside-pool`, which is about the *container*, not the catalog);
+`ValidateRerollable` takes a `lookupAffix` instead of a `resolutionOrderLanded` bool, `TargetsFor`
+added, `BudgetTargets`' doc corrected);
+`tests/FusionRpg.Core.Tests/Atoms/InstantiatorDrawBudgetTests.cs` (new — 13 facts, including the
 legacy-algorithm equivalence oracle); `tests/FusionRpg.Core.Tests/Items/RerollPolicyTests.cs`
 (EDIT — the Mixed refusal test replaced by five: no-longer-refused, the slot residual, `TargetsFor`'s
 both-budget counting, a retained `Mixed` blocking both exclusion sets, and an end-to-end partial
@@ -4130,17 +4244,22 @@ the one row that is neither.
       `capPerMatch` (**G4**, still unimplemented), `revive` on the battle-mode use moment (the action
       layer), `utility` on the menu executor above. Widening `classesAuthored` in
       `data/tuning/consumables.v1.json` is the whole change the day one lands
-- [ ] ⏸ **`use_context = battle` / `lawn` likewise stay refused**, and widening `contextsAuthored` is one
-      line. ⛔ The **reason** for keeping battle out is now the use SITE, not the runtime — `resource.delta`
-      is Battle `Full` (C3 above) — and the blocker the lane names in §9.5(b) is **stale, not open**:
-      `A3` (`spec-action-costs.md` §8) recommends, and `A4` (`spec-usability-conditions.md` §3a, locked)
-      already states, *"consuming the item is a precondition… rather than a cost"* — both REVISED
-      2026-08-27, a week before this module — shipped as `LeafId.HoldsStock` (`action-todo.md` T10, done
-      2026-08-28), the very leaf this entry already cites above as closing the lawn half.
-      `ssot-consumables.md` §9.5(b) was never annotated with the answer, which is what let this entry
-      restate it as open. What is genuinely still unresolved, narrower than the lane's original ask:
-      `HoldsStock` only reads a quantity (previous bullet), so nothing yet decrements the stock when a
-      `battle` action gated on it actually fires.
+- [x] ✅ **`use_context = battle` — RESOLVED AND BUILT 2026-09-05. `lawn` stays refused, on its own two
+      reasons rather than by association.** See the follow-up block below for the build and its evidence.
+      - **Before:** both contexts refused by `ConsumableValidator`, citing `ssot-consumables.md` §9.5(b)
+        as an open cross-program blocker — *"`A3` must either widen `resource_id`… or state that
+        consuming the item is a precondition."*
+      - **The blocker was stale, not open.** `A3` (`spec-action-costs.md` §8) recommends and `A4`
+        (`spec-usability-conditions.md` §3a) states as settled *"consuming the item is a
+        **precondition**… rather than a cost"* — both REVISED **2026-08-27**, a week before this module
+        was built — and it shipped as `LeafId.HoldsStock` (`action-todo.md` T10, done **2026-08-28**),
+        the very leaf this section already cited as closing the lawn half. §9.5(b) was **never annotated
+        with the answer**, which is the whole reason this entry kept restating a closed question.
+      - **What was genuinely open was narrower, and is what got built:** `HoldsStock` only ever **read**
+        a quantity. Nothing decremented a stack when a `battle` action gated on it fired, so authoring
+        the context before today would have shipped a free item rather than a feature.
+      - **After:** `contextsAuthored` is `["menu", "dispatch", "battle"]`, the stock decrement is wired
+        end to end, and the doc is annotated in three places so the question cannot be re-asked.
 - [ ] ⏸ **`rpg_run_draught` has no production writer yet.** `TrySpendDraughts` takes the run's own
       creation as a `seal` delegate so the store stays free of expedition knowledge, and the tests drive
       the seam including the forced-throw rollback. The dispatch endpoint that calls it is the
@@ -4187,6 +4306,165 @@ is split out of `ConsumableCatalog.cs` so the per-row rules can run against a se
 container alike. Same directory, same names for the four it does list.
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Consumable|FullyQualifiedName~DraughtManifest"`; `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RunDraught"`; `dotnet run --project tools\ItemSeedValidator`
+
+---
+
+#### ✅ P5.2 follow-up — `use_context = battle` un-refused and the stock spend wired — BUILT AND VERIFIED 2026-09-05
+
+⭐ **Found by a rigor pass that re-checked this module's own "blocked on another program" claims
+against real code rather than against the note that recorded them.** The claim did not survive: `A3`
+and `A4` had both been revised **2026-08-27** and answered *"consuming the item is a precondition, not
+a cost"*, and `LeafId.HoldsStock` shipped **2026-08-28** — a week before module 18 was built, and cited
+by module 18's own text three bullets earlier as *"the lawn half correctly closed from the action
+side."* The deferral survived because `ssot-consumables.md` §9.5(b) was never annotated with the
+answer, so every reader re-derived the question instead of the conclusion.
+
+**⛔ The real gap, once the stale half was removed — and it is why the context could not simply be
+widened:** the precondition was **read-only**. `LeafId.HoldsStock` answers *"do I hold ≥ N?"* and
+nothing anywhere took the stack. Widening `contextsAuthored` on its own would have shipped a
+**battle-context consumable that fires forever off one potion** — the free-item defect, not a feature.
+So the widening is the *last* line of this entry, not the first.
+
+**⭐ Why a new type was unavoidable, stated because "just call the existing spend" looks true and is
+not:** `PredicateCompiler` interns each `stockId` to a **0-3 slot index** at compile time
+(`FactReader`'s flat, allocation-free probe). By the time a compiled action fires, the string naming
+*what* it required **no longer exists in the compiled form**. The leaf can answer "enough?" and nothing
+downstream can answer "then spend what?". `CompiledAction.StockDemands` is that missing link.
+
+**What was built:**
+
+- [x] ⭐ **The demand is lifted at COMPILE time, in conjunctive position only.**
+      `ActionCompiler.TryCollectStockDemands` walks the parsed tree once and collects every
+      `holdsStock` leaf reachable from the root through `and` alone — the leaves a firing action has
+      **proven** true. Nothing is re-derived per resolve (T30's own rule).
+- [x] ⛔ **A `holdsStock` under an `or` or a `not` is REFUSED BY NAME, never guessed.** New
+      `ActionRejectionReason.ConsumableStockDemandNotGuaranteed`. Such an action can fire while the
+      leaf is false, so the honest options were "spend nothing" (the free-consumable defect this whole
+      entry exists to close) or "charge for a stack the player was never required to hold." Both are
+      wrong, so the row is refused instead and the message names the stack. ⚠ **T10's lawn-mode refusal
+      still runs FIRST** and is asserted to — the more specific answer keeps its typed reason, so no
+      existing caller's message moved.
+- [x] **Duplicate ids collapse to the STRICTEST demand, never the sum.** Two leaves asking for 1 and 2
+      of one stack are jointly satisfied by holding 2, so 2 is what was required and 2 is what is
+      taken; summing would charge 3 for a condition 2 satisfies. First-appearance order is preserved so
+      two logs of one action list its demands identically.
+- [x] ⭐ **`MinQty` is what gets spent, and that is a decision the specs do not state.** `A3` §8 refuses
+      to make an item a cost, so there is no `rpg_action_cost` row to price it and no second authored
+      number to reach for. Inventing a `spendQty` beside `minQty` would be two sources of truth for one
+      quantity. Recorded here rather than left implicit.
+- [x] **`IStockLedger` / `ActionStockCommit` — the caller the leaf never had**, in the same sense and
+      the same shape as `AuraUpkeepDriver` is the caller `CostLedger` never had. Spends **at commit, not
+      at landing** (spec-action-costs.md §3's rule for costs, reused rather than re-argued).
+      `ActionStockCommit.LedgerCalls` proves the no-demand short circuit is measurable rather than
+      argued, exactly as `FactReader.Reads` proves gate ordering — an ordinary action pays one null
+      check, not a ledger round trip.
+- [x] ⛔ **`NoStockLedger` takes the OPPOSITE posture to `AlwaysAffordable`, deliberately.** An unwired
+      affordability seam costs the player nothing; an unwired stock seam would hand out unlimited free
+      consumables. So an action that demands stock **does not fire** with no ledger wired, and an action
+      that demands none is untouched — every existing call site keeps its current behaviour.
+- [x] ⭐ **`UsabilityReason.MissingStock` finally has a raiser.** `spec-usability-conditions.md` §2
+      listed it in the result vocabulary; a grep found it **declared and dead** — gate 5 refused with
+      the generic `ConditionFailed` instead. `StockSpendResult.AsRefusal()` is its first and only
+      raiser, carrying the stack id in `Detail` exactly as `CannotAfford` carries the resource id.
+- [x] **One transaction on the DAL side, and ONE decrement statement in the whole repo.**
+      `RpgStore.TrySpendStock` spends every demand or none; the conditional `qty >= $q` **is** the
+      re-check, so there is no window between the gate reading a quantity and the commit taking it.
+      `TrySpendDraughts` was refactored onto the same private `TryDecrementStockUnlocked`, so the
+      draught manifest and the action spend cannot drift apart — a test drives **both** callers.
+- [x] **`long` end to end on the spend path**, widened once at the `StockDemand` boundary from the
+      leaf's `int`. No multiplication and no summation of quantities anywhere, so there is no overflow
+      surface; a non-positive demand **throws** rather than being clamped into a free grant.
+- [x] **`contextsAuthored` widened to `["menu", "dispatch", "battle"]` — one line, exactly as this
+      module's own text predicted.** ⛔ **`lawn` is NOT widened**, and that is the one place this
+      follow-up disagrees with the finding that opened it: the two halves are not symmetric.
+      `spec-usability-conditions.md` §3a's mode matrix makes a `holdsStock` action **not bindable** in
+      lawn mode at all (the overlay is a stateless observer and never reads current inventory —
+      `ActionCompiler.cs:97` refuses it by name with `ConsumableUnsupportedInMode`), and `capPerMatch`
+      (**G4**, §9 item 12(a)) is still unimplemented. That is a locked spec position plus a real missing
+      runtime, not a wiring gap.
+- [x] **The doc that caused this is annotated in three places, not one.** `ssot-consumables.md` §9 item
+      5(b) now carries the answer, the date it was answered, what shipped, and what was still missing;
+      §5.2's `use_context` row and §6.2 code 4's *"battle before the action layer"* both say `battle` is
+      served and `lawn` alone is not. A single annotation would have left the normative table
+      contradicting the answer.
+
+**⛔ Two further real defects found while doing this, named rather than silently fixed:**
+
+- [x] ⛔ ⭐ **`AdjustStock` could never have been the spend path, and nothing said so.**
+      `RpgStore.Items.cs:302` upserts with `qty = MAX(0, qty + $d)` — so `AdjustStock(player, id, -1)`
+      on an **empty** stack *succeeds* and leaves 0, telling the caller nothing. Clamping is right for a
+      grant that must not go negative and catastrophic for a spend, which has to know it failed. The
+      trap is now stated in a comment on the shared decrement and, better, **proven by a test**
+      (`AdjustStock_clamps_and_therefore_could_never_have_been_the_spend_path`) so it is a red test
+      rather than a paragraph if anyone reaches for it.
+- [ ] ⏸ ⚠ **`RpgStore.StockQty` returns `int` for a SQLite `INTEGER` (64-bit) column.** A narrowing on a
+      magnitude, which AGENTS.md's rule forbids. **Not widened from here:** the signature is module
+      2/18's and has a Server caller (`ItemSurfaceEndpoints.cs:129` reads `ListStock`, same family), so
+      widening it is that module's reviewed change. Named in the XML doc beside it. ⛔ Nothing on the
+      **spend** path narrows — `TrySpendStock` is `long` end to end — so this is a reporting-surface
+      defect, not a correctness one today. **Owner: module 2 `armoury`.**
+
+**⏸ Still deferred, unchanged and re-verified rather than restated:**
+
+- [ ] ⏸ **No production caller fires a battle-context consumable action yet.** `ActionStockCommit` is
+      the seam and `RpgStoreStockLedger` the real ledger behind it; the battle path that constructs one
+      and calls `TryCommit` at commit is the **battle/action stream's**, the same shape and the same
+      kind of wiring gap `CostLedger` itself still has (its only caller is `AuraUpkeepDriver`). Verified,
+      not assumed: `CostLedger.TryPay` has exactly one production call site today.
+- [ ] ⏸ **Stock is player-scoped, so `RpgStoreStockLedger` maps actor → player by identity by default.**
+      v1 binds a consumable at `player:{id}` (§4.3) and `rpg_item_stock` is keyed
+      `(player_id, container_id)` with no actor column. The mapping is a constructor parameter (and
+      tested through a non-identity one) so per-specimen stock (§10.4, the owner's) has a named place to
+      land instead of a silent identity assumption.
+
+**Verification, run fresh 2026-09-05 (baseline re-measured immediately BEFORE the edits, not inherited):**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "~ActionUsability\|~Consumable\|~DraughtManifest"` | ⭐ **113 passed / 0 failed** — measured per class: `ActionUsabilityStockSpendTests` **13** (new), `ActionUsabilityHoldsStockTests` 12 (T10's, untouched and still green), `ConsumableTests` **40** (was 39, +1 from splitting the battle/lawn refusal into an acceptance and a widening proof), `ConsumableCorpusTests` 18, `ConsumableCatalog`/`DraughtManifestTests` the rest |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "~StockSpend\|~RunDraught"` | ⭐ **27 passed / 0 failed** (was 14 — +13 new in `ActionStockSpendStoreTests`, and `RunDraughtStoreTests`' 14 still green **after** `TrySpendDraughts` was refactored onto the shared decrement) |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "~Tests.Items\|~Tests.Actions"` | ⭐ **1270 passed / 0 failed** — the entire surface this work touches, green |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7372 passed / 6 failed** — **zero** in `Items.*` or `Actions.*`. **5 of the 6 are in the pre-edit baseline list**: `ClassSystem.ProveAptitudeJsonEmitTests` ×3 (`BattleStatComposer.Configure` never ran), `Expeditions.ExpeditionResolverTests.Tier_goldens_are_locked`, and `Demons.SpeciesCatalogDiffTests` (a `demonTypeId` shape drift that appeared with commit `8a82cf0 update demon species`). The 6th is `Demons.DemonSpeciesGenExplainTests`, which ⭐ **passes 2/2 in isolation, twice** — it spawns a nested `dotnet build` that loses a lock race on `FusionRpg.Core.sourcelink.json` against its own parent run, so *which* of its two methods reports the loss varies per run. Contention, not a failure |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **871 passed / 1 failed** — `DemonSpeciesImportCliTests`, the demon stream's own process-spawning test that module 17 host-crashed on and module 18 excluded; on a later run it hung the host outright for >10 min before printing anything. ⭐ **Minus that one class: 870 passed / 0 failed, fully green.** **Zero** in `Items.*` either way |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | ⭐ **208 passed / 0 failed** — fully green |
+| `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | **0 errors** — boot still parses `consumables.v1.json` with the widened `contextsAuthored` |
+| `.\scripts\guard-single-writer.ps1` · `guard-funnel-delta.ps1` · `guard-dal.ps1` · `guard-secondary-no-unity.ps1` | all four **OK**, measured before AND after the edits. The new SQL is inside `FusionRpg.Data`; no combat field write and no HP delta is touched — the spend is an inventory row, not a stat |
+| `python scripts\audit-magic-numbers.py --summary` | **`M1 = 0`, `M2 = 0`, `M4 = 0`, exit 0**; no `consumables` or `actions` domain row |
+| `python scripts\audit-overflow.py` | **0 critical**, 62 findings, **zero** in any file this follow-up wrote or edited |
+
+⚠ **Baseline honesty.** The pre-edit Core run **hung** inside `Demons.DemonSpeciesGenExplainTests` and
+never printed a summary, so its recorded evidence is its *failure list* (5 names), not a count. That is
+precisely the test that passes in isolation above — the same nested-build lock, hit harder. An earlier
+run this session, before the three demon/doc commits landed, was **7337 passed / 4 failed** with the
+two `Demons.*` rows absent, which is what pins them to `8a82cf0`. Compare against the rows above, not
+against module 18's own snapshot.
+
+⚠ **One transient build break from the concurrent stream, resolved by waiting, in a file this
+follow-up did not touch** — `Demons/Fusion/DemonRecipeCatalog.cs:100` called `TryFindPair` before the
+method that defines it landed (`CS0103`), which briefly made the whole solution un-buildable. The same
+pattern P3.1, P4.1 and P5.2 all recorded. Every number in the table above was re-measured **after** it
+cleared. Also killed several orphaned `testhost` processes holding `FusionRpg.Core.dll` between runs.
+
+**Files:** `src/FusionRpg.Core/Actions/Cost/StockLedger.cs` (new — `StockDemand`, `StockSpendResult`,
+`IStockLedger`, `NoStockLedger`, `ActionStockCommit`);
+`src/FusionRpg.Core/Actions/ActionCompiler.cs` (EDIT — `TryCollectStockDemands`, the conjunctive-position
+rule, demands threaded onto the compiled action);
+`src/FusionRpg.Core/Actions/CompiledAction.cs` (EDIT — trailing defaulted `StockDemands`);
+`src/FusionRpg.Core/Actions/ActionRejection.cs` (EDIT — `ConsumableStockDemandNotGuaranteed`);
+`src/FusionRpg.Core/Items/Consumables/{ConsumableDef.cs, ConsumableValidator.cs}` (EDIT — the refusal
+message and the enum docs now name `lawn` alone, with its own two reasons);
+`src/FusionRpg.Data/Sqlite/RpgStore.Consumables.cs` (EDIT — `TryDecrementStockUnlocked`, the one shared
+decrement; `TrySpendStock`; `TrySpendDraughts` refactored onto it; the `StockQty` narrowing named);
+`src/FusionRpg.Data/Sqlite/RpgStoreStockLedger.cs` (new — the `IStockLedger` adapter);
+`data/tuning/consumables.v1.json` (EDIT — `contextsAuthored` += `battle`, note rewritten);
+`docs/architecture/item/ssot-consumables.md` (EDIT — §9 item 5(b) annotated with the answer, §5.2's
+`use_context` row and §6.2 code 4 brought into line);
+`tests/FusionRpg.Core.Tests/Actions/ActionUsabilityStockSpendTests.cs` (new, 13);
+`tests/FusionRpg.Data.Tests/Items/ActionStockSpendStoreTests.cs` (new, 13);
+`tests/FusionRpg.Core.Tests/Items/ConsumableTests.cs` (EDIT — the two tests that pinned `battle` as
+refused now pin it as authored, and a new one keeps the one-line-widening proof).
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionUsability|FullyQualifiedName~Consumable"`; `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~StockSpend|FullyQualifiedName~RunDraught"`
 
 ### ✅ P5.3 — Module 19 `granted-actions` — GATE GA2 BUILT AND VERIFIED 2026-09-05 (GA3/GA4, the `decisions.md` requests and the content-hash registration explicitly deferred to their real owners — all four either upstream or another program's, none skipped)
 
@@ -5027,6 +5305,60 @@ CharmCarryCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/CharmCarryStoreTes
 > ### ✅ CHECKPOINT 5
 > A player can see, compare, equip, socket and craft an item in the web control room without reading a
 > database.
+
+---
+
+## Post-completion rigor pass — 2026-09-05/06, after all 22 modules were built
+
+All 22 modules above were built module-by-module through 2026-09-05. Once complete, this pass answered
+two questions the build-by-module process cannot answer by itself: **(1) is the tracking document
+itself internally consistent** (do the cross-references between sections actually resolve), and
+**(2) does every claim this file makes about ANOTHER program's real state still hold** (a "blocked on
+X" note is only honest for as long as X hasn't since shipped). Both were checked exhaustively, not
+sampled.
+
+**Pass 1 — internal cross-reference consistency** (24 parallel readers, one per phase/module section,
+each finding candidate breaks then independently adversarially re-verified before being trusted): 27
+candidates raised, **8 confirmed real** and fixed — a Checkpoint 0 banner contradicted by its own
+adjacent status table, a citation naming the wrong module twice, two modules each believing the other
+tracked an obligation neither actually mentioned, and a shaped-but-unacknowledged reuse request
+between modules 12 and 16.
+
+**Pass 2 — external claim verification** (23 parallel readers extracting every checkable claim this
+file makes about another program's spec/decision/code, then each claim independently checked against
+the real external file): 194 claims found, **36 confirmed stale or wrong** and corrected — mostly
+citation drift from concurrent programs' own ongoing edits (line numbers, section numbers, member
+counts that grew), but **three were genuinely new, actionable engineering gaps**: a claimed blocker had
+actually shipped weeks earlier and the item-program side was never updated to use it. All three were
+built, tested and documented in full, in the sections above:
+
+| Module | Gap found | Resolution |
+|---|---|---|
+| **15** `enhance-reroll` | `Resolver`'s Mixed-affix semantics shipped 2026-09-02; `Instantiator.DrawBudget` still carried the old two-independent-draws model and refused every Mixed reroll | Threaded through directly; refusal deleted, narrowed to the genuinely-unsupported slot-bearing case; found and fixed a second real defect (`Resolver.DrawSuffixPass` has no paired-budget gate) and named it against its real owner (effect-pipeline) rather than fixing someone else's code |
+| **11** `drop-volume` | `mapLevel(M) = 5·DangerBand(M)` was owner-decided 2026-08-23; no code implemented it, so `drop.world.sector-clear` had no `loot_source` | `PowerIndexComposer.MapLevel` built per the exact decided formula (tunable `Wm`, never a literal), wired; found the decision's own spec docs still said "owed" 13 days after closing |
+| **18** `consumables` | The A3/A4 blocker on `use_context=battle` was answered and shipped 2026-08-27/28 as `LeafId.HoldsStock` — but `HoldsStock` only ever *read* a stock quantity, never spent it | Built the missing commit half (`IStockLedger`, one transaction, `long` end to end); **caught and corrected its own brief mid-build** — `lawn` must stay refused, not widened alongside `battle`, per `ActionCompiler.cs`'s own existing refusal — verified against code rather than assumed |
+
+**Also closed this pass:** `tasks/item-plan.md` was read in full for the first time since the build
+began (previously only `item-todo.md` had been the working document), surfacing that **Checkpoint 1's
+own two remaining success criteria** (the live lawn push, the first geared corner run) had never been
+revisited with real investigation. Both were: the lawn push gained a real, tested multi-owner wire
+extension plus a precisely-identified deeper gap (compiled grants aren't owner-scoped, needs an
+Injector change unverifiable without a real game install); the corner run's deferral was confirmed
+**correct**, not a shortcut, once its exact blocker was traced to an explicit prior cross-program
+decision (`class-system-map.md` §2a.0, "the composers stay separate"). See P1.5 above for both in full.
+
+**A real, previously-invisible testing gap was also found and closed**: six of this repo's thirteen
+test projects (`FusionRpg.Server.Tests` foremost) had never been run once by any of the 22 modules'
+own verification passes, because none of them touch those projects directly. Running them cold
+surfaced 21 real regressions from module 1's own C3 rule (landed session-start, never caught), plus one
+stale test and one real architectural inconsistency in `tools/ItemSeedValidator`. All fixed; see P1.5's
+own addendum above for the full account.
+
+**Final regression, after every fix in both passes and all three follow-up builds landed:**
+Core, Data, Guard and the four boundary guard scripts were re-run to a clean state throughout this
+pass, each time against a freshly-measured baseline (never a trusted stale number) and each remaining
+failure traced by name to a file a concurrent program stream (class-system, world-stage, battle-tempo,
+party-dungeon/`Delve`) owns and was mid-editing at the time — confirmed via `git status`, never assumed.
 
 ---
 

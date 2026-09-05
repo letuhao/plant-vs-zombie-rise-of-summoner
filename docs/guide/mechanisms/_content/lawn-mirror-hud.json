@@ -1,0 +1,77 @@
+{
+  "slug": "lawn-mirror-hud",
+  "title": "Live mirror and unit HUD",
+  "status": "Shipped",
+  "kicker": "Lawn · first core",
+  "pillar": {"text": "The lawn", "href": "the-lawn.md"},
+  "loopLine": "Lawn — first core",
+  "hook": "Watch the live **12×5 mirror** of the board in the browser, with a **unit HUD** above each unit — identity, shield, and statuses at a glance.",
+  "blindSpots": [
+    {"term": "Mirror", "meaning": "A live copy of the 12×5 board in the control room — observation and orders, not a second physics engine."},
+    {"term": "Unit HUD", "meaning": "Chips above each unit (identity, shield, statuses). You do not need a second panel to read the board under pressure."},
+    {"term": "Orders", "meaning": "High-level commands from the control room. You are not rewriting pea physics."},
+    {"term": "Closing a menu", "meaning": "Does not destroy the board. You stay on the Lawn stage."},
+    {"term": "Sun / wave clock", "meaning": "Match state on the mirror (sun bank, wave, phase) — separate from RPG stock souls."}
+  ],
+  "alsoTrue": [
+    "Shield and status chips use the shipped combat language — [shields, crit, and resistance](shields-crit-resist) · [statuses](statuses).",
+    "Deployed specimens and the commander chip show here when present."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Open the Lawn stage while a match is running.",
+        "You see plants, zombies, sun, wave clock, match phase, commander chip, deployed specimens, and statuses — live."
+      ]
+    },
+    {
+      "title": "How you use it",
+      "intro": "Observe first, then issue orders when you need them:",
+      "cards": [
+        {"name": "Read", "body": "Unit HUD carries identity, shield, and the statuses that matter at a glance."},
+        {"name": "Order", "body": "High-level orders only — you are not a second physics engine."},
+        {"name": "Stay", "body": "Closing overlays does not dump you off the stage or wipe the board."}
+      ],
+      "diagram": [
+        "  lawn game board  --live-->  12x5 mirror + unit HUD",
+        "                              (observe / high-level orders)"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "In the control room",
+          "steps": [
+            "Start a match in the lawn game.",
+            "Open the control room and select Lawn.",
+            "Read the mirror and HUD without hunting a second deep panel for every status."
+          ],
+          "note": "If the mirror is still, the match may not be running or the injector may not be connected — fix that before blaming the UI."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Get a match running.",
+    "Open Lawn and confirm a moving 12×5 mirror.",
+    "Point at one unit HUD and name identity, shield, or a status chip."
+  ],
+  "doNote": "Parent loop: [lawn match](lawn-match). Field demons onto that board: [bound demon deploy](lawn-deploy).",
+  "mixUps": [
+    {"q": "Is the mirror a second game I play with the mouse?", "a": "You observe and issue high-level orders. The lawn game still owns the board physics."},
+    {"q": "Do I need to open a detail panel for every status?", "a": "No. Unit HUD is built for glance reading under pressure."},
+    {"q": "Did I break the match when I closed a menu?", "a": "Closing a menu does not destroy the board — you stay on the stage."},
+    {"q": "Is mirror sun the same as souls?", "a": "No. Match sun is board state. Souls are the RPG stock — see [souls](souls)."},
+    {"q": "Why don’t I see shields?", "a": "Shield chips appear when overlay shields are present — see [shields, crit, and resistance](shields-crit-resist)."}
+  ],
+  "next": ["lawn-deploy"],
+  "related": ["lawn-match", "statuses", "shields-crit-resist"],
+  "sources": [
+    "docs/guide/the-lawn.md §What you see",
+    "docs/guide/combat.md §Shields · Statuses",
+    "docs/guide/mechanisms/lawn-mirror-hud.md (prior stub)"
+  ]
+}

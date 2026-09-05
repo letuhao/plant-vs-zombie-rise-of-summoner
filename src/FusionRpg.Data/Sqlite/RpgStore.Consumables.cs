@@ -1,3 +1,4 @@
+using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Items.Consumables;
 using Microsoft.Data.Sqlite;
 
@@ -217,24 +218,10 @@ public sealed partial class RpgStore
                     return new DraughtSpendResult(false, "draught.nonpositive", 0);
                 }
 
-                using (var dec = db.CreateCommand())
+                if (!TryDecrementStockUnlocked(db, playerId, entry.ContainerId, entry.Qty, now))
                 {
-                    // The conditional decrement, copied verbatim from the shipped material spend path
-                    // (RpgStore.Materials.cs): a zero row count fails the WHOLE transaction rather than
-                    // silently no-op'ing into a free draught.
-                    dec.CommandText = """
-                        UPDATE rpg_item_stock SET qty = qty - $q, updated_utc = $t
-                        WHERE player_id = $p AND container_id = $c AND qty >= $q;
-                        """;
-                    dec.Parameters.AddWithValue("$q", entry.Qty);
-                    dec.Parameters.AddWithValue("$t", now);
-                    dec.Parameters.AddWithValue("$p", playerId);
-                    dec.Parameters.AddWithValue("$c", entry.ContainerId);
-                    if (dec.ExecuteNonQuery() == 0)
-                    {
-                        tx.Rollback();
-                        return new DraughtSpendResult(false, "stock.insufficient", 0);
-                    }
+                    tx.Rollback();
+                    return new DraughtSpendResult(false, "stock.insufficient", 0);
                 }
 
                 ExecIn(db, tx, """
@@ -278,8 +265,93 @@ public sealed partial class RpgStore
         }
     }
 
+    // ---- the one stock decrement ---------------------------------------------------------------------
+
+    /// <summary>
+    /// ⛔ <b>The ONLY place a stock row is decremented, and every spend path goes through it.</b> The
+    /// conditional <c>qty &gt;= $q</c> is what makes it safe: a stack that cannot cover the spend
+    /// updates zero rows, and the caller fails its whole transaction rather than silently no-op'ing
+    /// into a free item.
+    ///
+    /// <para>⛔ <b><see cref="AdjustStock"/> can never be a spend path</b>, and that is worth stating
+    /// where someone would reach for it: its <c>MAX(0, qty + $d)</c> clamps, so
+    /// <c>AdjustStock(player, id, -1)</c> on an empty stack <i>succeeds</i> and leaves 0. Clamping is
+    /// right for a grant that must not go negative and catastrophic for a spend, which needs to know
+    /// it failed.</para>
+    ///
+    /// <para>Must be called with <c>_gate</c> held and inside the caller's own transaction — it does
+    /// not open either, so the decrement and whatever the caller writes beside it commit together.
+    /// </para>
+    /// </summary>
+    static bool TryDecrementStockUnlocked(SqliteConnection db, string playerId, string containerId, long qty, string utc)
+    {
+        using var dec = db.CreateCommand();
+        dec.CommandText = """
+            UPDATE rpg_item_stock SET qty = qty - $q, updated_utc = $t
+            WHERE player_id = $p AND container_id = $c AND qty >= $q;
+            """;
+        dec.Parameters.AddWithValue("$q", qty);
+        dec.Parameters.AddWithValue("$t", utc);
+        dec.Parameters.AddWithValue("$p", playerId);
+        dec.Parameters.AddWithValue("$c", containerId);
+        return dec.ExecuteNonQuery() != 0;
+    }
+
+    /// <summary>
+    /// Spend an action's <c>holdsStock</c> demands — <b>all of them or none</b>, in one transaction.
+    ///
+    /// <para>This is the commit half of ssot-consumables.md §9 item 5(b)'s answer: <c>A3</c> §8 and
+    /// <c>A4</c> §3a (both revised 2026-08-27) settle that consuming the item is a PRECONDITION rather
+    /// than a cost, and <c>LeafId.HoldsStock</c> shipped the check 2026-08-28 — but nothing took the
+    /// stack, so a battle-context consumable action fired for free. The conditional decrement above
+    /// doubles as the re-check, so there is no window between the gate reading a quantity and this
+    /// taking it.</para>
+    ///
+    /// <para>Returns the FIRST shortfall in demand order (matching <c>CostLedger</c>'s own
+    /// single-detail shape) and rolls everything back, so a two-demand action that can pay one of
+    /// them spends neither.</para>
+    /// </summary>
+    public StockSpendResult TrySpendStock(
+        string playerId, IReadOnlyList<StockDemand> demands, string? utc = null)
+    {
+        if (string.IsNullOrWhiteSpace(playerId)) throw new ArgumentException("playerId required", nameof(playerId));
+        if (demands is null || demands.Count == 0) return StockSpendResult.Spent;
+
+        var now = utc ?? DateTime.UtcNow.ToString("O");
+
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+
+            foreach (var demand in demands)
+            {
+                // A non-positive demand is a caller bug, not a stingy stack: PredicateCompiler already
+                // refuses minQty < 1 at load, so reaching here means someone hand-built a demand.
+                if (demand.MinQty < 1)
+                    throw new ArgumentOutOfRangeException(nameof(demands), demand.MinQty,
+                        $"stock demand '{demand.StockId}' asks for {demand.MinQty}; a spend is at least one");
+
+                if (!TryDecrementStockUnlocked(db, playerId, demand.StockId, demand.MinQty, now))
+                {
+                    tx.Rollback();
+                    return StockSpendResult.Missing(demand.StockId);
+                }
+            }
+
+            tx.Commit();
+            return StockSpendResult.Spent;
+        }
+    }
+
     /// <summary>A player's current stock of one fungible container — the usability leaf's real answer
-    /// once <c>LeafId.HoldsStock</c> reads a store instead of a caller-supplied quantity.</summary>
+    /// once <c>LeafId.HoldsStock</c> reads a store instead of a caller-supplied quantity.
+    ///
+    /// <para>⚠ Returns <c>int</c> while the column is SQLite <c>INTEGER</c> (64-bit) and
+    /// <see cref="StockDemand.MinQty"/> is <c>long</c>. Named rather than widened from here: the
+    /// signature is module 2/18's and has callers in the Server, so widening it is that module's
+    /// reviewed change. Nothing on the spend path narrows — <see cref="TrySpendStock"/> is
+    /// <c>long</c> end to end.</para></summary>
     public int StockQty(string playerId, string containerId)
     {
         lock (_gate)

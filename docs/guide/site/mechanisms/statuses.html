@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Statuses are timed conditions — butter, freeze, chill, poison, hypno, wither, contagions, and more — that actually resolve in combat." />
+    <title>Statuses — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/statuses.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Combat language · every place
+        </p>
+        <h1 class="teach-title">Statuses</h1>
+        <p class="teach-hook"><strong>Statuses</strong> are timed conditions — butter, freeze, chill, poison, hypno, wither, contagions, and more — that actually resolve in combat.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Status</dt>
+              <dd>A timed condition on a unit. Not a permanent class, not a stock, not an element on the ring.</dd>
+            </div>
+            <div>
+              <dt>Apply / cleanse</dt>
+              <dd>Statuses go on and come off through play. You do not buy them from a shop tab.</dd>
+            </div>
+            <div>
+              <dt>Catalog vs reach</dt>
+              <dd>The catalog is real; not every status is common in every mode yet. Missing one in a mode is reachability, not a fake row.</dd>
+            </div>
+            <div>
+              <dt>Contagion</dt>
+              <dd>Statuses that spread or mark (blight, rot, spark, and kin) — still statuses, not a second combat system.</dd>
+            </div>
+            <div>
+              <dt>Delve nerve ladder</dt>
+              <dd>Unsettled → Shaken → Afflicted is Vision for delve pressure — not something every lawn already runs.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>You read icons on the <a href="lawn-mirror-hud.html">lawn unit HUD</a> under pressure.</li>
+            <li>How hard a status sticks ties to <a href="shields-crit-resist.html">resistance</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Conditions with a clock. They change what a unit can do or how the next hits feel.</p>
+          <p>Familiar lawn wraps sit beside overlay pressure and contagion — one status language.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="families-you-will-see-title">
+          <h2 id="families-you-will-see-title">Families you will see</h2>
+          <p>Names from the combat pillar — not an exhaustive move list:</p>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Crowd control and lawn wraps</strong>
+              <p>Butter, Freeze, Chill, Poison, Hypno, Ember, Jala, Kelp.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Extra pressure</strong>
+              <p>Wither, Bond, Rally, Leech, Expose, Command, Shatter, Charm Pulse.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Contagion</strong>
+              <p>Blight, Rot, Spark, Pact Mark, Spore.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Vision (delve nerve)</strong>
+              <p>Unsettled → Shaken → Afflicted — locked as design for delve, not everyday lawn soup.</p>
+            </li>
+          </ol>
+          <p class="teach-note">Exact durations and stacks are balance surface. Trust icons and tooltips in the build you have.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>On the lawn today</h3>
+            <ol>
+              <li>Open Lawn during a match.</li>
+              <li>Read status chips on the unit HUD above units.</li>
+              <li>Apply and cleanse through ordinary play — plants, zombies, skills when they land.</li>
+            </ol>
+            <p class="teach-note">Battle-stage UI for the same icons is still catching up with <a href="interactive-battles.html">interactive battles</a>.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Run a lawn match with Lawn open in the control room.</li>
+            <li>Point at one status icon and name it (butter, freeze, chill, poison — whatever appears).</li>
+            <li>Watch whether it sticks, fades, or fails — that is apply, cleanse, and resist in one glance.</li>
+          </ol>
+          <p class="teach-note">Element matchups: <a href="element-ring.html">six elements and omni</a>. Named combo recipes on top stay Vision — <a href="named-reactions.html">named reactions</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is a status the same as an element?</dt>
+              <dd>No. Elements are types on the ring. Statuses are timed conditions.</dd>
+            </div>
+            <div>
+              <dt>Why don’t I see every name from the list?</dt>
+              <dd>The catalog is real; reachability grows with content. Absence in a mode is not a broken row.</dd>
+            </div>
+            <div>
+              <dt>Do statuses only exist on the lawn?</dt>
+              <dd>No. They are combat language everywhere — lawn reach is just the first place you read them.</dd>
+            </div>
+            <div>
+              <dt>Is Unsettled / Shaken / Afflicted live everywhere?</dt>
+              <dd>That ladder is Vision for delve nerve. Do not expect it as daily lawn soup yet.</dd>
+            </div>
+            <div>
+              <dt>Can I buy statuses with souls?</dt>
+              <dd>No. They apply through play, skills, and content — not a stock spend.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="actor-meters.html">Actor meters</a>
+          </p>
+          <p>
+            Related:
+            <a href="element-ring.html">Six elements and omni</a> ·
+            <a href="named-reactions.html">Named reactions and combo recipes</a> ·
+            <a href="skills-loadouts.html">Skills and loadouts</a> ·
+            <a href="lawn-mirror-hud.html">Live mirror and unit HUD</a> ·
+            <a href="shields-crit-resist.html">Shields, crit, and resistance</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/statuses.md">Markdown (editable SSOT)</a> ·
+            <a href="../../combat.md">Combat</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/statuses.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

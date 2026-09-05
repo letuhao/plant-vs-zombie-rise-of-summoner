@@ -1,0 +1,73 @@
+{
+  "slug": "save-select",
+  "title": "Title / save select",
+  "status": "Shipped",
+  "kicker": "Session and shell · how you play",
+  "pillar": {"text": "Sanctum", "href": "sanctum.md"},
+  "loopLine": "Session — how you play",
+  "hook": "At the **door** you meet the title screen, then **choose or create a summoner save** — that save is the world you keep.",
+  "blindSpots": [
+    {"term": "Title", "meaning": "The first control-room screen after the launcher opens the browser — Rise of Summoner’s front door, not the lawn game’s main menu."},
+    {"term": "Save / summoner", "meaning": "One local profile for your whole campaign: roster, stocks, map progress. Picked once at the door, not from a dropdown on every screen."},
+    {"term": "Continue", "meaning": "Resume with the summoner the control room already has selected. Disabled until you have created at least one save."},
+    {"term": "Lawn-game save", "meaning": "The Plants vs. Zombies pack’s own save files. Rise of Summoner does not rewrite them. This page is only about RPG saves."}
+  ],
+  "alsoTrue": [
+    "Saves live on your machine beside the local helper — no account, no cloud. See [local control room](local-control-room).",
+    "Updating Rise of Summoner is meant to keep this data."
+  ],
+  "sections": [
+    {
+      "title": "What you see — title",
+      "paras": [
+        "Centered title: Rise of Summoner, with a short Plants vs. Zombies line underneath.",
+        "Buttons: Continue, New summoner, Saves, Settings, and Quit (Quit may be unavailable in the browser-only path)."
+      ],
+      "cards": [
+        {"name": "Continue", "body": "Goes straight to the Sanctum with the current summoner. Greyed out if you have never created one."},
+        {"name": "New summoner", "body": "Opens save select already ready to name a new profile."},
+        {"name": "Saves", "body": "Opens the full choose-a-summoner list."},
+        {"name": "Settings", "body": "Opens System over Sanctum — same settings surface you reach with Esc later."}
+      ]
+    },
+    {
+      "title": "What you see — choose a summoner",
+      "paras": [
+        "Heading: Choose a summoner.",
+        "Each slot shows the name, when it was created, and a world seed for that save.",
+        "Continue on a slot selects it and lands you in the Sanctum. + New summoner asks for a name, creates the save, then continues."
+      ],
+      "note": "Back to title returns to the door without changing who is selected."
+    },
+    {
+      "title": "Why the door exists",
+      "paras": [
+        "A save is chosen once, at the door — not from a picker glued to the top of every layer.",
+        "That keeps Sanctum feeling like a place you are in, not a settings page that happens to have a game under it."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "From the title, pick New summoner (or Saves if you already have one).",
+    "Type a summoner name and Create — or Continue on an existing slot.",
+    "Land in the Sanctum. You are past the door."
+  ],
+  "doNote": "Stop here when you know which summoner you are playing. Next: [Sanctum](sanctum).",
+  "mixUps": [
+    {"q": "Is this my Plants vs. Zombies save?", "a": "No. This is the Rise of Summoner summoner profile. The lawn pack keeps its own saves."},
+    {"q": "Do I need an online account?", "a": "No. Local only — see [local control room](local-control-room)."},
+    {"q": "Where did the player picker on every screen go?", "a": "On purpose. You pick at the door; you do not re-pick from a HUD dropdown all session."},
+    {"q": "What is the seed under my name?", "a": "A label for this save’s world root. You can see it; you do not need to type it to play."},
+    {"q": "Can I have more than one summoner?", "a": "Yes. Create another slot from Saves or New summoner, then Continue on the one you want."}
+  ],
+  "next": ["sanctum"],
+  "related": ["local-control-room", "sanctum", "system-settings"],
+  "sources": [
+    "web/fusion-rpg-web/src/app/TitleScreen.tsx",
+    "web/fusion-rpg-web/src/app/SaveSelect.tsx",
+    "docs/guide/sanctum.md",
+    "docs/guide/how-you-play.md §Local control room",
+    "docs/guide/mechanisms/local-control-room.md"
+  ]
+}

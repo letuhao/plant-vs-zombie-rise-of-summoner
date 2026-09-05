@@ -1,0 +1,88 @@
+{
+  "slug": "new-world-prestige",
+  "title": "New world — keep who you are",
+  "status": "Shipped",
+  "statusNote": "fiction",
+  "kicker": "Quests, failure, memory · prestige of place",
+  "pillar": {"text": "The game", "href": "the-game.md"},
+  "loopLine": "Level up and power · Farm / hunt / defend",
+  "hook": "**You keep who you are. You lose where you were.** Ending a world is progression — not a prestige wipe of the summoner.",
+  "blindSpots": [
+    {"term": "New world", "meaning": "Starting another map after win or lose. Roster, souls, and essence come with you; loam and that map’s holdings do not."},
+    {"term": "Fiction status", "meaning": "The rule is real product law in the guide. Surfaces that start/end worlds may still feel thin — the promise is the keep/lose split."},
+    {"term": "Prestige wipe", "meaning": "The rejected idea that a new world deletes your summoner power. This game does not do that."},
+    {"term": "Loam stays behind", "meaning": "World stock and failed-map holdings die with the place. They never bank."}
+  ],
+  "alsoTrue": [
+    "Win: take Zomboss’s fortress. Lose: the homeworld falls.",
+    "Same roster, same souls, same essence — whichever world you open next."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Ending one world and starting another *is* the progression loop.",
+        "Identity (roster, souls, essence, Dave’s power) banks. Place (loam, holdings) resets with the map."
+      ],
+      "table": {
+        "cols": ["Keeps", "Leaves behind"],
+        "rows": [
+          ["Roster / specimens", "Loam"],
+          ["Souls", "Holdings of the failed or finished map"],
+          ["Essence", "That world’s ground story"]
+        ]
+      },
+      "note": "Status is Shipped (fiction) — the law holds even when world-end chrome is thin."
+    },
+    {
+      "title": "Why it exists",
+      "paras": [
+        "Without a keep/lose split, empire play either wipes your summoner (punishing) or banks forever-ground (boring).",
+        "You keep who you are so power and roster mean something across maps. You lose where you were so holdings stay a real fight."
+      ],
+      "diagram": [
+        "  win or lose world",
+        "        |",
+        "        +->  keep: roster, souls, essence, Dave power",
+        "        +->  lose: loam, holdings, that map"
+      ]
+    },
+    {
+      "title": "Where you meet it",
+      "groups": [
+        {
+          "title": "Win and lose",
+          "intro": "Defined on The game — fortress vs homeworld.",
+          "steps": [
+            "Play toward Zomboss’s fortress — or fall defending the homeworld.",
+            "When a world ends, expect banked identity and a fresh place.",
+            "Open Chronicle / Creatures to confirm who you still are."
+          ],
+          "note": "Exact end-of-world UI may be thin; the keep/lose rule is the teachable core."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Read win/lose on [The game](^the-game.md) once.",
+    "Check that souls and essence are player banks — loam is not.",
+    "Treat a future new-world start as prestige of place, not a summoner delete."
+  ],
+  "doNote": "Stop when new world ≠ soft reset of Dave. Related: [loam](loam), [souls](souls).",
+  "mixUps": [
+    {"q": "Does a new world delete my demons?", "a": "No. Roster banks. You lose the map’s holdings and loam."},
+    {"q": "Do souls reset?", "a": "No. Souls and essence bank across worlds."},
+    {"q": "Can I keep loam?", "a": "No. Loam never banks."},
+    {"q": "Is this a paid prestige layer?", "a": "No. Play is local with no payments — new world is the place loop."},
+    {"q": "Why “fiction” on a Shipped badge?", "a": "The keep/lose law is product-real; world-end presentation can still feel thin."}
+  ],
+  "next": ["loam"],
+  "related": ["loam", "souls", "essence", "dave-level", "chronicle"],
+  "sources": [
+    "docs/guide/the-game.md §Win and lose",
+    "docs/guide/the-rift.md §Three stocks",
+    "docs/guide/mechanisms/new-world-prestige.md (prior stub)",
+    "docs/guide/almanac.md §How progression lands"
+  ]
+}

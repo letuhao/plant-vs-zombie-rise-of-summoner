@@ -1,0 +1,70 @@
+{
+  "slug": "specimens",
+  "title": "Persistent specimens",
+  "status": "Shipped",
+  "kicker": "Roster and summoning · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion",
+  "hook": "Every demon is a **specimen** — its own level, gear, and history — not a stack of identical copies.",
+  "blindSpots": [
+    {"term": "Specimen", "meaning": "One individual demon in your roster. Two Peashooter-line demons are still two specimens."},
+    {"term": "Creature / demon", "meaning": "Player words for the same roster beings. You collect creatures; the ones you summon and bind are demons."},
+    {"term": "Duplicate", "meaning": "Another specimen of a species you already have — fuel for fusion, not trash to delete on sight."},
+    {"term": "Persistent", "meaning": "They stay in your save across sessions and bank across worlds with who you are."}
+  ],
+  "alsoTrue": [
+    "Open Creatures (`C`) from the [layer rail](layer-rail).",
+    "The full multi-tab creature sheet is still WIP — the roster already shows level, gear, and history."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Identity, level, gear, traits, element, rarity, variant, and history live on the specimen.",
+        "Duplicates are not dust — they feed star merges, recipes, and trait inheritance in fusion."
+      ]
+    },
+    {
+      "title": "How you use the roster",
+      "cards": [
+        {"name": "Inspect", "body": "Open Creatures and read who you have."},
+        {"name": "Bind", "body": "Put demons on pacts so they will deploy — see [pacts and loyalty](pacts-loyalty)."},
+        {"name": "Field", "body": "Bound specimens deploy to lawn; spare ones can go on expeditions."},
+        {"name": "Fuse", "body": "Spend duplicates and [essence](essence) in the Fusion lab."}
+      ]
+    },
+    {
+      "title": "Where specimens come from",
+      "paras": [
+        "Altar pulls spend souls.",
+        "Wild joins and (later) capture are other intakes — gacha is one path, never the only one."
+      ],
+      "diagram": [
+        "  altar / wild join / capture  ->  specimen on roster",
+        "                                      |",
+        "                                      +->  bind (pacts)",
+        "                                      +->  fuse (duplicates)"
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Press `C` to open Creatures.",
+    "Pick one specimen and notice it has its own level and identity.",
+    "If you own a duplicate, treat it as fusion fuel — do not assume it is worthless."
+  ],
+  "doNote": "Stop when “stack of copies” no longer fits. Next: [summoning altar](summoning-altar) or [pacts](pacts-loyalty).",
+  "mixUps": [
+    {"q": "Can I merge two identical names into one stack?", "a": "No. They stay individuals until you fuse them on purpose."},
+    {"q": "Is a specimen the same as a species?", "a": "Species is the kind. Specimen is one living instance of that kind."},
+    {"q": "Do specimens wipe on a new world?", "a": "No. Roster banks with who you are — see [New world](new-world-prestige)."},
+    {"q": "Where is the full sheet?", "a": "Roster is Shipped; the finished multi-tab sheet is WIP."}
+  ],
+  "next": ["summoning-altar"],
+  "related": ["summoning-altar", "pacts-loyalty", "specimen-fusion", "wild-joins", "souls"],
+  "sources": [
+    "docs/guide/creatures.md §Demons are individuals",
+    "docs/guide/creatures.md §Creature sheet",
+    "docs/guide/mechanisms/specimens.md (prior stub)"
+  ]
+}

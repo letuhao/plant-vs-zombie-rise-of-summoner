@@ -1,0 +1,70 @@
+{
+  "slug": "lawn-trophies",
+  "title": "Lawn trophies",
+  "status": "WIP",
+  "kicker": "Lawn · first core",
+  "pillar": {"text": "The lawn", "href": "the-lawn.md"},
+  "loopLine": "Lawn — first core",
+  "hook": "**WIP:** cosmetic **prestige** from lawn play — never stats, never a repeatable faucet. Not finished yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. You should not expect a full trophy case as a live grind yet."},
+    {"term": "Trophy", "meaning": "Display prestige from lawn play. Not gear, not a soul sink, not a combat buff."},
+    {"term": "Never stats", "meaning": "Design rule: trophies do not raise power."},
+    {"term": "Never a faucet", "meaning": "Design rule: trophies are not a repeatable currency printer."},
+    {"term": "Chronicle", "meaning": "Your history of runs and progression — related memory, not the same as a trophy shelf. See [chronicle](chronicle)."}
+  ],
+  "alsoTrue": [
+    "Blessing (soul boost on idle) and capture (roster intake) are different WIP lawn outcomes.",
+    "Play lawn for real faucets today — [souls](souls), XP, almanac — not for missing trophies."
+  ],
+  "sections": [
+    {
+      "title": "Not finished yet",
+      "paras": [
+        "When it ships, earn trophies from play for display only.",
+        "Until then, treat a missing trophy shelf as unfinished work."
+      ]
+    },
+    {
+      "title": "Design guardrails",
+      "intro": "Why the page exists before the UI:",
+      "cards": [
+        {"name": "Cosmetic", "body": "Show what you did on the lawn."},
+        {"name": "No power", "body": "Never stats — prestige does not win fights."},
+        {"name": "No faucet", "body": "Never a repeatable currency printer disguised as medals."}
+      ],
+      "diagram": [
+        "  lawn play  ->  trophy (WIP, display)",
+        "            ->  souls / XP / almanac (shipped faucets)"
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Chase shipped lawn outcomes: souls, levels, almanac meets, deploy.",
+        "Use [chronicle](chronicle) for history that already records runs."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Play lawn for souls and roster progress now.",
+    "When trophies appear, treat them as display — do not theorycraft power from them.",
+    "If a build ever ties power to trophies, that violates the design — flag it."
+  ],
+  "doNote": "Parent: [lawn match](lawn-match). Memory sibling: [chronicle](chronicle).",
+  "mixUps": [
+    {"q": "Where do I equip trophies for damage?", "a": "Nowhere. Design forbids stats on trophies."},
+    {"q": "Can I farm trophies for souls?", "a": "No. They must never be a repeatable faucet."},
+    {"q": "Is this the same as blessing?", "a": "No. Blessing is temporary idle soul pressure. Trophies are cosmetic."},
+    {"q": "Why is there no trophy UI?", "a": "WIP — not finished."},
+    {"q": "Does chronicle replace trophies?", "a": "Chronicle is history. Trophies are prestige display when they ship — related memory, different face."}
+  ],
+  "next": ["chronicle"],
+  "related": ["lawn-match", "chronicle", "lawn-blessing"],
+  "sources": [
+    "docs/guide/the-lawn.md §Blessing, capture, trophies",
+    "docs/guide/mechanisms/lawn-trophies.md (prior stub)",
+    "docs/guide/the-loops.md §Lawn — first core"
+  ]
+}

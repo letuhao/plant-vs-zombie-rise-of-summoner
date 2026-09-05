@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Deploy bound roster demons into a lawn run — usually as plant-side avatars, sometimes as designated hypno-zombie allies." />
+    <title>Bound demon deploy — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/lawn-deploy.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Lawn · first core · summon and fusion
+        </p>
+        <h1 class="teach-title">Bound demon deploy</h1>
+        <p class="teach-hook"><strong>Deploy</strong> bound roster demons into a lawn run — usually as plant-side avatars, sometimes as designated hypno-zombie allies.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Deploy</dt>
+              <dd>Send a bound specimen onto the live lawn board for this match — not an altar pull and not an expedition dispatch.</dd>
+            </div>
+            <div>
+              <dt>Plant-side avatar</dt>
+              <dd>Most demons appear as empowered plant-side uniques carrying that specimen’s traits and element.</dd>
+            </div>
+            <div>
+              <dt>Hypno-zombie ally</dt>
+              <dd>Designated boss-class species can deploy as hypno-zombie allies instead of plant avatars.</dd>
+            </div>
+            <div>
+              <dt>Soft-lock</dt>
+              <dd>A specimen already out on an expedition cannot lawn-deploy (and the reverse). No double-dipping.</dd>
+            </div>
+            <div>
+              <dt>Bound</dt>
+              <dd>Pacts keep demons on your roster ready to field — see <a href="pacts-loyalty.html">pacts and loyalty</a>.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>They fight with the traits and element you gave them — combat language still applies.</li>
+            <li>Specimens themselves: <a href="specimens.html">specimens</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Your raised demons come back onto the board as deployable presence.</p>
+          <p>Most arrive as plant-side avatars. A smaller set of boss-class designations can arrive as hypno-zombie allies.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Bind first, then field when free:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  pact-bound specimen  -&gt;  (not on expedition?)  -&gt;  deploy into lawn match
+                         plant avatar  or  hypno-zombie ally (designated)
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Bind</strong>
+              <p>Keep demons on pacts so they are roster-ready.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Check locks</strong>
+              <p>Expedition soft-locks block lawn deploy until the idle job is clear.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Deploy</strong>
+              <p>During a match, send an eligible specimen onto the lawn.</p>
+            </li>
+          </ol>
+          <table class="teach-table">
+            <thead>
+              <tr>
+                <th scope="col">Form</th>
+                <th scope="col">Who</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Plant-side avatar</td>
+                <td>Most demons</td>
+              </tr>
+              <tr>
+                <td>Hypno-zombie ally</td>
+                <td>Designated boss-class species</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>During a match</h3>
+            <ol>
+              <li>Bind demons on pacts in the control room.</li>
+              <li>Start a lawn match and open Lawn.</li>
+              <li>Deploy specimens that are not locked on an expedition.</li>
+            </ol>
+            <p class="teach-note">If a name is greyed or blocked, check expeditions before assuming a bug.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Confirm at least one specimen is bound on a pact.</li>
+            <li>Make sure it is not out on an expedition.</li>
+            <li>During a match, deploy it and watch it appear on the mirror.</li>
+          </ol>
+          <p class="teach-note">Parent loop: <a href="../../mechanisms/lawn-match.md">lawn match</a>. Soft-locks also protect expedition integrity — see <a href="expeditions.html">expeditions</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why can’t I deploy this demon?</dt>
+              <dd>Often soft-locked on an expedition — or not bound. Check both.</dd>
+            </div>
+            <div>
+              <dt>Is deploy the same as summoning at the altar?</dt>
+              <dd>No. Altar creates/binds. Deploy fields someone you already have into a match.</dd>
+            </div>
+            <div>
+              <dt>Do all demons become plants?</dt>
+              <dd>Most do as plant-side avatars. Designated boss-class species can be hypno-zombie allies.</dd>
+            </div>
+            <div>
+              <dt>Can one specimen be on lawn and expedition at once?</dt>
+              <dd>No. Soft-lock prevents double-dipping.</dd>
+            </div>
+            <div>
+              <dt>Do deployed demons ignore elements?</dt>
+              <dd>No. They carry the traits and element you gave them.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="lawn-blessing.html">Lawn blessing</a>
+          </p>
+          <p>
+            Related:
+            <a href="pacts-loyalty.html">Pacts and loyalty</a> ·
+            <a href="specimens.html">Persistent specimens</a> ·
+            <a href="../../mechanisms/lawn-match.md">Lawn match</a> ·
+            <a href="expeditions.html">Expeditions</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/lawn-deploy.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-lawn.md">The lawn</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/lawn-deploy.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

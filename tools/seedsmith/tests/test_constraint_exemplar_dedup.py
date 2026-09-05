@@ -12,6 +12,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from seedsmith.adapters.base import KindSpec  # noqa: E402
+from seedsmith.adapters.demons import DemonsAdapter  # noqa: E402
 from seedsmith.adapters.items import ItemsAdapter  # noqa: E402
 from seedsmith.corpus import Corpus  # noqa: E402
 from seedsmith.metrics import Ctx, MetricRegistry, Severity, run_all  # noqa: E402
@@ -23,6 +25,16 @@ from seedsmith.metrics.dedup import (  # noqa: E402
     shingles,
 )
 from seedsmith.metrics.exemplar import ExemplarConformance  # noqa: E402
+
+
+class _StubAdapterWithDedupFields:
+    """Minimal adapter double exposing only .kinds(), which is all SemanticDedup reads."""
+
+    def __init__(self, specs: "list[KindSpec]") -> None:
+        self._specs = specs
+
+    def kinds(self) -> "list[KindSpec]":
+        return self._specs
 
 
 def write(root: Path, rel_path: str, kind: str, entries: list, partition: str = "p") -> None:
@@ -194,6 +206,128 @@ class SemanticDedupTests(unittest.TestCase):
                                minhash_signature(shingles("Quantum Tax Filing")))
         self.assertGreater(close, far)
         self.assertGreaterEqual(close, 0.5)
+
+
+class ProseDedupTests(unittest.TestCase):
+    """`KindSpec.dedup_fields` — added 2026-09-06 to close the gap `SemanticDedup` had for any
+    kind's own free-text field (only `name` was ever checked). `commander-effect`'s `doctrine` is
+    the first real consumer.
+    """
+
+    def setUp(self) -> None:
+        self.root = Path(tempfile.mkdtemp())
+        self.spec_with_doctrine = KindSpec(
+            kind="commander-effect", directory="commander-effect", namespace="commanderEffect",
+            required=frozenset({"id", "nameKey", "name", "demonId"}),
+            dedup_fields=frozenset({"doctrine"}),
+        )
+
+    def test_a_kind_with_no_declared_dedup_fields_is_untouched(self) -> None:
+        # Every kind before this change (and every kind that never opts in) must produce zero
+        # prose findings — additive means nothing regresses for an adapter that says nothing.
+        write(self.root, "gems/a.json", "gem", [
+            {"id": "gem.g1-001", "nameKey": "g.1", "name": "Ember Shard",
+             "flavor": "A shard of pure ember, still warm to the touch."},
+            {"id": "gem.g1-002", "nameKey": "g.2", "name": "Frost Shard",
+             "flavor": "A shard of pure ember, still warm to the touch."},  # identical, but unwatched
+        ])
+        corpus = Corpus.load(self.root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        adapter = _StubAdapterWithDedupFields([
+            KindSpec(kind="gem", directory="gems", namespace="gem"),  # no dedup_fields
+        ])
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=adapter))
+        self.assertEqual([f for f in findings if "Prose" in f.evidence["code"]], [])
+
+    def test_no_adapter_means_no_prose_check_but_name_check_still_runs(self) -> None:
+        # SemanticDedup is called with adapter=None elsewhere in this suite (name-only checks
+        # never needed KindSpec) — that must keep working exactly as before.
+        write(self.root, "gems/a.json", "gem",
+             [{"id": "gem.g1-015", "nameKey": "g.1", "name": "Mending Pulse"}])
+        write(self.root, "consumables/a.json", "consumable",
+             [{"id": "consumable.k1-007", "nameKey": "c.1", "name": "Mending Pulse"}])
+        corpus = Corpus.load(self.root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=None))
+        self.assertEqual(len([f for f in findings if f.evidence["code"] == "ExactDuplicateName"]), 1)
+
+    def test_exact_duplicate_prose_text_across_two_entries_is_caught(self) -> None:
+        write(self.root, "commander-effect/a.json", "commander-effect", [
+            {"id": "commander-effect.a", "nameKey": "ce.a", "name": "A", "demonId": "a",
+             "doctrine": "The squad focuses fire on the nearest target."},
+            {"id": "commander-effect.b", "nameKey": "ce.b", "name": "B", "demonId": "b",
+             "doctrine": "The squad focuses fire on the nearest target."},
+        ])
+        corpus = Corpus.load(self.root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        adapter = _StubAdapterWithDedupFields([self.spec_with_doctrine])
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=adapter))
+
+        exact = [f for f in findings if f.evidence["code"] == "ExactProseDuplicate"]
+        self.assertEqual(len(exact), 1)
+        self.assertEqual(exact[0].severity, Severity.GAP)
+        self.assertEqual(set(exact[0].evidence["entryIds"]),
+                         {"commander-effect.a", "commander-effect.b"})
+        # An exact duplicate must not ALSO be double-reported as a near-duplicate.
+        self.assertEqual([f for f in findings if f.evidence["code"] == "ProseNearDuplicate"], [])
+
+    def test_the_real_corpus_near_duplicate_pair_is_caught(self) -> None:
+        # Replays the real finding from the live corpus, verified 2026-09-06: two commander
+        # effects describing the same split-shot mechanic in near-identical sentences.
+        write(self.root, "commander-effect/a.json", "commander-effect", [
+            {"id": "commander-effect.doublecherry", "nameKey": "ce.a", "name": "A",
+             "demonId": "doublecherry",
+             "doctrine": "每次发射时，子弹会分裂为两枚，呈扇形向目标区域覆盖。"},
+            {"id": "commander-effect.doubleshooter", "nameKey": "ce.b", "name": "B",
+             "demonId": "doubleshooter",
+             "doctrine": "每次发射时，子弹会分裂为两枚，呈扇形向前方区域扩散。"},
+        ])
+        corpus = Corpus.load(self.root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        adapter = _StubAdapterWithDedupFields([self.spec_with_doctrine])
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=adapter))
+
+        near = [f for f in findings if f.evidence["code"] == "ProseNearDuplicate"]
+        self.assertEqual(len(near), 1)
+        self.assertGreaterEqual(near[0].evidence["jaccard"], 0.5)
+        self.assertEqual(set(near[0].evidence["entryIds"]),
+                         {"commander-effect.doublecherry", "commander-effect.doubleshooter"})
+
+    def test_doctrines_sharing_only_a_verb_are_not_flagged(self) -> None:
+        # The real corpus's weaker candidates (Jaccard 0.41, 0.34) share one verb and are
+        # legitimate distinct doctrines — the threshold must not flag them.
+        write(self.root, "commander-effect/a.json", "commander-effect", [
+            {"id": "commander-effect.jalagatling", "nameKey": "ce.a", "name": "A",
+             "demonId": "jalagatling",
+             "doctrine": "通过持续的发射动作，在目标行径路径上留下带有地刺触感的弹道轨迹。"},
+            {"id": "commander-effect.jalapeashooter", "nameKey": "ce.b", "name": "B",
+             "demonId": "jalapeashooter",
+             "doctrine": "通过连续的发射动作引发地刺般的灼热冲击，对目标造成持续的触感灼伤。"},
+        ])
+        corpus = Corpus.load(self.root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        adapter = _StubAdapterWithDedupFields([self.spec_with_doctrine])
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=adapter))
+        self.assertEqual([f for f in findings if f.evidence["code"] == "ProseNearDuplicate"], [])
+
+    def test_real_commander_effect_corpus_reports_exactly_the_known_pair(self) -> None:
+        live_root = Path(__file__).resolve().parents[3] / "data" / "seed" / "demons"
+        if not live_root.is_dir():
+            self.skipTest("live demons corpus not present in this checkout")
+        corpus = Corpus.load(live_root)
+        registry = MetricRegistry()
+        registry.register(SemanticDedup())
+        findings = run_all(registry, Ctx(corpus=corpus, adapter=DemonsAdapter()))
+        near = [f for f in findings if f.evidence["code"] == "ProseNearDuplicate"]
+        self.assertEqual(
+            [tuple(sorted(f.evidence["entryIds"])) for f in near],
+            [("commander-effect.doublecherry", "commander-effect.doubleshooter")],
+            f"live corpus's known-answer prose near-duplicate set changed: {near}")
 
 
 if __name__ == "__main__":

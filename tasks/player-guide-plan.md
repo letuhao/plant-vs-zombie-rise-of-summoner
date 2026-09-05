@@ -4,25 +4,26 @@
 **Paths:** `tasks/player-guide-plan.md` · `tasks/player-guide-todo.md`
 **Deliverable:** `docs/guide/` — player/marketing/concept docs; also the **product-vision SSOT**.
 
-**Status:** v1 implemented 2026-09-05. Coverage pass same day. **v2 vision rewrite 2026-09-05** — RPG + empire, ten named loops, lawn first core, idle forever, Dave-level chapters as Vision.
+**Status:** Current through guide **v11** (2026-09-05). Started as v1 the same day; v2 locked RPG + empire + ten loops; later passes added features brief, HTML vision site, mechanisms handbook, teach pages (Local control room, Souls), and hygiene (v11).
 
 ---
 
 ## Goal
 
-Centralize and index every player-facing feature and mechanism as a **user guide** folder: concept, loops, glossary, and pillar pages. Audience is players and marketing. Full fantasy, with honest **Shipped / WIP / Vision** labels.
+Centralize and index every player-facing feature and mechanism as a **user guide** folder: concept, loops, glossary, pillar pages, market brief, HTML skim, and mechanisms handbook. Audience is players and marketing. Full fantasy, with honest **Shipped / WIP / Vision** labels.
 
-As of guide version 2, this folder is also the **product-vision SSOT**: what the game is and which loops a feature must extend. Architecture docs remain the system SSOT (power ladder, three stocks, Funnel, no player class).
+This folder is the **product-vision SSOT**: what the game is and which loops a feature must extend. Architecture docs remain the system SSOT (power ladder, three stocks, Funnel, no player class).
 
 ## Non-goals
 
-- Screenshots
+- Screenshots (PG-F1)
 - Lingui / in-app help strings
 - Developer companion docs or links into `docs/architecture/` from guide pages (DESIGN-GATE may link *to* the guide)
 - Rewriting `docs/runbook/players.md` (install stays there)
 - Dates or promises
 - Documenting cheats, sim, dumps, telemetry, seedsmith
 - Implementing Dave-level rail gates in code (separate unlock program)
+- Fleshing every mechanism stub in one pass (PG-F6 waves)
 
 ## Voice
 
@@ -32,46 +33,45 @@ As of guide version 2, this folder is also the **product-vision SSOT**: what the
 - You are Dave; homeworld is capital; win = take Zomboss’s fortress; lose = homeworld falls
 - Banned: engine vocabulary (GG-23) — typeId, UniqueActor, Intent, mods_json, Cold, injector, SignalR, module ids, wave numbers, file paths
 - You have no class — aptitudes are free-build; classes are Zomboss patterns
+- Teach pages: blind-user spots first; no math or source code on player pages
 
-## Folder shape (14 files)
+## Folder shape
 
 ```text
 docs/guide/
-  README.md                 index + legend + full catalog
+  README.md                 index + legend + full catalog (version stamp)
+  features.md               market feature brief
   the-game.md               concept, lore, win / lose (product vision)
   the-loops.md              ten named loops (product-vision SSOT)
   how-you-play.md           loop, lawn first, unlock ladder live + Vision
-  sanctum.md
-  creatures.md
-  combat.md
-  expeditions.md
-  the-rift.md
-  the-lawn.md
-  delves-and-sieges.md
-  relics-and-builds.md
-  almanac.md
+  sanctum.md … almanac.md   pillar pages
   glossary.md
+  mechanisms/               handbook index + stubs + teach pages
+    _content/               JSON SSOT for rendered teach pages
+    _render.py              md + site HTML from JSON
+  site/                     HTML vision skim (tabs)
+    mechanisms/             HTML teach pages (when rendered or hand-authored)
 ```
 
 ## Wiring
 
 - `docs/README.md` Players row → `guide/` as product vision SSOT, runbook for install
 - `docs/DESIGN-GATE.md` §1 → product vision row → `guide/the-game.md` + `guide/the-loops.md`
-- Root `README.md` → player guide link; pitch matches guide v2
+- Root `README.md` → player guide link; pitch matches guide
 - `SUPPORT.md` → one-liner after install steps
 
 ## Status badge rules
 
 - Map headers and IA win over README marketing when they disagree
-- Thin-but-open = Shipped + “in this build” note
+- Thin-but-open = Shipped + “thin” note; fiction rule live = Shipped (fiction)
 - Catalog only grows; Vision stays Vision until it ships
 - Live unlock rail = event beats (Shipped); Dave-level chapters = Vision until a separate code program
 
-## Acceptance (v2)
+## Acceptance (current)
 
-- [x] `the-loops.md` exists with ten named loops
-- [x] Pitch pages no longer say “lawn fight / world afterward” or “Fusion is extension”
-- [x] Catalog grew (quest log, world stage, farm/hunt/defend, item/power/summon loops, Dave-level unlocks, expedition→quest)
-- [x] DESIGN-GATE product-vision row
-- [x] Guide version 2 stamp
-- [x] This plan pair updated
+- [x] `the-loops.md` — ten named loops
+- [x] Pitch is RPG + empire, lawn first core (not “Fusion is extension”)
+- [x] `features.md` + `site/` HTML skim + Mechanisms tab
+- [x] Mechanisms handbook (~67 ids); teach pages for Local control room + Souls
+- [x] HTML sibling links fall back to `.md` when no teach HTML exists
+- [x] Guide version stamp on README; PG todo tracks each version pass

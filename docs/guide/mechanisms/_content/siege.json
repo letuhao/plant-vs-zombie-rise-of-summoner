@@ -1,0 +1,71 @@
+{
+  "slug": "siege",
+  "title": "Siege",
+  "status": "Vision",
+  "kicker": "Delve, siege, party · defend the Seat",
+  "pillar": {"text": "Delves and sieges", "href": "delves-and-sieges.md"},
+  "loopLine": "Farm / hunt / defend",
+  "hook": "**Vision:** when the war hits the Seat — yours or theirs — the fight becomes a **siege board**: structures, lanes of approach, occupy to possess. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not playable yet. You cannot open a siege stage in the current loop."},
+    {"term": "Siege", "meaning": "A tactical board for Seat defence or assault — buildings as actors, occupy to possess."},
+    {"term": "Seat", "meaning": "The capital fight focus — homeworld defence or Zomboss fortress assault."},
+    {"term": "Stage", "meaning": "You travel there to act; on resolve you return to the Sanctum — like delve, unlike a layer."}
+  ],
+  "alsoTrue": [
+    "Siege is the defend beat of farm / hunt / defend made into a stage.",
+    "Map pressure from Zomboss already ships; this page is the Seat board fantasy on top."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "You cannot enter a siege today. Sanctum, Lawn, World, and expeditions carry play.",
+        "Outcome will feed back to the rift when the stage ships."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "Defend the homeworld. Assault Zomboss’s fortress when you find it.",
+        "The fight is not only a graph node — structures matter, lanes of approach matter, possession of buildings matters."
+      ],
+      "diagram": [
+        "  war hits Seat  ->  siege board",
+        "                      |",
+        "                      +->  defend homeworld",
+        "                      +->  assault fortress",
+        "                      v",
+        "                 outcome -> rift"
+      ]
+    },
+    {
+      "title": "What it needs",
+      "paras": [
+        "Interactive battles you play yourself are WIP shared muscle.",
+        "Farm / hunt / defend names why the Seat matters even before the board exists."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Defend the homeworld on the shipped map — losing it still ends the world.",
+    "Do not hunt for a siege board button yet — it is Vision.",
+    "When sieges ship, expect a return to the Sanctum after resolve."
+  ],
+  "doNote": "Stop when siege ≠ any map contact. Related: [farm / hunt / defend](farm-hunt-defend).",
+  "mixUps": [
+    {"q": "Can I siege today?", "a": "No. Not finished / not playable yet."},
+    {"q": "Is every map fight a siege?", "a": "No. Siege is the Seat board. Ordinary contacts hang on map / battle handoff."},
+    {"q": "Does Zomboss pressure require siege?", "a": "No. He already acts on the shipped map. Siege is the capital-stage fantasy."},
+    {"q": "Is siege a delve?", "a": "No. Delve is the dungeon crawl; siege is Seat defence/assault."}
+  ],
+  "next": ["farm-hunt-defend"],
+  "related": ["farm-hunt-defend", "world-map", "interactive-battles", "delve"],
+  "sources": [
+    "docs/guide/delves-and-sieges.md §Siege",
+    "docs/guide/the-game.md §Win and lose",
+    "docs/guide/mechanisms/siege.md (prior stub)",
+    "docs/guide/glossary.md §Siege"
+  ]
+}

@@ -1,0 +1,51 @@
+{
+  "slug": "relics-armoury",
+  "title": "Relics armoury",
+  "status": "WIP",
+  "kicker": "Power and builds · item loop",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Item collection and progression",
+  "hook": "**WIP:** one vault of gear — find, equip, compare, salvage. Opens as a chapter in the Vision unlock ladder (proposed Dave 10).",
+  "blindSpots": [
+    {"term": "Relic", "meaning": "Gear in your vault — not lawn plant food."},
+    {"term": "Armoury", "meaning": "The one player vault fantasy for the item loop."},
+    {"term": "WIP / thin surfaces", "meaning": "Older storage pages may exist; treat them as scaffolding, not the finished armoury."},
+    {"term": "No dead loot UI", "meaning": "Before the item chapter opens, drops should not leave you staring at useless loot chrome."}
+  ],
+  "alsoTrue": [
+    "Vision chapter timing: [unlock chapters](unlock-chapters).",
+    "Deep craft: [relic crafting](relic-crafting)."
+  ],
+  "sections": [
+    {
+      "title": "Fantasy",
+      "paras": [
+        "Find gear, vault it, equip, compare, salvage what you do not need.",
+        "One vault — not scattered bags."
+      ]
+    },
+    {
+      "title": "In this build",
+      "paras": [
+        "Full armoury loop is not finished.",
+        "Relics layer unlocks on the live beat when you hold your first item — still not the finished chapter fantasy."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "If Relics unlocks, open `R` and learn what thin UI exists.",
+    "Do not expect finished craft/compare loops yet.",
+    "Keep playing power and roster loops."
+  ],
+  "doNote": "Craft depth: [relic crafting](relic-crafting).",
+  "mixUps": [
+    {"q": "Where is the armoury?", "a": "WIP — thin surfaces may appear; fantasy vault is unfinished."},
+    {"q": "Dave 10 didn’t open it?", "a": "Dave chapters are Vision; live unlock is first item held."},
+    {"q": "Is this the same as aptitudes?", "a": "No — gear vs free-build stats."},
+    {"q": "Should I hoard junk?", "a": "When salvage exists, junk has a sink; until then do not invent a hoarding rule."}
+  ],
+  "next": ["relic-crafting"],
+  "related": ["relic-crafting", "build-presets", "unlock-chapters"],
+  "sources": ["docs/guide/relics-and-builds.md §Relics armoury and crafting"]
+}

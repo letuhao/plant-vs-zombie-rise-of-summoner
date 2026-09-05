@@ -47,6 +47,8 @@ def test_a_missing_key_is_rejected_and_none_is_accepted():
     for field, prop in schema["properties"].items():
         if prop.get("type") != "string" or "enum" not in prop:
             continue
+        if field in FIELDS_WITH_A_REAL_NONE_VALUE:
+            continue
         has_none = "none" in prop["enum"]
         if field in NULLABLE_FIELDS:
             assert has_none, f"{field} must admit 'none' (declared-nullable)"
@@ -62,6 +64,13 @@ def test_every_field_description_has_a_negative_clause():
         assert text.strip(), f"{field}'s description is empty"
         assert any(marker in text for marker in NEGATIVE_MARKERS), \
             f"{field}'s description has no negative clause: {text!r}"
+
+
+def test_cover_tier_none_is_a_real_vocabulary_member_not_a_nullable_sentinel():
+    # spec SS1's own literal list: "none - light - heavy - trench" — four real values, not three
+    # plus an added sentinel.
+    schema = build_structure_anchor_schema()
+    assert schema["properties"]["coverTier"]["enum"] == ["none", "light", "heavy", "trench"]
 
 
 def test_strength_band_is_the_only_magnitude_ordinal():

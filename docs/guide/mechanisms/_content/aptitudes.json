@@ -1,0 +1,78 @@
+{
+  "slug": "aptitudes",
+  "title": "Free-build aptitudes",
+  "status": "Shipped",
+  "statusNote": "thin",
+  "kicker": "Power and builds · level up and power",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Level up and power",
+  "hook": "**Twelve aptitudes** — you have **no class**. Points go where you want, at one price.",
+  "blindSpots": [
+    {"term": "Aptitude", "meaning": "One of twelve free-build stats (Might, Fortitude, Vigor, …). Primary dials of a build."},
+    {"term": "No class", "meaning": "You do not pick Warrior/Mage. Classes exist as Zomboss AI patterns — enemy legibility, not your container."},
+    {"term": "Posture", "meaning": "Force, Finesse, Bastion — regions of build space, not locks that surcharge dabbling."},
+    {"term": "Respec", "meaning": "Changing your mind is allowed and priced when it applies — friction, not a forbidden door."}
+  ],
+  "alsoTrue": [
+    "In this build, commander-scope spend is live and thin; other scopes and a polished sheet are still ahead.",
+    "Allocation can stack across commander, species, variant, and the unique demon — who you are is the sum."
+  ],
+  "sections": [
+    {
+      "title": "The twelve (feel)",
+      "table": {
+        "cols": ["Aptitude", "Feel"],
+        "rows": [
+          ["Might", "Hit harder"],
+          ["Fortitude", "Take less of everything"],
+          ["Vigor", "More to lose before you lose"],
+          ["Onslaught", "Their guard stops mattering"],
+          ["Agility", "Be somewhere else"],
+          ["Composure", "Nothing lands clean on you"],
+          ["Pierce", "Armour stops mattering"],
+          ["Focus", "Do it again, sooner, cheaper"],
+          ["Bulwark", "Stop it outright, sometimes"],
+          ["Retribution", "Hitting you costs them"],
+          ["Precision", "They cannot dodge"],
+          ["Ferocity", "Sometimes it is much worse"]
+        ]
+      }
+    },
+    {
+      "title": "How you spend",
+      "steps": [
+        "Earn aptitude points as Dave progresses.",
+        "Open Builds / progression.",
+        "Spend freely across the twelve — no posture gate tax."
+      ],
+      "note": "Exact point costs are on screen / in balance data."
+    },
+    {
+      "title": "What reaches the field",
+      "paras": [
+        "What you allocate at commander scope reaches every demon you field.",
+        "Species and specimen layers can add more lean later (species builds still WIP)."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Confirm you have aptitude points to spend.",
+    "Open builds and put points into two aptitudes that match how you want to play.",
+    "Field a demon and treat the change as side-wide commander lean."
+  ],
+  "doNote": "Stop when “no class” sticks. WIP lean: [species builds](species-builds).",
+  "mixUps": [
+    {"q": "Which class should I pick?", "a": "None. Free-build only. Enemy “classes” are Zomboss patterns."},
+    {"q": "Do postures lock me out?", "a": "No. They describe space; they do not surcharge dabbling."},
+    {"q": "Why is the sheet thin?", "a": "Commander spend is Shipped thin — fuller scopes still ahead."},
+    {"q": "Is this the same as relics?", "a": "No. Aptitudes are free-build stats; relics are gear."}
+  ],
+  "next": ["species-builds"],
+  "related": ["dave-level", "species-builds", "build-presets", "commanders"],
+  "sources": [
+    "docs/guide/relics-and-builds.md §You have no class",
+    "docs/guide/relics-and-builds.md §Free-build aptitudes",
+    "docs/guide/glossary.md §Combat and build"
+  ]
+}

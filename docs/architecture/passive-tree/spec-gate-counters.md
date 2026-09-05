@@ -344,28 +344,41 @@ public interface IGateQuantitySource
   registered source is a known content gap, and a family with one that returns zero is a player who
   has not started. Neither is inferred from the zero.
 
-### 5.3 The two families, and the one place `AllocationScope` legitimately appears
+### 5.3 The two families, each behind its own rate key
+
+**Closed 2026-09-05, resolving OQ2 in `element_mastery`'s favour of owning its own key** — matching
+`passive-tree-ideal.md` §16's recorded decision, which this section previously disagreed with. Neither
+family reads `AllocationScope` at all; `PointBudget.PointsFor(AllocationScope.Aspect, …)` — which
+*"ships complete today and 'lights up' for Aspect the moment a caller has a real value to pass"*
+(`PointBudget.cs:15-18`) — remains unused by this module. The reason is the one `status_applied`
+already had: the Aspect rate is an explicitly unmeasured placeholder owned by the class system
+(`aptitudes.v5.json`'s own `_weightsWhy`: *"UNMEASURED… residual-fit (Phase 8) owns the real
+values"*), and reading it here would let that program's residual-fit republish silently re-pace the 6
+elemental trees while the 21 status trees stay put. Sharing it kept a single rate for the Aspect
+*concept*; owning it severs the tie entirely for one tunable line.
 
 | Family | Rate | Route |
 |---|---|---|
-| `element_mastery` | `PointBudget.PointsFor(AllocationScope.Aspect, index − 1, tuning)` | The **shipped** consumption shape. `PointBudget.cs:15-18` says this type *"ships complete today and 'lights up' for Aspect the moment a caller has a real value to pass."* This module is that caller |
-| `status_applied` | `(index − 1) × gateCounters.statusMasteryRatePoints` | D35 forbids an `AllocationScope`, so the rate is this module's own key. Default **4**, deliberately equal to the Aspect rate so the two counter-backed categories pace identically |
+| `element_mastery` | `(index − 1) × gateCounters.elementMasteryRatePoints` | D35's reasoning, applied a second time: this module's own key, never `AllocationScope` |
+| `status_applied` | `(index − 1) × gateCounters.statusMasteryRatePoints` | D35 forbids an `AllocationScope`, so the rate is this module's own key |
 
 **`index − 1`, never `index`.** `PointBudget.DemonTypeSourceFromLevel` (`:40`) is the precedent and
 gives the reason in full: *"a never-levelled species… must carry EXACTLY ZERO points."* Here the
 consequence is sharper — index 1 is what every existing save has on day one, and a non-zero value
 would open tier 1 on all 27 trees for free.
 
-**Calling `PointsFor(Aspect, …)` allocates nothing.** It reads a rate out of
-`AptitudePointsPerThetaMilliByScope` and returns a budget-shaped number (`PointBudget.cs:57-58`);
-`SpeciesAllocation.cs:35` does exactly this for DemonType. What this module must never do is write
-`AptitudeAllocation.Single(AllocationScope.Aspect, …)` — that would put mastery into the share
-denominator, which is §5.1's whole point.
+**Neither counter writes `AptitudeAllocation`.** Both read a rate out of their own tunable key and
+return a budget-shaped number — the same *reads, never allocates* shape `PointBudget.PointsFor` uses
+for `DemonType` (`SpeciesAllocation.cs:35`) — but neither constructs an `AptitudeAllocation` row.
+Writing `AptitudeAllocation.Single(AllocationScope.Aspect, …)` for `element_mastery` would put mastery
+into the share denominator, which is §5.1's whole point; owning a key rather than reading Aspect's
+makes that mistake harder to reach by construction, not just by discipline.
 
-**The two rates must move together.** `statusMasteryRatePoints` defaults to the Aspect rate, and the
-tuning load **refuses** when they differ and no `gateCounters.rateDivergenceWhy` string is present —
-T5's "no built-in default" discipline applied to a coupling instead of a value. See OQ2: the Aspect
-rate is an explicitly unmeasured placeholder owned by another program.
+**The two rates default equal and must move together.** `elementMasteryRatePoints` and
+`statusMasteryRatePoints` both default to **4** — deliberately equal, so the two counter-backed
+categories pace identically — and the tuning load **refuses** when they differ and no
+`gateCounters.rateDivergenceWhy` string is present. T5's "no built-in default" discipline applied to a
+coupling instead of a value.
 
 ---
 
@@ -668,7 +681,8 @@ the two can collide, and **the failure mode to prevent is silent double-counting
 |---|---|---:|---|
 | `gateCounters.masteryCurveFirstCount` | qualifying events | **23** | The ladder's first step. Derived (§3.3), not guessed — but it rests on an unmeasured anchor `A`, so a balance pass will move it |
 | `gateCounters.masteryCurveStepCount` | qualifying events | **23** | Defaulted **equal** to `first`, which makes the ladder exactly triangular and gives the index the same `t(t+1)/2` shape `req(t)` and `W(t)` already use. The pair stays separate so a balance pass can move early pace alone, exactly as `RpgXpCurve` allows per actor kind |
-| `gateCounters.statusMasteryRatePoints` | aptitude-point-equivalents per index | **4** | The status half of §5.3. Tracks the Aspect rate; a divergence refuses without `rateDivergenceWhy` |
+| `gateCounters.elementMasteryRatePoints` | aptitude-point-equivalents per index | **4** | The element half of §5.3, closed 2026-09-05 (OQ2) — its own key, never `AllocationScope.Aspect`. Tracks the status rate; a divergence refuses without `rateDivergenceWhy` |
+| `gateCounters.statusMasteryRatePoints` | aptitude-point-equivalents per index | **4** | The status half of §5.3. Tracks the element rate; a divergence refuses without `rateDivergenceWhy` |
 | `gateCounters.rateDivergenceWhy` | string | *(absent)* | Present only when the two rates are deliberately different. Absent is the normal state |
 | `gateCounters.flushIntervalMs` | milliseconds | **5000** | §4.3. Matches the shipped `PerfProbe` window — a balance pass would not move it, a perf pass would |
 
@@ -697,7 +711,6 @@ search's doubling bound (an overflow bound, not a progression cap).
 
 - **Any change to `c`, `r` or `s` in isolation.** They are calibrated against each other (§3.3);
   moving one alone silently re-paces 27 trees against 12. Test 12 goes red, which is the point.
-- **Reading the shared Aspect rate versus owning a key** (OQ2) — a cross-program coupling.
 - **Backfilling existing saves** (OQ1).
 - **Any per-specimen counter.** The `owner_kind` column exists for it; using it is a product decision
   about whether a new demon starts its status trees at zero.
@@ -750,15 +763,14 @@ seed an initial count from a proxy the save does have — player level through �
 hand a level-169 player ≈53,000 applications they never made? **This is a product decision about how a
 live save feels, not an engineering one.** The spec assumes cold start.
 
-**OQ2 — should `element_mastery` read the shared Aspect rate, or own its own key?** §5.3 routes it
-through `PointBudget.PointsFor(AllocationScope.Aspect, …)` because that is the shipped shape and
-`PointBudget.cs:15-18` explicitly reserves it for this caller. But that rate is an **unmeasured
-placeholder owned by another program** — `aptitudes.v5.json`'s own `_weightsWhy` says so:
-*"UNMEASURED… residual-fit (Phase 8) owns the real values."* When the class system republishes it,
-6 elemental trees re-pace while the 21 status trees do not. The refuse-on-divergence check makes that
-loud rather than silent, but it does not decide **who should own the number**. A separate
-`elementMasteryRatePoints` key here costs one line and severs the tie to `AllocationScope` entirely;
-reading the shared one keeps a single rate for the Aspect concept.
+**OQ2 — CLOSED 2026-09-05: `element_mastery` owns its own key.** This section previously routed it
+through `PointBudget.PointsFor(AllocationScope.Aspect, …)` on the grounds that it was the shipped
+shape (`PointBudget.cs:15-18`), while `passive-tree-ideal.md` §16 already recorded the opposite answer
+— the two documents disagreed until the owner resolved it directly. `elementMasteryRatePoints` costs
+one tunable line and severs the tie to `AllocationScope` entirely, so a residual-fit republish in the
+class system's unmeasured Aspect rate (`aptitudes.v5.json`'s own `_weightsWhy`: *"UNMEASURED…
+residual-fit (Phase 8) owns the real values"*) no longer silently re-paces the 6 elemental trees while
+the 21 status trees stay put. See §5.3.
 
 ---
 

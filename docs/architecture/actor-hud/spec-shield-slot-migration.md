@@ -5,6 +5,8 @@
 **Pipeline:** [../../research/actor-hud-data-pipeline-audit-2026-08-30.md](../../research/actor-hud-data-pipeline-audit-2026-08-30.md)
 **Depends on:** `actor-hud-unity` · **Blocks:** —
 **Status:** implemented 2026-08-31 — shipped; `ShieldBarPool` removed, VfxDirector cutover green.
+**LIVE parity (reconciled 2026-09-05):** shield row must match old **Body + worldYOffset**, bar size, and
+**stack pips** via `ActorHudPool` — not a second pool. Blocked on unity visual correction code follow-up.
 
 ---
 
@@ -68,7 +70,8 @@ dotnet test tests\FusionRpg.Guard.Tests
 
 ### Migration steps
 
-1. Verify `ActorHudPool` shield row matches ShieldBarPool visuals (element segments, stack pips).
+1. Verify `ActorHudPool` shield row matches retired ShieldBarPool visuals (Body+offset, element
+   segments, **stack pips**, familiar bar size from actor-hud tuning).
 2. Feature flag or compile-time gate: `ActorHudDirector` owns shield sync.
 3. Remove `ShieldBarPool.TickSync()` from `VfxDirector.Tick`.
 4. Delete or `[Obsolete]` `ShieldBarPool` if fully subsumed — extract shared color/segment helpers to

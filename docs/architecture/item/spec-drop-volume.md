@@ -202,13 +202,24 @@ contentLevel:
   web battle       WaveDef.ContentIndex            (src/FusionRpg.Core/Battle/WaveCatalog.cs:21)
   expedition tick  the resolved wave's own ContentIndex — NOT a second formula
   expedition boss  same, at BossWaveId = "rift-tyrant"
-  world sector     sectorLevel(danger_band)        — owed by the world program (X5)
+  world sector     sectorLevel(danger_band) = Wm · DangerBand(M), Wm = 5   ⭐ SHIPPED 2026-09-05
   PvZ run          ⛔ UNDESIGNED
 
 jitter j:  stream item.ilvl, NextPerMille() → [0,150) = −1 · [150,750) = 0 · [750,1000) = +1
 itemLevel  = max(1, contentLevel + j)
 level_req  = max(1, itemLevel − 2)
 ```
+
+⭐ **World-sector `contentLevel` is no longer owed — corrected 2026-09-05.** This row said *"owed by
+the world program (X5)"*; it had already been closed by owner decision **2026-08-23**
+(`ssot-power-scale.md` §5.3/§10.3: `mapLevel(M) = Wm · DangerBand(M)`, `Wm = 5` derived from the
+shipped `SectorTypeCatalog`, *"it no longer owes an unknown"*) and restated for this exact row by
+`spec-content-authoring.md` §2.1 (owner approved **2026-08-24**). What was missing was code, and
+`PowerIndexComposer.MapLevel` is now it. The `loot_source` row is **resolved at runtime** by
+`WorldSectorLootSource` rather than authored in `data/seed/loot/`, because the correlation id derives
+from `source_id` — one static row per sector *type* would make two sectors one loot event. A band-0
+sector (safe ground) is refused by name, `ContentRuleViolated{drop.sector-band-safe}`, never floored
+to 1.
 
 ⛔ **PvZ-run `contentLevel` is explicitly undesigned, and this module does not invent one.**
 `ssot-generation.md` §4.1's own correction says `mappedRunLevel` *"was never implemented anywhere — grep

@@ -5,6 +5,12 @@ across two rounds and a four-perspective adversarial design review (§8c). No op
 spec. No build authorized.** The deliverable of this phase is this document plus
 [plate 11](../design/11-world-stage.html), the component catalog drawn from it.
 
+**Renderer HOW superseded 2026-09-05.** The SVG `viewBox` camera and "drop xyflow, therefore draw the
+player map in SVG" clauses (§4.1–§4.2 implementation, §8 xyflow bullet, §8c.6 "removing xyflow now")
+are superseded by [world-map-runtime-ideal.md](world-map-runtime-ideal.md). HUD, inspector, commands,
+GG rules, no-minimap-on-medium, and plate 11 §A as the **panel** catalog remain. Plate 11 §O is the
+map-pin catalog (HTML stand-in for the Phaser plane).
+
 **Read §8c and §8d before §4.** The review found §4's interaction design calibrated for a game with
 dozens of units while this one has **one** (§8c.1). The owner's answer was not to shrink the interface
 but to **build recruitment first** (§8d.1) — so §4 stands whole, and the program now depends on a

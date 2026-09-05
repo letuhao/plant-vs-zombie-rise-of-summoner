@@ -8,9 +8,14 @@ public sealed record ActorHudTuning(
     int StatusStripMax,
     bool HpSliverEnabled,
     int BadgeMax,
+    string AnchorKind,
+    double WorldYOffset,
+    double BarWorldWidth,
+    double BarWorldHeight,
     double RowOffsetIdentity,
     double RowOffsetResources,
     double RowOffsetStatuses,
+    int MaxStackPips,
     int? EliteTierThreshold,
     double MagnitudeMidThreshold,
     double MagnitudeHighThreshold);
@@ -44,9 +49,14 @@ public static class ActorHudTuningLoader
                 StatusStripMax: Int(root, "statusStripMax", "$"),
                 HpSliverEnabled: Bool(root, "hpSliverEnabled", "$"),
                 BadgeMax: Int(root, "badgeMax", "$"),
+                AnchorKind: AnchorBody(root, "anchorKind", "$"),
+                WorldYOffset: Double(root, "worldYOffset", "$"),
+                BarWorldWidth: Double(root, "barWorldWidth", "$"),
+                BarWorldHeight: Double(root, "barWorldHeight", "$"),
                 RowOffsetIdentity: Double(root, "rowOffsetIdentity", "$"),
                 RowOffsetResources: Double(root, "rowOffsetResources", "$"),
                 RowOffsetStatuses: Double(root, "rowOffsetStatuses", "$"),
+                MaxStackPips: Int(root, "maxStackPips", "$"),
                 EliteTierThreshold: OptionalInt(root, "eliteTierThreshold", "$"),
                 MagnitudeMidThreshold: Double(root, "magnitudeMidThreshold", "$"),
                 MagnitudeHighThreshold: Double(root, "magnitudeHighThreshold", "$"));
@@ -83,6 +93,26 @@ public static class ActorHudTuningLoader
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Number)
             throw new ActorHudTuningRejection($"actor-hud tuning: missing or non-number '{path}.{key}'");
         return el.GetDouble();
+    }
+
+    static string Str(JsonElement parent, string key, string path)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.String)
+            throw new ActorHudTuningRejection($"actor-hud tuning: missing or non-string '{path}.{key}'");
+        var s = el.GetString();
+        if (string.IsNullOrWhiteSpace(s))
+            throw new ActorHudTuningRejection($"actor-hud tuning: empty '{path}.{key}'");
+        return s.Trim();
+    }
+
+    /// <summary>Unity Band B SSOT is Body only — reject other kinds at parse time.</summary>
+    static string AnchorBody(JsonElement parent, string key, string path)
+    {
+        var s = Str(parent, key, path);
+        if (!string.Equals(s, "body", StringComparison.OrdinalIgnoreCase))
+            throw new ActorHudTuningRejection(
+                $"actor-hud tuning: '{path}.{key}' must be 'body' (got '{s}') — crown/other anchors are not supported");
+        return "body";
     }
 }
 

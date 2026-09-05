@@ -1,0 +1,83 @@
+{
+  "slug": "sanctum",
+  "title": "Sanctum",
+  "status": "Shipped",
+  "statusNote": "thin",
+  "kicker": "Session and shell · home stage",
+  "pillar": {"text": "Sanctum", "href": "sanctum.md"},
+  "loopLine": "Places — home stage",
+  "hook": "The **Sanctum** is your home hall — the place you are when no lawn, battle, or map run is in progress, and where every run returns.",
+  "blindSpots": [
+    {"term": "Stage", "meaning": "Where you are playing right now. The Sanctum is a stage — a place to *be*, not a list of websites to click through."},
+    {"term": "Layer", "meaning": "A menu that opens **over** the stage (Creatures, Fusion, Expeditions…). Closing it returns you to the same hall."},
+    {"term": "Rail", "meaning": "The shared set of layer hotkeys and entries. Same keys on every stage. Detail: [layer rail](layer-rail)."},
+    {"term": "Home", "meaning": "Not “main menu.” When nothing else is active, you stand in the hall with creatures, travel, and a sense of what is next."}
+  ],
+  "alsoTrue": [
+    "The hall and rail are open in this build; some layers behind the rail are still thin. The guided first-run naming ritual is WIP — see [naming ritual](naming-ritual).",
+    "You arrive here after [title / save select](save-select)."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "A summoner’s hall: creatures on display, a way to travel, and a focus on what to do next.",
+        "When a lawn, battle, delve, or siege ends, you come back here."
+      ]
+    },
+    {
+      "title": "What you do here",
+      "cards": [
+        {"name": "Read the hall", "body": "Soul balance and summoner level sit on the HUD. Time in the Sanctum does not push you."},
+        {"name": "Open layers", "body": "Creatures, Fusion, Pacts, Expeditions, and the rest open over the hall without leaving it."},
+        {"name": "Travel", "body": "Go to the world map (`M` or the map table) or start a lawn run when a match is ready."},
+        {"name": "Collect", "body": "Take expedition returns that finished while you were away."}
+      ],
+      "note": "Expedition timers are wall-clock remaining — not a ticking panic meter in the hall."
+    },
+    {
+      "title": "Layers vs travel",
+      "paras": [
+        "Layers stack over the Sanctum and close back to the same place.",
+        "Travel replaces the stage when you leave for Lawn or World — that is a real departure, then you return home afterward."
+      ],
+      "table": {
+        "cols": ["Action", "What happens"],
+        "rows": [
+          ["Press C / F / E / …", "A layer opens over the hall"],
+          ["Esc (empty stack)", "System settings open"],
+          ["Travel (M / map table)", "You leave for the world map stage"]
+        ]
+      }
+    },
+    {
+      "title": "First session note",
+      "paras": [
+        "Vision for a brand-new save: the hall starts almost empty; you bind and name your first creature in place.",
+        "Until that ritual ships, you still land in the Sanctum and open the rail yourself."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Finish [save select](save-select) and land in the hall.",
+    "Look around without opening everything — note HUD stocks and any “what next” cue.",
+    "Open one layer (Creatures is a safe first), then close it and confirm you are still in the Sanctum."
+  ],
+  "doNote": "Stop when the hall feels like home, not a settings dump. Next: [layer rail](layer-rail) and [unlock beats](unlock-beats).",
+  "mixUps": [
+    {"q": "Is the Sanctum just the main menu?", "a": "No. It is a home stage. Layers open over it; you stay in the hall."},
+    {"q": "Do I lose my place when I open Creatures?", "a": "No. Closing the layer returns you to the same Sanctum."},
+    {"q": "Why are some rail entries locked?", "a": "They unlock as you play. Locked entries say what opens them — see [unlock beats](unlock-beats)."},
+    {"q": "Does standing here advance expeditions?", "a": "Expeditions run on wall-clock whether you watch or not. The hall does not add pressure."},
+    {"q": "Where is the naming ritual?", "a": "Not finished yet. You can still play from the Sanctum; see [naming ritual](naming-ritual)."}
+  ],
+  "next": ["layer-rail"],
+  "related": ["save-select", "layer-rail", "unlock-beats", "naming-ritual", "system-settings"],
+  "sources": [
+    "docs/guide/sanctum.md",
+    "docs/architecture/game-gui-principles.md §GG-1 GG-3",
+    "web/fusion-rpg-web/src/stages/sanctum/SanctumHome.tsx",
+    "docs/guide/mechanisms/sanctum.md (prior stub)"
+  ]
+}

@@ -44,11 +44,12 @@ This program builds the stage the information architecture already specified and
 2. **`#/world` keeps working until its replacement lands.** No flag day. It is currently exempt from
    the shell's redirects, the hex guard and the GG-7 reachability matrix; all three exemptions retire
    when the old route is deleted, not before.
-3. **`@xyflow/react` goes.** Locked at `decisions.md:93`. **Three** production files import it —
-   `WorldPage.tsx:2-3`, `SectorNode.tsx:2`, `LaneEdge.tsx:2` (`routes.tsx:9` only names it in a
-   comment) — and
-   `worldViewModel.ts` is already library-agnostic (plain `{x,y}` from an authored grid, no auto-layout
-   to replace), so the camera is a `viewBox` transform rather than a port.
+3. **`@xyflow/react` stays off the player map** (locked at `decisions.md` Game GUI / T3's valid
+   half). Production no longer imports it. **The camera HOW is no longer an SVG `viewBox` hook** —
+   superseded 2026-09-06 by [world-map-runtime-ideal.md](world-map-runtime-ideal.md) and
+   [world-map-runtime/spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md)
+   (Phaser `Cameras.Scene2D`). Gestures, no minimap on `small`/`medium`, and authored `{x,y}` survive.
+   `worldViewModel.ts` remains library-agnostic.
 4. **Components bind to the sealed FE view contract, never a REST DTO** — and §8e.2 makes that
    enforceable rather than aspirational.
 5. **The two available map tiers only.** 6–18 sectors. The first tier above `medium` shipping
@@ -68,8 +69,8 @@ it parallelises.
 | `world-contract` | **The sealed FE view contract for the world domain** — `SectorView` (corrected), `LaneView`, `LegionView`, `SlotView`, `ForceView`, `TurnEventView`; the `adaptWorld*` adapters against the byte-pinned fixture; **the `typeId` ADR**; moving the world DTOs to `lib/bus/world.ts` **and** widening `contractGuard` (§8e.2) | — |
 | `world-wire` | **The server projections** — the five missing DTO fields, `PressureMilli`, effective capacity, the calendar on the header, the prospected set; the **three** fog-filter defects; a generated turn-report fixture | — |
 | `world-commands` | **The write surface** — `Amount`/`StructureId` through `WorldCommandRequest` *and* `CommandPayload`; the **cede** order (§8d.2); the **ward** command; the `dowse` stance plus its missing `BudgetFor` arm; the first production `BindAsWarden` call site | — |
-| `world-shell` | The stage itself under `StageHost`: viewport-filling, **no page scroll**, the SVG `viewBox` camera (drag / wheel / arrows / fit), `@xyflow/react` deleted | `world-contract` |
-| `world-render` | Sector nodes in every state, lanes in 6 kinds × 5 states, legion markers, the **four** fog treatments, lifeline and supply overlays — tokens only, no state by colour or opacity alone | `world-shell`, `world-contract` |
+| `world-shell` | The stage itself under `StageHost`: viewport-filling, **no page scroll**, camera **gestures** (drag / wheel / arrows / fit). Camera vehicle is Phaser (`world-map-runtime`), not an SVG `viewBox`. `@xyflow/react` stays deleted | `world-contract` |
+| `world-render` | Sector nodes in every state, lanes in 6 kinds × 5 states, legion markers, the **four** fog treatments, lifeline and supply overlays — tokens only, no state by colour or opacity alone. **Map drawing vehicle:** Phaser island — [world-map-runtime](world-map-runtime-map.md). This module keeps channel functions and GG-27 | `world-shell`, `world-contract` |
 | `world-hud` | Band 1: the loam summary strip, turn + calendar, the **fixed corner roles**, the component-split state, and **band 1's exemption from a band-2 scrim** (§8d.3, a kit-wide GG-5 amendment) | `world-shell`, `world-contract` |
 | `world-numbers` | **Extends the existing magnitude renderer** — `i18n/magnitude.ts` already switches on a sealed `UnitClass` union — **thirteen** members at `contract/types.ts:33-55` since `loamUnits` landed 2026-09-04, governed by [design/spec-magnitude-and-units.md](../design/spec-magnitude-and-units.md). The world's families **map onto that union**; they never start a parallel one, which `DESIGN-GATE.md`'s Stats row names as the failure it exists to prevent. Owns the `CostMilli` trap, the verified `formatPerMille` defect, and the nested lockable **modifier ledger** with its WCAG 1.4.13 obligations | `world-contract` |
 | `world-inspector` | The **left-docked** (§8e.1) band-2 bounded shell with internal scroll (GG-61, Tier-1); identity, loam, component, slot, force, warden and prospecting blocks; the action cluster with a reason on every disabled verb | `world-render`, `world-numbers` |

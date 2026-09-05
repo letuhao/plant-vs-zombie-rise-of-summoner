@@ -51,13 +51,14 @@ no `passive-tree*` file. Keys: `tierLadder.reqScalePoints`, `budget.treeTotalPoi
 - [ ] Every key loads through a typed view under the standard `schemaVersion` / `version` / `_meta`
       header; a **missing** key is a load rejection naming it, never a built-in default (T5)
 - [ ] `soulTrack.thetaPerSoulLevelMilli = 1000` gives `Ws = 1`, pinned by test; `1` gives a thousandth
-- [ ] `gateCounters.statusMasteryRatePoints` defaults to the Aspect rate, and a divergence is refused
-      without a `gateCounters.rateDivergenceWhy`
+- [ ] `gateCounters.elementMasteryRatePoints` and `gateCounters.statusMasteryRatePoints` are each their
+      **own** key (OQ2 closed 2026-09-05 — neither reads `AllocationScope.Aspect`), default equal, and
+      a divergence is refused without a `gateCounters.rateDivergenceWhy`
 - [ ] `budget.treeTotalPoints` and `treeShareMilli` carry an `UNMEASURED` marker and a `_note` (D42),
       and no superseded spelling appears anywhere in code, config or a fixture: `Fmax`, `w`, `Ws`,
       `concentration.fmax`, `concentration.w`, `ladder.kPoints`, `tierLadder.k`, `soulThetaWeight`,
       `mechanism.floorMilli`, `mechanism.capMilli`, `nodePotencyCeiling`, `unlockCost.first`,
-      `passive-tree-gen.v1.json`
+      `unlockCost.step`, `passive-tree-gen.v1.json`
 **Verification:** a fixture with one key stripped fails naming that key; a text test asserts no
 superseded spelling; `audit-magic-numbers.py` shows no M1/M2 in the passive-tree namespace.
 **Depends on:** none. **Scope:** M. **Files:** `data/tuning/passive-tree.v1.json`,
@@ -245,10 +246,18 @@ it through the same registry.
       `minTerminalWidth`; `P-2` finds no rounded share above the derived maximum at tier counts 1..40;
       `PassiveTree/TreeEqualValue` runs at `--emit` and `--check`, refuses naming
       tree/branch/tier/node, and never clamps
+- [ ] **Gate 3, "Plan reachability"** (`spec-tree-language.md` §7): deterministic, over the plan alone,
+      **before any model call** — an unsatisfiable prereq (names a node id no branch/tier reaches), an
+      empty tier, and an orphan node (unreachable from the tree's root set) each refuse naming the tree
+      and the offending node. Lives here, not in Phase H, because the gate reads the plan and nothing
+      `tree-language` produces
+- [ ] A manifest missing the family roster emits `_pending: ["demonFamilies"]` (or the relevant token),
+      never silent generation against an empty roster — `absent_family_roster_emits_pending_not_silence`
 **Verification:** a hand-authored fourth archetype that widens the gradient is refused naming the tier
 and the two archetypes. The two deleted tests stay deleted —
 `no_node_exceeds_the_potency_ceiling` and `every_shipped_archetype_is_admissible` compare a
-construction against its own supremum.
+construction against its own supremum. A plan with a prereq naming a nonexistent node id fails gate 3
+naming both ids.
 **Depends on:** B1. **Scope:** M. **Files:**
 `tools/seedsmith/seedsmith/adapters/trees/plan/invariants.py`, `archetypes.py`, tests.
 
@@ -430,6 +439,9 @@ channels `tree-resolve` §6.1 says a node writes.
 - [ ] All **five** `LowerIsBetter` primaries (`attackInterval`, `produceInterval`, `attackCountdown`,
       `produceCountdown`, `takeDmgMultiplier`) refuse a `+X`; a `More` op on a derived channel is
       refused at bind with the rule named (M3)
+- [ ] The remaining **six outright-refuse** classes (`Milliseconds`, `Count`, `Flag`, `LadderIndex`,
+      `AptitudePoints`, `LoamUnits`) each have a named test refusing a bind attempt — `13 = 3+1+3+6`
+      is proven by enumeration, not asserted as a count
 - [ ] `combat.parry.break.*` / `combat.block.break.*` are granted flat and refuse a `powerLadder`
       amount — they are switches, not dials
 - [ ] `channelAnchorMilli` is derived from `power-scale.v{n}.json`'s own pins at bake time and moves
@@ -530,8 +542,14 @@ the memoisation the perf SSOT calls for.
       `Fmax = 1000‰` is a legal, tested configuration that removes `F` byte-identically without
       removing a code path
 - [ ] Resolution memoises by reference and re-resolves on a changed state reference (test 20)
+- [ ] `F` is **Θ-invariant**: a fixed one-tier contest gap is worth the same win-rate delta at every
+      measured Θ (tests 8, 8a) — the property that keeps PS-3's contest-linearity theorem legitimate
+      under a multiplier
+- [ ] The Herfindahl bound holds **per term**, both sides: no single `shareᵢ²` term can push `H` (and
+      therefore `F`) outside `[1, Fmax]` regardless of how many other trees are touched (tests 6a, 6b)
 **Verification:** the four hand-written mutants — `max`→`sum`, divide order, wallet-in-gate, points-paid
-in `H_nodes` — each turn a named test red.
+in `H_nodes` — each turn a named test red. Tests 6a/6b/8/8a are separately named and separately red
+under their own targeted mutants (dropping the invariance check, unbounding one term).
 **Depends on:** B6, C7, D3. **Scope:** M.
 
 ### D8: The `ssot-power-scale` rows the tree runtime owes
@@ -717,6 +735,27 @@ roster (12 + 66 + 12 + 1) and the 23-squad roster from **one** shared corner-sha
 **Depends on:** none (parallel with A–E). **Scope:** M. **Files:** `tools/SquadHarness/` (new),
 `tests/FusionRpg.SquadHarness.Tests/` (new).
 
+### F1b: measure the shipped commander-replicated allocation shape alongside D21's
+**Spec:** `spec-squad-harness.md` §1.1, §14 open question 2.
+**Description:** Today `WebMatchService.AptitudeChannelMods` merges only Commander + DemonType scopes,
+so two squad members of the same species cannot differ — every actor effectively replicates the
+commander's allocation. F1's roster builds D21's per-actor shape in memory. This task adds a second
+roster-construction mode that instead replicates one allocation across all six actors (the *shipped*
+shape), so `transfer`/`squad` can report whether D33's arbitrage exists **today**, under the shape the
+store can actually persist, versus only **after** `tree-state` lands D21. The answer changes whether
+`tree-state` needs a mitigation designed in from the start.
+**Acceptance:**
+- [ ] A `--allocation-shape shipped|per-actor` flag on `squad` and `transfer`; `per-actor` (F1's roster)
+      stays the default
+- [ ] The `shipped` roster builds six actors from **one** allocation via the same corner-shape helper,
+      never a second construction path
+- [ ] `_squad-scope.json` and `_scope-transfer.json` each carry which shape produced them, so the two
+      are never conflated in one artifact
+- [ ] No `src/` change — the harness still builds actors in memory (§1.1); this is additive to
+      `SquadRoster.cs`
+**Verification:** the same 23 named squad ids resolve under both shapes; `verify` covers both.
+**Depends on:** F1. **Scope:** S. **Files:** `tools/SquadHarness/SquadRoster.cs`, `Modes.cs`.
+
 ### F2: `squad-harness` S1b — the modes, the three columns, the two artifacts
 **Spec:** `spec-squad-harness.md` §2, §3, §5, §8, §9.2, §10.
 **Description:** Modes `duel`, `squad`, `transfer`, `verify`; the three columns `duelClosedForm` /
@@ -829,32 +868,48 @@ coordinate with E3, which also modifies `BattleRunState`.
 `src/FusionRpg.Core/Battle/BattleEngine.cs`.
 
 ### G2: `status_applied` counter
-**Spec:** `spec-gate-counters.md` §2.1, §4.1, §4.2, §4.3.
+**Spec:** `spec-gate-counters.md` §2.1, §4.1, §4.2, §4.3, §5.3.
 **Acceptance:**
 - [ ] Credits outbound, landed, fresh applications to a distinct host — never inbound, attempted,
       refreshed or self; **ownership is decided at spawn**, so a charmed or hypnotised actor cannot
       launder credit
 - [ ] Accumulates in memory, flushes batched (5 s and match end) in **one** transaction; no write on the
-      hot path
+      hot path, and no ICD map or per-target dedupe cache is added to reach it (§2.3) — the credit test
+      is `AppliedAmount != 0` on an existing pipeline event, never new per-hit state
 - [ ] Persisted raw and sparse in `rpg_gate_counter` with `owner_kind`/`owner_key`, no cap; the index is
       derived on read
+- [ ] Reads its **own** rate key, `gateCounters.statusMasteryRatePoints` (default 4) — never
+      `AllocationScope.Aspect` (§5.3: D35 removed the `AllocationScope` dependency for status trees, and
+      this counter is that removal's replacement)
+- [ ] Loading refuses when `statusMasteryRatePoints` diverges from `elementMasteryRatePoints` (G3) and
+      no `gateCounters.rateDivergenceWhy` string is present (§5.3's coupling, §11 test 14)
 - [ ] All SQL in `RpgStore.GateCounters.cs` as a partial slice sharing `_gate`, participating in
       `EnsureHotSchema` and `Reset()` — with a test that proves the `Reset()` participation
 **Verification:** a reapply loop on one target earns one credit; a resisted apply earns none; a
-`charm_pulse`ed enemy's applications earn its original owner nothing.
+`charm_pulse`ed enemy's applications earn its original owner nothing; loading with the two rates
+diverged and no `rateDivergenceWhy` fails naming both values.
 **Depends on:** G1. **Scope:** M.
 
 ### G3: `element_mastery` counter
-**Spec:** `spec-gate-counters.md` §2.2, §2.2b, §12.
+**Spec:** `spec-gate-counters.md` §2.2, §2.2b, §5.3, §12.
 **Acceptance:**
 - [ ] One credit per element component on a **direct** landed damage event; DoT pulses excluded
 - [ ] `Outcome == Applied` **and** `AppliedAmount != 0` — a fully-absorbed hit earns nothing (§11 test 7,
       the pipeline's deliberate zero-delta miss-telemetry parity)
-- [ ] Reads its **own** rate key, not the shared Aspect rate
+- [ ] Reads its **own** rate key, `gateCounters.elementMasteryRatePoints` (default 4) — never
+      `AllocationScope.Aspect`. **OQ2 closed 2026-09-05** in favour of owning a key (matching
+      `passive-tree-ideal.md` §16's recorded decision): `PointBudget.PointsFor(AllocationScope.Aspect,
+      …)`, the shipped shape `PointBudget.cs:15-18` reserves for this caller, is deliberately left
+      unused so a class-system residual-fit republish cannot silently re-pace this counter
+- [ ] Never writes `AptitudeAllocation.Single(AllocationScope.Aspect, …)`, which would put mastery into
+      the share denominator (§5.1)
+- [ ] Loading refuses when `elementMasteryRatePoints` diverges from `statusMasteryRatePoints` (G2) and
+      no `gateCounters.rateDivergenceWhy` string is present (§5.3's coupling, §11 test 14)
 - [ ] Registration is exclusive per family and **throws naming both owners** on a duplicate, with no
       combine path — asserted by a composition-root guard test
 **Verification:** a `wither` pulse train earns nothing; a hybrid two-element hit earns two; a hit fully
-eaten by a shield earns none.
+eaten by a shield earns none; a test asserts no `AptitudeAllocation` row is ever constructed by this
+counter.
 **Depends on:** G1, G2 (shares the store slice). **Scope:** M.
 
 ### G4: The index transform and the gate registry
@@ -871,7 +926,7 @@ eaten by a shield earns none.
       not an argument; and the tier-0 **reason** distinguishes *no aptitude allocated yet* from *this
       quantity has no producer*
 **Verification:** the parity table reproduces; D35 holds as a test; §11 test 9 is green.
-**Depends on:** G2, G3, B6. **Scope:** M.
+**Depends on:** G2, G3. **Scope:** M.
 
 ### G5: D43 — seed existing saves from a proxy
 **Spec:** `spec-gate-counters.md` §16 OQ1; decision D43.
@@ -960,8 +1015,12 @@ resolution, bounded repair, persist-time re-gate, idempotence, run verdict, offl
 - [ ] `GATING_METRICS` has **exactly one** entry, and an OPEN-loop metric registered with `gates=True`
       raises; `FAIL` beats `NOT_MEASURED`, and a held partition alone denies a `PASS`
 - [ ] The offline transport stub **raises** on any unexpected call
+- [ ] A forced rerun of the language stage over **unchanged** inputs leaves
+      `data/seed/passive-tree/nodes/<treeId>.json` **byte-identical**, hash-compared — distinct from
+      H9's catalog-from-plan byte-identical check, and catching the historical defect class ("the
+      commander-effect generator rewrote all 84 entries every run") at this pipeline stage specifically
 **Verification:** `python -m pytest tools/seedsmith/tests/adapters/trees`; a run that reaches a model
-fails the suite.
+fails the suite; a forced rerun over an unchanged fixture tree diffs to nothing.
 **Depends on:** A2, H1. **Scope:** M. **Files:**
 `tools/seedsmith/seedsmith/adapters/trees/nodegen/verdict.py`, `run.py`,
 `tools/seedsmith/tests/adapters/trees/`.
@@ -1028,6 +1087,9 @@ trees that are all subtly the same" becomes visible.
       implementation
 - [ ] The 2×10 lattice and the species' own sentence are on one screen
 - [ ] The sibling panel shows the three nearest by fingerprint
+- [ ] **Gates already green are collapsed to one chip** (§5.2 rule 1) — the card shows a line per gate
+      only for an OPEN-loop metric or a `NOT_MEASURED` result; a reviewer never re-reads 23 passing
+      lines to find the one that matters
 - [ ] The verdict control writes `_review/<lot>.json`, so a reject reason can become the next brief's
       anti-motif (§5.2 rule 6)
 **Verification:** `npm test -- magnitudeGuard`; a card renders from a fixture corpus with no network.
@@ -1191,6 +1253,10 @@ table.
       `max`, not a sum), and the rule is named in the fiction once, where it first matters
 - [ ] A shared plan carries **no price**; an imported plan is priced on arrival, under the §5.3 URL
       grammar; the draft preview reports what a change would **close**
+- [ ] Scope boundary (§15 *Ask first*): this task ships the plain GG-8 URL-reflects-open-layers
+      mechanism only — a plan code round-trips for the current session or a bookmark. No "share this
+      build" UI affordance, marketing copy, or versioned-decoder stability guarantee is added here; see
+      the non-blocking-asks table
 **Verification:** tests 18–19; two orderings of the same plan price identically.
 **Depends on:** I7, D4. **Scope:** M.
 
@@ -1302,7 +1368,11 @@ forced override; `FavourDrift`.
 - [ ] A forced cell returns its draw to the pool; an **overdrawn** forced quota is **refused with the
       rule named**, not rebalanced silently; every alternate offered is inside the quota
 - [ ] `FavourDrift` is symmetric: an injected 30% element skew fails it, and so does overshoot
-**Verification:** `the_plan_is_reproducible_from_species_id_alone`; a skewed fixture roster.
+- [ ] A species the planner cannot resolve to one of the three offered favours is written to the review
+      queue as `unresolved`, never silently defaulted; the corpus-wide `unresolved` rate is reported and
+      the run fails above **50‰** (§3.1/§4 success criterion)
+**Verification:** `the_plan_is_reproducible_from_species_id_alone`; a skewed fixture roster; a fixture
+forcing 6% unresolved (above the 50‰ bar) fails the run naming the rate.
 **Depends on:** A2, H4. **Scope:** M. **Files:**
 `tools/seedsmith/seedsmith/adapters/trees/species/plan.py`, `roster.py`.
 
@@ -1390,6 +1460,9 @@ Every row has a default, so nothing here blocks a task.
 | Does D15's equal-budget rule change once S4's evidence lands? | Keep the equal-budget rule | Owner, after F6 |
 | Is tree respec priced off its own soul counter or the species counter? | Its own counter | Owner, before C10 persists it |
 | The `DemonsPage.tsx:367-388` volume defect the Codex route hangs off | I5 ships without the Codex entry point and the route is added after | Owner — another program's file |
+| What does "the tier below is unlocked" mean for the skill-wallet calibration — one node owned in the tier below (same branch), or the tier complete? | The spec's own recommendation: **one node, same branch** (preserves D10's two-branch identity, rewards a single-branch dive) — used as the working assumption behind C11's band tests until revisited | Owner, before `unlockCost.firstPoints` is published (C11/C6) |
+| Auto-drafting a species-derived starter plan when a creature is bound (`spec-tree-surface.md` §15) | Do not auto-draft — I5/I8 ship with no starter-plan generation; the player lays out their own build from an empty draft | Owner, after I8 ships |
+| Shipping shareable build codes as a marketed feature (stable catalog-version stamp + decoder guarantee), vs. the plain URL-reflects-open-layers mechanism I8 already builds under GG-8 | I8 ships only the GG-8 behavior (see I8's scope-boundary bullet); no "share" UI affordance until this is answered | Owner, before any "share" UI is added |
 
 **Unowned prerequisite, recorded so it is visible:** A10b — the shipped stacking-status vehicle — needs
 G1 and G2 **plus a Battle status → `BattleDerivedModifierLedger` producer that no module's

@@ -1,0 +1,63 @@
+{
+  "slug": "type-specimen-xp",
+  "title": "Type and specimen XP",
+  "status": "Shipped",
+  "kicker": "Power and builds · level up and power",
+  "pillar": {"text": "Almanac", "href": "almanac.md"},
+  "loopLine": "Level up and power",
+  "hook": "Plants, zombies, and demons grow from **work they actually did** — type lines and individual specimens, not only Dave’s level.",
+  "blindSpots": [
+    {"term": "Specimen XP", "meaning": "Progress on one demon instance — that Peashooter-line specimen you fielded."},
+    {"term": "Type XP", "meaning": "Progress on a species / type line you have used and met — feeds how deep that line feels over time."},
+    {"term": "Almanac", "meaning": "Dossiers for what you have met. Meeting types deepens reference — see [almanac](almanac)."},
+    {"term": "Chronicle", "meaning": "Your run and progression history — a place XP and levels show up."}
+  ],
+  "alsoTrue": [
+    "Dave’s level is a separate summoner line — see [Dave’s level](dave-level).",
+    "Field units and specimens; progress shows on Chronicle / roster sheets."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Power is not only “Dave went up.”",
+        "Who you fielded and what you met also grow — individuals and type memory."
+      ]
+    },
+    {
+      "title": "How you use it",
+      "steps": [
+        "Deploy and play with real specimens.",
+        "Check roster sheets and Chronicle for their progress.",
+        "Meet new types in play to deepen almanac dossiers."
+      ]
+    },
+    {
+      "title": "Why both tracks",
+      "paras": [
+        "Specimen XP rewards the individuals you raise.",
+        "Type XP rewards learning and fielding a line — almanac and builds both care."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Field a bound demon on a lawn or expedition.",
+    "Afterward, open Creatures and notice that specimen’s progress.",
+    "Open Almanac or Chronicle and see type / history catch up."
+  ],
+  "doNote": "Stop when Dave ≠ specimen XP is clear. Spend power: [aptitudes](aptitudes).",
+  "mixUps": [
+    {"q": "Does only Dave’s level matter?", "a": "No. Specimens and types grow from work they did."},
+    {"q": "If I never field a demon, does it level?", "a": "Progress comes from work done — idle shelf pets stay behind."},
+    {"q": "Is type XP the same as fusion rarity?", "a": "No. Rarity and fusion are other systems; this is growth from play."},
+    {"q": "Where do I read it?", "a": "Roster sheets, Chronicle, and Almanac dossiers."}
+  ],
+  "next": ["aptitudes"],
+  "related": ["dave-level", "almanac", "specimens", "chronicle"],
+  "sources": [
+    "docs/guide/mechanisms/type-specimen-xp.md (prior stub)",
+    "docs/guide/almanac.md",
+    "docs/guide/relics-and-builds.md §In this build"
+  ]
+}

@@ -5,13 +5,12 @@ using FusionRpg.Injector.Effects;
 using FusionRpg.Injector.Fx;
 using FusionRpg.Injector.Host;
 using UnityEngine;
-using UObject = UnityEngine.Object;
 
 namespace FusionRpg.Injector.Hud;
 
 /// <summary>
 /// World-space Band B HUD — reads <see cref="ActorHudCache"/> snapshots only (actor-hud-unity spec).
-/// Placement via <see cref="UnitFrameResolver"/> crown anchor.
+/// Placement via UnitFrame sprite-bottom (Feet / bounds) + worldYOffset.
 /// </summary>
 public static class ActorHudPool
 {
@@ -20,9 +19,11 @@ public static class ActorHudPool
     const int MaxShieldSegments = 4;
     /// <summary>How many status tokens one actor's HUD row can show at once. **Structural, not a
     /// balance dial** (tunables-ssot.md §1 exempts buffers, and requires saying so): it is the length
-    /// of the <see cref="Pooled.StatusTokens"/> array, so it sizes an allocation rather than tuning a
+    /// of the <see cref="HudSlot.StatusTokens"/> array, so it sizes an allocation rather than tuning a
     /// number a balance pass would reach for.</summary>
     const int MaxStatusTokens = 3;
+    /// <summary>Structural pip buffer length — clamped by tuning <c>maxStackPips</c> at draw time.</summary>
+    const int MaxPips = 3;
 
     static readonly HashSet<string> SeenThisTick = new(StringComparer.Ordinal);
     static readonly List<HudSlot> Slots = new();
@@ -53,10 +54,16 @@ public static class ActorHudPool
         public MeshRenderer? TierFrame;
         public MeshRenderer? LevelBadge;
         public MeshRenderer? RolePip;
+        public ActorHudLabel? TierLabel;
+        public ActorHudLabel? LevelLabel;
         public MeshRenderer? ShieldTrack;
         public readonly MeshRenderer?[] ShieldSegments = new MeshRenderer?[MaxShieldSegments];
+        /// <summary>Stack pip quads — MeshRenderer cached at create (no per-frame GetComponent).</summary>
+        public readonly MeshRenderer?[] StackPips = new MeshRenderer?[MaxPips];
         public readonly MeshRenderer?[] StatusTokens = new MeshRenderer?[MaxStatusTokens];
+        public readonly ActorHudLabel?[] StatusLabels = new ActorHudLabel?[MaxStatusTokens];
         public MeshRenderer? OverflowPip;
+        public ActorHudLabel? OverflowLabel;
         public bool Live;
     }
 
@@ -112,8 +119,19 @@ public static class ActorHudPool
 
         _lastAvgRatio = _shieldBarsDrawn > 0 ? displaySum / _shieldBarsDrawn : 0f;
         _lastAvgTrueRatio = _shieldBarsDrawn > 0 ? trueSum / _shieldBarsDrawn : 0f;
-        if (OverlaySettings.ShieldBarEnabled && _shaderOk)
-            _lastEarly = _shieldBarsDrawn > 0 ? "ok" : "no-body";
+        if (!_shaderOk)
+        {
+            if (OverlaySettings.ShieldBarEnabled)
+                _lastEarly = "no-shader";
+        }
+        else if (!OverlaySettings.ShieldBarEnabled)
+            _lastEarly = "disabled";
+        else if (_shieldBarsDrawn > 0)
+            _lastEarly = "ok";
+        else if (_worldHud > 0)
+            _lastEarly = "no-shield";
+        else
+            _lastEarly = "idle";
     }
 
     public static void StopAll()
@@ -141,7 +159,7 @@ public static class ActorHudPool
         try { snapshot = ActorHudCache.GetOrBuild(ptrHex); }
         catch { return; }
 
-        if (snapshot == null || !ShouldShow(snapshot))
+        if (snapshot == null || !ActorHudVisibility.ShouldShow(snapshot, OverlaySettings.ShieldBarEnabled))
             return;
 
         var key = CombatPtr.Normalize(ptrHex);
@@ -156,10 +174,15 @@ public static class ActorHudPool
         try { frame = UnitFrameResolver.Resolve(follow); }
         catch { return; }
 
-        var crown = frame.World(VfxAnchorKind.Crown);
+        // Foot plate = Feet lane Y (lane ground line). UnitFrame Body is bounds *center*
+        // and put bars on faces; use bounds only for X centering when HasBounds.
+        var world = frame.World(VfxAnchorKind.Feet);
+        if (frame.HasBounds)
+            world.x = frame.BoundsCenterX;
+        world.y += (float)tuning.WorldYOffset;
         var span = frame.Span();
-        var barW = Mathf.Clamp(span * 0.55f, 0.35f, 1.2f);
-        var barH = Mathf.Clamp(span * 0.06f, 0.04f, 0.12f);
+        var barW = (float)tuning.BarWorldWidth;
+        var barH = (float)tuning.BarWorldHeight;
 
         var slot = FindLive(key) ?? TakeIdle() ?? CreateSlot();
         if (slot?.Root == null) return;
@@ -171,7 +194,7 @@ public static class ActorHudPool
         try
         {
             slot.Root.SetActive(true);
-            slot.Root.transform.position = crown;
+            slot.Root.transform.position = world;
         }
         catch { return; }
 
@@ -189,8 +212,8 @@ public static class ActorHudPool
             SetRowLocalY(slot.StatusTokens[i], yStatuses);
         SetRowLocalY(slot.OverflowPip, yStatuses);
 
-        ActorHudRowIdentity.Sync(slot, snapshot.Identity, mat, span);
-        if (ActorHudRowResources.Sync(slot, snapshot.Resources?.Shield, mat, barW, barH))
+        ActorHudRowIdentity.Sync(slot, snapshot.Identity, mat, span, yIdentity);
+        if (ActorHudRowResources.Sync(slot, snapshot.Resources?.Shield, mat, barW, barH, yResources, tuning.MaxStackPips))
         {
             _shieldBarsDrawn++;
             var shield = snapshot.Resources!.Shield!;
@@ -206,18 +229,11 @@ public static class ActorHudPool
             snapshot.Overflow.StatusCount,
             mat,
             span,
+            yStatuses,
             tuning.StatusStripMax);
 
         _worldHud++;
     }
-
-    static bool ShouldShow(ActorHudSnapshot s) =>
-        s.Identity.Tier != ActorHudTier.Normal
-        || s.Identity.LevelBand is not null
-        || s.Statuses.Count > 0
-        || s.Overflow.StatusCount > 0
-        || (OverlaySettings.ShieldBarEnabled
-            && s.Resources?.Shield is { Max: > 0, Hp: > 0 });
 
     static void SetRowLocalY(MeshRenderer? mr, float y)
     {
@@ -227,6 +243,21 @@ public static class ActorHudPool
             var t = mr.transform;
             var p = t.localPosition;
             t.localPosition = new Vector3(p.x, y, p.z);
+        }
+        catch { }
+    }
+
+    internal static void ApplyTint(MeshRenderer? mr, Material mat, Color tint)
+    {
+        if (mr == null) return;
+        try
+        {
+            if (mr.sharedMaterial != mat) mr.sharedMaterial = mat;
+            Block.Clear();
+            Block.SetColor("_Color", tint);
+            try { Block.SetColor("_TintColor", tint); } catch { }
+            mr.SetPropertyBlock(Block);
+            try { mr.sortingOrder = Fx.FxResources.ParticleSortingOrder + 3; } catch { }
         }
         catch { }
     }
@@ -255,6 +286,19 @@ public static class ActorHudPool
         }
         catch { }
     }
+
+    /// <summary>Returns false when the label backend is missing (Melon TextMesh stripped) —
+    /// callers must not draw mute badge quads without a glyph.</summary>
+    internal static bool PlaceLabel(
+        ActorHudLabel? label,
+        float localX,
+        float localY,
+        string text,
+        float charSize,
+        Color color) =>
+        label != null && label.TryPlace(localX, localY, text, charSize, color);
+
+    internal static void HideLabel(ActorHudLabel? label) => label?.Hide();
 
     static HudSlot? FindLive(string ownerKey)
     {
@@ -303,12 +347,22 @@ public static class ActorHudPool
             slot.TierFrame = MakeChild(root, "tier", mesh, mat);
             slot.LevelBadge = MakeChild(root, "lvl", mesh, mat);
             slot.RolePip = MakeChild(root, "role", mesh, mat);
+            slot.TierLabel = ActorHudLabel.Create(root, "tierLabel");
+            slot.LevelLabel = ActorHudLabel.Create(root, "lvlLabel");
             slot.ShieldTrack = MakeChild(root, "shieldTrack", mesh, mat);
             for (var i = 0; i < MaxShieldSegments; i++)
                 slot.ShieldSegments[i] = MakeChild(root, "shieldSeg" + i, mesh, mat);
+            for (var i = 0; i < MaxPips; i++)
+                slot.StackPips[i] = MakeChild(root, "pip" + i, mesh, mat);
+
             for (var i = 0; i < MaxStatusTokens; i++)
+            {
                 slot.StatusTokens[i] = MakeChild(root, "status" + i, mesh, mat);
+                slot.StatusLabels[i] = ActorHudLabel.Create(root, "statusLabel" + i);
+            }
+
             slot.OverflowPip = MakeChild(root, "overflow", mesh, mat);
+            slot.OverflowLabel = ActorHudLabel.Create(root, "overflowLabel");
 
             Slots.Add(slot);
             return slot;
@@ -320,22 +374,51 @@ public static class ActorHudPool
         }
     }
 
+    /// <summary>
+    /// Il2Cpp Melon: generic <c>AddComponent&lt;MeshFilter/MeshRenderer&gt;</c> blows the
+    /// MethodInfoStoreGeneric type initializer (LIVE 2026-09-05 — hudSlots stuck at 0).
+    /// CreatePrimitive installs those components on the engine side; we only rebind mesh/mat.
+    /// </summary>
     static MeshRenderer? MakeChild(GameObject root, string name, Mesh mesh, Material mat)
     {
-        var go = new GameObject(name);
-        go.hideFlags = HideFlags.HideAndDontSave;
-        go.transform.SetParent(root.transform, false);
-        var filter = go.AddComponent<MeshFilter>();
-        var mr = go.AddComponent<MeshRenderer>();
-        if (filter != null) filter.sharedMesh = mesh;
-        if (mr != null)
+        try
         {
-            mr.sharedMaterial = mat;
-            try { mr.sortingOrder = Fx.FxResources.ParticleSortingOrder + 2; } catch { }
-        }
+            var go = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            go.name = name;
+            go.hideFlags = HideFlags.HideAndDontSave;
+            go.transform.SetParent(root.transform, false);
+            try
+            {
+                // Physics Collider type may be stripped from injector compile refs — destroy by name.
+                foreach (var c in go.GetComponents<Component>())
+                {
+                    if (c == null || c is Transform) continue;
+                    string n;
+                    try { n = c.GetIl2CppType().Name; }
+                    catch { try { n = c.GetType().Name; } catch { continue; } }
+                    if (n.IndexOf("Collider", StringComparison.OrdinalIgnoreCase) >= 0)
+                        UnityEngine.Object.Destroy(c);
+                }
+            }
+            catch { }
 
-        go.SetActive(false);
-        return mr;
+            var filter = go.GetComponent<MeshFilter>();
+            var mr = go.GetComponent<MeshRenderer>();
+            if (filter != null) filter.sharedMesh = mesh;
+            if (mr != null)
+            {
+                mr.sharedMaterial = mat;
+                try { mr.sortingOrder = Fx.FxResources.ParticleSortingOrder + 2; } catch { }
+            }
+
+            go.SetActive(false);
+            return mr;
+        }
+        catch (Exception ex)
+        {
+            try { RpgHost.Log.Warning("[actor-hud] MakeChild: " + ex.Message); } catch { }
+            return null;
+        }
     }
 
     static Mesh? EnsureQuad()

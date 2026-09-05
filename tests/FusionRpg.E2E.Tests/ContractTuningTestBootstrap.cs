@@ -521,13 +521,18 @@ internal static class ContractTuningTestBootstrap
 
     public static readonly ActorHudTuning DefaultActorHud = new(
         SchemaVersion: 1,
-        Version: 1,
+        Version: 2,
         StatusStripMax: 3,
         HpSliverEnabled: false,
         BadgeMax: 99,
-        RowOffsetIdentity: 0.42,
-        RowOffsetResources: 0.28,
-        RowOffsetStatuses: 0.14,
+        AnchorKind: "body",
+        WorldYOffset: -0.35,
+        BarWorldWidth: 0.95,
+        BarWorldHeight: 0.12,
+        RowOffsetIdentity: 0.30,
+        RowOffsetResources: 0.0,
+        RowOffsetStatuses: 0.16,
+        MaxStackPips: 3,
         EliteTierThreshold: null,
         MagnitudeMidThreshold: 10.0,
         MagnitudeHighThreshold: 30.0);

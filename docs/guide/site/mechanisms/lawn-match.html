@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="A lawn match is a live board match (Plants vs. Zombies: Fusion on your machine) — the first core loop, not the whole war." />
+    <title>Lawn match — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/lawn-match.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Lawn · first core
+        </p>
+        <h1 class="teach-title">Lawn match</h1>
+        <p class="teach-hook">A <strong>lawn match</strong> is a live board match (Plants vs. Zombies: Fusion on your machine) — the <strong>first core loop</strong>, not the whole war.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Lawn</dt>
+              <dd>The live PvZ board match on your machine, watched and fed by Rise of Summoner — not the rift map and not a web-only puzzle.</dd>
+            </div>
+            <div>
+              <dt>First core</dt>
+              <dd>What you play first and what feeds almost every spine loop. It is not the win condition and not optional flavour.</dd>
+            </div>
+            <div>
+              <dt>Replace the game</dt>
+              <dd>What Rise of Summoner does <strong>not</strong> do. It observes, records, and can deploy demons back — it does not rewrite the binary.</dd>
+            </div>
+            <div>
+              <dt>Lawn-only forever</dt>
+              <dd>Unlocked web features stay playable with the lawn game closed once opened. Nothing essential stays lawn-only forever.</dd>
+            </div>
+            <div>
+              <dt>Same save</dt>
+              <dd>Progress lands in your Rise of Summoner save. The lawn game’s own saves stay that game’s.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>A run feeds <a href="souls.html">souls</a>, type XP, <a href="almanac.html">almanac</a>, specimen levels, and <a href="lawn-deploy.html">deploy</a>.</li>
+            <li>Blessing, capture, trophies, and in-game open are still WIP — see sibling pages.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Legal Plants vs. Zombies: Fusion on your machine, with the control room watching.</p>
+          <p>You play the board. Rise of Summoner records what happened and can send roster demons back into the fight.</p>
+          <p class="teach-note">Point the launcher at a legal install. Uninstalling the plugin is deleting a folder.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-a-run-leaves-behind-title">
+          <h2 id="what-a-run-leaves-behind-title">What a run leaves behind</h2>
+          <p>A normal lawn level ends when the wave ends. Here it leaves something:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  legal match  -&gt;  play board  -&gt;  souls / XP / almanac / levels
+                      |
+                      +-&gt;  deploy roster demons (when bound)
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Souls</strong>
+              <p>Kills and victories feed the soul ledger.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Almanac and types</strong>
+              <p>Plants and zombies you meet feed type progression and the almanac.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Specimen levels</strong>
+              <p>Specimens gain levels from work they actually did.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Deployed demons</strong>
+              <p>Bound demons you field fight with the traits and element you gave them.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>First session shape</h3>
+            <ol>
+              <li>Start a legal lawn-game match from your install.</li>
+              <li>Open the control room and go to the Lawn stage while it runs.</li>
+              <li>Play the match; when it ends, check souls and roster progress in the Sanctum.</li>
+            </ol>
+            <p class="teach-note">Closing a menu over the lawn does not destroy the board — you stay on the stage.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Launch a legal match.</li>
+            <li>Open Lawn in the control room and confirm the live mirror is moving.</li>
+            <li>Finish a wave and look for souls / almanac / specimen progress in your save.</li>
+          </ol>
+          <p class="teach-note">Read the board under pressure: <a href="../../mechanisms/lawn-mirror-hud.md">live mirror and unit HUD</a>. Field roster demons: <a href="lawn-deploy.html">bound demon deploy</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is the lawn the whole game?</dt>
+              <dd>No. It is the first core loop. Expeditions, map, and later places matter too.</dd>
+            </div>
+            <div>
+              <dt>Do I lose RPG progress if I close the lawn game?</dt>
+              <dd>Unlocked web features stay playable with the lawn game closed. RPG data lives beside the server.</dd>
+            </div>
+            <div>
+              <dt>Does Rise of Summoner patch the game binary?</dt>
+              <dd>No. It does not download, patch, or rewrite the binary.</dd>
+            </div>
+            <div>
+              <dt>Are cheats part of this guide?</dt>
+              <dd>Sandbox cheats exist for builders, off by default — not part of normal play guidance.</dd>
+            </div>
+            <div>
+              <dt>Is blessing required to earn souls?</dt>
+              <dd>No. Souls already pay from play. Blessing (WIP) is meant to boost later idle — see <a href="lawn-blessing.html">lawn blessing</a>.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/lawn-mirror-hud.md">Live mirror and unit HUD</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/lawn-mirror-hud.md">Live mirror and unit HUD</a> ·
+            <a href="lawn-deploy.html">Bound demon deploy</a> ·
+            <a href="souls.html">Souls</a> ·
+            <a href="almanac.html">Almanac dossiers</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/lawn-match.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-lawn.md">The lawn</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/lawn-match.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

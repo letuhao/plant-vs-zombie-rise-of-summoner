@@ -1,0 +1,72 @@
+{
+  "slug": "failure-branches",
+  "title": "Failure branches",
+  "status": "Vision",
+  "kicker": "Quests, failure, memory · consequence as content",
+  "pillar": {"text": "Delves and sieges", "href": "delves-and-sieges.md"},
+  "loopLine": "Quests and events · Farm / hunt / defend · Delve",
+  "hook": "**Vision:** a lost sector, failed extract, or failed defence can open **different ground** — not only a wipe. Consequence as content. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not playable yet. Loss today does not reliably open new questlines or domains by this rule."},
+    {"term": "Failure branch", "meaning": "Content that starts because you failed — bandits, a domain, a quest — not only “try again.”"},
+    {"term": "Wipe", "meaning": "The dead-run end. Branches sit beside wipe, not instead of stakes."},
+    {"term": "Different ground", "meaning": "New map pressure or places opened by loss — shared with farm / hunt / defend and delve."}
+  ],
+  "alsoTrue": [
+    "Ending a world still follows keep-who-you-are / lose-where-you-were — branches are not a prestige wipe of the summoner.",
+    "Named on both quests and territorial loops so it cannot hide."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "Do not expect every lost sector or failed run to open a curated branch today.",
+        "The design promise is consequence as content when this Vision ships."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "intro": "Loss can unlock paths:",
+      "cards": [
+        {"name": "Lost sector", "body": "Map failure opens bandits, pressure, or a new problem to solve."},
+        {"name": "Failed extract", "body": "Delve wipe can open a domain, quest, or other ground — not only emptiness."},
+        {"name": "Failed defence", "body": "Failed defence can open different ground as content — still beside real lose stakes (homeworld fall ends the world)."}
+      ],
+      "diagram": [
+        "  fail (sector / extract / defence)",
+        "            |",
+        "            +->  wipe / loss stakes",
+        "            +->  branch content (Vision)"
+      ],
+      "note": "Win/lose of a world still matter — see [new world](new-world-prestige)."
+    },
+    {
+      "title": "Where it hangs",
+      "paras": [
+        "Quests and events name the story clock.",
+        "Farm / hunt / defend and the Delve are where the failures happen."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Play for keeps — branches do not mean failure is free.",
+    "Treat missing “new quest from wipe” prompts as Vision.",
+    "When branches ship, read them as content you unlocked the hard way."
+  ],
+  "doNote": "Stop when failure ≠ only a reset button. Related: [quest log](quest-log), [delve](delve).",
+  "mixUps": [
+    {"q": "I wiped — where is my branch?", "a": "Failure branches are Vision. Absence is expected."},
+    {"q": "Does failure wipe my souls?", "a": "No. World loss drops loam and holdings; roster/souls/essence bank — see [new world](new-world-prestige)."},
+    {"q": "Is this soft failure with no stakes?", "a": "No. Branches sit beside real loss — consequence as content, not a free retry."},
+    {"q": "Only delves?", "a": "No. Lost sectors and failed defences are in scope too."}
+  ],
+  "next": ["quest-log"],
+  "related": ["quest-log", "delve", "farm-hunt-defend", "pack-extract-oaths"],
+  "sources": [
+    "docs/guide/delves-and-sieges.md §Failure branches",
+    "docs/guide/the-loops.md §Failure branches",
+    "docs/guide/mechanisms/failure-branches.md (prior stub)",
+    "docs/guide/glossary.md §Failure branches"
+  ]
+}

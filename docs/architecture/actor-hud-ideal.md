@@ -155,20 +155,24 @@ almanac. Detail, scenarios, and accessibility checks:
 
 ### Band B — Per-unit world HUD (this program)
 
-**Scope:** Compact readout **above each unit** (plant or zombie) while it is on the lawn.
+**Scope:** Compact readout on each unit (plant or zombie) while it is on the lawn.
 
-**Anchor:** [`UnitFrameResolver`](../../src/FusionRpg.Injector/Fx/UnitFrameResolver.cs) — same SSOT as
-status VFX. HUD must not call `BodyWorld` or read `Renderer.bounds` outside the resolver (guard-enforced).
+**Unity placement (SSOT):** center-bottom — [`UnitFrameResolver`](../../src/FusionRpg.Injector/Fx/UnitFrameResolver.cs)
+**Body** + tunable `worldYOffset` (default −0.35), matching the retired `ShieldBarPool` slot. HUD must not
+call `BodyWorld` or read `Renderer.bounds` outside the resolver (guard-enforced).
 
-**Layout (three rows, priority-capped):**
+**Phaser placement (this correction pass):** stays top-of-sprite / existing canvas attach. Dual-render
+still requires the same `Occupant.hud` fields and display tokens; Unity Body+offset is the lawn
+world SSOT for “under pea/zombie.”
+
+**Layout (three rows, priority-capped; Unity local Y upward from Body root):**
 
 ```text
-        [Identity row — glance read]
-  tier frame | role icon | level badge | unique/demon pip
-        [Resource row — optional slots]
-  shield segments (element-colored) | HP sliver (optional) | meter ticks
-        [Status strip — icons only, max N]
-  status tokens | CC corner glyph | +N overflow pip
+UnitFrame Body + worldYOffset (default -0.35)
+  local Y ≈ 0     — Resource row: shield track + element segments + stack pips
+                    | HP sliver (optional) | meter ticks
+  local Y > 0     — Status strip: 2-letter tokens | CC accent | +N overflow
+  local Y higher  — Identity: tier letter | role pip | level digits | unique/demon pip
 ```
 
 **Slot rules:**
@@ -176,8 +180,10 @@ status VFX. HUD must not call `BodyWorld` or read `Renderer.bounds` outside the 
 - Each slot type maps to **one** semantic dimension (documented in plate §B legend).
 - **Priority when crowded:** CC > commander-mark > unique/demon > shield > top statuses > level.
 - **Overflow:** collapse to `+N` pip — never shrink text to illegibility.
-- **Tunables:** slot caps, Y offsets, tier thresholds in `data/tuning/actor-hud.v1.json` (future).
+- **Tunables:** slot caps, bar W/H, `worldYOffset`, row offsets, stack pips in `data/tuning/actor-hud.v*.json`
+  (bar geometry SSOT — not orphaned `vfx.v3` `render.shieldBar`).
 - **Presentation-only:** HUD never writes gameplay state (same boundary as VFX).
+- **F9** mutes the shield resource row only — identity/status and sustain VFX remain.
 
 ---
 

@@ -1,0 +1,71 @@
+{
+  "slug": "delve",
+  "title": "The Delve",
+  "status": "Vision",
+  "kicker": "Delve, siege, party · dungeon crawler",
+  "pillar": {"text": "Delves and sieges", "href": "delves-and-sieges.md"},
+  "loopLine": "Dungeon crawler — the Delve",
+  "hook": "**Vision:** a party crawl through seeded rooms toward a boss — haul out or fail trying. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Locked fiction. You cannot enter a delve in the current loop."},
+    {"term": "Delve", "meaning": "A stage you travel to — room graph, pack, extract — not an expedition and not a lawn match."},
+    {"term": "Domain", "meaning": "A named place you find in the world, then enter from the Sanctum."},
+    {"term": "Stage vs layer", "meaning": "Delve is a stage (you go there to act). Almanac is a layer (opens over where you already are)."}
+  ],
+  "alsoTrue": [
+    "Expeditions stay the idle sibling — delves do not replace them.",
+    "Interactive battles you play yourself are WIP shared with delves; formations and oaths are Vision depth."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "Sanctum, Lawn, World, and expeditions are where play lives today.",
+        "This page keeps the dungeon-crawler fantasy in the catalog until it ships."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "You find domains out in the world (expedition discoveries are part of that story). From the Sanctum you pick a found domain and enter.",
+        "Inside: a room graph — fights, elites, caches, shrines, merchants, traps, wild talk. You manage a pack. You extract with a haul — or you wipe."
+      ],
+      "diagram": [
+        "  find domain  ->  Sanctum enter  ->  room graph",
+        "                                      |",
+        "                                      +->  extract with haul",
+        "                                      +->  wipe / fail"
+      ],
+      "note": "Unlock (when it ships): first domain found on an expedition."
+    },
+    {
+      "title": "What sits beside it",
+      "cards": [
+        {"name": "Pack / extract / oaths", "body": "How you provision and stake the run — see [pack, extract, oaths](pack-extract-oaths)."},
+        {"name": "Formations", "body": "How the pack stands and combo skills — see [party formations](party-formations)."},
+        {"name": "Failure branches", "body": "A wipe can open different ground — see [failure branches](failure-branches)."}
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Do not hunt for a Delve button on the live rail — it is Vision.",
+    "Keep expeditions as the async crawl-adjacent loop that ships today.",
+    "When domains appear later, enter from the Sanctum and expect a return there when the run resolves."
+  ],
+  "doNote": "Stop when delve ≠ expedition. Related: [pack, extract, oaths](pack-extract-oaths).",
+  "mixUps": [
+    {"q": "Can I enter a delve today?", "a": "No. Not finished / not playable yet."},
+    {"q": "Is this just a long expedition?", "a": "No. Expeditions auto-resolve idle. Delves are a presence stage with rooms and extract."},
+    {"q": "Where do I start one?", "a": "Design: find a domain, then enter from the Sanctum — when it ships."},
+    {"q": "Do delves replace expeditions?", "a": "No. They are siblings."}
+  ],
+  "next": ["pack-extract-oaths"],
+  "related": ["pack-extract-oaths", "party-formations", "interactive-battles", "failure-branches", "expeditions"],
+  "sources": [
+    "docs/guide/delves-and-sieges.md §The Delve",
+    "docs/guide/the-loops.md §Dungeon crawler — the Delve",
+    "docs/guide/mechanisms/delve.md (prior stub)",
+    "docs/guide/glossary.md §Delve · Domain"
+  ]
+}

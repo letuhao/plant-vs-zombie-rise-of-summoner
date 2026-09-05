@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Virtual turns are the world clock — everyone commits orders, then End Turn resolves them for every commander at once." />
+    <title>World virtual turns — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/virtual-turns.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          World and empire · End Turn clock
+        </p>
+        <h1 class="teach-title">World virtual turns</h1>
+        <p class="teach-hook"><strong>Virtual turns</strong> are the world clock — everyone commits orders, then <strong>End Turn</strong> resolves them for every commander at once.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Virtual turn</dt>
+              <dd>A shared resolve step on the map. Not a live match timer and not a real-life diary day.</dd>
+            </div>
+            <div>
+              <dt>End Turn</dt>
+              <dd>The button (or control) that commits the turn. The barrier waits until you and the other commanders are ready.</dd>
+            </div>
+            <div>
+              <dt>Orders</dt>
+              <dd>What you set for legions before the turn resolves — march, claim, and later richer tools.</dd>
+            </div>
+            <div>
+              <dt>Diary clock</dt>
+              <dd>A minute→day→week meta calendar. This game does not use one for the world — only lawn time, expedition wall-clock, and virtual turns.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Expeditions use wall-clock because they are idle. The map does not — it waits on End Turn.</li>
+            <li>Same clock applies when the finished <a href="../../mechanisms/world-stage.md">world stage</a> arrives.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>Time on the map is turn-based. There is no clock bullying you while you think.</p>
+          <p>When orders are set, press End Turn. You, Zomboss, and neutrals resolve together.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>One commit, one resolve:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  set orders  -&gt;  End Turn  -&gt;  resolve for all commanders
+                                  |
+                                  +-&gt;  you / Zomboss / neutrals
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Set</strong>
+              <p>Issue orders for your legions while the turn is open.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Commit</strong>
+              <p>Press End Turn when you are ready.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Resolve</strong>
+              <p>Everyone’s orders fire — including Zomboss evaluating from his fog.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>On the World map</h3>
+            <p>Open World travel and look for End Turn once you can issue orders.</p>
+            <ol>
+              <li>Set at least one legion order.</li>
+              <li>Press End Turn.</li>
+              <li>Read what moved — yours and theirs.</li>
+            </ol>
+            <p class="teach-note">If nothing resolves, you have not committed the turn yet.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Open the world map.</li>
+            <li>Give one clear order (march or claim).</li>
+            <li>Press End Turn and watch the resolve — including enemy motion.</li>
+          </ol>
+          <p class="teach-note">Stop when End Turn ≠ “wait five real minutes.” Related: <a href="../../mechanisms/world-map.md">world map</a>, <a href="../../mechanisms/zomboss-commander.md">Zomboss</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Does the map tick while I am AFK?</dt>
+              <dd>No. It waits for End Turn. Expeditions are the wall-clock loop.</dd>
+            </div>
+            <div>
+              <dt>Is this the same as lawn time?</dt>
+              <dd>No. Lawn is a live match. The map is virtual turns.</dd>
+            </div>
+            <div>
+              <dt>Do I need to End Turn for expeditions?</dt>
+              <dd>No. Expeditions use their own dispatch timers.</dd>
+            </div>
+            <div>
+              <dt>Does Zomboss move on my End Turn?</dt>
+              <dd>Yes. Everyone resolves together when you commit.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="fog-of-war.html">Fog of war</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/world-map.md">Rift world map</a> ·
+            <a href="../../mechanisms/zomboss-commander.md">Zomboss as commander</a> ·
+            <a href="../../mechanisms/world-stage.md">World-stage empire</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/virtual-turns.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-rift.md">The rift</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/virtual-turns.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,8 +1,10 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Match;
 using FusionRpg.Core.Vfx;
 using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Hud;
 using FusionRpg.Injector.Lawn;
+using FusionRpg.Injector.Match;
 using UnityEngine;
 
 namespace FusionRpg.Injector.Fx;
@@ -77,16 +79,22 @@ public static class VfxDirector
         // Idle early-out: with nothing queued or live the frame costs one lock + four counts.
         bool queued;
         lock (Gate) queued = Pending.Count > 0;
-        var shieldLive = false;
+        var hudWake = false;
         try
         {
-            shieldLive = ActorHudPool.WorldBars > 0
+            hudWake = ActorHudPool.WorldBars > 0
                 || (Effects.EffectRuntime.Bag.ShieldGate?.Runtime?.HasAnyInstances() == true);
+            if (!hudWake)
+            {
+                var phase = MatchHost.Runtime.Phase;
+                hudWake = phase is MatchPhase.InMatch or MatchPhase.Paused
+                    or MatchPhase.Starting;
+            }
         }
         catch { }
 
         if (!queued && Floaters.Count == 0 && Flashes.Count == 0 && BurstPool.LiveCount() == 0
-            && Sustained.LiveCount == 0 && !shieldLive)
+            && Sustained.LiveCount == 0 && !hudWake)
             return;
         DrainQueue();
         TickFloaters(dt);

@@ -4,6 +4,12 @@
 [world-stage capability map](../world-stage-map.md). **Level 2, depends on `world-contract`** — it is
 built in parallel with `world-numbers`, and `world-render` and `world-hud` both sit on top of it.
 
+**Camera HOW superseded 2026-09-06.** The SVG `viewBox` camera (§2) is replaced by Phaser
+`Cameras.Scene2D` in
+[world-map-runtime/spec-world-map-runtime.md](../world-map-runtime/spec-world-map-runtime.md).
+**This spec still owns:** `StageHost`, no page scroll, Esc/right-click, no minimap on medium,
+authored positions. Gestures survive; the implementation vehicle does not.
+
 **Ideal:** [world-stage-ideal.md](../world-stage-ideal.md) §4.1, §4.2, §4.3, §8c.6, §8e.1.
 **Catalog:** [design/11-world-stage.html](../../design/11-world-stage.html) §G.1, §G.2.
 

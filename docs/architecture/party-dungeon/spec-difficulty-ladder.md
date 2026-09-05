@@ -82,7 +82,7 @@ this module composes the band and nothing else. `ContentContext` has no producti
 | boss | impossible | 12 | 115 | 5,713 | 8,401 | — | — | — |
 | row 0, once domain | hard, once +7 | 10 | 105 | 5,015 | 7,375 | — | — | — |
 | row 0, once domain | impossible, once +7 | 13 | 120 | 6,080 | 8,941 | — | — | — |
-| row 0, tail `abyss +5` | 10 + 5 | 11 | 125 | 6,455 | 9,492 | — | — | — |
+| row 0, tail `abyss +5` | 10 + 5 | 11 | 110 | 5,360 | 7,882 | — | — | — |
 
 `P(Θ)` is `PowerLadder.Value` (`PowerLadder.cs:34-58`); `contentScale` is `ContentScale.Milli`
 (`ContentScale.cs:15-20`). `Θ_enemy = Θ_room + thetaOffset` is `encounter-generator`'s sum (offsets
@@ -307,7 +307,10 @@ public static void Validate(IReadOnlyList<RungDef> rungs)
 ## Testing strategy
 
 - **Composition goldens:** §1's table — `(3, hard, row 0) → 70`, boss of 11 rows `→ 100`, impossible
-  row 0 `→ 85`, once `+7` on hard `→ 105`, `abyss +5 → 125` — each through `ContentExplain`.
+  row 0 `→ 85`, once `+7` on hard `→ 105`, `abyss +5 → 110` — each through `ContentExplain`. (Corrected
+  2026-09-05, `RoomThetaComposerTests`: the table's other six rows all sit on an exact 5-Θ-per-band
+  rate above the band-3/Θ-70 anchor; band 11 on that line is 110, not the previously stated 125 — a
+  transcription slip, not a composer defect. `P(Θ)`/`contentScale` corrected to 5,360/7,882 to match.)
 - **Refuse-not-clamp:** band-1 offers `hard`…`impossible` only; band-2 offers `easy` and up; every
   offered rung composes a band `≥ 1`, so `ClampNonNegative` is never reached.
 - **Validator red/green:** twins (`easy` with `elite.rarityShiftRungs 0`) rejected; a penalty-only

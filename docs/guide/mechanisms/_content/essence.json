@@ -1,0 +1,89 @@
+{
+  "slug": "essence",
+  "title": "Essence",
+  "status": "Shipped",
+  "kicker": "Stocks and economy · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion · Farm / hunt / defend",
+  "hook": "**Essence** is element-matched material you stockpile for fusion (and for some buildings later) — fire essence is not the same as ice essence.",
+  "blindSpots": [
+    {"term": "Essence", "meaning": "A **material stock** in your save, split by element. Not souls, not loam, not a demon’s health."},
+    {"term": "Element-matched", "meaning": "A fusion that wants fire essence will not take ice essence instead. The colour (element) is the point of the bottleneck."},
+    {"term": "Bank", "meaning": "Essence stays with your summoner across worlds — same idea as souls. [Loam](loam) does not."},
+    {"term": "Fusion", "meaning": "Merging specimens in the Fusion lab (`F`). That is the main place you spend essence today."}
+  ],
+  "alsoTrue": [
+    "Essence is one of three stocks. The others are [souls](souls) and [loam](loam). They do not convert into each other.",
+    "You may also see **shards** as fusion materials. Shards are rarity-matched fodder; essence is the element gate. This page is about essence."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Six colours of stock — fire, ice, air, earth, light, dark — matching the combat elements.",
+        "You earn them by playing. You spend them when a fusion (or later a building) asks for a specific colour."
+      ],
+      "note": "Essence banks across worlds — see [New world](new-world-prestige)."
+    },
+    {
+      "title": "Why it exists",
+      "paras": [
+        "If every merge cost the same generic currency, element would stop mattering the moment you left combat.",
+        "Essence keeps the ring honest in the workshop: the result’s element asks for matching material, so farming and planning stay elemental."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "Think of faucets and sinks — same shape as souls, different wallet:",
+      "cards": [
+        {"name": "Faucets", "body": "Lawn play, expedition returns, and map work can pay essence (and related materials)."},
+        {"name": "Sinks", "body": "Specimen fusion spends the colour the recipe asks for. Some sector buildings later also ask for essence."}
+      ],
+      "diagram": [
+        "  play / expeditions  ->  essence (by element)",
+        "                              |",
+        "                              +->  Fusion lab (main sink)",
+        "                              +->  buildings (when they ask)"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "In the control room",
+          "intro": "Materials show up where fusion and expeditions care about them.",
+          "steps": [
+            "Open Fusion (`F`) and read the cost panel — have / need for the essence colour.",
+            "Open Expeditions and check materials after a return — drops include essences.",
+            "On the HUD stock strip, essence sits beside souls as a stock you can bank."
+          ],
+          "note": "Exact drop amounts change with balance. Trust the have/need numbers on screen."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Finish a lawn match or collect an expedition that can pay materials.",
+    "Open Fusion (`F`) with a merge in mind.",
+    "Read the cost panel: if essence is short, note the **colour** you need — then farm that colour, not a different one."
+  ],
+  "doNote": "Stop here when you can tell fire essence from ice essence. Next: how merges work in [specimen fusion](specimen-fusion).",
+  "mixUps": [
+    {"q": "Can I convert fire essence into ice?", "a": "No. Colours do not swap. That bottleneck is intentional."},
+    {"q": "Is essence the same as souls?", "a": "No. Souls buy summons and keep pacts. Essence feeds fusion’s element gate. See [souls](souls)."},
+    {"q": "Does essence fade if I neglect the map?", "a": "No. Only [loam](loam) fades with neglected ground. Essence banks."},
+    {"q": "Do I need essence to pull at the altar?", "a": "No. The altar spends souls. Essence shows up when you fuse."},
+    {"q": "Are shards the same thing?", "a": "No. Shards are another fusion material (rarity fodder). Essence is the element-matched stock."}
+  ],
+  "next": ["specimen-fusion"],
+  "related": ["souls", "loam", "specimen-fusion", "element-ring"],
+  "sources": [
+    "docs/guide/creatures.md §Souls and essence",
+    "docs/guide/glossary.md §Currencies",
+    "docs/guide/the-rift.md §stocks",
+    "docs/architecture/empire-economy-ssot.md §Essence",
+    "docs/architecture/demons/spec-demon-fusion.md §Materials",
+    "web/fusion-rpg-web/src/features/fusion/fusionView.ts"
+  ]
+}

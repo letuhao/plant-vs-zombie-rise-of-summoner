@@ -349,7 +349,8 @@ REST helpers: `POST /api/debug/economy`, `POST /api/debug/board-config`.
 
 **Actor HUD program E2E (owner):** live Playwright against vite dev + real injector — `npm run test:e2e:live` in `web/fusion-rpg-web` (auto-enables live mode via `--project=live-chromium`) or `.\scripts\prove-actor-hud-live.ps1` (also sets `FUSIONRPG_API_BASE` and optional `ACTOR_HUD_LIVE_E2E=1`). Requires server at `:5088` and game with injector connected. CI runs mocked `e2e/actor-hud.spec.ts` only.
 
-Expect bars **under** pea/zombie. Fill length uses **10% visual steps** (`ShieldBarVisual.DisplayRatio` — 89% capacity → 80% bar). F9 / F7. No top-left chip.
+Expect bars **under** pea/zombie (Actor HUD SSOT: UnitFrame **Body** + `worldYOffset`, reconciled
+2026-09-05). Fill length uses **10% visual steps** (`ShieldBarVisual.DisplayRatio` — 89% capacity → 80% bar). F9 / F7. No top-left chip.
 
 **Damage / decay (bar shortens):** lab freezes + silences peas, so shields stay full until you probe.
 

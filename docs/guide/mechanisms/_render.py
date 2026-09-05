@@ -42,6 +42,10 @@ def known_slugs() -> set[str]:
     return {f[:-3] for f in os.listdir(HERE) if f.endswith(".md") and f != "README.md"}
 
 
+def html_page_exists(slug: str) -> bool:
+    return os.path.isfile(os.path.join(SITE_MECH, slug + ".html"))
+
+
 def resolve(target: str, fmt: str) -> str:
     """Resolve an authoring link target for markdown ('md') or site HTML ('html').
 
@@ -49,6 +53,9 @@ def resolve(target: str, fmt: str) -> str:
     `^page.md`    -> guide root (docs/guide/)
     `~path`       -> docs root (docs/)
     `!url`        -> verbatim (external / in-page anchor)
+
+    For site HTML, sibling links use `.html` only when that teach page exists;
+    otherwise they fall back to the markdown stub under `../../mechanisms/`.
     """
     if target.startswith("!"):
         return target[1:]
@@ -56,7 +63,11 @@ def resolve(target: str, fmt: str) -> str:
         return ("../" if fmt == "md" else "../../") + target[1:]
     if target.startswith("~"):
         return ("../../" if fmt == "md" else "../../../") + target[1:]
-    return target + (".md" if fmt == "md" else ".html")
+    if fmt == "md":
+        return target + ".md"
+    if html_page_exists(target):
+        return target + ".html"
+    return f"../../mechanisms/{target}.md"
 
 
 # ------------------------------------------------------------- inline markup
@@ -166,6 +177,29 @@ def validate(doc: dict, slugs: set[str], path: str) -> list[str]:
                 bad(f"{key}: '{s}' is not a mechanism slug")
             if s == doc["slug"]:
                 bad(f"{key}: page links to itself")
+
+    # HTML resolve must never emit a missing .html (fallback to .md when no teach page)
+    def check_html_resolve(tgt: str, where: str) -> None:
+        if tgt.startswith(("^", "~", "!")):
+            return
+        href = resolve(tgt, "html")
+        if href.endswith(".html"):
+            if not html_page_exists(tgt):
+                bad(f"{where}: resolve('{tgt}') → {href} but site/mechanisms/{tgt}.html is missing")
+        elif href.endswith(".md"):
+            md_path = os.path.join(HERE, tgt + ".md")
+            if not os.path.isfile(md_path):
+                bad(f"{where}: resolve('{tgt}') → {href} but mechanisms/{tgt}.md is missing")
+        else:
+            bad(f"{where}: unexpected HTML resolve for '{tgt}' → {href}")
+
+    for text, where in walk_text(doc):
+        for m in INLINE.finditer(text):
+            if m.group(4) is not None:
+                check_html_resolve(m.group(4), where)
+    for key in ("related", "next"):
+        for s in doc.get(key, []):
+            check_html_resolve(s, key)
 
     return errs
 
@@ -473,10 +507,12 @@ def render_html(doc: dict) -> str:
     P.append('        <footer class="teach-foot">')
     if doc.get("next"):
         links = " ·\n            ".join(
-            f'<a href="{s}.html">{html.escape(link_title(s))}</a>' for s in doc["next"])
+            f'<a href="{html.escape(resolve(s, "html"), quote=True)}">'
+            f'{html.escape(link_title(s))}</a>' for s in doc["next"])
         P.append(f"          <p>\n            Next:\n            {links}\n          </p>")
     rel = " ·\n            ".join(
-        f'<a href="{s}.html">{html.escape(link_title(s))}</a>' for s in doc["related"])
+        f'<a href="{html.escape(resolve(s, "html"), quote=True)}">'
+        f'{html.escape(link_title(s))}</a>' for s in doc["related"])
     P.append(f"          <p>\n            Related:\n            {rel}\n          </p>")
     P.append("          <p>")
     P.append('            <a href="../index.html#mechanisms">← Mechanisms index</a> ·')

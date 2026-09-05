@@ -168,13 +168,18 @@ public sealed class ActorHudLayoutTests
         var json = """
             {
               "schemaVersion": 1,
-              "version": 1,
+              "version": 2,
               "statusStripMax": 3,
               "hpSliverEnabled": false,
               "badgeMax": 99,
-              "rowOffsetIdentity": 0.42,
-              "rowOffsetResources": 0.28,
-              "rowOffsetStatuses": 0.14,
+              "anchorKind": "body",
+              "worldYOffset": 0.08,
+              "barWorldWidth": 0.95,
+              "barWorldHeight": 0.12,
+              "rowOffsetIdentity": 0.30,
+              "rowOffsetResources": 0.0,
+              "rowOffsetStatuses": 0.16,
+              "maxStackPips": 3,
               "eliteTierThreshold": null,
               "magnitudeMidThreshold": 10.0,
               "magnitudeHighThreshold": 30.0
@@ -186,5 +191,7 @@ public sealed class ActorHudLayoutTests
         Assert.Equal(3, tuning.StatusStripMax);
         Assert.False(tuning.HpSliverEnabled);
         Assert.Equal(99, tuning.BadgeMax);
+        Assert.Equal("body", tuning.AnchorKind);
+        Assert.Equal(0.08, tuning.WorldYOffset);
     }
 }

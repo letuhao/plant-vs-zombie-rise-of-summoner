@@ -58,7 +58,8 @@ public static class ActorHudDirector
             });
         }
 
-        var worldBars = ActorHudPool.ShieldBarsDrawn;
+        var hudSlots = ActorHudPool.WorldBars;
+        var shieldBars = ActorHudPool.ShieldBarsDrawn;
         var fillRatio = ActorHudPool.LastAvgRatio;
         var trueRatio = ActorHudPool.LastAvgTrueRatio;
         return new Dictionary<string, object>
@@ -68,7 +69,9 @@ public static class ActorHudDirector
             ["hasInstances"] = runtime?.HasAnyInstances() ?? false,
             ["dataOwners"] = dataOwners,
             ["resolvedBodies"] = resolved,
-            ["worldBars"] = worldBars,
+            ["hudSlots"] = hudSlots,
+            ["shieldBars"] = shieldBars,
+            ["worldBars"] = shieldBars,
             ["fillRatio"] = fillRatio,
             ["trueRatio"] = trueRatio,
             ["displayRatio"] = fillRatio,
@@ -77,9 +80,11 @@ public static class ActorHudDirector
             ["lastDraw"] = new Dictionary<string, object>
             {
                 ["early"] = ActorHudPool.LastEarly,
-                ["drawnOwners"] = worldBars,
+                ["drawnOwners"] = shieldBars,
                 ["dataOwners"] = dataOwners,
-                ["worldBars"] = worldBars,
+                ["hudSlots"] = hudSlots,
+                ["shieldBars"] = shieldBars,
+                ["worldBars"] = shieldBars,
                 ["fillRatio"] = fillRatio,
                 ["trueRatio"] = trueRatio,
                 ["displayRatio"] = fillRatio,

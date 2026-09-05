@@ -4,6 +4,12 @@
 [world-stage capability map](../world-stage-map.md). **Level 3, depends on `world-shell` and
 `world-contract`** — built in parallel with `world-hud`.
 
+**Map-plane HOW superseded 2026-09-06.** React `SectorNode` **on the stage** and SVG lane drawing as
+the player map are replaced by
+[world-map-runtime/spec-world-map-runtime.md](../world-map-runtime/spec-world-map-runtime.md).
+**This spec still owns:** channel functions, GG-27 matrices, fog intel-first, greyscale rule. The
+inspector card (§A) is unchanged.
+
 **Ideal:** [world-stage-ideal.md](../world-stage-ideal.md) §4.1, §4.2, §4.9, §8.2, §8b.6, §8c.5.
 **Catalog:** [design/11-world-stage.html](../../design/11-world-stage.html) §A, §B, §C (and §D.3 for
 the mid-lane marker).

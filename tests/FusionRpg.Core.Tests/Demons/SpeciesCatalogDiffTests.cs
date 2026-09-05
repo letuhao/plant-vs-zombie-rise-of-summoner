@@ -95,11 +95,20 @@ public class SpeciesCatalogDiffTests
         var peashooterDiffs = diffs.Where(d => d.SpeciesId == "peashooter").Select(d => d.Field).ToHashSet(StringComparer.Ordinal);
         Assert.NotEmpty(peashooterDiffs); // real differences exist — this is not a no-op comparison
 
-        // demonTypeId differs by construction: the old generator used a plant/zombie-split id space
-        // (60000+t for plants, DemonCatalogTests.cs:104's own "review S5" note), the new pipeline
-        // uses one floor for both sides (T4.8's own RpgStore.BuildDemonSpeciesSnapshot). A real,
-        // known, structural difference — not a bug in either generator.
-        Assert.Contains("demonTypeId", peashooterDiffs);
+        // demonTypeId used to differ by construction — RpgStore.BuildDemonSpeciesSnapshot originally
+        // computed it as `GameTypeId + DemonTypeIdFloor` with no side split, unlike the old compiled
+        // generator's plant/zombie-split space (60000+/10000+). That was a real, undiscovered bug, not
+        // a documented divergence: found running the real catalog-runtime flip 2026-09-05 when a plant
+        // and a zombie sharing the same raw GameTypeId (BigWallNut/255, BlackTrainZombie/255)
+        // collided on the same DemonTypeId and DemonSpeciesCatalog.Validate correctly refused to
+        // start. Fixed by reproducing the old generator's own side split in
+        // BuildDemonSpeciesSnapshot — the two formulas are now IDENTICAL, so demonTypeId is no longer
+        // a diff for any species whose gameTypeId round-trips unchanged (every species here).
+        Assert.DoesNotContain("demonTypeId", peashooterDiffs);
+        // traitPool still differs by design (open-vocabulary anchor traits vs. the closed gameplay
+        // catalog — BuildDemonSpeciesSnapshot's own doc comment) — this is the real, remaining,
+        // documented divergence this test now proves instead.
+        Assert.Contains("traitPool", peashooterDiffs);
     }
 
     [Fact]

@@ -328,15 +328,24 @@ public class ConsumableTests
     }
 
     [Fact]
-    public void The_shipped_tuning_authors_three_classes_and_two_contexts()
+    public void The_shipped_tuning_authors_three_classes_and_three_contexts()
     {
         var t = Tuning();
         Assert.Equal(
             new[] { ConsumableClass.Restore, ConsumableClass.Draught, ConsumableClass.Ward },
             t.ClassesAuthored);
-        Assert.Equal(new[] { UseContext.Menu, UseContext.Dispatch }, t.ContextsAuthored);
+
+        // `battle` joined 2026-09-05 once the action layer served it end to end -- holdsStock reads
+        // the precondition (T10) and IStockLedger/RpgStore.TrySpendStock take the stack at commit.
+        // Until that second half existed, authoring the context would have shipped a free item.
+        Assert.Equal(new[] { UseContext.Menu, UseContext.Dispatch, UseContext.Battle }, t.ContextsAuthored);
         Assert.False(t.Authors(ConsumableClass.Board));
-        Assert.False(t.Authors(UseContext.Battle));
+        Assert.True(t.Authors(UseContext.Battle));
+
+        // `lawn` stays refused for its OWN reason, not by association: spec-usability-conditions.md
+        // §3a's mode matrix makes a holdsStock action not bindable there at all, and capPerMatch (G4)
+        // is unimplemented.
+        Assert.False(t.Authors(UseContext.Lawn));
         Assert.Equal(-100, t.DraughtBindingPriority);
     }
 
@@ -458,15 +467,42 @@ public class ConsumableTests
     }
 
     [Fact]
-    public void A_battle_or_lawn_use_context_is_refused_today_and_widening_is_one_line_of_tuning()
+    public void A_battle_use_context_is_now_ACCEPTED_and_only_lawn_is_still_refused()
     {
-        foreach (var ctx in new[] { UseContext.Battle, UseContext.Lawn })
-        {
-            var fails = ConsumableValidator.ValidateShape(
-                Def(contexts: new[] { ctx }), Array.Empty<ConsumableCoreAtom>(), 0, 0, null, null, null, Tuning());
-            Assert.Contains(fails,
-                f => f.Detail.StartsWith(ConsumableRules.UseContextUnsupported, StringComparison.Ordinal));
-        }
+        // ⭐ The "before" this test used to pin: both contexts refused, citing ssot-consumables.md
+        // §9.5(b)'s A3/A4 blocker. That blocker had already been ANSWERED on 2026-08-27 ("consuming
+        // the item is a precondition, not a cost") and shipped as LeafId.HoldsStock on 2026-08-28.
+        // What was genuinely missing was the spend, which now exists -- so `battle` is authored.
+        var battle = ConsumableValidator.ValidateShape(
+            Def(contexts: new[] { UseContext.Battle }), Array.Empty<ConsumableCoreAtom>(),
+            0, 0, null, null, null, Tuning());
+        Assert.DoesNotContain(battle,
+            f => f.Detail.StartsWith(ConsumableRules.UseContextUnsupported, StringComparison.Ordinal));
+
+        // `lawn` is refused on its own merits, and the message says which of the two reasons applies.
+        var lawn = ConsumableValidator.ValidateShape(
+            Def(contexts: new[] { UseContext.Lawn }), Array.Empty<ConsumableCoreAtom>(),
+            0, 0, null, null, null, Tuning());
+        var fail = Assert.Single(lawn,
+            f => f.Detail.StartsWith(ConsumableRules.UseContextUnsupported, StringComparison.Ordinal));
+        Assert.Contains("not bindable", fail.Detail, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void Widening_a_context_stays_one_line_of_tuning_and_never_invalidates_a_row()
+    {
+        // §4.1's no-migration proof, still true in the other direction: a tuning that has not yet
+        // authored `battle` refuses it by name, and the whole change is this list.
+        var narrower = ConsumableTuning.Parse(TuningJson().Replace(
+            "\"contextsAuthored\": [\"menu\", \"dispatch\", \"battle\"]",
+            "\"contextsAuthored\": [\"menu\", \"dispatch\"]", StringComparison.Ordinal));
+
+        Assert.False(narrower.Authors(UseContext.Battle));
+        Assert.Contains(
+            ConsumableValidator.ValidateShape(
+                Def(contexts: new[] { UseContext.Battle }), Array.Empty<ConsumableCoreAtom>(),
+                0, 0, null, null, null, narrower),
+            f => f.Detail.StartsWith(ConsumableRules.UseContextUnsupported, StringComparison.Ordinal));
     }
 
     [Fact]

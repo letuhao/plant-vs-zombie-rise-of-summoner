@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Almanac files what you meet — dossiers from your playthrough, not a wiki somebody else wrote." />
+    <title>Almanac dossiers — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/almanac.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          Quests, failure, memory · discovery record
+        </p>
+        <h1 class="teach-title">Almanac dossiers</h1>
+        <p class="teach-hook"><strong>Almanac</strong> files what you meet — dossiers from <strong>your</strong> playthrough, not a wiki somebody else wrote.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Almanac</dt>
+              <dd>The reference layer (<code>A</code>) for creature types, elements, statuses, recipes, and effect families as they become visible.</dd>
+            </div>
+            <div>
+              <dt>Dossier</dt>
+              <dd>A filed record of something you discovered — portrait, pedia text, costs, type info.</dd>
+            </div>
+            <div>
+              <dt>Discovery state</dt>
+              <dd>An empty slot means you have not met it yet — not a broken link.</dd>
+            </div>
+            <div>
+              <dt>Developer dump</dt>
+              <dd>Raw export pages are not the almanac. If it looks like a dump, it is not for players.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>Some dossiers are still thin; presentation polish continues.</li>
+            <li>Chronicle (<code>H</code>) is the history / XP ledger sibling — not the same layer.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>See something in the game and the RPG files it.</p>
+          <p>You end up with a browsable set of dossiers and fusion recipes you uncovered — a record of your run through the war.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Reference material, open over any stage:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  meet in play  -&gt;  filed dossier / recipe
+                       |
+                       v
+                 Almanac layer (A)
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Types</strong>
+              <p>Creature types you have discovered.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Ring and statuses</strong>
+              <p>Elements and statuses as they become player-visible.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Recipes</strong>
+              <p>Fusion recipes you uncover sit beside dossiers.</p>
+            </li>
+          </ol>
+          <p class="teach-note">Codex milestones for demons reward exploration. Web-only players can still claim completion milestones without every exclusive lawn capture.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>Almanac layer (A)</h3>
+            <p>Open over Sanctum or any stage when the rail allows.</p>
+            <ol>
+              <li>Meet something in play (lawn, expedition, map — wherever discovery fires).</li>
+              <li>Open Almanac (<code>A</code>).</li>
+              <li>Browse dossiers and recipes; empty slots are unmet, not errors.</li>
+            </ol>
+            <p class="teach-note">Older “types / recipes / runs” routes redirect here as the Sanctum model finishes replacing old audit screens.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Play until you have met at least one new type or recipe.</li>
+            <li>Open Almanac (<code>A</code>) and find that dossier.</li>
+            <li>Leave one empty slot alone — that is discovery state working.</li>
+          </ol>
+          <p class="teach-note">Stop when almanac ≠ wiki download. Sibling ledger: <a href="../../mechanisms/chronicle.md">chronicle</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why are some slots empty?</dt>
+              <dd>You have not discovered them yet. Empty means unmet.</dd>
+            </div>
+            <div>
+              <dt>Is this Chronicle?</dt>
+              <dd>No. Chronicle is history and XP ledgers (<code>H</code>).</dd>
+            </div>
+            <div>
+              <dt>Can web-only play finish milestones?</dt>
+              <dd>Design allows completion milestones without every exclusive lawn capture.</dd>
+            </div>
+            <div>
+              <dt>Is a raw data dump the almanac?</dt>
+              <dd>No. Developer dumps are not for players.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="../../mechanisms/chronicle.md">Chronicle</a>
+          </p>
+          <p>
+            Related:
+            <a href="../../mechanisms/chronicle.md">Chronicle</a> ·
+            <a href="type-specimen-xp.html">Type and specimen XP</a> ·
+            <a href="../../mechanisms/lawn-match.md">Lawn match</a> ·
+            <a href="specimen-fusion.html">Specimen fusion</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/almanac.md">Markdown (editable SSOT)</a> ·
+            <a href="../../almanac.md">Almanac</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/almanac.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

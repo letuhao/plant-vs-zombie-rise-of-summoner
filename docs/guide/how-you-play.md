@@ -12,6 +12,8 @@ The launcher starts the local server and opens the browser UI. Your save lives n
 
 That local browser UI is the **control room** — Sanctum, lawn, rift, expeditions, everything in this guide.
 
+Teach guide: [HTML](site/mechanisms/local-control-room.html) · [Markdown](mechanisms/local-control-room.md)
+
 ---
 
 ## The loop

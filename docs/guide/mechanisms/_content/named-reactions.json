@@ -1,0 +1,70 @@
+{
+  "slug": "named-reactions",
+  "title": "Named reactions and combo recipes",
+  "status": "Vision",
+  "kicker": "Combat language · every place",
+  "pillar": {"text": "Combat", "href": "combat.md"},
+  "loopLine": "Combat (every place)",
+  "hook": "**Vision — not playable yet:** a short **learnable** list of named reactions and combo recipes on top of the [element ring](element-ring) — the wet-and-lightning shape — not a second ring and no new elements.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Design locked, not in the current loop. You cannot study a finished named-recipe catalog as live play yet."},
+    {"term": "Named reaction", "meaning": "A learnable interaction with a name — not a random proc soup and not a seventh element."},
+    {"term": "Second ring", "meaning": "What this is **not**. Recipes sit on the existing six-plus-omni ring."},
+    {"term": "Reaction window", "meaning": "Interactive battles already talk about windows to react; this page is the shared catalog you can memorize."},
+    {"term": "Combo recipe", "meaning": "A short plan players can learn — wet then lightning style — not a secret wiki table."}
+  ],
+  "alsoTrue": [
+    "The ring, shields, and statuses already ship — play those.",
+    "Hands-on reaction feel hangs with [interactive battles](interactive-battles) (WIP)."
+  ],
+  "sections": [
+    {
+      "title": "Not in the current loop",
+      "paras": [
+        "Treat this as future study material on the combat spine.",
+        "Do not wait on named recipes to field elements or read statuses."
+      ]
+    },
+    {
+      "title": "Design intent",
+      "paras": [
+        "Players should plan interactions, not only read matchup tables.",
+        "The list stays short and learnable. It invents no new elements and does not replace the ring."
+      ],
+      "diagram": [
+        "  element ring (shipped)",
+        "       |",
+        "       +->  named recipes (Vision)  — learnable list on top",
+        "       +->  reaction windows in interactive battles (WIP)"
+      ]
+    },
+    {
+      "title": "What exists around it today",
+      "paras": [
+        "Matchups and statuses resolve now.",
+        "Interactive battles will name windows; this catalog is the thing you can study beside them."
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Read it as Vision — not a missing button bug.",
+    "Learn the shipped [element ring](element-ring) and [statuses](statuses) now.",
+    "When interactive battles ship reaction windows, treat named recipes as the catalog that will catch up."
+  ],
+  "doNote": "Combat depth hangs on places — see [Combat](^combat.md) and [The loops](^the-loops.md).",
+  "mixUps": [
+    {"q": "Where is the recipe book?", "a": "Vision — not shipped. You cannot open it as a live system yet."},
+    {"q": "Does this add new elements?", "a": "No. Design forbids a second ring and new colours."},
+    {"q": "Is this the same as statuses?", "a": "No. Statuses already resolve. Named recipes are a learnable interaction list on top of the ring."},
+    {"q": "Do I need a wiki?", "a": "Design wants a short shared list — not a secret table."},
+    {"q": "Are reaction windows Vision too?", "a": "Windows belong to interactive battles (WIP). This page is the named catalog (Vision)."}
+  ],
+  "next": ["interactive-battles"],
+  "related": ["element-ring", "interactive-battles", "statuses"],
+  "sources": [
+    "docs/guide/combat.md §Named reactions and combo recipes",
+    "docs/guide/the-loops.md §Combat depth · named combat reactions",
+    "docs/guide/mechanisms/named-reactions.md (prior stub)"
+  ]
+}

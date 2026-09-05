@@ -1,0 +1,77 @@
+{
+  "slug": "party-formations",
+  "title": "Party formations and combo skills",
+  "status": "Vision",
+  "kicker": "Delve, siege, party · how the pack stands",
+  "pillar": {"text": "Delves and sieges", "href": "delves-and-sieges.md"},
+  "loopLine": "Dungeon crawler — the Delve · Interactive battles",
+  "hook": "**Vision:** a second axis besides who is in the pack — **how they stand**, and a few **combination skills**. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not playable yet. Formations and combo skills are locked design for presence fights."},
+    {"term": "Formation", "meaning": "How the pack stands in a fight you play — not an expedition auto-resolve setting."},
+    {"term": "Combo skill", "meaning": "A combination skill that depends on who stands with whom — not a second element ring."},
+    {"term": "Presence", "meaning": "Matters in delves and interactive battles. Expeditions stay auto-resolve."}
+  ],
+  "alsoTrue": [
+    "Named combat reactions / combo recipes are a related Vision on the combat language — different catalog entry.",
+    "Who is in the pack is still the first axis — formations do not replace roster choice."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "You will not find a finished formation editor on the live delve or battle stage today — those stages are not in the loop yet.",
+        "Expeditions remain auto-resolve and do not need this axis."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "Pick who goes. Then pick how they stand.",
+        "A short set of combination skills rewards intentional setups when you are playing the fight yourself."
+      ],
+      "diagram": [
+        "  who is in the pack  +  how they stand  +  combo skills",
+        "                         |",
+        "                         +->  delve / interactive battle (presence)",
+        "                         +->  expeditions stay auto-resolve"
+      ]
+    },
+    {
+      "title": "Where it would matter",
+      "groups": [
+        {
+          "title": "Presence stages",
+          "intro": "Delves and interactive battles — not idle dispatch.",
+          "steps": [
+            "Provision a pack for a delve or battle.",
+            "Set formation when the UI exists.",
+            "Use combination skills when the fight opens those windows."
+          ],
+          "note": "Not in the current loop yet."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Keep expeditions auto-resolve — do not expect formation play there.",
+    "Treat missing formation UI as Vision, not a bug.",
+    "When presence fights ship, learn who + stance + combo as three readable choices."
+  ],
+  "doNote": "Stop when formation ≠ aptitude tree. Parent: [the Delve](delve).",
+  "mixUps": [
+    {"q": "Do expeditions use formations?", "a": "No. Expeditions stay auto-resolve."},
+    {"q": "Is this the same as named reactions?", "a": "Related Vision on combat depth — formations are party stance; named reactions are learnable fight recipes."},
+    {"q": "Can I set formations today?", "a": "No. Not finished / not playable yet."},
+    {"q": "Does formation replace who I bring?", "a": "No. It is a second axis beside roster choice."}
+  ],
+  "next": ["delve"],
+  "related": ["delve", "interactive-battles", "pack-extract-oaths"],
+  "sources": [
+    "docs/guide/delves-and-sieges.md §Formations and combo skills",
+    "docs/guide/the-loops.md §Party formations / combo skills",
+    "docs/guide/mechanisms/party-formations.md (prior stub)",
+    "docs/guide/glossary.md §Party formation"
+  ]
+}

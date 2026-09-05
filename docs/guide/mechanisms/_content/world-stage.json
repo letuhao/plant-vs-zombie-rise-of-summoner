@@ -1,0 +1,74 @@
+{
+  "slug": "world-stage",
+  "title": "World-stage empire",
+  "status": "Vision",
+  "kicker": "World and empire · where you stand",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-stage empire building",
+  "hook": "**Vision:** the finished place you stand to run the empire — one camera, corner HUD, loam strip, calendar, inspector — not a flowchart with a sidebar of buttons. Not finished / not playable yet as that place.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Locked design. The full empire stage as a finished place is not what you open today."},
+    {"term": "World stage", "meaning": "Where you **are** when you run the empire — distinct from the adventure graph where you **go**."},
+    {"term": "Thin map surface", "meaning": "What ships today: graph, movement, End Turn. Useful, but not the finished stage fantasy."},
+    {"term": "Inspector", "meaning": "A surface over the map for holdings and details — part of the stage HUD fantasy, not a separate wiki."}
+  ],
+  "alsoTrue": [
+    "Same virtual-turn clock as the adventure graph — End Turn still commits everyone’s orders.",
+    "Sector buildings and recruitment harden into this place as WIP / Vision pieces land."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "You play a thin map surface today. You do not yet stand in the finished empire place.",
+        "Read this page for the intended feel — then use [world map](world-map) and [virtual turns](virtual-turns) for live play."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "One camera. Corner HUD. Loam strip. Calendar. Inspector over the map.",
+        "Inside a held sector: slots, buildings, recruitment, upkeep, wardens. Neglect makes the Fracture real."
+      ],
+      "diagram": [
+        "  adventure graph (go)     world stage (are)",
+        "  sectors / lanes / fog  ->  HUD / inspector / buildings"
+      ]
+    },
+    {
+      "title": "What exists today",
+      "groups": [
+        {
+          "title": "Thin surface",
+          "intro": "Graph and End Turn are playable.",
+          "steps": [
+            "Travel to World and march as you do now.",
+            "Do not hunt for a finished stage HUD — it is Vision.",
+            "Watch for WIP buildings and tools as they harden toward this place."
+          ],
+          "note": "Full empire stage as the place you stand stays Vision."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Play the shipped world map without waiting on a finished stage chrome.",
+    "Treat missing inspector / recruitment game as Vision / WIP, not a broken install.",
+    "When you want construction fantasy, read [sector buildings](sector-buildings) as the farm beat that feeds this place."
+  ],
+  "doNote": "Stop when stage ≠ flowchart page. Live clock: [virtual turns](virtual-turns).",
+  "mixUps": [
+    {"q": "Is World travel the finished stage?", "a": "No. Travel opens the thin graph. Finished stage place is Vision."},
+    {"q": "Does the stage use a diary calendar?", "a": "Design shows a calendar in the HUD fantasy; time still resolves on virtual turns, not a real-life meta-clock."},
+    {"q": "Are buildings Vision too?", "a": "Buildings are WIP; the finished stage place is Vision."},
+    {"q": "Is this a different clock from the map?", "a": "No. Same End Turn / virtual turns."}
+  ],
+  "next": ["sector-buildings"],
+  "related": ["world-map", "sector-buildings", "virtual-turns", "three-layer-world"],
+  "sources": [
+    "docs/guide/the-rift.md §World stage — empire building",
+    "docs/guide/the-loops.md §World stage — empire building",
+    "docs/guide/mechanisms/world-stage.md (prior stub)"
+  ]
+}

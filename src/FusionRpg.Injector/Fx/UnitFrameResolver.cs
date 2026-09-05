@@ -126,29 +126,17 @@ public static class UnitFrameResolver
         var boundsH = 0f;
         var sortingOrder = 0;
 
-        try
+        // Prefer encapsulated SpriteRenderer bounds — a single first Renderer is often a tiny FX
+        // mesh, so "bottom = center - h/2" collapsed to mid-body and HUD sat on faces (LIVE 2026-09-06).
+        if (TryCollectSpriteBounds(follow, cellSpan, out var bx, out var by, out var bw, out var bh, out var sort))
         {
-            var r = follow.GetComponentInChildren<Renderer>();
-            if (r != null)
-            {
-                var b = r.bounds;
-                if (b.size.sqrMagnitude > 1e-6f)
-                {
-                    hasBounds = true;
-                    boundsCenterX = b.center.x;
-                    boundsCenterY = b.center.y;
-                    boundsW = b.size.x;
-                    boundsH = b.size.y;
-                }
-
-                try
-                {
-                    sortingOrder = r is SpriteRenderer sr ? sr.sortingOrder : r.sortingOrder;
-                }
-                catch { }
-            }
+            hasBounds = true;
+            boundsCenterX = bx;
+            boundsCenterY = by;
+            boundsW = bw;
+            boundsH = bh;
+            sortingOrder = sort;
         }
-        catch { }
 
         return new VfxUnitFrame
         {
@@ -164,6 +152,74 @@ public static class UnitFrameResolver
             HasBounds = hasBounds,
             SortingOrderHint = sortingOrder
         };
+    }
+
+    /// <summary>
+    /// Union of enabled SpriteRenderer bounds under <paramref name="follow"/>. Rejects decoy/tiny
+    /// sprites (&lt; 35% of cell span on both axes). Skips FusionRpg overlay objects.
+    /// </summary>
+    static bool TryCollectSpriteBounds(
+        Transform follow, float cellSpan,
+        out float centerX, out float centerY, out float width, out float height, out int sortingOrder)
+    {
+        centerX = centerY = width = height = 0f;
+        sortingOrder = 0;
+        try
+        {
+            var sprites = follow.GetComponentsInChildren<SpriteRenderer>(true);
+            if (sprites == null) return false;
+
+            var hasAcc = false;
+            var acc = default(Bounds);
+            var bestOrder = int.MinValue;
+            foreach (var sr in sprites)
+            {
+                if (sr == null) continue;
+                try { if (!sr.enabled) continue; } catch { continue; }
+                try
+                {
+                    var n = sr.gameObject.name;
+                    if (n != null && n.StartsWith("FusionRpg", StringComparison.Ordinal)) continue;
+                }
+                catch { }
+
+                Bounds b;
+                try { b = sr.bounds; }
+                catch { continue; }
+                if (b.size.sqrMagnitude < 1e-6f) continue;
+
+                if (!hasAcc)
+                {
+                    acc = b;
+                    hasAcc = true;
+                }
+                else
+                    acc.Encapsulate(b);
+
+                try
+                {
+                    if (sr.sortingOrder > bestOrder) bestOrder = sr.sortingOrder;
+                }
+                catch { }
+            }
+
+            if (!hasAcc) return false;
+            var box = acc;
+            var minAxis = cellSpan * 0.35f;
+            if (box.size.y < minAxis && box.size.x < minAxis)
+                return false;
+
+            centerX = box.center.x;
+            centerY = box.center.y;
+            width = box.size.x;
+            height = box.size.y;
+            sortingOrder = bestOrder == int.MinValue ? 0 : bestOrder;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     internal static Vector2 EstimateCellSize(int col, int row)

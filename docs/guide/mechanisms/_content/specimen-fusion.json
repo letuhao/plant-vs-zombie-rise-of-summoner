@@ -1,0 +1,71 @@
+{
+  "slug": "specimen-fusion",
+  "title": "Specimen fusion",
+  "status": "Shipped",
+  "kicker": "Roster and summoning · summon and fusion",
+  "pillar": {"text": "Creatures", "href": "creatures.md"},
+  "loopLine": "Summon and fusion",
+  "hook": "**Fusion** merges specimens into stronger forms and lets you discover recipes — the rail key `F` is this lab, not the host pack’s product name.",
+  "blindSpots": [
+    {"term": "Fusion (menu)", "meaning": "Specimen merge in Rise of Summoner. Separate from the lawn pack name Plants vs. Zombies: Fusion."},
+    {"term": "Recipe", "meaning": "A known merge path you discover by experimenting — not a wiki checklist you must memorize first."},
+    {"term": "Star merge", "meaning": "A merge that preserves identity and pushes power on that line."},
+    {"term": "Promotion", "meaning": "Raising rarity once, with a cost — a step up the display ladder, not a free rename."}
+  ],
+  "alsoTrue": [
+    "Fusion spends [essence](essence) (element-matched) and often shards — read the have/need panel.",
+    "Ingredients are [specimens](specimens); the altar is a different intake."
+  ],
+  "sections": [
+    {
+      "title": "What you can do",
+      "cards": [
+        {"name": "Star merges", "body": "Keep identity, push power."},
+        {"name": "Recipes", "body": "Discover by trying merges; silhouettes hint once you have met the species."},
+        {"name": "Trait inheritance", "body": "Builds come from merges — not only bigger numbers."},
+        {"name": "Promotion", "body": "Raise rarity once when the lab offers it, at a cost."}
+      ]
+    },
+    {
+      "title": "How a merge feels",
+      "steps": [
+        "Open Fusion (`F`).",
+        "Pick a base and sacrifices (locked or away-on-expedition specimens stay unavailable).",
+        "Read souls / shards / essence have-vs-need.",
+        "Confirm only when the colours and counts line up."
+      ],
+      "diagram": [
+        "  specimens + essence (+ shards)  ->  Fusion lab  ->  stronger specimen / discovery"
+      ],
+      "note": "Exact costs are on screen and in balance data — this page does not invent numbers."
+    },
+    {
+      "title": "Why element essence matters",
+      "paras": [
+        "The result’s element asks for matching essence so the combat ring still matters in the workshop.",
+        "Fire essence will not stand in for ice — see [essence](essence)."
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Unlock Fusion (you need a demon you can actually fuse).",
+    "Open `F` and pick a cheap experiment you can afford.",
+    "Watch discovery or power change, then check the specimen on Creatures."
+  ],
+  "doNote": "Stop when Fusion ≠ host-pack name is automatic. Optional WIP: [patron](patron).",
+  "mixUps": [
+    {"q": "Is this the lawn game’s fusion minigame?", "a": "No. This is the RPG specimen lab on key `F`."},
+    {"q": "Do I need a wiki to start?", "a": "No. Experiment — recipes reveal as you succeed."},
+    {"q": "Can I fuse with any essence colour?", "a": "No. Match the element the cost panel asks for."},
+    {"q": "Why is a specimen greyed out?", "a": "It may be locked or away (for example on an expedition)."}
+  ],
+  "next": ["patron"],
+  "related": ["essence", "specimens", "summoning-altar", "element-ring"],
+  "sources": [
+    "docs/guide/creatures.md §Fuse",
+    "docs/architecture/demons/spec-demon-fusion.md",
+    "web/fusion-rpg-web/src/features/fusion/fusionView.ts",
+    "docs/guide/mechanisms/specimen-fusion.md (prior stub)"
+  ]
+}

@@ -90,6 +90,33 @@ def _named_entries(corpus) -> "list[_Named]":
     return result
 
 
+@dataclass(frozen=True)
+class _Prosed:
+    entry_id: str
+    kind: str
+    field: str
+    text: str
+
+
+def _prose_entries(corpus, adapter) -> "list[_Prosed]":
+    # Additive: an adapter that declares no `dedup_fields` (every adapter before commander-effect)
+    # produces an empty list here, so this check is a strict addition with nothing to migrate.
+    if adapter is None:
+        return []
+    kind_specs = {k.kind: k for k in adapter.kinds()}
+    result = []
+    for kind in corpus.kinds:
+        spec = kind_specs.get(kind)
+        if spec is None or not spec.dedup_fields:
+            continue
+        for entry in corpus.by_kind(kind):
+            for field_name in sorted(spec.dedup_fields):
+                text = entry.get(field_name)
+                if text:
+                    result.append(_Prosed(entry.id, kind, field_name, text))
+    return result
+
+
 class SemanticDedup(Metric):
     id = "SemanticDedup/NearDuplicate"
     family = "SemanticDedup"
@@ -98,8 +125,16 @@ class SemanticDedup(Metric):
     needs = frozenset({"corpus"})
     covers: tuple[str, ...] = ("appendix-a:16",)
 
-    def __init__(self, near_duplicate_threshold: float = 0.6) -> None:
+    def __init__(self, near_duplicate_threshold: float = 0.6,
+                 prose_near_duplicate_threshold: float = 0.5) -> None:
         self.near_duplicate_threshold = near_duplicate_threshold
+        # Lower than the name threshold on purpose: calibrated 2026-09-06 against the real
+        # 84-entry commander-effect corpus with production shingles (k=5) + 32-hash MinHash. The
+        # clearest real pair (doublecherry/doubleshooter, near-identical sentences describing the
+        # same split-shot mechanic) scores 0.56; the next two candidates (0.41, 0.34) share only a
+        # verb ("发射", to fire) and are legitimate distinct doctrines, not near-copies. 0.5 catches
+        # the first without the other two.
+        self.prose_near_duplicate_threshold = prose_near_duplicate_threshold
 
     def run(self, ctx: Ctx) -> list[Finding]:
         entries = _named_entries(ctx.corpus)
@@ -165,4 +200,54 @@ class SemanticDedup(Metric):
                                     f"near-duplicate names (Jaccard~{similarity:.2f})",
                             evidence={"code": "LexicalNearDuplicate", "jaccard": similarity,
                                      "names": [by_id[a_id].name, by_id[b_id].name]}))
+
+        # 6.1c / 6.2b prose duplicate and near-duplicate — same pipeline as 6.1a/6.2, over each
+        # kind's own declared free-text field(s) (KindSpec.dedup_fields) rather than `name`.
+        # `commander-effect`'s `doctrine` is the first consumer; additive, so a kind that declares
+        # nothing produces no prose entries and this block is a no-op for it (see _prose_entries).
+        prosed = _prose_entries(ctx.corpus, ctx.adapter)
+
+        by_exact_text: "dict[tuple[str, str], list[_Prosed]]" = {}
+        for p in prosed:
+            by_exact_text.setdefault((p.field, p.text), []).append(p)
+        for (field_name, text), group in by_exact_text.items():
+            if len(group) > 1:
+                findings.append(Finding(
+                    metric=self.id, severity=Severity.GAP, subject=text,
+                    message=f"'{field_name}' text is used verbatim by {len(group)} entries: "
+                            f"{[g.entry_id for g in group]}",
+                    evidence={"code": "ExactProseDuplicate", "field": field_name,
+                             "entryIds": [g.entry_id for g in group]}))
+
+        # DIRECT all-pairs Jaccard over the exact shingle sets, not MinHash+LSH. §6.2's LSH banding
+        # exists to keep 1,400+ NAMES off O(n^2) — verified 2026-09-06 that at prose-scale
+        # similarity (~0.5-0.6, sentences sharing a topic rather than near-identical short
+        # strings), 8-band/4-row LSH has real recall loss: it missed the real corpus's clearest
+        # pair (Jaccard 0.56) entirely on a live run. A kind with a prose dedup field is bounded in
+        # the low thousands at worst (commander-effect's ceiling is ~900 demons), where O(n^2)
+        # exact-shingle comparison is cheap and has no recall problem to trade away.
+        prose_shingle_sets = {(p.entry_id, p.field): shingles(p.text) for p in prosed}
+        prose_by_key = {(p.entry_id, p.field): p for p in prosed}
+        prose_keys = list(prose_shingle_sets.keys())
+        for i in range(len(prose_keys)):
+            for j in range(i + 1, len(prose_keys)):
+                a_key, b_key = prose_keys[i], prose_keys[j]
+                a_entry, b_entry = prose_by_key[a_key], prose_by_key[b_key]
+                if a_entry.text == b_entry.text:
+                    continue  # exact duplicates already reported above
+                a_set, b_set = prose_shingle_sets[a_key], prose_shingle_sets[b_key]
+                if not a_set or not b_set:
+                    continue
+                similarity = len(a_set & b_set) / len(a_set | b_set)
+                if similarity >= self.prose_near_duplicate_threshold:
+                    findings.append(Finding(
+                        metric=self.id, severity=Severity.NOTE,
+                        subject=f"{a_entry.entry_id}~{b_entry.entry_id}",
+                        message=f"{a_entry.kind} entries '{a_entry.entry_id}' and "
+                                f"'{b_entry.entry_id}' have near-duplicate '{a_entry.field}' "
+                                f"text (Jaccard={similarity:.2f})",
+                        evidence={"code": "ProseNearDuplicate", "jaccard": similarity,
+                                 "field": a_entry.field,
+                                 "entryIds": [a_entry.entry_id, b_entry.entry_id],
+                                 "texts": [a_entry.text, b_entry.text]}))
         return findings

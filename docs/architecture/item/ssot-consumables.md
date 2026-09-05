@@ -435,7 +435,7 @@ Two new tables. Everything else is reused.
 |---|---|---|
 | `container_id` | TEXT PK, FK → `effect_container(container_id)` | must have `container_kind = 'consumable'` |
 | `class_id` | TEXT NOT NULL | **closed enum, six values**: `restore` `draught` `ward` `board` `revive` `utility`. Not content — each needs an executor, so adding one is code (SC7) |
-| `use_context` | TEXT NOT NULL | **closed set, comma-joined**: `menu` · `dispatch` · `battle` · `lawn`. v1 authors only `menu` and `dispatch`. Widening is additive and never invalidates a row (§4.1) |
+| `use_context` | TEXT NOT NULL | **closed set, comma-joined**: `menu` · `dispatch` · `battle` · `lawn`. v1 authors `menu`, `dispatch` and — since **2026-09-05** — `battle` (§9 item 5(b); the leaf reads the precondition, `IStockLedger` takes the stack at commit). `lawn` alone is still refused. Widening is additive and never invalidates a row (§4.1) |
 | `grade` | INT NOT NULL | 1–5, the strength axis. **Must equal the tier of every atom in the core** — the same band-consistency rule `I3` applies to base types |
 | `exclusion_group` | TEXT NOT NULL | The one-per-run key. Defaults to the container's dominant `(family_id, variant)`, which is the shipped `group` default (definitions §4) |
 | `manifest_cost` | INT NOT NULL DEFAULT 1 | How many of the `N` manifest places this consumable occupies. Lets a strong draught cost both places without a second table |
@@ -538,7 +538,7 @@ deliberately; each names a distinct player-visible refusal.
 | 1 | **`ConsumableRolls`** | A `consumable` container declares `pool_rolls > 0`, a `min_tier`/`max_tier` window, or a non-NULL `rarity` | `UnsatisfiablePool` means the pool cannot be drawn from. This is the opposite: a pool that must not exist at all. Conflating them makes the operator message actively misleading |
 | 2 | **`DraughtLimitExceeded`** | The manifest's summed `manifest_cost` exceeds `N` | This is the mechanic's primary refusal and a player sees it constantly. `BadParamValue` would name the input, not the rule. `I10` argues the same for `CharmBudgetExceeded` (`ssot-charms.md:436`) |
 | 3 | **`DraughtFamilyConflict`** | Two manifest entries share an `exclusion_group` | `DuplicateAtomInContainer` is an *authoring* collision inside one container. This is a *player* collision across two containers at the gate |
-| 4 | **`UseContextUnsupported`** | A consumable is used in a context its `use_context` does not name, **or** in a context the host cannot serve — `battle` before the action layer, `lawn` with no injector | `RuntimeUnsupported` is about a *kind's* executor. This is about a *use site*. A player told "runtime unsupported" for "you cannot drink this mid-fight yet" learns nothing |
+| 4 | **`UseContextUnsupported`** | A consumable is used in a context its `use_context` does not name, **or** in a context the host cannot serve — ~~`battle` before the action layer~~ (served since 2026-09-05, §9 item 5(b)), `lawn` with no injector **and** not bindable at all per `spec-usability-conditions.md` §3a's mode matrix | `RuntimeUnsupported` is about a *kind's* executor. This is about a *use site*. A player told "runtime unsupported" for "you cannot drink this mid-fight yet" learns nothing |
 
 ### 6.3 Startup and property validation
 
@@ -717,6 +717,35 @@ Twelve items. Items 1–3 are the ones without which v1 does not exist.
      `resource_id` to admit an item stock row, or state that consuming the item is a *precondition*
      (`A4`) rather than a *cost* (`A3`). Either is fine; leaving it unstated means the first consumable
      action has nowhere to declare what it spends.
+
+     > ✅ **ANSWERED 2026-08-27, and BUILT 2026-09-05. This ask was closed for more than a week before
+     > anyone annotated it here, and that omission is the whole reason it kept being restated as open.**
+     >
+     > **The answer: a precondition, not a cost.** `spec-action-costs.md` §8 declines to widen
+     > `resource_id` and gives three reasons, the decisive one being that *"costs scale with `Θ` and
+     > rungs; an item does not — one potion is one potion at every level."*
+     > `spec-usability-conditions.md` §3a takes it from there and states it as settled: *"So consuming
+     > the item is a **precondition**, and this module reads it."* Both documents were revised
+     > **2026-08-27**.
+     >
+     > **What shipped:** `LeafId.HoldsStock` — `(stockId, minQty)`, a flat allocation-free probe on
+     > `FactReader`, read by gate 5 of `UsabilityEvaluator` (`action-todo.md` T10, done **2026-08-28**).
+     >
+     > **What was still missing until 2026-09-05, and is the narrower thing this row really tracked:**
+     > the leaf only ever **read** a quantity. Nothing decremented a stack when an action gated on it
+     > fired, so a `battle` consumable would have been free forever. Closed now —
+     > `ActionCompiler` lifts each conjunctive `holdsStock` leaf into `CompiledAction.StockDemands`
+     > (the compiled predicate cannot do this itself: it interns the `stockId` away to a 0-3 slot),
+     > `ActionStockCommit`/`IStockLedger` spend at commit, and `RpgStore.TrySpendStock` takes the
+     > stacks in one transaction through the same conditional decrement `TrySpendDraughts` uses.
+     >
+     > **Consequence for §5.2:** `use_context = battle` is **authored** as of 2026-09-05
+     > (`consumables.v1.json`'s `contextsAuthored`). §6.2 code 4's reason for refusing it —
+     > *"`battle` before the action layer"* — no longer holds. **`lawn` stays refused**, on its own
+     > two reasons rather than by association with `battle`: `spec-usability-conditions.md` §3a's mode
+     > matrix makes a `holdsStock` action **not bindable** in lawn mode at all (the overlay is a
+     > stateless observer and never reads current inventory — `ActionCompiler` refuses it by name with
+     > `ConsumableUnsupportedInMode`), and `capPerMatch` (**G4**, §9 item 12(a)) is still unimplemented.
    - **(c) `A4`'s usability condition needs a leaf** that reads "do I hold ≥ 1 of this stock row". The
      leaf list is closed at ~8 (`atom-catalog-ssot.md` §8) and none of them reads inventory.
 

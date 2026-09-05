@@ -6,7 +6,9 @@
 [docs/research/actor-hud-data-pipeline-audit-2026-08-30.md](../docs/research/actor-hud-data-pipeline-audit-2026-08-30.md) ·
 **Tasks:** [actor-hud-todo.md](actor-hud-todo.md)
 
-**Status:** implemented 2026-08-31 — all modules shipped; CI + guard acceptance green. Optional: LIVE eyeball (`prove-actor-hud-live.ps1`).
+**Status:** implemented 2026-08-31 — all modules shipped; CI + guard acceptance green.
+**Placement SSOT (2026-09-05):** Unity Body + `worldYOffset` (center-bottom). Visual correction code
+landed (glyphs, pips, Body root). LIVE eyeball remains — see [actor-hud-todo.md](actor-hud-todo.md).
 
 ---
 

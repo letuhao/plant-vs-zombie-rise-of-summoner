@@ -1,0 +1,75 @@
+{
+  "slug": "sector-buildings",
+  "title": "Sector buildings",
+  "status": "WIP",
+  "kicker": "World and empire · farm on held ground",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-stage empire · Farm / hunt / defend",
+  "hook": "**WIP:** raise economy on ground you hold — wells, waystations, granaries, and kin — paid in [loam](loam) and sometimes [essence](essence). Not finished / not fully playable yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Designed and partly built. Do not expect a finished construction loop on every held sector today."},
+    {"term": "Sector building", "meaning": "A structure on held ground that raises economy or support — not a lawn plant card."},
+    {"term": "Loam cost", "meaning": "Buildings spend world stock. Exact amounts are balance data — trust the UI when it ships."},
+    {"term": "Farm beat", "meaning": "This is the empire farm verb — yield and upkeep on ground you keep."}
+  ],
+  "alsoTrue": [
+    "Named examples in the fiction include wells, waystations, granaries, deep roots, and soul conduits — not a closed final list.",
+    "The finished place you stand while building is [world stage](world-stage) (Vision as a finished place)."
+  ],
+  "sections": [
+    {
+      "title": "What it will feel like",
+      "paras": [
+        "Inside a held sector: slots, buildings, recruitment, upkeep.",
+        "Raise economy on ground you hold. Neglect still threatens the holding through loam and the Fracture."
+      ],
+      "diagram": [
+        "  hold sector  ->  spend loam (+ essence?)  ->  building",
+        "                         |",
+        "                         +->  yield / support on that ground"
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Play the shipped thin map: claim, hold, watch loam.",
+        "Treat missing construction panels as unfinished work, not a broken save."
+      ]
+    },
+    {
+      "title": "Where it will live",
+      "groups": [
+        {
+          "title": "Empire surface",
+          "intro": "When it ships, buildings raise from the empire / sector surface on ground you hold.",
+          "steps": [
+            "Hold a sector with a working loam story.",
+            "Open the sector / empire construction UI when it appears.",
+            "Spend loam (and essence when asked) — read on-screen costs, never a remembered constant."
+          ],
+          "note": "Not finished yet. Fantasy only until the loop hardens."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Keep claiming and holding ground so farm has somewhere to land.",
+    "Watch loam — buildings will spend it, not souls.",
+    "When construction UI appears, follow have/need on screen and ignore remembered numbers."
+  ],
+  "doNote": "Stop when building ≠ altar pull. Related: [loam](loam), [world stage](world-stage).",
+  "mixUps": [
+    {"q": "Can I build everywhere today?", "a": "No. Sector buildings are WIP — absence is expected."},
+    {"q": "Do buildings cost souls?", "a": "Design spends loam, sometimes essence — not souls as the building wallet."},
+    {"q": "Does loam bank with the building into the next world?", "a": "No. Loam and that map’s holdings stay behind."},
+    {"q": "Is this the world stage?", "a": "Buildings hang on the farm/empire beat. The finished stage place is a separate Vision page."}
+  ],
+  "next": ["world-stage"],
+  "related": ["loam", "essence", "world-stage", "farm-hunt-defend"],
+  "sources": [
+    "docs/guide/the-rift.md §Sector buildings",
+    "docs/guide/the-rift.md §World stage — empire building",
+    "docs/guide/mechanisms/sector-buildings.md (prior stub)"
+  ]
+}

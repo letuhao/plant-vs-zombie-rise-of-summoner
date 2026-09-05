@@ -40,6 +40,9 @@ COMMANDER_EFFECT = KindSpec(
     optional=frozenset(),
     reference_fields=frozenset({"demonId"}),
     motif_expression="a doctrine — how the squad behaves",
+    # `doctrine` is free prose (§2.4 of spec-commander-effect.md), the field where thesaurus
+    # convergence actually shows up — `name` alone missed the two pairs found on the live corpus.
+    dedup_fields=frozenset({"doctrine"}),
 )
 
 # Ships as a kind; nothing generates into it in v1 (audit A7). With no world host, a

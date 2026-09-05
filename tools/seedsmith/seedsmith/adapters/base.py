@@ -50,6 +50,16 @@ class KindSpec:
     # this one (over a demons-local dict, or abusing `registries()`) was chosen.
     motif_expression: "str | None" = None
 
+    # Free-text field(s) on this kind that should ALSO run through SemanticDedup's near-duplicate
+    # pipeline (spec-analytics.md §6.2), beyond the `name` field it always checks. `name` on most
+    # kinds is short (a few words); `dedup_fields` names a kind's own longer prose field, when it
+    # has one, where the same convergence risk applies at sentence scale -- confirmed for real on
+    # the live corpus 2026-09-06: `commander-effect`'s 84-entry `doctrine` field already contains
+    # two near-duplicate pairs (Jaccard 0.56, 0.41) with zero mechanism to notice as the roster
+    # grows toward ~900. Additive, defaulted empty, so every kind without a prose field is
+    # untouched -- same shape as `motif_expression` above.
+    dedup_fields: frozenset[str] = frozenset()
+
 
 @dataclass(frozen=True)
 class Dimension:

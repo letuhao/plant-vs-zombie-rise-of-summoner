@@ -1,0 +1,82 @@
+{
+  "slug": "chronicle",
+  "title": "Chronicle",
+  "status": "Shipped",
+  "kicker": "Quests, failure, memory · history and progression",
+  "pillar": {"text": "Almanac", "href": "almanac.md"},
+  "loopLine": "Level up and power",
+  "hook": "**Chronicle** is your history — run results, progression, and the lasting sheet of what you earned and spent.",
+  "blindSpots": [
+    {"term": "Chronicle", "meaning": "The history layer (`H`) — ledgers and run memory. Not the Almanac dossier browser."},
+    {"term": "Progress survives", "meaning": "Nothing you earn disappears with the level. There is no hard ceiling that says the grind is over."},
+    {"term": "XP ledger", "meaning": "Tracks summoner, plant types, zombie types, and specimens — separate from the souls bank."},
+    {"term": "Run result", "meaning": "A recorded outcome of play — part of history, not a quest checklist."}
+  ],
+  "alsoTrue": [
+    "Souls buy summons and rituals; XP grows power curves and unlocks — different stocks of progress.",
+    "New worlds keep who you are — chronicle memory hangs with that prestige of place."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "Your history of the war: what you ran, what you earned, what leveled.",
+        "It is the ledger of your summoner story — not a wiki of species art."
+      ]
+    },
+    {
+      "title": "How progression lands",
+      "table": {
+        "cols": ["Track", "What grows"],
+        "rows": [
+          ["Summoner", "Your account level and XP"],
+          ["Plant / zombie types", "Per-type levels from play"],
+          ["Specimens", "Individual demons from work they did — lawn, expedition, battle"]
+        ]
+      },
+      "cards": [
+        {"name": "Run results", "body": "History of what you finished."},
+        {"name": "Progression dossier", "body": "The lasting sheet of earned and spent power."}
+      ],
+      "diagram": [
+        "  play  ->  XP / run results  ->  Chronicle (H)",
+        "  play  ->  souls (separate bank)"
+      ]
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "Chronicle layer (`H`)",
+          "intro": "Open from the rail when available.",
+          "steps": [
+            "Open Chronicle (`H`).",
+            "Read run history and XP ledgers.",
+            "Cross-check Almanac (`A`) when you want dossiers instead of ledgers."
+          ],
+          "note": "Presentation polish continues; the surface exists in this build."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Finish a lawn match or expedition that can grant XP.",
+    "Open Chronicle (`H`) and find a ledger that moved.",
+    "Note that souls did not replace XP — both can rise for different jobs."
+  ],
+  "doNote": "Stop when chronicle ≠ almanac. Prestige of place: [new world](new-world-prestige).",
+  "mixUps": [
+    {"q": "Is Chronicle the quest log?", "a": "No. Quest log is Vision. Chronicle is history and XP."},
+    {"q": "Do I lose XP when a world ends?", "a": "You keep who you are — progression banks with the summoner. Loam and map holdings do not."},
+    {"q": "Is there a level cap?", "a": "No hard ceiling — magnitudes keep meaning as you climb."},
+    {"q": "Are souls shown as XP?", "a": "No. Souls are a separate stock from XP ledgers."}
+  ],
+  "next": ["new-world-prestige"],
+  "related": ["almanac", "dave-level", "type-specimen-xp", "new-world-prestige"],
+  "sources": [
+    "docs/guide/almanac.md §Chronicle layer",
+    "docs/guide/almanac.md §How progression lands",
+    "docs/guide/mechanisms/chronicle.md (prior stub)"
+  ]
+}

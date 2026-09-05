@@ -292,7 +292,12 @@ to branch/retry/resume"* (workflow definition). That is what `workflow-runtime` 
 
 **Module specs** (written 2026-09-01, audited, **SEALED — approved by the owner 2026-09-01,
 authorized to build**; audit: [review/audit-generation-runtime-specs.md](seedsmith/review/audit-generation-runtime-specs.md),
-10 findings all applied, **zero open questions remain**):
+10 findings all applied, **zero open questions remain**). **Amended 2026-09-06:**
+`spec-commander-effect.md` gained a corpus-wide near-duplicate check on `doctrine` — the sealed
+version measured per-item quality only, with no distribution/diversity gate at corpus scale, despite
+its own §9 probe already reproducing the thesaurus-collision failure at single-demon scale (Jaccard
+mean 0.52 across 3 generations for one demon). Found while auditing whether every seedsmith
+generator, not only `adapter-items`/`tree-plan`, has a deterministic pre-generation coverage check.
 [dependency-baseline](seedsmith/spec-dependency-baseline.md) ·
 [motif-prose-filter](seedsmith/spec-motif-prose-filter.md) ·
 [workflow-runtime](seedsmith/spec-workflow-runtime.md) ·

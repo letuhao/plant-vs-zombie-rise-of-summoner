@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="The rift world map is where you go — sectors joined by lanes, legions you march, ground you claim, and fog you push through." />
+    <title>Rift world map — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/world-map.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--shipped">Shipped</span>
+          World and empire · adventure graph
+        </p>
+        <h1 class="teach-title">Rift world map</h1>
+        <p class="teach-hook">The <strong>rift world map</strong> is where you go — sectors joined by lanes, legions you march, ground you claim, and fog you push through.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>Rift / world map</dt>
+              <dd>The adventure stage: a network of sectors and lanes. Not the lawn, and not the finished empire stage HUD.</dd>
+            </div>
+            <div>
+              <dt>Sector</dt>
+              <dd>A node of ground you can claim, hold, or lose. Your capital sector is the homeworld.</dd>
+            </div>
+            <div>
+              <dt>Legion</dt>
+              <dd>A force you march along lanes. Movement and fights hang on legions, not on a free camera fly-to.</dd>
+            </div>
+            <div>
+              <dt>End Turn</dt>
+              <dd>The world clock. Orders wait until you press it — see <a href="virtual-turns.html">virtual turns</a>.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>You are Dave. Find Zomboss’s fortress and take it before your homeworld falls.</li>
+            <li>Buildings, richer map tools, and map→battle handoff are still WIP. Three-layer presentation and the generator stay Vision.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="what-it-is-title">
+          <h2 id="what-it-is-title">What it is</h2>
+          <p>A graph of sectors joined by lanes. You scout through fog, march legions, claim ground, and read Zomboss as a real opponent.</p>
+          <p>Holding a sector grants full sight of it — standing on your own land is never a guessing game.</p>
+          <p class="teach-note">Win and lose live on <a href="../../the-game.md">The game</a>: take Zomboss’s fortress, or lose the homeworld.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="how-it-works-title">
+          <h2 id="how-it-works-title">How it works</h2>
+          <p>Adventure verbs on the graph:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  Sanctum  -&gt;  World map  -&gt;  march / claim / End Turn
+                    |
+                    +-&gt;  fog, loam, Zomboss
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">March and claim</strong>
+              <p>Move legions along lanes; claim sectors; watch supply and contact.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Hold</strong>
+              <p>Ground is not free to keep — <a href="loam.html">loam</a> and neglect make holdings real.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Opponent</strong>
+              <p><a href="../../mechanisms/zomboss-commander.md">Zomboss</a> runs his own war from his own fog.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="where-you-find-it-title">
+          <h2 id="where-you-find-it-title">Where you find it</h2>
+          <div class="gui-walk">
+            <h3>Travel to World</h3>
+            <p>Open the World stage from the Sanctum when travel is available.</p>
+            <ol>
+              <li>Travel to World.</li>
+              <li>Select a legion and move along lanes.</li>
+              <li>Claim when contact allows, then press End Turn when orders are set.</li>
+            </ol>
+            <p class="teach-note">Later doors into delves, cede, dowse, lenses, and the outliner are WIP / Vision — see <a href="map-orders.html">map orders</a>.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do (first time)</h2>
+          <ol class="steps-plain">
+            <li>Travel to World from the Sanctum.</li>
+            <li>Move one legion one step and notice fog vs clear ground.</li>
+            <li>Press End Turn once so you see everyone’s orders resolve.</li>
+          </ol>
+          <p class="teach-note">Stop when map ≠ lawn and End Turn ≠ a diary clock. Next: <a href="virtual-turns.html">virtual turns</a> and <a href="fog-of-war.html">fog of war</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Is this real-time?</dt>
+              <dd>No. Time is virtual turns — you press End Turn.</dd>
+            </div>
+            <div>
+              <dt>Is the full empire HUD here?</dt>
+              <dd>Thin map surface is playable. Finished world-stage place is Vision — see <a href="../../mechanisms/world-stage.md">world stage</a>.</dd>
+            </div>
+            <div>
+              <dt>Does Zomboss see my whole save?</dt>
+              <dd>No. He evaluates from his fog — see <a href="../../mechanisms/zomboss-commander.md">Zomboss</a>.</dd>
+            </div>
+            <div>
+              <dt>Can I enter a delve from a sector today?</dt>
+              <dd>Delve doors are Vision. Map play today is march, claim, End Turn, fog, Zomboss.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="virtual-turns.html">World virtual turns</a>
+          </p>
+          <p>
+            Related:
+            <a href="virtual-turns.html">World virtual turns</a> ·
+            <a href="fog-of-war.html">Fog of war</a> ·
+            <a href="loam.html">Loam and the Fracture</a> ·
+            <a href="../../mechanisms/zomboss-commander.md">Zomboss as commander</a> ·
+            <a href="farm-hunt-defend.html">Farm, hunt, and defend</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/world-map.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-rift.md">The rift</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/world-map.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>

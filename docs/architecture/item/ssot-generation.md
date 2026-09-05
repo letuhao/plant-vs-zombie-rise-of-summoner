@@ -336,7 +336,12 @@ contentLevel:
                     web battle (src/FusionRpg.Core/Expeditions/ExpeditionResolver.cs, WaveChain)
   expedition boss   same as above, at the fixed boss wave (BossWaveId = "rift-tyrant") — still
                     WaveDef.RecommendedLevel, not "tier base level + 3"
-  world sector      sectorLevel(danger_band)        — mapping owed by the world program (§10.10)
+  world sector      sectorLevel(danger_band) = Wm · DangerBand(M), Wm = 5 — CLOSED, and SHIPPED
+                    2026-09-05 as PowerIndexComposer.MapLevel (ssot-power-scale.md §5.3/§10.3, owner
+                    decision 2026-08-23; spec-content-authoring.md §2.1). §10.10 below is answered.
+                    The loot_source row is resolved at runtime by WorldSectorLootSource, not authored:
+                    the correlation id derives from source_id, so the SECTOR's own id has to be the
+                    key. Band 0 (safe ground) is refused by name, never floored to 1
   PvZ run           not yet designed — no `mappedRunLevel` concept exists in shipped code. PvZ-
                     sourced drops need a real contentLevel source before this lane can resolve one;
                     tracked as an open question (§11), not a formula to treat as built
@@ -932,9 +937,12 @@ before anything here is built.
 9. **I5 — how a set piece is drawn.** I assume set membership is a **tag on the base type**, drawn from
    the general table at its natural rarity, with no special group. If sets need
    guaranteed-progress-toward-completion, that is a pity variant: mine to build, I5's to specify.
-10. **The world map program — `danger_band → content level`.**
-    `rpg_world_sectors.danger_band` exists (`src/FusionRpg.Data/Sqlite/RpgStore.World.cs:50`) with no
-    level mapping I could find. §4.1 has a hole until it is published.
+10. ~~**The world map program — `danger_band → content level`.**~~ ✅ **Answered, and now built.**
+    The mapping was published as an owner decision on **2026-08-23** — `ssot-power-scale.md` §5.3/§10.3,
+    `mapLevel(M) = Wm · DangerBand(M)` with `Wm = 5` derived from the shipped `SectorTypeCatalog`
+    bands — and restated for this exact row by `spec-content-authoring.md` §2.1 on **2026-08-24**. It
+    stayed prose until **2026-09-05**, when it shipped as `PowerIndexComposer.MapLevel` with
+    `WorldSectorLootSource` as its first caller. §4.1's hole is closed.
 11. **The action program — confirm consumables stay out.** `entry_kind` has room; I do not ship one
     (§5.4). If consumables are wanted before the action layer, say so and I will add a degenerate arm.
 12. **E5/E6 (effect-atom) — the optional `DrawEnvelope` parameter** on `Instantiator.TryInstantiate`

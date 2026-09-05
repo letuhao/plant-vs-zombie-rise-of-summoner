@@ -1,8 +1,18 @@
 # Mechanism teach-page content — authoring contract
 
-One JSON file per mechanism. `_render.py` turns each file into **both**
+## Two tracks until PG-F6 finishes
+
+| Track | What | Edit |
+|---|---|---|
+| **A — Teach pages** | JSON here → `_render.py` writes both `mechanisms/<slug>.md` and `site/mechanisms/<slug>.html` | Edit the JSON only; never hand-edit those two outputs for a rendered slug |
+| **B — Short stubs** | Hand-written `mechanisms/<slug>.md` (~status / what / how / related) until promoted | Edit the markdown stub directly |
+| **Hand teach exception** | **Local control room** is a full teach page without JSON yet | Edit MD + HTML by hand until migrated into `_content/` |
+
+Today **every mechanism in the handbook index has a teach page** except the hand-authored Local control room (migrate to JSON when convenient). Edit JSON here and run `_render.py` — never hand-edit rendered `.md` / `.html` outputs for track-A slugs. Sibling links fall back to `.md` when a target has no HTML teach page yet (should be rare now).
+
+One JSON file per mechanism on track A. `_render.py` turns each file into **both**
 `mechanisms/<slug>.md` and `site/mechanisms/<slug>.html`, so the markdown and the
-site page can never drift. Never hand-edit those two outputs — edit the JSON and re-render.
+site page can never drift.
 
 ```powershell
 python _render.py            # render everything, refresh both indexes

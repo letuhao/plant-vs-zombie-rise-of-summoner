@@ -2475,3 +2475,152 @@ living end-to-end test, not scaffolding to throw away.
 - [ ] Every suite green; every guard green; overflow and magic-number audits clean
 - [ ] A demon summoned in game carries: species effects · its own trait roll · commander buff
 - [ ] Two players' rosters differ, and each player's own roster is stable across sessions
+
+---
+
+## Phase 8 — fusion recipes at scale (added 2026-09-05, `ds 17-18`)
+
+**Why this phase exists, and why it wasn't in the original 26-module scope.** The real
+`catalog-runtime` flip (Phase 4) found `DemonRecipeCatalog.Build()`'s deterministic, same-rung-below
+fusion assignment breaks at 829 species: 21 top-rarity (`Almanac`) species need unique input pairs from
+just 4 `Sunwoven` candidates one rung below — 4 elements support at most `C(4,2)=6` distinct pairs. Two
+narrower code fixes were tried and rejected (a per-`a`-candidate backtrack fixed a different, smaller
+collision but not this one — no reordering of 4 elements manufactures a 7th pair; a cross-rung
+pool-accumulation fix technically solved the math but silently broke `DemonRecipeCatalogTests`'s own
+tested "both inputs at the same rung" invariant, and was reverted before landing). Owner direction
+(2026-09-05): build a real seedsmith pipeline matching this program's own established shape —
+deterministic first, LLM only for the mathematically-forced gap, deterministic reconciler as sole write
+authority. Specced as modules 17-18 (`docs/architecture/demon-seed/spec-fusion-recipe-generator.md`,
+`spec-fusion-recipe-runtime.md`), registered in `demon-seed-map.md` §3b, then adversarially reviewed
+(three parallel audits — determinism/reproducibility, locked-decision compliance, mechanism soundness)
+and strengthened before this plan was written. Every finding from that review is now a spec decision,
+not an open question here.
+
+Dependency order: T8.1 → T8.2 → T8.3 are sequential (index feeds propose feeds reconcile). T8.4 can
+start in parallel with T8.2/T8.3 — it only needs the committed seed's SHAPE (already fixed in the
+spec), not its content. T8.5 needs T8.3's real committed output to exist first.
+
+- [ ] **T8.1** `ds 17` §1 `distribution-index` · **S**
+  - Acceptance:
+    - [ ] Thin C# CLI (`tools/DemonRecipeDistributionIndex`) reuses `DemonRecipeCatalog.InputPoolBelow`/
+          `OutputEligibilityFloor` directly — never reimplemented, so the index and the runtime
+          algorithm can never silently disagree about which rung is "below"
+    - [ ] Run against the real committed corpus (`data/generated/demons/*.json`) finds exactly the one
+          known shortfall (`Almanac`/21 outputs vs. `Sunwoven`/4 inputs, `C(4,2)=6`) and no others
+    - [ ] A synthetic zero-shortfall fixture exits 0 and reports nothing to fill — the "closed-loop
+          first, spend a model call only where determinism cannot close the gap" rule, mechanically
+    - [ ] A shared test fixture proves the index's "nearest populated rung below" agrees with
+          `DemonRecipeCatalog.InputPoolBelow`'s own answer — not a parallel reimplementation that could drift
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter DistributionIndex`
+  - Files: `tools/DemonRecipeDistributionIndex/Program.cs` (new) + its test
+
+- [ ] **T8.2** `ds 17` §2 `fusion-recipe-propose` · **M**
+  - Acceptance:
+    - [ ] The LLM prompt shows only the nearest 2-3 *populated* rungs below the output (~45 species for
+          the real `Almanac` case, not the ~808-829-species remainder of the whole roster) plus
+          `acquisition` per candidate — never an unbounded corpus, never a candidate the reconciler will
+          refuse anyway for being `CaptureOnly`
+    - [ ] Voting is **per-member**, reusing `anchor/vote.py`'s `resolve_set_vote` shape — NOT
+          `resolve_vote`'s whole-value equality, which this repo already measured a 40-55% unresolved
+          rate from at a smaller (~98-option) width ("the ceiling was in the aggregation, not the
+          model"). A pair is canonicalized to a sorted tuple before any comparison
+    - [ ] A pair proposed `(A,B)` by one sample and `(B,A)` by another canonicalizes to agreement, not
+          disagreement — proven by test
+    - [ ] 2-of-3 samples agreeing on a species resolves it even when the third disagrees on the
+          partner — the exact scenario whole-pair equality would wrongly call `unresolved`
+    - [ ] A genuine 1-1-1 split (no species reaching majority) resolves to `unresolved`, reported by
+          name, never sample 0's raw pick
+    - [ ] `inputA`/`inputB` on a resolved pair are assigned via `DemonRecipeCatalog`'s own existing
+          primary-element-match preference (`SpeciesId`-ordinal tiebreak) — no new assignment rule
+          invented for gap-fills
+  - **The mechanism above is fully unit-testable without a live model call** (pure functions over
+    synthetic three-sample fixtures, mirroring `anchor/vote.py`'s own test shape) — build and prove it
+    completely before touching a real LM Studio endpoint; the real endpoint run is Checkpoint 8a's own
+    owner-run step, not this task's.
+  - Verify: `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py -k "not live"`
+  - Files: `tools/seedsmith/seedsmith/adapters/demons/fusion/{__init__,schema,prompts,vote}.py` (new),
+    `tools/seedsmith/tests/test_fusion_recipe.py` (new)
+
+- [ ] **T8.3** `ds 17` §3/§3a/§4 `fusion-recipe-reconcile` + the committed seed · **M**
+  - Acceptance:
+    - [ ] Runs the EXISTING `DemonRecipeCatalog.Build()` (via a CLI seam into the real C#, never
+          reimplemented) for the deterministic pass first and completely — this covers at least 808 of
+          829 eligible outputs (Almanac's own `C(4,2)=6` land inside this same pass)
+    - [ ] Deficit outputs are processed in `SpeciesId` ordinal order — the same tie-break every other
+          iteration in this pipeline already uses — so which proposal wins a `usedPairs` collision
+          between two different deficits is a pinned, reproducible fact, not incidental dict/batch order
+    - [ ] A capture-only proposed input is refused, never silently dropped or substituted (owner lock 6,
+          unconditional — an LLM proposal is not an exception to a locked decision)
+    - [ ] A duplicate proposed pair is refused — uniqueness holds across BOTH the deterministic and
+          proposed sources via one shared `usedPairs` set
+    - [ ] `crossRungGapFill: true` appears only on a genuinely cross-rung reconciled recipe — never
+          decorative, always accurate
+    - [ ] An unresolved deficit ships with NO recipe entry, named in the run's own report — matches
+          `SpeciesBuildPlanCatalog.SharesFor`'s own "no entry, not a made-up one" rule
+    - [ ] **Freeze on commit**: each gap-fill entry carries `_provenance.corpusContentHash` +
+          `promptVersion` (mirrors `anchor-emit`'s own re-derivation rule); a clean re-run with an
+          unchanged candidate pool never calls the model again and reproduces the identical committed
+          file byte-for-byte; a genuinely-changed pool re-derives only that one entry
+    - [ ] `--check` mode refuses a stale/hand-edited committed file, matching every sibling generator's
+          own discipline (`species-import`, `DemonSpeciesGen`)
+  - **§4a's cost-model question** (does a `crossRungGapFill` recipe need a price adjustment) ships with
+    the default "no change, exposure accepted as negligible (≤15 recipes)" — a real "Ask first" per
+    `spec-demon-fusion.md`'s own boundaries, but NOT a gate on this task; tracked in
+    `tasks/seed-to-concrete-plan.md`'s own Open Questions section as a named, non-blocking follow-up
+  - Verify: `python -m pytest tools/seedsmith/tests/test_fusion_recipe.py`,
+    `dotnet test tests/FusionRpg.Core.Tests --filter FusionRecipe`
+  - Files: `tools/seedsmith/seedsmith/adapters/demons/fusion/{reconcile,emit}.py` (new),
+    `tests/FusionRpg.Core.Tests/Demons/Fusion/FusionRecipeReconcileTests.cs` (new)
+
+### ✅ Checkpoint 8a — the seed exists and is trustworthy
+- [ ] `dotnet run --project tools/DemonRecipeDistributionIndex` + the real seedsmith `propose`/
+      `reconcile` commands run end-to-end against the REAL 829-species corpus — **owner-run**, matching
+      T2.11's own established local-model precedent (see Owner-only steps)
+- [ ] The committed `data/generated/demons/_fusion-recipes.json` covers all ≥808 deterministic outputs
+      plus whatever the real vote converges on for the ≤15 `Almanac` deficits; every non-converged
+      deficit is named in the run's own report, not silently missing
+- [ ] `python -m pytest tools/seedsmith/tests` and
+      `dotnet test tests/FusionRpg.Core.Tests --filter FusionRecipe` both green
+
+- [ ] **T8.4** `ds 18` §1/§2 the `Configure` seam · **M**
+  - Acceptance:
+    - [ ] `DemonRecipeCatalog` gains `Configure`/`IsConfigured`/`UseScoped` mirroring
+          `SpeciesSnapshot.cs`'s exact pattern (throws on a missing/unparseable seed, naming the
+          reconcile command — never a silent fall-through to the old algorithm)
+    - [ ] `Build()` renamed `BuildDeterministicOnly()` — no longer `All`'s implementation, only the
+          generator's own dependency
+    - [ ] `All`/`Get`/`IsKnown`/`TryMatch` signatures unchanged — zero consumer call-site changes, per
+          `spec-catalog-runtime.md`'s own "nine call sites" lesson applied to this catalog's smaller
+          consumer set (`Server/DemonEndpoints.cs`, `RpgStore.Fusion.cs`, and any others found by grep)
+    - [ ] The diff test (store-backed recipes vs. `BuildDeterministicOnly()`, every non-gap-fill output)
+          passes, **scoped to `DemonSpeciesCatalog` configured (via `UseScoped`) from the SAME committed
+          `data/generated/demons/*.json` tree the seed was generated against — never the live
+          database**, so a DB/committed-tree drift can never produce a spurious diff failure
+    - [ ] Every real consumer of `DemonRecipeCatalog` works unchanged — one test per real call site
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter DemonRecipeCatalog`
+  - Files: `src/FusionRpg.Core/Demons/Fusion/DemonRecipeCatalog.cs` (edit),
+    `tests/FusionRpg.Core.Tests/Demons/Fusion/DemonRecipeCatalogTests.cs` (retargeted + new diff test)
+
+- [ ] **T8.5** `ds 18` §3 the flip + live check + cleanup · **S**
+  - Acceptance:
+    - [ ] `Program.cs` loads recipes from the committed seed via `Configure`, alongside the species
+          catalog's own already-flipped call — not live computation
+    - [ ] Full suite green after the flip
+    - [ ] A real live-lawn/server check: at least one real fusion `execute` against the store-backed
+          catalog — matching `spec-catalog-runtime.md`'s own binding "a live check is required" rule
+          for the sibling catalog, not optional
+    - [ ] Only AFTER the diff test (T8.4) and this live check both pass: `DemonRecipeCatalog.Build()`'s
+          public surface is deleted so only the generator's own CLI reaches `BuildDeterministicOnly()`
+          — sequenced after its own precondition, mirroring `catalog-runtime`'s own "step 7 deletion
+          gated behind step 5" order, not a separate approval gate
+  - Verify: `dotnet test tests/FusionRpg.Server.Tests --filter Fusion`, `.\scripts\guard-dal.ps1`,
+    `.\scripts\deploy-play.ps1 -NoServer` then a real lawn fusion (**owner-run**, server-lifetime rule)
+  - Files: `src/FusionRpg.Server/Program.cs` (edit), `DemonRecipeCatalog.cs` (deletion of old surface)
+
+### ✅ Checkpoint 8 — fusion scales past 84 species, the program closes again
+- [ ] Every suite green (Core, Data, Guard, Server); `guard-dal.ps1` clean
+- [ ] The real corpus's one known shortfall is resolved as far as voting converges; every gap-fill
+      flagged, every non-resolved deficit named — not silently dropped
+- [ ] A real fusion executes successfully on a live server against the store-backed recipe catalog
+- [ ] `DemonRecipeCatalog.Build()`'s old crash-prone live-computation path is gone from the running game
+- [ ] §4a's cost-model question is tracked as a named, resolved-or-deferred follow-up, not forgotten

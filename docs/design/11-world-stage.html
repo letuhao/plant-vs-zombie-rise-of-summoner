@@ -38,9 +38,11 @@
   <p>
     Every component the world map is made of, drawn in <em>all</em> its states, with the data field
     that drives it. This is an inventory before it is a design: the owner's question was
-    &ldquo;we have so many &mdash; I need to know what they are.&rdquo; The architecture behind it is
-    <a href="../architecture/world-stage-ideal.md">world-stage-ideal.md</a>; this plate draws what
-    that document decides.
+    &ldquo;we have so many &mdash; I need to know what they are.&rdquo;     The architecture behind it is
+    <a href="../architecture/world-stage-ideal.md">world-stage-ideal.md</a>
+    (HUD, inspector, commands) and
+    <a href="../architecture/world-map-runtime-ideal.md">world-map-runtime-ideal.md</a>
+    (map plane: Phaser island, compact pin, inspector card stays a panel). This plate draws both.
   </p>
   <p>
     It replaces <a href="03-world.html">plate 03</a>&rsquo;s world sections, which were authored
@@ -74,7 +76,7 @@
 <nav class="toc">
   <a href="00-foundation.html">&larr; Foundation</a>
   <a href="03-world.html">&larr; Plate 03 (superseded)</a>
-  <a href="#a">A &middot; Sector node</a>
+  <a href="#a">A &middot; Sector card</a>
   <a href="#b">B &middot; Lanes</a>
   <a href="#c">C &middot; Fog</a>
   <a href="#d">D &middot; Legions</a>
@@ -87,6 +89,8 @@
   <a href="#k">K &middot; Confirms</a>
   <a href="#l">L &middot; Turn playback</a>
   <a href="#m">M &middot; Numbers &amp; the ledger</a>
+  <a href="#o">O &middot; Map plane</a>
+  <a href="#n">N &middot; Settled</a>
 </nav>
 <style>
   /* =========================================================================
@@ -296,14 +300,17 @@
 
 <!-- ==================================================================== A -->
 <section class="sec" id="a">
-  <h2>A · The sector node — the atom of the map</h2>
+  <h2>A · The sector card — the inspector atom, not the map pin</h2>
   <p class="lede">
-    One card, and every state the engine can actually put it in. A sector carries four independent
-    facts at once — <b>who holds it</b>, <b>whether it can be kept</b>, <b>what is on it</b>, and
-    <b>what it earns</b> — so the node spends a different channel on each. Nothing below is invented:
-    every state maps to a field on <code>WorldSectorDto</code> / <code>WorldSlotDto</code>, cited in
-    the legend. Implements <a href="../architecture/world-stage-ideal.md">world-stage-ideal</a> §4.1
-    and §4.9.
+    One <b>card</b>, and every state the engine can actually put it in. This is the
+    <em>panel</em> representation of a sector (ERM card / panel rungs) &mdash; what the inspector
+    in &sect;J shows. The thing you pan across on the stage is a compact <b>pin</b>, catalogued in
+    <a href="#o">&sect;O</a>. A sector still carries four independent facts at once &mdash;
+    <b>who holds it</b>, <b>whether it can be kept</b>, <b>what is on it</b>, and
+    <b>what it earns</b> &mdash; and the card spends a different channel on each. Nothing below is
+    invented: every state maps to a field on <code>WorldSectorDto</code> / <code>WorldSlotDto</code>.
+    Implements <a href="../architecture/world-stage-ideal.md">world-stage-ideal</a> §4.9; map-plane
+    density is <a href="../architecture/world-map-runtime-ideal.md">world-map-runtime-ideal</a>.
   </p>
 
   <div class="note">
@@ -588,6 +595,9 @@
     supposed to plan against — <b>how far</b> (<code>Length</code>) and <b>how much crosses at once</b>
     (<code>Width</code>) — so the drawing spends stroke weight on width and a printed figure on
     length. Fields: <code>WorldLaneDto</code>.
+    <b>B.1 is a legend board</b> &mdash; rounded rects so every stroke is readable at once. The
+    player map does not look like this; sectors on the stage are compact pins
+    (<a href="#o">&sect;O</a>). Stroke language (weight, dash, twin rails, arrow) still transfers.
   </p>
 
   <div class="spec">
@@ -4105,6 +4115,12 @@
         comfortable size.
       </p>
       <div class="note">
+        <strong>The boxes on this frame are a stand-in, not the map language.</strong>
+        G.2 was drawn before the pin/card split. Corner roles, chrome budget, and the populated HUD
+        still hold. What the camera looks at is catalogued in <a href="#o">&sect;O</a> &mdash;
+        compact pins, not 80&times;60 flowchart cards sitting on the stage.
+      </div>
+      <div class="note">
         <strong>Every corner is populated, and no decision is split across two of them.</strong>
         The loam net and the component that cannot pay it are both in the top strip. The unresolved
         count and the button it would block are both in the bottom-right. The blocker&rsquo;s
@@ -6751,6 +6767,719 @@
   </div>
 </section>
 
+<!-- ==================================================================== O -->
+<style>
+  /* ===========================================================================
+     Plate 11 · fragment O — the map plane (pin, not card).
+     Prefix .wso- . Colour from tokens only. State never colour/opacity alone.
+     This is a catalog of what the stage *looks at*, not Phaser code.
+     =========================================================================== */
+
+  .wso-gap { display: grid; gap: var(--sp-3);
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    margin: 0 0 var(--sp-4); }
+  .wso-gap .cell { border: 1px solid var(--border); border-radius: var(--r-sm);
+    background: var(--panel-inset); padding: var(--sp-3); }
+  .wso-gap .cell b { display: block; font-size: var(--text-xs); margin-bottom: 2px; }
+  .wso-gap .cell span { font-size: var(--text-2xs); color: var(--muted); line-height: 1.35; }
+  .wso-gap .cell[data-k="have"] b { color: var(--ok); }
+  .wso-gap .cell[data-k="miss"] b { color: var(--warn); }
+
+  .wso-ladder { width: 100%; }
+  .wso-ladder td.rung { font-family: var(--font-mono); font-weight: 800; white-space: nowrap; }
+
+  /* --- pin atom ---------------------------------------------------------- */
+  .wso-gallery { display: grid; gap: var(--sp-4);
+    grid-template-columns: repeat(auto-fill, minmax(132px, 1fr));
+    align-items: start; }
+  .wso-cell { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); }
+  .wso-cap { font-size: var(--text-2xs); color: var(--muted); text-align: center; line-height: 1.35;
+    max-width: 140px; }
+  .wso-cap b { display: block; color: var(--text); font-size: var(--text-xs); margin-bottom: 1px; }
+
+  .wso-pin { position: relative; display: flex; flex-direction: column; align-items: center;
+    width: 92px; gap: 4px; background: none; border: 0; padding: 6px 0 0; color: inherit;
+    font: inherit; cursor: default; }
+  .wso-disc { position: relative; width: 44px; height: 44px; border-radius: 50%;
+    background: var(--panel); overflow: hidden;
+    display: grid; place-items: center; }
+  .wso-ring { position: absolute; inset: -5px; border-radius: 50%; pointer-events: none;
+    border: 3px solid var(--border-control); }
+  .wso-hatch { position: absolute; inset: 0; pointer-events: none; }
+  .wso-crest { position: relative; z-index: 1; font-size: var(--text-sm); line-height: 1; }
+  .wso-nm { font-family: var(--font-ui); font-size: var(--text-2xs); font-weight: 800;
+    text-align: center; max-width: 88px; white-space: nowrap; overflow: hidden;
+    text-overflow: ellipsis; line-height: 1.2; }
+  .wso-pips { display: flex; gap: 2px; justify-content: center; min-height: 8px; }
+  .wso-pips i { display: block; width: 7px; height: 7px; border-radius: 1px;
+    background: var(--border-control); }
+  .wso-pips i[data-k="s"] { background: var(--sun); clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+  .wso-pips i[data-k="e"] { background: var(--el-earth); border-radius: 50%; }
+  .wso-pips i[data-k="m"] { background: var(--info); }
+  .wso-pips i[data-k="v"] { background: var(--ok); transform: rotate(45deg); }
+  .wso-pips i[data-k="l"] { background: var(--el-dark); border-radius: 50% 50% 4px 4px; }
+  .wso-pips i[data-k="t"] { background: var(--warn); clip-path: polygon(50% 0, 100% 100%, 0 100%); }
+  .wso-net { font-family: var(--font-mono); font-size: var(--text-2xs); font-weight: 800;
+    padding: 0 4px; border-radius: var(--r-pill); border: 1px solid var(--border-control);
+    color: var(--muted); }
+  .wso-net[data-sign="pos"] { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 50%, transparent); }
+  .wso-net[data-sign="neg"] { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 50%, transparent); }
+  .wso-ownlb { font-size: var(--text-2xs); font-weight: 800; text-transform: uppercase;
+    letter-spacing: .06em; color: var(--muted); }
+  .wso-badge { position: absolute; top: -6px; right: 6px; z-index: 2;
+    font-size: var(--text-2xs); font-weight: 800; line-height: 1;
+    padding: 2px 4px; border-radius: var(--r-pill);
+    border: 1px solid var(--border-control); background: var(--soil-raised); color: var(--muted); }
+  .wso-badge[data-t="release"] { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 60%, transparent); }
+  .wso-badge[data-t="fog"] { color: var(--info); }
+
+  /* ownership — ring colour AND ring treatment AND crest AND word. Never ring hue alone. */
+  .wso-pin[data-own="mine"] .wso-ring { border-color: var(--side-plant); border-style: solid; }
+  .wso-pin[data-own="mine"] .wso-ownlb { color: var(--side-plant); }
+  .wso-pin[data-own="enemy"] .wso-ring {
+    border-color: var(--side-zombie);
+    border-style: dashed; }
+  .wso-pin[data-own="enemy"] .wso-ownlb { color: var(--side-zombie); }
+  .wso-pin[data-own="neutral"] .wso-ring {
+    border-color: var(--border-control);
+    border-style: dotted; }
+  .wso-pin[data-own="contested"] .wso-ring {
+    border-style: solid;
+    border-color: var(--sun); }
+  .wso-pin[data-own="contested"] .wso-disc {
+    background: linear-gradient(90deg,
+      color-mix(in srgb, var(--side-plant) 42%, var(--panel)) 0 50%,
+      color-mix(in srgb, var(--side-zombie) 42%, var(--panel)) 50% 100%); }
+  .wso-pin[data-own="contested"] .wso-ownlb { color: var(--sun); }
+
+  /* health — hatch + badge/word, never opacity. */
+  .wso-pin[data-health="fading"] .wso-hatch {
+    background: repeating-linear-gradient(-45deg,
+      color-mix(in srgb, var(--warn) 40%, transparent) 0 2px, transparent 2px 6px); }
+  .wso-pin[data-health="fading"] .wso-disc {
+    outline: 1px dashed var(--warn); outline-offset: -3px; }
+  .wso-pin[data-health="releasing"] .wso-hatch {
+    background:
+      repeating-linear-gradient(45deg,  color-mix(in srgb, var(--bad) 38%, transparent) 0 1px, transparent 1px 5px),
+      repeating-linear-gradient(-45deg, color-mix(in srgb, var(--bad) 38%, transparent) 0 1px, transparent 1px 5px); }
+  .wso-pin[data-health="releasing"] .wso-disc {
+    box-shadow: inset 4px 0 0 var(--bad-solid); }
+  .wso-pin[data-health="starving"] .wso-hatch {
+    background: repeating-linear-gradient(90deg,
+      color-mix(in srgb, var(--bad) 28%, transparent) 0 3px, transparent 3px 7px); }
+
+  /* fog — unknown is a different silhouette, not a dimmed disc. */
+  .wso-pin[data-fog="remembered"] .wso-disc {
+    background: var(--panel-inset);
+    border: 1px dashed var(--border-control); }
+  .wso-pin[data-fog="remembered"] .wso-nm { font-style: italic; color: var(--muted); }
+  .wso-pin[data-fog="unknown"] .wso-disc {
+    border-radius: 0;
+    background: var(--panel-inset);
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%); }
+  .wso-pin[data-fog="unknown"] .wso-ring {
+    border-radius: 0;
+    clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    border-style: dotted; }
+  .wso-pin[data-fog="unknown"] .wso-nm,
+  .wso-pin[data-fog="unknown"] .wso-pips,
+  .wso-pin[data-fog="unknown"] .wso-net { display: none; }
+
+  /* selection / hover / keyboard focus are three treatments (game-ui-ux). */
+  .wso-pin[data-selected] .wso-ring { box-shadow: 0 0 0 2px var(--soil), 0 0 0 4px var(--sun); }
+  .wso-pin[data-hover] .wso-disc { background: var(--panel-raised); }
+  .wso-pin[data-focus] {
+    outline: 2px solid var(--border-strong);
+    outline-offset: 4px;
+    border-radius: var(--r-sm); }
+  .wso-pin[data-focus]::after {
+    content: "focus";
+    position: absolute; left: 50%; bottom: -18px; transform: translateX(-50%);
+    font-size: var(--text-2xs); font-weight: 800; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--border-strong); }
+
+  /* zoom LOD — strict supersets. Hide by not drawing, never by inventing a second fact. */
+  .wso-pin[data-zoom="fit"] .wso-nm,
+  .wso-pin[data-zoom="fit"] .wso-pips,
+  .wso-pin[data-zoom="fit"] .wso-net,
+  .wso-pin[data-zoom="fit"] .wso-ownlb { display: none; }
+  .wso-pin[data-zoom="map"] .wso-net { display: none; }
+  .wso-pin[data-zoom="map"] .wso-pips i { width: 5px; height: 5px; clip-path: none;
+    border-radius: 50%; transform: none; }
+
+  .wso-lod { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
+  .wso-lod .pane { border: 1px solid var(--border); border-radius: var(--r-md);
+    background: var(--panel-inset); padding: var(--sp-3); display: grid; justify-items: center;
+    gap: var(--sp-2); min-height: 160px; }
+  .wso-lod h4 { margin: 0; font-size: var(--text-xs); text-transform: uppercase;
+    letter-spacing: .08em; color: var(--muted); }
+  @media (max-width: 720px) { .wso-lod { grid-template-columns: 1fr; } }
+
+  .wso-split { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-4); align-items: start; }
+  @media (max-width: 800px) { .wso-split { grid-template-columns: 1fr; } }
+  .wso-pane { border: 1px solid var(--border); border-radius: var(--r-md);
+    background: var(--panel-inset); padding: var(--sp-3); display: grid; justify-items: center;
+    gap: var(--sp-2); }
+  .wso-pane h4 { margin: 0; font-size: var(--text-sm); color: var(--muted); }
+
+  /* --- composed stage ---------------------------------------------------- */
+  .wso-stage { position: absolute; inset: 0; overflow: hidden;
+    background:
+      radial-gradient(ellipse at 38% 42%, color-mix(in srgb, var(--panel) 80%, transparent), var(--soil) 70%),
+      repeating-radial-gradient(circle at 20% 30%, var(--border) 0 1px, transparent 1px 48px); }
+  .wso-map { position: absolute; inset: 0; }
+  .wso-lanes { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .wso-place { position: absolute; transform: translate(-50%, -28px); }
+  .wso-call { position: absolute; z-index: var(--band-hud); font-family: var(--font-mono);
+    font-size: var(--text-2xs); font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+    padding: 2px 6px; border-radius: var(--r-sm); border: 1px dashed var(--border-control);
+    background: rgb(11 9 7 / .72); color: var(--muted); pointer-events: none; }
+  .wso-call[data-plane="map"] { left: 8px; bottom: 88px; top: auto; color: var(--lawn-hot);
+    border-color: color-mix(in srgb, var(--lawn-hot) 50%, transparent); }
+  .wso-call[data-plane="hud"] { left: 8px; top: 44px; color: var(--sun);
+    border-color: color-mix(in srgb, var(--sun) 50%, transparent); }
+  .wso-call[data-plane="panel"] { right: 12px; top: 44px; color: var(--info);
+    border-color: color-mix(in srgb, var(--info) 50%, transparent); }
+
+  .wso-insp { position: absolute; right: var(--sp-2); top: 52px; bottom: 88px; width: 220px;
+    z-index: var(--band-panel); display: flex; flex-direction: column; gap: var(--sp-2);
+    padding: var(--sp-2); pointer-events: none;
+    background: linear-gradient(rgb(11 9 7 / .82), rgb(11 9 7 / .55));
+    border: 1px solid var(--border-control); border-radius: var(--r-md); }
+  .wso-insp .card-mini { transform: none; }
+
+  /* --- aspect / safe area ----------------------------------------------- */
+  .wso-wide { aspect-ratio: 21 / 9; }
+  .wso-wide .hud { left: 48px; right: 48px; }
+  .wso-wide .wsc-mount--bl { left: 56px; }
+  .wso-wide .wsc-mount--br { right: 56px; }
+  .wso-safe { position: absolute; inset: 12px 48px 12px 48px; border: 1px dashed var(--sun);
+    border-radius: var(--r-sm); pointer-events: none; z-index: var(--band-hud); }
+  .wso-safe b { position: absolute; left: var(--sp-2); top: 2px;
+    font-size: var(--text-2xs); color: var(--sun); font-weight: 800;
+    letter-spacing: .06em; text-transform: uppercase;
+    background: rgb(11 9 7 / .8); padding: 0 4px; }
+  .wso-bleed { position: absolute; inset: 0; pointer-events: none;
+    background:
+      linear-gradient(90deg, color-mix(in srgb, var(--zombie) 18%, transparent), transparent 12%,
+        transparent 88%, color-mix(in srgb, var(--zombie) 18%, transparent)); }
+
+  .wso-keys { display: grid; gap: 4px; }
+  .wso-keys .kr { display: grid; grid-template-columns: 148px minmax(0, 1fr); gap: var(--sp-2);
+    align-items: baseline; font-size: var(--text-sm); }
+  .wso-keys .kr b { font-weight: 600; }
+</style>
+
+<section class="sec" id="o">
+  <h2>O &middot; The map plane &mdash; pin on the stage, card in the panel</h2>
+  <p class="lede">
+    Sections A&ndash;N already catalogue the <em>inspector</em>, the HUD corners, the lane
+    <em>language</em>, fog, orders, lenses, and turn chrome. They do <b>not</b> catalogue what the
+    camera looks at. Live <code>#/world</code> still paints &sect;A&rsquo;s 192px cards onto the
+    stage, which is why the map reads as a flowchart. This section is the missing rung:
+    a compact <b>pin</b> on a dual-plane stage, with zoom LOD, focus, and an aspect policy.
+    Architecture: <a href="../architecture/world-map-runtime-ideal.md">world-map-runtime-ideal.md</a>.
+    HUD corners stay <a href="#g">&sect;G</a>. The full card stays <a href="#a">&sect;A</a> /
+    <a href="#j">&sect;J</a>.
+  </p>
+
+  <div class="wso-gap">
+    <div class="cell" data-k="have"><b>Already covered (keep)</b>
+      <span>A card states, B lane strokes, C fog four states, D&ndash;F orders/lenses,
+        G corner anchors (~27% chrome), H&ndash;L turn/inspector/confirms, I.3 camera keys.</span></div>
+    <div class="cell" data-k="miss"><b>Not covered until this section</b>
+      <span>Map pin vs inspector card. Unknown as another silhouette among pins.
+        Phaser plane vs React HUD. Pin LOD as strict supersets. Spatial focus on the map.
+        Expand + safe-area when the window is not 16:9.</span></div>
+  </div>
+
+  <div class="sub">
+    <h3>O.1 &middot; Two rungs of the same entity</h3>
+    <p class="lede">
+      The sector ladder already exists (plate 00 / ERM): token &middot; chip &middot; card &middot;
+      panel. The bug was using the <em>card</em> as the map pin. Endless Space 2 puts a system
+      marker on the galaxy and the FIDSI sheet in a panel. Same split here.
+    </p>
+    <div class="spec">
+      <table class="statsheet wso-ladder">
+        <thead>
+          <tr><th class="fam">Rung</th><th class="fam">Where</th><th>What it must still say</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="rung">Token</td><td class="fam">Pin crest + ring</td>
+            <td>Identity and ownership. Survives at every zoom, including fit.</td></tr>
+          <tr><td class="rung">Chip</td><td class="fam">Pin at map zoom</td>
+            <td>Name, pip row (slot kinds as shape), fog silhouette. Health as hatch, not dim.</td></tr>
+          <tr><td class="rung">Card</td><td class="fam">&sect;A, inside &sect;J</td>
+            <td>Yields, slots as silhouettes, anchored/fading/releasing copy, every flag.</td></tr>
+          <tr><td class="rung">Panel</td><td class="fam">&sect;J inspector (band 2)</td>
+            <td>Commands, blockers, the rest of the sector. Map stays mounted (GG-11).</td></tr>
+        </tbody>
+      </table>
+      <div class="note">
+        <strong>What never drops from the pin, at any zoom:</strong> ownership (ring treatment),
+        economic health (hatch / inset bar), and whether the ground is unknown (silhouette).
+        Net loam and pip <em>labels</em> may drop; the facts they stand for must remain findable
+        in the inspector. That is Endless Legend&rsquo;s zoom failure stated as a rule we keep:
+        zoom tiers are <b>strict supersets of legibility</b>, not a second fact set.
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>O.2 &middot; The same sector, card and pin</h3>
+    <p class="lede">
+      One owned, solvent sector drawn twice so the density split is visible, not argued.
+    </p>
+    <div class="spec">
+      <div class="wso-split">
+        <div class="wso-pane">
+          <h4>Inspector card &mdash; &sect;A</h4>
+          <div class="ws-node" data-own="mine" data-anchor="anchored">
+            <span class="ws-edge"></span><span class="ws-wash"></span>
+            <div class="ws-hd"><span class="ws-crest">🌱</span><span class="ws-nm">Verdant Reach</span><span class="ws-ownlb">yours</span></div>
+            <div class="ws-meta"><span class="el" data-el="earth"><i class="dot"></i>Earth</span>
+              <span class="tier" title="development"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i><span class="n">3</span></span>
+              <span class="ws-danger" data-band="1">◆ 1 mild</span></div>
+            <div class="ws-state" data-t="ok">🌿 anchored</div>
+            <div class="ws-yield"><div><span class="ws-k">earns</span><span class="ws-v" data-sign="pos">+18</span></div><div><span class="ws-k">costs</span><span class="ws-v" data-sign="neg">−7</span></div><div><span class="ws-k">net</span><span class="ws-v" data-sign="pos">+11</span></div></div>
+          </div>
+          <span class="wso-cap">Lives in the inspector. Never duplicated as the map marker.</span>
+        </div>
+        <div class="wso-pane">
+          <h4>Map pin &mdash; this section</h4>
+          <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="detail" data-selected>
+            <span class="wso-ring" aria-hidden="true"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Verdant Reach</span>
+            <span class="wso-pips" aria-label="slots"><i data-k="s"></i><i data-k="e"></i><i data-k="m"></i><i></i><i></i><i></i></span>
+            <span class="wso-net" data-sign="pos">+11</span>
+            <span class="wso-ownlb">yours</span>
+          </div>
+          <span class="wso-cap">Selection halo is the sun ring, not a second card border.
+            Yields belong in the panel.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>O.3 &middot; Pin gallery &mdash; ownership &times; health &times; fog</h3>
+    <p class="lede">
+      Same GG-27 rule as the card: every fact spends at least two of
+      <b>shape &middot; border treatment &middot; pattern &middot; icon &middot; text</b>.
+      Unknown is a diamond, not a faded circle. Hover, selection, and keyboard focus are three
+      different treatments so a gamepad is not stranded.
+    </p>
+    <div class="spec">
+      <div class="ws-band">Ownership</div>
+      <div class="wso-gallery">
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Verdant Reach</span>
+            <span class="wso-pips"><i data-k="s"></i><i data-k="e"></i><i data-k="m"></i></span>
+            <span class="wso-ownlb">yours</span>
+          </div>
+          <span class="wso-cap"><b>Yours</b> Solid plant ring + crest + word.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="enemy" data-health="anchored" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">💀</span></span>
+            <span class="wso-nm">Hollowmoor</span>
+            <span class="wso-pips"><i data-k="l"></i><i data-k="t"></i></span>
+            <span class="wso-ownlb">not yours</span>
+          </div>
+          <span class="wso-cap"><b>Enemy</b> Dashed zombie ring + crest + word.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="neutral" data-health="anchored" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">◇</span></span>
+            <span class="wso-nm">Ridgeline</span>
+            <span class="wso-pips"><i data-k="e"></i></span>
+            <span class="wso-ownlb">open</span>
+          </div>
+          <span class="wso-cap"><b>Neutral</b> Dotted ring + open crest + word.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="contested" data-health="anchored" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">⚔</span></span>
+            <span class="wso-nm">Ash Column</span>
+            <span class="wso-pips"><i data-k="m"></i><i data-k="v"></i></span>
+            <span class="wso-ownlb">contested</span>
+          </div>
+          <span class="wso-cap"><b>Contested</b> Split conic ring + sun edge + word.</span>
+        </div>
+      </div>
+
+      <div class="ws-band">Health &mdash; hatch and bar, never opacity</div>
+      <div class="wso-gallery">
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Verdant Reach</span>
+            <span class="wso-pips"><i data-k="s"></i><i data-k="e"></i></span>
+          </div>
+          <span class="wso-cap"><b>Anchored</b> Clean disc. Word lives in the inspector.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="fading" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Sallowfen</span>
+            <span class="wso-pips"><i data-k="e"></i><i data-k="v"></i></span>
+          </div>
+          <span class="wso-cap"><b>Fading</b> Diagonal hatch + dashed inner outline.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="releasing" data-zoom="map">
+            <span class="wso-badge" data-t="release">!</span>
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Ashfall</span>
+            <span class="wso-pips"><i data-k="t"></i></span>
+          </div>
+          <span class="wso-cap"><b>Releases next turn</b> Cross-hatch + inset bar + badge.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="starving" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Briarvault</span>
+            <span class="wso-pips"><i data-k="m"></i></span>
+          </div>
+          <span class="wso-cap"><b>Starving</b> Vertical hatch. Inspector names the missing keep.</span>
+        </div>
+      </div>
+
+      <div class="ws-band">Fog, selection, hover, keyboard focus</div>
+      <div class="wso-gallery">
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="neutral" data-fog="remembered" data-zoom="map">
+            <span class="wso-badge" data-t="fog">old</span>
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">◇</span></span>
+            <span class="wso-nm">last seen</span>
+            <span class="wso-pips"><i></i><i></i></span>
+          </div>
+          <span class="wso-cap"><b>Remembered</b> Dashed disc + italic name + stamp. Distinctness over readability (&sect;C / N).</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-fog="unknown" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">?</span></span>
+            <span class="wso-nm">hidden</span>
+          </div>
+          <span class="wso-cap"><b>Unknown</b> Diamond silhouette. No name, no fake pips.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map" data-selected>
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Verdant Reach</span>
+            <span class="wso-pips"><i data-k="s"></i><i data-k="e"></i></span>
+          </div>
+          <span class="wso-cap"><b>Selected</b> Sun halo. Opens &sect;J; pin stays.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map" data-hover>
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Verdant Reach</span>
+            <span class="wso-pips"><i data-k="s"></i><i data-k="e"></i></span>
+          </div>
+          <span class="wso-cap"><b>Hover</b> Raised disc fill. Must not steal keyboard focus.</span>
+        </div>
+        <div class="wso-cell">
+          <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map" data-focus>
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Verdant Reach</span>
+            <span class="wso-pips"><i data-k="s"></i><i data-k="e"></i></span>
+          </div>
+          <span class="wso-cap"><b>Keyboard / gamepad focus</b> Offset outline + the word
+            <i>focus</i>. Distinct from the sun selection halo.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>O.4 &middot; Zoom LOD on the pin &mdash; strict supersets</h3>
+    <p class="lede">
+      Three camera distances, one object. Fit hides labels. Map keeps name and pip <em>dots</em>.
+      Detail restores pip shapes and the net chip. Ownership ring, health hatch, and unknown
+      silhouette are present in all three. Live code currently hardcodes
+      <code>zoom=&quot;map&quot;</code> on every frame &mdash; a wiring gap, not a missing rule.
+    </p>
+    <div class="spec">
+      <div class="wso-lod">
+        <div class="pane">
+          <h4>Fit &mdash; the whole rift</h4>
+          <div class="wso-pin" data-own="mine" data-health="fading" data-zoom="fit">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Sallowfen</span>
+            <span class="wso-pips"><i data-k="e"></i></span>
+            <span class="wso-net" data-sign="neg">−4</span>
+          </div>
+          <span class="wso-cap">Ring + crest + hatch. Name is in the outliner if you need it.</span>
+        </div>
+        <div class="pane">
+          <h4>Map &mdash; default play</h4>
+          <div class="wso-pin" data-own="mine" data-health="fading" data-zoom="map">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Sallowfen</span>
+            <span class="wso-pips"><i data-k="e"></i><i data-k="v"></i><i></i></span>
+            <span class="wso-net" data-sign="neg">−4</span>
+          </div>
+          <span class="wso-cap">Name + pip dots. Net still lives in the inspector.</span>
+        </div>
+        <div class="pane">
+          <h4>Detail &mdash; close</h4>
+          <div class="wso-pin" data-own="mine" data-health="fading" data-zoom="detail">
+            <span class="wso-ring"></span>
+            <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+            <span class="wso-nm">Sallowfen</span>
+            <span class="wso-pips"><i data-k="e"></i><i data-k="v"></i><i></i></span>
+            <span class="wso-net" data-sign="neg">−4</span>
+            <span class="wso-ownlb">yours</span>
+          </div>
+          <span class="wso-cap">Pip shapes + net chip. Still not the &sect;A card.</span>
+        </div>
+      </div>
+      <div class="note">
+        <strong>Lenses are not a zoom tier.</strong> &sect;F already locked lenses as exclusive
+        overlays. A fade-risk lens may recolour a channel that is already on the pin; it must not
+        hide the ownership ring to make room. The readout in &sect;I.2 names the active lens in
+        words beside the button.
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>O.5 &middot; The composed stage at the viewport floor</h3>
+    <p class="lede">
+      Pins on a starfield, HUD in the corners, inspector as a band-2 layer over a map that is
+      still there. Two planes, labelled. This is the picture G.2&rsquo;s flowchart boxes were
+      standing in for.
+    </p>
+    <div class="spec">
+      <div class="viewport">
+        <div class="frame-row">
+          <nav class="rail" aria-label="Stage rail">
+            <button type="button"><span class="g">&#8962;</span>Sanctum</button>
+            <div class="sep"></div>
+            <button type="button" class="is-active"><span class="g">&#128506;</span>World</button>
+          </nav>
+          <div class="stagearea">
+            <div class="wso-stage">
+              <span class="wso-call" data-plane="hud">band 1 · React HUD · corners</span>
+              <span class="wso-call" data-plane="map">band 0 · map plane · pins + lanes + camera</span>
+              <span class="wso-call" data-plane="panel">band 2 · inspector · &sect;A card lives here</span>
+
+              <svg class="wso-lanes" viewBox="0 0 900 470" preserveAspectRatio="xMidYMid meet" aria-hidden="true">
+                <g fill="none" stroke-linecap="round">
+                  <path d="M160,250 L300,160" stroke="var(--border-control)" stroke-width="3"/>
+                  <path d="M160,250 L290,350" stroke="var(--border-control)" stroke-width="2"/>
+                  <path d="M300,160 L470,130" stroke="var(--el-air)" stroke-width="3" stroke-dasharray="8 5"/>
+                  <path d="M290,350 L470,340" stroke="var(--border-control)" stroke-width="3"/>
+                  <path d="M470,130 L620,240" stroke="var(--el-dark)" stroke-width="3" stroke-dasharray="14 8"/>
+                  <path d="M470,340 L620,240" stroke="var(--bad)" stroke-width="3" stroke-dasharray="3 6"/>
+                </g>
+              </svg>
+
+              <div class="wso-map">
+                <div class="wso-place" style="left:18%;top:54%">
+                  <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map" data-selected>
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+                    <span class="wso-nm">Verdant Reach</span>
+                    <span class="wso-pips"><i data-k="s"></i><i data-k="e"></i><i data-k="m"></i></span>
+                  </div>
+                </div>
+                <div class="wso-place" style="left:33%;top:34%">
+                  <div class="wso-pin" data-own="mine" data-health="anchored" data-zoom="map">
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+                    <span class="wso-nm">Ridgeline</span>
+                    <span class="wso-pips"><i data-k="e"></i></span>
+                  </div>
+                </div>
+                <div class="wso-place" style="left:32%;top:74%">
+                  <div class="wso-pin" data-own="mine" data-health="fading" data-zoom="map">
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+                    <span class="wso-nm">Sallowfen</span>
+                    <span class="wso-pips"><i data-k="v"></i></span>
+                  </div>
+                </div>
+                <div class="wso-place" style="left:52%;top:28%">
+                  <div class="wso-pin" data-own="mine" data-health="releasing" data-zoom="map">
+                    <span class="wso-badge" data-t="release">!</span>
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">🌱</span></span>
+                    <span class="wso-nm">Ashfall</span>
+                    <span class="wso-pips"><i data-k="t"></i></span>
+                  </div>
+                </div>
+                <div class="wso-place" style="left:52%;top:72%">
+                  <div class="wso-pin" data-own="enemy" data-health="anchored" data-zoom="map">
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">💀</span></span>
+                    <span class="wso-nm">Hollowmoor</span>
+                    <span class="wso-pips"><i data-k="l"></i></span>
+                  </div>
+                </div>
+                <div class="wso-place" style="left:69%;top:51%">
+                  <div class="wso-pin" data-fog="unknown" data-zoom="map">
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-crest">?</span></span>
+                    <span class="wso-nm">never seen</span>
+                  </div>
+                </div>
+                <div class="wso-place" style="left:43%;top:31%">
+                  <div class="wso-pin" data-own="contested" data-health="anchored" data-zoom="map">
+                    <span class="wso-ring"></span>
+                    <span class="wso-disc"><span class="wso-hatch"></span><span class="wso-crest">⚔</span></span>
+                    <span class="wso-nm">Ash Column</span>
+                    <span class="wso-pips"><i data-k="m"></i></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hud wsc-strip">
+                <div class="wsc-read"><span class="k">Turn</span><span class="v">37</span></div>
+                <div class="wsc-read is-net"><span class="k">Net</span><span class="v">+24</span></div>
+              </div>
+
+              <div class="wso-insp" aria-hidden="true">
+                <div class="ws-node card-mini" data-own="mine" data-anchor="anchored">
+                  <span class="ws-edge"></span>
+                  <div class="ws-hd"><span class="ws-crest">🌱</span><span class="ws-nm">Verdant Reach</span></div>
+                  <div class="ws-state" data-t="ok">🌿 anchored</div>
+                  <div class="ws-yield"><div><span class="ws-k">net</span><span class="ws-v" data-sign="pos">+11</span></div></div>
+                </div>
+              </div>
+
+              <div class="wsc-mount wsc-mount--bl">
+                <span class="cluster-box">
+                  <button class="btn--icon" type="button" aria-label="Zoom out">&minus;</button>
+                  <span class="readout">map</span>
+                  <button class="btn--icon" type="button" aria-label="Zoom in">+</button>
+                  <button class="btn--icon" type="button" aria-label="Fit">&#9906;</button>
+                </span>
+              </div>
+              <div class="wsc-mount wsc-mount--br">
+                <button class="btn wsc-endturn" type="button"><span class="lead">End turn</span><span class="hotkey">&#9166;</span></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="vp-note">
+        1280&times;720 floor, 16:9. Chrome stays in the corners; the map is the only thing that
+        pans. The inspector is a layer, not a replacement for the pin. Dual-plane: React never
+        owns GameObjects; the map plane never owns HTTP or SignalR
+        (<a href="../architecture/fe-game-foundation.md">fe-game-foundation</a> DPLP).
+      </p>
+      <div class="note">
+        <strong>This HTML is the catalog, not the renderer.</strong>
+        Pins here are DOM so the plate can be reviewed in a browser. The player map&rsquo;s
+        long-term host is a Phaser island under the same HUD. Art drops into the same objects
+        (D10). Do not treat these <code>.wso-pin</code> rules as app CSS.
+      </div>
+    </div>
+  </div>
+
+  <div class="sub">
+    <h3>O.6 &middot; Aspect, safe area, focus, events</h3>
+    <p class="lede">
+      Layout rules the HUD plates implied and the map plane has to inherit. Reference resolution
+      scales to fit; extra width on ultrawide is more map, not more chrome. Critical HUD insets
+      to the safe rect. Every surface has an initial focus.
+    </p>
+    <div class="spec">
+      <div class="viewport wso-wide">
+        <div class="wso-bleed" aria-hidden="true"></div>
+        <div class="wso-stage">
+          <div class="wso-safe"><b>safe inset · HUD lives inside</b></div>
+          <div class="wso-place" style="left:22%;top:48%">
+            <div class="wso-pin" data-own="mine" data-zoom="fit">
+              <span class="wso-ring"></span>
+              <span class="wso-disc"><span class="wso-crest">🌱</span></span>
+            </div>
+          </div>
+          <div class="wso-place" style="left:48%;top:44%">
+            <div class="wso-pin" data-own="enemy" data-zoom="fit">
+              <span class="wso-ring"></span>
+              <span class="wso-disc"><span class="wso-crest">💀</span></span>
+            </div>
+          </div>
+          <div class="wso-place" style="left:74%;top:52%">
+            <div class="wso-pin" data-fog="unknown" data-zoom="fit">
+              <span class="wso-ring"></span>
+              <span class="wso-disc"><span class="wso-crest">?</span></span>
+            </div>
+          </div>
+          <div class="hud wsc-strip">
+            <div class="wsc-read"><span class="k">Turn</span><span class="v">37</span></div>
+          </div>
+          <div class="wsc-mount wsc-mount--bl"><span class="readout">fit</span></div>
+          <div class="wsc-mount wsc-mount--br"><span class="readout">end turn</span></div>
+        </div>
+      </div>
+      <p class="vp-note">
+        21:9 stand-in. Side wash is extra map (expand), not letterbox bars. Corner HUD stays
+        inside the dashed safe inset so a notch or TV overscan cannot clip End turn or the
+        loam net. Floor remains 1280&times;720; there is still no ceiling.
+      </p>
+
+      <table class="statsheet" style="margin-top:var(--sp-4)">
+        <thead>
+          <tr><th class="fam">Rule</th><th>What the stage does</th></tr>
+        </thead>
+        <tbody>
+          <tr><td class="fam">Anchors, not pixels</td>
+            <td>&sect;G corners are named roles. Pins are world-space. HUD is screen-space.</td></tr>
+          <tr><td class="fam">Scale + expand</td>
+            <td>Reference 1280&times;720 fits. Extra aspect is more map. HUD does not stretch to fill ultrawide.</td></tr>
+          <tr><td class="fam">Safe area</td>
+            <td>Inset critical chrome (strip, End turn, zoom cluster, rail). Backdrop and pins may bleed.</td></tr>
+          <tr><td class="fam">Screen stack</td>
+            <td>Stage stays mounted. Inspector / confirm / playback push. Esc pops one. Same as GG-1 / GG-11.</td></tr>
+          <tr><td class="fam">Initial focus</td>
+            <td>On entering World: spatial focus on the selected pin (or the first unresolved). First Tab lands on the layer rail, not a hidden control.</td></tr>
+          <tr><td class="fam">Two focus domains</td>
+            <td>Map = spatial neighbours (arrow keys pan the camera when the map owns input; outliner arrows move rows when the list owns it). Chrome = linear neighbours. Hover never clears keyboard focus.</td></tr>
+          <tr><td class="fam">Focus vs selection</td>
+            <td>Focus outline (&sect;O.3) is not the sun selection halo. Enter / click selects. Esc deselects then pops.</td></tr>
+          <tr><td class="fam">Events, not polling</td>
+            <td>HUD and pins bind to the world projection changing. React does not read Phaser internals every frame. Phaser does not fetch.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="wso-keys" style="margin-top:var(--sp-4)">
+        <span class="kr"><span class="hotkey">Tab</span><b>Chrome domain &mdash; rail, then outliner, then map controls, then End turn</b></span>
+        <span class="kr"><span class="hotkey">&larr;&uarr;&darr;&rarr;</span><b>Pan when the map has input; move outliner rows when the list does. Not WASD (&sect;I.3, GG-20)</b></span>
+        <span class="kr"><span class="hotkey">O</span><b>Hand input to the outliner and focus its current row</b></span>
+        <span class="kr"><span class="hotkey">Esc</span><b>Pop one layer, then restore spatial focus on the map</b></span>
+      </div>
+      <div class="note">
+        <strong>Hit target.</strong> The pin disc is 44px at map zoom (~9&nbsp;mm on a 1280-wide
+        window at 96&nbsp;dpi). Name and pips are labels, not the only hit area. Touch and
+        mouse share that disc; gamepad uses focus, not a hover state.
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- ==================================================================== N -->
 <section class="sec" id="n">
   <h2>N &middot; What this plate settles, and what it does not</h2>
@@ -6770,28 +7499,37 @@
       <tr><td class="fam">How is remembered ground drawn?</td><td class="fam">Unmistakably remembered &mdash; distinctness over readability, decided by the owner 2026-09-03</td></tr>
       <tr><td class="fam">Where do map colours come from?</td><td class="fam">Theme tokens only, including lanes, ownership and fog. No component carries a hex literal</td></tr>
       <tr><td class="fam">How is a blocked action shown?</td><td class="fam">Disabled with its reason beside it, in the player&rsquo;s words &mdash; always</td></tr>
+      <tr><td class="fam">What sits on the map?</td><td class="fam">A compact pin (token/chip). The &sect;A card lives in the inspector, never as the map marker</td></tr>
+      <tr><td class="fam">What does zoom hide?</td><td class="fam">Labels and pip detail only. Ownership, health hatch, and unknown silhouette are strict supersets</td></tr>
+      <tr><td class="fam">Unknown ground?</td><td class="fam">A different silhouette (diamond), not a dimmed disc or a dashed rectangle</td></tr>
+      <tr><td class="fam">Two planes?</td><td class="fam">Band 0 is the map (long-term Phaser island). Band 1 is React HUD. Phaser never HTTP; React never GameObjects</td></tr>
+      <tr><td class="fam">Odd aspect ratios?</td><td class="fam">Expand: extra width/height is more map. HUD stays corner-anchored inside the safe inset</td></tr>
+      <tr><td class="fam">Initial focus on World?</td><td class="fam">Spatial focus on the selected pin (or first unresolved). Tab walks chrome. Hover does not steal focus</td></tr>
     </tbody>
   </table>
 
   <p class="lede" style="margin-top:var(--sp-4)">
     <strong>What this plate does not decide.</strong> Illustration &mdash; the art
     <em>registry</em> and the designed placeholder are in scope, actual art is not, and the layout is
-    drawn to accept it later. The battle stage beyond the confirm that names what is staked. Whether
-    the world map replaces the tier ladder, which is a game-design question and not a UI one. And
-    whether the server ever stores a standing multi-turn order, which has hashing and replay
-    consequences the turn engine owns.
+    drawn to accept it later (D10: same pin objects, art later). The battle stage beyond the confirm
+    that names what is staked. Whether the world map replaces the tier ladder, which is a game-design
+    question and not a UI one. Whether the server ever stores a standing multi-turn order, which has
+    hashing and replay consequences the turn engine owns. And the Phaser wiring itself
+    (<code>createWorldGame</code>, <code>world:*</code> bus names) &mdash; that is
+    <a href="../architecture/world-map-runtime-ideal.md">world-map-runtime-ideal</a> into
+    <code>/spec</code>, not a drawing.
   </p>
 
   <p class="note">
     <strong>Three things the spec phase inherits as work, not questions.</strong>
-    This plate supersedes plate 03&rsquo;s world sections, so the index in
-    <a href="README.md">README.md</a> needs updating alongside it.
     <a href="information-architecture.md">information-architecture.md</a> &sect;7 still says World
     travel unlocks on &ldquo;first sector contact&rdquo; &mdash; superseded, the stage is available
     from session start.
-    And no turn-report fixture exists (<code>world.spec.ts</code> stubs that route as a 404), so
+    No turn-report fixture exists (<code>world.spec.ts</code> stubs that route as a 404), so
     &sect;L&rsquo;s translation table cannot be tested until one is generated the way
     <code>first-light.json</code> already is.
+    Live <code>#/world</code> still draws &sect;A cards on the SVG stage with a frozen camera;
+    that is the wiring gap &sect;O catalogues, not a new product question.
   </p>
 </section>
 

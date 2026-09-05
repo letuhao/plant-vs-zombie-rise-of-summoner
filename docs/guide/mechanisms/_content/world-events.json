@@ -1,0 +1,77 @@
+{
+  "slug": "world-events",
+  "title": "World events and raids",
+  "status": "Vision",
+  "kicker": "Quests, failure, memory · the world pushes back",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "Quests and events · World-map adventure",
+  "hook": "**Vision:** blood moons, roaming bosses, ecology — the world pushes back on a schedule of events. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Not playable yet. Do not expect blood moons or raid ecology on the live map today."},
+    {"term": "World event", "meaning": "A scheduled or triggered push from the world — not a single loot line in an expedition report."},
+    {"term": "Raid", "meaning": "A harder world push / boss pressure in that ecology — still Vision here."},
+    {"term": "Ecology", "meaning": "The living pressure of the war — sibling to [counter-development](counter-development)."}
+  ],
+  "alsoTrue": [
+    "Zomboss as commander already ships. Events are the wider story/ecology clock.",
+    "Quest log would surface many of these when both Vision pieces land."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "Play the shipped map and End Turn without waiting on event calendars.",
+        "This page is the intended pushback — the world as an actor, not only a graph."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "Blood moons, roaming bosses, and related ecology beats.",
+        "Events give the war a story clock that can feed quests, fights, and territorial pressure."
+      ],
+      "diagram": [
+        "  world clock / triggers  ->  event / raid",
+        "                               |",
+        "                               +->  map pressure",
+        "                               +->  quest log (Vision)",
+        "                               +->  counter-development (Vision)"
+      ]
+    },
+    {
+      "title": "Where it would show up",
+      "groups": [
+        {
+          "title": "On and over the rift",
+          "intro": "When it ships, expect surfacing on the map and in the quest layer.",
+          "steps": [
+            "Advance the map as you do now.",
+            "When events appear, read them as content to answer — not noise.",
+            "Until then, treat missing blood moons as Vision."
+          ],
+          "note": "Not in the current loop yet."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Fight the shipped war (Zomboss, fog, loam) without an event calendar.",
+    "Do not invent raid timers — they are Vision.",
+    "When events ship, expect them to hang beside [quest log](quest-log) and [counter-development](counter-development)."
+  ],
+  "doNote": "Stop when event ≠ End Turn. Related: [farm / hunt / defend](farm-hunt-defend).",
+  "mixUps": [
+    {"q": "Where are blood moons?", "a": "Vision — not finished / not playable yet."},
+    {"q": "Is End Turn a world event?", "a": "No. End Turn is the virtual-turn clock. Events are story/ecology pushes."},
+    {"q": "Are expedition injuries world events?", "a": "No. Those are expedition ticks. World events are the wider ecology clock."},
+    {"q": "Is this the same as counter-development?", "a": "Sibling Vision. Events are scheduled/triggered pushes; counters are strategy answers."}
+  ],
+  "next": ["counter-development"],
+  "related": ["quest-log", "counter-development", "farm-hunt-defend", "expedition-event-ticks"],
+  "sources": [
+    "docs/guide/the-rift.md §Layers of the war",
+    "docs/guide/the-loops.md §Quests and events",
+    "docs/guide/mechanisms/world-events.md (prior stub)"
+  ]
+}

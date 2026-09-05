@@ -20,10 +20,38 @@ public sealed class ActorHudUnityGuardTests
     };
 
     [Fact]
+    public void ActorHudPool_uses_Feet_lane_Y_and_bounds_X()
+    {
+        var text = ReadInjector(Path.Combine("Hud", "ActorHudPool.cs"));
+        Assert.Contains("VfxAnchorKind.Feet", text, StringComparison.Ordinal);
+        Assert.Contains("BoundsCenterX", text, StringComparison.Ordinal);
+        Assert.Contains("WorldYOffset", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("VfxAnchorKind.Crown", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void UnitFrameResolver_collects_SpriteRenderer_bounds()
+    {
+        var text = ReadInjector(Path.Combine("Fx", "UnitFrameResolver.cs"));
+        Assert.Contains("TryCollectSpriteBounds", text, StringComparison.Ordinal);
+        Assert.Contains("GetComponentsInChildren<SpriteRenderer>", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetComponentInChildren<Renderer>()", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ActorHudPool_uses_UnitFrameResolver_in_pool()
     {
         var text = ReadInjector(Path.Combine("Hud", "ActorHudPool.cs"));
         Assert.Contains("UnitFrameResolver.Resolve", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void VfxDirector_wakes_actor_hud_on_live_match_phase()
+    {
+        var text = ReadInjector(Path.Combine("Fx", "VfxDirector.cs"));
+        Assert.Contains("MatchHost.Runtime.Phase", text, StringComparison.Ordinal);
+        Assert.Contains("MatchPhase.InMatch", text, StringComparison.Ordinal);
+        Assert.Contains("ActorHudDirector.TickSync", text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -72,11 +100,32 @@ public sealed class ActorHudUnityGuardTests
     }
 
     [Fact]
-    public void ActorHudPool_ShouldShow_honors_ShieldBarEnabled_for_shield_only()
+    public void ActorHudPool_uses_ActorHudVisibility_ShouldShow()
     {
         var text = ReadInjector(Path.Combine("Hud", "ActorHudPool.cs"));
         Assert.Contains("OverlaySettings.ShieldBarEnabled", text, StringComparison.Ordinal);
-        Assert.Contains("static bool ShouldShow(ActorHudSnapshot s)", text, StringComparison.Ordinal);
+        Assert.Contains("ActorHudVisibility.ShouldShow", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("static bool ShouldShow(ActorHudSnapshot", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ActorHudRowIdentity_uses_display_tokens_and_hides_blank_tier()
+    {
+        var text = ReadInjector(Path.Combine("Hud", "ActorHudRowIdentity.cs"));
+        Assert.Contains("ActorHudDisplayTokens.TierLetter", text, StringComparison.Ordinal);
+        Assert.Contains("PlaceLabel", text, StringComparison.Ordinal);
+        Assert.Contains("hasLetter", text, StringComparison.Ordinal);
+        Assert.Contains("No blank Normal tier frame", text, StringComparison.Ordinal);
+        Assert.Contains("Never draw mute level badge", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ActorHudRowResources_uses_StackPips_and_maxStackPips()
+    {
+        var text = ReadInjector(Path.Combine("Hud", "ActorHudRowResources.cs"));
+        Assert.Contains("StackPips", text, StringComparison.Ordinal);
+        Assert.Contains("maxStackPips", text, StringComparison.Ordinal);
+        Assert.Contains("PipGap", text, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -115,6 +164,9 @@ public sealed class ActorHudUnityGuardTests
         var text = ReadInjector(Path.Combine("Hud", "ActorHudDirector.cs"));
         Assert.Contains("public static Dictionary<string, object> CaptureStatus()", text, StringComparison.Ordinal);
         Assert.Contains("ActorHudPool.ShieldBarsDrawn", text, StringComparison.Ordinal);
+        Assert.Contains("[\"hudSlots\"]", text, StringComparison.Ordinal);
+        Assert.Contains("[\"shieldBars\"]", text, StringComparison.Ordinal);
+        Assert.Contains("WorldBars", text, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -1,11 +1,14 @@
 # Capability map: `demon-seed`
 
 **Status:** proposed 2026-09-01, after the twenty-six cleared questions in
-[demon-seed-ideal.md](demon-seed-ideal.md). **Sixteen modules** (fourteen at first draft; `species-effects` and `player-materialise` were added 2026-09-01 after the effect-pipeline idea phase — see §3a). **Four of them (`rarity-migration`,
-`species-generator`, `species-import`, `catalog-runtime`) did not exist in the first draft of this
-map** — they are the consequence of the owner's Q23 and Q24 answers, which turned this from "a
-generator that replaces a generator" into "the first program that actually builds the seed → concrete
-chain."
+[demon-seed-ideal.md](demon-seed-ideal.md). **Eighteen modules** (fourteen at first draft;
+`species-effects` and `player-materialise` were added 2026-09-01 after the effect-pipeline idea phase —
+see §3a; `fusion-recipe-generator` and `fusion-recipe-runtime` were added 2026-09-05 after the real
+`catalog-runtime` flip found fusion recipes could not scale to the real roster — see §3b). **Four of
+them (`rarity-migration`, `species-generator`, `species-import`, `catalog-runtime`) did not exist in
+the first draft of this map** — they are the consequence of the owner's Q23 and Q24 answers, which
+turned this from "a generator that replaces a generator" into "the first program that actually builds
+the seed → concrete chain."
 
 > **The program in one sentence.** LLM pipelines read the almanac and classify every one of ~904
 > captured species into an **enum-only anchor**; deterministic code then expands that anchor into
@@ -118,6 +121,8 @@ inventory, and §10 says adding one is a reviewed change to that document. Owed;
 | 14 | `roster-metrics` | Distribution guard over element pair x aptitude x threat band x rarity. **The D2-Hammerdin control** | — | 8 |
 | 15 | `species-effects` | **The container.** Anchor -> a `species-passive.{speciesId}` seed: fixed core, affix pool, affinity ordinals, eligibility tags. Without it a generated demon has a stat block and no effects | **yes** | 8, 10, **effect-pipeline** |
 | 16 | `player-materialise` | **Runtime, per player.** At profile creation, roll every species container against that player's world seed and write it to their tables. Frozen for the save; append-only afterwards | — | 12, 15 |
+| 17 | `fusion-recipe-generator` | Distribution index over the real concrete roster finds rarity rungs whose input pool cannot support a unique pair per output (found real, 2026-09-05: 21 `Almanac` outputs vs. 4 `Sunwoven` inputs); an LLM proposes a cross-rung pairing only for those deficits; a deterministic reconciler validates and writes the committed recipe seed | **yes, bounded to shortfall rungs only** | 11 |
+| 18 | `fusion-recipe-runtime` | `DemonRecipeCatalog` moves from live in-process computation to a `Configure`d read of the committed seed — the same seam `catalog-runtime` already proved for the species catalog, applied to its sibling | — | 17 |
 
 ### Dependency graph
 
@@ -136,11 +141,12 @@ anchor-contract ----------------------+--> option-permutation --> classify-pipel
                               v                      v                  v
                        roster-metrics        species-generator <-- rarity-migration
                                                      |
-                                                     v
-                                              species-import
-                                                     |
-                                                     v
-                                              catalog-runtime
+                                                     +--------------------------+
+                                                     v                          v
+                                              species-import          fusion-recipe-generator
+                                                     |                          |
+                                                     v                          v
+                                              catalog-runtime          fusion-recipe-runtime
                                                      |
                                                      v
    effect-pipeline ──►  species-effects  ──►  player-materialise
@@ -155,6 +161,8 @@ corpus-dump -> anchor-contract -> power-parse -> threat-band -> dump-preflight
   -> option-permutation -> classify-pipelines -> anchor-emit -> run-control
   -> roster-metrics -> rarity-migration -> species-generator -> species-import -> catalog-runtime
   -> species-effects -> player-materialise      (15 and 16 gate on effect-pipeline)
+  -> fusion-recipe-generator -> fusion-recipe-runtime   (17-18 gate on species-generator only,
+                                                          independent of 12-16's own chain)
 ```
 
 **Why the front of that order.** The first five modules make **no model calls at all** and still
@@ -198,6 +206,57 @@ and it is stated here rather than discovered at task start.
 
 ---
 
+## 3b. The gap that added modules 17 and 18 (found and closed 2026-09-05)
+
+**Found running the real `catalog-runtime` flip, live, not by inspection.** With the store-backed
+roster finally loaded, the FIRST downstream consumer to break was not species-related at all:
+`DemonRecipeCatalog.Build()` — `spec-demon-fusion.md`'s own "code-generated from the species catalog"
+recipe assignment, shipped 2026-08-21 — threw `InvalidOperationException: No unused input pair
+available for 'jacksonzombie'`.
+
+**Root cause, found by direct query against the real database, not assumed:** 21 `Almanac`-rarity
+(top-rung) species need a unique fusion input pair each; the nearest populated rung below,
+`Sunwoven`, has only 4 species, and 4 elements support at most `C(4,2)=6` distinct unordered pairs.
+This is the exact same defect class `roster-metrics` (module 10) already declares a target for —
+*"rarity distribution: monotone decreasing across the ten rungs"* — but that module runs on anchors,
+before rarity is assigned during expansion, so it could not have caught this specific case even fully
+built and gated.
+
+**What was tried first, and why it was reverted.** A per-output backtrack across every candidate `a`
+(trying a different first input when the greedy first choice's pairs were already claimed) fixed a
+DIFFERENT, narrower collision (`newyearzombie`) but could not fix the Almanac/Sunwoven case — no
+reordering of 4 elements manufactures a 7th pair. A second attempt widened the input pool by
+ACCUMULATING rungs downward (Sunwoven + Firstseed together) — this technically supplied enough
+capacity, but silently violated `DemonRecipeCatalogTests`'s own tested invariant that both of a
+recipe's inputs come from the exact same single nearest-populated rung below the output. **Reverted
+before landing** once the test caught it: a technically-working fix that breaks a deliberate, already-
+tested game-design rule is not a fix, it is a different, unreviewed game design.
+
+**Owner's actual direction, once the tradeoff was surfaced (2026-09-05):** *"make new seedsmith
+pipeline for fusion with deterministic engine read the whole demon species seed and make distribution
+index... fill fusion hole gap by LLM propose the recipe, deterministic engine validate and reconcile...
+then finally output fusion seed and we will load it in the game runtime."* This is the exact seed →
+concrete shape every other artifact in this program already follows, applied to a fourth kind of
+content (recipes) that had never gone through it — recipes were the one thing this program still
+computed live, in-process, with no anchor, no seed file, and no LLM in the loop at all.
+
+Closed by two modules, mirroring §3a's own split between generation-time and a narrower runtime seam:
+
+- **17 `fusion-recipe-generator`** — dev-time. Distribution index (deterministic) finds shortfall
+  rungs; an LLM proposes a pairing ONLY for the specific deficits the deterministic pass cannot close;
+  a deterministic reconciler is the sole write authority over the committed seed. Bounded scope: for
+  the real corpus this is 21 deficit outputs, not a re-derivation of all 829 recipes.
+- **18 `fusion-recipe-runtime`** — the same `Configure`/`UseScoped` seam `catalog-runtime` already
+  proved for `DemonSpeciesCatalog`, applied to `DemonRecipeCatalog`'s much smaller shape (a single
+  committed JSON file, `SpeciesBuildPlanCatalog`'s pattern, not a SQLite import).
+
+**What the audit did *not* find.** Every OTHER rarity rung has ample pairing capacity (checked against
+the real distribution, not assumed) — `Sunwoven` itself (4 outputs, drawing from `Firstseed`'s 37) is
+nowhere close to its own ceiling. This is a single, isolated, well-bounded gap, not a sign the whole
+recipe-assignment design needs rework.
+
+---
+
 ## 4. What this program deliberately does not do
 
 | Excluded | Why | Owner reference |
@@ -221,6 +280,9 @@ discovered halfway through a task.**
 | [item/ssot-rarity.md](item/ssot-rarity.md) §4.1, §4.3 | Demons adopt the ten-rung ladder; the four-row band map becomes a migration shim with an end date, not a permanent wall | `rarity-migration` |
 | [power/ssot-power-scale.md](power/ssot-power-scale.md) §5.3, §10 | A species `Theta` offset joins the composition and the closed inventory | `threat-band` |
 | [item/seed-contract.md](item/seed-contract.md) | Its status line stops saying nothing is authorized, or demon seeds declare their own subtree under the same law | `anchor-emit` |
+| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Recipe fusion" | *"built deterministically from `DemonSpeciesCatalog` at startup"* -> a deterministic pass PLUS a bounded, LLM-filled gap for rungs the deterministic pass cannot mathematically satisfy, reconciled and committed as a seed, never computed live in the shipped game | `fusion-recipe-generator` |
+| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Boundaries" ("Ask first: … recipe-graph shape changes") | Cleared, not silently taken: `crossRungGapFill` lets a bounded subset of recipes draw inputs from more than one rung below the output — a real graph-shape change, distinct from the computation-method amendment on the row above. Owner, 2026-09-05 (quoted in `spec-fusion-recipe-generator.md`'s own Objective): authorized the whole pipeline shape this change is one consequence of | `fusion-recipe-generator` |
+| [demons/spec-demon-fusion.md](demons/spec-demon-fusion.md) §"Recipe fusion" ("every summonable rare/epic/legendary species gets exactly one recipe") | Narrowed to best-effort: a deficit whose LLM vote never resolves ships with **no recipe**, named as `unresolved` rather than fabricated. A separate loosening from the two rows above — coverage, not method or graph shape | `fusion-recipe-generator` |
 
 ---
 

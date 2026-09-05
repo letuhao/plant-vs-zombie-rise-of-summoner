@@ -29,6 +29,8 @@
 | PG-22 | v8: mechanisms handbook index + stubs (`docs/guide/mechanisms/`) | done |
 | PG-23 | v9: HTML Mechanisms tab — categorized index linking to mechanism stubs; guide version 9 | done |
 | PG-24 | v10: Local control room teach-detail (MD + HTML); blind-user structure; guide version 10 | done |
+| PG-25 | v11: guide stale cleanup — Souls HTML link fallback, How-you-play Items sync, catalog gaps, authoring honesty | done |
+| PG-26 | v12: full mechanisms teach pass — `_content` JSON + HTML for all handbook rows (LCR hand); guide version 12 | done |
 
 ## Follow-ups (not this pass)
 
@@ -39,4 +41,4 @@
 | PG-F3 | Optional: mirror short help into Lingui when chrome strings exist | open |
 | PG-F4 | Owner may add more Vision rows later | open |
 | PG-F5 | Dave-level rail/stage unlock program from `data/tuning/` (code — not guide copy) | open |
-| PG-F6 | Flesh mechanism stubs by wave: stocks → roster → combat → lawn → world → idle → builds → delve/quests (session shell started: local-control-room teach page) | open |
+| PG-F6 | Flesh / polish mechanism teach pages (all rows have a first teach pass; deepen waves and migrate LCR to `_content/`) | open |

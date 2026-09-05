@@ -58,10 +58,6 @@ FusionRpg.Core.Status.StatusPolicy.Configure(
 FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
     FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "derived-stats.v2.json"))));
-// T4.7 step 2 / T4.8 (catalog-runtime): behaviour-preserving today — the SAME compiled roster
-// DemonSpeciesCatalog.All always read, now routed through Configure. NOT the store-backed flip
-// (SpeciesSnapshot.cs's own doc comment says why).
-FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
 FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
     FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "overlay.v1.json"))));
@@ -299,6 +295,14 @@ if (SimFlags.Enabled)
 var app = builder.Build();
 var store = app.Services.GetRequiredService<RpgStore>();
 store.Init();
+// catalog-runtime (demon-seed module 13, spec-catalog-runtime.md §7 step 5) — THE FLIP, 2026-09-05:
+// species now load from the store `species-import` writes (data/generated/demons/**.json, imported
+// via `tools/DemonSpeciesImport`), not the compiled `DemonSpeciesCatalog.Generated.cs` snapshot.
+// Owner decision (2026-09-05): the classification/generation pipeline is real and current
+// (829 species, up from 84); further review happens against the real, running roster, not by
+// withholding it. Loaded once here, immutable for the process lifetime (§3a — no live reload; an
+// import needs a server restart, already how this repo deploys).
+FusionRpg.Core.Demons.DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot());
 store.SeedRarityLadder(itemRarityTuning);
 // item-ideal.md, salvage-craft (module 14): `salvage_yield`, the sixth `rarity_budget` key, whose
 // shape ssot-rarity.md §5 recorded as "awaiting I9" until this module decided it. Seeded here rather
@@ -519,7 +523,14 @@ store.LoadContentIntoRuntime();
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
 _ = FusionRpg.Core.Battle.WaveCatalog.All;
-_ = FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.All; // recipe graph must fail fast, not poison lazily
+// Recipe graph normally fails fast (not poison lazily). Almanac-band pair capacity can exhaust
+// on the current roster (e.g. jacksonzombie) — log and continue so debug/HUD live sessions still boot;
+// fusion endpoints that touch DemonRecipeCatalog.All will surface the same error on first use.
+try { _ = FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.All; }
+catch (Exception ex)
+{
+    Console.WriteLine("[demons] DemonRecipeCatalog.Build failed at boot — fusion recipes unavailable: " + ex.Message);
+}
 // Boot sweep: web matches logged but never ingested (crash window) re-resolve deterministically.
 var sweptMatches = app.Services.GetRequiredService<WebMatchService>().SweepUnresolved();
 if (sweptMatches > 0)

@@ -496,7 +496,7 @@ shipped curve (`B = 0.4`):
 
 | Shipped | Where | Why `tree-resolve` cannot use it |
 |---|---|---|
-| `ValueSpec.PowerLadderKMilli` is an **`int` per-mille** | `ValueSpec.cs:92` | Per-mille rounds a tier-1 node with **17% error** — larger than one tier step, which destroys D26's exactly-flat reward-per-point. `mechanism-wiring`'s `PowerLadderKMicro` sibling (three lines) is the fix; until it lands, tree coefficients are read from the catalog as `long` per-million, never through `ValueSpec` |
+| `ValueSpec.PowerLadderKMilli` is an **`int` per-mille** | `ValueSpec.cs:92` | Per-mille rounds a tier-1 node with **17% error** — larger than one tier step, which destroys D26's exactly-flat reward-per-point. `tree-binder` owns the `ValueSpec.PowerLadderKMicro` sibling (three lines, per its own §3.5) — not `mechanism-wiring`, corrected 2026-09-05; until it lands, tree coefficients are read from the catalog as `long` per-million, never through `ValueSpec` |
 | `AtomCompiler` narrows the compiled ladder value to **`int`** — `checked((int)((long)spec.PowerLadderKMilli * pThetaValue / 1000))` | `AtomCompiler.cs:464` | It is `checked`, so it throws rather than wraps — correct behaviour, wrong width. A tree magnitude reaches `int`'s ceiling at `Θ` 103,557 and would start *throwing* on a legal build. `tree-resolve` carries its own `long`/`decimal` read and never routes a tree magnitude through the compiler's ladder branch |
 
 **The one decided exception.** `BoundDerivedAtom.Amount` and `DerivedModifier.Value` are `double`

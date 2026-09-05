@@ -1,0 +1,78 @@
+{
+  "slug": "counter-development",
+  "title": "Enemy counter-development",
+  "status": "Vision",
+  "kicker": "World and empire · the war pushes back",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "Farm / hunt / defend · Quests and events",
+  "hook": "**Vision:** the war shifts resists and composition from **how you play** — not matched levels. Not finished / not playable yet.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Locked design. Do not expect the live map to hard-counter your build today."},
+    {"term": "Counter-development", "meaning": "If you lean fire, the war grows fire-hard; if you lean summons, anti-summon shows up. Rebuild follows."},
+    {"term": "Matched levels", "meaning": "The rejected idea that enemy power is only “Dave’s level ± N.” This Vision is about strategy pressure, not a level treadmill."},
+    {"term": "Ecology", "meaning": "World events and raids that make the pushback feel alive — sibling Vision with [world events](world-events)."}
+  ],
+  "alsoTrue": [
+    "Zomboss as a fog-bound commander already ships. Counter-development is the later “war learns your lean” layer.",
+    "Hangs on farm / hunt / defend and on world events — not a new loop heading."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "Play Zomboss and the map without waiting for automatic hard-counters to your aptitudes.",
+        "This page is the intended pressure curve — raise demons → a strategy works → the world counters → rebuild."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "Your successful leans become the world’s homework.",
+        "The answer is not inflating a level number — it is changing resists, composition, and threats so yesterday’s easy plan stops being free."
+      ],
+      "diagram": [
+        "  lean works  ->  world notices  ->  counters appear  ->  you rebuild"
+      ],
+      "cards": [
+        {"name": "Not this", "body": "Enemy level = Dave’s level."},
+        {"name": "This", "body": "Strategy answers strategy — fire lean meets fire-hard; summon lean meets anti-summon."}
+      ]
+    },
+    {
+      "title": "Where it would show up",
+      "groups": [
+        {
+          "title": "Across the war",
+          "intro": "When it ships, expect pressure through map threats and events — not a single toggle.",
+          "steps": [
+            "Keep building and fielding as you do now.",
+            "When counters appear, read them as content — then adjust roster and plan.",
+            "Until then, treat missing hard-counters as Vision."
+          ],
+          "note": "Not in the current loop yet."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Fight Zomboss and hold ground with the systems that ship today.",
+    "Do not assume the AI is broken because it does not hard-counter your lean yet.",
+    "When world events and counters arrive, rebuild on purpose — that is the fantasy."
+  ],
+  "doNote": "Stop when counter ≠ level sync. Related: [Zomboss](zomboss-commander), [world events](world-events).",
+  "mixUps": [
+    {"q": "Why isn’t the enemy hard-countering my fire team?", "a": "Counter-development is Vision. Absence is expected."},
+    {"q": "Is this just higher numbers?", "a": "No. Design rejects matched-level padding as the answer."},
+    {"q": "Is Zomboss Vision too?", "a": "No. Zomboss as commander ships. This is the later ecology of counters."},
+    {"q": "Does this wipe my roster?", "a": "No. It pressures strategy so you rebuild plans — not a prestige wipe of who you are."}
+  ],
+  "next": ["world-events"],
+  "related": ["zomboss-commander", "farm-hunt-defend", "world-events"],
+  "sources": [
+    "docs/guide/the-loops.md §Farming, hunting, and defending the empire",
+    "docs/guide/the-rift.md §Layers of the war",
+    "docs/guide/mechanisms/counter-development.md (prior stub)",
+    "docs/guide/glossary.md §Enemy counter-development"
+  ]
+}

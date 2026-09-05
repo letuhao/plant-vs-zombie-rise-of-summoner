@@ -1,6 +1,6 @@
 # Rise of Summoner — player guide
 
-**Guide version: 10 — 2026-09-05**
+**Guide version: 12 — 2026-09-05**
 
 This folder is the **product-vision SSOT** for players: what the game is, which loops exist, and every feature on the road map — not how the software is built. Later features implement or extend the loops named in [The loops](the-loops.md).
 
@@ -18,6 +18,8 @@ Every feature below wears one badge. Thin surfaces that you can already open cou
 | **WIP** | Designed and in the forge — not finished yet |
 | **Vision** | Locked as fiction or design; not in the current loop |
 
+Notes on **Shipped** are allowed: **Shipped (thin)** means the surface opens but is still rough; **Shipped (fiction)** means the rule is live in the product story (for example prestige across worlds) even when the full stage UI is not.
+
 Nothing here is a date promise. The catalog only grows — Vision stays Vision until it ships.
 
 ---
@@ -28,7 +30,7 @@ Nothing here is a date promise. The catalog only grows — Vision stays Vision u
 |---|---|
 | [**Vision site (HTML)**](site/) | Fancy tabbed skim — open `site/index.html` (includes a **Mechanisms** tab that indexes every system) |
 | [Feature list (brief)](features.md) | Market skim — short feature intro; open detail when hooked |
-| [**Mechanisms**](mechanisms/) | Handbook index — every gameplay system by category (same inventory as the HTML Mechanisms tab). First teach page: [Local control room](site/mechanisms/local-control-room.html) |
+| [**Mechanisms**](mechanisms/) | Handbook — every system has a teach guide (HTML under `site/mechanisms/` + markdown); open the Mechanisms tab |
 | [The game](the-game.md) | What Rise of Summoner is — RPG + empire, lore, win and lose |
 | [The loops](the-loops.md) | Ten named loops — product-vision SSOT every feature hangs on |
 | [How you play](how-you-play.md) | Lawn first, first session, unlock ladder (live + Vision chapters) |
@@ -73,13 +75,14 @@ Checklist of named features (Shipped / WIP / Vision). For **how each system work
 | Item chapter (Dave 10) | Armoury opens when Dave reaches the item unlock; no dead loot UI before | Vision | Relics | [How you play](how-you-play.md) · [Relics and builds](relics-and-builds.md) |
 | Creatures roster | Persistent specimens with level, gear, and history | Shipped | Creatures | [Creatures](creatures.md) |
 | Creature sheet | Full specimen panel — overview, progression, actions, gear | WIP | Creatures | [Creatures](creatures.md) |
-| Souls | Earn from play; spend to summon and bind | Shipped | HUD + altar | [Creatures](creatures.md) |
-| Essence | Element-matched materials for fusion and some buildings | Shipped | Fusion / rift | [Creatures](creatures.md) · [The rift](the-rift.md) |
+| Souls | Earn from play; spend to summon and bind | Shipped | HUD + altar | [Teach guide](site/mechanisms/souls.html) · [Creatures](creatures.md) |
+| Essence | Element-matched materials for fusion and some buildings | Shipped | Fusion / rift | [Teach guide](site/mechanisms/essence.html) · [Creatures](creatures.md) · [The rift](the-rift.md) |
 | Summoning altar | Spend souls for new demons; pity shown on the altar | Shipped | Summon / Demons | [Creatures](creatures.md) |
 | Pacts and loyalty | Bind demons to slots; neglect them and they refuse | Shipped | Pacts | [Creatures](creatures.md) |
 | Tribute on pacts | Keep contracts paid; overdue tribute is leverage | Shipped | Pacts | [Creatures](creatures.md) |
 | Fusion | Merge specimens into stronger forms; discover recipes | Shipped | Fusion | [Creatures](creatures.md) |
 | Patron demon | One demon’s element colours the army | WIP | Patron choice | [Creatures](creatures.md) |
+| Wild joins | Demons that join without an altar pull | Shipped | Creatures / world | [Creatures](creatures.md) · [mechanisms/wild-joins.md](mechanisms/wild-joins.md) |
 | In-run capture | Weaken and catch demons during play | WIP | Lawn / delves | [Creatures](creatures.md) · [The lawn](the-lawn.md) |
 | Six elements + omni | Fire, ice, air, earth, light, dark — real matchups | Shipped | Combat everywhere | [Combat](combat.md) |
 | Shields, crit, resistance | Layered defence and hits that can fail or land hard | Shipped | Lawn and battles | [Combat](combat.md) |
@@ -101,8 +104,8 @@ Checklist of named features (Shipped / WIP / Vision). For **how each system work
 | Fog of war | Your ground is clear; other people’s ground stays uncertain | Shipped | World map | [The rift](the-rift.md) |
 | World virtual turns | End Turn commits everyone’s orders — the world clock, not a diary | Shipped | World map | [The loops](the-loops.md) · [The rift](the-rift.md) |
 | Zomboss as commander | He runs his own war from his own fog | Shipped | World map | [The rift](the-rift.md) |
-| Loam and the Fracture | Ground you hold must stay real; neglect fades | Shipped | World map | [The rift](the-rift.md) |
-| Farm, hunt, and defend | Territorial loop — yield, prey, Seat and homeworld | Shipped (thin) / Vision (full) | World / lawn / siege | [The loops](the-loops.md) · [The rift](the-rift.md) |
+| Loam and the Fracture | Ground you hold must stay real; neglect fades | Shipped (thin) | World map | [Teach guide](site/mechanisms/loam.html) · [The rift](the-rift.md) |
+| Farm, hunt, and defend | Territorial loop — yield, prey, Seat and homeworld | Shipped (thin) | World / lawn / siege | [The loops](the-loops.md) · [The rift](the-rift.md) · [mechanisms/farm-hunt-defend.md](mechanisms/farm-hunt-defend.md) |
 | World stage (empire building) | Camera, HUD, inspector, End Turn — where you run the empire | Vision | World stage | [The rift](the-rift.md) · [The loops](the-loops.md) |
 | Sector buildings | Wells, waystations, granaries — economy on the map | WIP | World map | [The rift](the-rift.md) |
 | Map tools and orders | Wardens, cede, dowse, lenses, outliner | WIP | World map | [The rift](the-rift.md) |
@@ -129,6 +132,7 @@ Checklist of named features (Shipped / WIP / Vision). For **how each system work
 | Type and specimen XP | Plants, zombies, and demons grow from work done | Shipped | Chronicle / roster | [Almanac](almanac.md) |
 | Almanac dossiers | Meet it in play → it files itself | Shipped | Almanac | [Almanac](almanac.md) |
 | Chronicle | Run history, progression, lasting record | Shipped | Chronicle | [Almanac](almanac.md) |
+| New world — keep who you are | End a world and start another; roster and souls bank, loam and holdings do not | Shipped (fiction) | Prestige / new map | [The game](the-game.md) · [mechanisms/new-world-prestige.md](mechanisms/new-world-prestige.md) |
 
 ---
 

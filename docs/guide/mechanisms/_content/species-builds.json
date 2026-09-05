@@ -1,0 +1,51 @@
+{
+  "slug": "species-builds",
+  "title": "Species builds",
+  "status": "WIP",
+  "kicker": "Power and builds · level up and power",
+  "pillar": {"text": "Relics and builds", "href": "relics-and-builds.md"},
+  "loopLine": "Level up and power",
+  "hook": "**WIP:** species you field grow their own aptitude lean over time — you can override; changing your mind costs a priced respec.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not a finished player loop yet."},
+    {"term": "Species lean", "meaning": "Aptitude tilt that grows on a species line from fielding it — separate from one specimen’s XP."},
+    {"term": "Override", "meaning": "You can force a different face; respec is priced so the lean still means something."},
+    {"term": "Zomboss patterns", "meaning": "Enemies can show adaptive builds after fights — content, not a class you pick."}
+  ],
+  "alsoTrue": [
+    "Commander free-build aptitudes already ship thin — see [aptitudes](aptitudes).",
+    "Play without waiting on species lean."
+  ],
+  "sections": [
+    {
+      "title": "What it will be",
+      "paras": [
+        "Field a species and watch its lean drift toward how you used it.",
+        "Override when you need another face; pay the respec friction."
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Spend commander aptitudes.",
+        "Raise specimens; treat missing species-lean UI as unfinished."
+      ]
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Keep fielding the species you care about.",
+    "Use commander aptitudes for side-wide lean now.",
+    "Ignore absent species-build panels."
+  ],
+  "doNote": "Vision face: [passive trees](passive-trees).",
+  "mixUps": [
+    {"q": "Is this my class?", "a": "No. You still have no class. This is species lean."},
+    {"q": "Does every specimen share one lean?", "a": "Design is per species line you field, not one global class."},
+    {"q": "Can Zomboss use this against me?", "a": "Adaptive enemy patterns are content — yes, as opposing builds."},
+    {"q": "Broken if missing?", "a": "No — WIP."}
+  ],
+  "next": ["passive-trees"],
+  "related": ["aptitudes", "specimens", "dave-level"],
+  "sources": ["docs/guide/relics-and-builds.md §Species builds"]
+}

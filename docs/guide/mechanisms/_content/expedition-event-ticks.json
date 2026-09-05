@@ -1,0 +1,76 @@
+{
+  "slug": "expedition-event-ticks",
+  "title": "Expedition quest and event ticks",
+  "status": "Vision",
+  "kicker": "Idle expeditions · quests and world events",
+  "pillar": {"text": "Expeditions", "href": "expeditions.md"},
+  "loopLine": "Quests and events · Idle expeditions",
+  "hook": "**Vision:** idle expedition ticks that open **quests** and **world events** — a story clock, not only loot. Not finished / not playable yet as that handoff.",
+  "blindSpots": [
+    {"term": "Vision", "meaning": "Locked design. Full quest and world-event handoff from expedition ticks is not something you can rely on in the current loop."},
+    {"term": "Tick", "meaning": "A beat while an expedition is out — quiet stretches, finds, meetings, injuries today; quest/event starts later."},
+    {"term": "Quest handoff", "meaning": "A tick that opens a tracked quest (or world event), not only a material line in the return report."},
+    {"term": "Story clock", "meaning": "The world pushing narrative beats — opposite of a pure loot clock."}
+  ],
+  "alsoTrue": [
+    "Dispatch → wait → collect already ships. Thin in-run expedition event flavour can appear without this Vision handoff.",
+    "Discoveries that open domains for the Delve hang on the same Vision story."
+  ],
+  "sections": [
+    {
+      "title": "Not finished / not playable yet",
+      "paras": [
+        "Do not expect every expedition return to open a quest log entry or a world raid.",
+        "Read this page for the intended story clock — play loot and roster outcomes on [expeditions](expeditions) today."
+      ]
+    },
+    {
+      "title": "What it is (design)",
+      "paras": [
+        "While a squad is out, ticks can do more than pay materials.",
+        "Vision: some ticks start quests, surface world events, or discover doors into domains for the Delve."
+      ],
+      "diagram": [
+        "  expedition running  ->  tick",
+        "                           |",
+        "                           +->  loot / injury / wild meet (today)",
+        "                           +->  quest / world event / domain door (Vision)"
+      ]
+    },
+    {
+      "title": "Where you would find it",
+      "groups": [
+        {
+          "title": "When it ships",
+          "intro": "The fantasy hangs on Expeditions plus the quest layer.",
+          "steps": [
+            "Dispatch as you do now.",
+            "When a tick opens a quest or event, it would surface in the [quest log](quest-log) / [world events](world-events) surfaces.",
+            "Until then, treat missing quest prompts as Vision — not a broken expedition."
+          ],
+          "note": "Full handoff is Vision even if thin expedition event ticks exist in reports."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do with this page",
+  "doSteps": [
+    "Keep using dispatch → wait → collect for loot, XP, and wild joins.",
+    "Do not wait on expedition returns for a finished quest log.",
+    "When you want the story-clock fantasy, read [quest log](quest-log) and [world events](world-events) as Vision siblings."
+  ],
+  "doNote": "Stop when Vision ticks ≠ live payouts. Shipped loop: [expeditions](expeditions).",
+  "mixUps": [
+    {"q": "Why didn’t my overnight run open a quest?", "a": "Quest and world-event ticks are Vision. Absence is expected."},
+    {"q": "Are quiet stretches and injuries Vision too?", "a": "No. Those in-run tick flavours belong to the shipped expedition chain; the quest/event handoff is the Vision piece."},
+    {"q": "Will this replace expeditions?", "a": "No. Expeditions stay idle forever. Ticks add story, they do not delete the loop."},
+    {"q": "Is this the same as the quest log?", "a": "Related. Ticks would feed the log; the log itself is Vision — see [quest log](quest-log)."}
+  ],
+  "next": ["quest-log"],
+  "related": ["expeditions", "quest-log", "world-events", "delve"],
+  "sources": [
+    "docs/guide/expeditions.md §What happens while they are out",
+    "docs/guide/the-loops.md §Quests and events",
+    "docs/guide/mechanisms/expedition-event-ticks.md (prior stub)"
+  ]
+}

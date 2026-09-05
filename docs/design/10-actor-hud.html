@@ -14,7 +14,8 @@
   .hudstack { position: absolute; left: 50%; transform: translateX(-50%);
     display: flex; flex-direction: column; align-items: center; gap: 3px;
     pointer-events: none; z-index: 2; }
-  .hudstack--above { bottom: calc(100% + 4px); }
+  .hudstack--above { bottom: calc(100% + 4px); } /* legacy — Phaser mock may keep */
+  .hudstack--below { top: calc(100% - 6px); } /* Unity SSOT: center-bottom / under unit */
   .hudrow { display: inline-flex; align-items: center; gap: 3px; flex-wrap: nowrap; }
   .tierframe { display: inline-grid; place-items: center; width: 18px; height: 18px;
     border-radius: var(--r-sm); border: 2px solid var(--rarity-3); background: rgb(0 0 0 / .35);
@@ -68,9 +69,10 @@
 <header class="plate-head">
   <h1>Actor HUD — per-unit readout on the lawn</h1>
   <p>
-    A reusable, extensible HUD above each unit — icon, level, color, shape, and gradient — so the
+    A reusable, extensible HUD on each unit — icon, level, color, shape, and gradient — so the
     player can read <em>what</em> a unit is and <em>what is happening to it</em> without opening a
-    sheet or parsing a wall of text. This plate is the visual guide and user-facing legend; the
+    sheet or parsing a wall of text. Unity attaches the stack at <strong>center-bottom</strong>
+    (UnitFrame Body + worldYOffset). This plate is the visual guide and user-facing legend; the
     architecture ideal lives in
     <a href="../architecture/actor-hud-ideal.md">actor-hud-ideal.md</a>.
   </p>
@@ -97,32 +99,24 @@
 
 <!-- ==================================================================== A -->
 <section class="sec" id="a">
-  <h2>A · Anatomy — three rows above the unit</h2>
+  <h2>A · Anatomy — three rows at center-bottom</h2>
   <p class="lede">
     Band B only. Match chrome (sun, wave, commander chip) stays on the stage HUD —
     <a href="04-run-stages.html#a">plate 04 §A</a>. Each row uses a different visual channel so
-    facts do not compete.
+    facts do not compete. Unity places the stack under the unit (Body + worldYOffset); Phaser may
+    keep its canvas attach for this pass.
   </p>
 
   <div class="spec">
     <div class="viewport short" style="display:flex;justify-content:center;padding:var(--sp-6)">
       <div class="unitmock">
-        <div class="hudstack hudstack--above">
-          <!-- Identity row -->
+        <div class="sprite">🧟</div>
+        <div class="hudstack hudstack--below">
+          <!-- Identity (highest local Y) -->
           <div class="hudrow">
-            <span class="tierframe" data-tier="elite" title="Elite tier frame">★</span>
-            <span class="rolepip" data-role="demon" title="Bound demon specimen">👿</span>
+            <span class="tierframe" data-tier="elite" title="Elite tier frame">E</span>
+            <span class="rolepip" data-role="demon" title="Bound demon specimen">S</span>
             <span class="lvlbadge" title="Level band (not raw Θ)">42</span>
-          </div>
-          <!-- Resource row -->
-          <div class="hudrow">
-            <div class="shieldrow" title="Shield — element-colored segments">
-              <div class="track">
-                <span class="seg" data-el="fire" style="width:45%"></span>
-                <span class="seg" data-el="ice" style="width:30%"></span>
-              </div>
-              <span class="pip"></span><span class="pip"></span>
-            </div>
           </div>
           <!-- Status strip -->
           <div class="hudrow">
@@ -130,9 +124,18 @@
             <span class="st" data-fn="working" title="wither">WI</span>
             <span class="st" data-fn="partial" title="bond">BO</span>
           </div>
-          <span class="hudlabel">identity → resources → statuses</span>
+          <!-- Resource row at Body root (Y ≈ 0) -->
+          <div class="hudrow">
+            <div class="shieldrow" title="Shield — element-colored segments + pips">
+              <div class="track">
+                <span class="seg" data-el="fire" style="width:45%"></span>
+                <span class="seg" data-el="ice" style="width:30%"></span>
+              </div>
+              <span class="pip"></span><span class="pip"></span>
+            </div>
+          </div>
+          <span class="hudlabel">identity → statuses → shield (Body+offset)</span>
         </div>
-        <div class="sprite">🧟</div>
       </div>
     </div>
 
@@ -148,8 +151,10 @@
     </table>
 
     <div class="note">
-      <strong>Anchor:</strong> entire stack attaches at <code>UnitFrame</code> crown/body — same resolver
-      as status VFX. No per-primitive <code>BodyWorld</code> reads.
+      <strong>Anchor (Unity SSOT):</strong> stack attaches at <code>UnitFrame</code> <strong>Body</strong>
+      + tunable <code>worldYOffset</code> (default −0.35) — same resolver as status VFX, familiar
+      shield-bar slot. No per-primitive <code>BodyWorld</code> reads. Shield row at local Y ≈ 0;
+      statuses and identity stack upward. Phaser canvas attach may differ this pass.
     </div>
   </div>
 </section>

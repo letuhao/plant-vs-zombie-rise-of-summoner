@@ -6,6 +6,9 @@ Depends on `motif-prose-filter`, `workflow-runtime`, `quality-gates`. **The firs
 `R#` = [audit](review/audit-agent-runtime-proposal.md).
 
 **Status: SEALED — approved by the owner 2026-09-01. Authorized to build.**
+**Amended 2026-09-06:** added a corpus-wide near-duplicate check on `doctrine` (§6, §8) — the sealed
+version had no distribution/diversity gate at corpus scale, only per-item quality checks, despite the
+spec's own §9 probe already reproducing the failure mode at single-demon scale.
 
 ---
 
@@ -180,9 +183,12 @@ rule.
 | Same corpus generated twice (mock) | byte-identical files |
 | Zero real model calls | `MockModelServer` only |
 | ⛔ **Quality, measured separately** | on the first real run: report shoehorning rate by reading a **stratified sample**, not by quoting the validator pass rate (`quality-gates` §2.4) |
+| ⛔ **Corpus-wide near-duplicate check on `doctrine`** | added 2026-09-06, closing a gap this spec's own §9 probe already evidenced: 3 generations for one demon produced pairwise Jaccard 0.42 / 0.68 / 0.45 (mean 0.52) — the thesaurus failure, not resolved by "one per demon" alone, because it constrains *repeats for one demon*, not *convergence across many*. `metrics` runs the shared `spec-analytics.md` §6.2 pipeline (5-gram shingles → MinHash → Jaccard, LSH-banded) over every committed `doctrine` string corpus-wide, the same shape the item corpus's Appendix A row 16 (Semantic dedup) already owns. A synthetic fixture with two doctrines above the similarity threshold fails the check naming both ids |
 
-The last row is the one this module must not skip. Tier-2 pass rate is already known to be 100% on
-bad content.
+The **quality** and **near-duplicate** rows are the ones this module must not skip. Tier-2 pass rate is
+already known to be 100% on bad content, and per-item `motif_coverage` cannot see convergence across
+demons — a doctrine can use its own demon's motifs faithfully and still be the fourth
+near-copy of the same sentence.
 
 ---
 
@@ -207,6 +213,9 @@ bad content.
 5. Re-run produces zero new writes.
 6. **Quality reported from a read sample, separately from the pass rate.**
 7. Full seedsmith suite green; `check --adapter demons` shows the reduced gap count.
+8. **Corpus-wide near-duplicate rate on `doctrine` is reported before the real run ships**, using the
+   shared MinHash/Jaccard pipeline — not inferred from the single-demon probe in §9, which measured
+   repeats for one demon, never convergence across many.
 
 ---
 

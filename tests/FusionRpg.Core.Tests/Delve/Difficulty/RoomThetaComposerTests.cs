@@ -56,11 +56,18 @@ public class RoomThetaComposerTests
     }
 
     [Fact]
-    public void Tail_abyss_plus_5_on_impossibles_rule_row_composes_band_11_and_theta_125()
+    public void Tail_abyss_plus_5_on_impossibles_rule_row_composes_band_11_and_theta_110()
     {
+        // spec-difficulty-ladder.md §1's worked table states Θ 125 for this row, but every OTHER
+        // row in that same table (bands 6,8,9,10,12,13 -> Θ 85,95,100,105,115,120) sits on an
+        // exact rate of 5 Θ per band above the band-3/Θ-70 anchor; band 11 on that same line is
+        // 110, not 125 -- a transcription slip in the doc, not a composer defect (corrected in the
+        // spec alongside this test, 2026-09-05).
         var result = Compose(RichEntrance, "impossible", row: 0, tailPlus: 5);
         Assert.Equal(11, result.Band);
-        Assert.Equal(125, result.Theta);
+        Assert.Equal(110, result.Theta);
+        Assert.Equal(5360, new PowerLadder(Power).Value(result.Theta)); // P(Θ) -- corrects the doc's stated 6,455
+        Assert.Equal(7882, ContentScale.Milli(result.Theta, Power)); // contentScale ‰ -- corrects the doc's stated 9,492
     }
 
     // -----------------------------------------------------------------------------------------
@@ -111,8 +118,8 @@ public class RoomThetaComposerTests
     [Fact]
     public void A_band_exactly_at_the_floor_is_not_refused()
     {
-        var thinEntrance = new DomainThetaInputs(EntranceBand: 1, IsOnceEntry: false);
-        var result = Compose(thinEntrance, "medium", row: 0); // 1 + 0 + (-1) == minOfferedBand (1)
+        var thinEntrance = new DomainThetaInputs(EntranceBand: 2, IsOnceEntry: false);
+        var result = Compose(thinEntrance, "easy", row: 0); // 2 + 0 + (-1) == minOfferedBand (1)
         Assert.Equal(1, result.Band);
     }
 

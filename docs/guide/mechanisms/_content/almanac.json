@@ -1,0 +1,78 @@
+{
+  "slug": "almanac",
+  "title": "Almanac dossiers",
+  "status": "Shipped",
+  "kicker": "Quests, failure, memory · discovery record",
+  "pillar": {"text": "Almanac", "href": "almanac.md"},
+  "loopLine": "Level up and power · Lawn",
+  "hook": "**Almanac** files what you meet — dossiers from **your** playthrough, not a wiki somebody else wrote.",
+  "blindSpots": [
+    {"term": "Almanac", "meaning": "The reference layer (`A`) for creature types, elements, statuses, recipes, and effect families as they become visible."},
+    {"term": "Dossier", "meaning": "A filed record of something you discovered — portrait, pedia text, costs, type info."},
+    {"term": "Discovery state", "meaning": "An empty slot means you have not met it yet — not a broken link."},
+    {"term": "Developer dump", "meaning": "Raw export pages are not the almanac. If it looks like a dump, it is not for players."}
+  ],
+  "alsoTrue": [
+    "Some dossiers are still thin; presentation polish continues.",
+    "Chronicle (`H`) is the history / XP ledger sibling — not the same layer."
+  ],
+  "sections": [
+    {
+      "title": "What it is",
+      "paras": [
+        "See something in the game and the RPG files it.",
+        "You end up with a browsable set of dossiers and fusion recipes you uncovered — a record of your run through the war."
+      ]
+    },
+    {
+      "title": "How it works",
+      "intro": "Reference material, open over any stage:",
+      "cards": [
+        {"name": "Types", "body": "Creature types you have discovered."},
+        {"name": "Ring and statuses", "body": "Elements and statuses as they become player-visible."},
+        {"name": "Recipes", "body": "Fusion recipes you uncover sit beside dossiers."}
+      ],
+      "diagram": [
+        "  meet in play  ->  filed dossier / recipe",
+        "                       |",
+        "                       v",
+        "                 Almanac layer (A)"
+      ],
+      "note": "Codex milestones for demons reward exploration. Web-only players can still claim completion milestones without every exclusive lawn capture."
+    },
+    {
+      "title": "Where you find it",
+      "groups": [
+        {
+          "title": "Almanac layer (`A`)",
+          "intro": "Open over Sanctum or any stage when the rail allows.",
+          "steps": [
+            "Meet something in play (lawn, expedition, map — wherever discovery fires).",
+            "Open Almanac (`A`).",
+            "Browse dossiers and recipes; empty slots are unmet, not errors."
+          ],
+          "note": "Older “types / recipes / runs” routes redirect here as the Sanctum model finishes replacing old audit screens."
+        }
+      ]
+    }
+  ],
+  "doTitle": "What you do (first time)",
+  "doSteps": [
+    "Play until you have met at least one new type or recipe.",
+    "Open Almanac (`A`) and find that dossier.",
+    "Leave one empty slot alone — that is discovery state working."
+  ],
+  "doNote": "Stop when almanac ≠ wiki download. Sibling ledger: [chronicle](chronicle).",
+  "mixUps": [
+    {"q": "Why are some slots empty?", "a": "You have not discovered them yet. Empty means unmet."},
+    {"q": "Is this Chronicle?", "a": "No. Chronicle is history and XP ledgers (`H`)."},
+    {"q": "Can web-only play finish milestones?", "a": "Design allows completion milestones without every exclusive lawn capture."},
+    {"q": "Is a raw data dump the almanac?", "a": "No. Developer dumps are not for players."}
+  ],
+  "next": ["chronicle"],
+  "related": ["chronicle", "type-specimen-xp", "lawn-match", "specimen-fusion"],
+  "sources": [
+    "docs/guide/almanac.md §Almanac layer",
+    "docs/guide/mechanisms/almanac.md (prior stub)"
+  ]
+}

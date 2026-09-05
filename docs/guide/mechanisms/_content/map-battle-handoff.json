@@ -1,0 +1,72 @@
+{
+  "slug": "map-battle-handoff",
+  "title": "Map to battle handoff",
+  "status": "WIP",
+  "kicker": "World and empire · commit a legion into a fight",
+  "pillar": {"text": "The rift", "href": "the-rift.md"},
+  "loopLine": "World-map adventure · Combat",
+  "hook": "**WIP:** commit a legion into a fight — the map hands a battle a request and consumes an outcome. Not finished / not fully playable yet.",
+  "blindSpots": [
+    {"term": "WIP", "meaning": "Not finished. Full fantasy needs interactive battles you play yourself."},
+    {"term": "Handoff", "meaning": "Map → battle request → outcome back to the map. Not a separate save and not a lawn launch by itself."},
+    {"term": "Commit", "meaning": "Sending a legion into the test — travel into a fight, not only standing on a node."},
+    {"term": "Interactive battle", "meaning": "A fight you play (initiative, action bar, targets) — WIP as a stage; expeditions stay auto-resolve."}
+  ],
+  "alsoTrue": [
+    "Lane-board presentation hangs on the [three-layer world](three-layer-world) Vision.",
+    "You can still march, claim, and End Turn without this handoff."
+  ],
+  "sections": [
+    {
+      "title": "What it will feel like",
+      "paras": [
+        "You commit a legion into a fight from the graph.",
+        "The map hands the battle a request; when the fight ends, the map consumes the outcome and the war continues."
+      ],
+      "diagram": [
+        "  legion on map  ->  commit  ->  battle request",
+        "                                  |",
+        "                                  v",
+        "                            play / resolve fight",
+        "                                  |",
+        "                                  v",
+        "                            map consumes outcome"
+      ]
+    },
+    {
+      "title": "What you do today",
+      "paras": [
+        "Advance the shipped map without expecting a finished playable battle stage from every contact.",
+        "Treat missing commit-to-battle prompts as unfinished work."
+      ]
+    },
+    {
+      "title": "What it depends on",
+      "paras": [
+        "Interactive battles you play yourself are WIP — same combat language, your hands on the action bar.",
+        "Until that stage hardens, the handoff cannot feel finished."
+      ],
+      "note": "See [interactive battles](interactive-battles) when that teach page exists; combat pillar covers the language."
+    }
+  ],
+  "doTitle": "What you do while it is WIP",
+  "doSteps": [
+    "Keep using march, claim, and End Turn on the world map.",
+    "When a commit-to-battle control appears, follow it and read the outcome back on the map.",
+    "Do not confuse this with launching a casual lawn match from Sanctum."
+  ],
+  "doNote": "Stop when handoff ≠ lawn shortcut. Related: [world map](world-map), [three-layer world](three-layer-world).",
+  "mixUps": [
+    {"q": "Why doesn’t contact always open a battle I play?", "a": "Map→battle handoff and interactive battles are WIP."},
+    {"q": "Is this a lawn match?", "a": "No. It is a battle stage fed by the map — lawn remains its own first core loop."},
+    {"q": "Do expeditions use this handoff?", "a": "No. Expeditions stay async auto-resolve."},
+    {"q": "Does the map ignore the fight result?", "a": "Design consumes the outcome back into the war — that loop is what “handoff” means."}
+  ],
+  "next": ["three-layer-world"],
+  "related": ["world-map", "interactive-battles", "three-layer-world"],
+  "sources": [
+    "docs/guide/the-rift.md §Map → battle handoff",
+    "docs/guide/delves-and-sieges.md §Battles in the middle",
+    "docs/guide/mechanisms/map-battle-handoff.md (prior stub)"
+  ]
+}

@@ -118,9 +118,14 @@ public static class ConsumableValidator
             if (!tuning.Authors(ctx))
                 fails.Add(ConsumableRules.Fail(ConsumableRules.UseContextUnsupported,
                     $"'{def.ContainerId}' names use context '{UseContexts.Wire(ctx)}', which the host " +
-                    "cannot serve: 'battle' waits on the action layer and 'lawn' on an overlay use " +
-                    "affordance plus capPerMatch (G4). Widening is additive and never invalidates a row " +
-                    "(§4.1), so this is one line in consumables.v1.json the day the road exists"));
+                    "cannot serve. 'battle' was authored 2026-09-05 once the action layer served it end " +
+                    "to end (holdsStock reads the precondition, IStockLedger takes the stack at commit); " +
+                    "'lawn' is the one still refused, and for its own reason — spec-usability-conditions.md " +
+                    "§3a's mode matrix makes a holdsStock action NOT BINDABLE there (the overlay is a " +
+                    "stateless observer, and ActionCompiler refuses it by name with " +
+                    "ConsumableUnsupportedInMode), and capPerMatch (G4) is still unimplemented. Widening " +
+                    "is additive and never invalidates a row (§4.1), so this is one line in " +
+                    "consumables.v1.json the day the road exists"));
 
         // ---- §6.1 BadParamValue equivalents ----------------------------------------------------------
         if (def.Grade is < ConsumableLimits.MinGrade or > ConsumableLimits.MaxGrade)

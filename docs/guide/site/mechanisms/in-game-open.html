@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="WIP: open the RPG without leaving the lawn-game window (button / F10). Esc closes; the board pauses while you are away. Not finished yet." />
+    <title>In-game open control room — Rise of Summoner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@400;700;800&family=Noto+Sans+SC:wght@400;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="../styles.css" />
+  </head>
+  <body class="teach-body">
+    <a class="skip-link" href="#main">Skip to content</a>
+
+    <div class="stage teach-page">
+      <header class="site-header">
+        <a class="brand" href="../index.html#welcome">
+          <span class="brand-name">Rise of Summoner</span>
+          <span class="brand-tag">Mechanism guide</span>
+        </a>
+        <nav class="header-links" aria-label="Guide navigation">
+          <a href="../index.html#mechanisms">← Mechanisms</a>
+          <a href="../../mechanisms/in-game-open.md">Markdown</a>
+          <a href="../../README.md">Full catalog</a>
+        </nav>
+      </header>
+
+      <main id="main" class="teach-main">
+        <p class="teach-kicker">
+          <span class="mech-status mech-status--wip">WIP</span>
+          Lawn · first core
+        </p>
+        <h1 class="teach-title">In-game open control room</h1>
+        <p class="teach-hook"><strong>WIP:</strong> open the RPG <strong>without leaving</strong> the lawn-game window (button / F10). Esc closes; the board pauses while you are away. Not finished yet.</p>
+
+        <aside class="blind-spots" role="note" aria-labelledby="blind-title">
+          <h2 id="blind-title">Blind spots (if you are new)</h2>
+          <p>These words get guessed wrong. Read them once before the rest of the page.</p>
+          <dl class="def-list">
+            <div>
+              <dt>WIP</dt>
+              <dd>Not finished. Today the usual path is still launcher + browser — see <a href="local-control-room.html">local control room</a>.</dd>
+            </div>
+            <div>
+              <dt>In-game open</dt>
+              <dd>A door from inside the lawn-game window into the control room — not a second install and not alt-tab as the designed end state.</dd>
+            </div>
+            <div>
+              <dt>F10</dt>
+              <dd>The planned hotkey alongside an on-screen button. Treat missing F10 as unfinished, not a broken keymap forever.</dd>
+            </div>
+            <div>
+              <dt>Pause while away</dt>
+              <dd>Design: the board pauses while the control room is open from in-game. Esc closes it.</dd>
+            </div>
+            <div>
+              <dt>Control room</dt>
+              <dd>The local browser shell for Sanctum, Lawn, roster, and more — already playable via launcher + browser.</dd>
+            </div>
+          </dl>
+          <ul class="blind-also">
+            <li>You can already run the full local control room without this button.</li>
+            <li>Lawn play itself is shipped — <a href="../../mechanisms/lawn-match.md">lawn match</a>.</li>
+          </ul>
+        </aside>
+
+        <section class="teach-section" aria-labelledby="not-finished-yet-title">
+          <h2 id="not-finished-yet-title">Not finished yet</h2>
+          <p>The fantasy is one window: fight on the lawn, tap open, manage the RPG, Esc back.</p>
+          <p>Until it ships, use the launcher and browser path you already have.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="design-shape-title">
+          <h2 id="design-shape-title">Design shape</h2>
+          <p>What the WIP is aiming at:</p>
+          <pre class="teach-diagram" aria-label="diagram">
+  lawn-game window  -&gt;  (button / F10)  -&gt;  control room (paused board)
+                              Esc closes  -&gt;  back to match
+</pre>
+          <ol class="pieces">
+            <li class="piece">
+              <strong class="piece-name">Open</strong>
+              <p>In-game button and F10 open the control room.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Pause</strong>
+              <p>The board waits while you are in the RPG shell.</p>
+            </li>
+            <li class="piece">
+              <strong class="piece-name">Close</strong>
+              <p>Esc returns you; the match continues from the pause.</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="teach-section" aria-labelledby="what-you-do-today-title">
+          <h2 id="what-you-do-today-title">What you do today</h2>
+          <div class="gui-walk">
+            <h3>Current path</h3>
+            <ol>
+              <li>Start the local server / launcher flow you already use.</li>
+              <li>Open the control room in the browser.</li>
+              <li>Keep the lawn game and browser side by side until in-game open lands.</li>
+            </ol>
+            <p class="teach-note">Full teach page for that shell: <a href="local-control-room.html">local control room</a>.</p>
+          </div>
+        </section>
+
+        <section class="teach-section" aria-labelledby="do-title">
+          <h2 id="do-title">What you do while it is WIP</h2>
+          <ol class="steps-plain">
+            <li>Use launcher + browser for the control room today.</li>
+            <li>When in-game open appears, try the button or F10 once and confirm Esc pauses/closes as labeled.</li>
+            <li>Do not assume missing F10 means your keymap is wrong — the feature is still WIP.</li>
+          </ol>
+          <p class="teach-note">Session shell today: <a href="local-control-room.html">local control room</a>. Board loop: <a href="../../mechanisms/lawn-match.md">lawn match</a>.</p>
+        </section>
+
+        <section class="teach-section" aria-labelledby="mix-title">
+          <h2 id="mix-title">Common mix-ups</h2>
+          <dl class="faq-list">
+            <div>
+              <dt>Why isn’t F10 opening anything?</dt>
+              <dd>In-game open is WIP. Use the browser control room for now.</dd>
+            </div>
+            <div>
+              <dt>Do I need a second PC?</dt>
+              <dd>No. Local launcher + browser on the same machine is the shipped path.</dd>
+            </div>
+            <div>
+              <dt>Will opening the RPG quit my match?</dt>
+              <dd>Design pauses the board while you are away — it should not trash the run.</dd>
+            </div>
+            <div>
+              <dt>Is this a different control room?</dt>
+              <dd>No. Same local control room — a shorter door into it.</dd>
+            </div>
+            <div>
+              <dt>Can I play without the lawn game window?</dt>
+              <dd>Yes for unlocked web features. This page is only about opening from inside the lawn window.</dd>
+            </div>
+          </dl>
+        </section>
+
+        <footer class="teach-foot">
+          <p>
+            Next:
+            <a href="local-control-room.html">Local control room</a>
+          </p>
+          <p>
+            Related:
+            <a href="local-control-room.html">Local control room</a> ·
+            <a href="../../mechanisms/lawn-match.md">Lawn match</a>
+          </p>
+          <p>
+            <a href="../index.html#mechanisms">← Mechanisms index</a> ·
+            <a href="../../mechanisms/in-game-open.md">Markdown (editable SSOT)</a> ·
+            <a href="../../the-lawn.md">The lawn</a> ·
+            <a href="../../the-loops.md">The loops</a>
+          </p>
+        </footer>
+      </main>
+
+      <footer class="site-footer">
+        Rise of Summoner · mechanism teach page · mirrors the
+        <a href="../../mechanisms/in-game-open.md">markdown guide</a>
+      </footer>
+    </div>
+  </body>
+</html>
