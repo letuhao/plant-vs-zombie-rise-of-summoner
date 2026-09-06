@@ -881,22 +881,17 @@ function authoredNameOrKeyTail(value: string | undefined): string {
   return DISPLAY_KEY_SHAPE.test(value) ? keyTail(value) : value;
 }
 
-/**
- * A derived channel's own words, for a delta row's label — item-content `item-naming` (T3).
- *
- * ⚠ **A placement, never a translation**, on exactly the same terms as `keyTail` above. There is no
- * channel display-name corpus anywhere in the tree: `data/seed/derived-stats/catalog.json` describes
- * every family's compose/unit/consumer and authors no name, and `content/display/en.json` carries no
- * `channel.*` row. So this turns the registered id into the words it is already made of —
- * `combat.crit.rate.fire` → `Combat crit rate fire`, `progression.bonus.maxHp` → `Progression bonus
- * max hp` — and invents no English. The whole path is kept: `combat.absorption.fire` and
- * `combat.resist.fire` are different rows and a label that dropped the domain would merge them.
- *
- * **Named gap, owner the derived-stats catalog:** a per-channel display name. The day one ships,
- * this reads it and no caller changes.
- */
+/** Resolve authored catalog copy for a derived channel. Player surfaces never synthesize words from ids. */
 export function channelLabel(channelId: string): string {
-  return idWords(channelId);
+  const surface = window.__fusionRpgActorSurface;
+  const family = surface?.families
+    .filter((row) => channelId === row.family || channelId.startsWith(`${row.family}.`))
+    .sort((a, b) => b.family.length - a.family.length)[0];
+  if (!family) return "Unknown stat";
+
+  const suffix = channelId === family.family ? "" : channelId.slice(family.family.length + 1);
+  const element = surface?.elements.find((row) => row.id === suffix);
+  return element ? `${family.displayName} · ${element.displayName}` : family.displayName;
 }
 
 /**

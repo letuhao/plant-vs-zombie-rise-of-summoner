@@ -5,22 +5,6 @@ export const STATUS_STRIP_MAX = 3;
 
 export type HudTokenResolve = { hudToken: string; color: string; displayName: string };
 
-type ActorSurfaceStatusRow = {
-  id: string;
-  hudToken?: string;
-  color?: string;
-  displayName?: string;
-};
-
-declare global {
-  interface Window {
-    /** Injected from GET /api/catalogs/actor-surface when available (H2). */
-    __fusionRpgActorSurface?: {
-      statuses?: ActorSurfaceStatusRow[];
-    };
-  }
-}
-
 export const ELEMENT_COLORS_HEX: Record<string, string> = {
   fire: "#e07040",
   ice: "#60a8e0",
@@ -83,7 +67,7 @@ export function resolveStatusHudToken(id: string): HudTokenResolve {
   return {
     hudToken: "·",
     color: "#a89880",
-    displayName: id
+    displayName: "Unknown status"
   };
 }
 

@@ -658,10 +658,10 @@ export type ChannelView = {
 };
 
 // ===========================================================================
-// 7. Resource — Token · Meter · Row. Five locked ids (resource-hub-ssot.md).
+// 7. Resource — Token · Meter · Row. Runtime roster comes from resource-catalog.
 // ===========================================================================
 
-export type ResourceId = "hp" | "stamina" | "hunger" | "spirit" | "qi";
+export type ResourceId = string;
 
 export type ResourceView = {
   id: ResourceId;

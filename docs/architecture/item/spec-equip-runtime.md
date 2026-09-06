@@ -134,6 +134,79 @@ satisfies this amendment's objective as stated.
 | ⭐ `an_equipped_items_stat_modify_atom_reaches_a_real_battle_through_the_compiler_path` | the actual payoff for real content — a real affix atom (`op: "increased"` or `"more"`), not a synthetic `stat.derived` fixture, changes `DamageDealt`/a derived channel geared vs. bare, mirroring `BattleLiveStatModifiersTests`'s own existing proof shape for the non-equip case |
 | `equip_sourced_and_action_sourced_defs_coexist_in_one_battle_without_collision` | the two `RegisterInto` sources (equip, action-granted) don't clash on `EffectHost` registration |
 
+### ⭐ Amendment 2026-09-07 (second) — the Lawn half, traced precisely, still genuinely open
+
+**This module's own original Success Criteria always named two runtimes, not one**: *"One hand-made
+item on one actor measurably changes a number **in battle and on the lawn**."* The amendment above
+closes Battle for real content. It does not touch Lawn — a completely separate mechanism, confirmed by
+tracing it end to end rather than assumed from the module's own older "no new subsystem, no new
+ordering band" framing (which described the *lawn-side reader*, already built, not the *lawn-side
+writer*, which is what is actually missing).
+
+**The lawn never reads `effect_binding` at all.** When a specimen is deployed onto a real lawn,
+`UniqueBoundLoadout.TryApply` (`src/FusionRpg.Injector/Match/UniqueBoundLoadout.cs:14-39`) parses that
+specimen's `rpg_unique_stat_mods.mods_json` blob (`UniqueLoadoutSpec.Parse`), rewrites its grants to
+`entity:{ptr}` (`UniqueLoadoutSpec.BindToPtr` → `UniqueOwnerBinder.BindGrant`), and enqueues them into
+the live `EffectRuntime.Bag.Funnel`. `GrantedDerivedAtomReader.Read` (Core, Unity-free, already tested)
+then reads exactly three owner-key scopes off that same Bag — `match`, `plant:{typeId}`/`zombie:{typeId}`,
+and `entity:{ptr}` (`GrantedDerivedAtomReader.cs:103-112`) — to compose the lawn's derived stats. **Every
+step in this chain is real, live, and correctly wired — for `mods_json`.** None of it is reachable from
+`effect_binding`, the table module 4/5's projection (and this session's `MaterializeRolledEquipRuntime`
+fix) actually write to. A rolled item's equip bindings are therefore invisible to the lawn today,
+independent of anything the Battle amendment closed.
+
+**Why this correction matters precisely.** An earlier finding this session concluded `BindGrant`
+(`UniqueOwnerBinder.cs`) was unrelated to item equip and cited as a misattribution — that conclusion
+still stands; `BindGrant` genuinely serves the `mods_json` chain and nothing in it is item-specific.
+What's newly found is a *second*, real, Injector-side gap in the SAME neighborhood, for a different
+reason: nothing has ever pointed the `effect_binding`/`ResolveBindings(OwnerScope.UniqueActor, ...)`
+data module 4/5 already produces at this same Bound-transition enqueue step.
+
+**The fix, precisely scoped.** `UniqueBoundLoadout.TryApply` gains a second resolution alongside its
+existing `mods_json` one: resolve the specimen's `effect_binding` rows at `UniqueActor` scope (the same
+call `EquipAtomSource`'s production resolver already makes on the Battle side), compile them through the
+same `AtomCompiler`/def-or-overlay shape `GrantedDerivedAtomReader.CollectFromDef` already expects, bind
+them to `entity:{ptr}`, and enqueue them into the SAME `funnel` alongside the `mods_json`-derived grants
+— additive, not a replacement; a specimen with both a relic (`mods_json`) and a rolled item
+(`effect_binding`) equipped must see both.
+
+**Why this is genuinely, differently constrained from the Battle amendment.**
+`UniqueBoundLoadout.cs` references `UnityEngine.Object`, `Plant`, `Zombie` directly — the Injector
+project needs the game's BepInEx/interop DLLs just to compile (`$env:FUSIONRPG_GAME_DIR` set to a real
+install), and proving the enqueue actually reaches a live battle needs an attached, running match. This
+is the one piece of module 5 that is legitimately environment-blocked — not `BindGrant`'s own behavior
+(unrelated), but this specific new call site's live behavior.
+
+**New/edited files (this amendment only):**
+```text
+src/FusionRpg.Injector/Match/UniqueBoundLoadout.cs   EDIT — TryApply resolves effect_binding at
+                                                      UniqueActor scope alongside mods_json, compiles
+                                                      and enqueues both into the same funnel
+src/FusionRpg.Core/Match/UniqueLoadoutSpec.cs        possible EDIT — if the cleanest shape merges both
+                                                      grant sources into one UniqueLoadoutSpec before
+                                                      BindToPtr, rather than two separate enqueue loops
+```
+
+**New tests:**
+| Test | Asserts |
+|---|---|
+| ⭐ `a_rolled_items_equip_binding_reaches_the_lawns_live_funnel_on_bind` | Core-layer, Unity-free — construct the resolved grant list `TryApply` would build from a real `effect_binding` row and assert it lands in a fake `IEffectGrantStore`/funnel double, proving the LOGIC without a live game |
+| `mods_json_and_effect_binding_grants_coexist_on_one_bind_without_dropping_either` | the additive claim, proven not assumed |
+| ⭐ **Owner-run, live**: equip a rolled item, deploy the specimen onto the real lawn, confirm its derived stat actually changed — this specific assertion needs the environment this module's other tests do not |
+
+**Boundaries addendum:** the "Always: route combat writes through `EntityStatWriter`" rule is unaffected
+— this path never touches `EntityStatWriter` (it enqueues into the Funnel, exactly as the existing
+`mods_json`/`ApplyAbsolutes` split already does: absolutes go through `EntityStatWriter`, everything else
+through the Funnel). Never let this new resolution touch `ApplyAbsolutes`'s Unity-field writes directly —
+equip atoms are derived-channel contributions, not HP/ATK absolutes.
+
+## Success criteria — Lawn, added 2026-09-07
+
+- [ ] A rolled item's `effect_binding` atoms reach `UniqueBoundLoadout.TryApply`'s enqueue, proven at
+      the Core layer without a live game.
+- [ ] ⛔ **Owner-run**: a real geared specimen, deployed on the real lawn, shows the changed number —
+      this one criterion cannot be closed from a coding session alone.
+
 ### ⭐ D29 — this module is the gate for the first geared corner run
 
 **Item balance is validated by the class-system's existing two guards**, not by an item-specific
