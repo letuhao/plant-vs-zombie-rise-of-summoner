@@ -1,9 +1,27 @@
 import Phaser from "phaser";
 
-/** Preload placeholder; hand off to LawnWorld with generation. */
+export type CellBootConfig = {
+  /** Next cell-stage scene key after preload. */
+  nextScene: string;
+};
+
+/**
+ * Generic cell-stage Boot — lawn / later siege+battle pass nextScene.
+ * World stays Boot-less (D10).
+ */
 export class BootScene extends Phaser.Scene {
+  private nextScene = "LawnWorldScene";
+
   constructor() {
     super({ key: "BootScene" });
+  }
+
+  init(data?: CellBootConfig): void {
+    const fromData = data?.nextScene;
+    const fromRegistry = this.game.registry.get("bootNextScene") as
+      | string
+      | undefined;
+    this.nextScene = fromData || fromRegistry || "LawnWorldScene";
   }
 
   preload(): void {
@@ -16,6 +34,6 @@ export class BootScene extends Phaser.Scene {
 
   create(): void {
     const generation = (this.game.registry.get("generation") as number) ?? 0;
-    this.scene.start("LawnWorldScene", { generation });
+    this.scene.start(this.nextScene, { generation });
   }
 }

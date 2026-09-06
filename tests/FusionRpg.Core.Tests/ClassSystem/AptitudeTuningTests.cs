@@ -25,9 +25,9 @@ public class AptitudeTuningTests
     }
 
     static string ShippedJson() =>
-        // passive-tree C6 (2026-09-06): v5 -> v6, hosts moved with it (RpgHost.cs/Program.cs) --
+        // passive-tree D55 (2026-09-06): v6 -> v7, hosts moved with it (RpgHost.cs/Program.cs) --
         // kept in sync so "the shipped file" here stays the one actually loaded in production.
-        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v6.json"));
+        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v7.json"));
 
     // ── six-resource coverage (resource-hub-ssot.md, Phase 0 2026-09-02) ─────────────────────────
 
@@ -87,10 +87,13 @@ public class AptitudeTuningTests
         var tuning = AptitudeTuningLoader.Parse(ShippedJson());
 
         Assert.Equal(1, tuning.SchemaVersion);
-        Assert.Equal(6, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor; v6 (passive-tree C6, 2026-09-06) added pointEconomy.skillPointsPerThetaMilliByScope
+        Assert.Equal(7, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor; v6 (passive-tree C6, 2026-09-06) added pointEconomy.skillPointsPerThetaMilliByScope; v7 (D55, 2026-09-06) gave demonType/aspect/uniqueDemon their real rates
         Assert.Equal(3, tuning.Grant.AptitudePointsPerThetaMilli);
         Assert.Equal(1, tuning.Grant.SkillPointsPerThetaMilli);
         Assert.Equal(11, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.Commander]); // D38: 10.40 corner-share, rounded up
+        Assert.Equal(15, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.DemonType]); // D55: {3,4,4,6} ratio vs commander=11
+        Assert.Equal(15, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.Aspect]); // D55: ties demonType, same ratio cell
+        Assert.Equal(22, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.UniqueDemon]); // D55: {3,4,4,6} ratio vs commander=11
         Assert.Equal(100_000, tuning.Read.Contest.SpanPointsMilli); // 100.0 spanPoints * 1000
         Assert.Equal(1000, tuning.Read.Contest.ShareExponentMilli); // gamma = 1.0
         Assert.Equal(1000, tuning.Read.Magnitude.ShareExponentMilli); // gamma = 1.0

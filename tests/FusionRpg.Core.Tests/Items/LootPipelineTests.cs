@@ -593,4 +593,82 @@ public class LootPipelineTests
         Assert.True(m.PityOut.ItemsSinceHeirloom <= pityIn.ItemsSinceHeirloom + minted);
         Assert.True(m.PityOut.ItemsSinceSunwoven <= pityIn.ItemsSinceSunwoven + minted);
     }
+
+    // ---- D4.27: the MintUnique arm — "rung = the container's own Rarity, never drawn" ----------------
+
+    static LootContentView MinimalUniqueView(string refId, Func<string, string?>? uniqueRarityFor, Func<LootGrant, LootMintResult>? mint = null)
+    {
+        var entry = new DropTableEntryRow(Seq: 0, Kind: DropEntryKind.Unique, RefId: refId, Weight: 1000);
+        var table = new DropTableRow(
+            TableId: "t1", SourceAllow: Array.Empty<string>(), MinIlvl: null, MaxIlvl: null,
+            Enabled: true, Revision: 1,
+            Groups: new[] { new DropTableGroupRow("g1", Seq: 0, Rolls: 1, Entries: new[] { entry }) });
+        var source = new LootSourceRow("web-wave", "s1", "t1", ContentLevel: 20);
+
+        return new LootContentView(
+            new Dictionary<string, LootSourceRow> { [source.Key] = source },
+            new Dictionary<string, DropTableRow> { [table.TableId] = table },
+            DropVolumeCorpusTests.Ladder(),
+            (_, _) => Array.Empty<string>(), // no equipment draws in this fixture
+            UniqueRarityFor: uniqueRarityFor,
+            Mint: mint);
+    }
+
+    [Fact]
+    public void A_unique_draw_mints_at_the_containers_own_authored_rarity_never_drawn()
+    {
+        var view = MinimalUniqueView("item.rot-bloom-30-002", refId => refId == "item.rot-bloom-30-002" ? "cultivated" : null);
+        var grant = ResolveOneEquipmentGrant(view);
+
+        Assert.Equal(DropEntryKind.Unique, grant.Kind);
+        Assert.Equal("item.rot-bloom-30-002", grant.RefId);
+        Assert.Equal("cultivated", grant.RarityId);
+        var cultivated = DropVolumeCorpusTests.Ladder().Single(r => r.RarityId == "cultivated");
+        Assert.Equal(cultivated.Ordinal, grant.RarityOrdinal);
+    }
+
+    [Fact]
+    public void A_unique_draw_takes_its_own_RollSeed_never_the_flat_zero_the_pre_D427_arm_shipped()
+    {
+        var view = MinimalUniqueView("item.rot-bloom-30-002", _ => "cultivated");
+        var grant = ResolveOneEquipmentGrant(view);
+        Assert.NotEqual(0UL, grant.RollSeed);
+    }
+
+    [Fact]
+    public void A_unique_draw_reaches_Mint_and_carries_back_the_minted_instance_id()
+    {
+        var view = MinimalUniqueView("item.rot-bloom-30-002", _ => "cultivated",
+            mint: g => new LootMintResult(FusionRpg.Core.Effects.Atoms.AtomRejection.Ok, $"inst-{g.RefId}"));
+        var grant = ResolveOneEquipmentGrant(view);
+        Assert.Equal("inst-item.rot-bloom-30-002", grant.InstanceId);
+    }
+
+    [Fact]
+    public void A_unique_draw_with_no_UniqueRarityFor_resolver_refuses_naming_the_reason()
+    {
+        var view = MinimalUniqueView("item.rot-bloom-30-002", uniqueRarityFor: null);
+        Assert.True(LootPipeline.Resolve(Request("web-wave", "s1"), view, Tuning(), LootPityState.Empty, out var m)
+            is { IsOk: false } r && r.Detail.Contains("drop.unique-rarity-unresolved", StringComparison.Ordinal));
+        Assert.Null(m);
+    }
+
+    [Fact]
+    public void A_unique_draw_whose_resolver_cannot_place_it_refuses_naming_the_ref_id()
+    {
+        var view = MinimalUniqueView("item.does-not-exist", uniqueRarityFor: _ => null);
+        var rejection = LootPipeline.Resolve(Request("web-wave", "s1"), view, Tuning(), LootPityState.Empty, out var m);
+        Assert.False(rejection.IsOk);
+        Assert.Contains("item.does-not-exist", rejection.Detail);
+        Assert.Null(m);
+    }
+
+    [Fact]
+    public void Same_seed_and_ref_id_reproduce_the_same_unique_roll_seed()
+    {
+        var view = MinimalUniqueView("item.rot-bloom-30-002", _ => "cultivated");
+        var a = ResolveOneEquipmentGrant(view, seed: 42);
+        var b = ResolveOneEquipmentGrant(view, seed: 42);
+        Assert.Equal(a.RollSeed, b.RollSeed);
+    }
 }

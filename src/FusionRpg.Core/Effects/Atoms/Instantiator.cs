@@ -410,6 +410,24 @@ public static class Instantiator
         var rng = new AtomRandom(unchecked((ulong)rollSeed),
             AtomStreams.Pool + ".freeze." + atom.AtomId + "." + seq);
 
+        // D4.26 (party-dungeon, the extend-action-slot grant): a stat.derived atom whose channel is
+        // a Count-unit channel (e.g. loadout.slots) is a discrete count, never a magnitude —
+        // ContentScale.Apply(1, 4235) is 4, and a slot count must stay 1. Generic to ANY count-unit
+        // channel, gated only on stat.derived + the channel's own registered UnitClass — this file
+        // carries no branch for any one content module's own concept (Instantiator's own load-bearing
+        // rule: it stays data, never grows a branch for a single caller). Read once, outside the
+        // per-key loop below, since it depends on this atom's own "channel" param, a SIBLING of
+        // whichever key is actually being frozen (the value param, "amount") — not something the
+        // loop's own per-key def lookup sees.
+        Stats.Derived.UnitClass? channelUnit = null;
+        if (string.Equals(atom.KindId, "stat.derived", StringComparison.Ordinal)
+            && merged.TryGetValue("channel", out var channelEl) && channelEl.ValueKind == JsonValueKind.String
+            && Stats.Derived.DerivedStatRegistry.CreateDefault().TryGet(channelEl.GetString()!, out var channelDef))
+        {
+            channelUnit = channelDef.Unit;
+        }
+        var isCountChannel = channelUnit == Stats.Derived.UnitClass.Count;
+
         var frozen = new Dictionary<string, object?>(StringComparer.Ordinal);
 
         foreach (var (key, raw) in merged)
@@ -425,6 +443,17 @@ public static class Instantiator
 
             var read = AtomJson.TryReadValueSpec(raw, out var spec);
             if (!read.IsOk) return AtomRejection.Fail(read.Reason, $"{atom.AtomId}.{key}: {read.Detail}");
+
+            if (isCountChannel)
+            {
+                // A count must be a single authored value, never rolled or ranged — there is no
+                // sensible "which unscaled value" answer otherwise, so this refuses rather than guess.
+                if (spec.Roll != RollPolicy.Fixed || spec.Min != spec.Max)
+                    return AtomRejection.ContentRule("atom.count-scaled",
+                        $"{atom.AtomId}.{key}: a stat.derived atom on a Count-unit channel must be a single fixed value, never rolled or ranged");
+                frozen[key] = spec.Min; // unscaled — a count is not a magnitude
+                continue;
+            }
 
             frozen[key] = spec.Roll switch
             {

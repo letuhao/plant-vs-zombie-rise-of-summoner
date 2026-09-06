@@ -385,27 +385,31 @@ def quota_for_plan(plan: object, targets: object, *, category: str,
 
     Every axis's member list comes from `plan.property_vocabulary` (B1's own fresh count off the
     real mirrors — `axis_members`); every axis's weights come from `targets` (`axis_weights_milli`)
-    — **except `nodeClass`**, found real (2026-09-06, generalizing plan emission past `might`):
-    `nodeClass` is never drawn from a free pool at all (`build_slot` forces it on EVERY slot,
-    unconditionally — see its own docstring), and the archetype's own `mechNodes[tier]` ramp
-    (`plan.archetypes.mechanism_nodes`) decides the exact per-tree mechanism/magnitude split, which
-    is NOT 50/50 for two of the three shipped archetypes (`gated-deep` is 16/24, `late-crown` is
-    24/16 — only `broad-and-flat`, `might`'s own archetype, happens to land on 20/20). A flat,
-    archetype-oblivious `targets.node_class_weights_milli` (calibrated once, against `might`, the
-    only tree ever planned before this fix) can never simultaneously match all three splits at
-    single-tree scope — confirmed live: `quota_for_plan("fortitude"/"agility"/"focus"/"precision",
-    ...)` raised `OverdrawnQuota` the moment a second, non-broad-and-flat primary tree's plan was
-    ever emitted and generation was attempted, 100% reproducing with real committed plan data. The
-    three archetypes DO average to exactly 500/500 milli in aggregate across a 3k-cycle roster
-    (`might`+`onslaught`+`pierce`+`retribution`=broad-and-flat, etc. — 12 primary trees: mechanism
-    sum = 240, magnitude sum = 240), which is what the spec's own corpus-wide framing (§4.2 step 1,
-    `N := 1,560`, the whole generic catalog) actually describes — but `quota_for_plan` is called at
-    single-tree scope by both `_cmd_trees_generate` and `QuotaDriftMetric`, so a single-tree target
-    for `nodeClass` must equal that TREE's OWN archetype-driven distribution, never the corpus
-    aggregate. Since `nodeClass` is 100% forced already, its "quota" is trivially the plan's own real
-    tally — read back below, never independently computed — so `rebalance_axis`'s residual is
-    exactly 0 for every value, by construction, matching "this axis is never drawn from a free
-    sequence at all" (this module's own docstring, unchanged).
+    — **except an axis this tree forces on EVERY slot**, found real (2026-09-06, generalizing plan
+    emission past `might`) and generalized past its first instance the same day (an adversarial spec
+    audit, not a second real crash — see below). `nodeClass` is never drawn from a free pool at all
+    for ANY tree (`build_slot` forces it on every slot, unconditionally); `element`/`status` are
+    forced on every slot **only for an elemental/status category tree** (`build_slot`'s own two
+    category overrides), never for a primary/family/species tree. In either case, a flat,
+    tree-oblivious `targets` weight (`node_class_weights_milli`, or a uniform per-element/per-status
+    split) can never match a specific tree's own 100%-forced distribution unless that distribution
+    happens to equal the flat target by coincidence — confirmed live for `nodeClass`
+    (`quota_for_plan("fortitude"/"agility"/"focus"/"precision", ...)` raised `OverdrawnQuota` the
+    moment a second, non-`broad-and-flat` primary tree's plan was generated for real: two of the
+    three shipped archetypes split mechanism/magnitude 16/24 or 24/16, not `might`'s own 20/20) and
+    reproduced by direct construction for `element` (a synthetic elemental-category plan forcing all
+    40 slots to `"fire"` against the real `might`-shaped plan/targets: `OverdrawnQuota — 'fire' is
+    hard-forced on 40 slot(s) but the corpus-wide quota only allocated it 6`, since the flat
+    per-element weight assumes an even ~1/7 split, never "this whole tree is one element"). Neither
+    of the two real 40-slot-of-40 forced counts (`nodeClass` always; `element`/`status` for their own
+    category) is drawable from any single-tree-scoped flat weight, so the general rule replaces the
+    `nodeClass`-only special case: **whenever an axis's `tally_forced` sums to the WHOLE tree
+    (`total`), that tally IS the quota, read back rather than independently computed** — this covers
+    `nodeClass` (always true) and `element`/`status` (true only when this tree's own `category`
+    triggers the override) with one rule, and changes nothing for the three axes (`trigger`,
+    `channelFamily`, `exclusionForm`) that are never forced at all, nor for a primary tree's own
+    `element`/`status` (0% forced there, so the sum-check is false and the original weighted-target
+    path runs exactly as before).
     """
     total = len(plan.nodes)
     slots = [
@@ -413,7 +417,7 @@ def quota_for_plan(plan: object, targets: object, *, category: str,
                   forced_status=forced_status)
         for node in plan.nodes
     ]
-    node_class_tally = tally_forced(slots)["nodeClass"]
+    forced_tally = tally_forced(slots)
 
     quota: "dict[str, dict[str, int]]" = {}
     order: "dict[str, tuple[str, ...]]" = {}
@@ -421,8 +425,9 @@ def quota_for_plan(plan: object, targets: object, *, category: str,
         members = axis_members(axis, plan.property_vocabulary)
         axis_ord = axis_order(axis, targets, members)
         order[axis] = axis_ord
-        if axis == "nodeClass":
-            quota[axis] = {value: node_class_tally.get(value, 0) for value in axis_ord}
+        axis_forced = forced_tally.get(axis, {})
+        if sum(axis_forced.values()) == total:
+            quota[axis] = {value: axis_forced.get(value, 0) for value in axis_ord}
             continue
         weights = axis_weights_milli(axis, targets, members)
         quota[axis] = axis_marginals(weights, axis_ord, total)

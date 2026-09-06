@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "partition": "Extract"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "StructureCatalog.cs Seed[1] \u2014 raises a Rootbed's own loam yield (YieldMultiplierMilli).",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Rootbed",
+        "role": "Extract",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "well",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "well",
+      "magnitudes": {
+        "blocksLineOfFire": false,
+        "blocksMovement": false,
+        "buildTurns": 2,
+        "capacityBonus": 0,
+        "constructIronworkCost": 0,
+        "constructRubbleCost": 0,
+        "containerId": null,
+        "cost": 200,
+        "coverPowerMilli": 0,
+        "coverRadius": 0,
+        "entryStaminaMultiplierMilli": 1000,
+        "flatYieldPerTurn": 0,
+        "materialTier": 0,
+        "obstacleKind": "None",
+        "structureKind": "LoamSource",
+        "visionRangeTiles": null,
+        "yieldMultiplierMilli": 2000
+      },
+      "name": "Well"
+    }
+  ],
+  "kind": "structure-anchor"
+}

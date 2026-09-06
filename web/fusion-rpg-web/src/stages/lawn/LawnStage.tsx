@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { msg } from "@lingui/macro";
 import { useLingui } from "@lingui/react";
@@ -6,6 +6,7 @@ import { useDemonRoster, usePlayers, useRelics, useRuns } from "@/lib/bus";
 import { useContracts } from "@/lib/bus/contracts";
 import { useDevModeLive } from "@/dev/useDevModeLive";
 import { LawnPage } from "@/features/lawn/LawnPage";
+import { setLawnKeyboardMuted } from "@/game/focusGate";
 import { useExpeditionReturnWatcher } from "@/layers/expeditions/expeditionReturnWatcher";
 import { PanelShell } from "@/shell/PanelShell";
 import { Rail } from "@/shell/Rail";
@@ -34,6 +35,11 @@ export function LawnStage() {
   const { _ } = useLingui();
   const navigate = useNavigate();
   const [panelOpen, setPanelOpen] = useState(false);
+  // GG-18: mute Phaser keyboard while a React panel owns input.
+  useEffect(() => {
+    setLawnKeyboardMuted(panelOpen);
+    return () => setLawnKeyboardMuted(false);
+  }, [panelOpen]);
   // T28: this GG-11 keystone proof (a panel can open over the live board without disturbing it) is
   // now redundantly re-proven by real usage every time a player reaches System or a Sanctum layer
   // from here — visually found overlapping the top banner row at a wider viewport during a second

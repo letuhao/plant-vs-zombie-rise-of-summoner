@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import {
-  allocGameGeneration,
   worldBusEmit,
   worldBusOn,
   type WorldIgnoreRect,
@@ -8,6 +7,7 @@ import {
   type WorldSelectPayload
 } from "@/game/EventBus";
 import { createWorldGame, destroyWorldGame } from "@/game/createWorldGame";
+import { usePhaserIslandHost } from "@/game-host/usePhaserIslandHost";
 import type { AdaptedWorldState } from "@/contract/adapt";
 import type { LegionView } from "@/contract/types";
 import { cn } from "@/lib/cn";
@@ -51,7 +51,7 @@ function hostLog(payload: Record<string, unknown>): void {
 }
 
 /**
- * Facade host — mount/destroy idempotent under StrictMode (RT-02/07/11).
+ * Facade host — mount/destroy via usePhaserIslandHost (RT-02/07/11).
  * Buffers world:model / world:interaction / world:lens until world:ready; drops foreign generation.
  * Only this module may import createWorldGame (GG-38).
  */
@@ -70,9 +70,6 @@ export function WorldGameHost({
   className
 }: WorldGameHostProps) {
   const parentRef = useRef<HTMLDivElement | null>(null);
-  const gameRef = useRef<Phaser.Game | null>(null);
-  const generationRef = useRef(0);
-  const readyRef = useRef(false);
   const modelSeqRef = useRef(0);
   const lastFingerprintRef = useRef<string>("");
   const bufferedModelRef = useRef<{
@@ -118,37 +115,30 @@ export function WorldGameHost({
     } satisfies WorldModelPayload);
   };
 
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-
-    const generation = allocGameGeneration();
-    generationRef.current = generation;
-    onGenerationRef.current?.(generation);
-    readyRef.current = false;
-    bufferedModelRef.current = null;
-    bufferedLensRef.current = null;
-    bufferedInteractionRef.current = null;
-    lastFingerprintRef.current = "";
-    modelSeqRef.current = 0;
-
-    hostLog({ event: "create", generation });
-    const game = createWorldGame({ parent, generation });
-    gameRef.current = game;
-
-    const resizeToParent = () => {
-      const w = Math.floor(parent.clientWidth);
-      const h = Math.floor(parent.clientHeight);
-      if (w < 2 || h < 2) return;
-      game.scale.resize(w, h);
-      worldBusEmit("world:resized", { generation, width: w, height: h });
-    };
-
-    const ro = new ResizeObserver(() => resizeToParent());
-    ro.observe(parent);
-    resizeToParent();
-
-    const flushBuffers = () => {
+  const { generationRef, readyRef, notifyReady } = usePhaserIslandHost({
+    parentRef,
+    create: ({ parent, generation }) => {
+      onGenerationRef.current?.(generation);
+      return createWorldGame({ parent, generation });
+    },
+    destroy: async (game, generation) => {
+      hostLog({ event: "destroy", generation });
+      await destroyWorldGame(game, generation);
+      onGenerationRef.current?.(0);
+      if (typeof window !== "undefined") {
+        const w = window as unknown as {
+          __fusionRpgWorldGen?: number;
+          __fusionRpgWorldProbe?: unknown;
+        };
+        delete w.__fusionRpgWorldGen;
+        delete w.__fusionRpgWorldProbe;
+      }
+    },
+    onResized: (generation, width, height) => {
+      worldBusEmit("world:resized", { generation, width, height });
+    },
+    onReady: (generation) => {
+      hostLog({ event: "ready", generation });
       if (bufferedModelRef.current) {
         const buf = bufferedModelRef.current;
         bufferedModelRef.current = null;
@@ -171,44 +161,41 @@ export function WorldGameHost({
           targeting: i.targeting
         });
       }
-    };
+      worldBusEmit("world:camera", {
+        generation,
+        op: "fit",
+        padLeft: 100,
+        padRight: 40,
+        padTop: 56,
+        padBottom: 80
+      });
+    }
+  });
+
+  useEffect(() => {
+    bufferedModelRef.current = null;
+    bufferedLensRef.current = null;
+    bufferedInteractionRef.current = null;
+    lastFingerprintRef.current = "";
+    modelSeqRef.current = 0;
 
     const offReady = worldBusOn("world:ready", (raw) => {
       const p = raw as { generation?: number };
-      if (p.generation !== generation) return;
-      readyRef.current = true;
-      hostLog({ event: "ready", generation });
-      flushBuffers();
-      worldBusEmit("world:camera", { generation, op: "fit", padLeft: 100, padRight: 40, padTop: 56, padBottom: 80 });
+      if (p.generation == null) return;
+      notifyReady(p.generation);
     });
 
     const offSelect = worldBusOn("world:select", (raw) => {
       const p = raw as WorldSelectPayload;
-      if (p.generation !== generation) return;
-      hostLog({ event: "select", generation, kind: p.kind, id: p.id });
+      if (p.generation !== generationRef.current) return;
+      hostLog({ event: "select", generation: p.generation, kind: p.kind, id: p.id });
       onSelectRef.current(p);
     });
 
     return () => {
-      ro.disconnect();
       offReady();
       offSelect();
-      hostLog({ event: "destroy", generation });
-      destroyWorldGame(gameRef.current, generation);
-      gameRef.current = null;
-      readyRef.current = false;
-      generationRef.current = 0;
-      onGenerationRef.current?.(0);
-      if (typeof window !== "undefined") {
-        const w = window as unknown as {
-          __fusionRpgWorldGen?: number;
-          __fusionRpgWorldProbe?: unknown;
-        };
-        delete w.__fusionRpgWorldGen;
-        delete w.__fusionRpgWorldProbe;
-      }
     };
-    // emitModel closes over refs intentionally for mount lifetime
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -232,7 +219,7 @@ export function WorldGameHost({
     }
     hostLog({ event: "lens", generation, lens });
     worldBusEmit("world:lens", { generation, lens });
-  }, [lens]);
+  }, [lens, generationRef, readyRef]);
 
   useEffect(() => {
     const generation = generationRef.current;
@@ -254,7 +241,14 @@ export function WorldGameHost({
       ignoreRects,
       targeting
     });
-  }, [selectedSectorId, selectedEntityId, ignoreRects, targeting]);
+  }, [
+    selectedSectorId,
+    selectedEntityId,
+    ignoreRects,
+    targeting,
+    generationRef,
+    readyRef
+  ]);
 
   return (
     <div

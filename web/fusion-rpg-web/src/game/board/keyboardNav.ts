@@ -69,11 +69,17 @@ export type WireKeyboardNavOptions = {
   readonly onFocusChange: (pos: GridPos) => void;
   /** Called with the current cell on Enter/Space. */
   readonly onConfirm: (pos: GridPos) => void;
+  /**
+   * When false, arrows/confirm are ignored (GG-18 focus gate).
+   * Defaults to always enabled.
+   */
+  readonly isEnabled?: () => boolean;
 };
 
 /** Wires arrow-key navigation and confirm to a board; returns the disposer. */
 export function wireKeyboardNav(opts: WireKeyboardNavOptions): () => void {
   const onKeyDown = (event: KeyboardEventLike): void => {
+    if (opts.isEnabled && !opts.isEnabled()) return;
     const direction = KEY_TO_DIRECTION[event.key];
     if (direction) {
       opts.onFocusChange(nextFocus(opts.getSpec(), opts.getFocus(), direction));

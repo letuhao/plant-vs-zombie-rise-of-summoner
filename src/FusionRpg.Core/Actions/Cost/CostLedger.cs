@@ -44,7 +44,7 @@ public sealed class CostLedger : IAffordabilityCheck
     readonly IReadOnlyDictionary<string, IReadOnlyList<ActionCostRow>> _costsByActionId;
     readonly Func<string, ActorResourcePools> _poolsFor;
     readonly Func<string, ActorDerivedSnapshot> _derivedFor;
-    readonly Func<string, int> _rungOf;
+    readonly Func<string, string, int> _rungOf;
     readonly Func<long> _nowTick;
     readonly Func<double, int> _thetaScaleMilliOf;
 
@@ -52,7 +52,7 @@ public sealed class CostLedger : IAffordabilityCheck
         IReadOnlyDictionary<string, IReadOnlyList<ActionCostRow>> costsByActionId,
         Func<string, ActorResourcePools> poolsFor,
         Func<string, ActorDerivedSnapshot> derivedFor,
-        Func<string, int> rungOf,
+        Func<string, string, int> rungOf,
         Func<long> nowTick,
         Func<double, int>? thetaScaleMilliOf = null)
     {
@@ -87,7 +87,7 @@ public sealed class CostLedger : IAffordabilityCheck
         var pools = _poolsFor(actorKey);
         var derived = _derivedFor(actorKey);
         var nowTick = _nowTick();
-        var rung = _rungOf(actionId);
+        var rung = _rungOf(actorKey, actionId);
 
         foreach (var row in RowsFor(actionId, ActionCostTiming.OnCommit))
         {
@@ -108,7 +108,7 @@ public sealed class CostLedger : IAffordabilityCheck
         var pools = _poolsFor(actorKey);
         var derived = _derivedFor(actorKey);
         var nowTick = _nowTick();
-        var rung = _rungOf(actionId);
+        var rung = _rungOf(actorKey, actionId);
         var rows = RowsFor(actionId, when);
         if (rows.Count == 0) return CostPayResult.Success;
 

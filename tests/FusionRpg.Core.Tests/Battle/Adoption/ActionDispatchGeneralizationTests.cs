@@ -131,24 +131,107 @@ public class ActionDispatchGeneralizationTests
         Assert.NotEqual(string.Join("|", baselineTrace.Applies), string.Join("|", boostedTrace.Applies));
     }
 
+    /// <summary>
+    /// T60.2 (spec-action-resolution-by-category.md criterion 3): RENAMED and REWRITTEN, not deleted,
+    /// so the history of what changed and why survives in this file (spec's own acceptance criterion
+    /// 3). The ORIGINAL test (`T55_4_a_non_attack_category_action_still_deals_attack_shaped_damage_today`)
+    /// asserted TODAY'S wrong behavior on purpose, as a named, deliberate limitation A18f's own spec
+    /// planted — this is what makes that framing obsolete: A22 (T60.1) closes the gap, so this test now
+    /// asserts the CORRECTED behavior instead.
+    /// </summary>
+    /// <summary>A magnitude threshold no ordinary `CloseSetup()` attack crosses on its own (the same
+    /// empirically-found value `ActionCostsCooldownsAdoptionTests.BoostedHitMagnitudeThreshold` already
+    /// uses against this exact fixture), so a boosted hit is identifiable by SIZE alone -- necessary
+    /// because `BattleTrace.Apply` records the TARGET's key, not the attacker's, so a raw " squad:0 "
+    /// or round-number substring match cannot isolate squad:0's OWN hit from every other actor's.</summary>
+    const long BoostedHitMagnitudeThreshold = 100;
+
     [Fact]
-    public void T55_4_a_non_attack_category_action_still_deals_attack_shaped_damage_today()
+    public void T60_1_a_non_attack_category_action_no_longer_rolls_an_attack_shaped_hit()
     {
-        // The named, deliberate limitation (spec-action-dispatch-generalization.md's own "⛔ Real,
-        // load-bearing gap" section): ApplyBasicAttack is attack-shaped throughout regardless of the
-        // committed action's own Category. A Support-category action still rolls a hit and deals
-        // damage exactly like an Attack-category one -- proven here as TODAY'S REAL BEHAVIOR, not
-        // endorsed as correct, so a future change that silently assumes this gap is closed (e.g. a
-        // category branch skipping the attack roll for Support) fails this test rather than shipping
-        // an un-audited behavior change unnoticed.
+        var boostedChannel = DerivedStatChannels.SkillEffectiveness(DerivedStatChannels.ActionCategorySupport);
         var supportAction = SupportSkill() with { Category = ActionCategory.Support };
         var catalog = ActionCatalog.Build(new[] { supportAction });
-        var setup = EquipSquadZero("skill.support");
+        var setup = EquipSquadZero("skill.support", new BattleChannelMod(boostedChannel, 20_000));
+        var trace = new BattleTrace();
+
+        Run(setup, catalog, trace);
+
+        // Criterion 1: a target is still DECLARED (the action still resolves, commits, and picks a
+        // target the same as any other action) but calculator.Compute is never called for it -- proven
+        // by the absence of a boosted-magnitude Applies entry that a real hit roll (with this same
+        // 20,000-permille boost) would otherwise produce, mirroring T56.3's own "declared but never
+        // landed" trace-based technique, not by reading the code and assuming the branch was taken.
+        Assert.Contains(trace.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal));
+        Assert.DoesNotContain(trace.Applies, a =>
+        {
+            var parts = a.Split(' ');
+            return long.TryParse(parts[2], out var delta) && System.Math.Abs(delta) >= BoostedHitMagnitudeThreshold;
+        });
+    }
+
+    /// <summary>T60.1's own verify line: "one case per non-Attack category" — Defense/Movement/Status,
+    /// the three the test above (Support) does not already cover, same proof technique.</summary>
+    [Theory]
+    [InlineData(ActionCategory.Defense)]
+    [InlineData(ActionCategory.Movement)]
+    [InlineData(ActionCategory.Status)]
+    public void T60_1_every_non_attack_category_skips_the_hit_roll(ActionCategory category)
+    {
+        var boostedChannel = DerivedStatChannels.SkillEffectiveness(DerivedStatChannels.ActionCategorySupport);
+        var action = SupportSkill($"skill.{category}") with { Category = category };
+        var catalog = ActionCatalog.Build(new[] { action });
+        var setup = EquipSquadZero(action.ActionId, new BattleChannelMod(boostedChannel, 20_000));
         var trace = new BattleTrace();
 
         Run(setup, catalog, trace);
 
         Assert.Contains(trace.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal));
-        Assert.Contains(trace.Applies, a => a.StartsWith("1 ", System.StringComparison.Ordinal));
+        Assert.DoesNotContain(trace.Applies, a =>
+        {
+            var parts = a.Split(' ');
+            return long.TryParse(parts[2], out var delta) && System.Math.Abs(delta) >= BoostedHitMagnitudeThreshold;
+        });
+    }
+
+    /// <summary>A Support-category action with a real, long cooldown -- same shape as
+    /// `ActionCostsCooldownsAdoptionTests.CooldownGatedAttackSkill` (T56.4), Support instead of Attack,
+    /// `Class = CooldownClass.Specific` for the same reason T56.4 found: `NoOp`'s default
+    /// `CooldownClass.None` silently no-ops both the check and the arm regardless of `CooldownTicks`.</summary>
+    static CompiledAction CooldownGatedSupportSkill(string actionId) => new(
+        ActionId: actionId, Kind: ActionKind.Skill, Rung: 1, Tags: new[] { ActionTag.Offensive },
+        Enabled: true, Revision: 0, Grantable: false, DefaultAttackEligible: false, ContainerId: "",
+        Category: ActionCategory.Support,
+        Envelope: ActionEnvelope.NoOp with
+        {
+            ActionId = actionId,
+            Class = CooldownClass.Specific,
+            CooldownTicks = 1_000_000,
+            StartsAt = CooldownStart.Resolve,
+        },
+        Targeting: TargetSpecCompiler.Compile(new ActionTargetSpec()),
+        MinRange: 0, MaxRange: int.MaxValue, RangeChannel: null, RequiresLineOfSight: false,
+        Condition: PredicateCompiler.Always,
+        Costs: System.Array.Empty<CompiledActionCost>(),
+        Scopes: System.Array.Empty<ActionScopeRow>());
+
+    /// <summary>
+    /// T60.1 criterion 2: the cooldown arms the moment a non-Attack action resolves, unconditionally --
+    /// never gated on a hit outcome that was never rolled. Same "commit once, then refused every round
+    /// after" proof T56.4 already established for an Attack-category skill, now for a Support one whose
+    /// own resolution never reaches a hit roll at all.
+    /// </summary>
+    [Fact]
+    public void T60_1_a_non_attack_actions_cooldown_arms_unconditionally_on_resolve()
+    {
+        var catalog = ActionCatalog.Build(new[] { CooldownGatedSupportSkill("skill.support-cooldown-gated") });
+        var setup = EquipSquadZero("skill.support-cooldown-gated");
+        var trace = new BattleTrace();
+
+        Run(setup, catalog, trace);
+
+        var squadZeroAttacks = trace.Targets.Where(t => t.Contains(" squad:0->", System.StringComparison.Ordinal)).ToList();
+        Assert.Single(squadZeroAttacks); // committed once, then refused every round after by its own cooldown
+        Assert.StartsWith("1 ", squadZeroAttacks[0]);
     }
 }

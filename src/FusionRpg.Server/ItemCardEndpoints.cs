@@ -1,10 +1,39 @@
 using System.Text.Json;
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Display;
 using FusionRpg.Core.Items.Sockets;
 using FusionRpg.Data;
 
 namespace FusionRpg.Server;
+
+/// <summary>
+/// N2's string catalog (`content/display/en.json`) as a file the Server opens once at boot — Core
+/// parses the text (<see cref="DisplayStringCatalog"/>) and never touches the disk, the same split
+/// every other corpus loader in this file uses.
+///
+/// <para><b>Absence degrades, it never blocks.</b> No file, or an unreadable one, returns a lookup
+/// that answers <c>null</c> for every key. Block 10 then renders its key with no sentence, which is
+/// honest and is exactly what <c>DisplayRules.MissingDisplayKey</c> exists to report — the one thing
+/// it must never do is invent a sentence.</para>
+/// </summary>
+public static class DisplayStringCatalogFile
+{
+    public static Func<string, string?> Load(string path)
+    {
+        try
+        {
+            if (File.Exists(path)) return DisplayStringCatalog.Parse(File.ReadAllText(path));
+        }
+        catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException)
+        {
+            // Fall through to the empty catalog: a malformed string file must not stop the server.
+        }
+
+        return _ => null;
+    }
+}
 
 /// <summary>
 /// ⏸ <b>The second stopgap over module 6's missing <c>item_base_type</c> table</b>, and it says so
@@ -56,7 +85,12 @@ public static class ItemBaseTypeCorpus
                         ClassNounKey: Prefixed("class.", Str(entry, "class")),
                         Frame: Str(entry, "frame") ?? "",
                         RoleNameKey: Prefixed("role.", Str(entry, "role")),
-                        FlavourKey: Str(entry, "flavorKey"));
+                        FlavourKey: Str(entry, "flavorKey"),
+                        // item-content T2: the authored English name, read and no longer dropped. All
+                        // 740 entries carry one; `content/display/en.json` carries no `base.*` row for
+                        // any of them, so the key alone left the card showing `base.quilted-sock` in
+                        // its own name slot. Module 8's grammar also needs a real noun to glue onto.
+                        Name: Str(entry, "name") ?? "");
                 }
             }
         }
@@ -134,6 +168,157 @@ public static class GemInsertCorpus
         entry.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
 }
 
+/// <summary>
+/// ⏸ <b>The third stopgap of the same shape</b> as <see cref="ItemBaseTypeCorpus"/> and
+/// <see cref="GemInsertCorpus"/>, and it exists for the same reason: <c>AffixNameTable</c>'s own
+/// doc calls <c>item_affix_name</c> a PROJECTION built at import from each family's <c>nameWords</c>,
+/// and that import never shipped — no table, no loader, and therefore no production caller for
+/// <c>ItemNameComposer</c> (item-content T1, 2026-09-06).
+///
+/// <para>This walks <c>data/seed/items/affix-families/*.json</c> once at boot and keys each family's
+/// authored rows by <c>family_id</c>. Core still opens no file: <see cref="AffixNameTable.ParseSlot"/>
+/// takes the already-loaded JSON, exactly as it was written to. The day the projection table lands,
+/// this class is deleted and the delegate reads the table.</para>
+///
+/// <para>⛔ <b>A family authors exactly one slot</b> — 58 prefix, 51 suffix across the 109 shipped
+/// families — and that slot IS the family's naming side (<see cref="AffixNameSlot.Slot"/> documents
+/// why the atom-derived class cannot be used for this today). A file authoring both is a load-time
+/// rejection rather than a silent pick, because picking would decide half a grammar by file order.</para>
+/// </summary>
+public static class AffixNameWordCorpus
+{
+    public static Func<string, AffixNameSlot?> Load(string affixFamiliesDir)
+    {
+        var byFamily = new Dictionary<string, AffixNameSlot>(StringComparer.Ordinal);
+        if (!Directory.Exists(affixFamiliesDir)) return _ => null;
+
+        foreach (var file in Directory
+                     .EnumerateFiles(affixFamiliesDir, "*.json", SearchOption.AllDirectories)
+                     .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            // `_`-prefixed files are the corpus's own scratch/registry partitions, skipped the same
+            // way the real FamilyExpansion readers already skip them.
+            if (Path.GetFileName(file).StartsWith('_')) continue;
+
+            JsonDocument doc;
+            try { doc = JsonDocument.Parse(File.ReadAllText(file)); }
+            catch (JsonException) { continue; }
+
+            using (doc)
+            {
+                if (!doc.RootElement.TryGetProperty("entries", out var entries) ||
+                    entries.ValueKind != JsonValueKind.Array) continue;
+
+                foreach (var entry in entries.EnumerateArray())
+                {
+                    if (Str(entry, "id") is not { Length: > 0 } familyId) continue;
+                    if (!entry.TryGetProperty("nameWords", out var nameWords) ||
+                        nameWords.ValueKind != JsonValueKind.Object) continue;
+
+                    var hasPrefix = nameWords.TryGetProperty("prefix", out var prefixRows);
+                    var hasSuffix = nameWords.TryGetProperty("suffix", out var suffixRows);
+
+                    if (hasPrefix == hasSuffix)
+                        throw new AffixNameRejection(
+                            $"family '{familyId}' authors "
+                            + (hasPrefix ? "both a prefix and a suffix word list" : "an empty nameWords object")
+                            + " — a family's single authored slot is what says which half of the naming "
+                            + "grammar it fills (ssot-affixes.md §4.12)");
+
+                    byFamily[familyId] = new AffixNameSlot(
+                        hasPrefix ? AffixClass.Prefix : AffixClass.Suffix,
+                        AffixNameTable.ParseSlot(hasPrefix ? prefixRows : suffixRows));
+                }
+            }
+        }
+
+        return familyId => byFamily.TryGetValue(familyId, out var value) ? value : (AffixNameSlot?)null;
+    }
+
+    /// <summary>An explicit lookup for tests and for a host with no corpus on disk.</summary>
+    public static Func<string, AffixNameSlot?> From(IReadOnlyDictionary<string, AffixNameSlot> byFamily) =>
+        familyId => byFamily.TryGetValue(familyId, out var value) ? value : (AffixNameSlot?)null;
+
+    static string? Str(JsonElement entry, string name) =>
+        entry.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String ? v.GetString() : null;
+}
+
+/// <summary>
+/// The head/tail table a RARE item's two-word name is drawn from
+/// (<c>data/seed/items/rare-names/rare-names.json</c>), and the seeded draw over it.
+///
+/// <para>⏸ Nothing in the seed tree carried these words before 2026-09-06 — the corpus was searched
+/// for <c>rareName</c>/<c>rarePrefix</c>/<c>rareSuffix</c> and had none — which is the third and last
+/// reason <c>ItemNameComposer</c> had no production caller. The list is decorative by design: with 3+
+/// affixes there is no honest way to name the item after two of them (ssot-affixes.md §4.12).</para>
+///
+/// <para>⛔ <b>The draw is the shipped <see cref="SeededRng"/>, not a local hash.</b> That class is
+/// spec-fixed and version-pinned precisely so a replayable draw stays byte-identical across .NET
+/// versions, which is what SC5 asks of a name derived from <c>roll_seed</c>.</para>
+/// </summary>
+public static class RareNameCorpus
+{
+    /// <summary>The stream name the head/tail draw runs under. Structural, not a tunable: changing it
+    /// renames every rare item in every existing save.</summary>
+    public const string RngStream = "item.rare-name";
+
+    /// <summary>Returns <c>null</c> when the file is absent or carries no words — the card then falls
+    /// back to the base type's own name rather than inventing one, the same
+    /// absence-degrades-never-guesses rule the other two corpora follow.</summary>
+    public static Func<long, (string Head, string Tail)>? Load(string rareNamesPath)
+    {
+        if (!File.Exists(rareNamesPath)) return null;
+
+        JsonDocument doc;
+        try { doc = JsonDocument.Parse(File.ReadAllText(rareNamesPath)); }
+        catch (JsonException) { return null; }
+
+        List<string> heads = new(), tails = new();
+        using (doc)
+        {
+            if (!doc.RootElement.TryGetProperty("entries", out var entries) ||
+                entries.ValueKind != JsonValueKind.Array) return null;
+
+            foreach (var entry in entries.EnumerateArray())
+            {
+                var slot = entry.TryGetProperty("slot", out var s) && s.ValueKind == JsonValueKind.String
+                    ? s.GetString()
+                    : null;
+                if (!entry.TryGetProperty("words", out var words) || words.ValueKind != JsonValueKind.Array)
+                    continue;
+
+                var target = slot switch { "head" => heads, "tail" => tails, _ => null };
+                if (target is null) continue;
+
+                foreach (var w in words.EnumerateArray())
+                    if (w.ValueKind == JsonValueKind.String && w.GetString() is { Length: > 0 } word)
+                        target.Add(word);
+            }
+        }
+
+        if (heads.Count == 0 || tails.Count == 0) return null;
+        return Draw(heads, tails);
+    }
+
+    /// <summary>The pure draw, over two already-read lists — a test names its own words without a
+    /// file, and the file loader above has no second copy of the seeding rule.</summary>
+    public static Func<long, (string Head, string Tail)> Draw(
+        IReadOnlyList<string> heads, IReadOnlyList<string> tails)
+    {
+        if (heads is null || heads.Count == 0) throw new ArgumentException("no head words", nameof(heads));
+        if (tails is null || tails.Count == 0) throw new ArgumentException("no tail words", nameof(tails));
+
+        return rollSeed =>
+        {
+            // A reinterpretation of the seed's bits, not arithmetic on a magnitude: `roll_seed` is an
+            // identity and `SeededRng` takes the same 64 bits as unsigned. `checked` would reject a
+            // perfectly ordinary negative seed for no reason.
+            var rng = SeededRng.DeriveStream(unchecked((ulong)rollSeed), RngStream);
+            return (heads[rng.NextInt(heads.Count)], tails[rng.NextInt(tails.Count)]);
+        };
+    }
+}
+
 // ---- wire shapes ----------------------------------------------------------------------------------
 
 /// <summary>
@@ -170,8 +355,23 @@ public sealed record DisplayBlockDto(string BlockKey, IReadOnlyList<DisplayLineD
 public sealed record ItemCardDto(
     string InstanceId, IReadOnlyList<DisplayBlockDto> Blocks, string Fingerprint);
 
+/// <summary>
+/// One channel's delta, on the wire.
+///
+/// <para><c>Unit</c> is the <c>UnitClass</c> enum NAME and is nullable, exactly like
+/// <see cref="UnitClassGroupDto.Unit"/> — the two are the same lookup's answer (see
+/// <c>ChannelDelta</c>'s own note), so a client that reads one vocabulary reads both. Before
+/// 2026-09-06 this carried a second vocabulary of its own (<c>"per-mille"</c> / <c>"game-units"</c>,
+/// derived from the atom's op) and disagreed with the group it sat in.</para>
+///
+/// <para><c>IncumbentMax</c> / <c>CandidateMax</c> are non-null only for an <c>OnApply</c> BAND, and
+/// then the honest reading is <c>Incumbent … IncumbentMax</c> rather than a point. Additive fields:
+/// a client that ignores them reads the band's lower bound, which is what the scalar columns
+/// carry.</para>
+/// </summary>
 public sealed record ChannelDeltaDto(
-    string Channel, string Unit, long Incumbent, long Candidate, long Delta);
+    string Channel, string? Unit, long Incumbent, long Candidate, long Delta,
+    long? IncumbentMax, long? CandidateMax);
 
 public sealed record VerdictBadgeDto(string LabelKey, string Shape);
 
@@ -419,7 +619,11 @@ public sealed class ItemCardService
         return true;
     }
 
-    static ItemCardDto ToDto(string instanceId, DisplayModel model) => new(
+    /// <summary><b>Public since 2026-09-06</b> (item-content module <c>atom-preview</c>): the preview
+    /// route returns the same <see cref="ItemCardDto"/> shape this route does, and it must be the same
+    /// projection rather than a second one — a preview that reshaped a line would stop being a preview
+    /// of what ships.</summary>
+    public static ItemCardDto ToDto(string instanceId, DisplayModel model) => new(
         instanceId,
         model.Blocks
             .Select(b => new DisplayBlockDto(b.BlockKey, b.Lines.Select(ToDto).ToList()))
@@ -431,7 +635,7 @@ public sealed class ItemCardService
         line.RollBar?.Segments, line.ContextRead, line.RollQualityPerMille);
 
     static ChannelDeltaDto ToDto(ChannelDelta d) =>
-        new(d.Channel, d.Unit, d.Incumbent, d.Candidate, d.Delta);
+        new(d.Channel, d.Unit?.ToString(), d.Incumbent, d.Candidate, d.Delta, d.IncumbentMax, d.CandidateMax);
 }
 
 /// <summary>

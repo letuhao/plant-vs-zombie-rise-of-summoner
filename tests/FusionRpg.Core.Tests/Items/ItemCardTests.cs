@@ -54,14 +54,32 @@ public class ItemCardTests
     /// own rolled number and an assertion about it is about the roll, not about the depth.</summary>
     const int PinTheta = 20;
 
+    /// <summary>
+    /// The HIGHEST published <c>tier-bands.v{n}.json</c> — the one a real generation run reads, and
+    /// the one `_meta.rebalance` means by <i>"writes tier-bands.v{n+1}.json; the old version stays for
+    /// revert"</i>. Resolved, not hard-coded: this fixture pinned <c>v1</c> for as long as v1 was the
+    /// only version, which quietly meant a published rebalance would not have reached the guard test
+    /// that is supposed to prove the corpus renders (item-content T13).
+    /// </summary>
+    static string LatestTierBandsPath()
+    {
+        var dir = Path.Combine(Seed("items"), "_tuning");
+        var latest = Directory.GetFiles(dir, "tier-bands.v*.json")
+            .Select(f => (Path: f, Version: int.Parse(
+                Path.GetFileNameWithoutExtension(f)["tier-bands.v".Length..],
+                System.Globalization.CultureInfo.InvariantCulture)))
+            .OrderByDescending(t => t.Version)
+            .FirstOrDefault();
+        Assert.False(latest.Path is null, $"no tier-bands.v*.json under {dir}");
+        return latest.Path;
+    }
+
     static readonly Lazy<IReadOnlyList<AtomRow>> RealAtoms = new(() =>
     {
-        var itemsRoot = Seed("items");
-        var tierBands = TierBandsFile.Read(
-            File.ReadAllText(Path.Combine(itemsRoot, "_tuning", "tier-bands.v1.json")));
+        var tierBands = TierBandsFile.Read(File.ReadAllText(LatestTierBandsPath()));
 
         var families = new List<FamilyEntryInput>();
-        foreach (var file in Directory.GetFiles(Path.Combine(itemsRoot, "affix-families"), "*.json")
+        foreach (var file in Directory.GetFiles(Path.Combine(Seed("items"), "affix-families"), "*.json")
                      .OrderBy(f => f, StringComparer.Ordinal))
         {
             if (Path.GetFileName(file).StartsWith('_')) continue;
@@ -182,10 +200,22 @@ public class ItemCardTests
 
         // Every affix whose family the display corpus can render, in id order -- the pool a real drop
         // draws from. Ordered so the draw is reproducible from the seed alone.
+        //
+        // ⛔ POOLED-CHANNEL atoms are excluded, and it is a property of THIS MINTER, not a dodge.
+        // Everything below is minted through `Instantiator.TryInstantiate`, which copies an E30 pool
+        // object into `values_json` untouched -- so the affix has no concrete channel, hence no unit
+        // and no element, and `ItemCardRenderer` refuses it by name. That behaviour is already pinned
+        // deliberately, from both sides, by `A_compose_minted_pooled_channel_affix_renders_its_
+        // concrete_element` and its negative control below: resolving a pool is
+        // `InstanceProducer.Compose`'s job. Before tier-bands v2 (item-content T10) the shipped
+        // expansion contained no pooled atom at all, so this filter was invisible; seven element-typed
+        // families are admitted now, and without it these fixtures draw an affix their own minter is
+        // documented as unable to render.
         var pool = AffixesById.Value.Values
             .Where(a => a.Refs.Count == 1 && a.Refs[0].AtomId is { } id
                         && AtomsById.Value.TryGetValue(id, out var atom)
                         && !coreFamilies.Contains(atom.FamilyId)
+                        && !atom.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal)
                         && LookupTemplate(atom.FamilyId) is { Status: "live" })
             .OrderBy(a => a.AffixId, StringComparer.Ordinal)
             .Select(a => new ContainerPoolRow(a.AffixId, 100))
@@ -297,7 +327,11 @@ public class ItemCardTests
         Assert.NotEmpty(AffixesById.Value);
         // 98 → 107 on 2026-09-06: the phantom-closure pass authored nine families real content already
         // referenced, and each brought its own template row (7 into triggered.json, 2 into derived.json).
-        Assert.Equal(107, Templates.Value.Count);
+        // 107 → 109 the same day (item-content T11): `atom.chill-punisher` and `atom.rot-punisher` had
+        // been authored into g-punisher.json with no template row, so every family now has one --
+        // asserted against the family count itself rather than as a second literal.
+        Assert.Equal(109, Templates.Value.Count);
+        Assert.Equal(RealFamilies.Value.Count, Templates.Value.Count);
         Assert.NotEmpty(BaseTypes.Value);
     }
 
@@ -598,8 +632,13 @@ public class ItemCardTests
         Assert.Equal(set.Total.ToString(), block.Lines[0].Args["total"]);
     }
 
+    /// <summary>
+    /// Was <c>Flavour_is_uniques_only</c> until the owner's 2026-09-06 decision gave sets a lore
+    /// surface too (spec-item-lore.md §2.4). The invariant it asserts is the widened one: the block
+    /// renders for a unique OR a set that has an authored key, and for neither when neither has one.
+    /// </summary>
     [Fact]
-    public void Flavour_is_uniques_only()
+    public void Flavour_renders_for_a_unique_or_a_set_and_for_neither_when_neither_authored_one()
     {
         var ordinary = ItemCardRenderer.Render(FullCard());
         Assert.Empty(ordinary.Blocks.Single(b => b.BlockKey == CardBlocks.Flavour).Lines);
@@ -613,7 +652,117 @@ public class ItemCardTests
         var line = Assert.Single(ItemCardRenderer.Render(unique).Blocks
             .Single(b => b.BlockKey == CardBlocks.Flavour).Lines);
         Assert.Equal("flavour.kiln-nozzle", line.Args["flavourKey"]);
+        Assert.Equal(SourceKind.UniqueIdentity, line.SourceKind);
+
+        // The widened half: a SET with an authored flavour key renders the same block, with no
+        // unique anywhere on the card.
+        var baseCard = FullCard();
+        Assert.NotNull(baseCard.Set);
+        var setCard = baseCard with { Set = baseCard.Set!.Value with { FlavourKey = "flavor.set.copyhand" } };
+        var setLine = Assert.Single(ItemCardRenderer.Render(setCard).Blocks
+            .Single(b => b.BlockKey == CardBlocks.Flavour).Lines);
+        Assert.Equal("flavor.set.copyhand", setLine.Args["flavourKey"]);
+        Assert.Equal(SourceKind.SetThreshold, setLine.SourceKind);
+
+        // And the negative that matters: a set with NO authored flavour renders no block at all --
+        // not an empty line, not a placeholder.
+        Assert.Empty(ItemCardRenderer.Render(baseCard).Blocks
+            .Single(b => b.BlockKey == CardBlocks.Flavour).Lines);
     }
+
+    /// <summary>
+    /// T5 + T6: the authored sentence itself reaches the line, not the key and not a fragment of it.
+    /// Driven off the real shipped corpus row and the real string catalog — a fixture sentence would
+    /// prove the plumbing and not the wiring.
+    /// </summary>
+    [Fact]
+    public void A_real_unique_with_authored_flavour_renders_its_real_sentence()
+    {
+        var seed = UniqueCorpus
+            .Parse(File.ReadAllText(Path.Combine(Seed("items", "uniques"), "charnel-bloom-70.json")))
+            .First(u => u.FlavourKey is { Length: > 0 });
+
+        // T5: import carries the TEXT, not only the key.
+        Assert.False(string.IsNullOrWhiteSpace(seed.FlavourText));
+
+        var card = FullCard() with
+        {
+            Unique = new UniqueRow(seed.ContainerId, seed.BaseTypeId, UniqueCounterPressure.Narrow,
+                100, seed.PowerAxis, UniqueAcquisition.Drop, FlavourKey: seed.FlavourKey),
+            LookupString = ShippedStringCatalog.Value,
+        };
+
+        var line = Assert.Single(ItemCardRenderer.Render(card).Blocks
+            .Single(b => b.BlockKey == CardBlocks.Flavour).Lines);
+
+        Assert.Equal(seed.FlavourText, line.Args["__rendered"]);
+        // Not the key, and not `keyTail`'s old fragment of it.
+        Assert.NotEqual(seed.FlavourKey, line.Args["__rendered"]);
+        Assert.Contains(" ", line.Args["__rendered"]);
+    }
+
+    /// <summary>T7's positive half, over the one shipped set family that authored flavour.</summary>
+    [Fact]
+    public void A_real_set_with_authored_flavour_renders_its_real_sentence()
+    {
+        var set = SetCorpus
+            .Parse(File.ReadAllText(Path.Combine(Seed("items", "sets"), "sunwoven-almanac.json")))
+            .First(s => s.FlavourKey is { Length: > 0 });
+
+        Assert.False(string.IsNullOrWhiteSpace(set.FlavourText));
+
+        var baseCard = FullCard();
+        var card = baseCard with
+        {
+            Set = baseCard.Set!.Value with { FlavourKey = set.FlavourKey },
+            LookupString = ShippedStringCatalog.Value,
+        };
+
+        var line = Assert.Single(ItemCardRenderer.Render(card).Blocks
+            .Single(b => b.BlockKey == CardBlocks.Flavour).Lines);
+        Assert.Equal(set.FlavourText, line.Args["__rendered"]);
+    }
+
+    /// <summary>
+    /// The sync guard between the two halves of T6's acceptance: every authored `flavor` sentence in
+    /// the unique and set corpora has a real row in `content/display/en.json` carrying that exact
+    /// sentence. Authoring a new flavour line without a catalog row turns this red instead of
+    /// silently resolving to nothing on a player's card.
+    /// </summary>
+    [Fact]
+    public void Every_authored_unique_and_set_flavour_sentence_has_its_string_catalog_row()
+    {
+        var catalog = ShippedStringCatalog.Value;
+        var missing = new List<string>();
+
+        foreach (var (key, text) in AuthoredFlavour())
+            if (catalog(key) != text)
+                missing.Add(key);
+
+        Assert.Empty(missing);
+    }
+
+    /// <summary>Every authored (`flavorKey`, `flavor`) pair in the unique and set corpora.</summary>
+    static IEnumerable<(string Key, string Text)> AuthoredFlavour()
+    {
+        foreach (var file in Directory.EnumerateFiles(Seed("items", "uniques"), "*.json")
+                     .OrderBy(f => f, StringComparer.Ordinal))
+            foreach (var u in UniqueCorpus.Parse(File.ReadAllText(file)))
+                if (u.FlavourKey is { Length: > 0 } k && u.FlavourText is { Length: > 0 } t)
+                    yield return (k, t);
+
+        foreach (var file in Directory.EnumerateFiles(Seed("items", "sets"), "*.json")
+                     .OrderBy(f => f, StringComparer.Ordinal))
+            foreach (var s in SetCorpus.Parse(File.ReadAllText(file)))
+                if (s.FlavourKey is { Length: > 0 } k && s.FlavourText is { Length: > 0 } t)
+                    yield return (k, t);
+    }
+
+    /// <summary>`content/display/en.json`, as the lookup the card takes — the same file the Server
+    /// loads and the same one <c>DisplayCheck</c> validates keys against.</summary>
+    static readonly Lazy<Func<string, string?>> ShippedStringCatalog = new(() =>
+        DisplayStringCatalog.Parse(
+            File.ReadAllText(Path.Combine(RepoRoot(), "content", "display", "en.json"))));
 
     [Fact]
     public void A_unique_distinguishes_its_identity_lines_from_its_variance_line()
@@ -944,24 +1093,57 @@ public class ItemCardTests
     /// runtime the concrete element arrives from the channel POOL draw, which is
     /// <c>Resolver</c>/<c>InstanceProducer.Compose</c>'s job rather than the atom row's — so the guard
     /// supplies one real element, exactly as the resolved instance would.</para>
+    ///
+    /// <para><b>Scope (widened, item-content T13).</b> <see cref="RealAtoms"/> now reads the HIGHEST
+    /// published <c>tier-bands.v{n}.json</c> rather than a hard-coded <c>v1</c>, so the guard walks
+    /// whatever the shipped tuning admits today instead of the nine families v1 admitted. The
+    /// former quarantine skip for <c>atom.elpw-*</c> is gone: T12 gave both of their channel families
+    /// a real <see cref="UnitClass"/>, so nothing here is excluded by name any more. The floor
+    /// assertion below is DERIVED from the corpus, not a literal — a literal would go stale the next
+    /// time a family is authored, and a stale floor is how a guard starts passing vacuously.</para>
     /// </summary>
     [Fact]
     public void Every_real_atom_renders_at_min_mid_and_max_with_no_raw_id()
     {
-        var quarantined = new HashSet<string>(StringComparer.Ordinal)
-        {
-            "atom.elpw-focus", "atom.elpw-overflow", "atom.elpw-pierce",
-        };
+        // Nothing is skipped by name. A family reaches this guard iff the shipped tuning admits it
+        // AND it has a live template — both facts read off the corpus, neither hand-listed.
+        var expectedFamilies = RealAtoms.Value
+            .Select(a => a.FamilyId)
+            .Distinct(StringComparer.Ordinal)
+            .Where(f => LookupTemplate(f) is { Status: "live" })
+            .ToHashSet(StringComparer.Ordinal);
+        var exercisedFamilies = new HashSet<string>(StringComparer.Ordinal);
 
         var rendered = 0;
         foreach (var atom in RealAtoms.Value)
         {
-            if (quarantined.Contains(atom.FamilyId)) continue;          // pinned above, E12's own gap
             if (LookupTemplate(atom.FamilyId) is not { Status: "live" } template) continue;
+            exercisedFamilies.Add(atom.FamilyId);
 
             using var doc = JsonDocument.Parse(atom.ParamsJson);
-            var channel = doc.RootElement.TryGetProperty("channel", out var c) && c.ValueKind == JsonValueKind.String
-                ? c.GetString() : null;
+            var hasChannel = doc.RootElement.TryGetProperty("channel", out var c);
+
+            // A pooled channel is an OBJECT, not a string -- `FamilyExpansion` emits
+            // `{pool, count, allowRepeat}` for every {variant}-templated family (W7.9). At runtime
+            // `Resolver`/`InstanceProducer.Compose` draws one CONCRETE member out of
+            // `pools.v1.json` and stamps it into values_json, and the card reads that; the atom row
+            // alone never carries it. So the guard resolves the pool the same way Compose would --
+            // off the real pool file, whose members are all one channel family, so which member is
+            // read cannot change the unit (ChannelUnits' own probe rule). Reachable at all only
+            // since tier-bands v2 (item-content T10) admitted the first element-typed families.
+            string? channel = null;
+            if (hasChannel && c.ValueKind == JsonValueKind.String)
+                channel = c.GetString();
+            else if (hasChannel && c.ValueKind == JsonValueKind.Object
+                     && c.TryGetProperty("pool", out var poolIdEl)
+                     && poolIdEl.GetString() is { } poolId)
+            {
+                var pool = LookupPool(poolId);
+                Assert.True(pool is not null, $"{atom.AtomId} names pool '{poolId}', which pools.v1.json does not define");
+                Assert.NotEmpty(pool!.Members);
+                channel = pool.Members[0].Channel;
+            }
+
             var unit = channel is null ? null : ChannelUnits.ForAuthoredChannel(channel);
 
             long min = 0, max = 0;
@@ -988,8 +1170,68 @@ public class ItemCardTests
                 }
         }
 
-        // A guard that iterated nothing would pass forever.
-        Assert.True(rendered >= 100, $"only {rendered} renders exercised -- the corpus reader returned too little");
+        // Every family the corpus admits was actually walked -- not "most of them", and not a count
+        // that a silently-skipped family could still satisfy.
+        Assert.Equal(
+            expectedFamilies.OrderBy(f => f, StringComparer.Ordinal).ToList(),
+            exercisedFamilies.OrderBy(f => f, StringComparer.Ordinal).ToList());
+
+        // A guard that iterated nothing would pass forever. Derived, not literal: five tiers per
+        // family (FamilyExpansion.TierCount), three values (min/mid/max) on two frames.
+        const int ValuesPerAtom = 3;
+        const int Frames = 2;
+        Assert.Equal(expectedFamilies.Count * FamilyExpansion.TierCount * ValuesPerAtom * Frames, rendered);
+
+        // ...and the scope is the WIDENED one. tier-bands.v1 admitted 9 families through
+        // FamilyExpansion's full gate chain (45 atoms); item-content T10 published v2 with a weight
+        // for all 109 authored families. If this drops back to v1's nine, the guard has silently
+        // renarrowed and its own doc comment is lying again.
+        Assert.True(expectedFamilies.Count > 9,
+            $"only {expectedFamilies.Count} families exercised -- the tuning file admits fewer than "
+            + "tier-bands.v1 already did, so RealAtoms is reading the wrong version");
+    }
+
+    /// <summary>
+    /// ⭐ <b>Proof that widening the guard above was not cosmetic (item-content T13).</b> A guard whose
+    /// scope grew but whose reachable set did not would pass exactly as before, and its green would
+    /// mean exactly as little — so the two scopes are built side by side from the two tunings on disk
+    /// and the difference is asserted, family by family.
+    ///
+    /// <para>The <c>tier-bands.v1</c> scope is not simulated: it is the real v1 file, still shipped,
+    /// through the real generator. Every family in the difference set is one that the widened guard
+    /// renders at min/mid/max on both frames and the old scope never touched at all — so a broken
+    /// template on any of them was, until now, invisible to the suite.</para>
+    /// </summary>
+    [Fact]
+    public void The_widened_guard_reaches_families_the_v1_scoped_one_could_not()
+    {
+        var v1 = TierBandsFile.Read(
+            File.ReadAllText(Path.Combine(Seed("items"), "_tuning", "tier-bands.v1.json")));
+
+        HashSet<string> RenderableFamilies(IReadOnlyList<AtomRow> atoms) => atoms
+            .Select(a => a.FamilyId)
+            .Where(f => LookupTemplate(f) is { Status: "live" })
+            .ToHashSet(StringComparer.Ordinal);
+
+        var oldScope = RenderableFamilies(
+            FamilyExpansion.Expand(RealFamilies.Value, v1, FlatReferenceBase).Rows);
+        var newScope = RenderableFamilies(RealAtoms.Value);
+
+        // Strictly larger, and strictly a superset -- nothing the old scope covered was lost.
+        Assert.ProperSubset(newScope, oldScope);
+
+        var gained = newScope.Except(oldScope, StringComparer.Ordinal)
+            .OrderBy(f => f, StringComparer.Ordinal).ToList();
+        Assert.NotEmpty(gained);
+
+        // The specific thing §6.3 said was impossible: no ELEMENT-typed family was reachable at all
+        // before, because every one of them sat behind the tuning-file gate. Named by shape, read off
+        // the atoms, so this cannot pass on a coincidence of counts.
+        var pooledNow = RealAtoms.Value
+            .Where(a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal))
+            .Select(a => a.FamilyId).ToHashSet(StringComparer.Ordinal);
+        Assert.NotEmpty(pooledNow);
+        Assert.All(pooledNow, f => Assert.DoesNotContain(f, oldScope));
     }
 
     // ================================================================================================
@@ -1021,22 +1263,34 @@ public class ItemCardTests
     };
 
     /// <summary>
-    /// ⛔ <b>Why this fixture cannot use <see cref="RealAtoms"/>, stated rather than worked around.</b>
+    /// ⛔ <b>The tuning-file half of this gap is CLOSED (item-content T10, 2026-09-06) — what remains
+    /// is named, not papered over.</b>
     ///
-    /// <para><c>tier-bands.v1.json</c> authors a <c>channelWeightPermille</c> row for <b>14</b> channel
-    /// stems. The shipped <c>affix-families/*.json</c> corpus has <b>109</b> families (100 until the
-    /// 2026-09-06 phantom-closure pass authored nine more), so
-    /// <c>FamilyExpansion</c> refuses <b>95</b> of them at its first gate — <i>"no authored
-    /// sharePermille for family '…'"</i> — and <b>every element-typed family is among the 95</b>.
-    /// There is therefore no pooled-channel atom in the shipped expansion at all, and no seed can draw
-    /// one. That is a real content gap in the tuning file, upstream of this module and of E30, and it
-    /// is named in P2.5's todo entry rather than papered over.</para>
+    /// <para><b>What it used to say, and what actually happened.</b> <c>tier-bands.v1.json</c> authored
+    /// a <c>channelWeightPermille</c> row for <b>14</b> of the corpus's <b>109</b> families, so
+    /// <c>FamilyExpansion</c> refused <b>95</b> at its first gate (<c>FamilyExpansion.cs:121-125</c>,
+    /// <i>"no authored sharePermille for family '…'"</i>) and every element-typed family was among
+    /// them. <c>tier-bands.v2.json</c> (published through the file's own
+    /// <c>python -m seedsmith numerics rebalance --publish</c>, never hand-edited) authors all 109 at
+    /// the same <b>1000‰</b> the shipped 14 already carried, so that first gate now refuses
+    /// <b>zero</b> and <see cref="RealAtoms"/> reads it.</para>
     ///
-    /// <para>So the fixture supplies the ONE missing row per family and changes nothing else: the same
-    /// <c>baseSharePermille</c>, the same <c>opWeightPermille</c> table, the same weight
-    /// (<see cref="ShippedChannelWeightPermille"/>) every one of the authored 14 already carries, the
-    /// real family files, the real generator, the real pool mapping and the real display templates.
-    /// The moment the authoring fleet adds those rows this fixture and the shipped corpus converge.</para>
+    /// <para><b>Why this fixture still exists.</b> Nine families were admitted through the FULL gate
+    /// chain under v1; twenty-five are under v2. The other 84 are refused DOWNSTREAM of the tuning
+    /// file, at three gates the tuning file cannot reach and this fixture cannot fake either:
+    /// <b>40</b> author no <c>op</c> at all (trigger/status families — <c>FamilyExpansion</c>'s
+    /// primaryChannel path has no tier-magnitude formula for them, <c>:258</c>); <b>22</b> name an
+    /// <c>op</c> outside <c>opWeightPermille</c>'s three (<c>add</c>/<c>Replace</c>/<c>Flag</c>, plus
+    /// four <c>board.action</c> verbs the parser reads into the same field — see the todo's own
+    /// defect note); <b>19</b> name a channel with no shipped <c>BattleRuleset</c> curve
+    /// (<c>arm1Max</c>, <c>status.power</c>, the <c>{variant}</c> Flat families); <b>3</b> are the
+    /// <c>elpw-*</c> pool quarantine <c>FamilyExpansion.cs:44-47</c> names by id.</para>
+    ///
+    /// <para>So the fixture no longer needs to supply a weight — v2 supplies them all — but the
+    /// <see cref="ExtendedAtoms"/> path is kept because it is what the pooled-channel tests below
+    /// draw from, and because it reads the shipped tuning directly rather than through the
+    /// admitted-set filter. <see cref="ShippedChannelWeightPermille"/> is now the weight it asserts
+    /// the corpus already carries rather than one it invents.</para>
     /// </summary>
     const long ShippedChannelWeightPermille = 1000;
 
@@ -1054,13 +1308,14 @@ public class ItemCardTests
 
     static readonly Lazy<IReadOnlyList<AtomRow>> ExtendedAtoms = new(() =>
     {
-        var shipped = TierBandsFile.Read(
-            File.ReadAllText(Path.Combine(Seed("items"), "_tuning", "tier-bands.v1.json")));
+        var shipped = TierBandsFile.Read(File.ReadAllText(LatestTierBandsPath()));
 
         var weights = new Dictionary<string, long>(shipped.ChannelWeightPermille, StringComparer.Ordinal);
         foreach (var f in RealFamilies.Value)
         {
             var stem = f.Id.StartsWith("atom.", StringComparison.Ordinal) ? f.Id["atom.".Length..] : f.Id;
+            // Since tier-bands v2 the shipped file already carries every one of these; the loop is
+            // kept as the fixture's own safety net for a family authored ahead of its weight row.
             if (!weights.ContainsKey(stem)) weights[stem] = ShippedChannelWeightPermille;
         }
 
@@ -1134,43 +1389,55 @@ public class ItemCardTests
         };
 
     /// <summary>
-    /// ⛔ <b>Found while wiring the <c>Compose</c> fixture, pinned rather than fixed: the shipped
-    /// tuning authors a share for 14 of the corpus's 100 affix families, so <c>FamilyExpansion</c>
-    /// refuses the other 86 — and every element-typed family is in the refused set.</b>
+    /// ⭐ <b>item-content T10's before/after, pinned in the suite rather than measured once and
+    /// written down.</b> Both tunings are read from disk and run through the real generator, so the
+    /// claim "the tuning-file gate now refuses nothing" is re-proved on every run instead of trusted.
     ///
-    /// <para>This is why <see cref="RealAtoms"/> contains no pooled-channel atom and why a drop can
-    /// never roll one today. It is a <c>tier-bands.v1.json</c> authoring gap, upstream of module 10
-    /// and of E30: the generator's refusal is correct behaviour (it names the family and declines to
-    /// guess a share), the missing rows are the defect. Asserted as a FAITHFULNESS check rather than a
-    /// bare count — the refused set must be exactly "the families with no authored stem" — so an
-    /// authoring wave that adds rows moves the numbers without needing this test rewritten, while a
-    /// family refused for some OTHER reason fails loudly.</para>
+    /// <para><c>tier-bands.v1.json</c> — still on disk, kept for revert exactly as its own
+    /// <c>_meta.rebalance</c> line promises — authors a share for 14 of the corpus's 109 families and
+    /// refuses the other <b>95</b> at <c>FamilyExpansion.cs:121-125</c>. The latest published version
+    /// refuses <b>zero</b> there. Asserted as a FAITHFULNESS check on v1 (the refused set must be
+    /// exactly "the families v1 has no stem for") so the historical half cannot drift into a bare
+    /// number, and as an emptiness check on the shipped half.</para>
+    ///
+    /// <para>The consequence, and the reason this mattered: <b>no element-typed family survived
+    /// under v1</b>, so no drop could ever roll a pooled channel. Seven do under the shipped tuning
+    /// (the <c>Increased</c> halves of dodge / crit-resist / crit-resist-damage / shield-capacity /
+    /// shield-regen / shield-pen / elemental-defense), which is asserted below.</para>
     /// </summary>
     [Fact]
-    public void The_shipped_tuning_authors_a_share_for_only_a_fraction_of_the_affix_corpus()
+    public void The_shipped_tuning_authors_a_share_for_every_family_and_v1_did_not()
     {
-        var shipped = TierBandsFile.Read(
+        var v1 = TierBandsFile.Read(
             File.ReadAllText(Path.Combine(Seed("items"), "_tuning", "tier-bands.v1.json")));
+        var shipped = TierBandsFile.Read(File.ReadAllText(LatestTierBandsPath()));
 
-        var unshared = RealFamilies.Value
-            .Where(f => !shipped.ChannelWeightPermille.ContainsKey(
-                f.Id.StartsWith("atom.", StringComparison.Ordinal) ? f.Id["atom.".Length..] : f.Id))
-            .Select(f => f.Id)
-            .ToHashSet(StringComparer.Ordinal);
+        static HashSet<string> UnsharedUnder(TierBandsInput tuning, IReadOnlyList<FamilyEntryInput> families) =>
+            families
+                .Where(f => !tuning.ChannelWeightPermille.ContainsKey(
+                    f.Id.StartsWith("atom.", StringComparison.Ordinal) ? f.Id["atom.".Length..] : f.Id))
+                .Select(f => f.Id)
+                .ToHashSet(StringComparer.Ordinal);
 
-        Assert.NotEmpty(unshared);
-
-        var refusedForNoShare = FamilyExpansion
-            .Expand(RealFamilies.Value, shipped, FlatReferenceBase).Refusals
+        HashSet<string> RefusedForNoShare(TierBandsInput tuning) => FamilyExpansion
+            .Expand(RealFamilies.Value, tuning, FlatReferenceBase).Refusals
             .Where(r => r.Reason.Contains("no authored sharePermille", StringComparison.Ordinal))
             .Select(r => r.FamilyId)
             .ToHashSet(StringComparer.Ordinal);
 
-        Assert.Equal(unshared, refusedForNoShare);
+        // BEFORE — v1, faithfully: exactly the families it has no stem for, and 95 of them.
+        var unsharedV1 = UnsharedUnder(v1, RealFamilies.Value);
+        Assert.Equal(unsharedV1, RefusedForNoShare(v1));
+        Assert.Equal(95, unsharedV1.Count);
+        Assert.Equal(109, RealFamilies.Value.Count);
 
-        // And the consequence this fixture exists because of: not one element-typed family survives,
-        // so the shipped expansion has no pooled channel to resolve.
-        Assert.DoesNotContain(RealAtoms.Value, a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal));
+        // AFTER — the shipped tuning: nothing left at that gate at all.
+        Assert.Empty(UnsharedUnder(shipped, RealFamilies.Value));
+        Assert.Empty(RefusedForNoShare(shipped));
+
+        // And the consequence: pooled-channel atoms exist in the SHIPPED expansion now, not only in
+        // the fixture's own extended one.
+        Assert.Contains(RealAtoms.Value, a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal));
         Assert.Contains(ExtendedAtoms.Value, a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal));
     }
 
@@ -1438,23 +1705,25 @@ public class ItemCardTests
     }
 
     /// <summary>
-    /// ⛔ <b>Found, not fixed — and it is a pre-existing quarantine the corpus already documents.</b>
-    /// <c>MissingUnitClass</c> over the REAL corpus fires on exactly three families, and all three
-    /// name one of the two channels the seedsmith MINTED for a runtime that does not exist yet:
-    /// <c>combat.power.pierce.{variant}</c> and <c>combat.power.overflow.{variant}</c>.
-    /// <c>FamilyExpansion.cs:44-47</c> already names both by id as templates with no shipped E30 pool
-    /// and refuses them rather than assigning the nearest-looking one, and
-    /// <c>g-elem-power.json</c>'s own authoring note says the same in words:
-    /// <i>"stat.derived is None/None/None until E12; this row imports and binds nowhere today, which
-    /// is the known, scheduled state, not a defect of this authoring pass."</i>
+    /// ⭐ <b>The quarantine this test used to pin is CLOSED (item-content T12).</b> It pinned the set
+    /// <c>{ atom.elpw-focus, atom.elpw-overflow, atom.elpw-pierce }</c> and said, in its own words,
+    /// that <i>"authoring E12's registry rows turns this test red and makes someone delete the pin"</i>.
+    /// The rows are authored, so the pin is deleted and the assertion is inverted: no shipped family
+    /// declares a channel with no resolvable unit.
     ///
-    /// <para>So the rule is working: it surfaces the same quarantine from a third direction, at
-    /// display time. Pinned as a SET rather than asserted to zero — the honest shape modules 17 and 18
-    /// used for their own phantom families — so authoring E12's registry rows turns this test red and
-    /// makes someone delete the pin, and a FOURTH family drifting into the same state fails loudly.</para>
+    /// <para>Both channels the three families name — <c>combat.power.pierce.{variant}</c> and
+    /// <c>combat.power.overflow.{variant}</c> — now resolve through
+    /// <c>ChannelUnits.AuthoredChannelFamilies</c>, grounded in the term each one states it adds
+    /// into: <c>OverlayCombatCalculator.cs:145</c>'s <c>(power - defense)</c> sum, whose two existing
+    /// halves are both <see cref="UnitClass.GameUnits"/>. See that table's own comment for why this
+    /// is not <see cref="UnitClass.ReciprocalPoints"/> despite the word "pierce".</para>
+    ///
+    /// <para>The <c>FamilyExpansion.cs:44-47</c> pool quarantine is a SEPARATE, still-open gap and is
+    /// untouched: these three families still have no shipped E30 pool and are still refused by name
+    /// at generation. A unit is what the display lane owed them; a pool is E30's.</para>
     /// </summary>
     [Fact]
-    public void Exactly_three_shipped_families_name_a_channel_no_registry_row_backs()
+    public void No_shipped_family_names_a_channel_with_no_resolvable_unit()
     {
         var findings = DisplayContentRules.Check(RealFamilyFacts(), Templates.Value.Values.ToList());
 
@@ -1464,21 +1733,50 @@ public class ItemCardTests
             .OrderBy(s => s, StringComparer.Ordinal)
             .ToList();
 
-        Assert.Equal(new[] { "atom.elpw-focus", "atom.elpw-overflow", "atom.elpw-pierce" }, unresolved);
+        Assert.Empty(unresolved);
+    }
+
+    /// <summary>
+    /// The T12 registrations themselves, asserted per channel rather than only through the corpus
+    /// rule — so a future change that deletes a row fails here with the channel's name on it.
+    /// Probed with a concrete element, the way <c>ChannelUnits.ForAuthoredChannel</c> does.
+    /// </summary>
+    [Theory]
+    [InlineData("combat.power.pierce.{variant}")]        // atom.elpw-pierce (Flat), atom.elpw-focus (Increased)
+    [InlineData("combat.power.overflow.{variant}")]      // atom.elpw-overflow (Flat)
+    public void The_minted_elemental_power_channels_resolve_to_the_unit_of_the_sum_they_join(string channel)
+    {
+        // The unit is not asserted as a literal picked here: it is read off the channel this one
+        // states it adds into, so if `combat.power` is ever reclassified these move with it.
+        var reference = ChannelUnits.ForAuthoredChannel("combat.power.{variant}");
+        Assert.Equal(UnitClass.GameUnits, reference);
+        Assert.Equal(reference, ChannelUnits.ForAuthoredChannel(channel));
+
+        // ...and the bare family prefix is still NOT a channel. Only a concrete member resolves, so
+        // the prefix match cannot swallow an id that merely starts the same way.
+        Assert.Null(ChannelUnits.For(channel.Replace(".{variant}", "", StringComparison.Ordinal) + "."));
+    }
+
+    /// <summary>⛔ The name trap this registration had to avoid, pinned so it stays avoided:
+    /// <c>combat.penetration.*</c> is the asymptotic <c>PierceFactor</c> family and is
+    /// <see cref="UnitClass.ReciprocalPoints"/>; <c>combat.power.pierce.*</c> is an additive term in
+    /// the power/defense sum and is not. Two channels with "pierce" in the name, two different
+    /// units — which is exactly what §2.3 means by "a unit is inseparable from its reader".</summary>
+    [Fact]
+    public void The_two_pierce_shaped_channels_do_not_share_a_unit()
+    {
+        Assert.Equal(UnitClass.ReciprocalPoints, ChannelUnits.For("combat.penetration.fire"));
+        Assert.Equal(UnitClass.GameUnits, ChannelUnits.For("combat.power.pierce.fire"));
     }
 
     [Fact]
-    public void Every_other_shipped_channel_bearing_family_resolves_to_a_unit_class()
+    public void Every_shipped_channel_bearing_family_resolves_to_a_unit_class()
     {
-        // The positive half of the rule, and the one that matters day to day: outside the three
-        // quarantined rows above, every family that declares a channel has a unit, which is what makes
-        // `+10 fire power` and `+10 crit rate` distinguishable rather than hopeful.
-        var quarantined = new HashSet<string>(StringComparer.Ordinal)
-        {
-            "atom.elpw-focus", "atom.elpw-overflow", "atom.elpw-pierce",
-        };
-
-        var facts = RealFamilyFacts().Where(f => !quarantined.Contains(f.FamilyId)).ToList();
+        // The positive half of the rule, and the one that matters day to day: every family that
+        // declares a channel has a unit, which is what makes `+10 fire power` and `+10 crit rate`
+        // distinguishable rather than hopeful. The three-family quarantine this used to exclude by
+        // name was closed by item-content T12 — nothing is skipped here any more.
+        var facts = RealFamilyFacts().ToList();
         Assert.True(facts.Count > 80, "the corpus reader returned almost nothing -- the check would be vacuous");
 
         var findings = DisplayContentRules.Check(facts, Templates.Value.Values.ToList());
@@ -1488,10 +1786,13 @@ public class ItemCardTests
     /// <summary>
     /// <c>MissingDisplayTemplate</c> over the real corpus, asserted for FAITHFULNESS rather than for a
     /// count: the rule must fire on exactly the families that have no template row, and on nothing
-    /// else. A count would pin this test to whichever authoring wave is mid-flight — at the time of
-    /// writing two families (<c>atom.chill-punisher</c>, <c>atom.rot-punisher</c>, both from an
-    /// in-progress <c>g-punisher.json</c>) have no template yet, which is the check doing its job and
-    /// not something this module owns.
+    /// else. A count would pin this test to whichever authoring wave is mid-flight.
+    ///
+    /// <para>The two families it used to catch — <c>atom.chill-punisher</c> and
+    /// <c>atom.rot-punisher</c>, authored into <c>g-punisher.json</c> without a matching template —
+    /// got their rows in item-content T11 (<c>disptpl.p3-050</c>/<c>-051</c>), so the expected set is
+    /// empty today. The faithfulness shape is kept: the next family authored ahead of its template
+    /// is named by this test rather than counted by it.</para>
     /// </summary>
     [Fact]
     public void Missing_display_template_fires_on_exactly_the_untemplated_families()
@@ -1509,6 +1810,72 @@ public class ItemCardTests
             .ToList();
 
         Assert.Equal(expected, actual);
+
+        // T11's own acceptance: every authored family now has a template row. Asserted separately
+        // from the faithfulness check above, which would pass just as happily on an empty corpus.
+        Assert.Empty(expected);
+        Assert.True(facts.Count > 80, "the corpus reader returned almost nothing");
+    }
+
+    /// <summary>
+    /// T11's two new rows, rendered end to end at Min and Max through the real renderer — the
+    /// per-family check `spec-affix-draw-coverage.md` §6 asks for. Deliberately NOT driven from
+    /// <see cref="RealAtoms"/>: both families are still refused at generation (they author no
+    /// <c>op</c>, so <c>FamilyExpansion</c> has no tier-magnitude formula for them — see
+    /// <c>FamilyExpansion.cs:258</c>), which is a separate, named gap. The template must still
+    /// render, because <c>InstanceProducer</c> can carry a hand-seeded row for one.
+    /// </summary>
+    [Theory]
+    [InlineData("atom.chill-punisher")]
+    [InlineData("atom.rot-punisher")]
+    public void The_punisher_families_render_at_min_and_max_with_no_raw_id(string familyId)
+    {
+        var found = LookupTemplate(familyId);
+        Assert.NotNull(found);
+        var template = found!.Value;
+        Assert.Equal("live", template.Status);
+        Assert.Equal("g.punisher", template.GroupId);
+
+        var atom = new AtomRow
+        {
+            AtomId = AtomRow.DeriveId(familyId, "", 1),
+            KindId = "resource.delta",
+            FamilyId = familyId,
+            Variant = "",
+            Tier = 1,
+            Name = familyId,
+            WhenJson = "{}",
+            ParamsJson = """{"op":"flat","amount":{"min":4,"max":9,"roll":"onApply"}}""",
+            TagsJson = "{}",
+            Enabled = true,
+        };
+
+        // ⛔ The unit is SUPPLIED here, and that is a named production gap, not a convenience.
+        // `ItemCardRenderer` resolves a unit from `params.channel` only (`ItemCard.cs:389-390`), and
+        // every trigger-shaped family -- resource.delta / status.apply / spawn.entity, 40 of the 109
+        // -- authors no channel at all, so the card would pass `null` and `ItemDisplayRenderer` would
+        // refuse any template of theirs that shows `{value}`. That axis (kind -> unit, as opposed to
+        // channel -> unit) does not exist anywhere in the codebase today; it is filed in
+        // tasks/item-content-todo.md rather than invented here, because building it is a design
+        // change to ssot-presentation.md §2.3's ledger, not an authoring pass.
+        // GameUnits is the right value regardless: the payload is signed HP through FA10's
+        // resource.delta funnel, the same game-unit currency `atk` and `combat.power` carry.
+        const UnitClass BonusDamageUnit = UnitClass.GameUnits;
+
+        foreach (var value in new long[] { 4, 9 })
+            foreach (var frame in new[] { "humanoid", "plant" })
+            {
+                var text = ItemDisplayRenderer.Line(
+                    template, atom, frame, value, SourceKind.AffixSuffix, 0, BonusDamageUnit,
+                    elementVariant: null, roll: RollPolicy.OnApply, bandMax: 9).Args["__rendered"];
+
+                Assert.False(string.IsNullOrWhiteSpace(text));
+                Assert.DoesNotContain('{', text);
+                Assert.DoesNotContain('}', text);
+                Assert.DoesNotContain(familyId, text, StringComparison.Ordinal);
+                Assert.Contains(value.ToString(System.Globalization.CultureInfo.InvariantCulture), text,
+                    StringComparison.Ordinal);
+            }
     }
 
     [Fact]

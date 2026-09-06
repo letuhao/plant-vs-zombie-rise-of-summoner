@@ -6,6 +6,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
 using FusionRpg.Core.Actions.Cost;
+using FusionRpg.Core.Actions.Unlock;
 
 namespace FusionRpg.Core.Tests.Battle.Adoption;
 
@@ -264,5 +265,73 @@ public class ActionCostsCooldownsAdoptionTests
         var squadZeroAttacks = trace.Targets.Where(t => t.Contains(" squad:0->", System.StringComparison.Ordinal)).ToList();
         Assert.Single(squadZeroAttacks); // committed once, then refused every round after by its own cooldown
         Assert.StartsWith("1 ", squadZeroAttacks[0]);
+    }
+
+    /// <summary>T58.3 (A23, spec-cost-scaling-holder-rung.md): a real action whose authored `Rung` is 1
+    /// (`CostMulti` 1000‰, inert) but whose paid cost must scale with the HOLDER's `effectiveRung`
+    /// instead, once one is supplied. 40 `qi` at rung 1 is unchanged (40); at rung 5
+    /// (`CostMulti` 3627‰, the shipped `action-rungs.v2.json` row) it rounds to 145 — above squad:0's
+    /// own real derived `qi` max (empirically 105-109, T56.2/T56.3's own finding for this exact
+    /// `CloseSetup()` actor), so a holder who has earned to rung 5 finds the SAME action permanently
+    /// unaffordable while a holder at rung 1 pays it freely.</summary>
+    static CompiledAction RungScaledSkill(string actionId, int baseCost) => new(
+        ActionId: actionId, Kind: ActionKind.Skill, Rung: 1, Tags: new[] { ActionTag.Offensive },
+        Enabled: true, Revision: 0, Grantable: false, DefaultAttackEligible: false, ContainerId: "",
+        Envelope: ActionEnvelope.NoOp with { ActionId = actionId },
+        Targeting: TargetSpecCompiler.Compile(new ActionTargetSpec()),
+        MinRange: 0, MaxRange: int.MaxValue, RangeChannel: null, RequiresLineOfSight: false,
+        Condition: PredicateCompiler.Always,
+        Costs: new[] { new CompiledActionCost("qi", ValueSpec.Of(baseCost), ActionCostTiming.OnCommit) },
+        Scopes: Array.Empty<ActionScopeRow>());
+
+    static readonly UnlockTuning RungTestTuning =
+        new(P1Milli: 1000, DeltaMilli: 500, FloorMilli: 1, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100);
+
+    /// <summary>
+    /// T58.3 criterion 2 (spec-cost-scaling-holder-rung.md): the SAME actor, SAME seed, SAME setup,
+    /// SAME authored action -- the ONLY variable across the two `BattleEngine.Resolve` calls is which
+    /// `UnlockState` squad:0 holds for it, isolating the rung as the sole cause of any difference
+    /// (no second actor's possibly-different derived stats to confound the comparison).
+    /// </summary>
+    [Fact]
+    public void An_actor_holding_the_same_action_at_a_higher_earned_rung_pays_more_and_goes_unaffordable()
+    {
+        const int BaseCost = 40; // rung 1 -> 40 (affordable); rung 5 -> round(40 * 3.627) = 145 (not)
+        var catalog = ActionCatalog.Build(new[] { RungScaledSkill("skill.rung-scaled", BaseCost) });
+        var setup = EquipSquadZero("skill.rung-scaled");
+
+        var lowRungState = UnlockState.FromPersisted(1, new[] { new HeldUnlock("skill.rung-scaled", EarnCountAtAcceptance: 1) });
+        var highRungState = UnlockState.FromPersisted(5, new[] { new HeldUnlock("skill.rung-scaled", EarnCountAtAcceptance: 5) });
+
+        var traceLow = new BattleTrace();
+        BattleEngine.Resolve(setup, seed: 5501, trace: traceLow, actionCatalog: catalog,
+            unlockStateFor: key => key == "squad:0" ? lowRungState : UnlockState.Empty(),
+            unlockTuning: RungTestTuning);
+
+        var traceHigh = new BattleTrace();
+        BattleEngine.Resolve(setup, seed: 5501, trace: traceHigh, actionCatalog: catalog,
+            unlockStateFor: key => key == "squad:0" ? highRungState : UnlockState.Empty(),
+            unlockTuning: RungTestTuning);
+
+        Assert.Contains(traceLow.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal));      // rung 1: affordable, attacks
+        Assert.DoesNotContain(traceHigh.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal)); // rung 5: unaffordable, never attacks
+    }
+
+    /// <summary>T58.3 criterion 3: a caller supplying no `unlockStateFor` at all -- the EXACT call
+    /// shape every T56.x test above already uses -- must resolve to the authored `Rung`
+    /// (`RungScaledSkill`'s own `Rung: 1`), byte-identical to today. Proven against the SAME
+    /// rung-1-equivalent outcome the low-rung run above shows, through the real default path rather
+    /// than an explicit `UnlockState`.</summary>
+    [Fact]
+    public void No_unlock_state_supplied_falls_back_to_the_authored_rung_byte_identical_to_today()
+    {
+        const int BaseCost = 40;
+        var catalog = ActionCatalog.Build(new[] { RungScaledSkill("skill.rung-scaled", BaseCost) });
+        var setup = EquipSquadZero("skill.rung-scaled");
+        var trace = new BattleTrace();
+
+        BattleEngine.Resolve(setup, seed: 5501, trace: trace, actionCatalog: catalog); // no unlockStateFor/unlockTuning at all
+
+        Assert.Contains(trace.Targets, t => t.Contains(" squad:0->", System.StringComparison.Ordinal));
     }
 }

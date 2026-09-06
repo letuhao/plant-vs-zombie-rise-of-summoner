@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Store"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 Storage, the same per-stock rule as Stockyard, for the ironwork stock specifically.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Store",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "coffer",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "coffer",
+      "name": "Coffer"
+    }
+  ],
+  "kind": "structure-anchor"
+}

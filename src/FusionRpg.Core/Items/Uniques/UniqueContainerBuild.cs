@@ -14,10 +14,20 @@ public sealed record UniqueContainerLookups(
 /// <summary>
 /// D4.24 (spec-unique-pipeline.md §2) — "`UniqueContainerBuild.From(anchor, rollSeed, tuning, lookups)`
 /// is a pure function producing the `ContainerRow`; the instance is `TryInstantiate` on it — nothing
-/// else." This build takes <paramref name="rung"/> instead of a raw `rollSeed`/`tuning` pair: nothing
-/// here rolls anything (the seed contract forbids a seed from authoring numbers, and the ONE roll this
-/// container ever takes happens later, inside `TryInstantiate` itself) — only <see cref="UniqueBudget.ReferenceTier"/>
-/// needs the rung's own tier window, so that is the one live fact this function actually reads.
+/// else." This build takes <paramref name="rung"/> instead of a raw `rollSeed`/`tuning` pair: the seed
+/// contract forbids a seed from authoring numbers, and the ONE roll a container's OWN affix pool ever
+/// takes happens later, inside `TryInstantiate` itself — only <see cref="UniqueBudget.ReferenceTier"/>
+/// needs the rung's own tier window, so that is the one live fact the ORIGINAL D4.24 half of this
+/// function reads.
+///
+/// <para><b>D4.26 changes what "pure over" means here, honestly:</b> the extend-action-slot grant
+/// (spec §4) is carried by rung ≥ 90 unconditionally, and DRAWN at rung 80 — a hit is decided from the
+/// container's own eventual <paramref name="rollSeed"/> on a dedicated stream
+/// (<see cref="ExtendSlotRoll.Hit"/>), BEFORE `TryInstantiate` ever runs, so the fixed core itself can
+/// now depend on the roll seed at rung 80 specifically. The build stays pure over `(anchor, rung,
+/// rungOrdinal, rollSeed, extendSlotChanceMicro)` as a whole — deterministic, reproducible, no
+/// `System.Random` — just no longer independent of `rollSeed` the way the class doc above originally
+/// promised.</para>
 ///
 /// <para><b>Fixed core</b> = <c>fixedAtoms[]</c>, one <see cref="ContainerAtomRow"/> each: `family ×
 /// powerBand` → tier (<see cref="UniqueBudget.TierOfPowerBand"/>) → atom id
@@ -58,7 +68,20 @@ public static class UniqueContainerBuild
 
     public sealed record BuildResult(ContainerRow Container, IReadOnlyList<DroppedCandidate> Dropped);
 
-    public static BuildResult From(UniqueSeed anchor, RarityRungWindow rung, UniqueContainerLookups lookups)
+    /// <param name="rungOrdinal">The rarity ladder ordinal <paramref name="rung"/>'s own `RarityId`
+    /// resolves to — a separate, caller-supplied value rather than a field on `RarityRungWindow`
+    /// itself (that struct is deliberately narrow, shared with the rarity-overlap harness), matching
+    /// the identical `(RarityRungWindow rung, int rungOrdinal)` pair `UniqueValidator.Validate`
+    /// already takes for the same reason.</param>
+    /// <param name="rollSeed">The container's own eventual instance roll seed — read ONLY to decide
+    /// the rung-80 extend-slot draw (<see cref="ExtendSlotRoll.Hit"/>); never used to roll anything
+    /// else here (D4.26; see this class's own doc comment above).</param>
+    /// <param name="extendSlotChanceMicro">`loot.extendSlotChanceMicro` (`DungeonTuning`), per-million —
+    /// the same key the normal-drop arm reads (spec §4). Not read from a tuning object directly: this
+    /// module has no dependency on `Dungeon.Tuning`, matching every other primitive this function
+    /// already takes rather than a whole tuning record.</param>
+    public static BuildResult From(UniqueSeed anchor, RarityRungWindow rung, int rungOrdinal, long rollSeed,
+        long extendSlotChanceMicro, UniqueContainerLookups lookups)
     {
         if (anchor is null) throw new ArgumentNullException(nameof(anchor));
         if (lookups is null) throw new ArgumentNullException(nameof(lookups));
@@ -77,6 +100,18 @@ public static class UniqueContainerBuild
                 throw new UniqueCorpusRejection(UniqueRules.CorpusMalformed,
                     $"unique '{anchor.SeedId}' fixed atom '{atomId}' (family '{fa.Family}', band '{fa.PowerBand}') is not in the atom catalog");
             atoms.Add(new ContainerAtomRow(seq++, atomId));
+        }
+
+        // D4.26 (spec-unique-pipeline.md §4): rung >= 90 carries the extend-slot atom unconditionally
+        // (no roll spent); rung 80 draws exactly one roll on its own named stream. Appended AFTER the
+        // authored fixed core and never counted against anchor.FixedAtoms itself — this atom is the
+        // rung's own grant, not the seed's.
+        if (rungOrdinal >= 90 || (rungOrdinal >= 80 && ExtendSlotRoll.Hit(rollSeed, extendSlotChanceMicro)))
+        {
+            if (lookups.LookupAtom(ExtendSlotAtom.Id) is null)
+                throw new UniqueCorpusRejection(UniqueRules.CorpusMalformed,
+                    $"unique '{anchor.SeedId}' would carry the extend-slot atom '{ExtendSlotAtom.Id}' but it is not in the atom catalog");
+            atoms.Add(new ContainerAtomRow(seq++, ExtendSlotAtom.Id));
         }
 
         var pool = new List<ContainerPoolRow>();

@@ -40,8 +40,10 @@ public static class ItemCardCompare
         var resolved = registry ?? DerivedStatRegistry.CreateDefault();
 
         // ⛔ ONE call into module 13's payload. Never a second delta pass.
-        var payload = ArmouryCompare.Compare(leftAtoms, rightAtoms);
-        var leftQuality = ArmouryCompare.Compare(rightAtoms, leftAtoms).MeanRollQualityMilli;
+        // The registry goes in so the per-delta unit and the group header below resolve against the
+        // same one -- two registries would be two answers to the unit question all over again.
+        var payload = ArmouryCompare.Compare(leftAtoms, rightAtoms, resolved);
+        var leftQuality = ArmouryCompare.Compare(rightAtoms, leftAtoms, resolved).MeanRollQualityMilli;
 
         return new CompareModel(
             Left: left,

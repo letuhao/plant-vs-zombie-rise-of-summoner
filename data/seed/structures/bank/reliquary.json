@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Bank"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21's R6 Bank role, a second concept beyond Soul Conduit's EssenceDeposit case, sited on Shrine (an unused SlotKind until now).",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "grafted",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Shrine",
+        "role": "Bank",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "reliquary",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "reliquary",
+      "name": "Reliquary"
+    }
+  ],
+  "kind": "structure-anchor"
+}

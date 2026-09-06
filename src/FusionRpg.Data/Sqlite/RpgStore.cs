@@ -721,6 +721,9 @@ public sealed partial class RpgStore : IRpgDb
         EnsureRunPoolSchemaUnlocked(db);
         // rpg_actor_loadout — the equipped-skill set (spec-loadout.md §1, T21).
         EnsureLoadoutSchemaUnlocked(db);
+        // rpg_actor_unlock_state + rpg_actor_held_unlock — the unlock ladder's own persistence
+        // (spec-action-instance-and-grant.md §3, T59.2).
+        EnsureActionUnlockSchemaUnlocked(db);
         // rpg_player_commander — default lawn commander (commander-surface default-persistence).
         EnsurePlayerCommanderSchemaUnlocked(db);
         // demon_species + demon_species_magnitude — species-generator's committed output, imported

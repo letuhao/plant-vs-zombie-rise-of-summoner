@@ -269,6 +269,25 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>Atoms sharing one family — T59.4's real backing for the `atomsInFamily` seam
+    /// `UniqueContainerLookups`/`ActionCorpusComposer.Compose` both declare (nothing in the codebase
+    /// indexed atoms by family before this, confirmed by direct search).</summary>
+    public IReadOnlyList<AtomRow> ListAtomsByFamily(string familyId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = AtomSelect + " WHERE family_id = $f ORDER BY atom_id;";
+            cmd.Parameters.AddWithValue("$f", familyId);
+            using var r = cmd.ExecuteReader();
+
+            var list = new List<AtomRow>();
+            while (r.Read()) list.Add(ReadAtom(r));
+            return list;
+        }
+    }
+
     const string AtomSelect = """
         SELECT atom_id, kind_id, family_id, variant, tier, name, when_json, params_json, tags_json,
                power_json, power_override_json, power_note, icd_key, enabled, revision

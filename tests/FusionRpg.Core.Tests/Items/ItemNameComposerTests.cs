@@ -110,6 +110,43 @@ public class AffixNameTableTests
     public void A_row_with_both_band_and_variant_is_rejected() =>
         Assert.Throws<AffixNameRejection>(() =>
             AffixNameTable.ParseSlot(JsonDocument.Parse("""[{"band":"A","variant":"fire","word":"x"}]""").RootElement));
+
+    /// <summary>
+    /// ⛔ <b>Every band-keyed family must cover all three of D29's bands, or a perfectly ordinary roll
+    /// throws while being named.</b> Found 2026-09-06 wiring the composer to the real corpus:
+    /// <c>atom.bulwark</c> and <c>atom.tempo-stampede</c> each carried ONE row labelled
+    /// <c>band: "A"</c> while declaring <c>tierRange: "t1-t5"</c> and while their own notes described a
+    /// band-C-only word — three readings of the same fact. <c>FamilyExpansion</c> expands every family
+    /// to all five tiers regardless of a "rare tier band only" flag, so a t4 bulwark atom really exists
+    /// and really rolls; the one authored word now sits under all three bands.
+    /// </summary>
+    [Fact]
+    public void Every_band_keyed_family_resolves_a_word_at_every_tier()
+    {
+        var dir = Path.Combine(RepoRoot(), "data", "seed", "items", "affix-families");
+        foreach (var path in Directory.EnumerateFiles(dir, "*.json"))
+        {
+            if (Path.GetFileName(path).StartsWith('_')) continue;
+            using var doc = JsonDocument.Parse(File.ReadAllText(path));
+            foreach (var e in doc.RootElement.GetProperty("entries").EnumerateArray())
+            {
+                if (!e.TryGetProperty("nameWords", out var nw)) continue;
+                var id = e.GetProperty("id").GetString();
+
+                foreach (var slot in new[] { "prefix", "suffix" })
+                {
+                    if (!nw.TryGetProperty(slot, out var rows)) continue;
+                    var parsed = AffixNameTable.ParseSlot(rows);
+                    if (parsed[0].Variant is not null) continue;   // variant-keyed: its own fallback rule
+
+                    for (var tier = 1; tier <= 5; tier++)
+                        Assert.False(
+                            string.IsNullOrEmpty(AffixNameTable.Resolve(parsed, tier, null, "humanoid")),
+                            $"{id}.{slot} resolves no word at tier {tier}");
+                }
+            }
+        }
+    }
 }
 
 public class ItemNameComposerTests
@@ -180,6 +217,38 @@ public class ItemNameComposerTests
         var usedAsPrefix = name == "atom.hybrid-prefix-t3 Base";
         var usedAsSuffix = name == "Base of atom.hybrid-suffix-t3";
         Assert.True(usedAsPrefix ^ usedAsSuffix, $"expected exactly one slot filled, got '{name}'");
+    }
+
+    /// <summary>
+    /// ⛔ <b>Defect found and fixed 2026-09-06 (item-content T1).</b> All 153 suffix words in the
+    /// shipped corpus author their own connective (<c>of Killing Frost</c>) — §4.12's sample table does
+    /// too — while this function used to prepend one unconditionally, so a real item read
+    /// <i>"Bark Helm of of Embers"</i>. Nothing caught it because the only caller was
+    /// <see cref="Lookup"/> above, whose synthetic words carry no connective.
+    ///
+    /// <para>A corpus that authors a BARE word still gets the connective, which is why the other cases
+    /// in this class are untouched — the grammar still owns it.</para>
+    /// </summary>
+    [Fact]
+    public void A_suffix_word_that_already_carries_its_own_connective_is_not_given_a_second_one()
+    {
+        static string Authored(string familyId, string slot, int tier, string? variant) =>
+            slot == "suffix" ? "of Embers" : "Sturdy";
+
+        var rolled = new[]
+        {
+            new NamedAffix(AffixClass.Prefix, "atom.fortitude", 3, 1, null),
+            new NamedAffix(AffixClass.Suffix, "atom.searing-strike", 4, 2, null),
+        };
+
+        Assert.Equal(
+            "Sturdy Bark Helm of Embers",
+            ItemNameComposer.Compose("Bark Helm", rolled, "humanoid", Authored, RareDraw, 1));
+
+        // Suffix alone, same rule.
+        Assert.Equal(
+            "Bark Helm of Embers",
+            ItemNameComposer.Compose("Bark Helm", rolled.Skip(1).ToArray(), "humanoid", Authored, RareDraw, 1));
     }
 
     [Fact]

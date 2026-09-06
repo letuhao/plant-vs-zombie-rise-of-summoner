@@ -90,12 +90,18 @@ class GateEvidenceTests(unittest.TestCase):
         self.assertEqual(set(evidence.keys()),
                          {"aptitudePoints", "elementMastery", "statusApplied", "demonTypeLevel"})
 
-    def test_primary_and_family_are_carrier_elemental_and_status_are_pending(self) -> None:
+    def test_all_four_gate_index_kinds_are_carrier(self) -> None:
+        # 2026-09-06: elementMastery/statusApplied flipped pending -> carrier for real -- their
+        # production readers (ElementMasterySource/StatusAppliedSource, task G4) shipped, are
+        # registered at the real composition root (GateCounterEndpoints.cs), and were live-probed
+        # end to end against a real running save (task G6) well before this test's own old
+        # "still pending" assertion was noticed as stale (spec-gate-counters.md §19's own readiness
+        # ladder names the exact rung this crosses).
         evidence = gates.load_gate_evidence(real_seed_root())
         self.assertEqual(evidence["aptitudePoints"].gate_state, "carrier")
         self.assertEqual(evidence["demonTypeLevel"].gate_state, "carrier")
-        self.assertEqual(evidence["elementMastery"].gate_state, "pending")
-        self.assertEqual(evidence["statusApplied"].gate_state, "pending")
+        self.assertEqual(evidence["elementMastery"].gate_state, "carrier")
+        self.assertEqual(evidence["statusApplied"].gate_state, "carrier")
 
     def test_resolve_unknown_kind_raises_naming_it(self) -> None:
         evidence = gates.load_gate_evidence(real_seed_root())

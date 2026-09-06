@@ -9,36 +9,43 @@ island under `src/game` is the second-largest. Budget this at world-stage scale,
 
 ## Objective
 
-**Extract a generic grid-rendering layer from the lawn's Phaser island, so a siege board can be drawn
-without cloning it.**
+**Finish wiring the generic grid-rendering layer so a siege (and later battle) board can be drawn
+without cloning the lawn island.**
 
-The FE has exactly one Phaser integration and it is lawn-shaped throughout: `createLawnGame`,
-`LawnWorldScene`, `PtrEntityRegistry` keyed on lawn ptr semantics, and lawn geometry baked into the
-scene rather than passed in.
+**HEAD honesty (patched 2026-09-06, `phaser-kernel` Wave 0):** the FE already has **two** Phaser
+islands — lawn (`createLawnGame` → `LawnWorldScene`) and world (`createWorldGame` → world scenes under
+`src/game/world/`). They never coexist (one `Phaser.Game` at a time; GG-11 / D2). World is a **graph**
+camera stage, not a `GridSpec` consumer.
 
-**Success looks like:** one board layer that both the lawn and the siege configure differently, and a
-lawn that renders byte-identically after the extraction.
+`src/game/board/` already holds the cell-board primitives (`GridSpec`, `BoardLayers`, `pickCell`,
+`terrainCache`, …). Lawn paint still mostly uses lawn-shaped scenes/systems; siege/battle are the
+**Decision 40 discharge callers** and remain paused until [phaser-kernel](../phaser-kernel-map.md)
+freezes the named import list (lock 5a). **Decision 40 is not discharged by this doc patch** — discharge
+still requires live siege + battle both calling the layer.
+
+**Success looks like:** one board layer that lawn (optional adapter), siege, and battle configure
+differently — without opening `LawnWorldScene` from a siege host.
 
 ---
 
-## What already exists (verified at HEAD, 2026-09-04)
+## What already exists (verified at HEAD, refreshed 2026-09-06)
 
 **Built.**
 
-- `src/game/createLawnGame.ts` — game construction, **lawn-specific by name and by content**.
-- `src/game/scenes/LawnWorldScene.ts`, `BootScene.ts`.
+- `src/game/createGame.ts` — shared Game factory (injected scene list).
+- `src/game/createLawnGame.ts` / `createWorldGame.ts` — thin facades + (today) cloned destroy checklists.
+- `src/game/scenes/LawnWorldScene.ts`, `BootScene.ts`; `src/game/world/` — world Phaser island.
+- `src/game/board/` — generic grid primitives (mostly test-driven; not yet the live lawn paint path).
+- `src/game/camera/bindCamera.ts` — write-only contain-fit bridge (lawn wired; world uses its own camera).
 - `src/game/entities/PtrEntityRegistry.ts` — entity registry, keyed on **lawn ptr** semantics.
 - `src/game/systems/PickSystem.ts` — picking, against lawn geometry.
 - `src/game/systems/SyncFromModelSystem.ts`, `ActorHudDisplay.ts`, `fx/FxPool.ts`.
-- `src/stages/world/` — 6,902 LOC across `hud/`, `inspector/`, `playback/`, `render/`, `targeting/`.
-  **The subdirectory shape to copy** — it is the repo's own worked answer to "how is a stage
-  organised".
-- Three stages built: `lawn`, `sanctum`, `world`.
-- `src/shell/railState.ts:31` — `currentStageId: "sanctum" | "world" | "lawn" | "battle"`. **`battle`
-  is declared and unbuilt**, which Gate 0 confirmed and which the `decisions.md` amendment names as
-  its own third cost.
+- `src/stages/world/` — React chrome for the world stage (HUD / inspector / …); the **canvas** lives under
+  `src/game/world/`.
+- Stages with canvas: `lawn`, `world`. `battle` / `siege` declared; canvas work paused pending freeze.
 
-**Real gap.** No generic board layer. Every piece above assumes the lawn.
+**Real gap.** Board primitives exist; **production cell-stage consumers** (siege/battle scenes, and any
+lawn paint flip onto `BoardLayers`) are still unfinished. Do not re-clone lawn destroy/host for siege.
 
 ---
 

@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Enable"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21's R8 Enable role, a second concept distinct from district-charter: gates MILITARY (Defend/See/Deny) construction rather than economic, since base-defense's own combat roles are new territory separate from the pre-existing R1-R6 economy \u00a75.21 describes. Sited on Vault (an unused SlotKind until now).",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "grafted",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Vault",
+        "role": "Enable",
+        "roleSecondary": "none",
+        "strengthBand": "stone",
+        "structureId": "garrison-charter",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "garrison-charter",
+      "name": "Garrison Charter"
+    }
+  ],
+  "kind": "structure-anchor"
+}

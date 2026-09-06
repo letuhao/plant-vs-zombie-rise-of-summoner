@@ -582,20 +582,24 @@ public class UniqueCorpusTests
     }
 
     /// <summary>
-    /// ⏸ The <c>unique</c> drop ENTRY KIND is still refused, and for a reason that moved: module 17
-    /// exists now, so the blocker is one step further on — no concrete unique container exists to hand
-    /// a player. Pinned so the pointer cannot go stale a second time.
+    /// ✅ <b>Closed 2026-09-06 (D4.27, party-dungeon spec-unique-pipeline.md §5).</b> This used to
+    /// assert the <c>unique</c> drop entry kind was still refused, pointing at "no concrete unique
+    /// container exists" as the real remaining blocker. That blocker is closed:
+    /// `UniqueContainerBuild.From` (D4.24/26) resolves a real container, and `LootPipeline.cs`'s own
+    /// new `MintUnique` arm mints through it. The assertion is inverted — `Unique` now resolves, and
+    /// the other three kinds this dictionary still names stay exactly as unavailable as before.
     /// </summary>
     [Fact]
-    public void The_unique_entry_kind_is_still_unavailable_and_names_the_real_remaining_blocker()
+    public void The_unique_entry_kind_now_resolves_and_the_other_unavailable_kinds_are_unchanged()
     {
-        Assert.False(FusionRpg.Core.Items.Drops.DropTableDraw.IsAvailable(
+        Assert.True(FusionRpg.Core.Items.Drops.DropTableDraw.IsAvailable(
             FusionRpg.Core.Items.Drops.DropEntryKind.Unique));
+        Assert.DoesNotContain(FusionRpg.Core.Items.Drops.DropEntryKind.Unique,
+            FusionRpg.Core.Items.Drops.DropTableDraw.UnavailableKinds.Keys);
 
-        var reason = FusionRpg.Core.Items.Drops.DropTableDraw.UnavailableKinds[
-            FusionRpg.Core.Items.Drops.DropEntryKind.Unique];
-        Assert.Contains("seed-to-concrete", reason, StringComparison.Ordinal);
-        Assert.Contains("CONCRETE unique container", reason, StringComparison.Ordinal);
+        Assert.False(FusionRpg.Core.Items.Drops.DropTableDraw.IsAvailable(FusionRpg.Core.Items.Drops.DropEntryKind.Insert));
+        Assert.False(FusionRpg.Core.Items.Drops.DropTableDraw.IsAvailable(FusionRpg.Core.Items.Drops.DropEntryKind.Charm));
+        Assert.False(FusionRpg.Core.Items.Drops.DropTableDraw.IsAvailable(FusionRpg.Core.Items.Drops.DropEntryKind.Consumable));
     }
 
     /// <summary>

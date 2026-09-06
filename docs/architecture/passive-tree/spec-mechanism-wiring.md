@@ -1,6 +1,17 @@
 # Spec: `mechanism-wiring`
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05. **Built and verified 2026-09-06 — 3 of the 4 "inert lines" this spec's
+whole premise names are now wired** (tasks E1, E1b, E2–E5; G4 remains correctly excluded). Module of
+[passive-tree](../passive-tree-map.md). Corrected 2026-09-06 by an adversarial spec audit — see the
+per-line correction at the end of §0/§4/§8, wherever this file still describes G1–G3 in the present
+tense as unbuilt: `ActorHub.cs:160` now registers a fourth subsystem (`StatusDerivedSubsystem`, G1);
+`BattleEngine.cs:457` now calls `state.RecomposeDerivedForAllActors()` every round, a second call
+site beyond construction (G2); `AtomKindRegistry.cs:572` now reads `RuntimeState.Partial` for
+`stat.derived` in Sim, not `RuntimeState.None` (G3). Only G4 (no new trigger on `stat.derived`) is
+still accurately described as excluded. **A reader should treat every "is inert"/"cannot be scored"/
+"has exactly one call site" claim below about G1–G3 as historical unless a line explicitly says it
+was re-checked 2026-09-06** — the underlying line numbers have also shifted since this spec's own
+citations were written, so re-grep the symbol rather than trusting the cited line number.
 
 **Program:** passive-tree · **Wave:** 0 · **Depends on:** nothing ·
 **Depended on by:** `tree-language --write` — **this module's A10 is now a build gate**
@@ -889,11 +900,13 @@ Two, both genuinely open. Neither is a template slot.
    **Required by this closure:** a dedicated feedback-path test, and a note in `tree-language`'s
    authoring rules that a status raising `status.resist.*` makes application order significant.
 
-2. **Does this module take `aura-skill` T13's job?** `BattleRunState`'s own comment names T13 as the
-   owner of the live mid-match toggle. This module needs less than that — a per-round recompose — and
-   the ledger's empty-case no-op makes it safe. **Recommendation: take the per-round call, leave the
-   toggle event to T13, and note the split in `aura-skill`'s task list.** Needs that program's ack, not
-   a decision from this one.
+2. ~~**Does this module take `aura-skill` T13's job?**~~ **CLOSED 2026-09-06 (D50): yes, and it
+   already shipped.** `BattleRunState.RecomposeDerivedForAllActors()` (task E3) is exactly the
+   per-round recompose this question asked about — its own doc comment states the recommended split
+   verbatim: *"`RecomposeDerived` above stays explicit/per-actor for a live toggle event (aura-skill
+   T13's own job); this is the one new call site `BattleEngine.Resolve`'s round loop makes."* Pending
+   `aura-skill`'s own ack when that program starts (it does not exist yet), but nothing here blocks
+   on that ack — the split was the safe default this question already recommended, taken.
 
 ---
 

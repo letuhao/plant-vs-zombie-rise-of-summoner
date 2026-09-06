@@ -219,7 +219,7 @@ Do not block projector on full Unity atlas extract.
 | Constraint | Guidance |
 |---|---|
 | Grid | ~5×9 cells |
-| Sprites | On order of CapPolicy observe (e.g. ≤50 plants / ≤80 zombies) — not thousands |
+| Sprites | Soft canvas budget `PHASER_OCCUPANT_BUDGET = 96` (`pickPhaserOccupants.ts`) — not thousands; CapPolicy observe is separate |
 | Updates | Diff LawnViewModel → tweak sprites; avoid full scene rebuild per event |
 | Events | Consume bus ring / Snapshot revision; throttle UI to animation frame if flooded |
 

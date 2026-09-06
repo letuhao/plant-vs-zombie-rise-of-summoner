@@ -124,8 +124,10 @@ public static class DropTableDraw
     /// <item><c>charm</c> — X7's <c>charm</c> container kind, then module 13 `set-charm-gen`.</item>
     /// <item><c>consumable</c> — module 18; ssot-generation.md §5.4 makes its absence deliberate
     /// ("adding it now would ship a degenerate action mechanism the action program then has to absorb").</item>
-    /// <item><c>unique</c> — module 17 `uniques`.</item>
     /// </list>
+    /// <para><c>unique</c> is REMOVED from this list, D4.27 (party-dungeon, spec-unique-pipeline.md
+    /// §5): `LootPipeline.cs`'s own new `MintUnique` arm resolves it — a concrete unique container now
+    /// exists (D4.24/26) and the fixed-core/rarity/roll-seed shape is real, not a seed.</para>
     ///
     /// <para>Verified 2026-09-04, not assumed: <c>ContainerKind</c> (`Effects/Atoms/ContainerRow.cs:7`)
     /// ships six values — Item, Trait, Skill, SpeciesPassive, Patron, WorldBuff — and none of D27's
@@ -151,18 +153,11 @@ public static class DropTableDraw
                 "X7 must still mint the 'consumable' container_kind, and no CONCRETE consumable " +
                 "container exists — the 60 are seeds, and rolling one into an effect_container is the " +
                 "runtime generator's (seed-to-concrete)",
-            // ⚠ Module 17 SHIPPED 2026-09-05 — the class, its eight rule ids, the cross-row checks,
-            // `item_unique` and the parity metric are all live, and the 144 refs below all resolve
-            // against its corpus. The kind stays unavailable because what is missing is now one step
-            // further on: a CONCRETE unique CONTAINER. The corpus holds 144 seeds (bands and families,
-            // per seed-contract.md §3's no-numbers rule) and no `effect_container` row exists for any
-            // of them, so a draw would resolve to nothing. Rolling a seed into a container is the
-            // runtime generator's, per the seed-to-concrete rule. Reason updated rather than left
-            // pointing at a module that now exists.
-            [DropEntryKind.Unique] =
-                "module 17 (uniques) shipped the class and item_unique, but no CONCRETE unique container " +
-                "exists yet — the 144 are seeds, and rolling one into an effect_container is the runtime " +
-                "generator's (seed-to-concrete)",
+            // Unique REMOVED 2026-09-06 (D4.27, party-dungeon spec-unique-pipeline.md §5) — the exact
+            // "seed-to-concrete" gap this comment named is closed: `UniqueContainerBuild.From` (D4.24)
+            // resolves a unique seed into a real `ContainerRow`, and `LootPipeline.cs`'s own new
+            // `MintUnique` arm mints through it. Left as a historical marker of the correction
+            // sequence this dictionary's own doc comment already establishes for `consumable`.
         };
 
     public static bool IsAvailable(DropEntryKind kind) => !UnavailableKinds.ContainsKey(kind);

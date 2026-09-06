@@ -14,7 +14,7 @@ public sealed record SiegeTuning(
     int MoveCostOpen, int MoveCostRough, int DiagonalSurcharge, int MaxCells,
     DistrictTuning District, StructureTuning Structure, SiegeObjectiveTuning Objective,
     SiegeWavesTuning Waves, Siege.SiegeShootingTuning Shooting, ConstructionTuning Construction,
-    EconomyTuning Economy, Siege.AiTuning Ai);
+    EconomyTuning Economy, Siege.AiTuning Ai, FogTuning Fog);
 
 /// <summary>
 /// base-defense `siege-economy` (spec-siege-economy.md). <see cref="NodeYieldPerRoundLoam"/>/
@@ -51,6 +51,15 @@ public sealed record ConstructionTuning(
     /// silently matching the spec's literal wording. Revisit if a real percent-of-max mechanism is
     /// ever confirmed to exist for `ActionCostRow`.</summary>
     int SummonQiCost);
+
+/// <summary>
+/// base-defense `siege-fog` (spec-siege-fog.md, module 30, 2026-09-06). <see cref="Enabled"/> is a
+/// rollout kill switch (mirroring `FUSIONRPG_PERF=0`'s own precedent elsewhere in this repo), never a
+/// difficulty toggle. <see cref="DefaultVisionRangeTiles"/> is the fallback every `StructureDef` with no
+/// authored `VisionRangeTiles` uses, and every animate combatant at v1 (spec §2's own named scope
+/// limit — no per-species vision catalog exists yet).
+/// </summary>
+public sealed record FogTuning(bool Enabled, int DefaultVisionRangeTiles);
 
 /// <summary>
 /// base-defense `siege-waves` (spec-siege-waves.md). <see cref="BatchIntervalTicks"/>/
@@ -299,6 +308,14 @@ public static class SiegeTuningLoader
             if (summonQiCost < 0)
                 throw new SiegeTuningRejection($"siege tuning: construction.summonQiCost must be >= 0; got {summonQiCost}");
 
+            var fog = Obj(root, "fog");
+            var fogEnabled = Bool(fog, "enabled");
+            var fogDefaultVisionRangeTiles = Int(fog, "defaultVisionRangeTiles");
+            if (fogDefaultVisionRangeTiles <= 0)
+                throw new SiegeTuningRejection(
+                    $"siege tuning: fog.defaultVisionRangeTiles must be > 0 -- a zero-vision default would " +
+                    $"permanently fog the whole board for everyone, a config bug not a design; got {fogDefaultVisionRangeTiles}");
+
             var economy = Obj(root, "economy");
             var nodeYieldLoam = Long(economy, "nodeYieldPerRoundLoam");
             if (nodeYieldLoam < 0)
@@ -408,7 +425,8 @@ public static class SiegeTuningLoader
                     WeightLowHp: wLowHp, WeightCannotCounter: wCannotCounter, WeightRound: wRound,
                     WeightRisk: wRisk, StanceDefault: stanceDefault,
                     AutoResolveHandicapMilli: autoResolveHandicapMilli, RetargetLatencyTicks: retargetLatencyTicks,
-                    AggressionRange: aggressionRange, MaxCandidatesScored: maxCandidatesScored));
+                    AggressionRange: aggressionRange, MaxCandidatesScored: maxCandidatesScored),
+                Fog: new FogTuning(Enabled: fogEnabled, DefaultVisionRangeTiles: fogDefaultVisionRangeTiles));
         }
     }
 
@@ -417,6 +435,13 @@ public static class SiegeTuningLoader
         if (!parent.TryGetProperty(key, out var el) || el.ValueKind != JsonValueKind.Object)
             throw new SiegeTuningRejection($"siege tuning: missing or non-object '{key}'");
         return el;
+    }
+
+    static bool Bool(JsonElement parent, string key)
+    {
+        if (!parent.TryGetProperty(key, out var el) || el.ValueKind is not (JsonValueKind.True or JsonValueKind.False))
+            throw new SiegeTuningRejection($"siege tuning: missing or non-boolean '{key}'");
+        return el.GetBoolean();
     }
 
     static int Int(JsonElement parent, string key)
@@ -469,4 +494,5 @@ public static class SiegeTuningPolicy
     public static ConstructionTuning Construction => Tuning.Construction;
     public static EconomyTuning Economy => Tuning.Economy;
     public static Siege.AiTuning Ai => Tuning.Ai;
+    public static FogTuning Fog => Tuning.Fog;
 }

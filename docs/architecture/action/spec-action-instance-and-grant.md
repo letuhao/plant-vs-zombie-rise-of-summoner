@@ -74,11 +74,44 @@ A new, small orchestrator (`ActionCorpusImporter` or similar, `Core/Actions/Corp
 parsed `committed-round-*.json` entries, for each brief not already present (checked by `ActionId`,
 matching `UpsertAction`'s own revision-bump guard so a re-import of an unchanged brief moves nothing):
 
-1. Rolls the brief's `atomFamilies` into a concrete atom subset via the **same** `Instantiator.Draw`
-   mechanism `ActionSeeder` already wraps — reused directly, not re-implemented — seeded from
-   `Fnv1a64`-style hash of the brief's own stable `id` (mirroring `SeededRng.DeriveStream`'s existing
-   "seed XOR stable name" shape used everywhere else in this codebase), **never** a per-player
-   `WorldSeed`. Two imports of the same brief on two servers produce byte-identical containers.
+1. Rolls the brief's `atomFamilies` into a concrete atom subset — **⛔ corrected during T59.3's own
+   BUILD, 2026-09-06: not via `ActionSeeder.Generate`** (that wrapper also rolls a target SHAPE from a
+   weighted pool and composes a NAME via `ActionNameTemplates` — the brief already authors both
+   `targetMode`/`relation` and `name` directly, so `Generate`'s other two jobs do not apply here; only
+   the atom half, `Instantiator.Draw` itself, is reused). **The real template for "one or more atom
+   families → a container's pool" is `UniqueContainerBuild.From`**
+   (`src/FusionRpg.Core/Items/Uniques/UniqueContainerBuild.cs`), generalized from its one
+   `VarianceSlot.Family` to the brief's `atomFamilies` list (plural, unlike the unique case):
+   1. `atomsInFamily` (a caller-supplied `Func<string, IReadOnlyList<AtomRow>>`, the SAME seam
+      `UniqueContainerLookups` already declares — "nothing in the codebase indexes atoms by family
+      today... the caller... is the only one who can answer it") resolves every family in
+      `atomFamilies`, flattened into one candidate list — no tier filter (unlike the unique build's
+      own `ReferenceTier` step: nothing in the corpus brief or `action-corpus-ideal.md` correlates a
+      rung to an atom TIER, and inventing one would be a fabricated rule).
+   2. **Reused verbatim, not reinvented**: `AffixValidator.AffixClassOfAtom` (internal, same
+      assembly) classifies the FIRST candidate; every candidate of that class becomes one
+      `ContainerPoolRow` via `AffixLibraryGenerator.SingleAtomAffix`; a mismatched-class candidate is
+      DROPPED with a reported reason, exactly `UniqueContainerBuild`'s own policy — the alternative
+      (splitting the roll budget proportionally across both classes) is a new allocation rule nothing
+      specifies, so this module does not invent one.
+   3. **`PoolRolls` already answers "how many" — no new tunable.** `RungRow.PoolRolls`
+      (`action-rungs.v2.json`, already loaded via `RungPolicy.Table`) is the rung-keyed roll-count
+      `effect-pipeline-ideal.md` §3.4 named as undeclared ("skill (action): ~1-5... no tuning file
+      declares them") — true when that finding was written, **no longer true for rung-keyed content**:
+      the brief's own `RungBand.Collapse()` indexes a real row with a real `PoolRolls`. The whole count
+      goes to whichever side (`PrefixRolls` or `SuffixRolls`) step 2's `rollClass` selected; the other
+      stays `0` — a THIRD instance this reopening has found of "the number already exists on a
+      rung-keyed table, don't author a private one" (after A23's holder-rung fix and T59.1's
+      cost-vs-timing-template correction).
+   4. `Instantiator.Draw` runs ONCE against this temporary, pool-bearing `ContainerRow`, seeded from a
+      `Fnv1a64`-style hash of the brief's own stable `id` (mirroring `SeededRng.DeriveStream`'s existing
+      "seed XOR stable name" shape), **never** a per-player `WorldSeed` — two imports of the same brief
+      on two servers produce byte-identical results. **The drawn atoms become the container's
+      PERMANENT fixed core** (`Atoms`), and the pool is discarded (`Pool = []`, both roll budgets `0`)
+      in the row this module actually persists — matching §Objective point 3 exactly ("a granted
+      action has no instance and no rolls"): nothing will ever call `Instantiator.Draw` on this
+      container again, unlike the unique-item case, which keeps its pool for a later per-player
+      `TryInstantiate`.
 2. Mints a concrete `ContainerRow` (`Kind = Skill`) plus its atom rows via the already-built
    `RpgStore.UpsertContainer` (`RpgStore.Containers.cs:216`) — a new container per brief, keyed
    `container.action.{briefId}` or similar, never reusing a shared template container (that would
@@ -89,11 +122,18 @@ matching `UpsertAction`'s own revision-bump guard so a re-import of an unchanged
    the brief (byte-for-byte, matching `AuthoredEligibilityResolvesTests.cs`'s own mapping); `Rung =
    RungBand.Collapse()` (the existing, already-decided rule — `ActionRow.cs:104` — though this
    importer would be its first real caller: `grep` finds zero today, only the method's own doc
-   comment); `Targeting` compiled from
-   `targetMode`/`relation`; `ContainerId` from step 2; **`Envelope` and `MinRange`/`MaxRange` come
-   from a new, small per-category template** (§2 below) — the brief itself carries no timing data,
-   and inventing one per-brief would be exactly the "private `f(level)`"/per-row magic-number defect
-   `tunables-ssot.md` forbids.
+   comment); `Targeting` compiled from `targetMode`/`relation`; `ContainerId` from step 2.
+   **`Envelope`'s `CooldownChannel`/`EffectivenessChannel` come from the small per-category mapping**
+   (§2 below, corrected) — set on the row's OWN baseline envelope, which `BuildActionCatalog`'s
+   existing `ActionTimingDerivation.Derive` call preserves untouched while it separately (and already,
+   with no help from this importer) derives Windup/Recovery/TimeCost/Cooldown/`Class`/`CooldownKey`
+   from `row.Category`. **`MinRange`/`MaxRange` stay the fixed structural default every existing
+   action fixture already uses** (`0`/`int.MaxValue`, `RangeChannel: null` — unbounded): the brief
+   carries no range data, and no board-based range distinction is meaningful yet for a squad-vs-wave
+   battle (`A10`, unbuilt) — a per-category range window would be a guess with nothing to gate against,
+   not a balance choice this module can honestly make. Inventing per-brief TIMING numbers, by
+   contrast, would be exactly the "private `f(level)`"/per-row magic-number defect `tunables-ssot.md`
+   forbids — moot now that timing needs no per-brief or per-category authoring here at all.
 4. Persists via `RpgStore.UpsertAction`, then one `ActionCostRow` per the same per-category template,
    scaled by the brief's own `RungBand.Collapse()` (the **authored** rung — `ActionCostRow.AmountSpec`
    is a `ValueSpec`, scaled later, per-holder, by A23's corrected `CostLedger` at grant/battle time;
@@ -105,19 +145,45 @@ matching `UpsertAction`'s own revision-bump guard so a re-import of an unchanged
 live game/injector path; this is server-side catalog population, matching T30's own "actions are
 battle-mode and the injector never sees one."
 
-### 2. The per-category envelope/cost template — a new, small tunable
+### 2. The per-category cost template — a new, small tunable (⛔ narrowed during T59.1's own BUILD)
 
-**Real gap, named honestly**: `effect-pipeline-ideal.md` §3.4 already named this exact number as
-undeclared — *"`skill` (action): ~1-5, 'we will fine tune later'... no tuning file declares them, per
-kind or at all"* — for roll COUNT bands; the same is true here for envelope timing and cost amounts
-per category. This module authors `data/tuning/action-corpus-templates.v1.json`: one row per
-`ActionCategory` (`Attack`, `Defense`, `Support`, `Movement`, `Status`), each giving `WindupTicks`,
-`RecoveryTicks`, `CooldownTicks`, `Class` (`CooldownClass.Specific` — T56.4's own found lesson: `None`
-silently no-ops both the check and the arm), a `CooldownChannel`/`EffectivenessChannel` matching the
-category (`DerivedStatChannels.SkillCooldown/SkillEffectiveness(category)`, S2's existing pattern),
-and one `(resourceId, baseAmountAtRung1, timing)` cost row. **Shipped with a stated derivation and a
-named re-tune trigger** (`action-corpus-ideal.md` §36's own precedent for "default now, re-tune later
-is what a tunable is for") — not left as an open balance question this module cannot close.
+**⛔ Corrected during T59.1's own build pass, 2026-09-06 — the first draft duplicated an already-shipped
+module it did not know existed.** The original design below authored WindupTicks/RecoveryTicks/
+CooldownTicks/`Class` per category in a new file. Reading `RpgStore.BuildActionCatalog`
+(`RpgStore.ActionCatalog.cs:122-130`) during BUILD found this **already done, already wired to
+production**: `battle-tempo`'s `action-timing` module (2026-09-05, `ActionTimingTuning`/
+`ActionTimingDerivation`, `data/tuning/action-timing.v1.json`) derives WindupTicks/RecoveryTicks/
+TimeCostTicks/CooldownTicks/`Class`/`CooldownKey` from `row.Category` for **every** row
+`BuildActionCatalog` compiles — the real, only production path `WebMatchService`'s three
+`BattleEngine.Resolve` call sites use. `Class` there is `CooldownClass.Category` (not `.Specific` as
+first assumed here) when `cooldownTicks > 0`, which is equally non-`None` and therefore already clear
+of T56.4's found bug (`.None` is what silently no-ops both the check and the arm — `.Category` and
+`.Specific` are both real, working, non-`None` classes; `.Category`'s own doc comment — "shared across
+a named group, the group is `CooldownKey`" — is in fact the MORE correct choice for a category-templated
+action than a per-action `.Specific` cooldown would have been). **Writing a second timing tunable here
+would have been exactly the "two incompatible curves" failure `ssot-power-scale.md` warns about, for
+timing instead of power.** Corrected scope, narrower than originally drafted:
+
+1. **Envelope timing (Windup/Recovery/TimeCost/Cooldown/Class/CooldownKey) needs NOTHING new.** T59.3's
+   importer does not set these at all — `BuildActionCatalog` derives them unconditionally for any row
+   with a non-null `Category`, imported or not.
+2. **`CooldownChannel`/`EffectivenessChannel` per category IS a real, separate gap** — confirmed neither
+   `ActionCompiler.Compile` nor `ActionTimingDerivation.Derive` ever sets either field (`Derive`'s own
+   `baseline with {...}` touches six fields, not these two), so every row compiled today carries both
+   `null` — the ONLY place either channel is ever populated is a hand-built test fixture
+   (`ActionCostsCooldownsAdoptionTests.cs`'s `PerTickCostedSkill`/`CooldownGatedAttackSkill`). This is
+   not a balance number (a balance pass tunes what a channel's modifiers are worth, never which channel
+   name an action reads), so it is a small, pure, static mapping — `ActionCategory → (SkillCooldown,
+   SkillEffectiveness)` key strings, via `DerivedStatChannels.SkillCooldown/SkillEffectiveness` — not a
+   tuning-file row. T59.3's composer sets both directly on each imported row's own baseline
+   `ActionRow.Envelope` (the field `BuildActionCatalog`'s `ActionTimingDerivation.Derive` call takes as
+   its `baseline` and preserves untouched).
+3. **The `(resourceId, baseAmountAtRung1, timing)` cost row per category remains genuinely new** —
+   `ActionTimingTuning` has no notion of resource costs at all. This is the one real balance-surface
+   number left for this module to author: `data/tuning/action-corpus-cost-templates.v1.json`, one row
+   per `ActionCategory`. **Shipped with a stated derivation and a named re-tune trigger**
+   (`action-corpus-ideal.md` §36's own precedent for "default now, re-tune later is what a tunable is
+   for") — not left as an open balance question this module cannot close.
 
 ### 3. `UnlockState` persistence — the missing table
 

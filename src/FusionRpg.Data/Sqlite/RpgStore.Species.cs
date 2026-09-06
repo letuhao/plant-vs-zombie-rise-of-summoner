@@ -197,21 +197,24 @@ public sealed partial class RpgStore
     /// — never stored a second time (`ConcreteSpecies` deliberately does not carry it, its own doc
     /// comment already says why).</para>
     ///
-    /// <para>⛔ <c>TraitPool</c> is deliberately left empty here, not <c>s.TraitPool</c> — found for
-    /// real 2026-09-02, not assumed: the anchor's own `traits` field is an OPEN, free-form array
+    /// <para>⛔ <c>TraitPool</c> conversion (not <c>s.TraitPool</c> verbatim) — found for real
+    /// 2026-09-02, not assumed: the anchor's own `traits` field is an OPEN, free-form array
     /// (`anchor/schema.py`'s own `_open_array_prop`, unvalidated LLM flavor text — `pea.json`'s own
     /// real values are `"Projectile-launching"`, `"Defensive"`, `"Rapid-fire"`), while
     /// `DemonSpeciesDef.TraitPool` is validated against `DemonTraitCatalog`'s CLOSED, curated
     /// gameplay vocabulary (`"regenerator"`, `"berserker"`, `"loyal"`, ...) — two different
-    /// vocabularies that happen to share a field name. Wiring one into the other was tried and
-    /// caught by `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_DemonSpeciesCatalog_Validate`,
-    /// which threw exactly the mismatch this comment describes. `ConcreteSpecies.TraitPool` keeps
-    /// carrying the anchor's own raw flavor strings (a legitimate, separate use — `species_effects.py`
-    /// already reads the anchor's own `traits` field as LLM brief context) — only the SNAPSHOT
-    /// conversion into the gameplay-validated field stops here, honestly, rather than picking a
-    /// silently-wrong mapping. Assigning real trait ids to anchor-derived species is a genuine open
-    /// design question (which of ~20 curated gameplay traits fits a given species?) this task does
-    /// not answer.</para>
+    /// vocabularies that happen to share a field name. Wiring one straight into the other (an
+    /// `s.TraitPool` passthrough) was tried once and caught by
+    /// `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_DemonSpeciesCatalog_Validate`,
+    /// which threw exactly the mismatch this comment describes. <c>ConcreteSpecies.TraitPool</c> keeps
+    /// carrying the anchor's own raw flavor strings unchanged (a legitimate, separate use —
+    /// `species_effects.py` reads the anchor's own `traits` field as LLM brief context) — the bridge
+    /// into the gameplay-validated vocabulary instead lives in
+    /// <see cref="Core.Demons.Generation.DemonTraitPoolCuration"/> (2026-09-06, trait-roll), called
+    /// from <see cref="Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef"/> below — by
+    /// species id (porting the legacy compiled catalog's own already-authored pick forward) or by a
+    /// deterministic rarity/gameTypeId-seeded fallback, never by reinterpreting the flavor text
+    /// itself.</para>
     /// </summary>
     public IReadOnlyList<Core.Demons.DemonSpeciesDef> BuildDemonSpeciesSnapshot()
     {

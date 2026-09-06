@@ -68,6 +68,15 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- item-content T6 (item-lore): ssot-presentation.md §5.3 N2's string catalog. Program.cs reads
+         it at boot for card block 10's authored flavour sentence; without this rule the file is simply
+         absent next to the exe and every unique/set renders its key with no prose — the same silent
+         missing-copy-rule defect data\seed\items\ above already had. -->
+    <Content Include="..\..\content\display\*.json">
+      <Link>content\display\%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <!-- aura-skill-todo.md Phase 5: DebugEndpoints.FindLatestLiveBoardStart carries the stale-board

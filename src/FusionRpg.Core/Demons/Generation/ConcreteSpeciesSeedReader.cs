@@ -95,11 +95,12 @@ public static class ConcreteSpeciesMapper
         DeployMode = s.DeployMode,
         Acquisition = s.Acquisition,
         Variants = s.Variants,
-        // TraitPool stays empty unconditionally — the anchor's own traitPool is open LLM flavor text
-        // (e.g. "projectile-launching"), not DemonTraitCatalog's closed gameplay vocabulary; wiring
-        // one into the other was tried once already and SpeciesCatalogDiffTests caught the mismatch.
-        // Both hosts share this same deliberate deferral — see trait-pool-hardcoded-empty.
-        TraitPool = Array.Empty<string>(),
+        // s.TraitPool (ConcreteSpecies) stays the anchor's own open LLM flavor text, untouched —
+        // DemonTraitPoolCuration bridges to DemonTraitCatalog's closed gameplay vocabulary by
+        // species id/rarity/gameTypeId instead of re-interpreting that flavor text. A direct
+        // s.TraitPool passthrough was tried once already and SpeciesCatalogDiffTests caught the
+        // vocabulary mismatch — see trait-pool-hardcoded-empty.
+        TraitPool = DemonTraitPoolCuration.PickFor(s.SpeciesId, s.Rarity, s.GameTypeId),
         AttackIntervalMs = s.AttackIntervalMs,
     };
 }

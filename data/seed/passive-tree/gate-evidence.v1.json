@@ -13,13 +13,13 @@
     },
     {
       "gateIndexKind": "elementMastery",
-      "gateState": "pending",
-      "evidence": "AllocationScope.Aspect exists (AptitudeAllocation.cs:8) but no production reader for element_mastery.<id>@Aspect exists yet -- owed by gate-counters wave 0 (D37); PointBudget.cs:15 records the old, now-superseded ownership comment"
+      "gateState": "carrier",
+      "evidence": "ElementMasterySource.AptitudePointEquivalents -- shipped (spec-gate-counters.md §5.2/§5.3, task G4), registered at the real composition root (GateCounterEndpoints.cs:107) and live-probed end to end 2026-09-06 (task G6: injector credit -> 5s accumulator flush -> POST /api/gate-counters/credit -> RpgStore.FlushGateCounters -> GET read-back, against a real running save)"
     },
     {
       "gateIndexKind": "statusApplied",
-      "gateState": "pending",
-      "evidence": "D35 correctly removed the AllocationScope dependency for status_applied.<id> and nothing has replaced it yet -- owed by gate-counters wave 0 (D37)"
+      "gateState": "carrier",
+      "evidence": "StatusAppliedSource.AptitudePointEquivalents -- shipped (spec-gate-counters.md §5.2/§5.3, task G4), registered at the real composition root (GateCounterEndpoints.cs:104) and live-probed end to end 2026-09-06 (task G6: injector credit -> 5s accumulator flush -> POST /api/gate-counters/credit -> RpgStore.FlushGateCounters -> GET read-back, against a real running save)"
     },
     {
       "gateIndexKind": "demonTypeLevel",

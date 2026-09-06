@@ -116,7 +116,17 @@ public class ItemSetStoreTests : IDisposable
                          stored.Members.OrderBy(m => m.ContainerId, StringComparer.Ordinal));
             Assert.Equal(original.Tiers.OrderBy(t => t.PiecesRequired),
                          stored.Tiers.OrderBy(t => t.PiecesRequired));
+            // item-lore T7: the set's lore KEY survives the round trip; the sentence deliberately does
+            // not (it lives in the string catalog, not in SQL).
+            Assert.Equal(original.FlavourKey, stored.FlavourKey);
+            Assert.Null(stored.FlavourText);
         }
+
+        // Exactly the six sunwoven-almanac rows author one today, and none of the other 24 do —
+        // pinned as a real count so a corpus that starts authoring more turns this red on purpose.
+        Assert.Equal(6, back.Count(s => s.FlavourKey is { Length: > 0 }));
+        Assert.All(back.Where(s => s.FlavourKey is { Length: > 0 }),
+            s => Assert.StartsWith("flavor.set.", s.FlavourKey!, StringComparison.Ordinal));
     }
 
     [Fact]

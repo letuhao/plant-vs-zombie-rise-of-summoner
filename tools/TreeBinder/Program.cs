@@ -134,20 +134,39 @@ return anyFail ? 1 : 0;
 
 static (IReadOnlyDictionary<string, AffixRow>, IReadOnlyDictionary<string, AtomRow>) LoadSeedContent(string repoRoot)
 {
+    // 2026-09-06 real-run finding: `data/seed/effects/affixes/all.json` is a DIFFERENT subsystem's
+    // vocabulary entirely (the Delve "elite affix" system -- 10 entries, ids like
+    // `affix.authored.affix-draw-000`; see `src/FusionRpg.Core/Delve/Encounter/EliteAffix.cs`), never
+    // the passive-tree affix-family system tree-language actually draws its `affixIds[]` from
+    // (confirmed: it contains zero of the ~109 real family ids, e.g. `atom.might`). The real,
+    // GENERATED atom rows for those families live under `data/seed/atoms/generated/` (E43's
+    // `FamilyExpandGen`, one `family-expand.<stem>.json` per source family file) -- globbed here
+    // instead of the wrong fixed path.
+    var generatedDir = Path.Combine(repoRoot, "data", "seed", "atoms", "generated");
     var files = new[]
     {
-        Path.Combine(repoRoot, "data", "seed", "effects", "affixes", "all.json"),
         Path.Combine(repoRoot, "data", "seed", "atoms", "fx-board.json"),
         Path.Combine(repoRoot, "data", "seed", "atoms", "fx-core.json"),
         Path.Combine(repoRoot, "data", "seed", "atoms", "fx-status.json"),
-    }.Where(File.Exists).Select(f => (f, File.ReadAllText(f))).ToArray();
+    }.Concat(Directory.Exists(generatedDir)
+        ? Directory.GetFiles(generatedDir, "family-expand.*.json")
+        : Array.Empty<string>())
+     .Where(File.Exists).Select(f => (f, File.ReadAllText(f))).ToArray();
 
     var collected = AtomSeedFile.Collect(files);
     if (!collected.IsOk)
         throw new InvalidOperationException("seed content did not parse: " + string.Join("; ", collected.Errors));
 
-    return (collected.Content.Affixes.ToDictionary(a => a.AffixId),
-            collected.Content.Atoms.ToDictionary(a => a.AtomId));
+    var atomsById = collected.Content.Atoms.ToDictionary(a => a.AtomId);
+    var explicitAffixesById = collected.Content.Affixes.ToDictionary(a => a.AffixId);
+
+    // 2026-09-06, owner-decided design (spec-tree-binder.md's own filed note): no `kind: "affix"`
+    // wrapper at the bare family id exists anywhere in the committed seed data for the real
+    // ~109-family vocabulary, so one is synthesized -- see `AffixFamilySynthesis`'s own doc comment
+    // for the full reasoning (one canonical shape per family, the numeric band is irrelevant here).
+    var affixesById = AffixFamilySynthesis.WithSynthesizedFamilyAffixes(explicitAffixesById, atomsById);
+
+    return (affixesById, atomsById);
 }
 
 static string? FindUp(string markerFile)

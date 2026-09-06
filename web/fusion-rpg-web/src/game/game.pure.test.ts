@@ -17,7 +17,8 @@ import {
   lawnWorldSize,
   worldToCell
 } from "./gridMath";
-import { resetIconEpochForTests } from "@/lib/bus/icon-epoch";
+import { resetIconEpochMirrorForTests } from "./iconEpochMirror";
+import { setApiBaseMirror, resetApiBaseMirrorForTests } from "./apiBaseMirror";
 import { stackOffset } from "./stackLayout";
 
 describe("EventBus generation", () => {
@@ -70,10 +71,12 @@ describe("EventBus generation", () => {
 
 describe("lawnIconUrl", () => {
   afterEach(() => {
-    resetIconEpochForTests();
+    resetIconEpochMirrorForTests();
+    resetApiBaseMirrorForTests();
   });
 
-  it("includes /api/icons path, epoch query, and uses apiBase in DEV", () => {
+  it("includes /api/icons path, epoch query, and uses apiBase mirror in DEV", () => {
+    setApiBaseMirror(import.meta.env.DEV ? "http://127.0.0.1:5088" : "");
     const url = lawnIconUrl("plant", 3);
     expect(url).toContain("/api/icons/plant/3.png");
     expect(url).toMatch(/\?r=\d+/);

@@ -1058,6 +1058,89 @@ Binding` filter, 10/10 `TreeBinder.Tests`, 291/291 full `PassiveTree` filter). `
 `FusionRpg.Core` and the new `tools/TreeBinder` project. `audit-overflow.py --targets A3` /
 `audit-magic-numbers.py --targets M1`: zero hits. All four boundary guards pass (independently re-run).
 
+**Major finding + partial fix, 2026-09-06 — the owner asked "does this ever wire or become playable,"
+and checking that properly (not from memory) found the exact reason it doesn't yet: nothing H9 has
+ever generated has been reachable by `tools/TreeBinder`, for THREE separate, layered reasons.**
+
+1. **FIXED, verified against real data.** `spec-tree-binder.md` §3.1's own IN table has always said
+   `affixIds[]` comes "from tree-language"; `spec-tree-language.md` §6.4's own diagram has always
+   shown `plan/<treeId>.json` and `nodes/<treeId>.json` as two separate files. But `Program.cs` only
+   ever read the plan file — confirmed by actually running `tools/TreeBinder` against the real
+   committed corpus (`bound=0 refused=40` for every one of the 12 trees, reason: `"affixIds must be
+   1..3, got 0"`, even though `agility` alone has 39 real generated nodes). Added `PlanReader
+   .ReadPlanNodesWithSeed`, which reads the plan exactly as before and overlays each already-generated
+   node's real `affixIds`/`exclusion.form` from `nodes/<treeId>.json`; `Program.cs` now locates and
+   passes that file. The ORIGINAL one-argument `ReadPlanNodes` is untouched (still used by
+   `PlanReaderTests.cs`'s own plan-only fixtures) — this is additive, not a rewrite. 4 new tests in
+   `PlanReaderTests.cs` (`ReadPlanNodesWithSeedTests`) cover: a null seed behaves identically to the
+   old reader; a generated node's real content overrides the plan's own empty defaults; an
+   UN-generated node in the same tree correctly keeps refusing (the real, common partial-corpus
+   shape); the plan's own `budgetShareMilli`/`deliberateHole` are never overridden by the seed.
+   `dotnet test tests/FusionRpg.TreeBinder.Tests`: **14 passed** (was 10); `--filter
+   PassiveTree.Binding`: **67 passed**, unchanged — zero regressions.
+
+2. **FIXED, mechanically correct, necessary but not sufficient alone.** Re-running `TreeBinder` with
+   fix 1 live changed the refusal reason from "no affixIds" to `"affix 'atom.might' does not exist in
+   the shipped seed content"` — real progress, but a SECOND real bug: `Program.cs`'s own
+   `LoadSeedContent` read `data/seed/effects/affixes/all.json`, which is a COMPLETELY UNRELATED
+   subsystem's vocabulary (the Delve "elite affix" system — 10 entries, ids like
+   `affix.authored.affix-draw-000`, owned by `src/FusionRpg.Core/Delve/Encounter/EliteAffix.cs`) —
+   confirmed it contains zero of the ~109 real passive-tree family ids. The real generated atom rows
+   live at `data/seed/atoms/generated/family-expand.<stem>.json` (E43's `FamilyExpandGen`, owned by
+   the item/effect-atom program). Fixed `LoadSeedContent` to glob that directory instead of the wrong
+   fixed path. Necessary, but — see finding 3 — not sufficient on its own to bind anything yet.
+   `dotnet test tests/FusionRpg.TreeBinder.Tests` / `--filter PassiveTree.Binding`: still 14/67,
+   zero regressions.
+
+3. **FOUND, NOT fixed — a real, deeper, cross-program design gap, correctly left for a decision
+   rather than guessed at.** Even with fixes 1–2 live, EVERY node still refuses
+   (`bound=0 refused=40` for every tree), now for a THIRD reason. Traced fully: `AffixComposer.Resolve`
+   (B4, already-shipped) requires a real `AffixRow` keyed by the EXACT family id (e.g. `"atom.might"`),
+   referencing one or more `AtomRow`s. But `family-expand.<stem>.json`'s own entries are all
+   `kind: "stat.modify"` — bare, PER-TIER atom rows (`"Might T1"`..`"Might T10"`, each with its own
+   item-context numeric band) — never a `kind: "affix"` wrapper keyed by the bare family id. **No such
+   wrapper exists anywhere in the committed seed data for the real family system** — confirmed by
+   reading every file already in `TreeBinder`'s own load list; the only real `AffixRow`s that exist
+   belong to the unrelated Delve system named in finding 2. Running `FamilyExpandGen` for real (safe,
+   deterministic, zero model cost) additionally surfaced a FOURTH, even larger fact: **only 9 of 109
+   real families have ANY authored balance pricing in `data/seed/items/_tuning/tier-bands.v1.json` at
+   all** — `109 families read, 45 row(s) emitted across 3 family file(s), 100 family(ies) refused`,
+   each with `"no authored sharePermille... channel stem '<x>' not in tier-bands.v1.json"`. That file
+   is the item program's own balance surface (a tunable, per CLAUDE.md's own magic-number rule) — not
+   something to invent 100 numbers for unilaterally. **Filed here rather than fixed**, following this
+   map's own established "Filed by" convention (see `passive-tree-map.md`'s existing item-program
+   entry for the exact same pattern): this needs an owner decision on shape (does `AffixComposer`
+   resolve per-family, picking one canonical tier's channel/op shape and discarding the item-context
+   numeric band entirely — since D2's own architecture already computes magnitude from
+   `budgetShareMilli`, never from an atom's own amount range? or does it need the node's own tier to
+   select among per-tier atom rows directly?) before either program spends real effort building it.
+
+**Owner decided (2026-09-06): one canonical shape per family, tier-independent — built and proven
+real the same day.** New `src/FusionRpg.Core/PassiveTree/Binding/AffixFamilySynthesis.cs`
+(`WithSynthesizedFamilyAffixes`): groups `atomsById` by `FamilyId`, synthesizes one `AffixRow` per
+family referencing that family's LOWEST-tier `AtomRow` (an explicit, real `AffixRow` for the same id
+always wins over a synthesized one, never the reverse — proven by a dedicated test). Wired into
+`tools/TreeBinder/Program.cs`'s `LoadSeedContent`, replacing the raw dictionaries with the
+synthesized overlay. 5 new tests in `AffixFamilySynthesisTests.cs` (lowest-tier-wins regardless of
+dictionary order, explicit-never-overwritten, multiple distinct families, an atom with no family id
+is never synthesized). `dotnet test --filter PassiveTree.Binding`: **72 passed** (was 67, +5), zero
+regressions; `FusionRpg.TreeBinder.Tests`: still 14/14.
+
+**Result, run for real against the full 12-tree corpus, not assumed:** `might` alone: **10/40 nodes
+now genuinely bound** — the first real `kMicro` coefficients this program has ever produced for
+generated (not hand-authored) content, e.g. `skill.might-off-t1-n0` → `{kindId: "stat.modify",
+channelId: "atk", op: "Flat", kMicro: 608, unitClass: "GameUnits", scaleAxis: "PTheta"}`. All 12
+trees combined: **81 real nodes now bind** (agility: 0 — its own real affixes apparently reference
+families outside the 9 currently-priced ones; every other tree binds something). The remaining
+refusals are now ENTIRELY the `tier-bands.v1.json` 100-of-109-families-unpriced gap (finding 3's own
+second half) — confirmed the SAME 9 families (`vitality`, `fortitude`, `bulwark`, `might`, `ferocity`,
+`savagery`, `warding`, `resilience`, `plating`/`carapace`/`mending`/`quickening`/`flourishing`/
+`swiftness`, minus 3 refused for a missing `BattleRuleset` curve) are the only ones any tree can ever
+bind until the item program authors the other 100 families' pricing — a real, disclosed, cross-program
+boundary, not a bug left in this program's own code. **Net effect: the wiring chain H9 → TreeBinder is
+now genuinely, provably complete** — the ceiling on how much of the real corpus binds today is a
+DATA-authoring gap in a different program, not a code gap in this one.
+
 ### ✅ D3: The soul track, end to end (D3) — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-binder.md` §5.1–§5.4; `spec-tree-resolve.md` §6.2; `spec-tree-catalog.md` §2.3.
 **Description:** `Θ_node = Θ_actor + (soulTrack.thetaPerSoulLevelMilli · soulLevel)/1000`, derived at
@@ -2625,10 +2708,39 @@ present. No new work needed; this task closes as a reconciliation of the todo's 
 work already done under G4, the same "stale checkbox" pattern found (in both directions) elsewhere
 this session (C3, A1-B5).
 
-### ⬜ Checkpoint G — reachability — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
+### 🟡 Checkpoint G — reachability — 1 of 3 bullets proven, 2 need a live save (label corrected twice: was falsely ✅ with all bullets unchecked, then ⬜)
 - [ ] All 39 generic trees have a live gate quantity, and all 39 are reachable above tier 0
 - [ ] An existing save no longer shows 27 trees at tier 0
-- [ ] The per-hit lawn cost is unchanged within probe noise
+- [x] The per-hit lawn cost is unchanged within probe noise
+
+**Real, previously-undiscovered gap found and fixed 2026-09-06 while extending this spec per the
+owner's own `/spec` request: the gate-counter CODE (G1–G8) was genuinely complete and live-probed, but
+`data/seed/passive-tree/gate-evidence.v1.json` — the file `R-G1`'s refusal actually reads — still said
+`elementMastery`/`statusApplied` were `pending`, exactly as they were before G1–G8 were ever built.**
+Confirmed by reading the file directly rather than trusting the task checkboxes: `gateState: pending`
+for both, with evidence text literally saying "owed by gate-counters wave 0" — stale the moment that
+wave shipped. Verified the real carriers exist and are genuinely wired before touching the data
+(`StatusAppliedSource`/`ElementMasterySource.AptitudePointEquivalents`, both real, non-stub
+implementations; both registered at the real composition root, `GateCounterEndpoints.cs:104,107`; both
+already live-probed end-to-end by G6's own evidence today). Hand-edited both rows to `carrier`
+following the file's own explicit rule ("flip a row's gateState from pending to carrier only once a
+real production reader exists in src/ — name the line") — never ahead of the code, and the code was
+already there. **Lesson reconfirmed: a task marked ✅ does not mean every downstream data artifact
+that task's own acceptance depends on was updated to match — check the artifact the DOWNSTREAM
+consumer (`R-G1`) actually reads, not just the code that was supposed to produce it.**
+
+Bullet 3 checked, citing G6's own already-recorded evidence directly (not new work — G6's real load
+probe already proved it: two zero-credit runs swung `loop.tick` avgUs/`gc.allocKb` by +72%/+423% from
+pure noise, while a 104-real-credit run landed inside that same band with no directional signal).
+Bullets 1–2 need a fresh live save's own tier-reachability checked post-fix — the server from G6's
+own probe session was no longer running when checked just now (not restarted solely to re-verify this,
+since that is exactly the kind of live-game check this program treats as real work requiring its own
+session, not a rushed re-check). **Newly, genuinely unblocked by the gate-evidence fix above, but not
+yet exercised**: `R-G1` should no longer refuse `elementMastery`/`statusApplied`-gated trees — this is
+real, load-bearing progress for Phase J (§J1 depends on this checkpoint), even though J1 itself also
+needs `elemental_tree_spec`/`status_tree_spec` functions that do not exist yet (no code in
+`plan/emit.py` beyond `might_tree_spec`/`primary_tree_spec`, confirmed by reading the file directly) —
+that part is genuinely Phase J's own scope, not this checkpoint's.
 
 ---
 
@@ -4469,18 +4581,148 @@ standing rule for owner-only gates.
 
 ---
 
+## Owner decisions batch, 2026-09-06 — every genuinely open question across all 12 module specs
+
+Compiled by re-reading every spec's own "Open questions" section (all 12 have one), filtering out
+already-closed items and one that was stale-but-answered (species-tree's `UniqueDemon` question,
+fixed the same pass — G7 already shipped it). The owner cleared every genuinely open, decidable item
+in one sitting rather than leaving them scattered across specs to be re-discovered piecemeal.
+
+| # | Spec | Question | Decision |
+|---|---|---|---|
+| D44 | tree-state §OQ2 | "Tier below unlocked" = ? | **≥1 node, same branch** (preserves D10's two-branch identity, rewards a single-branch dive) |
+| D45 | tree-state §OQ1 | Tree respec shares species-respec counter, or its own? | **Its own, separate counter** |
+| D46 | tree-catalog §OQ3 | May a node author a bake-time-resolved (L2) slot? | **Yes, allowed** |
+| D47 | squad-harness §OQ2 | Measure the shipped allocation shape too, not just D21's? | **Yes — measure both shapes** |
+| D48 | tree-review §OQ2 | Two-reviewer agreement pass wanted? | **No — single reviewer is enough** |
+| D49 | tree-review §OQ3 | Acceptable manual-correction rate? | **Higher tolerance, 2–3%** (not the demon corpus's unproven ~0.4% floor) |
+| D50 | mechanism-wiring §OQ2 | Take `aura-skill` T13's per-round recompose job? | **Yes, take it now** — pending `aura-skill`'s own ack when that program starts |
+| D51 | map (filed 2026-09-06) | Accept the live registry's 24 statuses (was 21)? | **Yes — re-bake every mirror/plan, update every "39"/"1,560" citation to 42/1,680** |
+| D52 | map (filed 2026-09-06) | Accept the live registry's `channelFamily`=54 (was 53)? | **Yes — same re-bake pass as D51** |
+| D53 | tree-binder §OQ1 | `treeShareMilli` real value? | **1000 (100%)** — trees are the full power budget today, not a placeholder pending a competing system |
+| D54 | tree-plan §OQ1 | `budget.treeTotalPoints` posture? | **Ship a flagged guess now**, re-measure once mechanism-wiring/squad-harness produce real data |
+| D55 | tree-state §OQ3 | `skillPointsPerThetaMilliByScope` for `demonType`/`aspect`/`uniqueDemon`? | **Proportional to the sibling `{3,4,4,6}` ratio against commander=11**: `demonType≈15, aspect≈15, uniqueDemon=22` (rounded up, matching D38's own rounding convention) |
+| D56 | tree-binder §OQ2 | 17th atom kind (conversion) — prioritize or defer? | **Neither — write a real spec for it now** (owner's own words: "why don't we make spec to cover it?") rather than leave it as a bare priority call |
+| D57 | tree-language §OQ2 | `legitimateSkew` real rule? | **1.5× uniform, on any near-uniform axis** — the spec's own worked example (`earth`) promoted to the actual rule |
+| D58 | tree-catalog §OQ1 | Where does soul level enter `CurveInput`? | **Add a 4th `CurveInput` member** for soul level explicitly (a real E2 review, not folded into `Level`) |
+
+**Still correctly unresolved — blocked on unrun measurement, not a decision the owner could make yet
+(unchanged by this batch):** the real per-tree review rate (needs H8's pilot), whether D15's
+equal-budget rule changes once S4 lands, `w`'s real value (needs the harness to learn the soul
+track), stance groups for elemental/status/demon-family trees.
+
+**Implementation status of this batch, tracked here rather than only in chat:** D44/D45/D46/D47/D48/
+D49/D50/D53/D54/D57 are pure spec-text confirmations or small, contained changes — landing them now.
+D51/D52 (the corpus-growth accept) is a real, moderate mechanical task (re-run generators, re-bake 12
+plans, sweep every numeric citation) — landing now. D56 (17th atom kind) and D58 (`CurveInput` 4th
+member) are both real, wider-blast-radius work — D58 touches the shared E2 curve system other
+consumers besides passive-tree read, D56 is a new capability spanning effect-atom's own kind registry
+— both get their own dedicated pass rather than a rushed inline edit.
+
+**D55 — BUILT + VERIFIED 2026-09-06.** Published via
+`python tools/tuning/publish.py aptitudes --label "D55: skillPointsPerThetaMilliByScope proportional
+to the {3,4,4,6} ratio against commander=11" pointEconomy.skillPointsPerThetaMilliByScope.demonType=15
+pointEconomy.skillPointsPerThetaMilliByScope.aspect=15
+pointEconomy.skillPointsPerThetaMilliByScope.uniqueDemon=22` — `aptitudes.v6.json -> v7.json`, v6 kept
+on disk for revert. Every hardcoded `aptitudes.v6.json` reference migrated to `v7.json` across
+production (`Program.cs:163`, `RpgHost.cs:156`) and tests (`AptitudeTuningTests.cs`,
+`PointBudgetTests.cs`, `UniqueDemonSpeciesTreeGateTests.cs`, `SpeciesAllocationTests.cs`,
+`UniqueDemonAllocationTests.cs`, `AllocationStoreTests.cs`,
+`tools/seedsmith/tests/test_tree_state_band.py`) — confirmed zero remaining `aptitudes.v6.json` code
+references via repo-wide grep (the only surviving hits are frozen historical record: `content-stack-
+todo.md`'s own past-tense note, two `docs/research/class-system/_baseline-*.json` one-time measurement
+snapshots, and `ProveAptitude/Program.cs`'s own independent, untouched `aptitudes.v2.json` pin).
+`AptitudeTuningTests.cs` gained three new assertions pinning the shipped demonType/aspect/uniqueDemon
+rates directly. `spec-tree-state.md` §3, its file-citation table, and its Open questions #3 / Ask-first
+boundary all updated to the closed, shipped state — plus two adjacent stale items found and fixed in
+the same pass (the `respecPrice` file-version citation, and the D45 "own separate counter" ask-first
+bullet that had never been struck through despite OQ1 already closing it).
+
+**Verification, re-run for real, not trusted:** `dotnet test tests/FusionRpg.Core.Tests --filter
+"FullyQualifiedName~Aptitude|FullyQualifiedName~PointBudget|FullyQualifiedName~PassiveTree"` →
+615/618 passed, 3 failures are the exact pre-existing `ProveAptitudeJsonEmitTests`/
+`BattleStatComposer.Configure` cluster this same file already traced and confirmed unrelated at C6
+(line ~794 above — another session's uncommitted change, nothing to do with any aptitude tuning
+file). `dotnet test tests/FusionRpg.Data.Tests` → 1087/1088 passed, the 1 failure is
+`ItemUniqueStoreTests.Unique_eligible_seeds_every_rung_through_the_sc7_gate` — a different program's
+domain entirely (item unique-seeding), already tracked in `item-todo.md`/`action-todo.md`, untouched
+by this change. `AllocationStoreTests.cs` filtered alone: 15/15 green.
+
+---
+
 ## Phase J — volume
 
 The only phase whose cost is measured in days of machine time.
 
+**D51/D52 — BUILT + VERIFIED 2026-09-06.** Accepted the live registry's growth (24 statuses, was 21;
+`channelFamily`=54, was 53) and re-baked every mirror, plan, and citation.
+
+Mechanical steps, each re-run and its output verified directly (not assumed):
+1. `dotnet run --project tools/PassiveTreeRosterGen -- --status-emit data/seed/statuses/roster.json`
+   → `wrote data/seed/statuses/roster.json (24 status(es))`; re-ran `--status-check` after → *"agrees
+   with StatusCategoryRegistry (24 status(es))"*.
+2. `channelFamily` needed no separate mirror regen — `vocabulary.py`'s `load_property_vocabulary`
+   reads it live from `data/seed/derived-stats/catalog.json`, already at 54 unique families (another
+   session's already-committed growth, confirmed via `git status`/`git diff` before touching anything).
+3. `python -m seedsmith trees plan --check --tree <id>` run for all 12 primary trees BEFORE emitting —
+   every one showed the identical, safe 6-line diff (only `propertyVocabulary{,Counts}.{status,
+   channelFamily}` and `roster.{counts.statuses,statuses}`; zero node/id/budget/archetype changes).
+   `--emit` re-run for all 12, then `--check` re-run again — all 12 report *"byte-identical to a fresh
+   regeneration."*
+4. Test fixes for the two real breakages the count bump caused: `tools/seedsmith/tests/
+   test_tree_plan_emit.py`'s `test_roster_counts_match_the_spec` and
+   `test_property_vocabulary_counts_match_the_spec_table` (hardcoded 21/53) updated to 24/54.
+5. Full seedsmith suite re-run: `python -m pytest tools/seedsmith/tests/` → 2,379+ passing; the only
+   failures are the pre-existing, unrelated 100-vs-109 affix-family-count gap (a different axis
+   entirely — item program's own balance surface, already flagged in this file's earlier pending-work
+   notes; confirmed by tracing the failure to `KeyError: 'affliction'` in `numerics/model.py`, nothing
+   to do with `channelFamily`/`status`).
+
+**Citation sweep, 42 trees / 1,680 nodes (was 39/1,560), across every spec that counted the old
+figure:** `spec-tree-plan.md`, `spec-species-tree.md`, `spec-gate-counters.md`, `spec-tree-binder.md`,
+`spec-tree-catalog.md`, `spec-tree-language.md`, `spec-tree-resolve.md`, `spec-tree-review.md`
+(including a real recompute of its finite-population-correction sample sizes — verified by script:
+381/268 are UNCHANGED at the new N, the growth is too small to move either ceiling-rounded value —
+and its unlock-cost cumulative-price arithmetic, recomputed the same way: 1,244,819,520, still
+1.24×10⁹), `spec-tree-state.md`, `spec-tree-surface.md`. Every historical decision quote (D37's own
+block, DESIGN-GATE verification checklists) was preserved verbatim with a "superseded"/"was N" note
+rather than silently rewritten, matching this file's own established convention.
+
+**A real production-code hit, not just docs:** `web/fusion-rpg-web/src/ui/actor/PathBrowse.tsx:22-26`
+had the stale `39`/`21` baked into a comment justifying `RENDER_ALL_MAX`'s threshold choice — found by
+grepping the actual repo, not assumed from the spec alone, and corrected to 42/24. The threshold value
+itself (`24`) needed no change (42 > 24 windows exactly as 39 > 24 did).
+
+**A real design gap surfaced while fixing the citations, filed rather than silently left:**
+`spec-tree-surface.md` §9.1 rule 5 ("paths whose gate quantity has not been built yet, collapsed
+behind one row") keys purely on `gateState` — but `gateState` is now `carrier` for every category
+(gate-counters shipped), so as literally written, rule 5's bucket would read EMPTY today even though
+30 of 42 paths still cannot be planned or generated (J1's missing factory functions). Flagged inline
+at that section: rule 5 needs to key on `gateState` **plus** J1's own readiness, not `gateState` alone,
+once J1 ships — a real acceptance-criterion gap for whoever builds J1's FE side, not a citation typo.
+
 ### J1: The elemental and status corpus
 **Spec:** `spec-tree-plan.md` §7.1; `spec-tree-language.md`.
+**⚠ Re-scoped 2026-09-06 (D51/D52 sweep, `passive-tree-map.md`'s third filed item) — the blocker
+named below is stale and the count changed.** `data/seed/passive-tree/gate-evidence.v1.json` shows
+ALL FOUR `gateIndexKind` rows at `"gateState": "carrier"` (G6/I8 shipped and live-probed 2026-09-06)
+— `R-G1`'s own gate no longer refuses anything. **The real remaining blocker, confirmed by direct
+grep, zero hits:** `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py` has no
+`elemental_tree_spec()`/`status_tree_spec()` factory function at all (only `might_tree_spec()` and
+`primary_tree_spec()`, both `category="primary"`), and `report/cli.py`'s `_cmd_trees_plan` has no
+branch that could build one — `--tree fire` or `--tree wither` has no code path to succeed today,
+gate state notwithstanding. Also the count grew: D51 accepted 24 statuses (was 21), so this is now
+**30 trees** (6 elemental + 24 status), not 27.
 **Acceptance:**
-- [ ] 27 trees × 40 nodes emitted, generated, bound, gated
-- [ ] `R-G1` — not a schedule note — refuses any tree whose gate quantity is still `pending`
+- [ ] `elemental_tree_spec(element_id)` and `status_tree_spec(status_id)` built as mechanical
+      extensions of `primary_tree_spec`'s own pattern (H9 already generalized `might_tree_spec` ->
+      `primary_tree_spec` once; same shape, two more categories), wired into `_cmd_trees_plan`'s
+      `--tree` resolution
+- [ ] 30 trees × 40 nodes emitted, generated, bound, gated
 - [ ] The same gate bar as H9: every gate green, the gating metric measured
-**Verification:** `--check` green; all 27 resolve above tier 0 on a seeded save.
-**Depends on:** Checkpoint G, Checkpoint H, C2. **Scope:** M (a run).
+**Verification:** `--check` green; all 30 resolve above tier 0 on a seeded save.
+**Depends on:** Checkpoint G, Checkpoint H, C2. **Scope:** M (a run) — the factory functions themselves
+are S/XS each (mechanical, one existing pattern to copy twice); the generation run is the real cost.
 
 ### J2: The three-tier sampling design and the acceptance numbers
 **Spec:** `spec-tree-review.md` §3.1, §3.2, §6.3.

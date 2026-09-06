@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Move"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 R5 Move's third named gap: 'nothing gives protection'. Ties to WorldLane.WardLevel, the shipped-but-unread interdiction field \u00a75.21 names directly.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Move",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "convoy-depot",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "convoy-depot",
+      "name": "Convoy Depot"
+    }
+  ],
+  "kind": "structure-anchor"
+}

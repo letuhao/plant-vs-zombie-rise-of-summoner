@@ -10,11 +10,23 @@ public readonly record struct SetMemberDef(string ContainerId, ItemRole Role, It
 public readonly record struct SetTierDef(int PiecesRequired, string ContainerId, bool IsCapability);
 
 /// <summary>One authored set, as `data/seed/items/sets/*.json` ships it.</summary>
+/// <param name="FlavourKey">
+/// The set's own lore key, and <c>null</c> for the 24 of 30 shipped sets that authored none. Owner
+/// decision 2026-09-06 (spec-item-lore.md §2.4): a set gets the card's Flavour block too, so this is
+/// read rather than dropped. A key, never a literal — the sentence lives in N2's string catalog.
+/// </param>
+/// <param name="FlavourText">
+/// The authored sentence beside the key, as the seed's <c>flavor</c> field ships it (6 of 30 sets).
+/// Carried for the same reason <c>UniqueSeed.FlavourText</c> is: the catalog is generated from it, and
+/// a key with no sentence beside it is a content gap somebody should be able to see.
+/// </param>
 public sealed record SetDef(
     string SetId,
     string DisplayName,
     IReadOnlyList<SetMemberDef> Members,
-    IReadOnlyList<SetTierDef> Tiers)
+    IReadOnlyList<SetTierDef> Tiers,
+    string? FlavourKey = null,
+    string? FlavourText = null)
 {
     /// <summary>How many tiers this set can ever reach — its distinct member roles, not its member rows.</summary>
     public int DistinctRoleCount => Members.Select(m => m.Role).Distinct().Count();
@@ -145,7 +157,8 @@ public static class SetCorpus
                     $"set '{setId}' declares two thresholds at {t.PiecesRequired} pieces — " +
                     "PRIMARY KEY (set_id, pieces_required)");
 
-        var def = new SetDef(setId, displayName, members, tiers);
+        var def = new SetDef(setId, displayName, members, tiers,
+            OptStr(e, "flavorKey"), OptStr(e, "flavor"));
 
         // I5's completability rule, and the one check the whole seed tool was originally written for:
         // a threshold above the set's distinct ROLE count can never be reached, because counting is
@@ -171,4 +184,11 @@ public static class SetCorpus
             throw new SetCorpusRejection("threshold.set-corpus-malformed", $"missing or non-string '{key}'");
         return el.GetString()!;
     }
+
+    /// <summary>An optional authored string. Absent and empty both read as <c>null</c> — "no flavour
+    /// was authored" and "an empty one was" are the same fact, and only one of them should reach a
+    /// render decision.</summary>
+    static string? OptStr(JsonElement parent, string key) =>
+        parent.TryGetProperty(key, out var el) && el.ValueKind == JsonValueKind.String
+            && el.GetString() is { Length: > 0 } s ? s : null;
 }

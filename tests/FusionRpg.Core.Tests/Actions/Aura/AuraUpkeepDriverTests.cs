@@ -35,7 +35,7 @@ public class AuraUpkeepDriverTests
 
     static CostLedger MakeLedger(
         IReadOnlyDictionary<string, IReadOnlyList<ActionCostRow>> costs, ActorResourcePools pools, ActorDerivedSnapshot derived, long nowTick = 0) =>
-        new(costs, _ => pools, _ => derived, _ => Rung, () => nowTick);
+        new(costs, _ => pools, _ => derived, (_, _) => Rung, () => nowTick);
 
     static IReadOnlyDictionary<string, IReadOnlyList<ActionCostRow>> Costs(string auraId, params ActionCostRow[] rows) =>
         new Dictionary<string, IReadOnlyList<ActionCostRow>> { [auraId] = rows };

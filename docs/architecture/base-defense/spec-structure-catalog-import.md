@@ -160,3 +160,104 @@ unknown ordinal · a `float` magnitude · ship the literal and the corpus as par
 ## Open questions
 
 None.
+
+## Correction 1 (2026-09-06, found building this module) — a real gap between this spec and structure-schema's own foundational rule
+
+**Found by reading code and attempting the actual implementation, not by re-reading the spec text.**
+This spec's own §4 requires: *"the four \[now eight, see structure-corpus's own correction\] shipped
+structures must produce identical `StructureDef` values through the corpus path — same cost, same
+yield multiplier, same build turns, same capacity bonus."* But `structure-schema`'s own foundational
+rule (spec-structure-schema.md, tested and closed) is that the anchor **"holds no numbers at
+all"** — enforced by `numeric_audit` over the schema itself, not an incidental omission.
+
+**The contradiction, concretely:** `well`'s real `Cost` (200) and `granary`'s real `Cost` (150) are
+independently-tuned numbers (`data/tuning/loam.v4.json`'s own `structures` block — a real balance
+surface, CLAUDE.md's own tunables rule). §2's own proposed mechanism — resolving the anchor's
+`costProfile` ordinal (cheap/moderate/steep) through one shared band table — can only ever produce
+ONE number per band value. `well` and `granary` both authored `costProfile: "moderate"` in
+`structure-corpus` (a legitimate ordinal choice, §2's own "ratio-band name, never an amount"). A
+single shared "moderate" → number mapping cannot reproduce BOTH 200 and 150 at once. This is not a
+hypothetical — it was found by trying to write the actual resolver and failing to make it work for
+more than one row at a time.
+
+**Resolution — a third, sibling key on a corpus row, `magnitudes`, never inside `anchor`:**
+
+```jsonc
+{
+  "id": "well",
+  "anchor": { /* the 21 schema fields, ordinals and identity only — unchanged */ },
+  "_provenance": { "source": "AUTHORED", "citation": "..." },
+  "magnitudes": {
+    "cost": 200, "yieldMultiplierMilli": 2000, "buildTurns": 2, "capacityBonus": 0,
+    "flatYieldPerTurn": 0, "constructRubbleCost": 0, "constructIronworkCost": 0,
+    "materialTier": 0, "blocksMovement": false, "blocksLineOfFire": false,
+    "obstacleKind": "None", "coverPowerMilli": 0, "coverRadius": 0,
+    "entryStaminaMultiplierMilli": 1000, "visionRangeTiles": null
+  }
+}
+```
+
+- **`magnitudes` is what this module (`Configure`) actually reads to build a `StructureDef`.** A row
+  with no `magnitudes` is identity-registered but not yet catalog-loadable — exactly the state
+  `structure-corpus`'s 17 new anchor-only rows are in today, correctly: they have no pre-existing
+  numbers to preserve, and inventing plausible-looking ones now would be exactly the Law 2 violation
+  ("a model has no calibrated sense of scale... a number it picks... survives review because
+  nothing looks wrong with it") this whole program has been careful to avoid everywhere else.
+  `structure-planner` (27) is the module that assigns each new anchor its first real `magnitudes`
+  block, deterministically, per decision 33's own "extend the tier ladder before any model call."
+- **`magnitudes.materialTier` is always authoritative once present — never re-derived from
+  `anchor.strengthBand`.** This is what makes this spec's own §4 claim ("the \[loam\] rows author
+  tier zero") actually possible: `strengthBand` is a required, non-nullable, 3-value enum
+  (rubble/timber/stone) with no "zero" member — it cannot itself express "no material tier, this
+  predates any notion of siege." `magnitudes.materialTier: 0` says that directly, for exactly the
+  seven pre-siege loam rows (all of `loam-source-placeholder`/`well`/`waystation`/`granary`/
+  `soul-conduit`/`extractor`/`hatchery`), while `moat`'s `magnitudes.materialTier: 1` matches its
+  real, already-shipped `MaterialTier`.
+- **§2's `Bands.cs` still gets built, narrower than this spec's own literal text.** Only
+  `strengthBand → int tier` (`MaterialTierOf`, rubble=1/timber=2/stone=3) is a real, needed
+  resolution — feeding straight into the ALREADY-SHIPPED `StructurePolicy.TierMultiplierMilli(int)`
+  (`StructurePolicy.cs:18`, keyed by `SiegeTuningPolicy.Structure.TierMultiplierMilli`), never a
+  second, parallel string-keyed multiplier table (that would be a 6th instance of this codebase's
+  own recurring "N synced lists" bug class — see `siege-fog`'s and `siege-construction`'s own
+  evidence for the five prior instances). `reach`/`footprint`/`coverTier`/`costProfile`/`tempo` have
+  **no consuming `StructureDef` field today** — resolving them now would be building a converter
+  with no reader, the exact P3-5 shape this spec's own §2b already names as a defect elsewhere.
+  They stay real, validated, unconsumed ordinals until a future module (an action/battle-facing one,
+  most likely `structure-pipeline`'s own downstream content) gives one of them a reader.
+
+**Why this is a technical correction, not a product decision needing the owner's own input** (the
+bar this program has applied consistently — see `siege-construction`'s own §11 for the contrasting
+case that WAS taken to the owner): there is exactly one way to keep `structure-schema`'s closed,
+tested "no numbers in the anchor" rule AND make `structure-catalog-import`'s byte-identity gate
+achievable, and it is this sidecar. No alternative reads differently for the player or the balance
+surface — it only decides where a number that must exist somewhere actually lives.
+
+## Correction 2 (2026-09-06, found while writing the C# importer itself) — `StructureKind` is not a function of `role`, and the existing role→kind dict is already wrong
+
+**Found by trying to implement the derivation, not by re-reading the spec.** An early draft of
+`StructureCatalog`'s corpus→`StructureDef` mapping derived `Kind` from `anchor.role`, reusing
+`anchor/schema.py`'s own `ROLE_TO_STRUCTURE_KIND` dict as the intended source of truth
+(`Extract`/`Multiply` → `LoamSource`, `Store`/`Bank` → `Storage`). Checked against the real, shipped
+`StructureCatalog.cs` rows before trusting it: **wrong for three of the eight** — `hatchery`
+(role `Multiply`), `soul-conduit` (role `Bank`) and `extractor` (role `Extract`) are all real,
+already-shipped `StructureKind.Yield` rows, which that dict has no entry for producing at all (it
+only ever resolves to `LoamSource`/`Storage`/`Refinery`/`None`).
+
+**This is the same shape as Correction 1, one layer up**: `StructureKind`, like `Cost`, is a
+per-row AUTHORED fact, never a pure function of any ordinal — `role` groups structures by economic
+verb, `StructureKind` groups them by which of the five hardcoded C# behaviours
+(`LoamSource`/`Storage`/`Yield`/`Refinery`/`Obstacle`) they mechanically run through, and a single
+role can and does land in more than one bucket (three `Multiply`/`Bank`/`Extract` rows all landing
+in `Yield` is proof, not a coincidence to paper over).
+
+**Resolution**: `magnitudes.structureKind` (a plain string, `Enum.Parse`'d against the real C#
+`StructureKind` enum) is the authoritative source for every catalog-loadable row — set once,
+directly, by whoever authors that row's `magnitudes` (today: `structure-corpus`'s own dump of the
+real, already-shipped value; future: `structure-planner`, deciding a NEW row's real behaviour
+alongside its real numbers, never guessed from role after the fact).
+
+**`anchor/schema.py`'s own `ROLE_TO_STRUCTURE_KIND` dict is left exactly as it was** — this
+correction does not touch or fix it, because nothing in the real import path calls it any more.
+Named here as its own, separate, deferred cleanup (its tests only check the dict's own internal
+consistency, not against real content, so they keep passing despite being disconnected from what
+actually ships) rather than silently left for a future session to rediscover as if new.

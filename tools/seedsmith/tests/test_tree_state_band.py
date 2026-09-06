@@ -35,11 +35,12 @@ from seedsmith.adapters.trees.plan.archetypes import (  # noqa: E402
 
 REPO_ROOT = Path(__file__).resolve().parents[3]  # tools/seedsmith/tests -> repo root
 
-# tree-state's own two constants live in `aptitudes.v6.json` (class-system's tuning file, D34/D38,
+# tree-state's own two constants live in `aptitudes.v7.json` (class-system's tuning file, D34/D38,
 # spec-tree-state.md §3/§8) — a different program's file, so there is no shared Python loader for it
 # yet. Read directly, same `_require`-by-hand discipline as `plan_tuning.py`'s own loader: a missing
-# key fails loudly rather than substituting a default (tunables-ssot T5).
-APTITUDES_TUNING_PATH = REPO_ROOT / "data" / "tuning" / "aptitudes.v6.json"
+# key fails loudly rather than substituting a default (tunables-ssot T5). v6 -> v7 (D55, 2026-09-06)
+# only touched demonType/aspect/uniqueDemon; commander (read below) is untouched.
+APTITUDES_TUNING_PATH = REPO_ROOT / "data" / "tuning" / "aptitudes.v7.json"
 
 
 def _load_aptitude_economy() -> dict:
@@ -148,7 +149,7 @@ class SkillWalletClearsTierBandTests(unittest.TestCase):
         g_ceil = -(-numerator // denominator)  # exact integer ceiling division, no float
         self.assertEqual(g_ceil, 11)
         self.assertEqual(self.skill_points_per_theta_milli, 11,
-                          "aptitudes.v6.json's shipped skillPointsPerThetaMilliByScope.commander must "
+                          "aptitudes.v7.json's shipped skillPointsPerThetaMilliByScope.commander must "
                           "still be the D38-settled value this test reproduces")
 
     def test_the_skill_wallet_clears_the_tier_it_just_opened_for_every_shipped_archetype(self) -> None:

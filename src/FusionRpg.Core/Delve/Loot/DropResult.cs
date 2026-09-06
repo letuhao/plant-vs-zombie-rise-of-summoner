@@ -1,3 +1,5 @@
+using FusionRpg.Core.Items.Drops;
+
 namespace FusionRpg.Core.Delve.Loot;
 
 /// <summary>Two ways a room hands `loot-pack` something: a real, rolled item grant, or a deterministic
@@ -13,16 +15,31 @@ public enum DropResultKind
 /// scoped, ready for `loot-pack` to place: "Every grant becomes a `DropResult(kind, refId, instanceId?,
 /// count, row, col, grantIndex)` row emitted to `loot-pack`, which owns capacity, arrangement, the
 /// floor list and the D26 reconciliation. This module never places, floors or reads a cell count."
-///
-/// <para><b>PARTIALLY BUILT — the record only.</b> The spec's own cited factory methods
-/// (`DropResult.From(manifest, room)`, `DropResult.Key(laneId, room)`, `spec-dungeon-loot.md:309-310`)
-/// both take a `RoomLootInput` for their own `Row`/`Col` — `RoomLootInput` is `DelveLoot.RollRoom`'s own
-/// still-blocked parameter type (D3.11's already-named gap: `RollRoom` itself cannot be built without
-/// `RarityShift.Apply`, which does not exist). Building the factories now would mean inventing
-/// `RoomLootInput`'s own shape ahead of the task that actually owns deciding it. This record's own
-/// fields are stable and buildable regardless — a plain data carrier, callable directly wherever a
-/// `RoomLootInput`-free construction is possible (e.g. `RoomTableBinding.For`'s own key-grant case,
-/// D3.14).</para>
 /// </summary>
 public sealed record DropResult(
-    DropResultKind Kind, string RefId, string? InstanceId, long Count, int Row, int Col, int GrantIndex);
+    DropResultKind Kind, string RefId, string? InstanceId, long Count, int Row, int Col, int GrantIndex)
+{
+    /// <summary>D3.11: one row per manifest grant — `RollRoom`'s own room coordinates, never re-read
+    /// from the manifest itself (a `LootManifest` carries no row/col; that fact belongs to the room
+    /// that rolled it, not the pipeline's own source-agnostic output).</summary>
+    public static IReadOnlyList<DropResult> From(LootManifest manifest, RoomLootInput room)
+    {
+        if (manifest is null) throw new ArgumentNullException(nameof(manifest));
+        if (room is null) throw new ArgumentNullException(nameof(room));
+
+        return manifest.Grants
+            .Select(g => new DropResult(DropResultKind.Item, g.RefId, g.InstanceId, g.Count, room.Row, room.Col, g.Index))
+            .ToList();
+    }
+
+    /// <summary>Spec §5, verbatim: "a room with `keyForLaneId` adds one deterministic `DropResult` of
+    /// kind `Key`, `RefId = laneId` — no roll, fires on clear." <see cref="GrantIndex"/> is `-1` — a
+    /// key is never one of the manifest's own numbered grants, so no real index applies.</summary>
+    public static DropResult Key(string laneId, RoomLootInput room)
+    {
+        if (string.IsNullOrEmpty(laneId)) throw new ArgumentException("laneId must be non-empty", nameof(laneId));
+        if (room is null) throw new ArgumentNullException(nameof(room));
+
+        return new DropResult(DropResultKind.Key, laneId, null, 1, room.Row, room.Col, GrantIndex: -1);
+    }
+}

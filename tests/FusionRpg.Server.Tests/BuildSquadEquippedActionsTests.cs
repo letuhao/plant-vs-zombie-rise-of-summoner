@@ -1,5 +1,11 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Corpus;
+using FusionRpg.Core.Actions.Eligibility;
+using FusionRpg.Core.Actions.Rungs;
+using FusionRpg.Core.Actions.Unlock;
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
@@ -23,6 +29,16 @@ public class BuildSquadEquippedActionsTests : IDisposable
     readonly RpgStore _store;
     readonly WebMatchService _service;
 
+    /// <summary>T59.8: process-wide statics (`RungPolicy`/`DemonSpeciesCatalog`'s own established
+    /// shape), configured once for this whole test class -- an `AlwaysAccepts` tuning (no chance
+    /// decay) so a controlled XP award lands an unlock deterministically, never a real random wait.</summary>
+    static BuildSquadEquippedActionsTests()
+    {
+        UnlockTuningPolicy.Configure(new UnlockTuning(
+            P1Milli: 1000, DeltaMilli: 1000, FloorMilli: 1000, HeldCap: 10, RungCap: 10, DiscardTaxCoeffMilli: 100));
+        ActionFamilyMapPolicy.Configure(new Dictionary<string, string>());
+    }
+
     public BuildSquadEquippedActionsTests()
     {
         // ExecuteSummon's real mint path reaches SummonBannerCatalog/SummonRoller (SummoningTuningHub)
@@ -40,6 +56,21 @@ public class BuildSquadEquippedActionsTests : IDisposable
         // path this test drives needs StarPolicy configured too, exactly like AptitudeChannelModsTests.
         FusionRpg.Core.Demons.Fusion.StarPolicy.Configure(
             FusionRpg.Core.Demons.Fusion.FusionTuningLoader.Parse(Read("fusion.v1.json")));
+        // T59.8: AwardUniqueActorXp's own XpToNext call reads RpgXpCurve.Tuning -- not covered by
+        // this assembly's [ModuleInitializer] bootstrap either (no prior test in this file awarded
+        // specimen XP through a real level-up).
+        FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
+            FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(Read("progression.v1.json")));
+        // T59.8: the real BattleEngine.Resolve call needs the same three tunables
+        // ContractTuningTestBootstrap configures for Core.Tests -- none covered by this assembly's
+        // own [ModuleInitializer] bootstrap. battle.v3.json, not v2 (v2 is stale -- missing
+        // speciesTempo, the same drift AptitudeChannelModsTests is separately failing on).
+        FusionRpg.Core.Battle.BattleTuningHub.Configure(
+            FusionRpg.Core.Battle.BattleTuningLoader.Parse(Read("battle.v3.json")));
+        FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
+            FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(Read("battle-resources.v1.json")));
+        FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
+            FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(Read("action-timing.v1.json")));
 
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-buildsquad-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
@@ -199,5 +230,89 @@ public class BuildSquadEquippedActionsTests : IDisposable
         var setupB = squad.Single(s => s.Key.EndsWith("1", StringComparison.Ordinal));
         Assert.Contains(skillA, setupA.EquippedActionIds!);
         Assert.DoesNotContain(skillA, setupB.EquippedActionIds ?? Array.Empty<string>());
+    }
+
+    static ActionCorpusCostTemplate CostTemplate() => new(new Dictionary<ActionCategory, ActionCorpusCostTemplateRow>
+    {
+        [ActionCategory.Attack] = new("qi", 20, ActionCostTiming.OnCommit),
+        [ActionCategory.Defense] = new("qi", 30, ActionCostTiming.OnCommit),
+        [ActionCategory.Support] = new("qi", 40, ActionCostTiming.OnCommit),
+        [ActionCategory.Movement] = new("qi", 15, ActionCostTiming.OnCommit),
+        [ActionCategory.Status] = new("qi", 35, ActionCostTiming.OnCommit),
+    });
+
+    /// <summary>
+    /// T59.8 (spec-action-instance-and-grant.md criterion 4): summon → real corpus import (T59.3/
+    /// T59.4's real pipeline, a hand-built brief — the REAL committed corpus mostly can't resolve
+    /// today, T59.5's own honest finding, not a reason to weaken THIS proof) → award XP until the
+    /// unlock ladder grants it (a controlled, `AlwaysAccepts`-tuned roll, never a real random wait) →
+    /// `BuildSquad`. Proves the "equips" half of criterion 4 in full, the same shape T22's own
+    /// `A_real_skill_grant_reaches_the_built_squads_EquippedActionIds` already proved, now for a
+    /// GENERATED, IMPORTED action rather than a hand-authored one.
+    ///
+    /// <para>⛔ The "can activate" half is proven FALSE, honestly, not silently skipped: attempting a
+    /// real `BattleEngine.Resolve` with this squad throws — no `IContainerEffectResolver` is wired
+    /// into any real production battle path today (`WebMatchService.cs`'s own 3 call sites all pass
+    /// none), and every real imported action has a non-empty container (T59.3's composer refuses to
+    /// draw zero atoms), so this is not a corner case, it is EVERY real imported action, every time.
+    /// A real, general, RpgStore-backed resolver is a genuinely separate module's worth of work
+    /// (integrating `AtomCompiler`'s whole-catalog compile pass with `BattleEffectHost`'s effect
+    /// registry) — named in `action-plan.md` §5's deferred table, not attempted unreviewed here.</para>
+    /// </summary>
+    [Fact]
+    public void A_generated_imported_unlock_ladder_grant_reaches_BuildSquad_but_a_real_battle_cannot_yet_activate_it()
+    {
+        var atom = new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.e2e-test", "", 1), KindId = "stat.modify",
+            FamilyId = "atom.e2e-test", Variant = "", Tier = 1, Name = "e2e test",
+            ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":1}",
+        };
+        Assert.Empty(_store.UpsertAtoms(new[] { atom }).Rejected);
+
+        var brief = new ActionCorpusBrief(
+            Id: "action.e2e.only", Name: "E2E Only", Category: "attack", Scope: "general", ScopeKey: null,
+            RungFloor: 1, RungCeiling: 1, AtomFamilies: new[] { "atom.e2e-test" },
+            TargetMode: "single", Relation: "enemy");
+        var importResult = ActionCorpusImporter.Import(_store, new[] { brief }, CostTemplate(), RungPolicy.Table);
+        Assert.Equal(1, importResult.ImportedCount);
+
+        var (playerId, instanceId) = SummonOneSpecimen(_store, "e2e", rngSeed: 6);
+
+        var (awardOk, awardReason, actor) = _store.AwardUniqueActorXp(instanceId, delta: 1_000_000);
+        Assert.True(awardOk, awardReason);
+        Assert.True(actor!.Level > 1); // liveness -- the level gain that should have triggered a roll actually happened
+
+        var grants = _store.ListGrants(new OwnerScope(OwnerKind.Entity, instanceId));
+        Assert.Contains(grants, g => g.ActionId == "action.e2e.only"); // "equips" half of criterion 4
+
+        var (squadOk, squadReason, squad, _) = _service.BuildSquad(playerId, new[] { instanceId });
+        Assert.True(squadOk, squadReason);
+        var mySetup = Assert.Single(squad!);
+        Assert.Contains("action.e2e.only", mySetup.EquippedActionIds!);
+
+        // ⛔ Real, severe, NEWLY-discovered gap found here, not assumed -- the "can activate" half of
+        // criterion 4 is NOT true yet, for any real imported action, and this is proven directly
+        // below rather than silently worked around. `WebMatchService`'s own three real
+        // `BattleEngine.Resolve` call sites (`WebMatchService.cs:134,186,315`) supply NO
+        // `containerResolver` argument at all -- confirmed by direct read, not assumed. Every real
+        // action T59.3's own composer produces has a NON-EMPTY container (it refuses to draw zero
+        // atoms), so `BattleRunState.BindContainers` (`BattleRunState.cs:534-549`) throws for EVERY
+        // real imported action, immediately, at battle setup, before any round runs. The only real
+        // production resolver anywhere (`ConstructionActions.ContainerResolver`, siege-only, four
+        // hand-compiled containers) is not general-purpose and is not wired into `WebMatchService`.
+        // Building a real, general, RpgStore-backed resolver means integrating `AtomCompiler`'s
+        // whole-catalog compile pass with `BattleEffectHost`'s own effect registry for every
+        // action-holding actor -- a genuinely separate module's worth of work, never named anywhere
+        // in this reopening's own A21/A22/A23 scope, not something to improvise unreviewed here.
+        var catalog = _store.BuildActionCatalog(RungPolicy.Table);
+        var setup = new BattleSetup
+        {
+            Squad = new[] { mySetup with { Key = "squad:0" } },
+            Wave = new[] { new BattleActorSetup { Key = "wave:0", Side = "wave", MaxHp = 1_000_000, Level = 1 } },
+        };
+
+        var ex = Assert.Throws<ArgumentException>(() => BattleEngine.Resolve(setup, seed: 9001, actionCatalog: catalog));
+        Assert.Contains("no IContainerEffectResolver was supplied", ex.Message, StringComparison.Ordinal);
     }
 }

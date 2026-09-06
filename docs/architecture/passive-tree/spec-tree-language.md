@@ -166,10 +166,10 @@ iteration order. `expand_counts` (`:92-104`) flattens `{key: count}` determinist
 
 ```text
 INPUT   trees[]        from the plan's roster (D9/D27) — read, never hardcoded
-        nodes[]        the plan's skeleton: 39 generic trees x 40 nodes = 1,560 (D29)
+        nodes[]        the plan's skeleton: 42 generic trees x 40 nodes = 1,680 (D29; D51 2026-09-06: 24 statuses, not 21)
         targets        data/tuning/passive-tree-targets.v1.json  (D32, declared not implied)
 
-1  N := 1,560                                          # the generic catalog, one integer
+1  N := 1,680                                          # the generic catalog, one integer
 
 2  for each quota AXIS a in {nodeClass, trigger, element, status, channelFamily, exclusionForm}:
        quota[a] := largest_remainder_count(targets[a].weightsMilli, ORDER[a], N)
@@ -239,8 +239,8 @@ The ladder, applied in order. Both sides print the rule and name the same winner
 | **Precedence** | the conflict is *defined*, not forbidden: *"applies before conversion"* | the common case |
 | **Nullification** | a node declared inoperative while the property it conflicts with holds | ✅ **In the enum, and printed loudly (D40).** The last rung, taken only when the pair can be neither rerouted nor ordered. It keys on a **property**, never on a node id — §5.2 |
 
-**Target rarity ~2% of nodes** (D14). At 1,560 generic nodes that is ~31 exclusions — small enough to
-review by hand, which is the honest reason the ladder works.
+**Target rarity ~2% of nodes** (D14). At 1,680 generic nodes (D51: 24 statuses, not 21) that is ~34
+exclusions — small enough to review by hand, which is the honest reason the ladder works.
 
 ⚠️ All three forms are **printed runtime no-ops, not allocation blocks.** Every node stays
 allocatable and the concentration index still counts the nodes bought, including a nullified one.
@@ -264,7 +264,7 @@ node text is written (ideal §6 step 2), not the atom corpus's tags.** Until an 
 and `AtomRowValidator.cs:184` becomes a membership check, a predicate can key on `posture` and nothing
 else, and this module's exclusion gate must report that as a `NOT_MEASURED` rather than a pass.
 
-Stating it now costs a paragraph. Discovering it after 1,560 nodes are generated costs the run.
+Stating it now costs a paragraph. Discovering it after 1,680 nodes are generated costs the run.
 
 #### 5.2 Nullification stays, and the "reads like a bug" risk is answered by presentation (D40)
 
@@ -306,9 +306,9 @@ non-zero budget (`UnsatisfiablePool`, `:89`, `:93`). Tags are derived from the a
 
 | Unit | Calls | Problem |
 |---|---:|---|
-| One tree | 39 | 40 nodes in one response. Guardrail 2 is *"narrow scope per call — one partition, one kind"* (`pipeline/model.py:11`). A 40-node response cannot carry a per-node quota cell in its schema, so **layer 2 of the fence disappears** |
-| One tier-branch group | ~780 | Better, but the cell varies within a tier, so the enum becomes the union of its members' cells |
-| **One node** | **1,560** | ⭐ **The only unit at which the permitted subset is exact.** |
+| One tree | 42 (D51: 24 statuses, not 21) | 40 nodes in one response. Guardrail 2 is *"narrow scope per call — one partition, one kind"* (`pipeline/model.py:11`). A 40-node response cannot carry a per-node quota cell in its schema, so **layer 2 of the fence disappears** |
+| One tier-branch group | ~840 | Better, but the cell varies within a tier, so the enum becomes the union of its members' cells |
+| **One node** | **1,680** | ⭐ **The only unit at which the permitted subset is exact.** |
 
 **Sibling deduplication without widening the call.** `distribution_planner/derive.py:516-522,576`
 already passes `accepted_neighbours` and `avoid_neighbour_k` — the k nearest already-accepted siblings
@@ -318,14 +318,14 @@ is how you get *"do not repeat what you just wrote"* without putting 40 nodes in
 **Cost, computed before the shape was chosen** (D29's corpus, re-derived from doc 03's 7-tier figures):
 
 ```text
-generic nodes     39 trees x 40 nodes                    =  1,560
-base calls        1,560 x 1 pipeline                     =  1,560
-vote calls        1,560 x 1 voted field x (3 - 1)        =  3,120
+generic nodes     42 trees x 40 nodes                    =  1,680   (D51, 2026-09-06: 24 statuses, not 21)
+base calls        1,680 x 1 pipeline                     =  1,680
+vote calls        1,680 x 1 voted field x (3 - 1)        =  3,360
                                                             -----
-                                                            4,680 calls
+                                                            5,040 calls
 ```
 
-At the demon run's measured rate (16,272 calls ≈ 14 h locally) that is **≈ 4 h** — about a quarter of
+At the demon run's measured rate (16,272 calls ≈ 14 h locally) that is **≈ 4.3 h** — about a quarter of
 a run this repo has already done twice. **D30's 840 species trees at 40 nodes each are a separate
 ~100,800 calls and belong to `species-tree`, not here.**
 

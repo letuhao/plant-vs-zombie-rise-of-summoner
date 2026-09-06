@@ -69,3 +69,41 @@ public static class DisplayTemplates
     public static IReadOnlyList<string> PlaceholdersOf(string template) =>
         Placeholder.Matches(template).Select(m => m.Groups[1].Value).Distinct().ToList();
 }
+
+/// <summary>
+/// N2's string catalog (`ssot-presentation.md` §5.3) read back: a flat map from display key to
+/// <c>{ template, plural? }</c>. Pure — the caller supplies the JSON text; Core never opens a file.
+///
+/// <para>A key with no row resolves to <c>null</c>, never to the key itself and never to a
+/// synthesised sentence. That absence is <see cref="DisplayRules.MissingDisplayKey"/>'s question to
+/// answer, and papering over it here is exactly the "a placement, never a translation" defect this
+/// reader exists to remove.</para>
+/// </summary>
+public static class DisplayStringCatalog
+{
+    /// <summary>The catalog as the lookup <c>ItemCardInput</c> takes.</summary>
+    public static Func<string, string?> Parse(string json)
+    {
+        var byKey = ParseMap(json);
+        return key => byKey.TryGetValue(key, out var text) ? text : null;
+    }
+
+    /// <summary>The same read, as a map — for a caller that needs the whole key set.</summary>
+    public static IReadOnlyDictionary<string, string> ParseMap(string json)
+    {
+        var byKey = new Dictionary<string, string>(StringComparer.Ordinal);
+        if (string.IsNullOrWhiteSpace(json)) return byKey;
+
+        using var doc = JsonDocument.Parse(json);
+        if (doc.RootElement.ValueKind != JsonValueKind.Object) return byKey;
+
+        foreach (var row in doc.RootElement.EnumerateObject())
+        {
+            if (row.Value.ValueKind != JsonValueKind.Object) continue;
+            if (row.Value.TryGetProperty("template", out var t) && t.ValueKind == JsonValueKind.String)
+                byKey[row.Name] = t.GetString()!;
+        }
+
+        return byKey;
+    }
+}

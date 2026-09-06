@@ -156,7 +156,17 @@
         "prefix": [
           {
             "band": "A",
-            "tierRange": "t1-t5",
+            "tierRange": "t1-t2",
+            "word": "Adamant"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Adamant"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
             "word": "Adamant"
           }
         ]
@@ -165,7 +175,7 @@
       "tags": [
         "defensive"
       ],
-      "notes": "SHIPPED, id and params kept verbatim (atom-family-library.md §3.1: maxHp More, flagged \"rare tier band only\"). `powerBand: \"high\"` reflects that flag — the multiplicative lever is the strongest of the three maxHp ops, which is exactly why the family library restricts it to the rare tier window rather than the ordinary five-tier spread. `nameWords.prefix` carries only the Band C word: ssot-affixes.md §4.12's sample table shows Band A and Band B as an explicit em-dash for `bulwark`, because a min-tier-4 family never rolls at t1-t3 (Band A) or t3 (Band B) at all. A one-word pool is correct here, not an omission."
+      "notes": "SHIPPED, id and params kept verbatim (atom-family-library.md §3.1: maxHp More, flagged \"rare tier band only\"). `powerBand: \"high\"` reflects that flag — the multiplicative lever is the strongest of the three maxHp ops, which is exactly why the family library restricts it to the rare tier window rather than the ordinary five-tier spread. `nameWords.prefix` carries only the Band C word: ssot-affixes.md §4.12's sample table shows Band A and Band B as an explicit em-dash for `bulwark`, because a min-tier-4 family never rolls at t1-t3 (Band A) or t3 (Band B) at all. A one-word pool is correct here, not an omission. ⛔ 2026-09-06 (item-content T1): the single row was labelled `band: \"A\"` while declaring `tierRange: \"t1-t5\"` and while its own note above describes a Band-C-only word — three readings of the same fact, and `AffixNameTable.Resolve` throws for any tier the LABEL does not cover. FamilyExpansion expands every family to all five tiers regardless of a \"rare tier band only\" flag, so a t4 bulwark atom really does exist and really can roll. The one authored word is now carried under all three D29 bands, which is exactly what `tierRange: t1-t5` already said."
     },
     {
       "id": "atom.mending",

@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Store"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 Storage: 'per-stock capacity, extending what the granary already does' \u2014 the bulk/rubble stock's own capacity building. A shared pool would silently undo P4's min(bulk, ironwork) bottleneck (\u00a75.21's own explicit warning).",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Store",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "stockyard",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "stockyard",
+      "name": "Stockyard"
+    }
+  ],
+  "kind": "structure-anchor"
+}

@@ -112,6 +112,12 @@ function ArmouryRow({
           {row.assigned ? " · equipped" : ""}
           {row.locked ? " · locked" : ""}
           {row.stale ? " · out of date" : ""}
+          {/* item-content `granted-action-text` (T15), `ssot-presentation.md` §9.14: the tag belongs
+              on the compact line too, so a player scanning the armoury learns which items are inert
+              on the lawn without opening each card. */}
+          {row.battleOnly ? (
+            <span data-testid={`armoury-battle-only-${row.instanceId}`}> · battle only</span>
+          ) : null}
         </span>
       </span>
       {row.unseen ? (

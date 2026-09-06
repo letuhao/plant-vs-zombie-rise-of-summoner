@@ -688,8 +688,8 @@ public class ItemGrantedActionTests
         Assert.DoesNotContain(members, m => m.Contains("GrantedCap", StringComparison.OrdinalIgnoreCase));
 
         // The two caps it DOES name are real and already built.
-        Assert.Equal(LoadoutSet.MaxSize, CapPolicy.EquippedSkillCap);
-        Assert.True(CapPolicy.EquippedSkillCap > 0);
+        Assert.Equal(LoadoutSet.MaxSize, CapPolicy.EquippedSkillCap());
+        Assert.True(CapPolicy.EquippedSkillCap() > 0);
     }
 
     [Fact]
@@ -842,5 +842,45 @@ public class ItemGrantedActionTests
 
         Assert.DoesNotContain(nameof(ItemGrantRules.ActionCorpusAbsent), validator, StringComparison.Ordinal);
         Assert.DoesNotContain(nameof(ItemGrantRules.TooManyGranted), validator, StringComparison.Ordinal);
+    }
+
+    // ---- D4.27: a unique's container id is a legal grant container, and a unique grants an action ---
+
+    /// <summary>A real unique container id (`UniqueContainerIds.FromSeedId`'s own shape, `item.<slug>`)
+    /// — confirmed by a dedicated read pass that nothing in `ItemGrantValidator` distinguishes a
+    /// unique's own id from a base type's: `ItemGrantContainerIds.IsWellFormed` checks only the
+    /// `item.` prefix and a kebab slug (both satisfied), and `ValidateShape`'s only container-kind
+    /// check is `ContainerKind.Item` (a unique container is built with exactly that kind,
+    /// `UniqueContainerBuild.cs`). This test proves the ALREADY-PERMISSIVE behavior explicitly, so a
+    /// future tightening of either check cannot silently re-close this seam unnoticed.</summary>
+    [Fact]
+    public void A_uniques_own_container_id_is_admitted_as_a_legal_grant_container()
+    {
+        const string uniqueContainerId = "item.rot-bloom-30-002"; // UniqueContainerIds.FromSeedId("unique.rot-bloom-30-002")
+        var facts = new ItemGrantBaseTypeFacts(ContainerKind.Item, "armament-primary");
+
+        var fails = ItemGrantValidator.ValidateRow(
+            Row("skill.cleave", containerId: uniqueContainerId), facts, Skill("skill.cleave"), default);
+
+        Assert.Empty(fails);
+    }
+
+    /// <summary>The Verify line's own headline: a unique grants an action, through the REAL, already-
+    /// shipped mechanism (`EquippedGrantProjection.GrantFor` → `ActionSetAssembler.Assemble`) — the
+    /// identical path `The_grant_scope_matches_what_WebMatchService_reads` already proves for an
+    /// ordinary base-type item, exercised here with a unique's own container id instead.</summary>
+    [Fact]
+    public void A_unique_grants_an_action()
+    {
+        const string uniqueContainerId = "item.rot-bloom-30-002";
+        var row = Row("skill.emberburst", containerId: uniqueContainerId);
+        var grant = EquippedGrantProjection.GrantFor(
+            Assignment(RealSpecimenId, ItemRole.ArmamentPrimary, uniqueContainerId), uniqueContainerId, row);
+
+        Assert.Equal("skill.emberburst", grant.ActionId);
+        Assert.Equal(uniqueContainerId, grant.Source);
+
+        var set = ActionSetAssembler.Assemble(Basics, new[] { grant }, _ => true);
+        Assert.Contains(set.Actions, a => a.ActionId == "skill.emberburst");
     }
 }

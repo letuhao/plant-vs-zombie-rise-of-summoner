@@ -19,6 +19,15 @@ public static class TurnEngine
 {
     public const int EngineVersion = 1;
     /// <summary>
+    /// Bumped to 10 on 2026-09-06 (base-defense `siege-construction` 15.4b, audit F10, decision 48):
+    /// `WorldSlot.SlotDepletionMilli` now actually increments on a yielding turn, via the SAME
+    /// `Production` phase slot — a real behaviour change: an owned `Rootbed` slot (Loam's own faucet)
+    /// now accrues depletion every turn it is owned, where before this bump the field was fully wired
+    /// end-to-end (hashed, persisted, read by `IsExhausted`) but nothing ever moved it off zero.
+    /// **Named, deliberately out of scope**: `IsExhausted` reaching true does not yet stop a slot from
+    /// yielding (`LoamProduction.For`/`SiegeConstruction.Yield` neither one checks it) — the counter and
+    /// the transition event are real; the "and then it stops" half of `structure-state`'s own
+    /// `IsExhausted` doc comment is a separate, unscoped, un-started gap this task does not also close.
     /// Bumped to 9 on 2026-09-06 (base-defense `siege-construction` 15.4): the two raw faucets land in
     /// `Production` — `ironwork` from a CLEARED `shard-vein` slot, `rubble` from a CLEARED
     /// `material-seam` slot (§2). A real behaviour change, not a field addition: the same command log,
@@ -82,7 +91,7 @@ public static class TurnEngine
     /// — this bump exists only for the case a real order changes the outcome, and covers `bind-warden`
     /// (W28) and `dowse` (W30) landing after it without a second bump, per the same decision.
     /// </summary>
-    public const int RulesetVersion = 9;
+    public const int RulesetVersion = 10;
 
     public static class Phases
     {
@@ -259,7 +268,10 @@ public static class TurnEngine
         // for the two raw ironwork/rubble faucets (`shard-vein`/`material-seam`, cleared) — one phase
         // slot, not a second one, since both are conceptually the identical "this sector earns
         // resources this turn" step.
-        return World.Siege.SiegeConstruction.Production(next, report, Phases.Production);
+        next = World.Siege.SiegeConstruction.Production(next, report, Phases.Production);
+        // 15.4b / audit F10 / decision 48 (2026-09-06): the per-slot depletion counter nothing was
+        // incrementing — same phase slot again, since "a slot just yielded" is this exact moment.
+        return World.Siege.SiegeConstruction.AdvanceDepletion(next, report, Phases.Production);
     }
 
     static WorldState Growth(WorldState world, TurnReport report, int turn, ulong seed)

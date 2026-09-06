@@ -1,6 +1,11 @@
 # Spec: `tree-catalog`
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05. **Built and verified 2026-09-06** (tasks B2, C3–C5 — see
+`tasks/passive-tree-todo.md`). Module of [passive-tree](../passive-tree-map.md). Corrected
+2026-09-06 by an adversarial spec audit: the "no build authorized" line was never updated once the
+build landed — `src/FusionRpg.Core/PassiveTree/Catalog/{TreeRecord,NodeRecord,NodeAtom}.cs`,
+`PassiveTreeCatalogLoader.cs` and `src/FusionRpg.Data/Sqlite/RpgStore.TreeCatalog.cs` are real,
+shipped, tested code, not a future authorization gate.
 
 **Module id:** `tree-catalog` · **Wave:** 1 · **Depends on:** `tree-plan` · **Depended on by:**
 `tree-binder`, `tree-review`, `tree-state`, `tree-surface`
@@ -292,7 +297,8 @@ Most of this the repo already enforces; the module adopts rather than invents.
   calls it **per row** at ~~`RpgStore.Aptitudes.cs:132`~~ **`RpgStore.Aptitudes.cs:149`** — the
   `allocation += AptitudeAllocation.Single(scope, r.GetString(0), r.GetInt64(1))` inside
   `LoadAllocationUnlocked`'s reader loop, verified 2026-09-05. At twelve aptitudes that trade is fine. At
-  39 × 40 = 1,560 node ids per actor, one retired id makes the actor **unloadable** rather than red.
+  42 × 40 = 1,680 node ids per actor (D51, 2026-09-06: 24 statuses, not 21), one retired id makes the
+  actor **unloadable** rather than red.
   `tree-state` owns the boundary; this module owns the rule and the report format.
 - **R6 — a magnitude retune touches no id and migrates nothing.** Ids are structural; coefficients are
   content. A rebalance bumps `catalog_revision`, the next read sees new numbers at the same nodes, and
@@ -543,9 +549,10 @@ Three, all genuine; none blocks the module's own structure.
    That is an E2 decision, not one this module may make. It changes what `soulCurveId` means, not
    whether the field exists.
 2. **Does the species tree (D23/D30) ship as catalog data, or derive at import?** Both satisfy §1's
-   freeze line. Shipping the data makes ~~~35,200~~ **35,160** nodes across **879 trees** reviewable
-   and diffable (840 species × 40 + 39 generic × 40; counted in `data/seed/demons/species/_index.json`,
-   and `tree-review` §1.1 is the source the whole program cites); deriving keeps the repo
+   freeze line. Shipping the data makes ~~~35,200~~ ~~35,160~~ **35,280** nodes across **882 trees**
+   (D51, 2026-09-06: 24 statuses, not 21 — was 879/35,160) reviewable and diffable (840 species × 40 +
+   42 generic × 40; counted in `data/seed/demons/species/_index.json`, and `tree-review` §1.1 is the
+   source the whole program cites); deriving keeps the repo
    smaller and moves the review surface into a generator. The demon program chose *ship the data*
    (`demon-seed-map.md:41`), and map assumption 4 says species trees reuse this record — so the size
    is the owner's call, not this document's. Owned by `species-tree`; recorded here because it is this

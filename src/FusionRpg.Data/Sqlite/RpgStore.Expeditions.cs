@@ -315,7 +315,12 @@ public sealed partial class RpgStore
             {
                 if (xp > 0)
                 {
-                    AwardUniqueActorXpUnlocked(db, instanceId, xp);
+                    var (xpOk, _, xpActor, xpLevelsGained) = AwardUniqueActorXpUnlocked(db, instanceId, xp);
+                    // A21 (spec-action-instance-and-grant.md §4): the expedition reward apply is the
+                    // SECOND of AwardUniqueActorXpUnlocked's two production callers this module wires,
+                    // same shape as AwardUniqueActorXp above.
+                    if (xpOk && xpLevelsGained > 0 && xpActor is not null)
+                        TryRollActionUnlocks(instanceId, xpActor.TypeId, xpLevelsGained);
 
                     // species-build T1.4 (spec-species-xp.md §2 "Expedition" source, standalone-first
                     // proof) -- the SAME battle-won xp also levels the specimen's SPECIES row, in this

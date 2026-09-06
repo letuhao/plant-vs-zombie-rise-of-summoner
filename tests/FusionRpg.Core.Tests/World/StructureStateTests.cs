@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Numerics;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Loam;
@@ -185,10 +186,14 @@ public class StructureStateTests
     }
 
     [Fact]
-    public void Tier_zero_is_indestructible_and_the_shipped_rows_are_tier_zero()
+    public void Tier_zero_is_indestructible_and_every_pre_siege_loam_row_is_tier_zero()
     {
+        // 2026-09-06: the "moat" row (siege-construction §5) is the FIRST shipped row with a real
+        // material tier (1) — every OTHER shipped row still predates any notion of a siege and stays
+        // indestructible, which is what this test's own name always meant to guarantee.
         Assert.Equal(0, StructureDef.MaxHpOf(Def("stone", tier: 0), developmentLevel: 50));
-        Assert.All(StructureCatalog.All, s => Assert.Equal(0, s.MaterialTier));
+        Assert.All(StructureCatalog.All.Where(s => s.StructureId != "moat"), s => Assert.Equal(0, s.MaterialTier));
+        Assert.Equal(1, StructureCatalog.Get("moat").MaterialTier);
     }
 
     [Fact]

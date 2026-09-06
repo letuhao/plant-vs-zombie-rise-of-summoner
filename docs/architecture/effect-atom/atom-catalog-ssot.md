@@ -144,9 +144,9 @@ Armor channels are zombie-only — that is a fact about which Unity fields exist
 
 Ops available to an atom: **`Flat` · `Increased` · `More`**. `Override` exists in the stat system but effects cannot emit it — that is a deliberate constraint, not an oversight.
 
-### 4.2 Derived — 267 registered
+### 4.2 Derived — 268 registered
 
-**SSOT is `DerivedStatRegistry.CreateDefault().AllRegistered`** — 53 families in `data/seed/derived-stats/catalog.json`, expanded over their declared axis widths (`none`=1, `element`=7, `status-category`=4, `action-category`=5, `resource-id`=6). That enumeration reproduces **exactly 267**, so catalog and registry agree.
+**SSOT is `DerivedStatRegistry.CreateDefault().AllRegistered`** — 54 families in `data/seed/derived-stats/catalog.json`, expanded over their declared axis widths (`none`=1, `element`=7, `status-category`=4, `action-category`=5, `resource-id`=6). That enumeration reproduces **exactly 268**, so catalog and registry agree.
 
 | Axis | Families | Channels |
 |---|---:|---:|
@@ -154,12 +154,12 @@ Ops available to an atom: **`Flat` · `Increased` · `More`**. `Override` exists
 | `resource-id` (6 resources) | 4 | 24 |
 | `status-category` | 6 | 24 |
 | `action-category` (5 action categories) | 2 | 10 |
-| `none` | 13 | 13 |
-| **Total** | **53** | **267** |
+| `none` | 14 | 14 |
+| **Total** | **54** | **268** |
 
 Plus the open-ended prefix families (`status.power.{id}`, `status.resist.{id}`, `status.immune.{tag}`, `status.immuneReduction.{tag}`, `status.expose.{category}`).
 
-> **Corrected 2026-09-02, and this is the one that had drifted furthest.** This section said **99**. The real figure is **267** — the gap accumulated across three separate expansions (T2 element widening 99→256, `poise-resource` 256→259, `turn.speed`/`turn.haste` 259→261, `resource.restore` 261→267) with nothing watching.
+> **Corrected 2026-09-02, and this is the one that had drifted furthest.** This section said **99**. The real figure was **267** — the gap accumulated across three separate expansions (T2 element widening 99→256, `poise-resource` 256→259, `turn.speed`/`turn.haste` 259→261, `resource.restore` 261→267) with nothing watching. **267→268 (party-dungeon D4.25, 2026-09-06):** `loadout.slots`, the extend-action-slot grant, a 14th `none`-axis family.
 >
 > **Why it went unnoticed, and what now stops it:** `spec-derived-stat-sheet.md` carries the same numbers and *cannot* drift, because `ElementHubDocDriftTests.StatSheetCountsMatchGeneration` pins it to `registry.AllRegistered.Count` plus a planted-drift companion. This file had no such test. It does now — `AtomCatalogSsotDriftTests`.
 >

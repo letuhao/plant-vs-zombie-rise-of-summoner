@@ -1,5 +1,8 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Eligibility;
+using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Demons;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Progression;
@@ -93,6 +96,23 @@ public sealed partial class RpgStore
             // cannot be PvZ-deployed; the mirror check lives in DispatchExpedition.
             if (HasActiveExpeditionMembershipUnlocked(db, id))
                 return (false, "expedition.locked", row, false);
+
+            // demon-lawn-deploy T1.1: the active Patron is unconsumable in fusion
+            // (RpgStore.Fusion.cs:354) for the same reason it must never ALSO get free lawn combat
+            // value on top of its aura — the two economies would otherwise stack. Reuses the exact
+            // same IsPatronUnlocked check, same instance-keyed shape.
+            //
+            // Commander is deliberately NOT checked here, and that is not an oversight: CommanderId
+            // (Core/Commanders/CommanderId.cs) is a fixed two-value enum (Dave = the player, Zomboss =
+            // the AI) with NO demon-instance binding anywhere — PlayerEmpireCommanders.ForPlayer always
+            // returns just [Dave], never derived from any instanceId. There is currently no state
+            // anywhere in this codebase that means "this specific demon specimen IS the Commander," so
+            // there is nothing yet to refuse against. demon-system-map.md's own Axis 2 ("designate one
+            // demon" as Commander) describes a binding commander-surface-map.md's own text says is not
+            // built yet ("Dave today; roster grows later") — when that lands, this refusal needs a
+            // second branch here, symmetric with the Patron one above.
+            if (IsPatronUnlocked(db, row.PlayerId, id))
+                return (false, "patron.cannot-deploy", row, false);
 
             if (!string.Equals(row.Phase, UniqueActorPhases.Roster, StringComparison.Ordinal))
                 return (false, "phase." + row.Phase.ToLowerInvariant(), row, false);
@@ -1323,20 +1343,25 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            var (ok, why, actor) = AwardUniqueActorXpUnlocked(db, id, delta);
+            var (ok, why, actor, levelsGained) = AwardUniqueActorXpUnlocked(db, id, delta);
             _ = reason; // audit reason reserved; no type progression write
+            // A21 (spec-action-instance-and-grant.md §4): same critical section as the XP write
+            // above, never a post-commit hook -- see TryRollActionUnlocks's own doc comment for why
+            // "same lock" is this class's real atomicity guarantee, not a shared SQL transaction.
+            if (ok && levelsGained > 0 && actor is not null)
+                TryRollActionUnlocks(id, actor.TypeId, levelsGained);
             return (ok, why, actor);
         }
     }
 
     /// <summary>XP award inside an open transaction — used by the expedition reward apply.</summary>
-    internal (bool Ok, string Reason, UniqueActorDto? Actor) AwardUniqueActorXpUnlocked(
+    internal (bool Ok, string Reason, UniqueActorDto? Actor, int LevelsGained) AwardUniqueActorXpUnlocked(
         SqliteConnection db, string instanceId, long delta)
     {
         var row = ReadUniqueActorUnlocked(db, instanceId);
-        if (row is null) return (false, "not_found", null);
+        if (row is null) return (false, "not_found", null, 0);
         if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
-            return (false, "phase.retired", row);
+            return (false, "phase.retired", row, 0);
 
         long xp;
         checked { xp = row.Xp + delta; }
@@ -1364,7 +1389,79 @@ public sealed partial class RpgStore
         cmd.Parameters.AddWithValue("$now", now);
         cmd.Parameters.AddWithValue("$id", instanceId);
         cmd.ExecuteNonQuery();
-        return (true, "", ReadUniqueActorUnlocked(db, instanceId));
+        // A21 (spec-action-instance-and-grant.md §4): trailing, additive field -- the same
+        // "zero call-site rewrite needed" shape CompiledAction.Category/ActionCostRow.AllowLethal
+        // already established. row.Level is the BEFORE value (read above, before this UPDATE).
+        return (true, "", ReadUniqueActorUnlocked(db, instanceId), (int)(level - row.Level));
+    }
+
+    /// <summary>Standard FNV-1a 64-bit (public-domain hash, not app logic) -- mirrors
+    /// `ActionCorpusComposer`'s own private copy: a specimen has no separate "world seed" field, and
+    /// its own stable `instance_id` is exactly the right per-specimen discriminator for a
+    /// content-seeded, never-per-player-in-the-loot-sense roll (a specimen's OWN unlock rolls simply
+    /// must be deterministic and never collide with another specimen's).</summary>
+    static ulong Fnv1a64(string text)
+    {
+        var h = 14695981039346656037UL;
+        foreach (var ch in text)
+        {
+            h ^= ch;
+            h *= 1099511628211UL;
+        }
+        return h;
+    }
+
+    /// <summary>
+    /// A21 (spec-action-instance-and-grant.md §4): one roll attempt for one level gained, wired with
+    /// real, `RpgStore`-backed delegates -- `ActionUnlockGrantService` itself stays pure/DB-free.
+    /// Called once per `LevelsGained` by both production callers of `AwardUniqueActorXpUnlocked`
+    /// (`AwardUniqueActorXp` below, the expedition reward apply in `RpgStore.Expeditions.cs`), right
+    /// after the XP write each already made, under the SAME `lock (_gate)` critical section --
+    /// this class's own established concurrency discipline (every method serializes through one gate),
+    /// so no interleaving writer can ever observe the level and the roll as two separable facts even
+    /// though `GetUnlockState`/`SaveUnlockState`/`UpsertGrant` each open their own connection rather
+    /// than sharing one SQL transaction with the XP `UPDATE` above.
+    /// </summary>
+    void TryRollActionUnlocks(string instanceId, int typeId, int levelsGained)
+    {
+        if (levelsGained <= 0) return;
+        // No configured host has opted into the unlock ladder yet (every test project except the
+        // ones that explicitly call UnlockTuningPolicy.Configure) -- skip, not an error. Matches
+        // ActionFamilyMapPolicy's own "byte-identical unless configured" default one level up.
+        if (UnlockTuningPolicy.Tuning is not { } tuning) return;
+
+        // DemonSpeciesCatalog.Configure(...) may not have run in every host that reaches here (it
+        // exposes no IsConfigured check) -- treated the same as "no species" (ActionEligibility.
+        // Candidates' own null contract), not a reason to fail the whole roll: a specimen with no
+        // resolvable species simply sees only General-scope candidates, same as today.
+        string? speciesKey = null;
+        try { speciesKey = DemonSpeciesCatalog.All.FirstOrDefault(s => s.GameTypeId == typeId)?.SpeciesId; }
+        catch (InvalidOperationException) { /* not configured in this host -- no species */ }
+
+        // ⛔ Found during T59.8's own end-to-end investigation: the unlock RATCHET's own state
+        // (EarnCount/Held) is durable, so it belongs under OwnerKind.UniqueActor -- but the real,
+        // shipped read path a battle actually uses (WebMatchService.EquippedActionIdsFor, T22,
+        // 2026-08-28) reads GRANTS under OwnerKind.Entity, predating OwnerKind.UniqueActor's own
+        // 2026-09-01 introduction. Writing this grant under UniqueActor would make it invisible to
+        // every real battle -- BuildSquad would never see it. Matching the REAL read path here
+        // (Entity) is the correct choice for reachability today; OwnerKind.Entity's own session-scoped
+        // durability gap (a real, pre-existing, T22-era design smell, not something this module
+        // introduces or is scoped to fix) is named in action-plan.md §5's deferred table, not
+        // silently accepted.
+        var unlockStateOwner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+        var grantOwner = new OwnerScope(OwnerKind.Entity, instanceId);
+        var service = new ActionUnlockGrantService(
+            loadUnlockState: _ => GetUnlockState(unlockStateOwner),
+            saveUnlockState: (_, state) => SaveUnlockState(unlockStateOwner, state),
+            catalog: () => ListActionIds().Select(GetAction).Where(a => a is not null).Select(a => a!).ToList(),
+            familyOf: ActionFamilyMapPolicy.Map,
+            grant: (_, actionId) => UpsertGrant(
+                new ActionGrantRow(grantOwner.Kind, grantOwner.Key, actionId, Source: "unlock-ladder"),
+                grantId: $"unlock:{instanceId}:{actionId}"));
+
+        var specimenSeed = Fnv1a64(instanceId);
+        for (var i = 0; i < levelsGained; i++)
+            service.TryRollOnce(instanceId, speciesKey, specimenSeed, tuning);
     }
 }
 

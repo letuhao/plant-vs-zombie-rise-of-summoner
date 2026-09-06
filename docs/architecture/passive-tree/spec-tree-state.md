@@ -26,10 +26,10 @@ spend, price and power on every read.
 
 ### 1. Sparse storage is a hard requirement, and the arithmetic says why
 
-**The catalog side.** D27 ships 12 primary + 6 elemental + 21 status = **39 generic trees**, and D29
-fixes each at 10 tiers × 2 branches = **40 nodes** — exactly 40, everywhere, species trees
-included. So one actor faces **1,560** possible owned nodes and 1,560 possible soul levels, before
-demon-family or species trees exist
+**The catalog side.** D27 ships 12 primary + 6 elemental + 24 status = **42 generic trees** (D51,
+2026-09-06: was 21 status / 39 trees), and D29 fixes each at 10 tiers × 2 branches = **40 nodes** —
+exactly 40, everywhere, species trees included. So one actor faces **1,680** possible owned nodes and
+1,680 possible soul levels, before demon-family or species trees exist
 ([passive-tree-ideal.md:60-61](../passive-tree-ideal.md)).
 
 **The actor side is uncapped, and this is the half that decides the storage shape.** D21 gives *every*
@@ -44,8 +44,8 @@ actor its own tree state — commander and each demon alike. The roster has no c
   full"* (`RpgStore.Contracts.cs:80-83`). An unbound demon is still an actor, so it still carries tree
   state.
 
-A dense row per actor is therefore `2,012 × 1,560 ≈ 3.1 million` rows for one player, all zero. **Not
-an option.** Only non-zero entries may ever persist.
+A dense row per actor is therefore `2,012 × 1,680 ≈ 3.4 million` rows for one player, all zero (D51:
+was ≈3.1 million at 1,560). **Not an option.** Only non-zero entries may ever persist.
 
 #### 1.1 The table
 
@@ -137,7 +137,7 @@ citing its reason.
 | Node unlocked with item-granted points, item still equipped | **Yes** — the item paid for the node it is pricing | D11. The alternative needs per-node provenance, which destroys D11's stated advantage: *"points flow through the tree's own rules… no special case to define, enforce or test"* |
 | Node left invalid by unequipping (D11's red state) | **No** — grants nothing, costs nothing to hold | Otherwise unequipping leaves you paying more for nodes that give you nothing: a pure penalty with no compensation, which is exactly the trap D8's *self-spent only* amendment closed |
 | Soul level on a node | **No** — a different track | D3: points unlock *new bonuses*, souls scale *bonus power*. Souls are unlimited by design, so counting them would make the unlock price unbounded in a currency with no ceiling — converting a soft economic bound into a genuine wall |
-| Nodes on the actor's **other** trees | **Yes** — that is the whole point | A per-tree count makes the first node of a 40th tree cost 5 again. At `Θ=100` the dial affords 31 nodes (41 at §2.2d's corrected `g`) while 39 trees × tier 1 is 156 — a per-tree count hands a spread build four to five times the breadth for the same budget |
+| Nodes on the actor's **other** trees | **Yes** — that is the whole point | A per-tree count makes the first node of a 40th tree cost 5 again. At `Θ=100` the dial affords 31 nodes (41 at §2.2d's corrected `g`) while 42 trees × tier 1 is 168 (D51: was 39/156) — a per-tree count hands a spread build four to five times the breadth for the same budget |
 
 **"An item swap must not change what your next node costs, net"** is an invariant that is obvious in a
 spec and easy to lose in code. It gets a named test.
@@ -379,7 +379,7 @@ Substituting an effective width is not exact — the shipped `first = 5` makes t
 **What this module does about it.** `11` stays in §8's table, and under D38 it stays there **settled**
 rather than flagged. A later move is a tuning change on measurement, not a spec reopening. Two
 things that do *not* change either way: §2.1's breadth argument survives a recalibration (at `g = 19.2` the
-`Θ = 100` wallet affords 41 nodes against 39 trees × tier 1 = 156, so a per-tree count would still
+`Θ = 100` wallet affords 41 nodes against 42 trees × tier 1 = 168 (D51: was 39/156), so a per-tree count would still
 hand a spread build several times the breadth), and §7's `long` conclusion strengthens, because a
 larger `g` makes the budget larger.
 
@@ -483,7 +483,21 @@ paragraph above.
 
 ### 3. `skillPointsPerThetaMilliByScope` (D34) — required, not optional
 
-**FACT.** `AptitudeGrant` carries `SkillPointsPerThetaMilli` as a **single scalar**
+**SHIPPED 2026-09-06 as task C6 — this section's own "Requirement" below, built exactly as
+specified.** Corrected by an adversarial spec audit the same day: this section still argued the case
+in present tense (a real, live self-contradiction against §8's own tunables table three sections
+later, which already lists `pointEconomy.skillPointsPerThetaMilliByScope.commander` as "11 — settled
+(D38)"). Verified directly: `AptitudeTuning.cs:43-57` defines
+`AptitudePointEconomy.SkillPointsPerThetaMilliByScope` — the exact table this section proposed, its
+own doc comment citing this section by name — and `PointBudget.cs:95` implements `SkillPointsFor
+(AllocationScope, long, AptitudeTuning)`, the exact signature §3's own worked snippet below shows.
+The live tuning file is `aptitudes.v7.json` (D55, 2026-09-06, bumped from `v6` — demonType/aspect/
+uniqueDemon given real rates; see OQ3 below), not the `v5` this section's own line citations still
+name (re-grep the symbol, not the cited line number, if a citation below looks stale). The rest of
+this section is kept as the historical argument for why the fix was necessary — still accurate
+reasoning, just no longer a description of present, unbuilt work.
+
+**FACT (as it stood before C6 shipped).** `AptitudeGrant` carries `SkillPointsPerThetaMilli` as a **single scalar**
 (`AptitudeTuning.cs:13`), parsed at `:158`, value `1` at `data/tuning/aptitudes.v5.json:17`. Its
 sibling one block over is already a table:
 `AptitudePointEconomy.AptitudePointsPerThetaMilliByScope` (`AptitudeTuning.cs:43-45`,
@@ -493,8 +507,9 @@ no scope table.
 **Why that breaks the design outright.** With one scalar, "an actor's skill points" has no per-actor
 definition, and the path of least resistance is that every actor reads `Θ_player`. Fifty demons would
 then each get a full commander budget on its own fresh price ladder: **50 × 31 nodes at `Θ=100` is
-1,550 — effectively the whole 1,560-node generic catalog, owned across the roster at the calibration
-point.** D25's bound does not survive that.
+1,550 — most of the 1,680-node generic catalog (D51, 2026-09-06: was 1,560, when this WAS effectively
+the whole catalog), owned across the roster at the calibration point.** D25's bound does not survive
+that.
 
 **The conclusion does not depend on which `g` ships.** 31 is the count at the shipped `g = 11` (D38);
 at §2.2d's share-1.0 sizing of 19.2 it is 41 nodes each, so fifty actors reach 2,050 and the hole gets
@@ -537,8 +552,8 @@ it **per row** at ~~`RpgStore.Aptitudes.cs:132`~~ **`RpgStore.Aptitudes.cs:149`*
 `allocation += AptitudeAllocation.Single(scope, r.GetString(0), r.GetInt64(1))` inside
 `LoadAllocationUnlocked`'s reader loop (`:135`), which `LoadAllocation` (`:120`) delegates to.
 Re-verified 2026-09-05. At twelve aptitudes that is a fine trade. At
-1,560 node ids per actor across an uncapped roster, **one retired node id in one save makes that actor
-unloadable rather than showing red.** One bad row bricks a save.
+1,680 node ids per actor across an uncapped roster (D51, 2026-09-06: was 1,560), **one retired node id
+in one save makes that actor unloadable rather than showing red.** One bad row bricks a save.
 
 **The rule this module implements:**
 
@@ -620,9 +635,9 @@ question, and it is the one that stays in Open questions.
 when the caller did not. D21 turns that into **one read per actor**, and every `LoadAllocation` takes
 the global `lock (_gate)` (`RpgStore.Aptitudes.cs:125`; `_gate` is declared once at `RpgStore.cs:17`
 and shared by *every* partial slice of the store) and opens a fresh connection (`:126`). At a 6-actor
-squad — `const int maxSquad = 6`, `WebMatchService.cs:339` — and 39 trees, a naive per-(actor, tree)
-read is **234 lock-serialised queries before the first turn**, on the standalone path where battles
-*are* the loop.
+squad — `const int maxSquad = 6`, `WebMatchService.cs:339` — and 42 trees (D51: was 39), a naive
+per-(actor, tree) read is **252 lock-serialised queries before the first turn** (D51: was 234), on the
+standalone path where battles *are* the loop.
 
 **Three rules make that go away, and none is hard:**
 
@@ -630,7 +645,7 @@ read is **234 lock-serialised queries before the first turn**, on the standalone
    is the primary entry point: **one query, one lock acquisition, one connection**, returning every
    actor's sparse rows grouped by key. Battle setup reads the whole squad once.
 2. **There is no per-tree read at all.** The primary key is `(scope, scope_key, node_id)` and the tree
-   is inside the node id, so one actor is one row-set. The `n = 39` factor never enters.
+   is inside the node id, so one actor is one row-set. The `n = 42` factor (D51: was 39) never enters.
 3. **`LoadTreeState` (single key) exists for the editing surface only.** A named test asserts the
    battle path does not call it in a loop — the same seam discipline `SpeciesAllocationSeamTests`
    already enforces for `LoadAllocation`.
@@ -651,10 +666,12 @@ already large, and "compare my demons' builds" is exactly the surface that would
 | `int` (whole units) | 2,147,483,647 | 103,557 | never for a magnitude |
 | `long` | 9,223,372,036,854,775,807 | 214,748,300 | **the default for everything here** |
 
-**The price is small; the budget is not.** At the shipped corpus — **35,160** nodes across **879**
-trees (D29's 39 generic × 40 = 1,560 plus D30's 840 species × 40 = 33,600) — the marginal price of the
-last node is `5 + 2·35,159 = 70,323` and the cumulative is `35,160 · 35,164 = 1,236,366,240`, i.e.
-**1.24×10⁹**. ~~`5 + 2·25,899 = 51,803` … `670,913,600`~~ used the superseded ~25,900 figure and is
+**The price is small; the budget is not.** At the shipped corpus — **35,280** nodes across **882**
+trees (D29's 42 generic × 40 = 1,680 plus D30's 840 species × 40 = 33,600 — D51, 2026-09-06: was
+35,160/879/1,560) — the marginal price of the last node is `5 + 2·35,279 = 70,563` and the cumulative
+is `35,280 · 35,284 = 1,244,819,520`, i.e. still **1.24×10⁹**. ~~`5 + 2·35,159 = 70,323` …
+`1,236,366,240`~~ used the superseded ~35,160 figure. ~~`5 + 2·25,899 = 51,803` … `670,913,600`~~ used
+the superseded ~25,900 figure and is
 struck rather than adjusted, because a wrong corpus size is what made the old margin look comfortable.
 Both still fit `int`, but the cumulative is now **58% of `int.MaxValue`** where it was 31% — the same
 conclusion, arrived at with half the headroom, and one more content wave closes it. But the budget is
@@ -704,8 +721,8 @@ The struck names are superseded and must not appear in code, config or a sibling
 | `unlockCost.stepPoints` ~~`unlockCost.step`~~ | skill **points** | 2 | same |
 | `soulTrack.thetaPerSoulLevelMilli` ~~`soulThetaWeight` (`Ws`)~~ | `Θ` per soul level, **per-mille** | **unmeasured** | same |
 | `pointEconomy.skillPointsPerThetaMilliByScope.commander` | skill points per `Θ` | **11 — settled (D38).** `10.40` from the corner-share derivation, rounded up; §2.2d carries the working and the 19.2 alternative it is not | `data/tuning/aptitudes.v{n+1}.json` |
-| `pointEconomy.skillPointsPerThetaMilliByScope.{demonType,aspect,uniqueDemon}` | skill points per that scope's own source unit | **unmeasured** | same |
-| `pointEconomy.respecPrice` | **souls** (§5.1 — settled, not unresolved) | 10 today (`aptitudes.v5.json:30`) | same |
+| `pointEconomy.skillPointsPerThetaMilliByScope.{demonType,aspect,uniqueDemon}` | skill points per that scope's own source unit | **{15, 15, 22} — settled (D55, 2026-09-06).** Proportional to the sibling `aptitudePointsPerThetaMilliByScope` {3,4,4,6} ratio against commander=11; OQ3 below carries the derivation | `data/tuning/aptitudes.v7.json` |
+| `pointEconomy.respecPrice` | **souls** (§5.1 — settled, not unresolved) | 10 today (`aptitudes.v7.json`, unchanged since `v5`) | same |
 
 **Read in place, never copied.** `grant.skillPointsPerTheta` already ships with a live loader
 (`aptitudes.v5.json:17`, `AptitudeTuning.cs:158`); the tree reads `AptitudeTuning` rather than
@@ -892,12 +909,14 @@ batch the read; reject an unknown node id **once**, at the import boundary, nami
 keep every SQL statement inside `FusionRpg.Data`; keep the `RpgStore` partial-class convention.
 
 **Ask first:** ~~**republishing `g`**~~ **— closed by D38 (§2.2d): `11`, sized against the measured
-corner build, and a tunable `squad-harness` may move on measurement without reopening a spec**; the
-**other three** values of `skillPointsPerThetaMilliByScope` (`demonType`, `aspect`, `uniqueDemon`) —
-the table is required (§3), but those rates are a balance question residual-fit owns, and *shipping a
-guess is fine; calling it balance is not*; ~~**which resource respec costs**~~ **— closed, it is
-souls (§5.1)** — but **whether a tree respec shares the species respec counter or carries its own**;
-whether a respec may ever be roster-wide rather than per actor.
+corner build, and a tunable `squad-harness` may move on measurement without reopening a spec**; ~~the
+**other three** values of `skillPointsPerThetaMilliByScope` (`demonType`, `aspect`, `uniqueDemon`)~~
+**— closed 2026-09-06 by D55: `{15, 15, 22}`, shipped as a flagged guess (§ Open questions #3), and
+`squad-harness` may move any of the three on measurement without reopening this spec, same as
+commander's `11`**; ~~**which resource respec costs**~~ **— closed, it is
+souls (§5.1)** — ~~**whether a tree respec shares the species respec counter or carries its own**~~
+**— closed 2026-09-06 by D45: its own, separate counter (§ Open questions #1)** — but whether a
+respec may ever be roster-wide rather than per actor remains open.
 
 **Never:** store a price, a spent total, a remaining budget, or any resolved magnitude — that is a
 second SSOT that goes stale the moment a coefficient moves; clamp the price or the budget; add a
@@ -932,40 +951,37 @@ regression, not a slot; join tree state onto the unpaged `ListDemonRoster`; mult
 
 ## Open questions
 
-Three, all real; two of them are owner decisions this module may not make.
+Three, all real; two of them were owner decisions this module could not make on its own. **All three
+are now closed** (D44/D45 2026-09-06, D55 2026-09-06) — kept below, struck through, as the record of
+what was decided and why, per this file's own historical-record convention (§3 above).
 
 1. ~~**Which resource respec costs.**~~ **Closed 2026-09-05, against code — see §5.1.**
    `RespecPolicy.PriceOf` returns `RespecResource.Soul` (`RespecPolicy.cs:46`), `Soul` is the enum's
    only member (`:23`), Hunger is recorded at `:15` as the superseded placeholder, and there are two
    production callers (`RpgStore.SpeciesRespec.cs:176`, `SpeciesBuildEndpoints.cs:91`). D18,
-   `decisions.md:103` and the shipped code agree. **What remains open is narrower and is a scoping
-   question:** does a passive-tree respec advance the *species* respec counter, or carry its own? Its
-   own is the default reading — the two are different subjects and sharing a counter would make a tree
-   respec silently reprice a species respec — but it is the owner's to confirm before the counter is
-   persisted, because changing it afterwards is a data migration.
-2. **What "the tier below is unlocked" means** — at least one node in the tier below, or the tier
-   complete? §2.2's calibration assumes **complete**, at the uniform archetype's `k = 4`: the
-   conservative, most expensive reading and the only one exact flatness is a property of. The cheaper
-   reading roughly halves the effective width, and since `g ∝ k²` (§2.2d) that moves the wallet by
-   about **4×**, not 2× — so it is worth deciding **before `firstPoints` is published**. It does not
-   reopen `g`: D38 settled the commander value at `11` against the measured corner build **and made it
-   a tunable**, so a change of reading here changes what the harness measures and moves one number in
-   `aptitudes.v{n+1}.json`. It would move `firstPoints`, which is not a tunable a sweep can retune
-   quietly, and that is why this one is still owed an answer.
-   Recommendation on the record: at least one node in the tier below **of the same branch** — it
-   preserves D10's two-branch identity and rewards a single-branch dive, whose reward-per-point
-   gradient already points the right way.
-3. **The other three values of `skillPointsPerThetaMilliByScope` — `demonType`, `aspect`,
-   `uniqueDemon`.** ~~All four, and the commander one is no longer "derived".~~ **The commander value
-   is closed: D38, 2026-09-05 — `g = 11`, sized against the MEASURED corner build (10.40 rounded up),
-   and a tunable `squad-harness` may move without reopening a spec** (§2.2d carries the working, and
-   the share-1.0 alternative of 19.2 is recorded there as the answer to a different question, not as a
-   correction). At `11` the uniform archetype reaches tier 3 with 57% of the skill points the gate it
-   just opened costs to fill — a pacing fact, now measurable rather than disputed.
+   `decisions.md:103` and the shipped code agree. **The narrower scoping question — CLOSED 2026-09-06
+   by D45: a passive-tree respec carries its own counter, never the species one.** The two are
+   different subjects; sharing a counter would let a tree respec silently reprice a species respec.
+2. ~~**What "the tier below is unlocked" means**~~ — **CLOSED 2026-09-06 by D44: at least one node in
+   the tier below, of the SAME BRANCH** — not the whole tier complete. This is the cheaper reading
+   (§2.2's own calibration had assumed the complete-tier reading, the conservative and most expensive
+   one), so it changes what `firstPoints` should be published at — recompute it under this reading
+   before `aptitudes.v{n+1}.json` ships the value, not after. Chosen for D10's own two-branch identity:
+   this reading specifically rewards a single-branch dive, whose reward-per-point gradient already
+   points the right way, over rewarding breadth across both branches for the same tier-open cost.
+3. ~~**The other three values of `skillPointsPerThetaMilliByScope`**~~ — **CLOSED 2026-09-06 by D55:
+   proportional to the sibling `{3,4,4,6}` ratio, scaled against the already-settled commander value
+   (`11`).** Per-ratio-unit = `11 / 3 ≈ 3.667`; `demonType = 4 × 3.667 ≈ 14.667 → 15` (rounded up,
+   matching D38's own rounding convention for commander's `10.40 → 11`), `aspect` the same shape as
+   `demonType` (same ratio value, 4) `→ 15`, `uniqueDemon = 6 × 3.667 = 22.0 → 22` (exact, no
+   rounding needed). **Still explicitly a shipped guess, not a measurement** — the spec's own
+   posture holds ("shipping a guess is fine; calling it balance is not"); `squad-harness` may move
+   any of the three later without reopening this spec, the same tunable contract commander's `11`
+   already has.
 
-   The three remaining scopes are unmeasured, exactly as the sibling table's own `_weightsWhy` says of
-   its `{3,4,4,6}`. Each multiplies a different source unit, so one cannot be inferred from another,
-   and none of them has a sweep behind it. Shipping a guess is fine; calling it balance is not.
+   ```
+   pointEconomy.skillPointsPerThetaMilliByScope = { commander: 11, demonType: 15, aspect: 15, uniqueDemon: 22 }
+   ```
 
 ## Decisions implemented
 

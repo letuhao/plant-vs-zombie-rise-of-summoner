@@ -1,4 +1,5 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
@@ -212,7 +213,8 @@ public static partial class BattleEngine
     public static BattleReport Resolve(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace = null,
         Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null,
         ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null,
-        Timeline.IIntentSource? intentSource = null, Board.BoardState? board = null)
+        Timeline.IIntentSource? intentSource = null, Board.BoardState? board = null,
+        Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -235,7 +237,8 @@ public static partial class BattleEngine
         // live on BattleRunState (BattleRunState.cs, nested in this partial class). Zero behavior
         // change: every line below is the same statement sequence as before extraction, reading
         // through `state.` instead of a captured local.
-        var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver, board);
+        var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver, board,
+            unlockStateFor, unlockTuning);
 
         // B14: the round boundary runs on the kernel's own EventQueue/SimulationClock — the same
         // primitives every other Timeline module uses — instead of a raw integer counter. `Resolve`

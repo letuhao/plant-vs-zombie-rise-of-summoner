@@ -1,5 +1,6 @@
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Cost;
+using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
@@ -228,12 +229,20 @@ public static partial class BattleEngine
         /// round loop passes to `Status.Tick`'s own optional trailing `board` parameter.</summary>
         public Combat.BoardSnapshot? CombatBoardSnapshot { get; }
 
+        /// <summary>A22 (spec-action-resolution-by-category.md §1): the constructor already received
+        /// this — captured only inside the `rungOf` closure below (`:493`), never kept as a field.
+        /// `ApplyBasicAttack` needs it too, to resolve `envelope.ActionId`'s own `Category` and branch
+        /// resolution shape — the reason this module exists at all.</summary>
+        public ActionCatalog? ActionCatalog { get; }
+
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
-            IContainerEffectResolver? containerResolver = null, BoardState? board = null)
+            IContainerEffectResolver? containerResolver = null, BoardState? board = null,
+            Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null)
         {
             Trace = trace;
             _board = board;
+            ActionCatalog = actionCatalog;
 
             InitiativeRng = SeededRng.DeriveStream(seed, "initiative");
             ICombatRng critRng = new SeededRngCombatAdapter(SeededRng.DeriveStream(seed, "crit"));
@@ -490,8 +499,34 @@ public static partial class BattleEngine
                 costsByActionId,
                 poolsFor: key => ResourcePools.GetOrCreate(key, ByKey[key].Derived, NowTick),
                 derivedFor: key => ByKey[key].Derived,
-                rungOf: actionId => actionCatalog?.Get(actionId)?.Rung ?? 0,
+                rungOf: (actorKey, actionId) =>
+                    EffectiveRungOf(actorKey, actionId, actionCatalog, unlockStateFor, unlockTuning),
                 nowTick: () => NowTick);
+        }
+
+        /// <summary>
+        /// A23 (spec-cost-scaling-holder-rung.md §2): `CostLedger` must scale by the HOLDER's
+        /// `effectiveRung` (progression-derived), never the content's authored `Rung`
+        /// (spec-rung-semantics.md §3.1 — `StructureBudgetGuard` is the reader that wants the authored
+        /// value; this ledger is not). A match in the actor's own <see cref="UnlockState.Held"/> list
+        /// resolves through <see cref="UnlockLadder.EffectiveRung"/>; no match (every intrinsic/basic
+        /// action, and every caller that supplies no <paramref name="unlockStateFor"/> at all — the
+        /// exact byte-identical-to-today default) falls back to the authored `Rung`, unchanged.
+        /// </summary>
+        static int EffectiveRungOf(string actorKey, string actionId, ActionCatalog? actionCatalog,
+            Func<string, UnlockState>? unlockStateFor, UnlockTuning? unlockTuning)
+        {
+            var state = unlockStateFor?.Invoke(actorKey);
+            if (state is not null && unlockTuning is not null)
+            {
+                foreach (var held in state.Held)
+                {
+                    if (held.UnlockId == actionId)
+                        return UnlockLadder.EffectiveRung(held.EarnCountAtAcceptance, unlockTuning).Value;
+                }
+            }
+
+            return actionCatalog?.Get(actionId)?.Rung ?? 0;
         }
 
         /// <summary>

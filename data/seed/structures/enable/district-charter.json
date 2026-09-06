@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "Enable"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.21 R8 Enable's own definition: 'gates what may be built here \u2014 the district tier'. Sited on Market (an unused SlotKind until now) \u2014 a trade/rights hub gating further economic construction.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "grafted",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Market",
+        "role": "Enable",
+        "roleSecondary": "none",
+        "strengthBand": "stone",
+        "structureId": "district-charter",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "district-charter",
+      "name": "District Charter"
+    }
+  ],
+  "kind": "structure-anchor"
+}

@@ -37,8 +37,12 @@ public readonly record struct Classification(AtomPath Path, string Reason, AtomR
 /// </summary>
 public static class Compilability
 {
-    /// <summary>Kinds that map 1:1 to an FA opcode a sink implements.</summary>
-    static readonly HashSet<string> OpcodeKinds = new(StringComparer.Ordinal)
+    /// <summary>Kinds that map 1:1 to an FA opcode a sink implements. Internal (widened 2026-09-06,
+    /// `ConstructionActionCompilabilityGuardTests`) so a guard test can assert this set never again
+    /// drifts from <see cref="AtomCompiler.OpcodeOf"/>'s own switch — the fourth time the two lists
+    /// disagreed, this session's own `structure.place` addition being the latest (see this field's
+    /// own trailing comments for the first three).</summary>
+    internal static readonly HashSet<string> OpcodeKinds = new(StringComparer.Ordinal)
     {
         "stat.modify", "resource.delta", "resource.economy", "status.apply", "status.clear",
         "shield.grant", "spawn.entity", "board.action", "grid.spawn", "grid.clear", "box.set",
@@ -85,6 +89,19 @@ public static class Compilability
         // ratio, durationMs} on both the compiled and runner paths (ToOpcodeShape only rewrites
         // stat.modify/stat.derived), so there is no key-mismatch to guard here either.
         "ui.present",
+
+        // base-defense `siege-construction` 15.3b (2026-09-06): structure.place -> EffectActions.
+        // PlaceStructure. THE FOURTH TIME this exact gap has bitten (stat.derived, bullet.modify,
+        // wave.control above each found and fixed it independently) — this list and OpcodeOf are two
+        // SEPARATE gates, and adding a kind to OpcodeOf alone routes every one of its atoms to the
+        // Runner path silently ("has no FA opcode"), where AtomCompiler.EmitRunnerDefs would still
+        // technically produce a working EffectDef, but never through the path this kind was actually
+        // built and tested against. Found by a real, failing end-to-end test (ConstructionActionsTests),
+        // not by inspection. NOT declarative, like ui.present/shield.grant: it carries a real trigger
+        // (OnActivate) and a real per-fire executor (BattleEffectSink.ExecPlaceStructure). Params stay
+        // {structureId, instant} on both paths (ToOpcodeShape only rewrites stat.modify/stat.derived),
+        // so there is no key-mismatch to guard here either.
+        "structure.place",
     };
 
     /// <summary>The only leaves a legacy grant overlay can express.</summary>

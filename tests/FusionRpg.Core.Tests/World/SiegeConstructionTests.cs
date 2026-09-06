@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.World;
@@ -330,5 +331,113 @@ public class SiegeConstructionTests
         var next = SiegeConstruction.Production(world, new TurnReport(), "Production");
 
         Assert.True(next.Sectors.Single().IronworkStock >= 0);
+    }
+
+    // ---- 15.4b / audit F10 / decision 48: the per-slot depletion increment -----------------------
+
+    static WorldSector OwnedSector(params WorldSlot[] slots) =>
+        Sector(slots) with { OwnerFactionId = "dave" };
+
+    [Fact]
+    public void An_owned_rootbed_slot_advances_depletion_by_one_harvest_worth()
+    {
+        var world = World(OwnedSector(new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId }));
+
+        var next = SiegeConstruction.AdvanceDepletion(world, new TurnReport(), "Production");
+
+        Assert.Equal(StructurePolicy.DepletionPerHarvestMilli, next.Sectors.Single().Slots.Single().SlotDepletionMilli);
+    }
+
+    [Fact]
+    public void An_unowned_sectors_rootbed_slot_never_advances()
+    {
+        var world = World(Sector(new WorldSlot { SlotIndex = 0, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId }));
+
+        var next = SiegeConstruction.AdvanceDepletion(world, new TurnReport(), "Production");
+
+        Assert.Equal(0, next.Sectors.Single().Slots.Single().SlotDepletionMilli);
+    }
+
+    [Fact]
+    public void A_cleared_shard_vein_and_material_seam_both_advance_depletion()
+    {
+        var world = World(Sector(
+            new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Cleared },
+            new WorldSlot { SlotIndex = 1, SlotTypeId = "material-seam", GuardState = GuardState.Cleared }));
+
+        var next = SiegeConstruction.AdvanceDepletion(world, new TurnReport(), "Production");
+
+        Assert.All(next.Sectors.Single().Slots, s => Assert.Equal(StructurePolicy.DepletionPerHarvestMilli, s.SlotDepletionMilli));
+    }
+
+    [Fact]
+    public void A_guarded_shard_vein_never_advances()
+    {
+        var world = World(Sector(new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Intact }));
+
+        var next = SiegeConstruction.AdvanceDepletion(world, new TurnReport(), "Production");
+
+        Assert.Equal(0, next.Sectors.Single().Slots.Single().SlotDepletionMilli);
+    }
+
+    [Fact]
+    public void Other_slot_kinds_never_advance_depletion()
+    {
+        var world = World(OwnedSector(new WorldSlot { SlotIndex = 0, SlotTypeId = "wildland" }));
+
+        var next = SiegeConstruction.AdvanceDepletion(world, new TurnReport(), "Production");
+
+        Assert.Equal(0, next.Sectors.Single().Slots.Single().SlotDepletionMilli);
+    }
+
+    [Fact]
+    public void A_non_yielding_world_is_byte_identical()
+    {
+        var world = World(Sector(new WorldSlot { SlotIndex = 0, SlotTypeId = "wildland" }));
+
+        var next = SiegeConstruction.AdvanceDepletion(world, new TurnReport(), "Production");
+
+        Assert.Equal(world.Sectors.Single(), next.Sectors.Single());
+    }
+
+    [Fact]
+    public void Crossing_the_exhaustion_threshold_fires_the_event_exactly_once_not_again_next_turn()
+    {
+        var almostExhausted = new WorldSlot
+        {
+            SlotIndex = 0, SlotTypeId = SlotTypeCatalog.RootbedSlotTypeId,
+            SlotDepletionMilli = 1000 - StructurePolicy.DepletionPerHarvestMilli,
+        };
+        var world = World(OwnedSector(almostExhausted));
+        var report = new TurnReport();
+
+        var afterFirstTurn = SiegeConstruction.AdvanceDepletion(world, report, "Production");
+        var slot = afterFirstTurn.Sectors.Single().Slots.Single();
+        Assert.True(StructurePolicy.IsExhausted(slot.SlotDepletionMilli));
+        var exhaustedEvents = report.Entries.Where(e => e.Detail == "slot.exhausted:0").ToList();
+        Assert.Single(exhaustedEvents);
+        Assert.Equal("s1", exhaustedEvents[0].SectorId);
+        Assert.Equal("dave", exhaustedEvents[0].Audience);
+
+        // A second, already-exhausted turn keeps advancing the counter (no clamp, per BoardEconomy's
+        // own "no clamp" precedent) but must NOT fire the transition event again.
+        var afterSecondTurn = SiegeConstruction.AdvanceDepletion(afterFirstTurn, report, "Production");
+        Assert.True(afterSecondTurn.Sectors.Single().Slots.Single().SlotDepletionMilli > slot.SlotDepletionMilli);
+        Assert.Single(report.Entries.Where(e => e.Detail == "slot.exhausted:0"));
+    }
+
+    [Fact]
+    public void A_slot_not_yielding_this_turn_never_fires_the_exhaustion_event()
+    {
+        var world = World(Sector(new WorldSlot
+        {
+            SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Intact,
+            SlotDepletionMilli = 1000 - StructurePolicy.DepletionPerHarvestMilli,
+        }));
+        var report = new TurnReport();
+
+        SiegeConstruction.AdvanceDepletion(world, report, "Production");
+
+        Assert.Empty(report.Entries);
     }
 }

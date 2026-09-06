@@ -267,6 +267,12 @@ export type ArmouryRowView = {
   unseen: boolean;
   stale: boolean;
   acquiredUtc: string;
+  /**
+   * item-content `granted-action-text` (T15) — card block 9's compact-line half
+   * (`ssot-presentation.md` §9.14): the item grants a battle-only action, so it is inert on the lawn.
+   * A plain answer, not `Pending`: the grant rows are on the wire, unlike `role`/`frame` above.
+   */
+  battleOnly: boolean;
 };
 
 /** The inbox is counted over the WHOLE armoury, never the page. */

@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import {
-  allocGameGeneration,
   lawnBusEmit,
   lawnBusOn,
   type LawnModelPayload,
@@ -8,7 +7,12 @@ import {
   type LawnViewModePayload
 } from "@/game/EventBus";
 import { createLawnGame, destroyLawnGame } from "@/game/createLawnGame";
+import { setApiBaseMirror } from "@/game/apiBaseMirror";
+import { setIconEpochMirror } from "@/game/iconEpochMirror";
 import { lawnWorldSize } from "@/game/gridMath";
+import { usePhaserIslandHost } from "@/game-host/usePhaserIslandHost";
+import { apiBase } from "@/lib/bus/rest";
+import { getIconEpoch, subscribeIconEpoch } from "@/lib/bus/icon-epoch";
 import { cn } from "@/lib/cn";
 import type { LawnViewMode } from "./lawnViewMode";
 import { isLargeCanvas } from "./lawnViewMode";
@@ -22,7 +26,7 @@ import {
 } from "./lawnHostBuffer";
 
 /**
- * Facade host — mount/destroy idempotent under StrictMode (RT-02/07/11).
+ * Facade host — mount/destroy via usePhaserIslandHost (RT-02/07/11).
  * Buffers lawn:model and lawn:interaction until lawn:ready; drops foreign generation.
  */
 export function LawnGameHost({
@@ -37,9 +41,6 @@ export function LawnGameHost({
   onSelect: (payload: LawnSelectPayload) => void;
 }) {
   const parentRef = useRef<HTMLDivElement | null>(null);
-  const gameRef = useRef<Phaser.Game | null>(null);
-  const generationRef = useRef(0);
-  const readyRef = useRef(false);
   const bufferedModelRef = useRef<LawnViewModel | null>(null);
   const bufferedInteractionRef = useRef<InteractionState | null>(null);
   const bufferedViewRef = useRef<LawnViewMode | null>(null);
@@ -47,34 +48,14 @@ export function LawnGameHost({
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
 
-  useEffect(() => {
-    const parent = parentRef.current;
-    if (!parent) return;
-
-    const generation = allocGameGeneration();
-    generationRef.current = generation;
-    readyRef.current = false;
-    bufferedModelRef.current = null;
-    bufferedInteractionRef.current = null;
-    bufferedViewRef.current = null;
-    lastEmittedRev.current = undefined;
-
-    const game = createLawnGame({ parent, generation });
-    gameRef.current = game;
-
-    const resizeToParent = () => {
-      const w = Math.floor(parent.clientWidth);
-      const h = Math.floor(parent.clientHeight);
-      if (w < 2 || h < 2) return;
-      game.scale.resize(w, h);
-      lawnBusEmit("lawn:resized", { generation, width: w, height: h });
-    };
-
-    const ro = new ResizeObserver(() => resizeToParent());
-    ro.observe(parent);
-    resizeToParent();
-
-    const flushBuffers = () => {
+  const { generationRef, readyRef, notifyReady } = usePhaserIslandHost({
+    parentRef,
+    create: ({ parent, generation }) => createLawnGame({ parent, generation }),
+    destroy: destroyLawnGame,
+    onResized: (generation, width, height) => {
+      lawnBusEmit("lawn:resized", { generation, width, height });
+    },
+    onReady: (generation) => {
       const bufModel = takeBuffered(bufferedModelRef);
       if (bufModel) {
         lastEmittedRev.current = bufModel.revision;
@@ -95,29 +76,47 @@ export function LawnGameHost({
           viewMode: bufView
         } satisfies LawnViewModePayload);
       }
+    }
+  });
+
+  useEffect(() => {
+    bufferedModelRef.current = null;
+    bufferedInteractionRef.current = null;
+    bufferedViewRef.current = null;
+    lastEmittedRev.current = undefined;
+
+    // React owns HTTP / icon epoch — push mirrors into Phaser (lawn-plane).
+    setApiBaseMirror(apiBase());
+    const pushEpoch = () => {
+      const epoch = getIconEpoch();
+      setIconEpochMirror(epoch);
+      const generation = generationRef.current;
+      if (generation) {
+        lawnBusEmit("lawn:iconEpoch", { generation, epoch });
+      }
     };
+    pushEpoch();
+    const offEpoch = subscribeIconEpoch(pushEpoch);
 
     const offReady = lawnBusOn("lawn:ready", (raw) => {
       const p = raw as { generation?: number };
-      if (p.generation !== generation) return;
-      readyRef.current = true;
-      flushBuffers();
+      if (p.generation == null) return;
+      notifyReady(p.generation);
     });
 
     const offSelect = lawnBusOn("lawn:select", (raw) => {
       const p = raw as LawnSelectPayload;
-      if (p.generation !== generation) return;
+      if (p.generation !== generationRef.current) return;
       onSelectRef.current(p);
     });
 
     return () => {
-      ro.disconnect();
+      offEpoch();
       offReady();
       offSelect();
-      destroyLawnGame(gameRef.current, generation);
-      gameRef.current = null;
-      readyRef.current = false;
     };
+    // Mount-once listeners; generation filtered via refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -134,7 +133,7 @@ export function LawnGameHost({
       revision: model.revision,
       model
     } satisfies LawnModelPayload);
-  }, [model]);
+  }, [model, generationRef, readyRef]);
 
   useEffect(() => {
     const generation = generationRef.current;
@@ -144,7 +143,7 @@ export function LawnGameHost({
       return;
     }
     lawnBusEmit("lawn:interaction", toInteractionPayload(generation, interaction));
-  }, [interaction]);
+  }, [interaction, generationRef, readyRef]);
 
   useEffect(() => {
     const generation = generationRef.current;
@@ -157,7 +156,7 @@ export function LawnGameHost({
       generation,
       viewMode
     } satisfies LawnViewModePayload);
-  }, [viewMode]);
+  }, [viewMode, generationRef, readyRef]);
 
   const large = isLargeCanvas(viewMode);
   const world = lawnWorldSize(DEFAULT_ROWS, DEFAULT_COLS);
@@ -166,6 +165,7 @@ export function LawnGameHost({
     <div
       ref={parentRef}
       data-testid="lawn-game-host"
+      data-test-id="lawn-game-host"
       className={cn(
         "w-full overflow-hidden rounded-sm border border-border bg-soil",
         large

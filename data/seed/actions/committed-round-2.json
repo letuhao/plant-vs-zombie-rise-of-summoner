@@ -12,6 +12,7 @@
         "atom.searing-strike"
       ],
       "category": "attack",
+      "descriptionKey": "action.species.allpeater.001.desc",
       "id": "action.species.allpeater.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -36,6 +37,7 @@
         "atom.deathblast"
       ],
       "category": "attack",
+      "descriptionKey": "action.species.bucketnutzombie.001.desc",
       "id": "action.species.bucketnutzombie.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -60,6 +62,7 @@
         "atom.terraforming"
       ],
       "category": "attack",
+      "descriptionKey": "action.species.cabbagepult.001.desc",
       "id": "action.species.cabbagepult.001",
       "motifsUsed": [
         "攻击",
@@ -85,6 +88,7 @@
         "atom.terraforming"
       ],
       "category": "defense",
+      "descriptionKey": "action.species.cabbagepult.002.desc",
       "id": "action.species.cabbagepult.002",
       "kindHint": "innate",
       "motifsUsed": [
@@ -109,6 +113,7 @@
         "atom.retribution"
       ],
       "category": "defense",
+      "descriptionKey": "action.species.cactusblover.001.desc",
       "id": "action.species.cactusblover.001",
       "kindHint": "innate",
       "motifsUsed": [

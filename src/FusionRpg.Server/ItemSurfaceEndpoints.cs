@@ -28,9 +28,17 @@ public static class ItemSurfaceEndpoints
 {
     public sealed record SurfaceStatusDto(string Surface, string State, string UnlockKey);
 
+    /// <param name="BattleOnly">
+    /// item-content `granted-action-text` (T15): this item grants an action that only exists inside a
+    /// battle (a DefaultAttack grant replaces the species' basic attack). `ssot-presentation.md`
+    /// §9.14 asks for the tag HERE and not only on the card — "a player scanning an armoury should
+    /// not have to open each item to learn that half of them are inert on the lawn". Derived by
+    /// <c>RpgStore.GrantsBattleOnlyAction</c>, the same read card block 9 uses.
+    /// </param>
     public sealed record ArmouryRowDto(
         string InstanceId, string ContainerId, string Rarity, int RarityOrdinal,
-        bool Assigned, bool Locked, bool Unseen, bool Stale, string AcquiredUtc);
+        bool Assigned, bool Locked, bool Unseen, bool Stale, string AcquiredUtc,
+        bool BattleOnly = false);
 
     public sealed record ArmouryPageDto(
         int Total, int Unseen, bool OverReviewPressure, string RenderStrategy, IReadOnlyList<ArmouryRowDto> Rows);
@@ -39,7 +47,24 @@ public static class ItemSurfaceEndpoints
         string ComboId, string Shape, string State, int? Distance,
         IReadOnlyList<string> MissingFamilies, IReadOnlyList<string> MissingElements, int GrantedTier);
 
-    public static void MapItemSurfaces(this WebApplication app, ItemSurfaceTuning surfaceTuning, SocketTuning socketTuning)
+    /// <param name="lookupInsert">
+    /// ⭐ <b>The gem catalog, by container id</b> — the same <see cref="GemInsertCorpus"/> delegate
+    /// <see cref="ItemCardEndpoints"/> already reads (module 16 shipped <c>gems/*.json</c> as seed
+    /// JSON, not a table, so this is a boot-time stopgap exactly like
+    /// <see cref="BaseTypeSocketMaxCorpus"/>).
+    ///
+    /// <para>⛔ <b>Fixed 2026-09-06.</b> Both socket reads below used to build every
+    /// <see cref="InsertDef"/> with a hardcoded <c>Element: ""</c>, and
+    /// <c>CombinationEvaluator</c> matches ingredients on <c>Insert.Element</c> — so every
+    /// element-shaped resonance (Pure, Ring, Eclipse, and Diversity's distinct-element count) was
+    /// unreachable through this route no matter what the player had socketed. <c>null</c> here keeps
+    /// the old element-free shape rather than failing, and a container the corpus does not carry
+    /// falls back to <c>""</c>, which is a LEGITIMATE value: an element-free insert
+    /// (<c>SocketModel.cs:72</c>) contributes to no resonance shape at all.</para>
+    /// </param>
+    public static void MapItemSurfaces(
+        this WebApplication app, ItemSurfaceTuning surfaceTuning, SocketTuning socketTuning,
+        Func<string, CardInsertLookup?>? lookupInsert = null)
     {
         if (surfaceTuning is null) throw new ArgumentNullException(nameof(surfaceTuning));
         if (socketTuning is null) throw new ArgumentNullException(nameof(socketTuning));
@@ -96,7 +121,10 @@ public static class ItemSurfaceEndpoints
                     Row: new ArmouryRowDto(
                         item.InstanceId, instance?.ContainerId ?? "", rarity,
                         rarity.Length > 0 && ordinals.TryGetValue(rarity, out var ord) ? ord : 0,
-                        isAssigned, item.Locked, Unseen: !item.Seen, item.Stale, item.AcquiredUtc),
+                        isAssigned, item.Locked, Unseen: !item.Seen, item.Stale, item.AcquiredUtc,
+                        // §9.14's compact-line tag. No container means no grants to read, so the
+                        // honest answer is false rather than a lookup on an empty id.
+                        BattleOnly: instance is not null && store.GrantsBattleOnlyAction(instance.ContainerId)),
                     Entry: new ArmouryEntry(
                         item.InstanceId, instance?.ContainerId ?? "", Role: "", Frame: "",
                         rarity.Length > 0 && ordinals.TryGetValue(rarity, out var o2) ? o2 : 0,
@@ -130,8 +158,7 @@ public static class ItemSurfaceEndpoints
             // Only filled sockets reach the evaluator; an empty one is room, not an ingredient.
             var fill = slots
                 .Where(s => !s.IsEmpty)
-                .Select(s => new SocketFill(s.Index, s.Affinity,
-                    new InsertDef(s.InsertContainerId ?? "", s.InsertContainerId ?? "", "", 1)))
+                .Select(s => new SocketFill(s.Index, s.Affinity, InsertOf(lookupInsert, s.InsertContainerId)))
                 .ToList();
 
             var rows = CombinationDistance.Evaluate(host, fill, catalog, socketTuning, surfaceTuning, out _);
@@ -142,7 +169,7 @@ public static class ItemSurfaceEndpoints
             var held = playerId is { Length: > 0 }
                 ? HeldLedger.From(store.ListStock(playerId)
                     .Where(s => s.ContainerId.StartsWith("gem.", StringComparison.Ordinal))
-                    .Select(s => new InsertDef(s.ContainerId, s.ContainerId, "", 1)))
+                    .Select(s => InsertOf(lookupInsert, s.ContainerId)))
                 : HeldLedger.Empty;
 
             var rendered = CompendiumReveal.Render(rows, catalog, held, socketTuning, surfaceTuning);
@@ -151,5 +178,23 @@ public static class ItemSurfaceEndpoints
                 r.ComboId, ComboShapes.Id(r.Shape), r.State.ToString(), r.Distance,
                 r.Missing.Select(m => m.FamilyId).ToList(), r.MissingElements, r.GrantedTier)).ToList());
         });
+    }
+
+    /// <summary>
+    /// One insert, described the way module 16's evaluator needs it. <b>The element comes from the
+    /// gem corpus, never from a constant</b> — see the <c>lookupInsert</c> parameter's note.
+    ///
+    /// <para>The fallback shape is the one this route used unconditionally before the corpus was
+    /// wired: family = the container id (there is no family to know without the corpus) and
+    /// <c>Element: ""</c>, which is the honest "no element" and is also what a genuinely
+    /// element-free insert authors. Tier stays <see cref="GemInsertCorpus.UnauthoredInsertTier"/>
+    /// either way — <c>gems/*.json</c> authors no tier, and that class's own note explains why the
+    /// ladder's lowest rung is the safe direction.</para>
+    /// </summary>
+    static InsertDef InsertOf(Func<string, CardInsertLookup?>? lookupInsert, string? containerId)
+    {
+        var id = containerId ?? "";
+        return lookupInsert?.Invoke(id)?.Def
+               ?? new InsertDef(id, id, "", GemInsertCorpus.UnauthoredInsertTier);
     }
 }

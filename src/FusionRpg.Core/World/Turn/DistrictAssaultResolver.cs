@@ -134,7 +134,19 @@ public sealed class DistrictAssaultResolver : IBattleResolver
             report = BattleEngine.Resolve(setup, battleSeed,
                 profile: BattleModeProfileCatalog.Resolve(BattleModeProfileCatalog.SiegeId),
                 board: boardState,
-                onEffectHostReady: host => host.ConstructionBoard = constructionBoard);
+                containerResolver: ConstructionActions.ContainerResolver,
+                onEffectHostReady: host =>
+                {
+                    host.ConstructionBoard = constructionBoard;
+                    // 15.3b (2026-09-06): the four construction effects, upserted BEFORE BindContainers
+                    // runs later in this same BattleRunState constructor (onEffectHostReady fires at
+                    // BattleRunState.cs:330, BindContainers at :473 -- confirmed by reading the file, not
+                    // assumed) so a builder actor's own container grant resolves correctly. No actor
+                    // holds a construction action yet -- that is `siege-ai`'s own live intent source's
+                    // job (this module's own doc comment above), not this resolver's.
+                    if (host.Bag.Catalog is Effects.InMemoryEffectCatalog catalog)
+                        foreach (var def in ConstructionActions.CompiledEffects) catalog.Upsert(def);
+                });
         }
 
         var resultByKey = report?.Actors.ToDictionary(a => a.Key, StringComparer.Ordinal)

@@ -71,44 +71,59 @@
       "ordinal": 12
     },
     {
-      "id": "pact_mark",
-      "category": "contagion",
+      "id": "nerve.afflicted",
+      "category": "dot",
       "ordinal": 13
     },
     {
-      "id": "poison",
+      "id": "nerve.shaken",
       "category": "dot",
       "ordinal": 14
     },
     {
-      "id": "rally",
+      "id": "nerve.unsettled",
       "category": "dot",
       "ordinal": 15
     },
     {
-      "id": "rot",
+      "id": "pact_mark",
       "category": "contagion",
       "ordinal": 16
     },
     {
-      "id": "shatter",
+      "id": "poison",
       "category": "dot",
       "ordinal": 17
     },
     {
-      "id": "spark",
-      "category": "contagion",
+      "id": "rally",
+      "category": "dot",
       "ordinal": 18
     },
     {
-      "id": "spore",
+      "id": "rot",
       "category": "contagion",
       "ordinal": 19
     },
     {
-      "id": "wither",
+      "id": "shatter",
       "category": "dot",
       "ordinal": 20
+    },
+    {
+      "id": "spark",
+      "category": "contagion",
+      "ordinal": 21
+    },
+    {
+      "id": "spore",
+      "category": "contagion",
+      "ordinal": 22
+    },
+    {
+      "id": "wither",
+      "category": "dot",
+      "ordinal": 23
     }
   ]
 }

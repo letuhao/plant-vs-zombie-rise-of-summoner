@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Siege;
@@ -29,9 +30,26 @@ public class SiegeObstaclesTests
     };
 
     [Fact]
-    public void Obstacle_kind_defaults_to_none_and_shipped_rows_are_unaffected()
+    public void Obstacle_kind_defaults_to_none_and_every_pre_siege_loam_row_is_unaffected()
     {
-        Assert.All(StructureCatalog.All, s => Assert.Equal(ObstacleKind.None, s.Obstacle));
+        // 2026-09-06: the "moat" row (siege-construction §5) is the FIRST real obstacle this catalog
+        // ships — this assertion narrows from "every shipped row" to the loam-content rows that
+        // predate any notion of a siege, which is what the test's own name always meant to guarantee.
+        Assert.All(StructureCatalog.All.Where(s => s.StructureId != "moat"), s => Assert.Equal(ObstacleKind.None, s.Obstacle));
+    }
+
+    [Fact]
+    public void The_moat_is_a_real_shipped_Rampart_obstacle()
+    {
+        var moat = StructureCatalog.Get("moat");
+        Assert.Equal(ObstacleKind.Rampart, moat.Obstacle);
+        Assert.True(moat.BlocksMovement);
+        Assert.True(moat.BlocksLineOfFire);
+        // Buildable via all four paths on purpose (15.3b, 2026-09-06) — one real structure proves
+        // `structure.place`'s mechanism end to end; a fuller roster is `structure-corpus`'s own job.
+        Assert.Equal(
+            new[] { AcquisitionPath.Built, AcquisitionPath.Assembled, AcquisitionPath.Summoned, AcquisitionPath.Laboured },
+            moat.AcquisitionPaths);
     }
 
     [Fact]

@@ -94,7 +94,7 @@ The PvZ board projection. Observe-and-intent only; the RPG never owns this simul
 | | |
 |---|---|
 | **Contains** | The Phaser canvas — the Dual-Plane Lawn Projector |
-| **HUD** | Sun · wave clock · match phase · commander + active aura · deployed specimens · status tray · transport cluster |
+| **HUD** | Sun **bank** (not actor Sun) · wave clock · match phase · commander + active aura · fielded uniques · status tray · transport · **order bar** (off-board, 1–9) · cell occupancy dock + **ActorSheet** over the live canvas — [spec-lawn-interactive.md](spec-lawn-interactive.md) · [12-lawn-stage.html](12-lawn-stage.html) |
 | **Time** | Owned by the game. Under a band-2 panel it follows `overlay-spec.md` §Pause while away |
 | **Canvas lifetime** | Created on **entering this stage**, destroyed on **leaving it**. Never on opening a panel (GG-11) |
 | **Enter** | Start a run from the sanctum, or the injector reporting a live board |
@@ -369,3 +369,4 @@ stages, and one (`/recipes`) splits between a reference and a workshop.
 | [09-commander-list.html](09-commander-list.html) | Commanders layer · persisted default · list → Actor sheet |
 | [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render |
 | [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — every map component in all its states, with the field that drives it. Supersedes plate 03 §A–B |
+| [12-lawn-stage.html](12-lawn-stage.html) | **Lawn interactive catalog** — ActorCollection, ActorSheet character landing, cell stack, spawn tray, commander order bar. Contract: spec-lawn-interactive.md. Supersedes plate 04 lawn chrome and plate 08 landing |

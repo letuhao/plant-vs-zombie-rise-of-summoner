@@ -174,4 +174,113 @@ public class RarityShiftTests
         Assert.Equal(25, NewWeight(shift, 30, 90));   // occasional now carries seldom's
         Assert.Equal(7, NewWeight(shift, 40, 25));    // seldom now carries exceptional's
     }
+
+    // ---- Apply: the per-table orchestrator (D3.11) ----------------------------------------------------
+
+    static DropTableRow SampleTable(string tableId, string? entryFloor = null) => new(
+        tableId, SourceAllow: new[] { "web" }, MinIlvl: null, MaxIlvl: null, Enabled: true, Revision: 1,
+        Groups: new[]
+        {
+            new DropTableGroupRow("main", Seq: 0, Rolls: 1, Entries: new[]
+            {
+                new DropTableEntryRow(Seq: 0, Kind: DropEntryKind.Equipment, RefId: "", Weight: 100, RarityFloor: entryFloor),
+            }),
+        });
+
+    [Fact]
+    public void Apply_null_arguments_throw()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+        Assert.Throws<ArgumentNullException>(() => RarityShift.Apply(null!, Ladder, "t1", 0));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.Apply(tables, null!, "t1", 0));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.Apply(tables, Ladder, null!, 0));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.Apply(tables, Ladder, "t1", 0, null!));
+    }
+
+    [Fact]
+    public void Apply_on_an_unknown_table_id_returns_the_map_unchanged()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+        var result = RarityShift.Apply(tables, Ladder, "does-not-exist", 0);
+        Assert.Same(tables, result);
+    }
+
+    [Fact]
+    public void Apply_leaves_every_other_table_untouched_same_instance()
+    {
+        var t1 = SampleTable("t1");
+        var t2 = SampleTable("t2");
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = t1, ["t2"] = t2 };
+
+        var result = RarityShift.Apply(tables, Ladder, "t1", 1, "occasional");
+
+        Assert.Same(t2, result["t2"]);
+        Assert.NotSame(t1, result["t1"]);
+    }
+
+    [Fact]
+    public void Apply_composes_the_entrys_own_floor_with_the_callers_own_sources_caller_wins()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1", entryFloor: "frequent") };
+
+        var result = RarityShift.Apply(tables, Ladder, "t1", 0, "occasional", null);
+
+        Assert.Equal("occasional", result["t1"].Groups[0].Entries[0].RarityFloor); // occasional (30) beats frequent (20)
+    }
+
+    /// <summary>The other direction of the same claim, load-bearing on its own: with the caller's own
+    /// sources all LOWER than the entry's, the entry's own authored floor must still be the one that
+    /// wins — proving `Apply` genuinely folds it in, not just whatever the caller happens to supply.
+    /// (A caller-floor-always-highest fixture cannot tell "entry floor included" from "entry floor
+    /// silently dropped", since the caller's own value would win either way.)</summary>
+    [Fact]
+    public void Apply_composes_the_entrys_own_floor_with_the_callers_own_sources_entry_wins()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1", entryFloor: "seldom") };
+
+        var result = RarityShift.Apply(tables, Ladder, "t1", 0, "occasional", null);
+
+        Assert.Equal("seldom", result["t1"].Groups[0].Entries[0].RarityFloor); // seldom (40) beats occasional (30)
+    }
+
+    [Fact]
+    public void Apply_with_no_floor_sources_at_all_leaves_the_entry_unfloored()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+
+        var result = RarityShift.Apply(tables, Ladder, "t1", 0);
+
+        Assert.Null(result["t1"].Groups[0].Entries[0].RarityFloor);
+    }
+
+    [Fact]
+    public void Apply_writes_the_same_composed_shift_onto_every_entry_in_the_table()
+    {
+        var table = SampleTable("t1") with
+        {
+            Groups = new[]
+            {
+                new DropTableGroupRow("g1", 0, 1, new[] { new DropTableEntryRow(0, DropEntryKind.Equipment, "", 100) }),
+                new DropTableGroupRow("g2", 1, 1, new[] { new DropTableEntryRow(0, DropEntryKind.Equipment, "", 100) }),
+            },
+        };
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = table };
+
+        var result = RarityShift.Apply(tables, Ladder, "t1", 1);
+
+        var shift1 = result["t1"].Groups[0].Entries[0].RarityWeightShift;
+        var shift2 = result["t1"].Groups[1].Entries[0].RarityWeightShift;
+        Assert.Equal(RarityShift.ToWeightShift(Ladder, 1), shift1);
+        Assert.Equal(shift1, shift2);
+    }
+
+    [Fact]
+    public void Apply_sums_kind_and_rung_shifts_before_computing_the_weight_shift()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+
+        var result = RarityShift.Apply(tables, Ladder, "t1", shiftRungs: 1 + 1); // e.g. rung=1, room-kind=1
+
+        Assert.Equal(RarityShift.ToWeightShift(Ladder, 2), result["t1"].Groups[0].Entries[0].RarityWeightShift);
+    }
 }

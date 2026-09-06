@@ -43,7 +43,8 @@ public class AtomCatalogSsotDriftTests
 
         // Sanity anchors: these ARE today's generated values, not guesses. If one of these Assert.Equal
         // lines fails, code moved and the doc needs updating — that is the point.
-        Assert.Equal(267, registry.AllRegistered.Count);
+        // 267 -> 268 (party-dungeon D4.25, 2026-09-06): `loadout.slots`, the extend-action-slot grant.
+        Assert.Equal(268, registry.AllRegistered.Count);
         // 11 since E16; E38 (spec-entity-fields-12plus.md) took it to 23.
         Assert.Equal(23, StatChannels.All.Length);
         // E34 (spec-trigger-vocabulary.md): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/OnSunCollect/

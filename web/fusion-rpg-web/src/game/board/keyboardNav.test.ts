@@ -126,4 +126,46 @@ describe("wireKeyboardNav — duck-typed against a KeySource, no Phaser import n
     keys.fire("ArrowRight");
     expect(onFocusChange).not.toHaveBeenCalled();
   });
+
+  it("when isEnabled is false, arrows and confirm are ignored (GG-18 mute)", () => {
+    const keys = fakeKeySource();
+    const onFocusChange = vi.fn();
+    const onConfirm = vi.fn();
+    wireKeyboardNav({
+      keys,
+      getSpec: () => makeGridSpec(5, 9),
+      getFocus: () => ({ row: 2, col: 4 }),
+      onFocusChange,
+      onConfirm,
+      isEnabled: () => false
+    });
+
+    keys.fire("ArrowRight");
+    keys.fire("Enter");
+    keys.fire(" ");
+
+    expect(onFocusChange).not.toHaveBeenCalled();
+    expect(onConfirm).not.toHaveBeenCalled();
+  });
+
+  it("when isEnabled flips true again, navigation resumes", () => {
+    const keys = fakeKeySource();
+    const onFocusChange = vi.fn();
+    let enabled = false;
+    wireKeyboardNav({
+      keys,
+      getSpec: () => makeGridSpec(5, 9),
+      getFocus: () => ({ row: 2, col: 4 }),
+      onFocusChange,
+      onConfirm: vi.fn(),
+      isEnabled: () => enabled
+    });
+
+    keys.fire("ArrowRight");
+    expect(onFocusChange).not.toHaveBeenCalled();
+
+    enabled = true;
+    keys.fire("ArrowRight");
+    expect(onFocusChange).toHaveBeenCalledWith({ row: 2, col: 5 });
+  });
 });

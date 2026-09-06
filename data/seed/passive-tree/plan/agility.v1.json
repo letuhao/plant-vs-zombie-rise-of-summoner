@@ -797,6 +797,7 @@
       "combat.shield.pen",
       "combat.shield.regen",
       "combat.shield.toughness",
+      "loadout.slots",
       "move.range",
       "progression.bonus.arm1",
       "progression.bonus.arm2",
@@ -863,6 +864,9 @@
       "jala",
       "kelp",
       "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
       "pact_mark",
       "poison",
       "rally",
@@ -892,13 +896,13 @@
     "atomTrigger": 13,
     "atomTriggerAuthorable": 11,
     "branch": 2,
-    "channelFamily": 53,
+    "channelFamily": 54,
     "conversionState": 2,
     "element": 7,
     "exclusionForm": 3,
     "nodeClass": 2,
     "posture": 3,
-    "status": 21,
+    "status": 24,
     "tier": 10
   },
   "roster": {
@@ -920,7 +924,7 @@
       "aptitudes": 12,
       "demonFamilies": 19,
       "elements": 6,
-      "statuses": 21
+      "statuses": 24
     },
     "demonFamilies": [
       "base",
@@ -965,6 +969,9 @@
       "jala",
       "kelp",
       "leech",
+      "nerve.afflicted",
+      "nerve.shaken",
+      "nerve.unsettled",
       "pact_mark",
       "poison",
       "rally",

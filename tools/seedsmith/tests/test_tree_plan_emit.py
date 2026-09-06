@@ -34,7 +34,10 @@ class RosterAndVocabularyTests(unittest.TestCase):
         roster = vocabulary.load_roster(real_seed_root())
         self.assertEqual(len(roster.aptitudes), 12)
         self.assertEqual(len(roster.elements), 6)
-        self.assertEqual(len(roster.statuses), 21)
+        # D51 (2026-09-06): 21 -> 24, the live StatusCategoryRegistry's three nerve.* statuses
+        # (afflicted, shaken, unsettled) accepted into this program's own corpus, re-baked via
+        # `PassiveTreeRosterGen --status-emit`.
+        self.assertEqual(len(roster.statuses), 24)
 
     def test_property_vocabulary_counts_match_the_spec_table(self) -> None:
         vocab = vocabulary.load_property_vocabulary(10, real_seed_root())
@@ -44,12 +47,12 @@ class RosterAndVocabularyTests(unittest.TestCase):
         self.assertEqual(vocab.counts["posture"], 3)
         self.assertEqual(vocab.counts["aptitude"], 12)
         self.assertEqual(vocab.counts["element"], 7)  # 6 + omni
-        self.assertEqual(vocab.counts["status"], 21)
+        self.assertEqual(vocab.counts["status"], 24)  # D51: 21 -> 24, three nerve.* statuses accepted
         self.assertEqual(vocab.counts["atomAttachPoint"], 7)
         self.assertEqual(vocab.counts["atomKind"], 16)
         self.assertEqual(vocab.counts["atomTrigger"], 13)
         self.assertEqual(vocab.counts["atomTriggerAuthorable"], 11)
-        self.assertEqual(vocab.counts["channelFamily"], 53)
+        self.assertEqual(vocab.counts["channelFamily"], 54)  # D52: 53 -> 54, live derived-stats growth
         self.assertEqual(vocab.counts["conversionState"], 2)
         self.assertEqual(vocab.counts["exclusionForm"], 3)
 

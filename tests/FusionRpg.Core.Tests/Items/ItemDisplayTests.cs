@@ -1,4 +1,5 @@
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Generation;
 using FusionRpg.Core.Items.Display;
 using FusionRpg.Core.Stats.Derived;
 using Xunit;
@@ -35,11 +36,30 @@ public class ItemDisplayTests
     /// <summary>
     /// 98 → 107 on 2026-09-06: the nine formerly phantom families below were authored, and each one
     /// brought its own template row (seven into `triggered.json`, two into `derived.json`).
+    /// 107 → 109 the same day (item-content T11): `atom.chill-punisher` and `atom.rot-punisher` were
+    /// authored into `g-punisher.json` without matching rows, and got them (`disptpl.p3-050`/`-051`).
+    ///
+    /// <para>The count is kept AND the name is earned: the second assertion reads the real family
+    /// corpus and requires one template per family, so the literal above can never again be the only
+    /// thing standing between a newly authored family and a raw id on a tooltip.</para>
     /// </summary>
     [Fact]
     public void Every_shipped_family_has_a_display_template()
     {
-        Assert.Equal(107, LoadAllTemplates().Count);
+        var templates = LoadAllTemplates();
+        Assert.Equal(109, templates.Count);
+
+        var templated = templates.Select(r => r.RuntimeFamily).ToHashSet(StringComparer.Ordinal);
+        var familyDir = Path.Combine(RepoRoot(), "data", "seed", "items", "affix-families");
+        var families = Directory.EnumerateFiles(familyDir, "*.json")
+            .Where(f => !Path.GetFileName(f).StartsWith('_'))
+            .SelectMany(f => AffixFamilyFile.Read(Path.GetFileName(f), File.ReadAllText(f)))
+            .Select(f => f.Id)
+            .ToList();
+
+        Assert.NotEmpty(families);
+        Assert.Empty(families.Where(id => !templated.Contains(id)).OrderBy(id => id, StringComparer.Ordinal));
+        Assert.Equal(families.Count, templates.Count);
     }
 
     /// <summary>

@@ -378,6 +378,18 @@ public sealed record WorldStructureDto
     public int YieldMultiplierMilli { get; init; }
     public int BuildTurns { get; init; }
     public long CapacityBonus { get; init; }
+
+    /// <summary>
+    /// base-defense `structure-catalog-import` (module 25) P3-5, second half: `Name`/`Kind`/
+    /// `RequiredSlotKind` above already reached this DTO before this module (verified against
+    /// `WorldEndpoints.cs` directly — spec-structure-catalog-import.md's own claim that "nothing
+    /// can name a structure" was stale). `ObstacleKind` and `MaterialTier` had not — an inspector
+    /// panel could name a moat but not say it is an obstacle or how tough it is.
+    /// </summary>
+    public string ObstacleKind { get; init; } = "";
+
+    /// <summary>Decision 32's material tier ordinal (0 = indestructible). See <see cref="ObstacleKind"/>.</summary>
+    public int MaterialTier { get; init; }
 }
 
 /// <summary>One slot type (`SlotTypeCatalog`) — what a slot letter means.</summary>

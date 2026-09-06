@@ -480,6 +480,52 @@ the duel roster with the same half-widths every other cell here carries.
 The measurement is not a question and is no longer staged as one. **Whether D15's rule should change on
 the strength of it is the owner's**, and that is what §14 open question 3 now asks.
 
+### 12. Production-scale measurement — the real machine-time plan
+
+**Extended 2026-09-06** (Checkpoint F was reached as "measurement" but never as "measured" — every
+real run against this harness so far has been a deliberately low-trial smoke test, honestly reporting
+`UNRESOLVED` rather than a genuine finding, per this task's own established rule that an assumed
+constraint is the same defect as a wrong line of code). The trial-count arithmetic (§10, §9.2) has
+always been exact; what was missing is the concrete plan for actually running it.
+
+**What is measured, not assumed, about the real cost.** A scaled-down real probe
+(`transfer --theta 400 --trials 50`, Release build) did not complete inside a 3-minute budget on this
+machine, under this session's own already-documented concurrent load (17–22 other `dotnet.exe`
+processes from ~14 peer sessions active on this repo). That is one data point at 50 trials, one Θ
+value — nowhere near the 3,000-trial screen (506 pairs) or the 40,000-trial refine the spec's own bar
+requires, and it was already too slow to finish under contention. **The honest conclusion is not a
+total-hours estimate** (extrapolating from one contended, incomplete run would be exactly the "false
+precision" this program has repeatedly corrected elsewhere) — it is that this run needs a dedicated
+measurement window, not a fit-it-in-alongside-everything-else attempt.
+
+**The plan:**
+
+1. **Calibrate first, at trivial cost.** Before committing to a real screening pass, run
+   `transfer --theta 400 --trials 100` (a small, fast, single-Θ probe) on a machine confirmed quiet
+   (`Get-Process dotnet` showing only this session's own process), and time it directly. This gives a
+   real per-trial-per-pair cost on uncontended hardware, which the 50-trial/3-minute/contended data
+   point cannot — extrapolate the 3,000/40,000 schedule from THIS number, not from a guess.
+2. **Run the screening pass (3,000 trials, all 506 pairs) first, alone.** Most cells will resolve
+   cleanly at 3,000 (§10's own arithmetic: 1.8pp half-width, well inside most real gaps) — `--refine`
+   only re-measures the cells whose gap falls inside their own half-width (§10's "two-stage design"),
+   so the refine pass's real cost is bounded by however few cells the screen leaves unresolved, not by
+   506 × 40,000 in the worst case.
+3. **A quiet window means no other Claude session and no other `dotnet test`/`dotnet build` running
+   concurrently** — confirmed via `Get-Process dotnet` immediately before starting, not assumed from
+   "it's been a while since I checked."
+4. **What `UNRESOLVED` or `FAIL` concretely means here, stated so the run can act on it without a
+   second design conversation:** `UNRESOLVED` on A10a's own `D` bar (§10's "stop and review — phase H's
+   corpus is budgeted on this premise") means Checkpoint F does not close and Phase H's own 480-node
+   commitment is reported as resting on an unproven premise, not silently treated as fine. `FAIL`
+   (direction wrong, or the bar not met with a resolved half-width) means the deep-tier mechanism
+   budget `tree-plan` already spent (§3.5's own reserved share) is not doing what it was built to do —
+   an owner conversation about `tree-plan`'s own budget shape, not a re-run with more trials (more
+   trials shrinks the half-width; it does not change a genuinely wrong `D`).
+5. **S4's own budget re-measurement (D42's tuning republish) rides the same quiet window** — it uses
+   the same `tools/CombatSim/Marginal.cs` finite-difference machinery over the same duel roster, so
+   scheduling one production run that does both (Erosion's `D`, then S4's marginal-value sweep) is
+   cheaper than two separate machine-time asks.
+
 ---
 
 ## Commands

@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { assertDestroySettled } from "./destroyGame";
 
 /**
  * base-defense `board-render` (module 16): the generic board layer's game factory — `createGame`
@@ -47,5 +48,6 @@ export function buildGameConfig(opts: CreateGameOptions): Phaser.Types.Core.Game
 }
 
 export function createGame(opts: CreateGameOptions): Phaser.Game {
+  assertDestroySettled();
   return new Phaser.Game(buildGameConfig(opts));
 }

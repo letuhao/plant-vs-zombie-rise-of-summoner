@@ -6,6 +6,7 @@ using FusionRpg.Core.Items.Mutation;
 using FusionRpg.Core.Items.Sockets;
 using FusionRpg.Core.Items.Surfaces;
 using FusionRpg.Core.Items.Thresholds;
+using FusionRpg.Core.Items.Uniques;
 using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Data;
@@ -56,10 +57,31 @@ public readonly record struct CardInsertLookup(InsertDef Def, string NameKey);
 /// <see cref="RarityPalette.Light"/>.
 /// </param>
 /// <param name="ItemName">
-/// Module 8's <c>ItemNameComposer.Compose</c> output, or module 17's authored unique name.
-/// <b>Module 10 renders the name; it does not derive it</b> (spec-affix-legality.md's own note), and
-/// neither does this method — the composer needs the <c>nameWords</c> corpus and the rare two-word
-/// draw, both of which live outside SQL. Empty falls back to the base type's own name key.
+/// An EXPLICIT name that overrides composition — module 17's authored unique name, or a caller that
+/// has already decided what this item is called. Empty is the normal case and means "compose one"
+/// (see <paramref name="LookupNameWords"/>).
+///
+/// <para>⛔ Until 2026-09-06 this was the ONLY way a name could reach the card, and nothing set it —
+/// which is why every rendered card fell back to <c>baseType.NameKey</c> and the header read
+/// <c>base.card-proof-blade</c>. It could not have worked: <see cref="ItemCardCorpus"/> is built once
+/// at host start, so a per-instance composed name has no way in through a flat string. The two
+/// delegates below are the fix, and they follow the same "needs per-request resolution" shape
+/// <paramref name="LookupBaseType"/> and <paramref name="LookupInsert"/> already use.</para>
+/// </param>
+/// <param name="LookupNameWords">
+/// <c>family_id</c> → its authored <c>nameWords</c> rows and the slot they fill
+/// (<c>AffixNameWordCorpus.Load</c>). With <paramref name="RareNameDraw"/>, this turns naming on:
+/// <see cref="RpgStore.GetItemCardInput"/> then calls <c>ItemNameAssembly.Compose</c> — module 8's own
+/// function, once — over the instance's real rolled affixes.
+///
+/// <para><c>null</c> (either delegate) leaves naming off and the card falls back to the base type's
+/// authored name, which is honest rather than half-composed.</para>
+/// </param>
+/// <param name="RareNameDraw">
+/// <c>roll_seed</c> → the two-word name a RARE item (3+ affixes) gets instead of the affix grammar
+/// (<c>RareNameCorpus.Load</c>). Required alongside <paramref name="LookupNameWords"/> because the
+/// threshold is 3 and real rarity rungs roll 3+ routinely — a naming path that throws on the common
+/// case is not wired.
 /// </param>
 public sealed record ItemCardCorpus(
     Func<string, CardBaseType?> LookupBaseType,
@@ -69,7 +91,10 @@ public sealed record ItemCardCorpus(
     EnhancementTuning? Enhancement = null,
     IReadOnlyList<string>? Palette = null,
     string ItemName = "",
-    DerivedStatRegistry? Registry = null);
+    DerivedStatRegistry? Registry = null,
+    Func<string, string?>? LookupString = null,
+    Func<string, AffixNameSlot?>? LookupNameWords = null,
+    Func<long, (string Head, string Tail)>? RareNameDraw = null);
 
 /// <summary>
 /// Who is asking. Absent, the card still renders — it just carries no requirement block, no refusal
@@ -196,11 +221,12 @@ public sealed partial class RpgStore
 
         var (sockets, combinations) = ReadSocketBlock(instanceId, container, baseType.Frame, corpus, sets);
         var (set, wornRole) = ReadSetBlock(instanceId, wearer, sets);
+        var unique = GetItemUnique(container.ContainerId);
 
         return new ItemCardInput(
             instance, container, LookupAtom, LookupTemplate, baseType,
             ReadRarity(container.Rarity, corpus.Palette),
-            corpus.ItemName.Length > 0 ? corpus.ItemName : baseType.NameKey)
+            ComposeItemName(corpus, instance, container, baseType, unique, LookupAtom))
         {
             ItemLevel = generation?.ItemLevel ?? 0,
             EnhanceLevel = enhanceLevel,
@@ -213,14 +239,58 @@ public sealed partial class RpgStore
             Combinations = combinations,
             Set = set,
             GrantedActions = ReadGrantedActions(container.ContainerId),
-            Unique = GetItemUnique(container.ContainerId),
+            Unique = unique,
             Locked = item.Locked,
             Stale = item.Stale,
             // `no_reassign` is reserved and deliberately unadded (ssot-inventory.md:208). No column,
             // no read, no guess.
             NoReassign = false,
             Registry = corpus.Registry,
+            // N2's string catalog, for block 10's authored sentence. Null when the host has no
+            // catalog on disk: the flavour line then carries its key alone and nothing is invented.
+            LookupString = corpus.LookupString,
         };
+    }
+
+    // ---- the name (module 8) ----------------------------------------------------------------------------
+
+    /// <summary>
+    /// ⭐ <b>The production caller module 8 named as its own last blocker</b> (item-content T1,
+    /// 2026-09-06). <c>ItemNameComposer.Compose</c> shipped correct and tested with no caller outside
+    /// <c>tests/</c>, so every card in the game rendered its base type's display KEY where its name
+    /// belongs.
+    ///
+    /// <para>⛔ <b>It derives nothing.</b> The grammar, the (tier DESC, seq ASC) selection, the
+    /// rare-name threshold and the word resolution all belong to modules 8's own functions, called
+    /// once through <see cref="ItemNameAssembly"/>. What happens here is the four-way precedence, and
+    /// nothing else:</para>
+    ///
+    /// <list type="number">
+    /// <item>An EXPLICIT <see cref="ItemCardCorpus.ItemName"/> wins — a caller that already knows.</item>
+    /// <item>A UNIQUE takes its base type's authored name: module 17 hand-authors a unique's name and
+    /// <c>ItemNameComposer</c>'s own doc says it is <i>"never called for one"</i>. (⏸ Named gap:
+    /// <c>UniqueRow</c> carries no name column of its own, so the base type's name is what there is —
+    /// module 17's to close, not this method's to invent.)</item>
+    /// <item>Both naming delegates present ⇒ the composed name.</item>
+    /// <item>Otherwise the base type's authored name, or its key when even that is empty — the same
+    /// fallback this method has always had, just one rung better.</item>
+    /// </list>
+    /// </summary>
+    static string ComposeItemName(
+        ItemCardCorpus corpus, InstanceRow instance, ContainerRow container, CardBaseType baseType,
+        UniqueRow? unique, Func<string, AtomRow?> lookupAtom)
+    {
+        if (corpus.ItemName.Length > 0) return corpus.ItemName;
+
+        var baseName = baseType.Name.Length > 0 ? baseType.Name : baseType.NameKey;
+        if (unique is not null) return baseName;
+        if (corpus.LookupNameWords is not { } lookupNameWords) return baseName;
+        if (corpus.RareNameDraw is not { } rareNameDraw) return baseName;
+
+        return ItemNameAssembly.Compose(
+            baseName, baseType.Frame, instance.RollSeed,
+            ItemNameAssembly.RolledAffixes(instance, container, lookupAtom, lookupNameWords),
+            lookupNameWords, rareNameDraw);
     }
 
     // ---- rarity ---------------------------------------------------------------------------------------
@@ -230,7 +300,12 @@ public sealed partial class RpgStore
     /// 1-based position in <c>rarity</c>'s own append-only ordinal order (never <c>ordinal / 10</c>,
     /// which would bake the spacing in), and the hex is that same position into the palette.
     /// </summary>
-    CardRarity ReadRarity(string? rarityId, IReadOnlyList<string>? palette)
+    /// <remarks><b>Public since 2026-09-06</b> (item-content module <c>atom-preview</c>): the preview
+    /// route renders an UNSAVED container, so it never reaches <see cref="GetItemCardInput"/> — but it
+    /// still needs the rung's three redundant channels off the same stored ladder. Widening the
+    /// visibility is the anti-duplication move: the alternative was a second pip count and a second
+    /// palette index in the Server, which is exactly how two surfaces come to disagree about a rung.</remarks>
+    public CardRarity ReadRarity(string? rarityId, IReadOnlyList<string>? palette)
     {
         var hexes = palette ?? RarityPalette.Dark;
         if (string.IsNullOrEmpty(rarityId)) return new CardRarity("", 0, "");
@@ -418,7 +493,15 @@ public sealed partial class RpgStore
             def.Tiers.OrderBy(t => t.PiecesRequired)
                 .Select(t => new CardSetTier(t.PiecesRequired, t.PiecesRequired <= p.Count, t.IsCapability))
                 .ToList(),
-            Redundant: mine.RedundantSetIds.Count > 0), wornRole);
+            Redundant: mine.RedundantSetIds.Count > 0,
+            // item-lore T7: the set's own authored lore key, straight off `item_set.flavour_key`.
+            // Null for the 24 sets that authored none, which renders no Flavour block at all.
+            FlavourKey: def.FlavourKey,
+            // item-content T2: `item_set.display_name`. SetCorpus.Parse has read it into
+            // SetDef.DisplayName since it shipped and the column round-trips it; the card derived
+            // `set.{setId}` and dropped it, and the string catalog has no `set.*` row to resolve that
+            // key with — so the set block showed an id-shaped string where a name belongs.
+            Name: def.DisplayName), wornRole);
     }
 
     // ---- requirements (module 4) ----------------------------------------------------------------------
@@ -442,17 +525,42 @@ public sealed partial class RpgStore
     /// <c>AlreadyKnown</c> is always <c>false</c>: whether a specimen already knows an action is the
     /// action layer's own state, not the item store's, and a card that guessed it would tell a player
     /// they already have something they do not.
+    ///
+    /// <para>⛔ <b>Fixed 2026-09-06 (item-content `granted-action-text`, T15) — a real defect, named
+    /// rather than quietly patched.</b> Both keys used to be built as <c>"action." + g.ActionId</c>,
+    /// and <c>rpg_action.action_id</c> ALREADY carries the <c>action.</c> stem
+    /// (<c>action.family.cactus.001</c>) — so block 9 asked the string catalog for
+    /// <c>action.action.family.cactus.001.desc</c>, a key nothing could ever author. The id IS the
+    /// key stem, so the name key is the id and the description key is now READ from
+    /// <c>rpg_action.description_key</c> rather than guessed from it.</para>
+    ///
+    /// <para>The <c>.desc</c> suffix survives only as the fallback for an action whose row is gone or
+    /// whose <c>description_key</c> is unauthored — a key that resolves to nothing, which is
+    /// <c>DisplayRules.MissingDisplayKey</c>'s visible absence rather than a blank line.</para>
     /// </summary>
     IReadOnlyList<CardGrantedAction> ReadGrantedActions(string containerId) =>
         ListItemGrantedActions(containerId)
             .Where(g => g.Enabled)
             .OrderBy(g => g.Seq)
             .Select(g => new CardGrantedAction(
-                "action." + g.ActionId,
-                "action." + g.ActionId + ".desc",
+                g.ActionId,
+                GetAction(g.ActionId)?.DescriptionKey is { Length: > 0 } key ? key : g.ActionId + ".desc",
                 // A DefaultAttack grant replaces the species' basic attack, which only exists in a
                 // battle; a plain Granted entry is an extra selectable and is not battle-only.
                 BattleOnly: g.Role == ItemGrantRole.DefaultAttack,
                 AlreadyKnown: false))
             .ToList();
+
+    /// <summary>
+    /// The compact armoury line's half of card block 9 — `ssot-presentation.md` §9.14's own explicit
+    /// ask: <i>"the battle-only tag needs to be visible in the compact list line too, not only the
+    /// card — a player scanning an armoury should not have to open each item to learn that half of
+    /// them are inert on the lawn."</i>
+    ///
+    /// <para>Same rule as <see cref="ReadGrantedActions"/>'s own <c>BattleOnly</c>, read from the same
+    /// rows — a second derivation is how a list and a card come to disagree.</para>
+    /// </summary>
+    public bool GrantsBattleOnlyAction(string containerId) =>
+        ListItemGrantedActions(containerId)
+            .Any(g => g.Enabled && g.Role == ItemGrantRole.DefaultAttack);
 }

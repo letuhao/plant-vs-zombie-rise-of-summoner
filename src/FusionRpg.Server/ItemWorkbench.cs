@@ -90,6 +90,7 @@ public sealed class ItemWorkbench
     readonly EnhancementTuning _enhancement;
     readonly SocketTuning _sockets;
     readonly Func<string, int?>? _baseTypeSocketMax;
+    readonly Func<string, CardInsertLookup?>? _lookupInsert;
 
     /// <param name="baseTypeSocketMax">
     /// The base type's own declared <c>socketMax</c>, by base-type id. ⚠ <b>Module 6 shipped the
@@ -99,13 +100,22 @@ public sealed class ItemWorkbench
     /// <c>LootPipeline.Sockets</c>'s own stated rule: <i>"half a socket rule would grant the wrong
     /// count, which is worse than granting none."</i>
     /// </param>
+    /// <param name="lookupInsert">
+    /// ⭐ <b>The gem catalog, by container id</b> — the same <see cref="GemInsertCorpus"/> delegate
+    /// <see cref="ItemCardEndpoints"/> and <see cref="ItemSurfaceEndpoints"/> read. <c>socket-insert</c>
+    /// used to describe the insert by its container id alone with a hardcoded <c>Element: ""</c>;
+    /// the corpus carries the real element (<c>data/seed/items/gems/*.json</c>), so it is read rather
+    /// than assumed. A container the corpus does not carry keeps <c>""</c> — the honest "no element",
+    /// and also what a genuinely element-free insert authors (<c>SocketModel.cs:72</c>).
+    /// </param>
     public ItemWorkbench(
         RpgStore store,
         MaterialTuning materials,
         MaterialRecipeCatalog recipes,
         EnhancementTuning enhancement,
         SocketTuning sockets,
-        Func<string, int?>? baseTypeSocketMax = null)
+        Func<string, int?>? baseTypeSocketMax = null,
+        Func<string, CardInsertLookup?>? lookupInsert = null)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
         _materials = materials ?? throw new ArgumentNullException(nameof(materials));
@@ -113,6 +123,7 @@ public sealed class ItemWorkbench
         _enhancement = enhancement ?? throw new ArgumentNullException(nameof(enhancement));
         _sockets = sockets ?? throw new ArgumentNullException(nameof(sockets));
         _baseTypeSocketMax = baseTypeSocketMax;
+        _lookupInsert = lookupInsert;
     }
 
     // ---- module 14 `salvage-craft` -----------------------------------------------------------------
@@ -282,11 +293,16 @@ public sealed class ItemWorkbench
     /// <b>socket-insert</b> (module 14's flat-ten-souls <c>socket</c> price) — put an insert the player
     /// already holds into an open socket, and take it out of stock in the same transaction.
     ///
-    /// <para>⚠ The insert is described by its container id alone: <c>ContainerKind.Gem</c> has not
-    /// landed (X7), so no <c>gem.*</c> container and no insert <i>instance</i> can exist yet. This is
-    /// the same approximation the shipped read path already makes
-    /// (<c>ItemSurfaceEndpoints.cs:120</c>), named rather than hidden — the day X7 lands, the element
-    /// and tier come from the container and the insert gets its own bound instance.</para>
+    /// <para>⭐ <b>The element is real as of 2026-09-06</b> — it comes from module 16's shipped gem
+    /// corpus through <c>lookupInsert</c>, the same delegate the card and surface routes read, rather
+    /// than the hardcoded <c>""</c> this method used to pass. <c>""</c> survives only as the fallback
+    /// for a container the corpus does not carry, which is also what a genuinely element-free insert
+    /// authors.</para>
+    ///
+    /// <para>⚠ Still approximate in one respect: <c>ContainerKind.Gem</c> has not landed (X7), so no
+    /// <c>gem.*</c> container row and no insert <i>instance</i> exist — the insert is identified by
+    /// its catalog id, and the day X7 lands it gets its own bound instance. Tier is likewise
+    /// <see cref="GemInsertCorpus.UnauthoredInsertTier"/> because <c>gems/*.json</c> authors none.</para>
     /// </summary>
     public WorkbenchOutcomeDto SocketInsert(
         long playerId, string instanceId, string recipeId, string insertContainerId, int? socketIndex,
@@ -306,7 +322,9 @@ public sealed class ItemWorkbench
             return Refused("socket-insert", instanceId, recipeId,
                 $"ContentRuleViolated{{socket.insert-not-held}}: '{insertContainerId}' is not in this player's stock");
 
-        var insert = new InsertDef(insertContainerId, insertContainerId, Element: "", Tier: 1);
+        var insert = _lookupInsert?.Invoke(insertContainerId)?.Def
+                     ?? new InsertDef(insertContainerId, insertContainerId, Element: "",
+                         Tier: GemInsertCorpus.UnauthoredInsertTier);
         var current = _store.GetSockets(instanceId);
         var rejection = SocketOperations.TryInsert(current, socketIndex, insert, "", out var next);
         if (!rejection.IsOk) return Refused("socket-insert", instanceId, recipeId, rejection.ToString());

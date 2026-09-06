@@ -4,10 +4,16 @@
 [passive-tree](../passive-tree-map.md). **Task B1 built and verified 2026-09-06** — one tree
 (`might`, `broad-and-flat`) emitted end to end: topology, tier ladder, budget column, mechanism
 ramp, R-A1's reward-spread refusal, the §6 property vocabulary, and node id minting (R3). 55 tests,
-all passing against the spec's own worked tables. The remaining tasks (C1 and later — corpus-wide
-invariants, the 39-tree/1,560-node generic corpus, and the real `tree-language` model-calling run)
-are still unbuilt; this module makes zero model calls itself and none of its own work is gated on
-those later, expensive, real-cost steps.
+all passing against the spec's own worked tables. **Updated the same day, later, once H9 tried to
+scale past `might`:** the CLI's own `--tree` restriction (never a spec rule — `might_tree_spec()`'s
+own logic was always generic) was generalized to all 12 primary trees, and all 12 now have real,
+`--check`-verified committed plans, re-baked again 2026-09-06 (D51/D52) once the status roster grew
+21 -> 24 and `channelFamily` grew 53 -> 54. The remaining tasks (elemental/status/species corpora —
+corpus-wide invariants at the full 42-tree/1,680-node scale, and the real per-tree `tree-language`
+model-calling runs) are still unbuilt or in progress — `passive-tree-todo.md` task J1 tracks the
+missing `elemental_tree_spec()`/`status_tree_spec()` factory functions specifically; this module
+makes zero model calls itself and none of its own work is gated on those later, expensive,
+real-cost steps.
 
 **Module id:** `tree-plan` · **Wave:** 0 · **Depends on:** nothing · **Model calls:** none.
 **Wave-0 siblings:** `squad-harness`, `mechanism-wiring`, `gate-counters` (D37).
@@ -101,13 +107,15 @@ tier is 1**. Every tier-1 node is a root of its own branch.
 
 | Roster | `n` | Corpus |
 |---|---:|---:|
-| Closed rosters readable today (12 aptitudes + 6 elements + 21 statuses) | 39 | **1,560** |
-| With a closed demon-family roster at `F = 19` (D27's shipped roster, once curated) | 58 | 2,320 |
+| Closed rosters readable today (12 aptitudes + 6 elements + 24 statuses) | 42 | **1,680** |
+| With a closed demon-family roster at `F = 19` (D27's shipped roster, once curated) | 61 | 2,440 |
 
-`39 × 40 = 1,560` is the figure D29 states, and it is right for the trees the planner can name
-today. It is **not** the whole of D27's roster — `F` is 0 only because no closed family roster
-exists (§9). The plan emits the number it actually produced, so the difference is a one-line diff and
-never a stale recollection.
+`39 × 40 = 1,560` is the figure D29 states — right at the time D29 was written, for the 21-status
+roster then readable. **D51 (2026-09-06) grew the status roster to 24** (three `nerve.*` statuses
+accepted from the live registry), so the corpus the planner can name today is `42 × 40 = 1,680`, not
+D29's original 1,560. It is **not** the whole of D27's roster — `F` is 0 only because no closed family
+roster exists (§9). The plan emits the number it actually produced, so the difference is a one-line
+diff and never a stale recollection.
 
 The graph is a **layered DAG**, one shared reading order per branch: layers are tiers, edges run
 `t → t+1` inside one branch only, no cross-branch edges, no skips. Doc 02 §2.1's reasoning is adopted
@@ -495,12 +503,23 @@ mechanism.rampEndMilli   = 1000   the deepest tier is 100% mechanism
 > **The emitted interface is `archetypes[].mechNodes[]`: a per-tier COUNT of mechanism nodes, one
 > array per archetype. Nothing else is emitted, and no consumer may reconstruct a threshold from it.**
 >
-> `spec-tree-language.md:157` reads `cell.nodeClass := "mechanism" if tier >= t.mechanismFloor` and
-> its gate 16 fails *"any deep-tier `magnitude` node"*. That is a **threshold**; this is a **ramp**,
-> and no threshold reproduces it. `broad-and-flat` puts **one of two** nodes at tiers 4–7 in the
-> mechanism class and `gated-deep` **one of three** at tier 3, so there is no tier `f` for which
-> *"tier ≥ f ⇒ mechanism"* is the same rule. Pick `f = 8` and five mechanism nodes per branch sit
-> below it unexplained; pick `f = 3` and the gate fails a plan that is correct by construction.
+> **RECONCILED — `spec-tree-language.md` fixed itself; this paragraph now describes history, not a
+> live cross-spec conflict** (corrected 2026-09-06 by an adversarial spec audit that found this
+> callout still presented as an open complaint against the other spec). `spec-tree-language.md`'s own
+> gate 16 is now named `PassiveTree/MechanismRamp` (struck through from `MechanismFloor`), checks the
+> exact per-tier `mechNodes[t]` count — never a threshold — and its own §4.2 step 4 explicitly
+> cross-references THIS section's retirement by name: *"spec-tree-plan.md §4 retires the name
+> mechanismFloor 'everywhere — field, tunable and gate.'"* The line number `:157` below has also
+> moved (re-grep `cell.nodeClass` rather than trusting the cited line) — kept as the historical record
+> of the original defect, since the reasoning for WHY a threshold cannot work is still worth reading:
+>
+> Originally: `spec-tree-language.md:157` read `cell.nodeClass := "mechanism" if tier >=
+> t.mechanismFloor` and its gate 16 failed *"any deep-tier `magnitude` node"*. That is a
+> **threshold**; this is a **ramp**, and no threshold reproduces it. `broad-and-flat` puts **one of
+> two** nodes at tiers 4–7 in the mechanism class and `gated-deep` **one of three** at tier 3, so
+> there is no tier `f` for which *"tier ≥ f ⇒ mechanism"* is the same rule. Pick `f = 8` and five
+> mechanism nodes per branch sit below it unexplained; pick `f = 3` and the gate fails a plan that is
+> correct by construction.
 >
 > The collision was also live inside this spec: a tunable named `mechanism.floorMilli` held **0**, so
 > a consumer reading a key called `mechanismFloor` and finding `0` would have concluded that *every*
@@ -684,8 +703,8 @@ the sentence *"documentation constant: at the shipped topology nothing can excee
 ### 6. The property vocabulary (D14) — this module DEFINES it, it does not read one
 
 D14 makes exclusion **property-based**: a printed runtime no-op keyed on a property, never a named
-pair. A named-pair list is `O(n²)` and cannot survive generation across the 39 trees this module
-plans, let alone the 879 in the whole corpus; a property
+pair. A named-pair list is `O(n²)` and cannot survive generation across the 42 trees this module
+plans (D51: 24 statuses, not 21), let alone the 882 in the whole corpus; a property
 predicate is `O(1)` and covers nodes that do not exist yet. The vocabulary must therefore exist
 **before any node text is written** (§6 step 2).
 
@@ -710,11 +729,11 @@ subset. That is what makes D14's predicate `O(1)`.
 | `posture` | 3 | `posture` field of `data/seed/aptitudes/roster.json` |
 | `aptitude` | 12 | `data/seed/aptitudes/roster.json`, counted at load |
 | `element` | 6 + `omni` | `data/seed/elements/roster.json`, counted at load |
-| `status` | 21 | `data/seed/statuses/roster.json` — **owed, §9** |
+| `status` | 24 | `data/seed/statuses/roster.json` — **owed, §9** (D51, 2026-09-06: 21 -> 24) |
 | `atomAttachPoint` | 7 | `data/seed/atoms/vocabulary.json` — **owed, §9** |
 | `atomKind` | 16 | same mirror |
 | `atomTrigger` | 13 (11 authorable) | same mirror |
-| `channelFamily` | 53 | `entries` of `data/seed/derived-stats/catalog.json`, counted at load |
+| `channelFamily` | 54 | `entries` of `data/seed/derived-stats/catalog.json`, counted at load (D52, 2026-09-06: 53 -> 54) |
 | `conversionState` | 2 | `converted` \| `unconverted` (D16/R8) |
 | `exclusionForm` | 3 | `reroute` \| `precedence` \| `nullification` (D14's ladder, **all three kept — D40**) |
 
@@ -765,15 +784,25 @@ points allocated to that tree's gate quantity**; nodes are bought with **skill p
 touches only the first.
 
 **The plan emits `gateQuantity` as an opaque id and never resolves it.** That is the correct
-boundary, and it is what lets a complete plan be emitted for the 27 trees whose gate source has not
-been built yet:
+boundary, and it is what let a complete plan be emitted for the 30 trees whose gate source had not
+been built yet, back when this table was written:
 
 | Category (R7) | `gateQuantity` | State in code, verified this session | Owner |
 |---|---|---|---|
 | `primary` (12) | `aptitude.<Id>@Commander` | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` | shipped |
-| `elemental` (6) | `element_mastery.<id>@Aspect` | ⛔ **comments only today.** The scope exists (`AllocationScope.Aspect`, `AptitudeAllocation.cs:8`); the source does not. All four `src/` hits for `element_mastery` are XML doc comments, and `PointBudget.cs:15` records the old ownership: *"owned by the demon program's `aspect-scope` module and does not exist yet"* | **`gate-counters`, wave 0 (D37)** — the comment's attribution to the demon program is superseded |
-| `status` (21) | `status_applied.<id>` — **outside `AllocationScope`** (D35) | ⛔ **zero `src/` hits today.** D35 correctly removed the `AllocationScope` dependency, and removed the only place the counter was going to live with nothing replacing it | **`gate-counters`, wave 0 (D37)** |
+| `elemental` (6) | `element_mastery.<id>@Aspect` | ✅ **shipped 2026-09-06.** `ElementMasterySource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:107`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `elementMastery` row reads `carrier` | shipped |
+| `status` (24) | `status_applied.<id>` — **outside `AllocationScope`** (D35) | ✅ **shipped 2026-09-06.** `StatusAppliedSource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:104`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `statusApplied` row reads `carrier`. Count grew 21 -> 24 (D51: three `nerve.*` statuses accepted) | shipped |
 | `family` (`F`) | `species_level@DemonType` | ✅ rate shipped, source via `PointBudget.DemonTypeSourceFromLevel` | shipped |
+
+**Superseded by the above, 2026-09-06 — the ⛔ rows this table used to carry are gone, but that does
+NOT mean elemental/status trees generate today.** `gate-counters` shipping removed R-G1's own block.
+A separate, previously-unnamed block took its place, filed in `passive-tree-map.md` and tracked as
+`passive-tree-todo.md` task J1: the plan-emission CLI itself has no `elemental_tree_spec()` /
+`status_tree_spec()` factory function (only `might_tree_spec()`/`primary_tree_spec()` exist, both
+`category="primary"`), so there is no code path for `--tree <elementId>` or `--tree <statusId>` to
+succeed yet, gate state notwithstanding. Read the paragraphs below with that in mind: every "waits for
+gate-counters" statement is historically accurate but no longer the live reason; the live reason is
+"waits for J1's factory functions."
 
 #### 7.1 ⛔ A tree's gate quantity must EXIST before that tree's content is generated
 
@@ -787,8 +816,15 @@ been built yet:
 > ~~*"1,080 nodes ship permanently at tier 0"*~~ and ~~*"only the 12 primary trees are reachable"*~~
 > are superseded. **The plan plans all 39 trees; all 39 are reachable once wave 0 completes.** The
 > generation order below is a schedule, and `gateState` is what advances it.
+>
+> **Wave 0 has since completed (2026-09-06) — `gate-evidence.v1.json` reads `carrier` on all four
+> `gateIndexKind` rows, G6 live-probed end to end.** The count also grew (D51): 24 statuses, not 21.
+> The paragraph and diagram below are D37's own, kept as the historical record of the sequencing
+> argument — read them as "this was the schedule while wave 0 was pending," not as today's state.
+> Today's real blocker is named just below the diagram.
 
-**Ideal §13.4, verified in code above: the gate quantity is not built yet for 27 of the 39 trees.**
+**Ideal §13.4, as verified when this table was first written: the gate quantity was not yet built for
+27 of the 39 trees. Superseded 2026-09-06 — see the note directly below the diagram.**
 
 ```text
   12 primary trees × 40 =   480 nodes   generable today            31%
@@ -800,12 +836,26 @@ been built yet:
                            if generated ahead of it
 ```
 
+**Superseded 2026-09-06: wave 0 shipped, and the corpus grew.** `element_mastery` and `status_applied`
+both read `carrier` in `gate-evidence.v1.json` today (G6). With D51's 24 statuses the real partition is
+now 12 primary + 6 elemental + 24 status = **42 trees, 1,680 nodes** — 30 of them (6 elemental + 24
+status, 1,200 nodes) no longer wait on a gate. **They still do not generate**, for the reason
+`passive-tree-map.md`'s third D51/D52-adjacent filed item names and `passive-tree-todo.md` task J1
+tracks: `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py` has no `elemental_tree_spec()`/
+`status_tree_spec()` factory function, so `--tree <elementId>`/`--tree <statusId>` has no code path to
+succeed regardless of gate state. The diagram above is kept as the historical shape of the sequencing
+argument — the number in its bottom row (27/1,080/69%) is stale on BOTH axes now (the gate that used
+to justify it shipped, and the corpus it was counting grew to 30/1,200) — J1 is where the corrected
+version of this table belongs, once the factory functions exist to make it true again.
+
 A node behind a tier whose `req(t)` reads a quantity nothing produces yet is not a wiring gap that
 resolves itself; until the carrier lands, `req(1) = 5` is a threshold on a number that is
 structurally zero. **Nothing is broken by the plan — the plan is cheap, mints no content and makes no
-model call — but 1,080 nodes of authored content generated ahead of the counters would be bought
-before they could be delivered.** That is a scheduling defect with a known fix date, and `R-G1` is
-what keeps the schedule honest.
+model call.** That argument's premise (no carrier) no longer holds for `element_mastery`/
+`status_applied` themselves, but the SAME argument now applies one level up, to the missing
+`TreeSpec` factories — generating 1,200 nodes of content ahead of the code that could plan them
+correctly would be exactly the same kind of bought-before-deliverable mistake this section was
+written to prevent.
 
 **R-G1 — the generation gate.** A tree's `gateQuantity` must have a **production carrier in `src/`**
 before that tree's content is generated. This module emits a `gateState` per tree
@@ -851,7 +901,7 @@ distributes a whole total across a closed, ordered vocabulary by largest remaind
 than on dict iteration order. `expand_counts` (`:92-104`) flattens the result deterministically.
 
 ```text
-1  N := Σ over trees of nodesPerTree                       # 39 × 40 = 1,560 today
+1  N := Σ over trees of nodesPerTree                       # 42 × 40 = 1,680 today (D51: 24 statuses)
 2  for each axis a in {nodeClass, trigger, element, status, channelFamily, exclusionForm}:
        quota[a] := largest_remainder_count(targets[a].weightsMilli, ORDER[a], N)
 3  seq[a] := expand_counts(quota[a], ORDER[a])
@@ -960,8 +1010,9 @@ tools/seedsmith/tests/test_tree_plan_repro.py
 ```
 
 **Why a manifest plus one file per tree.** Doc 02 emits one file; doc 03 emits one per tree. Both
-reasons are good and they do not conflict: 39 files of 40 nodes each are readable in a diff, and one
-`planHash` over the manifest plus the sorted per-tree hashes gives CI a single cheap gate.
+reasons are good and they do not conflict: 42 files of 40 nodes each are readable in a diff (D51: 24
+statuses, not 21), and one `planHash` over the manifest plus the sorted per-tree hashes gives CI a
+single cheap gate.
 
 ---
 
@@ -1478,13 +1529,13 @@ either as a requirement above or as a named other module's.
 
 | # | Owed | To whom | Blocks |
 |---|---|---|---|
-| 1 | `data/seed/statuses/roster.json` — the 21-status mirror | this module emits it (`ElementEnumGen` pattern) | emitting a complete plan |
+| 1 | `data/seed/statuses/roster.json` — the 24-status mirror (D51, 2026-09-06: 21 -> 24) | this module emits it (`ElementEnumGen` pattern) | emitting a complete plan |
 | 2 | `data/seed/atoms/vocabulary.json` — the 7 / 16 / 13 mirror | this module emits it | emitting `propertyVocabulary` |
 | 3 | A **§10 cost-ladder row for `req(t)`** in `ssot-power-scale.md` | the power SSOT | shipping. Row 6's precedent (`XpToNext`) is exact: a threshold on an already-`Θ`-derived quantity that never multiplies a magnitude |
 | 4 | A **§11.10 content-breadth row** for the ten authored tiers | the caps register | shipping. The honest verdict: nothing is refused, and past `Θ ≈ 300` growth moves to the uncapped soul track — but §11.10a is explicit that a breadth verdict expires when its premise does, and generated content is exactly that premise |
-| 5 | A closed demon-family roster, or D27's curation sequenced | owner / build order | `F > 0`. Not a blocker on emitting a plan for the 39 closed-roster trees |
+| 5 | A closed demon-family roster, or D27's curation sequenced | owner / build order | `F > 0`. Not a blocker on emitting a plan for the 42 closed-roster trees |
 | 6 | `mechanism-wiring`'s four inert lines | wave 0 sibling | nothing here, but without them the mechanism budget buys nodes nothing can score (§4) |
-| 7 | `gate-counters`' two quantities — `element_mastery` and `status_applied.<id>` (D37) | wave 0 sibling | nothing here — `--emit` plans a `pending` tree for free. It gates **generation waves 1 and 2**, i.e. 1,080 of the 1,560 generic nodes (§7.1) |
+| 7 | ~~`gate-counters`' two quantities — `element_mastery` and `status_applied.<id>` (D37)~~ **— RESOLVED 2026-09-06.** Both read `carrier` in `gate-evidence.v1.json` (G6, live-probed). **Superseding blocker, tracked as `passive-tree-todo.md` J1:** `elemental_tree_spec()`/`status_tree_spec()` factory functions do not exist in `emit.py` | wave 0 sibling, then J1 | nothing here — `--emit` plans a `pending` tree for free. Gate-counters no longer gates generation waves 1 and 2 (1,200 of the 1,680 generic nodes, §7.1) — J1's missing factories do |
 
 Items 1 and 2 are this module's own work. Items 3 and 4 are reviewed changes to another document and
 must land before this module ships — `guard-power.ps1` cannot catch either absence, because its

@@ -1,3 +1,5 @@
+using FusionRpg.Core.Actions.Corpus;
+using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Generation;
 using FusionRpg.Core.Items;
@@ -278,8 +280,12 @@ public class ItemCardStoreTests : IDisposable
 
     // ---- the corpus half the DAL cannot know ------------------------------------------------------------
 
+    /// <summary>item-content T2: a real authored <c>Name</c> beside the key, the shape
+    /// <c>ItemBaseTypeCorpus.Load</c> now produces for all 740 shipped entries.</summary>
+    const string BaseName = "Proof Blade";
+
     static CardBaseType? BaseTypeOf(string containerId) => new CardBaseType(
-        "bt." + containerId, "class.blade", "humanoid", "role.armament-primary", null);
+        "bt." + containerId, "class.blade", "humanoid", "role.armament-primary", null, BaseName);
 
     static CardInsertLookup? InsertOf(string containerId) => new CardInsertLookup(
         new InsertDef(containerId, "gem.ember", "fire", 3), "gem.ember-shard");
@@ -372,7 +378,10 @@ public class ItemCardStoreTests : IDisposable
             family => _store.GetDisplayTemplate(family),
             baseType,
             new CardRarity("rarity." + container.Rarity, rung + 1, RarityPalette.Dark[rung]),
-            baseType.NameKey)
+            // item-content T1/T2: with no naming corpus in `Corpus()` the DAL falls back to the base
+            // type's AUTHORED name, not to its display key. `Corpus()` deliberately supplies no naming
+            // delegates so this mirror stays a mirror; the composed path is asserted separately below.
+            baseType.Name)
         {
             ItemLevel = generation.ItemLevel,
             EnhanceLevel = head.EnhanceLevel,
@@ -396,15 +405,146 @@ public class ItemCardStoreTests : IDisposable
                     f.Set.Tiers.OrderBy(t => t.PiecesRequired)
                         .Select(t => new CardSetTier(t.PiecesRequired, t.PiecesRequired <= p.Count, t.IsCapability))
                         .ToList(),
-                    Redundant: disclosure.RedundantSetIds.Count > 0)
+                    Redundant: disclosure.RedundantSetIds.Count > 0,
+                    // item-content T2: `item_set.display_name`, which SetCorpus has always parsed and
+                    // the card used to drop in favour of the derived `set.{setId}` key alone.
+                    Name: f.Set.DisplayName)
                 : null,
+            // item-content `granted-action-text` (T15): `action_id` already carries the `action.`
+            // stem, so the name key IS the id — the old `"action." + g.ActionId` produced
+            // `action.action.cleave`, a key nothing could author. The description key is READ from
+            // `rpg_action.description_key`, with the `.desc` suffix left as the unauthored fallback.
             GrantedActions = _store.ListItemGrantedActions(container.ContainerId)
-                .Select(g => new CardGrantedAction("action." + g.ActionId, "action." + g.ActionId + ".desc", false, false))
+                .Select(g => new CardGrantedAction(
+                    g.ActionId,
+                    _store.GetAction(g.ActionId)?.DescriptionKey is { Length: > 0 } key ? key : g.ActionId + ".desc",
+                    false, false))
                 .ToList(),
             Unique = _store.GetItemUnique(container.ContainerId),
             Locked = item.Locked,
             Stale = item.Stale,
         };
+    }
+
+    // ---- item-content T1 / T2, the name ------------------------------------------------------------------
+
+    /// <summary>Two inline naming rows, so this test proves the DAL's own wiring rather than the
+    /// Server's file loader: one prefix family, one suffix family, both with words nothing else in the
+    /// repo produces, so a name containing them can only have come through the composer.</summary>
+    static Func<string, AffixNameSlot?> NameWordsFor(string prefixFamily, string suffixFamily)
+    {
+        var rows = new Dictionary<string, AffixNameSlot>(StringComparer.Ordinal)
+        {
+            [prefixFamily] = new(AffixClass.Prefix, new[]
+            {
+                new AffixNameRow("A", null, "Probe-A", null),
+                new AffixNameRow("B", null, "Probe-B", null),
+                new AffixNameRow("C", null, "Probe-C", null),
+            }),
+            [suffixFamily] = new(AffixClass.Suffix, new[]
+            {
+                new AffixNameRow("A", null, "of Probes", null),
+                new AffixNameRow("B", null, "of Probes", null),
+                new AffixNameRow("C", null, "of Probes", null),
+            }),
+        };
+
+        return AffixNameWordCorpusStub(rows);
+    }
+
+    static Func<string, AffixNameSlot?> AffixNameWordCorpusStub(IReadOnlyDictionary<string, AffixNameSlot> rows) =>
+        familyId => rows.TryGetValue(familyId, out var v) ? v : (AffixNameSlot?)null;
+
+    /// <summary>
+    /// ⭐ <b>The wiring T1 exists for.</b> The fixture container rolls three affixes, which is
+    /// <c>ItemNameComposer.RareNameThreshold</c>, so the DAL must call the rare draw with the
+    /// INSTANCE'S OWN <c>roll_seed</c> — asserted by drawing the same pair here.
+    /// </summary>
+    [Fact]
+    public void The_card_name_is_composed_from_the_instances_own_rolled_affixes_and_seed()
+    {
+        var f = SeedWorld();
+        var instance = _store.GetInstance(f.InstanceId)!;
+
+        (string, string) Draw(long seed) => ("Rare" + seed, "Draw");
+        var corpus = Corpus() with
+        {
+            LookupNameWords = AffixNameWordCorpusStub(new Dictionary<string, AffixNameSlot>(StringComparer.Ordinal)),
+            RareNameDraw = Draw,
+        };
+
+        var input = _store.GetItemCardInput(f.InstanceId, corpus, Wearer(f))!;
+
+        Assert.Equal($"Rare{instance.RollSeed} Draw", input.ItemName);
+        Assert.NotEqual(BaseName, input.ItemName);
+    }
+
+    /// <summary>
+    /// The rolled set the name is composed from is the DRAWN atoms only — the container's fixed core is
+    /// what the base type guarantees, and counting it would push a two-affix item over the rare
+    /// threshold and rename it. Same <c>seq</c>-set rule <c>ItemCardRenderer.Classify</c> reads.
+    /// </summary>
+    [Fact]
+    public void The_named_affix_set_excludes_the_containers_fixed_core()
+    {
+        var f = SeedWorld();
+        var instance = _store.GetInstance(f.InstanceId)!;
+        var container = _store.GetContainer(f.ContainerId)!;
+
+        var rolled = ItemNameAssembly.RolledAffixes(instance, container, id => _store.GetAtom(id));
+
+        Assert.Equal(container.PrefixRolls + container.SuffixRolls, rolled.Count);
+        Assert.Equal(instance.Atoms.Count - container.Atoms.Count, rolled.Count);
+        Assert.DoesNotContain(rolled, a => container.Atoms.Any(c => c.Seq == a.Seq));
+    }
+
+    /// <summary>
+    /// The affix grammar itself, end to end through the DAL: one drawn affix (under the threshold)
+    /// composes <c>word + authored base name</c>. Uses its own single-family container so the drawn
+    /// family — and therefore the word — is not left to the roll.
+    /// </summary>
+    [Fact]
+    public void An_item_under_the_rare_threshold_is_named_by_the_affix_grammar()
+    {
+        var f = SeedWorld();
+        var instance = _store.GetInstance(f.InstanceId)!;
+        var container = _store.GetContainer(f.ContainerId)!;
+        var drawnFamily = _store.GetAtom(
+            instance.Atoms.First(a => container.Atoms.All(c => c.Seq != a.Seq)).AtomId)!.FamilyId;
+
+        // Raise the threshold above this item's affix count so the grammar path runs against a real,
+        // already-minted instance rather than needing a second fixture.
+        var previous = ItemsTuningHub.Tuning;
+        ItemsTuningHub.Configure(previous with { RareNameThreshold = 99 });
+        try
+        {
+            var corpus = Corpus() with
+            {
+                LookupNameWords = NameWordsFor(drawnFamily, "atom.not-drawn"),
+                RareNameDraw = _ => ("never", "used"),
+            };
+
+            var input = _store.GetItemCardInput(f.InstanceId, corpus, Wearer(f))!;
+
+            Assert.StartsWith("Probe-", input.ItemName, StringComparison.Ordinal);
+            Assert.EndsWith(" " + BaseName, input.ItemName, StringComparison.Ordinal);
+        }
+        finally { ItemsTuningHub.Configure(previous); }
+    }
+
+    /// <summary>item-content T2: the set block carries <c>item_set.display_name</c>, which
+    /// <c>SetCorpus.Parse</c> has always read and the card used to drop for a derived
+    /// <c>set.{setId}</c> key the string catalog has no row for.</summary>
+    [Fact]
+    public void The_set_block_carries_the_sets_authored_display_name()
+    {
+        var f = SeedWorld();
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.NotNull(input.Set);
+        Assert.Equal(f.Set.DisplayName, input.Set!.Value.Name);
+        Assert.NotEmpty(input.Set.Value.Name);
+        Assert.NotEqual(input.Set.Value.NameKey, input.Set.Value.Name);
     }
 
     // ---- what each module contributes, asserted one at a time --------------------------------------------
@@ -424,6 +564,98 @@ public class ItemCardStoreTests : IDisposable
         var header = ItemCardRenderer.Render(input).Blocks
             .Single(b => b.BlockKey == CardBlocks.Header).Lines[0];
         Assert.Equal("+" + PlusThree, header.Args["enhance"]);
+    }
+
+    // ---- item-content `granted-action-text` (T14 / T15), card block 9 ------------------------------------
+
+    /// <summary>
+    /// ⭐ <b>The T15 acceptance test.</b> A real item grants a real action out of the REAL shipped
+    /// corpus (<c>data/seed/actions/committed-round-*.json</c> through the real
+    /// <see cref="ActionCorpusImporter"/>), and card block 9 carries that action's real authored
+    /// description key — which resolves, through the real string catalog
+    /// (<c>content/display/en.json</c>), to the real authored sentence.
+    ///
+    /// <para>No fixture action and no fixture string: an invented pair would prove the plumbing and
+    /// not the content, which is the exact gap `granted-action-text` exists to close.</para>
+    /// </summary>
+    [Fact]
+    public void Block_9_renders_a_real_granted_actions_real_authored_description()
+    {
+        var f = SeedWorld();
+
+        // The real corpus, imported through the real importer against the atom catalog SeedWorld
+        // already loaded. Whichever rows resolve their atom families import; the rest refuse by name,
+        // which is a content gap in a sibling pipeline and not this test's subject.
+        var briefs = new[] { "committed-round-1.json", "committed-round-2.json" }
+            .SelectMany(file => ActionCorpusBriefJson.Parse(
+                File.ReadAllText(Path.Combine(RepoRoot(), "data", "seed", "actions", file))))
+            .ToList();
+        var costTemplate = ActionCorpusCostTemplateLoader.Parse(File.ReadAllText(
+            Path.Combine(RepoRoot(), "data", "tuning", "action-corpus-cost-templates.v1.json")));
+
+        var import = ActionCorpusImporter.Import(_store, briefs, costTemplate, RungPolicy.Table);
+        var importedId = import.Outcomes.First(o => o.Imported).BriefId;
+        var brief = briefs.First(b => string.Equals(b.Id, importedId, StringComparison.Ordinal));
+
+        // The schema half (T14): the key survived the round trip through `rpg_action`.
+        var stored = _store.GetAction(importedId);
+        Assert.NotNull(stored);
+        Assert.Equal(brief.DescriptionKey, stored!.DescriptionKey);
+
+        // The render half (T15): grant it, then read the card block back.
+        _store.UpsertItemGrantedAction(new ItemGrantedActionRow(
+            f.ContainerId, 1, importedId, ItemGrantRole.DefaultAttack));
+
+        // The REAL string catalog, the same file the Server loads at boot.
+        var strings = DisplayStringCatalog.Parse(File.ReadAllText(
+            Path.Combine(RepoRoot(), "content", "display", "en.json")));
+        var corpus = Corpus() with { LookupString = strings };
+
+        var input = _store.GetItemCardInput(f.InstanceId, corpus, Wearer(f))!;
+        var line = ItemCardRenderer.Render(input).Blocks
+            .Single(b => b.BlockKey == CardBlocks.GrantedAction).Lines
+            .Single(l => string.Equals(l.Args["nameKey"], importedId, StringComparison.Ordinal));
+
+        Assert.Equal(brief.DescriptionKey, line.Args["descriptionKey"]);
+        Assert.Equal("1", line.Args["battleOnly"]);        // a DefaultAttack grant is battle-only
+        Assert.Equal("0", line.Args["alreadyKnown"]);
+
+        // ⛔ The name key is the action id, NOT `"action." + id` — ids already carry the `action.`
+        // stem, and the old derivation asked for `action.action.general.0003`.
+        Assert.StartsWith("action.", line.Args["nameKey"], StringComparison.Ordinal);
+        Assert.DoesNotContain("action.action.", line.Args["nameKey"], StringComparison.Ordinal);
+
+        // ⭐ The finished text reaches the card, not just the key — the same `__rendered` contract
+        // block 10 already uses, so a consumer has one rule for both.
+        Assert.Equal(brief.Name, line.Args["__renderedName"]);
+        var description = line.Args["__rendered"];
+        Assert.False(string.IsNullOrWhiteSpace(description));
+        Assert.Equal(strings(brief.DescriptionKey), description);
+        Assert.DoesNotContain(importedId, description, StringComparison.Ordinal);
+        Assert.DoesNotContain('{', description);
+    }
+
+    /// <summary>
+    /// The compact armoury line's own half of §9.14: the store answers "is this item's granted action
+    /// battle-only?" without assembling a card. <c>ItemSurfaceEndpoints</c>' armoury row reads exactly
+    /// this, so the list and the card can never disagree.
+    /// </summary>
+    [Fact]
+    public void The_compact_line_can_ask_for_the_battle_only_tag_without_opening_the_card()
+    {
+        var f = SeedWorld();
+
+        // SeedWorld's own grant is a plain `Granted` entry — an extra selectable, not battle-only.
+        Assert.False(_store.GrantsBattleOnlyAction(f.ContainerId));
+
+        _store.UpsertItemGrantedAction(new ItemGrantedActionRow(
+            f.ContainerId, 1, "action.general.0003", ItemGrantRole.DefaultAttack));
+        Assert.True(_store.GrantsBattleOnlyAction(f.ContainerId));
+
+        // A disabled grant is not a promise about the lawn either.
+        _store.UpsertItemGrantedAction(new ItemGrantedActionRow(
+            f.ContainerId, 1, "action.general.0003", ItemGrantRole.DefaultAttack, Enabled: false));
+        Assert.False(_store.GrantsBattleOnlyAction(f.ContainerId));
     }
 
     [Fact]

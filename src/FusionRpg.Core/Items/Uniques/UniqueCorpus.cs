@@ -31,6 +31,14 @@ public sealed record UniqueCounterPressureSeed(
 /// `enabled: false`; `rungFloorOrdinal = 80` re-seeds `unique_eligible` with no code change") — a
 /// retired anchor, never re-runged, never deleted. Defaults `true` so the 49 shipped rows that never
 /// set the JSON field, and every hand-built test fixture predating this field, keep their old meaning.</param>
+/// <param name="FlavourText">
+/// The authored sentence itself, as the seed's sibling <c>flavor</c> field ships it — 112 of the 144
+/// shipped rows carry one, and until 2026-09-06 no C# anywhere read it. It is deliberately <b>not</b>
+/// written to <c>item_unique</c>: that column is a KEY, never a literal (`RpgStore.ItemUniques.cs:46`),
+/// and the literal's home is N2's string catalog (`content/display/en.json`), generated from this field
+/// rather than hand-authored a second time. Read here so the catalog, the validator and the tests can
+/// see the key and its sentence together.
+/// </param>
 public sealed record UniqueSeed(
     string SeedId,
     string ContainerId,
@@ -45,6 +53,7 @@ public sealed record UniqueSeed(
     UniqueCounterPressureSeed CounterPressure,
     UniqueAcquisition Acquisition,
     string? FlavourKey,
+    string? FlavourText,
     string Partition,
     string RungBand,
     bool Enabled = true)
@@ -207,7 +216,10 @@ public static class UniqueCorpus
         return new UniqueSeed(
             seedId, containerId, Str(e, "nameKey"), Str(e, "name"), frame, Str(e, "baseType"),
             Str(e, "rarity"), Str(e, "powerAxis"), fixedAtoms, variance, cp, acquisition,
-            OptStr(e, "flavorKey"), partition, band, OptBool(e, "enabled", @default: true));
+            // The KEY and the authored SENTENCE, together. Reading only the key was the whole of the
+            // item-lore wiring gap: 112 real sentences existed and no C# ever opened the field.
+            OptStr(e, "flavorKey"), OptStr(e, "flavor"),
+            partition, band, OptBool(e, "enabled", @default: true));
     }
 
     static string Str(JsonElement parent, string key)

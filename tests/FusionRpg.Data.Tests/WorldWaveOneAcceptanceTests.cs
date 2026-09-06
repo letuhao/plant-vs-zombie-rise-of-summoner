@@ -215,10 +215,35 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       three sites that needed them: `CreateWorld`'s own initial INSERT, `DiffSectors`' own
     //       INSERT-OR-REPLACE (both in the affected files above), and the sector read-back SELECT.
     //
-    // The plan expected one re-bless. Many more were needed since — most recently entry #17 above —
+    //   18. **base-defense `siege-construction` 15.4b (`RulesetVersion` 9 → 10), audit F10, decision 48,
+    //       2026-09-06** — `SiegeConstruction.AdvanceDepletion` (new) wires the already-shipped, already-
+    //       tested pure function `BoardEconomy.AdvanceDepletionMilli` into the SAME `Production` phase
+    //       15.4's own faucets already extended — the missing per-turn increment to `WorldSlot.
+    //       SlotDepletionMilli` audit F10 named. A genuine behaviour change: EVERY owned sector's
+    //       `Rootbed` slot now accrues depletion every turn it is owned (`LoamProduction.For`'s own base
+    //       `SeepPerTurn` applies unconditionally to any owned Rootbed, so "yielded this turn" is simply
+    //       "sector is owned" — re-derived independently here, `LoamProduction.For` itself untouched),
+    //       and this scenario has owned sectors with Rootbed slots from turn 1 — so this is NOT a narrow,
+    //       single-slot change like entry #17's, it moves the hash from the very first turn onward.
+    //
+    //       **A second, previously-undiscovered defect this same pass surfaced and fixed — the THIRD
+    //       instance of the exact same bug class entries #17 and (before it) the
+    //       `rpg_world_faction_intel.development_level` migration each already found**:
+    //       `WorldSlot.SlotDepletionMilli` was hashed by `WorldCanonical` (`structure-state`'s own
+    //       "slot-depletion" conditional row) and correctly diffed by `DiffSlots`' own plain record
+    //       equality (`WorldSlot == WorldSlot` already compares every field, so the diff logic itself was
+    //       never wrong) — but had NO database column anywhere: not on `rpg_world_slots`' own `CREATE
+    //       TABLE`, not on `CreateWorld`'s INSERT, not on `DiffSlots`' own INSERT-OR-REPLACE, not on the
+    //       read-back SELECT. Silently write-only since `structure-state` shipped, reset to 0 on every
+    //       save/reload, invisible until THIS task's own `AdvanceDepletion` phase made it non-zero for
+    //       the first time and tripped `DiffWorldGraphUnlocked`'s own equivalence guard with a hard
+    //       `DebugAssertException` — caught on the very first run against this exact test, not guessed
+    //       at. Fixed with the same `EnsureColumn` pattern across all four sites named above.
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #18 above —
     // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
     // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
-    const string GoldenFinalHash = "b3d8319344bbbfa29ec1a732cf47719c8ba5f083a79514ec92c2d9a40b5cd4cb";
+    const string GoldenFinalHash = "2e09a54e2c9079d72f377efe2683165c465e50b747ef4b0ed377b975733effbd";
 
     readonly string _dir;
     readonly RpgStore _store;

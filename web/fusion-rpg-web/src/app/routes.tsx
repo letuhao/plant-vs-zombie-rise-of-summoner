@@ -28,7 +28,7 @@ const WorldStage = lazy(() => import("@/stages/world/WorldStage").then((m) => ({
 // same Phaser weight as Lawn once `board-render` is wired in (a later `stages/siege/` task).
 const SiegeStage = lazy(() => import("@/stages/siege/SiegeStage").then((m) => ({ default: m.SiegeStage })));
 
-/** T12: these nine now live in the developer tree, reached via `` ` `` or `?dev=<id>` — never a route of their own. */
+/** T12: developer tree surfaces, reached via `` ` `` or `?dev=<id>` — never a route of their own. */
 const DEV_ROUTE_REDIRECTS: Record<string, string> = {
   status: "status",
   stats: "stats",
@@ -38,7 +38,8 @@ const DEV_ROUTE_REDIRECTS: Record<string, string> = {
   cheats: "cheats",
   sim: "sim",
   log: "log",
-  runs: "runs"
+  runs: "runs",
+  "phaser-scene-poc": "phaser-scene-poc"
 };
 
 export function AppRoutes() {

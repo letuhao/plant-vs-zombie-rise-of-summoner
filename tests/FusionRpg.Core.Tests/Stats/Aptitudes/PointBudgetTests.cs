@@ -31,19 +31,21 @@ public class PointBudgetTests
     // ShippedTuning() above stays pinned to aptitudes.v2.json, which predates this table (its own
     // pointEconomy.skillPointsPerThetaMilliByScope is absent, deliberately -- see
     // AptitudePointEconomy's own doc comment). The tests below that need real scoped skill rates load
-    // aptitudes.v6.json, the first version that carries the table (and the one RpgHost.cs/Program.cs
-    // actually load).
+    // the CURRENT shipped file (the one RpgHost.cs/Program.cs actually load) -- v7 as of D55
+    // (2026-09-06, spec-tree-state.md open question 3: demonType/aspect/uniqueDemon moved from the
+    // borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22}); v6 was the first
+    // version to carry the table at all.
 
     static string FindAptitudesV6Path()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)
         {
-            var candidate = Path.Combine(dir.FullName, "data", "tuning", "aptitudes.v6.json");
+            var candidate = Path.Combine(dir.FullName, "data", "tuning", "aptitudes.v7.json");
             if (File.Exists(candidate)) return candidate;
             dir = dir.Parent;
         }
-        throw new InvalidOperationException("could not locate data/tuning/aptitudes.v6.json above " + AppContext.BaseDirectory);
+        throw new InvalidOperationException("could not locate data/tuning/aptitudes.v7.json above " + AppContext.BaseDirectory);
     }
 
     static AptitudeTuning ShippedTuningWithSkillScopes() =>
@@ -362,13 +364,14 @@ public class PointBudgetTests
 
         // Positive proof: each scope reads its OWN rate against the same shared source value. commander
         // and uniqueDemon are each distinct from every other scope; demonType and aspect legitimately
-        // tie (both borrow the sibling table's placeholder 4) -- a tie is not a bug here, so it is
-        // asserted explicitly rather than folded into a blanket "all four differ" claim that would be
-        // false against the shipped numbers.
+        // tie (D55, 2026-09-06: both derived from the sibling {3,4,4,6} ratio's shared "4" for
+        // demonType/aspect, scaled against commander=11 -- 15 each) -- a tie is not a bug here, so it
+        // is asserted explicitly rather than folded into a blanket "all four differ" claim that would
+        // be false against the shipped numbers.
         Assert.NotEqual(commander, demonType);
         Assert.NotEqual(commander, aspect);
         Assert.NotEqual(commander, uniqueDemon);
-        Assert.Equal(demonType, aspect); // legal tie -- both 4, borrowed from the sibling table
+        Assert.Equal(demonType, aspect); // legal tie -- both 15, D55's ratio-derived rate
         Assert.NotEqual(aspect, uniqueDemon);
         Assert.NotEqual(demonType, uniqueDemon);
 

@@ -1169,6 +1169,93 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
     return EXIT_CLEAN
 
 
+def _parse_set_pairs(pairs: "list[str]") -> "dict[str, float]":
+    """`channelWeight.<id>=<value>` / `baseShare=<value>` -> the override map `TierBands.adjust`
+    already consumes (spec-numerics.md §3.2's own worked example). Values are plain ratio
+    multipliers (`1.0` == 1000‰), never per-mille integers — the same grammar the shipped
+    `tier-bands.v1.json` `_meta` line names."""
+    overrides: "dict[str, float]" = {}
+    for pair in pairs:
+        key, sep, raw = pair.partition("=")
+        if not sep:
+            raise ValueError(f"--set expects KEY=VALUE, got {pair!r}")
+        key = key.strip()
+        if key != "baseShare" and not key.startswith("channelWeight."):
+            raise ValueError(
+                f"--set key must be 'baseShare' or 'channelWeight.<id>', got {key!r}")
+        overrides[key] = float(raw)
+    return overrides
+
+
+def _cmd_numerics_rebalance(args: argparse.Namespace) -> int:
+    """`seedsmith numerics rebalance --set channelWeight.<id>=<value> [--publish]` — the command
+    `data/seed/items/_tuning/tier-bands.v1.json`'s own `_meta.rebalance` line has named since the
+    file shipped, and which did not exist until now (the `numerics` package was library-only).
+
+    Dry by default: it prints what would move and exits without touching disk, matching
+    spec-numerics.md §3.2's "nothing until publish". `--publish` writes `tier-bands.v{n+1}.json`
+    and leaves the old version in place for revert, exactly as that `_meta` line promises.
+    """
+    from ..numerics import TierBands, tier_bands_io
+
+    pairs = list(args.set_pairs or [])
+    if args.set_file:
+        for line in Path(args.set_file).read_text(encoding="utf-8").splitlines():
+            line = line.strip()
+            if line and not line.startswith("#"):
+                pairs.append(line)
+
+    try:
+        overrides = _parse_set_pairs(pairs)
+    except ValueError as ex:
+        print(f"EXIT_CANNOT_RUN: {ex}")
+        return EXIT_CANNOT_RUN
+
+    if not overrides:
+        print("EXIT_CANNOT_RUN: no --set/--set-file overrides given — refusing a no-op publish")
+        return EXIT_CANNOT_RUN
+
+    before = TierBands.load("latest")
+    after = before.adjust(overrides)
+
+    added = sorted(set(after.channel_weight_permille) - set(before.channel_weight_permille))
+    changed = sorted(
+        k for k in before.channel_weight_permille
+        if after.channel_weight_permille[k] != before.channel_weight_permille[k])
+
+    print(f"tier-bands v{before.version}: {len(before.channel_weight_permille)} channel weights, "
+          f"baseShare {before.base_share_permille}‰")
+    print(f"  + {len(added)} added, ~{len(changed)} changed, "
+          f"= {len(before.channel_weight_permille) - len(changed)} unchanged")
+    if after.base_share_permille != before.base_share_permille:
+        print(f"  baseShare {before.base_share_permille}‰ -> {after.base_share_permille}‰")
+    for key in changed:
+        print(f"  ~ {key}: {before.channel_weight_permille[key]}‰ -> "
+              f"{after.channel_weight_permille[key]}‰")
+    for key in added:
+        print(f"  + {key}: {after.channel_weight_permille[key]}‰")
+    print(f"total after: {len(after.channel_weight_permille)} channel weights")
+
+    if not args.publish:
+        print("dry run — nothing written (pass --publish to write the next version)")
+        return EXIT_CLEAN
+
+    published = TierBands(version=before.version + 1,
+                          base_share_permille=after.base_share_permille,
+                          channel_weight_permille=after.channel_weight_permille,
+                          op_weight_permille=after.op_weight_permille)
+    path = tier_bands_io.save(published, meta=tier_bands_io.read_meta("latest"))
+    print(f"wrote {path}")
+    return EXIT_CLEAN
+
+
+def cmd_numerics(args: argparse.Namespace) -> int:
+    if args.numerics_command == "rebalance":
+        return _cmd_numerics_rebalance(args)
+    print(f"unknown numerics command {args.numerics_command!r}")
+    return EXIT_CANNOT_RUN
+
+
 def cmd_structures(args: argparse.Namespace) -> int:
     """`seedsmith structures <contract>` — base-defense structure corpus entrypoints. Mirrors
     `cmd_demons`'s own dispatch shape exactly (module 23+, spec-structure-schema.md)."""
@@ -1803,6 +1890,24 @@ def build_parser() -> argparse.ArgumentParser:
         help="override where <lot>.json's sheetReads/entries are read from (default "
              "data/seed/passive-tree/_review)")
     trees.set_defaults(func=cmd_trees)
+
+    numerics = sub.add_parser(
+        "numerics", help="tier-bands tuning entrypoints (spec-numerics.md §3.1, §3.2)")
+    numerics_sub = numerics.add_subparsers(dest="numerics_command", required=True)
+    nrebalance = numerics_sub.add_parser(
+        "rebalance",
+        help="apply channelWeight/baseShare overrides to the latest tier-bands and, with "
+             "--publish, write the next version")
+    nrebalance.add_argument("--set", dest="set_pairs", action="append", default=None,
+                            metavar="KEY=VALUE",
+                            help="channelWeight.<id>=<ratio> or baseShare=<ratio>, repeatable "
+                                 "(ratio, not per-mille: 1.0 == 1000‰)")
+    nrebalance.add_argument("--set-file", dest="set_file", default="", metavar="PATH",
+                            help="a file of KEY=VALUE lines (# comments allowed) — the reviewable "
+                                 "form of a large --set batch")
+    nrebalance.add_argument("--publish", action="store_true",
+                            help="write tier-bands.v{n+1}.json; the old version stays for revert")
+    nrebalance.set_defaults(func=cmd_numerics)
 
     return parser
 

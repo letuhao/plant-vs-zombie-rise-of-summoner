@@ -315,6 +315,22 @@ resolve in a task list no one reviews.
     develops — `siege-construction` instead calls the existing pure function from its OWN per-turn phase
     (15.4's `SiegeConstruction.Production`, the same slot 15.4 already added the Ironwork/Rubble faucets
     to), so `LoamProduction.cs` is never touched.
+49. **The `moat` is buildable via all four acquisition paths, not `Laboured` only.** Found while
+    authoring 15.3b's real content (2026-09-06): a fuller siege roster (Trench/Wire/Mine/Emplacement,
+    separate structures per path) is `structure-corpus`'s (module 24) own job, not this module's to
+    invent. Since `StructureDef.AcquisitionPaths` is already a list, one real, shipped structure proves
+    `structure.place`'s mechanism end to end across all four paths without guessing at a roster nobody
+    has designed yet — `Built`'s own cost fields (`ConstructRubbleCost`/`ConstructIronworkCost`) are
+    real and non-zero on this row for the first time. **A larger, unplanned finding rides alongside
+    this decision**: no non-`BasicAttack` action had ever fired its own atoms anywhere in this
+    codebase's history before this pass (`BattleRunState.BindContainers` only ever grants permanently
+    at setup; `Bag.OnEvent` had exactly two production call sites, both hardcoded in `BasicAttack.cs`).
+    That gap is the `action` program's own foundational scope, not `siege-construction`'s — a second,
+    narrow, `BasicAttack`-shaped activation path (`ConstructionActivation.Fire`) was built instead of a
+    general fix. See `spec-siege-construction.md` §11 for the full account, including two more real,
+    previously-undiscovered defects found and fixed the same pass (`Compilability.OpcodeKinds` and
+    `EffectOverlayMerge.AllowedByAction` both missing `structure.place`/`PlaceStructure` — the fourth
+    and fifth instances of a bug class this codebase's own comments had already named three times).
 
 **Fog of war, reopened by the owner against this document's own original scope, now has its own ideal
 doc** rather than a retrofit into this one: [base-defense-fog-of-war-ideal.md](base-defense-fog-of-war-ideal.md)

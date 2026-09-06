@@ -267,7 +267,9 @@ public static class WorldEndpoints
                 Cost = s.Cost,
                 YieldMultiplierMilli = s.YieldMultiplierMilli,
                 BuildTurns = s.BuildTurns,
-                CapacityBonus = s.CapacityBonus
+                CapacityBonus = s.CapacityBonus,
+                ObstacleKind = s.Obstacle.ToString(),
+                MaterialTier = s.MaterialTier
             }).ToList(),
             SlotTypes = SlotTypeCatalog.All.Select(s => new WorldSlotTypeDto
             {

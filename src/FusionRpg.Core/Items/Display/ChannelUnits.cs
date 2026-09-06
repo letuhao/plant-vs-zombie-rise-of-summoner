@@ -31,6 +31,51 @@ public static class ChannelUnits
     };
 
     /// <summary>
+    /// Channel FAMILIES an affix family authors that <see cref="DerivedStatRegistry"/> does not
+    /// register — matched by prefix, exactly the shape ssot-presentation.md §5.3 N3 specifies
+    /// ("covering the 8 primary channels and the 12+4 derived families <b>by prefix pattern</b>").
+    ///
+    /// <para>⛔ <b>Every row's unit is the unit of the term it lands in, read off the consumer, not
+    /// off the channel's name.</b> Both rows below are `g.elem-power`'s own mints
+    /// (`data/seed/items/affix-families/g-elem-power.json`), authored ahead of a runtime that reads
+    /// them — <see cref="FamilyExpansion"/> already refuses all three families that name them, by
+    /// id, for having no shipped E30 pool. What makes a unit nameable anyway is that both channels
+    /// state, in their own authoring notes, WHICH existing term they add into:</para>
+    ///
+    /// <list type="bullet">
+    /// <item><c>combat.power.pierce.*</c> — <i>"a flat amount that offsets the matching-element
+    /// <c>combat.defense.*</c> term on the far side of the same (power − defense) sum"</i>. That sum
+    /// is <c>OverlayCombatCalculator.cs:145</c>, <c>(power - defense) + componentBonus</c> — a plain
+    /// additive delta in game units, and both of its existing halves are
+    /// <see cref="UnitClass.GameUnits"/> in <c>DerivedStatChannels.CombatFamilyUnitClass</c>. A term
+    /// added into that sum cannot carry a different unit.</item>
+    /// <item><c>combat.power.overflow.*</c> — <i>"a family authored as its own ledger so a later
+    /// formula is free to treat 'overflow' power differently from base power"</i>: a second, flat
+    /// power ledger (`op: Flat`, rendered "+{value} bonus {element} power"), same arithmetic shape
+    /// as <c>combat.power.*</c> itself.</item>
+    /// </list>
+    ///
+    /// <para>⛔ <b>Not <see cref="UnitClass.ReciprocalPoints"/>, despite the word "pierce".</b> The
+    /// asymptotic <c>PierceFactor</c> channel is <c>combat.penetration.*</c>, a different, already
+    /// registered H.1 family. Grouping <c>combat.power.pierce.*</c> with it by name would be exactly
+    /// the "wrongly grouped … by tuning-file section rather than by formula shape" error
+    /// <c>CombatFamilyUnitClass</c>'s own comment records having already been corrected once.</para>
+    ///
+    /// <para>These live here rather than in <c>DerivedStatChannels.CombatChannelFamilies</c> because
+    /// joining that list REGISTERS 8 real channel slots per family in the derived-stat catalog —
+    /// a derived-stats-program change with its own seed-catalog and doc-drift guards. Declaring a
+    /// display unit is not the same act as registering a channel, and only the first is this lane's.
+    /// When the derived-stats program registers these two families for real, delete the rows: the
+    /// <see cref="For"/> lookup below already prefers the registry.</para>
+    /// </summary>
+    static readonly IReadOnlyList<(string Prefix, UnitClass Unit)> AuthoredChannelFamilies =
+        new (string, UnitClass)[]
+        {
+            ("combat.power.pierce.", UnitClass.GameUnits),
+            ("combat.power.overflow.", UnitClass.GameUnits),
+        };
+
+    /// <summary>
     /// Matches by prefix, the way derived readers already match generated element channels
     /// (`DerivedStatChannels.cs`'s own `…Prefix` constants) — a new element needs no new unit row.
     ///
@@ -51,7 +96,15 @@ public static class ChannelUnits
         if (Primary.TryGetValue(channelId, out var primary)) return primary;
 
         var registry = derivedRegistry ?? DerivedStatRegistry.CreateDefault();
-        return registry.TryResolveChannel(channelId, out var def) ? def.Unit : null;
+        if (registry.TryResolveChannel(channelId, out var def)) return def.Unit;
+
+        // The registry wins wherever it answers; these are only the families it does not carry.
+        foreach (var (prefix, unit) in AuthoredChannelFamilies)
+            if (channelId.StartsWith(prefix, StringComparison.Ordinal)
+                && channelId.Length > prefix.Length)
+                return unit;
+
+        return null;
     }
 
     /// <summary>The concrete element a <c>{variant}</c>-templated channel is probed with. Structural,

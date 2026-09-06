@@ -127,6 +127,46 @@ function Unfilled({ state, reason }: { state: "absent" | "pending"; reason?: str
   return <p className="text-xs text-muted">None</p>;
 }
 
+/**
+ * Card block 9's own row shape — item-content `granted-action-text` (T15).
+ *
+ * `ssot-presentation.md` §9.14 asks for four things on this block: the action's **name**, its
+ * **description**, the **battle-only** tag and the **already known** state. A generic `LineRow`
+ * shows `rendered` and nothing else, which would drop three of the four.
+ *
+ * ⛔ Absent text is absent: a key the string catalog has no row for shows nothing rather than the
+ * key's own tail — the same rule flavour follows since T6.
+ */
+function GrantedActionLines({ lines, testId }: { lines: DisplayLine[]; testId: string }) {
+  if (lines.length === 0) return <Unfilled state="absent" />;
+  return (
+    <div className="flex flex-col gap-1.5">
+      {lines.map((line, i) => {
+        // `args` is `Record<string, string | Magnitude>`; block 9 authors only strings, and a
+        // Magnitude here would be a renderer bug rather than a name — so it renders nothing.
+        const raw = line.args.__renderedName;
+        const name = typeof raw === "string" ? raw : "";
+        const battleOnly = line.args.battleOnly === "1";
+        const alreadyKnown = line.args.alreadyKnown === "1";
+        return (
+          <div key={`${line.key}-${i}`} data-source-kind={line.sourceKind ?? undefined}>
+            <p className="flex items-baseline gap-2">
+              {name ? <span className="font-semibold text-text">{name}</span> : null}
+              {battleOnly ? (
+                <span className="text-xs text-muted" data-testid={`${testId}-granted-battle-only`}>
+                  battle only
+                </span>
+              ) : null}
+              {alreadyKnown ? <span className="text-xs text-muted">already known</span> : null}
+            </p>
+            {line.rendered ? <p className="text-sm text-muted">{line.rendered}</p> : null}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 function Lines({ lines }: { lines: DisplayLine[] }) {
   if (lines.length === 0) return <Unfilled state="absent" />;
   return (
@@ -330,10 +370,12 @@ export function ItemCard({
           )}
         </Block>
 
-        {/* 9. Granted action. */}
+        {/* 9. Granted action — name AND description, plus the battle-only tag and the already-known
+            state (`ssot-presentation.md` §9.14). `Lines` would show only the description, because a
+            generic line has one sentence and this one has a name beside it. */}
         <Block title="Grants" testId={`${testId}-granted-action`}>
           {item.grantedAction.state === "known" ? (
-            <Lines lines={item.grantedAction.value} />
+            <GrantedActionLines lines={item.grantedAction.value} testId={testId} />
           ) : (
             <Unfilled
               state={item.grantedAction.state}
@@ -342,10 +384,12 @@ export function ItemCard({
           )}
         </Block>
 
-        {/* 10. Flavour — uniques only, italic, may collapse. */}
+        {/* 10. Flavour — a unique's or a set's authored prose, italic, may collapse. Absent when
+            nothing was authored: no block, no placeholder. `whitespace-pre-line` so a card that
+            somehow carries both keeps them as two paragraphs rather than one run-on sentence. */}
         {item.flavour ? (
           <Block title="Flavour" testId={`${testId}-flavour`} collapsible>
-            <p className="italic text-muted">{item.flavour}</p>
+            <p className="italic text-muted whitespace-pre-line">{item.flavour}</p>
           </Block>
         ) : null}
 

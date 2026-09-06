@@ -368,5 +368,55 @@ class QuotaForRealMightPlanTests(unittest.TestCase):
                                           if k != "status"})
 
 
+class QuotaForForcedElementOrStatusCategoryTests(unittest.TestCase):
+    """2026-09-06, found by an adversarial spec audit (not a second real crash): `nodeClass`'s own
+    fix (quota derived from the real tally whenever an axis is forced on every slot) was written
+    against nodeClass's OWN always-100%-forced shape, but `build_slot` forces `element`/`status`
+    the exact same way -- 100% of a tree's own 40 slots -- whenever `category` is `"elemental"` /
+    `"status"`. A flat, tree-oblivious weight (the targets file's own near-uniform ~1/7-per-element
+    split) can never satisfy "this whole 40-node tree is one element," for the identical reason a
+    flat 500/500 nodeClass split could never satisfy a `gated-deep` tree's real 16/24 archetype
+    split. Proven here by reproducing the crash directly (against the REAL might.v1.json plan
+    reused as a stand-in shape, since no elemental/status tree has ever been planned for real) and
+    confirming the same general fix that already covers `nodeClass` for primary trees also covers
+    this case, with zero special-casing by axis name."""
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.plan = plan_read.load("might")
+        cls.targets = tuning.load()
+
+    def test_a_synthetic_elemental_tree_forcing_every_slot_to_one_element_no_longer_overdraws(self) -> None:
+        cells = quota.quota_for_plan(self.plan, self.targets, category="elemental",
+                                     forced_element="fire", forced_status=None)
+        self.assertEqual(len(cells), len(self.plan.nodes))
+        for cell in cells.values():
+            self.assertEqual(cell.value_for("element"), "fire")
+
+    def test_a_synthetic_status_tree_forcing_every_slot_to_one_status_no_longer_overdraws(self) -> None:
+        cells = quota.quota_for_plan(self.plan, self.targets, category="status",
+                                     forced_element=None, forced_status="wither")
+        self.assertEqual(len(cells), len(self.plan.nodes))
+        for cell in cells.values():
+            self.assertEqual(cell.value_for("status"), "wither")
+
+    def test_a_primary_trees_own_element_axis_still_draws_freely_not_forced(self) -> None:
+        """The fix must not accidentally force `element` on a tree whose category never triggers
+        the override -- a primary tree's element distribution stays a real, near-uniform spread."""
+        cells = quota.quota_for_plan(self.plan, self.targets, category="primary")
+        counts = collections.Counter(cell.value_for("element") for cell in cells.values())
+        self.assertGreater(len(counts), 1, "a primary tree's element axis must still be freely drawn")
+
+    def test_an_elemental_trees_own_nodeClass_axis_is_still_forced_by_the_plans_archetype(self) -> None:
+        """Both mechanisms (nodeClass always-forced, element forced-by-category) apply
+        simultaneously on the same synthetic elemental tree -- neither one's fix regresses the
+        other."""
+        cells = quota.quota_for_plan(self.plan, self.targets, category="elemental",
+                                     forced_element="fire", forced_status=None)
+        by_id = {n.node_id: n for n in self.plan.nodes}
+        for node_id, cell in cells.items():
+            self.assertEqual(cell.node_class, by_id[node_id].node_class)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -19,10 +19,11 @@ import {
 // function's own parameter type instead of importing `TreeResolveReport` from `@/lib/bus` here.
 type TreeReport = Parameters<typeof orderPathBrowse>[0][number];
 
-// GG-50: below this, render every card directly; above it, window the render. 39 real shared paths
-// (roster.aptitudes(12) + roster.elements(6) + roster.statuses(21), spec-tree-surface.md §9.1's own
-// table) sit above this threshold on purpose -- I4's own acceptance bullet is "39 cards render
-// windowed," so the number must clear 39 by less than CreaturesLayer's list ever needs to. Reusing
+// GG-50: below this, render every card directly; above it, window the render. 42 real shared paths
+// (roster.aptitudes(12) + roster.elements(6) + roster.statuses(24), spec-tree-surface.md §9.1's own
+// table -- D51, 2026-09-06, grew statuses 21 -> 24) sit above this threshold on purpose -- I4's own
+// acceptance bullet is "39 cards render windowed" (pre-D51 wording; the real count is now 42), so the
+// number must clear the real corpus size by less than CreaturesLayer's list ever needs to. Reusing
 // CreaturesLayer's own literal (24) rather than inventing a second one for the same GG-50 shape.
 const RENDER_ALL_MAX = 24;
 const ESTIMATED_CARD_HEIGHT = 72;

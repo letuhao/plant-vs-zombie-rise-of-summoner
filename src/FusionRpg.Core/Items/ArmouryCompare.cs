@@ -1,11 +1,41 @@
 using System.Text.Json;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Items.Display;
+using FusionRpg.Core.Stats.Derived;
 
 namespace FusionRpg.Core.Items;
 
-/// <summary>One channel's magnitude on each side. <c>Unit</c> labels rather than converts — SC4:
-/// magnitudes across channel families are not comparable, so they are never summed across channels.</summary>
-public sealed record ChannelDelta(string Channel, string Unit, long Incumbent, long Candidate, long Delta);
+/// <summary>
+/// One channel's magnitude on each side. <c>Unit</c> labels rather than converts — SC4: magnitudes
+/// across channel families are not comparable, so they are never summed across channels.
+///
+/// <para>⛔ <b><c>Unit</c> is <see cref="ChannelUnits.For"/>'s answer, and only ever that
+/// (fixed 2026-09-06).</b> It used to be a free string derived from the atom's OP —
+/// <c>"per-mille"</c> for <c>increased</c>/<c>more</c>, <c>"game-units"</c> otherwise — which made
+/// two answers to one question: <c>DominancePresentation.GroupByUnitClass</c> puts the same delta
+/// under <c>ChannelUnits.For(channel)</c>, so <c>maxHp</c> came back labelled <c>per-mille</c> inside
+/// a <c>GameUnits</c> group header. spec-item-card.md's unit ledger settles which is authoritative:
+/// <i>"a channel's unit is inseparable from its READER"</i> — the unit belongs to the channel, not to
+/// the op, which is exactly how the card already labels its own lines
+/// (<c>ItemCard.AtomLines</c> reads <c>ChannelUnits.ForAuthoredChannel</c> and lets the display
+/// template carry the word "increased"). Sourcing it here from the same lookup the group header uses
+/// makes the two agree BY CONSTRUCTION rather than by a test that notices when they stop.</para>
+/// </summary>
+/// <param name="Unit">The channel's unit class, or <c>null</c> when no reader resolves one — the same
+/// null <c>GroupByUnitClass</c> gives its own group rather than folding into <c>GameUnits</c>.</param>
+/// <param name="IncumbentMax">
+/// The top of an <c>OnApply</c> BAND, when this channel's magnitude is a band rather than a point.
+/// <c>null</c> means a point value and <see cref="Incumbent"/> is the whole answer.
+///
+/// <para>The shipped corpus authors <c>{min, max, roll: "onApply"}</c> for <b>every</b> generated
+/// affix family (<c>FamilyExpansion</c> E43), and <c>Instantiator.Freeze</c> copies such a spec
+/// through as authored because the HIT rolls it, not the item. Carrying both bounds is how the delta
+/// table reports that content without inventing a scalar the corpus never authored.</para>
+/// </param>
+/// <param name="CandidateMax">The candidate side of the same band. See <see cref="IncumbentMax"/>.</param>
+public sealed record ChannelDelta(
+    string Channel, UnitClass? Unit, long Incumbent, long Candidate, long Delta,
+    long? IncumbentMax = null, long? CandidateMax = null);
 
 public enum DominanceVerdict
 {
@@ -45,8 +75,15 @@ public readonly record struct CompareAtom(AtomRow Atom, string ValuesJson);
 /// </summary>
 public static class ArmouryCompare
 {
-    public static CompareResult Compare(IReadOnlyList<CompareAtom> incumbent, IReadOnlyList<CompareAtom> candidate)
+    /// <param name="registry">The derived-channel registry the unit lookup reads. Defaults to
+    /// <see cref="DerivedStatRegistry.CreateDefault"/>; a caller that already has one (the Compare
+    /// level does) passes it so the deltas and the group header resolve against the same registry.</param>
+    public static CompareResult Compare(
+        IReadOnlyList<CompareAtom> incumbent, IReadOnlyList<CompareAtom> candidate,
+        DerivedStatRegistry? registry = null)
     {
+        var resolved = registry ?? DerivedStatRegistry.CreateDefault();
+
         var incumbentChannels = ChannelMagnitudes(incumbent);
         var candidateChannels = ChannelMagnitudes(candidate);
 
@@ -60,8 +97,13 @@ public static class ArmouryCompare
         {
             incumbentChannels.TryGetValue(channel, out var i);
             candidateChannels.TryGetValue(channel, out var c);
-            var unit = i.Unit ?? c.Unit ?? "game-units";
-            deltas.Add(new ChannelDelta(channel, unit, i.Value, c.Value, c.Value - i.Value));
+            // ⛔ ONE producer for the unit -- ChannelUnits.For, the same call GroupByUnitClass makes.
+            // See ChannelDelta's own note: the op is not a unit.
+            var unit = ChannelUnits.For(channel, resolved);
+            var isBand = i.Max != i.Value || c.Max != c.Value;
+            deltas.Add(new ChannelDelta(
+                channel, unit, i.Value, c.Value, c.Value - i.Value,
+                isBand ? i.Max : null, isBand ? c.Max : null));
         }
 
         // Disjoint channel sets (both non-empty, nothing shared) means there is nothing to weigh --
@@ -88,25 +130,49 @@ public static class ArmouryCompare
         return DominanceVerdict.Sidegrade; // identical on every shared channel -- no change either way
     }
 
-    static Dictionary<string, (long Value, string? Unit)> ChannelMagnitudes(IReadOnlyList<CompareAtom> atoms)
+    /// <summary>
+    /// Every channel this side touches, summed, as a <c>[Value, Max]</c> pair. <c>Max == Value</c>
+    /// means a point; <c>Max &gt; Value</c> means an <c>OnApply</c> band. Bands add bound-wise, which
+    /// is the only correct way to add two ranges.
+    /// </summary>
+    static Dictionary<string, (long Value, long Max)> ChannelMagnitudes(IReadOnlyList<CompareAtom> atoms)
     {
-        var map = new Dictionary<string, (long, string?)>(StringComparer.Ordinal);
+        var map = new Dictionary<string, (long, long)>(StringComparer.Ordinal);
         foreach (var a in atoms)
         {
             if (a.Atom.KindId is not ("stat.modify" or "stat.derived")) continue;
-            if (!TryReadChannelOpAmount(a.ValuesJson, out var channel, out var op, out var amount)) continue;
+            if (!TryReadChannelAmount(a.ValuesJson, out var channel, out var min, out var max)) continue;
 
-            var unit = op is "increased" or "more" ? "per-mille" : "game-units";
             map[channel] = map.TryGetValue(channel, out var existing)
-                ? (existing.Item1 + amount, existing.Item2 ?? unit)
-                : (amount, unit);
+                ? (existing.Item1 + min, existing.Item2 + max)
+                : (min, max);
         }
         return map;
     }
 
-    static bool TryReadChannelOpAmount(string json, out string channel, out string op, out long amount)
+    /// <summary>
+    /// One frozen atom's channel and magnitude bounds.
+    ///
+    /// <para>⛔ <b>An <c>OnApply</c> band is no longer read as zero (fixed 2026-09-06).</b> This used
+    /// to take <c>amount</c> only when it was a JSON <i>number</i> and fall through to <c>0</c>
+    /// otherwise — and <c>Instantiator.Freeze</c> deliberately copies an <c>OnApply</c> spec through
+    /// as <c>{min, max, roll}</c> because the hit rolls it, which the shipped corpus authors for
+    /// <b>every</b> generated affix family. The whole delta table was therefore zeros on real content
+    /// while the card beside it rendered the same atoms as <c>125–249 increased attack</c>. It now
+    /// reads the band with <see cref="AtomJson.TryReadValueSpec"/> — the same reader
+    /// <c>ItemCard.Magnitude</c> uses, so the card and the comparison cannot disagree about what an
+    /// atom carries.</para>
+    ///
+    /// <para><b>The scalar column takes the band's MINIMUM</b>, and that is a read of authored
+    /// content rather than a number invented here: it is the same bound <c>ItemCard.Magnitude</c>
+    /// already treats as the line's value (with <c>Max</c> as the band top), and it is the
+    /// conservative end — a band can only ever over-deliver against it. The full range still reaches
+    /// the caller in <see cref="ChannelDelta.IncumbentMax"/> / <see cref="ChannelDelta.CandidateMax"/>,
+    /// so nothing the corpus authored is dropped.</para>
+    /// </summary>
+    static bool TryReadChannelAmount(string json, out string channel, out long min, out long max)
     {
-        channel = ""; op = ""; amount = 0;
+        channel = ""; min = 0; max = 0;
         if (string.IsNullOrWhiteSpace(json)) return false;
         try
         {
@@ -117,16 +183,24 @@ public static class ArmouryCompare
                 return false;
             channel = ch.GetString() ?? "";
 
-            op = doc.RootElement.TryGetProperty("op", out var opEl) && opEl.ValueKind == JsonValueKind.String
-                ? opEl.GetString() ?? "" : "";
-
             if (!doc.RootElement.TryGetProperty("amount", out var amt)) return false;
-            amount = amt.ValueKind switch
+
+            if (amt.ValueKind == JsonValueKind.Number)
             {
-                JsonValueKind.Number => amt.GetInt64(),
-                _ => 0,
-            };
-            return true;
+                min = max = amt.GetInt64();
+                return true;
+            }
+
+            if (amt.ValueKind == JsonValueKind.Object && AtomJson.TryReadValueSpec(amt, out var spec).IsOk)
+            {
+                min = spec.Min;
+                max = spec.Max;
+                return true;
+            }
+
+            // A shape neither this nor the card can read contributes NOTHING rather than a zero: a
+            // zero would sit in the table as a real magnitude and read as "this item has none".
+            return false;
         }
         catch (JsonException) { return false; }
     }

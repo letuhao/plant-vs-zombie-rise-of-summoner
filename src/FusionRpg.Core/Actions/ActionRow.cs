@@ -17,6 +17,20 @@ public sealed record ActionRow
     // ---- identity --------------------------------------------------------------------------
     public string ActionId { get; init; } = "";
     public string Name { get; init; } = "";
+
+    /// <summary>
+    /// item-content `granted-action-text` (T14): the display KEY for the action's player-facing
+    /// description — never the sentence itself. `ssot-presentation.md` §3.6 L3: content-authored
+    /// display text lives in a `_key` column and resolves through the string catalog
+    /// (`content/display/en.json`), the same rule `rarity.display_key` and `item_unique.flavour_key`
+    /// already follow.
+    ///
+    /// <para>Empty means "this action has no authored description" — a real, visible absence that
+    /// <c>DisplayRules.MissingDisplayKey</c> reports, never a synthesised sentence. Block 9 of the
+    /// item card (`ssot-presentation.md` §9.14) is the reader.</para>
+    /// </summary>
+    public string DescriptionKey { get; init; } = "";
+
     public ActionKind Kind { get; init; } = ActionKind.Skill;
 
     /// <summary>Indexes `A12`'s rung table. Never a magnitude — the table holds the multipliers.</summary>

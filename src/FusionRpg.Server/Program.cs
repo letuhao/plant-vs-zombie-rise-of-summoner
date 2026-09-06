@@ -159,8 +159,8 @@ FusionRpg.Core.Power.PowerTuningHub.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json"))));
 FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk.
-        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v6.json"))));
+        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk. passive-tree D55 (2026-09-06): v6 -> v7, published via tools/tuning/publish.py -- demonType/aspect/uniqueDemon skillPointsPerThetaMilliByScope moved from the borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22} against the already-settled commander=11 (spec-tree-state.md open question 3) -- v6 stays on disk.
+        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v7.json"))));
 // Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
 // sees one, so the rung ladder has no reason to load there.
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
@@ -332,6 +332,27 @@ store.SeedSocketGrants(socketTuning);
 // than authored as a second per-rung table, and seeded here under the same placement rule as the three
 // above — a later module's tuning never reaches module 7's own seeding.
 store.SeedUniqueEligible(uniqueTuning);
+// action-instance-and-grant (A21, T59.4): the corpus import — content-seeded, idempotent (a
+// re-import of an unchanged brief moves zero revisions, T30's own guard). Defaults ON, matching
+// this file's own kill-switch convention (FUSIONRPG_PERF, FUSIONRPG_NO_BROWSER) rather than
+// requiring an opt-in for content that already exists and is safe to re-run every start. Never a
+// live game/injector path -- this runs once, here, before the server accepts any connection.
+if (Environment.GetEnvironmentVariable("FUSIONRPG_ACTION_CORPUS_IMPORT") != "0")
+{
+    var actionCorpusTemplatePath = Path.Combine(AppContext.BaseDirectory, "data", "tuning", "action-corpus-cost-templates.v1.json");
+    if (File.Exists(actionCorpusTemplatePath))
+    {
+        var actionCostTemplate = FusionRpg.Core.Actions.Corpus.ActionCorpusCostTemplateLoader.Parse(File.ReadAllText(actionCorpusTemplatePath));
+        var actionBriefs = new List<FusionRpg.Core.Actions.Corpus.ActionCorpusBrief>();
+        foreach (var briefFile in new[] { "committed-round-1.json", "committed-round-2.json" })
+        {
+            var briefPath = Path.Combine(AppContext.BaseDirectory, "data", "seed", "actions", briefFile);
+            if (File.Exists(briefPath))
+                actionBriefs.AddRange(FusionRpg.Core.Actions.Corpus.ActionCorpusBriefJson.Parse(File.ReadAllText(briefPath)));
+        }
+        FusionRpg.Data.ActionCorpusImporter.Import(store, actionBriefs, actionCostTemplate, FusionRpg.Core.Actions.Rungs.RungPolicy.Table);
+    }
+}
 {
     var comboRecipes = FusionRpg.Core.Items.Sockets.ResonanceGenerator.Generate(socketTuning);
     // item-ideal.md, strain-splice-gen (module 21): every Strain/Splice recipe on the seed path is
@@ -409,6 +430,13 @@ FusionRpg.Core.Items.Materials.MaterialRecipeCatalog? recipeCatalog = null;
 // production callers. This is the joint. It is registered only when the recipe corpus loaded —
 // a workbench with no prices could only ever refuse, and a route that always refuses is worse than
 // a route that is absent, because it looks wired.
+// ⏸ Module 16 shipped the gem catalog as seed JSON, not a table — the same boot-time stopgap shape
+// `BaseTypeSocketMaxCorpus` is. Loaded ONCE here and handed to all three item route groups: the
+// workbench (`socket-insert`), the surface routes (`/combinations`) and the card routes each need an
+// insert's real element, and three separate loads would be three chances to disagree about it.
+var gemInserts = FusionRpg.Server.GemInsertCorpus.Load(
+    Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "gems"));
+
 FusionRpg.Server.ItemWorkbench? itemWorkbench = null;
 if (recipeCatalog is { } workbenchRecipes)
 {
@@ -417,7 +445,8 @@ if (recipeCatalog is { } workbenchRecipes)
     var socketMaxForBaseType = FusionRpg.Server.BaseTypeSocketMaxCorpus.Load(
         Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types"));
     itemWorkbench = new FusionRpg.Server.ItemWorkbench(
-        store, materialTuning, workbenchRecipes, enhancementTuning, socketTuning, socketMaxForBaseType);
+        store, materialTuning, workbenchRecipes, enhancementTuning, socketTuning, socketMaxForBaseType,
+        gemInserts);
 }
 // item-ideal.md, item-card (module 10): N1's item_display_template, seeded from the already-shipped
 // data/seed/items/display-templates/*.json (98 rows, one per affix family) -- never re-authored here.
@@ -643,7 +672,7 @@ app.MapAuraCatalog();
 // item module 20 (`item-surfaces`) — READ-ONLY. No MapPost lives in that file: equipping, socketing
 // and salvaging already have owners (modules 4, 16, 14), and a second write path through the
 // presentation layer is the "second surface" this module exists to prevent.
-app.MapItemSurfaces(itemSurfaceTuning, socketTuning);
+app.MapItemSurfaces(itemSurfaceTuning, socketTuning, gemInserts);
 // ⭐ item modules 14/15/16 — the WRITE half, and the production caller all three named as their
 // shared blocker. Mapped only when the recipe corpus loaded: a workbench with no prices could only
 // ever refuse, and a route that always refuses is worse than an absent one because it looks wired.
@@ -660,12 +689,56 @@ app.MapItemEquip(new FusionRpg.Server.ItemEquipService(store));
 //
 // ⏸ The two corpora are the same boot-time stopgap `BaseTypeSocketMaxCorpus` already is — module 6
 // shipped the base-type corpus and module 16 the gem corpus as seed JSON, neither as a table.
-app.MapItemCard(new FusionRpg.Server.ItemCardService(store, new ItemCardCorpus(
+// item-lore T6: N2's string catalog (ssot-presentation.md §5.3), copied next to the exe the same way
+// data/tuning and data/seed/items already are. Absent degrades to "no sentence resolved" — the card's
+// flavour line still carries its key and nothing is invented, which is the same
+// absence-degrades-never-guesses rule DisplayCheck applies to the very same file.
+var displayStrings = FusionRpg.Server.DisplayStringCatalogFile.Load(
+    Path.Combine(AppContext.BaseDirectory, "content", "display", "en.json"));
+// ⭐ item-content T1: the two corpora module 8's `ItemNameComposer` needed and nobody loaded, which is
+// the whole reason a rolled item had no name. Same boot-time stopgap shape as the base-type and gem
+// corpora above — the `nameWords` half is the `item_affix_name` PROJECTION `AffixNameTable`'s own doc
+// describes and no importer ever built; the rare half is a head/tail word table that did not exist in
+// the seed tree at all until today.
+//
+// ⛔ A malformed family is reported and naming degrades to the base type's authored name — it never
+// takes the process down. Same posture as the recipe-corpus import above: a card that reads
+// "Card-Proof Blade" instead of "Sap Tangle" is a worse card; a server that will not start is no game.
+Func<string, FusionRpg.Core.Items.AffixNameSlot?>? affixNameWords = null;
+try
+{
+    affixNameWords = FusionRpg.Server.AffixNameWordCorpus.Load(
+        Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "affix-families"));
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"[items] affix nameWords corpus failed to load — item naming stays off: {ex.Message}");
+}
+
+var rareNameDraw = FusionRpg.Server.RareNameCorpus.Load(
+    Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "rare-names", "rare-names.json"));
+if (affixNameWords is null || rareNameDraw is null)
+    Console.WriteLine(
+        "[items] item naming is OFF — every card falls back to its base type's authored name. " +
+        "Both halves are required: the families' nameWords AND rare-names.json (a 3+ affix item has " +
+        "no honest two-word name without the second).");
+var itemCardCorpus = new ItemCardCorpus(
     FusionRpg.Server.ItemBaseTypeCorpus.Load(
         Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types")),
-    FusionRpg.Server.GemInsertCorpus.Load(
-        Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "gems")),
-    socketTuning, itemSurfaceTuning, enhancementTuning)));
+    gemInserts,
+    socketTuning, itemSurfaceTuning, enhancementTuning,
+    LookupString: displayStrings,
+    LookupNameWords: affixNameWords,
+    RareNameDraw: rareNameDraw);
+app.MapItemCard(new FusionRpg.Server.ItemCardService(store, itemCardCorpus));
+// ⭐ item-content module `atom-preview` — the same renderer, over an UNSAVED container. It shares the
+// corpus above rather than loading a second one: a preview that read a different base-type corpus than
+// the live card would preview something the game does not ship.
+//
+// ⛔ Read-only despite being a POST. The body is a whole container definition, which is why it cannot
+// be a GET; nothing it receives is persisted anywhere.
+app.MapItemPreview(new FusionRpg.Server.ItemPreviewService(
+    store, itemCardCorpus, FusionRpg.Core.Power.PowerTuningHub.Tuning));
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

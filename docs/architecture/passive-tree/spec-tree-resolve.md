@@ -189,13 +189,17 @@ resolver never sees a specimen level or a mastery count. A tree whose gate quant
 yet is not blocked here either: it resolves to zero aptitude points, which resolves to tier 0, which
 resolves to no contribution. **Inert, not broken.**
 
-**"Inert" is the state 27 of the 39 shared trees would resolve in today** — 6 elemental and 21
-status, 1,080 of the 1,560 shared nodes (ideal §13.4), because their gate quantity has no counter
-yet. ~~A permanently-tier-0 tree~~ **A tier-0 tree is now a sequencing state, not a permanent one
-(D37):** [`gate-counters`](spec-gate-counters.md) ships those counters in wave 0, so **all 39 trees
-are reachable rather than 12**, and the wait is bounded by a module in this program instead of by
-unscheduled work in another one. The rule it waits on is unchanged — a tree's gate quantity exists
-before that tree's content is generated.
+**"Inert" was the state 27 of the 39 shared trees would have resolved in** — 6 elemental and 21
+status, 1,080 of the 1,560 shared nodes (ideal §13.4), while their gate quantity had no counter.
+~~A permanently-tier-0 tree~~ **A tier-0 tree became a sequencing state, not a permanent one
+(D37):** [`gate-counters`](spec-gate-counters.md) shipped those counters in wave 0 (carrier on both
+`elementMastery`/`statusApplied`, live-probed 2026-09-06, task G6), so **all 42 trees are reachable
+rather than 12** — D51 also grew the corpus to 24 statuses, so the real count today is 30 non-primary
+trees, 1,200 nodes, not 27/1,080. The wait is no longer bounded by `gate-counters` at all; it is
+bounded by `passive-tree-todo.md` task J1 (the plan-emission CLI has no `elemental_tree_spec()`/
+`status_tree_spec()` factory function yet, so those 30 trees cannot be planned, let alone generated).
+The rule it waits on is unchanged — a tree's gate quantity exists before that tree's content is
+generated; it is simply a different tree property blocking it now.
 
 A tier-0 tree is still arithmetically fine here and still disastrous on a player surface, where it
 reads as a wall the player failed to climb. That is true of a tree waiting for its counter as much as
@@ -307,8 +311,9 @@ because the points that buy them are, and souls are unlimited, so a direct sum l
 swamp the share vector and node allocation stops affecting focus. One index per currency, blended
 once.
 
-**Why no `1/n` normalisation.** The textbook form is `H* = (H − 1/n)/(1 − 1/n)`. At `n = 39` that
-term is a rounding error, and dropping it removes every `n` dependence — **so the roster can grow
+**Why no `1/n` normalisation.** The textbook form is `H* = (H − 1/n)/(1 − 1/n)`. At `n = 42` (D51,
+2026-09-06: 24 statuses, not 21) that term is a rounding error, and dropping it removes every `n`
+dependence — **so the roster can grow
 forever without re-scaling anybody's existing build** (ideal §3.1). A tree with zero investment
 contributes zero to `H`. That is the property that lets D27 ship the roster whole and add categories
 in any order.
@@ -496,7 +501,7 @@ shipped curve (`B = 0.4`):
 
 | Shipped | Where | Why `tree-resolve` cannot use it |
 |---|---|---|
-| `ValueSpec.PowerLadderKMilli` is an **`int` per-mille** | `ValueSpec.cs:92` | Per-mille rounds a tier-1 node with **17% error** — larger than one tier step, which destroys D26's exactly-flat reward-per-point. `tree-binder` owns the `ValueSpec.PowerLadderKMicro` sibling (three lines, per its own §3.5) — not `mechanism-wiring`, corrected 2026-09-05; until it lands, tree coefficients are read from the catalog as `long` per-million, never through `ValueSpec` |
+| `ValueSpec.PowerLadderKMilli` is an **`int` per-mille** | `ValueSpec.cs:92` | Per-mille rounds a tier-1 node with **17% error** — larger than one tier step, which destroys D26's exactly-flat reward-per-point. `tree-binder` owns the `ValueSpec.PowerLadderKMicro` sibling (three lines, per its own §3.5) — not `mechanism-wiring`. **Landed 2026-09-06 as task B3, corrected here by an adversarial spec audit the same day**: `ValueSpec.cs:119` now carries `long PowerLadderKMicro = 0` beside the old `int` field (additive, `PowerLadderKMilli` untouched for legacy content), and `AtomCompiler.cs:566-568` folds it through a `checked`, non-narrowing `long` multiply (`spec.PowerLadderKMicro * pThetaValue / 1_000_000`) — `ValueSpec.cs`'s own doc comment cites this exact task by name. The "until it lands" framing below no longer describes the present |
 | `AtomCompiler` narrows the compiled ladder value to **`int`** — `checked((int)((long)spec.PowerLadderKMilli * pThetaValue / 1000))` | `AtomCompiler.cs:464` | It is `checked`, so it throws rather than wraps — correct behaviour, wrong width. A tree magnitude reaches `int`'s ceiling at `Θ` 103,557 and would start *throwing* on a legal build. `tree-resolve` carries its own `long`/`decimal` read and never routes a tree magnitude through the compiler's ladder branch |
 
 **The one decided exception.** `BoundDerivedAtom.Amount` and `DerivedModifier.Value` are `double`

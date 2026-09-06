@@ -46,10 +46,25 @@ public static class CardBlocks
         new HashSet<string>(StringComparer.Ordinal) { Flavour, Footer };
 }
 
-/// <summary>Module 6's base type, as the card reads it. Every field is a KEY or a frame/role id —
-/// never the base type's <c>container_id</c>, which §2.4 forbids showing.</summary>
+/// <summary>Module 6's base type, as the card reads it. Every field is a KEY, an authored display
+/// string, or a frame/role id — never the base type's <c>container_id</c>, which §2.4 forbids showing.</summary>
+/// <param name="Name">
+/// The base type's AUTHORED English name (<c>"Quilted Sock"</c>), carried alongside
+/// <paramref name="NameKey"/> rather than instead of it (item-content T2, 2026-09-06).
+///
+/// <para>Both are real and neither replaces the other. <paramref name="NameKey"/> stays the
+/// localisation path ssot-presentation.md §5.3 N2 fixes — the string catalog is the SSOT for what a
+/// player reads once a key has a row. But the catalog has <b>no <c>base.*</c> row at all</b> today
+/// (108 keys, all <c>disptpl.*</c>), so a card that carried only the key showed literally
+/// <c>base.card-proof-blade</c> in its own name slot. All 740 shipped base types author a real
+/// <c>name</c>, and this is it: the renderer's fallback when the catalog cannot answer, and the string
+/// <see cref="ItemNameComposer"/> glues its words onto.</para>
+///
+/// <para>Empty for a caller with no corpus behind it, in which case the name key is all there is.</para>
+/// </param>
 public readonly record struct CardBaseType(
-    string NameKey, string ClassNounKey, string Frame, string RoleNameKey, string? FlavourKey);
+    string NameKey, string ClassNounKey, string Frame, string RoleNameKey, string? FlavourKey,
+    string Name = "");
 
 /// <summary>Module 7's rung, as the card reads it — I1's three redundant channels, all three
 /// (pips, the rung name in text, and the colour), never colour alone.</summary>
@@ -104,8 +119,22 @@ public readonly record struct CardSetTier(int PiecesRequired, bool Active, bool 
 /// equipping a second copy in another role stays legal, so the card must show "3 / 4" AND say why the
 /// fourth did not count.
 /// </summary>
+/// <param name="FlavourKey">
+/// The set's authored lore key, or <c>null</c> for the 24 of 30 shipped sets that have none. Owner
+/// decision 2026-09-06: block 10 renders for a set as well as a unique. Absent means the block renders
+/// nothing — never an empty section and never a placeholder sentence.
+/// </param>
+/// <param name="Name">
+/// The set's AUTHORED display name (<c>"Sunwoven Almanac"</c>), carried alongside
+/// <paramref name="NameKey"/> for the same reason <see cref="CardBaseType.Name"/> is (item-content T2,
+/// 2026-09-06): <c>SetCorpus.Parse</c> has always read <c>name</c> into <c>SetDef.DisplayName</c> and
+/// <c>item_set.display_name</c> has always round-tripped it, but the card threw it away and derived
+/// <c>set.{setId}</c> instead — and the string catalog carries no <c>set.*</c> row, so the set block
+/// showed a key. Empty when the set row carries no name.
+/// </param>
 public readonly record struct CardSet(
-    string NameKey, int Count, int Total, IReadOnlyList<CardSetTier> Ladder, bool Redundant);
+    string NameKey, int Count, int Total, IReadOnlyList<CardSetTier> Ladder, bool Redundant,
+    string? FlavourKey = null, string Name = "");
 
 /// <summary>G4's granted action, as §4.1 block 9 names it.</summary>
 public readonly record struct CardGrantedAction(
@@ -171,8 +200,23 @@ public sealed record ItemCardInput(
     // ---- uniques (module 17) -----------------------------------------------------------------------
 
     /// <summary>Non-null makes the fixed core render as <c>unique-identity</c>/<c>unique-variance</c>
-    /// (§4.4's exact rule) and unlocks the flavour block, which is uniques-only.</summary>
+    /// (§4.4's exact rule) and unlocks the flavour block. Since the owner's 2026-09-06 decision a set
+    /// unlocks it too — see <see cref="CardSet.FlavourKey"/>.</summary>
     public UniqueRow? Unique { get; init; }
+
+    // ---- the string catalog (N2) --------------------------------------------------------------------
+
+    /// <summary>
+    /// N2's `content/display/en.json`, as a key → sentence lookup
+    /// (<see cref="DisplayStringCatalog.Parse"/>). Only block 10 reads it today: every other line's
+    /// text comes from a display TEMPLATE row, which the renderer already substitutes into.
+    ///
+    /// <para><c>null</c>, or a key the catalog does not carry, is <b>not</b> an error and is
+    /// <b>never</b> filled in — the line still carries its <c>flavourKey</c>, so the absence is
+    /// visible and <see cref="DisplayRules.MissingDisplayKey"/> is the rule that reports it. A
+    /// synthesised sentence here is the exact L3/L4 violation this field exists to avoid.</para>
+    /// </summary>
+    public Func<string, string?>? LookupString { get; init; }
 
     // ---- footer -------------------------------------------------------------------------------------
 
@@ -384,6 +428,10 @@ public static class ItemCardRenderer
             ["colorHex"] = input.Rarity.ColorHex,
             ["name"] = input.ItemName,
             ["baseNameKey"] = input.BaseType.NameKey,
+            // item-content T2: the base type's authored name, beside its key rather than instead of
+            // it. The key stays the localisation path; this is what a client renders while the string
+            // catalog has no `base.*` row, and it is the noun module 8's grammar was composed onto.
+            ["baseName"] = input.BaseType.Name,
             ["classNounKey"] = input.BaseType.ClassNounKey,
             ["roleNameKey"] = input.BaseType.RoleNameKey,
             ["frame"] = input.BaseType.Frame,
@@ -549,6 +597,9 @@ public static class ItemCardRenderer
             new("item.card.set.header", new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 ["nameKey"] = set.NameKey,
+                // item-content T2: `item_set.display_name`, which SetCorpus has always parsed and the
+                // card has always discarded. Beside the key, never instead of it.
+                ["name"] = set.Name,
                 ["count"] = set.Count.ToString(CultureInfo.InvariantCulture),
                 ["total"] = set.Total.ToString(CultureInfo.InvariantCulture),
                 // Module 12's disclosure requirement: legal, uncounted, and said out loud.
@@ -569,32 +620,77 @@ public static class ItemCardRenderer
 
     // ---- block 9: granted action ------------------------------------------------------------------------------
 
+    /// <summary>
+    /// Name AND description (<c>ssot-presentation.md</c> §9.14), plus the battle-only tag and the
+    /// already-known state.
+    ///
+    /// <para>item-content <c>granted-action-text</c> (T15): both keys resolve through the string
+    /// catalog here, for the same reason block 10 does — an action's description is a CATALOG row,
+    /// not a template substitution, so no <c>ItemDisplayRenderer</c> pass will ever reach it. Same
+    /// consumer rule as block 10: show <c>__rendered</c>, never the key.</para>
+    ///
+    /// <para>⛔ <b>An unresolved key emits no <c>__rendered</c> at all</b> — never the key's own tail
+    /// and never a sentence synthesised from the action's parameters, which is §8.1's named failure
+    /// mode. The absence is <see cref="DisplayRules.MissingDisplayKey"/>'s to report.</para>
+    /// </summary>
     static IReadOnlyList<DisplayLine> GrantedActionLines(ItemCardInput input) =>
-        input.GrantedActions.Select(a => new DisplayLine(
-            "item.card.granted-action", new Dictionary<string, string>(StringComparer.Ordinal)
+        input.GrantedActions.Select(a =>
+        {
+            var args = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 ["nameKey"] = a.NameKey,
                 ["descriptionKey"] = a.DescriptionKey,
                 ["battleOnly"] = a.BattleOnly ? "1" : "0",
                 ["alreadyKnown"] = a.AlreadyKnown ? "1" : "0",
-            }, null, SourceKind.GrantedAction, 0)).ToList();
+            };
+
+            if (input.LookupString?.Invoke(a.NameKey) is { Length: > 0 } name) args["__renderedName"] = name;
+            if (input.LookupString?.Invoke(a.DescriptionKey) is { Length: > 0 } desc) args["__rendered"] = desc;
+
+            return new DisplayLine("item.card.granted-action", args, null, SourceKind.GrantedAction, 0);
+        }).ToList();
 
     // ---- block 10: flavour -------------------------------------------------------------------------------------
 
-    /// <summary>Uniques only (§4.1). A base type's own <c>flavorKey</c> is authored and real, but the
-    /// card does not carry it: G1's <c>flavour_key</c> is the unique's identity line, and rendering
-    /// every item's flavour would make block 10 the tallest thing on a common drop.</summary>
+    /// <summary>
+    /// Uniques <b>and sets</b> (§4.1, widened by the owner's 2026-09-06 decision — spec-item-lore.md
+    /// §2.4). A base type's own <c>flavorKey</c> is still not carried: G1's <c>flavour_key</c> is an
+    /// item's identity line, and rendering all 740 base types' flavour would make block 10 the tallest
+    /// thing on a common drop.
+    ///
+    /// <para>⛔ <b>Absent is absent.</b> Nothing authored ⇒ no line, never an empty one and never a
+    /// placeholder — <c>ssot-presentation.md</c>'s L3/L4 rule that display text is authored, never
+    /// synthesised at render time. The same applies one level down: a key whose catalog row is missing
+    /// still renders its line with the key and no <c>__rendered</c>, so the gap is reported by
+    /// <see cref="DisplayRules.MissingDisplayKey"/> rather than papered over with the key's own tail.</para>
+    ///
+    /// <para>A unique may not be a set member (<c>UniqueRules.SetMembership</c> refuses it at import),
+    /// so in practice at most one of these two ever fires. Both are emitted rather than one being
+    /// picked, because "the corpus rule holds" is not something a renderer should assume.</para>
+    /// </summary>
     static IReadOnlyList<DisplayLine> FlavourLines(ItemCardInput input)
     {
-        if (input.Unique?.FlavourKey is not { Length: > 0 } key) return Array.Empty<DisplayLine>();
+        var lines = new List<DisplayLine>(2);
 
-        return new[]
-        {
-            new DisplayLine("item.card.flavour", new Dictionary<string, string>(StringComparer.Ordinal)
-            {
-                ["flavourKey"] = key,
-            }, null, SourceKind.UniqueIdentity, 0),
-        };
+        if (input.Unique?.FlavourKey is { Length: > 0 } uniqueKey)
+            lines.Add(FlavourLine(input, uniqueKey, SourceKind.UniqueIdentity));
+
+        if (input.Set?.FlavourKey is { Length: > 0 } setKey)
+            lines.Add(FlavourLine(input, setKey, SourceKind.SetThreshold));
+
+        return lines;
+    }
+
+    static DisplayLine FlavourLine(ItemCardInput input, string key, SourceKind kind)
+    {
+        var args = new Dictionary<string, string>(StringComparer.Ordinal) { ["flavourKey"] = key };
+
+        // The one place block 10 differs from every other block: its sentence is a CATALOG row, not a
+        // template substitution, so the resolution happens here rather than in ItemDisplayRenderer.
+        // Same arg name either way, so a consumer has one rule: show `__rendered`, never the key.
+        if (input.LookupString?.Invoke(key) is { Length: > 0 } text) args["__rendered"] = text;
+
+        return new DisplayLine("item.card.flavour", args, null, kind, 0);
     }
 
     // ---- block 11: footer ---------------------------------------------------------------------------------------

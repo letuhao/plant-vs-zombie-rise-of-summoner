@@ -36,6 +36,13 @@ export type ArmouryRowDto = {
   unseen: boolean;
   stale: boolean;
   acquiredUtc: string;
+  /**
+   * item-content `granted-action-text` (T15): this item grants an action that only exists inside a
+   * battle. `ssot-presentation.md` §9.14 asks for the tag on the compact line and not only on the
+   * card — "a player scanning an armoury should not have to open each item to learn that half of
+   * them are inert on the lawn."
+   */
+  battleOnly: boolean;
 };
 
 export type ArmouryPageDto = {
@@ -103,12 +110,81 @@ export type ItemCardDto = {
   fingerprint: string;
 };
 
+// ---- the preview (item-content module `atom-preview`, served by `ItemPreviewEndpoints.cs`) -----
+
+/**
+ * An **unsaved** container, posted for preview.
+ *
+ * Every field down to `pool` is `ContainerRow`'s own, so a container an author is about to write can
+ * be posted with no translation step. The four below it are the preview's own inputs and none is a
+ * property of a container — see the C# record's docs for what each defaults to.
+ *
+ * ⛔ **Nothing posted here is stored.** The route mints an instance in memory, renders it through the
+ * same `ItemCardRenderer.Render` the live card route calls, and drops both.
+ */
+export type ItemPreviewRequestDto = {
+  containerId: string;
+  kind?: string | null;
+  slot?: string | null;
+  rarity?: string | null;
+  minTier?: number | null;
+  maxTier?: number | null;
+  levelReq?: number | null;
+  prefixRolls?: number;
+  suffixRolls?: number;
+  tagsJson?: string | null;
+  atoms?: { seq: number; atomId: string; overridesJson?: string | null }[];
+  pool?: { affixId: string; weight: number; group?: string | null }[];
+  baseTypeId?: string | null;
+  rollSeed?: number | null;
+  thetaContent?: number | null;
+  itemLevel?: number;
+};
+
+/** `mode` is `rolled` | `min` | `max`. `card` is the SAME `ItemCardDto` the live card route returns. */
+export type ItemPreviewCardDto = { mode: string; card: ItemCardDto };
+
+export type ItemPreviewDto = {
+  containerId: string;
+  rollSeed: number;
+  /** The depth actually used — the request's, or the power tuning's pin index it defaulted to. */
+  thetaContent: number;
+  /** What that depth multiplied every scaled magnitude by. 1000 = ×1.000. */
+  contentScaleMilli: number;
+  cards: ItemPreviewCardDto[];
+};
+
+/**
+ * ⭐ Render an unsaved container, three ways: as the seed draws it, and at both ends of every atom's
+ * authored range.
+ *
+ * A mutation rather than a query because the payload is a whole container definition, not because it
+ * writes anything — `sendJson` throws on a refusal and `httpErrorMessage` lifts the server's own named
+ * reason out of it, which is exactly what an author needs to see.
+ */
+export function useItemPreview() {
+  return useMutation({
+    meta: { entity: "Item preview" },
+    mutationFn: (req: ItemPreviewRequestDto) =>
+      sendJson<ItemPreviewDto>("/api/items/preview/card", "POST", req)
+  });
+}
+
 export type ChannelDeltaDto = {
   channel: string;
-  unit: string;
+  /**
+   * The `UnitClass` member name — the SAME vocabulary the group header uses, and nullable for the
+   * same reason. Before 2026-09-06 this was a second vocabulary (`game-units` / `per-mille`) derived
+   * from the atom's op, which could disagree with the group the row sat in.
+   */
+  unit: string | null;
   incumbent: number;
   candidate: number;
   delta: number;
+  /** The top of an `onApply` BAND. `null` means a point value and `incumbent` is the whole answer. */
+  incumbentMax: number | null;
+  /** The candidate side of the same band. */
+  candidateMax: number | null;
 };
 
 /** A word AND a shape, never a colour alone — and there is no colour field to fall back on. */

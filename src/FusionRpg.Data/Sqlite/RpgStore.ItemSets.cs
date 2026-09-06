@@ -52,6 +52,11 @@ public sealed partial class RpgStore
             CREATE INDEX IF NOT EXISTS ix_item_set_member_container ON item_set_member(container_id);
             CREATE INDEX IF NOT EXISTS ix_item_set_member_role ON item_set_member(role);
             """);
+
+        // item-lore T7 (owner decision 2026-09-06): a set gets the card's Flavour block too. A KEY,
+        // never a literal -- the same rule `item_unique.flavour_key` already states, and the sentence
+        // itself lives in N2's string catalog. NULL for the 24 of 30 shipped sets that authored none.
+        EnsureColumn(db, "item_set", "flavour_key", "TEXT");
     }
 
     /// <summary>Replace the whole set catalog in one transaction — the corpus is authored, not edited live.</summary>
@@ -71,10 +76,11 @@ public sealed partial class RpgStore
             foreach (var set in sets)
             {
                 LootExec(db, tx, """
-                    INSERT INTO item_set (set_id, display_name, level_req, enabled, revision)
-                    VALUES ($id, $name, NULL, 1, 1);
+                    INSERT INTO item_set (set_id, display_name, level_req, enabled, revision, flavour_key)
+                    VALUES ($id, $name, NULL, 1, 1, $flavour);
                     """,
-                    ("$id", set.SetId), ("$name", set.DisplayName));
+                    ("$id", set.SetId), ("$name", set.DisplayName),
+                    ("$flavour", (object?)set.FlavourKey ?? DBNull.Value));
 
                 foreach (var m in set.Members)
                     LootExec(db, tx, """
@@ -136,14 +142,17 @@ public sealed partial class RpgStore
             var result = new List<SetDef>();
             using (var cmd = db.CreateCommand())
             {
-                cmd.CommandText = "SELECT set_id, display_name FROM item_set WHERE enabled = 1 ORDER BY set_id;";
+                cmd.CommandText = "SELECT set_id, display_name, flavour_key FROM item_set WHERE enabled = 1 ORDER BY set_id;";
                 using var r = cmd.ExecuteReader();
                 while (r.Read())
                 {
                     var setId = r.GetString(0);
                     result.Add(new SetDef(setId, r.GetString(1),
                         members.TryGetValue(setId, out var m) ? m : new List<SetMemberDef>(),
-                        tiers.TryGetValue(setId, out var t) ? t : new List<SetTierDef>()));
+                        tiers.TryGetValue(setId, out var t) ? t : new List<SetTierDef>(),
+                        // The sentence is NOT stored -- only its key. `SetDef.FlavourText` is the
+                        // corpus reader's field and stays null on a DB round trip by design.
+                        FlavourKey: r.IsDBNull(2) ? null : r.GetString(2)));
                 }
             }
 

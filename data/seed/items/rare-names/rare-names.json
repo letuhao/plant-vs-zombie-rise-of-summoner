@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "kind": "rare-name-words",
+  "_meta": {
+    "purpose": "The head/tail word table ssot-affixes.md §4.12 names for a RARE item (3+ affixes): 'a generated two-word name from a head/tail word table, seeded by roll_seed — Bramble Bite, Havoc Root'. Nothing in data/seed/items/ carried one before 2026-09-06, which is why ItemNameComposer's rareNameDraw had no production supplier and the whole naming path stayed unwired.",
+    "shape": "Two independent lists. The draw picks one head and one tail with SeededRng.DeriveStream(roll_seed, 'item.rare-name'), so the same (container_id, catalog_revision, roll_seed) always produces the same name — SC5, the same guarantee the rolls themselves carry, and it survives a reroll unchanged.",
+    "notMechanical": "Deliberately decorative and deliberately unrelated to what the item does. §4.12's own reasoning: with up to 6 affixes there is no honest way to compress the item into prefix + noun + suffix, and naming it after two of six would be a lie. Diablo 2's RarePrefix.txt / RareSuffix.txt are the same shape for the same reason. The affix list is the tooltip's job, not the name's.",
+    "tone": "Plant / zombie / elemental / decay, matching the corpus's own established voice (Ashen Reliquary, Sunworn Charm, Ember Legion, Kindling, Tidewrack Band, Stillmarch) — never generic high fantasy. words.v1.json's v2 note is the standard: this is a suburb, a garden and a graveyard, not an armoury.",
+    "size": "26 × 26 = 676 pairs. Content, not a tunable — a balance pass has nothing to change here, so there is no data/tuning/ row for the list length (tunables-ssot.md's own test: changing a word changes no behaviour).",
+    "authoredUtc": "2026-09-06T00:00:00Z"
+  },
+  "entries": [
+    {
+      "id": "rare-name.head",
+      "slot": "head",
+      "words": [
+        "Ashen",
+        "Bitter",
+        "Bramble",
+        "Brine",
+        "Cinder",
+        "Dusk",
+        "Ember",
+        "Frost",
+        "Gloam",
+        "Grave",
+        "Havoc",
+        "Husk",
+        "Kindling",
+        "Loam",
+        "Mire",
+        "Moss",
+        "Rime",
+        "Rot",
+        "Rust",
+        "Sap",
+        "Soot",
+        "Sunworn",
+        "Thorn",
+        "Tide",
+        "Wilt",
+        "Wither"
+      ]
+    },
+    {
+      "id": "rare-name.tail",
+      "slot": "tail",
+      "words": [
+        "Bite",
+        "Bloom",
+        "Bough",
+        "Cleave",
+        "Coil",
+        "Ferment",
+        "Gnash",
+        "Grasp",
+        "Harvest",
+        "Hollow",
+        "Knot",
+        "Lantern",
+        "Maw",
+        "Reliquary",
+        "Rend",
+        "Ridge",
+        "Root",
+        "Shuck",
+        "Sprawl",
+        "Stalk",
+        "Tangle",
+        "Tithe",
+        "Verge",
+        "Wake",
+        "Wrack",
+        "Yield"
+      ]
+    }
+  ]
+}

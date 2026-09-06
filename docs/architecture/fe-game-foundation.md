@@ -42,7 +42,7 @@ Aligns with [lawn-projector.md](lawn-projector.md) (observe≠control, pure `Law
 | **Projector (ViewModel fold)** | Pure fold Snapshot/events → `LawnViewModel` + `revision` | `features/lawn/lawnProjectorFold.ts` |
 | **CQRS-lite (observe vs command)** | Observe = projection; Command = Intent/debug via `lib/bus` — never Phaser `fetch` | fold vs inspector/Intent |
 | **Mediator / EventBus** | Decouple React mount from Phaser scenes | `game/EventBus.ts` |
-| **Facade** | `createLawnGame` / host create+destroy `Phaser.Game` | `game/createLawnGame.ts` + React host |
+| **Facade** | `createLawnGame` / `createWorldGame` over shared `createGame`; host create+destroy | `game/createGame.ts`, `createLawnGame.ts`, `createWorldGame.ts` + React hosts (shared hook → `game-host/`, lock 3a) |
 | **Scene stack** | Boot (assets) → LawnWorld (while the lawn stage is current) | `game/scenes/*` |
 | **Registry (entity index)** | `ptr → view record + GameObject refs`; diff on model | `game/entities/PtrEntityRegistry.ts` |
 | **System (update pipeline)** | Ordered: Sync → Layout → StatusFx → Pick | `game/systems/*` |
@@ -302,15 +302,23 @@ Lifecycle: subscribe after create; buffer `lawn:model` until `lawn:ready`; on un
 ```text
 web/fusion-rpg-web/src/
   features/lawn/           # Projector fold + UI FSM + Almanac host
-    LawnPage.tsx           # Facade host (mount/destroy Game)
+    LawnPage.tsx           # Stage shell (hosts mount Phaser)
     lawnProjectorFold.ts   # Projector / CQRS-read
     lawnProjectorFold.test.ts
     interactionMode.ts     # UI-only FSM
     interactionMode.test.ts
-  game/                    # Phaser island (lite ECS + pools) — no React imports
+    pickPhaserOccupants.ts # PHASER_OCCUPANT_BUDGET = 96 (soft canvas pick)
+  game-host/               # React island hosts / hooks — no Phaser in entry chunk (GG-38, lock 3a)
+                           # Planned home for usePhaserIslandHost; facades today still stage-local
+  game/                    # Phaser islands (lite ECS + pools) — no React imports (RT-09)
+    createGame.ts          # Shared Phaser.Game factory (injected scenes)
+    createLawnGame.ts      # Lawn facade (+ destroy checklist until destroyGame lands)
+    createWorldGame.ts     # World facade (second island; never coexists with lawn Game)
     EventBus.ts            # Mediator (generation-scoped)
-    createLawnGame.ts      # Facade + destroy checklist
-    scenes/BootScene.ts    # Scene stack
+    board/                 # Grid primitives (GridSpec, BoardLayers, pickCell, …) — cell stages
+    camera/                # bindCamera (write-only contain-fit)
+    world/                 # World graph scenes / systems / entities
+    scenes/BootScene.ts
     scenes/LawnWorldScene.ts
     entities/PtrEntityRegistry.ts  # Registry (view mirror)
     systems/SyncFromModelSystem.ts # Monotonic revision
@@ -320,7 +328,8 @@ web/fusion-rpg-web/src/
     fx/FxPool.ts           # Object pool
 ```
 
-Do **not** nest Phaser under `features/lawn/phaser/` (RT-09).
+Do **not** nest Phaser under `features/lawn/phaser/` (RT-09). Shared React helpers belong in
+`game-host/`, never inside `game/`.
 
 ---
 
@@ -398,7 +407,7 @@ SpawnTargeting → Idle | SpawnTargeting (selectTile) | OccupantSelected
 | Constraint | Guidance |
 |---|---|
 | Grid | ~5×9 |
-| Sprites | CapPolicy-scale (e.g. ≤50 plants / ≤80 zombies) |
+| Sprites | Soft canvas budget `PHASER_OCCUPANT_BUDGET = 96` (`features/lawn/pickPhaserOccupants.ts`); CapPolicy observe remains separate |
 | Sync | Diff-by-ptr; monotonic revision; optional rAF coalesce |
 | Leaving the stage | Destroy checklist mandatory. A layer opening is **not** a leave |
 
@@ -442,8 +451,8 @@ Projection field shapes and feed priority remain in [lawn-projector.md](lawn-pro
 
 **Cross-island Phaser audit (2026-09-06):** lawn + world islands, unused `board-render` grid kernel,
 and the paused siege/battle canvas work are mapped in
-[fe-phaser-architecture-audit.md](fe-phaser-architecture-audit.md). **Idea (not a spec):**
-[phaser-kernel-ideal.md](phaser-kernel-ideal.md).
+[fe-phaser-architecture-audit.md](fe-phaser-architecture-audit.md). **Idea (not a spec), strengthened
+same day:** [phaser-kernel-ideal.md](phaser-kernel-ideal.md).
 
 ### Architecture compliance (W6 self-check)
 

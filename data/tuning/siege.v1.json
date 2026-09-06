@@ -87,6 +87,11 @@
     "labourMoatTurns": 2,
     "summonQiCost": 25
   },
+  "fog": {
+    "_note": "base-defense siege-fog (spec-siege-fog.md, module 30). enabled is a rollout kill switch, never a difficulty toggle. defaultVisionRangeTiles is the fallback for any structure with no authored VisionRangeTiles, and every animate combatant at v1 (no per-species catalog exists yet) -- must be > 0 or the whole board is permanently fogged for everyone.",
+    "enabled": true,
+    "defaultVisionRangeTiles": 6
+  },
   "economy": {
     "_note": "base-defense siege-economy (spec-siege-economy.md). nodeYieldPerRound is flat per node per round -- deliberately NOT on P(Theta) (principle P2: a node's yield is a property of the ground, so it cannot outrun the sinks it feeds). depotSeedMilli is how much of the DEFENDER's sector stockpile is actually reachable during a siege -- a bounded ratio, exempt from the progression-ceiling rule. captureRecoveryMilli is a scaling factor on top of the HP proportion (F11) -- 1000 = the HP proportion applies unscaled.",
     "nodeYieldPerRoundLoam": 5,

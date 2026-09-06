@@ -4,6 +4,7 @@ using System.Text.Json;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Drops;
+using FusionRpg.Core.Items.Grants;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -609,6 +610,46 @@ public class ItemEquipEndpointsTests : IAsyncLifetime
         _store.SaveAssignment(_specimenId, ItemRole.ArmamentPrimary, "stock", _bladeId);
 
         Assert.False((await ArmouryRows())[_bladeId]);
+    }
+
+    /// <summary>
+    /// ⭐ item-content <c>granted-action-text</c> (T15): <c>ssot-presentation.md</c> §9.14's own ask —
+    /// <i>"the battle-only tag needs to be visible in the compact list line too, not only the card — a
+    /// player scanning an armoury should not have to open each item to learn that half of them are
+    /// inert on the lawn."</i>
+    ///
+    /// <para>It was NOT true before this task: <c>ArmouryRowDto</c> carried no such field, so the only
+    /// way to learn an item's action was battle-only was to open its card.</para>
+    /// </summary>
+    [Fact]
+    public async Task Armoury_carriesTheBattleOnlyTagOnTheCompactLine()
+    {
+        // Nothing grants anything yet, so no row claims to be battle-only.
+        Assert.All((await ArmouryBattleOnly()).Values, Assert.False);
+
+        // A DefaultAttack grant replaces the species' basic attack, which only exists in a battle.
+        _store.UpsertItemGrantedAction(new ItemGrantedActionRow(
+            BladeContainer, 0, "action.general.0003", ItemGrantRole.DefaultAttack));
+        // A plain `Granted` entry is an extra selectable and is NOT inert on the lawn — the negative
+        // arm, so the tag is proven to discriminate rather than to light up for any grant at all.
+        _store.UpsertItemGrantedAction(new ItemGrantedActionRow(
+            HelmContainer, 0, "action.general.0001", ItemGrantRole.Granted));
+
+        var rows = await ArmouryBattleOnly();
+        Assert.True(rows[_bladeId]);
+        Assert.False(rows[_helmId]);
+    }
+
+    /// <summary>instanceId → `battleOnly`, off the same real module 20 route.</summary>
+    async Task<Dictionary<string, bool>> ArmouryBattleOnly()
+    {
+        var resp = await _http.GetAsync($"/api/items/armoury/{_playerKey}");
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+        return doc.RootElement.GetProperty("rows").EnumerateArray()
+            .ToDictionary(r => r.GetProperty("instanceId").GetString()!,
+                          r => r.GetProperty("battleOnly").GetBoolean(),
+                          StringComparer.Ordinal);
     }
 
     /// <summary>instanceId → `assigned`, off the real module 20 route.</summary>

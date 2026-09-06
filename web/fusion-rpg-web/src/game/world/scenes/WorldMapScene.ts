@@ -36,8 +36,16 @@ export class WorldMapScene extends Phaser.Scene {
     super("WorldMapScene");
   }
 
-  create(): void {
+  init(): void {
+    // Restart-safe: generation from registry in init (not only create).
     this.generation = (this.game.registry.get("generation") as number) ?? 0;
+    this.worldRegistry = new WorldRegistry();
+    this.lastApplied = 0;
+    this.model = null;
+  }
+
+  create(): void {
+    this.generation = (this.game.registry.get("generation") as number) ?? this.generation;
     const bootTheme = this.game.registry.get("worldTheme") as WorldTheme | undefined;
     if (bootTheme) this.theme = bootTheme;
 

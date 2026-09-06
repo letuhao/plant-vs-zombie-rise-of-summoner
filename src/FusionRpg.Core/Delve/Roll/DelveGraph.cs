@@ -20,7 +20,16 @@ public sealed record RoomPaletteEntry(string RoomId, string Kind, ElementTypeId?
 /// raw int here, matching every other band field in this program (an ordinal until tuning resolves
 /// it, ssot-power-scale.md's own discipline extended to non-power bands).
 /// </summary>
-public sealed record DomainAnchor(string DomainId, ElementTypeId Climate, string DangerBand, IReadOnlyList<RoomPaletteEntry> RoomPalette);
+/// <param name="FirstClearRef">D4.28 (spec-unique-pipeline.md §5): a rung-80+ `deterministic`
+/// unique container id (`item.&lt;slug&gt;`), or `null` for "none" — VALIDATED by
+/// <see cref="Loot.DungeonLootTableGen.ValidateFirstClearRef"/>, never trusted unchecked. Already
+/// decided at the seedsmith schema level (`tools/seedsmith/seedsmith/adapters/dungeon/schema.py`);
+/// this projection stayed deliberately minimal until a real consumer needed the field — D4.28 is
+/// that consumer. Defaulted so this stays a source-compatible addition: no `domains/*.json` C#
+/// loader exists yet to update, and every existing positional call site keeps compiling unchanged.</param>
+public sealed record DomainAnchor(
+    string DomainId, ElementTypeId Climate, string DangerBand, IReadOnlyList<RoomPaletteEntry> RoomPalette,
+    string? FirstClearRef = null);
 
 /// <summary>
 /// The layout template anchor's C# projection (`LAYOUT_OWNERSHIP`). Every field is a band MEMBER id

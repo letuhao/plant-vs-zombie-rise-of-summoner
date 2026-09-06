@@ -1,6 +1,9 @@
 # `gate-counters` — the two gate quantities that did not exist
 
-**Status:** spec, 2026-09-05. Module of [passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05. **Built and verified 2026-09-06** (tasks G1–G8 — see
+`tasks/passive-tree-todo.md`, and §19 below for the real-data readiness fix applied the same day).
+Module of [passive-tree](../passive-tree-map.md). Corrected 2026-09-06 by an adversarial spec audit:
+the "no build authorized" line predates the build and was never updated.
 
 ---
 
@@ -12,12 +15,17 @@ A tier gate reads a **gate quantity**. Four are named across the program and two
 |---|---:|---|---|
 | `primary` | 12 | `aptitude.<Id>@Commander` | ✅ shipped — `PointBudget.PointsFor(AllocationScope.Commander, …)` (`PointBudget.cs:51`) |
 | `family` | `F` | `species_level@DemonType` | ✅ shipped — `PointBudget.DemonTypeSourceFromLevel` (`PointBudget.cs:40`), consumed at `SpeciesAllocation.cs:34-35` |
-| `elemental` | 6 | `element_mastery.<id>` | ⛔ **comments only.** All four `src/` hits are XML doc comments (`PointBudget.cs:13,15,22`, `AptitudeTuning.cs:20`), and `PointBudget.cs:15` says outright it *"is owned by the demon program's `aspect-scope` module and does not exist yet"* |
-| `status` | 21 | `status_applied.<id>` | ⛔ **zero `src/` hits.** D35 correctly removed the `AllocationScope` dependency, and removed the only place the counter was going to live with nothing replacing it |
+| `elemental` | 6 | `element_mastery.<id>` | ✅ **shipped 2026-09-06.** `ElementMasterySource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:107`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `elementMastery` row reads `carrier` |
+| `status` | 24 (D51, 2026-09-06: was 21) | `status_applied.<id>` | ✅ **shipped 2026-09-06.** `StatusAppliedSource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:104`, live-probed end to end (task G6) — `gate-evidence.v1.json`'s `statusApplied` row reads `carrier` |
 
-That strands **1,080 of the 1,560 generic nodes — 69% — permanently at tier 0** (ideal §13.4).
+That USED TO strand 1,080 of the 1,560 generic nodes — 69% — permanently at tier 0 (ideal §13.4).
 D37 (owner, 2026-09-05) decided the two missing quantities are built **inside this program** rather
-than waiting on unscheduled work. This module is that decision.
+than waiting on unscheduled work. **This module was that decision, and it has since shipped** — both
+rows above read `carrier`. With D51's corpus growth the number this module used to strand is now
+1,200 of 1,680 (30 of 42 trees) — a figure that no longer applies to THIS module (its own job is
+done) but still describes those 30 trees' real state, blocked now by `passive-tree-todo.md` task J1
+(the plan-emission CLI's missing `elemental_tree_spec()`/`status_tree_spec()` factories) rather than
+by anything this module owns.
 
 **This module ships three things and nothing else:**
 
@@ -53,10 +61,10 @@ Lifetime rather than per-match is not a preference. A per-match counter cannot g
 at all — `tierReached` would oscillate inside a session — and endless grind is the SSOT other systems
 reconcile to.
 
-Per-player rather than per-specimen because the 39 generic trees are the commander's build, the same
-standing the 12 primary trees already have at `AllocationScope.Commander`. A per-specimen counter
-would restart 27 trees at tier 0 for every new demon. The `owner_kind` column in §4.1 is what keeps
-that reversible.
+Per-player rather than per-specimen because the 42 generic trees (D51: 24 statuses, not 21) are the
+commander's build, the same standing the 12 primary trees already have at `AllocationScope.Commander`.
+A per-specimen counter would restart 30 trees at tier 0 for every new demon. The `owner_kind` column
+in §4.1 is what keeps that reversible.
 
 ### 2.1 `status_applied.<id>` — a fresh landed application, by an actor you own
 
@@ -65,7 +73,7 @@ already carrying that status from that actor.**
 
 The four sub-decisions, each with what it rejects:
 
-**(a) Outbound, never inbound.** The 21 status trees are *build* trees — mastery of inflicting a
+**(a) Outbound, never inbound.** The 24 status trees (D51: was 21) are *build* trees — mastery of inflicting a
 status. *Rejected: counting statuses applied **to** you.* It rewards being hit, which is farmable by
 standing still and is the opposite of what a tree called "mastery" should measure. *Rejected: summing
 both.* When a counter moves you could not say which half moved it, and a build that could not land
@@ -352,9 +360,11 @@ family reads `AllocationScope` at all; `PointBudget.PointsFor(AllocationScope.As
 *"ships complete today and 'lights up' for Aspect the moment a caller has a real value to pass"*
 (`PointBudget.cs:15-18`) — remains unused by this module. The reason is the one `status_applied`
 already had: the Aspect rate is an explicitly unmeasured placeholder owned by the class system
-(`aptitudes.v5.json`'s own `_weightsWhy`: *"UNMEASURED… residual-fit (Phase 8) owns the real
-values"*), and reading it here would let that program's residual-fit republish silently re-pace the 6
-elemental trees while the 21 status trees stay put. Sharing it kept a single rate for the Aspect
+(the value is unchanged since `v5`, and its own `_weightsWhy` still reads: *"UNMEASURED… residual-fit
+(Phase 8) owns the real values"* — carried forward through `v6`'s D34 addition and `v7`'s D55 addition,
+neither of which touched this sibling table), and reading it here would let that program's
+residual-fit republish silently re-pace the 6 elemental trees while the 24 status trees (D51: was 21)
+stay put. Sharing it kept a single rate for the Aspect
 *concept*; owning it severs the tie entirely for one tunable line.
 
 | Family | Rate | Route |
@@ -365,7 +375,7 @@ elemental trees while the 21 status trees stay put. Sharing it kept a single rat
 **`index − 1`, never `index`.** `PointBudget.DemonTypeSourceFromLevel` (`:40`) is the precedent and
 gives the reason in full: *"a never-levelled species… must carry EXACTLY ZERO points."* Here the
 consequence is sharper — index 1 is what every existing save has on day one, and a non-zero value
-would open tier 1 on all 27 trees for free.
+would open tier 1 on all 30 trees for free (D51: was 27).
 
 **Neither counter writes `AptitudeAllocation`.** Both read a rate out of their own tunable key and
 return a budget-shaped number — the same *reads, never allocates* shape `PointBudget.PointsFor` uses
@@ -562,7 +572,7 @@ public static class MasteryIndex
     /// <summary>Aptitude-point-EQUIVALENTS — the only unit `tree-resolve` ever sees (spec §5.2).
     /// <c>index − 1</c>, never <c>index</c>, mirroring <c>PointBudget.DemonTypeSourceFromLevel</c>
     /// (<c>:40</c>) and for a sharper version of its reason: index 1 is what every existing save
-    /// carries on day one, and a non-zero value there would open tier 1 on all 27 trees for free.
+    /// carries on day one, and a non-zero value there would open tier 1 on all 30 trees for free (D51: was 27).
     /// Both operands are already `long`, so the multiply is widened before it happens rather than
     /// after (CLAUDE.md rule 3).</summary>
     public static long Equivalents(long count, long ratePoints, GateCounterTuning tuning)
@@ -620,7 +630,7 @@ counter is exactly the shape where a covered line asserted by nothing is worth n
 
 | # | Test | What breaks it |
 |---:|---|---|
-| 1 | `Index_of_zero_is_one_and_equivalents_are_zero` | Day-one saves opening tier 1 on 27 trees for free (§5.3) |
+| 1 | `Index_of_zero_is_one_and_equivalents_are_zero` | Day-one saves opening tier 1 on 30 trees for free (D51: was 27; §5.3) |
 | 2 | `Index_is_monotone_and_exact_at_every_ladder_boundary` | An off-by-one at `CountToReach(m)` exactly |
 | 3 | `Index_never_uses_a_float` | Text guard: no `Math.Sqrt`, `double` or `float` in `MasteryIndex.cs` |
 | 4 | `Index_search_survives_a_count_at_long_MaxValue` | The overflow a naive doubling search has (§6) |
@@ -710,8 +720,10 @@ search's doubling bound (an overflow bound, not a progression cap).
 ### Ask first
 
 - **Any change to `c`, `r` or `s` in isolation.** They are calibrated against each other (§3.3);
-  moving one alone silently re-paces 27 trees against 12. Test 12 goes red, which is the point.
-- **Backfilling existing saves** (OQ1).
+  moving one alone silently re-paces 30 trees against 12 (D51: was 27). Test 12 goes red, which is the point.
+- ~~**Backfilling existing saves** (OQ1).~~ **CLOSED 2026-09-06 — shipped as `ExistingSaveSeed`
+  (task G5/D43), see §16.** Changing ITS OWN formula still needs asking first; the decision of
+  whether to backfill at all no longer does.
 - **Any per-specimen counter.** The `owner_kind` column exists for it; using it is a product decision
   about whether a new demon starts its status trees at zero.
 - **Measuring `A`.** The anchor is a measurement task for `squad-harness` or a telemetry window, and
@@ -738,8 +750,11 @@ search's doubling bound (an overflow bound, not a progression cap).
 
 1. `status_applied.<id>` and `element_mastery.<id>` each have a production carrier in `src/` — the
    condition `tree-plan` §7.1's R-G1 gate tests for. Both `gateState` evidence rows move from
-   `pending` to `carrier`, unblocking **1,080 nodes** for generation.
-2. All **39** generic trees are reachable above tier 0, not 12 (D37).
+   `pending` to `carrier` — **MET, 2026-09-06** (task G6) — unblocking **1,200 nodes** for generation
+   (D51: 24 statuses, 30 non-primary trees, not 21/27).
+2. All **42** generic trees are reachable above tier 0, not 12 (D37) — R-G1's own block is satisfied;
+   `passive-tree-todo.md` task J1 tracks the separate plan-emission-CLI gap that still stops 30 of them
+   from actually being planned or generated.
 3. A focused build reaches tier 10 on a status or elemental tree within **5%** of the Θ at which it
    reaches tier 10 on a primary tree, measured, at every tier from 4 up (test 12, §3.4's table).
 4. Crediting any counter any number of times leaves `AptitudeAllocation.GrandTotal()` and all twelve
@@ -756,21 +771,26 @@ search's doubling bound (an overflow bound, not a progression cap).
 
 ## 16. Open questions — owner decisions only
 
-**OQ1 — cold start for existing saves.** These counters have no history, and none can be
-reconstructed: there is no event log to replay. On the day this ships, every current player has all 27
-counter-backed trees at tier 0 while their primary trees are already deep. Accept the cold start, or
-seed an initial count from a proxy the save does have — player level through §3.2's `A`, which would
-hand a level-169 player ≈53,000 applications they never made? **This is a product decision about how a
-live save feels, not an engineering one.** The spec assumes cold start.
+**OQ1 — CLOSED 2026-09-06 by task G5 (D43): seed from a proxy, never cold start.** These counters
+have no history, and none can be reconstructed — there is no event log to replay. The owner chose the
+proxy option this section originally offered as the alternative to cold start, using the player's own
+persisted Commander-scope aptitude total rather than raw level (avoiding the ≈53,000-application
+over-seed a level-169 proxy would have handed out): `ExistingSaveSeed.SeededCount(commanderTotalPoints,
+ratePoints, tuning)` computes `index = commanderTotalPoints / ratePoints + 1` — the exact integer
+inverse of `MasteryIndex.Equivalents`, floored so a division remainder under-seeds rather than
+over-seeds — and returns `0` only for a genuinely fresh account (`commanderTotalPoints == 0`), never
+for an existing one. Independently re-verified 396/396 + 19/19 tests green. **The spec's own line
+above ("the spec assumes cold start") is what shipped code now contradicts — corrected here rather
+than left to mislead a reader into re-litigating an already-closed decision.**
 
 **OQ2 — CLOSED 2026-09-05: `element_mastery` owns its own key.** This section previously routed it
 through `PointBudget.PointsFor(AllocationScope.Aspect, …)` on the grounds that it was the shipped
 shape (`PointBudget.cs:15-18`), while `passive-tree-ideal.md` §16 already recorded the opposite answer
 — the two documents disagreed until the owner resolved it directly. `elementMasteryRatePoints` costs
 one tunable line and severs the tie to `AllocationScope` entirely, so a residual-fit republish in the
-class system's unmeasured Aspect rate (`aptitudes.v5.json`'s own `_weightsWhy`: *"UNMEASURED…
+class system's unmeasured Aspect rate (unchanged since `v5`'s own `_weightsWhy`: *"UNMEASURED…
 residual-fit (Phase 8) owns the real values"*) no longer silently re-paces the 6 elemental trees while
-the 21 status trees stay put. See §5.3.
+the 24 status trees (D51: was 21) stay put. See §5.3.
 
 ---
 
@@ -790,7 +810,7 @@ the 21 status trees stay put. See §5.3.
 | **R2** tunable names carry their unit, one file | §13 — `…Count`, `…Points`, `…Ms`, all in `passive-tree.v1.json` |
 | **R7** five tree categories | §1's table covers all five; two of them are this module's |
 | **R9** cite `Battle*` by symbol | §7 P1 and §10 |
-| **Corpus numbers** 6 elements · 21 statuses | Counted and cited: `ActorElementTypes.cs:21-29`, `StatusCategoryRegistry.cs:7-28` |
+| **Corpus numbers** 6 elements · 24 statuses (D51, 2026-09-06: was 21) | Counted and cited: `ActorElementTypes.cs:21-29`, `StatusCategoryRegistry.cs:7-35` |
 | **`tree-plan` R-G1** a gate quantity must exist before content is generated | Unchanged, restated in §14. This module is what makes the wait bounded |
 | **AGENTS.md** no hard progression ceilings | §4.1 (no cap on `count`), §9 (no declared search ceiling), §13 (structural bounds say why) |
 | **CLAUDE.md** numeric overflow | §6, and §9's division-based predicate is the non-obvious half |
@@ -822,3 +842,48 @@ the 21 status trees stay put. See §5.3.
       "Ask first" rather than being dressed up as a question.
 - [ ] `squad-harness` has not yet proposed a value for `A`. `c = 23` is a working value derived from
       shipped constants (§3.3) and is explicitly not called balance.
+
+## 19. Readiness ladder for the 27 non-primary trees
+
+**Extended 2026-09-06**, while checking whether this program is actually wired end to end. G1–G8
+being ✅ in the task list is necessary but was found NOT sufficient — the real, previously-undiscovered
+gap that motivated writing this down: `data/seed/passive-tree/gate-evidence.v1.json` (the file
+`tree-plan`'s `R-G1` refusal actually reads, §14's "Never generate tree content for a category whose
+counter is not wired end to end") still said `elementMastery`/`statusApplied` were `pending` even
+after their real production carriers (`StatusAppliedSource`/`ElementMasterySource`) shipped and were
+live-probed. **A category is not "ready" the moment its `src/` code lands — it is ready once every
+rung below is checked, in order, each against the real artifact, never assumed from an earlier rung
+having passed:**
+
+1. **A real, non-stub `IGateQuantitySource` implementation exists** — read the file, not the task
+   checkbox. (`StatusAppliedSource`/`ElementMasterySource`, both real as of G4.)
+2. **It is registered at the real composition root**, not only unit-tested in isolation — grep for
+   `new <Source>Source(` outside `tests/` (`GateCounterEndpoints.cs:104,107`, as of G6).
+3. **It has been exercised against a real running save at least once** — not a synthetic fixture. G6's
+   own live probe today is this program's only such proof so far, and it only covers `status_applied`
+   (via `debug.status.apply`) and reads `element_mastery`'s wiring but did not credit a real elemental
+   hit through it.
+4. **`gate-evidence.v1.json`'s own row for that `gateIndexKind` says `carrier`, with a citation naming
+   the real file:line from rungs 1–2.** This is the ONE file `R-G1` actually reads (§7's rule: the
+   planner never resolves this itself) — a category can clear rungs 1–3 and still be refused by name
+   if this file was never hand-edited to match, exactly the gap found and fixed here.
+5. **A real save shows the category's own trees reachable above tier 0** — Checkpoint G's own bullets
+   1–2, genuinely unblocked by rung 4 today but not yet exercised (needs a live session, correctly left
+   for one rather than rushed to close out a spec-writing pass).
+
+**Wiring order for the two categories, restated from `passive-tree-map.md`'s own already-decided
+rule** ("primary trees → then one category per gate quantity as it lands, never the whole 1,680 at
+once" — D51, 2026-09-06: was 1,560): `element_mastery` (6 elemental trees, 240 nodes) and
+`status_applied` (24 status trees, 960 nodes — D51: was 21/840) are independent counters (§12's registry makes them unrepresentable as a shared key) and may be
+worked in either order or in parallel — nothing in this module or `tree-plan` sequences one before the
+other. **Both cleared rung 4 the same day**, so neither is ahead of the other structurally; whichever
+Phase J picks up first is a scheduling choice, not a dependency.
+
+**What Phase J still needs beyond this checkpoint, named so it is not mistaken for this module's own
+remaining scope:** `tools/seedsmith/seedsmith/adapters/trees/plan/emit.py` has `might_tree_spec`/
+`primary_tree_spec` (the 12 `aptitude.<Name>@Commander`-gated trees) and nothing yet for a
+`gate_quantity` shaped `element_mastery.<id>@Aspect` or `status_applied.<id>@Aspect` — confirmed by
+reading the file directly. Building `elemental_tree_spec`/`status_tree_spec` (mirroring
+`primary_tree_spec`'s own generalization, reading the SAME roster mirrors this module's `element`/
+`status` rosters already count) is real, buildable, zero-model-cost work — but it is J1's own task,
+not a gate-counters gap.

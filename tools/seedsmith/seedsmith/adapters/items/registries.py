@@ -104,6 +104,47 @@ def partition_kind_map() -> dict[str, str]:
     return dict(snapshot["partitionKind"])
 
 
+def load_tag_axes(*, applies_to: "str | None" = None) -> "dict[str, tuple[str, ...]]":
+    """`tags.v1.json`'s `axes`/`tags` arrays, grouped back to `axis id -> member tag ids` --
+    `load_vocabularies()["tags"]` flattens every axis into one set, which loses exactly the
+    grouping a caller needs to enforce an `exclusive: true` axis (e.g. `unique.tags` needing
+    "exactly one mass-class", spec-unique-pipeline.md §1). `applies_to` filters to axes whose
+    `appliesTo` list names that entry shape (e.g. `"unique"`); `None` returns every axis."""
+    tags = _load("tags.v1.json")
+    by_axis: "dict[str, list[str]]" = {}
+    axis_applies: "dict[str, list[str]]" = {a["id"]: a.get("appliesTo", []) for a in tags["axes"]}
+    for row in tags["tags"]:
+        by_axis.setdefault(row["axis"], []).append(row["id"])
+    return {
+        axis: tuple(sorted(ids))
+        for axis, ids in by_axis.items()
+        if applies_to is None or applies_to in axis_applies.get(axis, ())
+    }
+
+
+ATOMS_DIR = REPO_ROOT / "data" / "seed" / "atoms"
+
+
+def load_atom_families() -> frozenset[str]:
+    """`unique.fixedAtoms[].family` / `unique.varianceSlot.family`'s real VALIDATED vocabulary
+    (spec-unique-pipeline.md §1). The one function in this module that reads OUTSIDE
+    `data/seed/items/_registry/` -- deliberately, mirroring `load_theme_keys`'s own precedent of
+    a single named exception rather than pretending the boundary is absolute: no atom-specific
+    seedsmith adapter exists to own this loader instead, and `unique` is the only items kind that
+    references the atom catalog by family id at all (D4.24's own finding: 144 unique anchors name
+    68 families against a catalog of far fewer real ones -- reading this fresh, never
+    hand-transcribing it, is exactly the discipline that finding depends on to stay true as the
+    catalog grows, e.g. D4.26's `atom.extend-slot` landing the same session D4.24 counted 28)."""
+    families: "set[str]" = set()
+    for path in sorted(ATOMS_DIR.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for entry in doc.get("entries") or ():
+            family = entry.get("family")
+            if isinstance(family, str):
+                families.add(family)
+    return frozenset(families)
+
+
 # The one fact in this module transcribed rather than parsed: "hybrid drops these roles, and
 # the commander never wears this frame" lives only inside core.v1.json's frame vocabulary as
 # free-text prose (its `meaning` string for the "hybrid" entry), not a structured field —

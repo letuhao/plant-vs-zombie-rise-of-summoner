@@ -103,3 +103,48 @@ KINDS: "tuple[KindSpec, ...]" = (
 
 assert len(KINDS) == 15, "KindCatalog.cs carries 15 kinds (14 Defined + 1 Undefined: attribute)"
 assert len({k.kind for k in KINDS}) == 15, "duplicate kind id in this port"
+
+
+# ---------------------------------------------------------------------------------------------
+# D4.29 (spec-unique-pipeline.md §1) — one ownership level per `unique` field. Five levels: the
+# item seed-contract's four (AUTHORED, VALIDATED, DERIVED, GENERATED) plus dungeon-seed-contract's
+# PLANNED ("the planner fixes it from the budget before the call; the model is shown it and may
+# not change it") — first use of PLANNED under `adapters/items/`. A field with no declared level
+# is a contract defect (`every_field_has_exactly_one_level`, dungeon/audit.py's own precedent).
+#
+# Transcribed directly from the spec's §1 table, not re-derived: `id`/`nameKey`/`iconKey`/
+# `flavorKey` are PLANNED because the corpus mints them from a cell before any call
+# (`unique.<theme>-<band>-<nnn>`, three keys off the same slug), never from model output.
+# `frame`/`powerAxis`/`rarity`/`acquisition` are PLANNED because they ARE the grid cell (frame x
+# axis x band) plus the acquisition gate (ssot-uniques.md §4.5) -- a wrong one here is invisible
+# in the same way a wrong ordinal is (dungeon-seed-contract.md §1). `fixedAtoms[].family`,
+# `varianceSlot.family`, `baseType`, `counterPressure.kind`, `actionGrantRef`, `dungeonBinding`
+# and `tags` are VALIDATED against real, closed registries -- never invented, never free text.
+# `name`, `flavor`, `counterPressure.note` and `reason` are the only AUTHORED (free-text) fields.
+# `powerBand` on a fixed atom is AUTHORED but VOTED (seed-contract §4), not a plain free write.
+UNIQUE_OWNERSHIP: "dict[str, str]" = {
+    "id": "PLANNED", "nameKey": "PLANNED", "iconKey": "PLANNED", "flavorKey": "PLANNED",
+    "name": "AUTHORED", "flavor": "AUTHORED", "reason": "AUTHORED",
+    "frame": "PLANNED", "powerAxis": "PLANNED", "rarity": "PLANNED", "acquisition": "PLANNED",
+    "baseType": "VALIDATED",
+    "fixedAtoms": "VALIDATED",           # family VALIDATED, powerBand AUTHORED+voted -- one level
+    "varianceSlot": "VALIDATED",         # family VALIDATED, variance AUTHORED -- one level, per entry
+    "counterPressure": "VALIDATED",      # kind VALIDATED; its own arguments VALIDATED -- never the note
+    "actionGrantRef": "VALIDATED",
+    "theme": "VALIDATED", "themeKey": "VALIDATED",
+    "tags": "VALIDATED",
+    # COMMON_FIELDS this kind does not use for identity (name/nameKey/id/tags/flavor/flavorKey/
+    # iconKey are already assigned above): enabled, notes, overrides, unlockGate are structural
+    # bookkeeping, not part of the anchor's own identity -- VALIDATED (closed true/false or a
+    # frozen gate id, never authored free-form).
+    "enabled": "VALIDATED", "notes": "AUTHORED", "overrides": "VALIDATED", "unlockGate": "VALIDATED",
+}
+
+VALID_OWNERSHIP_LEVELS = frozenset({"AUTHORED", "VALIDATED", "DERIVED", "GENERATED", "PLANNED"})
+
+# DERIVED, never in the file (spec §1's own table, last row): climateAffinity (the theme's
+# elementAffinity[]), budget_ae, the container id, extend-slot carriage, footprint. Listed for
+# documentation -- there is no field in the seed file to assign a level to for any of these.
+UNIQUE_DERIVED_FACTS = frozenset({
+    "climateAffinity", "budget_ae", "containerId", "extendSlotCarriage", "footprint",
+})

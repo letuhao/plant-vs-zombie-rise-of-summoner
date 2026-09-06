@@ -527,4 +527,50 @@ public class AtomCompilerTests
         Assert.Contains(EffectActions.PresentUi, consts);
         Assert.Contains(EffectActions.PlaceStructure, consts);
     }
+
+    // base-defense `siege-construction` 15.3b (2026-09-06): found by a REAL failing end-to-end test
+    // (ConstructionActionsTests), not by inspection — `structure.place` was added to OpcodeOf's switch
+    // but not to Compilability's separate OpcodeKinds set, so every structure.place atom silently
+    // compiled to the Runner path instead of the Compiled one, exactly the trap `stat.derived`/
+    // `bullet.modify`/`wave.control`'s own comments already documented twice before. This guard closes
+    // the class of bug, not just this one instance: every kind OpcodeOf actually maps reaches the
+    // Compiled path too, for the whole registry, forever — not just the four kinds that have each
+    // individually been bitten by this so far.
+    [Fact]
+    public void Every_kind_OpcodeOf_maps_is_also_in_Compilabilitys_own_OpcodeKinds_set()
+    {
+        foreach (var kind in AtomKindRegistry.All)
+        {
+            var opcode = AtomCompiler.OpcodeOf(kind.KindId);
+            if (opcode is null) continue; // no opcode at all -- Runner ("has no FA opcode") is correct
+            Assert.True(Compilability.OpcodeKinds.Contains(kind.KindId),
+                $"'{kind.KindId}' has an opcode ({opcode}) via AtomCompiler.OpcodeOf but is missing from " +
+                "Compilability.OpcodeKinds -- every atom of this kind silently compiles to the Runner " +
+                "path instead of the Compiled one. Add it to OpcodeKinds.");
+        }
+    }
+
+    // base-defense `siege-construction` 15.3b (2026-09-06): the SAME "unknown action PlaceStructure"
+    // discovery, one seam further downstream -- EffectBag.Grant calls
+    // EffectOverlayMerge.TryValidateOverlayForDef UNCONDITIONALLY for every grant, and it throws the
+    // instant any action in a def's compiled list has no entry in AllowedByAction, even against an
+    // EMPTY overlay. This dictionary's own comment already names four prior instances
+    // (ModifyMatch/WaveControl/BulletModify/PlaceStructure) found the same way -- a real Grant() call
+    // throwing at the very first line, never caught by tests that exercise AtomCompiler.Compile or
+    // BattleEffectSink.Execute directly. This guard closes the class of bug: every published
+    // EffectActions constant has an entry, for the whole vocabulary, forever.
+    [Fact]
+    public void Every_EffectActions_constant_has_an_AllowedByAction_entry()
+    {
+        var consts = typeof(EffectActions)
+            .GetFields(BindingFlags.Public | BindingFlags.Static)
+            .Where(f => f.IsLiteral && !f.IsInitOnly && f.FieldType == typeof(string))
+            .Select(f => (string)f.GetRawConstantValue()!);
+
+        foreach (var action in consts)
+            Assert.True(EffectOverlayMerge.AllowedByAction.ContainsKey(action),
+                $"EffectActions.{action} has no entry in EffectOverlayMerge.AllowedByAction -- " +
+                "EffectBag.Grant will throw 'unknown action' the instant anything ever grants an " +
+                "effect whose compiled Actions include it, regardless of overlay content.");
+    }
 }

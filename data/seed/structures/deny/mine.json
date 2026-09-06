@@ -1,0 +1,46 @@
+{
+  "_meta": {
+    "partition": "Deny"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.18 kind 4, Mine: BITE+DENY, ironwork, damage-on-entry, single-use, unrevealed to the other side, 'the only obstacle that punishes the safe-looking cell' \u2014 ignores cover.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "laboured",
+          "summoned",
+          "assembled"
+        ],
+        "controlPoint": false,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [
+          "BITE",
+          "DENY"
+        ],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Deny",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "mine",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "mine",
+      "name": "Mine"
+    }
+  ],
+  "kind": "structure-anchor"
+}

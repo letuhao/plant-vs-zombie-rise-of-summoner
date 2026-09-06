@@ -1,4 +1,5 @@
 using FusionRpg.Core.Battle.Board;
+using FusionRpg.Core.Battle.Siege;
 using FusionRpg.Core.World.Turn;
 
 namespace FusionRpg.Core.World.Siege;
@@ -102,5 +103,71 @@ public static class SiegeConstruction
         }
 
         return world with { Sectors = sectors };
+    }
+
+    /// <summary>
+    /// audit F10 / decision 48 (2026-09-06): the per-turn `WorldSlot.SlotDepletionMilli` increment
+    /// nothing was calling. Wires the ALREADY-SHIPPED, already-tested pure function
+    /// <see cref="BoardEconomy.AdvanceDepletionMilli"/> (`siege-economy`, built for the tactical
+    /// board's own per-round harvest) into the WORLD-MAP's per-turn one — the two were never the same
+    /// caller, only the same formula, and this method is that formula's second, world-scoped caller.
+    ///
+    /// <para><b>Deliberately does NOT touch `Loam.LoamProduction.For`</b> — that stays the pure,
+    /// unmodified `WorldSector → long` read it has always been (a hot file another program actively
+    /// develops; the same "sibling function, not a rewrite" discipline 15.4's own faucets already
+    /// used for the same reason). This method independently re-derives "did this slot yield THIS
+    /// turn" using the SAME per-slot facts `LoamProduction.For`/<see cref="Yield"/> already read —
+    /// never a second, drifting definition of what "yielded" means: a `Rootbed` slot yields whenever
+    /// its sector is owned (`LoamProduction.For`'s own base `SeepPerTurn` applies unconditionally to
+    /// every owned Rootbed, structure or not — confirmed by reading that method directly); a
+    /// `ShardVein`/`MaterialSeam` slot yields exactly when <see cref="Yield"/> already says it does
+    /// (`GuardState.Cleared`).</para>
+    /// </summary>
+    public static WorldState AdvanceDepletion(WorldState world, TurnReport report, string phase)
+    {
+        var sectors = new List<WorldSector>(world.Sectors.Count);
+        foreach (var sector in world.Sectors)
+        {
+            var slots = new List<WorldSlot>(sector.Slots.Count);
+            var changed = false;
+
+            foreach (var slot in sector.Slots)
+            {
+                if (!YieldedThisTurn(sector, slot))
+                {
+                    slots.Add(slot);
+                    continue;
+                }
+
+                var wasExhausted = StructurePolicy.IsExhausted(slot.SlotDepletionMilli);
+                var advanced = BoardEconomy.AdvanceDepletionMilli(slot.SlotDepletionMilli, yieldedThisRound: true);
+                if (advanced == slot.SlotDepletionMilli)
+                {
+                    slots.Add(slot);
+                    continue;
+                }
+
+                changed = true;
+                slots.Add(slot with { SlotDepletionMilli = advanced });
+
+                if (!wasExhausted && StructurePolicy.IsExhausted(advanced))
+                    report.Add(phase, TurnReportKinds.Event, sector.SectorId, "slot.exhausted:" + slot.SlotIndex,
+                        sectorId: sector.SectorId, audience: sector.OwnerFactionId);
+            }
+
+            sectors.Add(changed ? sector with { Slots = slots } : sector);
+        }
+
+        return world with { Sectors = sectors };
+    }
+
+    static bool YieldedThisTurn(WorldSector sector, WorldSlot slot)
+    {
+        if (!SlotTypeCatalog.IsKnown(slot.SlotTypeId)) return false;
+        var kind = SlotTypeCatalog.Get(slot.SlotTypeId).Kind;
+
+        if (kind == SlotKind.Rootbed) return sector.OwnerFactionId is not null;
+        if (kind == SlotKind.ShardVein || kind == SlotKind.MaterialSeam) return slot.GuardState == GuardState.Cleared;
+        return false;
     }
 }

@@ -385,6 +385,14 @@ def apply_promotions(round_rows: Sequence[Mapping[str, object]],
         row = dict(row)
         if row.get("id") in promotions:
             row["kindHint"] = "innate"
+        # item-content `granted-action-text` (T14): every committed row must name the display key
+        # its description resolves under -- `ActionCorpusBriefJson.Parse` REFUSES a committed row
+        # without one, so a promotion that omitted it would break the server's own boot import of
+        # the whole file. The key is structural (`<id>.desc`); the SENTENCE behind it is authored
+        # content that lands in `content/display/en.json`, and the corpus guard
+        # (`GrantedActionTextTests`) is what demands it. A row that already carries an authored key
+        # keeps it.
+        row.setdefault("descriptionKey", f"{row['id']}.desc")
         out.append(row)
     return sorted(out, key=lambda r: r["id"])
 

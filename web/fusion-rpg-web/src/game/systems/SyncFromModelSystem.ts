@@ -4,7 +4,7 @@ import { listMowers, listOccupants, listPets, listTiles, normalizePtr } from "@/
 import type { PtrEntityRegistry, PtrViewRecord } from "../entities/PtrEntityRegistry";
 import { noteIconLoadFailure } from "@/features/lawn/lawnSyncGate";
 import { lawnIconTextureKey, lawnIconUrl } from "../iconUrl";
-import { getIconEpoch } from "@/lib/bus/icon-epoch";
+import { getIconEpochMirror } from "../iconEpochMirror";
 import { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, cellToWorld } from "../gridMath";
 import { setHudDisplay } from "./ActorHudDisplay";
 
@@ -71,7 +71,7 @@ function ensureIcon(
   typeId: number,
   onReady?: () => void
 ): string {
-  const epoch = getIconEpoch();
+  const epoch = getIconEpochMirror();
   const key = lawnIconTextureKey(side, typeId, epoch);
   const placeholder = scene.textures.exists("lawn-placeholder")
     ? "lawn-placeholder"

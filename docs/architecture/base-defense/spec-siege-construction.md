@@ -439,6 +439,67 @@ acceptance is economic.
 5. A besieging force can fortify meaningfully — asserted, not assumed.
 6. `audit-overflow.py` and `audit-magic-numbers.py` both clean for this module's files.
 
+## §11. Real content + the activation mechanism (15.3b, 2026-09-06) — a FOURTH correction
+
+> ⛔ **This section's own finding is bigger than this module.** §9 named `BuildResolver.cs` as the
+> reference implementation for the peacetime `Build` shape, but never checked whether ANY real,
+> non-`BasicAttack` action had ever actually FIRED its own atoms in this codebase's history. It had
+> not. `BattleRunState.BindContainers` grants an actor's held-action containers PERMANENTLY at battle
+> setup, but nothing anywhere calls `Bag.OnEvent` for a committed action's own `OnActivate` atoms except
+> the hardcoded `BasicAttack.cs` special case — confirmed by exhaustive grep (`Bag.OnEvent(` has exactly
+> two production call sites, both in `BasicAttack.cs`) and by the fact that every production caller of
+> `BattleEngine.Resolve` omits `containerResolver` entirely, which means a real container-bearing action
+> would THROW at `BattleRunState`'s own constructor the instant anyone actually tried it. **This is the
+> whole action program's own foundational scope, not `siege-construction`'s** — named here because it
+> was found here, not claimed as this module's fix.
+
+**What this module built instead, to prove its own four paths work without solving that larger gap**:
+a second, narrow, hardcoded activation path — `ConstructionActivation.Fire` — the exact same shape
+`BasicAttack.cs` itself already is (a special case, not a generalization). `ConstructionActions.cs`
+compiles the four `structure.place` atoms through the REAL `AtomCompiler`/`AtomPushCodec` pipeline (not
+hand-built `EffectDef`s), authors the four `ActionRow`s (`ActionCategory.Support`, `Summon`/`Construct`
+tags per §7's own decision), and wires `Summoned`/`Laboured`'s costs through the existing
+`ActionCostRow`/`CostLedger` mechanism directly.
+
+**Two more real, previously-undiscovered defects found and fixed while proving this end to end** — the
+SAME class of bug as each other, and the fourth and fifth instances of a pattern this codebase's own
+`Compilability.cs` comments already named three times before (`stat.derived`, `bullet.modify`,
+`wave.control`): `AtomCompiler.OpcodeOf`'s switch and `Compilability`'s separate `OpcodeKinds` set (and,
+one seam further downstream, `EffectOverlayMerge`'s `AllowedByAction` dictionary) must BOTH list a kind
+for it to actually reach the Compiled path and actually be grantable — `structure.place`/
+`PlaceStructure` was added to the first list this session (session 2) but not the other two, so every
+`structure.place` atom silently routed to the Runner path, and any real `Grant()` of it would have
+thrown `"unknown action PlaceStructure"` at the very first line. Found by a real, failing end-to-end
+test (`ConstructionActionsTests`), not by inspection. Both fixed, and a NEW general guard test added for
+each (`Every_kind_OpcodeOf_maps_is_also_in_Compilabilitys_own_OpcodeKinds_set`,
+`Every_EffectActions_constant_has_an_AllowedByAction_entry`) — closing the CLASS of bug, not just these
+two instances, since three prior instances with no general guard is how it reached a fourth and fifth.
+
+**Content scope, decided rather than assumed**: one real structure — `moat` (`StructureCatalog.cs`) —
+is buildable via **all four** acquisition paths (`AcquisitionPaths` is a list; nothing stops a
+structure using every path it authors a cost for). A fuller siege roster (Trench/Wire/Mine/Emplacement,
+separate structures per path) is `structure-corpus`'s (module 24) own job — this module proves the
+`structure.place` mechanism end to end with one real, shipped structure, not a content roster nobody
+has designed yet. `Built`'s own cost (`ConstructRubbleCost`/`ConstructIronworkCost`) is real and
+non-zero on this row for the first time.
+
+**`Built`'s own cost gate, built as a small, dedicated pure function pair** (`ConstructionCost` in
+`ConstructionActions.cs`) rather than a fourth `ActionCostRow` resource kind: confirmed no existing
+mechanism can express "spend a WORLD-scoped resource through a unit action" —
+`ActionCostRow.ResourceId` only resolves against the closed six actor resources, and `IStockLedger` is
+actor-inventory-scoped. `ConstructionCost.CanAffordBuilt`/`SpendBuilt` mirror
+`ConstructionPlacement.CanPlace`'s own "pure validator, caller applies it" shape exactly.
+
+**What is still genuinely missing, named rather than assumed done**: `Assembled`'s own item-consumption
+precondition (`AssembledConsumableItemId` is a placeholder id — the real `StockDemand`/`IStockLedger`
+wiring, and the real craftable item content, are `structure-corpus`'s own job); no intent source ever
+calls `ConstructionActivation.Fire` in a live battle yet (`siege-ai`'s own job, unchanged from this
+module's earlier framing); `SiegeDepot`'s own Rubble tracking (fixed, `BoardEconomy.cs`) is not yet
+wired into `DistrictAssaultResolver`'s own `request.Budgets` flow — `ConstructionCost` reads a
+`WorldSector`'s stocks directly today, not a live `SiegeDepot`; and the module's own headline acceptance
+test (`A_besieging_legion_can_afford_more_than_one_structure`) still needs a live intent source to
+drive, which is why it is not yet written.
+
 ## Open questions
 
 **None.** ✅ **Decision 38 (owner, 2026-09-04): `rubble` and `ironwork` trade FREELY between sectors.**

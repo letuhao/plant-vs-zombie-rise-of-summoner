@@ -12,6 +12,7 @@
         "atom.volley"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.cactus.001.desc",
       "id": "action.family.cactus.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -37,6 +38,7 @@
         "atom.death-harvest"
       ],
       "category": "support",
+      "descriptionKey": "action.family.cherry.001.desc",
       "id": "action.family.cherry.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -62,6 +64,7 @@
         "atom.lifesteal"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.chomper.001.desc",
       "id": "action.family.chomper.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -87,6 +90,7 @@
         "atom.elpw-pierce"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.corn.001.desc",
       "id": "action.family.corn.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -112,6 +116,7 @@
         "atom.volley"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.double.001.desc",
       "id": "action.family.double.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -137,6 +142,7 @@
         "atom.shld-surge"
       ],
       "category": "defense",
+      "descriptionKey": "action.family.fruit.001.desc",
       "id": "action.family.fruit.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -162,6 +168,7 @@
         "atom.withering"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.garlic.001.desc",
       "id": "action.family.garlic.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -186,6 +193,7 @@
         "atom.venomous"
       ],
       "category": "support",
+      "descriptionKey": "action.family.garlic.002.desc",
       "id": "action.family.garlic.002",
       "kindHint": "innate",
       "motifsUsed": [
@@ -211,6 +219,7 @@
         "atom.mesmerizing"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.hypno.001.desc",
       "id": "action.family.hypno.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -236,6 +245,7 @@
         "atom.sust-husk"
       ],
       "category": "defense",
+      "descriptionKey": "action.family.hypno.002.desc",
       "id": "action.family.hypno.002",
       "kindHint": "innate",
       "motifsUsed": [
@@ -261,6 +271,7 @@
         "atom.elpw-pierce"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.nut.001.desc",
       "id": "action.family.nut.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -286,6 +297,7 @@
         "atom.sporing"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.pea.001.desc",
       "id": "action.family.pea.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -311,6 +323,7 @@
         "atom.tempo-surge"
       ],
       "category": "movement",
+      "descriptionKey": "action.family.pea.002.desc",
       "id": "action.family.pea.002",
       "kindHint": "innate",
       "motifsUsed": [
@@ -336,6 +349,7 @@
         "atom.sunbloom"
       ],
       "category": "attack",
+      "descriptionKey": "action.family.sunflower.001.desc",
       "id": "action.family.sunflower.001",
       "kindHint": "innate",
       "motifsUsed": [
@@ -361,6 +375,7 @@
         "atom.sust-grit"
       ],
       "category": "defense",
+      "descriptionKey": "action.general.0001.desc",
       "id": "action.general.0001",
       "name": "Brace",
       "pairedPayoffFamily": null,
@@ -381,6 +396,7 @@
         "atom.vitality"
       ],
       "category": "support",
+      "descriptionKey": "action.general.0003.desc",
       "id": "action.general.0003",
       "name": "Shared Pulse",
       "pairedPayoffFamily": null,
@@ -401,6 +417,7 @@
         "atom.tempo-surge"
       ],
       "category": "movement",
+      "descriptionKey": "action.general.0004.desc",
       "id": "action.general.0004",
       "name": "Shift",
       "pairedPayoffFamily": null,
@@ -421,6 +438,7 @@
         "atom.swiftness"
       ],
       "category": "movement",
+      "descriptionKey": "action.general.0005.desc",
       "id": "action.general.0005",
       "name": "Shift",
       "pairedPayoffFamily": null,
@@ -441,6 +459,7 @@
         "atom.withering"
       ],
       "category": "status",
+      "descriptionKey": "action.general.0006.desc",
       "id": "action.general.0006",
       "name": "Lingering Tremor",
       "pairedPayoffFamily": null,

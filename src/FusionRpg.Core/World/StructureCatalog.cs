@@ -170,6 +170,27 @@ public sealed record StructureDef
     /// is legal, per AGENTS.md's no-hard-ceilings rule for a magnitude a balance pass raises.
     /// </summary>
     public int EntryStaminaMultiplierMilli { get; init; } = 1000;
+
+    /// <summary>
+    /// base-defense `siege-fog` (spec-siege-fog.md §2, module 30, 2026-09-06): how far this structure
+    /// lets its own side see, in tiles. Defaults to `fog.defaultVisionRangeTiles` so no structure ships
+    /// with an unauthored, unreadable range by omission. A `See`-role structure (`structure-schema`'s
+    /// own reserved-but-unmapped role) authors a larger value than a non-`See` structure — this is the
+    /// mechanical payoff the idea doc named for that role's first real purpose.
+    /// </summary>
+    public int VisionRangeTiles { get; init; } = SiegeTuningPolicy.Fog.DefaultVisionRangeTiles;
+
+    /// <summary>
+    /// base-defense `structure-instantiate` (spec-structure-instantiate.md, module 26): which
+    /// `ContainerRow` (if any) this structure rolls traits/actions from at placement time, via
+    /// <see cref="FusionRpg.Core.Battle.Siege.StructureInstantiate.TryInstantiateStructure"/>. Null
+    /// for every structure today — a real, honest state (spec-structure-instantiate.md §1: "the roll
+    /// is narrow" — cost/HP/footprint never roll, only traits/actions do), not a placeholder: giving
+    /// a structure a container is `structure-planner`/`structure-pipeline`'s (27/28) own content
+    /// decision, not this catalog's. A null container means "nothing to roll," a real, correct
+    /// outcome the instantiate call handles directly rather than treating as an error.
+    /// </summary>
+    public string? ContainerId { get; init; }
 }
 
 /// <summary>
@@ -180,8 +201,87 @@ public static class StructureCatalog
 {
     static IReadOnlyList<StructureDef>? _all;
     static Dictionary<string, StructureDef>? _byId;
+    static FusionRpg.Core.World.StructureSeed.StructureCorpus? _corpus;
 
-    public static IReadOnlyList<StructureDef> All => _all ??= Validate(Seed);
+    /// <summary>
+    /// base-defense `structure-catalog-import` (module 25, spec-structure-catalog-import.md §1).
+    /// Called by the composition root, never by game code — resets the cached rows so a
+    /// reconfigure is honoured, the same contract `BattleModeProfileCatalog.Configure` already
+    /// states for profiles. Pass `null` to revert to the pure C# <see cref="Seed"/> literal (the
+    /// same behaviour as never calling this at all — every existing test that never calls
+    /// `Configure` keeps seeing exactly what it always has).
+    /// </summary>
+    public static void Configure(FusionRpg.Core.World.StructureSeed.StructureCorpus? corpus)
+    {
+        _corpus = corpus;
+        _all = null;
+        _byId = null;
+    }
+
+    public static IReadOnlyList<StructureDef> All => _all ??= Validate(BuildRows());
+
+    /// <summary>
+    /// The four C# <see cref="Seed"/> rows are the FALLBACK, not the source (spec §1): a row the
+    /// configured corpus does not cover (or no corpus configured at all) still comes from `Seed`.
+    /// Once every `Seed` id has a real, catalog-loadable corpus row — proven by the byte-identity
+    /// tests — the `Seed` literal itself is deleted (task 25.4), per the spec's own "order matters"
+    /// instruction (prove identity, then delete, never the reverse).
+    /// </summary>
+    static IReadOnlyList<StructureDef> BuildRows()
+    {
+        if (_corpus is null) return Seed;
+
+        var fromCorpus = new List<StructureDef>();
+        var corpusIds = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var row in _corpus.Rows)
+        {
+            if (!row.IsCatalogLoadable) continue; // identity-registered only — structure-planner's job
+            corpusIds.Add(row.StructureId);
+            fromCorpus.Add(ToStructureDef(row));
+        }
+
+        foreach (var seedRow in Seed)
+            if (!corpusIds.Contains(seedRow.StructureId))
+                fromCorpus.Add(seedRow);
+
+        return fromCorpus;
+    }
+
+    /// <summary>The one place a corpus row's ordinals/magnitudes become a real `StructureDef` —
+    /// see spec-structure-catalog-import.md's own Correction 1 for why `Magnitudes` (never
+    /// `StrengthBand` alone) is authoritative for `MaterialTier`, and Correction 2 for why
+    /// `Magnitudes.StructureKind` (never a `role`-keyed derivation) is authoritative for `Kind` —
+    /// `anchor/schema.py`'s own `ROLE_TO_STRUCTURE_KIND` dict is provably wrong against real
+    /// shipped rows (`hatchery`/`soul-conduit`/`extractor` are all `Yield`, not what it predicts).
+    /// </summary>
+    static StructureDef ToStructureDef(FusionRpg.Core.World.StructureSeed.StructureCorpusRow row)
+    {
+        var m = row.Magnitudes!;
+        return new StructureDef
+        {
+            StructureId = row.StructureId,
+            Name = row.Name,
+            Kind = Enum.Parse<StructureKind>(m.StructureKind),
+            RequiredSlotKind = Enum.Parse<SlotKind>(row.RequiredSlotKind),
+            Cost = m.Cost,
+            YieldMultiplierMilli = m.YieldMultiplierMilli,
+            BuildTurns = m.BuildTurns,
+            CapacityBonus = m.CapacityBonus,
+            FlatYieldPerTurn = m.FlatYieldPerTurn,
+            ConstructRubbleCost = m.ConstructRubbleCost,
+            ConstructIronworkCost = m.ConstructIronworkCost,
+            MaterialTier = m.MaterialTier,
+            BlocksMovement = m.BlocksMovement,
+            BlocksLineOfFire = m.BlocksLineOfFire,
+            Obstacle = Enum.Parse<ObstacleKind>(m.ObstacleKind),
+            AcquisitionPaths = row.AcquisitionPaths.Select(p => Enum.Parse<AcquisitionPath>(p, ignoreCase: true)).ToList(),
+            CoverPowerMilli = m.CoverPowerMilli,
+            CoverRadius = m.CoverRadius,
+            EntryStaminaMultiplierMilli = m.EntryStaminaMultiplierMilli,
+            VisionRangeTiles = m.VisionRangeTiles ?? SiegeTuningPolicy.Fog.DefaultVisionRangeTiles,
+            ContainerId = m.ContainerId,
+        };
+    }
 
     public static bool IsKnown(string? structureId) =>
         structureId != null && ByIdMap().ContainsKey(structureId);
@@ -198,11 +298,6 @@ public static class StructureCatalog
     // assembled path exists anywhere for loam content today). This is what keeps `AcquisitionPaths`
     // validated non-empty for EVERY structure, obstacle or not, without breaking startup.
     static readonly IReadOnlyList<AcquisitionPath> BuiltOnly = new[] { AcquisitionPath.Built };
-
-    // base-defense `siege-construction` §5 (corrected 2026-09-06): the moat is an ordinary
-    // Rampart-obstacle StructureDef built via the Laboured path -- NOT a terrain override, per
-    // spec-siege-obstacles.md's own "a cell you cannot enter and cannot stand on IS a wall" rule.
-    static readonly IReadOnlyList<AcquisitionPath> LabouredOnly = new[] { AcquisitionPath.Laboured };
 
     static readonly IReadOnlyList<StructureDef> Seed = new StructureDef[]
     {
@@ -302,17 +397,26 @@ public static class StructureCatalog
             // rung: a dug ditch is the most basic obstacle a legion can raise, not a fortified wall.
             // The FIRST obstacle row this catalog has ever shipped — `siege-obstacles`' own "closed"
             // status was the mechanism (ObstacleKind, LineOfFire, cover math), not content.
+            //
+            // Deliberately buildable via ALL FOUR acquisition paths (15.3b, 2026-09-06): a fuller
+            // siege-content roster (Trench/Wire/Mine/Emplacement, and separate Assembled/Summoned/Built
+            // structures) is `structure-corpus`'s (module 24) own job, not this task's — inventing three
+            // more obstacle rows here would be unrequested content, not mechanism-proving. One real,
+            // shipped structure exercising every path proves the `structure.place` mechanism end to end
+            // without guessing at a roster nobody has designed yet.
             StructureId = "moat",
             Name = "Moat",
             Kind = StructureKind.Obstacle,
             RequiredSlotKind = SlotKind.Wildland,
-            Cost = 0, // never built peacetime; siege-time Laboured spends stamina/hunger, not loam
+            Cost = 0, // never built peacetime; every siege-time path spends its own action cost, not loam
             BuildTurns = SiegeTuningPolicy.Construction.LabourMoatTurns,
             MaterialTier = 1,
             BlocksMovement = true,
             BlocksLineOfFire = true,
             Obstacle = ObstacleKind.Rampart,
-            AcquisitionPaths = LabouredOnly
+            ConstructRubbleCost = SiegeTuningPolicy.Construction.RefineRubblePerIronwork, // a real, non-zero Built cost — reuses an already-tunable number rather than inventing a fresh one
+            ConstructIronworkCost = 1,
+            AcquisitionPaths = new[] { AcquisitionPath.Built, AcquisitionPath.Assembled, AcquisitionPath.Summoned, AcquisitionPath.Laboured }
         }
     };
 
@@ -364,6 +468,8 @@ public static class StructureCatalog
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has negative cover radius.");
             if (s.EntryStaminaMultiplierMilli < 0)
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has a negative entry stamina multiplier.");
+            if (s.VisionRangeTiles < 0)
+                throw new InvalidOperationException($"Structure '{s.StructureId}' has a negative vision range.");
         }
 
         return structures;

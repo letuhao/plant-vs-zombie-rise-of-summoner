@@ -195,3 +195,27 @@ for the reasoning kept with each one. The one honestly-named gap this spec carri
 scope limit (no per-animate-combatant vision catalog exists yet) — a scope statement, not an open
 question: it does not block this module, and whichever future module wants richer animate-combatant
 vision inherits `fog.defaultVisionRangeTiles` as its own starting point, not a blocker.
+
+## As-built (2026-09-06)
+
+Built the same day as spec'd, with **zero deviations from this contract** — every acceptance criterion
+in §1-§6 landed exactly as written, so this section records confirmations, not corrections (unlike
+`spec-siege-construction.md`'s own §11, which exists because that module's spec needed real fixes).
+
+- §1: `SiegeVisibility.IsVisible` took a `Watcher` record struct (position + range) plus a
+  `blocksVision` callback instead of the literal `(viewerSide, cell, board, ranges)` signature sketched
+  in the contract — the CONTRACT (one shared pure function, both consumers call the same one) is what
+  shipped; the exact parameter shape was always `/plan`'s call per this section's own opening line.
+- §2: `StructureDef.VisionRangeTiles` and the `fog` tuning block shipped exactly as specified, including
+  the `> 0` validation on `defaultVisionRangeTiles` and the `< 0` rejection on the per-structure field.
+- §3-§4: `FoggedBattleView`/`FoggedOccupancy` shipped as the exact decorator shapes named, over the exact
+  existing seams (`IBattleView`, `IBoardOccupancy`) — confirmed post-hoc via `git status --porcelain`
+  that `BattleRunState.cs` and `BoardPathfinder.cs` both required zero edits, exactly as predicted.
+- §5: symmetry proven structurally (reflection scan for side-specific fields/branches), not just
+  behaviorally, per this section's own requirement.
+- §6: golden-neutrality proven directly — `WorldWaveOneAcceptanceTests`/`WorldTwentyTurnCheckpointTests`
+  both stayed at the exact same golden hash this module's predecessor task (15.4b) left them at. Zero
+  goldens moved, because neither decorator is wired into any live resolver call site yet (correct at
+  this stage — `siege-ai`'s 17.4 is what will eventually consume `FoggedBattleView` for real).
+- Full evidence, per-task, lives in `tasks/base-defense-todo.md`'s own 30.1-30.6 — this note exists so a
+  reader of this spec alone knows the module shipped, without having to cross-reference the todo file.

@@ -30,7 +30,7 @@ public class UniqueDemonSpeciesTreeGateTests
     }
 
     static readonly AptitudeTuning RealAptitudeTuning = AptitudeTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v6.json")));
+        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v7.json")));
 
     static readonly PassiveTreeTuning RealTreeTuning = PassiveTreeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "passive-tree.v1.json")));

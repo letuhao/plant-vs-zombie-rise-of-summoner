@@ -282,6 +282,60 @@ describe("the rendered card (item module 10)", () => {
     expect(view.enhancement.state).toBe("absent");
     expect(view.set.state).toBe("absent");
   });
+
+  // ---- flavour (item-content T6) ------------------------------------------------------------------
+
+  /** One flavour block, as the card route emits it once the string catalog resolves the key. */
+  function withFlavour(args: Record<string, string>): ItemCardDto {
+    const dto = cardDto();
+    return {
+      ...dto,
+      blocks: [
+        ...dto.blocks,
+        {
+          blockKey: "item.card.flavour",
+          lines: [
+            {
+              key: "item.card.flavour",
+              args,
+              unit: null,
+              sourceKind: "UniqueIdentity",
+              groupOrder: 0,
+              rollBarSegments: null,
+              contextRead: null,
+              rollQualityPerMille: null
+            }
+          ]
+        }
+      ]
+    };
+  }
+
+  it("shows the AUTHORED sentence for a unique's flavour, never a fragment of its key", () => {
+    const real =
+      "It doesn't wait for the battlefield to finish. It roots in mid-fight and blooms before the body is cold.";
+    const view = adaptItemCard(
+      withFlavour({ flavourKey: "flavor.unique.carrion-spitter", __rendered: real })
+    );
+    expect(view.flavour).toBe(real);
+    // The old `keyTail` placeholder would have produced exactly this.
+    expect(view.flavour).not.toBe("carrion spitter");
+  });
+
+  it("shows a SET's authored sentence through the same block (owner decision 2026-09-06)", () => {
+    const real = "It has never once composed a line of its own, only reproduced the last hand's exactly.";
+    const view = adaptItemCard(withFlavour({ flavourKey: "flavor.set.copyhand", __rendered: real }));
+    expect(view.flavour).toBe(real);
+  });
+
+  it("shows NOTHING when the key has no catalog row — a key tail is not prose", () => {
+    const view = adaptItemCard(withFlavour({ flavourKey: "flavor.unique.no-string-row" }));
+    expect(view.flavour).toBeUndefined();
+  });
+
+  it("shows nothing when no flavour was authored at all", () => {
+    expect(adaptItemCard(cardDto()).flavour).toBeUndefined();
+  });
 });
 
 describe("the comparison payload (item modules 13 + 20)", () => {
@@ -291,18 +345,18 @@ describe("the comparison payload (item modules 13 + 20)", () => {
       candidate: cardDto({ instanceId: "new" }),
       differingLineIndexes: [1],
       deltas: [
-        { channel: "combat.hp", unit: "game-units", incumbent: 71, candidate: 62, delta: -9 },
-        { channel: "defense", unit: "per-mille", incumbent: 0, candidate: 140, delta: 140 }
+        { channel: "combat.hp", unit: "GameUnits", incumbent: 71, candidate: 62, delta: -9, incumbentMax: null, candidateMax: null },
+        { channel: "defense", unit: "PerMilleRatio", incumbent: 0, candidate: 140, delta: 140, incumbentMax: null, candidateMax: null }
       ],
       dominance: "Sidegrade",
       badge: { labelKey: "item.compare.sidegrade", shape: "◆" },
       trade: {
-        youGain: [{ channel: "defense", unit: "per-mille", incumbent: 0, candidate: 140, delta: 140 }],
-        youGiveUp: [{ channel: "combat.hp", unit: "game-units", incumbent: 71, candidate: 62, delta: -9 }]
+        youGain: [{ channel: "defense", unit: "PerMilleRatio", incumbent: 0, candidate: 140, delta: 140, incumbentMax: null, candidateMax: null }],
+        youGiveUp: [{ channel: "combat.hp", unit: "GameUnits", incumbent: 71, candidate: 62, delta: -9, incumbentMax: null, candidateMax: null }]
       },
       unitGroups: [
-        { unit: "GameUnits", deltas: [{ channel: "combat.hp", unit: "game-units", incumbent: 71, candidate: 62, delta: -9 }] },
-        { unit: null, deltas: [{ channel: "mystery", unit: "game-units", incumbent: 1, candidate: 2, delta: 1 }] }
+        { unit: "GameUnits", deltas: [{ channel: "combat.hp", unit: "GameUnits", incumbent: 71, candidate: 62, delta: -9, incumbentMax: null, candidateMax: null }] },
+        { unit: null, deltas: [{ channel: "mystery", unit: null, incumbent: 1, candidate: 2, delta: 1, incumbentMax: null, candidateMax: null }] }
       ],
       meanRollQualityMilliIncumbent: 500,
       meanRollQualityMilliCandidate: 734,

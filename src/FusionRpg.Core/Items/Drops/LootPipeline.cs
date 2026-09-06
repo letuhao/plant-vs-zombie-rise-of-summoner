@@ -89,7 +89,16 @@ public sealed record LootContentView(
     /// <summary>⭐ Step 10, live as of module 16. Both this and <see cref="SocketMaxFor"/> must be
     /// supplied or the step stays the documented no-op it was — half a socket rule would silently
     /// grant the wrong count rather than none.</summary>
-    FusionRpg.Core.Items.Sockets.SocketTuning? SocketTuning = null);
+    FusionRpg.Core.Items.Sockets.SocketTuning? SocketTuning = null,
+    /// <summary>D4.27 (spec-unique-pipeline.md §5): resolves a `unique` entry's own `RefId` (a
+    /// container id, `item.&lt;slug&gt;`) to its AUTHORED rarity id — "rung = the container's own
+    /// `Rarity`, never drawn". Nothing else in this file can answer this (no lookup from a ref id to a
+    /// `ContainerRow`/its rarity exists anywhere in `Core` — confirmed by a dedicated search; the real
+    /// resolver lives in the Data layer, `RpgStore.GetContainer`, which this I/O-free file cannot call
+    /// itself). `null` (the default) refuses any unique draw (`drop.unique-rarity-unresolved`) rather
+    /// than guessing a rarity — the same "no default, refuse" posture `DelvePrices.Merchant` already
+    /// uses for its own undesigned price.</summary>
+    Func<string, string?>? UniqueRarityFor = null);
 
 /// <summary>Server-derived correlation ids (§4.4). One shape per source kind, none client-reachable.</summary>
 public static class LootCorrelation
@@ -292,6 +301,14 @@ public static class LootPipeline
                         continue;
                     }
 
+                    if (entry.Kind == DropEntryKind.Unique)
+                    {
+                        var unique = MintUnique(entry, out var uniqueRejection);
+                        if (!uniqueRejection.IsOk) return uniqueRejection;
+                        grants.Add(unique!);
+                        continue;
+                    }
+
                     if (entry.Kind != DropEntryKind.Equipment)
                     {
                         // Kind is drawn; quantity is rolled; nothing is scaled. Inclusive integers.
@@ -371,6 +388,58 @@ public static class LootPipeline
                 envelope.MinTier, envelope.MaxTier, envelope.PrefixRolls, envelope.SuffixRolls,
                 SocketCount: Sockets(rollSeed, view, baseTypeId, rung.RarityId), RollSeed: rollSeed,
                 EnvelopeNarrowed: envelope.Narrowed, PityForced: pityOutcome.Forced);
+
+            if (view.Mint is { } mint)
+            {
+                var minted = mint(grant);
+                if (!minted.Rejection.IsOk) { rejected = minted.Rejection; return null; }
+                grant = grant with { InstanceId = minted.InstanceId };
+            }
+
+            rejected = AtomRejection.Ok;
+            return grant;
+        }
+
+        /// <summary>
+        /// D4.27 (spec-unique-pipeline.md §5): "`MintUnique` (beside `MintEquipment`): `rollSeed =
+        /// DeriveStream(lootSeed, LootStreams.RollSeed(i)).NextULong()`, `ItemLevel` from step 3, rung
+        /// = the container's own `Rarity` (authored, never drawn), then `view.Mint`." No base type, no
+        /// envelope, no affix draw — a unique's own fixed core and variance pool are
+        /// <see cref="FusionRpg.Core.Items.Uniques.UniqueContainerBuild.From"/>'s job, already done
+        /// before this pipeline ever sees the container; this arm only assembles the grant and mints.
+        /// </summary>
+        LootGrant? MintUnique(DropTableEntryRow entry, out AtomRejection rejected)
+        {
+            var i = index++;
+
+            if (view.UniqueRarityFor is not { } rarityFor)
+            {
+                rejected = AtomRejection.ContentRule("drop.unique-rarity-unresolved",
+                    $"drew unique '{entry.RefId}' but the host supplies no UniqueRarityFor resolver");
+                return null;
+            }
+
+            var rarityId = rarityFor(entry.RefId);
+            if (rarityId is null)
+            {
+                rejected = AtomRejection.ContentRule("drop.unknown-unique",
+                    $"unique container '{entry.RefId}' has no resolvable rarity");
+                return null;
+            }
+
+            var rung = view.Ladder.FirstOrDefault(r => string.Equals(r.RarityId, rarityId, StringComparison.Ordinal));
+            if (rung is null)
+            {
+                rejected = AtomRejection.ContentRule("drop.unknown-unique",
+                    $"unique container '{entry.RefId}' resolved rarity '{rarityId}', which is not on the ladder");
+                return null;
+            }
+
+            var rollSeed = SeededRng.DeriveStream(lootSeed, LootStreams.RollSeed(i)).NextULong();
+
+            var grant = new LootGrant(
+                i, DropEntryKind.Unique, entry.RefId, 1, entry.AffixChannel,
+                RarityId: rung.RarityId, RarityOrdinal: rung.Ordinal, ItemLevel: itemLevel, RollSeed: rollSeed);
 
             if (view.Mint is { } mint)
             {

@@ -499,8 +499,8 @@ public class ItemSurfaceTests
     {
         var deltas = new[]
         {
-            new ChannelDelta("maxHp", "game-units", 100, 80, -20),
-            new ChannelDelta("atk", "game-units", 10, 18, 8),
+            new ChannelDelta("maxHp", UnitClass.GameUnits, 100, 80, -20),
+            new ChannelDelta("atk", UnitClass.GameUnits, 10, 18, 8),
         };
 
         var trade = DominancePresentation.Trade(deltas);
@@ -522,7 +522,9 @@ public class ItemSurfaceTests
             .Distinct(StringComparer.Ordinal)
             .ToList();
 
-        var deltas = channels.Select((c, i) => new ChannelDelta(c, "?", 0, i, i)).ToList();
+        var deltas = channels
+            .Select((c, i) => new ChannelDelta(c, ChannelUnitsOf(c, registry), 0, i, i))
+            .ToList();
         var groups = DominancePresentation.GroupByUnitClass(deltas, registry);
 
         Assert.Equal(deltas.Count, groups.Sum(g => g.Deltas.Count));

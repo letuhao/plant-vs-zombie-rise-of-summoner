@@ -172,6 +172,26 @@ public static partial class BattleEngine
         ActorState attacker, ActorState target, ActionEnvelope envelope, BattleRunState state,
         DateTimeOffset now, long nowTick, OverlayCombatCalculator calculator, ICombatRng critRng)
     {
+        // A22 (spec-action-resolution-by-category.md §2): Category lives on CompiledAction, not on
+        // ActionEnvelope -- resolved here via the catalog reference BattleRunState now keeps as a
+        // field. null (every action authored before A-E1 shipped, and the basic attack itself, which
+        // is hand-built and never reaches this lookup at all since it is not in any real catalog) maps
+        // to Attack deliberately -- changing that reading would silently alter every already-blessed
+        // golden's own resolution.
+        var category = state.ActionCatalog?.Get(envelope.ActionId)?.Category ?? ActionCategory.Attack;
+        if (category != ActionCategory.Attack)
+        {
+            // Defense/Support/Movement/Status: the hit/crit roll is meaningless for a non-attack
+            // action (it was never supposed to "miss") -- calculator.Compute is never called, so its
+            // own OnDamageDealt trigger never fires either (there is no hit to trigger it; OnActivate,
+            // A18b, already covers this action's real effect, unconditionally, regardless of category).
+            // The cooldown arms the moment the action resolves -- unconditional, never gated on an
+            // outcome that was never rolled, unlike the Attack branch below.
+            state.Cooldowns.Start(attacker.Setup.Key, envelope, nowTick,
+                SkillCooldownReductionPm(attacker, envelope));
+            return new AttackStep(AttackStepOutcome.Proceed, target, 0);
+        }
+
         var (signedDelta, breakdown) = calculator.Compute(new OverlayCombatRequest
         {
             // A18e (spec-battle-live-stat-modifiers.md §2): the one production read-site this module

@@ -530,6 +530,11 @@ public static class DerivedStatChannels
     // requires a StatClass on any capped channel, spec-stat-taxonomy.md §6.1).
     public const string ProgressionXpRate = "progression.xpRate";
     public const string ProgressionBreakthroughSuccess = "progression.breakthroughSuccess";
+
+    // H.8 -- loadout, 1 channel (D4.25, spec-unique-pipeline.md §4: "the extend-action-slot grant").
+    // The actor's own equipped-slot capacity granted by worn gear -- LoadoutSet/AutoEquip/CapPolicy
+    // are this channel's three readers.
+    public const string LoadoutSlots = "loadout.slots";
 }
 
 /// <summary>Actor element type metadata field names — see element-hub-ssot.md §5.</summary>

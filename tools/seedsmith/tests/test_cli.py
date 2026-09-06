@@ -178,3 +178,53 @@ def test_species_alone_never_carries_a_pipeline_key():
     from seedsmith.report.cli import _selector_from_args
     selector = _selector_from_args(_selector_args(species="Peashooter"))
     assert "pipeline" not in selector
+
+
+# ---------------------------------------------------------------------------------------------
+# `seedsmith numerics rebalance` — the command tier-bands.v1.json's own `_meta.rebalance` line
+# has always named, and which did not exist until item-content T10 (affix-draw-coverage).
+# ---------------------------------------------------------------------------------------------
+
+def test_set_pairs_parse_the_meta_documented_key_grammar():
+    from seedsmith.report.cli import _parse_set_pairs
+    assert _parse_set_pairs(["channelWeight.might=0.85", "baseShare=0.036"]) == {
+        "channelWeight.might": 0.85, "baseShare": 0.036}
+
+
+def test_a_set_key_that_is_neither_baseshare_nor_a_channel_weight_is_refused():
+    from seedsmith.report.cli import _parse_set_pairs
+    import pytest
+    with pytest.raises(ValueError):
+        _parse_set_pairs(["opWeight.More=0.55"])
+    with pytest.raises(ValueError):
+        _parse_set_pairs(["channelWeight.might"])
+
+
+def test_rebalance_with_no_overrides_refuses_rather_than_publishing_a_noop(capsys):
+    assert main(["numerics", "rebalance"]) == EXIT_CANNOT_RUN
+    assert "refusing a no-op publish" in capsys.readouterr().out
+
+
+def test_rebalance_is_dry_by_default_and_reports_what_would_move(capsys):
+    assert main(["numerics", "rebalance", "--set", "channelWeight.might=0.85"]) == EXIT_CLEAN
+    out = capsys.readouterr().out
+    assert "~ might: 1000‰ -> 850‰" in out
+    assert "nothing written" in out
+
+
+def test_the_shipped_tuning_file_authors_a_weight_for_every_affix_family(capsys):
+    """T10's acceptance re-stated as a CLI-level check: a rebalance that adds nothing means the
+    shipped corpus is already fully weighted, so `FamilyExpansion` refuses none at its first
+    gate."""
+    import json
+    from seedsmith.numerics import TierBands
+    from seedsmith.numerics.tier_bands_io import TUNING_DIR
+
+    weighted = set(TierBands.load("latest").channel_weight_permille)
+    for path in sorted((TUNING_DIR.parent / "affix-families").glob("*.json")):
+        if path.name.startswith("_"):
+            continue
+        for entry in json.loads(path.read_text(encoding="utf-8"))["entries"]:
+            fid = entry["id"]
+            stem = fid[len("atom."):] if fid.startswith("atom.") else fid
+            assert stem in weighted, f"{fid} has no authored channelWeight — undrawable"

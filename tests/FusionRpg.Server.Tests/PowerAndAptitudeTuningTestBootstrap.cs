@@ -29,6 +29,10 @@ internal static class PowerAndAptitudeTuningTestBootstrap
         DerivedStatPolicy.Configure(DefaultDerivedStats);
         RungPolicy.Configure(DefaultRungs);
         AuraTuningHub.Configure(DefaultAura);
+        // item-content T1 (2026-09-06): the card route now composes a real item name, and
+        // `ItemNameComposer.RareNameThreshold` reads this hub. Latent until today for the same reason
+        // AuraTuningHub was — nothing in this assembly reached the read.
+        FusionRpg.Core.Items.ItemsTuningHub.Configure(DefaultItems);
         // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
         // own identical comment (tests/FusionRpg.Core.Tests/ContractTuningTestBootstrap.cs).
         DemonSpeciesCatalog.ConfigureFromCompiledDefault();
@@ -65,6 +69,11 @@ internal static class PowerAndAptitudeTuningTestBootstrap
     public static readonly AuraTuning DefaultAura = new(
         new Dictionary<int, long> { [7] = 5359, [8] = 7090, [9] = 9379, [10] = 12407 },
         MaxActiveAuras: 1);
+
+    // Matches data/tuning/items.v1.json exactly, the same way Core.Tests' own bootstrap does — the two
+    // values are unchanged from their prior ItemNameComposer/RoleFamilyTable consts (3, 5).
+    public static readonly FusionRpg.Core.Items.ItemsTuning DefaultItems = new(
+        SchemaVersion: 1, Version: 1, RareNameThreshold: 3, DefaultMaxTier: 5);
 
     public static readonly DerivedStatTuning DefaultDerivedStats = new(
         SchemaVersion: 2, Version: 2, CategoryResistCap: 0.95, TurnDefaultSpeed: 100);

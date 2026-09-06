@@ -28,9 +28,14 @@ public static class AutoEquip
     /// actions (spec §3: "candidates = held actions, skill kind only") — this method does not
     /// re-check kind or holding, the same division of responsibility <see cref="LoadoutSet"/> keeps
     /// between validation and the state it validates against. Ranks by power descending, ties break
-    /// on <c>action_id</c> ordinal, takes at most <see cref="LoadoutSet.MaxSize"/>.
+    /// on <c>action_id</c> ordinal, takes at most <see cref="LoadoutSet.EffectiveMaxSize"/>
+    /// (D4.25 — <paramref name="loadoutSlotsChannel"/> is the actor's composed
+    /// <see cref="FusionRpg.Core.Stats.Derived.DerivedStatChannels.LoadoutSlots"/> value, rounded to a
+    /// whole count at the caller's Data-layer boundary — see <see cref="LoadoutSet.EffectiveMaxSize"/>
+    /// for why this is `long`, not the channel's own composed `double`).
     /// </summary>
-    public static IReadOnlyList<string> Select(IReadOnlyList<AutoEquipCandidate> candidates, RungTable rungTable)
+    public static IReadOnlyList<string> Select(
+        IReadOnlyList<AutoEquipCandidate> candidates, RungTable rungTable, long loadoutSlotsChannel = 0)
     {
         if (candidates is null) throw new ArgumentNullException(nameof(candidates));
         if (rungTable is null) throw new ArgumentNullException(nameof(rungTable));
@@ -52,7 +57,7 @@ public static class AutoEquip
             return byPower != 0 ? byPower : string.CompareOrdinal(a.ActionId, b.ActionId);
         });
 
-        var take = Math.Min(LoadoutSet.MaxSize, scored.Length);
+        var take = Math.Min(LoadoutSet.EffectiveMaxSize(loadoutSlotsChannel), scored.Length);
         var result = new string[take];
         for (var i = 0; i < take; i++) result[i] = scored[i].ActionId;
         return result;

@@ -259,8 +259,8 @@ as §3.3 requires:
 | `late-crown` | **1 of 40** | defensive tier 1 |
 
 **Every shipped archetype has dead nodes, and they sit in the shallow tiers — the ones every new build
-buys first.** Across 39 shared trees that is on the order of a few hundred silently inert nodes before
-species trees are counted at all.
+buys first.** Across 42 shared trees (D51, 2026-09-06: was 39) that is on the order of a few hundred
+silently inert nodes before species trees are counted at all.
 
 The rounding error is bad too, on the surviving rows:
 
@@ -955,6 +955,33 @@ module does about an exclusion, which is nothing, and says so because the neighb
     corrected-away resolver-points model). DESIGN-GATE's own row wins over any spec, so
     amending it is an owner call, not a side effect of this spec.
 ```
+
+## Filed 2026-09-06 — a real gap between this spec and the shipped affix-family data
+
+Found while checking whether the passive-tree program is actually wired end to end: this spec's own
+§3.1 IN table (`affixIds[]` "from tree-language") was always correct, and the fix for the CLI never
+reading `tree-language`'s own `nodes/<treeId>.json` output landed the same day (`tools/TreeBinder
+/PlanReader.ReadPlanNodesWithSeed`). That fix surfaced a deeper, unresolved gap this spec does not
+yet answer:
+
+**`AffixComposer.Resolve` requires a real `AffixRow` keyed by the exact family id** (e.g.
+`"atom.might"`), referencing one or more `AtomRow`s (§1's own "an affix is a named bundle of atom
+refs"). **No such row exists anywhere in the committed seed data for the real, ~109-family affix
+vocabulary tree-language actually draws `affixIds[]` from.** The item program's own
+`FamilyExpandGen` (E43) emits `data/seed/atoms/generated/family-expand.<stem>.json`, but every entry
+there is a bare, PER-TIER `kind: "stat.modify"` atom row (`"Might T1"`..`"Might T10"`, each carrying
+its own item-context numeric band) — never a `kind: "affix"` wrapper at the bare family id this
+module's own `AffixComposer` needs. Running `FamilyExpandGen` for real (2026-09-06, safe, zero model
+cost) additionally found **only 9 of 109 real families have any authored balance pricing in
+`data/seed/items/_tuning/tier-bands.v1.json` at all** — 100 refuse with "no authored sharePermille."
+
+**Open question this spec does not answer, and should before either program builds anything more
+here:** does `AffixComposer` resolve a family id to ONE canonical shape (channel + op + kind),
+discarding the tier-specific numeric band entirely — consistent with this module's own architecture
+decision that magnitude comes from `budgetShareMilli`, never from an atom's own amount range — or
+does it need the binding NODE's own tier to select among the family's per-tier atom rows? Whichever
+answer, `tier-bands.v1.json`'s own 100-family pricing gap is the item program's balance surface, not
+a number to invent here.
 
 ## Related
 

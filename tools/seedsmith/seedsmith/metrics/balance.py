@@ -79,6 +79,7 @@ class OutOfEnvelope(Metric):
         point = _first_non_calibration_point(progression)
 
         findings = []
+        unresolvable: "list[str]" = []
         for channel in sorted(tuning.channel_weight_permille):
             for op in OpWeight:
                 for tier in range(1, TIER_COUNT + 1):
@@ -86,12 +87,32 @@ class OutOfEnvelope(Metric):
                         resolve(channel, op, tier, tuning, progression, point)
                     except (UnsharedChannelError, CalibrationLevelError):
                         continue  # not what this check is for
+                    except KeyError:
+                        # The tuning authors a share for a channel the PROGRESSION MODEL has no
+                        # reference base for. Since tier-bands v2 (item-content T10) that is the
+                        # normal case, not an error: the file now authors a weight for all 109
+                        # affix-family stems so `FamilyExpansion` stops refusing them, while
+                        # `adapters.items.channels` still only carries the 14 primary channels with
+                        # a transcribed `BattleRuleset` curve. Reported once per channel as
+                        # NOT_MEASURED -- this metric is about envelope violations, and a channel it
+                        # cannot resolve at all is a thing it did not measure, never a pass and never
+                        # a crash (spec-metrics.md's own third severity exists for exactly this).
+                        if channel not in unresolvable:
+                            unresolvable.append(channel)
+                        break
                     except AssertionError as e:
                         findings.append(Finding(
                             metric=self.id, severity=Severity.GAP,
                             subject=f"{channel}/{op.value}/t{tier}",
                             message=str(e),
                             evidence={"channel": channel, "op": op.value, "tier": tier}))
+
+        for channel in unresolvable:
+            findings.append(Finding(
+                metric=self.id, severity=Severity.NOT_MEASURED, subject=channel,
+                message=f"'{channel}' has an authored channelWeight but the progression model has "
+                        f"no reference base for it — envelope not checked",
+                evidence={"channel": channel}))
         return findings
 
 

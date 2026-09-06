@@ -10,9 +10,22 @@ import { DEV_SURFACES, DeveloperTree } from "./DeveloperTree";
 // bus mocking is needed here — this is a real smoke test of the tree shell around them.
 
 describe("DeveloperTree (T12)", () => {
-  it("declares exactly the nine surfaces T12 names", () => {
+  it("declares the developer surfaces including the scene-switch POC tab", () => {
     expect(DEV_SURFACES.map((s) => s.id).sort()).toEqual(
-      ["almanac-dump", "cheats", "icon-dump", "log", "pvz-activity", "runs", "sim", "stats", "status"].sort()
+      [
+        "almanac-dump",
+        // item-content module `atom-preview` (T9) — the container preview surface.
+        "atom-preview",
+        "cheats",
+        "icon-dump",
+        "log",
+        "phaser-scene-poc",
+        "pvz-activity",
+        "runs",
+        "sim",
+        "stats",
+        "status"
+      ].sort()
     );
   });
 

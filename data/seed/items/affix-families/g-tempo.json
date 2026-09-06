@@ -336,7 +336,17 @@
         "prefix": [
           {
             "band": "A",
-            "tierRange": "t1-t5",
+            "tierRange": "t1-t2",
+            "word": "Onslaught"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "Onslaught"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
             "word": "Onslaught"
           }
         ]
@@ -345,7 +355,7 @@
       "tags": [
         "offensive"
       ],
-      "notes": "NEW family, stem `tempo`, word `stampede`. The `More`-op rare sibling g.tempo was missing entirely — `bulwark` (`maxHp` More) and `savagery` (`atk` More) are each atom-family-library.md §3.1's \"rare tier band only\" family for their group, and g.tempo had no equivalent for its pressure channel. `powerBand: high` reflects the same rare-appearance, larger-single-pull judgement as those two siblings. `nameWords` carries a single Band-C-only word, following the exact pattern `bulwark` itself already shows in ssot-affixes.md §4.12's sample table (`— | — | Adamant`, i.e. bands A/B deliberately unpopulated for a family that only ever shows up at the top of the ladder)."
+      "notes": "NEW family, stem `tempo`, word `stampede`. The `More`-op rare sibling g.tempo was missing entirely — `bulwark` (`maxHp` More) and `savagery` (`atk` More) are each atom-family-library.md §3.1's \"rare tier band only\" family for their group, and g.tempo had no equivalent for its pressure channel. `powerBand: high` reflects the same rare-appearance, larger-single-pull judgement as those two siblings. `nameWords` carries a single Band-C-only word, following the exact pattern `bulwark` itself already shows in ssot-affixes.md §4.12's sample table (`— | — | Adamant`, i.e. bands A/B deliberately unpopulated for a family that only ever shows up at the top of the ladder). ⛔ 2026-09-06 (item-content T1): same fix as `bulwark` — the row was labelled `band: \"A\"` while declaring `tierRange: \"t1-t5\"`, and `AffixNameTable.Resolve` throws for any tier the label does not cover. The one authored word now sits under all three D29 bands."
     }
   ]
 }

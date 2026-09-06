@@ -654,7 +654,10 @@ export function adaptArmouryRow(dto: ArmouryRowDto): ArmouryRowView {
     locked: dto.locked,
     unseen: dto.unseen,
     stale: dto.stale,
-    acquiredUtc: dto.acquiredUtc
+    acquiredUtc: dto.acquiredUtc,
+    // item-content `granted-action-text` (T15). `?? false` covers a server older than the field
+    // rather than letting `undefined` reach a boolean slot — absent is "we do not know of one".
+    battleOnly: dto.battleOnly ?? false
   };
 }
 
@@ -802,12 +805,6 @@ const SOURCE_KIND_BY_WIRE: Record<string, SourceKind> = {
   UniqueVariance: "unique-variance"
 };
 
-/** `ArmouryCompare`'s own two labels. A channel it could not classify falls back to `null`'s group. */
-const DELTA_UNIT_BY_WIRE: Record<string, UnitClass> = {
-  "game-units": "gameUnits",
-  "per-mille": "perMilleRatio"
-};
-
 const DOMINANCE_BY_WIRE: Record<string, DominanceVerdict> = {
   StrictlyBetter: "strictly-better",
   StrictlyWorse: "strictly-worse",
@@ -818,10 +815,16 @@ const DOMINANCE_BY_WIRE: Record<string, DominanceVerdict> = {
 /**
  * A display key's last segment, shown where the key itself would be.
  *
- * ⚠ **A placement, never a translation.** `content/display/en.json` carries no row for
- * `base.*` / `class.*` / `rarity.*` / `item.compare.*` yet — a named wiring gap in the string corpus,
- * owned by the content side — so the honest thing to show is the key's own tail rather than an
- * invented English word. The same rule `ItemCard`'s `LineRow` already applies to a line's label.
+ * ⚠ **A placement, never a translation.** `content/display/en.json` still carries no row for
+ * `class.*` / `rarity.*` / `combo.*` / `item.compare.*` — a named wiring gap in the string corpus,
+ * owned by the content side — so for those the honest thing to show is the key's own tail rather than
+ * an invented English word. The same rule `ItemCard`'s `LineRow` already applies to a line's label.
+ *
+ * ⛔ **Flavour no longer comes through here** (item-content T6, 2026-09-06). The catalog now carries a
+ * real row for all 118 authored unique and set sentences, the server resolves it, and the card's
+ * flavour line arrives with the finished sentence in `__rendered` — see `adaptItemCard`. A key with no
+ * catalog row renders no flavour at all, which is the honest answer; `keyTail` on a flavour key would
+ * turn `flavor.unique.carrion-spitter` into "carrion spitter" and call it prose.
  */
 function keyTail(key: string | undefined): string {
   if (!key) return "";
@@ -930,7 +933,12 @@ export function adaptItemCard(dto: ItemCardDto, combinations: CombinationView[] 
   const header = blockLines(dto, CARD_BLOCK.header)[0]?.args ?? {};
   const enhancement = blockLines(dto, CARD_BLOCK.enhancement)[0];
   const footer = blockLines(dto, CARD_BLOCK.footer)[0]?.args ?? {};
-  const flavour = blockLines(dto, CARD_BLOCK.flavour)[0];
+  // Block 10 can carry a unique's line and a set's (a unique may not be a set member, so in practice
+  // one). Only lines the string catalog actually resolved are shown — a key with no row contributes
+  // nothing rather than its own tail dressed up as a sentence.
+  const flavour = blockLines(dto, CARD_BLOCK.flavour)
+    .map((l) => l.args.__rendered)
+    .filter((s): s is string => typeof s === "string" && s.length > 0);
 
   const view: ContainerView = {
     instanceId: dto.instanceId,
@@ -967,13 +975,17 @@ export function adaptItemCard(dto: ItemCardDto, combinations: CombinationView[] 
   if (header.ilvl) view.header.itemLevel = Number(header.ilvl);
   // Absent at +0 rather than present as "+0": a zero enhancement is not a thing the item has.
   if (header.enhance) view.header.enhancementPrefix = header.enhance + " ";
-  if (flavour) view.flavour = keyTail(flavour.args.flavourKey);
+  if (flavour.length > 0) view.flavour = flavour.join("\n\n");
 
   return view;
 }
 
 function adaptChannelDelta(dto: ChannelDeltaDto): ChannelDeltaView {
-  const unit = DELTA_UNIT_BY_WIRE[dto.unit] ?? "gameUnits";
+  // ONE unit vocabulary, shared with the group header above. Until 2026-09-06 the delta carried a
+  // second one of its own (`game-units` / `per-mille`, derived server-side from the atom's OP) and
+  // could disagree with the group it sat in — `maxHp` arrived as `per-mille` inside a `GameUnits`
+  // header. The server now labels the CHANNEL, which is the unit ledger's own rule.
+  const unit = dto.unit ? UNIT_CLASS_BY_WIRE[dto.unit] ?? "gameUnits" : "gameUnits";
   // `more` is the per-mille reading for a value that is already a delta from zero — a stat
   // modifier's own "+400‰ more". `flat` would render a proportion as if it were an absolute.
   const op = unit === "perMilleRatio" ? ("more" as const) : undefined;

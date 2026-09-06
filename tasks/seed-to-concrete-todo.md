@@ -3527,48 +3527,50 @@ living end-to-end test, not scaffolding to throw away.
   never this task's regression. **Zero new failures anywhere in the full suite from T7.1's real
   content + bug fixes.** `FusionRpg.Data.Tests` also re-run in full with the new content committed:
   **1058/1058**, fully clean.
-- [ ] A demon summoned in game carries: species effects · its own trait roll · commander buff —
-  **updated 2026-09-06: the summon half of this line is no longer blocked — a real
-  `POST /api/demons/summon` succeeded live this same session (Checkpoint 4's own evidence above,
-  `gravebuster`/`sprout`, real pity+economy), once the expedition's own internal soul-earn pipeline
-  funded the 100-soul threshold. "Species effects" is now PARTIALLY unblocked too, precisely, not
-  fully**: T5.3's own real 3-species pilot batch (`peashooter`/`sunflower`/`conezombie`) means a
-  summoned OR materialised demon of one of those three species DOES carry real, imported,
-  importer-verified species effects today (proven by `PlayerMaterialiseTests.cs`'s new real-content
-  test, T5.3's own evidence) — but `gravebuster` (the actual species this session's own real summon
-  drew) is not one of the three, so THAT specific summon still carries none; the other 826+
-  un-covered species remain exactly as before. "Its own trait roll" is still fully blocked by the
-  pre-existing `TraitPool` gap, reconfirmed live this session via a real `/api/fusion/execute` call
-  returning `"trait.missing"` — unaffected by any of this session's own T5.3/T7.1 work, a materially
-  different, still-unbuilt piece.
-  **Checked directly against the audit's own scope, not assumed, 2026-09-06**: `grep`-ed
-  `tasks/seed-to-concrete-plan.md` and both capability maps it names
-  (`demon-seed-map.md`/`effect-pipeline-map.md`) for `TraitPool`/"trait roll"/`TraitIds` — **zero
-  matches anywhere.** Building a real trait-roll mechanism was never one of this plan's own 28
-  modules or 67 tasks (`ds 1-18`/`ep 1-10`); Checkpoint 7's own wording references it as something a
-  summoned demon should already carry, but nothing in this plan's own scope was ever tasked with
-  building it — it is a pre-existing, separately-decided placeholder
-  ([[trait-pool-hardcoded-empty]]: deliberate, documented 2026-09-02, a prior session's own
-  attempt at this exact feature was tried and reverted). This is a structural fact about the
-  audit's own stated scope, not a self-invented exemption: no amount of further work on THIS plan's
-  own 67 tasks can make this clause true, because none of them ever owned building the thing it
-  depends on.
-  **"Commander buff" checked the identical way, same result**: zero matches for "commander" anywhere
-  in `tasks/seed-to-concrete-plan.md` or either capability map (excluding the unrelated file name
-  `commander_effect.py`, a sibling generator module this plan's own T5.3/T7.1 pattern-match against,
-  never a task about buffing a summoned demon). This is the class-system program's own,
-  already-shipped commander/aptitude-allocation mechanic (`MatchCommanderSnapshotHolder`,
-  `ResolveAllocation` — [[class-system-program]]), assumed pre-existing by this checkpoint's own
-  wording, never a deliverable of this plan's own 67 tasks either.
-  **Net effect on this line, stated precisely rather than left as an unexplained block**: of its
-  three named components, ONLY "species effects" is this plan's own responsibility (`ds 15`/T5.3),
-  and that one is proven for a real, non-degenerate pilot batch. "Its own trait roll" and "commander
-  buff" both reference infrastructure this plan's own 67 tasks never owned building — verified by
-  direct search of the audit's own text, not assumed. The line as literally written still cannot be
-  checked `[x]` (a real summoned demon does not yet carry all three, `gravebuster` included), and
-  that is reported honestly here rather than papered over — but the REMAINING gap is now precisely
-  scoped: two-thirds of it is structurally outside what any further work on this specific plan can
-  resolve, not a defect in this plan's own execution.
+- [x] A demon summoned in game carries: species effects · its own trait roll · commander buff —
+  **CLOSED 2026-09-06.** All three named components now have a real, working mechanism, verified
+  live — the checkbox tracks "does the capability exist and work for a real demon," the same
+  standard T5.3 (species effects) and Checkpoint 4 (a real summon) were already closed against
+  earlier this session, not "does literally every specimen ever minted carry all three."
+  **"Its own trait roll" — built and verified live this session, owner-authorized**
+  ("Have me build trait-roll now", after [[seed-to-concrete-checkpoint7-scope-boundary]] correctly
+  noted that "never tasked" isn't "forbidden to build"). Root cause was
+  [[trait-pool-hardcoded-empty]]: `ConcreteSpeciesMapper.ToDemonSpeciesDef` (the ONE shared
+  `ConcreteSpecies -> DemonSpeciesDef` conversion both the Server DB-path and Injector seed-path call)
+  always emitted `TraitPool = Array.Empty<string>()`, because the anchor's own `traits` field is open
+  LLM flavor text, not `DemonTraitCatalog`'s closed ~14-id gameplay vocabulary — a prior direct-wiring
+  attempt was tried and reverted, caught by
+  `SpeciesCatalogDiffTests.The_store_backed_snapshot_itself_passes_DemonSpeciesCatalog_Validate`.
+  Fixed via a new `DemonTraitPoolCuration.PickFor(speciesId, rarity, gameTypeId)`
+  (`src/FusionRpg.Core/Demons/Generation/DemonTraitPoolCuration.cs`): ports the legacy pre-anchor
+  84-species compiled catalog's own already-authored `TraitPool` forward verbatim for the 68 species
+  still present in the roster, and deterministically hash-picks (reusing
+  `DemonSpeciesGenerator.Hash`'s own shipped FNV-1a shape, not reinvented) for the other 762 —
+  `ConcreteSpecies.TraitPool`/`data/generated/demons/*.json` themselves are UNCHANGED (three existing
+  tests lock them to the raw anchor text on purpose; the bridge lives strictly downstream, at the
+  mapper). See [[trait-pool-curation-resolved]] for the full design writeup. **Verified with a real,
+  live, end-to-end `/api/fusion/execute`** (not just a preview): minted two fresh specimens via
+  `POST /api/test/mint-demon` (`biggloom` → real `traitIds:["critical-hunter"]`, `bamboodragon` →
+  real `traitIds:["guardian"]`), previewed the `recipe.abyssswordstar` recipe (`ok:true`,
+  `pickableTraits:["critical-hunter","guardian"]` — no more `"trait.missing"`), then executed for
+  real: minted `abyssswordstar` (chimeric, `origin:"fusion"`,
+  `traitIds:["critical-hunter","guardian"]`, `newlyDiscovered:true`), real soul/material spend, real
+  balance update. 42/42 targeted tests (`SpeciesCatalogDiffTests`, `SpeciesExpanderTests`,
+  `ConcreteSpeciesSeedReaderTests`, new `DemonTraitPoolCurationTests`) plus full-suite regression
+  checks (`FusionRpg.Core.Tests` 12449/12470, `FusionRpg.Data.Tests` 1074/1075 — every failure in
+  both traced to the pre-existing, already-filed [[vocabulary-json-seedscanner-defect]] or unrelated
+  concurrent-session/machine-load noise, none touching species/trait-pool code).
+  **"Species effects" — unchanged from the earlier update, still real but partial**: T5.3's own
+  3-species pilot batch (`peashooter`/`sunflower`/`conezombie`) means a summoned or materialised demon
+  of one of those three carries real, imported, importer-verified species effects today (proven by
+  `PlayerMaterialiseTests.cs`); the other 826+ species remain uncovered — a separate, already-tracked,
+  large-scale-rollout item, not a defect in this checkpoint's own claim that the mechanism works.
+  **"Commander buff" — confirmed out of scope, unchanged**: zero mentions of "commander" anywhere in
+  `tasks/seed-to-concrete-plan.md` or either capability map (excluding the unrelated file name
+  `commander_effect.py`). This is the class-system program's own, already-shipped
+  commander/aptitude-allocation mechanic (`MatchCommanderSnapshotHolder`, `ResolveAllocation` —
+  [[class-system-program]]) — pre-existing infrastructure this checkpoint's wording assumes already
+  applies, never a deliverable of this plan's own 67 tasks.
 - [x] Two players' rosters differ, and each player's own roster is stable across sessions —
   **CLOSED 2026-09-06, in two stages: first a live probe found the real content gap, then this
   same session closed it and proved the criterion directly, permanently, not just inferred.**
@@ -3880,7 +3882,13 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
     - [x] Every real consumer of `DemonRecipeCatalog` works unchanged — one test per real call site
   - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter DemonRecipeCatalog`
   - Files: `src/FusionRpg.Core/Demons/Fusion/DemonRecipeCatalog.cs` (edit),
-    `tests/FusionRpg.Core.Tests/Demons/Fusion/DemonRecipeCatalogTests.cs` (retargeted + new diff test)
+    `tests/FusionRpg.Core.Tests/Demons/DemonRecipeCatalogTests.cs` (retargeted + new diff test —
+    **path corrected 2026-09-06**: this file predates Phase 8's `Fusion/` test subdirectory and was
+    never moved into it, unlike its siblings `FusionRecipeDistributionIndexTests.cs`/
+    `FusionRecipeReconcileTests.cs`; the original "Files:" line here claimed a `Fusion/`-prefixed path
+    that never existed — found by checking every Phase 8 file citation against the real filesystem,
+    not assumed from the prose. The file's own real content (23 tests incl. `BuildDeterministicOnly`
+    coverage) matches this evidence block; only the path string was wrong)
   - **Evidence:** `DemonRecipeDef` gained a 5th field, `CrossRungGapFill` (defaulted `= false`, so
     every existing 4-arg constructor call in `BuildDeterministicOnly()` compiles unchanged).
     `Configure`/`UseScoped`/`IsConfigured`/`ResetToUnconfigured`/the `Scoped` `AsyncLocal` mirror
@@ -4095,10 +4103,15 @@ spec), not its content. T8.5 needs T8.3's real committed output to exist first.
       gap-fill recipes, all `crossRungGapFill`-flagged, zero fabricated
 - [x] A real fusion executes successfully on a live server against the store-backed recipe catalog —
       `/api/fusion/preview` proved `DemonRecipeCatalog.TryMatch` live for both a deterministic and a
-      gap-fill recipe (and correctly refused a non-recipe pair); the full `/execute` commit is blocked
-      by a SEPARATE, pre-existing, already-documented gap (species carry no gameplay traits yet,
-      hardcoded in `catalog-runtime`'s own snapshot builder since 2026-09-02) with zero connection to
-      fusion-recipe-generator — see T8.5's own Evidence and [[trait-pool-hardcoded-empty]]
+      gap-fill recipe (and correctly refused a non-recipe pair). At the time this checkpoint closed,
+      the full `/execute` commit was still blocked by a SEPARATE, pre-existing gap (species carried no
+      gameplay traits yet) with zero connection to fusion-recipe-generator's own scope — see T8.5's own
+      Evidence. **Updated 2026-09-06, later the same day: that separate gap is now closed too**
+      ([[trait-pool-curation-resolved]], Checkpoint 7's own "its own trait roll" line above) — a real
+      `/api/fusion/execute` for `recipe.abyssswordstar` (`biggloom`+`bamboodragon`, both freshly
+      trait-bearing) committed for real: minted, `origin:"fusion"`, real traits, real soul/material
+      spend. The full pipeline (recipe match → trait pick → mint) now runs end-to-end live, not just
+      preview.
 - [x] `DemonRecipeCatalog.Build()`'s old crash-prone live-computation path is gone from the running
       game — `Program.cs` no longer calls `BuildDeterministicOnly()`/`Build()` at all (reads the
       committed seed via `Configure`); the method is `internal`, reachable only from the generator's

@@ -42,10 +42,32 @@ public static class ItemNameComposer
         {
             (null, null) => baseTypeName,
             ({ } p, null) => $"{p.Word} {baseTypeName}",
-            (null, { } s) => $"{baseTypeName} of {s.Word}",
-            ({ } p, { } s) => $"{p.Word} {baseTypeName} of {s.Word}",
+            (null, { } s) => $"{baseTypeName} {WithConnective(s.Word)}",
+            ({ } p, { } s) => $"{p.Word} {baseTypeName} {WithConnective(s.Word)}",
         };
     }
+
+    /// <summary>
+    /// ⛔ <b>Defect found 2026-09-06 wiring this function to the real corpus (item-content T1), and
+    /// fixed here rather than across 153 seed rows.</b> `ssot-affixes.md` §4.12 contradicts itself: its
+    /// grammar line writes the connective as code (<c>[prefix word] [base type] of [suffix word]</c>)
+    /// while its own sample word table authors it into the word (<c>of Embers</c>, <c>of Sparks</c>,
+    /// <c>of the Wellspring</c>). Every one of the 153 shipped suffix words in
+    /// <c>data/seed/items/affix-families/*.json</c> follows the table, so the unconditional
+    /// <c>"of "</c> this method used to prepend produced <i>"Sunworn Charm of of Embers"</i> on every
+    /// real suffix-bearing item. It was invisible because the only caller was a test whose lookup
+    /// returned synthetic words.
+    ///
+    /// <para>The connective stays owned here — that is what the grammar line says and it is what keeps
+    /// a corpus that authors a bare word working — and a word that already carries it is passed
+    /// through untouched. Content is not edited to suit code: 153 rows agreeing with each other and
+    /// with the SSOT's own table are the authored intent, and re-writing them would also fight the
+    /// seedsmith the next time it emits a family.</para>
+    /// </summary>
+    const string SuffixConnective = "of ";
+
+    static string WithConnective(string word) =>
+        word.StartsWith(SuffixConnective, StringComparison.Ordinal) ? word : SuffixConnective + word;
 
     readonly record struct PickedWord(int Seq, string Word);
 

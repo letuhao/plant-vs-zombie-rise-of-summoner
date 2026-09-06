@@ -273,6 +273,17 @@ public sealed class DerivedStatRegistry
         Register(new(DerivedStatChannels.ProgressionBreakthroughSuccess, DerivedComposeKind.SumIncreased, 0,
                      DerivedStatPolicy.BreakthroughSuccessCap, Class: StatClass.Pool,
                      UnitClassNote: "No reader: the breakthrough roll/grant mechanism this probability would drive is unbuilt."));
+
+        // H.8 -- loadout.slots (D4.25, spec-unique-pipeline.md §4). Pool (Q4, same reasoning as
+        // resource/movement above): the actor's own equipped-slot capacity, no attacker-side
+        // counterpart. Count unit (StatClass.cs): a discrete slot count, not a magnitude. FlatSum,
+        // uncapped composition -- composing two +1 grants must sum to a faithful 2, not saturate at 1,
+        // or a reader wanting the raw worn count (e.g. a UI badge counting extend-slot items) would
+        // have no way to recover it. The three readers (LoadoutSet.EffectiveMaxSize, called from
+        // LoadoutSet.Validate, AutoEquip.Select and CapPolicy.EquippedSkillCap) apply the "one at a
+        // time" rule (channel > 0 ? 1 : 0) AT THE READ, never here.
+        Register(new(DerivedStatChannels.LoadoutSlots, DerivedComposeKind.FlatSum, 0,
+                     Class: StatClass.Pool, Unit: UnitClass.Count));
     }
 
     void RegisterCombatDefaults()

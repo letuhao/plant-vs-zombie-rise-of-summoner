@@ -70,7 +70,8 @@ public class ElementHubDocDriftTests
         // 261 -> 267 (action-corpus Phase 0.8, 2026-09-02): `combat.heal.power` generalised into
         // `resource.restore.{resource}` — +6 members over ResourceIds, and the old id stays registered as a
         // retirement shim so the archived aptitudes.v1/v2/v3.json remain loadable (net +6).
-        Assert.Equal(267, registry.AllRegistered.Count);
+        // 267 -> 268 (party-dungeon D4.25, 2026-09-06): `loadout.slots`, the extend-action-slot grant.
+        Assert.Equal(268, registry.AllRegistered.Count);
     }
 
     [Fact]

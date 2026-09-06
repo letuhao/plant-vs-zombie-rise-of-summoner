@@ -187,7 +187,11 @@ public static class EffectOwnerKey
 
 public static class EffectOverlayMerge
 {
-    static readonly Dictionary<string, HashSet<string>> AllowedByAction = new(StringComparer.OrdinalIgnoreCase)
+    /// <summary>Internal (widened 2026-09-06, `EffectActionsAllowlistGuardTests`) so a guard test can
+    /// assert this covers every `EffectActions` constant — the fifth time a new opcode shipped without
+    /// an entry here (see this field's own trailing comments for the first four, `PlaceStructure` most
+    /// recently).</summary>
+    internal static readonly Dictionary<string, HashSet<string>> AllowedByAction = new(StringComparer.OrdinalIgnoreCase)
     {
         [EffectActions.ModifyStat] = new(StringComparer.OrdinalIgnoreCase)
             { "channel", "flat", "increased", "more", "byChannel", "chance", "icd_ms", "max_stacks", "filters" },
@@ -262,7 +266,18 @@ public static class EffectOverlayMerge
         [EffectActions.WaveControl] = new(StringComparer.OrdinalIgnoreCase)
             { "op", "wave", "timerMs", "enabled", "chance", "icd_ms", "max_stacks", "filters" },
         [EffectActions.BulletModify] = new(StringComparer.OrdinalIgnoreCase)
-            { "op", "amount", "bulletType", "moveWay", "chance", "icd_ms", "max_stacks", "filters" }
+            { "op", "amount", "bulletType", "moveWay", "chance", "icd_ms", "max_stacks", "filters" },
+        // base-defense `siege-construction` 15.3b (2026-09-06): structure.place -> PlaceStructure. The
+        // FIFTH time this exact class of bug has bitten (ModifyMatch/WaveControl/BulletModify's own
+        // comment above already documents the first three; Compilability.OpcodeKinds' own comment,
+        // fixed the same day as this entry, documents a fourth, separate list with the identical shape)
+        // — EffectBag.Grant calls TryValidateOverlayForDef UNCONDITIONALLY for every grant, so a
+        // structure.place effect would throw "unknown action PlaceStructure" the instant anything ever
+        // actually granted it, regardless of overlay content. Found by a real, failing end-to-end test
+        // (ConstructionActionsTests), not by inspection. Keys mirror structureId/instant exactly
+        // (ToOpcodeShape only rewrites stat.modify/stat.derived, so both travel unchanged).
+        [EffectActions.PlaceStructure] = new(StringComparer.OrdinalIgnoreCase)
+            { "structureId", "instant", "chance", "icd_ms", "max_stacks", "filters" },
     };
 
     public static bool TryValidateOverlayForDef(

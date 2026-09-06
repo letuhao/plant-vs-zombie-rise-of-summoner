@@ -11,7 +11,8 @@
 
 ## Objective
 
-Make a 35,160-node catalog reviewable by one person, and make the second pass cost `O(diff)`.
+Make a 35,280-node catalog (D51, 2026-09-06: 24 statuses, not 21 — was 35,160) reviewable by one
+person, and make the second pass cost `O(diff)`.
 
 D24 makes review a **shipping requirement**: the catalog is what ships, so *"reviewed, then
 committed"* is the contract, not a nicety. The honest baseline is that the last corpus of this shape
@@ -35,10 +36,10 @@ to actually have is only visible between trees (§3.3).
 |---|---:|---:|---:|
 | Aptitudes | 12 | 40 | 480 |
 | Elements | 6 | 40 | 240 |
-| Statuses | 21 | 40 | 840 |
-| **Shared subtotal** | **39** | | **1,560** |
+| Statuses | 24 (D51, 2026-09-06: was 21) | 40 | 960 |
+| **Shared subtotal** | **42** | | **1,680** |
 | Demon species | **840** | 40 | **33,600** |
-| **Total** | **879** | | **35,160** |
+| **Total** | **882** | | **35,280** |
 
 **FACT, counted 2026-09-05.** `data/seed/demons/species/` holds **840** anchor entries across **502**
 non-`_` files, **840** distinct species ids, and `_index.json` carries **840** keys. Species tree size
@@ -46,8 +47,9 @@ is 40, not 29: D30 as amended defers to D10's one-shape rule and D29's 10 tiers 
 (`passive-tree-ideal.md:62`).
 
 ⚠ **The ideal's headline figure is 35,200 and its §9 skew table is over 841.** Both were computed
-with the stale duplicate included. The verified corpus is **35,160 nodes over 879 trees**, and §9's
-table shifts by two cells at 840: `dark` is **70**, not 71, and `unresolved` is **11**, not 12 —
+with the stale duplicate included. The verified corpus (before D51's separate 2026-09-06 status-count
+growth) was **35,160 nodes over 879 trees** — now **35,280 nodes over 882 trees** (D51: 24 statuses,
+not 21). §9's table shifts by two cells at 840: `dark` is **70**, not 71, and `unresolved` is **11**, not 12 —
 because the stale copy is the extra `dark` and the indexed `SnorkleZombie` is one of the eleven
 unresolved. Onslaught 332 (39.5%) against Ferocity 2 (0.24%) is unchanged, and so is the **166×**
 ratio D17 and D32 are aimed at. The difference is not material to any decision; it is recorded
@@ -79,8 +81,8 @@ Three levers, and the second is worth more than the other two combined.
 
 | Line | Hours | Basis |
 |---|---:|---|
-| Tree census, 879 cards @ 90 s | **22.0** | §5's card; 14.7 h at 60 s, 44.0 h at 3 min. **All 879 — the 39 shared trees included**, ~58 min of the total (closed question 4) |
-| Tier 1 census — exclusion nodes, ~1,055 @ 30 s | **8.8** | 30‰ of 35,160, the `exclusionRate` cap |
+| Tree census, 882 cards @ 90 s | **22.1** | §5's card; 14.7 h at 60 s, 44.1 h at 3 min (D51, 2026-09-06: 24 statuses, not 21 — was 879/22.0/14.7/44.0). **All 882 — the 42 shared trees included**, ~63 min of the total (closed question 4) |
+| Tier 1 census — exclusion nodes, ~1,058 @ 30 s | **8.8** | 30‰ of 35,280, the `exclusionRate` cap |
 | Tier 2 — 60 tree cards @ 90 s | **1.5** | §3 |
 | Tier 3 — 200 nodes @ 30 s | **1.7** | §3 |
 | **One full pass** | **≈ 34** | |
@@ -92,6 +94,20 @@ its first run completed — `attackTempo` (entropy 0.00), `rarity` (59‰ unreso
 rewritten, `:355-370`). So the realistic human cost of the first catalog is **≈ 78–117 hours**,
 front-loaded, and steady state after that is `O(diff)` (§6).
 
+**Extended 2026-09-06 — a real, measured GENERATION-side rate, kept clearly distinct from this
+section's own HUMAN-reviewer-rejection rate above (they answer different questions and should never
+be conflated).** `tree-language`'s own real runs across the first 12 primary trees show first-pass
+machine accept rates of 57.5%–97.5% (spec-species-tree.md §7.1 has the full figures and the
+`--workers` caution). What that means for THIS module's own census, concretely: by the time a tree
+reaches tree-review, it will typically carry a small residual of genuinely UNRESOLVED (vote-tie) and
+BLOCKED (model-declined) subjects that several real `--write` passes did not close — these are real,
+legitimate content the census's own Tier 1 population (exclusion nodes, escalated, unresolved votes,
+review-flagged) already exists to adjudicate (§3.1), not a sign the generation run should be re-run
+indefinitely. **This does not change the 34-hour-per-pass estimate above** (that figure is about how
+long a HUMAN spends per tree/node once content exists, not about how many machine passes produced
+it) — it is a heads-up that the Tier 1 unresolved-vote population this section already budgets for
+will not be a rare edge case in practice; expect it on most real trees.
+
 ### 2. What is claimed, and what is not
 
 Sampling supports a claim about a **population**, at a **confidence**. Naming the population is the
@@ -99,13 +115,13 @@ step that gets skipped, so it goes first.
 
 | Design | Population | The claim it supports | The claim it does **NOT** support |
 |---|---|---|---|
-| **A. Node sample** | 35,160 nodes | *"the corpus-wide reviewer-rejection rate is p ± e"* | anything about any particular tree |
-| **B. Tree cluster sample** | 879 trees | *"at most X% of trees carry a rejectable defect"* | anything about a **named** tree |
-| **C. Tree census** | 879 trees | *"every tree was looked at by a person"* | that every **node** was read |
+| **A. Node sample** | 35,280 nodes (D51: was 35,160) | *"the corpus-wide reviewer-rejection rate is p ± e"* | anything about any particular tree |
+| **B. Tree cluster sample** | 882 trees (D51: was 879) | *"at most X% of trees carry a rejectable defect"* | anything about a **named** tree |
+| **C. Tree census** | 882 trees (D51: was 879) | *"every tree was looked at by a person"* | that every **node** was read |
 
 **D30's value is per-species recognition, and recognition does not pool.** *"It does not need to be
 distinguishable from 903 others; it needs to feel like that demon"*
-(`03-llm-stage-contract.md:973`). No sample of 60 trees certifies 879 identities. So A and B are
+(`03-llm-stage-contract.md:973`). No sample of 60 trees certifies 882 identities. So A and B are
 quality-control instruments **for the generator** — they tell you whether to *start* the census — and
 **C is the only design that discharges D24 for a species catalog.**
 
@@ -131,6 +147,9 @@ p = 0.5 (the worst case). **Acceptance sampling — what a clean sample proves:*
 **Rate estimation — what a sample measures**, ±5% at 95%: **384** for an infinite population,
 **381** at N = 35,160 nodes, **268** at N = 879 trees. The finite-population correction is negligible
 at node scale and material at tree scale, which is itself an argument for the tree as the unit.
+Recomputed against D51's grown corpus (2026-09-06: N = 35,280 nodes, N = 882 trees) — **both figures
+are unchanged, 381 and 268**; the growth (+120 nodes, +3 trees) is too small to move either
+ceiling-rounded sample size.
 
 #### 3.2 The three tiers
 
@@ -225,7 +244,7 @@ construction, and *consequential* balance by simulation over a corpus of exactly
 | Property | What the machine gets | What it misses |
 |---|---|---|
 | **Motif / theme adherence** | token presence, anti-motif tokens, the **Brief conformance** gate | A node that uses every motif word and means none of them |
-| **Diversity** | normalized Shannon entropy per vocabulary | Entropy is high when 879 trees use all 12 aptitudes evenly **and are all one tree wearing 12 hats** |
+| **Diversity** | normalized Shannon entropy per vocabulary | Entropy is high when 882 trees (D51: was 879) use all 12 aptitudes evenly **and are all one tree wearing 12 hats** |
 | **Mechanism floor** | is `nodeClass` `mechanism` at deep tiers — **`PassiveTree/MechanismFloor`** | Whether the mechanism *does* anything. `nodeClass` is a plan-side label, so the gate checks the plan against itself. **The behavioural half REPORTS — see below** |
 | **Near-duplication** | lexical Jaccard over 5-gram shingles — **`PassiveTree/NearDuplicate`** | **Semantic** sameness. `metrics/dedup.py:12-17` states this as a deliberate documented gap — conceptual clustering ships only once `axis` reaches the adjective entries |
 
@@ -263,7 +282,7 @@ properties, and where each is paid for:
 | **H2** | **Flavour quality** — is the line worth reading? | Ruled OPEN-loop in code | 2 |
 | **H3** | **Is a mechanism node interesting?** | **Decomposes, and half is machine-checkable.** *"Does it change anything measurable"* → simulate in `CombatSim` and read the win-share delta. *"Is it legible and worth building toward"* → human | sim + tiers 1–2 |
 | **H4** | **Species recognition** — does this tree read as *that* demon? | The point of D23/D30, with no referent but the lore | **census** |
-| **H5** | **Corpus-scale sameness** — are 879 trees secretly one tree? | Lexical dedup catches copies; this failure is 879 *different* sentences expressing one idea | tier 2 + the corpus sheet |
+| **H5** | **Corpus-scale sameness** — are 882 trees (D51: was 879) secretly one tree? | Lexical dedup catches copies; this failure is 882 *different* sentences expressing one idea | tier 2 + the corpus sheet |
 
 **H5 is the failure this corpus is most likely to have, and the one no per-node review can ever
 see.** A reviewer reading node 4,112 in isolation has no way to notice it is the 400th variation on
@@ -402,7 +421,7 @@ sheet — which is the failure that actually happens.
 hand-rolled rendering on an authored grid. A review surface must be *generated, diffable and
 regenerable*; an editor is a second source of truth for content that is supposed to come from a plan.
 
-**Per-tree cards are regenerated, not committed.** 879 HTML files would dominate every diff while
+**Per-tree cards are regenerated, not committed.** 882 HTML files (D51: was 879) would dominate every diff while
 carrying no information their inputs do not already carry. **The corpus sheet and the verdict queue
 are committed** — the sheet because its per-lot diff is the review's own history, the queue because it
 is not derivable from anything. This is a deliberate narrowing of doc 13 §6's *"checked in beside
@@ -547,7 +566,7 @@ next to.**
 `skill.<treeId>-<branch>-t<tier>-<nodeKey>`, with a content hash and a positional ordinal both
 refused. That is not a nicety for build guides — **it is the single decision that makes a second
 review pass possible at all.** With stable ids, re-review is `O(diff)`. With content-hash ids, every
-rebalance is a full 35,160-node re-review: 293 hours, i.e. never.
+rebalance is a full 35,280-node re-review (D51: was 35,160): 294 hours, i.e. never.
 
 | Change | What re-review costs | Why |
 |---|---|---|
@@ -690,7 +709,7 @@ class HiddenFileCountMetric(Metric):
 | `a_magnitude_retune_produces_an_empty_review_diff` | §8's headline property |
 | `a_renamed_node_id_produces_a_full_tree_diff` | the id-stability dependency, proven not assumed |
 | `the_card_renders_every_effect_through_formatMagnitude` | no raw channel id reaches the card |
-| `the_card_fits_a_fixed_two_by_ten_lattice_for_every_tree` | one card shape, all 879 |
+| `the_card_fits_a_fixed_two_by_ten_lattice_for_every_tree` | one card shape, all 882 (D51: was 879) |
 | `the_sibling_panel_names_three_distinct_trees` | never the tree itself, never a duplicate |
 | `a_verdict_writes_a_machine_readable_row` | rule 6 — a review that produces no artifact did not happen |
 | `hidden_file_count_reports_the_number_of_files_it_visited` | §7 — a green with `visitedFileCount` 0 is a walk that looked at nothing |
@@ -701,7 +720,7 @@ class HiddenFileCountMetric(Metric):
 | `a_loser_marked_unlocked_rather_than_inert_denies_the_lot_a_pass` | §6.4 rule 2 (c) — the catalog must let `tree-surface` render a trait the player still owns |
 | `a_well_presented_nullification_ships` | D40, stated as a test so the withdrawn rule cannot creep back: a nullification that satisfies (a)–(c) is censused, reported and **passes** |
 | `the_deep_mechanism_value_metric_never_gates` | §4.2 — a below-threshold behavioural sample files a finding; only the ladder stops a lot |
-| `the_shared_corpus_lot_requires_a_completed_census` | closed question 4 — 39 trees, same protocol, its own sheet and verdict queue |
+| `the_shared_corpus_lot_requires_a_completed_census` | closed question 4 — 42 trees (D51: 24 statuses, not 21), same protocol, its own sheet and verdict queue |
 
 Fixtures are synthetic lots with a deliberately injected defect — a duplicated name across 300 trees,
 an empty tier, an exclusion pair whose two sides name different winners, a parked `_` entry.
@@ -759,8 +778,9 @@ property the machine already closes completely.
       the rule, both name the same winner, and the loser is marked **inert** rather than un-unlocked
       (§6.4 rule 2, D40). A `nullification` that satisfies it ships; one that does not denies the lot
       a pass.
-- [ ] The 39 shared trees complete a census as their own lot, with their own corpus sheet and
-      `sheetRead` row — about **58 minutes** at 90 s a card (closed question 4).
+- [ ] The 42 shared trees (D51, 2026-09-06: 24 statuses, not 21) complete a census as their own lot,
+      with their own corpus sheet and `sheetRead` row — about **63 minutes** at 90 s a card (closed
+      question 4).
 
 ## Open questions
 
@@ -779,14 +799,16 @@ is a task — neither is listed here. The fourth was answerable and is answered 
 ### Closed 2026-09-05
 
 4. ~~**Does the shared corpus get a census too, or only the species lots?**~~ **Closed: yes, it gets a
-   census.** 39 trees × 90 s is **58 minutes** — and this spec was already pricing it, since §1.3's
-   census line is *879* cards, not 840. The argument settles itself on cost: **an hour is cheaper
-   than the argument about whether an hour is worth it.** What that hour buys is not marginal either
-   — the shared corpus is the whole learnable vocabulary of the game (`tree-surface` §1: 1,560 nodes,
-   4.4% of the corpus, and the only part a build guide can be written about), so a defect there is
-   read by every player rather than by the owners of one bloodline.
+   census.** 39 trees × 90 s was **58 minutes** at the time this decision was written — and this spec
+   was already pricing it, since §1.3's census line was *879* cards, not 840. D51 (2026-09-06) grew the
+   status roster to 24, so the live figure is **42 trees × 90 s = 63 minutes**, 882 cards — the
+   argument settles itself on cost either way: **an hour is cheaper than the argument about whether an
+   hour is worth it.** What that hour buys is not marginal either — the shared corpus is the whole
+   learnable vocabulary of the game (`tree-surface` §1: 1,680 nodes, ~4.8% of the corpus, and the only
+   part a build guide can be written about), so a defect there is read by every player rather than by
+   the owners of one bloodline.
 
-   **Specified, so it is not re-derived:** the 39 shared trees are **one census lot**, run under the
+   **Specified, so it is not re-derived:** the 42 shared trees are **one census lot**, run under the
    same protocol as a species lot — its own corpus sheet, its own `sheetRead` row, its own verdict
    queue, every card judged, and the acceptance record saying *"every tree was judged."* It is a
    separate lot from the species corpus because the two land at different times and a lot is the unit
@@ -794,15 +816,18 @@ is a task — neither is listed here. The fourth was answerable and is answered 
    the claim about the shared corpus a **C**-type claim (§2) rather than a **B**-type one.
 
    ⚠ Under D37 the shared corpus arrives in **category waves** as `gate-counters` lands each gate
-   quantity, so in practice this is up to three census lots — 12 primary trees now, 6 elemental and
-   21 status as they become generable. The per-lot cost is proportional and the total is unchanged.
+   quantity — that module has since shipped both quantities (carrier, 2026-09-06), so the real
+   remaining wait is `passive-tree-todo.md` task J1's missing `elemental_tree_spec()`/
+   `status_tree_spec()` factories, not `gate-counters` itself. In practice this is up to three census
+   lots — 12 primary trees now, 6 elemental and 24 status (D51: was 21) as they become generable. The
+   per-lot cost is proportional and the total is unchanged.
 
 ## Decisions implemented
 
 | Requirement in this spec | Decision |
 |---|---|
 | §1, §2 — the catalog is reviewed before it is committed; review is a shipping requirement | **D24** |
-| §1.1 — 879 trees × 40 nodes; species trees are the same shape as every other | **D10**, **D29**, **D30** as amended |
+| §1.1 — 882 trees × 40 nodes (D51, 2026-09-06: 24 statuses, not 21 — was 879); species trees are the same shape as every other | **D10**, **D29**, **D30** as amended |
 | §1.3, §5 — review cost scales with **trees**, which is what makes D30 affordable | **D30**, **D23** |
 | §3.2 — the favour triple is the first stratum axis | **D17**, and §9's measured 166× skew |
 | §3.2, §5.5 — the quota grid is checked against a declared target, not against the corpus | **D32** |

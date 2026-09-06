@@ -105,10 +105,15 @@ public class SpeciesCatalogDiffTests
         // BuildDemonSpeciesSnapshot — the two formulas are now IDENTICAL, so demonTypeId is no longer
         // a diff for any species whose gameTypeId round-trips unchanged (every species here).
         Assert.DoesNotContain("demonTypeId", peashooterDiffs);
-        // traitPool still differs by design (open-vocabulary anchor traits vs. the closed gameplay
-        // catalog — BuildDemonSpeciesSnapshot's own doc comment) — this is the real, remaining,
-        // documented divergence this test now proves instead.
-        Assert.Contains("traitPool", peashooterDiffs);
+        // traitPool no longer differs (2026-09-06, trait-roll): DemonTraitPoolCuration now ports the
+        // compiled catalog's own TraitPool forward verbatim for every species it still covers,
+        // peashooter included — the two rosters agree on this field by construction, a real positive
+        // change from the prior "always empty" snapshot this assertion used to document.
+        Assert.DoesNotContain("traitPool", peashooterDiffs);
+        // variants still differs: the compiled catalog's own hash-based VariantsFor(rarity, typeId)
+        // and the anchor pipeline's real anchor.Variants are two independently-computed lists that
+        // were never unified — the real, remaining divergence this test now proves instead.
+        Assert.Contains("variants", peashooterDiffs);
     }
 
     [Fact]

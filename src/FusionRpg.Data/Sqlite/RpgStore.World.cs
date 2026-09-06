@@ -149,6 +149,19 @@ public sealed partial class RpgStore
         // this batch of fields existed.
         EnsureColumn(db, "rpg_world_slots", "structure_id", "TEXT");
         EnsureColumn(db, "rpg_world_slots", "construction_turns_remaining", "INTEGER");
+
+        // base-defense `siege-construction` 15.4b (2026-09-06, decision 48): `WorldSlot.SlotDepletionMilli`
+        // was hashed by WorldCanonical (structure-state, spec-structure-state.md §3's own "slot-depletion"
+        // conditional row) and diffed by DiffSlots' own record equality (WorldSlot == WorldSlot already
+        // compares every field) since that module shipped -- but had NO column here, ever, on either the
+        // CREATE TABLE above or DiffSlots' own INSERT OR REPLACE below. Silently write-only, reset to 0 on
+        // every save/reload, until 15.4b's own AdvanceDepletion phase made it non-zero for the first time
+        // and tripped DiffWorldGraphUnlocked's own equivalence guard with a hard DebugAssertException --
+        // the THIRD time this exact bug class has bitten this program (see the `rpg_world_sectors`
+        // rubble_stock/ironwork_stock migration note above, and rpg_world_faction_intel.development_level's
+        // own comment for the first). An existing saved world reads this back at 0 -- exactly the world
+        // before any slot had ever been harvested, which is the correct migration default.
+        EnsureColumn(db, "rpg_world_slots", "slot_depletion_milli", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_world_sectors", "warden_binding_id", "TEXT");
         EnsureColumn(db, "rpg_world_sectors", "neglected_turns", "INTEGER NOT NULL DEFAULT 0");
         EnsureColumn(db, "rpg_world_entities", "carried_loam", "INTEGER NOT NULL DEFAULT 0");
@@ -280,12 +293,12 @@ public sealed partial class RpgStore
         using (var slotCmd = Prepared(db, tx, """
             INSERT INTO rpg_world_slots (world_id, sector_id, slot_index, slot_type_id,
                 element, state, owner_faction_id, guard_wave_id, guard_state,
-                structure_id, construction_turns_remaining, revision)
+                structure_id, construction_turns_remaining, slot_depletion_milli, revision)
             VALUES ($w, $s, $i, $type, $elem, $state, $owner, $guard, $gstate,
-                    $structure, $construction, 0);
+                    $structure, $construction, $depletion, 0);
             """,
             "$w", "$s", "$i", "$type", "$elem", "$state", "$owner", "$guard", "$gstate",
-            "$structure", "$construction"))
+            "$structure", "$construction", "$depletion"))
         {
             foreach (var s in world.Sectors)
             {
@@ -302,7 +315,7 @@ public sealed partial class RpgStore
                         world.WorldId, s.SectorId, sl.SlotIndex, sl.SlotTypeId,
                         (object?)sl.Element?.ToString(), sl.State.ToString(), (object?)sl.OwnerFactionId,
                         (object?)sl.GuardWaveId, sl.GuardState.ToString(), (object?)sl.StructureId,
-                        (object?)sl.ConstructionTurnsRemaining);
+                        (object?)sl.ConstructionTurnsRemaining, sl.SlotDepletionMilli);
             }
         }
 
@@ -465,7 +478,8 @@ public sealed partial class RpgStore
             {
                 cmd.CommandText = """
                     SELECT sector_id, slot_index, slot_type_id, element, state, owner_faction_id,
-                           guard_wave_id, guard_state, structure_id, construction_turns_remaining
+                           guard_wave_id, guard_state, structure_id, construction_turns_remaining,
+                           slot_depletion_milli
                     FROM rpg_world_slots WHERE world_id = $w ORDER BY sector_id, slot_index;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -485,7 +499,8 @@ public sealed partial class RpgStore
                         GuardWaveId = r.IsDBNull(6) ? null : r.GetString(6),
                         GuardState = Enum.Parse<GuardState>(r.GetString(7)),
                         StructureId = r.IsDBNull(8) ? null : r.GetString(8),
-                        ConstructionTurnsRemaining = r.IsDBNull(9) ? null : r.GetInt32(9)
+                        ConstructionTurnsRemaining = r.IsDBNull(9) ? null : r.GetInt32(9),
+                        SlotDepletionMilli = r.GetInt32(10)
                     });
                 }
             }

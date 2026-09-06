@@ -1,0 +1,44 @@
+{
+  "_meta": {
+    "partition": "Defend"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "\u00a75.18 kind 1, Trench: COVER verb, bulk, occupiable and passable, grants a flat combat.dodge delta. 'Two tiers by value (sandbag / revetted)' resolves via strengthBand at import \u2014 never a second row (spec's own 'never a tier chain as separate rows').",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built",
+          "laboured"
+        ],
+        "controlPoint": false,
+        "costProfile": "cheap",
+        "coverTier": "trench",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [
+          "COVER"
+        ],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Wildland",
+        "role": "Defend",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "trench",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "trench",
+      "name": "Trench"
+    }
+  ],
+  "kind": "structure-anchor"
+}

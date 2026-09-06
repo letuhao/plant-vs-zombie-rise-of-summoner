@@ -1,0 +1,60 @@
+{
+  "_meta": {
+    "partition": "Multiply"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "StructureCatalog.cs Seed[6]. Raises a Lair's own recruit yield (YieldMultiplierMilli) \u2014 \u00a75.21 R3 Multiply: 'raise another producer's yield'.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "moderate",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "loam-structures",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "sprout",
+        "reach": "melee",
+        "reason": "",
+        "requiredSlotKind": "Lair",
+        "role": "Multiply",
+        "roleSecondary": "none",
+        "strengthBand": "rubble",
+        "structureId": "hatchery",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "hatchery",
+      "magnitudes": {
+        "blocksLineOfFire": false,
+        "blocksMovement": false,
+        "buildTurns": 3,
+        "capacityBonus": 0,
+        "constructIronworkCost": 0,
+        "constructRubbleCost": 0,
+        "containerId": null,
+        "cost": 300,
+        "coverPowerMilli": 0,
+        "coverRadius": 0,
+        "entryStaminaMultiplierMilli": 1000,
+        "flatYieldPerTurn": 0,
+        "materialTier": 0,
+        "obstacleKind": "None",
+        "structureKind": "Yield",
+        "visionRangeTiles": null,
+        "yieldMultiplierMilli": 1500
+      },
+      "name": "Hatchery"
+    }
+  ],
+  "kind": "structure-anchor"
+}

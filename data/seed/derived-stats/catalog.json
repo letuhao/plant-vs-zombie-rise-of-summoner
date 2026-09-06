@@ -665,6 +665,18 @@
       "unitClass": "PerMilleRatio",
       "statClass": null,
       "note": "P0.5 / battle-timeline B9, 2026-08-28. Same as turn.speed. Default 1000 (DerivedTurnChannels.NominalHasteMilli) is load-bearing: 0 would mean instant actions. Per-mille: 1000 = normal pace, 500 = twice as fast."
+    },
+    {
+      "family": "loadout.slots",
+      "axis": "none",
+      "compose": "FlatSum",
+      "default": 0,
+      "cap": null,
+      "unitClass": "Count",
+      "statClass": "Pool",
+      "consumer": "LoadoutSet.EffectiveMaxSize (read by LoadoutSet.Validate, AutoEquip.Select, CapPolicy.EquippedSkillCap)",
+      "note": "H.8, D4.25 (party-dungeon, spec-unique-pipeline.md SS4: the extend-action-slot grant). Pool (H.9 Q4, same reasoning as resource/movement): the actor's own equipped-slot capacity, no attacker-side counterpart. FlatSum composition sums every worn grant honestly; the three readers collapse any positive value to exactly one extra slot ('one at a time') at the read, never in composition.",
+      "unitClassNote": "A discrete extra-slot count (StatClass.cs Count: \"a discrete count, e.g. bullets or max targets\") -- direct, not inferred: the three readers listed above consume it today."
     }
   ],
   "prefixFamilies": [

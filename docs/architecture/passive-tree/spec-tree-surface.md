@@ -1,7 +1,11 @@
 # Spec: `tree-surface` — the player surface
 
-**Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. Module of
-[passive-tree](../passive-tree-map.md). No build authorized.
+**Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. **Built and
+verified 2026-09-06** (tasks I1–I10 — see `tasks/passive-tree-todo.md`, Checkpoint I 🟡 "playable").
+Module of [passive-tree](../passive-tree-map.md). Corrected 2026-09-06 by an adversarial spec audit:
+the "no build authorized" line predates the build; §12's own FE file-path table also predates it and
+names a directory (`ui/actor/passives/`) that was never created — every real component ships flat
+under `ui/actor/` instead (re-grep the component name, not the cited path, if §12 looks wrong).
 
 **Module id:** `tree-surface` · **Wave 3** · **Depends on:** `tree-state`, `tree-catalog` ·
 **Reads:** `tree-resolve`'s `TreeResolveReport` · **Blocks:** nothing
@@ -16,23 +20,24 @@ wrong.** This spec adopts that verdict. Where doc 14 says doc 07 survives, this 
 
 ## 1. Objective
 
-Make **35,160** authored nodes learnable, plannable and spendable — on a surface the player already
-opens, in words a player already uses.
+Make **35,280** authored nodes (D51, 2026-09-06: 24 statuses, not 21 — was 35,160) learnable,
+plannable and spendable — on a surface the player already opens, in words a player already uses.
 
-**It is learnable because the number a player has to learn is 1,560**, not 35,160:
+**It is learnable because the number a player has to learn is 1,680**, not 35,280:
 
 | Quantity | Nodes | Share |
 |---|---:|---:|
-| Whole corpus (39 × 40 shared + 840 species × 40) | **35,160** | 100% |
-| **The shared corpus — the only part a build guide can be written about** | **1,560** | **4.4%** |
-| A 30-demon player's whole reachable reading surface | **2,760** | 7.9% |
+| Whole corpus (42 × 40 shared + 840 species × 40) | **35,280** | 100% |
+| **The shared corpus — the only part a build guide can be written about** | **1,680** | **4.8%** |
+| A 30-demon player's whole reachable reading surface | **2,880** | 8.2% |
 | Traits *open* to a one-aptitude build at Θ=100 across the twelve primary paths | 176 | 0.50% |
 | Traits that build actually **owns** at Θ=100 under D25 | 13–36 | **0.04–0.10%** |
 
 *(the Θ=100 rows are computed in
 [14](../../research/passive-tree/14-learnability-at-scale.md) §9 from the shipped
-`Floor`/`Total`/ladder constants; the corpus rows are the 2026-09-05 verified count — **840 species ·
-40 nodes per tree everywhere including species · 879 trees**. Doc 14's own totals were written against
+`Floor`/`Total`/ladder constants; the corpus rows are the 2026-09-05 verified count (**840 species ·
+40 nodes per tree everywhere including species · 879 trees**; D51, 2026-09-06, grew this to **882
+trees**, 24 statuses not 21). Doc 14's own totals were written against
 841 species and 29 nodes per species tree and are superseded. The share column is recomputed, not
 carried over: every one of these percentages fell, because the denominator grew by 36% while the
 learnable numerator did not move at all. **That is the finding, not a correction** — the shared corpus
@@ -83,7 +88,7 @@ stage is sheet (1) → path (2) → trait (3) — GG-10's budget of three pushes
 Actor sheet (band 2, already exists) → Passives tab
 ├── Level 0   Yours       paths this actor has invested in · Focus · not-working count · unspent
 ├── Level 0b  Bloodline   THIS creature's own path — pinned, never in a browse
-├── Level 1   All paths   the 39 shared paths, ordered, searchable
+├── Level 1   All paths   the 42 shared paths, ordered, searchable
 ├── Level 2   One path    2 branches × 10 tiers, 40 traits, one fixed lattice — species too
 └── Level 3   One trait   value · what it costs next · depth · exclusion print · where it goes
 ```
@@ -93,19 +98,23 @@ Levels 0 and 1 are **tabs inside the Passives tab**, not pushes. Level 2 and 3 a
 **Level 0 — Yours.** Opens first, every time. The paths this actor has put anything into (typically
 1–4), the **Focus** line (§6), a count of any traits that have stopped working (§7), and what is
 unspent. The empty state is content, not an edge case (GG-17): a new actor sees *"You have 6 points.
-Pick a path."* and one affordance — never thirty-nine cards.
+Pick a path."* and one affordance — never forty-two cards.
 
-**Level 1 — All paths.** The 39 shared paths. **Ordering matters more than search**, because 35 of
-the 39 are irrelevant to any given build. Default order:
+**Level 1 — All paths.** The 42 shared paths (D51, 2026-09-06: 24 statuses, not 21 — was 39). **Ordering
+matters more than search**, because 38 of the 42 are irrelevant to any given build. Default order:
 
 1. paths you have invested in,
 2. **your own stance's other three paths** — because under D28 those are already open and the player
    does not know it (§5.4),
 3. paths matching this creature's element and status,
 4. everything else,
-5. **paths whose gate quantity has not been built yet**, collapsed behind one row (§9.1). Today that
-   is 27 of the 39, which is why the bucket is a rule rather than an edge case — and under D37 the
-   bucket **empties as `gate-counters` lands**, one category at a time, with no FE change.
+5. **paths whose gate quantity has not been built yet**, collapsed behind one row (§9.1). This bucket
+   held 27 of the 39 (30 of 42 after D51) while `gate-counters` was building — that module has since
+   shipped both quantities (carrier, 2026-09-06, task G6), so THIS bucket's original condition no
+   longer applies to any path. The bucket is still real, though: `passive-tree-todo.md` task J1's
+   missing `elemental_tree_spec()`/`status_tree_spec()` factories mean the same 30 paths still cannot
+   be planned or generated, just for a different reason — rule 5 should key on whatever `gateState`
+   plus J1's own readiness ends up reporting, not solely on `gateState`, once J1 ships.
 
 Then search and category filters. **Categories are five** — `primary | elemental | status | family |
 species` (R7) — and species never enters this browse (§3), so the filter offers four here. Query state belongs to the layer and survives closing it (GG-51).
@@ -133,9 +142,9 @@ const SEARCH_FIRST_ABOVE = 240;
 
 | Surface | Count | Tier |
 |---|---:|---|
-| All paths (shared only) | 39 | **windowed** (25–240) |
-| All paths **+ species in one browse** | **879** | search-first — a search box over a bag of trees, the "database viewer" GG-25 rejects. **§3 refuses this arrangement** |
-| Traits flattened across paths | **35,160** | never rendered — traits exist only inside a path |
+| All paths (shared only) | 42 (D51: was 39) | **windowed** (25–240) |
+| All paths **+ species in one browse** | **882** (D51: was 879) | search-first — a search box over a bag of trees, the "database viewer" GG-25 rejects. **§3 refuses this arrangement** |
+| Traits flattened across paths | **35,280** (D51: was 35,160) | never rendered — traits exist only inside a path |
 | **One path's lattice** | **40** | **GG-61, not GG-50** |
 
 **Doc 07 called a single path "render-all" and that was wrong** — 40 > 24, and 29 was already over.
@@ -180,7 +189,7 @@ bloodline — it is a property of the creature they bound. There is no build-pla
 of them side by side, because **no decision is taken by comparing them.** D23's own framing is *"you
 give up build freedom and receive something unobtainable elsewhere."*
 
-Two supporting reasons: keeping them out is what keeps the browse in the windowed tier (39 vs 879,
+Two supporting reasons: keeping them out is what keeps the browse in the windowed tier (42 vs 882, D51: was 39 vs 879,
 against a 240 threshold); and the one real cross-species question — *"which creature should I bind
 next?"* — is a **collection** question the Codex already answers at its own resolution, given one
 sentence per bloodline saying what it is *for*. 840 sentences, reviewable in an afternoon, and they
@@ -476,7 +485,19 @@ unreachable on touch and invisible to a keyboard user."* Reasons route through *
 player text.
 
 **5. The draft preview reports what a change would close** — the highest-value line the preview
-renders, one sentence computed from the draft:
+renders, one sentence — **built 2026-09-06 as the I8 follow-up, and NOT "computed from the draft"
+as this line originally said, corrected here by an adversarial spec audit the same day.**
+Simulating "moving 30 points out of Might" requires a HYPOTHETICAL aptitude reallocation, which a
+node-ownership-only draft cannot produce — aptitude points are edited on an entirely different tab
+(§4.1) — and re-deriving `CrossUnlock`/`TierGate` client-side to fake it is exactly what AGENTS.md's
+"one power ladder, no private curves" rule forbids. The real fix is a server round-trip: `POST
+/api/passive-tree/{playerId}/preview` (`PassiveTreeEndpoints.cs:83-116`, additive — never named in
+§12's own file table below, which still only lists the two original routes) takes the draft's node
+set plus a hypothetical aptitude-points-by-tree delta, runs it through the SAME `CrossUnlock`/
+`TierGate`/`TreeResolveReport` resolution the committed path uses, and persists nothing.
+`PassivesTab.tsx`'s own `usePreviewTree()` comment states this explicitly: the sentence comes from
+"the real server resolution... never a re-derivation... here." One sentence, still — the wording
+below is unchanged — just never client-computed:
 
 > ⚠ *Moving 30 points out of Might closes tier 8 in Fortitude, Vigor and Onslaught — 4 of your traits
 > would stop working.*
@@ -597,24 +618,31 @@ The repo ships three presentations of out-of-reach content, and they say differe
 > **acceptance test is the same test either way** (§14 tests 29–32): flipping `gateState` flips the
 > render and nothing else, which is precisely what makes a transitional state cheap to leave.
 
-**The state, verified in code this session.** A tier gate reads a *gate quantity*. Of the 39 shared
-paths, **27 gate on a quantity with no producer in `src/` today**:
+**The state, as verified in code the session this section was written.** A tier gate reads a *gate
+quantity*. Of the 39 shared paths (30 of 42 after D51's later count growth), **27 gated on a quantity
+with no producer in `src/` at the time**:
 
 | Category | Paths | Gate quantity | State, and who lands it |
 |---|---:|---|---|
 | Primary | 12 | aptitude points, `Commander` scope | ✅ shipped and wired |
-| Elemental | 6 | `element_mastery` | ⛔ comments only today — `PointBudget.cs:15` still attributes it to *"the demon program's `aspect-scope` module"*, which **D37 supersedes**: `gate-counters` owns it, in wave 0 |
-| Status | 21 | `status_applied.<id>` | ⛔ **zero hits in `src/`** today — D35 removed the `AllocationScope` dependency and, with it, the only place the counter was going to live. **D37 gave it one:** `gate-counters` |
+| Elemental | 6 | `element_mastery` | ✅ **shipped 2026-09-06** — `ElementMasterySource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:107`, live-probed end to end (task G6). `gate-evidence.v1.json`'s row reads `carrier` |
+| Status | 24 (D51: was 21) | `status_applied.<id>` | ✅ **shipped 2026-09-06** — `StatusAppliedSource.AptitudePointEquivalents`, registered at `GateCounterEndpoints.cs:104`, live-probed end to end (task G6). `gate-evidence.v1.json`'s row reads `carrier` |
 
-`tree-resolve` §3.3 resolves those paths to zero aptitude points, therefore tier 0, therefore no
-contribution — *"inert, not broken"*, and arithmetically it is fine. **On a player surface it is
-still the worst thing this module can render while the wait lasts: 1,080 of the 1,560 shared traits,
-69% of the corpus, at tier 0 for every player until their counter ships.**
+**Superseded 2026-09-06 — the table above no longer describes a live blocker, but the render outcome
+is unchanged for a separate reason.** `gate-counters` shipping means `tree-resolve` §3.3 no longer
+resolves elemental/status paths to zero for lack of a gate quantity. But `passive-tree-todo.md` task
+J1 tracks the real remaining block: the plan-emission CLI has no `elemental_tree_spec()`/
+`status_tree_spec()` factory function, so those 30 paths have no plan or content to render AT ALL yet
+— not "gated at tier 0" but "not in the catalog this surface reads." **On a player surface this is
+still the worst thing this module can render while the wait lasts: 1,200 of the 1,680 shared traits
+(D51: was 1,080 of 1,560), ~71% of the corpus, absent for every player until J1 ships.**
 
 **Applied naively, §9's own rule causes the damage.** *"Give an out-of-reach thing a distance"*
-produces *"Tier 1 · 5 aptitude points · you have 0"* on 1,080 traits. That is a gap the player cannot
+produces *"Tier 1 · 5 aptitude points · you have 0"* on 1,200 traits. That is a gap the player cannot
 close, printed in the exact grammar the surface uses for gaps they can. It reads as content they
-failed to unlock — the one reading §9 exists to prevent.
+failed to unlock — the one reading §9 exists to prevent. (This specific rendering only fires once J1
+ships and these paths first appear in the catalog with `gateState` — while J1 is unbuilt, per §9.1's
+own rule 5 above, they simply don't appear in Level 1's browse at all.)
 
 > **The answer: this is the one case that takes the CONDITION presentation, and it is the reason the
 > repo ships three and not two.**
@@ -737,7 +765,7 @@ npm run test:e2e                  # volume fixtures at 10 / 100 / 1000, and the 
 web/fusion-rpg-web/src/ui/actor/PassivesTab.tsx              replaces the placeholder; :12's comment corrected
 web/fusion-rpg-web/src/ui/actor/passives/YoursPanel.tsx      level 0 — invested paths, Focus, not-working count
 web/fusion-rpg-web/src/ui/actor/passives/BloodlinePin.tsx    level 0b — this creature's own path
-web/fusion-rpg-web/src/ui/actor/passives/PathBrowse.tsx      level 1 — 39 cards, ordered, windowed
+web/fusion-rpg-web/src/ui/actor/passives/PathBrowse.tsx      level 1 — 42 cards (D51: was 39), ordered, windowed
 web/fusion-rpg-web/src/ui/actor/passives/PathLattice.tsx     level 2 — 2 x 10 CSS grid, GG-61 bounded body
 web/fusion-rpg-web/src/ui/actor/passives/TierRow.tsx         the attributed requirement + two-route reason
 web/fusion-rpg-web/src/ui/actor/passives/TraitCell.tsx       three states, one verb
@@ -748,7 +776,9 @@ web/fusion-rpg-web/src/ui/actor/passives/passiveReason.ts    one reason table, r
                                                             -- including the gateState condition (9.1)
 web/fusion-rpg-web/src/hooks/useAllocationDraft.ts           the EXTRACTION named below
 web/fusion-rpg-web/src/contract/types.ts                     tree DTOs. UnitClass union unchanged
-src/FusionRpg.Server/PassiveTreeEndpoints.cs                 GET state, POST whole allocation
+src/FusionRpg.Server/PassiveTreeEndpoints.cs                 GET state, POST whole allocation,
+                                                              POST {playerId}/preview (I8, 2026-09-06 --
+                                                              hypothetical delta, persists nothing)
 src/FusionRpg.Contracts/PassiveTreeDtos.cs                   the wire shape
 ```
 
@@ -825,10 +855,10 @@ leak, because every trait is a channel underneath.
 |---|---|---|
 | 1 | `Passives_is_a_tab_not_a_route` | No entry added to the router or the rail; the sheet mounts over any stage. GG-1 |
 | 2 | `Depth_from_a_stage_is_three_pushes` | sheet → path → trait. GG-10 |
-| 3 | `Path_browse_declares_windowed_at_39` | A row in `volumeMatrix.test.ts`. GG-50 |
+| 3 | `Path_browse_declares_windowed_at_39` | A row in `volumeMatrix.test.ts` (not yet built; name kept from I4's original wording — the real corpus is 42 paths since D51, 2026-09-06). GG-50 |
 | 4 | `A_lattice_scrolls_inside_the_panel_and_never_grows_it` | 40 cells at the 1280×720 floor; `scrollHeight > clientHeight` on the **body**, shell height unchanged. GG-61 — the measurement GG-61 was written after, not an eyeball |
 | 5 | `Level_two_opens_scrolled_to_your_own_depth` | Not to tier 1. §2.3's acceptance criterion |
-| 6 | `Species_trees_never_enter_the_browse` | 879 is never a collection anywhere. §3 |
+| 6 | `Species_trees_never_enter_the_browse` | 882 (D51: was 879) is never a collection anywhere. §3 |
 | 7 | `A_bloodline_is_pinned_to_its_creature` | Level 0b renders on that sheet and nowhere else |
 | 8 | `Exactly_one_lender_is_named` | Three same-stance mates → one name, and the number equals the largest, not the sum |
 | 9 | `A_locked_tier_names_both_routes_in_visible_text` | Queried by text, not by `title`. §7.2 part 4 |
@@ -852,7 +882,7 @@ leak, because every trait is a channel underneath.
 | 27 | `The_lattice_uses_no_graph_library` | `xyflowGuard`. GG-38 |
 | 28 | `Every_surface_renders_with_the_injector_absent` | GG-39, standalone-first |
 | 29 | `A_gateless_path_renders_a_condition_never_a_distance` | On a path whose `gateState` is `unproduced`: no requirement number, no have-number, no bar, no Unlock verb, no price, on any tier. §9.1 rules 1–2 |
-| 30 | `Gateless_paths_collapse_into_one_row_and_sort_last` | 27 of 39 behind one expandable row; all 12 wired paths render above it. §9.1 rule 3 |
+| 30 | `Gateless_paths_collapse_into_one_row_and_sort_last` | 30 of 42 (D51: was 27 of 39) behind one expandable row; all 12 wired paths render above it. §9.1 rule 3 |
 | 31 | `A_gateless_path_is_counted_in_nothing` | Absent from the not-working count, from any locked total, from the Focus denominator and from Level 0. §9.1 rule 4 |
 | 32 | `gateState_comes_from_the_report_never_from_a_zero` | A **wired** path with zero allocation renders a distance; an **unproduced** path renders a condition. Flipping only the field flips only the render, and no path id appears anywhere in this module. §9.1 rule 5 |
 | 33 | `The_gate_row_names_aptitude_points_and_the_cell_names_skill_points` | `vocabularyGuard`-adjacent string assertion over `TierRow` and `TraitCell`: neither ever renders the bare word *points*. §4.1, R1 |
@@ -897,7 +927,7 @@ leak, because every trait is a channel underneath.
 **Never**
 
 - Add a top-level route, a rail entry, or a stage (GG-1).
-- Put all 879 paths in one browse. That crosses the search-first threshold and turns the map into a
+- Put all 882 paths (D51: was 879) in one browse. That crosses the search-first threshold and turns the map into a
   query — GG-25 rejects it by name, and it is the **one arrangement that makes this unlearnable**.
 - Invent a unit class. Thirteen ship; the fractional path count renders as prose.
 - Use engine vocabulary on a player surface (GG-23).
@@ -945,7 +975,7 @@ leak, because every trait is a channel underneath.
    *aptitude points* and *skill points* from §4.1, which are the two the player must be able to tell
    apart — are this spec's working vocabulary and need an owner call before player text is authored.
 2. **Comparing two plans side by side.** GG-47 makes comparison first-class wherever a player
-   chooses, and a plan is chosen. A comparison across 1,560 traits has no shipped shape and is not
+   chooses, and a plan is chosen. A comparison across 1,680 traits (D51: was 1,560) has no shipped shape and is not
    designed here — §14 test 26 accepts a stated reason in place of a diff state, which is the honest
    interim.
 
@@ -971,7 +1001,7 @@ leak, because every trait is a channel underneath.
 | **D4/D5** the focus multiplier | §6 — Focus line, `1/H` prose, `perMilleRatio`/`absolute` for `F` |
 | **D7** hybrids are Neutral | *"Spreading is a real choice, not a mistake"* is stated to the player, not discovered |
 | **D8 / D39** `H` reads the final allocation, self-spent only | §6 — Focus renders what `tree-resolve` computes and never re-derives it; the line is order-independent, and the F4 breadth exploit is named as parked rather than left to be found |
-| **D9/D27** the roster ships whole | Level 1 holds 39 shared paths, and grows without re-scaling — the browse tier is the constraint, not the roster |
+| **D9/D27** the roster ships whole | Level 1 holds 42 shared paths (D51: was 39), and grows without re-scaling — the browse tier is the constraint, not the roster |
 | **D11** items grant points | §8's second sentence — *"needs 3 more points; the gear that gave them is off"* |
 | **D14 / D40** printed exclusion, runtime no-op; all three forms kept | §8 in full — both sides print the rule and name the same winner, and a nullified trait renders **inert rather than un-unlocked**. Tests 34–35 |
 | **D17** species favour triple | The Codex line — booked as `codexSummary` in [`species-tree`](spec-species-tree.md) §6 — and the starter-plan question (§15, ask first) |
@@ -983,7 +1013,7 @@ leak, because every trait is a channel underneath.
 | **D26** one tier ladder | §2.2 — both branches share one ladder down the middle, which teaches D26's rule by layout |
 | **D28** cross-unlock, one lender | §7 in full — five parts, and §7.3's ordering mitigation for the case with no home |
 | **D29** 10 tiers × 2 branches | §2.3 — 40 cells is GG-61, not GG-50; §9 — the tenth tier gets a distance |
-| **ideal §13.4, as amended by D37** 27 of 39 gates have no producer *yet*; `gate-counters` owns both quantities in wave 0 | §9.1 — the condition presentation, the collapsed bucket, and `gateState` read from the report. **A transitional design with a known end:** it renders the wait, and the bucket empties as the counters land, with no FE change |
+| **ideal §13.4, as amended by D37** 27 of 39 gates (30 of 42 after D51) had no producer at the time; `gate-counters` shipped both quantities 2026-09-06 (task G6) | §9.1 — the condition presentation, the collapsed bucket, and `gateState` read from the report. **The transitional design's first end-condition landed** (both quantities are `carrier`); `passive-tree-todo.md` task J1 is the new end-condition (the missing `elemental_tree_spec()`/`status_tree_spec()` factories) the bucket now actually waits on |
 | **D32** near-uniform target distribution | Not rendered. It is a generation-side property with no player surface |
 | **PS-8** endless grind | §4 rule 1 — a stepper, never a slider, because a slider needs a maximum |
 

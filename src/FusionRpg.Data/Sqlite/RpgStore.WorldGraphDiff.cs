@@ -189,12 +189,12 @@ public sealed partial class RpgStore
         using var cmd = Prepared(db, tx, """
             INSERT OR REPLACE INTO rpg_world_slots (world_id, sector_id, slot_index, slot_type_id,
                 element, state, owner_faction_id, guard_wave_id, guard_state,
-                structure_id, construction_turns_remaining, revision)
+                structure_id, construction_turns_remaining, slot_depletion_milli, revision)
             VALUES ($w, $s, $i, $type, $elem, $state, $owner, $guard, $gstate,
-                    $structure, $construction, 0);
+                    $structure, $construction, $depletion, 0);
             """,
             "$w", "$s", "$i", "$type", "$elem", "$state", "$owner", "$guard", "$gstate",
-            "$structure", "$construction");
+            "$structure", "$construction", "$depletion");
 
         foreach (var (key, sl) in after)
         {
@@ -203,7 +203,7 @@ public sealed partial class RpgStore
                 next.WorldId, key.SectorId, key.SlotIndex, sl.SlotTypeId,
                 (object?)sl.Element?.ToString(), sl.State.ToString(), (object?)sl.OwnerFactionId,
                 (object?)sl.GuardWaveId, sl.GuardState.ToString(), (object?)sl.StructureId,
-                (object?)sl.ConstructionTurnsRemaining);
+                (object?)sl.ConstructionTurnsRemaining, sl.SlotDepletionMilli);
         }
     }
 

@@ -6,10 +6,11 @@ namespace FusionRpg.Core.Delve.Loot;
 /// `dungeon-loot` D3.14 (spec-dungeon-loot.md §4, "Rung reward columns — the floor and the shift") —
 /// the two pure, math-only pieces of the rung reward columns: a FLOOR (removes low rungs entirely) and
 /// a WEIGHT SHIFT (moves the default weight column up or down `n` rungs, "never a multiplier"). Both
-/// are breadth and ceiling, never `contentScale`/`P(Θ)`/an atom range (spec, verbatim). Composing these
-/// into a room's own live table (`RarityShift.Apply`, the spec's own cited orchestrator) is
-/// `DelveLoot.RollRoom`'s own remaining job (D3.11's already-named gap) — this file owns only the two
-/// functions that math, not the per-table wiring around them.
+/// are breadth and ceiling, never `contentScale`/`P(Θ)`/an atom range (spec, verbatim).
+///
+/// <para><see cref="Apply"/> (D3.11) is the per-table orchestrator composing the two into a room's own
+/// live table, called from <see cref="DelveLoot.RollRoom"/> — never the pipeline's own shared `Tables`
+/// map directly, so one room's floor/shift can never leak into another's.</para>
 /// </summary>
 public static class RarityShift
 {
@@ -86,5 +87,48 @@ public static class RarityShift
         }
         delta[absorbOrdinal] = checked(-runningSum);
         return delta;
+    }
+
+    /// <summary>
+    /// D3.11: composes <see cref="ComposeFloor"/>/<see cref="ToWeightShift"/> into the ONE table at
+    /// <paramref name="tableId"/> — every other table in <paramref name="tables"/> passes through
+    /// untouched, so a nested `Table`-kind entry pointing elsewhere never sees this room's own floor
+    /// or shift. Returns <paramref name="tables"/> itself, unmodified, when <paramref name="tableId"/>
+    /// is not present — an unknown table id is <see cref="LootPipeline.Resolve"/>'s own refusal to
+    /// raise, not this function's.
+    /// </summary>
+    /// <param name="shiftRungs">The rung's own `RarityShiftRungs` plus the room kind's (`loot.rooms
+    /// .boss.rarityShiftRungs`) — "kind and rung shifts add" (spec §4, verbatim); summed by the
+    /// caller before this runs, matching <see cref="ComposeFloor"/>'s own "caller gathers, function
+    /// composes" shape rather than this function reading either tunable itself.</param>
+    /// <param name="floors">The room-kind's, the rung's, and — once-domain boss only — the domain's
+    /// own `bossRarityFloor`; each entry's OWN authored `RarityFloor` is prepended automatically, so a
+    /// caller never repeats it here.</param>
+    public static IReadOnlyDictionary<string, DropTableRow> Apply(
+        IReadOnlyDictionary<string, DropTableRow> tables, IReadOnlyList<RarityRung> ladder,
+        string tableId, int shiftRungs, params string?[] floors)
+    {
+        if (tables is null) throw new ArgumentNullException(nameof(tables));
+        if (ladder is null) throw new ArgumentNullException(nameof(ladder));
+        if (tableId is null) throw new ArgumentNullException(nameof(tableId));
+        if (floors is null) throw new ArgumentNullException(nameof(floors));
+
+        if (!tables.TryGetValue(tableId, out var table))
+            return tables;
+
+        var shift = ToWeightShift(ladder, shiftRungs);
+        var patched = table with
+        {
+            Groups = table.Groups.Select(g => g with
+            {
+                Entries = g.Entries.Select(e => e with
+                {
+                    RarityFloor = ComposeFloor(ladder, new[] { e.RarityFloor }.Concat(floors).ToArray()),
+                    RarityWeightShift = shift,
+                }).ToList(),
+            }).ToList(),
+        };
+
+        return new Dictionary<string, DropTableRow>(tables, StringComparer.Ordinal) { [tableId] = patched };
     }
 }

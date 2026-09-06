@@ -1,0 +1,41 @@
+{
+  "_meta": {
+    "partition": "See"
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "citation": "structure-schema's reserved-but-unmapped See role, given its first real content per spec-siege-fog.md \u00a72: a See-role structure authors a larger VisionRangeTiles than the default. Spire (an unused SlotKind until now) fits height-for-vision thematically.",
+        "source": "AUTHORED"
+      },
+      "anchor": {
+        "acquisitionPaths": [
+          "built"
+        ],
+        "controlPoint": true,
+        "costProfile": "steep",
+        "coverTier": "none",
+        "elementPrimary": "none",
+        "elementSecondary": "none",
+        "family": "siege-obstacles",
+        "footprint": "one-cell",
+        "obstacleVerbs": [],
+        "rarity": "grafted",
+        "reach": "long",
+        "reason": "",
+        "requiredSlotKind": "Spire",
+        "role": "See",
+        "roleSecondary": "none",
+        "strengthBand": "timber",
+        "structureId": "watchtower",
+        "targetPreference": "none",
+        "tempo": "none",
+        "traits": [],
+        "variants": []
+      },
+      "id": "watchtower",
+      "name": "Watchtower"
+    }
+  ],
+  "kind": "structure-anchor"
+}

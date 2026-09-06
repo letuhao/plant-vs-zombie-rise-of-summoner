@@ -293,8 +293,8 @@ Severity: **lock** (must not break) · **wiring** (built but inert / cloned) · 
 | F5 | gap | No shared `PhaserGameHost` / shared destroy helper — each island reimplements buffer-until-ready |
 | F6 | gap | Lawn has no `importGuard` analogue for `@/lib/bus` |
 | F7 | gap | BootScene is lawn-hardcoded; world skipped Boot by design — no generic Boot for cell stages |
-| F8 | stale doc | `decisions.md` Lawn projector row still says **Implementation deferred**; [fe-game-foundation.md](fe-game-foundation.md) Implementation status says W6–W7 **shipped** |
-| F9 | stale doc | [spec-board-render.md](base-defense/spec-board-render.md):15–17 “exactly one Phaser integration” — false after world island |
+| F8 | stale doc | **Cleared T0 2026-09-06** — `decisions.md` Lawn projector row now **Shipped (W6–W7)** |
+| F9 | stale doc | **Cleared T0 2026-09-06** — [spec-board-render.md](base-defense/spec-board-render.md) opening acknowledges lawn + world islands |
 | F10 | lock | Do not merge lawn+world into one Game; do not force world onto `GridSpec` |
 | F11 | lock | Siege/battle PAUSED pending named kernel — [tasks/base-defense-todo.md](../../tasks/base-defense-todo.md) ~1045–1091 |
 | F12 | wiring | Host paths split: `features/lawn/LawnGameHost` vs `stages/world/host/WorldGameHost` |
@@ -386,9 +386,11 @@ and view-model events. Not one Scene Manager owning lawn and world at once.
 
 ## 12. Next step (not this audit)
 
-**Idea captured 2026-09-06:** [phaser-kernel-ideal.md](phaser-kernel-ideal.md) — two kernels (island
-runtime + grid board), dual-track (new path tested before old clones retire). Next is `/spec` once
-the owner graduates it. Until that map **names** APIs, leave `siege-stage` 21.3+ and `battle-stage`
-22.x paused.
+**Ideal + specs 2026-09-06:** [phaser-kernel-ideal.md](phaser-kernel-ideal.md) ·
+[phaser-kernel-map.md](phaser-kernel-map.md) · [phaser-kernel/](phaser-kernel/) module specs.
+Next is owner review → `/plan` (`tasks/phaser-kernel-plan.md` / `-todo.md`) → implement Wave 0–1b.
+Until the map **freeze gate** (island + `board-contract` + `host-data-lifecycle`) lands, leave
+`siege-stage` 21.3+ and `battle-stage` 22.x paused (lock 5a).
 
 **Prior art:** [../research/phaser-architecture-prior-art-2026-09-06.md](../research/phaser-architecture-prior-art-2026-09-06.md)
+**Scene-switch POC:** [../research/phaser-scene-switch-poc-2026-09-06.md](../research/phaser-scene-switch-poc-2026-09-06.md)

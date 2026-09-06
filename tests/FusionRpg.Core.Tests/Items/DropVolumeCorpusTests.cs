@@ -305,8 +305,11 @@ public class DropVolumeCorpusTests
         Assert.Equal(70, counts[DropEntryKind.Charm]);
         Assert.Equal(41, counts[DropEntryKind.Insert]);
 
+        // 315 -> 171 (D4.27, party-dungeon spec-unique-pipeline.md §5, 2026-09-06): `unique` (144) now
+        // resolves through the real `MintUnique` arm -- Insert (41) + Charm (70) + Consumable (60)
+        // stay unavailable, unchanged.
         var unavailable = counts.Where(kv => !DropTableDraw.IsAvailable(kv.Key)).Sum(kv => kv.Value);
-        Assert.Equal(315, unavailable);
+        Assert.Equal(171, unavailable);
     }
 
     [Fact]
@@ -320,11 +323,13 @@ public class DropVolumeCorpusTests
         Assert.DoesNotContain("Gem", kinds);
         Assert.DoesNotContain("Charm", kinds);
 
+        // `Unique` REMOVED 2026-09-06 (D4.27) -- it now resolves; see
+        // `A_unique_entry_now_resolves_rather_than_being_refused_by_x7s_own_gate` below.
         var t = DropVolumeTests.Tuning();
         foreach (var kind in new[]
                  {
                      DropEntryKind.Insert, DropEntryKind.Charm,
-                     DropEntryKind.Consumable, DropEntryKind.Unique,
+                     DropEntryKind.Consumable,
                  })
         {
             var table = new DropTableRow("drop.test.x7", new[] { "web" }, null, null, true, 1, new[]
@@ -343,6 +348,30 @@ public class DropVolumeCorpusTests
             // The refusal names WHO lands it — a build order, not a defect.
             Assert.Contains("module", result.Detail, StringComparison.Ordinal);
         }
+    }
+
+    /// <summary>The inverse of the test above (D4.27, 2026-09-06): a `unique` entry no longer trips
+    /// the `drop.entry-kind-unavailable` gate — `UnavailableKinds` no longer names it. Asserts only
+    /// that THIS specific gate is gone, not that the whole row validates clean for every other reason
+    /// (a bogus `RefId` like this fixture's may still fail a DIFFERENT check, which is not this test's
+    /// claim).</summary>
+    [Fact]
+    public void A_unique_entry_no_longer_trips_the_entry_kind_unavailable_gate()
+    {
+        Assert.True(DropTableDraw.IsAvailable(DropEntryKind.Unique));
+
+        var t = DropVolumeTests.Tuning();
+        var table = new DropTableRow("drop.test.unique", new[] { "web" }, null, null, true, 1, new[]
+        {
+            new DropTableGroupRow("g", 0, 1, new[]
+            {
+                new DropTableEntryRow(0, DropEntryKind.Unique, "item.rot-bloom-30-002", 100),
+                new DropTableEntryRow(1, DropEntryKind.Nothing, "", 900),
+            }),
+        });
+
+        var result = DropTableValidator.Validate(Array.Empty<LootSourceRow>(), new[] { table }, t);
+        Assert.DoesNotContain("drop.entry-kind-unavailable", result.Detail, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -31,17 +31,18 @@ the hard part. The review is** — which is why this module is sequenced after
 ### 1. Why this needs its own pipeline
 
 The roster is **five tree categories** — `primary | elemental | status | family | species`. Three of
-them exist today and [`tree-language`](spec-tree-language.md) handles all three as 39 shared trees
-whose brief is a roster row: an aptitude, or an element, or a status. `family` waits on a closed
+them exist today and [`tree-language`](spec-tree-language.md) handles all three as 42 shared trees
+(D51, 2026-09-06: 24 statuses, not 21 — was 39) whose brief is a roster row: an aptitude, or an
+element, or a status. `family` waits on a closed
 taxonomy (§7.3). **`species` is this module, and it is a category in its own right, not a variant of
 the generic pipeline** — a species tree's brief is a *creature*, and five things change at once.
 
 | | Generic pipeline (`tree-language`) | This module |
 |---|---|---|
-| **Population** | 39 trees | **840 species** — 21× |
+| **Population** | 42 trees (D51, 2026-09-06: 24 statuses, not 21) | **840 species** — 20× |
 | **Input** | one roster row | the **species anchor**: 18 classified fields plus the almanac lore, already committed |
 | **Quota axes** | 6 (nodeClass, trigger, element, status, channelFamily, exclusionForm) | the same **plus the D17 favour triple** — the axis with the measured 166× problem |
-| **Distinctness bar** | *differentiation* — 39 trees must be tellable apart | ⭐ **recognition** — *"it does not need to be distinguishable from 903 others; it needs to feel like that demon"* (`spec-set-charm-gen.md` D17) |
+| **Distinctness bar** | *differentiation* — 42 trees must be tellable apart | ⭐ **recognition** — *"it does not need to be distinguishable from 903 others; it needs to feel like that demon"* (`spec-set-charm-gen.md` D17) |
 | **Uniqueness** | nodes drawn from a shared affix library | **nodes no other tree has** (§5) |
 
 Two of those are differences of *kind*, not degree, and either alone justifies a separate module:
@@ -406,6 +407,34 @@ Three **measured** rates from this repo's own runs bracket the wall clock:
 optional at this size: the workflow's SQLite checkpoint and the `run start/pause/resume/rerun` verbs
 already ship for exactly this shape, and a run that cannot resume is a run that must be perfect.
 
+**Extended 2026-09-06 with `tree-language`'s own real per-tree yield, measured across the 12 primary
+trees (H9) — two corrections to the headline `100,800`/`105,840` figures, both real not estimated:**
+
+1. **The three bracketing rates above are all `workers=4`, from the DEMON corpus's own pipeline —
+   `tree-language`'s own real `--workers` test found the OPPOSITE result at just `workers=2`: a 56%
+   escalation rate against a ~30% sequential baseline on the SAME tree.** The cause was not
+   conclusively isolated (genuine concurrency interference vs. batch-to-batch variance), so this is
+   not a claim that species generation must run sequential — it is a caution that the demon corpus's
+   own `workers=4` throughput is **not evidence** that `tree-language`'s adapter tolerates it
+   equally well, since the two are different pipelines under this same map (`tree-language` vs. the
+   demon program's own generator). Whoever schedules the real species run should re-measure
+   `--workers` on ONE species tree first, the same way this session did for the primary trees, before
+   assuming the demon corpus's rate transfers.
+2. **A real, single `--write` pass over one tree does not reach 100% acceptance, and the headline call
+   count assumes it does.** Measured across the first 12 real trees generated (might through
+   ferocity): first-pass accept rates ranged **57.5%–97.5%** (median ≈ 75%), zero escalations once the
+   `_node_verify_fn` ordering fix landed, with the remainder split between genuine 1-1-1 vote ties and
+   genuine model declines. **Repeated `--write` passes measurably close the gap** (idempotent — only
+   still-unresolved subjects are re-attempted, at full base+vote cost each time) — `might` went
+   30→32→35→37/40 over three further passes, `fortitude` 12→18→25→32/40 over three, `vigor` 23→35/40
+   in one — but **with diminishing returns, and a residual few percent that may never converge**
+   (a persistent 1-1-1 tie reproduced identically across three separate real runs on the same tree).
+   **Budget real total calls above the headline figure by the same proportion**, and budget the
+   review/generation schedule around "most trees need 2–4 real passes to reach a high (not
+   necessarily 100%) accept rate," not "one pass per tree." A tree's own residual ties/declines after
+   several passes are a legitimate terminal state for tree-review to adjudicate (§7.2 below), never a
+   sign the generation run itself is broken.
+
 #### 7.2 Human
 
 From [`tree-review`](spec-tree-review.md) §1.3, applied to the 840-tree species lot:
@@ -456,16 +485,22 @@ Named here so they are raised at task start rather than discovered mid-run.
 
 #### 8.1 The gate quantity — this module is not in the ideal's §13.4 position
 
-The ideal's §13.4 finding is real: **27 of the 39 generic trees have no gate quantity in code today**,
-so 1,080 of the 1,560 generic nodes would ship authored, reviewed, committed and at tier 0 if they
-were generated ahead of their counters. Verified again this session: `element_mastery` exists only in
-comments (`PointBudget.cs:13,15`, `AptitudeTuning.cs:20`, which says outright that its source *"does
-not exist yet"*), and `status_applied` has **zero hits in `src/`**.
+The ideal's §13.4 finding was real at the time this section was written: **27 of the 39 generic trees
+had no gate quantity in code**, so 1,080 of the 1,560 generic nodes would have shipped authored,
+reviewed, committed and at tier 0 if generated ahead of their counters. `element_mastery` existed only
+in comments and `status_applied` had zero hits in `src/`.
 
-**D37 (2026-09-05) bounds that finding:** both quantities are built by **`gate-counters`, a wave-0
-module of this program** — counters, persistence and the `PointBudget` binding — so the generic
-corpus's wait is a schedule, not a permanent hole, and all 39 generic trees are reachable. The
-sequencing rule is unchanged: content still waits for its gate.
+**Superseded 2026-09-06 (D37's own schedule completed, then D51 grew the corpus).**
+`data/seed/passive-tree/gate-evidence.v1.json` reads `carrier` on both `elementMastery` and
+`statusApplied` today — `ElementMasterySource`/`StatusAppliedSource`, registered at
+`GateCounterEndpoints.cs:104,107`, live-probed end to end (task G6). D51 also accepted three new
+`nerve.*` statuses, so the corpus is now 12 primary + 6 elemental + 24 status = **42 generic trees,
+1,680 nodes** (30 of them, 1,200 nodes, are the ones this section is about). **The gate is open, but
+that is not the same as generable:** `passive-tree-map.md`'s third D51/D52-adjacent filed item and
+`passive-tree-todo.md` task J1 name the real remaining block — the plan-emission CLI has no
+`elemental_tree_spec()`/`status_tree_spec()` factory function at all, so there is still no code path
+that plans, let alone generates, any of those 30 trees. The sequencing rule stated here is unchanged
+in spirit: content still waits, only the name of what it waits on changed.
 
 **A reader who has just read that number will ask whether the 840 species trees are in the same
 position. They are not, and the difference is worth stating precisely rather than asserting.**
@@ -675,7 +710,15 @@ decision, or an answerable question, which makes it a task. Two of the three que
 carried were answered by the owner on 2026-09-05 and are recorded below with their answers, because a
 closed question that vanishes gets re-asked.
 
-1. **Does a species tree gate on `UniqueDemon` specimen level, and does that satisfy D26's ladder?**
+1. ~~**Does a species tree gate on `UniqueDemon` specimen level, and does that satisfy D26's ladder?**~~
+   **CLOSED 2026-09-06 by task G7: yes.** `PointBudget.UniqueDemonSourceFromLevel(specimenLevel) =>
+   Math.Max(0, specimenLevel - 1)` ships (`PointBudget.cs:53`), mirroring `DemonTypeSourceFromLevel`
+   exactly, and `UniqueDemonAllocation.cs` (new, sibling to `SpeciesAllocation.cs` — keyed by
+   `instanceId`, one specimen, not `(playerId, speciesId)`) is a real production caller. A species
+   tree's tier ladder now reads non-zero on an actor with a levelled specimen, independently
+   re-verified. Corrected here by an adversarial spec audit that found this question still presented
+   as open. Kept below as the historical record of the investigation that led to the fix:
+
    `AllocationScope.UniqueDemon` ships (`AptitudeAllocation.cs:8`), and **counted this session it has
    exactly three references in `src/`** — the tuning table's own row (`AptitudeTuning.cs:204`) and the
    store's scope-key round-trip (`RpgStore.Aptitudes.cs:58,67`). **No production code ever saves or

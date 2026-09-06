@@ -429,7 +429,8 @@ internal static class ContractTuningTestBootstrap
             WeightCannotCounter: 10, WeightRound: 1, WeightRisk: 120,
             StanceDefault: FusionRpg.Core.Battle.Siege.Stance.Guard,
             AutoResolveHandicapMilli: 1000, RetargetLatencyTicks: 0, AggressionRange: 2,
-            MaxCandidatesScored: 32));
+            MaxCandidatesScored: 32),
+        Fog: new FusionRpg.Core.Battle.Board.FogTuning(Enabled: true, DefaultVisionRangeTiles: 6));
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,

@@ -43,6 +43,21 @@ public class ItemCardEndpointsTests : IAsyncLifetime
     const string BladeContainer = "item.card-proof-blade";
     const string HelmContainer = "item.card-proof-helm";
     const string StrandedContainer = "item.card-proof-stranded";
+
+    /// <summary>item-content T1: a container that rolls ONE affix, so it stays under
+    /// <c>ItemNameComposer.RareNameThreshold</c> (3) and is named by the affix grammar rather than by
+    /// the rare two-word draw. The blade above rolls three and proves the other side.</summary>
+    const string CharmContainer = "item.card-proof-charm";
+
+    /// <summary>The one family the charm's pool may offer, so its composed name is deterministic:
+    /// `atom.fortitude` authors exactly the three prefix words asserted below, and it is one of the 14
+    /// families the shipped `tier-bands.v1.json` actually admits.</summary>
+    const string CharmFamily = "atom.fortitude";
+    static readonly string[] CharmWords = { "Sound", "Sturdy", "Enduring" };
+
+    const string BladeName = "Card-Proof Blade";
+    const string HelmName = "Card-Proof Helm";
+    const string CharmName = "Card-Proof Charm";
     const string Frame = "humanoid";
     const int ItemLevel = 24;
     const int LevelReq = 20;
@@ -60,6 +75,7 @@ public class ItemCardEndpointsTests : IAsyncLifetime
     string _bladeId = "";
     string _helmId = "";
     string _strandedId = "";
+    string _charmId = "";
     ItemCardCorpus _corpus = null!;
 
     // ---- the real corpus -------------------------------------------------------------------------
@@ -131,6 +147,17 @@ public class ItemCardEndpointsTests : IAsyncLifetime
         EnhancementTuning.Parse(File.ReadAllText(
             Path.Combine(RepoRoot(), "data", "tuning", "enhancement.v1.json")));
 
+    /// <summary>item-content T1's two naming corpora, both over the REAL shipped seed tree — the
+    /// 109 families' own authored <c>nameWords</c> and the head/tail table. Loaded once for the whole
+    /// class the same way the atom catalog is.</summary>
+    static readonly Func<string, AffixNameSlot?> AffixNameWords =
+        AffixNameWordCorpus.Load(Seed("items", "affix-families"));
+
+    static readonly Func<long, (string Head, string Tail)> RareNames =
+        RareNameCorpus.Load(Seed("items", "rare-names", "rare-names.json"))
+        ?? throw new FileNotFoundException(
+            "data/seed/items/rare-names/rare-names.json — a rare item's two-word name has no other source");
+
     // ---- fixture ---------------------------------------------------------------------------------
 
     public async Task InitializeAsync()
@@ -187,6 +214,18 @@ public class ItemCardEndpointsTests : IAsyncLifetime
             return pool;
         }
 
+        // item-content T1: one family, so the single drawn affix — and therefore the composed name —
+        // is the same on every run. `Assert.NotEmpty` because a silently empty pool would roll nothing
+        // and the item would fall back to its base name for the wrong reason.
+        var charmPool = affixes
+            .Where(a => a.Refs.Count == 1 && a.Refs[0].AtomId is { } id && byId.TryGetValue(id, out var at)
+                        && string.Equals(at.FamilyId, CharmFamily, StringComparison.Ordinal)
+                        && templated.Contains(at.FamilyId))
+            .OrderBy(a => a.AffixId, StringComparer.Ordinal)
+            .Select(a => new ContainerPoolRow(a.AffixId, 100))
+            .ToList();
+        Assert.NotEmpty(charmPool);
+
         _bladeId = SeedItem(BladeContainer, ItemRole.ArmamentPrimary, hpBase, PoolExcept(hpBase.FamilyId),
             rollSeed: 0xC0FFEE, LookupAtom, LookupAffix);
         _helmId = SeedItem(HelmContainer, ItemRole.HeadGuard, defenseBase, PoolExcept(defenseBase.FamilyId),
@@ -194,20 +233,33 @@ public class ItemCardEndpointsTests : IAsyncLifetime
         // Deliberately NOT in the base-type corpus below — the 409 case.
         _strandedId = SeedItem(StrandedContainer, ItemRole.ArmamentPrimary, hpBase, PoolExcept(hpBase.FamilyId),
             rollSeed: 0x1234, LookupAtom, LookupAffix);
+        _charmId = SeedItem(CharmContainer, ItemRole.CoreGuard, defenseBase, charmPool,
+            rollSeed: 0x5EED, LookupAtom, LookupAffix, prefixRolls: 1);
 
         _specimenId = _store.CreateUniqueActor(playerId, "plant", 1).InstanceId;
 
         // ⭐ The corpus half the DAL cannot know. The gem catalog is the REAL shipped loader over the
         // REAL seed files; the base type is an explicit map because these three container ids are the
         // test's own, and module 6 has no table to register them in.
+        //
+        // ⭐ item-content T1: the two naming corpora, both over the REAL shipped seed files. Without
+        // them `GetItemCardInput` has nothing to compose with and falls back to the base type's name,
+        // which is exactly the state every card was in before 2026-09-06.
         _corpus = new ItemCardCorpus(
             ItemBaseTypeCorpus.From(new Dictionary<string, CardBaseType>(StringComparer.Ordinal)
             {
-                [BladeContainer] = new("base.card-proof-blade", "class.blade", Frame, "role.armament-primary", null),
-                [HelmContainer] = new("base.card-proof-helm", "class.helm", Frame, "role.head-guard", null),
+                [BladeContainer] = new("base.card-proof-blade", "class.blade", Frame, "role.armament-primary", null, BladeName),
+                [HelmContainer] = new("base.card-proof-helm", "class.helm", Frame, "role.head-guard", null, HelmName),
+                [CharmContainer] = new("base.card-proof-charm", "class.charm", Frame, "role.core-guard", null, CharmName),
             }),
             GemInsertCorpus.Load(Seed("items", "gems")),
-            Sockets(), Surfaces(), Enhancement());
+            Sockets(), Surfaces(), Enhancement(),
+            LookupNameWords: AffixNameWords,
+            RareNameDraw: RareNames,
+            // ⭐ item-content T6: N2's real string catalog, so block 10 resolves a real authored
+            // flavour sentence rather than emitting a bare key for the browser to fake.
+            LookupString: DisplayStringCatalogFile.Load(
+                Path.Combine(RepoRoot(), "content", "display", "en.json")));
 
         var port = GetFreeTcpPort();
         var baseUrl = $"http://127.0.0.1:{port}";
@@ -243,7 +295,8 @@ public class ItemCardEndpointsTests : IAsyncLifetime
     /// real generation stamp — everything the card reader joins over.</summary>
     string SeedItem(
         string containerId, ItemRole role, AtomRow baseStat, IReadOnlyList<ContainerPoolRow> pool,
-        long rollSeed, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix)
+        long rollSeed, Func<string, AtomRow?> lookupAtom, Func<string, AffixRow?> lookupAffix,
+        int prefixRolls = 3)
     {
         var container = new ContainerRow
         {
@@ -252,7 +305,7 @@ public class ItemCardEndpointsTests : IAsyncLifetime
             Slot = ItemRoles.Id(role),
             Rarity = Rung,
             LevelReq = LevelReq,
-            PrefixRolls = 3,
+            PrefixRolls = prefixRolls,
             SuffixRolls = 0,
             Atoms = new[] { new ContainerAtomRow(0, baseStat.AtomId) },
             Pool = pool,
@@ -337,7 +390,15 @@ public class ItemCardEndpointsTests : IAsyncLifetime
         // The header is one line and carries the identity the browser draws.
         var header = Assert.Single(Lines(body, CardBlocks.Header));
         var args = header.GetProperty("args");
-        Assert.Equal("base.card-proof-blade", args.GetProperty("name").GetString());
+        // ⛔ Until 2026-09-06 this line asserted `base.card-proof-blade` — the base type's display KEY,
+        // pinned as if it were the item's name. It was not a stale expectation: `ItemCardCorpus.ItemName`
+        // was a flat string on a record built once at host start, so no per-instance composed name could
+        // ever have reached it, and `ItemNameComposer` had no production caller at all. The blade rolls
+        // three affixes, which is `RareNameThreshold`, so its real name is the seeded two-word draw.
+        Assert.Equal(RareName(_bladeId), args.GetProperty("name").GetString());
+        Assert.Equal("base.card-proof-blade", args.GetProperty("baseNameKey").GetString());
+        // item-content T2: the authored name, beside the key rather than instead of it.
+        Assert.Equal(BladeName, args.GetProperty("baseName").GetString());
         Assert.Equal("rarity." + Rung, args.GetProperty("rungKey").GetString());
         Assert.Equal("7", args.GetProperty("pips").GetString());
         Assert.Equal(ItemLevel.ToString(), args.GetProperty("ilvl").GetString());
@@ -423,6 +484,172 @@ public class ItemCardEndpointsTests : IAsyncLifetime
             l => l.GetProperty("key").GetString() == "item.card.requirement.refused");
         Assert.Equal("item.equip.refusal.level-too-low",
             refused.GetProperty("args").GetProperty("reasonKey").GetString());
+    }
+
+    // ====================================================================================================
+    // item-content T1 — the name (item module 8's production caller)
+    // ====================================================================================================
+
+    /// <summary>The seeded two-word name the shipped corpus draws for an instance's own
+    /// <c>roll_seed</c>. Read through the same loader production uses, so this pins the SEED PLUMBING
+    /// (the card must draw on the instance's roll seed, not on some other number) rather than
+    /// restating the words.</summary>
+    string RareName(string instanceId)
+    {
+        var (head, tail) = RareNames(_store.GetInstance(instanceId)!.RollSeed);
+        return $"{head} {tail}";
+    }
+
+    /// <summary>
+    /// ⭐ <b>The under-threshold half.</b> One rolled affix (below <c>RareNameThreshold</c> = 3) means
+    /// the affix grammar: the family's own authored band word in front of the base type's own authored
+    /// name. Every word here is real shipped content — `atom.fortitude` authors exactly
+    /// <c>Sound / Sturdy / Enduring</c> and nothing else.
+    /// </summary>
+    [Fact]
+    public async Task Card_forAnItemUnderTheRareThreshold_isNamedByTheAffixGrammar()
+    {
+        var body = await Body($"/api/items/{_charmId}/card");
+        var name = Assert.Single(Lines(body, CardBlocks.Header))
+            .GetProperty("args").GetProperty("name").GetString()!;
+
+        // The real, whole composed string — `atom.fortitude`'s own band-C word in front of the
+        // base type's own authored name. Pinned rather than pattern-matched: a name is a player-
+        // facing string, and "it looked name-shaped" is what let the key ship for months.
+        Assert.Equal("Enduring Card-Proof Charm", name);
+        Assert.EndsWith(" " + CharmName, name, StringComparison.Ordinal);
+        Assert.Contains(name[..^(CharmName.Length + 1)], CharmWords);
+
+        // The two things this module exists to stop: a display key where a name goes, and a bare base
+        // type on an item that really did roll something.
+        Assert.DoesNotContain("base.", name, StringComparison.Ordinal);
+        Assert.NotEqual(CharmName, name);
+    }
+
+    /// <summary>
+    /// ⭐ <b>The at-or-over-threshold half.</b> Three rolled affixes is <c>RareNameThreshold</c>, so
+    /// §4.12's own rule applies: a generated two-word name, because naming the item after two of its
+    /// affixes would be a lie about what it does. Both words must come from the shipped head/tail
+    /// table — read independently here, so the test would fail if the draw invented a word.
+    /// </summary>
+    [Fact]
+    public async Task Card_forARareItem_getsASeededTwoWordNameFromTheShippedTable()
+    {
+        var body = await Body($"/api/items/{_bladeId}/card");
+        var name = Assert.Single(Lines(body, CardBlocks.Header))
+            .GetProperty("args").GetProperty("name").GetString()!;
+
+        // Pinned: seed 0xC0FFEE draws this pair out of the shipped table and always will —
+        // SeededRng is version-pinned precisely so a replayable draw does not move.
+        Assert.Equal("Sap Tangle", name);
+        var parts = name.Split(' ');
+        Assert.Equal(2, parts.Length);
+
+        var (heads, tails) = ShippedRareWords();
+        Assert.Contains(parts[0], heads);
+        Assert.Contains(parts[1], tails);
+        Assert.NotEqual(BladeName, name);
+    }
+
+    /// <summary>SC5 for the name: same stored state, same name, byte for byte. A name derived from
+    /// anything generated (an instance id, a clock) would drift between two reads of the same card.</summary>
+    [Fact]
+    public async Task Card_composesTheSameNameOnEveryRead()
+    {
+        var first = await Body($"/api/items/{_bladeId}/card");
+        var second = await Body($"/api/items/{_bladeId}/card");
+
+        Assert.Equal(
+            Assert.Single(Lines(first, CardBlocks.Header)).GetProperty("args").GetProperty("name").GetString(),
+            Assert.Single(Lines(second, CardBlocks.Header)).GetProperty("args").GetProperty("name").GetString());
+    }
+
+    /// <summary>
+    /// The corpus is what turns naming ON. With it absent the card falls back to the base type's
+    /// AUTHORED name — not to its display key, which is what shipped before T2. This is the assertion
+    /// that would catch naming quietly regressing to the pre-2026-09-06 state.
+    /// </summary>
+    [Fact]
+    public void WithoutTheNamingCorpora_theCardFallsBackToTheAuthoredBaseNameNotAKey()
+    {
+        var bare = _corpus with { LookupNameWords = null, RareNameDraw = null };
+        var input = _store.GetItemCardInput(_bladeId, bare)!;
+
+        Assert.Equal(BladeName, input.ItemName);
+        Assert.NotEqual("base.card-proof-blade", input.ItemName);
+    }
+
+    /// <summary>
+    /// The <c>nameWords</c> corpus over the REAL shipped tree: every one of the 109 families resolves,
+    /// and the prefix/suffix split is the authored one (58 / 51). A family that authored both slots, or
+    /// neither, is a load rejection — so this also proves the loader is not silently skipping rows.
+    /// </summary>
+    [Fact]
+    public void TheAffixNameWordCorpus_carriesEveryShippedFamilysAuthoredSlot()
+    {
+        var warding = AffixNameWords("atom.warding");
+        Assert.NotNull(warding);
+        Assert.Equal(AffixClass.Prefix, warding!.Value.Slot);
+        Assert.Equal("Bramblewrought", AffixNameTable.Resolve(warding.Value.Rows, 5, null, Frame));
+
+        var freezing = AffixNameWords("atom.freezing");
+        Assert.NotNull(freezing);
+        Assert.Equal(AffixClass.Suffix, freezing!.Value.Slot);
+        Assert.Equal("of Hoarfrost", AffixNameTable.Resolve(freezing.Value.Rows, 5, null, Frame));
+
+        Assert.Null(AffixNameWords("atom.not-a-family"));
+    }
+
+    /// <summary>
+    /// ⛔ <b>The connective defect, proven against real authored words.</b> Every one of the 153 shipped
+    /// suffix words carries its own <c>"of "</c> (<c>of Killing Frost</c>), and
+    /// <c>ItemNameComposer</c> used to prepend a second one unconditionally — so a real item read
+    /// <i>"Sturdy Bark Helm of of Killing Frost"</i>. Invisible until today because the only caller was
+    /// a unit test whose lookup returned synthetic words.
+    /// </summary>
+    [Fact]
+    public void TheAffixGrammar_doesNotDoubleTheOfConnectiveOnRealAuthoredWords()
+    {
+        var rolled = new[]
+        {
+            new NamedAffix(AffixClass.Prefix, "atom.fortitude", 3, 1, null),
+            new NamedAffix(AffixClass.Suffix, "atom.freezing", 5, 2, null),
+        };
+
+        var name = ItemNameAssembly.Compose("Bark Helm", Frame, rollSeed: 1, rolled, AffixNameWords, RareNames);
+
+        Assert.Equal("Sturdy Bark Helm of Hoarfrost", name);
+        Assert.DoesNotContain("of of", name, StringComparison.Ordinal);
+    }
+
+    /// <summary>The rare draw is a function of <c>roll_seed</c> alone and uses the shipped, version-
+    /// pinned <c>SeededRng</c>, so it is stable across runs and across .NET versions — SC5's own
+    /// requirement, applied to the name.</summary>
+    [Fact]
+    public void TheRareNameDraw_isSeedStableAndSpreadsAcrossTheTable()
+    {
+        Assert.Equal(RareNames(4242), RareNames(4242));
+        Assert.NotEqual(RareNames(1), RareNames(2));
+
+        var (heads, tails) = ShippedRareWords();
+        var drawn = Enumerable.Range(0, 200).Select(i => RareNames(i)).ToList();
+        Assert.All(drawn, d => Assert.Contains(d.Head, heads));
+        Assert.All(drawn, d => Assert.Contains(d.Tail, tails));
+        // A draw that ignored one half of the seed would collapse to a handful of names.
+        Assert.True(drawn.Select(d => d.Head).Distinct().Count() > 5);
+        Assert.True(drawn.Select(d => d.Tail).Distinct().Count() > 5);
+    }
+
+    /// <summary>The head/tail lists, read straight off the shipped JSON rather than through the loader
+    /// under test — otherwise "the draw used a real word" would only mean "the draw used the loader".</summary>
+    static (IReadOnlyList<string> Heads, IReadOnlyList<string> Tails) ShippedRareWords()
+    {
+        using var doc = JsonDocument.Parse(File.ReadAllText(Seed("items", "rare-names", "rare-names.json")));
+        List<string> Words(string slot) => doc.RootElement.GetProperty("entries").EnumerateArray()
+            .Single(e => e.GetProperty("slot").GetString() == slot)
+            .GetProperty("words").EnumerateArray().Select(w => w.GetString()!).ToList();
+
+        return (Words("head"), Words("tail"));
     }
 
     // ---- refusals: named, and never a 500 ---------------------------------------------------------
@@ -589,6 +816,10 @@ public class ItemCardEndpointsTests : IAsyncLifetime
         var known = lookup("item.humanoid-main-hand-a-001");
         Assert.NotNull(known);
         Assert.Equal("base.honed-hatchet", known!.Value.NameKey);
+        // item-content T2: the authored `name`, read and no longer dropped. All 740 entries carry one
+        // and `content/display/en.json` carries no `base.*` row for any of them, so before this the
+        // card's own name slot showed the key.
+        Assert.Equal("Honed Hatchet", known.Value.Name);
         Assert.Equal("class.blade", known.Value.ClassNounKey);
         Assert.Equal("role.armament-primary", known.Value.RoleNameKey);
         Assert.Equal("humanoid", known.Value.Frame);
@@ -617,6 +848,67 @@ public class ItemCardEndpointsTests : IAsyncLifetime
         Assert.Equal(GemInsertCorpus.UnauthoredInsertTier, ember.Value.Def.Tier);
 
         Assert.Null(lookup("gem.not-a-gem"));
+    }
+
+    /// <summary>
+    /// item-content T6: the Server's own loader over the REAL `content/display/en.json`, which is what
+    /// turns a unique's or a set's <c>flavourKey</c> into the sentence a player reads. Absence
+    /// degrades to "no sentence", never to a guess — the same rule <c>DisplayCheck</c> applies to this
+    /// very file.
+    /// </summary>
+    [Fact]
+    public void TheStringCatalog_resolvesARealAuthoredFlavourSentenceAndNeverInventsOne()
+    {
+        var lookup = DisplayStringCatalogFile.Load(
+            Path.Combine(RepoRoot(), "content", "display", "en.json"));
+
+        var text = lookup("flavor.unique.carrion-spitter");
+        Assert.False(string.IsNullOrWhiteSpace(text));
+        // The sentence, not the key and not `keyTail`'s old fragment of it.
+        Assert.DoesNotContain("flavor.unique", text!, StringComparison.Ordinal);
+        Assert.NotEqual("carrion spitter", text);
+
+        Assert.False(string.IsNullOrWhiteSpace(lookup("flavor.set.copyhand")));
+
+        // A key with no row, and a catalog file that is not there at all: both answer null.
+        Assert.Null(lookup("flavor.unique.never-authored"));
+        Assert.Null(DisplayStringCatalogFile.Load(
+            Path.Combine(RepoRoot(), "content", "display", "no-such-language.json"))("anything"));
+    }
+
+    /// <summary>
+    /// ⭐ item-content T5+T6, end to end over HTTP: a real unique row, carrying a real shipped
+    /// <c>flavorKey</c>, renders the AUTHORED sentence in block 10 of the card the route serves.
+    /// This is the assertion that separates "the key travelled" from "the player can read the prose".
+    /// </summary>
+    [Fact]
+    public async Task Card_forAUniqueWithAuthoredFlavour_carriesTheRealSentenceNotTheKey()
+    {
+        // A real shipped pair, read out of the corpus rather than typed here.
+        var seed = FusionRpg.Core.Items.Uniques.UniqueCorpus
+            .Parse(File.ReadAllText(Path.Combine(Seed("items", "uniques"), "charnel-bloom-70.json")))
+            .First(u => u.FlavourKey is { Length: > 0 } && u.FlavourText is { Length: > 0 });
+
+        _store.UpsertItemUnique(new FusionRpg.Core.Items.Uniques.UniqueRow(
+            BladeContainer, "item.card-proof-blade",
+            FusionRpg.Core.Items.Uniques.UniqueCounterPressure.Narrow, 100, "offense",
+            FusionRpg.Core.Items.Uniques.UniqueAcquisition.Drop,
+            FlavourKey: seed.FlavourKey));
+
+        var body = await Body($"/api/items/{_bladeId}/card");
+        var line = Assert.Single(Lines(body, CardBlocks.Flavour));
+        var args = line.GetProperty("args");
+
+        Assert.Equal(seed.FlavourKey, args.GetProperty("flavourKey").GetString());
+        Assert.Equal(seed.FlavourText, args.GetProperty("__rendered").GetString());
+    }
+
+    /// <summary>The negative half: nothing authored means block 10 is empty, not a placeholder.</summary>
+    [Fact]
+    public async Task Card_forAnItemWithNoAuthoredFlavour_emitsAnEmptyBlockAndNoPlaceholder()
+    {
+        var body = await Body($"/api/items/{_helmId}/card");
+        Assert.Empty(Lines(body, CardBlocks.Flavour));
     }
 
     async Task<JsonElement> Body(string path)
