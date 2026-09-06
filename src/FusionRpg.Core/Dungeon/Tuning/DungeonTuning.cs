@@ -316,6 +316,8 @@ public static class DungeonTuningLoader
         if (wildDeltaBands.Count != 4)
             throw new DungeonTuningRejection($"{File}: wild.deltaBands must have exactly 4 signed Θ edges (5 resulting deltaBand members), found {wildDeltaBands.Count}.");
         var wildDeltaShiftRungs = IntArray(wild, "deltaShiftRungs", "wild");
+        if (wildDeltaShiftRungs.Count != 5)
+            throw new DungeonTuningRejection($"{File}: wild.deltaShiftRungs must have exactly 5 entries (one per deltaBand member: far-below..far-above), found {wildDeltaShiftRungs.Count}.");
         var tideEl = Obj(wild, "tide", "wild");
         var wildTide = new WildTideTuning(Bool(tideEl, "enabled", "wild.tide"), IntArray(tideEl, "shiftRungs", "wild.tide"));
         var offerPrefEl = Obj(wild, "offerPreference", "wild");

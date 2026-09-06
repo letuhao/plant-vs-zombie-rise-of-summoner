@@ -97,6 +97,58 @@ public class EquipRuntimeTests : IDisposable
         ParamsJson = $"{{\"channel\":\"{channel}\",\"op\":\"flat\",\"amount\":{amount}}}",
     };
 
+    /// <summary>
+    /// A `stat.derived` `amount` is <c>ParamKind.Value</c> — a plain number OR a ValueSpec object
+    /// (a curve reference, or `patron-absorption`'s <c>externalRef</c>). The shipped corpus carries
+    /// twelve of the latter (`data/seed/atoms/patron-aura.json`), and
+    /// <c>JsonElement.TryGetInt64</c> <b>throws</b> on an object rather than returning false. Without
+    /// a ValueKind guard the whole compose died with an unhandled
+    /// <c>InvalidOperationException</c> — and so did the geared corner run, which sweeps every
+    /// `stat.derived` row in the corpus. Skip the row, exactly as an unparseable `op` is skipped;
+    /// this seam has no ValueSpec resolver (the compiler does), so resolving one here would be
+    /// inventing a second, divergent evaluation of the same spec.
+    /// </summary>
+    static AtomRow ValueSpecAtom(string channel) => new()
+    {
+        AtomId = AtomRow.DeriveId("atom.equip-valuespec", "", 1), KindId = "stat.derived",
+        FamilyId = "atom.equip-valuespec", Variant = "", Tier = 1, Name = "Equip ValueSpec",
+        ParamsJson = $"{{\"channel\":\"{channel}\",\"op\":\"flat\",\"amount\":{{\"externalRef\":\"patron.auraPowerMilli.fire\"}}}}",
+    };
+
+    [Fact]
+    public void A_ValueSpec_amount_is_skipped_not_crashed_on_in_battle()
+    {
+        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(_ => new[]
+        {
+            ValueSpecAtom(DerivedStatChannels.CombatPowerFire),
+            DerivedAtom(DerivedStatChannels.CombatPowerFire, 30),
+        }));
+
+        var composed = BattleStatComposer.Compose(Actor(specimenId: "s42"));
+        var bare = BattleStatComposer.Compose(Actor(specimenId: null) with { SpecimenId = null });
+
+        // The unresolvable row is skipped and the walk CONTINUES -- the readable atom beside it still
+        // lands. A thrown row would take the whole squad build with it.
+        Assert.Equal(bare.Get(DerivedStatChannels.CombatPowerFire) + 30,
+            composed.Get(DerivedStatChannels.CombatPowerFire));
+    }
+
+    [Fact]
+    public void A_ValueSpec_amount_is_skipped_on_the_derived_side_too()
+    {
+        var equip = EquipAtomSource.FromResolver(_ => new[]
+        {
+            ValueSpecAtom(DerivedStatChannels.CombatPowerFire),
+            DerivedAtom(DerivedStatChannels.CombatPowerFire, 30),
+        });
+
+        var atoms = equip.DerivedAtomsFor("s42");
+
+        // Same one shared parse (EquippedDerived), so the two sides cannot diverge on which rows count.
+        Assert.Single(atoms);
+        Assert.Equal(30L, atoms[0].Amount);
+    }
+
     [Fact]
     public void No_specimen_id_means_no_equipment_contribution()
     {

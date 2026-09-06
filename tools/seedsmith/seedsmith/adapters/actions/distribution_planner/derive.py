@@ -610,7 +610,12 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
             },
             "pool": {"allowedAtomFamilies": list(this_allowed),
                     "forbiddenAtomFamilies": list(forbidden_pair_ids)},
-            "pairing": {"role": pa.role, "pairedPayoffFamily": pa.paired_payoff_family},
+            # `forcedEnabler` (A-S7 dependency, spec-coverage-assignment.md §3): the exact
+            # `PairingAssignment.forced_enabler` already computed above -- serialized here so a
+            # downstream module can know WHICH family was forced without re-deriving
+            # `assign_pairing_roles`'s own tie-break logic. `None` for every `payoff`/`none` role.
+            "pairing": {"role": pa.role, "pairedPayoffFamily": pa.paired_payoff_family,
+                       "forcedEnabler": pa.forced_enabler},
             "avoidNeighbours": avoid_neighbours,
             "_provenance": {"corpusHash": corpus_hash, "promptVersion": prompt_version,
                            "round": round_no, "tuningVersion": tuning_version},

@@ -4,7 +4,9 @@
 [../docs/architecture/action-map.md](../docs/architecture/action-map.md) · Specs:
 [../docs/architecture/action/](../docs/architecture/action/) · Ideal: **sealed**.
 
-**36 slices · 11 phases.** Scope: **S** ≈ under an hour · **M** ≈ a focused session · **L** ≈ multi-session.
+**36 slices · 11 phases**, plus Phase 12 (A18a-e, T40-T54) and Phase 13 (A18f/A19/A20, T55-T57)
+added 2026-08-28 and 2026-09-06. Scope: **S** ≈ under an hour · **M** ≈ a focused session ·
+**L** ≈ multi-session.
 
 > ## ⛔ Two rules binding on every slice below
 >
@@ -1695,6 +1697,117 @@ never left only in the global scratch file).
   execution route, the DoT-payload-lives-on-Overlay-not-Params rule, the `target` vs `targetPtr`
   overlay key), T48/T49 (`BaseDuration`'s ms unit), T52 (the `IBattleStatTarget` gap, the real
   `flat`/`increased`/`more` param shape, the `TriggerOptional` validation gap).
+
+---
+
+## Phase 13 — A18f, A19, A20 (2026-09-06) — dispatch, costs/cooldowns, the balance harness
+
+Module specs: [spec-action-dispatch-generalization.md](../docs/architecture/action/spec-action-dispatch-generalization.md) (A18f),
+[spec-action-costs-cooldowns-adoption.md](../docs/architecture/action/spec-action-costs-cooldowns-adoption.md) (A19),
+[spec-synthetic-loadout-harness.md](../docs/architecture/action/spec-synthetic-loadout-harness.md) (A20).
+Plan: `action-plan.md` §4c. **Build order: A18f → A19 → A20**, real, not a preference — A19's own
+acceptance tests test nothing if no non-basic-attack action can ever resolve, and A20's own
+acceptance #4 needs a real cost/cooldown difference to measure.
+
+Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5.
+
+### A18f — action-dispatch-generalization
+
+- [ ] **T55.1** `ActionRunner.CurrentEnvelope(actorKey)` · **XS**
+  - Acceptance: returns the exact `ActionEnvelope` the actor's active run committed (`_runs[actorKey].Envelope`);
+    `null` under the identical conditions `CurrentTarget` returns `null` — same shape, verified by a
+    test that constructs both from the same run state and compares.
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~ActionRunnerTests.CurrentEnvelope"`
+
+- [ ] **T55.2** `TimelineDispatch`'s resolve branch reads it instead of the hardcoded field · **S** · Deps: T55.1
+  - Acceptance: `TimelineDispatch.cs:211`'s call site becomes
+    `runner.CurrentEnvelope(ev.OwnerKey) ?? state.BasicAttackEnvelopeCompiled` — the fallback proven,
+    not assumed, to reproduce today's exact behavior for an empty loadout.
+  - Verify: a synthetic loadout test — one attack-category action carrying a distinct
+    `CooldownChannel` from the basic attack — asserting the resolve step read that channel; a second
+    test with an empty loadout, asserting byte-identical output to a pre-fix baseline capture.
+
+- [ ] **T55.3** Regression pin on `RunBasicAttackStep` (the atomic path) · **XS** · Deps: T55.2
+  - Acceptance: a test asserting `RunBasicAttackStep` still threads its own local `envelope` from
+    `DeclareBasicAttack` straight into `ApplyBasicAttack` — so a future edit that reintroduces the
+    hardcoded-field coupling on this path fails a test immediately, not silently.
+
+- [ ] **⛔ T55.4** Planted-violation test naming the real, un-closed gap · **S** · Deps: T55.2
+  - Acceptance: a synthetic **Skill-category** (non-attack) loadout run through the fixed dispatch
+    path asserts today's actual (still attack-shaped, still potentially wrong) behavior — proving
+    this module makes **no** correctness claim for it, so a future change that silently assumes the
+    gap is closed fails this test rather than shipping unnoticed. Named explicitly in the test method
+    name so a reviewer sees the limitation, not just a passing green dot.
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~NonAttackCategoryActionIsNotYetCorrectlyResolved"`
+
+### ✅ Checkpoint F.5 — dispatch generalizes for attack-shaped actions
+
+- [ ] All eight existing battle goldens byte-identical, run for real (not predicted) — the same
+  discipline A17/A18 each already held themselves to.
+- [ ] T55.1–T55.4 all green; the planted-violation test (T55.4) is a **known, named, tested**
+  limitation, not a silent gap.
+
+### A19 — action-costs-cooldowns-adoption
+
+- [ ] **T56.1** Swap both `AlwaysAffordable.Instance` construction sites · **S** · Deps: Checkpoint F.5
+  - Acceptance: `BasicAttack.cs:117` and `TimelineDispatch.cs:70` both construct a real `CostLedger`
+    (one instance per `BattleRunState`, mirroring `ActionCatalog`/`Cooldowns`) instead of
+    `AlwaysAffordable.Instance` — **both sites**, proven by a test that would fail if either were
+    missed, not just one happy-path fixture.
+  - Verify: a fixture actor with an authored cost row and an empty pool is refused via
+    `UsabilityEvaluator`'s existing gate 3, exercised through **both** `RunBasicAttackStep` and
+    `TimelineDispatch`'s own commit path.
+
+- [ ] **T56.2** `TryCommitReady` calls `CostLedger.TryPay(..., ActionCostTiming.OnCommit, ...)` · **M** · Deps: T56.1
+  - Acceptance: committing to a costed action debits `ActorResourcePools` by exactly the authored
+    amount, at commit — never at resolve, never at landing; fizzle/miss/interrupt all still cost
+    (three separate fixtures, one per exit path, matching A3's own "committing is what costs" rule).
+  - **Corrected acceptance for the multi-resource case** (validate-all-then-spend-all, not
+    spend-then-rollback — verified against `CostLedger.TryPay`'s real implementation): a cost with
+    an affordable first row and an unaffordable second row spends **neither** — both pools' values
+    unchanged, asserted per pool.
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~TimelineDispatchCostTests"`
+
+- [ ] **T56.3** `perTick` cost shortfall interrupts through the existing `ActionRunner.Interrupt` path · **S** · Deps: T56.2
+  - Acceptance: a `perTick`-costed action that cannot pay mid-run is interrupted (remaining resolves
+    cancelled, slot released, `InterruptCooldownMilli` charged) — never a bespoke cancellation branch.
+
+- [ ] **T56.4** Cooldown generalization proof, on a real attack-category skill · **S** · Deps: T56.2
+  - Acceptance: a real attack-category skill (not the basic attack) on cooldown is refused at
+    commit — proving cooldown arming (already correct per S2/A18f) and the affordability gate
+    (T56.1) compose correctly together, not just individually.
+
+### ✅ Checkpoint G — costs bite
+
+- [ ] Every action with no authored cost table behaves byte-identically to today.
+- [ ] All eight existing battle goldens byte-identical, run for real.
+- [ ] T56.1–T56.4 all green.
+
+### A20 — synthetic-loadout-harness
+
+- [ ] **T57.1** `SyntheticLoadoutBuilder` — same base template, loadout-only variance · **S** · Deps: Checkpoint G
+  - Acceptance: two `BattleActorSetup` variants built from one template differ **only** in
+    `EquippedActionIds` — every other field asserted byte-equal, not spot-checked.
+
+- [ ] **T57.2** Seeded multi-run comparator · **M** · Deps: T57.1
+  - Acceptance: `(baseSeed, variantIndex, runIndex)`-seeded, **a fresh RNG instance constructed per
+    run** (never reused across a variant's N runs — verified against `SeededCombatRng`'s real,
+    non-static shape) — the same `(baseSeed, variantIndex, runIndex)` tuple reproduces a
+    byte-identical single-battle outcome across two calls.
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~LoadoutComparatorDeterminismTests"`
+
+- [ ] **T57.3** The null-hypothesis and real-difference proofs · **S** · Deps: T57.2, Checkpoint G
+  - Acceptance: two mechanically-identical loadouts (different ids, same resolved envelope/container)
+    produce statistically indistinguishable aggregates across a real multi-seed run; two loadouts
+    differing in cooldown category or resource cost (real, thanks to A19) produce measurably
+    different aggregates — the actual acceptance bar this whole reopening exists to reach.
+
+### ✅ Checkpoint H — a balance pass can actually run
+
+- [ ] T57.1–T57.3 all green.
+- [ ] The harness never reads/writes `data/seed`, never touches a shipped golden fixture.
+- [ ] **The program's own stated success bar is met**: two different loadouts on the same actor
+  produce measurably different real outcomes, attributable to the loadout, not to a confound.
 
 ---
 

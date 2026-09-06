@@ -6,6 +6,7 @@ import {
   MAX_SCALE,
   MIN_SCALE
 } from "../objects/pinConstants";
+import { edgeScrollBlockedByIgnore, fitExtentFromPoints } from "./worldCameraMath";
 
 const STATE_KEY = "worldCamera";
 
@@ -52,13 +53,6 @@ function clampZoom(z: number): number {
   return Phaser.Math.Clamp(z, MIN_SCALE, MAX_SCALE);
 }
 
-function inIgnoreRect(x: number, y: number, rects: WorldIgnoreRect[]): boolean {
-  for (const r of rects) {
-    if (x >= r.left && x <= r.left + r.width && y >= r.top && y <= r.top + r.height) return true;
-  }
-  return false;
-}
-
 function applyPan(scene: Phaser.Scene, dx: number, dy: number): void {
   const cam = scene.cameras.main;
   cam.scrollX -= dx / cam.zoom;
@@ -97,12 +91,23 @@ function applyFit(scene: Phaser.Scene, payload: WorldCameraPayload): void {
   const viewH = scene.scale.height - padT - padB;
   if (viewW <= 0 || viewH <= 0) return;
 
-  // Default authored grid extent — host may later pass explicit bounds.
-  const extentW = 220 * 4;
-  const extentH = 190 * 3;
+  // Prefer live pin AABB (followup F5); fall back to authored 4×3 grid.
+  const points: Array<{ x: number; y: number }> = [];
+  const registry = scene.data.get("worldRegistry") as
+    | { sectorIds: () => string[]; getSector: (id: string) => Phaser.GameObjects.GameObject | undefined }
+    | undefined;
+  if (registry) {
+    for (const id of registry.sectorIds()) {
+      const go = registry.getSector(id) as Phaser.GameObjects.Container | undefined;
+      if (!go || !go.active) continue;
+      points.push({ x: go.x, y: go.y });
+    }
+  }
+  const { extentW, extentH, midX, midY } = fitExtentFromPoints(points);
+
   const zoom = clampZoom(Math.min(viewW / extentW, viewH / extentH));
   cam.setZoom(zoom);
-  cam.centerOn(extentW / 2, extentH / 2);
+  cam.centerOn(midX, midY);
   cam.scrollX += padL / zoom;
   cam.scrollY += padT / zoom;
 }
@@ -212,17 +217,30 @@ function isPickSuppressed(scene: Phaser.Scene): boolean {
 function tickEdgeScroll(scene: Phaser.Scene, delta: number): void {
   const s = scene.data.get(STATE_KEY) as CameraWireState | undefined;
   if (!s) return;
-  // Edge-scroll no-ops inside ignoreRects (gaps D7).
-  if (inIgnoreRect(s.pointerX, s.pointerY, s.getIgnoreRects())) return;
-  const w = scene.scale.width;
-  const h = scene.scale.height;
+  const canvas = scene.game.canvas as HTMLCanvasElement;
+  const gameW = scene.scale.width;
+  const gameH = scene.scale.height;
+  // Edge-scroll no-ops inside ignoreRects (gaps D7) — CSS space (followup F2).
+  if (
+    edgeScrollBlockedByIgnore(
+      s.pointerX,
+      s.pointerY,
+      gameW,
+      gameH,
+      canvas.clientWidth,
+      canvas.clientHeight,
+      s.getIgnoreRects()
+    )
+  ) {
+    return;
+  }
   const m = EDGE_SCROLL_MARGIN_PX;
   let dx = 0;
   let dy = 0;
   if (s.pointerX < m) dx = 1;
-  else if (s.pointerX > w - m) dx = -1;
+  else if (s.pointerX > gameW - m) dx = -1;
   if (s.pointerY < m) dy = 1;
-  else if (s.pointerY > h - m) dy = -1;
+  else if (s.pointerY > gameH - m) dy = -1;
   if (dx === 0 && dy === 0) return;
   const cam = scene.cameras.main;
   const speed = (EDGE_SCROLL_SPEED * delta) / cam.zoom;
@@ -235,5 +253,7 @@ export const worldCameraSystem = {
   wirePointer,
   unwire,
   tickEdgeScroll,
-  isPickSuppressed
+  isPickSuppressed,
+  edgeScrollBlockedByIgnore,
+  fitExtentFromPoints
 };

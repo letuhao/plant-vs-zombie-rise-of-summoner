@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildWorldIgnoreRects, SHELL_RAIL_WIDTH_PX } from "./worldIgnoreRects";
+import {
+  buildWorldIgnoreRects,
+  fitPadLeft,
+  FALLBACK_DOCK_W,
+  FALLBACK_RIGHT_W,
+  rectRelativeToCanvas,
+  SHELL_RAIL_WIDTH_PX
+} from "./worldIgnoreRects";
 
 describe("buildWorldIgnoreRects — canvas CSS space (gaps D7 / D22)", () => {
   it("omits the 92px shell-rail strip when the canvas already sits beside the rail", () => {
@@ -52,5 +59,35 @@ describe("buildWorldIgnoreRects — canvas CSS space (gaps D7 / D22)", () => {
     expect(rects).toContainEqual({ left: 0, top: 0, width: 1000, height: 56 });
     expect(rects).toContainEqual({ left: 0, top: 600, width: 200, height: 200 });
     expect(rects).toContainEqual({ left: 720, top: 0, width: 280, height: 800 });
+  });
+
+  it("uses measured anchors when provided (followup F6)", () => {
+    const rects = buildWorldIgnoreRects({
+      width: 1000,
+      height: 800,
+      dockOpen: false,
+      canvasBesideRail: true,
+      measured: {
+        top: { left: 0, top: 0, width: 1000, height: 72 },
+        bottomLeft: { left: 0, top: 650, width: 240, height: 150 },
+        right: { left: 700, top: 0, width: 300, height: 800 }
+      }
+    });
+    expect(rects).toContainEqual({ left: 0, top: 0, width: 1000, height: 72 });
+    expect(rects).toContainEqual({ left: 0, top: 650, width: 240, height: 150 });
+    expect(rects).toContainEqual({ left: 700, top: 0, width: 300, height: 800 });
+    expect(rects.some((r) => r.width === FALLBACK_RIGHT_W && r.left === 720)).toBe(false);
+  });
+
+  it("fitPadLeft widens when dock is open (followup F5)", () => {
+    expect(fitPadLeft(false)).toBe(100);
+    expect(fitPadLeft(true)).toBe(FALLBACK_DOCK_W);
+    expect(fitPadLeft(true, 420)).toBe(420);
+  });
+
+  it("rectRelativeToCanvas subtracts canvas origin", () => {
+    const canvas = { left: 92, top: 30, width: 1000, height: 800, right: 1092, bottom: 830 } as DOMRect;
+    const el = { left: 92, top: 30, width: 1000, height: 56, right: 1092, bottom: 86 } as DOMRect;
+    expect(rectRelativeToCanvas(canvas, el)).toEqual({ left: 0, top: 0, width: 1000, height: 56 });
   });
 });

@@ -586,6 +586,35 @@ class VoteResolutionTests(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------------------------
+# A-S7 `coverage-assignment` splice (spec-coverage-assignment.md SS6) -- proven independently on
+# THIS pipeline, not assumed to transfer from `signature_propose`'s own identical proof.
+# ---------------------------------------------------------------------------------------------
+
+class RequiredFamiliesSpliceTests(unittest.TestCase):
+    def test_omitting_required_families_is_byte_identical(self):
+        drafts = [make_draft(), make_draft(), make_draft()]
+        with_key = finalize_candidate(make_brief(requiredFamilies=[]), drafts, candidate_id="x")
+        without_key = finalize_candidate(make_brief(), drafts, candidate_id="x")
+        self.assertEqual(with_key.entry["atomFamilies"], without_key.entry["atomFamilies"])
+        self.assertEqual(without_key.entry["atomFamilies"], sorted({"atom.a", "atom.b"}))
+
+    def test_an_accepted_candidate_gets_the_required_family_spliced_in(self):
+        drafts = [make_draft(), make_draft(), make_draft()]
+        cand = finalize_candidate(make_brief(requiredFamilies=["atom.required"]), drafts,
+                                  candidate_id="x")
+        self.assertEqual(cand.outcome, "accepted")
+        self.assertEqual(cand.entry["atomFamilies"], sorted({"atom.a", "atom.b", "atom.required"}))
+
+    def test_an_unresolved_candidate_is_never_spliced(self):
+        drafts = [make_draft(atomFamilies=["atom.a"]), make_draft(atomFamilies=["atom.b"]),
+                 make_draft(atomFamilies=["atom.c"])]
+        cand = finalize_candidate(make_brief(requiredFamilies=["atom.required"]), drafts,
+                                  candidate_id="x")
+        self.assertEqual(cand.outcome, "unresolved")
+        self.assertIsNone(cand.entry)
+
+
+# ---------------------------------------------------------------------------------------------
 # Recorded-transcript replay (spec SS4.2): three PRE-RECORDED samples fed through the same
 # deterministic vote/hash logic twice -- byte-identical candidate output both times.
 # ---------------------------------------------------------------------------------------------

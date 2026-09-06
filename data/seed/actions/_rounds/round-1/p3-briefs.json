@@ -142,6 +142,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.bloodletting"
+      ],
       "scope": "species",
       "scopeKey": "allpeater",
       "slot": {
@@ -300,6 +303,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.bulwark"
+      ],
       "scope": "species",
       "scopeKey": "allpeater",
       "slot": {
@@ -458,6 +464,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.chill-punisher"
+      ],
       "scope": "species",
       "scopeKey": "ashthreepeater",
       "slot": {
@@ -616,6 +625,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.cleansing"
+      ],
       "scope": "species",
       "scopeKey": "ashthreepeater",
       "slot": {
@@ -777,6 +789,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-bounty"
+      ],
       "scope": "species",
       "scopeKey": "bucketnutzombie",
       "slot": {
@@ -938,6 +953,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-endure"
+      ],
       "scope": "species",
       "scopeKey": "bucketnutzombie",
       "slot": {
@@ -1100,6 +1118,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-graze"
+      ],
       "scope": "species",
       "scopeKey": "bucketzombie",
       "slot": {
@@ -1262,6 +1283,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-muster"
+      ],
       "scope": "species",
       "scopeKey": "bucketzombie",
       "slot": {
@@ -1420,6 +1444,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-toll"
+      ],
       "scope": "species",
       "scopeKey": "cabbagepult",
       "slot": {
@@ -1578,6 +1605,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elemental-defense"
+      ],
       "scope": "species",
       "scopeKey": "cabbagepult",
       "slot": {
@@ -1749,6 +1779,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.entangling"
+      ],
       "scope": "species",
       "scopeKey": "cactus",
       "slot": {
@@ -1920,6 +1953,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-husk"
+      ],
       "scope": "species",
       "scopeKey": "cactus",
       "slot": {
@@ -2091,6 +2127,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-scar"
+      ],
       "scope": "species",
       "scopeKey": "cactusblover",
       "slot": {
@@ -2262,6 +2301,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-seal"
+      ],
       "scope": "species",
       "scopeKey": "cactusblover",
       "slot": {
@@ -2420,6 +2462,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.flourishing"
+      ],
       "scope": "species",
       "scopeKey": "caltrop",
       "slot": {
@@ -2578,6 +2623,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.gravedigging"
+      ],
       "scope": "species",
       "scopeKey": "caltrop",
       "slot": {
@@ -2736,6 +2784,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.gravemaking"
+      ],
       "scope": "species",
       "scopeKey": "caltropnut",
       "slot": {
@@ -2894,6 +2945,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.hit-mend"
+      ],
       "scope": "species",
       "scopeKey": "caltropnut",
       "slot": {
@@ -3065,6 +3119,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.midas"
+      ],
       "scope": "species",
       "scopeKey": "cherrybomb",
       "slot": {
@@ -3236,6 +3293,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.padding"
+      ],
       "scope": "species",
       "scopeKey": "cherrybomb",
       "slot": {
@@ -3408,6 +3468,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-fixation"
+      ],
       "scope": "species",
       "scopeKey": "cherrygatling",
       "slot": {
@@ -3580,6 +3643,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-reckoning"
+      ],
       "scope": "species",
       "scopeKey": "cherrygatling",
       "slot": {
@@ -3752,6 +3818,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-truesight"
+      ],
       "scope": "species",
       "scopeKey": "cherrynut",
       "slot": {
@@ -3924,6 +3993,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.precision"
+      ],
       "scope": "species",
       "scopeKey": "cherrynut",
       "slot": {
@@ -4096,6 +4168,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.regeneration"
+      ],
       "scope": "species",
       "scopeKey": "cherrynutzombie",
       "slot": {
@@ -4268,6 +4343,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.resilience"
+      ],
       "scope": "species",
       "scopeKey": "cherrynutzombie",
       "slot": {
@@ -4440,6 +4518,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.rot-punisher"
+      ],
       "scope": "species",
       "scopeKey": "cherrypaperzombie",
       "slot": {
@@ -4612,6 +4693,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-capacity"
+      ],
       "scope": "species",
       "scopeKey": "cherrypaperzombie",
       "slot": {
@@ -4784,6 +4868,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-pen"
+      ],
       "scope": "species",
       "scopeKey": "cherryshooter",
       "slot": {
@@ -4956,6 +5043,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-regen"
+      ],
       "scope": "species",
       "scopeKey": "cherryshooter",
       "slot": {
@@ -5128,6 +5218,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-toughness"
+      ],
       "scope": "species",
       "scopeKey": "cherrysplit",
       "slot": {
@@ -5300,6 +5393,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.stalwart"
+      ],
       "scope": "species",
       "scopeKey": "cherrysplit",
       "slot": {
@@ -5458,6 +5554,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.stoicism"
+      ],
       "scope": "species",
       "scopeKey": "cherrythreepeater",
       "slot": {
@@ -5616,6 +5715,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sust-freshgraft"
+      ],
       "scope": "species",
       "scopeKey": "cherrythreepeater",
       "slot": {
@@ -5774,6 +5876,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-stampede"
+      ],
       "scope": "species",
       "scopeKey": "chomper",
       "slot": {
@@ -5932,6 +6037,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-yield"
+      ],
       "scope": "species",
       "scopeKey": "chomper",
       "slot": {
@@ -6090,6 +6198,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.ward-brace"
+      ],
       "scope": "species",
       "scopeKey": "conezombie",
       "slot": {
@@ -6248,6 +6359,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.ward-harden"
+      ],
       "scope": "species",
       "scopeKey": "conezombie",
       "slot": {
@@ -6419,6 +6533,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.warded"
+      ],
       "scope": "species",
       "scopeKey": "cornpot",
       "slot": {
@@ -6590,6 +6707,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.arm-welding"
+      ],
       "scope": "species",
       "scopeKey": "cornpot",
       "slot": {
@@ -6762,6 +6882,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.death-glean"
+      ],
       "scope": "species",
       "scopeKey": "cornpult",
       "slot": {
@@ -6934,6 +7057,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.dooming"
+      ],
       "scope": "species",
       "scopeKey": "cornpult",
       "slot": {
@@ -7092,6 +7218,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-attune"
+      ],
       "scope": "species",
       "scopeKey": "dancepolzombie",
       "slot": {
@@ -7250,6 +7379,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-focus"
+      ],
       "scope": "species",
       "scopeKey": "dancepolzombie",
       "slot": {
@@ -7408,6 +7540,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evasion"
+      ],
       "scope": "species",
       "scopeKey": "darkthreepeater",
       "slot": {
@@ -7566,6 +7701,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-flinch"
+      ],
       "scope": "species",
       "scopeKey": "darkthreepeater",
       "slot": {
@@ -7724,6 +7862,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.ferocity"
+      ],
       "scope": "species",
       "scopeKey": "dolldiamond",
       "slot": {
@@ -7882,6 +8023,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.firelining"
+      ],
       "scope": "species",
       "scopeKey": "dolldiamond",
       "slot": {
@@ -8043,6 +8187,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.gardener"
+      ],
       "scope": "species",
       "scopeKey": "dollgold",
       "slot": {
@@ -8204,6 +8351,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.hit-followthrough"
+      ],
       "scope": "species",
       "scopeKey": "dollgold",
       "slot": {
@@ -8366,6 +8516,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.martyrdom"
+      ],
       "scope": "species",
       "scopeKey": "dollsilver",
       "slot": {
@@ -8528,6 +8681,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shld-breach"
+      ],
       "scope": "species",
       "scopeKey": "dollsilver",
       "slot": {
@@ -8686,6 +8842,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shld-cycle"
+      ],
       "scope": "species",
       "scopeKey": "doomcactus",
       "slot": {
@@ -8844,6 +9003,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sust-grit"
+      ],
       "scope": "species",
       "scopeKey": "doomcactus",
       "slot": {
@@ -9002,6 +9164,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.carapace"
+      ],
       "scope": "species",
       "scopeKey": "doorzombie",
       "slot": {
@@ -9160,6 +9325,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.cherry-bloom"
+      ],
       "scope": "species",
       "scopeKey": "doorzombie",
       "slot": {
@@ -9331,6 +9499,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-brace"
+      ],
       "scope": "species",
       "scopeKey": "doublecherry",
       "slot": {
@@ -9502,6 +9673,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-harden"
+      ],
       "scope": "species",
       "scopeKey": "doublecherry",
       "slot": {
@@ -9673,6 +9847,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.immunity"
+      ],
       "scope": "species",
       "scopeKey": "doubleshooter",
       "slot": {
@@ -9844,6 +10021,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.life-graft"
+      ],
       "scope": "species",
       "scopeKey": "doubleshooter",
       "slot": {
@@ -10015,6 +10195,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sunbloom"
+      ],
       "scope": "species",
       "scopeKey": "doublesnow",
       "slot": {
@@ -10186,6 +10369,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.warding"
+      ],
       "scope": "species",
       "scopeKey": "doublesnow",
       "slot": {
@@ -10344,6 +10530,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.quickening"
+      ],
       "scope": "species",
       "scopeKey": "driverzombie",
       "slot": {
@@ -10502,6 +10691,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.searing-strike"
+      ],
       "scope": "species",
       "scopeKey": "driverzombie",
       "slot": {
@@ -10660,6 +10852,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shld-surge"
+      ],
       "scope": "species",
       "scopeKey": "flagzombie",
       "slot": {
@@ -10818,6 +11013,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.summoner"
+      ],
       "scope": "species",
       "scopeKey": "flagzombie",
       "slot": {
@@ -10976,6 +11174,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.arm-riveting"
+      ],
       "scope": "species",
       "scopeKey": "footballzombie",
       "slot": {
@@ -11134,6 +11335,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.plating"
+      ],
       "scope": "species",
       "scopeKey": "footballzombie",
       "slot": {
@@ -11292,6 +11496,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-verdict"
+      ],
       "scope": "species",
       "scopeKey": "fumeshroom",
       "slot": {
@@ -11450,6 +11657,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-surge"
+      ],
       "scope": "species",
       "scopeKey": "fumeshroom",
       "slot": {
@@ -11605,6 +11815,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.vitality"
+      ],
       "scope": "species",
       "scopeKey": "garlic",
       "slot": {
@@ -11760,6 +11973,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.hit-retort"
+      ],
       "scope": "species",
       "scopeKey": "garlic",
       "slot": {
@@ -11939,6 +12155,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.life-surge"
+      ],
       "scope": "species",
       "scopeKey": "garlicpea",
       "slot": {
@@ -12118,6 +12337,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.mesmerizing"
+      ],
       "scope": "species",
       "scopeKey": "garlicpea",
       "slot": {
@@ -12298,6 +12520,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-haste"
+      ],
       "scope": "species",
       "scopeKey": "garlicthreepeater",
       "slot": {
@@ -12478,6 +12703,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.withering"
+      ],
       "scope": "species",
       "scopeKey": "garlicthreepeater",
       "slot": {
@@ -12633,6 +12861,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.death-harvest"
+      ],
       "scope": "species",
       "scopeKey": "gatlingpea",
       "slot": {
@@ -12788,6 +13019,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-pierce"
+      ],
       "scope": "species",
       "scopeKey": "gatlingpea",
       "slot": {
@@ -12946,6 +13180,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.flash-freeze"
+      ],
       "scope": "species",
       "scopeKey": "hypnochomper",
       "slot": {
@@ -13104,6 +13341,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.terraforming"
+      ],
       "scope": "species",
       "scopeKey": "hypnochomper",
       "slot": {
@@ -13284,6 +13524,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.lifesteal"
+      ],
       "scope": "species",
       "scopeKey": "hypnojalapeno",
       "slot": {
@@ -13464,6 +13707,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.might"
+      ],
       "scope": "species",
       "scopeKey": "hypnojalapeno",
       "slot": {
@@ -13645,6 +13891,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sust-callus"
+      ],
       "scope": "species",
       "scopeKey": "hypnopeashooter",
       "slot": {
@@ -13826,6 +14075,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-override"
+      ],
       "scope": "species",
       "scopeKey": "hypnopeashooter",
       "slot": {
@@ -14006,6 +14258,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.freezing"
+      ],
       "scope": "species",
       "scopeKey": "hypnoshroom",
       "slot": {
@@ -14186,6 +14441,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.savagery"
+      ],
       "scope": "species",
       "scopeKey": "hypnoshroom",
       "slot": {
@@ -14347,6 +14605,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sporing"
+      ],
       "scope": "species",
       "scopeKey": "icecaltrop",
       "slot": {
@@ -14508,6 +14769,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.venomous"
+      ],
       "scope": "species",
       "scopeKey": "icecaltrop",
       "slot": {
@@ -14670,6 +14934,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.fortitude"
+      ],
       "scope": "species",
       "scopeKey": "iceshroom",
       "slot": {
@@ -14832,6 +15099,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.death-salvo"
+      ],
       "scope": "species",
       "scopeKey": "iceshroom",
       "slot": {
@@ -14990,6 +15260,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.swiftness"
+      ],
       "scope": "species",
       "scopeKey": "ironpeazombie",
       "slot": {
@@ -15148,6 +15421,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.mending"
+      ],
       "scope": "species",
       "scopeKey": "ironpeazombie",
       "slot": {
@@ -15309,6 +15585,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.volley"
+      ],
       "scope": "species",
       "scopeKey": "jalacaltrop",
       "slot": {
@@ -15470,6 +15749,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.arm-hardening"
+      ],
       "scope": "species",
       "scopeKey": "jalacaltrop",
       "slot": {
@@ -15632,6 +15914,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.deathblast"
+      ],
       "scope": "species",
       "scopeKey": "jalagatling",
       "slot": {
@@ -15794,6 +16079,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sust-husk"
+      ],
       "scope": "species",
       "scopeKey": "jalagatling",
       "slot": {
@@ -15956,6 +16244,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.retribution"
+      ],
       "scope": "species",
       "scopeKey": "jalapeashooter",
       "slot": {
@@ -16118,6 +16409,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-overflow"
+      ],
       "scope": "species",
       "scopeKey": "jalapeashooter",
       "slot": {
@@ -16280,6 +16574,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.bloodletting"
+      ],
       "scope": "species",
       "scopeKey": "jalapeno",
       "slot": {
@@ -16442,6 +16739,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.bulwark"
+      ],
       "scope": "species",
       "scopeKey": "jalapeno",
       "slot": {
@@ -16604,6 +16904,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.chill-punisher"
+      ],
       "scope": "species",
       "scopeKey": "jalastar",
       "slot": {
@@ -16766,6 +17069,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.cleansing"
+      ],
       "scope": "species",
       "scopeKey": "jalastar",
       "slot": {
@@ -16927,6 +17233,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-bounty"
+      ],
       "scope": "species",
       "scopeKey": "lanterncactus",
       "slot": {
@@ -17088,6 +17397,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-endure"
+      ],
       "scope": "species",
       "scopeKey": "lanterncactus",
       "slot": {
@@ -17250,6 +17562,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-graze"
+      ],
       "scope": "species",
       "scopeKey": "lanternchomper",
       "slot": {
@@ -17412,6 +17727,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-muster"
+      ],
       "scope": "species",
       "scopeKey": "lanternchomper",
       "slot": {
@@ -17574,6 +17892,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.econ-toll"
+      ],
       "scope": "species",
       "scopeKey": "lanternpea",
       "slot": {
@@ -17736,6 +18057,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elemental-defense"
+      ],
       "scope": "species",
       "scopeKey": "lanternpea",
       "slot": {
@@ -17894,6 +18218,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.entangling"
+      ],
       "scope": "species",
       "scopeKey": "marigold",
       "slot": {
@@ -18052,6 +18379,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-husk"
+      ],
       "scope": "species",
       "scopeKey": "marigold",
       "slot": {
@@ -18210,6 +18540,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-scar"
+      ],
       "scope": "species",
       "scopeKey": "melonpult",
       "slot": {
@@ -18368,6 +18701,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-seal"
+      ],
       "scope": "species",
       "scopeKey": "melonpult",
       "slot": {
@@ -18526,6 +18862,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.flourishing"
+      ],
       "scope": "species",
       "scopeKey": "normalzombie",
       "slot": {
@@ -18684,6 +19023,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.gravedigging"
+      ],
       "scope": "species",
       "scopeKey": "normalzombie",
       "slot": {
@@ -18855,6 +19197,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.gravemaking"
+      ],
       "scope": "species",
       "scopeKey": "nutchomper",
       "slot": {
@@ -19026,6 +19371,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.hit-mend"
+      ],
       "scope": "species",
       "scopeKey": "nutchomper",
       "slot": {
@@ -19184,6 +19532,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.midas"
+      ],
       "scope": "species",
       "scopeKey": "paperzombie",
       "slot": {
@@ -19342,6 +19693,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.padding"
+      ],
       "scope": "species",
       "scopeKey": "paperzombie",
       "slot": {
@@ -19514,6 +19868,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-fixation"
+      ],
       "scope": "species",
       "scopeKey": "peachomper",
       "slot": {
@@ -19686,6 +20043,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-reckoning"
+      ],
       "scope": "species",
       "scopeKey": "peachomper",
       "slot": {
@@ -19857,6 +20217,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-truesight"
+      ],
       "scope": "species",
       "scopeKey": "peanut",
       "slot": {
@@ -20028,6 +20391,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.precision"
+      ],
       "scope": "species",
       "scopeKey": "peanut",
       "slot": {
@@ -20208,6 +20574,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.regeneration"
+      ],
       "scope": "species",
       "scopeKey": "peashooter",
       "slot": {
@@ -20388,6 +20757,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.resilience"
+      ],
       "scope": "species",
       "scopeKey": "peashooter",
       "slot": {
@@ -20569,6 +20941,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.rot-punisher"
+      ],
       "scope": "species",
       "scopeKey": "peashooterzombie",
       "slot": {
@@ -20750,6 +21125,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-capacity"
+      ],
       "scope": "species",
       "scopeKey": "peashooterzombie",
       "slot": {
@@ -20931,6 +21309,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-pen"
+      ],
       "scope": "species",
       "scopeKey": "peasquash",
       "slot": {
@@ -21112,6 +21493,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-regen"
+      ],
       "scope": "species",
       "scopeKey": "peasquash",
       "slot": {
@@ -21273,6 +21657,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shield-toughness"
+      ],
       "scope": "species",
       "scopeKey": "peasunflower",
       "slot": {
@@ -21434,6 +21821,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.stalwart"
+      ],
       "scope": "species",
       "scopeKey": "peasunflower",
       "slot": {
@@ -21596,6 +21986,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.stoicism"
+      ],
       "scope": "species",
       "scopeKey": "plantern",
       "slot": {
@@ -21758,6 +22151,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sust-freshgraft"
+      ],
       "scope": "species",
       "scopeKey": "plantern",
       "slot": {
@@ -21916,6 +22312,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-stampede"
+      ],
       "scope": "species",
       "scopeKey": "polevaulterzombie",
       "slot": {
@@ -22074,6 +22473,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-yield"
+      ],
       "scope": "species",
       "scopeKey": "polevaulterzombie",
       "slot": {
@@ -22235,6 +22637,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.ward-brace"
+      ],
       "scope": "species",
       "scopeKey": "pot",
       "slot": {
@@ -22396,6 +22801,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.ward-harden"
+      ],
       "scope": "species",
       "scopeKey": "pot",
       "slot": {
@@ -22558,6 +22966,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.warded"
+      ],
       "scope": "species",
       "scopeKey": "pumpkin",
       "slot": {
@@ -22720,6 +23131,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.arm-welding"
+      ],
       "scope": "species",
       "scopeKey": "pumpkin",
       "slot": {
@@ -22878,6 +23292,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.death-glean"
+      ],
       "scope": "species",
       "scopeKey": "scaredyshroom",
       "slot": {
@@ -23036,6 +23453,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.dooming"
+      ],
       "scope": "species",
       "scopeKey": "scaredyshroom",
       "slot": {
@@ -23198,6 +23618,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-attune"
+      ],
       "scope": "species",
       "scopeKey": "snowgatling",
       "slot": {
@@ -23360,6 +23783,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.elpw-focus"
+      ],
       "scope": "species",
       "scopeKey": "snowgatling",
       "slot": {
@@ -23522,6 +23948,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evasion"
+      ],
       "scope": "species",
       "scopeKey": "snowpeashooter",
       "slot": {
@@ -23684,6 +24113,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-flinch"
+      ],
       "scope": "species",
       "scopeKey": "snowpeashooter",
       "slot": {
@@ -23864,6 +24296,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.ferocity"
+      ],
       "scope": "species",
       "scopeKey": "snowsplit",
       "slot": {
@@ -24044,6 +24479,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.firelining"
+      ],
       "scope": "species",
       "scopeKey": "snowsplit",
       "slot": {
@@ -24224,6 +24662,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.gardener"
+      ],
       "scope": "species",
       "scopeKey": "splitpea",
       "slot": {
@@ -24404,6 +24845,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.hit-followthrough"
+      ],
       "scope": "species",
       "scopeKey": "splitpea",
       "slot": {
@@ -24561,6 +25005,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.martyrdom"
+      ],
       "scope": "species",
       "scopeKey": "squash",
       "slot": {
@@ -24718,6 +25165,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shld-breach"
+      ],
       "scope": "species",
       "scopeKey": "squash",
       "slot": {
@@ -24889,6 +25339,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shld-cycle"
+      ],
       "scope": "species",
       "scopeKey": "starfruit",
       "slot": {
@@ -25060,6 +25513,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sust-grit"
+      ],
       "scope": "species",
       "scopeKey": "starfruit",
       "slot": {
@@ -25231,6 +25687,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.carapace"
+      ],
       "scope": "species",
       "scopeKey": "starpea",
       "slot": {
@@ -25402,6 +25861,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.cherry-bloom"
+      ],
       "scope": "species",
       "scopeKey": "starpea",
       "slot": {
@@ -25573,6 +26035,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-brace"
+      ],
       "scope": "species",
       "scopeKey": "sunchomper",
       "slot": {
@@ -25744,6 +26209,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.evd-harden"
+      ],
       "scope": "species",
       "scopeKey": "sunchomper",
       "slot": {
@@ -25916,6 +26384,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.immunity"
+      ],
       "scope": "species",
       "scopeKey": "sunflower",
       "slot": {
@@ -26088,6 +26559,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.life-graft"
+      ],
       "scope": "species",
       "scopeKey": "sunflower",
       "slot": {
@@ -26246,6 +26720,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.sunbloom"
+      ],
       "scope": "species",
       "scopeKey": "threecabbage",
       "slot": {
@@ -26404,6 +26881,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.warding"
+      ],
       "scope": "species",
       "scopeKey": "threecabbage",
       "slot": {
@@ -26565,6 +27045,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.quickening"
+      ],
       "scope": "species",
       "scopeKey": "threepeater",
       "slot": {
@@ -26726,6 +27209,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.searing-strike"
+      ],
       "scope": "species",
       "scopeKey": "threepeater",
       "slot": {
@@ -26888,6 +27374,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.shld-surge"
+      ],
       "scope": "species",
       "scopeKey": "threeplantern",
       "slot": {
@@ -27050,6 +27539,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.summoner"
+      ],
       "scope": "species",
       "scopeKey": "threeplantern",
       "slot": {
@@ -27206,6 +27698,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.arm-riveting"
+      ],
       "scope": "species",
       "scopeKey": "twinflower",
       "slot": {
@@ -27362,6 +27857,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.plating"
+      ],
       "scope": "species",
       "scopeKey": "twinflower",
       "slot": {
@@ -27520,6 +28018,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.prec-verdict"
+      ],
       "scope": "species",
       "scopeKey": "wallnut",
       "slot": {
@@ -27678,6 +28179,9 @@
           "atom.keen-edge"
         ]
       },
+      "requiredFamilies": [
+        "atom.tempo-surge"
+      ],
       "scope": "species",
       "scopeKey": "wallnut",
       "slot": {

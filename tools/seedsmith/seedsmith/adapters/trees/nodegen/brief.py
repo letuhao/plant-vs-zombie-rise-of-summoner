@@ -120,13 +120,26 @@ def render_brief(*, node_id: str, sample_index: int, tree_display_name: str, tre
     sibling_lines = "\n".join(
         f"    - {s.name} ({', '.join(s.affix_ids)})" for s in siblings
     ) or "    (none yet)"
+    # 2026-09-06 real-call finding (`might`, multiple tier-1 through tier-7 nodes, LM Studio local
+    # model): the original one-line gloss ("makes an existing thing larger") was read by the model as
+    # "there must already be a node in THIS TREE to reference" -- most real blocks quoted some variant
+    # of "no existing effect/property in the current tier/context." Per spec-tree-plan.md's own formal
+    # definition (§ "MAGNITUDE node ≔ every bound atom has AttachPoint.Stat AND kind ∈ {stat.modify,
+    # stat.derived} AND conditionality == 1"), "an existing thing" means an existing GAME STAT/EFFECT
+    # -- one of the entries in "Legal effects" below, which is ALREADY narrowed to stat-kind affixes
+    # for a magnitude node by the plan's own quota cell -- never a sibling node this tree has or has
+    # not generated yet. The clarification below states that explicitly rather than leaving the model
+    # to infer it; it does not change what a magnitude node IS, only removes real, measured ambiguity
+    # in how that definition was worded for a model to read.
     class_note = (
         "a MECHANISM node grants something the resolver does not otherwise have."
         if node_class == "mechanism" else
-        "a MAGNITUDE node makes an existing thing larger."
+        "a MAGNITUDE node makes one of the effects below — an EXISTING game stat, always available, "
+        "never a node this tree has or has not generated yet — scale with level. Picking an effect "
+        "from the list IS naming the existing thing; nothing else needs to exist first."
     )
 
-    return f"""Tree: {tree_display_name} — {tree_reading}
+    return f"""Tree: {tree_display_name}{f" — {tree_reading}" if tree_reading != tree_display_name else ""}
 Branch: {branch}.  Depth: {depth}.
 This node must be a {node_class} node.
   - {class_note}
@@ -138,8 +151,9 @@ Choose, and nothing else:
   2. `affinity`  — how central each is: core | likely | occasional.
   3. `exclusion` — only if this node's effect genuinely conflicts with a PROPERTY below.
                    Prefer `reroute`. Most nodes have none. `nullification` is the last
-                   resort — use it only when the pair can be neither rerouted nor ordered,
-                   and say plainly which side wins.
+                   resort — use it only when the pair can be neither rerouted nor ordered.
+                   If you use it, say plainly which side wins in `rationale` — never in
+                   `blocked`, which is reserved for declining to answer this brief at all.
   4. `name`, `nameKey`, `flavor`.
 
 Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.

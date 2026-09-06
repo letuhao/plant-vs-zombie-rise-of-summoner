@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Data;
 using FusionRpg.Data.Abstractions;
 using Microsoft.AspNetCore.Builder;
@@ -163,6 +164,109 @@ public class UniqueActorAtomRepushTests : IAsyncLifetime
         Assert.Equal(UniqueActorPhases.Roster, _store.GetUniqueActor(actor.InstanceId)!.Phase);
         var commands = DrainInbox();
         Assert.Contains(commands, IsAtomPush);
+    }
+
+    // ---- T6.2: a compiled grant reaches the wire through BOTH real push paths ----------------------
+    //
+    // ⛔ Found 2026-09-06 and PRE-EXISTING (true of the original Player-only push, long before the
+    // equip-runtime work): AtomPushCodec.BuildPayload fills AtomPushDto.Grants from catalog.Compiled,
+    // and both server call sites then hand-rolled a payload dictionary carrying `defs` +
+    // `runnerBindings` and dropped it -- so every passive, non-triggered atom compiled to a grant that
+    // was never transmitted. A def with no grant naming it does nothing at the far end.
+    //
+    // These two tests drive the REAL hub and the REAL event pipeline, not the payload builder alone.
+
+    static readonly FusionRpg.Core.Power.PowerTuning Tuning = FusionRpg.Core.Power.PowerTuning.Build(
+        1, 1, 80_000, 0, 20, 680,
+        1000, 25000, 250, 1000, 5000, 5000, 25000);
+
+    /// <summary>One passive <c>stat.modify</c> atom (no trigger, so it COMPILES) bound to one owner.</summary>
+    void SeedCompiledAtomFor(OwnerKind ownerKind, string ownerKey)
+    {
+        var atomId = AtomRow.DeriveId("atom.vitality", "", 1);
+        Assert.True(_store.UpsertAtom(new AtomRow
+        {
+            AtomId = atomId, KindId = "stat.modify", FamilyId = "atom.vitality", Variant = "", Tier = 1,
+            Name = "atom.vitality", ParamsJson = """{"channel":"maxHp","op":"flat","amount":45}""",
+            WhenJson = "{}",
+        }).IsOk);
+
+        Assert.True(_store.UpsertContainer(new ContainerRow
+        {
+            ContainerId = "trait.stalwart",
+            Kind = ContainerKind.Trait,
+            Atoms = new[] { new ContainerAtomRow(1, atomId) },
+        }).IsOk);
+
+        var atoms = _store.ListAtoms().ToDictionary(a => a.AtomId, StringComparer.Ordinal);
+        Assert.True(Instantiator.TryInstantiate(_store.GetContainer("trait.stalwart")!,
+            id => atoms.TryGetValue(id, out var a) ? a : null, _store.GetAffix, 1, 20, Tuning, out var inst).IsOk);
+
+        var instanceId = _store.SaveInstance(inst! with { CatalogRevision = _store.GetCatalogRevision() });
+        Assert.True(_store.Bind(new BindingRow
+        {
+            InstanceId = instanceId, OwnerKind = ownerKind, OwnerKey = ownerKey, Priority = 0, Source = "test",
+        }, Guid.NewGuid().ToString("N")).IsOk);
+    }
+
+    static List<JsonElement> GrantsOf(CommandDto cmd)
+    {
+        var payload = (JsonElement)cmd.Payload!;
+        Assert.True(payload.TryGetProperty("grants", out var arr), "payload has no grants[]");
+        Assert.Equal(JsonValueKind.Array, arr.ValueKind);
+        return arr.EnumerateArray().ToList();
+    }
+
+    [Fact]
+    public async Task A_real_Hello_puts_the_compiled_grant_on_the_wire_not_only_its_def()
+    {
+        // The Hello path -- RpgHub.BuildApplyCommand -- for a PLAYER-scoped compiled grant. This is
+        // the case that predates every specimen: it shipped with E19 and has been inert ever since.
+        SeedCompiledAtomFor(OwnerKind.Player,
+            _store.GetCurrentPlayerId().ToString(System.Globalization.CultureInfo.InvariantCulture));
+        DrainInbox();
+
+        // Clients is null on a hand-built hub, so the SendAsync inside PushGrantSnapshotAsync throws
+        // and is swallowed by its own catch -- exactly as it is when no injector is connected. The
+        // inbox enqueue happens first and is the reliable path either way (SendInjectorCommand's own
+        // comment says so), so the real command is observable here.
+        var hub = ActivatorUtilities.CreateInstance<RpgHub>(_app.Services);
+        await hub.Hello(new HelloDto { Game = "pvz" });
+
+        var push = DrainInbox().Single(IsAtomPush);
+        var grant = Assert.Single(GrantsOf(push));
+
+        Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), grant.GetProperty("effectId").GetString());
+        Assert.Equal(EffectOwnerKeys.Match, grant.GetProperty("ownerKey").GetString());
+
+        // And the def it names travels with it -- a grant whose effectId the catalog never saw makes
+        // EffectBag.Grant throw at the far end.
+        var payload = (JsonElement)push.Payload!;
+        Assert.Contains(payload.GetProperty("defs").EnumerateArray(),
+            d => d.GetProperty("effectId").GetString() == AtomRow.DeriveId("atom.vitality", "", 1));
+    }
+
+    [Fact]
+    public async Task A_mid_session_repush_carries_the_deployed_specimens_own_compiled_grant()
+    {
+        // The other real call site -- UniqueActorService.PushAtomUnionAsync -- for a UNIQUEACTOR-scoped
+        // compiled grant, carrying the per-owner key today's earlier fix stamps.
+        var player = _store.CreatePlayer("Owner");
+        var create = await _http.PostAsJsonAsync("/api/unique/actors", new { playerId = player.Id, side = "plant", typeId = 5 });
+        var actor = await create.Content.ReadFromJsonAsync<UniqueActorDto>();
+        SeedCompiledAtomFor(OwnerKind.UniqueActor, actor!.InstanceId);
+
+        await _http.PostAsJsonAsync($"/api/unique/actors/{actor.InstanceId}/deploy", new { correlationId = "repush-compiled-corr" });
+        DrainInbox();
+
+        await PostEventAsync("pvz.spawn.extra.ack", "m-compiled",
+            new { correlationId = "repush-compiled-corr", ptr = "0xCOMPILED" });
+        Assert.Equal(UniqueActorPhases.ActiveBound, _store.GetUniqueActor(actor.InstanceId)!.Phase);
+
+        var grant = Assert.Single(GrantsOf(DrainInbox().Single(IsAtomPush)));
+        Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), grant.GetProperty("effectId").GetString());
+        Assert.Equal("instance:" + actor.InstanceId, grant.GetProperty("ownerKey").GetString());
+        Assert.Equal(EffectOwnerKeys.InstanceKind, grant.GetProperty("ownerKind").GetString());
     }
 
     [Fact]

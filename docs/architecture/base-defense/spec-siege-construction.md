@@ -174,8 +174,23 @@ Zero on every existing world → zero bytes → zero golden movement.
 
 ### 3. `Assembled` — a consumable becomes a building
 
-An item with a `structure.assemble` atom. Consumed, structure appears **finished**
-(`ConstructionTurnsRemaining = null`), on an adjacent legal cell.
+> ⛔ **Correction, 2026-09-06 — a THIRD real spec defect, same class as §7's two.** This section
+> originally named `structure.assemble` as if `AtomKindRegistry` could carry "place a structure" the
+> way it already carries damage/status/shield. It could not, as shipped: `AtomKindRegistry` is a
+> closed, PvZ-opcode vocabulary where every `Board`-attached kind is Battle=`None` (Lawn/Unity-only —
+> none has ever reached the tactical siege board), `BattleEffectSink.Execute` hardcoded acceptance to
+> exactly `ApplyResourceDelta`/`ApplyStatus`/`ModifyStat`, and no atom/effect DTO anywhere carried a
+> board-cell target — confirmed by two independent research passes plus direct reading of all three.
+> **Brought to the owner via `AskUserQuestion`** (extend the atom system, vs. a dedicated atom-free
+> resolver matching `BuildResolver.cs`'s own precedent) — **decided: extend the atom system.** Built:
+> a new 8th attach point (`AttachPoint.Siege`) and a single new 17th kind, **`structure.place`**
+> (params `structureId`, `instant`), shared across all four acquisition paths rather than one
+> `structure.assemble`/`structure.summon` pair — the board-effect is identical for all four ("place
+> this structure, instant or not"); only the cost source differs, which is the calling ACTION's own
+> concern, never the atom's. See `tasks/base-defense-todo.md` 15.3b for the full build record.
+
+An item consumed via an action carrying a `structure.place` atom (`instant: true`). Structure appears
+**finished** (`ConstructionTurnsRemaining = null`), on an adjacent legal cell.
 
 **No new economy.** The cost was paid at crafting. This is exactly the *"producing (craft series
 equippement)"* building role from the owner's round-5 message closing its own loop: your workshops
@@ -183,26 +198,46 @@ make deployable fortifications, and you carry them to the siege.
 
 ### 4. `Summoned` — a demon action paid in `qi`
 
-An ordinary action with a `qi` cost and a `structure.summon` atom. **Nothing new is needed**: the
-action system already validates costs, the resource hub already holds `qi`, and `structure-seed` will
-author which demons can do it.
+An ordinary action with a `qi` cost and the SAME `structure.place` atom (§3's correction above,
+`instant: true` — a summoned structure is also immediate). **Nothing new needed beyond the atom
+itself**: the action system already validates costs, the resource hub already holds `qi`, and
+`structure-seed` will author which demons can do it.
 
 This is the seedsmith Law-1 shape working as intended — the container-roll path already exists, so
-this is a **wiring** question, not a build.
+authoring the action/container is a **content** question now, not a mechanism build.
 
 ### 5. `Laboured` — stamina and hunger, no stockpile
 
-The moat. An action costing `stamina` and `hunger` that converts a cell's terrain — `Open` → `Gap`
-for a moat, `Open` → `Rough` for piled earth.
+> ⛔ **Correction, 2026-09-06 — this section is contradicted by `spec-siege-obstacles.md` (module 19,
+> level 4, so it is the authoritative, EARLIER-owning spec for this vocabulary) and was never
+> propagated back here.** §5.18/`spec-siege-obstacles.md` §"The layer split the audit found wrong in
+> `siege-board`" states plainly: *"A cell you cannot enter and cannot stand on IS a wall. Identical
+> verbs. A moat is a Rampart built by the laboured path, and it is destructible, which a terrain
+> change is not."* Its own Boundaries table lists **"a moat modelled as terrain"** under **Never**.
+> The paragraph below (kept, struck through in spirit rather than deleted, so a future reader sees
+> what was wrong and why) is the exact mistake that rule exists to refuse.
 
-**Terrain change, not a structure.** A dug moat has no HP, cannot be repaired, and is not in
+The moat. An action costing `stamina` and `hunger` that ~~converts a cell's terrain — `Open` → `Gap`
+for a moat, `Open` → `Rough` for piled earth.~~
+
+~~**Terrain change, not a structure.** A dug moat has no HP, cannot be repaired, and is not in
 `StructureCatalog`. It is a cell whose terrain changed, which `siege-cover` already reads and
-`siege-pathing` already routes around.
+`siege-pathing` already routes around.~~
 
-That is why it costs nothing but effort: there is nothing to build, only ground to move.
+~~That is why it costs nothing but effort: there is nothing to build, only ground to move.~~
 
-**It persists.** A moat dug during a siege is still there next turn, so the terrain override is stored
-per slot alongside `structure-state`'s fields, under the same conditional row.
+~~**It persists.** A moat dug during a siege is still there next turn, so the terrain override is
+stored per slot alongside `structure-state`'s fields, under the same conditional row.~~
+
+**What replaces it**: a moat is an ordinary `StructureDef` row (`Obstacle: ObstacleKind.Rampart`,
+`AcquisitionPaths: [Laboured]`, `BlocksMovement: true`, `BlocksLineOfFire: true`) placed through the
+SAME `structure.place` atom §3/§4 already use (`instant: false` — digging takes `construction.labour.moatTurns`,
+authored as the row's own `StructureDef.BuildTurns`). It has HP (from `MaterialTier`, decision 32,
+the same power-ladder every other structure uses), is destructible, and leaves `SlotState.Ruined` like
+any other structure — no terrain-override field is needed anywhere, and `WorldSlot` gains nothing new
+for this path. Costing `stamina`/`hunger` rather than `Rubble`/`Ironwork` is the ACTION's own cost
+declaration (§4's own "the cost source differs, never the atom's concern"), not a property of the
+structure or the atom.
 
 ### 6. Placement rules — shared by all four paths
 

@@ -79,6 +79,56 @@ public class ArtifactsTests : IDisposable
     }
 
     [Fact]
+    public void WriteTransfer_carries_which_allocation_shape_produced_it_shipped_and_per_actor_differ()
+    {
+        // F1b bullet 3 (deferred to F2's own real artifact-writer scope, closed here): "_squad-scope.json
+        // and _scope-transfer.json each carry which shape produced them, so the two are never conflated
+        // in one artifact" -- proven directly against the written JSON, not just that the parameter is
+        // accepted by the writer function.
+        TuningBootstrap.Configure();
+        var perActorResult = TransferReport.Build(new RunSpec(60, 3, 20260906), TinyClassifiedRoster.Duels(),
+            TinyClassifiedRoster.Squads(), AllocationShape.PerActor, refineTrials: null, parallel: false);
+        var shippedResult = TransferReport.Build(new RunSpec(60, 3, 20260906), TinyClassifiedRoster.Duels(),
+            TinyClassifiedRoster.Squads(), AllocationShape.Shipped, refineTrials: null, parallel: false);
+
+        var perActorJson = Artifacts.WriteTransfer(perActorResult, TempJsonPath());
+        var shippedJson = Artifacts.WriteTransfer(shippedResult, TempJsonPath());
+
+        using var perActorDoc = JsonDocument.Parse(perActorJson);
+        using var shippedDoc = JsonDocument.Parse(shippedJson);
+        var perActorShape = perActorDoc.RootElement.GetProperty("allocationShape").GetString();
+        var shippedShape = shippedDoc.RootElement.GetProperty("allocationShape").GetString();
+
+        Assert.Equal(nameof(AllocationShape.PerActor), perActorShape);
+        Assert.Equal(nameof(AllocationShape.Shipped), shippedShape);
+        Assert.NotEqual(perActorShape, shippedShape);
+    }
+
+    [Fact]
+    public void WriteSquadScope_carries_which_allocation_shape_produced_it_shipped_and_per_actor_differ()
+    {
+        TuningBootstrap.Configure();
+        var roster = TinyClassifiedRoster.Squads().Select(RosterEntry.From).ToList();
+        var spec = new RunSpec(60, 3, 20260906);
+        var screening = Screening.RunWithRefine("squad", roster, spec, refineTrials: null, parallel: false);
+
+        var perActorJson = Artifacts.WriteSquadScope("squad", screening, spec, AllocationShape.PerActor, TempJsonPath());
+        var shippedJson = Artifacts.WriteSquadScope("squad", screening, spec, AllocationShape.Shipped, TempJsonPath());
+        var nullShapeJson = Artifacts.WriteSquadScope("duel", screening, spec, shape: null, TempJsonPath());
+
+        using var perActorDoc = JsonDocument.Parse(perActorJson);
+        using var shippedDoc = JsonDocument.Parse(shippedJson);
+        using var nullDoc = JsonDocument.Parse(nullShapeJson);
+
+        Assert.Equal(nameof(AllocationShape.PerActor), perActorDoc.RootElement.GetProperty("allocationShape").GetString());
+        Assert.Equal(nameof(AllocationShape.Shipped), shippedDoc.RootElement.GetProperty("allocationShape").GetString());
+        // `duel` mode carries no allocation-shape concept at all (Modes.cs's own doc comment) --
+        // recorded as JSON null, never a fabricated default that would misreport which shape a
+        // duel-scope artifact came from.
+        Assert.Equal(JsonValueKind.Null, nullDoc.RootElement.GetProperty("allocationShape").ValueKind);
+    }
+
+    [Fact]
     public void WriteSquadScope_marks_every_pair_with_a_half_width_and_a_lowConfidence_flag()
     {
         TuningBootstrap.Configure();

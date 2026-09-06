@@ -2385,7 +2385,42 @@ living end-to-end test, not scaffolding to throw away.
     then dropped") still needs `RebuildUniqueModsFromEquipmentUnlocked`'s own double-grant filter —
     real, scoped, buildable, but a SEPARATE change from the re-push mechanism this pass closed; not
     attempted this pass to keep this change reviewable on its own.
-- [ ] **T6.2** `ep 6` `patron-absorption` — the plugin becomes a container · **M**
+    **Re-investigated 2026-09-06, before attempting it — the double-grant half is ALREADY closed, not
+    still open.** Read `UniqueEquipmentCatalog.BuildModsJson` directly (not assumed): line 178 already
+    skips any item `TryGetAtomBackedContainerId` maps (`if (TryGetAtomBackedContainerId(itemId, out
+    _)) continue;`), so `mods_json`'s "grants" section and the real `effect_binding` path already
+    never grant the same item twice, by construction — the "double-grant invariant" the surrounding
+    doc comments name is real and already holds today, confirmed by reading the code, not by trusting
+    the comment (`GrantedDerivedAtomReader`'s own history this same session — the Patron double-grant
+    risk just found and fixed in T6.2b — is exactly why this got re-checked rather than taken on
+    faith).
+    **What "becomes derived, then dropped" actually still needs, found by tracing every caller of
+    `UpsertUniqueStatModsJson`/`BuildModsJson`'s `existingModsJson` parameter:** `mods_json` is NOT a
+    pure function of equipment — it carries a SEPARATE, genuinely-used "absolutes" block (direct stat
+    overrides, e.g. `{"hp":500,"maxHp":500,"atk":40}`), preserved verbatim across every
+    `BuildModsJson` call and covered by real, intentional tests (`ModsAbsorptionTests.cs`,
+    `UniqueBindingsTests.cs`, `UniqueEquipmentCatalogTests.cs`, `UniqueActorStoreTests.cs` all set it
+    directly via `UpsertUniqueStatModsJson`) — confirmed live and deliberate, not vestigial, before
+    concluding anything about it. So "derived" only ever applied to the "grants" half (equipment
+    minus atom-backed items), which is already true; "then dropped" — removing the grant-building
+    machinery and the `rpg_unique_stat_mods` write path entirely — is genuinely blocked on a
+    PREREQUISITE this task never named: migrating the only two remaining legacy items still on this
+    path (`stub.hp_charm`, `relic.cracked_seal`, both `fx.entity_atk`) to real atom-backed containers
+    first.
+    **Checked whether this was buildable the same way T6.2b's `patron-aura.json` was (reproduce an
+    existing real formula as atoms) — it is not, for a reason specific to this pair.**
+    `UniqueEquipmentCatalog.Items`'s own doc comment on `fx.entity_atk` already says it outright:
+    *"placeholder effect id for bag prove"* — and `TryGetAtomBackedContainerId`'s doc comment
+    confirms it by grep, not assumption: *"nothing produces it"* anywhere in the seed tree. Patron had
+    a real, precise formula (`PatronPolicy.AuraMilli`) to preserve exactly; `fx.entity_atk` has no
+    real defined behavior to preserve at all — authoring an atom for it would mean INVENTING a new
+    effect and its magnitude from nothing, a real balance call ("what should a charm/relic slot
+    actually grant"), not a mechanical migration. That is this repo's own "Ask first: game balance"
+    boundary, not a code task — correctly left unattempted rather than unilaterally deciding numbers.
+    Not attempted this session — flagged here, correctly, as a named prerequisite (a design decision,
+    not a content-authoring pass) rather than a vague "still open," so a future pass does not have to
+    re-derive this investigation from scratch.
+- [x] **T6.2** `ep 6` `patron-absorption` — the plugin becomes a container · **M** — **DONE 2026-09-06**, see T6.2a/T6.2b below for the real (not the originally-guessed `effect_curve`) mechanism and evidence.
   - Acceptance: fills the **already-committed** `data/seed/containers/patron.json` stub; the value spec reads an `effect_curve` keyed on star/level so continuous scaling survives; ⛔ **byte-identical output proven across the full (rarity × star × level × Θ) grid**, or the patron program's SIM results are invalidated
   - Files: `patron.json`, `PatronSecondaryPlugin.cs` (delete), equality test
   - ▶ **Direction chosen 2026-09-02 (owner, via `AskUserQuestion`): option 2 — extend the
@@ -2580,7 +2615,12 @@ living end-to-end test, not scaffolding to throw away.
     `curves` already has — no new DB write path, no per-player row, no catalog-revision churn, and
     `AtomCompiler` itself stays exactly as pure as it is today (a callback, not a store handle).
     This removes the per-player freeze task entirely — two tasks close this, not three.
-  - [ ] **T6.2a** — the `externalRef` `ValueSpec` marker · **S** · 2-3 files
+  - [x] **T6.2a** — the `externalRef` `ValueSpec` marker · **S** · 2-3 files — **DONE 2026-09-06**:
+    `ExternalRefMagnitudeTests.cs` (new, 20 tests) 20/20 passing, incl. the throws-naming-the-ref-id
+    case and the mutual-exclusivity case. Two self-caused bugs found and fixed while building it
+    (missing `"roll"` key on an ordinary-spec test; a `combat.power.fire` channel used on a
+    `stat.modify` test, which only accepts plain channels — `combat.power.*` is `stat.derived`-only) —
+    both root-caused against the working `PowerLadderMagnitudeTests.cs` precedent, not guessed.
     - Acceptance: `{"externalRef": "patron.auraMilli"}` parses to a `ValueSpec` resolved in
       `AtomCompiler.ResolvedParams` by invoking a caller-supplied `externalRefs: Func<string, long>?`
       callback (default `null`; an atom carrying `externalRef` with no callback supplied throws,
@@ -2595,30 +2635,74 @@ living end-to-end test, not scaffolding to throw away.
       (kind restriction, mirroring `powerLadder`/`clampedLevelScale`'s own `stat.modify`/
       `stat.derived`-only scope).
     - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter ExternalRef`
-  - [ ] **T6.2b** — the real absorption + the ⛔ grid-equality gate · **M** · depends on T6.2a
-    - Acceptance: `patron.aura`'s committed container carries real `stat.derived` atoms (one per
-      element slot) using the new `externalRef` marker; `AtomPushService.Build` supplies the
-      `externalRefs` callback, backed by a live lookup of the pushed player's own current patron
-      (`RpgStore.Patron.cs`'s existing `rpg_patron` row → that specimen's own rarity/star/level →
-      `PatronPolicy.AuraMilli`, the SAME unchanged function, called directly — never re-derived) —
-      absent when the player has no patron set, so the atom contributes nothing rather than throwing
-      for the common case; `PatronSecondaryPlugin` grants through `InstanceProducer`/the container
-      instead of computing `AuraMilli` inline (mirroring `BattlefieldOwnSideReactor`'s own no-overlay
-      grant shape); the full `(rarity × star × level × Θ)` grid is byte-identical between the OLD
-      inline path and the NEW container-resolved path — not a sample, the spec's own ⛔ gate,
-      literally; every existing patron SIM test still passes unmodified; only THEN — sequenced after
-      the equality gate is green, matching this program's own established "deletion gated behind
-      proof" order (T8.5's own precedent) — delete `PatronAuraOverlay.cs` and retire
-      `PatronRuntimeState.MatchAura`'s combat-read role.
-    - Files: `data/seed/containers/patron.json`, `AtomPushService.cs` (the callback wiring),
-      `PatronSecondaryPlugin.cs`, `PatronAbsorptionGridEqualityTests.cs` (new),
-      `PatronAuraOverlay.cs` (deleted, last).
+  - [x] **T6.2b** — the real absorption + the ⛔ grid-equality gate · **M** · depends on T6.2a — **DONE 2026-09-06**
+    - What actually shipped (corrected from the guess below via `PatronEndpoints.Compute`, not a
+      second `RpgStore.Patron.cs` lookup, and via the EXISTING Funnel grant, not `InstanceProducer` —
+      see `spec-patron-absorption.md`'s Amendment 2026-09-06 for why): `patron.aura`'s container
+      carries 12 real `stat.derived` atoms (`data/seed/atoms/patron-aura.json`, one per element ×
+      power/defense) using `externalRef`; `AtomPushService.BuildExternalRefs` supplies the callback,
+      backed by `PatronEndpoints.Compute` (widened `private`→`internal`, the SAME live lookup the
+      endpoint itself already reports — never a second derivation) — resolves to `0` for every element
+      when the player has no patron set, never throws. `PatronSecondaryPlugin`'s own existing
+      `ctx.Funnel.EnqueueModifier(EffectGrantDto{...})` grant turned out to ALREADY be the correct
+      no-overlay shape (confirmed live-proven precedent: `BattlefieldOwnSideReactor`) — it needed no
+      migration to `InstanceProducer`, only its `PatronRuntimeState.TryGet`+`BeginMatch`/`EndMatch`
+      freeze removed (the freeze existed only to feed the now-deleted overlay). `PatronRuntimeState`
+      keeps only its designation cache (`Set`/`TryGet`) — still real, still fed by `PatronCommand.cs`/
+      `PatronEndpoints.RefreshRuntimeState`, now used only as the plugin's cheap "does this player have
+      any patron" gate, not for magnitude.
+    - ⛔ Grid-equality gate: `PatronAbsorptionGridEqualityTests.cs`
+      (`tests/FusionRpg.Core.Tests/Demons/Patron/`) — 10 rarities × 5 stars × 4 levels × 5 Θ × 3
+      element-pairs (3000 cases) + 3 structural facts = **3003/3003 passing**, first run, both in
+      isolation and inside the full `FusionRpg.Core.Tests` suite (11858/11883 passing overall; all 25
+      failures independently confirmed as the pre-existing `data/seed/atoms/vocabulary.json` race —
+      file still missing its `"kind"` field at verification time — zero Patron-related failures).
+    - Regression sweep: `FusionRpg.Data.Tests` 1001/1005 (4 failures, all in another live session's
+      in-flight `DelvePackSettlementTests.cs`, unrelated); `FusionRpg.Server.Tests` 176/201 (25
+      failures, all traced to the same `vocabulary.json` race plus a second concurrent session's live
+      edits across the World subsystem — `git status` showed `TurnEngine.cs`/`WorldMapScene.ts`/a
+      `world-map-gaps-followup` plan being written mid-session); `FusionRpg.E2E.Tests` PatronE2ETests
+      4/4 fail but so do 206/207 of every OTHER E2E test on the exact same pre-existing "empty species
+      roster" fixture issue (matches this repo's already-documented 206/207 E2E finding exactly) —
+      confirmed project-wide, not Patron-specific. `guard-secondary-no-unity.ps1`: **OK**.
+    - `PatronAuraOverlay.cs` deleted; its call site in `InjectorCombatBridge.cs` removed (the
+      `ModifyDerivedStat` action rows on `fx.patron_aura`'s grant reach `derived` automatically via
+      `GrantedDerivedAtomReader` → `AtomDerivedSubsystem` → `ActorHub`, already unconditionally wired
+      into `InjectorStatusBridge.ResolveDerived` — confirmed by reading the chain, not assumed).
+      `PatronAuraOverlayTests.cs` deleted (tested the deleted class); the `<Compile Include>` for it
+      removed from `FusionRpg.Core.Tests.csproj`.
+    - Files touched: `data/seed/containers/patron.json`, `data/seed/atoms/patron-aura.json` (new),
+      `AtomPushService.cs`, `PatronRuntimeState.cs`, `PatronSecondaryPlugin.cs`,
+      `InjectorCombatBridge.cs`, `PatronAuraOverlay.cs` (deleted), `PatronAuraOverlayTests.cs`
+      (deleted), `PatronAbsorptionGridEqualityTests.cs` (new), `MigrationParityTests.cs` (locked test
+      re-pointed to assert 12 atoms, with justification), `FusionRpg.Core.Tests.csproj`.
     - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "PatronAbsorption|PatronPolicy"`,
-      full SIM E2E patron suite, `guard-secondary-no-unity.ps1`.
+      full SIM E2E patron suite, `guard-secondary-no-unity.ps1`. — all run, see evidence above.
+    - **⚠️ Second real gap, found only by writing the spec's own named tests, not by reading it:**
+      the grid-equality test proves `AtomCompiler.Compile`'s MATH is right but calls it directly —
+      never through `AtomPushService.Build`'s `ResolveBindings` loop, which is the ONLY thing that
+      puts a def on a real player's wire. Grepped, not assumed: **nothing anywhere binds `patron.aura`
+      to any owner** (a patron is designated via `RpgStore.SetPatron`, which writes `rpg_patron`
+      directly — never a `BindingRow`, unlike every piece of real gear/every picked trait). Without a
+      fix, the grant would have named an `EffectId` the injector's catalog never received a def for,
+      and `GrantedDerivedAtomReader`'s own doc says that "yields nothing" — the aura would have
+      delivered **zero** live combat magnitude despite 3003/3003 passing. Fixed by a new
+      `AtomPushService.PatronAuraAtoms()` + a second, ISOLATED `AtomCompiler.Compile` call in `Build`
+      merging ONLY its `.Defs` (never its auto-generated `.Compiled` grant — `AtomCompiler.Compile`
+      always emits at least a match-scoped grant per group, which would have double-granted
+      `fx.patron_aura` under a second `GrantId` and doubled the magnitude, since
+      `GrantedDerivedAtomReader` has no cross-grant de-dup). New test file
+      `AtomPushServicePatronCallbackTests.cs` (4/4 passing, seeds the REAL `patron-aura.json` from
+      disk) proves: a real patron's live aura reaches the push; no-patron resolves to 0 not a throw;
+      the auto-grant is genuinely absent from `payload.Grants`; a patron switch reflects immediately
+      on the very next push with no staleness. Full `FusionRpg.Server.Tests` re-run after the fix:
+      205 total (180 passed, same 25 pre-existing failures as before — all independently re-confirmed
+      as the `vocabulary.json` race + a second concurrent session's own World-subsystem edits, zero
+      Patron-related). See `spec-patron-absorption.md`'s "Amendment 2026-09-06 (b)" for the full trace.
 
 ### ✅ Checkpoint 6
-- [ ] Exactly **one** effect path reaches an actor, except `AuraContentCatalog` — deferred by its owning program, with evidence
-- [ ] The patron equality proof is green across the whole grid
+- [x] Exactly **one** effect path reaches an actor, except `AuraContentCatalog` — deferred by its owning program, with evidence. Patron's own former second path (`PatronAuraOverlay.cs`) is now gone too.
+- [x] The patron equality proof is green across the whole grid — 3003/3003, `PatronAbsorptionGridEqualityTests.cs`, 2026-09-06.
 
 ---
 

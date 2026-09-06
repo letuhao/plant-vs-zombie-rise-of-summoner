@@ -11,8 +11,8 @@
     E35 (spec-match-modify.md §2.3/§2.6): CheatState.SetLong/LVal and the scoped match-end restore
     (MatchModifyWrites, EffectRuntime.NotifyMatchEnd) live in FusionRpg.Injector, whose files are
     entangled with the rest of the injector graph (RpgHost, ActorHub, GameHooks) rather than being
-    standalone like PatronAuraOverlay.cs (see FusionRpg.Core.Tests' own Compile-Include exception for
-    that file), so this project references the real host build, not individual files.
+    standalone like InjectorDerivedOverride.cs (see FusionRpg.Core.Tests' own Compile-Include exception
+    for that file), so this project references the real host build, not individual files.
 
     This means it needs the same interop DLLs FusionRpg.Injector.BepInEx.csproj needs to compile at
     all: set $env:FUSIONRPG_GAME_DIR to a folder with BepInEx\core and BepInEx\interop before building

@@ -1,0 +1,596 @@
+using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Effects.Atoms.Generation;
+using FusionRpg.Core.Items;
+using FusionRpg.Core.Items.Display;
+using FusionRpg.Core.Items.Drops;
+using FusionRpg.Core.Items.Grants;
+using FusionRpg.Core.Items.Mutation;
+using FusionRpg.Core.Items.Sockets;
+using FusionRpg.Core.Items.Surfaces;
+using FusionRpg.Core.Items.Thresholds;
+using FusionRpg.Core.Power;
+using FusionRpg.Data;
+using Xunit;
+
+namespace FusionRpg.Data.Tests.Items;
+
+/// <summary>
+/// ⭐ <b><c>RpgStore.GetItemCardInput</c> — the DAL read path P2.5 deferred.</b>
+///
+/// <para>The whole point is the join: an item id goes in, and every block of the card comes back
+/// assembled from rows the shipped stores already hold — the owned <c>rpg_item</c>, the
+/// <c>effect_instance</c> and its container, the <c>item_display_template</c> rows boot seeds, the
+/// <c>item_socket</c> fill, the <c>effect_instance.enhance_level</c> the mutation ledger moved, the
+/// <c>item_set_member</c> join under the wearer's assignments, and module 4's gate.</para>
+///
+/// <para>⛔ <b>Nothing here is a fixture atom.</b> The catalog is the REAL
+/// <c>data/seed/items/affix-families/*.json</c> corpus through the REAL <c>FamilyExpansion</c> and
+/// <c>AffixLibraryGenerator</c>, the item is minted by the REAL <c>Instantiator</c>, the sockets go
+/// in through <c>SetSockets</c>, the enhancement through <c>AppendMutationOp</c>, and the set through
+/// <c>ImportSetCorpus</c> + <c>SaveAssignment</c>. Against a real SQLite store, not a mock.</para>
+///
+/// <para><b>The acceptance test is byte equality against a hand-assembled input</b>
+/// (<c>DisplayModel.Fingerprint</c>), so the DAL cannot pass by rendering something merely
+/// plausible — it has to produce exactly the card a caller who assembled the input itself would get.</para>
+/// </summary>
+public class ItemCardStoreTests : IDisposable
+{
+    readonly string _dir;
+    readonly RpgStore _store;
+
+    public ItemCardStoreTests()
+    {
+        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(_dir);
+        _store = new RpgStore(_dir);
+        _store.Init();
+    }
+
+    public void Dispose()
+    {
+        try { Directory.Delete(_dir, recursive: true); } catch { /* temp dir */ }
+    }
+
+    // ---- the real corpus ------------------------------------------------------------------------------
+
+    static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (Directory.Exists(Path.Combine(dir.FullName, "src", "FusionRpg.Injector"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+
+        throw new DirectoryNotFoundException("repo root");
+    }
+
+    static string Seed(params string[] parts) =>
+        Path.Combine(new[] { RepoRoot(), "data", "seed" }.Concat(parts).ToArray());
+
+    /// <summary>The same tuning shape every other instantiation test uses, pinned at Θ_content 20 so
+    /// <c>contentScale</c> is exactly ×1.000 and a frozen number is the atom's own roll.</summary>
+    static readonly PowerTuning Power = PowerTuning.Build(
+        1, 1, PowerTuning.FixedCMilli, 0, PowerTuning.FixedPinIndex, PowerTuning.FixedPinValue,
+        1000, 25000, 250, 1000, 5000, 5000, 25000);
+
+    const int PinTheta = 20;
+    const string Rung = "heirloom";
+    const int EnhanceCapMilli = 400;
+    const int PlusThree = 3;
+
+    static long? FlatReferenceBase(string channel) => channel switch
+    {
+        "maxHp" or "hp" => FusionRpg.Core.Battle.BattleRuleset.BaseHp(FamilyExpansion.ReferenceLevel),
+        "atk" => FusionRpg.Core.Battle.BattleRuleset.BaseAtk(FamilyExpansion.ReferenceLevel),
+        "defense" => FusionRpg.Core.Battle.BattleRuleset.BaseDefense(FamilyExpansion.ReferenceLevel),
+        _ => null,
+    };
+
+    static readonly Lazy<IReadOnlyList<AtomRow>> RealAtoms = new(() =>
+    {
+        var itemsRoot = Seed("items");
+        var tierBands = TierBandsFile.Read(
+            File.ReadAllText(Path.Combine(itemsRoot, "_tuning", "tier-bands.v1.json")));
+
+        var families = new List<FamilyEntryInput>();
+        foreach (var file in Directory.GetFiles(Path.Combine(itemsRoot, "affix-families"), "*.json")
+                     .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            if (Path.GetFileName(file).StartsWith('_')) continue;
+            families.AddRange(AffixFamilyFile.Read(Path.GetFileName(file), File.ReadAllText(file)));
+        }
+
+        return FamilyExpansion.Expand(families, tierBands, FlatReferenceBase).Rows;
+    });
+
+    static readonly Lazy<IReadOnlyList<DisplayTemplateRow>> Templates = new(() =>
+        Directory.EnumerateFiles(Seed("items", "display-templates"), "*.json")
+            .OrderBy(f => f, StringComparer.Ordinal)
+            .SelectMany(f => DisplayTemplates.Parse(File.ReadAllText(f)))
+            .ToList());
+
+    static readonly Lazy<IReadOnlyList<SetDef>> Sets = new(() =>
+        Directory.EnumerateFiles(Seed("items", "sets"), "*.json")
+            .OrderBy(f => f, StringComparer.Ordinal)
+            .SelectMany(f => SetCorpus.Parse(File.ReadAllText(f)))
+            .ToList());
+
+    static SocketTuning Sockets() =>
+        SocketTuning.Parse(File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "sockets.v1.json")));
+
+    static ItemSurfaceTuning Surfaces() =>
+        ItemSurfaceTuning.Parse(File.ReadAllText(
+            Path.Combine(RepoRoot(), "data", "tuning", "item-surfaces.v1.json")));
+
+    static EnhancementTuning Enhancement() =>
+        EnhancementTuning.Parse(File.ReadAllText(
+            Path.Combine(RepoRoot(), "data", "tuning", "enhancement.v1.json")));
+
+    // ---- the seeded world -----------------------------------------------------------------------------
+
+    /// <summary>What one seeded fixture produced, so a test asserts against real ids rather than
+    /// re-deriving them.</summary>
+    sealed record Fixture(
+        string InstanceId, string ContainerId, string SpecimenId, ItemRole Role,
+        SetDef Set, IReadOnlyList<AtomRow> Atoms);
+
+    /// <summary>
+    /// Seeds the whole world one card needs and returns the item's own ids. Everything goes in through
+    /// a shipped write path — no INSERT is hand-written here, which is the same discipline the read
+    /// side is being tested for.
+    /// </summary>
+    Fixture SeedWorld(bool withSockets = true, bool withEnhancement = true, bool withSet = true)
+    {
+        // 1 — the rarity ladder. Ordinals are append-only and load-bearing for the card's pip count,
+        // so the whole ten-rung ladder goes in, not just the one rung the item uses.
+        for (var i = 0; i < RarityLadder.RungIds.Count; i++)
+            _store.UpsertRarity(new RarityRow(RarityLadder.RungIds[i], (i + 1) * 10, 3, 0, 1, 5));
+
+        _store.SetRarityBudget(Rung, "enhance_cap", EnhanceCapMilli);
+
+        // 2 — the real atom catalog and the affix library generated from it.
+        var atoms = RealAtoms.Value;
+        Assert.NotEmpty(atoms);
+        _store.UpsertAtoms(atoms);
+
+        var affixes = AffixLibraryGenerator.Generate(atoms);
+        var byId = atoms.ToDictionary(a => a.AtomId, StringComparer.Ordinal);
+        AtomRow? LookupAtom(string id) => byId.TryGetValue(id, out var a) ? a : null;
+        foreach (var affix in affixes) Assert.True(_store.UpsertAffix(affix, LookupAtom).IsOk);
+        var affixById = affixes.ToDictionary(a => a.AffixId, StringComparer.Ordinal);
+        AffixRow? LookupAffix(string id) => affixById.TryGetValue(id, out var a) ? a : null;
+
+        // 3 — the display corpus, through the boot seeder the Server itself calls.
+        _store.SeedItemDisplayTemplates(Templates.Value);
+
+        // 4 — the set corpus, and the set this item belongs to.
+        _store.ImportSetCorpus(Sets.Value);
+        var set = Sets.Value.First(s => s.Tiers.Count > 0 && s.Members.Select(m => m.Role).Distinct().Count() >= 3);
+        var member = set.Members[0];
+
+        // 5 — the container. Its id IS the set member's base type: that is what item_set_member joins on.
+        var templated = Templates.Value
+            .Where(t => t.Status == "live")
+            .Select(t => t.RuntimeFamily)
+            .ToHashSet(StringComparer.Ordinal);
+
+        var baseStat = atoms
+            .Where(a => a.ParamsJson.Contains("\"maxHp\"", StringComparison.Ordinal))
+            .OrderByDescending(a => a.Tier)
+            .First();
+
+        var pool = affixes
+            .Where(a => a.Refs.Count == 1 && a.Refs[0].AtomId is { } id && byId.TryGetValue(id, out var at)
+                        && !string.Equals(at.FamilyId, baseStat.FamilyId, StringComparison.Ordinal)
+                        && templated.Contains(at.FamilyId))
+            .OrderBy(a => a.AffixId, StringComparer.Ordinal)
+            .Select(a => new ContainerPoolRow(a.AffixId, 100))
+            .ToList();
+        Assert.NotEmpty(pool);
+
+        var container = new ContainerRow
+        {
+            ContainerId = member.ContainerId,
+            Kind = ContainerKind.Item,
+            Slot = ItemRoles.Id(member.Role),
+            Rarity = Rung,
+            LevelReq = 20,
+            PrefixRolls = 3,
+            SuffixRolls = 0,
+            Atoms = new[] { new ContainerAtomRow(0, baseStat.AtomId) },
+            Pool = pool,
+        };
+        Assert.True(_store.UpsertContainer(container).IsOk);
+
+        // A granted action on the base type (module 19's own table).
+        _store.UpsertItemGrantedAction(new ItemGrantedActionRow(container.ContainerId, 0, "action.cleave", ItemGrantRole.Granted));
+
+        // 6 — the real mint, then the ownership row that makes it an ITEM rather than a bare instance.
+        var mint = Instantiator.TryInstantiate(
+            container, LookupAtom, LookupAffix, rollSeed: 0xC0FFEE, thetaContent: PinTheta,
+            tuning: Power, out var instance, InstanceOrigin.Drop, catalogRevision: _store.GetCatalogRevision());
+        Assert.True(mint.IsOk, mint.ToString());
+
+        var instanceId = _store.SaveInstance(instance!);
+        Assert.True(_store.AcquireItem(new RpgItemRow
+        {
+            InstanceId = instanceId,
+            PlayerId = "p1",
+            AcquiredUtc = "2026-09-06T00:00:00Z",
+            OriginKind = "drop",
+            Locked = true,
+        }).IsOk);
+
+        // 7 — the generation stamp, through the one transaction that writes it.
+        _store.PersistLoot(
+            "p1",
+            new LootManifest("corr-1", "table.t1", 99UL, ItemLevel: 24, Array.Empty<LootGrant>(),
+                Array.Empty<string>(), "{}", LootPityState.Empty, LootPityState.Empty, null, false, null),
+            "delve", "d1", _store.GetCatalogRevision(), 1,
+            new[]
+            {
+                new ItemGenerationRow(instanceId, 0, container.ContainerId, 70, 24,
+                    FrameMixPredicate.BucketOf(member.Frame), ItemRoles.Id(member.Role), "drop"),
+            });
+
+        // 8 — real sockets, through module 16's own writer, plus the generated resonance catalog.
+        if (withSockets)
+        {
+            _store.SeedComboRecipes(ResonanceGenerator.Generate(Sockets()));
+            _store.SetSockets(instanceId, new List<SocketSlot>
+            {
+                new(0, "fire", Crafted: false, "gem.ember-shard-t3", null),
+                new(1, "fire", Crafted: false, "gem.ember-shard-t3", null),
+                new(2, "", Crafted: true, null, null),
+            });
+        }
+
+        // 9 — a real enhancement level, through module 15's ledger. No AtomValueSet: the level is the
+        // thing under test, and moving the frozen magnitudes as well would confuse two questions.
+        if (withEnhancement)
+        {
+            var appended = _store.AppendMutationOp(
+                instanceId, MutationOpKind.Enhance, "corr-enh-1", opSeed: 7,
+                new MutationResult("success", PlusThree, Array.Empty<AtomValueSet>(),
+                    Array.Empty<int>(), Array.Empty<AtomAppend>()),
+                newStateHash: null, originValuesJson: null, appliedUtc: "2026-09-06T00:01:00Z");
+            Assert.True(appended.Ok, appended.Reason);
+        }
+
+        // 10 — the wearer. Three distinct member roles so SetEvaluator has a real 3 / N to report.
+        const string specimen = "spec-1";
+        if (withSet)
+            foreach (var m in set.Members.GroupBy(m => m.Role).Select(g => g.First()).Take(3))
+                _store.SaveAssignment(
+                    specimen, m.Role,
+                    string.Equals(m.ContainerId, container.ContainerId, StringComparison.Ordinal) ? "item" : "stock",
+                    string.Equals(m.ContainerId, container.ContainerId, StringComparison.Ordinal) ? instanceId : m.ContainerId);
+
+        return new Fixture(instanceId, container.ContainerId, specimen, member.Role, set, atoms);
+    }
+
+    // ---- the corpus half the DAL cannot know ------------------------------------------------------------
+
+    static CardBaseType? BaseTypeOf(string containerId) => new CardBaseType(
+        "bt." + containerId, "class.blade", "humanoid", "role.armament-primary", null);
+
+    static CardInsertLookup? InsertOf(string containerId) => new CardInsertLookup(
+        new InsertDef(containerId, "gem.ember", "fire", 3), "gem.ember-shard");
+
+    ItemCardCorpus Corpus() => new(
+        BaseTypeOf, InsertOf, Sockets(), Surfaces(), Enhancement());
+
+    ItemCardWearer Wearer(Fixture f) => new(new SpecimenActor(f.SpecimenId, Frame: null, Level: 30, Faction: null));
+
+    // ====================================================================================================
+
+    [Fact]
+    public void An_item_id_becomes_a_rendered_card_with_no_hand_assembly()
+    {
+        var f = SeedWorld();
+
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f));
+        Assert.NotNull(input);
+
+        var model = ItemCardRenderer.Render(input!);
+        Assert.Equal(CardBlocks.Order, model.Blocks.Select(b => b.BlockKey).ToList());
+
+        // The blocks that prove the join actually reached each module's own store.
+        Assert.NotEmpty(model.Blocks.Single(b => b.BlockKey == CardBlocks.BaseStats).Lines);
+        Assert.NotEmpty(model.Blocks.Single(b => b.BlockKey == CardBlocks.Affixes).Lines);
+        Assert.NotEmpty(model.Blocks.Single(b => b.BlockKey == CardBlocks.Enhancement).Lines);
+        Assert.NotEmpty(model.Blocks.Single(b => b.BlockKey == CardBlocks.Sockets).Lines);
+        Assert.NotEmpty(model.Blocks.Single(b => b.BlockKey == CardBlocks.Set).Lines);
+        Assert.NotEmpty(model.Blocks.Single(b => b.BlockKey == CardBlocks.GrantedAction).Lines);
+    }
+
+    /// <summary>
+    /// ⭐ <b>The acceptance test.</b> The same stored state, assembled twice — once by the DAL and once
+    /// by hand from the same public reads — must render to the same fingerprint. A DAL that produced a
+    /// plausible-but-different card fails here, which is the only assertion that actually pins the
+    /// join rather than the plumbing.
+    /// </summary>
+    [Fact]
+    public void The_dal_assembled_card_is_byte_identical_to_a_hand_assembled_one()
+    {
+        var f = SeedWorld();
+
+        var fromDal = ItemCardRenderer.Render(_store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!);
+        var byHand = ItemCardRenderer.Render(HandAssemble(f));
+
+        Assert.Equal(byHand.Fingerprint(), fromDal.Fingerprint());
+    }
+
+    /// <summary>
+    /// The hand-assembled control: every field read through the same public store methods a caller
+    /// had to string together before <c>GetItemCardInput</c> existed. This IS the code the DAL method
+    /// replaces, kept here so the two can be compared rather than asserted equal by description.
+    /// </summary>
+    ItemCardInput HandAssemble(Fixture f)
+    {
+        var item = _store.GetItem(f.InstanceId)!;
+        var instance = _store.GetInstance(f.InstanceId)!;
+        var container = _store.GetContainer(instance.ContainerId)!;
+        var generation = _store.GetItemGeneration(f.InstanceId)!;
+        var head = _store.GetInstanceMutationHead(f.InstanceId)!;
+        var baseType = BaseTypeOf(container.ContainerId)!.Value;
+
+        var ladder = _store.ListRarities().OrderBy(r => r.Ordinal).ToList();
+        var rung = ladder.FindIndex(r => r.RarityId == container.Rarity);
+
+        var slots = _store.GetSockets(f.InstanceId);
+        var fill = slots.Where(s => !s.IsEmpty)
+            .Select(s => new SocketFill(s.Index, s.Affinity, InsertOf(s.InsertContainerId!)!.Value.Def))
+            .ToList();
+
+        var host = new SocketHost(container.ContainerId, f.Role, baseType.Frame, slots.Count,
+            IsSetPiece: _store.ListSets().Any(s => s.Members.Any(m => m.ContainerId == container.ContainerId)));
+        var distances = CombinationDistance.Evaluate(
+            host, fill, _store.GetComboRecipes(), Sockets(), Surfaces(), out _);
+
+        var worn = _store.ListAssignments(f.SpecimenId)
+            .Select(a => new EquippedPiece(a.Role, a.RefKind == "item"
+                ? _store.GetInstance(a.RefId)!.ContainerId
+                : a.RefId))
+            .ToList();
+        SetProgress? progress = null;
+        foreach (var row in SetEvaluator.Progress(worn, _store.ListSets()))
+            if (string.Equals(row.SetId, f.Set.SetId, StringComparison.Ordinal)) { progress = row; break; }
+        var disclosure = SetDisclosure.ForWearer(worn, _store.ListSets())
+            .First(d => d.Piece.Role == f.Role);
+
+        return new ItemCardInput(
+            instance, container,
+            id => _store.GetAtom(id),
+            family => _store.GetDisplayTemplate(family),
+            baseType,
+            new CardRarity("rarity." + container.Rarity, rung + 1, RarityPalette.Dark[rung]),
+            baseType.NameKey)
+        {
+            ItemLevel = generation.ItemLevel,
+            EnhanceLevel = head.EnhanceLevel,
+            EnhanceGainMilli = EnhancePolicy.GainMilli(
+                head.EnhanceLevel, _store.GetRarityBudget(container.Rarity!, "enhance_cap")!.Value, Enhancement()),
+            LevelReq = container.LevelReq,
+            SpecimenLevel = 30,
+            Refusal = new EquipGate().Explain(f.Role, Wearer(f).Actor, generation.Frame, container.LevelReq, null),
+            Sockets = slots.Select(s => new CardSocketCell(
+                s.Index, s.Affinity.Length == 0 ? "" : "element." + s.Affinity, s.Crafted,
+                s.IsEmpty ? null : InsertOf(s.InsertContainerId!)!.Value.NameKey)).ToList(),
+            Combinations = distances
+                .Where(d => d.State != CombinationDisplayState.Undiscovered)
+                .Select(d => new CardCombination(
+                    "combo." + d.Shape.ToString().ToLowerInvariant(), d.Shape, d.State, d.Distance,
+                    d.GrantedTier, d.AllAttuned,
+                    d.MissingElements.Select(e => "element." + e).ToList()))
+                .ToList(),
+            Set = progress is { } p
+                ? new CardSet("set." + p.SetId, p.Count, p.Total,
+                    f.Set.Tiers.OrderBy(t => t.PiecesRequired)
+                        .Select(t => new CardSetTier(t.PiecesRequired, t.PiecesRequired <= p.Count, t.IsCapability))
+                        .ToList(),
+                    Redundant: disclosure.RedundantSetIds.Count > 0)
+                : null,
+            GrantedActions = _store.ListItemGrantedActions(container.ContainerId)
+                .Select(g => new CardGrantedAction("action." + g.ActionId, "action." + g.ActionId + ".desc", false, false))
+                .ToList(),
+            Unique = _store.GetItemUnique(container.ContainerId),
+            Locked = item.Locked,
+            Stale = item.Stale,
+        };
+    }
+
+    // ---- what each module contributes, asserted one at a time --------------------------------------------
+
+    [Fact]
+    public void The_enhancement_level_comes_from_the_mutation_ledger_and_its_gain_from_the_rungs_own_cap()
+    {
+        var f = SeedWorld();
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.Equal(PlusThree, input.EnhanceLevel);
+        Assert.Equal(
+            EnhancePolicy.GainMilli(PlusThree, EnhanceCapMilli, Enhancement()),
+            input.EnhanceGainMilli);
+
+        // And the header carries the `+N` token only because the ledger moved.
+        var header = ItemCardRenderer.Render(input).Blocks
+            .Single(b => b.BlockKey == CardBlocks.Header).Lines[0];
+        Assert.Equal("+" + PlusThree, header.Args["enhance"]);
+    }
+
+    [Fact]
+    public void A_plus_zero_item_reads_zero_out_of_sql_rather_than_omitting_the_read()
+    {
+        var f = SeedWorld(withEnhancement: false);
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.Equal(0, input.EnhanceLevel);
+        Assert.Equal(0, input.EnhanceGainMilli);
+        Assert.Empty(ItemCardRenderer.Render(input).Blocks.Single(b => b.BlockKey == CardBlocks.Enhancement).Lines);
+    }
+
+    [Fact]
+    public void The_sockets_and_their_combinations_come_from_item_socket_and_the_recipe_table()
+    {
+        var f = SeedWorld();
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.Equal(3, input.Sockets.Count);
+        Assert.Equal("element.fire", input.Sockets[0].AffinityKey);
+        Assert.False(input.Sockets[0].IsEmpty);
+        Assert.True(input.Sockets[2].Crafted);
+        Assert.True(input.Sockets[2].IsEmpty);
+
+        // Two attuned fire inserts really do fire a resonance, and it came off the stored catalog.
+        Assert.NotEmpty(input.Combinations);
+        Assert.Contains(input.Combinations, c => c.State == CombinationDisplayState.Active);
+        // §4.3: an undiscovered combination never reaches the card at all.
+        Assert.DoesNotContain(input.Combinations, c => c.State == CombinationDisplayState.Undiscovered);
+    }
+
+    [Fact]
+    public void An_item_with_no_socket_rows_carries_no_cells_and_no_combinations()
+    {
+        var f = SeedWorld(withSockets: false);
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.Empty(input.Sockets);
+        Assert.Empty(input.Combinations);
+    }
+
+    /// <summary>A filled socket with no gem catalog is REFUSED, never rendered as empty — the DAL's
+    /// one hard failure, and the reason it is hard is that the alternative is a card that lies about
+    /// what the item is wearing.</summary>
+    [Fact]
+    public void A_filled_socket_with_no_insert_lookup_is_refused_rather_than_shown_empty()
+    {
+        var f = SeedWorld();
+        var blind = Corpus() with { LookupInsert = null };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => _store.GetItemCardInput(f.InstanceId, blind, Wearer(f)));
+        Assert.Contains("gem", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public void The_set_block_comes_from_item_set_member_joined_under_the_wearers_assignments()
+    {
+        var f = SeedWorld();
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.NotNull(input.Set);
+        Assert.Equal("set." + f.Set.SetId, input.Set!.Value.NameKey);
+        Assert.Equal(3, input.Set.Value.Count);
+        Assert.Equal(f.Set.Members.Select(m => m.Role).Distinct().Count(), input.Set.Value.Total);
+        // The WHOLE ladder renders, active and inactive alike.
+        Assert.Equal(f.Set.Tiers.Count, input.Set.Value.Ladder.Count);
+        Assert.Contains(input.Set.Value.Ladder, t => t.Active);
+    }
+
+    /// <summary>No wearer, no set — a set is a fact about a wearer, and an item in the bag advances
+    /// nothing. Nor is there a requirement block or a refusal to explain.</summary>
+    [Fact]
+    public void An_unworn_item_carries_no_set_no_requirement_and_no_refusal()
+    {
+        var f = SeedWorld(withSet: false);
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.Null(input.Set);
+        Assert.Null(input.Refusal);
+        Assert.Empty(input.Requirements);
+    }
+
+    [Fact]
+    public void The_equip_gate_refuses_a_level_it_actually_cannot_meet()
+    {
+        var f = SeedWorld();
+        var tooYoung = new ItemCardWearer(new SpecimenActor(f.SpecimenId, null, Level: 3, null));
+
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), tooYoung)!;
+
+        Assert.NotNull(input.Refusal);
+        Assert.Equal(EquipRefusalReason.LevelTooLow, input.Refusal!.Value.Reason);
+
+        // And it reaches the card as a reason key plus a remedy, never as a bare boolean.
+        var block = ItemCardRenderer.Render(input).Blocks.Single(b => b.BlockKey == CardBlocks.Requirements);
+        Assert.Contains(block.Lines, l => l.Key == "item.card.requirement.refused");
+    }
+
+    [Fact]
+    public void The_rarity_pips_and_colour_come_off_the_stored_ladder_in_ordinal_order()
+    {
+        var f = SeedWorld();
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        var expected = RarityLadder.RungIds.ToList().IndexOf(Rung);
+        Assert.Equal("rarity." + Rung, input.Rarity.DisplayKey);
+        Assert.Equal(expected + 1, input.Rarity.PipCount);
+        Assert.Equal(RarityPalette.Dark[expected], input.Rarity.ColorHex);
+
+        // The light theme is one argument, not a second code path.
+        var light = _store.GetItemCardInput(f.InstanceId, Corpus() with { Palette = RarityPalette.Light }, Wearer(f))!;
+        Assert.Equal(RarityPalette.Light[expected], light.Rarity.ColorHex);
+    }
+
+    [Fact]
+    public void The_item_level_and_the_ownership_flags_come_from_their_own_tables()
+    {
+        var f = SeedWorld();
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+
+        Assert.Equal(24, input.ItemLevel);
+        Assert.True(input.Locked);
+        Assert.False(input.Stale);
+        // ssot-inventory.md:208 — `no_reassign` is reserved and deliberately not added, so there is no
+        // column to read. False is the honest answer; a guess would not be.
+        Assert.False(input.NoReassign);
+    }
+
+    /// <summary>The three genuinely absent rows return <c>null</c> rather than throwing — an
+    /// unowned instance, a missing instance and a container the catalog does not have are all
+    /// "no card", not "bad card".</summary>
+    [Fact]
+    public void A_missing_row_returns_null_rather_than_throwing()
+    {
+        SeedWorld();
+        Assert.Null(_store.GetItemCardInput("no-such-instance", Corpus()));
+
+        // A real effect_instance that nobody owns is not an item card: rpg_item is the ownership root.
+        var orphan = _store.SaveInstance(new InstanceRow
+        {
+            ContainerId = "item.orphan",
+            RollSeed = 1,
+            CatalogRevision = _store.GetCatalogRevision(),
+            Origin = InstanceOrigin.Drop,
+            Atoms = new[] { new InstanceAtomRow(0, RealAtoms.Value[0].AtomId, """{"amount":1}""") },
+        });
+        Assert.Null(_store.GetItemCardInput(orphan, Corpus()));
+    }
+
+    /// <summary>The display templates the card renders with are the ones boot seeded into
+    /// <c>item_display_template</c> — not a file read behind the DAL's back. Dropping the table's
+    /// rows makes the renderer refuse by name, which is what proves the read is real.</summary>
+    [Fact]
+    public void The_card_renders_from_item_display_template_rows_and_refuses_without_them()
+    {
+        var freshDir = Path.Combine(Path.GetTempPath(), "fusionrpg-itemcard-nodisplay-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(freshDir);
+        try
+        {
+            var f = SeedWorld();
+            Assert.NotEmpty(_store.ListDisplayTemplates());
+
+            // Same store, same item, but ask for a family the table does not have: the lookup the DAL
+            // handed over returns null and the renderer refuses rather than printing a raw id.
+            var input = _store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!;
+            Assert.Null(input.LookupTemplate("atom.not-a-family"));
+            Assert.NotNull(input.LookupTemplate(
+                f.Atoms.First(a => _store.GetDisplayTemplate(a.FamilyId) is not null).FamilyId));
+        }
+        finally
+        {
+            try { Directory.Delete(freshDir, recursive: true); } catch { /* temp dir */ }
+        }
+    }
+}

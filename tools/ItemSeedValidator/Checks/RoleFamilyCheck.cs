@@ -104,5 +104,51 @@ public static class RoleFamilyCheck
                 ctx.CorpusError("RoleRelocationHostNotLegal", "role-relocation.v1.json",
                     $"relocation moves '{familyId}' onto host '{hostRole}', but that family is not legal on that role");
         }
+
+        CheckRelocationCoverage(ctx, familyRoles, doc, rows, isLikelyFullSweep);
+    }
+
+    /// <summary>
+    /// The REVERSE direction of the loop above, and the one that was missing until 2026-09-06: every
+    /// check here walked the relocation file and asked "does the corpus still have this?", so a family
+    /// the corpus GAINED after the file was computed had no row and nothing said so. Found by a
+    /// final-proof pass when the affix-authoring lane shipped `g-punisher.json` — two families legal on
+    /// the dropped `sense` role, zero relocation rows, so both silently kept `max_tier = 5` on their
+    /// surviving hybrid-core hosts while every other `sense`-legal family sits at 3.
+    ///
+    /// <para>The relocation table is DERIVED (`_meta.source`: "computed from
+    /// data/seed/items/affix-families/**"), so its completeness is a corpus fact, not an authoring
+    /// choice — which makes it checkable rather than a matter of taste. Same `isLikelyFullSweep` guard
+    /// as above: a scoped run loads a handful of families and must not be told its own partial corpus
+    /// is missing rows.</para>
+    /// </summary>
+    static void CheckRelocationCoverage(
+        ValidationContext ctx,
+        Dictionary<string, HashSet<string>> familyRoles,
+        JsonObject doc,
+        List<JsonObject> rows,
+        bool isLikelyFullSweep)
+    {
+        if (!isLikelyFullSweep) return;
+
+        // Read the dropped roles from the file's own `_meta`, never a second hardcoded list here --
+        // D3's three roles are that file's declaration and a copy would drift away from it silently.
+        var dropped = (doc["_meta"]?["droppedRoles"] as JsonArray)?
+            .OfType<JsonValue>()
+            .Select(v => v.TryGetValue<string>(out var s) ? s : null)
+            .OfType<string>()
+            .ToHashSet(StringComparer.Ordinal) ?? new HashSet<string>(StringComparer.Ordinal);
+        if (dropped.Count == 0) return;
+
+        var covered = rows
+            .Select(r => (Dropped: r["droppedRole"]!.GetValue<string>(), Family: r["familyId"]!.GetValue<string>()))
+            .ToHashSet();
+
+        foreach (var (familyId, roles) in familyRoles.OrderBy(kv => kv.Key, StringComparer.Ordinal))
+            foreach (var droppedRole in roles.Where(dropped.Contains).OrderBy(r => r, StringComparer.Ordinal))
+                if (!covered.Contains((droppedRole, familyId)))
+                    ctx.CorpusError("RoleRelocationRowMissing", "role-relocation.v1.json",
+                        $"'{familyId}' is legal on the dropped role '{droppedRole}' but no relocation row "
+                        + "covers it -- it would keep its full max_tier on every surviving hybrid-core host");
     }
 }

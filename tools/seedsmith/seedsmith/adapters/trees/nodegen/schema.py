@@ -76,7 +76,10 @@ def _identity_fields() -> "dict[str, Any]":
         "nameKey": {
             "type": "string", "pattern": NAME_KEY_PATTERN,
             "description": "Lowercase-kebab key, `tree.node.<slug>`. It is NOT free text and it "
-                           "is NOT the node id — the plan already minted that.",
+                           "is NOT the node id — the plan already minted that. Derive <slug> from "
+                           "the `name` you just chose above (e.g. name \"Primal Surge\" -> slug "
+                           "\"primal-surge\") — never a generic template like \"branch-depth-01\", "
+                           "which is not unique and will collide with a different node's own name.",
         },
         "flavor": {
             "type": "string", "maxLength": FLAVOR_MAX_LENGTH,

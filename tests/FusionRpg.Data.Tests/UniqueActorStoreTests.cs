@@ -447,28 +447,30 @@ public class UniqueActorStoreTests : IDisposable
     }
 
     [Fact]
-    public void Equipment_same_stub_two_slots_unique_grantIds()
+    public void Equipment_same_stub_two_slots_grants_nothing_in_mods_json_either_slot()
     {
-        // stub.hp_charm — legacy path; stub.atk_ring's own per-slot identity now lives on
-        // effect_binding (a distinct binding per slot, proven in ModsAbsorptionTests/
-        // UniqueEquipmentAtomBindingTests), not on a stamped mods_json grantId.
+        // 2026-09-06: stub.hp_charm is atom-backed now too (item.fx-entity-atk) — every known item's
+        // per-slot identity lives on effect_binding (a distinct binding per slot, proven in
+        // ModsAbsorptionTests/UniqueEquipmentAtomBindingTests, which import the real seed tree this
+        // fixture does not), never on a stamped mods_json grantId any more; the real regression to
+        // guard HERE is that the SAME item in two slots leaks a grant into neither slot's mods_json.
         var a = _store.CreateUniqueActor(_playerId, "zombie", 2);
         _store.UpsertUniqueEquipment(a.InstanceId, "weapon", "stub.hp_charm");
         var eq = _store.UpsertUniqueEquipment(a.InstanceId, "armor", "stub.hp_charm");
-        Assert.Contains("equip-stub-hp:weapon", eq.ModsJson, StringComparison.Ordinal);
-        Assert.Contains("equip-stub-hp:armor", eq.ModsJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
     }
 
     [Fact]
     public void Equipment_rebuild_preserves_flat_absolutes()
     {
-        // stub.hp_charm — legacy path; stub.butter_bead's grant moved to effect_binding.
+        // 2026-09-06: stub.hp_charm is atom-backed now too — absolutes survive regardless, proven
+        // against a mods_json that no longer carries any grant for a known item at all.
         var a = _store.CreateUniqueActor(_playerId, "plant", 1);
         _store.UpsertUniqueStatModsJson(a.InstanceId, """{"hp":12,"atk":3}""");
         var eq = _store.UpsertUniqueEquipment(a.InstanceId, "trinket", "stub.hp_charm");
         Assert.Contains("12", eq.ModsJson, StringComparison.Ordinal);
         Assert.Contains("3", eq.ModsJson, StringComparison.Ordinal);
-        Assert.Contains("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
+        Assert.DoesNotContain("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
     }
 
     [Fact]

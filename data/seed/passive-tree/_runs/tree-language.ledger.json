@@ -28,6 +28,814 @@
         "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the shell.",
         "rationale": ""
       }
+    },
+    "might:skill.might-off-t1-n1": {
+      "record": {
+        "id": "skill.might-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overwhelming Might",
+        "nameKey": "tree.node.might-might-offensive-shallow-01",
+        "flavor": "The sheer weight of the blow leaves no room for recovery.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t8-n0": {
+      "record": {
+        "id": "skill.might-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sunder-Might",
+        "nameKey": "tree.node.might-might-offensive-deep-mechanism",
+        "flavor": "The weight of the blow is measured not by the arm, but by the inevitability of the impact.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t1-n0": {
+      "record": {
+        "id": "skill.might-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.might"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.might-offensive-shallow-01",
+        "flavor": "The weight of the blow grows with every heartbeat.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t1-n1": {
+      "record": {
+        "id": "skill.might-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.plating"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Layered Bastion",
+        "nameKey": "tree.node.bastion",
+        "flavor": "The weight of the shell becomes a second skin, unyielding and thick.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t3-n1": {
+      "record": {
+        "id": "skill.might-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.might-offensive-apex",
+        "flavor": "The weight of the blow is matched only by the hunger for the next.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t3-n1": {
+      "record": {
+        "id": "skill.might-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.might-defensive-deeprooting",
+        "flavor": "The weight of existence anchors the spirit to the marrow.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t4-n1": {
+      "record": {
+        "id": "skill.might-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Savage Momentum",
+        "nameKey": "tree.node.might-offensive-mid-savage-momentum",
+        "flavor": "The more the blood flows, the harder the blow lands.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t6-n0": {
+      "record": {
+        "id": "skill.might-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.swiftness",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Momentum Shift",
+        "nameKey": "tree.node.might-offensive-mid-momentum-shift",
+        "flavor": "The rhythm of the strike dictates the speed of the recovery.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t6-n0": {
+      "record": {
+        "id": "skill.might-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recoil",
+        "nameKey": "tree.node.defensive-mid-kinetic-recoil",
+        "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the ward.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t7-n0": {
+      "record": {
+        "id": "skill.might-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Resonance",
+        "nameKey": "tree.node.might-offensive-deep-resonance",
+        "flavor": "The air hums with the weight of an impending storm.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t7-n1": {
+      "record": {
+        "id": "skill.might-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.might-offensive-deep-apex",
+        "flavor": "The weight of the blow is matched only by the hunger that drove it.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t9-n0": {
+      "record": {
+        "id": "skill.might-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calcified Husk",
+        "nameKey": "tree.node.calcifiedhusk",
+        "flavor": "The skin thickens where the spirit has already begun to harden.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t10-n1": {
+      "record": {
+        "id": "skill.might-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.quickening",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Accelerated Momentum",
+        "nameKey": "tree.node.might-offensive-deep-01",
+        "flavor": "The rhythm of the strike dictates the rhythm of the soul.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t1-n0": {
+      "record": {
+        "id": "skill.might-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Deep Rooted",
+        "nameKey": "tree.node.might-defensive-deeprooted",
+        "flavor": "The weight of the earth settles into the marrow, turning bone to stone.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t4-n0": {
+      "record": {
+        "id": "skill.might-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.might",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Weight of Intent",
+        "nameKey": "tree.node.might-offensive-mid-weight-of-intent",
+        "flavor": "The momentum of a strike is measured not by its speed, but by the inevitability of its impact.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t4-n1": {
+      "record": {
+        "id": "skill.might-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.deeprooting",
+        "flavor": "The more the soil is disturbed, the deeper the roots take hold.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t5-n1": {
+      "record": {
+        "id": "skill.might-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.might-offensive-apex-predator",
+        "flavor": "The weight of the strike is matched only by the hunger of the wielder.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t6-n1": {
+      "record": {
+        "id": "skill.might-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Iron Silt",
+        "nameKey": "tree.node.might-defensive-mid-ironsilt",
+        "flavor": "The weight of the earth settles into the seams of your armor.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t9-n1": {
+      "record": {
+        "id": "skill.might-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recirculation",
+        "nameKey": "tree.node.defensive-deep-mechanism-kinetic-recirculation",
+        "flavor": "Energy is never lost, only redirected through the structural lattice.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t6-n1": {
+      "record": {
+        "id": "skill.might-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apexpredator",
+        "flavor": "The scent of iron and adrenaline sharpens the instinct to strike before the prey can even scream.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t9-n0": {
+      "record": {
+        "id": "skill.might-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-stampede",
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Vanguard's Momentum",
+        "nameKey": "tree.node.might-offensive-deep-vanguardmomentum",
+        "flavor": "The weight of the charge becomes the edge of the blade.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t10-n0": {
+      "record": {
+        "id": "skill.might-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Iron Sieve",
+        "nameKey": "tree.node.iron-sieve",
+        "flavor": "The weight of the shell is not a burden, but a foundation.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t5-n0": {
+      "record": {
+        "id": "skill.might-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "While posture holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Heavy Impact",
+        "nameKey": "tree.node.heavy-impact",
+        "flavor": "The weight of the strike is felt long after the contact.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t5-n0": {
+      "record": {
+        "id": "skill.might-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Siphon",
+        "nameKey": "tree.node.kinetic-siphon",
+        "flavor": "The impact of a blow feeds the very barrier meant to deflect it.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t10-n0": {
+      "record": {
+        "id": "skill.might-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Weight of Intent",
+        "nameKey": "tree.node.might-offensive-deep-weight",
+        "flavor": "The momentum of the strike is measured by the conviction behind it.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t3-n0": {
+      "record": {
+        "id": "skill.might-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calloused Grit",
+        "nameKey": "tree.node.might-defensive-shallow-calloused-grit",
+        "flavor": "The skin thickens where the pressure is most constant.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t10-n1": {
+      "record": {
+        "id": "skill.might-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.arm-welding",
+          "atom.sust-husk"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Silt-Bound Plate",
+        "nameKey": "tree.node.might-defensive-deep-siltboundplate",
+        "flavor": "Layers of sediment and iron fused into a living, unyielding shell.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-def-t2-n1": {
+      "record": {
+        "id": "skill.might-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Verdant Marrow",
+        "nameKey": "tree.node.verdantmarrow",
+        "flavor": "The very essence of life hardens into a structural foundation.",
+        "rationale": ""
+      }
+    },
+    "might:skill.might-off-t2-n1": {
+      "record": {
+        "id": "skill.might-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apex-predator",
+        "flavor": "The scent of iron and adrenaline sharpens the instinct to strike.",
+        "rationale": ""
+      }
     }
   }
 }

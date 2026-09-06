@@ -210,6 +210,12 @@ if (wantGeared)
                 atomId = a.AtomId, family = a.FamilyId, tier = a.Tier, @params = a.ParamsJson,
             }).ToArray(),
             equippedAtomCount = equippedRows.Length,
+            // What actually reached the predictor, which is NOT the same as what was swept.
+            // `EquipAtomSource` skips a row whose `amount` is a ValueSpec object rather than a plain
+            // number (`patron-absorption`'s twelve `externalRef` aura atoms, 2026-09-06) — this seam
+            // has no ValueSpec resolver. Reported separately so the evidence never reads "13 atoms
+            // equipped" when one carried the whole delta.
+            contributingAtomCount = gear.Length == 0 ? 0 : gear[0].Count,
             seedFilesRead = seedFiles.Length,
             seedFilesRefused = collected.Errors.Count,
             // Named, not hidden: every stat.derived AFFIX family is refused by E43 today because

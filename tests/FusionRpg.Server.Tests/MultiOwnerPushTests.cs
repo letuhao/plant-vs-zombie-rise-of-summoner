@@ -291,4 +291,82 @@ public class MultiOwnerPushTests : IDisposable
     {
         Assert.Throws<ArgumentException>(() => _push.Build(Array.Empty<OwnerScope>(), Lawn(), matchSeed: 7));
     }
+
+    // ---- T6.2: the per-owner grant reaches the WIRE, not just the DTO ------------------------------
+    //
+    // ⛔ The gap this suite NAMED on 2026-09-06 and did not close: "`AtomPushDto.Grants` never reaches
+    // the wire at all. Both server call sites build it and drop it." Verified still true at the time
+    // of this pass and now closed -- so everything the block above proves about per-owner scope was,
+    // until here, proven about a value nothing transmitted.
+
+    [Fact]
+    public void A_specimens_scoped_grant_survives_all_the_way_onto_the_wire_payload()
+    {
+        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-abc");
+        Bind("item.gear", OwnerKind.Player, "1");
+
+        var atoms = _push.Build(
+            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, "specimen-abc") },
+            Lawn(), matchSeed: 7);
+
+        var grants = Assert.IsType<List<FusionRpg.Contracts.EffectGrantDto>>(
+            AtomPushService.BuildApplyPayload(atoms, sessionGrants: null)["grants"]);
+
+        // Both owners' compiled grants, each still carrying the key today's earlier fix stamped.
+        Assert.Equal(2, grants.Count);
+        Assert.Equal(
+            new[] { "instance:specimen-abc", FusionRpg.Contracts.EffectOwnerKeys.Match },
+            grants.Select(g => g.OwnerKey).OrderBy(k => k, StringComparer.Ordinal));
+
+        var scoped = Assert.Single(grants, g => g.OwnerKey == "instance:specimen-abc");
+        Assert.Equal(AtomRow.DeriveId("atom.vitality", "", 1), scoped.EffectId);
+        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.InstanceKind, scoped.OwnerKind);
+    }
+
+    [Fact]
+    public void The_owner_key_is_not_flattened_by_serialisation()
+    {
+        // The wire is where an owner key would silently be lost -- EffectGrantDto.OwnerKey has to
+        // actually serialise for the injector's grant loop to read it back, and that loop's whole
+        // fail-closed contract (refuse `instance:`, never apply match-wide) depends on seeing it.
+        Bind("trait.foundation", OwnerKind.UniqueActor, "specimen-xyz");
+
+        var atoms = _push.Build(
+            new[] { new OwnerScope(OwnerKind.UniqueActor, "specimen-xyz") }, Lawn(), matchSeed: 7);
+        var json = System.Text.Json.JsonSerializer.Serialize(
+            AtomPushService.BuildApplyPayload(atoms, sessionGrants: null));
+
+        using var doc = System.Text.Json.JsonDocument.Parse(json);
+        var raw = Assert.Single(doc.RootElement.GetProperty("grants").EnumerateArray().ToList());
+        Assert.Equal("instance:specimen-xyz", raw.GetProperty("ownerKey").GetString());
+        Assert.Equal(FusionRpg.Contracts.EffectOwnerKeys.InstanceKind, raw.GetProperty("ownerKind").GetString());
+
+        // And it is still refused by the hot path in exactly this transmitted form -- the fail-closed
+        // half survives the wire too, so a never-wired injector-side BindGrant stays loud.
+        Assert.True(FusionRpg.Core.Match.UniqueOwnerBinder.WouldRejectOnHot(
+            raw.GetProperty("ownerKey").GetString()));
+    }
+
+    [Fact]
+    public void Two_owners_of_one_atom_put_two_distinct_grants_on_the_wire_over_one_def()
+    {
+        // The wire half of Two_owners_sharing_the_same_atom_compile_to_one_catalog_entry_not_two.
+        // EffectBag's grant store is keyed on GrantId: two owners' grants collapsing to one id here
+        // would silently drop an owner at the far end, which no DTO-only assertion can see.
+        Bind("item.gear", OwnerKind.Player, "1");
+        Bind("item.gear", OwnerKind.UniqueActor, "specimen-shared");
+
+        var atoms = _push.Build(
+            new[] { new OwnerScope(OwnerKind.Player, "1"), new OwnerScope(OwnerKind.UniqueActor, "specimen-shared") },
+            Lawn(), matchSeed: 7);
+        var json = System.Text.Json.JsonSerializer.Serialize(
+            AtomPushService.BuildApplyPayload(atoms, sessionGrants: null));
+
+        var round = System.Text.Json.JsonSerializer.Deserialize<FusionRpg.Contracts.AtomPushDto>(json)!;
+        var might = round.Grants.Where(g => g.EffectId == AtomRow.DeriveId("atom.might", "", 1)).ToList();
+
+        Assert.Equal(2, might.Count);
+        Assert.Equal(2, might.Select(g => g.GrantId).Distinct(StringComparer.Ordinal).Count());
+        Assert.Single(round.Defs, d => d.EffectId == AtomRow.DeriveId("atom.might", "", 1));
+    }
 }

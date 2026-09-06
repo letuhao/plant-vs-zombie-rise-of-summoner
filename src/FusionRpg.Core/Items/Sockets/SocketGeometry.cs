@@ -65,8 +65,13 @@ public static class SocketGeometry
     /// Module 6's per-entry value against this module's per-role ceiling. ⛔ The check is
     /// <b>"never exceeds its role's ceiling"</b>, not spec-sockets.md §3's stronger "fixed per role,
     /// never varied per base type" — the shipped 740-entry corpus varies within a role by design
-    /// (module 6 measured <c>armament-primary</c> at <c>{0:18, 1:26, 2:4}</c>), so the stronger
-    /// invariant is contradicted by real data and enforcing it would refuse the corpus.
+    /// (<c>armament-primary</c> is <c>{0:10, 1:10, 2:10, 3:10, 4:8}</c>, re-measured 2026-09-06), so
+    /// the stronger invariant is contradicted by real data and enforcing it would refuse the corpus.
+    /// ⚠ The figures module 6 first measured (<c>{0:18, 1:26, 2:4}</c>) were superseded when it
+    /// re-issued the <c>socketMax</c> table on 2026-09-04; the RULE is unaffected and re-verified
+    /// across all 740 entries. Two docs still quote the old distribution — spec-strain-splice-gen.md
+    /// §"Ingredient count is 4" and item-ideal.md's audit row 2 — recorded in tasks/item-todo.md
+    /// P4.3/P4.4, not silently reconciled here.
     /// </summary>
     public static AtomRejection ValidateEntry(ItemRole role, int entrySocketMax, SocketTuning tuning)
     {

@@ -194,9 +194,9 @@ class VocabularyTests(unittest.TestCase):
         """Mitigation #2 in the spec, and the thing that stops the picker collapsing onto the
         three or four most flattering capabilities.
 
-        ⛔ **Measured, and it does NOT hold uniformly.** Every one of the 60 capability picks
-        carries a `roles` list (none is unrestricted), and the narrowing is real for most roles —
-        `retinue` reaches 7 of 60, `footing` 13. But **`jewel-minor-a` reaches all 60**: it is the
+        ⛔ **Measured, and it does NOT hold uniformly.** Every capability pick carries a `roles`
+        list (none is unrestricted), and the narrowing is real for most roles — `retinue` reaches 7,
+        `footing` 13. But **`jewel-minor-a` reaches the WHOLE pool**: it is the
         universal capability host in the shipped corpus, so a set that claims a minor jewel gets
         the whole pool back and mitigation #2 does no work for it. The first draft of this test
         assumed narrowing everywhere and failed; corrected against the data rather than the data

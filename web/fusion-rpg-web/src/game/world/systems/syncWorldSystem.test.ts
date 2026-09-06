@@ -22,15 +22,26 @@ vi.mock("phaser", () => ({
 function fakeScene() {
   const objects: Array<{ destroy: () => void; setDepth?: (d: number) => void; setName?: (n: string) => void; setData?: () => void; setSize?: () => void; setInteractive?: () => void }> = [];
   const mk = () => {
+    const data = new Map<string, unknown>();
     const o: Record<string, unknown> = {
       destroy: vi.fn(),
       setDepth: vi.fn(),
       setName: vi.fn(),
-      setData: vi.fn(),
+      setData: vi.fn((k: string, v: unknown) => {
+        data.set(k, v);
+        return o;
+      }),
+      getData: vi.fn((k: string) => data.get(k)),
       setSize: vi.fn(),
       setInteractive: vi.fn(),
       setOrigin: vi.fn(),
+      setPosition: vi.fn(function (this: { x: number; y: number }, x: number, y: number) {
+        this.x = x;
+        this.y = y;
+        return this;
+      }),
       add: vi.fn(),
+      active: true,
       // Graphics draw surface used by sectorPin / laneStroke / forceMarker
       clear: vi.fn(),
       fillStyle: vi.fn(),
@@ -263,9 +274,123 @@ describe("syncWorldSystem — mid-lane legions (gaps D15)", () => {
       tier: "map"
     });
 
-    const force = registry.getForce("e-march") as { x: number; y: number } | undefined;
+    const force = registry.getForce("e-march") as {
+      x: number;
+      y: number;
+      destroy: ReturnType<typeof vi.fn>;
+      setPosition: ReturnType<typeof vi.fn>;
+    };
     expect(force).toBeTruthy();
     // GRID centres: layoutX 0 → 110, layoutX 2 → 550; progress 500 → midpoint 330.
-    expect(force!.x).toBe(330);
+    expect(force.x).toBe(330);
+    const destroyCalls = force.destroy.mock.calls.length;
+
+    // Progress-only: move in place, do not recreate (followup F7).
+    const advanced = {
+      ...model,
+      legions: [
+        {
+          ...model.legions![0]!,
+          position: {
+            kind: "lane" as const,
+            laneId: "l-ab",
+            towardSectorId: "b",
+            progress: { unit: "perMilleRatio" as const, op: "flat" as const, value: 750 }
+          }
+        }
+      ]
+    };
+    syncWorldSystem({
+      scene,
+      theme: WORLD_THEME_FALLBACK,
+      registry,
+      lastApplied: 1,
+      modelSeq: 2,
+      model: advanced,
+      tier: "map"
+    });
+    expect(registry.getForce("e-march")).toBe(force);
+    expect(force.destroy.mock.calls.length).toBe(destroyCalls);
+    expect(force.x).toBe(440);
+  });
+
+  it("reuses pin GameObjects on identical re-apply (followup F7)", () => {
+    const scene = fakeScene() as ReturnType<typeof fakeScene> & { objects: Array<{ destroy: ReturnType<typeof vi.fn> }> };
+    const registry = new WorldRegistry();
+    const sector = {
+      sectorId: "homeworld",
+      typeId: "homeworld",
+      climate: null,
+      ownerFactionId: "dave",
+      intel: "Watched" as const,
+      intelAge: 0,
+      phase: "Held",
+      dangerBand: { unit: "count" as const, value: 0 },
+      developmentLevel: { unit: "count" as const, value: 0 },
+      stability: { unit: "perMilleRatio" as const, op: "flat" as const, value: 1000 },
+      pressure: { unit: "perMilleRatio" as const, op: "flat" as const, value: 0 },
+      fractureIntensity: { unit: "perMilleRatio" as const, op: "absolute" as const, value: 1000 },
+      habitable: true,
+      layoutX: 0,
+      layoutY: 0,
+      loam: {
+        production: { unit: "loamUnits" as const, value: 0 },
+        upkeep: { unit: "loamUnits" as const, value: 0 },
+        net: { unit: "loamUnits" as const, value: 0 },
+        stock: { unit: "loamUnits" as const, value: 0 },
+        capacity: { state: "pending" as const, reason: "x" },
+        upkeepBreakdown: {
+          base: { unit: "loamUnits" as const, value: 0 },
+          garrison: { unit: "loamUnits" as const, value: 0 },
+          development: { unit: "loamUnits" as const, value: 0 },
+          danger: { unit: "loamUnits" as const, value: 0 },
+          intensityMilli: { unit: "perMilleRatio" as const, op: "absolute" as const, value: 1000 }
+        }
+      },
+      component: {
+        componentId: null,
+        production: { unit: "loamUnits" as const, value: 0 },
+        upkeep: { unit: "loamUnits" as const, value: 0 },
+        net: { unit: "loamUnits" as const, value: 0 },
+        stock: { unit: "loamUnits" as const, value: 0 }
+      },
+      willReleaseNextTurn: false,
+      lifelineCost: { state: "pending" as const, reason: "x" },
+      lifeline: { state: "pending" as const, reason: "x" },
+      wardenBindingId: { state: "pending" as const, reason: "x" },
+      neglectedTurns: { state: "pending" as const, reason: "x" }
+    };
+    const model = {
+      sectors: [sector],
+      lanes: [],
+      slotsBySectorId: {},
+      forcesBySectorId: {},
+      playerFactionId: "dave"
+    };
+
+    syncWorldSystem({
+      scene: scene as unknown as Phaser.Scene,
+      theme: WORLD_THEME_FALLBACK,
+      registry,
+      lastApplied: 0,
+      modelSeq: 1,
+      model,
+      tier: "map"
+    });
+    const pin = registry.getSector("homeworld") as { destroy: ReturnType<typeof vi.fn> };
+    expect(pin).toBeTruthy();
+    const destroyCalls = pin.destroy.mock.calls.length;
+
+    syncWorldSystem({
+      scene: scene as unknown as Phaser.Scene,
+      theme: WORLD_THEME_FALLBACK,
+      registry,
+      lastApplied: 1,
+      modelSeq: 2,
+      model,
+      tier: "map"
+    });
+    expect(registry.getSector("homeworld")).toBe(pin);
+    expect(pin.destroy.mock.calls.length).toBe(destroyCalls);
   });
 });

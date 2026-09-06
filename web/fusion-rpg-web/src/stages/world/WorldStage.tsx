@@ -47,7 +47,7 @@ import { LensPicker } from "./lenses/LensPicker";
 import { initialLensState, lensReducer } from "./lenses/lensState";
 import { useLensData } from "./lenses/useLensData";
 import { isWorldMapChromeMuted } from "./mapChromeMute";
-import { buildWorldIgnoreRects } from "./worldIgnoreRects";
+import { buildWorldIgnoreRects, fitPadLeft, rectRelativeToCanvas, type MeasuredIgnoreAnchors } from "./worldIgnoreRects";
 
 /**
  * World stage — Phaser map plane + React HUD/inspector (world-map-runtime).
@@ -110,6 +110,7 @@ export function WorldStage() {
   const [worldGeneration, setWorldGeneration] = useState(0);
   const mapPaneRef = useRef<HTMLDivElement | null>(null);
   const [mapPaneSize, setMapPaneSize] = useState({ w: 1280, h: 720 });
+  const [measuredAnchors, setMeasuredAnchors] = useState<MeasuredIgnoreAnchors>({});
   useEffect(() => {
     const el = mapPaneRef.current;
     if (!el) return;
@@ -148,6 +149,34 @@ export function WorldStage() {
 
   const selectedSector = world.sectors.find((s) => s.sectorId === ui.selectedSectorId) ?? null;
   const prospectedSectorIds: string[] = dto.prospectedSectorIds ?? [];
+
+  useEffect(() => {
+    const el = mapPaneRef.current;
+    if (!el) return;
+    const syncMeasured = () => {
+      const canvas = el.querySelector("canvas");
+      if (!canvas) {
+        setMeasuredAnchors({});
+        return;
+      }
+      const canvasRect = canvas.getBoundingClientRect();
+      const measure = (testid: string) => {
+        const node = document.querySelector(`[data-testid="${testid}"]`);
+        if (!node) return undefined;
+        return rectRelativeToCanvas(canvasRect, node.getBoundingClientRect()) ?? undefined;
+      };
+      setMeasuredAnchors({
+        top: measure("world-hud-anchor-top-strip"),
+        bottomLeft: measure("world-hud-anchor-bottom-left"),
+        right: measure("world-hud-right-column"),
+        dock: measure("sector-inspector")
+      });
+    };
+    syncMeasured();
+    const ro = new ResizeObserver(syncMeasured);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [ui.selectedSectorId, mapPaneSize.w, mapPaneSize.h]);
 
   const graph = useMemo(() => toGraph(dto), [dto]);
   const loamSummary = useMemo(() => summarizeLoam(graph.nodes.map((n) => n.data)), [graph]);
@@ -190,9 +219,10 @@ export function WorldStage() {
       width: mapPaneSize.w,
       height: mapPaneSize.h,
       dockOpen: selectedSector != null,
-      canvasBesideRail: true
+      canvasBesideRail: true,
+      measured: measuredAnchors
     });
-  }, [selectedSector, mapPaneSize]);
+  }, [selectedSector, mapPaneSize, measuredAnchors]);
 
   const targeting = useMemo(
     () =>
@@ -319,9 +349,9 @@ export function WorldStage() {
                       worldBusEmit("world:camera", {
                         generation: worldGeneration,
                         op: "fit",
-                        padLeft: 100,
+                        padLeft: fitPadLeft(selectedSector != null, measuredAnchors.dock?.width),
                         padRight: 40,
-                        padTop: 56,
+                        padTop: measuredAnchors.top?.height ?? 56,
                         padBottom: 80
                       });
                     }}
@@ -404,6 +434,7 @@ export function WorldStage() {
                 playerFactionId={playerFactionId}
                 overlayEpoch={overlayEpoch}
                 selectedSectorId={ui.selectedSectorId}
+                selectedEntityId={ui.selectedEntityId}
                 ignoreRects={ignoreRects}
                 targeting={targeting}
                 lens={lens.active}

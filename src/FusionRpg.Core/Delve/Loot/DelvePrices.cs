@@ -90,4 +90,21 @@ public static class DelvePrices
         if (tuning is null) throw new ArgumentNullException(nameof(tuning));
         return SoulSinkPolicy.Price(recoveryRitualSouls, woundingDelveThetaRun, tuning);
     }
+
+    /// <summary>
+    /// D3.30 (spec-supplies-and-objects.md §Objective, "Provisioning as a soul sink") — priced at
+    /// `contentScale(Θ_entrance + Wm·bandDelta)`, verbatim. `Wm` is `PowerTuning.Weights.WmMilli`
+    /// (already shipped, `power-scale.v1.json:15`, 5000‰) — the SAME weight `PowerIndexComposer`
+    /// itself weighs `dangerBand` by, reused here rather than a private re-derivation; `bandDelta` is
+    /// the rung's own `DifficultyRungTuning.BandDelta` (`difficulty-ladder`'s own column, can be
+    /// negative for an easier rung). One widen (`long × int`), one divide, at the end, matching this
+    /// program's own "never twice" rule.
+    /// </summary>
+    public static long Provisioning(long basePriceSouls, int thetaEntrance, int bandDelta, PowerTuning tuning)
+    {
+        if (tuning is null) throw new ArgumentNullException(nameof(tuning));
+        var wmMilli = tuning.Weights.WmMilli ?? throw new ArgumentException("power tuning has no WmMilli weight configured", nameof(tuning));
+        var theta = thetaEntrance + checked((int)(wmMilli * bandDelta / 1000));
+        return SoulSinkPolicy.Price(basePriceSouls, theta, tuning);
+    }
 }

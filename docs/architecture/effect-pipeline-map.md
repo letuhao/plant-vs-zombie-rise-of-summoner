@@ -243,3 +243,13 @@ plus eight files; after content, each is a migration of everything ever authored
 - [effect-atom/definitions.md](effect-atom/definitions.md) — **wins over every spec here**
 - [demon-seed-map.md](demon-seed-map.md) — the first consumer; its modules 15 and 16 gate on this
 - [../research/arpg-effects/](../research/arpg-effects/) · [../research/ai-native-generation/](../research/ai-native-generation/)
+
+## 9. Filed by the item program (2026-09-06)
+
+A live defect in already-shipped code, found while the item program was verifying its own cross-program
+dependencies — reported here, not fixed here (this program's file, not item's).
+
+| | Defect | Evidence |
+|---|---|---|
+| **I1** | `spec-eligibility-tags.md:40-43`'s premise is false in shipped code, so `ep-8`'s shipped `AffixTags.cs` derives the wrong tag set for every affix | The spec says *"The 98 authored families already carry tags ... and E43 stamps them onto every emitted row"*. The first clause is true (`data/seed/items/affix-families/*.json` entries do carry `tags`); the second is false — `effect-atom/FamilyExpansion.cs:194-198` (E43) emits exactly `{generatedFrom, generator}` per row, confirmed in shipped output (`data/seed/atoms/generated/family-expand.g-attack.json`). So `AffixTags.cs`'s `tagsOf(affixId) := union of the refs' AtomRow.TagsJson` unions **provenance keys**, not the authored `offensive`/`elemental`/etc. tags — every rule keyed on a real family tag is silently inert today. Fix is two-part and cross-program: effect-atom lands real tags in `TagsJson` (filed as this program's own `D28`/`X-item` row, `effect-atom-map.md` §20), and this spec's premise gets corrected in the same pass — filing both together so neither lands without the other |
+

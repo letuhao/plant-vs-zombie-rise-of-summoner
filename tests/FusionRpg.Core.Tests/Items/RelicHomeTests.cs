@@ -175,15 +175,21 @@ public class RelicHomeTests
 
     /// <summary>
     /// ⛔ <b>The second half of "relics become uniques" is a content decision, and this is why.</b>
-    /// <c>item_unique</c> is keyed 1:1 on an <c>effect_container</c>. Two of the four relics share
-    /// their container with a stub item, so flagging the container would flag the stub too; one
-    /// relic has no container at all. Making the disposition literal needs a dedicated container
-    /// per relic plus three authored values (<c>counter_pressure</c>, <c>power_axis</c>,
-    /// <c>derived_from</c>) — which `spec-equip-assign.md`'s Boundaries mark **Ask first**. Pinned
-    /// so the blocker is a measured fact and not a remembered one.
+    /// <c>item_unique</c> is keyed 1:1 on an <c>effect_container</c>. Half of the four relics share
+    /// their container with a stub item, so flagging the container would flag the stub too. Making
+    /// the disposition literal needs a dedicated container per relic plus three authored values
+    /// (<c>counter_pressure</c>, <c>power_axis</c>, <c>derived_from</c>) — which
+    /// `spec-equip-assign.md`'s Boundaries mark **Ask first**. Pinned so the blocker is a measured
+    /// fact and not a remembered one.
+    ///
+    /// <para>2026-09-06: <c>relic.cracked_seal</c> (fx.entity_atk) moved off "no container at all" —
+    /// T6.1's own migration gave it a real, deliberately empty container, shared with
+    /// <c>stub.hp_charm</c>. This does not weaken the argument; it strengthens it (now half the
+    /// relics, not one quarter, would flag their shared stub) and the "no container at all" case this
+    /// test used to also cover is simply gone.</para>
     /// </summary>
     [Fact]
-    public void No_relic_owns_a_container_of_its_own_so_none_can_be_flagged_a_unique_today()
+    public void Half_the_relics_share_a_container_with_a_stub_so_none_can_be_flagged_a_unique_today()
     {
         var containerByRelic = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var relic in RelicCatalog.Items)
@@ -192,14 +198,24 @@ public class RelicHomeTests
                 containerByRelic[relic.Id] = containerId;
         }
 
-        // Three of four resolve to a container; relic.cracked_seal (fx.entity_atk, a placeholder
-        // effect id nothing produces) resolves to none.
-        Assert.Equal(3, containerByRelic.Count);
-        Assert.DoesNotContain("relic.cracked_seal", containerByRelic.Keys);
+        // Every relic now resolves to a real container (fx.entity_atk's own migration closed the
+        // last "no container at all" case) — the blocker moved from "some have none" to "sharing"
+        // alone, which is still enough on its own to refuse the disposition.
+        Assert.Equal(4, containerByRelic.Count);
 
-        // And of those three, the one backing relic.ashen_reliquary is the SAME container backing
-        // stub.atk_ring — so an item_unique row on it would classify the stub as a unique too.
-        Assert.True(UniqueEquipmentCatalog.TryGetAtomBackedContainerId("stub.atk_ring", out var stubContainer));
-        Assert.Equal(containerByRelic["relic.ashen_reliquary"], stubContainer);
+        // relic.ashen_reliquary shares stub.atk_ring's container; relic.cracked_seal shares
+        // stub.hp_charm's — an item_unique row on either would classify its stub as a unique too.
+        Assert.True(UniqueEquipmentCatalog.TryGetAtomBackedContainerId("stub.atk_ring", out var atkRingContainer));
+        Assert.Equal(containerByRelic["relic.ashen_reliquary"], atkRingContainer);
+        Assert.True(UniqueEquipmentCatalog.TryGetAtomBackedContainerId("stub.hp_charm", out var hpCharmContainer));
+        Assert.Equal(containerByRelic["relic.cracked_seal"], hpCharmContainer);
+
+        // relic.sunworn_charm/relic.tidewrack_band's own containers are not shared with any stub
+        // today — they are blocked by the missing counter_pressure/power_axis/derived_from values
+        // alone, not by sharing, which is exactly why the Ask-first gate names BOTH reasons.
+        Assert.DoesNotContain(containerByRelic["relic.sunworn_charm"],
+            new[] { atkRingContainer, hpCharmContainer });
+        Assert.DoesNotContain(containerByRelic["relic.tidewrack_band"],
+            new[] { atkRingContainer, hpCharmContainer });
     }
 }

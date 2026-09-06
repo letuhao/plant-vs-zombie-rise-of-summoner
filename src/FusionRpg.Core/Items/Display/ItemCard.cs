@@ -236,7 +236,7 @@ public static class ItemCardRenderer
                 CardBlocks.Set => SetLines(input),
                 CardBlocks.GrantedAction => GrantedActionLines(input),
                 CardBlocks.Flavour => FlavourLines(input),
-                CardBlocks.Footer => FooterLines(input, registry, groupOrder, lines),
+                CardBlocks.Footer => FooterLines(input, lines),
                 _ => throw new InvalidOperationException($"unhandled card block '{key}'"),
             }));
         }
@@ -350,7 +350,7 @@ public static class ItemCardRenderer
             lines.Add((
                 ItemDisplayRenderer.Line(
                     template, p.Atom, input.BaseType.Frame, frozen, p.Kind, group,
-                    unit, ElementVariantOf(p.Atom), roll, quality, contextRead: null, bandMax: bandMax),
+                    unit, ElementOf(p.Atom, p.Row.ValuesJson), roll, quality, contextRead: null, bandMax: bandMax),
                 group,
                 p.Atom.Tier,
                 p.Row.Seq,
@@ -604,9 +604,7 @@ public static class ItemCardRenderer
     /// (<c>ArmouryCompare.RollQualityMilli</c>), never passed in — a footer that could disagree with
     /// the bars on the same card is the two-implementations defect in miniature.
     /// </summary>
-    static IReadOnlyList<DisplayLine> FooterLines(
-        ItemCardInput input, DerivedStatRegistry registry,
-        IReadOnlyDictionary<string, int> groupOrder, Placement placement)
+    static IReadOnlyList<DisplayLine> FooterLines(ItemCardInput input, Placement placement)
     {
         var rolled = placement.Affixes
             .Where(p => RollOf(p.Atom) == RollPolicy.OnInstantiate)
@@ -698,9 +696,58 @@ public static class ItemCardRenderer
         catch (JsonException) { return null; }
     }
 
-    /// <summary>An element-typed atom's variant, for a template that names <c>{element}</c>. Empty is
-    /// <c>null</c>: <c>AtomRow.Variant</c> is "" and never NULL by design, and passing "" would render
-    /// an empty word into the sentence.</summary>
-    static string? ElementVariantOf(AtomRow atom) =>
-        atom.Variant.Length == 0 ? null : atom.Variant;
+    /// <summary>
+    /// The concrete element a template's <c>{element}</c> names — from the atom's own variant if it
+    /// materialised there, otherwise from the <b>resolved channel the instance froze</b>.
+    ///
+    /// <para><b>Both arms are real, and they are the two entry points, not a fallback.</b> An affix
+    /// whose ref is a SLOT (<c>$element</c>) resolves through <c>Resolver</c>'s step 1/4 into a
+    /// concrete atom id, so the element genuinely is in <c>AtomRow.Variant</c>. A family whose channel
+    /// is <c>{variant}</c>-templated does the opposite: <c>FamilyExpansion</c> emits ONE row per tier
+    /// carrying an E30 pool reference and leaves the variant deliberately empty (W7.9, "element does
+    /// not materialise" in the atom id), and the concrete element arrives later, as the pool draw
+    /// <c>Resolver.RollValues</c> stamps into <c>values_json.channel</c>. Reading only the variant
+    /// meant every pooled-channel affix refused to render, which is the entry-point split P2.5 named
+    /// and this closes.</para>
+    ///
+    /// <para>⛔ <b>Gated on the atom's own channel actually being a pool reference</b>, not on the
+    /// resolved string looking element-shaped. A trailing segment is only read as an element when
+    /// <c>params.channel</c> is an E30 pool object — otherwise an unrelated channel whose last segment
+    /// happens to collide with an element name would silently acquire one.</para>
+    ///
+    /// <para><c>omni</c> resolves to <c>null</c>, deliberately: <c>ElementRoster.TryParse</c> refuses
+    /// it (it is the untyped case, and <c>pools.v1.json</c>'s own note says omni is never a pool
+    /// member), so there is no concrete element to name and the renderer refuses rather than writing
+    /// "omni" into a sentence.</para>
+    /// </summary>
+    static string? ElementOf(AtomRow atom, string valuesJson)
+    {
+        // `AtomRow.Variant` is "" and never NULL by design; passing "" would render an empty word.
+        if (atom.Variant.Length > 0) return atom.Variant;
+        if (!IsPooledChannel(atom.ParamsJson)) return null;
+
+        var resolved = ChannelOf(valuesJson);
+        if (resolved is null) return null;
+
+        var dot = resolved.LastIndexOf('.');
+        if (dot < 0 || dot == resolved.Length - 1) return null;
+
+        return ElementRoster.TryParse(resolved[(dot + 1)..], out var id) ? id.ToElementId() : null;
+    }
+
+    /// <summary>Whether the atom AUTHORS an E30 pool reference — read through the shipped
+    /// <see cref="ChannelRefJson"/>, never by shape-matching the JSON here, so "is this a pool" has one
+    /// answer across the resolver and the card.</summary>
+    static bool IsPooledChannel(string? paramsJson)
+    {
+        if (string.IsNullOrWhiteSpace(paramsJson)) return false;
+        try
+        {
+            using var doc = JsonDocument.Parse(paramsJson!);
+            if (doc.RootElement.ValueKind != JsonValueKind.Object) return false;
+            if (!doc.RootElement.TryGetProperty("channel", out var c)) return false;
+            return ChannelRefJson.TryRead(c, out var channelRef).IsOk && channelRef.IsPool;
+        }
+        catch (JsonException) { return false; }
+    }
 }

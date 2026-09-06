@@ -139,4 +139,51 @@ public class DelvePricesTests
         var atHigherTheta = DelvePrices.RecoveryRitual(800, Pin + 100, Tuning);
         Assert.NotEqual(atPin, atHigherTheta);
     }
+
+    // ---- Provisioning (D3.30) ----
+
+    [Fact]
+    public void Provisioning_null_tuning_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => DelvePrices.Provisioning(1000, Pin, 0, null!));
+    }
+
+    [Fact]
+    public void Provisioning_at_bandDelta_zero_matches_SoulSinkPolicy_Price_at_theta_entrance_exactly()
+    {
+        // hard's own identity row: bandDelta 0 -> Wm*0/1000 = 0 -> theta stays exactly theta_entrance.
+        Assert.Equal(SoulSinkPolicy.Price(1000, Pin, Tuning), DelvePrices.Provisioning(1000, Pin, bandDelta: 0, Tuning));
+    }
+
+    [Fact]
+    public void A_price_test_at_two_rungs_a_positive_bandDelta_prices_higher_a_negative_one_lower()
+    {
+        // Tuning's own WmMilli = 5000 (5.0): impossible-shaped (+3) adds 15 to theta; very-easy-shaped
+        // (-2) subtracts 10 -- both real, spec-difficulty-ladder.md's own §11.9 box deltas.
+        var identity = DelvePrices.Provisioning(1000, Pin, bandDelta: 0, Tuning);
+        var harderRung = DelvePrices.Provisioning(1000, Pin, bandDelta: 3, Tuning);
+        var easierRung = DelvePrices.Provisioning(1000, Pin, bandDelta: -2, Tuning);
+
+        Assert.Equal(SoulSinkPolicy.Price(1000, Pin + 15, Tuning), harderRung);
+        Assert.Equal(SoulSinkPolicy.Price(1000, Pin - 10, Tuning), easierRung);
+        Assert.True(harderRung > identity);
+        Assert.True(easierRung < identity);
+    }
+
+    [Fact]
+    public void Provisioning_reuses_the_real_shipped_WmMilli_weight_not_a_private_constant()
+    {
+        Assert.Equal(5000, Tuning.Weights.WmMilli); // the fixture's own value, matching power-scale.v1.json
+        var withDoubleWm = TuningAt(400) with { Weights = TuningAt(400).Weights with { WmMilli = 10000 } };
+        var atNormalWm = DelvePrices.Provisioning(1000, Pin, bandDelta: 2, Tuning);
+        var atDoubleWm = DelvePrices.Provisioning(1000, Pin, bandDelta: 2, withDoubleWm);
+        Assert.NotEqual(atNormalWm, atDoubleWm); // reading tuning.Weights.WmMilli genuinely, not a hardcoded 5000
+    }
+
+    [Fact]
+    public void Provisioning_refuses_when_WmMilli_is_not_configured()
+    {
+        var noWm = TuningAt(400) with { Weights = TuningAt(400).Weights with { WmMilli = null } };
+        Assert.Throws<ArgumentException>(() => DelvePrices.Provisioning(1000, Pin, 2, noWm));
+    }
 }

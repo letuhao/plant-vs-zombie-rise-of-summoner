@@ -142,18 +142,15 @@ export class WorldMapScene extends Phaser.Scene {
       const allowProbe =
         import.meta.env.DEV ||
         (window as unknown as { __PLAYWRIGHT?: boolean }).__PLAYWRIGHT === true;
-      const w = window as unknown as {
-        __fusionRpgWorldGen?: number;
-        __fusionRpgWorldProbe?: {
-          generation: number;
-          pinScreen: (sectorId: string) => { x: number; y: number } | null;
-          pinCount: () => number;
-          centreOn?: (sectorId: string) => boolean;
-        };
-      };
-      // Still set for legacy e2e until G14; production Fit/pan must not rely on this (gaps D2).
-      w.__fusionRpgWorldGen = this.generation;
       if (allowProbe) {
+        const w = window as unknown as {
+          __fusionRpgWorldProbe?: {
+            generation: number;
+            pinScreen: (sectorId: string) => { x: number; y: number } | null;
+            pinCount: () => number;
+            centreOn?: (sectorId: string) => boolean;
+          };
+        };
         w.__fusionRpgWorldProbe = {
           generation: this.generation,
           pinCount: () => this.worldRegistry.sectorIds().length,

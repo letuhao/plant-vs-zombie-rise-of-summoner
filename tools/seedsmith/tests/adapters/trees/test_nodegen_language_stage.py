@@ -13,6 +13,7 @@ pipeline stage specifically (distinct from H9's later catalog-from-plan byte-ide
 from __future__ import annotations
 
 import hashlib
+import itertools
 import json
 import sys
 import tempfile
@@ -214,6 +215,121 @@ class MechanismBeforeMagnitudeSiblingTests(unittest.TestCase):
         self.assertNotIn("(none yet)", rendered[0])
 
 
+class TreeWideSiblingScopeTests(unittest.TestCase):
+    """2026-09-06 real-call finding, closed the SAME day as the original tier-scoped sibling fix: a
+    real `might` run independently generated "Deep Rooting" for THREE different defensive-branch
+    nodes across TWO different tiers (t2-n0, t2-n1, t3-n1) — tier-scoped siblings cannot see across
+    tiers, so none of them ever knew the name was already taken. Widened `run_language_stage`'s own
+    tracking from per-tier to tree-wide (capped, most-recent-N) to close this for real."""
+
+    def setUp(self) -> None:
+        self.seed_root = Path(tempfile.mkdtemp())
+        write_plan(self.seed_root, "t1", node_count=4)  # n0/n1 tier 1, n2/n3 tier 2 (fixture's own math)
+        self.plan = plan_read.load("t1", self.seed_root)
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+    def test_a_node_in_a_later_tier_sees_an_earlier_tiers_own_accepted_sibling(self) -> None:
+        rendered: "list[str]" = []
+
+        def fake_call(_system, user, *, config=None, temperature=0.2, schema=None):
+            n = len(rendered)
+            rendered.append(user)
+            return json.dumps(_accepted_response(f"n{n // 3}"))
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=fake_call):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG)
+
+        self.assertTrue(all(o.outcome == "accepted" for o in result.outcomes),
+                        [(o.subject_id, o.outcome, o.detail) for o in result.outcomes])
+        # Subject order: t1/n0 (mechanism, tier 1), t1/n1 (magnitude, tier 1), then tier 2's two
+        # magnitude nodes (n2, n3) -- fixture's own `tier = 1 + (i // 2)` math. n2's own base call
+        # (index 6 -- two tier-1 subjects x 3 calls each) is the first call that could show a
+        # DIFFERENT-tier sibling; under the OLD tier-scoped design it would still read "(none yet)"
+        # since nothing has been accepted in tier 2 yet -- under tree-wide scope it sees BOTH tier-1
+        # nodes by name.
+        n2_base_call_user = rendered[6]
+        self.assertNotIn("(none yet)", n2_base_call_user)
+        self.assertIn("Test Node n0", n2_base_call_user)
+        self.assertIn("Test Node n1", n2_base_call_user)
+
+    def test_the_sibling_list_is_capped_at_the_most_recent_N_not_unbounded(self) -> None:
+        # write_plan's own fixture pairs two magnitude nodes per tier from tier 2 onward (tier =
+        # 1 + i//2), so the count of already-accepted nodes BEFORE each new tier's batch starts runs
+        # 0, 1, 2, 4, 6, 8, 10, 12, 14, ... -- the tier-8 batch (i=14/15) is the first whose OWN
+        # pre-batch snapshot (14 already accepted) exceeds the cap (12), so it must have dropped the
+        # two OLDEST (n0, n1) while keeping the dozen most recent.
+        write_plan(self.seed_root, "t2", node_count=16)
+        plan16 = plan_read.load("t2", self.seed_root)
+        ledger_path = self.seed_root / "_runs" / "ledger16.json"
+        rendered: "list[str]" = []
+
+        def fake_call(_system, user, *, config=None, temperature=0.2, schema=None):
+            n = len(rendered)
+            rendered.append(user)
+            return json.dumps(_accepted_response(f"n{n // 3}"))
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=fake_call):
+            result = run.run_language_stage(plan16, _inputs_for, ledger_path=ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG)
+
+        self.assertTrue(all(o.outcome == "accepted" for o in result.outcomes))
+        # Subject index 14 (0-indexed) is the first of the tier-8 batch -- its own base call is the
+        # 15th subject's first call, i.e. rendered[14 * 3].
+        tier8_base_call = rendered[14 * 3]
+        self.assertNotIn("Test Node n0 (", tier8_base_call)
+        self.assertNotIn("Test Node n1 (", tier8_base_call)
+        self.assertIn("Test Node n2", tier8_base_call)
+        self.assertIn("Test Node n13", tier8_base_call)
+
+
+class DeriveUniqueNameKeyTests(unittest.TestCase):
+    """2026-09-06 real-call finding, the deeper of two: even after `schema.py`'s own `nameKey`
+    description was fixed to say "derive this from your own name" explicitly, the real local model
+    reproduced the IDENTICAL generic templated key on a fresh run -- proving wording alone is not a
+    durable fix for a demonstrated real-model failure to follow this instruction twice. `nameKey` is
+    no longer trusted from the model's own response at all; `_derive_unique_name_key` computes it,
+    deterministically, from the model's own accepted `name`."""
+
+    def test_a_fresh_name_slugifies_with_no_suffix(self) -> None:
+        self.assertEqual(run._derive_unique_name_key("Primal Surge", known_name_keys=set()),
+                         "tree.node.primal-surge")
+
+    def test_punctuation_and_mixed_case_fold_to_one_hyphen_run(self) -> None:
+        self.assertEqual(run._derive_unique_name_key("  Weight of Intent!! ", known_name_keys=set()),
+                         "tree.node.weight-of-intent")
+
+    def test_a_name_that_collapses_to_nothing_falls_back_to_a_real_slug_not_an_empty_one(self) -> None:
+        # NAME_KEY_PATTERN requires at least one character after "tree.node." -- a name that is pure
+        # punctuation must never produce an invalid, schema-refused key.
+        self.assertEqual(run._derive_unique_name_key("***", known_name_keys=set()), "tree.node.node")
+
+    def test_a_colliding_slug_gets_the_next_free_numeric_suffix(self) -> None:
+        known = {"tree.node.deep-rooting"}
+        self.assertEqual(run._derive_unique_name_key("Deep Rooting", known_name_keys=known),
+                         "tree.node.deep-rooting-2")
+
+    def test_suffix_search_skips_every_already_taken_number_not_just_the_first(self) -> None:
+        known = {"tree.node.deep-rooting", "tree.node.deep-rooting-2", "tree.node.deep-rooting-3"}
+        self.assertEqual(run._derive_unique_name_key("Deep Rooting", known_name_keys=known),
+                         "tree.node.deep-rooting-4")
+
+    def test_forty_identically_named_nodes_all_get_forty_distinct_keys(self) -> None:
+        # The exact real shape (`might`'s own smoke test): the model returns the SAME name forty
+        # times over. Every derived key must still be unique -- proven by actually deriving all 40,
+        # not asserting a formula.
+        known: "set[str]" = set()
+        derived = []
+        for _ in range(40):
+            key = run._derive_unique_name_key("Deep Rooting", known_name_keys=known)
+            known.add(key)
+            derived.append(key)
+        self.assertEqual(len(derived), len(set(derived)))
+        self.assertEqual(derived[0], "tree.node.deep-rooting")
+        self.assertEqual(derived[1], "tree.node.deep-rooting-2")
+        self.assertEqual(derived[39], "tree.node.deep-rooting-40")
+
+
 class NullishBlockedTokenTests(unittest.TestCase):
     """2026-09-06 real-call finding (`might`, tier-4 mechanism node, LM Studio local model): asked to
     leave `blocked` as the empty string, the model wrote a full valid draft with `"blocked": "none"`
@@ -258,6 +374,146 @@ class NullishBlockedTokenTests(unittest.TestCase):
     def test_true_is_deliberately_left_alone_no_real_call_evidence_for_that_direction(self) -> None:
         out = run._normalize_blocked({"blocked": "true"})
         self.assertEqual(out["blocked"], "true")
+
+
+def _write_two_mechanism_one_magnitude_plan(seed_root: Path, tree_id: str = "t1") -> None:
+    """One tier: two mechanism nodes (n0, n1 -- meant to run in the SAME parallel batch) and one
+    magnitude node (n2 -- the next batch, meant to see BOTH n0 and n1 as tier-siblings)."""
+    plan = {
+        "schemaVersion": 1, "treeId": tree_id, "archetype": "broad-and-flat",
+        "propertyVocabulary": {"posture": ["vanguard", "warden"]},
+        "mechNodesByTier": [2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "nodes": [
+            {"id": f"skill.{tree_id}-off-t1-n0", "nodeKey": "n0", "branch": "offensive", "tier": 1,
+             "indexInTier": 0, "nodeClass": "mechanism", "budgetShareMilli": 333, "budgetPoints": 25},
+            {"id": f"skill.{tree_id}-off-t1-n1", "nodeKey": "n1", "branch": "offensive", "tier": 1,
+             "indexInTier": 1, "nodeClass": "mechanism", "budgetShareMilli": 333, "budgetPoints": 25},
+            {"id": f"skill.{tree_id}-off-t1-n2", "nodeKey": "n2", "branch": "offensive", "tier": 1,
+             "indexInTier": 2, "nodeClass": "magnitude", "budgetShareMilli": 334, "budgetPoints": 25},
+        ],
+    }
+    path = seed_root / "passive-tree" / "plan" / f"{tree_id}.v1.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+
+
+class BatchedParallelExecutionTests(unittest.TestCase):
+    """2026-09-06, owner request: `max_workers>1` fans out WITHIN a `(tier, node_class)` batch (no
+    subject in a batch can be another's sibling), never ACROSS batches (a later batch must see an
+    earlier one's real accepted siblings) — proven here, not just claimed."""
+
+    def setUp(self) -> None:
+        self.seed_root = Path(tempfile.mkdtemp())
+        _write_two_mechanism_one_magnitude_plan(self.seed_root, "t1")
+        self.plan = plan_read.load("t1", self.seed_root)
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+    def test_default_max_workers_one_is_byte_identical_to_the_pre_existing_sequential_path(self) -> None:
+        # The exact same multi-call fixture RunLanguageStageMultiNodeTests already trusts, run once
+        # with the new parameter explicit at its default and once omitted entirely -- both must
+        # produce the identical seed document, proving the new parameter changes nothing by default.
+        write_plan(self.seed_root, "t2", node_count=2)
+        plan2 = plan_read.load("t2", self.seed_root)
+        responses = ([json.dumps(_accepted_response("n0"))] * 3 + [json.dumps(_accepted_response("n1"))] * 3)
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=list(responses)):
+            explicit = run.run_language_stage(plan2, _inputs_for, ledger_path=self.seed_root / "l1.json",
+                                              seed_root=self.seed_root, config=TEST_CONFIG, max_workers=1)
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=list(responses)):
+            omitted = run.run_language_stage(plan2, _inputs_for, ledger_path=self.seed_root / "l2.json",
+                                             seed_root=self.seed_root, config=TEST_CONFIG)
+        self.assertEqual(explicit.seed_path.read_bytes(), omitted.seed_path.read_bytes())
+
+    def test_two_nodes_in_the_same_batch_never_see_each_other_as_siblings(self) -> None:
+        # n0 and n1 (the SAME batch) each run entirely within ONE worker thread for their whole
+        # generation (all 3 of a subject's own sample calls come from the thread that drew it from
+        # the pool) -- a global call counter cannot tell them apart under real concurrency (their own
+        # 3-call sequences interleave unpredictably), but THREAD IDENTITY can: whichever thread makes
+        # a given call, ALL of that subject's calls share it. n2 (the next, size-1 batch) runs
+        # in-process on the CURRENT thread, a third, distinct identity.
+        import threading
+        import time
+
+        rendered_by_thread: "dict[int, list[str]]" = {}
+        lock = threading.Lock()
+        counter = itertools.count()
+
+        def fake_call(_system, user, *, config=None, temperature=0.2, schema=None):
+            # `ThreadPoolExecutor` only guarantees `max_workers` as an UPPER bound on concurrency,
+            # never a lower one -- a near-instant fake call can complete before the pool ever spins up
+            # a second thread, silently collapsing this "two real threads" test into one. A brief
+            # sleep on every call forces both submitted tasks to genuinely overlap.
+            time.sleep(0.02)
+            tid = threading.get_ident()
+            with lock:
+                rendered_by_thread.setdefault(tid, []).append(user)
+                n = next(counter)
+            return json.dumps(_accepted_response(f"c{n}"))
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=fake_call):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG, max_workers=2)
+
+        self.assertEqual(len(result.outcomes), 3)
+        self.assertTrue(all(o.outcome == "accepted" for o in result.outcomes),
+                        [(o.subject_id, o.outcome, o.detail) for o in result.outcomes])
+
+        main_thread_calls = rendered_by_thread.pop(threading.get_ident())
+        # n2 (batch 2, size 1) always runs in-process on the calling thread -- its 3 calls are the
+        # main thread's own entry.
+        self.assertEqual(len(main_thread_calls), 3)
+        # Exactly two OTHER threads did the batch-1 work (n0, n1), each making exactly 3 calls.
+        self.assertEqual(sorted(len(v) for v in rendered_by_thread.values()), [3, 3])
+        for calls in rendered_by_thread.values():
+            self.assertIn("(none yet)", calls[0],
+                         "a batch-1 subject must never see the OTHER batch-1 subject as a sibling")
+        # n2's own brief names BOTH accepted batch-1 records as real tier-siblings, by NAME -- the
+        # base call's own accepted `name` is `Test Node c<k>` for whichever unique call index k was
+        # each subject's own sample_index=0 call; assert both real accepted names appear, never the
+        # empty-sibling placeholder.
+        accepted_names = {o.record.name for o in result.outcomes if o.record is not None
+                          and o.subject_id != "t1:skill.t1-off-t1-n2"}
+        self.assertEqual(len(accepted_names), 2)
+        for name in accepted_names:
+            self.assertIn(name, main_thread_calls[0])
+        self.assertNotIn("(none yet)", main_thread_calls[0])
+
+    def test_outcomes_are_returned_in_plan_order_regardless_of_which_worker_finishes_first(self) -> None:
+        # n0 and n1 (the same batch) run in two DIFFERENT worker threads, submitted concurrently --
+        # their own 3-call sequences (base + 2 votes) interleave unpredictably at the transport level,
+        # so a global call counter cannot reliably tell them apart. Rather than guess which thread is
+        # "n0", this makes the FIRST call from each newly-seen thread sleep once -- since the pool has
+        # 2 workers for a 2-subject batch, this reliably makes whichever subject's thread happens to
+        # start LAST finish first, forcing at least one real completion-order/plan-order mismatch
+        # without needing to know which logical subject that thread belongs to. Every call gets a
+        # globally unique name/nameKey (an itertools.count(), never tied to node identity) so no two
+        # calls can collide regardless of interleaving.
+        import time
+        import threading
+
+        seen_threads: "set[int]" = set()
+        lock = threading.Lock()
+        counter = itertools.count()
+
+        def interleaving_call(_system, user, *, config=None, temperature=0.2, schema=None):
+            tid = threading.get_ident()
+            with lock:
+                is_new = tid not in seen_threads
+                seen_threads.add(tid)
+            if is_new:
+                time.sleep(0.05)
+            n = next(counter)
+            return json.dumps(_accepted_response(f"c{n}"))
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=interleaving_call):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG, max_workers=2)
+
+        self.assertTrue(all(o.outcome == "accepted" for o in result.outcomes),
+                        [(o.subject_id, o.outcome, o.detail) for o in result.outcomes])
+        subject_order = [o.subject_id for o in result.outcomes]
+        self.assertEqual(subject_order, [
+            "t1:skill.t1-off-t1-n0", "t1:skill.t1-off-t1-n1", "t1:skill.t1-off-t1-n2",
+        ], "outcomes must follow plan order, never worker-completion order")
 
 
 class RunLanguageStageMultiNodeTests(unittest.TestCase):

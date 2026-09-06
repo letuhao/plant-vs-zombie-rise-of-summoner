@@ -3230,6 +3230,78 @@
     },
     {
       "droppedRole": "sense",
+      "familyId": "atom.chill-punisher",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chill-punisher",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chill-punisher",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chill-punisher",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chill-punisher",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chill-punisher",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rot-punisher",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rot-punisher",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rot-punisher",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rot-punisher",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rot-punisher",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rot-punisher",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
       "familyId": "atom.elemental-defense",
       "hostRole": "armament-secondary",
       "maxTier": 3

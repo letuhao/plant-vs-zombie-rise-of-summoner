@@ -47,10 +47,17 @@ public static class UniqueEquipmentCatalog
     /// `mods-absorption` (T6.1, `spec-mods-absorption.md`): which of the shipped `EffectId`s already
     /// have a real, seeded atom (`data/seed/containers/unique-equip.json`, wrapping the SAME atoms
     /// `EffectAtomCatalog.Generated.cs` already compiles from — found real, not invented, 2026-09-02).
-    /// `fx.entity_atk` is deliberately absent — its own doc comment on <see cref="Items"/> already
-    /// calls it a placeholder id with no real effect behind it, verified by grep across every seed
-    /// file: nothing produces it. An item/relic granting through `fx.entity_atk` stays on the legacy
-    /// `mods_json` grant path; every other one now produces through <c>InstanceProducer</c> instead.
+    ///
+    /// <para><c>fx.entity_atk</c> (2026-09-06): its own doc comment on <see cref="Items"/> already
+    /// called it a placeholder id with no real effect behind it, verified by grep across every seed
+    /// file at the time — nothing produced it. Migrated here with a deliberately EMPTY atom list
+    /// (`item.fx-entity-atk`, zero atoms — the exact fixed-core-marker shape `patron.aura` shipped
+    /// with before patron-absorption filled it in): this closes T6.1's own "never both paths" gap for
+    /// the last two legacy items (`stub.hp_charm`, `relic.cracked_seal`) WITHOUT inventing a real
+    /// effect or a balance number — the placeholder's current no-op behavior is preserved exactly, not
+    /// changed. Giving it a real magnitude is a separate, genuine game-balance decision (what should a
+    /// charm/relic trinket actually grant), correctly left for that decision to make, not this
+    /// migration.</para>
     /// </summary>
     static readonly IReadOnlyDictionary<string, string> AtomBackedContainerByEffectId =
         new Dictionary<string, string>(StringComparer.Ordinal)
@@ -59,6 +66,7 @@ public static class UniqueEquipmentCatalog
             ["fx.butter_on_hit"] = "item.fx-butter-on-hit",
             ["fx.shield_grant"] = "item.fx-shield-grant",
             ["fx.cold_on_hit"] = "item.fx-cold-on-hit",
+            ["fx.entity_atk"] = "item.fx-entity-atk",
         };
 
     /// <summary>The real container id for an equipped item/relic's own effect, or null when none
@@ -123,9 +131,12 @@ public static class UniqueEquipmentCatalog
     /// (<c>RpgStore.ReconcileUniqueEquipmentAtomBindingsUnlocked</c>, called alongside this rebuild on
     /// every equip/unequip) — this method never writes that same item's grant into <c>mods_json</c> too,
     /// or the actor would carry the same slot's effect through both paths at once, exactly the
-    /// double-grant the migration exists to close. Only an item with no real atom behind it (today,
-    /// only <c>stub.hp_charm</c> / <c>relic.cracked_seal</c>, both <c>fx.entity_atk</c>) still gets a
-    /// grant here — the legacy path stays live for whatever the atom layer does not yet cover.</para>
+    /// double-grant the migration exists to close. As of 2026-09-06 every shipped `EffectId`
+    /// (including `fx.entity_atk`, migrated to a deliberately empty atom-backed container — see
+    /// <see cref="AtomBackedContainerByEffectId"/>'s own doc comment) now maps here, so this loop's
+    /// `TryGetAtomBackedContainerId` skip is always taken for every currently-known item/relic — the
+    /// legacy grant path stays live in the code (a future item with no atom yet would still need it),
+    /// but nothing shipped today actually reaches it.</para>
     /// </summary>
     public static string BuildModsJson(
         string? existingModsJson,

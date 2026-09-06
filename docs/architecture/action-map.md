@@ -727,10 +727,51 @@ anything to fire.
 | **A18d** | `battle-status-apply` | New `BattleEffectSink` branch for `status.apply` (FA2) — an atom-triggered `StatusRuntime.Apply` call, distinct from today's scripted-initial-statuses-only path | A18a, A18b |
 | **A18e** | `battle-live-stat-modifiers` | A sourced, revertible modifier layer over `ActorDerivedSnapshot` (today a spawn-time-only, last-write-wins snapshot — no Flat/Increased/More/Override phases, no re-compose step anywhere in the round loop) plus the live recompose step itself, so `stat.modify` (FA1) actually affects ongoing combat, not just the pre-battle setup composition it already does | A18a, A18b |
 
-**Build order:** A17 → A18a → A18b → {A18c, A18d in parallel} → A18e → A19, with A20 developed
-alongside once A17/A18a/A18b prove out. A18e lands last — highest-risk and most novel (new
-architecture on `ActorDerivedSnapshot`'s currently-immutable-after-spawn shape), so the grant-path
-concept proves out on the better-understood kinds (A18c/A18d) first.
+**Build order:** A17 → A18a → A18b → {A18c, A18d in parallel} → A18e → **A18f** → A19, with A20
+developed alongside once A17/A18a/A18b prove out. A18e lands last among the a–e set — highest-risk
+and most novel (new architecture on `ActorDerivedSnapshot`'s currently-immutable-after-spawn shape),
+so the grant-path concept proves out on the better-understood kinds (A18c/A18d) first.
+
+### 12.1a A18f — the real gap a 2026-09-06 completeness audit found, before spec-writing began
+
+**Why this module exists, and why it wasn't visible until checked.** A18a's own spec is explicit
+that every one of an actor's equipped actions gets its container bound as a persistent grant **at
+`BattleRunState` construction** — not just the basic attack's. So the binding is already general.
+What is NOT general is *activation*: `TimelineDispatch.cs:118,211` hardcodes
+`DeclareBasicAttack`/`ApplyBasicAttack` as the only intent it ever commits, every turn, for every
+actor — regardless of which action id `StubIntentSource` actually selected that turn (A17's own
+spec names this precisely: *"whichever action is chosen still resolves through the exact same
+`calculator.Compute` → `ApplyHp` path the basic attack already uses, treating every chosen action as
+'a basic-attack-shaped hit' regardless of its own atom container"* — stated there as an explicit,
+deliberate boundary of A17, not a defect, but never closed by a later module either).
+
+**Net effect: selection (A17) computes a real per-turn choice, and dispatch throws it away.** A19
+(costs/cooldowns) gates *whichever action executes* — but with no general dispatch, "whichever
+action executes" is always the basic attack, so A19 would ship provably correct against content
+that can never actually run through it in a live battle. **A18f must land before A19**, not after,
+for A19's own acceptance tests to mean anything beyond a synthetic direct call.
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A18f** | `action-dispatch-generalization` | `TimelineDispatch`'s intent-commit step reads the actor's own per-turn `StubIntentSource` pick and raises the already-built `OnActivate` trigger (A18b) against **that** action's already-bound grant (A18a) — not a hardcoded basic-attack call. The basic attack becomes one ordinary entry in the loadout, not a separate code path | A17, A18a, A18b, A18e |
+
+**Spec written 2026-09-06**: [spec-action-dispatch-generalization.md](action/spec-action-dispatch-generalization.md) —
+traced the gap to two exact lines (`TimelineDispatch.cs:211-213` hardcoding
+`state.BasicAttackEnvelopeCompiled` at resolve time, discarding the real envelope
+`DeclareBasicAttack` already selected and already fired `OnActivate` for). A18f is a small, surgical
+fix: one new `ActionRunner.CurrentEnvelope` accessor mirroring the existing `CurrentTarget`, one
+call-site change. **A19 and A20 also get their specs the same day**, closing the "get their own
+specs when their turn comes" deferral this section's own header named:
+[spec-action-costs-cooldowns-adoption.md](action/spec-action-costs-cooldowns-adoption.md) (A19) and
+[spec-synthetic-loadout-harness.md](action/spec-synthetic-loadout-harness.md) (A20).
+
+**Golden-safety, stated up front rather than discovered mid-build**: per A17's own precedent
+("Explicitly out of scope: the grant-writer — no real player-owned loadout persistence yet;
+synthetic loadouts... are the test input"), **no real, shipped content today equips a second
+action** — every real actor's loadout is empty (falling back to the one synthetic basic attack) or
+directly-constructed test fixtures. So generalizing dispatch is expected to be a **zero-golden-mover**
+exactly like A17 was, provable the same way A17 proved it (run the full suite, compare hashes,
+never assume) — but it is the module that makes a *second* real action possible to ship at all.
 
 ### 12.2 Golden ordering
 
@@ -753,12 +794,36 @@ program's re-bless event.
   (`fx.board_cherry`/`fx.overlay_damage`/`fx.shield_grant`/`fx.poison_on_hit`/`fx.passive_atk_flat`)
   where one exists. Zero goldens moved across all five sub-modules — measured at every checkpoint, not
   assumed; `RulesetVersion` stays 4. See `action-todo.md` T40–T54.
+- **⛔ Checkpoint F.5 — dispatch generalizes.** A18f: a real, non-basic-attack action in an actor's
+  loadout actually activates on its turn, through the same `OnActivate`/grant path A18 already
+  proved, not through a hardcoded basic-attack call.
 - **⛔ Checkpoint G — costs bite.** A19: a skill on cooldown, or one an actor cannot afford, is
   refused by the same gate `UsabilityEvaluator` already defines — proven with a fixture that would
   pass silently if the gate were bypassed.
 - **⛔ Checkpoint H — a balance pass can actually run.** A20: two different synthetic loadouts on the
   same actor produce measurably different aggregate outcomes across many seeds — the acceptance bar
   this whole reopening was built to reach.
+
+### 12.3a Real, current status — 2026-09-06 completeness audit, ahead of A18f/A19/A20 spec-writing
+
+Verified directly against shipped code, not against this map's own (2026-08-28) prose above, which
+is stale in the specific ways corrected here:
+
+| Thing | Real state today | Evidence |
+|---|---|---|
+| Cooldown arming | **Real for the basic attack only.** `state.Cooldowns.Start` fires at `BasicAttack.cs:198`, reduced by the actor's own `skill.cooldown.{category}` derived channel (species-skills S2, closed 2026-09-04) | `BasicAttack.cs:193-199`, `DerivedStatRegistry.cs:197-198` |
+| `ActionRunner`/`TimelineDispatch` | **Live in every real battle now**, a bigger step than this map's own 2026-08-28 text assumed — `UsesTimelineDispatch=true` ships for all three profiles (`galaxy-sync`, `hybrid-atb`, `classic-round`, the last fixed same-day) | `decisions.md` "Battle timeline dispatch" row, 2026-09-05; `BattleModeProfile.cs:221,235,251` |
+| Resource **consumption** at execution | **Not wired to any action.** `CostLedger.TryPay` has exactly one production caller in the whole repo — per-tick aura upkeep. `UsabilityEvaluator` only *checks* affordability (read-only, gate 3); nothing ever *spends* when an action resolves | `CostLedger.cs:106`, `AuraUpkeepDriver.cs:39`, `UsabilityEvaluator.cs:65-67` |
+| Resource **generation**/regen | **Real and live.** `ActorResourcePools` implements lazy `value(now) = clamp(stored + rate·Δt, 0, max)` and runs in every real battle (`BattleRunState.ResourcePools`) — but only `poise` (the reaction lane) is ever actually drained in production; the other five regen with nothing spending them, consistent with the consumption gap above | `ActorResourcePools.cs:51-106`, `BattleRunState.cs:122`, `TimelineDispatch.cs:191` |
+| `RangeChannel` | **Compiled and stored, never read.** No `.Get(...)` call site exists for it anywhere; `UsabilityEvaluator`'s range gate only evaluates when both positions are non-null, and `BattleRunState.PositionOf` returns `null` with no board — "no board means every range check passes" (§10.6) still holds exactly as designed | `ActionCompiler.cs:66`, `UsabilityEvaluator.cs:69-77`, `BattleRunState.cs:500-501` |
+| A10 `battle-board` | **Still zero production callers.** A real `Board.BoardState` type exists, exercised only by a test-only seam | `BattleRunState.cs:871` |
+
+**The corrected causal chain**: A17 makes the *choice* real; A18a–e make a chosen action's *effects*
+real once it activates; **nothing makes a non-basic-attack action activate at all** (A18f, above);
+and even once it does, nothing spends what it costs or arms its cooldown as anything but the one
+hardcoded case (A19). Building A19 before A18f would test costs/cooldowns against content that can
+never run live — sequencing them the other way round is not a preference, it is what makes A19's own
+acceptance tests test something real.
 
 ## 13. Filed by the party-dungeon program (2026-09-05)
 

@@ -121,6 +121,34 @@ public class BattleSeamWideningTests
         Assert.Null(slot.StructureId);
     }
 
+    /// <summary>base-defense `siege-construction` (decision 27, 2026-09-06): a structure PLACED this
+    /// battle (Built/Assembled/Summoned/Laboured) writes StructureId/ConstructionTurnsRemaining and a
+    /// fresh (null, "undamaged") StructureHp — SlotState resets to Intact even if the slot's own prior
+    /// State happened to be Ruined, since a freshly built structure is not rubble.</summary>
+    [Fact]
+    public void Slot_results_apply_a_newly_placed_structure()
+    {
+        var world = World();
+        var targetSlot = world.Sectors.Single(s => s.SectorId == "homeworld").Slots.First();
+
+        var results = new[]
+        {
+            new SlotOutcome
+            {
+                SlotIndex = targetSlot.SlotIndex, StructurePlaced = "granary",
+                PlacedConstructionTurnsRemaining = 3,
+            }
+        };
+
+        var next = BattleApplication.ApplySlotResults(world, "homeworld", results);
+        var slot = next.Sectors.Single(s => s.SectorId == "homeworld").Slots.Single(sl => sl.SlotIndex == targetSlot.SlotIndex);
+
+        Assert.Equal("granary", slot.StructureId);
+        Assert.Equal(3, slot.ConstructionTurnsRemaining);
+        Assert.Null(slot.StructureHp); // null means undamaged -- the default a fresh structure gets
+        Assert.Equal(SlotState.Intact, slot.State);
+    }
+
     [Fact]
     public void Guard_clearing_still_works_unchanged()
     {

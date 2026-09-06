@@ -271,9 +271,16 @@ python -m pytest tests/test_items_adapter.py -q          # HYBRID_FRAME_CITATION
 python -m seedsmith check ..\..\data\seed\items --adapter items --metric Linkage/SetCompletability
 ```
 
-⚠ **`SetCompletability` reports zero findings today and 18 after the correction.** A clean run before
-the v2 bump is the gate being blind, not the corpus being right — read it that way or the check is
-worse than useless.
+⚠ **`SetCompletability` reports zero findings today and 30 after the correction, over 18 distinct
+sets.** A clean run before the v2 bump is the gate being blind, not the corpus being right — read it
+that way or the check is worse than useless.
+
+⚠ **This line said "18 findings" until 2026-09-06.** 18 is the distinct-**set** count (§"Correcting
+them turns 18 of the 30 shipped sets red", above, is right); the **finding** count is 30, because 10
+of those sets claim two off-core roles apiece and `set.verdant-graft-005` claims four. Counted off a
+live `seedsmith check --adapter items --gate` run, which also reports `61 gap, 80 note,
+23 not_measured` suite-wide. The wrong unit propagated into `tasks/item-plan.md` and
+`tasks/item-todo.md` P1.3; both are corrected.
 
 ## Project structure
 

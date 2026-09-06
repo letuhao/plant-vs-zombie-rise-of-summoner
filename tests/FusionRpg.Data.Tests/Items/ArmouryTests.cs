@@ -213,4 +213,87 @@ public class ArmouryTests : IDisposable
         var entry = Assert.Single(entries);
         Assert.Equal("b", entry.RefId);
     }
+
+    // ---- loadouts: validate-on-read, the half the library shipped without ------------------------
+
+    /// <summary>`spec-armoury.md`'s own named test. The entry must come back MARKED, not omitted —
+    /// asserting the count first is the point: a shorter list is the defect, and a test that only
+    /// looked for the marker would pass on a silently dropped row too.</summary>
+    [Fact]
+    public void A_loadout_entry_whose_item_was_salvaged_returns_missing()
+    {
+        var instanceId = SeedInstance();
+        _store.SaveItem(new RpgItemRow { InstanceId = instanceId, PlayerId = "p1", AcquiredUtc = "2026-01-01T00:00:00Z" });
+        _store.SaveLoadout(
+            new RpgItemLoadoutRow("lo-1", "p1", "Offense", null, "2026-01-01T00:00:00Z", 0),
+            new[] { new RpgItemLoadoutEntryRow("lo-1", "armament-primary", "item", instanceId) });
+
+        Assert.Equal(FusionRpg.Core.Items.LoadoutEntryState.Present,
+            Assert.Single(_store.GetLoadoutEntriesValidated("lo-1", "p1")).State);
+
+        // Salvage: the instance and its ownership row are gone, the preset row is not.
+        _store.DeleteInstance(instanceId);
+
+        var after = Assert.Single(_store.GetLoadoutEntriesValidated("lo-1", "p1"));
+        Assert.Equal("armament-primary", after.Role);
+        Assert.Equal(FusionRpg.Core.Items.LoadoutEntryState.Missing, after.State);
+    }
+
+    [Fact]
+    public void A_stock_entry_is_missing_only_once_the_last_copy_is_spent()
+    {
+        _store.AdjustStock("p1", "item.iron-band", delta: 1);
+        _store.SaveLoadout(
+            new RpgItemLoadoutRow("lo-1", "p1", "Offense", null, "2026-01-01T00:00:00Z", 0),
+            new[] { new RpgItemLoadoutEntryRow("lo-1", "core-guard", "stock", "item.iron-band") });
+
+        Assert.Equal(FusionRpg.Core.Items.LoadoutEntryState.Present,
+            Assert.Single(_store.GetLoadoutEntriesValidated("lo-1", "p1")).State);
+
+        _store.AdjustStock("p1", "item.iron-band", delta: -1);
+
+        Assert.Equal(FusionRpg.Core.Items.LoadoutEntryState.Missing,
+            Assert.Single(_store.GetLoadoutEntriesValidated("lo-1", "p1")).State);
+    }
+
+    /// <summary>Another player's copy is not this player's — validate-on-read is scoped to the owner,
+    /// or a preset would report a hole filled by someone else's item.</summary>
+    [Fact]
+    public void Validate_on_read_is_scoped_to_the_owning_player()
+    {
+        var instanceId = SeedInstance();
+        _store.SaveItem(new RpgItemRow { InstanceId = instanceId, PlayerId = "p2", AcquiredUtc = "2026-01-01T00:00:00Z" });
+        _store.SaveLoadout(
+            new RpgItemLoadoutRow("lo-1", "p1", "Offense", null, "2026-01-01T00:00:00Z", 0),
+            new[] { new RpgItemLoadoutEntryRow("lo-1", "armament-primary", "item", instanceId) });
+
+        Assert.Equal(FusionRpg.Core.Items.LoadoutEntryState.Missing,
+            Assert.Single(_store.GetLoadoutEntriesValidated("lo-1", "p1")).State);
+    }
+
+    /// <summary>An unrecognised `ref_kind` cannot be resolved, so it reports a visible hole rather
+    /// than passing silently.</summary>
+    [Fact]
+    public void An_unreadable_ref_kind_is_reported_missing_rather_than_assumed_present()
+    {
+        _store.SaveLoadout(
+            new RpgItemLoadoutRow("lo-1", "p1", "Offense", null, "2026-01-01T00:00:00Z", 0),
+            new[] { new RpgItemLoadoutEntryRow("lo-1", "core-guard", "sorcery", "whatever") });
+
+        Assert.Equal(FusionRpg.Core.Items.LoadoutEntryState.Missing,
+            Assert.Single(_store.GetLoadoutEntriesValidated("lo-1", "p1")).State);
+    }
+
+    [Fact]
+    public void FindAssignmentHolders_names_the_cell_holding_a_pinned_copy()
+    {
+        _store.SaveAssignment("spec-A", FusionRpg.Core.Items.ItemRole.ArmamentPrimary, "item", "inst-1");
+
+        var held = _store.FindAssignmentHolders(new[] { "inst-1", "inst-unheld" });
+
+        var cell = Assert.Contains("inst-1", (IDictionary<string, FusionRpg.Core.Items.LoadoutCell>)held);
+        Assert.Equal("spec-A", cell.SpecimenId);
+        Assert.Equal("armament-primary", cell.Role);
+        Assert.DoesNotContain("inst-unheld", held.Keys);
+    }
 }

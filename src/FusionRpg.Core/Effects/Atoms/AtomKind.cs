@@ -28,6 +28,18 @@ public enum AttachPoint
     /// see <c>EffectBag.FireGrant</c>'s own bag-side branch for the sink separation this guarantees.
     /// </summary>
     Ui,
+
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27, 2026-09-06): acts on the TACTICAL SIEGE BOARD —
+    /// `FusionRpg.Core.Battle.Board.BoardState`/`GridSpec` — never the PvZ lawn. Distinct from
+    /// <see cref="Board"/> on purpose: every existing `Board`-attached kind (`spawn.entity`,
+    /// `board.action`, `grid.spawn`, `grid.clear`, `box.set`) is Battle=<see cref="RuntimeState.None"/>
+    /// and Lawn=Full/Partial — they only ever reach Unity `GridItem`/`Plant`/`Zombie` objects through
+    /// `InjectorEffectActionSink`. This attach point is the reverse: Lawn=None always (there is no
+    /// tactical board there), Battle carries the real executor. `structure.place` is the first (and,
+    /// today, only) kind.
+    /// </summary>
+    Siege,
 }
 
 /// <summary>

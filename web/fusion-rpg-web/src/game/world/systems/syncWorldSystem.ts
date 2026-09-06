@@ -89,8 +89,13 @@ function upsertSectorPin(
     slotTypeId: s.slotTypeId
   }));
   const netLoam = ownership === "yours" ? sector.loam.net.value : null;
+  const paintKey = JSON.stringify({ channels, fog, tier, slots, netLoam, x, y });
 
-  registry.getSector(sector.sectorId)?.destroy();
+  const existing = registry.getSector(sector.sectorId) as Phaser.GameObjects.Container | undefined;
+  if (existing?.active && existing.getData("paintKey") === paintKey) {
+    return;
+  }
+  existing?.destroy();
 
   const pin = createSectorPin(scene, theme, {
     id: sector.sectorId,
@@ -103,6 +108,7 @@ function upsertSectorPin(
     netLoam
   });
   pin.setDepth(0);
+  pin.setData("paintKey", paintKey);
   registry.setSector(sector.sectorId, pin);
 }
 
@@ -119,19 +125,34 @@ function upsertLane(
 
   const a = sectorCenter(from.layoutX, from.layoutY);
   const b = sectorCenter(to.layoutX, to.layoutY);
-
-  registry.getLane(lane.laneId)?.destroy();
-
-  const stroke = createLaneStroke(scene, theme, {
-    id: lane.laneId,
-    kind: lane.typeId as LaneKind,
-    state: laneState(lane),
+  const state = laneState(lane);
+  const paintKey = JSON.stringify({
+    kind: lane.typeId,
+    state,
     widthMilli: lane.width.value,
     x0: a.x,
     y0: a.y,
     x1: b.x,
     y1: b.y
   });
+
+  const existing = registry.getLane(lane.laneId) as Phaser.GameObjects.Container | undefined;
+  if (existing?.active && existing.getData("paintKey") === paintKey) {
+    return;
+  }
+  existing?.destroy();
+
+  const stroke = createLaneStroke(scene, theme, {
+    id: lane.laneId,
+    kind: lane.typeId as LaneKind,
+    state,
+    widthMilli: lane.width.value,
+    x0: a.x,
+    y0: a.y,
+    x1: b.x,
+    y1: b.y
+  });
+  stroke.setData("paintKey", paintKey);
   registry.setLane(lane.laneId, stroke);
 }
 
@@ -143,6 +164,25 @@ function forceFromLegion(legion: LegionView): ForceView {
     exact: true,
     strength: { unit: "gameUnits", value: legion.members.length }
   };
+}
+
+/** Cheap fingerprint for force paint — position is updated separately (followup F7). */
+function forcePaintKey(force: ForceView, ownership: "yours" | "enemy"): string {
+  if (force.exact) {
+    return JSON.stringify({
+      ownership,
+      kind: force.kind,
+      exact: true,
+      strength: force.strength
+    });
+  }
+  return JSON.stringify({
+    ownership,
+    kind: force.kind,
+    exact: false,
+    bandName: force.bandName,
+    bandCeiling: force.bandCeiling
+  });
 }
 
 function legionWorldPosition(
@@ -192,15 +232,24 @@ function upsertForces(
     if (!pos) continue;
     const id = legion.entityId;
     nextForceIds.add(id);
-    registry.getForce(id)?.destroy();
+    const force = forceFromLegion(legion);
+    const ownership = legion.ownerFactionId === playerFactionId ? "yours" : "enemy";
+    const paintKey = forcePaintKey(force, ownership);
+    const existing = registry.getForce(id) as Phaser.GameObjects.Container | undefined;
+    if (existing?.active && existing.getData("paintKey") === paintKey) {
+      existing.setPosition(pos.x, pos.y);
+      continue;
+    }
+    existing?.destroy();
     const marker = createForceMarker(scene, theme, {
       id,
-      force: forceFromLegion(legion),
-      ownership: legion.ownerFactionId === playerFactionId ? "yours" : "enemy",
+      force,
+      ownership,
       x: pos.x,
       y: pos.y
     });
     marker.setDepth(5);
+    marker.setData("paintKey", paintKey);
     registry.setForce(id, marker);
   }
 
@@ -213,17 +262,27 @@ function upsertForces(
       if (legionIds.has(force.entityId)) return;
       const id = force.entityId;
       nextForceIds.add(id);
-      registry.getForce(id)?.destroy();
-
+      const ownership = force.ownerFactionId === playerFactionId ? "yours" : "enemy";
       const offset = (index - (forces.length - 1) / 2) * 16;
+      const x = cx + offset;
+      const y = cy - 20;
+      const paintKey = forcePaintKey(force, ownership);
+      const existing = registry.getForce(id) as Phaser.GameObjects.Container | undefined;
+      if (existing?.active && existing.getData("paintKey") === paintKey) {
+        existing.setPosition(x, y);
+        return;
+      }
+      existing?.destroy();
+
       const marker = createForceMarker(scene, theme, {
         id,
         force,
-        ownership: force.ownerFactionId === playerFactionId ? "yours" : "enemy",
-        x: cx + offset,
-        y: cy - 20
+        ownership,
+        x,
+        y
       });
       marker.setDepth(5);
+      marker.setData("paintKey", paintKey);
       registry.setForce(id, marker);
     });
   }

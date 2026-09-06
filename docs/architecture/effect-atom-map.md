@@ -434,3 +434,17 @@ Two rows the delve modules need from this program; each is one reviewed change h
 | `Freeze` leaves count-unit channels unscaled | `party-dungeon/spec-unique-pipeline.md` §4 | `Instantiator.Freeze` (`Instantiator.cs:313-315`) applies `ContentScale.Apply` to every fixed value; `Apply(1, 4235)` is 4, and a `stat.derived` on `loadout.slots` (a count) must stay 1 — one guard reading the channel's `UnitClass`, tested by *"frozen at Θ 100, still 1"* | the unique build refuses `unique.slot-scaled` rather than ship five extra slots |
 | `status.clear` admitted on `OnActivate` | `party-dungeon/spec-supplies-and-objects.md` §3 | one trigger row in `AtomKindRegistry` (today `Events`-only, `AtomKindRegistry.cs:638-646`) so an antidote supply can fire | the supply validator refuses such a row at import (`consumable.trigger-not-allowed`) |
 
+## 20. Filed by the item program (2026-09-06)
+
+Two rows the item program's own `item-map.md` §3 has carried since 2026-09-03/04 (`X7`, `D28`) without
+ever landing here — verified 2026-09-06 that neither term, nor `container_kind`/`gem`/`combo`, nor a
+family-tags row, appears anywhere in this map, `docs/architecture/effect-atom/`, `tasks/effect-atom-todo.md`
+or `tasks/content-stack-todo.md`. Recording the ask was not the same as filing it; this section is the
+filing.
+
+| Ask | Filed by | Shape | Until it lands |
+|---|---|---|---|
+| Five `container_kind` values (D27): `gem` · `set` · `charm` · `combo` · `consumable` | `item-map.md` §3 row `X7`, `spec-sockets.md:30` | `ContainerRow.cs:9-18` ships **seven** kinds (⚠ corrected 2026-09-06 — a seventh, `Enemy`, landed the same day via party-dungeon's D2.6, commit `50fcdf8`; unrelated to this ask) and none of these five. This program's own `spec-container-schema.md:22` still enumerates only six (not yet updated for `Enemy` either), and `:153` already names adding a kind as **"Ask first"** — this is that ask | 111 item-program seeds have no legal container home (70 `charm` + 41 `insert`); item modules 12, 13, 16, 18 and 21 all ship with this half deferred and refused |
+| Real family tags stamped into `AtomRow.TagsJson`, not provenance-only | `item-map.md` §3 row `D28`, cross-referenced from `spec-eligibility-tags.md` | `FamilyExpansion.cs:194-198` (E43, already shipped and closed) emits exactly `{generatedFrom, generator}` per row — confirmed in shipped output (`data/seed/atoms/generated/family-expand.g-attack.json`). The authored families' own `tags` (`offensive`/`elemental`/etc., `data/seed/items/affix-families/*.json`; **100** as of a same-day 11:55 commit `5864231`, up from 98 when this was first counted a few hours earlier) never reach the atom row at all | item module 8: every tag-gated content rule is inert. **Also, found while verifying this, and worth fixing in the same pass:** `effect-pipeline/spec-eligibility-tags.md:40-43` was written on the premise that E43 *already* does this ("E43 stamps them onto every emitted row") — that premise is false in shipped code, so effect-pipeline's own `AffixTags.cs` (`ep-8`, shipped) unions provenance keys only, and every rule keyed on a real family tag is silently inert today, independent of when this row lands |
+
+

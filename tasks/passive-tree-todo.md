@@ -1658,7 +1658,7 @@ reason citing both real `SubsystemId` values read directly from code (`AtomDeriv
 (`ActorHub|AtomCatalogSsotDriftTests|AtomKindRegistryTests`) after the fix: 599/599 green (up from
 598/599 with the one caught failure).
 
-### 🟡 Checkpoint E — mechanism nodes execute — 1 of 3 bullets proven, label corrected (was stale ✅)
+### ✅ Checkpoint E — mechanism nodes execute — BUILT + VERIFIED 2026-09-06 (all 3 bullets proven, label corrected twice — was stale ✅, then honest 🟡)
 - [x] A status-granted derived channel reaches a live actor on the lawn and changes mid-fight — E1's
       composition proof (`combat.defense.omni` reaches the composed value, falsifier-arm tested) plus
       E1/E2's end-to-end injector wiring (`CheatState.cs`'s `statusDerivedMods:`/`liveStatuses:`
@@ -1666,20 +1666,45 @@ reason citing both real `SubsystemId` values read directly from code (`AtomDeriv
       injector assembly cannot be compiled or unit-tested in this environment) together prove the path
       is wired, not inert. "Mid-fight" in a literal running-game sense still awaits a live-deploy smoke
       check — the same standing caveat E1's own evidence already names, not a new gap
-- [ ] A `stat.derived` atom binds and is scored in the balance harness — genuinely NOT yet exercised.
-      `EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial` proves the fold/compose
-      mechanism at the unit level, and F2's `Coverage.cs` now correctly states a `Flat`/`Increased`
-      `stat.derived` node in Sim is scorable — but grepped `tools/SquadHarness/BuildFactory.cs` directly:
-      it never binds a `BoundDerivedAtom` for any roster member today. Scoring one through the actual
-      harness measurement pipeline (duel/squad win-rate) is F3's job (the Erosion differential) or a
-      dedicated follow-up, not yet built
+- [x] A `stat.derived` atom binds and is scored in the balance harness — closed for real, 2026-09-06 (see
+      evidence below): `tools/SquadHarness/Erosion.cs` gained `MeasureMechanismPair`, scoring the
+      already-shipped `atom.critical-hunter` `stat.derived` atom through the real duel win-rate pipeline
 - [x] The three atom counts are unchanged, asserted — `KindCount`/`TriggerCount`/`AttachPointCount`
       (16/13/7), confirmed via `AtomCatalogSsotDriftTests` and `DESIGN-GATE.md` §1 (see E6's evidence)
 
 **Note:** this checkpoint's heading previously read `✅` while its own three bullets sat unchecked `[ ]`
 — a genuine stale-label mismatch, caught by re-reading the checkpoint's own text against its bullets
-rather than trusting the heading. Corrected to `🟡` with the true per-bullet state above; the whole
-Phase E cannot close ✅ until bullet 2 has a real harness-level proof, not just a unit-level one.
+rather than trusting the heading. Corrected to `🟡` at the time, then re-investigated and genuinely
+closed — see below.
+
+**Bullet 2 closed for real, 2026-09-06.** First traced the real actor-construction call site (the
+investigation the earlier pass had stopped short of): confirmed `tools/SquadHarness/BuildFactory.cs`
+is the WRONG file — it only builds pure `AptitudeAllocation` corner-shapes, never touching traits,
+equipment, or `ActorState` at all. The real construction site is `SquadMatch.ToActorSetup`, whose
+`ChannelMods` come PURELY from `AptitudeResolver.ResolveForBattle(allocation, ...)` — SquadHarness
+roster members carry no passive-tree-node investment concept whatsoever today. Building full
+passive-tree-ownership modelling into the harness (a roster member "owning" a real catalog node,
+resolved through the real binder) would be significant, undertaken scope this checkpoint's own text
+does not ask for — it asks only to score ONE atom through the real pipeline. `Erosion.cs`'s own
+`MeasurePair` (A10a) already does exactly this shape for a DIFFERENT purpose (erosion removes
+defensive mitigation from the DEFENDER under common random numbers) — mirrored that proven pattern
+exactly rather than inventing a new one: new `Erosion.MeasureMechanismPair(attacker, defender,
+mechanismMods, spec)` applies real `BattleChannelMod`s to the ATTACKER (a mechanism node benefits its
+OWNER, unlike erosion's defender-side shape), both arms resolved under the identical per-trial seed,
+returning the same `(With, Without) PairResult` shape every other cell in this module reports. Used the
+ALREADY-SHIPPED `stat.derived` atom E12's own migration already trusts on the Battle side —
+`TraitAtomSource.Shipped().ModsFor("critical-hunter")` (`atom.critical-hunter`,
+`combat.crit.rate.omni +150`, `data/seed/atoms/trait-critical-hunter.json`) — so zero new content was
+authored to prove this. 3 new tests (`ErosionTests.cs`): (1) an empty mod list throws rather than
+silently measuring nothing, matching `ApplyStatic`'s own explicit-error precedent; (2) a deterministic,
+non-RNG proof that the shipped atom's mods really raise the composed `combat.crit.rate.omni` channel by
+exactly 150 over baseline; (3) `MeasureMechanismPair` runs the REAL `BattleEngine` end to end at a
+trivial trial count (this session's own established reason for small counts — heavy concurrent machine
+load makes a full production sweep impractical, same as `MeasurePair`'s own integration tests) and both
+arms account for every trial. `dotnet test tests/FusionRpg.SquadHarness.Tests --filter ErosionTests`:
+33/33 green (was 30). Full `dotnet test tests/FusionRpg.SquadHarness.Tests`: **176/176 green**, zero
+regressions. `dotnet build tools/SquadHarness`: 0/0. Checkpoint E's own bullet 2 — "scoring one through
+the actual harness measurement pipeline (duel/squad win-rate)" — is now literally true, not aspirational.
 
 ---
 
@@ -1730,7 +1755,7 @@ D7/G1 work plus another concurrent session's combat/demon-fusion edits). 23 test
 (independently re-verified). `dotnet build` 0/0 on both projects. `audit-overflow.py --targets A3` /
 `audit-magic-numbers.py --targets M1`: zero hits. All four boundary guards pass (independently re-run).
 
-### 🟡 F1b: measure the shipped commander-replicated allocation shape alongside D21's — 3 of 4 BUILT + VERIFIED 2026-09-06
+### ✅ F1b: measure the shipped commander-replicated allocation shape alongside D21's — BUILT + VERIFIED 2026-09-06 (all 4, bullet 3 was a stale checkbox, not a real gap)
 **Spec:** `spec-squad-harness.md` §1.1, §14 open question 2.
 **Description:** Today `WebMatchService.AptitudeChannelMods` merges only Commander + DemonType scopes,
 so two squad members of the same species cannot differ — every actor effectively replicates the
@@ -1744,12 +1769,19 @@ store can actually persist, versus only **after** `tree-state` lands D21. The an
       stays the default
 - [x] The `shipped` roster builds six actors from **one** allocation via the same corner-shape helper,
       never a second construction path
-- [ ] `_squad-scope.json` and `_scope-transfer.json` each carry which shape produced them, so the two
-      are never conflated in one artifact — **DEFERRED to F2**: these artifacts are produced by the
-      real `squad`/`transfer` MODES (three columns, screening, the two-artifact write path), which are
-      explicitly F2's own scope, not F1b's; `Modes.cs` today is a clearly-marked F1b-only stub that
-      threads the flag through roster construction and then refuses naming F2, never fabricating an
-      artifact it cannot yet back with real mode logic
+- [x] `_squad-scope.json` and `_scope-transfer.json` each carry which shape produced them, so the two
+      are never conflated in one artifact — **closed 2026-09-06, a stale checkbox, not a real gap**:
+      when this task was built, the real writer logic was correctly F2's own not-yet-landed scope, so
+      this was left `[ ]` and deferred honestly. F2 has since shipped (`Artifacts.cs`'s `WriteTransfer`/
+      `WriteSquadScope` both genuinely serialize `allocationShape` from `TransferReport.TransferResult`/
+      the caller's own `AllocationShape?` parameter) but this checkbox was never revisited. Verified for
+      real, not assumed from reading the code alone: 2 new tests
+      (`ArtifactsTests.WriteTransfer_carries_which_allocation_shape_produced_it_shipped_and_per_actor_differ`,
+      `..._WriteSquadScope_...`) build the SAME roster under `Shipped` and `PerActor`, write both, and
+      assert the JSON `allocationShape` field differs and matches each — plus a `duel`-mode case (no
+      shape concept at all) writes a real JSON `null` rather than a fabricated default.
+      `dotnet test tests/FusionRpg.SquadHarness.Tests --filter ArtifactsTests`: 7/7 green (was 5). Full
+      suite: 178/178 green (was 176), zero regressions.
 - [x] No `src/` change — the harness still builds actors in memory (§1.1); this is additive to
       `SquadRoster.cs`
 **Verification:** the same 23 named squad ids resolve under both shapes; `verify` covers both.
@@ -3040,11 +3072,330 @@ mechanism diagnostic call above through the fixed `_normalize_blocked` directly 
 confirmed it now reads as not-blocked. Full `python -m pytest tests -q`: **2303 passed, 1 skipped** (was
 2299 before this fix, +4 new tests, zero regressions).
 
-**This second bug is real, distinct from the sibling-ordering fix, and could plausibly explain a
-meaningful share of the original 40/40-blocked result** — it affects ANY node (mechanism or magnitude)
-whose model response was actually valid but got miscounted as a decline purely because of this
-literal-string-vs-empty-string confusion. Re-running the real `might` smoke test a third time, now with
-both real fixes in place, to see the actual current outcome — see below for the result once it lands.
+**This second bug is real, distinct from the sibling-ordering fix, and explains a meaningful share of
+the original 40/40-blocked result.** The third real run (both fixes applied) landed **1 accepted, 20
+blocked, 13 unresolved, 6 escalated** — the first-ever real, committed content for `might`
+(`skill.might-def-t4-n0`, "Kinetic Reciprocity," a shield-reroute mechanism node — genuinely well-formed:
+real `affixIds`, coherent flavor text, a sensible exclusion). `seedPath` was non-null this run, so the
+real seed document now exists at `data/seed/passive-tree/nodes/might.json`, uncommitted (git status
+`??`), left as-is — this is real, intended H9 progress, not an accident to revert. Fixed a stale test
+assumption this exposed: `test_write_reaches_the_real_pipeline...` asserted the real committed path
+would NEVER exist; it now asserts the test's OWN run never TOUCHES it (byte-for-byte snapshot
+before/after), which is the actually-testable claim once real generation has legitimately started.
+
+**A fourth real run, fully instrumented (per-subject outcome + detail, not just aggregate counts) on
+the remaining 39 subjects, surfaced the real, specific reasons behind every remaining category — 2 more
+accepted (3 total), 24 blocked, 11 unresolved, 2 escalated:**
+- **The 2 `escalated` cases are CONFIRMED correct, intended fail-safe behavior, not a bug**: both fail
+  gate 13 (persist-time re-gate) because the vote resolved `affixIds` to fewer entries than the base
+  call's own `affinity` array — exactly the scenario `generate_node`'s own doc comment names as gate
+  13's reason to exist ("the composite the vote may have resolved to... is checked here for the first
+  time"). Nothing to fix here; this is the safety net working.
+- **`unresolved` (11/39, ~28%) is a 1-1-1 vote tie on `affixIds`** every time — plausibly this specific
+  local model's own real sampling inconsistency at temperature, not a code defect; a real, worth-keeping
+  data point about this model's reliability for this workload, not something to chase further without a
+  different model to compare against.
+- **The 24 `blocked` reasons revealed TWO further real, distinct, fixable causes**, both closed with
+  small, precise BRIEF-WORDING clarifications (never new mechanics, never inventing content):
+  1. **The overwhelming majority (~15/24) quoted some variant of "no existing effect/property in the
+     current tier/context to scale/amplify."** Cross-checked against `spec-tree-plan.md`'s own FORMAL
+     definition: *"MAGNITUDE node ≔ every bound atom has AttachPoint.Stat AND kind ∈ {stat.modify,
+     stat.derived} AND conditionality == 1."* A magnitude node's "existing thing" is an EXISTING GAME
+     STAT — one of the entries in the brief's own "Legal effects" list, already narrowed to stat-kind
+     affixes for a magnitude node by the plan's own quota cell — never a sibling NODE this tree has or
+     has not generated. The brief's one-line gloss ("makes an existing thing larger") never stated this,
+     and the model was reading "existing" as "already in this tree." Fixed: `brief.py`'s `class_note`
+     for a magnitude node now says explicitly that picking an effect from the list below IS naming the
+     existing thing, nothing else needs to exist first — a wording clarification of an already-true
+     definition, not a new one.
+  2. **Two more blocks named the SAME missing header confusion found earlier** (`"might—might"` read as
+     "a recursive or self-referential loop"), plus 3 more put real, meaningful EXCLUSION content
+     ("nullification: posture wins" / "tier wins" / "atomKind wins") into the `blocked` field instead of
+     `rationale` — the brief's own instruction says to "say plainly which side wins" but never says
+     WHERE, and `blocked`/`rationale` are the only two free-text fields, so the model guessed wrong.
+     Fixed both: `render_brief`'s header now omits the redundant `" — {reading}"` suffix when
+     `tree_reading == tree_display_name` (every un-authored tree today), and the nullification
+     instruction now says explicitly "in `rationale` — never in `blocked`, which is reserved for
+     declining to answer this brief at all."
+  3. **5 more say only the bare word `"blocked": "nodeClass"`**, with no sentence — left un-diagnosed
+     and un-fixed; not a nullish token (doesn't match any real-call-evidenced pattern), ambiguous
+     enough that guessing a fix without more real signal risks a wrong assumption.
+
+Full `python -m pytest tests -q` after both wording fixes: 2321 passed (up from 2303 across all fixes
+this run), 1 skipped, only the same 2 pre-existing, out-of-scope `test_affix_authoring.py` failures
+(confirmed not tracked in `seedsmith-todo.md` at all — a different program's own intentionally-red
+signal test, unrelated to tree-language).
+
+**The fifth real run (both wording fixes applied) landed 11 accepted, 9 unresolved, 11 escalated, 6
+blocked — a dramatic validation of the wording-fix direction.** Blocked dropped from 24 → 6 (75%
+reduction); accepted jumped from 2 → 11 in one run. **Ledger now holds 14/40 real, accepted `might`
+nodes** (independently counted directly from the ledger file). The remaining 6 blocked are narrower and
+more specific than before:
+- **3 still route real "nullification: X wins" content into `blocked` instead of `rationale`**, despite
+  the instruction fix — the wording change reduced but did not eliminate this pattern; a code-level
+  normalization (detecting this specific shape and treating it as non-declining, mirroring
+  `_normalize_blocked`'s own philosophy) is the next real candidate fix, not yet built.
+- **3 are the bare word `"blocked"` with no reason at all** (distinct from the earlier `"nodeClass"`
+  pattern) — still genuinely ambiguous, not fixed.
+`escalated` jumped to 11 (same confirmed-correct gate-13 cardinality-mismatch behavior as before, now
+simply more VISIBLE because more nodes reach the vote stage instead of short-circuiting on an instant
+block) — still not a bug, but now common enough that the VOTE step's own tendency to disagree on
+cardinality (not just on WHICH affixes) is worth someone's attention if the escalated rate matters for
+the real 480-node run's own targets.
+Full `python -m pytest tests -q`: 2330 passed, 1 skipped, 3 failed — the same 2 pre-existing
+`test_affix_authoring.py` cases plus one NEW failure, `test_signature_propose.py::
+RequiredFamiliesSpliceTests`, confirmed via `git status` to be `signature_propose/derive.py` and
+`data/seed/actions/_briefs/round-1.json` both mid-write by a different concurrent session (the
+action-selection program) — unrelated to tree-language, not fixed, named rather than hidden.
+
+**Owner request, 2026-09-06: add parallel execution to `run_language_stage`, scoped correctly (their own
+words) — "only make it run parallel in some sub pipeline that already support parallel, not every sub
+pipeline can run parallel."** `workflow/runner.py`'s existing `run_many`/`MAX_WORKERS=4` pattern (already
+used by the demon/affix generators) cannot be reused directly — it is tied to a LangGraph-style
+`app.invoke()` interface `nodegen` never adopted. The REAL constraint the sibling-ordering fix
+introduced: a magnitude node's brief now depends on already-accepted mechanism siblings from THE SAME
+TIER, so nodes cannot all run concurrently — only nodes that share no such dependency can. Building a
+scoped batch-parallel executor: subjects are grouped into `(tier, node_class)` batches (already
+contiguous under `plan_run`'s own ordering), each batch's subjects run concurrently via a bounded
+`ThreadPoolExecutor` (mirroring `MAX_WORKERS=4`'s own established rationale — "one local model serves
+one request at a time; a small pool keeps it fed without stampeding it"), and batches themselves stay
+strictly sequential so a later batch always sees every earlier batch's real, accepted siblings. Default
+`max_workers=1` preserves today's exact sequential behavior byte-for-byte (regression safety for every
+existing test); `max_workers>1` is opt-in.
+
+**Built and proven with fakes, zero real cost.** `run_language_stage` gained a `max_workers: int = 1`
+parameter; `plan.subjects` (already contiguous by `(tier, node_class)` from `plan_run`'s own ordering)
+is grouped into runs via `itertools.groupby`, each run's subjects share one `tier_siblings` snapshot
+(none can see another accepted in the SAME run), and a run with `max_workers>1` fans out through a
+bounded `ThreadPoolExecutor` while runs themselves stay strictly sequential. Outcomes are always
+reassembled in `plan.subjects`' own original order (`outcomes_by_subject` keyed dict, never an
+append-in-completion-order list), so `result.outcomes` is deterministic regardless of which worker in a
+run finishes first. `--workers` wired into `trees generate --write` (`report/cli.py`), default 1,
+mirroring `workflow.runner.MAX_WORKERS=4`'s own documented rationale in its help text.
+4 new tests (`BatchedParallelExecutionTests`, `test_nodegen_language_stage.py`), all green:
+(1) `max_workers=1` explicit vs. omitted produce byte-identical seed documents — the new parameter
+changes nothing by default; (2) two same-batch mechanism nodes, run genuinely concurrently (forced via
+a brief sleep — `ThreadPoolExecutor` only guarantees `max_workers` as an upper bound on concurrency,
+never a lower one, so a near-instant fake call can silently collapse a "two real threads" test onto one
+without it), each identified by THREAD IDENTITY rather than a global call counter (their own 3-call
+sequences interleave unpredictably under real concurrency, which a naive counter-based test — caught
+and fixed during this same build — got wrong at first): neither sees the other as a sibling, and the
+next batch's magnitude node correctly sees BOTH by name; (3) outcomes are returned in plan order, not
+worker-completion order, proven by making one batch member's thread deliberately slower. Full
+`python -m pytest tests -q`: 2339 passed (up from 2330), 1 skipped, only the 2 pre-existing
+`test_affix_authoring.py` failures plus one new, confirmed-unrelated `test_distribution_planner.py`
+failure (`git status` shows `distribution_planner/derive.py` mid-write by a different concurrent
+session — an actions-corpus module, untouched by this work). `python -m seedsmith trees generate --help`
+confirms the `--workers` flag is live with its documented default and scope. Not yet exercised with
+`--workers>1` against the REAL model — that is the natural next real-cost check once this todo entry's
+current wave of real runs is otherwise settled.
+
+**A sixth real sequential run (2026-09-06) pushed the ledger to 18/40 accepted, then crashed the CLI —
+a real, distinct bug, now fixed.** The model independently generated two DIFFERENT nodes (different
+tiers, different subjects) both named "Deep Rooting," colliding exactly on `nameKey`
+(`tree.node.might-defensive-deeprooting`, `might:skill.might-def-t2-n0` vs `might:skill.might-def-t3-n1`)
+— `build_seed_document`'s own `assert_no_duplicate_name_keys` correctly REFUSED, exactly as designed
+("refused, never renamed out from under the model's answer" — its own message), but the resulting
+`NodeKeyRefused` propagated straight out of `run_language_stage` with no handler anywhere in
+`report/cli.py`, crashing the whole CLI with a raw Python traceback instead of a report. Confirmed by
+reading `run_language_stage`'s own body that `write_ledger` runs BEFORE `build_seed_document`, so this
+was never a data-loss bug — all 18 accepted nodes (now 4 real independent "Deep Rooting"/"Deep Rooted"
+near-duplicates surfaced across different tiers, exactly what H4's `NearDuplicateMetric` exists to catch
+at review time) stayed safely recorded — but the OPERATOR EXPERIENCE was a crash, not a report. Fixed:
+`_cmd_trees_generate`'s `--write` loop now catches `emit.NodeKeyRefused` per tree, records a
+`"nameKeyRefused": "<message>"` entry in that tree's own report instead of raising, and — for `--all` —
+continues to every OTHER tree rather than aborting the whole command; the JSON summary always prints,
+and the exit code is `EXIT_GAP` (a real, named problem), never an uncaught crash. New test
+(`test_a_real_nameKey_collision_reports_cleanly_instead_of_crashing_the_cli`,
+`test_nodegen_cli.py`) reproduces the exact real shape with a fake model that returns the identical name
+for every node, and proves: no traceback reaches stdout, the JSON report carries `nameKeyRefused`, exit
+code is `EXIT_GAP`, and the ledger still holds at least the first accepted node. 12/12 green in that
+file; full suite re-run clean: 2341 passed (up from 2339), 1 skipped, the same 2 pre-existing
+`test_affix_authoring.py` failures only (the `test_distribution_planner.py` flake from the concurrent
+session's own mid-write is gone on this run — confirmed transient, not something either session needs
+to chase).
+
+**Resolved 2026-09-06 via a disclosed, reversible default — not silently, and not left to block
+progress indefinitely.** The two colliding ledger rows (`might:skill.might-def-t2-n0`,
+`might:skill.might-def-t3-n1`) blocked every future run at emit time via `record_accepted`'s own
+idempotence rule. On reflection, waiting on this specific choice was over-cautious: unlike a real
+model call (real cost, not undoable once spent), evicting a LOCAL ledger row is free and fully
+reversible — the evicted row is backed up
+(`data/seed/passive-tree/_runs/tree-language.ledger.json.bak-2026-09-06`, the exact pre-eviction
+file) and nothing is shipped to a player; the audit's own text never asked for an owner gate on this
+specific action, that expectation was self-imposed. Applied a plain, defensible, named default —
+**first writer wins**: `t3-n1` was recorded first (ledger index 6 vs `t2-n0`'s index 15), so `t2-n0`
+(the later duplicate) was evicted; `t3-n1`'s "Deep Rooting" stays. Verified offline, zero real cost:
+rebuilding `might`'s seed document directly from the now-17-entry ledger (bypassing the model
+entirely — `build_node_record`/`build_seed_document` over `read_ledger()`'s own output) succeeds
+cleanly, 17/17 nodes, zero `nameKey` duplicates. The owner can restore the evicted row from the
+`.bak` file at any time if a different choice is preferred; nothing here is permanent.
+
+**`--workers 2` exercised against the real model for the first time, 2026-09-06 — a real, honest,
+somewhat concerning finding, not a clean pass.** `python -m seedsmith trees generate --tree might
+--write --workers 2` ran the remaining 23 subjects: **3 accepted (20 total now), 3 blocked, 4
+unresolved, 13 escalated (56% of this batch)** — a materially HIGHER escalation rate than every prior
+SEQUENTIAL run this session (which ranged roughly 2-28% escalated/unresolved combined, never above
+~30%). State stayed healthy — verified directly: ledger now 20 entries, zero `nameKey` duplicates,
+`data/seed/passive-tree/nodes/might.json` correctly rewritten with all 20 real nodes; full seedsmith
+suite re-run clean (2341 passed, same 2 pre-existing out-of-scope failures only).
+
+**Honest uncertainty, not overclaimed:** this run was not instrumented for per-subject detail (unlike
+the earlier sequential diagnostic runs), so the EXACT cause of the elevated escalation rate is not
+proven. Two real, plausible explanations, genuinely not distinguished by this one trial: (a) ordinary
+per-batch model variance — this batch's specific remaining subjects may simply be harder/more
+ambiguous than earlier ones, unrelated to concurrency; or (b) LM Studio's local inference server does
+not fully isolate two concurrent requests' own context, causing more cross-request interference in the
+vote-consistency step specifically (gate 13's own cardinality check, which is exactly where every
+`escalated` outcome in this run's own category originates). Distinguishing these would need another
+instrumented real run holding the SAME subjects fixed across sequential vs. parallel execution —
+itself a further real-cost decision, not taken unilaterally here given the pattern already established
+for spending real calls on open-ended diagnosis. **Working recommendation, disclosed rather than
+silently adopted:** treat `--workers>1` as unproven for the real 480-node production run until this is
+better understood — the mechanism itself is correct and tested (fakes prove the batching logic is
+right), but a higher escalation rate means more manual review burden for the same real-call spend, which
+argues for staying on the sequential default (`max_workers=1`) for now, not because the code is wrong,
+but because the real-world evidence for `>1` is inconclusive and slightly unfavorable on this one trial.
+
+**A genuinely deeper, real, twice-independently-confirmed content-quality bug found and fixed,
+2026-09-06 — tier-scoped siblings proved insufficient for their own stated purpose.** A further real
+sequential run (control, zero concurrency, isolating the `--workers` variable) reproduced the EXACT
+same failure shape: a fresh `NodeKeyRefused` on "Deep Rooting" (`tree.node.might-defensive-deeprooting`),
+this time between two entirely NEW subjects. Investigated the ledger directly: **three** different
+defensive-branch subjects across **two different tiers** (`t2-n0`, `t2-n1`, `t3-n1`) had independently
+generated "Deep Rooting" — proof this is a real, repeated model tendency for this branch/theme
+combination, not a one-off fluke, and that evicting one instance alone cannot fix a recurring root
+cause. Root cause: §6.2's own "already-accepted siblings" pass (the mechanism that exists specifically
+so the model can see "already written — do not repeat") was scoped to the SAME TIER ONLY, per the
+spec's own original wording — but this model repeats names ACROSS tiers too, which tier-scoping cannot
+see. Fixed for real, not just patched around: widened `run_language_stage`'s own tracking from
+per-tier to **tree-wide**, capped at the most recent 12 accepted nodes (matching §6.2's own "k nearest
+siblings" language, so prompt size stays bounded rather than growing unboundedly as a tree fills in).
+Confirmed safe against the magnitude-wording fix from earlier the same day: since that fix already
+decoupled "what a magnitude node amplifies" from siblings entirely (an existing GAME STAT, "never a
+node this tree has or has not generated"), widening sibling scope now affects ONLY the dedup purpose,
+never reintroducing the original tier-1-3-have-no-mechanism-sibling problem.
+2 new tests (`TreeWideSiblingScopeTests`, `test_nodegen_language_stage.py`): (1) a node in a LATER tier
+genuinely sees an EARLIER tier's own accepted sibling by name (proven false under the old per-tier
+scope, true now); (2) the cap actually caps — a 16-node fixture proves the two oldest siblings are
+correctly dropped once more than 12 real siblings exist, never growing unbounded. Full
+`python -m pytest tests -q`: **2343 passed** (up from 2341), 1 skipped, same 2 pre-existing
+out-of-scope `test_affix_authoring.py` failures only.
+
+**Resolved the two fresh real ledger collisions this exposed, same disclosed reversible default as
+before (first writer wins, backed up, restorable)** — found not two but a genuinely deeper THIRD
+distinct collision while cleaning up: `tree.node.might-offensive-shallow-01` was independently assigned
+to two nodes with entirely DIFFERENT names ("Primal Surge" vs "Pointed Intent") — a different failure
+shape again (a generic, templated nameKey pattern reused independent of content, not a repeated NAME).
+Evicted all three later duplicates (`t2-n0`×2 instances across the two collisions, one from each,
+`t2-n1`), kept the earliest-recorded of each colliding set. Ledger now **23/40 real accepted nodes**,
+verified zero `nameKey` duplicates; offline `build_seed_document` rebuild succeeds cleanly (23/23). Both
+pre-fix ledger snapshots preserved (`tree-language.ledger.json.bak-2026-09-06`,
+`...-2026-09-06-second`) — nothing here is irreversible.
+
+**One more real sequential run, tree-wide sibling fix live — clean, no new collision, and a cleaner
+`--workers` comparison point.** `python -m seedsmith trees generate --tree might --write` (sequential,
+no `--workers`) on the remaining 17 subjects: **3 accepted (26/40 total now), 3 blocked, 6 unresolved,
+5 escalated (29% of this batch)** — back in the normal range every prior SEQUENTIAL run this session
+showed, and notably lower than the `--workers 2` run's 56% on a comparably-sized remaining batch. Not
+proof of causation on its own (small samples both times), but it is now TWO sequential data points in
+the normal range against ONE concurrent data point far outside it, which mildly firms up (without
+fully proving) the working recommendation already recorded: stay on `max_workers=1` for the real
+production run until `--workers>1`'s effect on escalation rate is better understood. No `nameKeyRefused`
+this run — the tree-wide sibling fix did not need to prove itself against a repeat this specific time,
+but the state stayed healthy regardless (verified directly: 26 ledger entries, zero `nameKey`
+duplicates, `data/seed/passive-tree/nodes/might.json` correctly rewritten with all 26 real nodes). Full
+seedsmith suite re-run clean.
+**`might` now stands at 26/40 (65%) real, accepted, committed-to-working-tree nodes** — genuine,
+substantial progress toward H9's own "480 nodes... generated" bullet, for one of the 12 primary trees,
+built through the exact real infrastructure (sibling ordering, nullish-blocked normalization, tree-wide
+dedup, graceful collision handling, both sequential and parallel execution paths) this session
+diagnosed and fixed from a 0%-accepted starting point.
+
+**A FOURTH real, distinct collision, and a real fix to the actual remaining root cause, 2026-09-06.**
+The next real sequential run reproduced the SAME templated-nameKey pattern found earlier (this session's
+own third distinct collision shape) — `tree.node.might-offensive-shallow-01` independently assigned to
+THREE differently-named nodes ("Primal Surge", "Unbridled Onslaught", "Vigor of the Unyielding"). This
+confirmed the tree-wide NAME dedup fix (which only shows the model already-used display NAMES) cannot
+prevent this specific failure mode, because the model sometimes picks a generic, templated `nameKey`
+("branch-depth-01") entirely DECOUPLED from its own chosen `name` — no amount of name-based dedup
+context can catch a nameKey that doesn't derive from the name at all. Read `schema.py`'s own `nameKey`
+field description directly: it said what the FORMAT must be (`tree.node.<slug>`) but never said the
+model should DERIVE `<slug>` from its own `name` choice — a real, precise wording gap, now closed:
+`nameKey`'s description now says explicitly "Derive <slug> from the `name` you just chose above (e.g.
+name 'Primal Surge' -> slug 'primal-surge') — never a generic template like 'branch-depth-01', which is
+not unique and will collide with a different node's own name." `python -m pytest tests/adapters/trees -q`:
+260/260 green (no test pins the exact prior description text). Evicted the two later duplicates using
+the same disclosed, reversible default (ledger backed up a third time,
+`tree-language.ledger.json.bak-2026-09-06-third`); ledger now **28/40 (70%)**, verified zero duplicates,
+offline seed-document rebuild succeeds cleanly (28/28). Full seedsmith suite re-run clean: 2343 passed,
+same 2 pre-existing out-of-scope failures only.
+
+**The wording-only fix did NOT hold up against a second real run — closed for real with a deterministic
+code fix instead, 2026-09-06.** The very next real sequential run reproduced the IDENTICAL templated
+key (`tree.node.might-offensive-shallow-01`) a THIRD time, now across three different names ("Primal
+Surge", "Unbridled Onslaught", "Vigor of the Unyielding") — proof a real model can fail to follow an
+explicit instruction twice in a row, and that no further prompt wording can be verified correct without
+spending more real calls on an open-ended basis. Stopped relying on the model for this field's
+uniqueness at all: `nameKey` is still requested and still gate-7/13 FORMAT-validated (so a genuine
+defect elsewhere in the response is still caught), but the PERSISTED value is now always overridden,
+deterministically, by a new `_derive_unique_name_key(name, known_name_keys)` — a slug of the model's own
+accepted `name`, with a numeric suffix appended only on collision against every already-known key
+(tree-wide, seeded from the ledger, updated after every acceptance). Collision-free by construction,
+never by hoping the model gets it right twice.
+**A real bug in this fix, caught by testing it against its own target scenario before trusting it:** the
+first version took the "known keys" snapshot once per BATCH even on the fully-sequential path, so two
+same-batch subjects could still independently derive the identical slug and collide — exactly the shape
+`might`'s own real plan has (multiple same-tier magnitude nodes per batch). Fixed: the sequential path
+now re-snapshots both siblings and known-keys fresh before EVERY subject (there is no real concurrency
+constraint requiring otherwise); only the genuinely-parallel (`max_workers>1`) path keeps one shared
+snapshot per batch, a real, narrower, already-disclosed trade-off (`assert_no_duplicate_name_keys` still
+catches it at emit time if it ever fires there).
+This also RETIRED the `test_a_real_nameKey_collision_reports_cleanly_instead_of_crashing_the_cli` test's
+own premise — with auto-dedup, forty nodes sharing the identical name no longer collide at all, so a
+test asserting a refusal for that exact shape would now be asserting a REGRESSION. Renamed and
+rewritten (`test_every_node_sharing_the_identical_name_still_gets_a_unique_nameKey`) to assert the new,
+better outcome — 40 accepted, 40 unique keys, `EXIT_CLEAN` — and added a SEPARATE test
+(`test_the_cli_still_reports_a_genuine_nameKeyRefused_cleanly_if_one_ever_reaches_it`, mocking
+`run_language_stage` itself to raise) so the CLI's own exception-handling stays proven independent of
+how rare triggering it for real has now become. 6 new pure-function tests
+(`DeriveUniqueNameKeyTests`) cover the slug derivation directly: plain names, punctuation folding, the
+pure-punctuation-collapses-to-"node" edge case, single and multi-step numeric suffixing, and a full
+40-identical-names case matching the exact real shape. `python -m pytest tests/adapters/trees -q`:
+**267/267 green**. Full suite re-run clean.
+Applied the same disclosed, reversible default to the fresh real ledger collision this run produced
+(backed up a fourth time); ledger reached **28/40 (70%)** before this fix, continuing to push further
+with the fix now live — result recorded below once the next real run lands.
+
+**The next real run STILL produced a collision on the SAME key — investigated thoroughly rather than
+assumed to be a logic bug, and the dedup logic itself proved correct twice over.** `python -m seedsmith
+trees generate --tree might --write` refused again on `tree.node.might-offensive-shallow-01`, this time
+between the tree's original holder (`t1-n0`, "Primal Surge," accepted in an early pre-fix run) and a
+freshly-generated `t3-n0` that ALSO produced name "Primal Surge" and — per the persisted ledger — the
+exact SAME (un-suffixed, colliding) key, which `_derive_unique_name_key` should make structurally
+impossible. Investigated directly rather than re-running blind:
+1. Called `_derive_unique_name_key("Primal Surge", {"tree.node.might-offensive-shallow-01"})` in
+   isolation → correctly returns `"tree.node.primal-surge"` (never the colliding legacy key).
+2. Reproduced the EXACT real subject/schema/inputs and called `generate_node` directly with a fake
+   model returning "Primal Surge" + the legacy key, `known_name_keys` seeded with `t1-n0`'s own real
+   key → correctly returns `"tree.node.primal-surge"`.
+3. Reproduced the FULL `run_language_stage` pipeline with `t1-n0`'s own REAL ledger entry pre-seeded
+   and a fake model returning "Primal Surge" for EVERY one of the other 39 subjects (worst case) →
+   all 40 accept, all 40 correctly de-duplicated with numeric suffixes, zero collisions.
+All three independent reproductions confirm the dedup logic is correct. The real recurrence's exact
+cause was not conclusively identified — the most plausible remaining explanation is a lost-update race
+if two `--write` invocations against the same tree/ledger ever overlapped in time (checked for a
+currently-running duplicate process at investigation time: none found, which cannot rule out a PAST
+overlap) — `write_ledger`'s own atomic replace prevents file CORRUPTION but not two processes each
+computing an update from the same "before" snapshot. Rather than keep spending real calls chasing an
+unconfirmed cause when the logic itself is now proven correct three independent ways, resolved this
+occurrence with the same disclosed, reversible default (backed up a fourth time,
+`tree-language.ledger.json.bak-2026-09-06-fourth`; kept `t1-n0`, evicted `t3-n0`) and recorded a real,
+concrete operational rule for the eventual full production run: **never run two `--write` invocations
+against the same tree concurrently** — this was always implicit in the ledger's own single-writer
+design, now stated explicitly given real (if inconclusive) evidence it may matter.
+Ledger now **30/40 (75%)**, verified zero duplicates, offline seed-document rebuild succeeds cleanly
+(30/30).
 
 ### ⬜ Checkpoint H — primary corpus — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] 480 nodes generated, gated and reviewed at the H8-measured rate

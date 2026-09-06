@@ -64,7 +64,7 @@ public class ConsumableTests
     }
 
     [Fact]
-    public void OnActivate_is_legal_on_FIVE_kinds_today_not_the_specs_four_and_the_fifth_is_cosmetic()
+    public void OnActivate_is_legal_on_SIX_kinds_today_not_the_specs_four_and_two_are_cosmetic_or_siege_only()
     {
         // spec-consumables.md's Code-style block: "the check asks the registry rather than carrying a
         // list that can drift". So does this test — the expectation is the SET, derived by asking.
@@ -72,8 +72,12 @@ public class ConsumableTests
         // ⛔ And it has drifted: the spec's evidence table lists FOUR carriers. E41 added `ui.present`
         // afterwards, which takes AllTriggers like the other four. It is harmless here — a present
         // writes no state, carries PowerCategory.None, and is Battle/Sim None so a dispatch consumable
-        // naming one is refused by the runtime check anyway — but the number in the spec is wrong and
-        // the module asserts the shipped set rather than the transcribed one.
+        // naming one is refused by the runtime check anyway. base-defense `siege-construction`
+        // (2026-09-06) added a sixth, `structure.place` — also harmless for a Lawn-dispatch consumable
+        // specifically: it is Lawn=None (there is no tactical siege board on the PvZ lawn), so naming
+        // it is refused by the SAME runtime check `ui.present`'s own carve-out already relies on — but
+        // the number in the spec is wrong and the module asserts the shipped set rather than the
+        // transcribed one.
         var carriers = AtomKindRegistry.All
             .Where(k => k.AllowsTrigger(AtomTriggers.OnActivate))
             .Select(k => k.KindId)
@@ -81,7 +85,7 @@ public class ConsumableTests
             .ToArray();
 
         Assert.Equal(
-            new[] { "resource.delta", "shield.grant", "stat.modify", "status.apply", "ui.present" },
+            new[] { "resource.delta", "shield.grant", "stat.modify", "status.apply", "structure.place", "ui.present" },
             carriers);
 
         // the four the spec names really are all there — the drift is an addition, not a substitution
@@ -172,12 +176,12 @@ public class ConsumableTests
     // ---- the closed vocabularies --------------------------------------------------------------------
 
     [Fact]
-    public void The_class_and_context_vocabularies_are_closed_at_six_and_four()
+    public void The_class_and_context_vocabularies_are_closed_at_six_and_six()
     {
         Assert.Equal(6, ConsumableClasses.All.Count);
         Assert.Equal(6, Enum.GetValues<ConsumableClass>().Length);
-        Assert.Equal(4, UseContexts.All.Count);
-        Assert.Equal(4, Enum.GetValues<UseContext>().Length);
+        Assert.Equal(6, UseContexts.All.Count); // D3.24 widened Menu/Dispatch/Battle/Lawn to add Rest/Curio
+        Assert.Equal(6, Enum.GetValues<UseContext>().Length);
 
         foreach (var c in ConsumableClasses.All)
         {
@@ -201,6 +205,38 @@ public class ConsumableTests
         // ⛔ menu must not require the game to be running (SC8), and §6.2's own code-4 row names only
         // `battle` and `lawn` as the contexts a host can fail to serve.
         Assert.Empty(UseContexts.RuntimesFor(UseContext.Menu));
+
+        // D3.24 (spec-supplies-and-objects.md §2 table row 2): "neither is a combat runtime; a supply
+        // used at rest or at a curio resolves through the battle runtime's OnActivate grant path
+        // OUTSIDE a fight" -- the Menu -> [] shape, not the Dispatch/Battle -> [Battle] one.
+        Assert.Empty(UseContexts.RuntimesFor(UseContext.Rest));
+        Assert.Empty(UseContexts.RuntimesFor(UseContext.Curio));
+    }
+
+    [Fact]
+    public void Rest_and_curio_wire_spellings_are_the_approved_seed_contract_ones()
+    {
+        // D3.24: the brief's own "Rest"/"Room" naming loses to the approved seed contract's "rest"/"curio".
+        Assert.Equal("rest", UseContexts.Wire(UseContext.Rest));
+        Assert.Equal("curio", UseContexts.Wire(UseContext.Curio));
+        Assert.True(UseContexts.TryParse("rest", out var rest));
+        Assert.Equal(UseContext.Rest, rest);
+        Assert.True(UseContexts.TryParse("curio", out var curio));
+        Assert.Equal(UseContext.Curio, curio);
+        Assert.False(UseContexts.TryParse("room", out _)); // the brief's own spelling was never approved
+    }
+
+    [Fact]
+    public void Rest_and_curio_are_appended_after_lawn_every_existing_wire_string_stays_byte_identical()
+    {
+        // §2's own stated reason for append-only placement: UseContextWire sorts by declaration order.
+        var all = UseContexts.All;
+        Assert.Equal(UseContext.Rest, all[4]);
+        Assert.Equal(UseContext.Curio, all[5]);
+        Assert.Equal("menu", UseContexts.Wire(all[0]));
+        Assert.Equal("dispatch", UseContexts.Wire(all[1]));
+        Assert.Equal("battle", UseContexts.Wire(all[2]));
+        Assert.Equal("lawn", UseContexts.Wire(all[3]));
     }
 
     [Fact]
@@ -328,7 +364,7 @@ public class ConsumableTests
     }
 
     [Fact]
-    public void The_shipped_tuning_authors_three_classes_and_three_contexts()
+    public void The_shipped_tuning_authors_three_classes_and_five_contexts()
     {
         var t = Tuning();
         Assert.Equal(
@@ -338,9 +374,15 @@ public class ConsumableTests
         // `battle` joined 2026-09-05 once the action layer served it end to end -- holdsStock reads
         // the precondition (T10) and IStockLedger/RpgStore.TrySpendStock take the stack at commit.
         // Until that second half existed, authoring the context would have shipped a free item.
-        Assert.Equal(new[] { UseContext.Menu, UseContext.Dispatch, UseContext.Battle }, t.ContextsAuthored);
+        // `rest`/`curio` joined D3.24 (spec-supplies-and-objects.md §2) -- neither needs a combat
+        // runtime (RuntimesFor maps both to []), so there is no analogous host-readiness gate for them.
+        Assert.Equal(
+            new[] { UseContext.Menu, UseContext.Dispatch, UseContext.Battle, UseContext.Rest, UseContext.Curio },
+            t.ContextsAuthored);
         Assert.False(t.Authors(ConsumableClass.Board));
         Assert.True(t.Authors(UseContext.Battle));
+        Assert.True(t.Authors(UseContext.Rest));
+        Assert.True(t.Authors(UseContext.Curio));
 
         // `lawn` stays refused for its OWN reason, not by association: spec-usability-conditions.md
         // §3a's mode matrix makes a holdsStock action not bindable there at all, and capPerMatch (G4)
@@ -493,9 +535,11 @@ public class ConsumableTests
     {
         // §4.1's no-migration proof, still true in the other direction: a tuning that has not yet
         // authored `battle` refuses it by name, and the whole change is this list.
-        var narrower = ConsumableTuning.Parse(TuningJson().Replace(
-            "\"contextsAuthored\": [\"menu\", \"dispatch\", \"battle\"]",
-            "\"contextsAuthored\": [\"menu\", \"dispatch\"]", StringComparison.Ordinal));
+        const string liveContextsLine = "\"contextsAuthored\": [\"menu\", \"dispatch\", \"battle\", \"rest\", \"curio\"]";
+        var json = TuningJson();
+        Assert.Contains(liveContextsLine, json, StringComparison.Ordinal); // fails loudly, not silently, the day this literal next drifts
+        var narrower = ConsumableTuning.Parse(json.Replace(
+            liveContextsLine, "\"contextsAuthored\": [\"menu\", \"dispatch\"]", StringComparison.Ordinal));
 
         Assert.False(narrower.Authors(UseContext.Battle));
         Assert.Contains(

@@ -19,6 +19,22 @@ public static class TurnEngine
 {
     public const int EngineVersion = 1;
     /// <summary>
+    /// Bumped to 8 on 2026-09-06 (base-defense `siege-engagement`, module 20, spec-siege-engagement.md):
+    /// a CONTINUING siege — an attacker already standing in a sector it does not own, with no fresh
+    /// `assault` order this turn — used to fall through `ContactResolver.SectorContacts` into a generic
+    /// `BattleKinds.Sector` request, which `DistrictAssaultResolver`'s own delegation guard sent
+    /// straight to `PlaceholderBattleResolver`. A siege silently stopped being a real board fight the
+    /// moment its attacker held still for one turn. `MovementPhase.BuildContactRequest` now checks
+    /// `SiegeEngagement.IsUnderSiege` per contact and routes a genuinely besieged sector to
+    /// `BattleKinds.District` instead, reusing `DistrictAssaultPhase.BuildBoard` — the same real board
+    /// (structures, elements, `BattleEngine.Resolve`) an explicit `assault` order already got. A real
+    /// behaviour change, not a field addition: the same command log, for any world with a siege that
+    /// spans a turn boundary, now resolves that turn's fight on the real board instead of
+    /// `PlaceholderBattleResolver`'s abstract strength comparison. Found and re-blessed against
+    /// `WorldWaveOneAcceptanceTests`' own scripted incursion (entry #16 there) — Zomboss's band walks
+    /// directly onto Dave's newly-claimed `ash-waste` at turns 11-12, the same contact `siege-supply`
+    /// F1/F1b (entry #14, `RulesetVersion` unchanged) already named without this fix touching combat.
+    ///
     /// Bumped to 7 on 2026-09-05 (world-map W58, spec-sector-development.md §1/§2, decisions.md): the
     /// phase's own second and final re-bless — `growth.seatPulsePerWeek` moves off 0 (a held Seat now
     /// genuinely accrues `RecruitStock` on a week boundary) and `LoamUpkeep`'s season factor moves off
@@ -55,7 +71,7 @@ public static class TurnEngine
     /// — this bump exists only for the case a real order changes the outcome, and covers `bind-warden`
     /// (W28) and `dowse` (W30) landing after it without a second bump, per the same decision.
     /// </summary>
-    public const int RulesetVersion = 7;
+    public const int RulesetVersion = 8;
 
     public static class Phases
     {

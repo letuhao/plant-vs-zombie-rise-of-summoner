@@ -1,3 +1,5 @@
+using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Turn;
 using Xunit;
@@ -171,8 +173,127 @@ public class DistrictAssaultResolverTests
         var outcome = DistrictAssaultResolver.Instance.Resolve(request, new[] { attacker }, seed: 1);
 
         Assert.NotNull(outcome);
-        // The structure itself is not a WorldEntity, so it never appears in outcome.Sides -- this test
-        // asserts only that resolving with a large long StructureHp does not throw or narrow silently.
+        // The structure itself is not a WorldEntity, so it never appears in outcome.Sides -- but it
+        // MUST appear in SlotResults (base-defense siege-construction: found and fixed a real,
+        // previously-unwired gap where this seam existed and was tested in isolation but nothing ever
+        // populated it from a real fight). A single level-1 peashooterzombie cannot dent 4 billion HP.
+        var slotResult = Assert.Single(outcome.SlotResults);
+        Assert.Equal(0, slotResult.SlotIndex);
+        Assert.False(slotResult.StructureDestroyed);
+        Assert.True(slotResult.StructureHp > int.MaxValue, "structure HP must survive the round trip as a real long, not narrow to int");
+    }
+
+    /// <summary>
+    /// `BuildSlotResults` tested directly against a synthetic `resultByKey`, the same "test the seam in
+    /// isolation" discipline `StructureStateTests`/`BattleSeamWideningTests` already use for
+    /// `ApplySlotResults` itself — deliberately NOT routed through a full `BattleEngine.Resolve` call.
+    /// Found while writing this fix: an approach-zone attacker with no equipped movement action cannot
+    /// reliably reach a core-zone structure within the siege profile's own round/tick budget in this
+    /// synthetic test harness, so a real fight landing zero damage on a structure proves nothing about
+    /// THIS translation step either way — a separate, pre-existing question (whether the shipped default
+    /// action loadout and approach-to-core distance ever let a real attacker close to melee range) that
+    /// belongs to `siege-pathing`/`siege-resolver`, not to this seam fix.
+    /// </summary>
+    [Fact]
+    public void Build_slot_results_reports_an_existing_structures_damage_and_destruction()
+    {
+        var board = Board(slots: new[]
+        {
+            new SlotProjection { SlotIndex = 2, SlotTypeId = "wildland", StructureId = "granary", OwnerFactionId = "zomboss" },
+        });
+        var resultByKey = new Dictionary<string, BattleActorResult>(StringComparer.Ordinal)
+        {
+            ["slot:2"] = new("slot:2", "wave", "granary", 0, HpRemaining: 0, DamageDealt: 0, Kills: 0, Survived: false, Retreated: false, XpMilli: 0),
+        };
+
+        var results = DistrictAssaultResolver.BuildSlotResults(board, resultByKey);
+
+        var slotResult = Assert.Single(results);
+        Assert.Equal(2, slotResult.SlotIndex);
+        Assert.True(slotResult.StructureDestroyed);
+        Assert.Equal(0, slotResult.StructureHp);
+        Assert.Equal("zomboss", slotResult.HeldByFactionId); // preserved, not recomputed from capture
+    }
+
+    [Fact]
+    public void Build_slot_results_skips_a_slot_with_no_structure_or_no_battle_engine_result()
+    {
+        var board = Board(slots: new[]
+        {
+            new SlotProjection { SlotIndex = 0, SlotTypeId = "wildland", StructureId = null },
+            new SlotProjection { SlotIndex = 1, SlotTypeId = "rootbed", StructureId = "well" }, // never fielded -- no "slot:1" entry
+        });
+
+        var results = DistrictAssaultResolver.BuildSlotResults(board, new Dictionary<string, BattleActorResult>(StringComparer.Ordinal));
+
+        Assert.Empty(results);
+    }
+
+    [Fact]
+    public void Build_slot_results_reports_a_structure_placed_this_battle_finished_immediately()
+    {
+        var board = Board(); // empty -- the slot did not exist before this battle
+        var placed = new[] { new StructurePlacementRecord(SlotIndex: 3, StructureId: "granary", Instant: true) };
+
+        var results = DistrictAssaultResolver.BuildSlotResults(
+            board, new Dictionary<string, BattleActorResult>(StringComparer.Ordinal), placed);
+
+        var slotResult = Assert.Single(results);
+        Assert.Equal(3, slotResult.SlotIndex);
+        Assert.Equal("granary", slotResult.StructurePlaced);
+        Assert.Null(slotResult.PlacedConstructionTurnsRemaining); // instant: finished immediately
+    }
+
+    [Fact]
+    public void Build_slot_results_reports_a_structure_placed_this_battle_still_under_construction()
+    {
+        // "well" ships with a real, positive BuildTurns (Loam.LoamPolicy.WellBuildTurns) -- instant:
+        // false must read it from the catalog, not invent a countdown of its own.
+        var board = Board();
+        var placed = new[] { new StructurePlacementRecord(SlotIndex: 1, StructureId: "well", Instant: false) };
+
+        var results = DistrictAssaultResolver.BuildSlotResults(
+            board, new Dictionary<string, BattleActorResult>(StringComparer.Ordinal), placed);
+
+        var slotResult = Assert.Single(results);
+        Assert.Equal("well", slotResult.StructurePlaced);
+        Assert.Equal(StructureCatalog.Get("well").BuildTurns, slotResult.PlacedConstructionTurnsRemaining);
+        Assert.True(slotResult.PlacedConstructionTurnsRemaining > 0);
+    }
+
+    [Fact]
+    public void An_existing_structures_ownership_is_preserved_not_recomputed_from_capture()
+    {
+        // This fix's own named, deliberate scope boundary: HP/destruction persist, but capture-based
+        // ownership transfer for an EXISTING structure's slot is a separate, unscoped question --
+        // HeldByFactionId passes the projection's own OwnerFactionId straight through, unchanged.
+        var attacker = Legion("e-a", "player", "s1", ("peashooterzombie", 1, 100));
+        var slots = new[]
+        {
+            new SlotProjection
+            {
+                SlotIndex = 0, SlotTypeId = "rootbed", StructureId = "well",
+                StructureHp = 4_000_000_000L, OwnerFactionId = "zomboss",
+            },
+        };
+        var request = DistrictRequest("b1", attacker.EntityId, null, Board(slots: slots));
+
+        var outcome = DistrictAssaultResolver.Instance.Resolve(request, new[] { attacker }, seed: 1);
+
+        Assert.Equal("zomboss", Assert.Single(outcome.SlotResults).HeldByFactionId);
+    }
+
+    [Fact]
+    public void A_slot_with_no_structure_never_appears_in_slot_results()
+    {
+        var attacker = Legion("e-a", "player", "s1", ("peashooterzombie", 3, 300));
+        var defender = Legion("e-d", "zomboss", "s1", ("normalzombie", 3, 300));
+        var slots = new[] { new SlotProjection { SlotIndex = 0, SlotTypeId = "wildland", StructureId = null } };
+        var request = DistrictRequest("b1", attacker.EntityId, defender.EntityId, Board(slots: slots));
+
+        var outcome = DistrictAssaultResolver.Instance.Resolve(request, new[] { attacker, defender }, seed: 1);
+
+        Assert.Empty(outcome.SlotResults);
     }
 
     [Fact]

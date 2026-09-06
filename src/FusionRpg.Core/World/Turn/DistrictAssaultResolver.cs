@@ -80,6 +80,23 @@ public sealed class DistrictAssaultResolver : IBattleResolver
 
         var structureSetups = PlaceStructures(board, spec, boardState, districtSeed, coreCenter, coreSideCells);
 
+        // base-defense `siege-construction` (decision 27, 2026-09-06): the SAME deterministic
+        // slot-to-cell mapping PlaceStructures just used, inverted, plus each slot's own SlotKind --
+        // closes ConstructionPlacement.CanPlace's own named gap ("the tactical board has no mapping
+        // from a GridPos cell to a world-layer SlotKind today"). An unrecognised SlotTypeId is skipped
+        // rather than thrown on -- "cannot verify what may be built here" is refused construction, not
+        // a crash, matching this file's own established "fall back rather than throw mid-turn" posture.
+        var slotByCell = new Dictionary<GridPos, (int SlotIndex, SlotKind Kind)>();
+        foreach (var slot in board.Slots)
+        {
+            if (!SlotTypeCatalog.IsKnown(slot.SlotTypeId)) continue;
+            var cell = DistrictLayout.CellForSlot(districtSeed, slot.SlotIndex, spec, coreCenter, coreSideCells);
+            slotByCell[cell] = (slot.SlotIndex, SlotTypeCatalog.Get(slot.SlotTypeId).Kind);
+        }
+        var constructionBoard = new ConstructionBoardContext(
+            boardState, spec.Rows, SiegeTuningPolicy.District.CoreSideMilli,
+            SiegeTuningPolicy.District.RampartThickness, slotByCell);
+
         var attackerKeys = new List<string>();
         var attackerSetups = BuildAnimateSetups(attacker, AttackerSide, attackerKeys);
         if (attackerSetups.Count == 0)
@@ -116,7 +133,8 @@ public sealed class DistrictAssaultResolver : IBattleResolver
             };
             report = BattleEngine.Resolve(setup, battleSeed,
                 profile: BattleModeProfileCatalog.Resolve(BattleModeProfileCatalog.SiegeId),
-                board: boardState);
+                board: boardState,
+                onEffectHostReady: host => host.ConstructionBoard = constructionBoard);
         }
 
         var resultByKey = report?.Actors.ToDictionary(a => a.Key, StringComparer.Ordinal)
@@ -147,6 +165,7 @@ public sealed class DistrictAssaultResolver : IBattleResolver
             BattleId = request.BattleId,
             WinnerEntityId = winnerEntityId,
             Sides = sides.OrderBy(s => s.EntityId, StringComparer.Ordinal).ToList(),
+            SlotResults = BuildSlotResults(board, resultByKey, constructionBoard.Placed),
             EngineVersion = BattleRuleset.EngineVersion,
             RulesetVersion = BattleRuleset.RulesetVersion,
             Seed = battleSeed,
@@ -156,6 +175,60 @@ public sealed class DistrictAssaultResolver : IBattleResolver
             // own module notes for that named, un-started gap).
             Exit = SiegeEngagement.ExitFor(objective, sides, attacker.EntityId),
         };
+    }
+
+    /// <summary>
+    /// base-defense `siege-construction`: the pre-existing structure-damage half of the seam, found
+    /// unwired while building the new structure-PLACEMENT half (`structure.place`) alongside it — this
+    /// resolver has always built a `resultByKey` entry for every `"slot:{index}"` structure key
+    /// (<see cref="AddSiegeCombatants"/>'s own key format matches <see cref="PlaceStructures"/>'s), but
+    /// nothing ever read it back into <see cref="BattleOutcome.SlotResults"/>, so a structure's HP
+    /// damage from a real district fight was silently discarded on every return from this method until
+    /// now. Scoped deliberately to HP/destruction only: <see cref="SlotOutcome.HeldByFactionId"/> is
+    /// passed straight through from <paramref name="board"/>'s own projected ownership (a no-op write)
+    /// rather than computed from post-battle occupation — capture-based ownership transfer for an
+    /// EXISTING structure's own slot is a separate, unscoped question this fix does not also attempt
+    /// (F11's capture-transfers-the-stockpile rule belongs to `siege-economy`'s own `SiegeDepot`, not
+    /// this field). A slot with no `resultByKey` entry (never fielded — the whole fight was unopposed
+    /// with no structures at all, so `BattleEngine.Resolve` never ran) contributes nothing, matching
+    /// every existing caller's exact current behaviour for that case.
+    /// </summary>
+    internal static IReadOnlyList<SlotOutcome> BuildSlotResults(
+        BoardProjection board, IReadOnlyDictionary<string, BattleActorResult> resultByKey,
+        IReadOnlyList<StructurePlacementRecord>? placed = null)
+    {
+        var outcomes = new Dictionary<int, SlotOutcome>();
+        foreach (var slot in board.Slots)
+        {
+            if (slot.StructureId is null) continue;
+            if (!resultByKey.TryGetValue($"slot:{slot.SlotIndex}", out var result)) continue;
+
+            outcomes[slot.SlotIndex] = new SlotOutcome
+            {
+                SlotIndex = slot.SlotIndex,
+                StructureHp = result.HpRemaining,
+                StructureDestroyed = !result.Survived,
+                HeldByFactionId = slot.OwnerFactionId,
+            };
+        }
+
+        // base-defense `siege-construction`: a structure PLACED this battle (any of the four
+        // acquisition paths, all resolved through `structure.place`) wins over anything computed
+        // above for the same slot. Not really a merge conflict -- the placement gate itself refuses
+        // building on an occupied cell, so a slot cannot be both "an existing structure that fought"
+        // and "freshly placed" in the same battle; overwriting only guards a hypothetical double-count.
+        foreach (var record in placed ?? Array.Empty<StructurePlacementRecord>())
+        {
+            var def = StructureCatalog.Get(record.StructureId);
+            outcomes[record.SlotIndex] = new SlotOutcome
+            {
+                SlotIndex = record.SlotIndex,
+                StructurePlaced = record.StructureId,
+                PlacedConstructionTurnsRemaining = record.Instant || def.BuildTurns <= 0 ? null : def.BuildTurns,
+            };
+        }
+
+        return outcomes.Values.OrderBy(o => o.SlotIndex).ToList();
     }
 
     /// <summary>

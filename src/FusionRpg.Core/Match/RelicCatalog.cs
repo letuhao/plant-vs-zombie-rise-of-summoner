@@ -20,10 +20,15 @@ namespace FusionRpg.Core.Match;
 /// <para><b>⚠ Why these four are not <c>item_unique</c> rows.</b> Module 17's <c>item_unique</c> is
 /// a nine-column classification flag keyed 1:1 on an <c>effect_container</c> — it has no name,
 /// rarity, slot, description or effect column, so it cannot hold a relic definition. Making
-/// "relics become uniques" literal needs a dedicated container per relic
-/// (<c>item.fx-passive-atk-flat</c> today backs <b>both</b> <c>relic.ashen_reliquary</c> and
-/// <c>stub.atk_ring</c>, so flagging it would flag the stub too, and <c>relic.cracked_seal</c> has
-/// no container at all) plus three authored content values per row — <c>counter_pressure</c>,
+/// "relics become uniques" literal needs a dedicated container per relic — <b>two of the four share
+/// one with a stub today</b>, so flagging either container would classify the stub as a unique too:
+/// <c>item.fx-passive-atk-flat</c> backs <c>relic.ashen_reliquary</c> and <c>stub.atk_ring</c>, and
+/// <c>item.fx-entity-atk</c> backs <c>relic.cracked_seal</c> and <c>stub.hp_charm</c>. ⚠ This
+/// paragraph previously said <c>relic.cracked_seal</c> had <i>"no container at all"</i>; T6.1's own
+/// migration (2026-09-06) gave it a real, deliberately empty one, which strengthens the argument
+/// rather than weakening it. Pinned by
+/// <c>Half_the_relics_share_a_container_with_a_stub_so_none_can_be_flagged_a_unique_today</c>. The
+/// dedicated containers also need three authored content values per row — <c>counter_pressure</c>,
 /// <c>power_axis</c> and a <c>derived_from</c> base type. `spec-equip-assign.md`'s Boundaries mark
 /// the relic disposition **Ask first**; that half is a content decision, not this migration.</para>
 /// </summary>

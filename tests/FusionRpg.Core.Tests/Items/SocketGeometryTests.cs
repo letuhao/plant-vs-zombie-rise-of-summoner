@@ -108,8 +108,10 @@ public class SocketGeometryTests
     public void Socket_max_is_a_role_ceiling_and_a_base_type_may_vary_beneath_it()
     {
         // ⛔ spec-sockets.md §3 asks for `socket_max_is_fixed_per_role_and_never_varies_by_base_type`.
-        // That test is UNWRITABLE against the shipped corpus: module 6 measured `armament-primary` at
-        // {0:18, 1:26, 2:4}. The enforceable invariant — and the one that actually defends §8.1 — is
+        // That test is UNWRITABLE against the shipped corpus: `armament-primary` is
+        // {0:10, 1:10, 2:10, 3:10, 4:8} (re-measured 2026-09-06; module 6's first pass read
+        // {0:18, 1:26, 2:4} and was superseded when it re-issued the table on 2026-09-04). The
+        // enforceable invariant — and the one that actually defends §8.1 — is
         // "never EXCEEDS its role's ceiling", which is what SocketGeometry.ValidateEntry checks.
         var tuning = Shipped();
 

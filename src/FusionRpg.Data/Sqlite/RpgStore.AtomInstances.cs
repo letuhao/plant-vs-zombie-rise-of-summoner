@@ -644,9 +644,18 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
-    /// Instances no binding points at. An instance is reachable only through a binding, so once the
-    /// last one goes the rows are unreachable — and a durable database would grow by one instance per
-    /// entity binding per match, forever.
+    /// Instances nothing points at. Counts what <see cref="CollectOrphanInstancesUnlocked"/> would
+    /// delete, and must use the identical predicate — a count that disagrees with the sweep is worse
+    /// than no count.
+    ///
+    /// <para><b>R1 (item-ideal.md D5): two reachability roots, not one.</b> A binding says "equipped";
+    /// <c>rpg_item</c> says "owned". An instance is orphaned only when it has <b>neither</b>. ⚠ This
+    /// summary previously read <i>"an instance is reachable only through a binding"</i> — the pre-R1
+    /// sentence, left behind when module 1 widened the SQL below it. It was wrong for as long as it
+    /// stood, and it described the exact data-loss defect R1 removed.</para>
+    ///
+    /// <para>Without the sweep a durable database would grow by one instance per entity binding per
+    /// match, forever — which is why the count exists at all.</para>
     /// </summary>
     public int CountOrphanInstances()
     {

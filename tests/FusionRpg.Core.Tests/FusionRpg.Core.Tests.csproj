@@ -30,11 +30,11 @@
     <ProjectReference Include="..\..\tools\DemonCorpusDump\DemonCorpusDump.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <!-- PatronAuraOverlay has no Unity/Harmony/BepInEx deps (pure Core types only) — compile for
-         unit tests rather than referencing FusionRpg.Injector.BepInEx, which needs the real game's
-         interop DLLs (FUSIONRPG_GAME_DIR) to build at all. Same pattern as FusionRpg.Launcher.Tests'
-         link of FileRpgConfig.cs. -->
-    <Compile Include="..\..\src\FusionRpg.Injector\Effects\PatronAuraOverlay.cs" Link="Injector\PatronAuraOverlay.cs" />
+    <!-- These have no Unity/Harmony/BepInEx deps (pure Core types only) — compile for unit tests
+         rather than referencing FusionRpg.Injector.BepInEx, which needs the real game's interop
+         DLLs (FUSIONRPG_GAME_DIR) to build at all. Same pattern as FusionRpg.Launcher.Tests' link
+         of FileRpgConfig.cs. PatronAuraOverlay.cs itself was removed 2026-09-06 (patron-absorption,
+         `seed-to-concrete` T6.2) — its combat math moved to the compiled-atom grant path. -->
     <Compile Include="..\..\src\FusionRpg.Injector\Stats\InjectorDerivedOverride.cs" Link="Injector\InjectorDerivedOverride.cs" />
     <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudCache.cs" Link="Injector\ActorHudCache.cs" />
     <Compile Include="..\..\src\FusionRpg.Injector\Hud\ActorHudUniqueFlags.cs" Link="Injector\ActorHudUniqueFlags.cs" />

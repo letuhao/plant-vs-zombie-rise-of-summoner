@@ -38,18 +38,16 @@ public class UniqueEquipmentAtomMappingTests
     [InlineData("relic.ashen_reliquary", "item.fx-passive-atk-flat")] // shares atk_ring's own EffectId
     [InlineData("relic.sunworn_charm", "item.fx-shield-grant")]
     [InlineData("relic.tidewrack_band", "item.fx-cold-on-hit")]
+    // 2026-09-06: fx.entity_atk (a placeholder with no defined effect) migrated to a deliberately
+    // EMPTY atom-backed container — closes T6.1's "never both paths" gap for the last two legacy
+    // items WITHOUT inventing a real effect or a balance number; the placeholder's own no-op stays
+    // exactly as it was, only the delivery mechanism moved.
+    [InlineData("stub.hp_charm", "item.fx-entity-atk")]
+    [InlineData("relic.cracked_seal", "item.fx-entity-atk")] // shares hp_charm's own EffectId
     public void Items_with_a_real_atom_resolve_to_the_real_container_id(string itemId, string expectedContainerId)
     {
         Assert.True(UniqueEquipmentCatalog.TryGetAtomBackedContainerId(itemId, out var containerId));
         Assert.Equal(expectedContainerId, containerId);
-    }
-
-    [Theory]
-    [InlineData("stub.hp_charm")] // fx.entity_atk — its own doc comment already calls it a placeholder
-    [InlineData("relic.cracked_seal")] // same placeholder EffectId
-    public void Items_whose_effect_has_no_real_atom_stay_on_the_legacy_path(string itemId)
-    {
-        Assert.False(UniqueEquipmentCatalog.TryGetAtomBackedContainerId(itemId, out _));
     }
 
     [Fact]
@@ -84,10 +82,13 @@ public class UniqueEquipmentAtomMappingTests
         Assert.Contains("item.fx-butter-on-hit", containerIds);
         Assert.Contains("item.fx-shield-grant", containerIds);
         Assert.Contains("item.fx-cold-on-hit", containerIds);
+        Assert.Contains("item.fx-entity-atk", containerIds);
 
         var atomIds = result.Content.Atoms.Select(a => a.AtomId).ToHashSet(StringComparer.Ordinal);
         var shieldGrant = result.Content.Containers.Single(c => c.ContainerId == "item.fx-shield-grant");
         Assert.Equal(3, shieldGrant.Atoms.Count); // the a/b/c coordinated bundle, all three present
+        var entityAtk = result.Content.Containers.Single(c => c.ContainerId == "item.fx-entity-atk");
+        Assert.Empty(entityAtk.Atoms); // the placeholder's real no-op, preserved deliberately
         foreach (var containerId in containerIds)
         {
             var container = result.Content.Containers.Single(c => c.ContainerId == containerId);

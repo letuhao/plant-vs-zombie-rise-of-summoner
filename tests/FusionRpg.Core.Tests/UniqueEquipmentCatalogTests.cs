@@ -43,20 +43,18 @@ public class UniqueEquipmentCatalogTests
     }
 
     [Fact]
-    public void BuildModsJson_includes_a_relic_grant()
+    public void BuildModsJson_excludes_a_relic_grant_too()
     {
-        // relic.cracked_seal (fx.entity_atk) is the one relic with no real atom behind it
-        // (mods-absorption, spec-mods-absorption.md) — still the legacy grant path.
-        // relic.ashen_reliquary (fx.passive_atk_flat) moved to effect_binding; see
-        // BuildModsJson_excludes_grant_for_atom_backed_items below.
+        // 2026-09-06: relic.cracked_seal (fx.entity_atk) was the LAST relic still on the legacy grant
+        // path — mods-absorption's own doc comment called it out by name. Migrated to a deliberately
+        // empty atom-backed container (item.fx-entity-atk), same as the other three relics before it,
+        // so every real relic now excludes its grant here — there is no more "includes a relic grant"
+        // case left to prove against real content.
         var json = UniqueEquipmentCatalog.BuildModsJson(
             "{}",
             new[] { ("trinket", "relic.cracked_seal") });
         using var doc = JsonDocument.Parse(json);
-        var grants = doc.RootElement.GetProperty("grants");
-        Assert.Equal(1, grants.GetArrayLength());
-        Assert.Equal("equip-relic-cracked_seal:trinket", grants[0].GetProperty("grantId").GetString());
-        Assert.Equal("fx.entity_atk", grants[0].GetProperty("effectId").GetString());
+        Assert.Equal(0, doc.RootElement.GetProperty("grants").GetArrayLength());
     }
 
     [Fact]
@@ -75,24 +73,26 @@ public class UniqueEquipmentCatalogTests
     [Fact]
     public void BuildModsJson_preserves_nested_and_flat_absolutes()
     {
+        // stub.hp_charm is atom-backed now too (2026-09-06) — every known item/relic excludes its
+        // grant here, so this test's own point (absolutes survive regardless of what's equipped) is
+        // proven against a 0-grant result, not a 1-grant one.
         var json = UniqueEquipmentCatalog.BuildModsJson(
             """{"absolutes":{"hp":42},"atk":9}""",
-            new[] { ("weapon", "stub.hp_charm") }); // legacy path — stub.atk_ring's grant moved off mods_json
+            new[] { ("weapon", "stub.hp_charm") });
         using var doc = JsonDocument.Parse(json);
         var abs = doc.RootElement.GetProperty("absolutes");
         Assert.Equal(42, abs.GetProperty("hp").GetInt32());
         Assert.Equal(9, abs.GetProperty("atk").GetInt32());
-        var grants = doc.RootElement.GetProperty("grants");
-        Assert.Equal(1, grants.GetArrayLength());
-        Assert.Equal("equip-stub-hp:weapon", grants[0].GetProperty("grantId").GetString());
-        Assert.Equal("fx.entity_atk", grants[0].GetProperty("effectId").GetString());
+        Assert.Equal(0, doc.RootElement.GetProperty("grants").GetArrayLength());
     }
 
     [Fact]
-    public void BuildModsJson_same_stub_two_slots_unique_grantIds()
+    public void BuildModsJson_same_atom_backed_item_in_two_slots_grants_nothing_in_either()
     {
-        // stub.hp_charm — legacy path; stub.atk_ring's own grantId-stamping moved to effect_binding's
-        // per-slot binding, proven in ModsAbsorptionTests.
+        // Was "unique grantIds per slot" while stub.hp_charm was still legacy; now every known item is
+        // atom-backed (2026-09-06), so the real regression to guard is that equipping the SAME
+        // atom-backed item in two slots does not leak a grant into mods_json for either — each slot's
+        // own real binding is effect_binding's job (ModsAbsorptionTests), never this method's.
         var json = UniqueEquipmentCatalog.BuildModsJson(
             "{}",
             new[]
@@ -101,11 +101,7 @@ public class UniqueEquipmentCatalogTests
                 ("armor", "stub.hp_charm")
             });
         using var doc = JsonDocument.Parse(json);
-        var grants = doc.RootElement.GetProperty("grants");
-        Assert.Equal(2, grants.GetArrayLength());
-        var ids = grants.EnumerateArray().Select(g => g.GetProperty("grantId").GetString()).ToList();
-        Assert.Contains("equip-stub-hp:weapon", ids);
-        Assert.Contains("equip-stub-hp:armor", ids);
+        Assert.Equal(0, doc.RootElement.GetProperty("grants").GetArrayLength());
     }
 
     [Fact]
@@ -122,16 +118,17 @@ public class UniqueEquipmentCatalogTests
     [Fact]
     public void UniqueLoadoutMerge_empty_deploy_keeps_equip_mods()
     {
-        // stub.butter_bead's own grant moved to effect_binding (mods-absorption); stub.hp_charm stays
-        // on the legacy path, so this merge behavior still has a non-empty grants list to prove against.
+        // Every known item is atom-backed now (2026-09-06), so mods_json's own grants list is always
+        // empty for real content — this proves the merge preserves equip's own content (its absolutes)
+        // through a null deploy, via the absolutes half instead of the now-always-empty grants half.
         var mods = UniqueEquipmentCatalog.BuildModsJson(
-            "{}",
+            """{"absolutes":{"hp":7}}""",
             new[] { ("trinket", "stub.hp_charm") });
         var merged = UniqueLoadoutMerge.Merge(null, mods);
         Assert.Equal(mods, merged);
-        Assert.Contains("fx.entity_atk", merged, StringComparison.Ordinal);
+        Assert.Contains("\"hp\":7", merged.Replace(" ", ""), StringComparison.Ordinal);
         var deployWins = UniqueLoadoutMerge.Merge("""{"absolutes":{"hp":1}}""", mods);
         Assert.Contains("\"hp\":1", deployWins.Replace(" ", ""), StringComparison.Ordinal);
-        Assert.DoesNotContain("entity_atk", deployWins, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("\"hp\":7", deployWins.Replace(" ", ""), StringComparison.Ordinal);
     }
 }

@@ -835,6 +835,8 @@ public sealed partial class RpgStore : IRpgDb
                              // party-dungeon delve-scope: the same orphan reason as the W21 rows
                              // above — a delve world outliving a reset would leave rpg_delves
                              // pointing at a deleted rpg_worlds row. Ahead of rpg_worlds itself.
+                             // loot-pack D3.22: ahead of rpg_delves for the identical reason.
+                             "DELETE FROM rpg_delve_pack_lock;",
                              "DELETE FROM rpg_delve_rooms;", "DELETE FROM rpg_delves;",
                              "DELETE FROM rpg_worlds;",
                              "DELETE FROM players;"

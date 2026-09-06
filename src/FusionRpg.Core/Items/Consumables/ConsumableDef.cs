@@ -60,6 +60,18 @@ public enum UseContext
     /// inventory — <c>ActionCompiler</c> refuses it by name), and <c>capPerMatch</c> (G4) is
     /// unimplemented.</summary>
     Lawn,
+
+    /// <summary>D3.24 (spec-supplies-and-objects.md §2) — used at a delve `rest` room, one of
+    /// `rest.activations` per member. Appended after <see cref="Lawn"/>, never inserted earlier, so
+    /// declaration order (which <c>UseContextWire</c> sorts by) keeps every existing wire string
+    /// byte-identical. Wire spelling <c>"rest"</c> — the approved seed-contract spelling, not the
+    /// brief's <c>"Rest"</c>/mismatched-case guess.</summary>
+    Rest,
+
+    /// <summary>D3.24 (spec-supplies-and-objects.md §2) — used at a room object between fights ("Room"
+    /// in the brief; the approved seed contract and the map spell it <c>curio</c>, which wins). Same
+    /// append-only placement as <see cref="Rest"/>.</summary>
+    Curio,
 }
 
 /// <summary>The closed six, and the wire spellings <c>consumable_def.class_id</c> carries.</summary>
@@ -97,12 +109,13 @@ public static class ConsumableClasses
     }
 }
 
-/// <summary>The closed four, their wire spellings, and the runtime each one requires.</summary>
+/// <summary>The closed six (D3.24 widened four to six — additive, "never invalidates a row"), their
+/// wire spellings, and the runtime each one requires.</summary>
 public static class UseContexts
 {
     public static readonly IReadOnlyList<UseContext> All = new[]
     {
-        UseContext.Menu, UseContext.Dispatch, UseContext.Battle, UseContext.Lawn,
+        UseContext.Menu, UseContext.Dispatch, UseContext.Battle, UseContext.Lawn, UseContext.Rest, UseContext.Curio,
     };
 
     public static string Wire(UseContext u) => u switch
@@ -111,6 +124,8 @@ public static class UseContexts
         UseContext.Dispatch => "dispatch",
         UseContext.Battle => "battle",
         UseContext.Lawn => "lawn",
+        UseContext.Rest => "rest",
+        UseContext.Curio => "curio",
         _ => throw new ArgumentOutOfRangeException(nameof(u)),
     };
 
@@ -122,6 +137,8 @@ public static class UseContexts
             case "dispatch": u = UseContext.Dispatch; return true;
             case "battle": u = UseContext.Battle; return true;
             case "lawn": u = UseContext.Lawn; return true;
+            case "rest": u = UseContext.Rest; return true;
+            case "curio": u = UseContext.Curio; return true;
             default: u = default; return false;
         }
     }
@@ -157,6 +174,12 @@ public static class UseContexts
         UseContext.Dispatch => new[] { RuntimeId.Battle },
         UseContext.Battle => new[] { RuntimeId.Battle },
         UseContext.Lawn => new[] { RuntimeId.Lawn },
+        // D3.24 (spec-supplies-and-objects.md §2, table row 2): "neither is a combat runtime; a supply
+        // used at rest or at a curio resolves through the battle runtime's OnActivate grant path
+        // OUTSIDE a fight, exactly as Dispatch maps to RuntimeId.Battle for the same reason" -- the
+        // Menu -> [] precedent immediately above is the shape this follows.
+        UseContext.Rest => Array.Empty<RuntimeId>(),
+        UseContext.Curio => Array.Empty<RuntimeId>(),
         _ => throw new ArgumentOutOfRangeException(nameof(u)),
     };
 }

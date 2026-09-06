@@ -464,6 +464,19 @@ public class ItemCardTests
     }
 
     [Fact]
+    public void Only_an_on_instantiate_line_carries_a_roll_quality()
+    {
+        // A `Fixed` line never rolled and an `OnApply` line has a BAND -- "where in the band did this
+        // land" is a question about a hit that has not happened yet. Reporting 1000‰ on either (which
+        // is what an unreadable band degrades to) would put a full-luck number on a line with no luck.
+        var model = ItemCardRenderer.Render(FullCard());
+
+        foreach (var line in model.Lines.Where(l => l.SourceKind is SourceKind.Base or SourceKind.Implicit
+                                                    or SourceKind.AffixPrefix or SourceKind.AffixSuffix))
+            Assert.Equal(line.RollBar is not null, line.RollQualityPerMille is not null);
+    }
+
+    [Fact]
     public void An_on_apply_affix_renders_its_band_and_never_a_single_number()
     {
         // §3.4's OnApply arm: no bar, and the BAND -- "the hit rolled it, not the item".
@@ -975,6 +988,320 @@ public class ItemCardTests
 
         // A guard that iterated nothing would pass forever.
         Assert.True(rendered >= 100, $"only {rendered} renders exercised -- the corpus reader returned too little");
+    }
+
+    // ================================================================================================
+    //  InstanceProducer.Compose — the OTHER minter, and the pooled channel only it resolves
+    // ================================================================================================
+
+    /// <summary>E30's shipped catalog, read from the real file. Without it a pooled-channel atom
+    /// cannot resolve at all — <c>Resolver.RollValues</c> throws rather than freezing the pool object
+    /// unread.</summary>
+    static readonly Lazy<IReadOnlyDictionary<string, ChannelPoolRow>> Pools = new(() =>
+    {
+        var json = File.ReadAllText(Path.Combine(RepoRoot(), "data", "seed", "channel-pools", "pools.v1.json"));
+        var read = ChannelPoolFile.TryParse(json, out var rows);
+        Assert.True(read.IsOk, read.ToString());
+        return rows.ToDictionary(p => p.PoolId, StringComparer.Ordinal);
+    });
+
+    static ChannelPoolRow? LookupPool(string poolId) =>
+        Pools.Value.TryGetValue(poolId, out var p) ? p : null;
+
+    /// <summary>The real vocabulary <c>Resolver</c> step 1 substitutes a slot from — <c>ElementRoster</c>
+    /// itself, "the one legal way to enumerate elements", never a hand-typed list. Throws on an
+    /// unknown domain rather than returning empty, because an empty member list would make the
+    /// resolver's own pick index out of range and hide the real cause.</summary>
+    static IReadOnlyList<string> DomainMembers(string domain) => domain switch
+    {
+        "element" => ElementRoster.Concrete.Select(e => e.ToElementId()).ToList(),
+        _ => throw new InvalidOperationException($"no member list for slot domain '{domain}'"),
+    };
+
+    /// <summary>
+    /// ⛔ <b>Why this fixture cannot use <see cref="RealAtoms"/>, stated rather than worked around.</b>
+    ///
+    /// <para><c>tier-bands.v1.json</c> authors a <c>channelWeightPermille</c> row for <b>14</b> channel
+    /// stems. The shipped <c>affix-families/*.json</c> corpus has <b>100</b> families, so
+    /// <c>FamilyExpansion</c> refuses <b>86</b> of them at its first gate — <i>"no authored
+    /// sharePermille for family '…'"</i> — and <b>every element-typed family is among the 86</b>.
+    /// There is therefore no pooled-channel atom in the shipped expansion at all, and no seed can draw
+    /// one. That is a real content gap in the tuning file, upstream of this module and of E30, and it
+    /// is named in P2.5's todo entry rather than papered over.</para>
+    ///
+    /// <para>So the fixture supplies the ONE missing row per family and changes nothing else: the same
+    /// <c>baseSharePermille</c>, the same <c>opWeightPermille</c> table, the same weight
+    /// (<see cref="ShippedChannelWeightPermille"/>) every one of the authored 14 already carries, the
+    /// real family files, the real generator, the real pool mapping and the real display templates.
+    /// The moment the authoring fleet adds those rows this fixture and the shipped corpus converge.</para>
+    /// </summary>
+    const long ShippedChannelWeightPermille = 1000;
+
+    static readonly Lazy<IReadOnlyList<FamilyEntryInput>> RealFamilies = new(() =>
+    {
+        var families = new List<FamilyEntryInput>();
+        foreach (var file in Directory.GetFiles(Seed("items", "affix-families"), "*.json")
+                     .OrderBy(f => f, StringComparer.Ordinal))
+        {
+            if (Path.GetFileName(file).StartsWith('_')) continue;
+            families.AddRange(AffixFamilyFile.Read(Path.GetFileName(file), File.ReadAllText(file)));
+        }
+        return families;
+    });
+
+    static readonly Lazy<IReadOnlyList<AtomRow>> ExtendedAtoms = new(() =>
+    {
+        var shipped = TierBandsFile.Read(
+            File.ReadAllText(Path.Combine(Seed("items"), "_tuning", "tier-bands.v1.json")));
+
+        var weights = new Dictionary<string, long>(shipped.ChannelWeightPermille, StringComparer.Ordinal);
+        foreach (var f in RealFamilies.Value)
+        {
+            var stem = f.Id.StartsWith("atom.", StringComparison.Ordinal) ? f.Id["atom.".Length..] : f.Id;
+            if (!weights.ContainsKey(stem)) weights[stem] = ShippedChannelWeightPermille;
+        }
+
+        return FamilyExpansion
+            .Expand(RealFamilies.Value, new TierBandsInput(
+                shipped.BaseSharePermille, weights, shipped.OpWeightPermille), FlatReferenceBase)
+            .Rows;
+    });
+
+    static readonly Lazy<IReadOnlyDictionary<string, AtomRow>> ExtendedById = new(() =>
+        ExtendedAtoms.Value.ToDictionary(a => a.AtomId, StringComparer.Ordinal));
+
+    static readonly Lazy<IReadOnlyDictionary<string, AffixRow>> ExtendedAffixes = new(() =>
+        AffixLibraryGenerator.Generate(ExtendedAtoms.Value).ToDictionary(a => a.AffixId, StringComparer.Ordinal));
+
+    static AtomRow? LookupExtendedAtom(string id) =>
+        ExtendedById.Value.TryGetValue(id, out var a) ? a : null;
+
+    static AffixRow? LookupExtendedAffix(string id) =>
+        ExtendedAffixes.Value.TryGetValue(id, out var a) ? a : null;
+
+    /// <summary>A container whose whole pool is ONE pooled-channel affix, so the draw is not a
+    /// coin toss: the seed decides the magnitude and the pool draw decides the element, and both are
+    /// asserted.</summary>
+    static (ContainerRow Container, AtomRow Pooled, RealBaseType BaseType) PooledContainer()
+    {
+        var baseType = PickBaseType();
+        var baseStat = ExtendedAtoms.Value
+            .Where(a => a.ParamsJson.Contains("\"maxHp\"", StringComparison.Ordinal))
+            .OrderByDescending(a => a.Tier)
+            .First();
+        var implicitAtom = ExtendedById.Value[AtomRow.DeriveId(baseType.ImplicitFamily!, "", 1)];
+        var core = new[] { baseStat, implicitAtom };
+        var coreFamilies = core.Select(a => a.FamilyId).ToHashSet(StringComparer.Ordinal);
+
+        // The first real expanded atom whose channel is an E30 POOL reference and whose family the
+        // display corpus renders live -- chosen from content, so an authoring change moves the fixture
+        // instead of breaking it.
+        var pooled = ExtendedAtoms.Value
+            .Where(a => !coreFamilies.Contains(a.FamilyId))
+            .Where(a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal))
+            .First(a => LookupTemplate(a.FamilyId) is { Status: "live" });
+
+        var affix = ExtendedAffixes.Value.Values.First(a =>
+            a.Refs.Count == 1 && string.Equals(a.Refs[0].AtomId, pooled.AtomId, StringComparison.Ordinal));
+
+        return (new ContainerRow
+        {
+            ContainerId = baseType.Id,
+            Kind = ContainerKind.Item,
+            Slot = baseType.Role,
+            Rarity = "heirloom",
+            LevelReq = 20,
+            PrefixRolls = 1,
+            SuffixRolls = 0,
+            Atoms = core.Select((a, i) => new ContainerAtomRow(i, a.AtomId)).ToList(),
+            Pool = new[] { new ContainerPoolRow(affix.AffixId, 100) },
+        }, pooled, baseType);
+    }
+
+    static ItemCardInput PooledCard(InstanceRow instance, ContainerRow container, RealBaseType baseType) =>
+        new(instance, container, LookupExtendedAtom, LookupTemplate,
+            new CardBaseType(baseType.NameKey, "class." + baseType.ClassId, baseType.Frame,
+                "role." + baseType.Role, baseType.FlavourKey),
+            new CardRarity("rarity.heirloom", 7, "#8bd3c7"),
+            ItemName: "Pooled Fixture")
+        {
+            ItemLevel = 24,
+            LevelReq = container.LevelReq,
+            SpecimenLevel = 30,
+        };
+
+    /// <summary>
+    /// ⛔ <b>Found while wiring the <c>Compose</c> fixture, pinned rather than fixed: the shipped
+    /// tuning authors a share for 14 of the corpus's 100 affix families, so <c>FamilyExpansion</c>
+    /// refuses the other 86 — and every element-typed family is in the refused set.</b>
+    ///
+    /// <para>This is why <see cref="RealAtoms"/> contains no pooled-channel atom and why a drop can
+    /// never roll one today. It is a <c>tier-bands.v1.json</c> authoring gap, upstream of module 10
+    /// and of E30: the generator's refusal is correct behaviour (it names the family and declines to
+    /// guess a share), the missing rows are the defect. Asserted as a FAITHFULNESS check rather than a
+    /// bare count — the refused set must be exactly "the families with no authored stem" — so an
+    /// authoring wave that adds rows moves the numbers without needing this test rewritten, while a
+    /// family refused for some OTHER reason fails loudly.</para>
+    /// </summary>
+    [Fact]
+    public void The_shipped_tuning_authors_a_share_for_only_a_fraction_of_the_affix_corpus()
+    {
+        var shipped = TierBandsFile.Read(
+            File.ReadAllText(Path.Combine(Seed("items"), "_tuning", "tier-bands.v1.json")));
+
+        var unshared = RealFamilies.Value
+            .Where(f => !shipped.ChannelWeightPermille.ContainsKey(
+                f.Id.StartsWith("atom.", StringComparison.Ordinal) ? f.Id["atom.".Length..] : f.Id))
+            .Select(f => f.Id)
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.NotEmpty(unshared);
+
+        var refusedForNoShare = FamilyExpansion
+            .Expand(RealFamilies.Value, shipped, FlatReferenceBase).Refusals
+            .Where(r => r.Reason.Contains("no authored sharePermille", StringComparison.Ordinal))
+            .Select(r => r.FamilyId)
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.Equal(unshared, refusedForNoShare);
+
+        // And the consequence this fixture exists because of: not one element-typed family survives,
+        // so the shipped expansion has no pooled channel to resolve.
+        Assert.DoesNotContain(RealAtoms.Value, a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal));
+        Assert.Contains(ExtendedAtoms.Value, a => a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// ⭐ <b>The <c>InstanceProducer.Compose</c> half of the card, which P2.5 named as not done.</b>
+    ///
+    /// <para>A <c>{variant}</c>-templated family expands into ONE atom per tier carrying an E30 pool
+    /// reference, with the variant deliberately empty (W7.9). <c>Instantiator.Freeze</c> copies that
+    /// pool object into <c>values_json</c> untouched, so an item minted through
+    /// <c>Instantiator.TryInstantiate</c> has no element to name — proved by the negative control
+    /// below. <c>InstanceProducer.Compose</c> goes through <c>Resolver</c>, whose fifth named stream
+    /// draws a CONCRETE channel from <c>pools.v1.json</c> and stamps it into <c>values_json</c>; the
+    /// card reads that and renders <c>+12 fire penetration</c> rather than refusing.</para>
+    ///
+    /// <para>Every element assertion is checked against the pool's own member list, so a wrong element
+    /// cannot pass by looking element-shaped.</para>
+    /// </summary>
+    [Fact]
+    public void A_compose_minted_pooled_channel_affix_renders_its_concrete_element()
+    {
+        var (container, pooled, baseType) = PooledContainer();
+
+        var ok = InstanceProducer.Compose(
+            container, LookupExtendedAtom, LookupExtendedAffix, DomainMembers,
+            rollSeed: 0xE1E3E7, thetaContent: PinTheta,
+            tuning: Tuning, out var instance, catalogRevision: 7, lookupPool: LookupPool);
+        Assert.True(ok.IsOk, ok.ToString());
+        Assert.NotNull(instance);
+
+        // The pool the ATOM names, and the concrete channel the INSTANCE froze -- the second must be a
+        // member of the first, or the resolver invented one.
+        var poolId = PoolIdOf(pooled.ParamsJson);
+        Assert.NotNull(poolId);
+        var members = Pools.Value[poolId!].Members.Select(m => m.Channel).ToHashSet(StringComparer.Ordinal);
+
+        var drawn = instance!.Atoms.Single(a => string.Equals(a.AtomId, pooled.AtomId, StringComparison.Ordinal));
+        var resolvedChannel = ChannelString(drawn.ValuesJson);
+        Assert.NotNull(resolvedChannel);
+        Assert.Contains(resolvedChannel!, members);
+
+        // The card renders it, and the element in the sentence is the channel's own tail.
+        var model = ItemCardRenderer.Render(PooledCard(instance, container, baseType));
+        var affixes = model.Blocks.Single(b => b.BlockKey == CardBlocks.Affixes);
+        var line = Assert.Single(affixes.Lines);
+
+        var expectedElement = resolvedChannel![(resolvedChannel.LastIndexOf('.') + 1)..];
+        Assert.Contains(expectedElement, ElementRoster.Concrete.Select(e => e.ToElementId()));
+        Assert.Equal(expectedElement, line.Args["element"]);
+
+        var text = line.Args["__rendered"];
+        Assert.Contains(expectedElement, text, StringComparison.Ordinal);
+        Assert.DoesNotContain('{', text);
+        Assert.DoesNotContain('}', text);
+        Assert.DoesNotContain(pooled.FamilyId, text, StringComparison.Ordinal);
+        Assert.DoesNotContain(pooled.AtomId, text, StringComparison.Ordinal);
+    }
+
+    /// <summary>
+    /// The negative control, and the reason the test above is not vacuous: the SAME container minted
+    /// through <c>Instantiator.TryInstantiate</c> keeps the pool object in <c>values_json</c>, so the
+    /// affix has neither a unit (its channel is not a string) nor an element, and the renderer refuses
+    /// by name. That is a fact about which minter the caller picked, not a renderer limit — which is
+    /// exactly what P2.5's bullet said and what this pins.
+    /// </summary>
+    [Fact]
+    public void The_same_container_minted_by_try_instantiate_still_refuses_the_unresolved_pool()
+    {
+        var (container, pooled, baseType) = PooledContainer();
+
+        var r = Instantiator.TryInstantiate(
+            container, LookupExtendedAtom, LookupExtendedAffix, rollSeed: 0xE1E3E7, thetaContent: PinTheta,
+            tuning: Tuning, out var minted, InstanceOrigin.Drop, catalogRevision: 7);
+        Assert.True(r.IsOk, r.ToString());
+        var instance = minted!;
+
+        // The pool object really did survive the freeze -- otherwise this test proves nothing.
+        var drawn = instance.Atoms.Single(a => string.Equals(a.AtomId, pooled.AtomId, StringComparison.Ordinal));
+        Assert.Null(ChannelString(drawn.ValuesJson));
+        Assert.Contains("\"pool\"", drawn.ValuesJson, StringComparison.Ordinal);
+
+        Assert.Throws<DisplayTemplateRejection>(
+            () => ItemCardRenderer.Render(PooledCard(instance, container, baseType)));
+    }
+
+    /// <summary>A non-pooled atom's element is still its own variant, and a non-pooled channel whose
+    /// last segment merely LOOKS like an element never acquires one — the gate that keeps the new arm
+    /// from over-reaching.</summary>
+    [Fact]
+    public void A_concrete_channel_never_acquires_an_element_from_its_last_segment()
+    {
+        var concrete = RealAtoms.Value.First(a =>
+            !a.ParamsJson.Contains("\"pool\"", StringComparison.Ordinal)
+            && LookupTemplate(a.FamilyId) is { Status: "live" });
+
+        Assert.Equal("", concrete.Variant);
+
+        // A values_json whose channel string ends in a real element name, on an atom that authored a
+        // CONCRETE channel: the card must not read "fire" out of it.
+        var faked = $"{{\"channel\":\"status.duration.fire\",\"amount\":10}}";
+        var model = ItemCardRenderer.Render(new ItemCardInput(
+            new InstanceRow
+            {
+                InstanceId = "i1", ContainerId = "item.probe", RollSeed = 1, CatalogRevision = 1,
+                Origin = InstanceOrigin.Drop, ThetaContent = PinTheta, ContentScaleMilli = 1000,
+                Atoms = new[] { new InstanceAtomRow(0, concrete.AtomId, faked) },
+            },
+            new ContainerRow
+            {
+                ContainerId = "item.probe", Kind = ContainerKind.Item, Slot = "armament-primary",
+                Atoms = new[] { new ContainerAtomRow(0, concrete.AtomId) },
+            },
+            LookupAtom, LookupTemplate,
+            new CardBaseType("bt.probe", "class.probe", "humanoid", "role.armament-primary", null),
+            new CardRarity("rarity.chaff", 1, "#63645d"), "Probe"));
+
+        var line = Assert.Single(model.Blocks.Single(b => b.BlockKey == CardBlocks.BaseStats).Lines);
+        Assert.False(line.Args.ContainsKey("element"));
+    }
+
+    static string? PoolIdOf(string paramsJson)
+    {
+        using var doc = JsonDocument.Parse(paramsJson);
+        return doc.RootElement.TryGetProperty("channel", out var c) && c.ValueKind == JsonValueKind.Object
+               && c.TryGetProperty("pool", out var p) && p.ValueKind == JsonValueKind.String
+            ? p.GetString()
+            : null;
+    }
+
+    static string? ChannelString(string json)
+    {
+        using var doc = JsonDocument.Parse(json);
+        return doc.RootElement.TryGetProperty("channel", out var c) && c.ValueKind == JsonValueKind.String
+            ? c.GetString()
+            : null;
     }
 
     [Fact]

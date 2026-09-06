@@ -123,7 +123,12 @@ public static class ItemDisplayRenderer
             GroupOrder: groupOrder,
             RollBar: BarFor(roll, qualityPerMille),
             ContextRead: contextRead,
-            RollQualityPerMille: roll == RollPolicy.Fixed ? null : qualityPerMille);
+            // Only OnInstantiate has a roll quality at all. `Fixed` never rolled; `OnApply` has a
+            // BAND, and "where in the band did this land" is a question about a hit that has not
+            // happened yet — reporting 1000‰ there (which is what an unreadable band degrades to)
+            // would put a full-luck number on a line that has no luck. Corrected 2026-09-06 while
+            // wiring the Card level; the bar already followed this rule, the field did not.
+            RollQualityPerMille: roll == RollPolicy.OnInstantiate ? qualityPerMille : null);
     }
 
     /// <summary>

@@ -5,8 +5,9 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Items;
 
 /// <summary>
-/// `affix-legality` (item module 8) against the REAL, shipped 98 affix families,
-/// `family-overrides.v1.json` and `role-relocation.v1.json`.
+/// `affix-legality` (item module 8) against the REAL, shipped affix families (98 at module 8's
+/// build, 100 since `g-punisher.json` landed 2026-09-06), `family-overrides.v1.json` and
+/// `role-relocation.v1.json`.
 /// </summary>
 public class RoleFamilyTableTests
 {
@@ -49,17 +50,27 @@ public class RoleFamilyTableTests
 
     static IReadOnlyList<RoleFamilyCell> Derive() => RoleFamilyTable.Derive(LoadFamilies(), LoadOverrides(), LoadRelocation());
 
+    /// <summary>
+    /// A corpus-count pin, and it exists to catch a family going MISSING. It is expected to move
+    /// upward when the affix-authoring lane ships one: 98 at module 8's build (2026-09-04), 100 after
+    /// `g-punisher.json` landed (2026-09-06, commit 5864231). Bump it deliberately, with the corpus
+    /// counted rather than quoted from a stale note — a DROP is the defect this guards.
+    /// </summary>
     [Fact]
-    public void Ninety_eight_families_are_shipped()
+    public void The_whole_shipped_affix_family_corpus_loads()
     {
-        Assert.Equal(98, LoadFamilies().Count);
+        Assert.Equal(100, LoadFamilies().Count);
     }
 
     [Fact]
     public void The_relocation_artefact_exists_and_covers_every_dropped_family_with_zero_orphans()
     {
         var relocation = LoadRelocation();
-        Assert.Equal(619, relocation.RowCount);
+        // 619 over the 98-family corpus; 631 once `g-punisher.json`'s two `sense`-legal families got
+        // their 6 surviving hybrid-core hosts each (2026-09-06). The artefact is DERIVED from the
+        // corpus, so this number tracks it -- see `RoleRelocationRowMissing` in ItemSeedValidator,
+        // the check that now refuses a corpus family with no row rather than letting it keep t5.
+        Assert.Equal(631, relocation.RowCount);
         Assert.Equal(new[] { "head-guard", "sense", "ward-array" }, relocation.DroppedRoles.OrderBy(s => s));
     }
 
@@ -132,15 +143,17 @@ public class RoleFamilyTableTests
     [Fact]
     public void Item_role_family_is_derived_with_no_authored_cells()
     {
-        // 656 (role, family) pairs come straight from the 98 families' own roles lists, before any
+        // 670 (role, family) pairs come straight from the 100 families' own roles lists, before any
         // override narrows it -- reproduced here against the raw corpus, not through Derive(), which
-        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 652).
+        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 666).
+        // Was 656/652 over the 98-family corpus at module 8's build; `g-punisher.json`'s two families
+        // add 7 roles each (2026-09-06). Moves with the corpus, same rule as the count pin above.
         var families = LoadFamilies();
         var rawPairs = families.SelectMany(f => f.Roles.Select(r => (Role: r, f.FamilyId))).Distinct().Count();
-        Assert.Equal(656, rawPairs);
+        Assert.Equal(670, rawPairs);
 
         var derivedPairs = Derive().Select(c => (c.RoleId, c.FamilyId)).Distinct().Count();
-        Assert.Equal(652, derivedPairs);
+        Assert.Equal(666, derivedPairs);
     }
 
     [Fact]

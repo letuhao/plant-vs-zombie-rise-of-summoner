@@ -55,6 +55,18 @@
         "migratedFrom": "mods-absorption",
         "effectId": "fx.cold_on_hit"
       }
+    },
+    {
+      "id": "item.fx-entity-atk",
+      "kind": "item",
+      "prefixRolls": 0,
+      "suffixRolls": 0,
+      "atoms": [],
+      "tags": {
+        "migratedFrom": "mods-absorption",
+        "effectId": "fx.entity_atk",
+        "note": "fx.entity_atk is a placeholder id with no defined effect anywhere in the seed tree (UniqueEquipmentCatalog's own doc comment on Items). Zero atoms preserves that exact no-op behavior while moving stub.hp_charm/relic.cracked_seal off the legacy mods_json grant path — the same fixed-core-marker shape patron.aura shipped with before patron-absorption filled it in."
+      }
     }
   ]
 }

@@ -509,8 +509,10 @@ public class AtomCompilerTests
     // E41 (spec-ui-attach-point.md §2b) grows this by one more again, to 16, with PresentUi -- the
     // same reflection mechanism, re-verified rather than assumed, growing the published
     // /effects/contract list with no separate endpoint edit, exactly as E35/E36/E37 already found.
+    // base-defense `siege-construction` (decision 27, 2026-09-06) grows this by one more again, to 17,
+    // with PlaceStructure -- the same mechanism, same "declaring the constant is the whole obligation".
     [Fact]
-    public void EffectActions_publishes_sixteen_constants_including_ModifyMatch_WaveControl_BulletModify_and_PresentUi()
+    public void EffectActions_publishes_seventeen_constants_including_ModifyMatch_WaveControl_BulletModify_PresentUi_and_PlaceStructure()
     {
         var consts = typeof(EffectActions)
             .GetFields(BindingFlags.Public | BindingFlags.Static)
@@ -518,10 +520,11 @@ public class AtomCompilerTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToArray();
 
-        Assert.Equal(16, consts.Length);
+        Assert.Equal(17, consts.Length);
         Assert.Contains(EffectActions.ModifyMatch, consts);
         Assert.Contains(EffectActions.WaveControl, consts);
         Assert.Contains(EffectActions.BulletModify, consts);
         Assert.Contains(EffectActions.PresentUi, consts);
+        Assert.Contains(EffectActions.PlaceStructure, consts);
     }
 }

@@ -15,7 +15,11 @@ Three populations of `themeKey`, collision-free by prefix:
 
 ⚠ **Two D34 preconditions are not met today, and this module reports them rather than working around
 them.** `theme-refresh` (P0.2) and `theme-enrich` (P0.3) are both unbuilt: the registry still holds
-**84** themes against **386** shipped species, and **31** are still at `basis = "name"`. A theme at
+**84** themes against **840** shipped species — of which 16 are orphans naming a species the tree no
+longer ships, so real coverage is **68 of 840** — and **31** are still at `basis = "name"`. ⚠ This
+line read *"84 against 386"* until 2026-09-06; **386 was the family-file count, not the species
+count**, and it is the exact wrong denominator `shipped_species_ids` below exists to prevent. Do not
+re-derive either number here — call `coverage_report`. A theme at
 `basis = "name"` is *held*, never generated from — `generatable` excludes it and `holdback_report`
 names the count, so an incomplete run reports `not_measured` instead of a green partial.
 
@@ -177,8 +181,15 @@ def _species_ids_from_index(doc) -> "frozenset[str]":
     ⛔ **The shape that matters, and the one a filename count gets wrong.** `_index.json` is a flat
     `{speciesId: "plant/family.json"}` map — the *files* under `species/` are FAMILY files holding
     many species each, so `ls data/seed/demons/species/{plant,zombie} | wc -l` counts families, not
-    species. Measured 2026-09-04: **496 family files, 840 species.** Anything comparing the theme
-    registry against the file count is comparing against the wrong denominator.
+    species. Re-measured 2026-09-06: **502 family files, 840 species** (was 496 files on 2026-09-04 —
+    the concurrent stream keeps rewriting the tree, and the species count has held across every
+    re-measure). Anything comparing the theme registry against the file count is comparing against the
+    wrong denominator, which is why both numbers are functions and neither is a constant.
+
+    ⚠ **Case is load-bearing.** Index keys are PascalCase (`AllPeater`); published theme `speciesId`s
+    are lowercase (`allpeater`). `coverage_report` lowercases both sides. A new checker that compares
+    them case-sensitively reports 840 uncovered and 84 orphans — every row wrong, and green-looking
+    nowhere, so it fails loudly rather than silently. Match on the folded form.
     """
     if isinstance(doc, dict):
         for key in ("species", "entries", "anchors"):

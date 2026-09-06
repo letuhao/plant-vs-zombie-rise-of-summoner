@@ -1,12 +1,20 @@
 using System.Text.Json;
 using FusionRpg.Core.Delve;
 using FusionRpg.Core.Delve.Attrition;
+using FusionRpg.Core.Delve.Pack;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Intel;
 using FusionRpg.Core.World.Movement;
 using Microsoft.Data.Sqlite;
 
 namespace FusionRpg.Data;
+
+/// <summary>D3.22 (spec-loot-pack.md §Structure: "parties_json[p].pack read/write") — one party's
+/// pack grid, the JSON element `{rows, cols, cells: [...]}`. Reuses <see cref="PackCell"/> directly
+/// (a plain record of primitives) rather than a private copy of the same shape. Floor items are NOT
+/// persisted here — they live on `rpg_delve_rooms.floor_json`, already `delve-scope`'s own column for
+/// whatever room a party currently stands in.</summary>
+public sealed record DelvePartyPackState(int Rows, int Cols, IReadOnlyList<PackCell> Cells);
 
 /// <summary>One party's route/pity/haul, one element of <c>rpg_delves.parties_json</c> per
 /// <c>PartyIndex</c> — a single JSON array on the header, not a third table (spec-delve-scope.md
@@ -16,10 +24,14 @@ namespace FusionRpg.Data;
 /// "each [party] gains `members[]`, one record per demon, read and written only through
 /// `RpgStore.Delve.cs`"). Nullable, not <see cref="Array.Empty{T}"/>: a party written before this
 /// field existed deserializes to <c>null</c> rather than a lossy empty list a caller could mistake
-/// for "this party genuinely has no members."</para></summary>
+/// for "this party genuinely has no members."</para>
+///
+/// <para><b><see cref="Pack"/></b> — loot-pack D3.22, same nullable-not-empty reasoning as
+/// <see cref="Members"/>: a party written before this field existed has no pack yet, not an empty
+/// one.</para></summary>
 public sealed record DelvePartyState(
     long EntityId, IReadOnlyList<string> Route, IReadOnlyDictionary<string, int> Pity, IReadOnlyList<string> Haul,
-    IReadOnlyList<DelveMemberState>? Members = null);
+    IReadOnlyList<DelveMemberState>? Members = null, DelvePartyPackState? Pack = null);
 
 public sealed record DelveRow(
     long DelveId, long PlayerId, string WorldId, string DomainId, string RaidMode, string RungId,
@@ -48,9 +60,10 @@ public static class DelveStates
 
 public sealed partial class RpgStore
 {
-    /// <summary>The two delve tables. Called from <c>EnsureWorldSchemaUnlocked</c> beside
-    /// <c>EnsureWorldTurnSchemaUnlocked</c> — a delve world is a <c>rpg_worlds</c> row, so its own
-    /// schema setup lives beside the world program's (spec-delve-scope.md §1).</summary>
+    /// <summary>The three delve tables (`rpg_delve_pack_lock` added D3.22). Called from
+    /// <c>EnsureWorldSchemaUnlocked</c> beside <c>EnsureWorldTurnSchemaUnlocked</c> — a delve world is
+    /// a <c>rpg_worlds</c> row, so its own schema setup lives beside the world program's
+    /// (spec-delve-scope.md §1).</summary>
     void EnsureDelveSchemaUnlocked(SqliteConnection db)
     {
         Exec(db, """
@@ -82,6 +95,12 @@ public sealed partial class RpgStore
               revision INTEGER NOT NULL DEFAULT 0,
               PRIMARY KEY (delve_id, sector_id)
             );
+
+            CREATE TABLE IF NOT EXISTS rpg_delve_pack_lock (
+              delve_id INTEGER NOT NULL,
+              instance_id TEXT NOT NULL PRIMARY KEY
+            );
+            CREATE INDEX IF NOT EXISTS ix_rpg_delve_pack_lock_delve ON rpg_delve_pack_lock(delve_id);
             """);
     }
 
@@ -266,19 +285,19 @@ public sealed partial class RpgStore
     /// possibly-disagreeing source of truth). <paramref name="tuning"/> is the single opt-in switch for
     /// every extraction-time settlement this seam has grown since D2.21: <c>null</c> keeps the
     /// pre-D2.23 caller shape byte-identical (only the trailing state UPDATE runs). Supplying it runs,
-    /// in this SAME transaction:
+    /// in this SAME transaction, in the spec's own stated hook order:
     /// <list type="number">
+    /// <item>D3.22's own pack settlement (spec-loot-pack.md §7) — see
+    /// <see cref="ApplyPackSettlementUnlocked"/>.</item>
     /// <item>D2.23's attrition settlement (spec-delve-attrition.md §7, §9) — every member's
     /// Retire/Recover/Roster outcome, contract loyalty credited once, persisted cross-delve pools, and
     /// every OTHER delve-recovering actor this player owns aged one delve.</item>
     /// <item>D3.16's own souls settlement (spec-dungeon-loot.md §7, `:213-219`) — see
     /// <see cref="ApplyLootEarnUnlocked"/>.</item>
     /// </list>
-    /// The spec's own full stated hook order is pack settlement, attrition settlement, loot earn, quest
-    /// verdicts, then domain unlocks (spec-dungeon-loot.md's own Structure-table row for this file). Only
-    /// the middle two exist today — pack settlement (`loot-pack`), quest verdicts (`delve-quests`) and
-    /// domain unlocks (`domain-catalog`) are separate, still-unbuilt modules, named here as an honest gap
-    /// rather than silently skipped.
+    /// The spec's own full stated hook order also names quest verdicts and domain unlocks after loot
+    /// earn — `delve-quests` and `domain-catalog` are separate, still-unbuilt modules, named here as an
+    /// honest gap rather than silently skipped.
     /// </summary>
     public bool CloseDelve(long delveId, string finalState, bool archiveNow, FusionRpg.Core.Dungeon.Tuning.DungeonTuning? tuning = null)
     {
@@ -293,6 +312,7 @@ public sealed partial class RpgStore
                 var delve = ReadDelveUnlocked(db, delveId);
                 if (delve is not null)
                 {
+                    ApplyPackSettlementUnlocked(db, tx, delve, finalState, now);
                     SettleExtractionUnlocked(db, delve, finalState, tuning, now);
                     ApplyLootEarnUnlocked(db, delve, finalState, now);
                 }
@@ -523,6 +543,136 @@ public sealed partial class RpgStore
             tx.Commit();
             return ReadDelveUnlocked(db, delveId);
         }
+    }
+
+    /// <summary>
+    /// D3.22 (spec-loot-pack.md §Structure) — the pack grid writer, same "first room, first row" upsert
+    /// shape as <see cref="WritePartyMembers"/>/<see cref="WritePartyRoute"/>.
+    /// </summary>
+    public DelveRow? WritePartyPack(long delveId, long partyEntityId, DelvePartyPackState pack)
+    {
+        if (pack is null) throw new ArgumentNullException(nameof(pack));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var current = ReadDelveJsonColumnUnlocked(db, tx, delveId, "parties_json");
+            var parties = DelveRow.ParsePartiesJson(current ?? "[]");
+
+            var updated = parties.Any(p => p.EntityId == partyEntityId)
+                ? parties.Select(p => p.EntityId == partyEntityId ? p with { Pack = pack } : p).ToList()
+                : parties.Append(new DelvePartyState(partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), Array.Empty<string>(), Pack: pack)).ToList();
+            var json = JsonSerializer.Serialize(updated);
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;",
+                "$j", "$id"))
+                ExecuteWith(cmd, json, delveId);
+
+            tx.Commit();
+            return ReadDelveUnlocked(db, delveId);
+        }
+    }
+
+    /// <summary>
+    /// D3.22 (spec-loot-pack.md §5: "acquired at placement... and lock-rowed"). The composable half —
+    /// takes an existing connection so a FUTURE placement caller can lock an instance in the SAME
+    /// transaction as its own <c>AcquireItem</c> call (spec's own Structure note: <c>RpgStore.Items.cs</c>
+    /// stays untouched, so that composition happens at the CALL SITE, not inside either method).
+    /// `INSERT OR IGNORE`: locking an already-locked instance for the SAME delve is a harmless replay.
+    /// </summary>
+    static void LockPackInstanceUnlocked(SqliteConnection db, long delveId, string instanceId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "INSERT OR IGNORE INTO rpg_delve_pack_lock(delve_id, instance_id) VALUES ($d, $i);";
+        cmd.Parameters.AddWithValue("$d", delveId);
+        cmd.Parameters.AddWithValue("$i", instanceId);
+        cmd.ExecuteNonQuery();
+    }
+
+    /// <summary>Standalone, self-locking form of <see cref="LockPackInstanceUnlocked"/> for a caller
+    /// with nothing else to compose the lock write with.</summary>
+    public void LockPackInstance(long delveId, string instanceId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            LockPackInstanceUnlocked(db, delveId, instanceId);
+            tx.Commit();
+        }
+    }
+
+    /// <summary>The check spec-loot-pack.md's own Interface table names as "owed to the item program":
+    /// "salvage, transfer, assign and bulk paths refuse an instance in `rpg_delve_pack_lock`
+    /// (`pack.carried`)". This is the read those future call sites fold into their own
+    /// `SalvageCandidate.Locked`-shaped bool — this store never decides what "locked" means to them.</summary>
+    public bool IsPackLocked(string instanceId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM rpg_delve_pack_lock WHERE instance_id = $i;";
+            cmd.Parameters.AddWithValue("$i", instanceId);
+            return Convert.ToInt64(cmd.ExecuteScalar()) > 0;
+        }
+    }
+
+    /// <summary>
+    /// D3.22 (spec-loot-pack.md §7) — the pack half of `CloseDelve`'s own settlement, first in the
+    /// spec's own stated hook order (pack settlement, then attrition, then loot earn). Reads each
+    /// party's OWN persisted <see cref="DelvePartyPackState"/> (grid cells only — floor items live on
+    /// `rpg_delve_rooms.floor_json`, a separate read this pass does not join; an honest, named gap,
+    /// see <see cref="FusionRpg.Core.Delve.Pack.PackSettlement"/>'s own doc comment), decides via the
+    /// pure <see cref="FusionRpg.Core.Delve.Pack.PackSettlement.Decide"/>, and applies every write on
+    /// THIS SAME transaction — `AdjustStock`'s/`DeleteInstance`'s own SQL inlined here rather than
+    /// calling either (both self-lock their own transaction, the same reason `AwardSouls` cannot be
+    /// called from inside `CloseDelve` either), mirroring `RpgStore.Loot.cs`'s own `PersistLoot`
+    /// precedent for keeping several writes on one `tx`. Every lock row for this delve is deleted
+    /// either way — extraction and a wipe both end the reservation.
+    /// </summary>
+    static void ApplyPackSettlementUnlocked(SqliteConnection db, SqliteTransaction tx, DelveRow delve, string finalState, string now)
+    {
+        var extracted = string.Equals(finalState, DelveStates.Extracted, StringComparison.Ordinal);
+        var items = delve.Parties
+            .Where(p => p.Pack is not null)
+            .SelectMany(p => p.Pack!.Cells)
+            .Select(c => c.Item)
+            .ToList();
+
+        foreach (var write in FusionRpg.Core.Delve.Pack.PackSettlement.Decide(items, extracted))
+        {
+            switch (write.Action)
+            {
+                case FusionRpg.Core.Delve.Pack.PackSettlementAction.BankStack:
+                    ExecIn(db, tx, """
+                        INSERT INTO rpg_item_stock (player_id, container_id, qty, updated_utc)
+                        VALUES ($p, $c, MAX(0, $d), $utc)
+                        ON CONFLICT(player_id, container_id) DO UPDATE SET
+                          qty = MAX(0, rpg_item_stock.qty + $d), updated_utc = excluded.updated_utc;
+                        """,
+                        ("$p", delve.PlayerId.ToString()), ("$c", write.RefId), ("$d", write.Qty), ("$utc", now));
+                    break;
+
+                case FusionRpg.Core.Delve.Pack.PackSettlementAction.UnlockHaulInstance:
+                case FusionRpg.Core.Delve.Pack.PackSettlementAction.UnlockCarryInInstance:
+                    ExecIn(db, tx, "DELETE FROM rpg_delve_pack_lock WHERE instance_id = $id;", ("$id", write.InstanceId!));
+                    break;
+
+                case FusionRpg.Core.Delve.Pack.PackSettlementAction.DestroyHaulInstance:
+                    if (write.InstanceId is not null)
+                    {
+                        ExecIn(db, tx, "DELETE FROM effect_binding WHERE instance_id = $id;", ("$id", write.InstanceId));
+                        ExecIn(db, tx, "DELETE FROM effect_instance_atom WHERE instance_id = $id;", ("$id", write.InstanceId));
+                        ExecIn(db, tx, "DELETE FROM rpg_item WHERE instance_id = $id;", ("$id", write.InstanceId));
+                        ExecIn(db, tx, "DELETE FROM effect_instance WHERE instance_id = $id;", ("$id", write.InstanceId));
+                        ExecIn(db, tx, "DELETE FROM rpg_delve_pack_lock WHERE instance_id = $id;", ("$id", write.InstanceId));
+                    }
+                    break;
+            }
+        }
+
+        ExecIn(db, tx, "DELETE FROM rpg_delve_pack_lock WHERE delve_id = $id;", ("$id", delve.DelveId));
     }
 
     /// <summary>

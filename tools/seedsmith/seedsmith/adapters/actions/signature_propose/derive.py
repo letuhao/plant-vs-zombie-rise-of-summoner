@@ -267,7 +267,10 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
             or _is_unresolved(differentiator_vote, _UNRESOLVED_DIFFERENTIATOR_SENTINEL)):
         return Candidate(brief_id=brief_id, outcome="unresolved", entry=None, votes=votes, provenance=prov)
 
-    atom_families = list(atom_vote.values)
+    # A-S7 `coverage-assignment` splice (spec-coverage-assignment.md SS6): unions in the brief's
+    # own required family, ONLY on an accepted candidate -- deterministic, zero extra model calls,
+    # omitted `requiredFamilies` is byte-identical to before this existed.
+    atom_families = sorted(set(atom_vote.values) | set(brief.get("requiredFamilies") or ()))
     entry = entry_for(
         {**primary, "atomFamilies": atom_families, "differentiator": differentiator_vote.value},
         candidate_id=candidate_id, brief_id=brief_id, provenance=prov,

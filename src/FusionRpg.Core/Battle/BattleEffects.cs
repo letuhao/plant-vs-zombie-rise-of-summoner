@@ -1,7 +1,10 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Actions;
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
+using FusionRpg.Core.World;
 
 namespace FusionRpg.Core.Battle;
 
@@ -80,6 +83,16 @@ public sealed class BattleEffectHost
     /// <see cref="IBattleHpTarget"/>.</summary>
     public Func<string, IBattleStatTarget?>? ResolveStatTarget { set => _sink.ResolveStatTarget = value; }
 
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27, 2026-09-06): wired post-construction, the same
+    /// shape as <see cref="Status"/> above — `structure.place`'s own executor needs it, and
+    /// `BattleEffectSink` is private to this host. Null (the default) for every battle without a board,
+    /// which is every existing caller until `DistrictAssaultResolver` sets it — `structure.place` then
+    /// refuses quietly rather than throwing, the same posture <see cref="ExecApplyStatus"/>'s own
+    /// unwired case already establishes.
+    /// </summary>
+    public ConstructionBoardContext? ConstructionBoard { set => _sink.ConstructionBoard = value; }
+
     /// <summary>passive-tree G2 (spec-mechanism-wiring.md §4.2): the one forward this host needs so a
     /// live mid-battle trigger can add a contribution, matching `BattleDerivedModifierLedger.Add`'s own
     /// signature exactly (actorKey, channel, sourceId, value) — every other trigger this class forwards
@@ -128,6 +141,10 @@ public sealed class BattleEffectHost
         public BattleStatModifierLedger? Ledger { get; set; }
         public Func<string, IBattleStatTarget?>? ResolveStatTarget { get; set; }
 
+        /// <summary>base-defense `siege-construction`: wired post-construction via
+        /// <see cref="BattleEffectHost.ConstructionBoard"/> — same shape.</summary>
+        public ConstructionBoardContext? ConstructionBoard { get; set; }
+
         public List<BattleAppliedHpDelta> Applied { get; } = new();
 
         public bool Execute(EffectExecuteContext ctx, EffectActionPlanItem item)
@@ -142,8 +159,16 @@ public sealed class BattleEffectHost
             if (string.Equals(item.Action, EffectActions.ModifyStat, StringComparison.OrdinalIgnoreCase))
                 return ExecModifyStat(ctx, item);
 
+            // base-defense `siege-construction` (decision 27, 2026-09-06): a fourth standalone plan
+            // item action — widens this comment's own "only" claim below for the first time since it
+            // was written, deliberately: `structure.place` is Battle-only by construction
+            // (AttachPoint.Siege), so it belongs on the SAME allowlist as the other three rather than a
+            // separate mechanism.
+            if (string.Equals(item.Action, EffectActions.PlaceStructure, StringComparison.OrdinalIgnoreCase))
+                return ExecPlaceStructure(ctx, item);
+
             if (!string.Equals(item.Action, EffectActions.ApplyResourceDelta, StringComparison.OrdinalIgnoreCase))
-                return true; // battle mode consumes ApplyResourceDelta (FA10) / ApplyStatus (FA2) / ModifyStat (FA1) only; every other action is inert here
+                return true; // battle mode consumes ApplyResourceDelta (FA10) / ApplyStatus (FA2) / ModifyStat (FA1) / PlaceStructure (Siege) only; every other action is inert here
 
             var ptr = item.Params.TryGetValue("targetPtr", out var p) ? p as string : null;
             if (string.IsNullOrWhiteSpace(ptr))
@@ -238,6 +263,59 @@ public sealed class BattleEffectHost
                 owner.Derived.Set(DerivedStatChannels.CombatDefenseOmni,
                     Ledger.Recompose(ownerKey, channel!, owner.BaselineDefense));
 
+            return true;
+        }
+
+        /// <summary>
+        /// base-defense `siege-construction` (decision 27, 2026-09-06): `structure.place`'s executor.
+        /// Validates through the SAME <see cref="ConstructionPlacement.CanPlace"/> gate every one of the
+        /// four acquisition paths shares (§6), then occupies the cell for the REST of this battle
+        /// (blocking movement/pathing immediately) and records the placement for
+        /// <see cref="DistrictAssaultResolver"/> to read back once <c>BattleEngine.Resolve</c> returns.
+        ///
+        /// <para><b>Named, deliberate simplification</b>: the newly-placed structure does NOT become a
+        /// fightable <c>CombatantKind.Structure</c> actor within THIS SAME battle — the actor list is
+        /// built once, up front, from the setup's own Squad/Wave, and is not designed to grow mid-fight.
+        /// It occupies its cell (so pathing/adjacency
+        /// for the rest of THIS engagement already sees it as real ground), and becomes a real,
+        /// fightable structure with correct HP from the NEXT engagement onward, once the world layer
+        /// has persisted it and <c>DistrictAssaultResolver.PlaceStructures</c> rebuilds the board fresh
+        /// — the same "board rebuilt from world truth every engagement" model decision 24's own
+        /// siege-spans-turns fix already established.</para>
+        /// </summary>
+        bool ExecPlaceStructure(EffectExecuteContext ctx, EffectActionPlanItem item)
+        {
+            if (ConstructionBoard is null) return true; // not wired (e.g. a bare test harness) -- refuse quietly
+
+            var structureId = item.Params.TryGetValue("structureId", out var s) ? s as string : null;
+            if (string.IsNullOrWhiteSpace(structureId) || !StructureCatalog.IsKnown(structureId))
+                return true; // malformed content, refused upstream at bind
+
+            var instant = item.Params.TryGetValue("instant", out var i) && Convert.ToBoolean(i);
+
+            var builderPtr = ctx.Event.ActorPtr;
+            if (string.IsNullOrWhiteSpace(builderPtr)
+                || !ConstructionBoard.Board.Positions.TryGetValue(builderPtr, out var builderPos))
+                return true; // no live builder position -- cannot validate adjacency
+
+            if (ctx.Event.TargetRow is not { } targetRow || ctx.Event.TargetCol is not { } targetCol)
+                return true; // no target cell named
+
+            var targetCell = new GridPos(targetRow, targetCol);
+            if (!ConstructionBoard.SlotByCell.TryGetValue(targetCell, out var slot))
+                return true; // not a world slot's own cell -- nothing can ever be built here (§6: every legal target is a WorldSlot cell)
+
+            var def = StructureCatalog.Get(structureId!);
+            var slotKindSatisfied = def.RequiredSlotKind == slot.Kind;
+
+            if (!ConstructionPlacement.CanPlace(
+                    ConstructionBoard.Board, ConstructionBoard.Board.Spec, targetCell, builderPos,
+                    ConstructionBoard.BoardSide, ConstructionBoard.CoreSideMilli, ConstructionBoard.RampartThickness,
+                    slotKindSatisfied))
+                return true; // refused by the shared gate -- a legal "cannot build here", not a bug
+
+            ConstructionBoard.Board.Place($"slot:{slot.SlotIndex}", targetCell);
+            ConstructionBoard.Placed.Add(new StructurePlacementRecord(slot.SlotIndex, structureId!, instant));
             return true;
         }
     }

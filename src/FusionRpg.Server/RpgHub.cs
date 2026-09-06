@@ -129,17 +129,12 @@ public sealed class RpgHub : Hub
             && (atoms is null || (atoms.Grants.Count == 0 && atoms.RunnerBindings.Count == 0 && atoms.Defs.Count == 0));
         if (nothingToSend) return null;
 
-        var payload = new Dictionary<string, object?> { ["grants"] = grants };
-        if (atoms != null)
-        {
-            payload["defs"] = atoms.Defs;
-            payload["runnerBindings"] = atoms.RunnerBindings;
-            payload["catalogRevision"] = atoms.CatalogRevision;
-            payload["contentHash"] = atoms.ContentHash;
-            payload["matchSeed"] = atoms.MatchSeed;
-            payload["matchKey"] = atoms.MatchKey;
-            payload["upToDate"] = atoms.UpToDate;
-        }
+        // T6.2 (2026-09-06): assembled by AtomPushService.BuildApplyPayload, not inline here. This
+        // dictionary was hand-rolled in two places and BOTH dropped `atoms.Grants` — the compiled
+        // (passive) half of the push — while this very method already read `atoms.Grants.Count` in
+        // its nothingToSend test above. See that method for why the compiled grants merge into the
+        // SAME `grants` array as the session snapshot rather than a key of their own.
+        var payload = AtomPushService.BuildApplyPayload(atoms, grants);
 
         return new CommandDto
         {

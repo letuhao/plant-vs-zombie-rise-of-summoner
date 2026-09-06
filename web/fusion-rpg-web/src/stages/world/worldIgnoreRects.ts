@@ -3,6 +3,20 @@ import type { WorldIgnoreRect } from "@/game/EventBus";
 /** Shell `Rail` column width (`Rail.tsx` `w-[92px]`). */
 export const SHELL_RAIL_WIDTH_PX = 92;
 
+/** Fallback chrome sizes when HUD anchors are not yet measured (followup F6). */
+export const FALLBACK_TOP_H = 56;
+export const FALLBACK_BOTTOM_LEFT_W = 200;
+export const FALLBACK_BOTTOM_LEFT_H = 200;
+export const FALLBACK_RIGHT_W = 280;
+export const FALLBACK_DOCK_W = 380;
+
+export type MeasuredIgnoreAnchors = {
+  top?: WorldIgnoreRect;
+  bottomLeft?: WorldIgnoreRect;
+  right?: WorldIgnoreRect;
+  dock?: WorldIgnoreRect;
+};
+
 export type BuildWorldIgnoreRectsInput = {
   /** Map pane size in CSS px (the Phaser canvas parent). */
   width: number;
@@ -15,6 +29,8 @@ export type BuildWorldIgnoreRectsInput = {
    * (that would eat homeworld / left pins). Gaps D7 / D22.
    */
   canvasBesideRail: boolean;
+  /** Optional measured HUD boxes in canvas CSS space (followup F6). */
+  measured?: MeasuredIgnoreAnchors;
 };
 
 /**
@@ -22,14 +38,21 @@ export type BuildWorldIgnoreRectsInput = {
  * Callers that mount `Rail` beside the map pass `canvasBesideRail: true`.
  */
 export function buildWorldIgnoreRects(input: BuildWorldIgnoreRectsInput): WorldIgnoreRect[] {
-  const { width: w, height: h, dockOpen, canvasBesideRail } = input;
+  const { width: w, height: h, dockOpen, canvasBesideRail, measured } = input;
   const rects: WorldIgnoreRect[] = [
-    // Top strip (calendar / loam)
-    { left: 0, top: 0, width: w, height: 56 },
-    // Bottom-left: Fit / +/− / LensPicker
-    { left: 0, top: Math.max(0, h - 200), width: 200, height: 200 },
-    // Right column: NotifyRail → Outliner → Playback (+ bottom-right turn cluster)
-    { left: Math.max(0, w - 280), top: 0, width: 280, height: h }
+    measured?.top ?? { left: 0, top: 0, width: w, height: FALLBACK_TOP_H },
+    measured?.bottomLeft ?? {
+      left: 0,
+      top: Math.max(0, h - FALLBACK_BOTTOM_LEFT_H),
+      width: FALLBACK_BOTTOM_LEFT_W,
+      height: FALLBACK_BOTTOM_LEFT_H
+    },
+    measured?.right ?? {
+      left: Math.max(0, w - FALLBACK_RIGHT_W),
+      top: 0,
+      width: FALLBACK_RIGHT_W,
+      height: h
+    }
   ];
 
   if (!canvasBesideRail) {
@@ -39,10 +62,33 @@ export function buildWorldIgnoreRects(input: BuildWorldIgnoreRectsInput): WorldI
   }
 
   if (dockOpen) {
-    // DockShell is fixed at left-[92px] w-[380px]; canvas starts at the rail's right edge, so the
-    // dock covers roughly the left 380px of the canvas — not 92+380.
-    rects.push({ left: 0, top: 0, width: 380, height: h });
+    rects.push(
+      measured?.dock ?? { left: 0, top: 0, width: FALLBACK_DOCK_W, height: h }
+    );
   }
 
   return rects;
+}
+
+/**
+ * Convert an absolute DOM rect into canvas-relative CSS space.
+ * Returns null when width/height are degenerate.
+ */
+export function rectRelativeToCanvas(
+  canvasRect: DOMRectReadOnly,
+  elRect: DOMRectReadOnly
+): WorldIgnoreRect | null {
+  if (elRect.width < 1 || elRect.height < 1) return null;
+  return {
+    left: elRect.left - canvasRect.left,
+    top: elRect.top - canvasRect.top,
+    width: elRect.width,
+    height: elRect.height
+  };
+}
+
+/** Fit padLeft from dock ignore (followup F5). */
+export function fitPadLeft(dockOpen: boolean, measuredDockWidth?: number): number {
+  if (!dockOpen) return 100;
+  return measuredDockWidth != null && measuredDockWidth > 0 ? measuredDockWidth : FALLBACK_DOCK_W;
 }

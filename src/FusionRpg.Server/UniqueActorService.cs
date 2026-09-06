@@ -214,23 +214,15 @@ public sealed class UniqueActorService
             return;
         }
 
-        // The injector's own RunEffectsGrantsApply (CheatCommandRunner.cs:777-814) refuses the WHOLE
-        // command — including the atom half, InstallAtomPush is never reached — when "grants" is
-        // absent or not an array: "effects.grants.apply: missing grants[]". An empty array (not an
-        // absent key) is what makes this genuinely a no-op for the session grant snapshot while still
-        // letting the atom push through — found by reading the real consumer before shipping an
-        // atoms-only payload that would have silently done nothing.
-        var payload = new Dictionary<string, object?>
-        {
-            ["grants"] = Array.Empty<object>(),
-            ["defs"] = atoms.Defs,
-            ["runnerBindings"] = atoms.RunnerBindings,
-            ["catalogRevision"] = atoms.CatalogRevision,
-            ["contentHash"] = atoms.ContentHash,
-            ["matchSeed"] = atoms.MatchSeed,
-            ["matchKey"] = atoms.MatchKey,
-            ["upToDate"] = atoms.UpToDate,
-        };
+        // T6.2 (2026-09-06): assembled by AtomPushService.BuildApplyPayload, the one place this shape
+        // is built. It was hand-rolled here and again in RpgHub.BuildApplyCommand, and BOTH copies
+        // dropped `atoms.Grants` — the compiled (passive) half of the push — which is exactly the
+        // drift a second hand-rolled copy invites. The `grants` array is still always present (the
+        // injector's RunEffectsGrantsApply, CheatCommandRunner.cs:777-814, refuses the WHOLE command
+        // — InstallAtomPush never reached — when it is absent or not an array), and it still carries
+        // no SESSION grant: a mid-match equip/unequip never touches the player's own Effect-bag
+        // snapshot. What it now carries is this push's own compiled grants, which is the point.
+        var payload = AtomPushService.BuildApplyPayload(atoms, sessionGrants: null);
 
         await SendInjectorCommand(_hub, _inbox, new CommandDto
         {

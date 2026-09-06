@@ -2,10 +2,14 @@ import Phaser from "phaser";
 import { worldBusEmit, type WorldIgnoreRect } from "../../EventBus";
 import type { WorldRegistry } from "../entities/WorldRegistry";
 import { worldCameraSystem } from "./worldCameraSystem";
-import { hitRadiusWorld, nearestSectorId } from "./worldPickHit";
+import { resolvePickResult, type PickPoint } from "./worldPickHit";
 import { cssToGamePoint, gameToCssPoint } from "./worldPickCoords";
 
 const WIRE_KEY = "worldPick";
+
+/** Scratch buffers — reused every pick (followup F1). */
+const scratchSectors: PickPoint[] = [];
+const scratchForces: PickPoint[] = [];
 
 type PickWireState = {
   generation: number;
@@ -24,20 +28,31 @@ function inIgnoreRect(x: number, y: number, rects: WorldIgnoreRect[]): boolean {
   return false;
 }
 
-function resolveSectorHit(
+function fillScratch(registry: WorldRegistry): void {
+  scratchSectors.length = 0;
+  scratchForces.length = 0;
+  for (const id of registry.sectorIds()) {
+    const go = registry.getSector(id);
+    if (!go || !go.active) continue;
+    const c = go as Phaser.GameObjects.Container;
+    scratchSectors.push({ id, x: c.x, y: c.y });
+  }
+  for (const id of registry.forceIds()) {
+    const go = registry.getForce(id);
+    if (!go || !go.active) continue;
+    const c = go as Phaser.GameObjects.Container;
+    scratchForces.push({ id, x: c.x, y: c.y });
+  }
+}
+
+function resolvePick(
   scene: Phaser.Scene,
   registry: WorldRegistry,
   worldX: number,
   worldY: number
-): string | null {
-  const hitR = hitRadiusWorld(scene.cameras.main.zoom);
-  const pins = registry.sectorIds().flatMap((id) => {
-    const go = registry.getSector(id);
-    if (!go || !go.active) return [];
-    const container = go as Phaser.GameObjects.Container;
-    return [{ id, x: container.x, y: container.y }];
-  });
-  return nearestSectorId(pins, worldX, worldY, hitR);
+) {
+  fillScratch(registry);
+  return resolvePickResult(scratchForces, scratchSectors, worldX, worldY, scene.cameras.main.zoom);
 }
 
 function wire(
@@ -65,6 +80,14 @@ function wire(
 
   const emitEmpty = () => emitSelect({ kind: "empty" });
 
+  const emitPickResult = (result: ReturnType<typeof resolvePickResult>) => {
+    if (result.kind === "empty") {
+      emitEmpty();
+      return;
+    }
+    emitSelect({ kind: result.kind, id: result.id });
+  };
+
   /** ignoreRects are authored in canvas CSS px (gaps D7). */
   const blockedByChromeOrDragCss = (cssX: number, cssY: number): boolean => {
     if (inIgnoreRect(cssX, cssY, getIgnoreRects())) return true;
@@ -74,10 +97,22 @@ function wire(
 
   const pointerToCss = (pointer: Phaser.Input.Pointer) => {
     const canvas = scene.game.canvas as HTMLCanvasElement;
-    return gameToCssPoint(pointer.x, pointer.y, scene.scale.width, scene.scale.height, canvas.clientWidth, canvas.clientHeight);
+    return gameToCssPoint(
+      pointer.x,
+      pointer.y,
+      scene.scale.width,
+      scene.scale.height,
+      canvas.clientWidth,
+      canvas.clientHeight
+    );
   };
 
   const onPointerDown = () => {
+    pickConsumed = false;
+  };
+
+  const onDomPointerDown = (ev: PointerEvent) => {
+    if (ev.button !== 0) return;
     pickConsumed = false;
   };
 
@@ -88,11 +123,8 @@ function wire(
 
     const reg = (scene.data.get("worldRegistry") as WorldRegistry | undefined) ?? registry;
     if (reg) {
-      const sectorId = resolveSectorHit(scene, reg, pointer.worldX, pointer.worldY);
-      if (sectorId) {
-        emitSelect({ kind: "sector", id: sectorId });
-        return;
-      }
+      emitPickResult(resolvePick(scene, reg, pointer.worldX, pointer.worldY));
+      return;
     }
 
     emitEmpty();
@@ -129,9 +161,7 @@ function wire(
       emitSelect({ kind: "force", id: name.slice("force:".length) });
       return;
     }
-    if (name?.startsWith("lane:")) {
-      emitSelect({ kind: "lane", id: name.slice("lane:".length) });
-    }
+    // lane: not interactive in v1 — ignore named lane hits (followup F1).
   };
 
   /** DOM path — Playwright / WebView often miss Phaser's synthetic pointer stream. */
@@ -149,11 +179,8 @@ function wire(
     const world = scene.cameras.main.getWorldPoint(game.x, game.y);
     const reg = (scene.data.get("worldRegistry") as WorldRegistry | undefined) ?? registry;
     if (reg) {
-      const sectorId = resolveSectorHit(scene, reg, world.x, world.y);
-      if (sectorId) {
-        emitSelect({ kind: "sector", id: sectorId });
-        return;
-      }
+      emitPickResult(resolvePick(scene, reg, world.x, world.y));
+      return;
     }
     emitEmpty();
   };
@@ -164,6 +191,7 @@ function wire(
   scene.input.on("contextmenu", onContextMenu);
   scene.input.on("gameobjectup", onGameObjectUp);
   const canvasEl = scene.game.canvas as HTMLCanvasElement | undefined;
+  canvasEl?.addEventListener("pointerdown", onDomPointerDown);
   canvasEl?.addEventListener("pointerup", onDomPointerUp);
 
   s.offs.push(
@@ -172,6 +200,7 @@ function wire(
     () => scene.input.off("pointerupoutside", onPointerUp),
     () => scene.input.off("contextmenu", onContextMenu),
     () => scene.input.off("gameobjectup", onGameObjectUp),
+    () => canvasEl?.removeEventListener("pointerdown", onDomPointerDown),
     () => canvasEl?.removeEventListener("pointerup", onDomPointerUp)
   );
 }

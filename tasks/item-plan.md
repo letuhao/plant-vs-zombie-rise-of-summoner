@@ -125,13 +125,20 @@ them costs two full runs and leaves the corpus incoherent in between.
 >
 > ⚠ **Amended 2026-09-04, against a measured result:** "the seedsmith gating metrics are green" does
 > not hold universally, and it was wrong to write it that way. Bumping `core.v1.json` to D30's shape
-> makes `Linkage/SetCompletability` (`gates = True`, wired into CI at `ci.yml:220`) report **18**
-> `SetRoleNotHybridCore` findings it was previously blind to (measured: `seedsmith check --adapter
-> items --gate` goes from exit 0 to exit 1). **This is D30's own accepted cost** — its ruling text says
-> "silently leaving the gate blind is the only expensive answer" — not a defect in the bump. It closes
-> when module 13 (`set-charm-gen`, Phase 3) regenerates those 18 sets, which D30 already prices at "no
-> additional pass". CI's items-check step is red between here and there; that is expected, not a build
-> break to chase.
+> makes `Linkage/SetCompletability` (`gates = True`, wired into CI at `ci.yml:231`) report **30**
+> `SetRoleNotHybridCore` findings over **18 distinct sets**, all of which it was previously blind to
+> (measured: `seedsmith check --adapter items --gate` goes from exit 0 to exit 1). **This is D30's own
+> accepted cost** — its ruling text says "silently leaving the gate blind is the only expensive
+> answer" — not a defect in the bump. It closes when module 13 (`set-charm-gen`, Phase 3) regenerates
+> those 18 sets, which D30 already prices at "no additional pass". CI's items-check step is red between
+> here and there; that is expected, not a build break to chase.
+>
+> ⚠ **Two citations in the paragraph above were wrong and are corrected here, 2026-09-06, both
+> re-measured rather than reasoned about.** It said **18 findings** — 18 is the distinct-*set* count;
+> the finding count is **30**, since 10 sets claim two off-core roles apiece and one claims four. And
+> it cited `ci.yml:220`, which is prose inside the step's comment block; the gate command is at
+> `ci.yml:231` (step name `:211`). `item-todo.md` P1.3 had the CI line right and the finding count
+> wrong; both files now agree with a live gate run (`61 gap, 80 note, 23 not_measured`).
 
 ### Phase 1 — the spine to the payoff (modules 1–5)
 

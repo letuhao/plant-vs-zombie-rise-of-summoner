@@ -50,4 +50,15 @@ public static class CrossProgramLandedFlags
     /// narrow definition ("turn.speed registered with a reader, and readiness computed") — true —
     /// not B9's full scope.</summary>
     public const bool TurnSpeedLanded = true;
+
+    /// <summary>A3 (party-dungeon `supplies-and-objects`, spec-supplies-and-objects.md §3): an
+    /// item-shaped cost row on actions, the seam a `useContext: battle` supply needs (its
+    /// <c>GrantsActionId</c> names a corpus action whose cost IS the item, "external and gating for
+    /// battle use only" — rest and curio uses never wait on this, their own cost is the pack decrement
+    /// `loot-pack` already owns). Verified false by reading the row itself, not assumed:
+    /// <see cref="ActionCostRow"/> is `(ActionId, ResourceId, AmountSpec, When, AllowLethal)` —
+    /// <c>ResourceId</c> is one of the six resource-hub ids only (`ActionRow.cs:122-123`), with no way
+    /// to name an item id as a cost. <b>False today</b> — flip it, and the tests that gate on it,
+    /// together, the day a real item-cost row lands.</summary>
+    public const bool ItemCostRowLanded = false;
 }

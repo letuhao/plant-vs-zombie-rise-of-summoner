@@ -5,6 +5,7 @@ import {
   MAX_SCALE,
   MIN_SCALE
 } from "../objects/pinConstants";
+import { edgeScrollBlockedByIgnore, fitExtentFromPoints } from "./worldCameraMath";
 
 /**
  * Camera structural consts and clamp math — pure oracle for R9 / gaps D4/D7/D9/D25.
@@ -66,6 +67,23 @@ describe("worldCameraSystem structural clamps (R9)", () => {
     expect(
       edgeScrollAxes(10, 200, 1280, 720, [{ left: 0, top: 0, width: 100, height: 400 }])
     ).toEqual({ dx: 0, dy: 0 });
+  });
+
+  it("edge-scroll ignoreRects compare in CSS space when display is scaled (followup F2)", () => {
+    const rightStrip = [{ left: 520, top: 0, width: 280, height: 450 }];
+    expect(edgeScrollBlockedByIgnore(1100, 200, 1600, 900, 800, 450, rightStrip)).toBe(true);
+    expect(edgeScrollBlockedByIgnore(800, 200, 1600, 900, 800, 450, rightStrip)).toBe(false);
+  });
+
+  it("fitExtentFromPoints grows with far sector AABB (followup F5)", () => {
+    const empty = fitExtentFromPoints([]);
+    expect(empty.extentW).toBe(880);
+    const wide = fitExtentFromPoints([
+      { x: 0, y: 0 },
+      { x: 2000, y: 100 }
+    ]);
+    expect(wide.extentW).toBeGreaterThan(empty.extentW);
+    expect(wide.midX).toBe(1000);
   });
 
   it("accepts centre and relative zoom payload shapes (gaps D9/D25)", () => {

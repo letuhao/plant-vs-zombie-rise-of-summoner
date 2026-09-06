@@ -24,8 +24,16 @@ public static class AffixFilters
 
     /// <summary>
     /// True when <paramref name="kindId"/> can execute in <paramref name="target"/> at all
-    /// (anything but <see cref="RuntimeState.None"/>). `stat.derived` is Full/Full/None as of the
-    /// D6 quarantine lifting (2026-09-02) — Sim stays refused, on purpose, unchanged by that lift.
+    /// (anything but <see cref="RuntimeState.None"/>).
+    ///
+    /// <para>⚠ `stat.derived` was Lawn/Battle/Sim = Full/Full/<b>None</b> when the D6 quarantine
+    /// lifted (2026-09-02), so Sim was refused here. The effect-atom program moved the Sim cell to
+    /// <b>Partial</b> on 2026-09-06 (mechanism-wiring E5 — `ActorDerivedLookup`'s contribution fold
+    /// gave it a real, if Flat/Increased-only, consumer), so this predicate now ADMITS a
+    /// `stat.derived` affix for a Sim target. That is the intended behaviour of reading the registry
+    /// live rather than quoting a document — recorded here only because the old comment named a
+    /// matrix that no longer exists. Tracked by
+    /// `IlvlTierLadderTests.A_stat_derived_affix_is_now_allowed_for_a_sim_target_via_the_partial_fold`.</para>
     /// </summary>
     public static bool RuntimeAllows(string kindId, RuntimeId target)
     {

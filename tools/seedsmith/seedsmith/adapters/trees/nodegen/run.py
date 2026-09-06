@@ -35,12 +35,15 @@ trees test suite's own copy lives in `_nodegen_fixtures.py` so every test file h
 """
 from __future__ import annotations
 
+import itertools
 import json
 import os
+import re
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, replace
 from pathlib import Path
-from typing import Any, Callable, Mapping, Sequence
+from typing import Any, Callable, Collection, Mapping, Sequence
 
 from ....pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig, call_with_self_heal
 from ....pipeline.model import BLOCKED_FIELD
@@ -452,8 +455,46 @@ def _exhausted(soft: "Mapping[str, str]") -> bool:
     return any(isinstance(v, str) and v.startswith("FAILED:") for v in soft.values())
 
 
+_NAME_KEY_SLUG_RE = re.compile(r"[^a-z0-9]+")
+
+
+def _slugify(name: str) -> str:
+    """`name` -> the `<slug>` half of `tree.node.<slug>`, matching `NAME_KEY_PATTERN`
+    (`^tree\\.node\\.[a-z0-9-]+$`): lowercase, every run of non-alphanumeric characters becomes one
+    hyphen, no leading/trailing hyphen. Never returns an empty string — `"node"` if `name` collapses
+    to nothing (e.g. it was pure punctuation), since `NAME_KEY_PATTERN` requires at least one
+    character after `tree.node.`."""
+    slug = _NAME_KEY_SLUG_RE.sub("-", name.strip().lower()).strip("-")
+    return slug or "node"
+
+
+def _derive_unique_name_key(name: str, known_name_keys: "Collection[str]") -> str:
+    """2026-09-06 real-call finding (`might`, three separate real collisions across two real runs):
+    asked to derive `nameKey` from its own `name` choice (`schema.py`'s own field description, itself
+    a fix for this same finding), the real local model kept it as a bare FORMAT instruction and
+    repeatedly fell back to a generic templated key (`tree.node.<branch>-<depth>-01`) completely
+    decoupled from the name it had just chosen — proven not a one-off: the identical fallback key
+    recurred on a FRESH run even after the wording fix landed. No amount of further prompt wording
+    can be verified to fix a demonstrated real-model failure to follow an instruction twice in a row;
+    the durable fix is to stop trusting the model for this field's UNIQUENESS at all. The model's own
+    `nameKey` is still requested and still gates 7/13-validated for FORMAT (a real defect in some
+    other field could still make the whole response fail those gates) — only the final persisted
+    value is overridden here, deterministically, from the model's own accepted `name` (a slug of
+    `name`, exactly what the schema now already asks the model to do by hand), with a numeric suffix
+    appended only if that slug collides with an already-known key — collision-free by construction,
+    never by hoping the model gets it right."""
+    base_key = f"tree.node.{_slugify(name)}"
+    if base_key not in known_name_keys:
+        return base_key
+    suffix = 2
+    while f"{base_key}-{suffix}" in known_name_keys:
+        suffix += 1
+    return f"{base_key}-{suffix}"
+
+
 def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
-                  config: LlmCallerConfig = DEFAULT_CONFIG) -> NodeOutcome:
+                  config: LlmCallerConfig = DEFAULT_CONFIG,
+                  known_name_keys: "Collection[str]" = ()) -> NodeOutcome:
     """One node, start to finish: gate 2 (schema description audit, before any call), the base
     call, the two `affixIds` vote calls (§6.1), gate 11's vote resolution, and gate 13's
     persist-time re-gate over the base response with the VOTED `affixIds` substituted in.
@@ -544,6 +585,12 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
         return NodeOutcome(subject.subject_id, "escalated",
                            detail=f"failed the gate at persist time (§7 gate 13): {persist_defects}")
 
+    # See `_derive_unique_name_key`'s own docstring: the model's own `nameKey` already passed gates
+    # 7/13's FORMAT validation above (so a real defect elsewhere in the response is still caught) --
+    # only the persisted VALUE is replaced here, deterministically derived from the model's own
+    # accepted `name`, collision-free by construction against every already-known key.
+    final_response["nameKey"] = _derive_unique_name_key(str(final_response["name"]), known_name_keys)
+
     record = build_node_record(subject.node_id, subject.node_key, subject.branch, subject.tier,
                                subject.node_class, final_response)
     return NodeOutcome(subject.subject_id, "accepted", record=record)
@@ -564,22 +611,44 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
                        inputs_for: "Callable[[Subject], NodeGenerationInputs]", *,
                        ledger_path: "Path | None" = None, seed_root: "Path | None" = None,
                        config: LlmCallerConfig = DEFAULT_CONFIG,
-                       unresolved_max_share_permille: "int | None" = None) -> LanguageStageResult:
+                       unresolved_max_share_permille: "int | None" = None,
+                       max_workers: int = 1) -> LanguageStageResult:
     """One tree, start to finish, idempotent. §7 gate 14: a subject already in the ledger is never
     regenerated — its ALREADY-ACCEPTED record is read back from the ledger and reused, so a forced
     rerun over unchanged inputs makes zero model calls and re-emits byte-identical bytes (the
     historical defect this whole task exists to catch: "the commander-effect generator rewrote all
     84 entries every run").
 
-    **Tier-sibling tracking (§6.2, closed 2026-09-06).** This function, not `inputs_for`, owns
-    "already-accepted TIER siblings" — populating it needs `records`/`done`, data only this loop
-    holds. Whatever `siblings` the caller's own `inputs_for(subject)` sets is REPLACED with the real,
-    freshly-tracked tuple for that subject's tier (via `dataclasses.replace`); a caller is never
-    expected to track this itself. The pool is seeded from resumed (`plan.already_done`) records too,
-    so a resumed run's first newly-generated node in a tier still sees whatever an EARLIER run already
-    accepted there, not just what this call accepts. Combined with `plan_run`'s own
-    mechanism-before-magnitude ordering, a magnitude node normally has at least one real sibling to
-    read by the time it renders, rather than always seeing brief.py's own "(none yet)" placeholder.
+    **Tree-wide sibling tracking (§6.2, closed 2026-09-06, widened same day).** This function, not
+    `inputs_for`, owns "already-accepted siblings" — populating it needs `records`/`done`, data only
+    this loop holds. Whatever `siblings` the caller's own `inputs_for(subject)` sets is REPLACED with
+    the real, freshly-tracked tuple (via `dataclasses.replace`); a caller is never expected to track
+    this itself. The pool is seeded from resumed (`plan.already_done`) records too, so a resumed run's
+    first newly-generated node still sees whatever an EARLIER run already accepted, not just what this
+    call accepts. **Tree-wide, not tier-scoped** — widened from the original per-tier design the same
+    day a real run proved tier-scoping insufficient for its own stated "do not repeat" purpose (a
+    real, independent three-way name collision across two different tiers) — capped to the most
+    recent `_TREE_SIBLING_CAP` (12) accepted nodes, matching §6.2's own "k nearest siblings" language
+    rather than passing an ever-growing, unbounded list as the tree fills in. Combined with
+    `plan_run`'s own mechanism-before-magnitude ordering, a magnitude node normally has at least one
+    real sibling to read by the time it renders, rather than always seeing brief.py's own "(none yet)"
+    placeholder.
+
+    **`max_workers` (owner request, 2026-09-06): batched parallelism, not blanket parallelism.**
+    `plan.subjects` is already grouped into contiguous `(tier, node_class)` runs by `plan_run`'s own
+    ordering — every subject in ONE such run shares the identical siblings snapshot (none of them can
+    be a sibling of another in the SAME run; siblings only ever come from an EARLIER run), so they have
+    no dependency on each other and are safe to generate concurrently. Runs themselves stay STRICTLY
+    SEQUENTIAL — a later run must see everything an earlier one accepted, which is the whole point of
+    §6.2's sibling pass. `max_workers=1` (the default) takes the single-subject-at-a-time path
+    unconditionally, byte-for-byte the same code as before this parameter existed — every existing
+    caller and test keeps its exact prior behavior with zero change. `max_workers>1` fans out within a
+    run via a bounded `ThreadPoolExecutor`, mirroring `workflow.runner.MAX_WORKERS=4`'s own stated
+    rationale ("one local model serves one request at a time; a small pool keeps it fed without
+    stampeding it") — `workflow.runner.run_many` itself cannot be reused here, since it is built around
+    a LangGraph `app.invoke()` interface this module never adopted. Outcomes are always reassembled in
+    `plan.subjects`' own original order before being returned, regardless of which worker in a run
+    finished first, so `result.outcomes` is deterministic either way.
     """
     from . import verdict  # local import — avoids a module-level cycle with `verdict.py`'s own
                             # re-export of A2's `targets` module, which nothing here otherwise needs
@@ -588,7 +657,24 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     plan = plan_run(tree_plan, ledger=done)
 
     records: "dict[str, NodeSeedRecord]" = {}
-    tier_siblings: "dict[int, list[brief_mod.SiblingSummary]]" = {}
+    # 2026-09-06 real-call finding: TIER-scoped siblings (the original §6.2 shape) proved insufficient
+    # for the "do not repeat" purpose the spec's own text names -- a real run independently generated
+    # "Deep Rooting" for three DIFFERENT defensive-branch nodes across TWO different tiers (t2-n0,
+    # t2-n1, t3-n1), which tier-scoping cannot see across. Widened to a tree-wide, most-recent-N list
+    # (capped, not unbounded, matching §6.2's own "k nearest siblings" language) -- this is sound now
+    # that the magnitude class-note fix (brief.py, same date) already decoupled "what a magnitude node
+    # amplifies" from siblings entirely ("an EXISTING game stat... never a node this tree has or has
+    # not generated"), so widening scope here only affects the dedup purpose, never the amplification
+    # one, and cannot reintroduce the tier-1-3-have-no-mechanism-sibling problem the original ordering
+    # fix solved.
+    _TREE_SIBLING_CAP = 12
+    tree_siblings: "list[brief_mod.SiblingSummary]" = []
+    # 2026-09-06 real-call finding: even with an explicit "derive nameKey from your own name" schema
+    # description (the fix for the SAME finding, wording alone did not hold up against a second real
+    # run), the model kept falling back to an identical generic templated key. `known_name_keys`
+    # tracks every nameKey already spoken for so `generate_node` can override the model's own choice
+    # deterministically -- see `_derive_unique_name_key`'s own docstring for the full reasoning.
+    known_name_keys: "set[str]" = set()
     for subject_id in plan.already_done:
         entry = done[subject_id]
         node = entry["record"]
@@ -599,23 +685,70 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
                 "flavor": node["flavor"], "rationale": node.get("rationale", ""),
             })
         records[subject_id] = record
-        tier_siblings.setdefault(record.tier, []).append(
-            brief_mod.SiblingSummary(record.node_id, record.name, record.affix_ids))
+        tree_siblings.append(brief_mod.SiblingSummary(record.node_id, record.name, record.affix_ids))
+        known_name_keys.add(record.name_key)
 
-    outcomes: "list[NodeOutcome]" = []
+    outcomes_by_subject: "dict[str, NodeOutcome]" = {}
     unresolved_count = 0
-    for subject in plan.subjects:
+
+    def _generate_one(subject: Subject, siblings_here: "tuple[brief_mod.SiblingSummary, ...]",
+                      known_keys_here: "frozenset[str]") -> NodeOutcome:
         base_inputs = inputs_for(subject)
-        siblings_here = tuple(tier_siblings.get(subject.tier, ()))
-        outcome = generate_node(subject, replace(base_inputs, siblings=siblings_here), config=config)
-        outcomes.append(outcome)
+        return generate_node(subject, replace(base_inputs, siblings=siblings_here), config=config,
+                             known_name_keys=known_keys_here)
+
+    def _record_outcome(subject: Subject, outcome: NodeOutcome) -> None:
+        nonlocal done, unresolved_count
+        outcomes_by_subject[subject.subject_id] = outcome
         if outcome.outcome == "unresolved":
             unresolved_count += 1
         if outcome.outcome == "accepted" and outcome.record is not None:
-            tier_siblings.setdefault(subject.tier, []).append(brief_mod.SiblingSummary(
+            tree_siblings.append(brief_mod.SiblingSummary(
                 outcome.record.node_id, outcome.record.name, outcome.record.affix_ids))
+            known_name_keys.add(outcome.record.name_key)
             done = record_accepted(done, subject.subject_id, outcome.record)
             records[subject.subject_id] = outcome.record
+
+    for _key, group_iter in itertools.groupby(plan.subjects, key=lambda s: (s.tier, s.node_class)):
+        run = list(group_iter)
+
+        if max_workers <= 1 or len(run) <= 1:
+            # Sequential: nothing stops a subject from seeing what the PREVIOUS subject in this SAME
+            # batch just produced -- there is no real concurrency here, so the snapshot is retaken
+            # fresh before every single subject (real-call finding, 2026-09-06: an earlier version of
+            # this fix took the snapshot once per BATCH even on the sequential path, which meant two
+            # same-batch subjects with max_workers=1 could still both derive the identical nameKey
+            # slug and collide -- caught by testing the fix against `might`'s own real 4-per-tier
+            # magnitude batches, not assumed correct).
+            for subject in run:
+                siblings_here = tuple(tree_siblings[-_TREE_SIBLING_CAP:])
+                known_keys_here = frozenset(known_name_keys)
+                _record_outcome(subject, _generate_one(subject, siblings_here, known_keys_here))
+            continue
+
+        # Parallel: every subject in this run shares ONE siblings/known-keys snapshot, taken before
+        # any of them starts -- none can see (or collide-check against) another accepted in the SAME
+        # run, only what an EARLIER run already contributed. The most recent _TREE_SIBLING_CAP
+        # accepted nodes, tree-wide, never just this subject's own tier. Two subjects in the SAME
+        # parallel batch independently choosing the identical name is a real, narrower remaining edge
+        # case `assert_no_duplicate_name_keys` would still catch at emit time, just not pre-empt --
+        # the same trade-off already accepted for siblings under real concurrency.
+        siblings_here = tuple(tree_siblings[-_TREE_SIBLING_CAP:])
+        known_keys_here = frozenset(known_name_keys)
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            future_by_subject = {
+                pool.submit(_generate_one, subject, siblings_here, known_keys_here): subject for subject in run
+            }
+            results: "dict[str, NodeOutcome]" = {}
+            for future in future_by_subject:
+                subject = future_by_subject[future]
+                results[subject.subject_id] = future.result()
+        # Applied in the run's own original order, never completion order, so tier_siblings grows
+        # deterministically regardless of which worker finished first.
+        for subject in run:
+            _record_outcome(subject, results[subject.subject_id])
+
+    outcomes = [outcomes_by_subject[s.subject_id] for s in plan.subjects]
 
     if plan.subjects:
         write_ledger(done, ledger_path)

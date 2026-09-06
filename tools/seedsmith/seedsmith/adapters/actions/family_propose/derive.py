@@ -220,7 +220,10 @@ def finalize_candidate(brief: Mapping[str, Any], drafts: Sequence[Mapping[str, A
     if vote.confidence == "unresolved":
         return Candidate(brief_id=brief_id, outcome="unresolved", entry=None, vote=vote, provenance=prov)
 
-    atom_families = list(vote.values)
+    # A-S7 `coverage-assignment` splice (spec-coverage-assignment.md SS6): unions in the brief's
+    # own required family, ONLY on an accepted candidate -- deterministic, zero extra model calls,
+    # omitted `requiredFamilies` is byte-identical to before this existed.
+    atom_families = sorted(set(vote.values) | set(brief.get("requiredFamilies") or ()))
     entry = entry_for({**primary, "atomFamilies": atom_families}, candidate_id=candidate_id,
                       brief_id=brief_id, provenance=prov)
     return Candidate(brief_id=brief_id, outcome="accepted", entry=entry, vote=vote, provenance=prov)

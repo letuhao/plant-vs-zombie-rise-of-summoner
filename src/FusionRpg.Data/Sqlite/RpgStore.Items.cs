@@ -408,6 +408,92 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// The spec's validate-on-read: <i>"Entries validate on read, never silently drop. An entry whose
+    /// item was salvaged returns with a <c>missing</c> marker, so the player sees the hole."</i>
+    /// Every stored entry comes back — the marker is the output, never a shorter list.
+    ///
+    /// <para>An <c>"item"</c> entry resolves when this player still owns that instance; a
+    /// <c>"stock"</c> entry resolves while the count is above zero, since a stock entry names a
+    /// <c>container_id</c> and never pins one copy. An unrecognised <c>ref_kind</c> resolves to
+    /// nothing and is reported <c>Missing</c> — an unreadable entry is a visible hole, not a silent
+    /// pass.</para>
+    ///
+    /// <para>⚠ Ownership is the only liveness test available today: <c>rpg_item.disposition</c> ships
+    /// with no writer (module 2's soft-delete/undo window is unbuilt), so gating on a disposition
+    /// vocabulary here would invent one. When that lands, this predicate is where it plugs in.</para>
+    /// </summary>
+    public IReadOnlyList<FusionRpg.Core.Items.LoadoutEntryStatus> GetLoadoutEntriesValidated(
+        string loadoutId, string playerId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT e.role, e.ref_kind, e.ref_id,
+                       CASE e.ref_kind
+                         WHEN 'item'  THEN (SELECT COUNT(*) FROM rpg_item i
+                                             WHERE i.instance_id = e.ref_id AND i.player_id = $p)
+                         WHEN 'stock' THEN (SELECT COALESCE(MAX(s.qty), 0) FROM rpg_item_stock s
+                                             WHERE s.player_id = $p AND s.container_id = e.ref_id)
+                         ELSE 0
+                       END AS resolves
+                FROM rpg_item_loadout_entry e
+                WHERE e.loadout_id = $id
+                ORDER BY e.role;
+                """;
+            cmd.Parameters.AddWithValue("$id", loadoutId);
+            cmd.Parameters.AddWithValue("$p", playerId);
+
+            using var r = cmd.ExecuteReader();
+            var list = new List<FusionRpg.Core.Items.LoadoutEntryStatus>();
+            while (r.Read())
+                list.Add(new FusionRpg.Core.Items.LoadoutEntryStatus(
+                    r.GetString(0), r.GetString(1), r.GetString(2),
+                    r.GetInt64(3) > 0
+                        ? FusionRpg.Core.Items.LoadoutEntryState.Present
+                        : FusionRpg.Core.Items.LoadoutEntryState.Missing));
+            return list;
+        }
+    }
+
+    /// <summary>Where each instance-pinned reference currently sits, so
+    /// <see cref="FusionRpg.Core.Items.LoadoutReport.Plan"/> can name the cell rather than a count.
+    /// Served by <c>ix_rpg_item_assignment_ref</c>.
+    ///
+    /// <para>The role comes back as the stored string rather than through
+    /// <c>ItemRoles.TryParse</c> on purpose: <c>ListAssignments</c> skips a row whose role it cannot
+    /// parse, which is right for projecting bindings and wrong here — a holder we failed to parse is
+    /// still holding the item, and dropping it would report "free" for a copy that is worn.</para>
+    /// </summary>
+    public IReadOnlyDictionary<string, FusionRpg.Core.Items.LoadoutCell> FindAssignmentHolders(
+        IReadOnlyCollection<string> refIds, string refKind = FusionRpg.Core.Items.LoadoutReport.InstanceRefKind)
+    {
+        var held = new Dictionary<string, FusionRpg.Core.Items.LoadoutCell>(StringComparer.Ordinal);
+        if (refIds.Count == 0) return held;
+
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            foreach (var refId in refIds.Distinct(StringComparer.Ordinal))
+            {
+                using var cmd = db.CreateCommand();
+                cmd.CommandText = """
+                    SELECT specimen_id, role FROM rpg_item_assignment
+                    WHERE ref_kind = $rk AND ref_id = $rid
+                    ORDER BY specimen_id, role LIMIT 1;
+                    """;
+                cmd.Parameters.AddWithValue("$rk", refKind);
+                cmd.Parameters.AddWithValue("$rid", refId);
+                using var r = cmd.ExecuteReader();
+                if (r.Read())
+                    held[refId] = new FusionRpg.Core.Items.LoadoutCell(r.GetString(0), r.GetString(1));
+            }
+        }
+        return held;
+    }
+
     public IReadOnlyList<RpgItemLoadoutRow> ListLoadouts(string playerId)
     {
         lock (_gate)

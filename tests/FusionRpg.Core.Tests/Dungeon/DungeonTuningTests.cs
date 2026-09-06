@@ -313,6 +313,27 @@ public class DungeonTuningTests
         Assert.Throws<DungeonTuningRejection>(() => DungeonTuningLoader.Parse(root.ToJsonString(), Registries()));
     }
 
+    // D4.1 (spec-wild-room.md §1) -- found while building Disposition.Shift: the loader already
+    // length-checks the sibling wild.deltaBands ("4 edges -> 5 resulting deltaBand members") but
+    // never checked this one, and the shipped file had shipped with only 4 entries (missing the
+    // "even" band's own shift) -- a real, silently-under-indexable gap, fixed alongside this check.
+
+    [Fact]
+    public void Wild_deltaShiftRungs_must_have_exactly_5_entries_one_per_deltaBand_member()
+    {
+        var root = JsonNode.Parse(RealJson())!;
+        root["wild"]!["deltaShiftRungs"]!.AsArray().RemoveAt(0);
+        Assert.Throws<DungeonTuningRejection>(() => DungeonTuningLoader.Parse(root.ToJsonString(), Registries()));
+    }
+
+    [Fact]
+    public void The_real_shipped_wild_deltaShiftRungs_has_5_entries_one_per_named_band()
+    {
+        var tuning = DungeonTuningLoader.Parse(RealJson(), Registries());
+        Assert.Equal(5, tuning.WildDeltaShiftRungs.Count);
+        Assert.Equal(new[] { -2, -1, 0, 1, 2 }, tuning.WildDeltaShiftRungs);
+    }
+
     [Fact]
     public void Solo_raid_mode_must_not_carry_a_boss_shield_key()
     {

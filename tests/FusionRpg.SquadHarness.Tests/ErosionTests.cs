@@ -231,6 +231,64 @@ public class ErosionTests
         Assert.Equal(without.Stalemates, with.Stalemates);
     }
 
+    // ---- MeasureMechanismPair: Checkpoint E bullet 2, a real stat.derived atom scored through the
+    // real measurement pipeline (duel/squad win-rate), not just at the unit or capability level -------
+
+    [Fact]
+    public void MeasureMechanismPair_throws_on_an_empty_mod_list_rather_than_silently_measuring_nothing()
+    {
+        TuningBootstrap.Configure();
+        var duel = SquadRoster.Duels();
+        var attacker = RosterEntry.From(duel.First(b => b.Id == Erosion.AttackerCornerId));
+        var defender = RosterEntry.From(duel.First(b => b.Id == "even12"));
+
+        Assert.Throws<ArgumentException>(() => Erosion.MeasureMechanismPair(
+            attacker, defender, Array.Empty<BattleChannelMod>(), Spec(trials: 1)));
+    }
+
+    [Fact]
+    public void The_shipped_critical_hunter_atom_really_raises_the_composed_crit_channel_by_its_own_amount()
+    {
+        // Pure-ish, no BattleEngine: proves the exact mod TraitAtomSource.Shipped() already trusts on
+        // the Battle side (E12) is the same one this measurement applies -- deterministic, no RNG.
+        TuningBootstrap.Configure();
+        var duel = SquadRoster.Duels();
+        var attacker = duel.First(b => b.Id == Erosion.AttackerCornerId).Allocation;
+        var mods = TraitAtomSource.Shipped().ModsFor("critical-hunter");
+
+        var baseSetup = SquadMatch.ToActorSetup("squad:0", "squad", attacker, theta: 60);
+        var withSetup = baseSetup with { ChannelMods = baseSetup.ChannelMods.Concat(mods).ToList() };
+
+        var baseline = BattleStatComposer.Compose(baseSetup).Get(DerivedStatChannels.CombatCritRateOmni);
+        var boosted = BattleStatComposer.Compose(withSetup).Get(DerivedStatChannels.CombatCritRateOmni);
+        Assert.Equal(baseline + 150.0, boosted);
+    }
+
+    [Fact]
+    public void MeasureMechanismPair_runs_the_real_engine_end_to_end_and_both_arms_account_for_every_trial()
+    {
+        // Checkpoint E bullet 2's own bar: "scoring one through the actual harness measurement
+        // pipeline (duel/squad win-rate)" -- this is that scoring, for real, against the shipped
+        // critical-hunter stat.derived atom, at a trivial trial count (this session's own established
+        // reason: a full production sweep is impractical under this machine's concurrent load, same as
+        // MeasurePair's own integration tests above).
+        TuningBootstrap.Configure();
+        var duel = SquadRoster.Duels();
+        var attacker = RosterEntry.From(duel.First(b => b.Id == Erosion.AttackerCornerId));
+        var defender = RosterEntry.From(duel.First(b => b.Id == "even12"));
+        var mods = TraitAtomSource.Shipped().ModsFor("critical-hunter");
+
+        var (with, without) = Erosion.MeasureMechanismPair(attacker, defender, mods, Spec(trials: 5));
+
+        Assert.Equal(5, with.Victories + with.Defeats + with.Stalemates);
+        Assert.Equal(5, without.Victories + without.Defeats + without.Stalemates);
+        // Both arms share the SAME defender and the SAME per-trial seed (common random numbers) --
+        // only the attacker's own crit rate differs, so a real difference in outcome distribution is
+        // real signal from the atom, never seed noise. Not asserted as an exact win-count (RNG-real,
+        // would be flaky) -- the wiring itself, proven above via the deterministic channel-value test,
+        // is what this bullet actually asks to see scored.
+    }
+
     [Fact]
     public void MeasureScope_resolves_to_the_documented_default_ids()
     {

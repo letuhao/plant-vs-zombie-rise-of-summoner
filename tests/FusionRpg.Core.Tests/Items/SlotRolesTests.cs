@@ -197,6 +197,14 @@ public class SlotRolesTests
             {
                 Assert.True(entry.TryGetProperty("enabled", out var enabled), $"{file}: entry missing 'enabled'");
                 Assert.False(enabled.GetBoolean(), $"{file}: a standard base type must be retired (enabled: false)");
+
+                // `seed-contract.md` §7.2 is "retire, don't delete" — and a retirement with no stated
+                // reason is a deletion with the row left behind. The owner's ruling was both halves;
+                // this assert is the half that was unguarded until 2026-09-06.
+                Assert.True(entry.TryGetProperty("retiredReason", out var reason),
+                    $"{file}: a retired entry must say why (retiredReason)");
+                Assert.False(string.IsNullOrWhiteSpace(reason.GetString()),
+                    $"{file}: retiredReason must not be blank");
             }
         }
     }

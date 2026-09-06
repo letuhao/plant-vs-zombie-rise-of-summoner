@@ -34,7 +34,7 @@ namespace FusionRpg.Core.Tests.Atoms;
 /// actual "does the executor read this" proof) needs no compilation of the Injector project at all, so
 /// that half costs nothing extra to do from here too — Core.Tests already carries the same idea one
 /// step further, `&lt;Compile Include&gt;`-ing a handful of individually Unity-free Injector files
-/// directly (see this project's own .csproj, `PatronAuraOverlay.cs` etc.). Core.Tests already builds
+/// directly (see this project's own .csproj, `InjectorDerivedOverride.cs` etc.). Core.Tests already builds
 /// and runs under CI with no <c>$env:FUSIONRPG_GAME_DIR</c> requirement, so this test runs on every
 /// commit — the "durable" shape spec-param-parity.md §5 asks test 12 to have.</para>
 /// </summary>
@@ -78,6 +78,7 @@ public class ParamParityGuardTests
     const string StatusBridge = "src/FusionRpg.Core/Status/StatusEffectBridge.cs";
     const string Bag = "src/FusionRpg.Core/Effects/EffectBag.cs";
     const string BulletReader = "src/FusionRpg.Core/Effects/Atoms/GrantedBulletModifyAtomReader.cs";
+    const string BattleEffects = "src/FusionRpg.Core/Battle/BattleEffects.cs";
 
     static readonly Dictionary<string, string[]> ConsumerFiles = new(StringComparer.Ordinal)
     {
@@ -97,6 +98,7 @@ public class ParamParityGuardTests
         ["match.modify"] = new[] { Sink },
         ["wave.control"] = new[] { Sink },
         ["ui.present"] = new[] { Bag },
+        ["structure.place"] = new[] { BattleEffects },
     };
 
     /// <summary>

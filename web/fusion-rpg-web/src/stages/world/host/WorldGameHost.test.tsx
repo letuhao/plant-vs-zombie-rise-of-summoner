@@ -80,6 +80,54 @@ describe("WorldGameHost", () => {
     expect(destroyWorldGame).not.toHaveBeenCalled();
   });
 
+  it("emits force selection on world:interaction (followup F3)", () => {
+    const interactions: Array<{ selectedId: string | null; selectedKind: string | null }> = [];
+    worldBusOn("world:interaction", (raw) => {
+      const p = raw as { selectedId: string | null; selectedKind: string | null };
+      interactions.push({ selectedId: p.selectedId, selectedKind: p.selectedKind ?? null });
+    });
+
+    const { rerender } = render(
+      <WorldGameHost
+        model={emptyModel}
+        selectedSectorId={null}
+        selectedEntityId={null}
+        onSelect={() => {}}
+      />
+    );
+    const generation = createWorldGame.mock.calls[0]![0].generation as number;
+    act(() => {
+      worldBusEmit("world:ready", { generation });
+    });
+    interactions.length = 0;
+
+    rerender(
+      <WorldGameHost
+        model={emptyModel}
+        selectedSectorId="homeworld"
+        selectedEntityId="e-dave-legion-1"
+        onSelect={() => {}}
+      />
+    );
+    expect(interactions.at(-1)).toEqual({
+      selectedId: "e-dave-legion-1",
+      selectedKind: "force"
+    });
+
+    rerender(
+      <WorldGameHost
+        model={emptyModel}
+        selectedSectorId="homeworld"
+        selectedEntityId={null}
+        onSelect={() => {}}
+      />
+    );
+    expect(interactions.at(-1)).toEqual({
+      selectedId: "homeworld",
+      selectedKind: "sector"
+    });
+  });
+
   it("bumps modelSeq when ownerFactionId changes with identical intel (gaps D1)", () => {
     const models: Array<{ modelSeq: number }> = [];
     worldBusOn("world:model", (raw) => {

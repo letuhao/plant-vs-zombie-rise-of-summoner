@@ -134,6 +134,17 @@ public static class SeedFixture
             Obj(Core), Obj(Bands), Obj(Tags), Obj(Themes), Obj(Classes), Obj(Naming),
             withWords ? Obj(Words) : null);
 
+    /// <summary>
+    /// The same registries plus a `role-relocation.v1.json` body — the only optional registry with a
+    /// check that reasons about ABSENT rows (`RoleRelocationRowMissing`), which cannot be exercised
+    /// through the parameterless overload because it supplies none.
+    /// </summary>
+    public static RegistrySet RegistriesWithRelocation(string roleRelocationJson) =>
+        RegistrySet.FromNodes(
+            Obj(Core), Obj(Bands), Obj(Tags), Obj(Themes), Obj(Classes), Obj(Naming),
+            words: null, retired: null, buildThemes: null, familyOverrides: null,
+            roleRelocation: Obj(roleRelocationJson));
+
     /// <summary>A complete, conforming base-type file with the given entries spliced in.</summary>
     public static string BaseTypeFile(params string[] entries) => $$"""
     {

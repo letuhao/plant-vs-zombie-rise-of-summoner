@@ -99,6 +99,18 @@ public static class EffectActions
     /// constant is the whole of the "grow the published /effects/contract list" requirement.
     /// </summary>
     public const string PresentUi = "PresentUi";
+
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27, 2026-09-06): <c>structure.place</c>'s opcode.
+    /// Acts on the tactical siege board (<c>FusionRpg.Core.Battle.Board.BoardState</c>), never Unity —
+    /// the first opcode `BattleEffectSink` handles that `InjectorEffectActionSink` never implements at
+    /// all (there is no Lawn executor for this one; see `FusionRpg.Core.Effects.Atoms.AttachPoint.Siege`'s
+    /// own doc comment). Same reflection-published
+    /// obligation as <see cref="ModifyMatch"/>/<see cref="WaveControl"/>/<see cref="BulletModify"/>/
+    /// <see cref="PresentUi"/> — declaring this constant is the whole of the "grow the published
+    /// `/effects/contract` list" requirement.
+    /// </summary>
+    public const string PlaceStructure = "PlaceStructure";
 }
 
 public static class EffectTypes
@@ -156,6 +168,22 @@ public sealed class EffectEventDto
     /// <summary>E34 (spec-trigger-vocabulary.md §2.2): the wave number for OnWave. Additive nullable —
     /// breaks no existing shape, so FoundationContractVersion.Current stays at its current value.</summary>
     [JsonPropertyName("wave")] public int? Wave { get; set; }
+
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27, 2026-09-06): the tactical siege board cell this
+    /// event targets — `structure.place`'s own target, chosen at declare time (adjacent to the acting
+    /// unit, `ConstructionPlacement.CanPlace`-validated), never authored content. Plain ints, not
+    /// `GridPos`: this project cannot reference `FusionRpg.Core.Actions` (the dependency runs the other
+    /// way), the same boundary `grid.spawn`'s own bare `row`/`col` atom PARAMS already cross — those are
+    /// static content, though, while these two are per-event and dynamic, which is why they live on the
+    /// EVENT rather than an atom param. Both null for every trigger that predates this field (every
+    /// existing `EffectEventDto` construction site) — additive nullable, breaks no existing shape, so
+    /// `FoundationContractVersion.Current` stays at its current value.
+    /// </summary>
+    [JsonPropertyName("targetRow")] public int? TargetRow { get; set; }
+
+    /// <summary>See <see cref="TargetRow"/>.</summary>
+    [JsonPropertyName("targetCol")] public int? TargetCol { get; set; }
 }
 
 public sealed class EffectGrantDto

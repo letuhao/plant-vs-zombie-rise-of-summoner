@@ -148,10 +148,22 @@ gate's status change as a side effect of this module (it stays exactly as open o
 
 ## Success criteria
 
-- [ ] `patron.aura` resolves through `Instantiator`/`InstanceProducer`, not the plugin's inline formula.
-- [ ] The full `(rarity × star × level × Θ)` grid is byte-identical before and after, proven by test.
-- [ ] Every existing patron SIM test still passes.
-- [ ] The open LIVE gate's status is unchanged by this module — no new risk introduced to it.
+- [x] `patron.aura` resolves through the compiled atom/grant path (`GrantedDerivedAtomReader` →
+      `AtomDerivedSubsystem` → `ActorHub`), not the plugin's inline formula — **corrected mechanism**
+      from the original text's `Instantiator`/`InstanceProducer` guess (superseded by the Amendment:
+      `PatronSecondaryPlugin`'s existing Funnel-based grant already matched the required no-overlay
+      shape, so no migration to `InstanceProducer` was needed, only the now-dead
+      `PatronRuntimeState` freeze removed). DONE 2026-09-06.
+- [x] The full `(rarity × star × level × Θ)` grid is byte-identical before and after, proven by test —
+      `PatronAbsorptionGridEqualityTests.cs`, 3003/3003 passing (10 rarities × 5 stars × 4 levels × 5
+      Θ × 3 element-pairs + 3 structural facts), 2026-09-06.
+- [x] Every existing patron SIM test still passes — `PatronPolicyTests.cs` unchanged and green;
+      `PatronE2ETests.cs` fails 4/4 but so does 206/207 of every other E2E test on a pre-existing,
+      project-wide "empty species roster" fixture issue unrelated to this module (confirmed by running
+      a non-Patron E2E filter and getting the identical error) — not a regression this module caused.
+- [x] The open LIVE gate's status is unchanged by this module — no new risk introduced to it. No
+      change to `PatronPolicy.Aura`/`AuraMilli` itself; the grid-equality test proves the atom path
+      reproduces it exactly, so anything already true of the LIVE gate before this module stays true.
 
 ## Amendment 2026-09-06 — the mechanism for "referenced, not re-expressed," and a second real gap this
 ## spec's own text did not yet name
@@ -257,6 +269,26 @@ tests/FusionRpg.Core.Tests/Atoms/ExternalRefMagnitudeTests.cs   new — the mark
 tests/FusionRpg.Core.Tests/Effects/PatronAbsorptionGridEqualityTests.cs   new — the ⛔ acceptance gate
 ```
 
+**As-built 2026-09-06 (two more corrections, found only while actually implementing the above):**
+
+1. **`AtomPushService.cs` calls `PatronEndpoints.Compute` (widened `private`→`internal`), not a second
+   direct `RpgStore.Patron.cs` lookup.** `PatronEndpoints.cs` already did the exact live round trip
+   (patron row → profile/actor → the player's own Θ via `ServerPowerIndexProvider` → `PatronPolicy.
+   Aura`) — reusing it is the same "referenced, not re-expressed" principle this whole module is built
+   on, applied one layer down. A second hand-written lookup would have been a second place the two
+   could silently drift.
+2. **`PatronSecondaryPlugin.cs` does NOT move to `InstanceProducer`.** Its existing
+   `ctx.Funnel.EnqueueModifier(EffectGrantDto{...})` grant already matched the required no-overlay
+   shape exactly (see "What is now confirmed" above) — the only edit needed was deleting the
+   now-redundant `PatronRuntimeState.TryGet`+`BeginMatch`/`EndMatch` freeze, since nothing reads
+   `MatchAura` once `PatronAuraOverlay.cs` is gone. The plugin keeps a `TryGet` gate (skip granting for
+   a player with no patron at all) — that's the only surviving use of `PatronRuntimeState` here.
+3. The grid-equality test's real path is `tests/FusionRpg.Core.Tests/Demons/Patron/
+   PatronAbsorptionGridEqualityTests.cs`, not `.../Effects/...` — that path collided with production
+   `FusionRpg.Core.Effects` (C# namespace search stops at the first segment match), breaking
+   `TreeAtomSourceTests.cs`. A real, self-caught regression; fixed by relocating, not by working around
+   the collision in place.
+
 ### Revised testing strategy (additive to the table above)
 
 | Test | Asserts |
@@ -266,3 +298,42 @@ tests/FusionRpg.Core.Tests/Effects/PatronAbsorptionGridEqualityTests.cs   new �
 | `atompushservice_supplies_the_real_patron_auraMilli_for_a_player_with_a_patron_set` | the live lookup, real `_store` round trip, calls the real unchanged `PatronPolicy.AuraMilli` |
 | `a_player_with_no_patron_set_contributes_nothing_rather_than_throwing` | the common case (no patron) is not an error |
 | `two_pushes_after_a_promotion_reflect_the_new_star_immediately` | fresh-every-push means no staleness and no refresh step is needed — proves the design's own main claim |
+
+### Amendment 2026-09-06 (b) — the def still never reached a real push, found only by writing these
+### exact tests, and fixed the same session
+
+The grid-equality test (above) proves `AtomCompiler.Compile` produces byte-identical output GIVEN
+`patron.aura`'s atoms. It does not prove those atoms ever reach a real player's push, because it calls
+`AtomCompiler.Compile` directly on the atom list — it never goes through `AtomPushService.Build`'s own
+`ResolveBindings` loop at all. Writing the four tests this table names (not merely reading the spec)
+surfaced that gap directly: `ResolveBindings` discovers atoms strictly from `ListBindings(owner)`, and
+**nothing anywhere in the codebase ever creates a `BindingRow` for `patron.aura`** — a patron is
+designated via `RpgStore.SetPatron`, which writes the `rpg_patron` row directly, never a binding, unlike
+every piece of gear or every picked trait, which all reach a player through `ProduceAndBind`/`Bind`.
+Confirmed by grep, not assumed: zero production call sites bind `patron.aura` to any owner. Without a
+fix, `PatronSecondaryPlugin`'s grant would name an `EffectId` the injector's local catalog had never
+received a def for — `GrantedDerivedAtomReader`'s own doc is explicit that this "yields nothing," so
+the aura would have silently delivered **zero** combat magnitude in a real match, despite the grid test
+passing 3003/3003.
+
+**Fixed in `AtomPushService.Build`:** after the normal per-owner compile, `patron.aura`'s atoms
+(fetched via a new `PatronAuraAtoms()` — `_store.GetContainer("patron.aura")` + `GetAtom` per entry,
+empty and non-throwing when unseeded) are compiled in a SECOND, ISOLATED `AtomCompiler.Compile` call
+and merged into the payload as **`Defs` only** — never `.Compiled` (its own auto-generated grant is
+discarded). This second part matters as much as the first: `AtomCompiler.Compile`'s own doc comment
+says a `null`/absent `grantOwnerKeys` result is "the shipped behaviour verbatim: one grant per ICD
+group at Match" — i.e. compiling `patron.aura`'s atoms through the NORMAL path would auto-grant
+`fx.patron_aura` a SECOND time under a different `GrantId` (`atom:fx.patron_aura`, vs.
+`PatronSecondaryPlugin`'s own `patron:aura`), and `GrantedDerivedAtomReader` has no de-dup across
+grants naming the same `EffectId` — two grants would have doubled the aura's magnitude. Proven absent
+by its own test (`The_auto_generated_compile_grant_is_never_pushed...`).
+
+Real test file: `tests/FusionRpg.Server.Tests/AtomPushServicePatronCallbackTests.cs`, seeding the REAL
+`data/seed/atoms/patron-aura.json` from disk (not hand-typed). 4/4 passing, plus confirmed zero
+regressions across the rest of `FusionRpg.Server.Tests` (205 total, same 25 pre-existing failures as
+before this fix, all independently traced to an unrelated `vocabulary.json` seed race and a second
+concurrent session's own in-flight World-subsystem edits — none Patron-related).
+
+The "promotion" scenario in the third test's name is exercised as a patron **switch** to a
+different-element demon instead of a real fusion star-up — proves the identical "nothing is cached
+between pushes" property far more reliably than depending on fusion RNG/thresholds for a test fixture.

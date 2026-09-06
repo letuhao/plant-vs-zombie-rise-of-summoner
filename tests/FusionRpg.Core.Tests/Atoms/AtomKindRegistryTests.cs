@@ -17,7 +17,7 @@ public class AtomKindRegistryTests
     }
 
     [Fact]
-    public void Vocabulary_is_closed_at_sixteen_kinds_and_seven_attach_points()
+    public void Vocabulary_is_closed_at_seventeen_kinds_and_eight_attach_points()
     {
         // E35 (spec-match-modify.md §2.1), E36 (spec-wave-control.md §2.1), E37
         // (spec-projectile-control.md §2b), then E41 (spec-ui-attach-point.md §2a): each states only
@@ -27,6 +27,10 @@ public class AtomKindRegistryTests
         // guard itself is a self-consistency check (Const == BuiltCount), never a copied literal, so a
         // sibling Wave 8 module landing its own kind/attach point moves these two consts again without
         // this test needing to guess the wave's combined end state.
+        //
+        // base-defense `siege-construction` (decision 27, 2026-09-06): 16/7 -> 17/8 with
+        // structure.place / AttachPoint.Siege — the tactical-siege-board mirror of Board's Lawn-only
+        // reach (AttachPoint.Siege's own doc comment).
         Assert.Equal(AtomKindRegistry.KindCount, AtomKindRegistry.All.Count);
         Assert.Equal(AtomKindRegistry.AttachPointCount, Enum.GetValues<AttachPoint>().Length);
     }
@@ -159,12 +163,16 @@ public class AtomKindRegistryTests
     /// kinds stay refused (H3: Battle is `RuntimeState.None` for all of them regardless of trigger).
     /// </summary>
     [Fact]
-    public void OnActivate_reaches_exactly_resource_delta_status_apply_shield_grant_and_stat_modify()
+    public void OnActivate_reaches_exactly_resource_delta_status_apply_shield_grant_stat_modify_and_structure_place()
     {
         Assert.True(AtomKindRegistry.ValidateTrigger("resource.delta", AtomTriggers.OnActivate).IsOk);
         Assert.True(AtomKindRegistry.ValidateTrigger("status.apply", AtomTriggers.OnActivate).IsOk);
         Assert.True(AtomKindRegistry.ValidateTrigger("shield.grant", AtomTriggers.OnActivate).IsOk);
         Assert.True(AtomKindRegistry.ValidateTrigger("stat.modify", AtomTriggers.OnActivate).IsOk);
+        // base-defense `siege-construction` (decision 27, 2026-09-06): the fifth -- construction is
+        // exactly "an actor's own decision to act", the same category BasicAttack's own OnActivate fire
+        // already establishes, never a board/economy event.
+        Assert.True(AtomKindRegistry.ValidateTrigger("structure.place", AtomTriggers.OnActivate).IsOk);
 
         Assert.Equal(AtomRejectionReason.TriggerNotAllowed,
             AtomKindRegistry.ValidateTrigger("stat.derived", AtomTriggers.OnActivate).Reason);
@@ -849,5 +857,42 @@ public class AtomKindRegistryTests
     {
         Assert.Null(AtomKindRegistry.Get("spawn.entity")!.Params.Defs
             .First(d => d.Name == "atk").NotImplementedNote);
+    }
+
+    // ---- base-defense `siege-construction` (decision 27, 2026-09-06) -------------------------------
+
+    [Fact]
+    public void StructurePlace_attaches_to_the_new_Siege_point_and_is_battle_only()
+    {
+        var kind = AtomKindRegistry.Get("structure.place")!;
+        Assert.Equal(AttachPoint.Siege, kind.Attach);
+        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Lawn)); // no tactical board on the lawn
+        Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Battle));
+    }
+
+    [Fact]
+    public void StructurePlace_requires_structureId_and_instant()
+    {
+        Assert.Equal(AtomRejectionReason.MissingParam,
+            AtomKindRegistry.Validate("structure.place", P(("instant", true))).Reason);
+        Assert.Equal(AtomRejectionReason.MissingParam,
+            AtomKindRegistry.Validate("structure.place", P(("structureId", "well"))).Reason);
+    }
+
+    [Fact]
+    public void StructurePlace_refuses_an_unknown_structure_id()
+    {
+        var rejection = AtomKindRegistry.Validate("structure.place",
+            P(("structureId", "not-a-real-structure"), ("instant", true)));
+        Assert.Equal(AtomRejectionReason.BadParamValue, rejection.Reason);
+    }
+
+    [Fact]
+    public void StructurePlace_accepts_a_real_shipped_structure_id()
+    {
+        Assert.True(AtomKindRegistry.Validate("structure.place",
+            P(("structureId", "well"), ("instant", true))).IsOk);
+        Assert.True(AtomKindRegistry.Validate("structure.place",
+            P(("structureId", "granary"), ("instant", false))).IsOk);
     }
 }

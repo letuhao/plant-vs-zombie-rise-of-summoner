@@ -54,6 +54,19 @@ band.
 original cause — a bind accepted and then doing nothing forever. ⚠ **Consequence worth stating:**
 CombatSim cannot read item effects, so item balance cannot be simulated there until it does.
 
+> ⚠ **Amended 2026-09-06 — the premise above expired, and the outcome is the one this section wanted.**
+> `mechanism-wiring` E5 gave `SimEffectHost` the real consumer this section said it lacked
+> (`ActorDerivedLookup`'s contribution fold, reached through
+> `SimEffectHost`/`FoundationHarness.ContributeDerived`), so `stat.derived` now reads
+> **`Partial`/`Full`/`Full`** for Sim/Battle/Lawn, not `None`/`Full`/`Full`. This module's own test
+> asserts the live matrix rather than the old constant —
+> `Sim_runtime_opens_partially_and_the_spec_says_why`, `EquipRuntimeTests.cs`. `Partial`, not `Full`,
+> because the fold is a plain sum honouring `Flat`/`Increased` and not `Replace`/`Flag`. **So
+> `tools/CombatSim` CAN now simulate an item's `Flat`/`Increased` channels**; a `Replace`/`Flag`-
+> authored item still composes wrong there until the fold routes through the real `DerivedComposer`.
+> Nothing in this module was flipped to get there — the kind was re-opened by its own consumer
+> landing, which is exactly the order D6 requires.
+
 ### ⭐ D29 — this module is the gate for the first geared corner run
 
 **Item balance is validated by the class-system's existing two guards**, not by an item-specific

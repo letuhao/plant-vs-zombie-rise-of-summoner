@@ -155,6 +155,43 @@ def might_tree_spec(seed_root: "Path | None" = None) -> TreeSpec:
     )
 
 
+def primary_tree_spec(aptitude_id: str, seed_root: "Path | None" = None) -> TreeSpec:
+    """H9 (spec-tree-plan.md §3.1, §7): the 12 primary trees, GENERALIZED past `might_tree_spec`'s
+    own single hard-authored tree — a real gap H9's own "Scope: M (a run, not code)" line did not
+    name, found while trying to emit a second primary tree's plan for real and discovering
+    `report/cli.py` refused every `--tree` value but `"might"` by name. Nothing here is a new
+    content decision: `ordinal` (which drives `assign_archetype`, §3.1's own append-safe rule) is
+    read directly from `vocabulary.load_roster()`'s own `aptitudes` tuple — the SAME single source
+    of truth `might_tree_spec` itself never duplicated (`ordinal=0` there is `might`'s own position
+    in that exact list, not a hand-picked number) — and `gate_quantity`/`gate_index_kind`/
+    `gate_state` follow the identical `aptitude.<Id>@Commander` / `"aptitudePoints"` shape spec-tree-
+    plan.md §7's table gives EVERY primary tree, not just `might`'s row, confirmed by reading
+    `gate-evidence.v1.json` directly: `gateState` is keyed by `gateIndexKind`
+    (`"aptitudePoints"`), never per-tree, so the same shipped-carrier state already covers all 12.
+
+    Raises `ValueError` (never a silent guess) if `aptitude_id` is not in the roster at all, or is
+    not exactly one of the 12 `category="primary"` trees the roster's own `aptitudes` tuple names —
+    a typo here must refuse loudly, not mint a plan for a tree that does not exist.
+    """
+    root = seed_root or (REPO_ROOT / "data" / "seed")
+    roster = load_roster(root)
+    try:
+        ordinal = roster.aptitudes.index(aptitude_id)
+    except ValueError:
+        raise ValueError(
+            f"{aptitude_id!r} is not one of the {len(roster.aptitudes)} roster aptitudes "
+            f"{roster.aptitudes!r} — refused, never guessed") from None
+
+    evidence = gates_mod.load_gate_evidence(root)
+    gate_index_kind = "aptitudePoints"
+    gate_state = gates_mod.resolve_gate_state(gate_index_kind, evidence)
+    return TreeSpec(
+        tree_id=aptitude_id.lower(), category="primary", ordinal=ordinal,
+        gate_quantity=f"aptitude.{aptitude_id}@Commander", gate_index_kind=gate_index_kind,
+        gate_state=gate_state,
+    )
+
+
 def _read_existing_plan(path: Path) -> "dict | None":
     if not path.exists():
         return None

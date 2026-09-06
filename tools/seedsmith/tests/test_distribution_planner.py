@@ -482,6 +482,26 @@ class PairingRoleTests(unittest.TestCase):
         self.assertIn("payoff", other_roles)
         self.assertIn("enabler", other_roles)
 
+    def test_forced_enabler_is_serialized_onto_the_brief(self) -> None:
+        """A-S7 (`coverage-assignment`, spec-coverage-assignment.md §3) needs to know WHICH
+        specific enabler family `assign_pairing_roles` forced into an `enabler`-role brief, without
+        re-deriving `assign_pairing_roles`'s own tie-break logic. `PairingAssignment.forced_enabler`
+        was already computed but never serialized onto the brief's own `pairing` dict -- this
+        proves it now is, against the real corpus (real `chill-punisher`/`rot-punisher` pairing)."""
+        if not OUTPUT_PATH.is_file():
+            self.skipTest("round-1.json not yet generated in this checkout")
+        doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
+        enabler_briefs = [e for e in doc["entries"] if e["pairing"]["role"] == "enabler"]
+        payoff_briefs = [e for e in doc["entries"] if e["pairing"]["role"] == "payoff"]
+        none_briefs = [e for e in doc["entries"] if e["pairing"]["role"] == "none"]
+        self.assertTrue(enabler_briefs, "no real enabler-role brief in the committed round-1 plan")
+        for brief in enabler_briefs:
+            forced = brief["pairing"]["forcedEnabler"]
+            self.assertIsNotNone(forced)
+            self.assertIn(forced, brief["pool"]["allowedAtomFamilies"])
+        for brief in payoff_briefs + none_briefs:
+            self.assertIsNone(brief["pairing"]["forcedEnabler"])
+
     def test_planted_violation_unpaired_payoff_refused(self) -> None:
         group = [
             {"briefId": "brief.species.x.001",
@@ -832,13 +852,38 @@ class DeterminismTests(unittest.TestCase):
         self.assertEqual(r1, r2)
 
     def test_regenerate_is_byte_identical_across_two_real_runs(self) -> None:
+        """⛔ FIXED 2026-09-06 -- a real, reproduced test-isolation race, found while building
+        A-S7 (spec-coverage-assignment.md). This test used to call `gen_mod.regenerate(write=True)`
+        with the default `actions_root`, which writes the REAL, shared, committed
+        `_briefs/round-1.json` -- any other test or process reading/writing that same real file
+        concurrently (confirmed: `test_general_propose.py`'s own determinism check, under `pytest
+        -n auto`) could see torn or unexpected content mid-run. Reproduced (fails intermittently
+        under xdist, never sequentially) and fixed by redirecting only the WRITE target to an
+        isolated temp directory per call -- every real INPUT (species anchors, tuning, pairings)
+        stays real, since none of them derive from `actions_root`
+        (generate_distribution_planner.py:100-104's own comment). Same pattern
+        `DryRunAndOfflineTests` already uses one class up; this test still proves both properties
+        it always did: two fresh runs are byte-identical to each other, AND to what is actually
+        shipped at `OUTPUT_PATH` today."""
         if not OUTPUT_PATH.is_file():
             self.skipTest("round-1.json not yet generated in this checkout")
-        text1 = OUTPUT_PATH.read_text(encoding="utf-8")
-        gen_mod.regenerate(write=True)
-        text2 = OUTPUT_PATH.read_text(encoding="utf-8")
+        shipped = OUTPUT_PATH.read_text(encoding="utf-8")
+
+        with tempfile.TemporaryDirectory() as tmp1:
+            actions_root_1 = Path(tmp1) / "actions"
+            gen_mod.regenerate(actions_root=actions_root_1, write=True)
+            text1 = (actions_root_1 / "_briefs" / "round-1.json").read_text(encoding="utf-8")
+
+        with tempfile.TemporaryDirectory() as tmp2:
+            actions_root_2 = Path(tmp2) / "actions"
+            gen_mod.regenerate(actions_root=actions_root_2, write=True)
+            text2 = (actions_root_2 / "_briefs" / "round-1.json").read_text(encoding="utf-8")
+
         self.assertEqual(text1, text2)
         self.assertTrue(text2.endswith("\n"))
+        self.assertEqual(text1, shipped,
+                         "the committed round-1.json is stale relative to current code/data -- "
+                         "regenerate it for real before trusting this comparison")
 
     def test_provenance_records_corpus_hash_tuning_version_round(self) -> None:
         if not OUTPUT_PATH.is_file():

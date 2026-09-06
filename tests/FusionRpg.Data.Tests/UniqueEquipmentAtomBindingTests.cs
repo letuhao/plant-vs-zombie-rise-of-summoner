@@ -141,15 +141,18 @@ public class UniqueEquipmentAtomBindingTests : IDisposable
     }
 
     [Fact]
-    public void A_placeholder_item_with_no_real_atom_stays_on_the_legacy_mods_json_path()
+    public void A_placeholder_item_now_binds_through_a_real_zero_action_container()
     {
-        // stub.hp_charm grants fx.entity_atk, which no seed atom defines — TryGetAtomBackedContainerId
-        // returns false for it, so reconciliation must not attempt (and fail on) a real atom bind.
+        // 2026-09-06: stub.hp_charm's fx.entity_atk moved to item.fx-entity-atk, a deliberately empty
+        // atom-backed container (the placeholder's own no-op preserved exactly, just via the real
+        // reconciliation path instead of mods_json). No atom means no action reaches combat either
+        // way — this proves reconciliation binds it cleanly rather than skipping or failing on it.
         var a = _store.CreateUniqueActor(_playerId, "plant", 5);
         var eq = _store.UpsertUniqueEquipment(a.InstanceId, "trinket", "stub.hp_charm");
 
-        Assert.Empty(_store.ListBindings(UniqueOwner(a.InstanceId)));
-        Assert.Contains("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
+        var binding = Assert.Single(_store.ListBindings(UniqueOwner(a.InstanceId)));
+        Assert.Equal("item.fx-entity-atk", _store.GetInstance(binding.InstanceId)!.ContainerId);
+        Assert.DoesNotContain("fx.entity_atk", eq.ModsJson, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -76,3 +76,9 @@ Homeworld loss penalty (menu in the ideal §10.5) · campaign length in turns ·
 |---|---|---|
 | `world-generator` places domain entrances | `party-dungeon/spec-domain-catalog.md` §Interface | entrance slots (`Lair · Tear · Vault · Anomaly`, `SlotTypeCatalog.cs:14-20`) are placed from `dungeon_domain.entrance_hint`; until it lands the Sanctum picker offers found domains directly (decision 15) |
 | `delve-scope` row | `party-dungeon/spec-delve-scope.md` | `rpg_worlds.kind = 'delve'` / `parent_world_id`; `WorldValidation.Validate(world, profile)` with the delve profile; `GetActiveWorld` keeps `kind = 'map'` |
+
+## Filed by the item program (2026-09-06)
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| The content ladder must keep growing past level 10 | `item-map.md` §3 row `X5`, `item-ideal.md` D29 | Item level *is* content level (`ssot-generation.md` §4.1); item content stops at level 10 today, and D29 makes the item power ladder unbounded past it (tier saturates at t5, `contentScale` carries growth beyond). The item program does not set pacing — this is `world map · wave catalog · event generator`'s loop (gear → harder realm → gear, D26); item only supplies the middle arrow. **Filed here because this is the only one of those three names with a document to file into** — `tasks/item-todo.md` P0.1 confirmed 2026-09-06 that neither "wave catalog" nor "event generator" has a map, ideal or task file anywhere in the repo, so half this ask has no address yet |

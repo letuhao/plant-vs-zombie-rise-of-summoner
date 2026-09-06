@@ -4,7 +4,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using Xunit;
 
-namespace FusionRpg.Core.Tests.Effects;
+namespace FusionRpg.Core.Tests.Demons.Patron;
 
 /// <summary>
 /// `patron-absorption`'s own ⛔ acceptance gate (`spec-patron-absorption.md`): before/after
@@ -12,9 +12,17 @@ namespace FusionRpg.Core.Tests.Effects;
 /// committed `data/seed/atoms/patron-aura.json` (12 real atoms, the exact file the live game ships)
 /// through the REAL `AtomCompiler`, with an `externalRefs` callback computing `PatronPolicy.Aura`
 /// directly (the same function `AtomPushService.BuildExternalRefs` calls in production, exercised here
-/// without needing a live `RpgStore` — proven separately by `AtomPushServicePatronCallbackTests`),
-/// and asserts every one of the 12 compiled channel values matches the OLD, still-shipped
-/// `PatronPolicy.Aura` computation exactly, for every real `DemonRarity` × a real star/level/Θ sweep.
+/// without needing a live `RpgStore`), and asserts every one of the 12 compiled channel values matches
+/// the OLD, still-shipped `PatronPolicy.Aura` computation exactly, for every real `DemonRarity` × a
+/// real star/level/Θ sweep.
+///
+/// <para>Lives under `Demons/Patron`, not `Effects` (this file's own path in
+/// `spec-patron-absorption.md`'s original project-structure listing) — found, while first placing it
+/// there, that `namespace FusionRpg.Core.Tests.Effects` shadows the production
+/// `FusionRpg.Core.Effects` namespace for any test elsewhere in the `Tests.*` hierarchy using an
+/// unqualified `Effects.Atoms.X` reference (`TreeAtomSourceTests.cs` does exactly this) — a real,
+/// self-caught regression, not a hypothetical one, fixed by choosing a namespace that cannot collide.
+/// </para>
 /// </summary>
 public class PatronAbsorptionGridEqualityTests
 {
@@ -28,9 +36,6 @@ public class PatronAbsorptionGridEqualityTests
         }
         throw new DirectoryNotFoundException("repo root");
     }
-
-    static readonly PatronTuning RealPatronTuning = PatronTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "patron.v1.json")));
 
     static readonly PowerTuning RealPowerTuning = PowerTuningLoader.Parse(
         File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "power-scale.v2.json")));

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FusionRpg.Core.World;
 
 namespace FusionRpg.Core.Effects.Atoms;
 
@@ -18,7 +19,9 @@ public static class AtomKindRegistry
     // E35 (spec-match-modify.md §2.1): 5 -> 6 with AttachPoint.Match. E41 (spec-ui-attach-point.md
     // §2a): 6 -> 7 with AttachPoint.Ui, Wave 8's stated combined end state (spec-match-modify.md
     // §2.1) — this module asserts only its own +1 delta, never the wave total.
-    public const int AttachPointCount = 7;
+    // base-defense `siege-construction` (decision 27, 2026-09-06): 7 -> 8 with AttachPoint.Siege, the
+    // tactical-board counterpart to Board's Lawn-only reach (AttachPoint.Siege's own doc comment).
+    public const int AttachPointCount = 8;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     // E35: 12 -> 13 with match.modify, the first Match-attached kind.
     // E36 (spec-wave-control.md §2.1): 13 -> 14 with wave.control, the second Match-attached kind.
@@ -28,7 +31,9 @@ public static class AtomKindRegistry
     // "No new attach point" rule).
     // E41 (spec-ui-attach-point.md §2a): 15 -> 16 with ui.present, the first (and, today, only)
     // Ui-attached kind — AttachPointCount moves alongside it this time (see above).
-    public const int KindCount = 16;
+    // base-defense `siege-construction` (decision 27, 2026-09-06): 16 -> 17 with structure.place, the
+    // first (and, today, only) Siege-attached kind — AttachPointCount moves alongside it too.
+    public const int KindCount = 17;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     // E34 (spec-trigger-vocabulary.md §2.1): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/
     // OnSunCollect/OnGridPlace. Verified live before editing, per this module's own caution about
@@ -250,6 +255,12 @@ public static class AtomKindRegistry
     /// added here and nothing else on this kind changes.</para>
     /// </summary>
     static readonly string[] UiPresentBannerCatalogIds = Array.Empty<string>();
+
+    /// <summary>base-defense `siege-construction`: every known structure id, read fresh from the SSOT
+    /// catalog rather than copied — a structure minted after this kind was authored validates against
+    /// the same list this line always evaluates.</summary>
+    static IReadOnlyCollection<string> StructureIds() =>
+        StructureCatalog.All.Select(s => s.StructureId).ToList();
 
     static readonly Dictionary<string, AtomKind> Kinds = Build();
 
@@ -927,6 +938,32 @@ public static class AtomKindRegistry
                 "op is number|banner|meter. A present is read-only: it never writes state and is " +
                 "never read back into content. amount only under number, bannerId only under banner, " +
                 "meterId/ratio only under meter."),
+
+            // ---- Siege ---------------------------------------------------------------------
+            // base-defense `siege-construction` (decision 27, 2026-09-06): the first Siege-attached
+            // kind. Places a structure on the tactical siege board — never the PvZ lawn, which has no
+            // executor for this kind at all (Lawn=None, unlike every Board-attached kind above, which
+            // is the reverse). See AttachPoint.Siege's own doc comment for the layering this splits.
+            new("structure.place", AttachPoint.Siege, new ParamSchema(
+                    new ParamDef("structureId", ParamKind.String, Required: true, Vocabulary: StructureIds),
+                    // Required, not defaulted: a silent default either way is exactly the class of
+                    // "plausible-looking wrong" bug E29/E40 exist to refuse at load instead of guessing.
+                    // true = finished immediately (Assembled/Summoned, decision 27: "immediate — you
+                    // carried it here already" / "nothing new is needed"); false = under construction,
+                    // reading the placed structure's own StructureDef.BuildTurns (Built/Laboured).
+                    new ParamDef("instant", ParamKind.Bool, Required: true)),
+                // Lawn: None always — there is no tactical board there. Sim: PlanOnly, the same
+                // "produces a plan, no live executor yet" default every kind without a Sim consumer
+                // carries.
+                new RuntimeSupportMatrix(RuntimeState.None, RuntimeState.Full, RuntimeState.PlanOnly),
+                AtomTriggers.Actions,
+                PowerCategory.Utility,
+                "The only Siege-attached kind. Places structureId at the firing event's own " +
+                "TargetRow/TargetCol, validated through ConstructionPlacement.CanPlace against the " +
+                "live BoardState. Never reads or writes WorldState directly — the placement crosses " +
+                "back out through BattleOutcome.SlotResults[].StructurePlaced, the same seam " +
+                "structure-state's own HP damage already uses, applied only once the world layer " +
+                "receives the finished BattleOutcome."),
         };
 
         var map = new Dictionary<string, AtomKind>(StringComparer.OrdinalIgnoreCase);

@@ -29,7 +29,7 @@
       "hardCeilingItems": 221,
       "note": "sunwoven-and-above is 1800/100000 = 1.8% (1100+700). 0.982^83 = 22.14% matches I12's 0.99^150 = 22.15% ramp-start drought; 0.982^221 = 1.81% matches its 0.99^400 = 1.79% ceiling drought. The ramp doubles the sunwoven and almanac weights once per rampStepItems past rampStartItems."
     },
-    "unguardedTopRungNote": "ssot-rarity.md 3.8 leaves ordinal 100 (almanac) unguarded on purpose. Its deterministic source is the first-clear grant (data/seed/loot/first-clear.v1.json) and promotion (module 15), not a third counter."
+    "unguardedTopRungNote": "ssot-rarity.md 3.8 leaves ordinal 100 (almanac) unguarded on purpose. Its deterministic source is the first-clear grant (data/seed/containers/first-clear-grants.json, container item.first-clear-almanac-seed) and promotion (module 15), not a third counter. Path corrected 2026-09-06: this note named data/seed/loot/first-clear.v1.json, which has never existed. The grant lives under containers/ because that is a SeedScanner.OwnedFolders entry, so it imports through the standard AtomSeedFile -> RpgStore.ImportContent path instead of a second hand-written writer."
   },
   "itemLevelJitter": {
     "downBelowPerMille": 150,

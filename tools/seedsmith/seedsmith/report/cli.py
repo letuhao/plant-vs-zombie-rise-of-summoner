@@ -792,6 +792,7 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
     systematic failure to land would be the defect §7.1 exists to prevent.
     """
     from ..adapters.trees.nodegen import brief as brief_mod
+    from ..adapters.trees.nodegen import emit as emit_mod
     from ..adapters.trees.nodegen import plan_read
     from ..adapters.trees.nodegen import quota as quota_mod
     from ..adapters.trees.nodegen import run as run_mod
@@ -922,11 +923,31 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     affix_vocab=affix_vocab,
                 )
 
-            result = run_mod.run_language_stage(
-                plan, inputs_for,
-                ledger_path=Path(args.ledger_path) if getattr(args, "ledger_path", "") else None,
-                seed_root=seed_root,
-                unresolved_max_share_permille=targets.unresolved_count_max_share_permille)
+            # 2026-09-06 real-call finding (`might`, a real generation run): two DIFFERENT accepted
+            # nodes collided on `nameKey` ("Deep Rooting" generated twice, independently, for two
+            # different tiers) -- `build_seed_document`'s own `assert_no_duplicate_name_keys` refused
+            # exactly as designed ("refused, never renamed out from under the model's answer" --
+            # NodeKeyRefused's own message), but nothing here caught it, so a real, well-defined,
+            # already-reported-elsewhere content defect crashed the whole CLI with a raw traceback
+            # instead of a clean report. The ledger itself is NOT at risk: `run_language_stage` writes
+            # it before ever building the seed document, so every already-accepted node from this run
+            # (and prior runs) stays safely recorded regardless of this refusal -- confirmed by reading
+            # the function's own body, not assumed. Caught here, once, at the one place that already
+            # aggregates per-tree reports, so `--all` still reports every OTHER tree that succeeded.
+            try:
+                result = run_mod.run_language_stage(
+                    plan, inputs_for,
+                    ledger_path=Path(args.ledger_path) if getattr(args, "ledger_path", "") else None,
+                    seed_root=seed_root,
+                    unresolved_max_share_permille=targets.unresolved_count_max_share_permille,
+                    max_workers=max(1, getattr(args, "workers", 1)))
+            except emit_mod.NodeKeyRefused as ex:
+                per_tree_reports.append({
+                    "tree": tree_id, "seedPath": None,
+                    "nameKeyRefused": str(ex),
+                })
+                overall_outcomes["nameKeyRefused"] = overall_outcomes.get("nameKeyRefused", 0) + 1
+                continue
             for outcome in result.outcomes:
                 overall_outcomes[outcome.outcome] = overall_outcomes.get(outcome.outcome, 0) + 1
             per_tree_reports.append({
@@ -941,8 +962,9 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
 
         print(json.dumps({"perTree": per_tree_reports, "outcomeTotals": overall_outcomes},
                           ensure_ascii=False, indent=2))
-        any_fail = any(r["runReport"]["verdict"] == "FAIL" for r in per_tree_reports)
-        return EXIT_GAP if any_fail else EXIT_CLEAN
+        any_refused = any("nameKeyRefused" in r for r in per_tree_reports)
+        any_fail = any(r.get("runReport", {}).get("verdict") == "FAIL" for r in per_tree_reports)
+        return EXIT_GAP if (any_fail or any_refused) else EXIT_CLEAN
     return EXIT_CLEAN
 
 
@@ -1033,21 +1055,38 @@ def _cmd_trees_plan(args: argparse.Namespace) -> int:
             return EXIT_CLEAN
         return EXIT_GAP
 
-    if args.tree != "might":
-        print(f"only 'might' is wired today (task B1's own named tree); got --tree {args.tree!r}")
-        return EXIT_CANNOT_RUN
-
     try:
         tuning_doc = plan_tuning.load()
     except plan_tuning.PassiveTreePlanTuningError as ex:
         print(f"EXIT_CANNOT_RUN: {ex}")
         return EXIT_CANNOT_RUN
 
-    try:
-        spec = plan_emit.might_tree_spec()
-    except Exception as ex:  # gates.GateEvidenceError, etc. — never resolved silently
-        print(f"EXIT_CANNOT_RUN: {ex}")
-        return EXIT_CANNOT_RUN
+    # H9 (2026-09-06): generalized past "might" alone — `primary_tree_spec` is a mechanical
+    # extension of `might_tree_spec`'s own logic (proven byte-identical for "might" itself, see its
+    # own docstring), reading each of the 12 primary trees' `ordinal`/`gate_quantity` from the SAME
+    # roster/gate-evidence files `might_tree_spec` always read, never a new content decision. "might"
+    # keeps calling the original named function verbatim — zero behavior change for the one tree
+    # every existing test already exercises.
+    if args.tree == "might":
+        try:
+            spec = plan_emit.might_tree_spec()
+        except Exception as ex:  # gates.GateEvidenceError, etc. — never resolved silently
+            print(f"EXIT_CANNOT_RUN: {ex}")
+            return EXIT_CANNOT_RUN
+    else:
+        from ..adapters.trees.plan.vocabulary import load_roster
+        roster = load_roster()
+        aptitude_by_lower = {a.lower(): a for a in roster.aptitudes}
+        aptitude_id = aptitude_by_lower.get(args.tree)
+        if aptitude_id is None:
+            print(f"seedsmith: {args.tree!r} is not one of the {len(roster.aptitudes)} primary "
+                 f"trees {sorted(aptitude_by_lower)!r}", file=sys.stderr)
+            return EXIT_CANNOT_RUN
+        try:
+            spec = plan_emit.primary_tree_spec(aptitude_id)
+        except Exception as ex:  # ValueError, gates.GateEvidenceError, etc. — never resolved silently
+            print(f"EXIT_CANNOT_RUN: {ex}")
+            return EXIT_CANNOT_RUN
 
     if args.generate:
         try:
@@ -1729,6 +1768,15 @@ def build_parser() -> argparse.ArgumentParser:
                                      "(data/seed/passive-tree/nodes/<treeId>.json) follow "
                                      "--plan-root, the same seed root the committed plan is read "
                                      "under, for the identical reason")
+    trees_generate.add_argument("--workers", type=int, default=1,
+                                help="parallel model-call workers WITHIN a (tier, nodeClass) batch "
+                                     "only — batches themselves stay sequential so a later one still "
+                                     "sees every earlier one's real accepted tier-siblings (§6.2). "
+                                     "Default 1 = sequential, byte-identical to pre-2026-09-06 "
+                                     "behaviour. Mirrors workflow.runner.MAX_WORKERS=4's own "
+                                     "rationale for a local model queue, but cannot reuse that helper "
+                                     "directly (it is built around a LangGraph app.invoke() interface "
+                                     "this pipeline never adopted)")
     trees_review = trees_sub.add_parser(
         "review", help="tree-review entrypoints (task H7, spec-tree-review.md §5.5, §Commands)")
     trees_review.add_argument("--lot", required=True, help="the review lot id")

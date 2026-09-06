@@ -251,6 +251,39 @@ settable property forwarded through `BattleEffectHost`, never a constructor para
 `ShieldGate`; A18d (`Status`/`StatusRng`) and A18e (`Ledger`) both reuse it rather than reinventing a
 constructor-injection approach that cannot compile against the real construction order.
 
+## 4c. A18f, A19, A20 (2026-09-06, Phase 13) — the modules that make a second real action playable
+
+A 2026-09-06 completeness audit (ahead of writing any of these three specs) found the actual gap
+was narrower and more precise than "costs/cooldowns are unwired": `DeclareBasicAttack` already
+selects and activates any real equipped action correctly; **only the resolve-time damage/cooldown
+step ignores that selection**, hardcoding the basic attack's own envelope
+(`TimelineDispatch.cs:211-213`). That single, exact defect is what makes A19 depend on a new module
+(A18f) never previously named in the map — enforcing costs against an action that can never actually
+run live would prove nothing. Full evidence: `action-map.md` §12.1a/§12.3a.
+
+**A second audit pass — adversarial, against the specs themselves before any code was written —
+found one load-bearing gap in the A18f design and tightened two things in A19.** See each spec's own
+"⛔ Real, load-bearing gap" / corrected sections for the specifics; the short version: `ApplyBasicAttack`
+is attack-shaped throughout (a hit/miss roll gates cooldown-arming), so A18f's own acceptance bar is
+now scoped to attack-category actions only, with a **named, unbuilt follow-up**
+(`action-resolution-by-category`) for a genuinely different-shaped Skill — see §5 below. A19's design
+corrected two things found the same way: both `AlwaysAffordable.Instance` construction sites named
+explicitly (missing the second would leave two of three shipped battle profiles unenforced), and its
+own acceptance criterion for a multi-resource cost failure corrected from "spend then rollback" to
+the real, verified "validate all, spend none until all clear" shape `CostLedger.TryPay` actually
+implements.
+
+**Build order: A18f → A19 → A20** (A20 needs A19's real cost/cooldown differences for its own
+acceptance #4 to test anything beyond target selection, which A17 already proved). Tasks:
+`action-todo.md` Phase 13 (T55–T57). Module specs, all written and adversarially audited against real
+code before any implementation:
+
+| id | Spec | Owns |
+|---|---|---|
+| A18f | [spec-action-dispatch-generalization.md](../docs/architecture/action/spec-action-dispatch-generalization.md) | The resolve-time envelope fix — one accessor, one call-site change, scoped to attack-category actions |
+| A19 | [spec-action-costs-cooldowns-adoption.md](../docs/architecture/action/spec-action-costs-cooldowns-adoption.md) | Real `CostLedger` affordability + spend at commit; `perTick` costs interrupt on shortfall |
+| A20 | [spec-synthetic-loadout-harness.md](../docs/architecture/action/spec-synthetic-loadout-harness.md) | The balance-comparison tool this whole reopening exists to eventually serve |
+
 ## 5. Deferred, and why
 
 | Module | Waits on |
@@ -259,3 +292,4 @@ constructor-injection approach that cannot compile against the real construction
 | `A10` battle-board | owner deferral — built with the board map |
 | `A8`'s reaction lane | timeline **B6** — the *stance* half ships in P7 |
 | seedsmith | **after this program**, as a dev tool |
+| `action-resolution-by-category` | **not scheduled, no module id assigned yet.** Named 2026-09-06 by A18f's own spec-audit: a non-attack-category Skill (pure buff/heal/status, no attack roll) needs `ActionRunner` to thread `Category` alongside `Envelope` and `TimelineDispatch` to branch resolution — arm cooldown unconditionally, skip `calculator.Compute`, rely on `OnActivate`'s atoms alone. **Do not equip a non-attack-category action on a real actor before this lands** — A18f's own acceptance bar explicitly does not cover it |

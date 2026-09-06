@@ -303,9 +303,11 @@ public class RelicRowMigrationTests : IDisposable
         ImportRealSeedTree();
         var a = NewActor();
 
-        // relic.cracked_seal -> fx.entity_atk: no atom exists, so it stays on the legacy blob.
+        // 2026-09-06: relic.cracked_seal -> fx.entity_atk moved to item.fx-entity-atk (a deliberately
+        // empty atom-backed container) — it must NOT appear in the blob and MUST appear as a binding
+        // now too, same as every other relic.
         var withStub = _store.UpsertUniqueEquipment(a, "trinket", "relic.cracked_seal");
-        Assert.Contains("equip-relic-cracked_seal", withStub.ModsJson);
+        Assert.DoesNotContain("equip-relic-cracked_seal", withStub.ModsJson);
 
         // relic.ashen_reliquary -> fx.passive_atk_flat -> item.fx-passive-atk-flat: atom-backed,
         // so it must NOT appear in the blob and MUST appear as a binding.
@@ -316,6 +318,7 @@ public class RelicRowMigrationTests : IDisposable
             new FusionRpg.Core.Effects.Atoms.OwnerScope(
                 FusionRpg.Core.Effects.Atoms.OwnerKind.UniqueActor, a));
         Assert.Contains(bindings, b => b.Source == "unique-equip" && b.Slot == "weapon");
+        Assert.Contains(bindings, b => b.Source == "unique-equip" && b.Slot == "trinket");
     }
 
     /// <summary>⛔ <b>Found while landing M2, and fixed here:</b> <c>Reset()</c> cleared

@@ -306,9 +306,20 @@ public class ConsumableCorpusTests
         Assert.All(Corpus.Where(c => c.Family == "atom.elemental-power"),
             c => Assert.Equal(ConsumableClass.Draught, c.ClassId));
 
-        // and it really is absent from the shipped 98, not merely missing a kindId
+        // and it really is absent from the shipped corpus, not merely missing a kindId
         Assert.DoesNotContain("atom.elemental-power", FamilyKinds.Keys, StringComparer.Ordinal);
-        Assert.Equal(98, FamilyKinds.Count);
+
+        // ⚠ Re-measured 2026-09-06: the shipped affix-family corpus is **100**, not the 98 this test
+        // pinned when module 18 was built. `data/seed/items/affix-families/g-punisher.json` (commit
+        // 5864231, 2026-09-06 11:55) added `atom.chill-punisher` and `atom.rot-punisher` — the
+        // affix-authoring lane's content, not an item-program change. The pin stays a pin (a
+        // re-authoring pass should see it move); only the number is re-measured. Nothing else in this
+        // test moved: the phantom is still exactly one and still `atom.elemental-power`.
+        // ⚠ 100 is the shipped count, NOT a blessed one: `tools/ItemSeedValidator` refuses both new
+        // rows — `IdOutsideNamespace` (no wave-1 prefix owns `atom.*-punisher`) and
+        // `MissingDisplayTemplate` — so the two may yet be re-authored. That is the affix lane's call;
+        // this test tracks what ships.
+        Assert.Equal(100, FamilyKinds.Count);
     }
 
     // ---- module 11's 60 refused drop entries -------------------------------------------------------------

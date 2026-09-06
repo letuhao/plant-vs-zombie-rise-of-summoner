@@ -32,10 +32,10 @@ public static class InjectorCombatBridge
         }
         else
         {
-            elementTypes = ResolveElementTypesFromHub(key, out var side);
-            // Patron aura (spec-patron-demon.md): plant-side typed bonus, riding the side the
-            // element resolve already looked up — no extra board scan on the hit path.
-            derived = PatronAuraOverlay.Apply(derived, side);
+            // Patron aura no longer applies as a compose-time overlay here (patron-absorption,
+            // `seed-to-concrete` T6.2, 2026-09-06) — its magnitude now arrives on `derived` already,
+            // via the same GrantedDerivedAtomReader path every other match-scoped grant uses.
+            elementTypes = ResolveElementTypesFromHub(key);
         }
 
         return new CombatActorSnapshot(derived, elementTypes);

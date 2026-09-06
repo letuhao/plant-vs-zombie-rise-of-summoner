@@ -392,6 +392,8 @@ public static class AtomCompiler
         "bullet.modify" => EffectActions.BulletModify,
         // E41 (spec-ui-attach-point.md §2b).
         "ui.present" => EffectActions.PresentUi,
+        // base-defense `siege-construction` (decision 27, 2026-09-06).
+        "structure.place" => EffectActions.PlaceStructure,
         _ => null,
     };
 

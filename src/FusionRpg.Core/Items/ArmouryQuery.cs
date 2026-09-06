@@ -76,6 +76,16 @@ public sealed record ArmouryPage(IReadOnlyList<ArmouryEntry> Items, string? Next
 /// </summary>
 public static class ArmouryQuery
 {
+    /// <summary>Largest page one call may return. ⚠ <b>A per-request runtime cap — exempt from
+    /// AGENTS.md's no-hard-ceilings rule, and saying so here is the rule's own condition.</b> It
+    /// bounds one response, never what a player may own: the collection itself is unlimited, and its
+    /// only ceiling is <c>RpgStore.InventoryCeiling</c>, an abuse guard with its own exemption note.
+    /// Paging past this is the <c>after</c> cursor's job, so a larger armoury costs more calls, never
+    /// fewer items.
+    ///
+    /// <para><b>Structural, not a tunable</b> (<c>tunables-ssot.md</c>): a balance pass has no reason
+    /// to change a page size — changing it moves how much arrives per call, not how the game
+    /// feels.</para></summary>
     const int MaxLimit = 200;
 
     public static IEnumerable<ArmouryEntry> ApplyFilter(IEnumerable<ArmouryEntry> entries, ArmouryFilter filter)

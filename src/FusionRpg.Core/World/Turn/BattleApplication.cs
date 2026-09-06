@@ -133,6 +133,12 @@ public static class BattleApplication
     /// `ConstructionTurnsRemaining` all cleared — `SlotState.Ruined`'s first reader, closing a wiring
     /// gap rather than adding a new enum. `district-layout` §5 already maps `Ruined` → `Rough` terrain,
     /// so rubble-you-can-cross-but-slowly falls out free.
+    ///
+    /// <para>base-defense `siege-construction`: a NEW structure this battle placed
+    /// (<see cref="SlotOutcome.StructurePlaced"/>) wins over destruction — a slot cannot be simultaneously
+    /// ruined and freshly built this same battle, and a placement is the more specific fact. Checked
+    /// first, so a `StructurePlaced` result never has to also carry `StructureDestroyed: false` just to
+    /// avoid being cleared by the branch below it.</para>
     /// </summary>
     public static WorldState ApplySlotResults(WorldState world, string sectorId, IReadOnlyList<SlotOutcome> slotResults)
     {
@@ -150,11 +156,17 @@ public static class BattleApplication
                                 ? sl with
                                 {
                                     OwnerFactionId = result.HeldByFactionId,
-                                    State = result.StructureDestroyed ? SlotState.Ruined : sl.State,
-                                    StructureId = result.StructureDestroyed ? null : sl.StructureId,
-                                    StructureHp = result.StructureDestroyed ? null : result.StructureHp,
-                                    ConstructionTurnsRemaining = result.StructureDestroyed
-                                        ? null : sl.ConstructionTurnsRemaining
+                                    State = result.StructurePlaced is not null
+                                        ? SlotState.Intact
+                                        : result.StructureDestroyed ? SlotState.Ruined : sl.State,
+                                    StructureId = result.StructurePlaced
+                                        ?? (result.StructureDestroyed ? null : sl.StructureId),
+                                    StructureHp = result.StructurePlaced is not null
+                                        ? null // freshly placed -- full HP, the same "null means undamaged" default every other new structure gets
+                                        : result.StructureDestroyed ? null : result.StructureHp,
+                                    ConstructionTurnsRemaining = result.StructurePlaced is not null
+                                        ? result.PlacedConstructionTurnsRemaining
+                                        : result.StructureDestroyed ? null : sl.ConstructionTurnsRemaining
                                 }
                                 : sl)
                             .ToList()

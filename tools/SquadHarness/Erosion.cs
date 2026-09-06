@@ -316,6 +316,59 @@ public static class Erosion
         return (with, without);
     }
 
+    /// <summary>
+    /// passive-tree Checkpoint E bullet 2 (spec-mechanism-wiring.md, F3's own disclosed gap): a real
+    /// `stat.derived` atom, scored through this module's OWN measurement pipeline (duel/squad win-rate),
+    /// not just at the unit level (`EffectOfflineKitTests`) or the schema-capability level (F2's
+    /// `Coverage.cs`). No existing shipped test exercised this before it — `BuildFactory.cs`/`SquadMatch.
+    /// ToActorSetup` build `ChannelMods` purely from `AptitudeResolver.ResolveForBattle`, with no notion
+    /// of a passive-tree node's own bound atom at all.
+    ///
+    /// <para><b>Deliberately NOT full passive-tree-ownership modelling.</b> Wiring "this roster member
+    /// owns node X, resolved through the real catalog/binder" into `SquadHarness` would be new,
+    /// significant scope this checkpoint's own text does not ask for ("scoring ONE" atom "through the
+    /// actual harness measurement pipeline"). This mirrors <see cref="ApplyStatic"/>'s own proven
+    /// shape exactly — apply a real atom's own `BattleChannelMod`s to one arm, resolve both arms under
+    /// common random numbers, report the real win-share delta — using the ALREADY-SHIPPED
+    /// `stat.derived` atom this program's own E12 migration already trusts on the Battle side
+    /// (<see cref="TraitAtomSource.Shipped"/>'s `critical-hunter`, `combat.crit.rate.omni +150`), so
+    /// zero new content is authored to prove this.</para>
+    ///
+    /// <para>Applied to the ATTACKER, not the defender — a mechanism node is something the OWNING actor
+    /// benefits from (unlike Erosion's own defender-side mitigation-removal shape), so <c>squadWith</c>
+    /// carries the extra mods and <c>squadWithout</c> does not, both waves held identical.</para>
+    /// </summary>
+    public static (PairResult With, PairResult Without) MeasureMechanismPair(
+        RosterEntry attacker, RosterEntry defender, IReadOnlyList<BattleChannelMod> mechanismMods, RunSpec spec)
+    {
+        if (mechanismMods.Count == 0)
+            throw new ArgumentException("a mechanism atom with zero channel mods measures nothing", nameof(mechanismMods));
+
+        var theta = CheckedTheta(spec.Theta);
+        long withVictories = 0, withDefeats = 0, withStalemates = 0;
+        long withoutVictories = 0, withoutDefeats = 0, withoutStalemates = 0;
+
+        for (var k = 0L; k < spec.Trials; k++)
+        {
+            var seed = Seeds.Mix(spec.RunSeed, attacker.Id, defender.Id, k);
+            var wave = defender.Actors.Select((a, i) => SquadMatch.ToActorSetup($"wave:{i}", "wave", a, theta)).ToList();
+            var squadWithout = attacker.Actors.Select((a, i) => SquadMatch.ToActorSetup($"squad:{i}", "squad", a, theta)).ToList();
+
+            var withoutReport = BattleEngine.Resolve(new BattleSetup { Squad = squadWithout, Wave = wave }, seed);
+            Tally(withoutReport.Outcome, ref withoutVictories, ref withoutDefeats, ref withoutStalemates);
+
+            var squadWith = squadWithout
+                .Select(s => s with { ChannelMods = s.ChannelMods.Concat(mechanismMods).ToList() })
+                .ToList();
+            var withReport = BattleEngine.Resolve(new BattleSetup { Squad = squadWith, Wave = wave }, seed);
+            Tally(withReport.Outcome, ref withVictories, ref withDefeats, ref withStalemates);
+        }
+
+        var without = ToPairResult(attacker.Id, defender.Id, withoutVictories, withoutDefeats, withoutStalemates);
+        var with = ToPairResult(attacker.Id, defender.Id, withVictories, withDefeats, withStalemates);
+        return (with, without);
+    }
+
     static PairResult Relabel(PairResult r, string defenderSuffix) => r with { DefenderId = r.DefenderId + defenderSuffix };
 
     /// <summary>

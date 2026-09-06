@@ -42,6 +42,65 @@ public sealed class AtomPushService
         return owners;
     }
 
+    /// <summary>
+    /// The ONE place an <c>effects.grants.apply</c> wire payload is assembled (T6.2, 2026-09-06).
+    ///
+    /// <para><b>Why this exists at all: the compiled grants were being dropped.</b>
+    /// <see cref="AtomPushCodec.BuildPayload"/> fills <see cref="AtomPushDto.Grants"/> from
+    /// <c>catalog.Compiled</c> — every passive, non-triggered atom (<c>stat.derived</c> /
+    /// <c>stat.modify</c> with no trigger) compiles to a grant there rather than to a runner entry.
+    /// Both real call sites then hand-rolled their own payload dictionary carrying <c>defs</c> and
+    /// <c>runnerBindings</c> and <b>never that list</b>, so the entire compiled half of the push was
+    /// inert on the wire — a def with no grant naming it is content the bag holds and never applies.
+    /// That predates the equip-runtime work entirely: it was true of the original Player-only push.</para>
+    ///
+    /// <para><b>One key, not two.</b> The compiled grants go into the SAME <c>grants</c> array as the
+    /// session snapshot rather than a key of their own, because that array is the only thing on the
+    /// receiving side that applies a grant at all: the injector's <c>RunEffectsGrantsApply</c> loops
+    /// <c>grants[]</c> → <c>RunEffectGrant</c> → <c>EffectRuntime.Grant</c>, and
+    /// <c>AtomPushReceiver.Install</c> deliberately does NOT apply <see cref="AtomPushDto.Grants"/>
+    /// ("the command runner's existing grant loop owns that" — its own doc comment) because that loop
+    /// does injector-only work the receiver must not duplicate: resolving <c>entity:selected</c>,
+    /// normalising the owner key, and refusing an <c>instance:</c> owner on the Hot path. A separately
+    /// named key would have been read by nothing. <see cref="AtomPushDto.Grants"/> is itself declared
+    /// <c>[JsonPropertyName("grants")]</c>, so this is the shape the contract always described.</para>
+    ///
+    /// <para><b>Session grants first, compiled appended.</b> Purely additive — the pre-existing half
+    /// keeps its exact order and content, and on the receiving side a later entry would only win a
+    /// <c>GrantId</c> collision, which <c>atom:{icdKey}</c> ids cannot realistically have with a
+    /// session grant.</para>
+    ///
+    /// <para><b><c>grants</c> is always present and always an array</b>, even when empty and even when
+    /// <paramref name="atoms"/> is null: the injector refuses the WHOLE command — the atom half
+    /// included, <c>InstallAtomPush</c> never reached — when the key is absent or not an array
+    /// ("effects.grants.apply: missing grants[]").</para>
+    /// </summary>
+    /// <param name="atoms">The compiled push, or null when its build failed (Foundation grants still ship).</param>
+    /// <param name="sessionGrants">The Hot Effect session snapshot; null for an atoms-only re-push.</param>
+    public static Dictionary<string, object?> BuildApplyPayload(
+        AtomPushDto? atoms,
+        IReadOnlyList<EffectGrantDto>? sessionGrants = null)
+    {
+        var grants = new List<EffectGrantDto>();
+        if (sessionGrants is not null) grants.AddRange(sessionGrants);
+        if (atoms is not null) grants.AddRange(atoms.Grants);
+
+        var payload = new Dictionary<string, object?> { ["grants"] = grants };
+        if (atoms is null) return payload;
+
+        payload["defs"] = atoms.Defs;
+        payload["runnerBindings"] = atoms.RunnerBindings;
+        payload["catalogRevision"] = atoms.CatalogRevision;
+        payload["contentHash"] = atoms.ContentHash;
+        payload["matchSeed"] = atoms.MatchSeed;
+        payload["matchKey"] = atoms.MatchKey;
+        payload["upToDate"] = atoms.UpToDate;
+        // E26 stamp. AtomPushDto's own doc says "always present, on every payload"; neither call site
+        // ever sent it. Harmless to a receiver that ignores it, and required by the contract.
+        payload["emitterVersion"] = atoms.EmitterVersion;
+        return payload;
+    }
+
     public AtomPushService(RpgStore store) => _store = store ?? throw new ArgumentNullException(nameof(store));
 
     /// <summary>
@@ -227,7 +286,46 @@ public sealed class AtomPushService
             }
         }
 
-        return AtomPushCodec.BuildPayload(
+        var payload = AtomPushCodec.BuildPayload(
             catalog, bindings, matchSeed, matchKey, contentHash, receiverRevision, receiverEmitterVersion);
+
+        // patron-absorption (T6.2b, 2026-09-06): `fx.patron_aura` is never behind a real BindingRow —
+        // nothing equips or picks a patron aura the way gear/traits are bound (RpgStore.SetPatron
+        // writes rpg_patron, never a BindingRow), so the ResolveBindings loop above never discovers
+        // patron.aura's atoms for ANY owner, and its def would never reach this payload without this
+        // block. Compiled in ISOLATION (its own AtomCompiler.Compile call) and merged as Defs-ONLY,
+        // deliberately discarding its own auto-generated grant: AtomCompiler.Compile always emits at
+        // least a match-scoped grant per compiled group (Compile's own "grantOwnerKeys" doc: "Null is
+        // the shipped behaviour verbatim: one grant per ICD group at Match") — PatronSecondaryPlugin's
+        // existing grant (GrantId "patron:aura", issued only when the player has a patron designated)
+        // must stay the SOLE grant for this effect, or the actor would carry two grants naming the
+        // same EffectId and GrantedDerivedAtomReader has no de-dup across grants, so the aura's
+        // magnitude would apply twice.
+        var patronAuraAtoms = PatronAuraAtoms();
+        if (patronAuraAtoms.Count > 0)
+        {
+            var patronCatalog = AtomCompiler.Compile(
+                patronAuraAtoms, ctx.Runtime, revision, externalRefs: BuildExternalRefs(owners));
+            payload.Defs.AddRange(patronCatalog.Defs);
+        }
+
+        return payload;
+    }
+
+    /// <summary>`patron.aura`'s own real atoms (`data/seed/atoms/patron-aura.json`), or empty when the
+    /// container/atoms are not seeded (a minimal test fixture, e.g.) — never throws for their absence,
+    /// since Patron content is not a hard requirement for every caller of this service.</summary>
+    IReadOnlyList<AtomRow> PatronAuraAtoms()
+    {
+        var container = _store.GetContainer("patron.aura");
+        if (container is null || container.Atoms.Count == 0) return Array.Empty<AtomRow>();
+
+        var rows = new List<AtomRow>(container.Atoms.Count);
+        foreach (var entry in container.Atoms)
+        {
+            var atom = _store.GetAtom(entry.AtomId);
+            if (atom is not null) rows.Add(atom);
+        }
+        return rows;
     }
 }

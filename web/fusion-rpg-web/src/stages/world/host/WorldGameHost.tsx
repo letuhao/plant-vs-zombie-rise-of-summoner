@@ -21,6 +21,8 @@ export type WorldGameHostProps = {
   /** Bumps when overlay inputs (lifelines/supply) change even if graph refs are equal. */
   overlayEpoch?: number;
   selectedSectorId?: string | null;
+  /** Force / entity selection for map halo (followup F3). Wins over sector when set. */
+  selectedEntityId?: string | null;
   ignoreRects?: WorldIgnoreRect[];
   /** Targeting overlay inputs (reachable / pending routes / blocked). */
   targeting?: unknown;
@@ -31,6 +33,16 @@ export type WorldGameHostProps = {
   onSelect: (payload: WorldSelectPayload) => void;
   className?: string;
 };
+
+/** Resolve interaction selection — force wins over sector (followup F3). */
+export function interactionSelection(
+  selectedSectorId: string | null | undefined,
+  selectedEntityId: string | null | undefined
+): { selectedId: string | null; selectedKind: "sector" | "force" | null } {
+  if (selectedEntityId) return { selectedId: selectedEntityId, selectedKind: "force" };
+  if (selectedSectorId) return { selectedId: selectedSectorId, selectedKind: "sector" };
+  return { selectedId: null, selectedKind: null };
+}
 
 function hostLog(payload: Record<string, unknown>): void {
   if (import.meta.env.DEV) {
@@ -49,6 +61,7 @@ export function WorldGameHost({
   playerFactionId = null,
   overlayEpoch = 0,
   selectedSectorId = null,
+  selectedEntityId = null,
   ignoreRects = [],
   targeting = null,
   lens = "ownership",
@@ -71,6 +84,7 @@ export function WorldGameHost({
   const bufferedLensRef = useRef<string | null>(null);
   const bufferedInteractionRef = useRef<{
     selectedId: string | null;
+    selectedKind: "sector" | "force" | null;
     ignoreRects: WorldIgnoreRect[];
     targeting: unknown;
   } | null>(null);
@@ -152,7 +166,7 @@ export function WorldGameHost({
         worldBusEmit("world:interaction", {
           generation,
           selectedId: i.selectedId,
-          selectedKind: i.selectedId ? "sector" : null,
+          selectedKind: i.selectedKind,
           ignoreRects: i.ignoreRects,
           targeting: i.targeting
         });
@@ -223,9 +237,11 @@ export function WorldGameHost({
   useEffect(() => {
     const generation = generationRef.current;
     if (!generation) return;
+    const sel = interactionSelection(selectedSectorId, selectedEntityId);
     if (!readyRef.current) {
       bufferedInteractionRef.current = {
-        selectedId: selectedSectorId,
+        selectedId: sel.selectedId,
+        selectedKind: sel.selectedKind,
         ignoreRects,
         targeting
       };
@@ -233,12 +249,12 @@ export function WorldGameHost({
     }
     worldBusEmit("world:interaction", {
       generation,
-      selectedId: selectedSectorId,
-      selectedKind: selectedSectorId ? "sector" : null,
+      selectedId: sel.selectedId,
+      selectedKind: sel.selectedKind,
       ignoreRects,
       targeting
     });
-  }, [selectedSectorId, ignoreRects, targeting]);
+  }, [selectedSectorId, selectedEntityId, ignoreRects, targeting]);
 
   return (
     <div
@@ -250,7 +266,7 @@ export function WorldGameHost({
       role="img"
       aria-label="World map"
       onContextMenu={(e) => {
-        // G7 will make Phaser the sole owner; keep preventDefault so the page menu stays closed.
+        // Phaser owns empty select via contextmenu; host only blocks the browser menu.
         e.preventDefault();
       }}
     >

@@ -161,10 +161,37 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       never written, leaving the file's own "every re-bless recorded" convention silently
     //       broken by one entry despite the substance being right.
     //
-    // The plan expected one re-bless. Many more were needed since — most recently entry #15 above —
+    //   16. **base-defense `siege-engagement`, module 20 (`RulesetVersion` 7 → 8), 2026-09-06** — a
+    //       CONTINUING siege (no fresh `assault` order) used to fall through
+    //       `ContactResolver.SectorContacts` into a generic `BattleKinds.Sector` request, which
+    //       `DistrictAssaultResolver`'s own delegation guard sent straight to
+    //       `PlaceholderBattleResolver` — a siege silently stopped being a real board fight the moment
+    //       its attacker held still for one turn. `MovementPhase.BuildContactRequest` now checks
+    //       `SiegeEngagement.IsUnderSiege` per contact and routes a genuinely besieged sector to
+    //       `BattleKinds.District` instead, reusing `DistrictAssaultPhase.BuildBoard`. This scenario's
+    //       own frontier claim (entry #14's own words) is exactly where it fires: Zomboss's band walks
+    //       directly onto `ash-waste` at turns 11-12, which Dave claimed at turn 10 — before this fix
+    //       that contact resolved as an abstract `Sector` fight; now it resolves on the real board
+    //       (structures, elements, `BattleEngine.Resolve`), a genuinely different combat outcome from
+    //       that point on. A real behaviour change, not a field addition.
+    //
+    //       Caught alongside a second, unrelated defect this same investigation surfaced:
+    //       `The_pure_engine_reproduces_the_stored_hashes_from_the_command_log_alone`'s own replay loop
+    //       called `TurnEngine.Step` with no resolver (defaulting to `PlaceholderBattleResolver`), while
+    //       the store commits with `DistrictAssaultResolver.Instance`
+    //       (`RpgStore.WorldTurns.cs`) — silently correct only because this script never fielded an
+    //       `assault` order and, until this fix, never routed a contact into `BattleKinds.District`
+    //       either. Fixed by passing `DistrictAssaultResolver.Instance` into that replay loop, which is
+    //       what actually makes "pure engine reproduces stored hashes" a true statement instead of one
+    //       that happened to hold by coincidence. `WorldTwentyTurnCheckpointTests.cs`'s own CP2 replay
+    //       carried the identical gap (fixed there too) and re-ran green, unchanged — CP2's script never
+    //       reaches a District battle at all, so that fix was a no-op for it, confirming this was a
+    //       test-methodology defect and not a second production behaviour change.
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #16 above —
     // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
     // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
-    const string GoldenFinalHash = "11cff991ba55f9e579a8e2cdbe0e73ea80a2bb1102336a818c3c041299f015e7";
+    const string GoldenFinalHash = "258af1a0fe5fdc8cd9ead00a4f88f8483d9135c971392a4838dba0f6f813d585";
 
     readonly string _dir;
     readonly RpgStore _store;
@@ -349,11 +376,17 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     {
         var stored = Play("cp3-replay");
 
+        // The resolver must match what the store actually commits with (RpgStore.WorldTurns.cs) or
+        // "pure engine" would silently mean "pure engine, minus whichever battle kind the store's
+        // resolver wasn't the default" — a gap base-defense `siege-engagement` (2026-09-06) found the
+        // hard way: this scenario fields no `assault` order anywhere in its script, so before that
+        // module's own dispatch fix no `BattleKinds.District` battle had ever fired here, and the two
+        // resolvers had always agreed by coincidence, not by construction.
         var world = Scenario("cp3-replay");
         var replayed = new List<string>();
         for (var turn = 0; turn < Turns; turn++)
         {
-            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp3-replay", turn), Seed);
+            var result = TurnEngine.Step(world, _store.ListWorldCommands("cp3-replay", turn), Seed, DistrictAssaultResolver.Instance);
             world = result.World;
             replayed.Add(result.StateHash);
         }

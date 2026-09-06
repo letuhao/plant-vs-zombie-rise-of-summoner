@@ -486,6 +486,33 @@ public sealed partial class RpgStore
     }
 
     /// <summary>
+    /// One instance's generation stamp. <c>item_generation.instance_id</c> is the PK, so this is the
+    /// point lookup <see cref="ListGenerations"/>'s drop-log sweep could never be — it is what lets a
+    /// reader go from an instance id to the item level / frame / role / rarity ordinal the pipeline
+    /// decided, without knowing which drop produced it.
+    ///
+    /// <para>Added 2026-09-06 for <see cref="GetItemCardInput"/>: the card's own <c>ItemLevel</c> and
+    /// the frame the equip gate compares against both live here and nowhere else.</para>
+    /// </summary>
+    public ItemGenerationRow? GetItemGeneration(string instanceId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT instance_id, drop_log_id, base_type_id, rarity_ordinal, item_level, frame, role, affix_channel
+                FROM item_generation WHERE instance_id = $id;
+                """;
+            cmd.Parameters.AddWithValue("$id", instanceId);
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return null;
+            return new ItemGenerationRow(r.GetString(0), r.GetInt64(1), r.GetString(2), r.GetInt32(3),
+                r.GetInt32(4), r.GetString(5), r.GetString(6), r.GetString(7));
+        }
+    }
+
+    /// <summary>
     /// The inflow measurement module 20's loot filter needs — I12 §8's `40/day` tripwire read as
     /// written. ⛔ It is a <b>measurement</b>, never a counter that could become a gate: this method
     /// only reads, and nothing in the pipeline consults it.

@@ -54,8 +54,10 @@ public class AtomCatalogSsotDriftTests
         // E37 (spec-projectile-control.md): 14 -> 15 kinds, bullet.modify on the existing Board point
         // (no attach-point change).
         // E41 (spec-ui-attach-point.md): 15 -> 16 kinds, 6 -> 7 attach points, with ui.present / Ui.
-        Assert.Equal(16, AtomKindRegistry.KindCount);
-        Assert.Equal(7, AtomKindRegistry.AttachPointCount);
+        // base-defense `siege-construction` (decision 27, 2026-09-06): 16 -> 17 kinds, 7 -> 8 attach
+        // points, with structure.place / Siege.
+        Assert.Equal(17, AtomKindRegistry.KindCount);
+        Assert.Equal(8, AtomKindRegistry.AttachPointCount);
 
         Assert.Contains($"Derived — {registry.AllRegistered.Count} registered", text);
         Assert.Contains($"Primary — {StatChannels.All.Length}, and only these", text);

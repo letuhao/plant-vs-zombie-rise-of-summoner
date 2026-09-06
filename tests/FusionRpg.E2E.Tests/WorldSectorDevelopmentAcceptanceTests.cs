@@ -220,11 +220,17 @@ public class WorldSectorDevelopmentAcceptanceTests : IAsyncLifetime
         var store = new RpgStore(_factory.DataDir);
         store.Init();
 
+        // The resolver must match what the store actually commits with (RpgStore.WorldTurns.cs) or
+        // "pure engine" would silently mean "pure engine, minus whichever battle kind the store's
+        // resolver wasn't the default" — base-defense `siege-engagement` (2026-09-06) found this
+        // exact gap in two sibling acceptance suites (WorldWaveOneAcceptanceTests,
+        // WorldTwentyTurnCheckpointTests); fixed here too for the same reason, though this scenario
+        // scripts no hostile faction at all, so it was never reachable in practice.
         var world = WorldTemplateCatalog.Build(WorldTemplateCatalog.FirstLightId, seed: 59, "w59-pure-replay");
         var replayed = new List<string>();
         for (var turn = 0; turn < Turns; turn++)
         {
-            var result = TurnEngine.Step(world, store.ListWorldCommands("w59-pure-replay", turn), seed: 59);
+            var result = TurnEngine.Step(world, store.ListWorldCommands("w59-pure-replay", turn), seed: 59, DistrictAssaultResolver.Instance);
             world = result.World;
             replayed.Add(result.StateHash);
         }

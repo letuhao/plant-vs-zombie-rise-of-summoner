@@ -236,6 +236,24 @@ public sealed record SlotOutcome
     /// <summary>Who ended the battle occupying it — possession is by occupation (decision 4:
     /// buildings have no ownership). Null means nobody.</summary>
     public string? HeldByFactionId { get; init; }
+
+    /// <summary>
+    /// base-defense `siege-construction` (decision 27): the structure now standing on this slot, if a
+    /// NEW one was placed this battle (`Built`/`Assembled`/`Summoned`/`Laboured`, all resolved through
+    /// the `structure.place` atom). Null means no placement happened this battle — every caller that
+    /// predates this field constructs the identical record it always did.
+    /// </summary>
+    public string? StructurePlaced { get; init; }
+
+    /// <summary>
+    /// Mirrors `WorldSlot.ConstructionTurnsRemaining`, for a <see cref="StructurePlaced"/> only —
+    /// meaningless when that is null. Null means the placed structure is finished immediately
+    /// (`Assembled`/`Summoned`, decision 27: "immediate — you carried it here already" / "nothing new
+    /// is needed"); a positive count (`Built`/`Laboured`, from `StructureDef.BuildTurns`) means it is
+    /// still under construction and decrements turn-by-turn through the SAME `LoamPhases.Production`
+    /// pass that already drives the peacetime `Build` path — no second countdown mechanism.
+    /// </summary>
+    public int? PlacedConstructionTurnsRemaining { get; init; }
 }
 
 /// <summary>

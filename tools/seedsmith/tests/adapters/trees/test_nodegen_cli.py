@@ -153,6 +153,13 @@ class TreesGenerateDryRunTests(unittest.TestCase):
                 "flavor": "A steady line.", "rationale": "", "blocked": "",
             })
 
+        # H9's own real generation runs (2026-09-06) have started legitimately writing to the real
+        # committed path below, so this test can no longer assert it stays ABSENT -- it asserts the
+        # test's OWN run never TOUCHES it instead, by snapshotting whatever is there (present or not)
+        # before, and comparing byte-for-byte after.
+        real_committed_path = plan_read_mod.REPO_ROOT / "data" / "seed" / "passive-tree" / "nodes" / "might.json"
+        real_before = real_committed_path.read_bytes() if real_committed_path.exists() else None
+
         with tempfile.TemporaryDirectory() as tmp:
             tmp_root = Path(tmp)
             real_plan_path = plan_read_mod.plan_path("might")
@@ -169,9 +176,10 @@ class TreesGenerateDryRunTests(unittest.TestCase):
             # The write landed under the temp root, never the real committed seed document.
             written_path = tmp_root / "passive-tree" / "nodes" / "might.json"
             self.assertTrue(written_path.exists())
-            real_committed_path = plan_read_mod.REPO_ROOT / "data" / "seed" / "passive-tree" / "nodes" / "might.json"
-            self.assertFalse(real_committed_path.exists(),
-                            "the real committed seed document must never be touched by this test")
+            real_after = real_committed_path.read_bytes() if real_committed_path.exists() else None
+            self.assertEqual(real_before, real_after,
+                            "the real committed seed document must never be touched by this test, "
+                            "whether or not it already existed going in")
 
         # The dry-run-shaped summary prints first (unchanged), then the real per-tree write report
         # as a second, separately-printed JSON document — both land in the same captured stdout.
@@ -183,6 +191,101 @@ class TreesGenerateDryRunTests(unittest.TestCase):
     def test_an_unplanned_tree_id_exits_cannot_run(self) -> None:
         code, _ = _run_captured(["trees", "generate", "--tree", "no-such-tree", "--dry-run"])
         self.assertEqual(code, EXIT_CANNOT_RUN)
+
+    def test_every_node_sharing_the_identical_name_still_gets_a_unique_nameKey(self) -> None:
+        """2026-09-06 real-call finding, chapter 1: two accepted `might` nodes independently named
+        themselves "Deep Rooting", colliding on `nameKey` -- `NodeKeyRefused` propagated straight out
+        of `run_language_stage` with no handler, crashing the CLI. Chapter 2 (same day): even after
+        catching the crash cleanly, the REAL root cause -- the model choosing `nameKey` independent of
+        its own `name` -- kept recurring against the real model twice in a row, including after an
+        explicit schema-wording fix. Closed for real: `nameKey` is no longer trusted from the model at
+        all, it is derived deterministically from the model's own accepted `name`, with a numeric
+        suffix on collision (`_derive_unique_name_key`). This test reproduces the ORIGINAL failing
+        shape -- a fake model returning the IDENTICAL name for every one of `might`'s 40 real nodes --
+        and proves the new, better outcome: all 40 accepted, all 40 unique, never a refusal."""
+        from seedsmith.adapters.trees.nodegen import plan_read as plan_read_mod
+
+        def _run_with_fake_model(argv: "list[str]", fake) -> "tuple[int, str]":
+            buf = io.StringIO()
+            with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=fake):
+                with contextlib.redirect_stdout(buf):
+                    code = main(argv)
+            return code, buf.getvalue()
+
+        def fake_call_model(_system, _user, *, config=None, temperature=0.2, schema=None):
+            props = schema["properties"]
+            affix_ids = props["affixIds"]["items"]["enum"][:1]
+            # EVERY node gets the identical name -- and, matching the real finding, a nameKey that is
+            # STILL the same regardless (the model's own nameKey is never trusted downstream now).
+            return json.dumps({
+                "affixIds": affix_ids, "affinity": ["core"] * len(affix_ids),
+                "exclusion": {"form": "none", "propertyKeys": []},
+                "name": "Deep Rooting", "nameKey": "tree.node.deep-rooting",
+                "flavor": "A steady line.", "rationale": "", "blocked": "",
+            })
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            real_plan_path = plan_read_mod.plan_path("might")
+            tmp_plan_path = plan_read_mod.plan_path("might", tmp_root)
+            tmp_plan_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_plan_path.write_bytes(real_plan_path.read_bytes())
+            ledger_path = tmp_root / "ledger.json"
+
+            code, out = _run_with_fake_model([
+                "trees", "generate", "--tree", "might", "--write",
+                "--plan-root", str(tmp_root), "--ledger-path", str(ledger_path),
+            ], fake_call_model)
+
+            self.assertNotIn("Traceback", out)
+            self.assertNotIn("nameKeyRefused", out)
+            self.assertIn('"accepted": 40', out)
+            self.assertEqual(code, EXIT_CLEAN)
+
+            ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+            self.assertEqual(len(ledger["done"]), 40)
+            name_keys = [entry["record"]["nameKey"] for entry in ledger["done"].values()]
+            self.assertEqual(len(name_keys), len(set(name_keys)),
+                            "every one of the 40 identically-NAMED nodes must still get a unique nameKey")
+            # The deterministic derivation is visible, not hidden -- the base slug plus numeric
+            # suffixes, never the model's own literal (and collision-prone) "deep-rooting" repeated.
+            self.assertIn("tree.node.deep-rooting", name_keys)
+            self.assertIn("tree.node.deep-rooting-2", name_keys)
+
+    def test_the_cli_still_reports_a_genuine_nameKeyRefused_cleanly_if_one_ever_reaches_it(self) -> None:
+        """The auto-dedup above closes the ONE real way this fired in practice, but the CLI's own
+        exception-handling (report cleanly, EXIT_GAP, never a raw traceback, continue to other trees
+        under --all) is a real, independent property worth pinning on its own terms -- proven here by
+        making `run_language_stage` itself raise, bypassing generation entirely, so this test survives
+        even if the dedup fix above is ever changed or removed."""
+        from seedsmith.adapters.trees.nodegen import emit as emit_mod
+
+        def _raise_name_key_refused(*_a, **_kw):
+            raise emit_mod.NodeKeyRefused("nameKey 'tree.node.x' is used by both node index 0 and node index 1")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            from seedsmith.adapters.trees.nodegen import plan_read as plan_read_mod
+            real_plan_path = plan_read_mod.plan_path("might")
+            tmp_plan_path = plan_read_mod.plan_path("might", tmp_root)
+            tmp_plan_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_plan_path.write_bytes(real_plan_path.read_bytes())
+
+            buf = io.StringIO()
+            # `report/cli.py` imports `run` as `run_mod` via a LOCAL import inside the function --
+            # `run_mod` is the same module object as `seedsmith.adapters.trees.nodegen.run`, so
+            # patching the attribute there (not a nonexistent `cli.run_mod`) is what actually reaches it.
+            with patch("seedsmith.adapters.trees.nodegen.run.run_language_stage", side_effect=_raise_name_key_refused):
+                with contextlib.redirect_stdout(buf):
+                    code = main([
+                        "trees", "generate", "--tree", "might", "--write",
+                        "--plan-root", str(tmp_root),
+                    ])
+            out = buf.getvalue()
+
+        self.assertNotIn("Traceback", out)
+        self.assertIn("nameKeyRefused", out)
+        self.assertEqual(code, EXIT_GAP)
 
 
 if __name__ == "__main__":

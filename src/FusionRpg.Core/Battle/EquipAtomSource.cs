@@ -106,8 +106,18 @@ public sealed class EquipAtomSource
             var pars = Effects.Atoms.Power.CostFunction.Read(atom.ParamsJson);
             if (!pars.TryGetValue("channel", out var chEl)
                 || chEl.ValueKind != System.Text.Json.JsonValueKind.String) continue;
-            if (!pars.TryGetValue("amount", out var amtEl)
-                || !amtEl.TryGetInt64(out var amount)) continue;
+            if (!pars.TryGetValue("amount", out var amtEl)) continue;
+            // `amount` is ParamKind.Value: a plain number OR a ValueSpec OBJECT (a curve reference,
+            // or `patron-absorption`'s `externalRef`). Guarding the kind is not optional —
+            // JsonElement.TryGetInt64 THROWS on an object, it does not return false, and
+            // `data/seed/atoms/patron-aura.json` ships twelve such `stat.derived` rows. Without this
+            // line a single unresolvable row took the whole compose with it (measured 2026-09-06: the
+            // geared corner run, which sweeps every `stat.derived` row in the corpus, died with an
+            // unhandled InvalidOperationException). Skip the row and keep walking, exactly as an
+            // unparseable `op` is skipped: this seam has no ValueSpec resolver — AtomCompiler owns
+            // that — so resolving one here would be a second, divergent evaluation of the same spec.
+            if (amtEl.ValueKind != System.Text.Json.JsonValueKind.Number) continue;
+            if (!amtEl.TryGetInt64(out var amount)) continue;
 
             var op = pars.TryGetValue("op", out var opEl) && opEl.ValueKind == System.Text.Json.JsonValueKind.String
                 ? opEl.GetString()
