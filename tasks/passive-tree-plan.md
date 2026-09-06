@@ -1,15 +1,30 @@
 # Implementation plan — passive tree
 
 **Program:** `passive-tree`. Capability map: [docs/architecture/passive-tree-map.md](../docs/architecture/passive-tree-map.md)
-(12 modules). Specs: `docs/architecture/passive-tree/spec-<module-id>.md`. Design record:
+(14 modules — 12 original plus `element-conversion` (D56) and `soul-curve-resolution` (D58), both
+added 2026-09-06/07). Specs: `docs/architecture/passive-tree/spec-<module-id>.md`. Design record:
 [passive-tree-ideal.md](../docs/architecture/passive-tree-ideal.md) — 45 owner decisions.
 Task list: [passive-tree-todo.md](passive-tree-todo.md).
 
 **Status:** plan, rewritten 2026-09-05. **Completeness-audited 2026-09-06** against all twelve module
 specs (four parallel audit passes, one per dependency wave) — every finding either closed with a task,
 folded into an existing task's acceptance criteria, or tracked in the non-blocking-asks table with a
-named default. Zero open gaps against the specs as they stand today. Awaiting owner review before any
-build starts — no phase is authorized yet.
+named default.
+
+**Updated 2026-09-07 — build is well underway, not "awaiting review."** Phases A-E are built and
+verified. Phase F is partial (F1/F4/F5 done; F2/F3 done pending a real production-scale sweep; F6
+done and revealed a real gap — see the new **F7** task below). Phase G's gate-side work shipped and is
+live-probed; its remaining two checkpoint bullets wait on content, not design. Phase H is partial
+(H1-H8 done; H9 has generated 379 of 480 primary-tree nodes, bind+commit+review still to run). Phase I
+is fully built (I1-I10), with only the owner-only eyeball bullet left. Phase J has two new,
+spec-complete, zero-blocker tasks (**J11** `element-conversion`, **J12** `soul-curve-resolution`) ready
+to build now, alongside J1's existing block (missing plan-emission factory functions in
+`tools/seedsmith`).
+
+Two new module specs landed since this plan's own module count was written:
+[`spec-element-conversion.md`](../docs/architecture/passive-tree/spec-element-conversion.md) (D56) and
+[`spec-soul-curve-resolution.md`](../docs/architecture/passive-tree/spec-soul-curve-resolution.md)
+(D58) — the capability map now lists 14 modules, not 12.
 
 **Why it was rewritten.** Three coverage audits read the twelve module specs against the previous
 27-task plan and found **149 requirements with no delivering task** and **16 acceptance criteria that
@@ -30,23 +45,27 @@ coefficients, and the resolver folds them into combat as ordinary channel contri
 35,280 nodes across 882 trees when complete (D51, 2026-09-06: 24 statuses, not 21 — was 35,160/879)
 — but the plan reaches a playable single tree long before that, deliberately.
 
-**79 tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
+**81+ tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
 more than about five files. (E1b — the L2b resist feedback path — and F1b — squad-harness's own OQ2,
 measuring the shipped commander-replicated allocation shape alongside D21's — were added after this
-count was first written, both closing a coverage-audit gap rather than changing scope.)
+count was first written, both closing a coverage-audit gap rather than changing scope. **F7 — added
+2026-09-07, reconciling `squad-harness`'s tree-power model against the real direct-channel pipeline —
+and J11/J12 — added 2026-09-06/07, the two new module specs' own build tasks — are the same kind of
+addition: closing a gap the audit/build process found, not new scope invented ahead of it.** F8 is
+conditional on F7's own finding and is not counted until opened.)
 
 | Phase | What it lands | Tasks |
 |---|---|---|
-| A — foundations | The three files eleven downstream tasks read | 3 (A1–A3) |
-| B — one trait, end to end | The vertical slice: planner → catalog → binder → store → a changed number | 6 (B1–B6) |
-| C — the plan corpus, the catalog and the store | Corpus invariants, migration, the store's own hardening | 11 (C1–C11) |
-| D — the binder and the resolver completed | Channel legality, the soul track, cross-unlock, the report | 8 (D1–D8) |
-| E — mechanism wiring | G1–G3 across Core, the injector, Battle and Sim | 6 (E1–E6) |
-| F — `squad-harness` and the measurements | The tool, A10a, and stages S2–S4 | 6 (F1–F6) |
-| G — the gate quantities | The two counters, the index, the surface, D43's seed | 8 (G1–G8) |
-| H — generation machinery and the primary corpus | The 24 gates, their runner, the metrics, 480 nodes | 9 (H1–H9) |
-| I — the player surface | The wire, and the spec's levels 0 / 0b / 1 / 2 / 3 | 10 (I1–I10) |
-| J — volume | The elemental, status and species corpora, and the census | 10 (J1–J10) |
+| A — foundations | The three files eleven downstream tasks read | 3 (A1–A3) ✅ |
+| B — one trait, end to end | The vertical slice: planner → catalog → binder → store → a changed number | 6 (B1–B6) ✅ |
+| C — the plan corpus, the catalog and the store | Corpus invariants, migration, the store's own hardening | 11 (C1–C11) ✅ |
+| D — the binder and the resolver completed | Channel legality, the soul track, cross-unlock, the report | 8 (D1–D8) ✅ |
+| E — mechanism wiring | G1–G3 across Core, the injector, Battle and Sim | 7 (E1, E1b, E2–E6) ✅ |
+| F — `squad-harness` and the measurements | The tool, A10a, S2–S4, and reconciling the tree-power model against the real pipeline | 8 (F1, F1b, F2–F7) 🟡 |
+| G — the gate quantities | The two counters, the index, the surface, D43's seed | 8 (G1–G8) 🟡 gate-side shipped; checkpoint waits on J1's content |
+| H — generation machinery and the primary corpus | The 24 gates, their runner, the metrics, 480 nodes | 9 (H1–H9) 🟡 H1–H8 done, H9 partial (379/480) |
+| I — the player surface | The wire, and the spec's levels 0 / 0b / 1 / 2 / 3 | 10 (I1–I10) ✅ owner eyeball pending |
+| J — volume | The elemental, status and species corpora, the census, plus the two new atom/curve-vocabulary modules | 12 (J1–J12) ⬜ J11/J12 ready now, no blockers |
 
 ## Architecture decisions this plan is built on
 
@@ -95,7 +114,7 @@ Checked against `planning-and-task-breakdown`'s gates-vs-checkpoints test:
 
 | Candidate | Irreversible? | Verdict |
 |---|---|---|
-| A10a before `tree-language --write` | No — expensive (~4,680 calls, ~34 h review), but **detectable and redoable**; nothing is minted into a save | **Checkpoint F**, with a reversible default: emit the 12 primary trees first (~1,440 calls), measure, then decide on the rest |
+| A10a before `tree-language --write` | No — expensive (~5,040 calls, D51 2026-09-06: 24 statuses not 21, was ~4,680; ~34 h review), but **detectable and redoable**; nothing is minted into a save | **Checkpoint F**, with a reversible default: emit the 12 primary trees first (~1,440 calls), measure, then decide on the rest |
 | A tree's gate quantity before its content | No — nodes generated early become reachable when the counter lands | **Sequencing rule**, and now a refusal in code (`R-G1`, task C2) rather than a note in prose. Cost, not correctness |
 | **First catalog shipped to players** | **Yes** — after that a node id change is a migration (D24) | The one real gate, at Checkpoint J, and it is already an owner decision rather than a plan artifact |
 
@@ -151,7 +170,8 @@ contest channels. Checkpoint E is where the two tracks actually meet.
 
 The node class §3.5 proved is the only one that rescues a focused build. G1 is the critical path — one
 subsystem, ~90 lines, unblocking Erosion, layer parity and conditional scaling at once. G4 stays
-excluded on purpose and no task adds a 17th atom kind.
+excluded on purpose and no task in this phase adds a new atom kind — `element.convert` (D56,
+`spec-element-conversion.md`) is J11's own, separately-scoped addition, not this phase's.
 
 Tasks E1, E1b, E2–E6. **Checkpoint E: a status-granted derived channel reaches a live actor and is
 scored in Sim.**
@@ -163,8 +183,29 @@ differential, concentration and cross-unlock, the soul track, and S4's budget ev
 not optional* — no other module is scoped to produce it, and it is the only thing that can re-derive
 D42's two dials.
 
-Tasks F1, F1b, F2–F6. **Checkpoint F: A10a produces `D` with a half-width, and D42's two dials are
-republished.**
+**F6 ran S4 for real and found a genuine structural gap, not an under-measurement — F7 answers it.**
+`BudgetSweep`'s `ProposeTreeTotalPoints`/`ProposeTreeShareMilli` always report `Resolved: false`,
+because `TreeModel` folds tree power back as extra **aptitude allocation**
+(`effective += AptitudeAllocation.Single(...)`, inherited from `tools/HybridViability --trees`'s
+pre-passive-tree sweep) while the real, shipped pipeline (`TreeAtomSource.BoundAtomsFor`) writes a
+node's contribution **directly to its own derived channel**, through the same fan-in
+`AtomDerivedSubsystem` uses for traits/equipment — never through aptitude at all. These are two
+different causal paths, not two units of one path. Reconciling them is possible (an `AptitudeEdge`'s
+own `KMilli` rate is a known, invertible linear map for whichever channel a node writes to) but only
+**per representative channel**, matching this program's own `combat.power.fire`/`combat.power.omni`
+worked-example convention (`spec-tree-binder.md` §3.4) — not a single universal constant, and not by
+having the harness read a corpus that mostly doesn't exist yet (its own spec forbids that, for good
+reason: purity and speed against unbuilt content). **F7 does this investigation and reconciliation
+before F4/F5's expensive real-production-scale sweeps run** (a coverage audit corrected this from
+"F2/F3" — F2/F3 never call `TreeModel` at all; only F4/F5/F6 do), so those sweeps validate the right
+mechanism instead of the aptitude-fold-back shortcut at high trial counts. If F7 finds the fold-back
+model itself doesn't represent the real pipeline even qualitatively (the more likely outcome, given
+the two paths' difference is exact, not approximate), it opens F8 as a scoped rebuild rather than
+forcing a reconciliation that doesn't exist.
+
+Tasks F1, F1b, F2–F7 (F8 conditional on F7's own finding). **Checkpoint F: A10a produces `D` with a
+half-width, and D42's two dials are republished — with F7's own honest label if the republish is
+representative-channel-derived rather than corpus-measured.**
 
 ### Phase G — the gate quantities
 
@@ -212,21 +253,22 @@ Tasks J1–J10. **Checkpoint J: full corpus reviewed and ready to ship — the o
 | The species-namespace affix bill: **6,720 authored affixes** against a shipped authored corpus of two | High | J7 is its own task and its own run, with the cost stated here before it is scheduled. J6's marking rule keeps a later `speciesUniqueAffixMin` change `O(diff)` |
 | `battle-tempo` is editing `BattleModels.cs` / `BattleRunState.cs` right now | Medium | R9: cite by symbol, never by line. Seventeen citations already drifted twice during the spec round. G1 and E3 both touch `BattleRunState` — the one place wave 0's "no shared files" claim does not hold, and they are sequenced accordingly |
 | Review rate unknown; every hour figure rests on it | Medium | H8's 20-tree pilot, early, gates the full census rather than the whole program |
-| The generic corpus is generated before its gate quantities exist | Medium | Phase G precedes phase J, and `R-G1` (task C2) makes it a **refusal in code** rather than a schedule note. Phase H is deliberately limited to the 12 trees whose gate already ships |
+| ~~The generic corpus is generated before its gate quantities exist~~ — **superseded 2026-09-06**: both gate quantities shipped and are live-probed (G6); `R-G1` no longer refuses anything. **Current risk: the 30 elemental/status trees have no plan-emission tooling at all** (`elemental_tree_spec`/`status_tree_spec` don't exist in `tools/seedsmith`) | Medium | J1 names this precisely; building the two factory functions is a mechanical extension of `primary_tree_spec`'s own already-generalized pattern (H9), not new design |
 | Species volume (33,600 nodes, ~105,840 calls) | Medium | Last phase, resumable with a mid-run-kill test, and D41's 8-of-40 bounds the *unique* authoring to 6,720 affixes |
 | No guard can detect a missing `ssot-power-scale.md` row for this program | Medium | `guard-power.ps1:74` keys on a parameter named `level`/`lvl`/`index`; this program's are `t`, `count`, `nodesOwned`, `soulLevel`, `thetaActor`. D8, E6 and G8 exist because a green guard is not evidence |
-| Existing saves show 27 trees at tier 0 | Low | D43's one-time proxy seed (G5), stamped and auditable |
+| ~~Existing saves show 27 trees at tier 0~~ — superseded: D43's proxy seed (G5) already ships, and the count is now 30 of 42 (D51) for whichever trees still lack content once J1 unblocks them | Low | Stamped and auditable; re-verify against a live save once J1 lands |
 
 ## Open questions
 
-None block phase A, and none blocks any task. **Twelve** are tracked in the todo's non-blocking-asks
-table (recount 2026-09-06, after a completeness audit closed one and added three), each with a named
-default and a resolver — the 17th atom kind, three scope point rates, `legitimateSkew` rows,
-player-facing naming, `aura-skill` T13's scope, the transfer verdict's opponent, D15's rule after S4,
-respec's soul counter, the `DemonsPage` volume defect the Codex route hangs off, what "the tier below
-is unlocked" means for the skill-wallet calibration, auto-drafting a species starter plan, and
-shareable build codes as a marketed feature. One needs the owner specifically and changes shipped
-behaviour: the transfer verdict.
+None block phase A, and none blocks any task. The todo's own non-blocking-asks table originally
+tracked twelve; **reconciled 2026-09-07** against the D44-D59 owner-decisions batch and one older,
+pre-batch decision — seven were already answered and had simply never been propagated back into the
+table (the same defect class the module-spec audit found and fixed six times over). **Five remain
+genuinely open**, each with a standing default already carrying it: player-facing naming, the
+`DemonsPage` volume defect the Codex route hangs off, auto-drafting a species starter plan, shareable
+build codes as a marketed feature, and D15's equal-budget rule — the last of these re-scoped, not
+closed: S4 (task F6) has now run and found a structural non-resolution rather than an answer, so this
+question is repointed at the new **F7** task instead of "after F6."
 
 **Closed since the table was first written:** the L2b resist path question — the owner answered
 *contribute everything*, shipped as task E1b. Removed from the table, not left stale.

@@ -1,5 +1,8 @@
 # Spec: `gear-tab`
 
+> **TRAIL — do not implement.** Catalog-era sheet uses `kit-tab` for paper-doll + equipment.
+> Kept for history only. See [actor-sheet-map.md](../actor-sheet-map.md) Trail.
+
 **Module id:** `gear-tab` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
 **Status:** Draft — pending owner review.
 

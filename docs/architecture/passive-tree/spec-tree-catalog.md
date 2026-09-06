@@ -315,8 +315,9 @@ are the same number, and a test asserts it.**
 
 ```text
 data/seed/passive-tree/**.json          THE SEED - enums, shapes, budgets, allocated node keys,
-                                        the frozen property vocabulary. No magnitudes.
-        |  tools/PassiveTreeGen  (deterministic C#)
+                                        the per-tree property vocabulary. No magnitudes.
+        |  tools/TreeBinder  (deterministic C#; shipped name — this diagram said `PassiveTreeGen`
+        |                     before the module built it, see §6)
         v
 data/generated/passive-tree/**.json     CONCRETE - coefficients, committed, diffable, reviewable,
                                         byte-identical on regeneration, identical for every player
@@ -348,17 +349,29 @@ which apply unchanged: it must **call** the shipped `PowerLadder.Value(Θ)` rath
 (*"a Python transcription of them is a second curve by another name"*); the widening and precision
 decisions do not survive a port; and the runtime is C#. **Seedsmith stops at the seed.**
 
-**Frozen registry.** The property vocabulary D14's exclusions key on is a **frozen** registry file in
-`data/seed/passive-tree/_registry/`, following `data/seed/items/_registry/`'s eight `"frozen": true`
-files and `bands.v1.json:8`'s own immutability note. Ideal §6 step 2 is explicit that it *"must exist
-before any node text is written"* — a generated corpus cannot maintain named-pair exclusions.
+**Frozen registry — superseded 2026-09-06 by how H1 actually shipped it, verified this session against
+both the code and a real committed plan file.** This paragraph originally specced the property
+vocabulary D14's exclusions key on as a **frozen** registry file in `data/seed/passive-tree/_registry/`,
+following `data/seed/items/_registry/`'s eight `"frozen": true` files. That file was never built and no
+task tracks building it — `data/seed/passive-tree/_registry/` does not exist on disk. What shipped
+instead (task H1, `spec-tree-language.md` §5): the vocabulary travels as `propertyVocabulary`, an
+object **inline inside each tree's own committed plan file** — confirmed present at
+`data/seed/passive-tree/plan/might.v1.json:709` — and `exclusion.py`'s own doc comment states the rule
+directly: *"the property space is `tree-plan`'s `propertyVocabulary`, never the atom corpus's tags... a
+CALLER-SUPPLIED vocabulary (read by `plan_read` from the committed plan)."* This still satisfies ideal
+§6 step 2's requirement (*"must exist before any node text is written"*) — the plan is emitted, and
+therefore its `propertyVocabulary`, before any node-generation call runs — it simply satisfies it
+per-tree, inline, rather than via one shared frozen file. The Project structure row below is corrected
+to match; no `_registry/` directory is missing work, it is a superseded design.
 
 ### 6. The load path
 
 **Who reads it, and when.**
 
-1. `tools/PassiveTreeGen` writes `data/generated/passive-tree/`. Committed. `--check` gates CI on
-   staleness, copied verbatim from `tools/DemonSpeciesGen/Program.cs:17`.
+1. `tools/TreeBinder` (shipped 2026-09-06; this spec's earlier drafts named it `PassiveTreeGen` before
+   `spec-tree-binder.md` built it under its own module name — verified against the real directory,
+   `tools/PassiveTreeGen` does not exist) writes `data/generated/passive-tree/`. Committed. `--check`
+   gates CI on staleness, copied verbatim from `tools/DemonSpeciesGen/Program.cs:17`.
 2. A **boot-time importer inside `FusionRpg.Data`** reads the generated files into SQLite in one
    all-or-nothing transaction and bumps `catalog_revision` once. SQL lives only in `FusionRpg.Data`
    (`data-architecture.md`; `scripts/guard-dal.ps1` enforces it and scans `src/`, so a generator in
@@ -394,9 +407,9 @@ symptom (PS-8).
 ## Commands
 
 ```powershell
-dotnet run --project tools/PassiveTreeGen -- --seed data/seed/passive-tree --out data/generated/passive-tree
-dotnet run --project tools/PassiveTreeGen -- --check                  # byte-identity gate; exit 1 on drift
-dotnet run --project tools/PassiveTreeGen -- --explain <nodeId>       # every derivation step, shown
+dotnet run --project tools/TreeBinder -- --seed data/seed/passive-tree --out data/generated/passive-tree
+dotnet run --project tools/TreeBinder -- --check                  # byte-identity gate; exit 1 on drift
+dotnet run --project tools/TreeBinder -- --explain <nodeId>       # every derivation step, shown
 dotnet test tests/FusionRpg.Core.Tests --filter TreeCatalog
 dotnet test tests/FusionRpg.Data.Tests --filter TreeCatalogImport
 python scripts/audit-overflow.py
@@ -411,12 +424,12 @@ division, the stored `kMicro`. It is how a balance question gets answered withou
 ## Project structure
 
 ```text
-tools/PassiveTreeGen/Program.cs                                  arguments, --check, --explain
+tools/TreeBinder/Program.cs                                      arguments, --check, --explain (shipped name; this spec's earlier drafts said `PassiveTreeGen`)
 src/FusionRpg.Core/PassiveTree/Catalog/NodeRecord.cs             the record shapes
 src/FusionRpg.Core/PassiveTree/Catalog/NodeId.cs                 slug composition + IdMismatch
 src/FusionRpg.Core/PassiveTree/Catalog/ScaleAxis.cs              the UnitClass -> axis function
 src/FusionRpg.Core/PassiveTree/Catalog/CatalogValidator.cs       every refusal in the load-path table
-data/seed/passive-tree/_registry/properties.v1.json              frozen exclusion vocabulary
+data/seed/passive-tree/plan/<treeId>.v1.json#propertyVocabulary  exclusion vocabulary, per-tree, inline (superseded 2026-09-06 from a planned shared `_registry/properties.v1.json` — see §6)
 data/seed/passive-tree/**                                        the seed
 data/generated/passive-tree/**                                   committed output
 src/FusionRpg.Data/Sqlite/RpgStore.TreeCatalog.cs                the import transaction (the only SQL)

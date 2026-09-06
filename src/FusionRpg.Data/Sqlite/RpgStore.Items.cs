@@ -714,6 +714,65 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// The "deploy" moment module 4's own architecture named but nothing ever triggered
+    /// (`decision-d1-durable-ownership.md`: "Deploy: full projection ... hand the compiled grants to
+    /// the runtime"; `ssot-inventory.md:132` names the two real triggers as "at deploy (or at squad
+    /// build for a battle / expedition)" — only the second exists in this server, so this is where it
+    /// lives). Before this, <see cref="ApplyEquipProjection"/> and <c>ApplyEquippedGrants</c> had zero
+    /// production callers (item-todo.md Checkpoint 1 / Phase 1's own named gap): an equipped rolled
+    /// item persisted in <c>rpg_item_assignment</c> and changed nothing else. This closes both halves
+    /// for a squad member — bindings and granted actions — from the SAME assignment read, in one call.
+    ///
+    /// <para>A full rebuild every call, never a delta, matching <see cref="FusionRpg.Core.Items.EquipProjector"/>'s
+    /// own contract — safe and idempotent to call once per specimen on every squad build, exactly the
+    /// shipped shape for "deploy", not a simplification of it.</para>
+    ///
+    /// <para><paramref name="level"/> is supplied by the caller rather than re-read here because
+    /// `WebMatchService.BuildSquad` already resolved it for the same specimen one line above every call
+    /// site — re-reading it here would be a second, and possibly diverging, source for a number the
+    /// gate actually uses (<see cref="FusionRpg.Core.Items.EquipGate.Projectable"/> consults level via
+    /// module 3's <c>SlotUnlock</c>).</para>
+    /// </summary>
+    public IReadOnlyList<FusionRpg.Core.Actions.ActionRejection> MaterializeRolledEquipRuntime(string specimenId, int level)
+    {
+        var assignments = ListAssignments(specimenId)
+            .Where(a => string.Equals(a.RefKind, FusionRpg.Core.Items.EquipRefKinds.Rolled, StringComparison.Ordinal))
+            .ToList();
+
+        string? ContainerIdOf(FusionRpg.Core.Items.EquipAssignment a) => GetInstance(a.RefId)?.ContainerId;
+
+        // ⚠ EquippedGrantProjection.ForSpecimen only withdraws sources still PRESENT in `assignments` —
+        // it has no memory of what used to be equipped, so it correctly re-authors a still-equipped
+        // item's grants after a content edit but cannot detect "this item was unequipped since the last
+        // materialize". A deploy-time reconciliation needs the same "diff against stored state"
+        // ApplyEquipProjection already does for bindings: read what is actually stored, withdraw any
+        // source no longer backed by a current assignment, only then let ApplyEquippedGrants (re)write
+        // the rest. Found while wiring this method's first real caller — ApplyEquippedGrants alone had
+        // zero production callers before, so this gap was structurally unreachable until now.
+        var entityScope = new OwnerScope(OwnerKind.Entity, specimenId);
+        var currentSources = assignments.Select(ContainerIdOf)
+            .Where(id => id is not null).ToHashSet(StringComparer.Ordinal);
+        foreach (var staleSource in ListGrants(entityScope).Select(g => g.Source).Distinct(StringComparer.Ordinal))
+            if (!currentSources.Contains(staleSource))
+                WithdrawGrantsBySource(entityScope, staleSource);
+
+        var actor = new FusionRpg.Core.Items.SpecimenActor(specimenId, Frame: null, level, Faction: null);
+        var projector = new FusionRpg.Core.Items.EquipProjector(new FusionRpg.Core.Items.EquipGate(),
+            actorOf: _ => actor,
+            itemFactsOf: a =>
+            {
+                var instance = GetInstance(a.RefId);
+                var container = instance is null ? null : GetContainer(instance.ContainerId);
+                var generation = GetItemGeneration(a.RefId);
+                return new FusionRpg.Core.Items.EquipItemFacts(generation?.Frame, container?.LevelReq, FactionReq: null);
+            });
+
+        ApplyEquipProjection(specimenId, projector.Project(specimenId, assignments));
+
+        return ApplyEquippedGrants(specimenId, assignments, containerIdOf: ContainerIdOf);
+    }
+
     // ---- rarity_budget (module 7, rarity-bands) ----------------------------------------------------
 
     void EnsureRarityBudgetSchemaUnlocked(SqliteConnection db)

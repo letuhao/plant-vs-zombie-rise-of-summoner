@@ -183,17 +183,21 @@ visible**, so suppression never reads as absence.
 and it is what stops `+150 crit rate` and `+12 fire power` being read as comparable. Guard 3 of that
 document tests exactly this.
 
-### 5.2a Player names — lexicon, not `idWords` (added 2026-09-07)
+### 5.2a Player names — runtime catalog, not `idWords` (added 2026-09-07; home amended same day)
 
 The sheet in §5.2 already used English family names (*Power*, *Crit rate*). The FE did not:
 `channelLabel` in `web/fusion-rpg-web/src/contract/adapt.ts` title-cases the dotted id because
 `catalog.json` authors no `displayName`. That is a named gap, not a style miss.
 
-**Home:** [`data/seed/derived-stats/lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json).
-Sibling to `catalog.json` (compose / unit / consumer). **Not** `data/tuning/derived-stats.v{n}.json`
-— that file holds `categoryResistCap` and `turnDefaultSpeed`. Copy is not a tunable (T1).
+**Home (amended 2026-09-07):** [`data/tuning/derived-stat-catalog.v{n}.json`](../../data/tuning/) —
+families carry `displayName`, `reading`, `icon`, `gauge`, sheet group, and a cap **ref**. Cap
+*values* stay in `data/tuning/derived-stats.v{n}.json` (`categoryResistCap`, `turnDefaultSpeed`).
+Seed [`lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json) and
+[`catalog.json`](../../data/seed/derived-stats/catalog.json) become check mirrors once hosts inject
+the tuning catalog. The sheet still renders **what the snapshot holds**, laid out by the catalog
+rule — not by a hardcoded component list (§1).
 
-A player row binds `(displayName, reading, unitClass, gauge, cap)` from the lexicon plus the six
+A player row binds `(displayName, reading, unitClass, gauge, cap)` from the catalog plus the six
 render states from §3. `idWords` is developer-only (GG-62).
 
 ### 5.2b StatRow + InspectSplit (added 2026-09-07)
@@ -202,11 +206,11 @@ The combat block is still a **matrix** (28 × 7). The player does not meet it as
 
 | Piece | Job |
 |---|---|
-| **StatRow** | icon · lexicon name · number · spark · `?`. One family per row; element occupancy as seven pips, not seven columns of text |
-| **Category collapse** | offense / defense / shield / guard / reflect / status / progression. **One group open** |
+| **StatRow** | icon · catalog name · number · spark · `?`. One family per row; element occupancy as seven pips, not seven columns of text |
+| **Category collapse** | offense / defense / shield / guard / reflect / status / progression (from catalog sheet groups). **One group open** |
 | **InspectSplit** | clicking a row or `?` fills the **right inspector** (value, unit sentence, compose sentence from §4, cap or “no cap — more still counts”, contribution list). Not a nested dialog (GG-63) |
 
-**Spark policy** is the lexicon `gauge` field. Uncapped `GameUnits` sparks are *relative to this
+**Spark policy** is the catalog `gauge` field. Uncapped `GameUnits` sparks are *relative to this
 actor’s siblings* and never paint `CAP`. Registry caps (`status.resist.dot` at 0.95) fill against
 the cap and show the §3 marker. That is GG-64 / PS-8, not a third classification.
 

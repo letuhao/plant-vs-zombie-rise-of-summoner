@@ -1,5 +1,8 @@
 # Spec: `derived-stats-tab`
 
+> **TRAIL — do not implement.** Catalog-era sheet uses `derived-tab` (full sheet, not a doorway).
+> Kept for history only. See [actor-sheet-map.md](../actor-sheet-map.md) Trail.
+
 **Module id:** `derived-stats-tab` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
 **Status:** Draft — pending owner review.
 

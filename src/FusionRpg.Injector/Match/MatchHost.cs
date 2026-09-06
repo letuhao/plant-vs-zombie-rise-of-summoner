@@ -170,6 +170,9 @@ public static class MatchHost
                     // demon-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
                     // Cold-plane roster/patron read frozen once, never re-queried mid-match.
                     LawnDeployRosterSnapshotHolder.BeginMatch(LawnDeployRosterSessionCache.BuildFromSessionCache());
+                    // demon-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
+                    // evaluator, same board.start moment as everything else above.
+                    LawnDeployEventRunStateHolder.BeginMatch();
                     // T13: a fresh timeline per board, alongside the commander snapshot that is
                     // already frozen at exactly this moment.
                     TryEffect("KernelBeginBoard", Effects.KernelDriveHost.BeginBoard);
@@ -179,11 +182,57 @@ public static class MatchHost
                 {
                     GameHooks.MatchKey = null;
                 }
+
+                // demon-lawn-deploy T2.4: checked after every event while a match is actually live —
+                // the evaluator's own gates (empty roster, per-run budget, per-case "already fired",
+                // the condition itself) make this cheap and safe to call this often; PlantCount/
+                // ZombieCount only ever change on a spawn/die event, so this is exactly "off
+                // MatchRuntime's own event stream" per the spec's own Assumption 2.
+                if (_runtime.Phase == MatchPhase.InMatch)
+                    CheckLawnDeployTrigger();
             }
         }
         catch (Exception ex)
         {
             try { CheatState.Error("MatchHost.Apply: " + ex.Message); } catch { }
+        }
+    }
+
+    /// <summary>Must be called from inside the Gate lock — reads `_runtime` directly, matching every
+    /// other Phase-1 helper in this method. Never throws to the caller.</summary>
+    static void CheckLawnDeployTrigger()
+    {
+        try
+        {
+            var roster = LawnDeployRosterSnapshotHolder.ResolveOrEmpty();
+            if (roster.Eligible.Count == 0) return;
+            if (!LawnDeployEventsTuningHub.IsConfigured) return;
+
+            var matchKey = _runtime.MatchKey;
+            if (string.IsNullOrEmpty(matchKey)) return;
+
+            // No new numeric match seed exists anywhere in this runtime (MatchRuntime/MatchState never
+            // tracked one) -- derived from the one per-match identifier that already does exist, reusing
+            // SeededRng's own hash rather than inventing a new one (WorldSeed.cs's own "ONE place this
+            // is computed" discipline, adapted: DeriveStream already turns an arbitrary label into a
+            // reproducible stream; a fixed base seed of 0 makes THIS derivation depend only on matchKey).
+            var seed = FusionRpg.Core.Battle.SeededRng.DeriveStream(0, matchKey).NextULong();
+
+            var result = LawnDeployEventEvaluator.Evaluate(
+                _runtime.ToSnapshot(), roster, LawnDeployEventsTuningHub.Tuning,
+                LawnDeployEventRunStateHolder.Current, seed);
+            if (!result.Fires) return;
+
+            LawnDeployEventRunStateHolder.RecordFired(result.CaseId!);
+            GameHooks.Emit("lawn-deploy-event.fired", new Dictionary<string, object>
+            {
+                ["caseId"] = result.CaseId!,
+                ["eligibleInstanceIds"] = roster.Eligible.Select(e => e.InstanceId).ToArray(),
+            });
+        }
+        catch (Exception ex)
+        {
+            try { CheatState.Error("MatchHost.CheckLawnDeployTrigger: " + ex.Message); } catch { }
         }
     }
 
@@ -196,6 +245,7 @@ public static class MatchHost
         MatchCommanderSnapshotHolder.EndMatch();
         CheatState.RefreshCommanderAllocationCache();
         LawnDeployRosterSnapshotHolder.EndMatch();
+        LawnDeployEventRunStateHolder.EndMatch();
     }
 
     static void TryEffect(string label, Action action)

@@ -56,18 +56,24 @@ flowchart TB
 
 ---
 
-## 3. Extensibility (code-first, no runtime loader)
+## 3. Extensibility (host-injected catalog — amended 2026-09-07)
 
-Fusion lawn overlay is **simple**. Scale by **adding code and grant rows**, not by loading external YAML at runtime.
+Fusion lawn overlay stays **simple**. Scale by **adding catalog rows + grant content**, not by
+embedding YAML loaders inside Core or inventing status ids only in C#.
 
-| Mechanism | v1 design | Later (explicit plan only) |
+| Mechanism | Design (amended) | Notes |
 |---|---|---|
-| **StatusDef catalog** | In-memory `StatusCatalog` in Core (same pattern as `FoundationHarness` / effect defs) | Optional SQLite catalog if Cold authoring needs it |
-| **Magnitudes / spread** | Grant `overlay_json` (Server push, debug API, Secondary enqueue) | Same |
-| **New status id** | Register def in Core catalog + grant content | Mod `IStatusDefProvider` assembly — **not v1** |
-| **Hot reload / YAML loader** | **Not shipped** | Revisit only if modding plan demands it |
+| **StatusDef catalog** | Hosts load `data/tuning/status-catalog.v{n}.json` and inject into Core; `StatusCatalog` is the in-memory registry built from that object (tunables-ssot §7.2 / T8). DisplayName, reading, hudToken, color live on the same row | Replaces “code-first; no runtime YAML loader.” YAML is still **not** shipped. `StatusCatalogBootstrap` C# registration is the **migration source** until inject lands |
+| **Magnitudes / spread** | Grant `overlay_json` (Server push, debug API, Secondary enqueue) | Unchanged |
+| **New status id** | Add a catalog row whose `kind` / payload kinds already exist in C# enums + grant content. Load-reject unknown kind names (T5) | UnityCc with no FA2 case is a **def error** (shipped once for `charm_pulse`) — not a silent no-op |
+| **Hot reload** | **Not required** — startup load + restart | Same as every other tuning domain |
 
-Secondary never applies; it enqueues grants. Modders/plugins: **future optional surface** only — stable `statusId` + overlay schema documented here.
+Secondary never applies; it enqueues grants. Modders/plugins: **future optional surface** only —
+stable `statusId` + overlay schema documented here.
+
+**Count rule:** the live id count is whatever the injected catalog lists (today 24 including
+`nerve.*`). A module that widens the set is not finished until DESIGN-GATE’s status row and this
+spec’s §9 move with it.
 
 ---
 
@@ -90,9 +96,9 @@ EffectEvent (ActorPtr, TargetPtr)
 
 ## 5. Status def vs overlay vs actor runtime
 
-| Layer | Owns | Where (v1 design) |
+| Layer | Owns | Where (design) |
 |---|---|---|
-| **StatusDef** | `statusId`, `kind`, `categories[]`, `tags[]`, stacking, family, payload *kinds* | Core `StatusCatalog` registry |
+| **StatusDef** | `statusId`, `kind`, `categories[]`, `tags[]`, stacking, family, payload *kinds*, **displayName / reading / hudToken / color** | Injected `status-catalog.v{n}.json` → Core `StatusCatalog` registry |
 | **Grant overlay** | `periodMs`, `durationMs`, `amount`, `stat`, `spread`, `chance`, `icd_ms` | `foundation_effect_grant.overlay_json` |
 | **Actor runtime** | Active instances; Apply-time derived power/resist inputs | L2 RAM + **ActorDerivedSnapshot** (composed at Apply — [actor-hub-ssot.md](actor-hub-ssot.md)) |
 

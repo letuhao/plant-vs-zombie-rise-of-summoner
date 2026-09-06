@@ -1,62 +1,138 @@
 # Capability map: actor-sheet
 
-> **2026-09-07 — stale as intent.** [actor-sheet-ideal.md](actor-sheet-ideal.md) supersedes this
-> six-tab “Overview unchanged / derived doorway / locked Actions” shape. Plate 13 is eight tabs +
-> InspectSplit. Do not implement from this map. `/spec` rewrites it. Kept as the 2026-08-29 trail.
+**Status:** proposed 2026-09-07 — catalog-first rewrite. Ideal:
+[actor-sheet-ideal.md](actor-sheet-ideal.md). Visual:
+[13-actor-sheet.html](../design/13-actor-sheet.html). Lawn landing:
+[spec-lawn-interactive.md](../design/spec-lawn-interactive.md). Sibling HUD:
+[actor-hud-ideal.md](actor-hud-ideal.md) (glyphs consume the same catalogs).
 
-Source: [docs/design/08-actor-sheet.html](../design/08-actor-sheet.html) (draft plate, reviewed
-2026-08-29 — reference sweep against Diablo IV / Path of Exile / Baldur's Gate 3 character-menu
-conventions, then grounded against this repo's own current code and locked design docs before
-drawing anything). **Status: proposed, pending owner approval.**
+> **Supersedes the 2026-08-29 six-tab map** (Overview unchanged / derived doorway / locked
+> Actions·Passives). That shape is kept only as the trail under [actor-sheet/](actor-sheet/) —
+> five pre-catalog `spec-*.md` files with old module ids. Do not implement from those trail files;
+> implement from the module ids below.
 
-**Draft successor (2026-09-06, not owner-approved):** [13-actor-sheet.html](../design/13-actor-sheet.html)
-is the complete inventory (eight tabs, AptitudeTile, shield layers, 24 statuses). Lawn composition:
-[spec-lawn-interactive.md](../design/spec-lawn-interactive.md). Keep `ActorPanel.tsx`; export alias
-`ActorSheet`. This map's six-tab "Overview unchanged" shell is **not** the layout to implement.
+Keep `ActorPanel.tsx`; export alias `ActorSheet`. `?sel=` = `instanceId` only. Promote is out of
+scope. Action corpus is sealed in [action-ideal.md](action-ideal.md) — Kit shows slots, does not
+author actions.
+
+---
 
 ## What this program is
 
-One centralized Actor Panel — six tabs — replacing today's scattered surfaces: Primary Stats lives
-in its own standalone rail layer, derived stats has a locked spec with zero render path, actions and
-passives have no menu outside live battle, and the existing Panel's own Overview tab is real while
-its other three (Effects/Gear/History) are undrawn button stubs.
+One band-2 ActorSheet over whichever stage the player is already on (GG-9). Eight **structural
+tab kinds** (Condition · Aptitudes · Derived · Shield · Status · Elements · Kit · Paths). Row
+membership, names, readings, icons, and tab **labels/order** come from versioned runtime catalogs
+in `data/tuning/` — hosts inject, FE iterates `GET /api/catalogs/actor-surface`. No hardcoded
+roster unions in the FE.
 
-**Promote is explicitly out of scope** (owner: "ignore it for now, we will come back later if I have
-an idea") — nothing in this program should reference it, block on it, or leave a placeholder for it.
+**Shell size (owner, 2026-09-07):** the sheet is **near-fullscreen** — it uses most of the viewport
+because it holds a dense catalog. Today `PanelShell` is `min(640px,92vw)` × `min(720px,82vh)` and
+leaves unused stage space. ActorSheet opts into
+`width: min(1800px, 96vw)` · `height: min(960px, 92vh)` (see `actor-sheet-shell`); it does
+**not** become a stage or a route (GG-1). GG-61 still holds: declared max, body scrolls, footer
+sticky, stage peeks at the margins.
+
+**Runtime catalog SSOT** (file table, load path, file-save vs code):
+[actor-sheet-ideal.md](actor-sheet-ideal.md) § Runtime catalog SSOT.
+
+---
+
+## Tech stack (icons, meters, graphs, assets)
+
+Locked against [design/tech-stack.md](../design/tech-stack.md) §3.3 (**buy before build**, amended
+2026-09-07) and GG-58 / GG-38 / GG-64. **Buy libraries** — do not hand-roll meters, icon packs, or
+graphs. Fat chunk ⇒ split (`React.lazy` / dynamic import); never ban the dep.
+
+| Need | Choice | Why |
+|---|---|---|
+| Stat sparks | **`react-tiny-sparkline`** | Dense StatRow lists |
+| HP/shield radials, element donuts, leftover bar | **`recharts`** | Restored; plate shapes map cleanly |
+| Catalog `icon` / status `hudToken` glyphs | **`lucide-react`** + GG-58 generated fallback (side/element tint + authored `hudToken` text, never `idWords`) | Buy before a local SVG registry as primary path |
+| Paths / passive glance + tree push | **Reuse `PassivesTab` / tree-surface**; tree graph on **`@xyflow/react`** (read-only) | Node UI — not world-map HOW (Phaser) |
+| Motion | **`motion`** when CSS insufficient | Buy springs; honour prefers-reduced-motion |
+| Portrait / rarity frames | Existing `ActorFrame` + art registry when portraits exist | No new asset pipeline in v1 |
+| Band B lawn VFX | **Out of scope** — status sustain VFX stays vfx program; HUD tokens only resolve catalog `hudToken`/`color` | Owner “modal” = this sheet, not lawn tokens |
+
+Ask only before adding a *second* library that overlaps one already locked. GG-38 = Phaser stage-lazy,
+not a veto on these packages.
+
+---
 
 ## Modules
 
-| Module id | Responsibility | Depends on |
-|---|---|---|
-| `actor-sheet-shell` | The six-tab container itself. Wires Overview as the landing tab, keeping today's real `ActorPanel.tsx` content exactly as-is behind the new tab bar: the identity header (real), and the four `PendingNote` placeholders for Standing/Element typing/Shield/Equipment (all unconditionally pending today — no server endpoint, confirmed by reading `adaptActor`). **Correction from this map's own first draft**: the resource meters and five-axis "Standing" power vector shown in `00-foundation.html`'s mockup were never built as real React code — only the identity header and the pending-note stubs exist in `ActorPanel.tsx` today. This module does not invent meters/vectors that have no backing data; it only adds the tab bar around what's real. Also wires the two dead footer buttons (`Release`/`Deploy` — currently no `onClick` at all) to at least the panel-close action if nothing more specific is decided. | — (foundational, first) |
-| `progression-tab` | Per-actor level/XP (typed on `ActorView` today, never rendered — `xp`/`xpToNext` sit unused) shown as a real progress readout, plus primary-stat (aptitude) distribution embedded here, fronting the *same* `AptitudeEndpoints`/save flow the standalone Primary Stats rail layer already uses — not a second allocation system. | `actor-sheet-shell` |
-| `derived-stats-tab` | A small, new key-value grid (`statgrid` is a plate-only CSS class today, not existing React — this module writes a first, minimal React equivalent, not a reuse) showing a handful of headline channels, plus a button that opens the *already fully specified* `spec-derived-stat-sheet.md` panel. **Does not build that full sheet** — this module's own boundary is the summary + doorway only; the sheet behind the door is that spec's own scope, unchanged. | `actor-sheet-shell` |
-| `locked-preview-tabs` | Actions and Passives, combined — both are static, locked-grid previews sharing one visual pattern (`.actionslot` reused verbatim from the live battle bar; `.passnode`, new but trivial) and one acceptance shape ("shows what exists, locked, states the real reason why"). Neither has a backing system to wire — the action program is approved-but-unbuilt, passives are the owner's own explicitly deferred sub-feature. Splitting these into two modules would be ceremony over two near-identical static components. | `actor-sheet-shell` |
-| `gear-tab` | An honest empty state — `equipSlots` is typed and already unconditionally "pending" (no server endpoint yet, same reason as derived stats). Not a lock (nothing gates it — there's just nothing to equip yet), so it gets `EmptyState`, not the locked-grid treatment. | `actor-sheet-shell` |
+| Module id | Responsibility | Depends on | Spec |
+|---|---|---|---|
+| `actor-surface-catalog` | Versioned `*-catalog.v{n}.json` + `actor-sheet.v1.json`. Pure parsers. Host inject. Core register-from-object. `GET /api/catalogs/actor-surface`. Load-reject unknown kinds. Injector same catalogs for HUD tokens. | — | [spec-actor-surface-catalog.md](actor-sheet/spec-actor-surface-catalog.md) |
+| `actor-sheet-shell` | Near-fullscreen band-2 panel; header; InspectSplit; leftover sticky footer; tab bar iterates catalog kinds; shared widgets (StatRow, …); `PanelShell` size variant. Esc pops. | `actor-surface-catalog` | [spec-actor-sheet-shell.md](actor-sheet/spec-actor-sheet-shell.md) |
+| `condition-tab` | HP radial + shield overlay, resource meters from resource-catalog, Standing, live status glyphs. | `actor-sheet-shell` | [spec-condition-tab.md](actor-sheet/spec-condition-tab.md) |
+| `aptitudes-tab` | Tiles from aptitude-catalog, leftover Confirm (commander-scope v1). | `actor-sheet-shell` | [spec-aptitudes-tab.md](actor-sheet/spec-aptitudes-tab.md) |
+| `derived-tab` | StatRows from derived-stat-catalog × `/derived`. Six states. | `actor-sheet-shell` | [spec-derived-tab.md](actor-sheet/spec-derived-tab.md) |
+| `shield-tab` | Three instance radials; omni shield StatRows. Noun **Shield**. | `actor-sheet-shell` | [spec-shield-tab.md](actor-sheet/spec-shield-tab.md) |
+| `status-tab` | Glyphs from status-catalog. | `actor-sheet-shell` | [spec-status-tab.md](actor-sheet/spec-status-tab.md) |
+| `elements-tab` | Radials from element-catalog + mastery StatRows. | `actor-sheet-shell` | [spec-elements-tab.md](actor-sheet/spec-elements-tab.md) |
+| `kit-tab` | ActionSlot chrome + paper-doll roles from actor-sheet catalog. | `actor-sheet-shell` | [spec-kit-tab.md](actor-sheet/spec-kit-tab.md) |
+| `paths-tab` | Species vs shared corpus glance; may push tree once. | `actor-sheet-shell` | [spec-paths-tab.md](actor-sheet/spec-paths-tab.md) |
+
+Shared React kit is owned by `actor-sheet-shell` and reused by tab modules.
+
+---
 
 ## Build order
 
-`actor-sheet-shell` first — it's the container every other tab mounts into, and it's also the module
-with the least new work (reusing existing Overview content almost verbatim). After that,
-`progression-tab`, `derived-stats-tab`, `locked-preview-tabs`, and `gear-tab` are independent of each
-other and can build in any order.
+```text
+actor-surface-catalog
+        │
+        ▼
+actor-sheet-shell
+        │
+        ├── condition-tab
+        ├── aptitudes-tab
+        ├── derived-tab
+        ├── shield-tab
+        ├── status-tab
+        ├── elements-tab
+        ├── kit-tab
+        └── paths-tab
+```
+
+---
+
+## Acceptance (program-level)
+
+> With Fusion closed, opening ActorSheet for a commander or unique shows **catalog displayNames**
+> (never dotted channel ids); resource meters include every id in resource-catalog (including
+> `poise`); tab labels/order match `actor-sheet.v1.json`. The shell fills most of a 1280×720 /
+> 1920×1080 viewport via `min(1800px, 96vw)` × `min(960px, 92vh)` with a visible stage margin; body
+> scrolls; leftover/Confirm footer appears **only** on Aptitudes (or while an aptitude draft is dirty)
+> (GG-61). Adding a family/status/resource row on an existing axis/kind is `publish.py` + restart with
+> **no FE change**. Presentation libs (`lucide-react`, `recharts`, `react-tiny-sparkline`,
+> `@xyflow/react`, `motion`) are allowed — fat chunk ⇒ split, not ban.
+
+Lawn Band B still obeys GG-60. HUD glyphs resolve status-catalog `hudToken`/`color`.
+
+---
 
 ## Explicitly not in this program
 
-- **Building real resource meters or a "Standing" power-vector for Overview.** `00-foundation.html`'s
-  mockup shows both, but neither was ever built as real React code (`ActorPanel.tsx` confirmed —
-  identity header plus four unconditionally-pending placeholders, nothing else) and `ActorView` has
-  no HP/stamina fields to bind a meter to regardless. `actor-sheet-shell` wraps what's real in a tab
-  bar; it does not close this older, separate gap.
-- **Promote** — no definition exists; out of scope per the owner's own instruction.
-- **The full derived-stat sheet** (the six-state, 12-column grid behind `derived-stats-tab`'s doorway
-  button) — that's `spec-derived-stat-sheet.md`'s own scope, a separate, already-locked design. This
-  program does not re-spec or rebuild it.
-- **The action system itself** (live resolution, costs, cooldowns) and **a passive-skill system** (any
-  node-graph, any effect resolution) — both are `locked-preview-tabs`' whole point: preview what's
-  coming, build none of the system behind it.
-- **The other three aptitude-allocation scopes** (demon-type / aspect / unique-demon) — commander
-  scope only, matching what's already built; the other three need "a specimen-picker design fork
-  nothing has decided yet" (`spec-aptitude-allocation-surface.md` §1), unchanged by this program.
-- **Whether the standalone "Primary Stats" rail entry retires** once `progression-tab` ships, or stays
-  as a shortcut — an open question from the plate's own §H, owner call, not resolved here.
+- **Promote** — owner: ignore.
+- **Action corpus / costs / targeting** — sealed; Kit shows slots.
+- **Aspect-scope aptitude** — reverted.
+- **UniqueDemon allocate POST** — open product question; commander leftover recommended for v1.
+- **Moving `ItemRole` off the C# enum** — item program owns append-only `registryVersion`.
+- **Hot-reload** without process restart.
+- **A third channel classification** — six render states + thirteen `UnitClass` only.
+- **Hand-rolling chart/icon/graph UIs** when the locked presentation libs already fit — buy before build.
+- **Enlarging Band B lawn tokens** — not this request; GG-60 stays.
+- **Implementing from the five trail specs** with old module ids — trail only.
+
+---
+
+## Trail (do not implement)
+
+| Path | Why kept |
+|---|---|
+| ~~`spec-actor-sheet-shell.md` (six-tab)~~ | **Replaced** by the catalog-era shell spec at the same path |
+| [spec-progression-tab.md](actor-sheet/spec-progression-tab.md) | Aptitudes were “Progression” |
+| [spec-derived-stats-tab.md](actor-sheet/spec-derived-stats-tab.md) | Doorway-only, superseded by `derived-tab` |
+| [spec-locked-preview-tabs.md](actor-sheet/spec-locked-preview-tabs.md) | Actions/Passives locked — Passives now live |
+| [spec-gear-tab.md](actor-sheet/spec-gear-tab.md) | Empty-state only; Kit supersedes |

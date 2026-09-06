@@ -558,7 +558,7 @@ python -m seedsmith trees species run start|pause|resume|status|rerun --pipeline
 # 4. gates and review
 python -m seedsmith check data/seed/passive-tree --gate
 python -m seedsmith trees review --lot <lot> --tier 1                 # tree-review owns this
-dotnet run --project tools/PassiveTreeGen -- --check                  # byte-identity
+dotnet run --project tools/TreeBinder -- --check                      # byte-identity (shipped name; was PassiveTreeGen)
 python -m pytest tools/seedsmith/tests/test_species_tree.py
 ```
 
@@ -577,11 +577,12 @@ tools/seedsmith/seedsmith/metrics/passive_tree.py               FavourDrift, Spe
 data/tuning/passive-tree-targets.v1.json                        quotas, legitimateSkew, thresholds
 data/seed/passive-tree/plan/species/<speciesId>.json            THE PLAN - model-free
 data/seed/passive-tree/species/<speciesId>.json                 THE SEED - enums + prose + codexSummary
-data/generated/passive-tree/species/<speciesId>.json            CONCRETE - coefficients (tools/PassiveTreeGen)
+data/generated/passive-tree/species/<speciesId>.json            CONCRETE - coefficients (tools/TreeBinder, shipped name; was PassiveTreeGen)
 tools/seedsmith/tests/test_species_tree.py
 ```
 
-**Seedsmith stops at the seed.** The concrete stage is `tools/PassiveTreeGen` in C#, for
+**Seedsmith stops at the seed.** The concrete stage is `tools/TreeBinder` in C# (shipped name; this
+spec's earlier drafts said `PassiveTreeGen`), for
 [`tree-catalog`](spec-tree-catalog.md) §5's reasons — it must *call* the shipped `PowerLadder` rather
 than transcribe it, because *"a Python transcription of them is a second curve by another name."*
 
@@ -698,7 +699,7 @@ chooser; leave an entry parked in a `_`-prefixed file.
 - [ ] Every species carries exactly one `codexSummary`, ≤ 140 chars, with no number in it.
 - [ ] No response schema contains a numeric field — proven at `Pipeline.__post_init__`, before a call.
 - [ ] The plan regenerates byte-identically from an unchanged roster; so does the concrete catalog
-      under `PassiveTreeGen --check`.
+      under `TreeBinder --check` (shipped name; was `PassiveTreeGen`).
 - [ ] The 840-tree census completes under [`tree-review`](spec-tree-review.md)'s protocol, and the
       acceptance record says *"every tree was judged"* — not *"the catalog was reviewed."*
 - [ ] `PassiveTree/HiddenFileCount` is green over this module's own seed roots.

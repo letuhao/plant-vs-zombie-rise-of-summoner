@@ -1,6 +1,7 @@
 # Actor HUD — the ideal
 
-**Status:** Proposed — strengthened 2026-08-30. **Not a spec. No build authorized.**
+**Status:** Implemented 2026-08-31. **Catalog amend 2026-09-07** — glyphs, colors, and player names
+come from injected runtime catalogs (shared with ActorSheet); geometry stays in `actor-hud.v{n}.json`.
 
 **Strengthen pass:** multi-perspective audit in
 [actor-hud-audit-2026-08-30.md](../research/actor-hud-audit-2026-08-30.md) (user perspective first,
@@ -9,7 +10,8 @@ built/wiring/gap verified against code). Data pipeline SSOT:
 
 Visual guide: [`10-actor-hud.html`](../design/10-actor-hud.html) (§H player scenarios) · Match chrome
 (separate band): [`commander-surface/spec-lawn-hud-chip.md`](commander-surface/spec-lawn-hud-chip.md) ·
-Anchor SSOT: [`vfx/spec-unit-frame.md`](vfx/spec-unit-frame.md)
+Anchor SSOT: [`vfx/spec-unit-frame.md`](vfx/spec-unit-frame.md) · Sibling sheet catalog SSOT:
+[actor-sheet-ideal.md](actor-sheet-ideal.md) (Runtime catalog SSOT).
 
 **Map and plan:** [actor-hud-map.md](actor-hud-map.md) · [actor-hud-plan.md](../tasks/actor-hud-plan.md) ·
 Module specs: [actor-hud/](actor-hud/)
@@ -34,6 +36,7 @@ stats, status, shield, VFX. Verify against code, not plate comments alone.
 | ShieldBarPool migrates into resource row | Subsumption, not parallel systems |
 | No per-unit commander mark | Commander identity is Band A only |
 | Inspector expands fold — not primary glance readout | Token/chip on canvas under time pressure |
+| **HUD tokens from runtime catalogs (2026-09-07)** | `hudToken`/`color`/`displayName` from injected status/resource catalogs — never id-slice or hash RGB |
 
 Source: [actor-hud-audit-2026-08-30.md §6–§7](../research/actor-hud-audit-2026-08-30.md).
 
@@ -181,9 +184,30 @@ UnitFrame Body + worldYOffset (default -0.35)
 - **Priority when crowded:** CC > commander-mark > unique/demon > shield > top statuses > level.
 - **Overflow:** collapse to `+N` pip — never shrink text to illegibility.
 - **Tunables:** slot caps, bar W/H, `worldYOffset`, row offsets, stack pips in `data/tuning/actor-hud.v*.json`
-  (bar geometry SSOT — not orphaned `vfx.v3` `render.shieldBar`).
+  (bar geometry SSOT — not orphaned `vfx.v3` `render.shieldBar`). **Glyphs, initials, and status/resource
+  colors do not live here** — they come from `status-catalog` / `resource-catalog` (see §4.1).
 - **Presentation-only:** HUD never writes gameplay state (same boundary as VFX).
 - **F9** mutes the shield resource row only — identity/status and sustain VFX remain.
+
+### 4.1 Runtime catalog — tokens from data, not from ids (2026-09-07)
+
+`Occupant.hud` / `ActorHudSnapshot` still carries **ids** (`statusId`, resource id, element id). That
+does not change. What renderers must **not** invent at draw time:
+
+| Forbidden today | Why | Replace with |
+|---|---|---|
+| [`ActorHudDisplayTokens.StatusInitials`](../../src/FusionRpg.Core/Hud/ActorHudDisplayTokens.cs) slicing the id (`butter` → `BU`) | GG-62 — generated English from a schema | Authored `hudToken` on `status-catalog.v{n}.json` |
+| [`StatusRgb`](../../src/FusionRpg.Injector/Hud/ActorHudRowStatuses.cs) hashing the id to RGB | Colour is presentation SSOT, not a hash | Authored `color` on the same catalog row |
+| Hardcoded FE chip maps (`OBSERVE_CHIPS` id lists as the roster) | Adding a status requires a FE change | Iterate the injected catalog; snapshot ids ⊆ catalog |
+
+**Load path (same as ActorSheet):** hosts inject `status-catalog` / `resource-catalog` /
+`element-catalog`; Unity, Phaser, and web fold resolve `id → { hudToken, color, displayName }` from
+that object. Geometry stays in `actor-hud.v{n}.json` (next bump `v3` when the glyph fields leave any
+orphan geometry-adjacent copy). Dual-render SSOT (`Occupant.hud` → Unity + Phaser + Inspector) is
+unchanged.
+
+**Still GG-60:** the lawn shows bands and icons, not full derived magnitudes. Full numbers stay on
+ActorSheet.
 
 ---
 
@@ -218,11 +242,12 @@ generic row instead of a bespoke pool.
 | **Magnitude band** | Strong vs weak (not raw number) | Magnitude → band enum | Core resolve | Not on lawn |
 
 **HUD icons ≠ sustain VFX.** Static readable glyphs at token size (~16–24px). Motion grammar stays in
-`VfxDirector` (Orbit, WispOut, etc.). Icon shape comes from `StatusVfxIdentity` / almanac tokens;
-color from element or status RGB.
+`VfxDirector` (Orbit, WispOut, etc.). Token letters and chip colours come from **status-catalog**
+(`hudToken`, `color`) — not from id-slicing or a hash. Sustain VFX identity (Orbit, WispOut) stays
+on the VFX program; do not conflate motion grammar with the HUD token.
 
-Extend web [`OBSERVE_CHIPS`](../../web/fusion-rpg-web/src/features/lawn/lawnProjectorFold.ts) to all
-13 custom ids in `StatusVfxIdentity.CustomIds`.
+Strip membership is “live instances whose `statusId` is in the injected catalog,” capped by
+`statusStripMax` — not a hardcoded FE id list.
 
 ---
 
@@ -354,7 +379,10 @@ repo at audit time.
 - **Full derived channel sheet on unit** — ActorPanel only.
 - **Replacing damage floaters** — combat feedback stays in VfxDirector floaters/bursts.
 - **Mid-run commander picker on unit** — violates commander-surface decisions.
-- **Magic numbers in code** — caps and offsets in `actor-hud.v1.json` when built.
+- **Magic numbers in code** — caps and offsets in `actor-hud.v{n}.json`.
+- **Inventing player tokens from ids** — no `StatusInitials(id)`, no hashed RGB (§4.1).
+- **Owning status/resource/element rosters** — those catalogs are shared with ActorSheet; HUD is a
+  consumer.
 
 ---
 
@@ -401,7 +429,7 @@ Each item includes audit recommendation; §0 decisions stand unless owner overri
 | 3 | **Level badge source v1** | Band from `progression.power` Θ, not raw `theLevel` | `actor-hud-core` band enum |
 | 4 | **Event-driven vs poll** | Invalidate on shield/status/binding events | Perf probe before/after build |
 | 5 | **Phaser parity priority** | **Gate v1 on both renders** (§0) — not Unity-only ship | Dual-render module order |
-| 6 | **Status icon art SSOT** | Almanac tokens + `StatusVfxIdentity` color | Map spec for sprite sheet |
+| 6 | **Status icon art SSOT** | Authored `hudToken` + `color` on `status-catalog.v{n}.json`; VFX motion stays separate | Catalog inject + renderer lookup |
 
 ---
 

@@ -372,7 +372,8 @@ moves on. **Diagnosis is not the reviewer's job**; §6's triage is the pipeline'
 #### 5.4 Where the renderer lives — one implementation of the magnitude contract, not two
 
 Rule 3 has a consequence that must not be discovered during the build. The concrete catalog is
-produced by `tools/PassiveTreeGen` in **C#** ([`tree-catalog`](spec-tree-catalog.md) §5, *"Seedsmith
+produced by `tools/TreeBinder` in **C#** (shipped name; this spec's earlier drafts said
+`PassiveTreeGen`) ([`tree-catalog`](spec-tree-catalog.md) §5, *"Seedsmith
 stops at the seed"*), and the player-facing string is composed in **TypeScript** by `formatMagnitude`
 plus the `DisplayLine` template (`web/fusion-rpg-web/src/contract/types.ts:97`). A third renderer, in
 Python or in C#, would be a second source of truth for how a number reaches a person — the exact
@@ -614,7 +615,7 @@ python -m seedsmith trees review --diff <fromRev> <toRev>    # the O(diff) pass
 python -m seedsmith check data/seed/passive-tree --gate      # exit 1 on a gates=True finding
 python -m pytest tools/seedsmith/tests/test_tree_review.py
 
-dotnet run --project tools/PassiveTreeGen -- --check         # byte-identity, exit 1 on drift
+dotnet run --project tools/TreeBinder -- --check              # byte-identity, exit 1 on drift (shipped name; was PassiveTreeGen)
 ```
 
 `--dry-run` is the default everywhere a run could spend calls, and `--write` must be passed

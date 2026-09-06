@@ -503,6 +503,13 @@ public sealed class WebMatchService
             var s = picked[i];
             var species = FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(s.Profile.SpeciesId);
             var level = (int)Math.Max(1, s.Actor.Level);
+
+            // item module 4/5's own "deploy" moment (RpgStore.MaterializeRolledEquipRuntime's own doc) —
+            // a rolled item's binding and granted actions did not exist anywhere outside
+            // rpg_item_assignment until this call. Must run before EquippedActionIdsFor below, which
+            // reads what this writes.
+            _store.MaterializeRolledEquipRuntime(s.Profile.InstanceId, level);
+
             squad.Add(new BattleActorSetup
             {
                 Key = $"squad:{i}",
@@ -633,16 +640,25 @@ public sealed class WebMatchService
     /// </summary>
     static IReadOnlyList<string> EquippedActionIdsFor(string instanceId, RpgStore store)
     {
-        var grantScope = new OwnerScope(OwnerKind.UniqueActor, instanceId);
-        var loadoutScope = new OwnerScope(OwnerKind.Entity, instanceId);
+        // Two grant sources, two lifetimes, both real. UniqueActor carries the durable unlock-ladder
+        // grant (action-grant-owner-kind-durability, fixed 2026-09-07 — a specimen's hard-earned grant
+        // must survive a session boundary). Entity carries an ITEM's granted action
+        // (EquippedGrantProjection.GrantFor, module 19) — the opposite lifetime is deliberate:
+        // unequipping the item must make the action disappear, and the boot sweep's
+        // ClearSessionScopedBindings() already clears every `entity:` binding on a session boundary.
+        // Reading only one scope silently drops the other grant source, so both are read and merged.
+        var unlockLadderGrants = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+        var entityScope = new OwnerScope(OwnerKind.Entity, instanceId);
 
-        var candidates = store.ListGrants(grantScope)
+        var candidates = store.ListGrants(unlockLadderGrants)
+            .Concat(store.ListGrants(entityScope))
             .Select(g => store.GetAction(g.ActionId))
             .Where(a => a is { Kind: ActionKind.Skill })
             .Select(a => new AutoEquipCandidate(a!.ActionId, a.Rung))
+            .Distinct()
             .ToList();
 
-        return store.GetLoadoutOrAutoEquip(loadoutScope, candidates);
+        return store.GetLoadoutOrAutoEquip(entityScope, candidates);
     }
 
     static BattleActorSetup Synthetic(int i) => new()

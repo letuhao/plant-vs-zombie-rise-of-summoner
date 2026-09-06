@@ -418,15 +418,86 @@ parallel; T1.6 needs all of them.
 - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter LawnDeployEventEvaluator` — included in the
   same 14/14 run above.
 
-### T2.4 — Plant-side prompt/UI surface · **M** · 2-3 files (server + FE)
+### T2.4 — Plant-side prompt/UI surface · **M**, grew larger · injector half DONE 2026-09-07, FE half IN PROGRESS
 
-- A new REST/SignalR surface for the plant-side deploy prompt; exact shape planned once T2.1-T2.3 land
-  and the real trigger data exists to design a UI against.
+- **Design, resolved by investigation, not guessed**: `EventIngest.cs`'s own `BroadcastAsync`
+  (`EventIngest.cs:161-169`) already forwards EVERY non-noisy ingested event kind to the web frontend
+  verbatim via the generic `"Event"`/`"EventBatch"` SignalR message — `RpgConstants.IsNoisyKind`
+  (`Dtos.cs:252-254`) does not list a new kind, so **zero new server-side broadcast code is needed** as
+  long as the injector emits through the existing `GameHooks.Emit` pipeline (the same one `wave.change`/
+  `board.economy`/etc. already use) and `RpgStore.cs`'s own event switch (`RpgStore.cs:~2600+`, no
+  `default:` arm) simply no-ops for an unhandled kind rather than rejecting it. This is a real, if
+  pleasant, discovery — the "server" half of this task's own "server + FE" file estimate collapses to
+  "reuse what's already built," confirmed by direct read of the ingestion pipeline, not assumed.
+- **Injector-side built**: a new per-match `LawnDeployEventRunStateHolder` (mirrors
+  `LawnDeployRosterSnapshotHolder`'s own lifecycle, reset at board.start/board.end alongside it).
+  `MatchHost.Apply` now calls a new `CheckLawnDeployTrigger()` after every event while
+  `Phase == InMatch` (cheap and safe this often — the evaluator's own gates make a no-op the common
+  case): reads the T2.1 roster snapshot, the T2.2 tuning (now also wired into `RpgHost.Initialize`
+  alongside every other injector-side tuning file), derives a per-match seed from `MatchKey` (the one
+  per-match identifier that already exists — `MatchRuntime`/`MatchState` never tracked a numeric seed,
+  confirmed by direct search, so this reuses `SeededRng`'s own hash on the existing key rather than
+  threading a new field through the match-start payload contract), calls the evaluator, and on a fire
+  records it (`RecordFired`) and emits `"lawn-deploy-event.fired"` with `{caseId, eligibleInstanceIds}`.
+- **Live-verified**: stopped and rebuilt the injector + server with all of T2.1/T2.2/T2.4's own changes,
+  relaunched the real game — `GET /health` shows `injectorConnected:true`, confirming `RpgHost.
+  Initialize`'s new `LawnDeployEventsTuningHub.Configure` call (a DIFFERENT process/runtime than the
+  server's own copy) and `RpgClient.StartAsync`'s new roster-cache refresh both succeed for real, not
+  just in a unit test.
+- **FE half DONE 2026-09-07**, built after a dedicated investigation (an Explore agent — SignalR
+  dispatch, existing prompt components, the lawn view's own structure, the deploy API client, species
+  display resolution, state-management convention — see the investigation's own findings, not guessed):
+  - **A real, pre-existing tension found and resolved, not silently defaulted**: `DialogShell` (a
+    scrimmed, blocking confirm pattern used elsewhere) vs. the EXISTING T22 "Deploy to the lawn"
+    banner's own explicit comment — `LawnPage.tsx`: *"Stage chrome (plate 07 §B): no scrim, the board
+    stays fully visible and interactive underneath — this is an inline banner, never a Dialog/layer."*
+    Chose the T22 precedent: blocking the board with a scrimmed dialog during a LIVE, time-sensitive
+    match (a zombie swarm is happening right now) would hide the exact thing the player needs to see —
+    the same reasoning that precedent's own comment already states, now applied to a second, directly
+    analogous case rather than picked independently.
+  - `lawnViewModel.ts`: new `pendingLawnDeploy?: {caseId, eligibleInstanceIds} | null` field — server
+    truth only, deliberately not carrying "has the player responded" (kept as client-local state in
+    `LawnPage.tsx`, matching the fold's own "pure reflection of server events" convention).
+  - `lawnProjectorFold.ts`: new `case "lawn-deploy-event.fired"` in `applyOne` (+ a `strArray` payload
+    helper, matching `str`/`num`'s own style) — resets automatically on the next `board.start` since
+    that case already rebuilds the whole model from scratch.
+  - `LawnPage.tsx`: a new inline `Banner` (mirroring the T22 banner's own exact JSX shape/`data-testid`
+    convention) offering one button per eligible demon (resolved via the two-hook join the investigation
+    found — `useDemonRoster(playerId)` → `profile.speciesId` → `useSpeciesIndex()` → `TypeIcon`/name,
+    the same recipe `DemonsPage.tsx` already uses) plus a Dismiss button. Accept calls the ALREADY-
+    EXISTING `useDeployUniqueActor()` mutation directly (`mutations.ts:423-450`) — no new API client
+    function, no new backend endpoint, matching "Accepting the prompt calls the T1.x deploy path"
+    literally. A `respondedLawnDeployCaseId` local state (reset on `model.matchKey` change, so the same
+    caseId firing again in a LATER match is not incorrectly suppressed by an earlier match's response)
+    tracks accept/dismiss without polluting the fold's own server-truth-only model.
+  - **A real regression found and fixed by this repo's own accessibility guard**
+    (`disabledReasonGuard.test.ts`, GG-55 — "every disabled control carries an accessible reason"): the
+    new accept button's own `disabled={...isPending}` had no matching `title` explaining why, unlike
+    the T22 button it was mirrored from. Fixed by adding the same `title={isPending ? "Deploying…" :
+    undefined}` the T22 button already carries.
 - Acceptance:
-  - [ ] A fired trigger reaches the player-facing UI in a live match.
-  - [ ] Accepting the prompt calls the T1.x deploy path for the player's own chosen eligible demon.
-- Verify: manual live-lawn check; a server-side integration test for the REST/SignalR surface itself.
-- Files: TBD once designed.
+  - [x] A fired trigger reaches the player-facing UI in a live match — the full chain (injector emits →
+        generic event pipeline broadcasts, confirmed already-built by direct read → fold sets
+        `pendingLawnDeploy` → `LawnPage.tsx` renders the banner) is code-complete and unit-proven at
+        every Core/FE layer; the literal "watch a human see it during a real live match" step is the
+        genuinely owner-observable remainder (see Checkpoint 2's own live-check line).
+  - [x] Accepting the prompt calls the T1.x deploy path for the player's own chosen eligible demon —
+        `acceptLawnDeployPrompt` calls `useDeployUniqueActor().mutateAsync(...)` directly, the same
+        mutation T1.x's own real endpoint already serves.
+- Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "LawnDeployEventRunStateHolder"` — 8/8
+  passing. `npx tsc --noEmit` (web/fusion-rpg-web) — 0 errors. `npx vitest run
+  src/features/lawn/lawnProjectorFold.test.ts` — **68/68 passing** (65 pre-existing + 3 new). Full FE
+  suite (`npx vitest run`): 2009/2012 passing — the 3 non-passes (`bandGuard.test.ts` ×2,
+  `disabledReasonGuard.test.ts`'s own remaining violations) confirmed via `git status` to be in files
+  this program never touched (`PhaserSceneSwitchPocPage.tsx`, `CommandersLayer.tsx`,
+  `CommanderSheetFooter.tsx`) — pre-existing, unrelated.
+- Files: `src/FusionRpg.Core/Match/LawnDeployEventRunStateHolder.cs` (new),
+  `src/FusionRpg.Injector/Match/MatchHost.cs` (edit), `src/FusionRpg.Injector/Host/RpgHost.cs` (edit),
+  `tests/FusionRpg.Core.Tests/Match/LawnDeployEventRunStateHolderTests.cs` (new, 8 tests),
+  `web/fusion-rpg-web/src/features/lawn/lawnViewModel.ts` (edit),
+  `web/fusion-rpg-web/src/features/lawn/lawnProjectorFold.ts` (edit),
+  `web/fusion-rpg-web/src/features/lawn/lawnProjectorFold.test.ts` (edit, +3 tests),
+  `web/fusion-rpg-web/src/features/lawn/LawnPage.tsx` (edit).
 
 ### ✅ Checkpoint 2 — a real trigger fires in a live run, and the player can act on it
 - [ ] T2.1-T2.4 all done and verified.

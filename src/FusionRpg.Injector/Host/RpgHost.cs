@@ -157,6 +157,9 @@ public static class RpgHost
         FusionRpg.Core.Hud.ActorHudTuningHub.Configure(
             FusionRpg.Core.Hud.ActorHudTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-hud.v1.json"))));
+        FusionRpg.Core.Match.LawnDeployEventsTuningHub.Configure(
+            FusionRpg.Core.Match.LawnDeployEventsTuningLoader.Parse(
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "lawn-deploy-events.v1.json"))));
 
         IsInitialized = true;
     }

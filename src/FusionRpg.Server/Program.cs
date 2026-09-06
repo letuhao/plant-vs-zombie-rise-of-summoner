@@ -660,6 +660,24 @@ if (clearedBindings > 0)
 var orphanInstances = app.Services.GetRequiredService<RpgStore>().CountOrphanInstances();
 if (orphanInstances > 0)
     Console.WriteLine($"[atoms] {orphanInstances} orphan instance(s) remain after the boot sweep");
+// `equip-atom-source-not-wired` (action-plan.md §5, found 2026-09-06, fixed 2026-09-07):
+// BattleStatComposer.Equipment defaulted to EquipAtomSource.None forever -- no production caller ever
+// called UseEquipment, so an equipped item's stat.derived atoms never reached a live battle's derived
+// stats, only tests did (EquipRuntimeTests.cs). The production resolver shape is EquipAtomSource.
+// FromResolver's own documented contract: resolve this specimen's UniqueActor-scoped bindings and
+// flatten their atoms. RuntimeId.Battle, not Lawn -- this feeds BattleStatComposer specifically.
+var equipStore = app.Services.GetRequiredService<RpgStore>();
+FusionRpg.Core.Battle.BattleStatComposer.UseEquipment(
+    FusionRpg.Core.Battle.EquipAtomSource.FromResolver(instanceId =>
+    {
+        var resolution = equipStore.ResolveBindings(
+            new FusionRpg.Core.Effects.Atoms.OwnerScope(FusionRpg.Core.Effects.Atoms.OwnerKind.UniqueActor, instanceId),
+            new FusionRpg.Core.Effects.Atoms.BindContext(FusionRpg.Core.Effects.Atoms.RuntimeId.Battle));
+        if (resolution.AtomsByBinding is null) return Array.Empty<FusionRpg.Core.Effects.Atoms.AtomRow>();
+        var flattened = new List<FusionRpg.Core.Effects.Atoms.AtomRow>();
+        foreach (var atoms in resolution.AtomsByBinding.Values) flattened.AddRange(atoms);
+        return flattened;
+    }));
 app.UseCors();
 app.UseDefaultFiles();
 app.UseStaticFiles();

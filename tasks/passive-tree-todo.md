@@ -65,8 +65,12 @@ from the moment the file exists: never hand-edit, republish `v{n+1}`.**
 - [x] `gateCounters.elementMasteryRatePoints` and `gateCounters.statusMasteryRatePoints` are each their
       **own** key (OQ2 closed 2026-09-05 — neither reads `AllocationScope.Aspect`), default equal, and
       a divergence is refused without a `gateCounters.rateDivergenceWhy`
-- [x] `budget.treeTotalPoints` and `treeShareMilli` carry an `UNMEASURED` marker and a `_note` (D42),
-      and no superseded spelling appears anywhere in code, config or a fixture: `Fmax`, `w`, `Ws`,
+- [x] `budget.treeTotalPoints` carries an `UNMEASURED` marker and a `_note` (D42; **still true under
+      D54's own posture** — "ship a flagged guess now, re-measure once mechanism-wiring/squad-harness
+      produce real data," and F6/F7 are that re-measure, still in flight). `treeShareMilli` **no
+      longer carries one** — **closed by D53: 1000 (100%)**, trees are the full power budget today,
+      not a placeholder pending a competing system — and no superseded spelling appears anywhere in
+      code, config or a fixture: `Fmax`, `w`, `Ws`,
       `concentration.fmax`, `concentration.w`, `ladder.kPoints`, `tierLadder.k`, `soulThetaWeight`,
       `mechanism.floorMilli`, `mechanism.capMilli`, `nodePotencyCeiling`, `unlockCost.first`,
       `unlockCost.step`, `passive-tree-gen.v1.json`
@@ -2167,18 +2171,78 @@ should be revised to accept a structural refusal as equivalent to "cannot separa
 future task needs to give this harness (or a different one) real access to the plan/catalog units these
 two dials actually live in.
 
-### ⬜ Checkpoint F — measurement — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
+### ⬜ F7: Reconcile `TreeModel`'s aptitude-fold-back against the real direct-channel pipeline — NOT STARTED, added 2026-09-07
+**Spec:** `spec-squad-harness.md` §4, §11 S4 (amended); `spec-tree-resolve.md` §2.1-2.2, §5.3;
+`spec-tree-binder.md` §3.1-3.4.
+**Description:** F6 (above) ran S4 for real and found `ProposeTreeTotalPoints`/`ProposeTreeShareMilli`
+always return `Resolved: false` — not from insufficient trials, but a genuine structural gap. Read on
+both sides this session, real code only:
+- `TreeModel.Resolve` (`tools/SquadHarness/TreeModel.cs:214-284`) folds tree power back as **extra
+  aptitude allocation**: `effective += AptitudeAllocation.Single(AllocationScope.Commander, treeId,
+  effectivePoints)`. Inherited verbatim from `tools/HybridViability --trees`'s own pre-passive-tree
+  exploratory sweep (the class's own doc comment names it, `TreeModel.cs:1-42`).
+- The real, shipped pipeline (`TreeAtomSource.BoundAtomsFor`,
+  `src/FusionRpg.Core/PassiveTree/Resolve/TreeAtomSource.cs:42-79`) does the opposite: it writes a
+  node's `stat.derived` atom **directly to its own derived channel**
+  (`BoundDerivedAtom(atom.ChannelId, op, amount, sourceId)`), through the same fan-in
+  `AtomDerivedSubsystem` already uses for traits and equipment — never through the aptitude system.
+
+Two different causal paths, not two units of one path. They only agree where a channel has a defined
+`AptitudeEdge` (`Channel, Source, KMilli` — `AptitudeTuning.cs:11`) connecting it to an aptitude, and
+that rate is **per-channel**, not a single constant — confirmed by reading `AptitudeEdge`'s own shape.
+So a reconciliation is analytically possible (a known, invertible linear map) but only **per
+representative channel**, matching this program's own `combat.power.fire`/`combat.power.omni`
+worked-example convention (`spec-tree-binder.md` §3.4) — not a single universal constant, and not by
+having the harness read a corpus that mostly doesn't exist yet (its own §13 "Never" list forbids that,
+for good reason: purity and speed against unbuilt content).
+**Acceptance:**
+- [ ] Confirmed (or refuted) with evidence, not assumed: does `TreeModel`'s aptitude-fold-back model
+      still produce *representative* F4/F5 conclusions (does concentration hurt, does cross-unlock
+      reverse an ordering, does the soul track behave linearly) despite not matching the real
+      direct-channel path? **Corrected 2026-09-07 — a coverage audit found this bullet originally
+      named F2/F3/F5, which overstates the blast radius**: F2's three columns (duel/squad/transfer)
+      resolve pure aptitude builds and F3's Erosion arms apply `BattleActorSetup.ChannelMods`
+      directly — neither ever calls `TreeModel` (confirmed by reading both tasks' own Evidence text).
+      Only **F4 and F5** actually invoke it; F6 already ran and is what surfaced this gap. This matters
+      beyond F6 because if the fold-back shortcut is wrong, F4/F5's own already-scheduled
+      real-production-scale sweeps (`spec-squad-harness.md` §12) would spend real machine time
+      validating the wrong mechanism at high trial counts — F2/F3's own real sweeps are unaffected and
+      do not need to wait on this task. Answer this **before** F4/F5's production sweeps run, not after.
+- [ ] If confirmed representative: build the reconciliation for F6's two dials only, as a small, pure
+      function — pick the representative channel (§3.4's convention), read its real `AptitudeEdge.KMilli`
+      from the shipped `aptitudes.v7.json`, and derive algebraically what `treeShareMilli` would need to
+      be for a node on that channel to produce the same `P(Θ)`-domain effect `b` produces via the
+      aptitude path, at the same `Θ`. Report it the way every other flagged number in this program
+      ships: a value, an explicit "analytical, representative-channel, not corpus-wide" label, and
+      either a half-width or an honest "no half-width — analytical, not sampled" note (F2's own
+      convention).
+- [ ] If NOT confirmed representative (the more likely outcome, given the two paths' difference is
+      exact, not approximate): do not force a reconciliation that doesn't exist. Open **F8** with a
+      concrete rebuild scope (model tree power using the real `TreeAtomSource`/`AtomDerivedSubsystem`
+      shape in memory — still no live catalog or `RpgStore` read, synthetic `LoadedTree`/`NodeAtom`
+      records the same way B1's own fixtures already do) rather than attempting the rebuild inside F7.
+- [ ] Whichever outcome, state it plainly — this bullet is not satisfied by silence either way.
+**Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests` stays at its 173/173 baseline (or
+grows, never shrinks); the reconciliation function (or F8's own scope doc) is checked against the real
+`AptitudeTuning.cs`/`CoefficientBinder.cs` source cited above, not a re-derivation.
+**Depends on:** F6. **Scope:** M — investigation plus either a small pure function or a follow-up
+task definition, not a rebuild inside this task.
+
+### ⬜ Checkpoint F — measurement — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked; bullet 3 re-pointed at F7 2026-09-07)
 - [ ] A10a produces `D` with a half-width, at the effect size the spec names
 - [ ] If UNRESOLVED or FAIL: **stop and review** — phase H's corpus is budgeted on this premise
-- [ ] S4 has run, so `treeShareMilli` and `budget.treeTotalPoints` are re-derived from real data and
-      republished as `passive-tree.v2.json` (D42), with their `UNMEASURED` markers removed
+- [ ] `treeShareMilli` and `budget.treeTotalPoints` are re-derived and republished as
+      `passive-tree.v2.json` (D42), with their `UNMEASURED` markers removed — **F6 already ran S4 and
+      found this cannot happen from corpus-wide sampled data (structural, not a trial-count gap); F7
+      is what actually closes this bullet, either with a representative-channel-derived value (labeled
+      as such, not corpus-measured) or by opening F8 as a named follow-up**
 
 ---
 
 ## Phase G — the gate quantities
 
-Without these, 27 of 39 trees sit at tier 0 (§13.4). D37 put them in this program; D43 seeds existing
-saves.
+Without these, 30 of 42 trees sit at tier 0 (§13.4; D51, 2026-09-06: 24 statuses not 21, was 27 of 39).
+D37 put them in this program; D43 seeds existing saves.
 
 ### ✅ G1: The two shipped-code prerequisites (P1, P2) — BUILT + VERIFIED 2026-09-06 (pulse-site wiring closed after being deferred)
 **Spec:** `spec-gate-counters.md` §7 P1 and P2.
@@ -2711,8 +2775,9 @@ work already done under G4, the same "stale checkbox" pattern found (in both dir
 this session (C3, A1-B5).
 
 ### 🟡 Checkpoint G — reachability — 1 of 3 bullets proven, 2 need a live save (label corrected twice: was falsely ✅ with all bullets unchecked, then ⬜)
-- [ ] All 39 generic trees have a live gate quantity, and all 39 are reachable above tier 0
-- [ ] An existing save no longer shows 27 trees at tier 0
+- [ ] All 42 generic trees have a live gate quantity, and all 42 are reachable above tier 0 (D51,
+      2026-09-06: 24 statuses not 21, was 39)
+- [ ] An existing save no longer shows 30 trees at tier 0 (D51: was 27)
 - [x] The per-hit lawn cost is unchanged within probe noise
 
 **Real, previously-undiscovered gap found and fixed 2026-09-06 while extending this spec per the
@@ -2792,7 +2857,8 @@ resolution, bounded repair, persist-time re-gate, idempotence, run verdict, offl
 **Acceptance:**
 - [x] `python -m seedsmith check --family PassiveTree --gate` exits 0/1/2/3 on the shipped four codes
 - [x] The dry run prints `gatingMetrics` and `gatesMissingAThreshold` **before** spending a call, and
-      prints the ~4,680-call figure for the generic corpus
+      prints the ~5,040-call figure for the generic corpus (D51, 2026-09-06: 24 statuses not 21, was
+      ~4,680 when this bullet was written and verified against the then-1,560-node corpus below)
 - [x] `GATING_METRICS` has **exactly one** entry, and an OPEN-loop metric registered with `gates=True`
       raises; `FAIL` beats `NOT_MEASURED`, and a held partition alone denies a `PASS`
 - [x] The offline transport stub **raises** on any unexpected call
@@ -2826,7 +2892,11 @@ delta). All four exit codes reproduced live, exactly as reported: `check --famil
 --family NotAFamily` → `EXIT_CODE=2`; `check --adapter stub tests/fixtures/broken` → `EXIT_CODE=1` (1
 gap + 20 not_measured). `calls_for(1560)` run directly →
 `{'baseCalls': 1560, 'voteCalls': 3120, 'totalCalls': 4680}`, matching the spec's own ~4,680 figure
-exactly. Read `verdict.py`'s `hard_gate_ids`/`assert_exactly_one_hard_gate` directly: the spec's literal
+exactly **as it stood on 2026-09-06** — D51 grew the corpus to 1,680 nodes the same day (24 statuses,
+not 21), so `calls_for(1680)` now yields `{'baseCalls': 1680, 'voteCalls': 3360, 'totalCalls': 5040}`,
+matching the spec's current ~5,040 figure; `calls_for`'s own arithmetic (`totalCalls = 3·baseCalls`)
+was never the thing under test here and needed no code change, only a bigger corpus. Read `verdict.py`'s
+`hard_gate_ids`/`assert_exactly_one_hard_gate` directly: the spec's literal
 *"`GATING_METRICS` has exactly one entry"* cannot mean the shipped `adapters.trees.targets.
 GATING_METRICS` dict (six entries, already H1-tested, answers "does this gate have a threshold" not "is
 this gate hard-promoted") — the agent's resolution ships the INVARIANT (exactly one `gates=True` metric
@@ -4927,6 +4997,33 @@ written and grounded against real code (`ElementPayload.cs`, `AtomKindRegistry.c
 - [ ] Checked against `decisions.md`'s "extended action slots" row before landing — that row also
       floats a possible new kind for `loadout.slots`; whichever lands second reconciles `KindCount`
       (spec §6's own named collision)
+
+**Bullets below added 2026-09-07 by a coverage audit — the original five bullets above named only the
+high-level "write an ElementPayload" framing, with none of the spec's own corrected-design detail
+(§2b/§2c) surfaced. A builder working from the original bullets alone could plausibly reconstruct the
+ORIGINAL, rejected "Physical fallback" design this spec exists to correct, since none of the specific
+corrections had any footprint in this task:**
+- [ ] `element.convert`'s params are exactly `fromElement` (optional `ElementTypeId` — omitted means
+      "largest current component first"), `toElement` (required `ElementTypeId`), and `shareMilli`
+      (required, `1..1000`) — no additional or renamed params (spec §2b).
+- [ ] A `null` `packet.ElementPayload` is a **no-op** for `element.convert` — never an exception, never
+      a fabricated component, and never a synthesized "Physical" element (no such `ElementTypeId`
+      exists) — proven by spec §4's dedicated null-payload test, not folded into the
+      payload-exactness test.
+- [ ] A fully-converted source component (`shareMilli=1000`) is **removed** from `ElementPayload`,
+      never retained at weight `0` — `ElementPayload.Validate` throws on `Weight <= 0`, so this is a
+      build-breaking correctness bar, not a style choice (spec §2c, §4).
+- [ ] `element.convert` only redistributes weight already present in a payload — it never converts an
+      implicitly non-elemental hit into a partially-elemental one, and it never widens `ElementPayload`
+      itself to admit an unaccounted remainder (spec §2b's explicit out-of-scope note — that is a
+      separate future spec, not this one).
+- [ ] The `Element` attach point is genuinely new, not a kind folded onto `Stat` or `Board` — both were
+      considered and rejected in spec §2a (`Stat` is a scalar-channel seam; `Board` requires a cell or
+      board entity a conversion has neither of). Reusing either contradicts the reviewed decision.
+- [ ] `shareMilli`'s own pricing shape (flat per-mille literal vs. a `Θ`-scaled `ValueSpec`, per D24's
+      coefficient-not-magnitude rule) is **still an open, unresolved question** owned by
+      `tree-plan`/`tree-binder` (spec §5 "Ask first", §6, Open question 2) — this task does not resolve
+      it and must not silently pick one without flagging it back to those specs.
 **Verification:** spec §4's own testing strategy — payload-exactness test, adversarial stacking test,
 trigger-rejection test, permanent-modifiers guard-set test, empirical `Sim`-fold test before claiming
 anything but `None` there.
@@ -4972,20 +5069,31 @@ read status-granted resist channels after G1?" — the owner answered **yes, con
 and it shipped as task E1b (`spec-mechanism-wiring.md` §12 q1, `StatusDerivedSubsystem`, 13 tests
 green). Kept as a decision, not an open row.
 
+**Reconciled 2026-09-07 — seven of the original twelve rows were already answered by the D44-D59 batch
+(2026-09-06) and one older, pre-batch decision, but the answers were never propagated back into this
+table.** Same defect class the module-spec audit already found and fixed six times over; fixed here
+too, in the same pass, rather than left for a future reader to rediscover. Kept as closed rows (not
+deleted) so the table stays the complete historical record, matching this file's own convention.
+
 | Ask | Default if unanswered | Resolver |
 |---|---|---|
-| The 17th atom kind (D16) | The binder refuses conversion nodes, as specified (B4) | Owner, via `decisions.md` |
-| `demonType` / `aspect` / `uniqueDemon` point rates | Commander's 11 until swept (C6) | `squad-harness` F4 |
-| `legitimateSkew` rows | Uniform, with `earth` at D32's worked 1.5× | Owner, after the corpus exists |
-| Player-facing naming | Spec vocabulary until authored; **I10 applies the names when they land** | Owner, before I3 ships text |
-| Does `mechanism-wiring` take `aura-skill` T13's live-toggle scope? | Take the per-round recompose only (E3); leave the toggle to T13 | `aura-skill`'s ack |
-| Is the transfer verdict scored against mirror squads or authored waves? | Mirror squads decide; waves reported beside (F2) | Owner |
-| Does D15's equal-budget rule change once S4's evidence lands? | Keep the equal-budget rule | Owner, after F6 |
-| Is tree respec priced off its own soul counter or the species counter? | Its own counter | Owner, before C10 persists it |
-| The `DemonsPage.tsx:367-388` volume defect the Codex route hangs off | I5 ships without the Codex entry point and the route is added after | Owner — another program's file |
-| What does "the tier below is unlocked" mean for the skill-wallet calibration — one node owned in the tier below (same branch), or the tier complete? | The spec's own recommendation: **one node, same branch** (preserves D10's two-branch identity, rewards a single-branch dive) — used as the working assumption behind C11's band tests until revisited | Owner, before `unlockCost.firstPoints` is published (C11/C6) |
-| Auto-drafting a species-derived starter plan when a creature is bound (`spec-tree-surface.md` §15) | Do not auto-draft — I5/I8 ship with no starter-plan generation; the player lays out their own build from an empty draft | Owner, after I8 ships |
-| Shipping shareable build codes as a marketed feature (stable catalog-version stamp + decoder guarantee), vs. the plain URL-reflects-open-layers mechanism I8 already builds under GG-8 | I8 ships only the GG-8 behavior (see I8's scope-boundary bullet); no "share" UI affordance until this is answered | Owner, before any "share" UI is added |
+| ~~The 17th atom kind (D16)~~ | **CLOSED 2026-09-06 by D56 — not "the 17th" (that slot was already taken by base-defense's unrelated `structure.place` the same day): [`spec-element-conversion.md`](../docs/architecture/passive-tree/spec-element-conversion.md) specs an 18th kind + 9th attach point (`Element`/`element.convert`). Spec-complete, tracked as task J11, not yet built.** | — |
+| ~~`demonType` / `aspect` / `uniqueDemon` point rates~~ | **CLOSED 2026-09-06 by D55: `{15, 15, 22}`, derived from the sibling `{3,4,4,6}` ratio against commander=11. Shipped in `aptitudes.v7.json`, migrated across every hardcoded reference, verified by a real test run.** | — |
+| ~~`legitimateSkew` rows~~ | **CLOSED 2026-09-06 by D57: 1.5× uniform, on any near-uniform axis — D32's own `earth` worked example promoted to the actual rule.** | — |
+| Player-facing naming | Spec vocabulary until authored; **I10 applies the names when they land** | Owner, before I3 ships text — **still open** |
+| ~~Does `mechanism-wiring` take `aura-skill` T13's live-toggle scope?~~ | **CLOSED 2026-09-06 by D50: yes, take it now — and it had already shipped** (`BattleRunState.RecomposeDerivedForAllActors`, task E3), pending only `aura-skill`'s own ack when that program starts. | — |
+| ~~Is the transfer verdict scored against mirror squads or authored waves?~~ | **CLOSED 2026-09-05** (`spec-squad-harness.md`'s own D46, pre-dating the 2026-09-06 batch by a day — not the same D46 as `tree-catalog`'s bake-time-slot decision, which was renumbered D59 to resolve the collision): mirror squads decide; waves reported beside, no longer a verdict prerequisite. | — |
+| Does D15's equal-budget rule change once S4's evidence lands? | Keep the equal-budget rule | **S4 (F6) has now run and found a structural non-resolution, not an answer — see the new task F7 (`tasks/passive-tree-plan.md` Phase F). This row stays open, re-pointed at F7 instead of F6.** |
+| ~~Is tree respec priced off its own soul counter or the species counter?~~ | **CLOSED 2026-09-06 by D45: its own, separate counter.** | — |
+| The `DemonsPage.tsx:367-388` volume defect the Codex route hangs off | I5 ships without the Codex entry point and the route is added after | Owner — another program's file — **still open** |
+| ~~What does "the tier below is unlocked" mean for the skill-wallet calibration?~~ | **CLOSED 2026-09-06 by D44: ≥1 node owned in the tier below, same branch** (preserves D10's two-branch identity, rewards a single-branch dive) — matches what was already the working assumption, now settled rather than provisional. | — |
+| Auto-drafting a species-derived starter plan when a creature is bound (`spec-tree-surface.md` §15) | Do not auto-draft — I5/I8 ship with no starter-plan generation; the player lays out their own build from an empty draft | Owner, after I8 ships — **still open** |
+| Shipping shareable build codes as a marketed feature (stable catalog-version stamp + decoder guarantee), vs. the plain URL-reflects-open-layers mechanism I8 already builds under GG-8 | I8 ships only the GG-8 behavior (see I8's scope-boundary bullet); no "share" UI affordance until this is answered | Owner, before any "share" UI is added — **still open** |
+
+**Genuinely still open: four** (player-facing naming, the `DemonsPage` volume defect, auto-drafting a
+starter plan, shareable build codes) **plus one re-scoped** (D15's rule, now pointed at F7 rather than
+F6). None of the four block any task in flight — each already has a default I5/I8/I10 or the owner's
+own working assumption carries until answered.
 
 **Unowned prerequisite, recorded so it is visible:** A10b — the shipped stacking-status vehicle — needs
 G1 and G2 **plus a Battle status → `BattleDerivedModifierLedger` producer that no module's

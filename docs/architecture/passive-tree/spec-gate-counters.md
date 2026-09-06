@@ -843,7 +843,7 @@ the 24 status trees (D51: was 21) stay put. See §5.3.
 - [ ] `squad-harness` has not yet proposed a value for `A`. `c = 23` is a working value derived from
       shipped constants (§3.3) and is explicitly not called balance.
 
-## 19. Readiness ladder for the 27 non-primary trees
+## 19. Readiness ladder for the 30 non-primary trees
 
 **Extended 2026-09-06**, while checking whether this program is actually wired end to end. G1–G8
 being ✅ in the task list is necessary but was found NOT sufficient — the real, previously-undiscovered

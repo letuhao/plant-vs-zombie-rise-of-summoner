@@ -12,14 +12,17 @@
   .sheet-floor {
     position: relative;
     width: 100%;
-    max-width: 1080px;
-    height: min(680px, 82vh);
+    max-width: min(1800px, 96vw);
+    height: min(960px, 92vh);
+    margin: 0 auto;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     background: var(--panel);
     border: 1px solid var(--border-control);
     border-radius: var(--r-md);
+    /* Owner 2026-09-07: near-fullscreen ActorSheet bound — matches actor-sheet-shell spec.
+       Default PanelShell (640×720-capped) is too small for eight catalog tabs + InspectSplit. */
   }
   .sheet-floor > header {
     flex: none;
@@ -170,9 +173,11 @@
     The implementable character sheet. Inventories below still list every closed row an implementer
     must ship. The live mock is no longer a schema dump: <strong>InspectSplit</strong> instead of a
     nested dialog, <strong>StatRow</strong> instead of channel ids, leftover points + Confirm,
-    gauges that do not fake caps. Names come from
-    <code>data/seed/derived-stats/lexicon.v1.json</code> — not from title-casing the id, and not from
-    <code>data/tuning/</code>.
+    gauges that do not fake caps. Names come from runtime catalogs under
+    <code>data/tuning/*-catalog.v{n}.json</code> (and <code>actor-sheet.v1.json</code>) — hosts inject;
+    FE iterates the API. The seed lexicon at
+    <code>data/seed/derived-stats/lexicon.v1.json</code> is a <strong>migration mirror</strong> only,
+    not the player-name home. Do not title-case the id.
   </p>
   <p>
     <span class="tag tag--warn">Draft — complete inventory, not build-authorized</span>
@@ -188,7 +193,7 @@
   <a href="#mock">Live mock</a>
   <a href="#split">InspectSplit</a>
   <a href="#statrow">StatRow</a>
-  <a href="#lex">Lexicon seed</a>
+  <a href="#lex">Runtime catalogs</a>
   <a href="#refs">References</a>
   <a href="#inv-apt">12 aptitudes</a>
   <a href="#inv-combat">28 families</a>
@@ -223,7 +228,8 @@
     Shared widgets: <strong>AptitudeTile</strong> (+/−), <strong>StatRow</strong>,
     <strong>InspectSplit</strong>, <strong>ShieldLayer</strong> (radial), <strong>StatusGlyph</strong>,
     <strong>LeftoverBar</strong>. Combat tab is renamed <strong>Derived</strong> — it is the
-    derived-stat sheet. Height is the GG-36 floor.
+    derived-stat sheet. Shell is near-fullscreen: min(1800px, 96vw) × min(960px, 92vh).
+    Presentation: buy before build (<code>lucide-react</code>, <code>recharts</code>, sparks, xyflow on Paths).
   </p>
 
   <div class="sheet-floor" id="sheet">
@@ -472,7 +478,7 @@
       </div>
     </div>
   </div>
-  <p class="vp-note">Shell height min(680px, 82vh). Page around the mock may scroll — chrome inside it must not.</p>
+  <p class="vp-note">Shell height min(960px, 92vh) × width min(1800px, 96vw). Page around the mock may scroll — chrome inside it must not.</p>
 </section>
 
 <section class="sec" id="split">
@@ -487,11 +493,11 @@
 <section class="sec" id="statrow">
   <h2>Shared — StatRow</h2>
   <p class="lede">
-    Icon · lexicon name · number · spark · <code>?</code>. Binds
+    Icon · catalog displayName · number · spark · <code>?</code>. Binds
     <code>(channelId, displayName, value, unitClass, state, cap)</code>.
     Six render states from <a href="spec-derived-stat-sheet.md">spec-derived-stat-sheet.md</a> §3
-    — do not invent a seventh. Spark policy is in the lexicon <code>gauge</code> field.
-    Uncapped GameUnits never paint CAP.
+    — do not invent a seventh. Spark / gauge policy comes from <code>derived-stat-catalog</code>
+    (seed lexicon is the migration mirror). Uncapped GameUnits never paint CAP.
   </p>
   <div class="spec">
     <button class="stat-row is-on" type="button">
@@ -512,13 +518,16 @@
 </section>
 
 <section class="sec" id="lex">
-  <h2>Lexicon seed — not a tunable</h2>
+  <h2>Runtime catalogs — player names (seed lexicon is a mirror)</h2>
   <p class="lede">
     <code>web/fusion-rpg-web/src/contract/adapt.ts</code> already records the gap:
-    <code>catalog.json</code> has compose/unit/consumer and no names;
+    seed <code>catalog.json</code> has compose/unit/consumer and no names;
     <code>channelLabel</code> title-cases the id. That is the FE defect.
-    Home: <code>data/seed/derived-stats/lexicon.v1.json</code>.
-    <code>data/tuning/derived-stats.v2.json</code> stays numbers
+    <strong>Home:</strong> <code>data/tuning/derived-stat-catalog.v{n}.json</code> (and sibling
+    <code>*-catalog</code> files) — hosts inject; FE reads
+    <code>GET /api/catalogs/actor-surface</code>.
+    Seed <code>data/seed/derived-stats/lexicon.v1.json</code> is a check mirror during migration only.
+    <code>data/tuning/derived-stats.v2.json</code> stays numbers.
     (<code>categoryResistCap</code>, <code>turnDefaultSpeed</code>).
   </p>
   <div class="note">
@@ -621,14 +630,14 @@
 
 <section class="sec inv" id="inv-combat">
   <h2>Inventory — 28 combat families</h2>
-  <p class="lede">Player names from the lexicon. Engine ids stay here for implementers. Matrix columns: omni + 6.</p>
+  <p class="lede">Player names from runtime catalogs. Engine ids stay here for implementers. Matrix columns: omni + 6.</p>
   <div class="fam-wrap" id="inv-combat-static"></div>
 </section>
 
 <section class="sec inv" id="inv-status">
   <h2>Inventory — 24 locked statuses</h2>
   <p class="lede">
-    Engine ids below. Player names live in the lexicon. <code>StatusInstance</code> has no stack-count
+    Engine ids below. Player names live in the catalogs. <code>StatusInstance</code> has no stack-count
     field. HUD still uses initials until the glyph set is art-complete (GG-58 placeholder is identity, not a 404).
   </p>
   <table class="t">

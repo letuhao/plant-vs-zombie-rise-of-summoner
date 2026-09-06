@@ -10,12 +10,16 @@ namespace FusionRpg.Core.Items.Grants;
 /// whole time (<c>WebMatchService.EquippedActionIdsFor</c>). The pipe was connected at the far end and
 /// nothing fed it. This is what feeds it.
 ///
-/// <para><b>The scope is not a choice.</b> <c>WebMatchService.EquippedActionIdsFor</c> already reads at
-/// <see cref="OwnerKind.Entity"/> + the specimen's own instance id, and says why — "two specimens of
-/// the same species held by one player can carry different loadouts". Writing at any other scope would
-/// produce rows the shipped reader never sees. <c>source</c> is the item's container id, so unassign is
-/// a delete-by-source against the index that already exists
-/// (<c>ix_rpg_action_grant_source</c>).</para>
+/// <para><b>The scope is not a choice — it is about lifetime, not the loadout-preference reason this
+/// comment used to give.</b> <c>WebMatchService.EquippedActionIdsFor</c> merges TWO owner scopes as of
+/// 2026-09-07 (a side effect of `action-grant-owner-kind-durability`, which moved the UNLOCK-LADDER
+/// grant read to <see cref="OwnerKind.UniqueActor"/> for its own, unrelated durability reason): that
+/// scope for the durable unlock-ladder grant, and <see cref="OwnerKind.Entity"/> for this one. An
+/// item's granted action must disappear the moment the item is unequipped, and <c>Entity</c> is
+/// exactly the session-scoped kind the boot sweep's <c>ClearSessionScopedBindings()</c> already clears
+/// on a session boundary — writing this at <c>UniqueActor</c> would make an item's grant outlive
+/// unequipping it. <c>source</c> is the item's container id, so unassign is a delete-by-source against
+/// the index that already exists (<c>ix_rpg_action_grant_source</c>).</para>
 ///
 /// <para><b>Pure.</b> No persistence, no clock, no ambient state — the DAL half is
 /// <c>RpgStore.ApplyEquippedGrants</c>, which does nothing but run this and write the result.</para>

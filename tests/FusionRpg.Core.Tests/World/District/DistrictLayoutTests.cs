@@ -273,3 +273,51 @@ public class DistrictLayoutTests
         Assert.Equal(typeof(int), method.ReturnType);
     }
 }
+
+/// <summary>
+/// base-defense `siege-ai` R3 (spec-siege-ai.md §4): `DistrictLayout.ObjectivePositionFor` — the
+/// pure geometry half of the objective fallback, proven standalone before any `IBattleView`/AI
+/// wiring commits to it (see its own doc comment for exactly what wiring remains).
+/// </summary>
+public class ObjectivePositionForTests
+{
+    [Fact]
+    public void Attacker_objective_is_the_core_centre()
+    {
+        var pos = DistrictLayout.ObjectivePositionFor(isAttacker: true, attackerEdge: BoardEdge.North, side: 20);
+        Assert.Equal(new GridPos(10, 10), pos);
+    }
+
+    [Fact]
+    public void Attacker_objective_ignores_which_edge_they_entered_from()
+    {
+        // The Core has exactly one centre regardless of the entry edge -- attackerEdge only matters
+        // for the DEFENDER'S own objective (the gate), never the attacker's own (the Core).
+        var edges = new[] { BoardEdge.North, BoardEdge.South, BoardEdge.East, BoardEdge.West };
+        GridPos? first = null;
+        foreach (var edge in edges)
+        {
+            var pos = DistrictLayout.ObjectivePositionFor(isAttacker: true, attackerEdge: edge, side: 20);
+            first ??= pos;
+            Assert.Equal(first.Value, pos);
+        }
+    }
+
+    [Theory]
+    [InlineData(BoardEdge.North, 0, 10)]
+    [InlineData(BoardEdge.South, 19, 10)]
+    [InlineData(BoardEdge.East, 10, 19)]
+    [InlineData(BoardEdge.West, 10, 0)]
+    public void Defender_objective_is_the_attackers_own_entry_gate(BoardEdge attackerEdge, int row, int col)
+    {
+        var pos = DistrictLayout.ObjectivePositionFor(isAttacker: false, attackerEdge, side: 20);
+        Assert.Equal(new GridPos(row, col), pos);
+    }
+
+    [Fact]
+    public void Rejects_a_non_positive_side()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(
+            () => DistrictLayout.ObjectivePositionFor(isAttacker: true, attackerEdge: BoardEdge.North, side: 0));
+    }
+}

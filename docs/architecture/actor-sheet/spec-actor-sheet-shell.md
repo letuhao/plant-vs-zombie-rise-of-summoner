@@ -1,126 +1,231 @@
 # Spec: `actor-sheet-shell`
 
 **Module id:** `actor-sheet-shell` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
-**Status:** Draft — pending owner review.
+**Ideal:** [actor-sheet-ideal.md](../actor-sheet-ideal.md) · **Visual:**
+[13-actor-sheet.html](../../design/13-actor-sheet.html) ·
+**Status:** Draft — pending owner review. **Replaces** the 2026-08-29 six-tab shell draft at this path.
 
-**Depends on:** nothing · **Blocks:** `progression-tab`, `derived-stats-tab`, `locked-preview-tabs`,
-`gear-tab` (all four mount as tabs inside this shell)
+**Depends on:** `actor-surface-catalog` · **Blocks:** all `*-tab` modules.
 
 ---
 
 ## Assumptions
 
-1. **Today's `ActorPanel.tsx` has no tabs and far less real content than the design plate shows.**
-   Confirmed by reading the file directly (not inferred from the plate): the "Standing" power vector,
-   resource meters, and Effects chips visible in `00-foundation.html`'s mockup were **never built as
-   React code**. The real component is an identity header (avatar/side/level/phase/name, all real)
-   plus four bare `<PendingNote pending={data.X} />` sections (Standing/Element typing/Shield/
-   Equipment — every one unconditionally pending, per `adaptActor`'s own hardcoded reason strings)
-   and two footer buttons (`Release`/`Deploy`) with **no `onClick` at all**. This module wraps that
-   real content in a tab bar; it does not invent meters/vectors with no data to bind to.
-2. **The footer buttons get a minimal, honest fix, not a redesign.** `Release`/`Deploy` doing nothing
-   today is a pre-existing defect this module surfaces by touching the file anyway. Proposal: wire
-   `onOpenChange(false)` as the bare minimum (closing the panel is always correct; it beats a button
-   that visibly does nothing) — a real Release/Deploy *mutation* is out of scope here (no spec names
-   what either should actually call). Correct me now if the owner wants these left exactly as
-   non-functional rather than partially wired; proceeding with "close on click" otherwise.
+1. **“Near-fullscreen modal” means ActorSheet (`ActorPanel`), not Band B lawn HUD tokens.** Lawn
+   tokens stay GG-60. Owner complaint about unused space maps to today’s
+   `PanelShell` `w-[min(640px,92vw)]` / `max-h-[min(720px,82vh)]`
+   ([PanelShell.tsx:84-86](../../../web/fusion-rpg-web/src/shell/PanelShell.tsx)).
+2. **Default `PanelShell` size for other panels (Roster, etc.) does not change.** ActorSheet passes a
+   size variant (or a thin `ActorSheetShell` wrapper) so only this surface grows.
+3. **GG-61 still applies:** declared max height/width; header + leftover footer `flex-none`; body
+   scrolls; page/stage never scrolls to compensate. Near-fullscreen ≠ `100vw×100vh` stage replacement
+   (GG-1).
+4. **Tab kinds are structural** (Condition … Paths). Catalog may order/hide/retitle; a ninth kind
+   without a React renderer is a load reject (catalog module).
+5. **Tech stack (buy before build):** `lucide-react`, `recharts`, `react-tiny-sparkline`, `motion`,
+   and `@xyflow/react` on Paths — [actor-sheet-map.md](../actor-sheet-map.md) Tech stack;
+   [tech-stack.md](../../design/tech-stack.md) §3.3. Fat chunk ⇒ split; never ban these libs.
+6. **Commander leftover v1** until UniqueDemon POST — Confirm uses existing allocate API; scope chip
+   honest. Leftover footer **only** on Aptitudes (or while aptitude draft is dirty).
+7. **`defaultOpen`** from `actor-sheet.v1.json`; **`versionStamp`** on the fan-in DTO for cache bust.
+
+→ Correct these now or this spec proceeds as written.
+
+---
 
 ## Objective
 
-Replace `ActorPanel`'s flat, four-`PendingNote` body with a six-tab container — Overview /
-Progression / Derived Stats / Actions / Passives / Gear — so a player has one door into everything
-about a specimen instead of hunting across the standalone Primary Stats rail layer, a locked-but-
-unbuilt derived-stat spec, and nothing at all for actions/passives/gear.
+Deliver the one band-2 ActorSheet chrome: near-fullscreen shell, identity header, catalog-driven
+tab bar, InspectSplit layout, shared widgets, sticky leftover/Confirm footer — so every tab module
+mounts into a surface that can actually show a dense catalog.
 
-**Users:** any player opening a specimen's panel (rung 5, band 2, opens over any stage — GG-9's "one
-canonical actor surface").
+**Users:** any player opening a unique / commander sheet (GG-9).
 
-**Success is measurable:** the panel shows a real tab bar; Overview (tab 1) renders exactly what
-`ActorPanel.tsx` renders today, unchanged in content, just relocated under a tab; the other five tabs
-render their own module's content once built, or an inert-but-correct empty container until they are.
+**Success:** At 1280×720 and 1920×1080 the sheet occupies most of the viewport with a visible stage
+margin; tabs come from `actor-sheet.v1.json`; InspectSplit does not push band 3; Esc pops the sheet.
 
-## Design
+---
 
-### Tab bar, using the shared `TabList` primitive already proven in `ui/scope/ActorMenuScopePicker.tsx`
+## Tech Stack
 
-```tsx
-type ActorSheetTab = "overview" | "progression" | "derived-stats" | "actions" | "passives" | "gear";
+| Piece | Choice |
+|---|---|
+| Shell | Existing Radix `Dialog` via `PanelShell` + **`size="actorSheet"`** (or equivalent prop) |
+| Tabs | Existing `TabList` |
+| Layout | CSS grid InspectSplit (list | inspector); plate 13 proportions |
+| Meters / radials / leftover | **`recharts`** (`RadialBarChart`, bar for leftover) under `web/.../ui/actor/` |
+| Sparks | **`react-tiny-sparkline`** on StatRow |
+| Icons | `CatalogIcon` → **`lucide-react`** keyed by catalog `icon` / `hudToken`; GG-58 fallback |
+| Motion | **`motion`** for open/tab/InspectSplit when CSS insufficient; prefers-reduced-motion |
+| State | Existing Zustand layer stack; local tab state; React Query for catalog + actor GETs |
+| i18n | Catalog strings are content; chrome via Lingui later — do not block on Lingui for v1 |
 
-const TABS: TabItem[] = [
-  { id: "overview", label: "Overview", testId: "actor-sheet-tab-overview" },
-  { id: "progression", label: "Progression", testId: "actor-sheet-tab-progression" },
-  { id: "derived-stats", label: "Derived Stats", testId: "actor-sheet-tab-derived-stats" },
-  { id: "actions", label: "Actions", testId: "actor-sheet-tab-actions" },
-  { id: "passives", label: "Passives", testId: "actor-sheet-tab-passives" },
-  { id: "gear", label: "Gear", testId: "actor-sheet-tab-gear" }
-];
+**Near-fullscreen bound (locked for this module):**
+
+```text
+width:  min(1800px, 96vw)
+height: min(960px, 92vh)
 ```
 
-`ActorPanel.tsx` gains local `useState<ActorSheetTab>("overview")`, renders `<TabList tabs={TABS}
-value={tab} onChange={...} testId="actor-sheet-tabs" />` between the identity header and the body,
-then conditionally renders one tab's content — mirroring `ActorMenuScopePicker`'s own established
-mode-switch shape exactly (same session, same pattern, already proven).
+Rationale: at 1920×1080 a 1280-wide cap leaves unused stage; owner wants most of the viewport used;
+4% / 8% margins keep the stage readable and satisfy GG-61. Fixture asserts `clientHeight ≤ 92vh`
+and body scrollbar when content exceeds.
 
-### What moves where
-
-- Identity header (avatar, side badge, level tag, phase, name pending-note) — **stays exactly as-is**,
-  above the tab bar, visible regardless of which tab is active (matches the plate's own header/tabs
-  split).
-- The four existing `PendingNote` sections (Standing/Element typing/Shield/Equipment) — **Standing
-  and Element typing move into the Overview tab unchanged**; Shield has no owning tab named in this
-  program (left on Overview, since no module claims it) and Equipment's pending-note **moves into
-  `gear-tab`** (it's the same field `gear-tab`'s own empty state is built around — no duplicate
-  pending-note between two tabs).
-
-### Footer
-
-Unchanged position (still `PanelShell`'s `footer` prop, always visible regardless of active tab) —
-only the `onClick` wiring changes per Assumption 2.
+---
 
 ## Commands
 
 ```powershell
-cd web/fusion-rpg-web
-npm run test -- ActorPanel
-npm run build
+cd web\fusion-rpg-web
+npm test -- --run src/ui/actor/ActorPanel
+npm test -- --run src/shell/shells.test.tsx
+npx playwright test e2e/actor-sheet.spec.ts   # when added: viewport sweep GG-36
 ```
 
-## Project structure
+---
 
+## Project Structure
+
+```text
+web/fusion-rpg-web/src/shell/PanelShell.tsx     # size variant
+web/fusion-rpg-web/src/ui/actor/ActorPanel.tsx  # sheet orchestration
+web/fusion-rpg-web/src/ui/actor/InspectSplit.tsx
+web/fusion-rpg-web/src/ui/actor/StatRow.tsx
+web/fusion-rpg-web/src/ui/actor/AptitudeTile.tsx
+web/fusion-rpg-web/src/ui/actor/LeftoverBar.tsx
+web/fusion-rpg-web/src/ui/actor/CatalogIcon.tsx   # lucide-react + GG-58 fallback
+web/fusion-rpg-web/src/ui/actor/meters/          # recharts RadialBar / leftover; tiny-sparkline
+web/fusion-rpg-web/src/hooks/useActorSurfaceCatalog.ts
 ```
-web/fusion-rpg-web/src/ui/actor/
-  ActorPanel.tsx        edited — gains the tab bar, delegates tab bodies to the other 4 modules
-  ActorPanel.test.tsx   new — this module's own tests (no file exists today)
+
+---
+
+## Design
+
+### Chrome
+
+```text
+┌ header: portrait · name · species · side · level · elements · Fielded/Wave · Esc ─┐
+├ tab bar (from catalog) ───────────────────────────────────────────────────────────┤
+├──────────────────────────────┬────────────────────────────────────────────────────┤
+│ tab body (no page scroll)    │ inspector (scrolls)                                │
+│                              │                                                    │
+├──────────────────────────────┴────────────────────────────────────────────────────┤
+│ leftover meter · Reset · Confirm  — **only when Aptitudes active or draft dirty** │
+└───────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-## Code style
+Leftover footer is **only** on Aptitudes (or while an aptitude draft is dirty). Other tabs omit the
+footer strip entirely — do not move Confirm into a band-3 dialog (GG-63). Empty leftover is legal;
+Confirm disabled when leftover `< 0`; overspend refuses (409).
 
-Match `ui/scope/ActorMenuScopePicker.tsx`'s own conventions exactly (same repo, same session, already
-reviewed): `TabList` for the switch, a `kind`-discriminated render per tab, `data-testid` on every
-interactive element and every tab's root container.
+### Tab bar
 
-## Testing strategy
+```tsx
+// Pseudo — kinds closed in code; labels/order from catalog
+const tabs = surface.tabs
+  .filter(t => !t.hidden)
+  .sort((a, b) => a.order - b.order)
+  .map(t => ({ id: t.kind, label: t.label, testId: `actor-sheet-tab-${t.kind}` }));
+```
 
-- **Overview content is byte-identical to today**, just relocated: a test asserting `actor-standing-
-  pending`/`actor-element-pending` (or whichever two stay) render exactly as they do on `main` today.
-- **Tab switching**: clicking each tab shows that tab's own root testid and hides the others (no two
-  tab bodies mounted at once).
-- **Non-ready states unchanged**: loading/empty/error/locked still short-circuit to
-  `RungStateFallback` before the tab bar ever renders (this module must not regress that guard).
-- **Footer buttons**: `Release`/`Deploy` each call `onOpenChange(false)` — proven by test, closing the
-  gap where they previously did nothing detectable.
+Renderer switch: `condition` | `aptitudes` | `derived` | `shield` | `status` | `elements` | `kit` |
+`paths`. Unknown kind → never rendered (host already rejected). `defaultOpen` from catalog.
+
+### Shared widgets
+
+| Widget | Job |
+|---|---|
+| `StatRow` | lucide icon · displayName · number · tiny-sparkline · `?` |
+| `InspectSplit` | left dock / right inspector (list may scroll independently of inspector) |
+| `AptitudeTile` | `+`/`−`, selected state |
+| `LeftoverBar` | recharts bar; budget − spent; empty legal |
+| `ShieldLayer` | recharts radial well |
+| `StatusGlyph` | lucide / catalog hudToken + color |
+| `CatalogIcon` | lucide-react map + GG-58 fallback |
+
+Spark fill-to-100% only for pools, bounded ratios, registry caps (GG-64 / D14).
+
+### Labels
+
+`channelLabel` and every player-band name read catalog `displayName`. Delete the five-string
+`ResourceId` union as a roster once resource-catalog is consumed.
+
+### Filename / routing
+
+Export alias `ActorSheet`. `?panel=…&sel=<instanceId>`. No `#/actor/:id`.
+
+---
+
+## Tunables
+
+| Key | Home | Unit |
+|---|---|---|
+| Sheet width/height caps | structural CSS in shell (comment: GG-61 bound, not balance) | CSS px / vh |
+| Tab labels/order | `actor-sheet.v1.json` | — |
+
+No new combat numbers.
+
+---
+
+## Code Style
+
+```tsx
+<PanelShell
+  open={open}
+  onOpenChange={onOpenChange}
+  title={title}
+  size="actorSheet"
+  footer={<LeftoverFooter ... />}
+  testId="actor-sheet"
+>
+  <InspectSplit
+    list={<TabList ... /> /* + active tab body */}
+    inspector={<InspectorPane ... />}
+  />
+</PanelShell>
+```
+
+Magnitudes from APIs stay `number`/`bigint` as today’s contract; display formatting via existing
+unit-class helpers — never invent a third classification.
+
+---
+
+## Testing Strategy
+
+| Level | What |
+|---|---|
+| Unit | Tab list built from fixture catalog; unknown kind ignored; leftover Confirm disabled when overspend |
+| Shell fixture | Dense content → body `scrollHeight > clientHeight`; shell `clientHeight ≤ 92vh` |
+| Viewport | 1280×720 / 1440×900 / 1920×1080 — no horizontal page scroll; stage margin visible |
+| Guard | No `idWords` on player-band labels when catalog present |
+
+---
 
 ## Boundaries
 
-- **Always:** keep Overview's real content unchanged in substance; keep non-ready states short-
-  circuiting before the tab bar.
-- **Ask first:** giving `Release`/`Deploy` a real mutation — no spec names what either should call.
-- **Never:** invent resource meters or a Standing power-vector with no backing `ActorView` field to
-  bind to — that gap is explicitly out of this program (map's own exclusion list).
+- **Always:** Near-fullscreen bound above; GG-61 body scroll; catalog-driven tabs; buy-before-build
+  presentation libs; leftover footer only on Aptitudes/dirty draft; Esc pops sheet.
+- **Ask first:** Changing the bound numbers; making *all* PanelShells this large; UniqueDemon
+  allocate; a second overlapping presentation library.
+- **Never:** `#/actor/:id`; nested dialog for readings; hand-rolling radials/icons to dodge npm;
+  Band B numeric wall; hardcoded eight tab labels in React once catalog ships; five-string
+  `ResourceId` roster.
 
-## Success criteria
+---
 
-1. Six real tabs render; Overview shows today's real content unchanged.
-2. Non-ready states (loading/empty/error/locked) still short-circuit correctly.
-3. `Release`/`Deploy` each do something detectable (close the panel) instead of nothing.
-4. The other four modules have a real tab body to mount into once each ships.
+## Success Criteria
+
+- [ ] ActorSheet uses `min(1800px, 96vw)` × `min(960px, 92vh)` — visibly larger than today’s
+      640×720-capped panel at 1920×1080
+- [ ] Other PanelShell consumers unchanged at default size
+- [ ] Tabs match `actor-sheet.v1.json` order/labels/`defaultOpen`
+- [ ] InspectSplit does not push band 3; Confirm stays footer decision control on Aptitudes only
+- [ ] Shared widgets exported for tab modules; plate 13 visual grammar matched for chrome
+- [ ] `channelLabel` / resource meters use catalog displayNames
+
+---
+
+## Open Questions
+
+None — leftover visibility locked (Aptitudes / dirty draft only); plate 13 is visual SSOT.

@@ -263,7 +263,31 @@ public static class DistrictLayout
     /// exposing it would risk a private, drifting second curve for board-side-to-Core-cell-count.</summary>
     internal static int CoreSideCells(int boardSide, int coreSideMilli) => Math.Max(1, checked(coreSideMilli * boardSide) / 1000);
 
-    static GridPos CardinalMidpoint(BoardEdge edge, int side) => edge switch
+    /// <summary>
+    /// base-defense `siege-ai` R3 (spec-siege-ai.md §4): "the objective" a side with no target in
+    /// reach advances toward — the Core zone's own centre for an attacker (the SAME `center` formula
+    /// <see cref="ZoneOf"/> already computes internally — re-derived here rather than exposed as a
+    /// shared field since it is a one-line integer midpoint, not a curve worth a second name), the
+    /// gate/breach it must intercept for a defender (<see cref="CardinalMidpoint"/>, the SAME cell
+    /// <see cref="Build"/> itself already opens a corridor through).
+    ///
+    /// <para><b>Deliberately a pure, standalone function — not yet wired into `IBattleView` or
+    /// `AiCandidate.ObjectiveClassMilli`</b>, this program's own established "mechanism before wiring"
+    /// precedent (`siege-fog`, `SiegeAiIntentSource`, `RetargetLedger`, `ConstructionAi`). The real
+    /// remaining gap this leaves precisely scoped: a real `IBattleView` caller needs to know WHICH
+    /// side is attacking for a given battle (`DistrictLayout.EntryEdgeFor`'s own result, computed at
+    /// `siege-resolver` time but not currently threaded into `BattleRunState`) before it can supply
+    /// `isAttacker`/`attackerEdge` here — that plumbing, not this formula, is the un-started part.</para>
+    /// </summary>
+    public static GridPos ObjectivePositionFor(bool isAttacker, BoardEdge attackerEdge, int side)
+    {
+        if (side <= 0) throw new ArgumentOutOfRangeException(nameof(side));
+        return isAttacker
+            ? new GridPos(side / 2, side / 2) // the Core's own centre — ZoneOf's own `center` formula
+            : CardinalMidpoint(attackerEdge, side); // the gate the attacker breaches
+    }
+
+    internal static GridPos CardinalMidpoint(BoardEdge edge, int side) => edge switch
     {
         BoardEdge.North => new GridPos(0, side / 2),
         BoardEdge.South => new GridPos(side - 1, side / 2),

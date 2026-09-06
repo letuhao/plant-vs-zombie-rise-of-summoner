@@ -1,5 +1,8 @@
 # Spec: `progression-tab`
 
+> **TRAIL — do not implement.** Catalog-era sheet uses `aptitudes-tab` + Condition XP/Standing.
+> Kept for history only. See [actor-sheet-map.md](../actor-sheet-map.md) Trail.
+
 **Module id:** `progression-tab` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
 **Status:** Draft — pending owner review.
 

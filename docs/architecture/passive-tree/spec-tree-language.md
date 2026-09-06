@@ -271,8 +271,8 @@ Stating it now costs a paragraph. Discovering it after 1,680 nodes are generated
 The case against nullification was never that it is unbalanced — it is that a node the player bought
 and which then does nothing **reads as a bug**. **D40's answer is presentation, not removal**, and it
 comes with a reason: dropping the rung would force the generator to refuse a pair it can neither
-reroute nor order, and a generator that can refuse is a generator that stalls a 4,680-call run on a
-content problem nobody is awake to fix.
+reroute nor order, and a generator that can refuse is a generator that stalls a 5,040-call run (D51:
+was 4,680) on a content problem nobody is awake to fix.
 
 Three requirements travel with the form. All three are checkable, and a nullification that misses any
 of them is a defect, not a style note:
@@ -499,7 +499,7 @@ The template is `demon_roster.py:369` — the only metric in the repo at `gates 
 justification (`:357-365`) transfers exactly: an unresolved field silently produced zero-stat species,
 so *"gating the RATE here stops a full run early — before spending thousands of model calls."* The
 same is true of `affixIds`: an unresolved node has no effect for `tree-binder` to price, so a run that
-is systematically unresolvable should stop at hundreds of calls, not 4,680.
+is systematically unresolvable should stop at hundreds of calls, not 5,040 (D51: was 4,680).
 
 Every other gate starts `False` and is promoted as a deliberate, later, separate act, because a
 threshold promoted before a real run is a threshold nobody can name in advance
@@ -513,7 +513,7 @@ threshold promoted before a real run is a threshold nobody can name in advance
 # dry-run is the DEFAULT; --write is the explicit opt-in (cli.py:285-289's rule, adopted verbatim)
 python -m seedsmith trees generate --tree tree.aptitude.might --dry-run --sample-brief
 python -m seedsmith trees generate --all --dry-run          # prints gatingMetrics + gatesMissingAThreshold
-python -m seedsmith trees generate --all --write            # the real run: 4,680 calls
+python -m seedsmith trees generate --all --write            # the real run: 5,040 calls (D51: was 4,680)
 python -m seedsmith check --family PassiveTree --gate       # exit 1 on a gap, 3 on a refusal
 python -m seedsmith metrics --family PassiveTree
 python -m pytest tools/seedsmith/tests/adapters/trees
@@ -574,7 +574,7 @@ def permitted(axis: str, cell: "Mapping[str, str]", vocab: Vocabulary) -> "list[
 | `enum_is_empty_in_the_constant` | the shipped schema's enums are `[]`; only `fill_schema` populates them |
 | `two_calls_never_alias_one_enum` | fill twice with different cells, assert the first is unchanged |
 | `out_of_quota_value_is_absent_from_the_enum` | for a sampled cell, every out-of-cell id is missing from the printed enum |
-| `quota_marginals_sum_to_the_corpus` | `Σ quota[a] == 1560` for every axis, exactly |
+| `quota_marginals_sum_to_the_corpus` | `Σ quota[a] == 1680` for every axis, exactly (D51, 2026-09-06: 24 statuses not 21, was 1560) |
 | `overrides_return_their_draw_to_the_pool` | force every elemental tree's element; assert the residual marginals still match target within tolerance |
 | `quota_drift_is_re_derived_not_read` | mutate the stored brief; the drift metric still catches the corpus |
 | `permutation_is_verified_not_trusted` | `verify_permutation` raises on a rendered order that does not reproduce `order_for` |
@@ -621,7 +621,8 @@ write to `SPEC.md`, `tasks/plan.md` or `tasks/todo.md`; write outside
       prints on both sides and names one winner** (D40, §5.2).
 - [ ] Exactly one metric is `gates=True`, and it is `PassiveTree/UnresolvedCount`.
 - [ ] A rerun over unchanged inputs is byte-identical, proven by hash.
-- [ ] The full generic run is ~4,680 calls, and the dry-run prints that figure before spending any.
+- [ ] The full generic run is ~5,040 calls (D51, 2026-09-06: 24 statuses, not 21, was ~4,680), and the
+      dry-run prints that figure before spending any.
 - [ ] `python -m seedsmith check --family PassiveTree --gate` exits 0 on the committed corpus.
 
 ## Open questions

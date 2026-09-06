@@ -963,12 +963,43 @@ what was decided and why, per this file's own historical-record convention (§3 
    by D45: a passive-tree respec carries its own counter, never the species one.** The two are
    different subjects; sharing a counter would let a tree respec silently reprice a species respec.
 2. ~~**What "the tier below is unlocked" means**~~ — **CLOSED 2026-09-06 by D44: at least one node in
-   the tier below, of the SAME BRANCH** — not the whole tier complete. This is the cheaper reading
-   (§2.2's own calibration had assumed the complete-tier reading, the conservative and most expensive
-   one), so it changes what `firstPoints` should be published at — recompute it under this reading
-   before `aptitudes.v{n+1}.json` ships the value, not after. Chosen for D10's own two-branch identity:
-   this reading specifically rewards a single-branch dive, whose reward-per-point gradient already
-   points the right way, over rewarding breadth across both branches for the same tier-open cost.
+   the tier below, of the SAME BRANCH** — not the whole tier complete. Chosen for D10's own two-branch
+   identity: this reading specifically rewards a single-branch dive, whose reward-per-point gradient
+   already points the right way, over rewarding breadth across both branches for the same tier-open
+   cost.
+
+   ⚠ **Investigated 2026-09-07 — the closure's own follow-up claim does not hold, traced to the real
+   code.** This closure's original text asserted *"§2.2's own calibration had assumed the complete-tier
+   reading... so it changes what `firstPoints` should be published at — recompute it under this reading
+   before `aptitudes.v{n+1}.json` ships the value."* Three independent checks all say that link does
+   not exist:
+
+   - **§2.2's own derivation** (re-read in full) calibrates `first`/`step` against `k` — nodes owned
+     **per tier**, from the archetype width vectors — to keep reward-per-skill-point flat. It never
+     reads, or depends on, how many nodes of the tier below are owned before the next tier opens.
+   - **A repo-wide search** for "tier below" / "complete-tier" outside this one closure note found no
+     other passage, in this spec or in `spec-tree-plan.md`, that makes the calibration link the closure
+     claims.
+   - **`TierGate.Reached` itself** (`src/FusionRpg.Core/PassiveTree/Resolve/TierGate.cs:16-30`), read
+     directly: `Reached(long aptitudePoints, int authoredTierCount, long reqScalePoints)`. Its only
+     per-tier comparison is `aptitudePoints < req` where `req = reqScalePoints·t·(t+1)/2` — a single
+     scalar aptitude-point total against a threshold. The signature has **no branch parameter and no
+     node-ownership input at all** — it structurally cannot express "at least one node in the tier
+     below, of the same branch." Its own doc comment independently confirms the boundary D44 crossed:
+     *"a different currency from `tree-state`'s unlock cost."*
+
+   **Conclusion: the closure's recompute instruction over-reached.** "The tier below is unlocked, same
+   branch" describes a node-purchase **eligibility** concept (a yes/no connectivity condition) that has
+   no shipped consumer anywhere in this program today — not the aptitude tier gate (confirmed by
+   reading its source: branch-agnostic, ownership-agnostic, a pure scalar threshold) and not the
+   skill-point cost ladder (confirmed by re-deriving §2.2: calibrated only against tier width `k`).
+   D44 correctly picked a reading for a concept that will matter once a per-node connectivity rule is
+   built, but incorrectly asserted that choice retroactively changes an already-shipped, already-tested
+   tunable (`unlockCost.firstPoints`/`stepPoints`, `first=5, step=2`) that was never coupled to it in
+   the first place. **No recompute is owed; `aptitudes.v7.json`'s existing corner-share-derived values
+   stand.** If a per-node connectivity/eligibility rule is built later (this spec has no task for one
+   today — it would be new scope, not a gap in existing scope), D44's own reading is the correct one to
+   implement it against; it just was never a `firstPoints`/`stepPoints` question.
 3. ~~**The other three values of `skillPointsPerThetaMilliByScope`**~~ — **CLOSED 2026-09-06 by D55:
    proportional to the sibling `{3,4,4,6}` ratio, scaled against the already-settled commander value
    (`11`).** Per-ratio-unit = `11 / 3 ≈ 3.667`; `demonType = 4 × 3.667 ≈ 14.667 → 15` (rounded up,

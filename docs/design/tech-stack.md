@@ -1,6 +1,7 @@
 # Tech stack and gap register — the FE refactor
 
-**Status:** decided. Stack choices T1–T4 and the migration order are settled under design authority (2026-08-22); reversing one is a normal decision, not a re-litigation. Governed by
+**Status:** decided (T1–T4 2026-08-22; **T5 buy-before-build + GG-38 amend 2026-09-07**). Reversing
+one is a normal decision, not a re-litigation. Governed by
 [architecture/game-gui-principles.md](../architecture/game-gui-principles.md) and
 [information-architecture.md](information-architecture.md).
 
@@ -19,7 +20,7 @@ Not a wishlist — each row is a rule that is already binding and a stack that h
 | GG-19 | Focus trap and restore per layer | 1 keyboard handler in the whole app | **cannot** |
 | GG-16 | A notification surface | **zero** toast surfaces exist | **cannot** |
 | GG-8 | URL encodes stage + open layers | HashRouter, untyped search params | partial |
-| GG-38 | Layers load what they need | one 2.77 MB chunk, zero splitting | **cannot** |
+| GG-38 | Phaser-class canvases stage-lazy; fat chunk ⇒ split | one chunk, zero splitting — **split, don’t ban libs** |
 | GG-50 | 1 000-item collections | `array.map` | **cannot** |
 | GG-31 | Nine declared transitions, incl. exit animation | CSS transitions, no presence | partial |
 | GG-46 | Magnitudes formatted by unit family | string interpolation; **0** uses of `Intl` | **cannot** |
@@ -58,11 +59,14 @@ Built this repo with vendor chunking to attribute the payload. Reproduce by addi
 | CSS | 9.1 KB | 1.3% |
 | **Total** | **712.9 KB** | |
 
-**Three libraries are 74% of the payload, and none of them is needed on the home screen.** Phaser is
-the lawn stage; charts are the Chronicle; the map is the world stage. In an overlay the player
-toggles mid-match, that is boot cost paid on every launch for surfaces most sessions never open.
+**Three libraries were 74% of that single chunk, and none is needed on sanctum boot.** Phaser is
+the lawn/world stage; charts are Chronicle / ActorSheet meters; a node graph is Paths (or a future
+authoring tool) — not the player world map HOW. The correct fix is **code-splitting** (`React.lazy`,
+dynamic `import()`, route chunks). Deleting the libraries or hand-rolling four SVG shapes was the
+wrong remedy (amended 2026-09-07 — buy before build).
 
-**Projected entry chunk after splitting: ~160 KB gz — a 4.4× reduction.**
+**Projected entry after splitting Phaser off sanctum boot:** large drop without losing presentation
+libs. Do not design features around a hard entry-KB fantasy.
 
 ---
 
@@ -90,22 +94,34 @@ toggles mid-match, that is boot cost paid on every launch for surfaces most sess
 | **@tanstack/react-virtual** | GG-50 | ~3 KB | Headless, coherent with Query already present |
 | **@fontsource/**\* (or vendored woff2) | GG-56 + offline | assets | Kills the CDN dependency |
 | **@axe-core/playwright** | GG-21 in CI | dev only | |
-| **size-limit** *(or a 20-line script)* | GG-38 budget | dev only | |
 | **rollup-plugin-visualizer** | Chunk attribution | dev only | The tool that produced §2 |
+| **lucide-react** | Catalog / StatRow / status glyphs | tree-shake | Buy before a local SVG registry; map catalog `icon` / `hudToken` → Lucide + GG-58 fallback |
+| **recharts** | Chronicle + ActorSheet radials / leftover | — | Restored 2026-09-07; four shapes do not justify hand-rolling |
+| **react-tiny-sparkline** | Dense StatRow sparks | ~2 KB | Purpose-built; keep recharts for radials |
+| **@xyflow/react** | Paths / read-only node UIs (not `#/world`) | — | Restored for node surfaces; world map HOW stays Phaser (T3) |
+| **motion** | Panel / tab / InspectSplit presence | — | Buy springs when CSS is insufficient; respect prefers-reduced-motion |
 
-Total runtime addition: **≈ 21 KB gz** — against 500 KB removed from the entry path.
+Presentation libs above are **buy before build** — see §3.3. Total of the original small adds
+(Zustand/Radix/Lingui/virtual/fonts) remains ≈ 21 KB gz runtime; charts/icons/xyflow/motion are
+paid where those surfaces load via normal Vite splits, not banned from `package.json`.
 
-### 3.3 Remove
+### 3.3 Buy before build (presentation) — amended 2026-09-07
 
-**`recharts` — 100.8 KB gz, 14% of the payload.** The design uses exactly four chart shapes:
-horizontal bar (Chronicle "where growth came from"), sparkline, meter, and a zero-anchored diverging
-bar. All four are already drawn on the plates in plain CSS and SVG, in about forty lines total. A
-charting library that costs a hundred kilobytes to draw four rectangles is not paying for itself.
+**Principle.** Prefer a maintained library over hand-rolled icons, charts/gauges, graphs, or motion
+when one already fits. A fat bundle is a **splitting competence failure** — fix with Vite/React
+lazy patterns; **never ban the library** as the remedy.
 
-**`@xyflow/react` — 41.4 KB gz — dropped.** It is a node-editor library and our map is authored,
-read-only content. Full reasoning in **T3** (§8); the short version is that plate 03 renders the whole
-map in plain SVG and we would be paying for roughly 15% of a library. It may return later as a
-*developer* authoring tool, where the bundle is unbudgeted.
+| Need | Library | Note |
+|---|---|---|
+| Glyphs | `lucide-react` | Catalog key → component; GG-58 generated fallback when missing |
+| Radials / leftover / Chronicle charts | `recharts` | Restored; use on those surfaces |
+| StatRow sparks | `react-tiny-sparkline` | Dense lists |
+| Paths / trees / node UIs | `@xyflow/react` | Read-only OK; **not** the player world-map HOW (Phaser — T3) |
+| Panel motion | `motion` | Prefer over hand-rolled springs |
+
+**Retracted (2026-09-07):** the 2026-08-22 decision to **remove** `recharts` and `@xyflow/react`
+from the player stack “to save 140 KB gz,” and the ban on icon packs / Framer. Measurement showed
+zero splitting; the fix is split, not delete.
 
 ### 3.4 Demote
 
@@ -120,10 +136,11 @@ failure modes in one change.
 | | Why not |
 |---|---|
 | **Storybook** | The plates are the design reference and the acceptance target. A second reference that can disagree with the first is a liability. Verify components against plate screenshots with Playwright instead |
-| **Framer Motion / `motion`** | The nine transitions in [IA §10](information-architecture.md) are all reachable with CSS. Revisit only if springs are wanted |
 | **Redux / MobX / Jotai** | Query owns server state, Zustand owns UI state. There is no third category |
 | **MUI / Chakra / shadcn wholesale** | They bring opinions that would fight the token system. Radix primitives give the behaviour without the styling |
-| **An icon library** | GG-58 needs an art *registry* with a fallback, not a set of generic glyphs |
+
+Ask before adding a *second* library that overlaps one already locked in §3.2–3.3 — not before the
+first fit.
 
 ### 3.6 One project-specific advantage worth using
 
@@ -248,29 +265,30 @@ The design covers every surface. These are the things a build will hit that no p
 | **G9** | **Does the dev tree ship?** | D4 says the tree ships and a toggle reveals it — but should a player build contain it at all | Resolved — **T2**. It ships. One artifact, lazy chunk, persisted toggle, default off |
 | **G10** | **Audio assets** | GG-35 and the Sound tab exist; there is no audio pipeline | Out of scope for this refactor. The tab ships **disabled with its reason** rather than lying |
 | **G11** | **Test queries** | The suite is `data-testid`-heavy. The new rules make roles and accessible names real | Migrate to role/name queries; keep `testid` only where semantics are genuinely absent. Free a11y regression coverage |
-| **G12** | **Bundle budget numbers** | GG-38 demands "a ceiling" and never sets one | §6 |
+| **G12** | **Bundle / stage weight** | GG-38 amended 2026-09-07: Phaser stage-lazy; fat chunk ⇒ split, not ban libs | §6 |
 
 ---
 
-## 6. Bundle plan and budget
+## 6. Bundle plan — split, don’t ban (amended 2026-09-07)
 
-| Chunk | Loads when | Budget (gz) |
+| Chunk | Loads when | Guidance |
 |---|---|---|
-| **entry** — shell, sanctum, kit, rail, bands, Query, SignalR, router | Always | **≤ 180 KB** |
-| `layer-collection` — Creatures, Relics, Fusion | First open of any | ≤ 40 KB |
-| `layer-world` — sector inspector, Expeditions, Pacts | First open | ≤ 30 KB |
-| `layer-reference` — Almanac, Chronicle, chart primitives | First open | ≤ 30 KB |
-| `stage-lawn` — Phaser + the projector | Entering the lawn | ≤ 400 KB |
-| `stage-map` — Phaser dual-plane world map (lazy; not in entry) | Entering the world | ≤ 400 KB (shares Phaser with lawn; xyflow forbidden) |
+| **entry** — shell, sanctum, kit, rail, bands, Query, SignalR, router | Always | Keep Phaser out. Presentation libs may appear if a surface imports them — prefer route/layer lazy |
+| `layer-collection` — Creatures, Relics, Fusion | First open of any | Split normally |
+| `layer-world` — sector inspector, Expeditions, Pacts | First open | Split normally |
+| `layer-reference` — Almanac, Chronicle, recharts | First open | Charts belong here / ActorSheet — not deleted |
+| `layer-actor-sheet` — ActorSheet + lucide / sparks / motion as used | First open | Buy-before-build libs OK |
+| `stage-lawn` — Phaser + the projector | Entering the lawn | Phaser here, not entry |
+| `stage-map` — Phaser dual-plane world map | Entering the world | Phaser HOW; **xyflow forbidden on `#/world` only** (T3) |
 | `dev` — the whole developer tree | Developer mode on | unbudgeted |
 
-Measured baseline: **712.9 KB gz, one chunk.** Target entry: **≤ 180 KB gz** — a 4× reduction on the
-path every launch pays.
+Measured baseline (2026-08-22): **712.9 KB gz, one chunk** — zero splitting. That was a competence
+failure. **Remedy: split.** Do **not** treat an entry-KB ceiling as a veto on `recharts`,
+`lucide-react`, `@xyflow/react`, or `motion`.
 
-**The check:** CI asserts the entry chunk ceiling *and* asserts that `phaser` does not appear in it
-(`recharts` and `@xyflow` are removed outright, so their check is that they stay out of
-`package.json`). A budget without the second half passes the day someone imports Phaser
-at the top of a shared module.
+**The check:** CI may assert `phaser` is not on the sanctum/shell boot path. It must **not** fail
+because presentation libraries exist in `package.json` or appear in a layer chunk. Optimize after
+measured player pain.
 
 ---
 
@@ -289,7 +307,7 @@ at the top of a shared module.
 | GG-29 tokens only | No hex outside `src/theme` | script |
 | GG-30 contrast | Token-pair matrix vs WCAG | script (already written for §A.2 of plate 00) |
 | GG-36 viewports | Every layer at the declared widths, no h-scroll | Playwright |
-| GG-38 budget | Entry ceiling + heavy-dep exclusion | size-limit |
+| GG-38 weight | Phaser stage-lazy; fat chunk ⇒ split (not ban presentation libs) | Vite lazy + optional visualizer |
 | GG-46 units | No formatter overload takes a bare number | the type system |
 | GG-50 volume | 10 / 100 / 1000 fixtures, assert rendered node count | Vitest |
 | GG-56 CJK | Pseudolocale + a Chinese fixture through every text component | Playwright |
@@ -330,21 +348,25 @@ problem can be asked to turn developer mode on and screenshot the status page.
 
 It costs nothing on the entry path because it is its own chunk (§6).
 
-### T3 — Drop `@xyflow/react` (player map HOW = Phaser dual-plane)
+### T3 — Player world map HOW = Phaser dual-plane; xyflow for node UIs (amended 2026-09-07)
 
 **Decision.** The **player** world map is a **Phaser dual-plane** island under `web/fusion-rpg-web/src/game/world/`
-(same lifetime pattern as the lawn: React HUD + Phaser canvas). Do **not** put `@xyflow/react` on the
-player map or in the **entry** chunk. Do **not** treat SVG `viewBox` pan/zoom as the player map HOW
+(same lifetime pattern as the lawn: React HUD + Phaser canvas). Do **not** put `@xyflow/react` on
+`#/world` as the map HOW. Do **not** treat SVG `viewBox` pan/zoom as the player map HOW
 (that path was the interim sketch; `world-map-runtime` retires it from `#/world`).
 
-`@xyflow/react` remains a **node-editor** library. Our authored player map never needs graph editing
-idioms on the live stage. Paying for xyflow on entry or on `#/world` is still forbidden.
+**Amended 2026-09-07:** `@xyflow/react` is **restored** for genuine node/tree surfaces (ActorSheet
+Paths, passive-tree push, future sector-graph *authoring*). The 2026-08-22 “drop xyflow entirely
+to save bundle” lock is retracted — that was a splitting failure dressed as a library ban. Paying
+for xyflow on the **player map stage** remains forbidden (HOW), not because of entry-KB theater.
 
-**Where xyflow may legitimately return:** a sector-graph *authoring* tool is a genuine node editor, and
-that is a developer surface, where the bundle is unbudgeted. If we ever build one, xyflow belongs in
-the `dev` chunk — never the player map / entry chunk.
+Catalog plate references that still show SVG are historical visuals; the runtime world-map HOW is Phaser.
 
-Catalog plate references that still show SVG are historical visuals; the runtime HOW is Phaser.
+### T5 — Buy before build for FE presentation (2026-09-07)
+
+**Decision.** Locked presentation libs: `lucide-react`, `recharts`, `react-tiny-sparkline`,
+`@xyflow/react` (node UIs), `motion`. Fat chunk ⇒ split. Do not refuse a fit library for GG-38
+anxiety. See §3.3 and CLAUDE.md / AGENTS.md.
 
 ### T4 — Preferences are device-scoped; view state is session-scoped. Nothing is server-side
 
@@ -376,11 +398,11 @@ second.
 
 | # | Phase | Contains | Why here |
 |---|---|---|---|
-| **0** | **Foundations** | Tokens regenerated from `_kit`, fonts self-hosted, Lingui + pseudolocale, the `Magnitude` formatter, code splitting + budget, Radix + the layer stack + bands | Nothing ships visibly and everything depends on it. **Prove the layer stack over the *existing* pages first** — wrap a current page in a panel shell and assert the stage never unmounts. That de-risks GG-1/GG-11 before a single screen is redesigned |
+| **0** | **Foundations** | Tokens regenerated from `_kit`, fonts self-hosted, Lingui + pseudolocale, the `Magnitude` formatter, code splitting (Phaser stage-lazy), Radix + the layer stack + bands | Nothing ships visibly and everything depends on it. **Prove the layer stack over the *existing* pages first** — wrap a current page in a panel shell and assert the stage never unmounts. That de-risks GG-1/GG-11 before a single screen is redesigned |
 | **1** | **Shell + the sweep** | Title, save select, Sanctum, rail, HUD — and move the nine diagnostic routes behind the developer gate | The sweep is nearly free and it is what makes the navigation stop reading as `AUDIT`. Old routes stay reachable inside the dev tree, so nothing is lost during migration |
 | **2** | **Collection** | Creatures, Relics, Fusion, comparison, virtualization | Highest player value, and it exercises the entity ladder hardest — if the ladder is wrong, it is wrong here and cheap to fix before four more layers depend on it |
-| **3** | **Stages** | Lawn re-hosted under the stage model with Phaser lazy-loaded; world map as Phaser dual-plane (xyflow off player map) | Depends on phase 0's stage/layer split being real |
-| **4** | **Reference** | Almanac, Chronicle, the four chart shapes, recharts removed | Lower risk, and the chart primitives are small once the tokens exist |
+| **3** | **Stages** | Lawn re-hosted under the stage model with Phaser lazy-loaded; world map as Phaser dual-plane (xyflow off `#/world` only) | Depends on phase 0's stage/layer split being real |
+| **4** | **Reference + sheet meters** | Almanac, Chronicle, ActorSheet radials — **recharts / lucide / sparks restored** (buy before build) | Lower risk once tokens exist; do not hand-roll chart primitives |
 | **5** | **System + flows** | Settings, keymap, rebinding, loadout, deploy targeting, the offer, the first-run script | The first-run script is last on purpose — it should be authored against the game as it actually plays, not against a design |
 
 Two rules for the whole migration: **the old route keeps working until its replacement lands**, and

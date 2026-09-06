@@ -1211,4 +1211,40 @@ describe("lawnProjectorFold", () => {
     );
     expect(findOccupant(model, "Z1")?.hud?.statuses).toHaveLength(2);
   });
+
+  it("lawn-deploy-event.fired sets pendingLawnDeploy; a second fire replaces it; board.start clears it", () => {
+    const seeded = foldLawnEvents([evt("board.start", {}, "m1")]);
+    expect(seeded.pendingLawnDeploy).toBeUndefined();
+
+    const fired = foldLawnEvents(
+      [evt("lawn-deploy-event.fired", { caseId: "zombie-swarm", eligibleInstanceIds: ["a", "b"] })],
+      seeded
+    );
+    expect(fired.pendingLawnDeploy).toEqual({ caseId: "zombie-swarm", eligibleInstanceIds: ["a", "b"] });
+
+    const refired = foldLawnEvents(
+      [evt("lawn-deploy-event.fired", { caseId: "thin-defense", eligibleInstanceIds: ["c"] })],
+      fired
+    );
+    expect(refired.pendingLawnDeploy).toEqual({ caseId: "thin-defense", eligibleInstanceIds: ["c"] });
+
+    const restarted = foldLawnEvents([evt("board.start", {}, "m2")], refired);
+    expect(restarted.pendingLawnDeploy).toBeUndefined();
+  });
+
+  it("lawn-deploy-event.fired with no caseId is ignored", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("lawn-deploy-event.fired", { eligibleInstanceIds: ["a"] })
+    ]);
+    expect(model.pendingLawnDeploy).toBeUndefined();
+  });
+
+  it("lawn-deploy-event.fired tolerates a missing/non-array eligibleInstanceIds", () => {
+    const model = foldLawnEvents([
+      evt("board.start", {}, "m1"),
+      evt("lawn-deploy-event.fired", { caseId: "zombie-swarm" })
+    ]);
+    expect(model.pendingLawnDeploy).toEqual({ caseId: "zombie-swarm", eligibleInstanceIds: [] });
+  });
 });

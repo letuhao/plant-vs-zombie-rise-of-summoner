@@ -192,4 +192,26 @@ public class ConstructionActionsTests
         Assert.True(moat.ConstructRubbleCost > 0, "Built needs a real, non-zero Rubble cost to be a meaningful path");
         Assert.True(moat.ConstructIronworkCost > 0, "Built needs a real, non-zero Ironwork cost to be a meaningful path");
     }
+
+    /// <summary>
+    /// base-defense `siege-construction` 15.5 (spec §5.19, decision: "not a new rule -- an authored
+    /// value on a shipped field"): re-examined rather than left "blocked on 15.3b needing a real build
+    /// envelope" -- that envelope has existed since session 3's own `ConstructionActions.Actions`, and
+    /// none of its four rows override `Envelope`, so all four inherit `ActionRow.Envelope`'s own
+    /// default (`ActionEnvelope.NoOp`), whose `InterruptRefundMilli` is the plain C# `int` default of
+    /// 0 -- authored correctly by omission, not by an explicit `= 0` that would read as a magic number
+    /// for a field already zero by default. `ActionRunner.Interrupt` (`Battle/Timeline/ActionRunner.cs:323`)
+    /// already reads this exact field generically for every action in the game -- this test proves the
+    /// AUTHORED VALUE on these four specific rows, not a second copy of that generic mechanism.
+    /// </summary>
+    [Theory]
+    [InlineData(ConstructionActions.BuiltActionId)]
+    [InlineData(ConstructionActions.AssembledActionId)]
+    [InlineData(ConstructionActions.SummonedActionId)]
+    [InlineData(ConstructionActions.LabouredActionId)]
+    public void An_involuntary_interrupt_refunds_nothing_for_every_construction_action(string actionId)
+    {
+        var row = ConstructionActions.Actions.Single(a => a.ActionId == actionId);
+        Assert.Equal(0, row.Envelope.InterruptRefundMilli);
+    }
 }

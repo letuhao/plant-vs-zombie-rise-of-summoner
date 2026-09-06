@@ -8,6 +8,9 @@ Source: [actor-hud-ideal.md](actor-hud-ideal.md) (strengthened 2026-08-30) ·
 **Status: implemented 2026-08-31** — all six modules shipped. Specs signed off in [actor-hud-todo.md](../../tasks/actor-hud-todo.md).
 **Placement SSOT (reconciled 2026-09-05):** Unity Band B = UnitFrame **Body** + `worldYOffset` (center-bottom,
 like old shield bar). Visual correction (glyphs, pips, Body root) tracked on todo.
+**Catalog amend (2026-09-07):** glyphs / initials / colors resolve from injected `status-catalog` /
+`resource-catalog` — see [actor-hud-ideal.md](actor-hud-ideal.md) §4.1. Geometry stays in
+`actor-hud.v{n}.json`. Do not reintroduce `StatusInitials(id)` or hashed RGB as player tokens.
 
 Module specs live in [actor-hud/](actor-hud/), one per module id, written in dependency order once this
 map is approved.

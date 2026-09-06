@@ -592,7 +592,7 @@ proves the fixture, not the fix.
 | **G3** | `A_stat_derived_bind_in_Sim_is_accepted` through the real `BindGate` | the cell being flipped with no bind site, i.e. authorizing nothing |
 | **G3** | `The_four_derived_ops_decide_Full_versus_Partial` — exercise `Flat`/`Increased`/`Replace`/`Flag` and assert the cell matches what the fold honours | writing `Full` into a cell that silently drops `Replace` — D6's exact failure, re-created |
 | **G4** | `stat_derived_still_refuses_every_trigger` — keep `AtomKindRegistryTests.cs:133-146,170` green, unchanged | the law in `definitions.md` §14.2 being eroded by a convenience |
-| **A10** | **Run the Erosion differential.** §4c's *"costs a spread build several times what it costs a corner"* is INFERENCE from curve shapes, and §11.1 gives it a bar it can fail. `squad-harness --erosion` produces `D` with a 95% interval; nothing in this repo is entitled to believe §4c until that run exists | evidence rule 4, again — and here the cost of assuming is ~4,680 model calls released against an unmeasured premise |
+| **A10** | **Run the Erosion differential.** §4c's *"costs a spread build several times what it costs a corner"* is INFERENCE from curve shapes, and §11.1 gives it a bar it can fail. `squad-harness --erosion` produces `D` with a 95% interval; nothing in this repo is entitled to believe §4c until that run exists | evidence rule 4, again — and here the cost of assuming is ~5,040 model calls (D51: was ~4,680) released against an unmeasured premise |
 
 ### Mutation
 
@@ -805,8 +805,9 @@ survive measurement, and `tree-plan` needs to know that before it reserves deep-
 **Which is exactly why the old wording was a defect.** It read *"produces a **different** win share for
 a spread defender than for a corner defender"* — no effect size, no direction, no half-width, against a
 trial harness with a **measured 0.9pp noise floor at 3,000 trials** (`Marginal.cs:21-23`). **Any two
-cells differ.** A criterion that cannot fail is not a gate, and this one now releases ~4,680 model
-calls for the generic corpus and ~105,840 for species (`passive-tree-map.md:42-47`). Stated properly:
+cells differ.** A criterion that cannot fail is not a gate, and this one now releases ~5,040 model
+calls (D51: was ~4,680) for the generic corpus and ~105,840 for species (`passive-tree-map.md:42-47`).
+Stated properly:
 
 #### The quantity
 

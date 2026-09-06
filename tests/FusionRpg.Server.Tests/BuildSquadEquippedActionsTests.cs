@@ -419,4 +419,120 @@ public class BuildSquadEquippedActionsTests : IDisposable
         Assert.NotNull(capturedHost);
         Assert.NotNull(capturedHost!.Runner); // A25's own wiring: a runner-path atom means a real Runner attached
     }
+
+    /// <summary>
+    /// `equip-atom-source-not-wired` (action-plan.md §5, found 2026-09-06, fixed 2026-09-07):
+    /// `BattleStatComposer.Equipment` defaulted to `EquipAtomSource.None` forever -- no production
+    /// caller ever called `UseEquipment`, so an equipped item's `stat.derived` atoms never reached a
+    /// live battle's derived stats (only `EquipRuntimeTests.cs`, a synthetic-resolver test, ever
+    /// exercised the compose-side logic). Re-investigated rather than left as "adjacent, another
+    /// program's scope" (this session's own earlier, unverified framing) -- `EquipAtomSource`/
+    /// `BattleStatComposer` live entirely in `Core/Battle/`, this program's own territory, and the
+    /// production resolver shape is already documented on `EquipAtomSource.FromResolver`'s own doc
+    /// comment. Fixed in `Program.cs` (wired once at boot, matching `RungPolicy.Configure`'s own
+    /// established pattern): `BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(instanceId
+    /// => store.ResolveBindings(...).AtomsByBinding` flattened`))`.
+    ///
+    /// <para>This test proves the exact resolver construction `Program.cs` now uses, built against a
+    /// REAL `RpgStore` with a REAL specimen, reaches `BattleStatComposer.Compose` and changes a real
+    /// derived stat by exactly the bound atom's declared magnitude -- not merely that the wiring
+    /// compiles.</para>
+    ///
+    /// <para><b>Why a synthetic atom+container, not a real catalogued item.</b> Every real, shipped
+    /// item today (`data/seed/containers/unique-equip.json`) wraps a `stat.modify` atom, never
+    /// `stat.derived` -- confirmed directly (`atom.fx-passive-atk-flat.t1`'s `KindId` is
+    /// `"stat.modify"`), and `EquipAtomSource.EquippedDerived`'s own filter correctly, by design,
+    /// consumes only `stat.derived`. That is a CONTENT gap (no equippable item wraps the one atom
+    /// kind this seam reads), not a wiring gap -- so this test binds a well-formed `stat.derived` atom
+    /// directly via <c>RpgStore.ProduceAndBind</c>, the SAME primitive
+    /// `ReconcileUniqueEquipmentAtomBindingsUnlocked` calls internally for every real item equip
+    /// (`RpgStore.UniqueActors.cs`: `ProduceAndBind(container, DomainMembers, rollSeed,
+    /// UniqueEquipAtomPinTheta, PowerTuningHub.Tuning, new OwnerScope(OwnerKind.UniqueActor,
+    /// instanceId), slot, ...)`), only skipping the `UniqueEquipmentCatalog.IsKnownItem` item-name
+    /// indirection a synthetic fixture cannot pass. The shape mirrors the real corpus's only concrete
+    /// `stat.derived` atom, `atom.critical-hunter` (`{"channel":"combat.crit.rate.omni","op":"flat",
+    /// "amount":150}`) -- a fixed, unrolled magnitude, exactly like this fixture's.</para>
+    /// </summary>
+    [Fact]
+    public void A_real_equipped_items_atom_reaches_BattleStatComposer_through_the_real_production_resolver()
+    {
+        // A real registered stat.derived channel (DerivedStatRegistry.RegisterDefaults,
+        // DerivedComposeKind.FlatSum -- accepts "flat"), not an arbitrary string: AtomRowValidator's
+        // G6 check refuses any stat.derived channel outside that closed vocabulary.
+        const string channel = FusionRpg.Core.Stats.Derived.DerivedStatChannels.ProgressionBonusAtk;
+        const long amount = 250;
+        var (_, instanceId) = SummonOneSpecimen(_store, "equip-wiring", rngSeed: 8);
+
+        var upsertAtom = _store.UpsertAtom(new AtomRow
+        {
+            AtomId = "atom.equip-wiring-test.t1", KindId = "stat.derived",
+            FamilyId = "atom.equip-wiring-test", Variant = "", Tier = 1, Name = "Equip Wiring Test Derived",
+            ParamsJson = $"{{\"channel\":\"{channel}\",\"op\":\"flat\",\"amount\":{amount}}}",
+        });
+        Assert.True(upsertAtom.IsOk, upsertAtom.ToString());
+        var container = new ContainerRow
+        {
+            ContainerId = "item.equip-wiring-test", Kind = ContainerKind.Item,
+            Atoms = new[] { new ContainerAtomRow(1, "atom.equip-wiring-test.t1") },
+        };
+        Assert.True(_store.UpsertContainer(container).IsOk);
+
+        // Same tuning/theta pin AtomInstanceStoreTests/InstanceProducerStoreTests already establish
+        // for this store -- reused rather than re-derived so this fixture rolls through the real
+        // production PowerTuning shape, not a private one.
+        var tuning = FusionRpg.Core.Power.PowerTuning.Build(
+            1, 1, 80_000, 0, 20, 680, 1000, 25000, 250, 1000, 5000, 5000, 25000);
+        const int pinTheta = 20;
+        static IReadOnlyList<string> NoDomains(string domain) => Array.Empty<string>();
+
+        var owner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+        var produce = _store.ProduceAndBind(
+            container, NoDomains, rollSeed: 1, pinTheta, tuning, owner,
+            slot: "weapon", priority: 0, source: "test", out var producedInstanceId, out var producedBindingId);
+        Assert.True(produce.IsOk, produce.ToString());
+        Assert.NotNull(producedInstanceId);
+        Assert.NotNull(producedBindingId);
+
+        // DIAGNOSTIC: confirm ResolveBindings itself sees the bound atom before blaming the composer.
+        var diag = _store.ResolveBindings(owner, new BindContext(RuntimeId.Battle));
+        Assert.True(diag.Bindings.Count > 0, $"Bindings=0, Refused=[{string.Join(",", diag.Refused.Select(r => r.ToString()))}]");
+        Assert.NotNull(diag.AtomsByBinding);
+        var diagAtoms = diag.AtomsByBinding!.Values.SelectMany(a => a).ToList();
+        var diagAtom = diagAtoms.Single(a => a.AtomId == "atom.equip-wiring-test.t1");
+        Assert.Equal("stat.derived", diagAtom.KindId);
+
+        // The exact resolver shape Program.cs wires at boot -- EquipAtomSource.FromResolver's own
+        // documented production contract, built here against the same real _store.
+        BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(specimenId =>
+        {
+            var resolution = _store.ResolveBindings(
+                new OwnerScope(OwnerKind.UniqueActor, specimenId), new BindContext(RuntimeId.Battle));
+            if (resolution.AtomsByBinding is null) return Array.Empty<AtomRow>();
+            var flattened = new List<AtomRow>();
+            foreach (var atoms in resolution.AtomsByBinding.Values) flattened.AddRange(atoms);
+            return flattened;
+        }));
+        try
+        {
+            var geared = BattleStatComposer.Compose(new BattleActorSetup
+            {
+                Key = "squad:0", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
+                SpecimenId = instanceId, MaxHp = 100, Atk = 50, Defense = 20,
+            });
+            var bare = BattleStatComposer.Compose(new BattleActorSetup
+            {
+                Key = "squad:0", Side = "squad", SpeciesId = "spec", TypeId = 1, Level = 5,
+                SpecimenId = null, MaxHp = 100, Atk = 50, Defense = 20,
+            });
+
+            // Exact arithmetic, not just "changed" -- proves the declared magnitude flows through
+            // unmodified, not merely that some unrelated value moved.
+            Assert.Equal(bare.Get(channel) + amount, geared.Get(channel));
+        }
+        finally
+        {
+            // A GLOBAL static -- must not leak into any other test in this assembly.
+            BattleStatComposer.ResetEquipment();
+        }
+    }
 }

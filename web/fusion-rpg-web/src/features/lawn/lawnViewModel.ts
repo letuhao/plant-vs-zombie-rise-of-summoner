@@ -153,6 +153,14 @@ export type LawnViewModel = {
     displayName: string;
     auraDisplayName: string | null;
   };
+  /**
+   * demon-lawn-deploy T2.4: the latest `lawn-deploy-event.fired` the fold has observed this match —
+   * server truth only (fires once per case per run, per the injector's own evaluator). Whether the
+   * player has already responded to THIS specific case is client-local UI state, deliberately not
+   * carried here (LawnPage.tsx tracks a respondedCaseId alongside this field) — the fold stays a pure
+   * reflection of server events, never owns "did the user dismiss this yet."
+   */
+  pendingLawnDeploy?: { caseId: string; eligibleInstanceIds: string[] } | null;
 };
 
 export const DEFAULT_ROWS = 5;

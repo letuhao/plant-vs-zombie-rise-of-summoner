@@ -4,10 +4,10 @@
   "version": 1,
   "_meta": {
     "owner": "docs/design/spec-derived-stat-sheet.md",
-    "note": "Player-facing names and readings for derived families, statuses, and resource ids. Not tunables — a balance pass does not retitle Crit chance. Catalog.json stays the engineering mirror (compose/unit/consumer). This file is the presentation sibling the FE already named as missing (web/fusion-rpg-web/src/contract/adapt.ts channelLabel). Ids stay English keys; Lingui wraps displayName/reading later. Never generate a player label from the dotted id.",
-    "notTunables": "Lives under data/seed/, not data/tuning/. data/tuning/derived-stats.v2.json holds categoryResistCap and turnDefaultSpeed only.",
+    "note": "MIGRATION MIRROR (amended 2026-09-07). Runtime SSOT for displayName/reading/gauge is data/tuning/derived-stat-catalog.v{n}.json (+ status/resource/aptitude/element catalogs). This seed file remains until hosts inject those catalogs and SeedCatalogMatchesCode asserts against them. Never generate a player label from the dotted id (GG-62).",
+    "notTunables": "Copy still must NOT live in data/tuning/derived-stats.v2.json (that file holds categoryResistCap and turnDefaultSpeed only). Copy lives in *-catalog.v{n}.json — a runtime catalog class, not a balance-number file (tunables-ssot §1).",
     "expand": "Combat families expand over omni + ElementRoster the same way catalog.json does. The player name is family + element noun: Fire Power, Omni Defense. omni renders as Omni, never as a seventh type chip.",
-    "channelLabel": "The day this ships, channelLabel reads displayName here and stops calling idWords on player surfaces."
+    "channelLabel": "The day catalogs inject, channelLabel reads displayName from the surface catalog API and stops calling idWords on player surfaces."
   },
   "families": [
     {

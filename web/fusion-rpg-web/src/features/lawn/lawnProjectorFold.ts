@@ -72,6 +72,10 @@ function num(v: unknown): number | undefined {
   return undefined;
 }
 
+function strArray(v: unknown): string[] {
+  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+}
+
 function bool(v: unknown): boolean | undefined {
   if (typeof v === "boolean") return v;
   return undefined;
@@ -945,6 +949,14 @@ function applyOne(m: LawnViewModel, e: EventEnvelope): LawnViewModel {
           typeId: num(p.type) ?? num(p.typeId),
           typeName: str(p.typeName)
         }
+      });
+    }
+    case "lawn-deploy-event.fired": {
+      const caseId = str(p.caseId);
+      if (!caseId) return m;
+      return bump({
+        ...m,
+        pendingLawnDeploy: { caseId, eligibleInstanceIds: strArray(p.eligibleInstanceIds) }
       });
     }
     case "match.restart":

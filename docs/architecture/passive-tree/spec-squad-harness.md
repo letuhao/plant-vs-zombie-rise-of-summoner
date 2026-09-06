@@ -378,7 +378,8 @@ Both lists go in the harness's `coverage` block, so a null result is never mista
 
 `mechanism-wiring`'s **A10** is the acceptance test for that whole module, and the map gates
 `tree-language --write` on it (`passive-tree-map.md:42-47`) because the step after the plan costs
-~4,680 model calls for the generic corpus and ~105,840 for species. **The measurement is this
+~5,040 model calls (D51: was ~4,680) for the generic corpus and ~105,840 for species. **The measurement
+is this
 module's**, so its shape belongs here. `mechanism-wiring` §11.1 owns the bars and the verdict table; this
 section owns producing the numbers and refusing to round an unresolved run into a pass.
 

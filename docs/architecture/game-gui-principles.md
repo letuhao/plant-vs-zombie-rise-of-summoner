@@ -519,16 +519,21 @@ empty.
 
 ### GG-38 — Weight is a player-facing cost
 
-**Rule.** A layer loads only what it needs. Heavy runtimes (the game canvas, charting, graph
-rendering) load when their layer opens, never on boot.
+**Rule (amended 2026-09-07).** Do not force **Phaser-class game canvases** onto every boot — lawn
+and world stages load their canvas when the player enters that stage. Presentation libraries
+(charts, icons, node graphs, motion) are **allowed**; buy them when they fit
+([design/tech-stack.md](../design/tech-stack.md)). A fat bundle is fixed by **code-splitting**
+(`React.lazy`, dynamic `import()`, route chunks), not by deleting the library or hand-rolling
+four SVG shapes.
 
-**Why.** Today the production build is a **single 2.77 MB chunk (705 KB gzip) with zero code
-splitting** — the Phaser runtime, the charting library and the graph library are all downloaded and
-parsed before the first screen paints. In an overlay the player toggles mid-match, boot cost is felt
-directly.
+**Why.** The 2026-08-22 production build was a **single chunk with zero splitting** — Phaser and
+everything else paid on first paint. That was a **splitting competence failure**. Converting it into
+“drop recharts / ban Lucide / no xyflow” blocked FE work; that interpretation is retracted.
+Phaser stays stage-lazy because it is huge and only needed on game stages.
 
-**Testable as.** A build-time budget: entry chunk ceiling, plus a check that heavy dependencies do
-not appear in the entry chunk.
+**Testable as.** Assert `phaser` is not forced onto the sanctum/shell boot path (stage-lazy). Do
+**not** treat “recharts / lucide / `@xyflow` / `motion` appear in a chunk” as a GG-38 failure.
+Optimize entry weight after measured player pain — never as a pre-merge veto on a fit library.
 
 ### GG-39 — The interface is complete offline of the game
 
@@ -823,22 +828,28 @@ triggers the body's scrollbar, not the page's.
 ### GG-62 — Player words are authored, never generated from ids
 
 **Rule.** Every player-facing name and one-line reading for a derived family, status, resource, or
-aptitude is an **authored lexicon row**. Title-casing a dotted id (`combat.crit.rate.fire` →
+aptitude is an **authored catalog row**. Title-casing a dotted id (`combat.crit.rate.fire` →
 `Combat crit rate fire`) is a developer fallback and is forbidden on a player surface.
 
 **Why.** GG-23 already bans engine vocabulary. This names the remaining failure: the vocabulary is
 banned, so the FE invented English from the id instead. That is still a schema, just with spaces.
-The gap is already recorded at `web/fusion-rpg-web/src/contract/adapt.ts` (`channelLabel`) and at
-`data/seed/derived-stats/catalog.json` (compose/unit/consumer, **no names**). The presentation
-sibling is [`data/seed/derived-stats/lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json)
-— not `data/tuning/`. A balance pass does not retitle Crit chance.
+The gap is already recorded at `web/fusion-rpg-web/src/contract/adapt.ts` (`channelLabel`).
+
+**Home (amended 2026-09-07):** runtime catalogs under `data/tuning/` —
+`derived-stat-catalog.v{n}.json`, `status-catalog.v{n}.json`, `resource-catalog.v{n}.json`,
+`aptitude-catalog.v{n}.json`, `element-catalog.v{n}.json` — injected by hosts (tunables-ssot T7.2 /
+T8). The earlier seed file
+[`data/seed/derived-stats/lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json) is a
+migration source / check mirror until tools read tuning. **Not**
+`data/tuning/derived-stats.v{n}.json` — that file holds caps and defaults (numbers only).
 
 **Forbids.** `idWords` / `channelLabel` on a player band. A sheet that prints `combat.power.fire`.
-Putting display copy in `data/tuning/derived-stats.v{n}.json` (that file holds caps and defaults).
+Putting display copy in a balance-number file. Hardcoded FE roster unions (`ResourceId` five-string
+literal, status chip maps as the roster).
 
-**Testable as.** A vocabulary guard: every rendered derived-family label on a player surface matches
-a lexicon `displayName`; unknown ids fall to the developer tree or a designed placeholder, never
-`idWords`.
+**Testable as.** A vocabulary guard: every rendered derived-family / status / resource label on a
+player surface matches a catalog `displayName`; unknown ids fall to the developer tree or a designed
+placeholder, never `idWords`.
 
 ### GG-63 — Inspect in-pane; do not nest a dialog for reading
 
@@ -1011,9 +1022,9 @@ done.
 | Contrast test | GG-30 | Token pair matrix vs WCAG thresholds |
 | Viewport sweep | GG-36 | Every layer at 1280×720 / 1440×900 / 1920×1080; no horizontal scroll |
 | Shell-height fixtures | GG-61 | A dense-entity fixture (max derived channels, max affixes) per shell; assert body scrolls, shell height never exceeds its band bound |
-| Bundle budget | GG-38 | Entry chunk ceiling; heavy deps must not be in the entry chunk |
+| Bundle / stage weight | GG-38 | Phaser stage-lazy; fat chunk ⇒ split, not ban presentation libs |
 | Unit-family guard | GG-46 | Magnitude renderer refuses an unlabelled unit; golden per family |
-| Lexicon guard | GG-62 | Every player-band derived/status label matches `lexicon.v1.json`; `idWords` is developer-only |
+| Lexicon guard | GG-62 | Every player-band derived/status/resource label matches the injected runtime catalog `displayName`; `idWords` is developer-only |
 | Inspect-band | GG-63 | ActorSheet inspect does not push band 3; Confirm may |
 | Diff-state matrix | GG-47 | Every picker surface renders a comparison state in its tests |
 | Volume fixtures | GG-50 | Seeded 10 / 100 / 1000 per collection; assert rendered node count |
@@ -1092,7 +1103,7 @@ channel-id tables, a nested aptitude dialog, and a shield text wall. Completenes
 
 | # | Question | Decision | Because |
 |---|---|---|---|
-| D11 | Where do derived/status display names live? | **`data/seed/derived-stats/lexicon.v1.json`**, sibling to `catalog.json`. Not `data/tuning/` | Tunables are numbers a balance pass changes (T1). Crit chance's English is copy. `channelLabel` already named this gap |
+| D11 | Where do derived/status/resource/aptitude display names live? | **`data/tuning/<domain>-catalog.v{n}.json`** (runtime catalogs). Hosts inject; FE/HUD iterate. Seed `lexicon.v1.json` is a migration mirror until tools cut over. **Not** mixed into `derived-stats.v{n}.json` number files | Owner lock 2026-09-07: the sheet must extend without a FE change; copy has the same rebuild tax as a magic number. T7 still separates copy bumps from combat goldens. GG-62 forbids `idWords` either way |
 | D12 | Aptitude extra info — dialog or split? | **InspectSplit** (tiles left, reading right). Leftover + Confirm in a sticky footer | GG-10/GG-63. Confirm is the dialog-shaped *decision*; the paragraph is not |
 | D13 | Combat tab | **Rename to Derived.** `StatRow` (icon, name, number, spark, `?`). Categories collapse with one group open | The tab *is* the derived-stat sheet. Six render states stay; a third classification is still refused |
 | D14 | May a spark fill to 100%? | **Only for pools, bounded ratios, and registry caps.** Uncapped GameUnits sparks are relative | PS-8 / GG-64. `status.resist.dot` at 0.95 is a real cap and must show `CAP` |

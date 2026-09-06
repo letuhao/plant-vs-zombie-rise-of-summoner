@@ -157,33 +157,44 @@ public class UniqueCorpusTests
     /// <summary>
     /// ⭐ The corpus was AUTHORED AND NEVER WIRED. 144 rows shipped 2026-08-22; nothing in Core read
     /// one until this module. `naming.v1.json` allocates 8 per partition across 18 partitions.
+    /// D4.29 (2026-09-06) appended 10 real anchors to the three ordinal-70 partitions specifically
+    /// (the only band with real, verified-free role/axis slots) -- so those three partitions now
+    /// carry more than 8 each, and every one of the other 15 still carries exactly 8.
     /// </summary>
     [Fact]
-    public void The_shipped_corpus_is_one_hundred_and_forty_four_rows_across_eighteen_partitions()
+    public void The_shipped_corpus_is_one_hundred_and_fifty_four_rows_across_eighteen_partitions()
     {
-        Assert.Equal(144, Corpus.Count);
+        Assert.Equal(154, Corpus.Count);
         Assert.Equal(18, Corpus.Select(s => s.Partition).Distinct().Count());
-        Assert.All(Corpus.GroupBy(s => s.Partition), g => Assert.Equal(8, g.Count()));
+
+        var expectedGrown = new Dictionary<string, int>
+        {
+            ["uniques/charnel-bloom/70"] = 12, ["uniques/gilded-porcelain/70"] = 11, ["uniques/earthen-bastion/70"] = 11,
+        };
+        foreach (var g in Corpus.GroupBy(s => s.Partition))
+            Assert.Equal(expectedGrown.TryGetValue(g.Key, out var n) ? n : 8, g.Count());
     }
 
     /// <summary>
     /// D4.23 (spec-unique-pipeline.md §5 point 5, decision 13) — the todo's own literal count test:
-    /// 144 anchors, 95 disabled, 49 live at rung ≥ 80, no anchor's OWN rung/rarity changed. Split by
-    /// rarity name, matching the spec's own "from disk" tally exactly (grafted 20 · cultivated 20 ·
-    /// fused 20 · chimeric 20 · heirloom 15 = 95 below; firstseed 9 · sunwoven 23 · almanac 17 = 49 at
-    /// or above) rather than by the seed files' own rung-BAND grouping, which spans two rarities per
-    /// band (`-70` files mix `heirloom`, disabled, with `firstseed`, not) — the exact split this test
-    /// would silently get wrong if it filtered by filename/partition instead of by rarity ordinal.
+    /// originally 144 anchors, 95 disabled, 49 live at rung ≥ 80, no anchor's OWN rung/rarity changed.
+    /// Split by rarity name, matching the spec's own "from disk" tally exactly (grafted 20 ·
+    /// cultivated 20 · fused 20 · chimeric 20 · heirloom 15 = 95 below; firstseed 9 · sunwoven 23 ·
+    /// almanac 17 = 49 at or above) rather than by the seed files' own rung-BAND grouping, which spans
+    /// two rarities per band (`-70` files mix `heirloom`, disabled, with `firstseed`, not) — the exact
+    /// split this test would silently get wrong if it filtered by filename/partition instead of by
+    /// rarity ordinal. D4.29 (2026-09-06) appended 10 real, all-`enabled`, all-`firstseed` anchors --
+    /// `disabled` and every OTHER rarity tally is unchanged; only `live` and `firstseed` grow by 10.
     /// </summary>
     [Fact]
-    public void The_144_anchors_split_95_disabled_49_live_by_rung_floor_no_rarity_moved()
+    public void The_154_anchors_split_95_disabled_59_live_by_rung_floor_no_rarity_moved()
     {
-        Assert.Equal(144, Corpus.Count);
+        Assert.Equal(154, Corpus.Count);
 
         var disabled = Corpus.Where(s => !s.Enabled).ToList();
         var live = Corpus.Where(s => s.Enabled).ToList();
         Assert.Equal(95, disabled.Count);
-        Assert.Equal(49, live.Count);
+        Assert.Equal(59, live.Count); // 49 + 10 D4.29 anchors (2026-09-06)
 
         // Every disabled anchor is below the new floor; every live one meets it -- "enabled" tracks
         // the floor exactly, it is not an independent flag that happens to agree today.
@@ -198,7 +209,7 @@ public class UniqueCorpusTests
         Assert.Equal(20, byRarity["fused"]);
         Assert.Equal(20, byRarity["chimeric"]);
         Assert.Equal(15, byRarity["heirloom"]);
-        Assert.Equal(9, byRarity["firstseed"]);
+        Assert.Equal(19, byRarity["firstseed"]); // 9 + 10 D4.29 anchors (2026-09-06)
         Assert.Equal(23, byRarity["sunwoven"]);
         Assert.Equal(17, byRarity["almanac"]);
 
@@ -406,9 +417,9 @@ public class UniqueCorpusTests
         // which is §8.1's. Pinned so a re-authoring pass can see it move. Re-measured 2026-09-06
         // after D4.29 appended 10 real anchors (17 new identity-atom readings across them -- not a
         // flat 2 each, since a unique carries 1-3 fixed atoms).
-        Assert.Equal(90, report.InBand);
+        Assert.Equal(100, report.InBand); // was 90 pre-D4.29
         Assert.Equal(47, report.StrictlyBetter);
-        Assert.Equal(150, report.Trophy);
+        Assert.Equal(157, report.Trophy); // was 150 pre-D4.29
     }
 
     /// <summary>The measurement reproduces exactly — same seed, same rolls, same numbers.</summary>

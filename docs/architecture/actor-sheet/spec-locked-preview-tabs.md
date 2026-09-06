@@ -1,5 +1,8 @@
 # Spec: `locked-preview-tabs`
 
+> **TRAIL — do not implement.** Catalog-era sheet uses `kit-tab` + `paths-tab` (live Passives wrap).
+> Kept for history only. See [actor-sheet-map.md](../actor-sheet-map.md) Trail.
+
 **Module id:** `locked-preview-tabs` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
 **Status:** Draft — pending owner review.
 

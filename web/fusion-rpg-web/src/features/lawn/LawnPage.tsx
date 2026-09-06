@@ -3,14 +3,17 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   getLastHitEvent,
   getLawnMembershipRing,
+  newCorrelationId,
   subscribeLastHit,
   subscribeLog,
   useCommanders,
+  useDemonRoster,
   useDeployUniqueActor,
   useLawnDebugPost,
   usePlayers,
   useSetDefaultCommander,
   useSpawnExtraIntent,
+  useSpeciesIndex,
   useUniqueActor
 } from "@/lib/bus";
 import type { LawnSelectPayload } from "@/game/EventBus";
@@ -341,6 +344,50 @@ export function LawnPage() {
     clearMsgs();
     clearDeploy();
     setInteraction(idleInteraction());
+  };
+
+  // demon-lawn-deploy T2.4 — a server-fired "reinforcements available" trigger (lawn-deploy-events'
+  // own evaluator), distinct from T22's own player-INITIATED deploy above: no cell-targeting, the
+  // server picks the spawn side/typeId from the specimen's own species (lawn-deploy-core). Stage
+  // chrome, same "no scrim, inline banner" convention as the T22 banner — this is a live-match
+  // reaction, blocking the board with a Dialog would hide the exact thing the player needs to see.
+  const [respondedLawnDeployCaseId, setRespondedLawnDeployCaseId] = useState<string | null>(null);
+  const pendingLawnDeploy = model.pendingLawnDeploy;
+  useEffect(() => {
+    // A new match can legitimately fire the same caseId again — the "already responded" memory is
+    // per-match, matching how pendingLawnDeploy itself resets on the fold's own board.start.
+    setRespondedLawnDeployCaseId(null);
+  }, [model.matchKey]);
+  const showLawnDeployPrompt =
+    !!pendingLawnDeploy && pendingLawnDeploy.caseId !== respondedLawnDeployCaseId;
+  const lawnDeployRosterQ = useDemonRoster(playerId);
+  const speciesIndex = useSpeciesIndex();
+  const lawnDeployMutation = useDeployUniqueActor();
+  const lawnDeployEligible = useMemo(() => {
+    if (!pendingLawnDeploy) return [];
+    const bySpecimenId = new Map(
+      (lawnDeployRosterQ.data?.items ?? []).map((it) => [it.actor.instanceId, it] as const)
+    );
+    return pendingLawnDeploy.eligibleInstanceIds
+      .map((id) => bySpecimenId.get(id))
+      .filter((it): it is NonNullable<typeof it> => !!it);
+  }, [pendingLawnDeploy, lawnDeployRosterQ.data]);
+
+  const dismissLawnDeployPrompt = () => {
+    if (pendingLawnDeploy) setRespondedLawnDeployCaseId(pendingLawnDeploy.caseId);
+  };
+
+  const acceptLawnDeployPrompt = (instanceId: string) => {
+    if (!pendingLawnDeploy) return;
+    const caseId = pendingLawnDeploy.caseId;
+    void runAction("Deployed reinforcement", async () => {
+      await lawnDeployMutation.mutateAsync({
+        instanceId,
+        correlationId: newCorrelationId(),
+        matchKey: model.matchKey ?? undefined
+      });
+      setRespondedLawnDeployCaseId(caseId);
+    });
   };
 
   const enqueueIntentSpawn = () => {
@@ -1094,6 +1141,48 @@ export function LawnPage() {
               Deploy here
             </Button>
           </span>
+        </Banner>
+      ) : null}
+      {showLawnDeployPrompt && pendingLawnDeploy ? (
+        <Banner
+          tone="info"
+          className="mb-3 flex flex-wrap items-center justify-between gap-2"
+          data-testid="lawn-deploy-event-banner"
+        >
+          <span className="flex flex-wrap items-center gap-2">
+            <span>Reinforcements available —</span>
+            {lawnDeployEligible.length === 0 ? (
+              <span>no eligible creature found</span>
+            ) : (
+              lawnDeployEligible.map((it) => {
+                const species = speciesIndex.get(it.profile.speciesId);
+                return (
+                  <Button
+                    key={it.actor.instanceId}
+                    size="sm"
+                    variant="ghost"
+                    disabled={lawnDeployMutation.isPending}
+                    title={lawnDeployMutation.isPending ? "Deploying…" : undefined}
+                    onClick={() => acceptLawnDeployPrompt(it.actor.instanceId)}
+                    data-testid="lawn-deploy-event-accept"
+                  >
+                    {species ? (
+                      <TypeIcon side={species.side} typeId={species.gameTypeId} size={20} />
+                    ) : null}
+                    {species?.name ?? it.profile.speciesId}
+                  </Button>
+                );
+              })
+            )}
+          </span>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={dismissLawnDeployPrompt}
+            data-testid="lawn-deploy-event-dismiss"
+          >
+            Dismiss
+          </Button>
         </Banner>
       ) : null}
 

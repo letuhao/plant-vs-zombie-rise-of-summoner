@@ -826,5 +826,35 @@
   },
   "tpl.affix.evasion.plant": {
     "template": "{value} chance to sway aside from {element} attacks"
+  },
+  "flavor.unique.charnel-bloom-70-009": {
+    "template": "A pulsating, violet petal that rhythmically constricts the air around it. Those caught in its scent find their limbs turning to heavy, unyielding wood."
+  },
+  "flavor.unique.charnel-bloom-70-010": {
+    "template": "A pulsing, fleshy orb that beats in rhythm with the heartbeat of those it ensnares. It whispers of eternal stillness to the frantic mind."
+  },
+  "flavor.unique.charnel-bloom-70-011": {
+    "template": "Every petal is a crystallized coin, blooming only when fed upon the wealth of the fallen. Its thorns drip with a liquid gold that intoxicates the greedy."
+  },
+  "flavor.unique.charnel-bloom-70-012": {
+    "template": "A heavy, ornate buckler etched with veins of pure gold that pulse in rhythm with the market's ebb and flow. It seems to drink the very essence of prosperity from the air around it."
+  },
+  "flavor.unique.earthen-bastion-70-009": {
+    "template": "A dense, unyielding stone carved from the roots of the world. It pulses with a rhythmic, tectonic heartbeat that stabilizes the wearer's very essence."
+  },
+  "flavor.unique.earthen-bastion-70-010": {
+    "template": "A living staff of woven briars that pulses with the rhythm of the forest. It seeks to entangle those who disturb the sacred grove."
+  },
+  "flavor.unique.earthen-bastion-70-011": {
+    "template": "The glass vibrates with the rhythmic pulse of the world. It reveals the hidden paths of the ancient spirits."
+  },
+  "flavor.unique.gilded-porcelain-70-010": {
+    "template": "A delicate lattice of enchanted porcelain that vibrates with the heat of a dying star. It seeks to crack the very air to release its stored fury."
+  },
+  "flavor.unique.gilded-porcelain-70-011": {
+    "template": "Woven from living vines and reinforced with ancient sap, this ward pulses with a rhythmic, life-giving heartbeat. It seeks to mend the wearer even as the world attempts to tear them asunder."
+  },
+  "flavor.unique.gilded-porcelain-70-012": {
+    "template": "Jagged vines wrap around the core to strike at anything that dares approach. The sap pulses with a violent hunger for life."
   }
 }
