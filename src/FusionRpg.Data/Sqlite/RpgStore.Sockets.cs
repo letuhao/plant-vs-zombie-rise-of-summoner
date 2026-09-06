@@ -103,6 +103,22 @@ public sealed partial class RpgStore
     /// </summary>
     public void SetSockets(string instanceId, IReadOnlyList<SocketSlot> sockets)
     {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            SetSocketsUnlocked(db, instanceId, sockets);
+            tx.Commit();
+        }
+    }
+
+    /// <summary>
+    /// The same wholesale replace on a connection the CALLER owns, so a socket write and the module-14
+    /// material debit that paid for it commit together. See <see cref="AppendMutationOpUnlocked"/> for
+    /// why every command comes from <c>db.CreateCommand()</c>.
+    /// </summary>
+    internal void SetSocketsUnlocked(SqliteConnection db, string instanceId, IReadOnlyList<SocketSlot> sockets)
+    {
         if (sockets is null) throw new ArgumentNullException(nameof(sockets));
 
         for (var i = 0; i < sockets.Count; i++)
@@ -111,38 +127,28 @@ public sealed partial class RpgStore
                     $"socket rows must be dense and 0-based: index {sockets[i].Index} sits at position {i}. " +
                     "A gap would make socketsNow disagree with the rows that exist.", nameof(sockets));
 
-        lock (_gate)
+        using (var del = db.CreateCommand())
         {
-            using var db = OpenUnlocked();
-            using var tx = db.BeginTransaction();
+            del.CommandText = "DELETE FROM item_socket WHERE instance_id = $id;";
+            del.Parameters.AddWithValue("$id", instanceId);
+            del.ExecuteNonQuery();
+        }
 
-            using (var del = db.CreateCommand())
-            {
-                del.Transaction = tx;
-                del.CommandText = "DELETE FROM item_socket WHERE instance_id = $id;";
-                del.Parameters.AddWithValue("$id", instanceId);
-                del.ExecuteNonQuery();
-            }
-
-            foreach (var slot in sockets)
-            {
-                using var ins = db.CreateCommand();
-                ins.Transaction = tx;
-                ins.CommandText = """
-                    INSERT INTO item_socket
-                      (instance_id, socket_index, affinity, crafted, insert_container_id, insert_instance_id)
-                    VALUES ($id, $ix, $aff, $crafted, $gem, $gemInstance);
-                    """;
-                ins.Parameters.AddWithValue("$id", instanceId);
-                ins.Parameters.AddWithValue("$ix", slot.Index);
-                ins.Parameters.AddWithValue("$aff", slot.Affinity ?? "");
-                ins.Parameters.AddWithValue("$crafted", slot.Crafted ? 1 : 0);
-                ins.Parameters.AddWithValue("$gem", (object?)slot.InsertContainerId ?? DBNull.Value);
-                ins.Parameters.AddWithValue("$gemInstance", (object?)slot.InsertInstanceId ?? DBNull.Value);
-                ins.ExecuteNonQuery();
-            }
-
-            tx.Commit();
+        foreach (var slot in sockets)
+        {
+            using var ins = db.CreateCommand();
+            ins.CommandText = """
+                INSERT INTO item_socket
+                  (instance_id, socket_index, affinity, crafted, insert_container_id, insert_instance_id)
+                VALUES ($id, $ix, $aff, $crafted, $gem, $gemInstance);
+                """;
+            ins.Parameters.AddWithValue("$id", instanceId);
+            ins.Parameters.AddWithValue("$ix", slot.Index);
+            ins.Parameters.AddWithValue("$aff", slot.Affinity ?? "");
+            ins.Parameters.AddWithValue("$crafted", slot.Crafted ? 1 : 0);
+            ins.Parameters.AddWithValue("$gem", (object?)slot.InsertContainerId ?? DBNull.Value);
+            ins.Parameters.AddWithValue("$gemInstance", (object?)slot.InsertInstanceId ?? DBNull.Value);
+            ins.ExecuteNonQuery();
         }
     }
 

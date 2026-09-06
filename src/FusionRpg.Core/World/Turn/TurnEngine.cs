@@ -19,6 +19,17 @@ public static class TurnEngine
 {
     public const int EngineVersion = 1;
     /// <summary>
+    /// Bumped to 9 on 2026-09-06 (base-defense `siege-construction` 15.4): the two raw faucets land in
+    /// `Production` — `ironwork` from a CLEARED `shard-vein` slot, `rubble` from a CLEARED
+    /// `material-seam` slot (§2). A real behaviour change, not a field addition: the same command log,
+    /// for any world with a cleared `shard-vein`/`material-seam` slot, now accrues a stock that stayed
+    /// zero under version 8. Re-blessed against `WorldWaveOneAcceptanceTests`' own scripted turn-9
+    /// clear of `ash-waste`'s `material-seam` (entry #17 there). The same investigation also found and
+    /// fixed a real, unrelated persistence defect — `WorldSector.RubbleStock`/`IronworkStock` had no
+    /// database columns at all since 15.1, silently write-only — recorded in `RpgStore.World.cs`'s own
+    /// migration list and the same entry #17, not here (it changed no hashed behaviour by itself: a
+    /// field already read 0 in memory for every world that never round-tripped through a save).
+    ///
     /// Bumped to 8 on 2026-09-06 (base-defense `siege-engagement`, module 20, spec-siege-engagement.md):
     /// a CONTINUING siege — an attacker already standing in a sector it does not own, with no fresh
     /// `assault` order this turn — used to fall through `ContactResolver.SectorContacts` into a generic
@@ -71,7 +82,7 @@ public static class TurnEngine
     /// — this bump exists only for the case a real order changes the outcome, and covers `bind-warden`
     /// (W28) and `dowse` (W30) landing after it without a second bump, per the same decision.
     /// </summary>
-    public const int RulesetVersion = 8;
+    public const int RulesetVersion = 9;
 
     public static class Phases
     {
@@ -243,7 +254,12 @@ public static class TurnEngine
     static WorldState Production(WorldState world, TurnReport report)
     {
         report.BeginPhase(Phases.Production);
-        return LoamPhases.Production(world, report, Phases.Production);
+        var next = LoamPhases.Production(world, report, Phases.Production);
+        // base-defense `siege-construction` 15.4: the SAME "a sector earns before it pays" moment,
+        // for the two raw ironwork/rubble faucets (`shard-vein`/`material-seam`, cleared) — one phase
+        // slot, not a second one, since both are conceptually the identical "this sector earns
+        // resources this turn" step.
+        return World.Siege.SiegeConstruction.Production(next, report, Phases.Production);
     }
 
     static WorldState Growth(WorldState world, TurnReport report, int turn, ulong seed)

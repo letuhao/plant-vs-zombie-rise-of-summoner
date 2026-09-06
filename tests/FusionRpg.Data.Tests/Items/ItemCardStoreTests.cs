@@ -262,9 +262,15 @@ public class ItemCardStoreTests : IDisposable
         const string specimen = "spec-1";
         if (withSet)
             foreach (var m in set.Members.GroupBy(m => m.Role).Select(g => g.First()).Take(3))
+                // ⛔ Was `"item"` until 2026-09-06 (defect R2). `rpg_item_assignment` never carries
+                // that kind — it is `rpg_item_loadout_entry`'s spelling, a different table — so this
+                // fixture was seeding a row production cannot produce, and the card reader's own
+                // matching `"item"` literal made the pair agree while both were wrong.
                 _store.SaveAssignment(
                     specimen, m.Role,
-                    string.Equals(m.ContainerId, container.ContainerId, StringComparison.Ordinal) ? "item" : "stock",
+                    string.Equals(m.ContainerId, container.ContainerId, StringComparison.Ordinal)
+                        ? EquipRefKinds.Rolled
+                        : EquipRefKinds.Stock,
                     string.Equals(m.ContainerId, container.ContainerId, StringComparison.Ordinal) ? instanceId : m.ContainerId);
 
         return new Fixture(instanceId, container.ContainerId, specimen, member.Role, set, atoms);
@@ -350,7 +356,7 @@ public class ItemCardStoreTests : IDisposable
             host, fill, _store.GetComboRecipes(), Sockets(), Surfaces(), out _);
 
         var worn = _store.ListAssignments(f.SpecimenId)
-            .Select(a => new EquippedPiece(a.Role, a.RefKind == "item"
+            .Select(a => new EquippedPiece(a.Role, a.RefKind == EquipRefKinds.Rolled
                 ? _store.GetInstance(a.RefId)!.ContainerId
                 : a.RefId))
             .ToList();
@@ -486,6 +492,50 @@ public class ItemCardStoreTests : IDisposable
         // The WHOLE ladder renders, active and inactive alike.
         Assert.Equal(f.Set.Tiers.Count, input.Set.Value.Ladder.Count);
         Assert.Contains(input.Set.Value.Ladder, t => t.Active);
+    }
+
+    /// <summary>
+    /// ⛔ <b>Defect R2, fixed 2026-09-06.</b> This read tested <c>a.RefKind == "item"</c>, which is
+    /// <c>rpg_item_loadout_entry</c>'s spelling. <c>rpg_item_assignment</c> only ever carries
+    /// <c>rolled</c> or <c>stock</c>, so the ONE kind <c>POST /api/items/equip</c> writes could never
+    /// match: <c>wornRole</c> stayed null, and with it the whole set block and the requirement
+    /// refusal. Latent while nothing wrote a rolled row, live from the day module 4 got a caller.
+    ///
+    /// <para>The row below is written exactly as <c>ItemEquipService.Equip</c> writes it —
+    /// <c>SaveAssignment(specimen, role, "rolled", instanceId)</c>, the route's own last line — so
+    /// this is the shipped write, not a fixture-shaped stand-in.</para>
+    /// </summary>
+    [Fact]
+    public void A_rolled_assignment_is_what_the_card_reads_as_worn()
+    {
+        var f = SeedWorld(withSet: false);
+        Assert.Null(_store.GetItemCardInput(f.InstanceId, Corpus(), Wearer(f))!.Refusal);
+
+        // Exactly the row POST /api/items/equip lands.
+        _store.SaveAssignment(f.SpecimenId, f.Role, EquipRefKinds.Rolled, f.InstanceId);
+
+        // Worn now, so the gate has a role to judge — and it refuses this wearer's level, which it
+        // can only do once `wornRole` is found. A silent null here IS the defect.
+        var tooYoung = new ItemCardWearer(new SpecimenActor(f.SpecimenId, null, Level: 3, null));
+        var input = _store.GetItemCardInput(f.InstanceId, Corpus(), tooYoung)!;
+
+        Assert.NotNull(input.Refusal);
+        Assert.Equal(EquipRefusalReason.LevelTooLow, input.Refusal!.Value.Reason);
+    }
+
+    /// <summary>The other half of R2: the retired literal must NOT be re-accepted as a synonym. A row
+    /// spelled <c>"item"</c> in this table is unreadable, and an unreadable kind is a visible hole —
+    /// the same rule <c>GetLoadoutEntriesValidated</c> applies to the preset table — never a silently
+    /// plausible container id.</summary>
+    [Fact]
+    public void The_retired_item_ref_kind_is_not_quietly_treated_as_worn()
+    {
+        var f = SeedWorld(withSet: false);
+        _store.SaveAssignment(f.SpecimenId, f.Role, "item", f.InstanceId);
+
+        var tooYoung = new ItemCardWearer(new SpecimenActor(f.SpecimenId, null, Level: 3, null));
+
+        Assert.Null(_store.GetItemCardInput(f.InstanceId, Corpus(), tooYoung)!.Refusal);
     }
 
     /// <summary>No wearer, no set — a set is a fact about a wearer, and an item in the bag advances

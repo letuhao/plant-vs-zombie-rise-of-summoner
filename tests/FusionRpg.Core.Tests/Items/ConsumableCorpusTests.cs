@@ -284,42 +284,44 @@ public class ConsumableCorpusTests
         });
     }
 
-    // ---- ⛔ the defect the corpus carries -----------------------------------------------------------------
+    // ---- ✅ the defect the corpus used to carry ------------------------------------------------------------
 
     [Fact]
-    public void Exactly_one_phantom_family_is_named_by_the_corpus_and_it_is_excluded_rather_than_guessed()
+    public void The_corpus_names_no_phantom_family_and_elemental_power_resolves()
     {
-        // ⛔ `atom.elemental-power` resolves to no affix-family row. It is real in
-        // `_exemplars/affix-family.exemplar.json` (template content module 8 deliberately left out of
-        // the 98) and in the lane's own §7.2 worked example, but the shipped corpus has no such family.
-        // Module 10 filed eight phantom families; module 17 found five of them in the unique corpus.
-        // This is a NINTH, from a third direction. Excluded from the runtime check rather than guessed
-        // into it — a guess would make an unresolved reference look like a balance failure.
+        // ✅ Closed 2026-09-06. `atom.elemental-power` used to resolve to no affix-family row: it was
+        // real in `_exemplars/affix-family.exemplar.json` and in the lane's own §7.2 worked example, but
+        // `SeedFile.IsExemplar` excludes the exemplar from the corpus by construction, so the definition
+        // existed nowhere a loader reads. `g-elem-power.json`'s own `_meta.partitionScopeNote` records
+        // the cause — its brief scoped the file to "~5 further families BEYOND THE TWO ALREADY IN THE
+        // EXEMPLAR". It is now authored in that file, with the exemplar's own fields copied verbatim.
         var report = Report();
-        Assert.Equal(new[] { "atom.elemental-power" }, report.PhantomFamilies);
+        Assert.Empty(report.PhantomFamilies);
 
         // 11 of the 60 rows sit on it, all of them draughts. (13 rows carry an `element`; two of those
-        // name `atom.elemental-defense`, which IS one of the shipped 98.)
+        // name `atom.elemental-defense`, its already-real defensive mirror.) Unchanged by the fix —
+        // those 11 references were always correct, and repointing them was never the right repair: the
+        // element is this family's VARIANT column, so there is no per-element family to point at.
         Assert.Equal(11, Corpus.Count(c => c.Family == "atom.elemental-power"));
         Assert.Equal(2, Corpus.Count(c => c.Family == "atom.elemental-defense"));
         Assert.Contains("atom.elemental-defense", FamilyKinds.Keys, StringComparer.Ordinal);
         Assert.All(Corpus.Where(c => c.Family == "atom.elemental-power"),
             c => Assert.Equal(ConsumableClass.Draught, c.ClassId));
 
-        // and it really is absent from the shipped corpus, not merely missing a kindId
-        Assert.DoesNotContain("atom.elemental-power", FamilyKinds.Keys, StringComparer.Ordinal);
+        // and it really is in the shipped corpus now, with the same kind its mirror carries
+        Assert.Contains("atom.elemental-power", FamilyKinds.Keys, StringComparer.Ordinal);
+        Assert.Equal(FamilyKinds["atom.elemental-defense"], FamilyKinds["atom.elemental-power"]);
 
-        // ⚠ Re-measured 2026-09-06: the shipped affix-family corpus is **100**, not the 98 this test
-        // pinned when module 18 was built. `data/seed/items/affix-families/g-punisher.json` (commit
-        // 5864231, 2026-09-06 11:55) added `atom.chill-punisher` and `atom.rot-punisher` — the
-        // affix-authoring lane's content, not an item-program change. The pin stays a pin (a
-        // re-authoring pass should see it move); only the number is re-measured. Nothing else in this
-        // test moved: the phantom is still exactly one and still `atom.elemental-power`.
-        // ⚠ 100 is the shipped count, NOT a blessed one: `tools/ItemSeedValidator` refuses both new
-        // rows — `IdOutsideNamespace` (no wave-1 prefix owns `atom.*-punisher`) and
-        // `MissingDisplayTemplate` — so the two may yet be re-authored. That is the affix lane's call;
+        // ⚠ Re-measured 2026-09-06: 98 → 100 → 109. `g-punisher.json` (commit 5864231) added
+        // `atom.chill-punisher` and `atom.rot-punisher` — the affix-authoring lane's content, not an
+        // item-program change. The nine that follow are this session's phantom-closure pass: seven
+        // `status.apply` families into `g-affliction.json` and two `stat.derived` into
+        // `g-elem-power.json`. The pin stays a pin; only the number is re-measured.
+        // ⚠ 109 is the shipped count, NOT a blessed one: `tools/ItemSeedValidator` still refuses the two
+        // punisher rows — `IdOutsideNamespace` (no wave-1 prefix owns `atom.*-punisher`) and
+        // `MissingDisplayTemplate` — so those two may yet be re-authored. That is the affix lane's call;
         // this test tracks what ships.
-        Assert.Equal(100, FamilyKinds.Count);
+        Assert.Equal(109, FamilyKinds.Count);
     }
 
     // ---- module 11's 60 refused drop entries -------------------------------------------------------------

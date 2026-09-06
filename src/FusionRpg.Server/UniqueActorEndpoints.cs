@@ -125,6 +125,11 @@ public static class UniqueActorEndpoints
         });
     }
 
+    /// <summary>The reasons that mean "the request itself was malformed" and answer 400. Everything
+    /// else is a well-formed request the rules say no to, and answers 409 — <c>phase.not_roster</c>
+    /// and, since 2026-09-06, <c>slot.claimed_by_item</c>, which is deliberately absent from this
+    /// list: a role held by a real item is a conflict, exactly as the item route's mirror refusal
+    /// (<c>equip.role-held-by-relic</c>) is a conflict there.</summary>
     static bool IsValidationReason(string reason) =>
         reason is "bad_delta" or "bad_args" or "bad_slot" or "unknown_item" or "slot_mismatch";
 }

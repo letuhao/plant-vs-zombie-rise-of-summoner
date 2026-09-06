@@ -358,15 +358,28 @@ public sealed partial class RpgStore
 
         foreach (var a in assignments)
         {
-            // `item` points at an rpg_item instance; `stock` points straight at a container id — a
-            // stock-backed preset entry never pins one specific copy (RpgItemLoadoutEntryRow's own rule).
-            var containerId = string.Equals(a.RefKind, "item", StringComparison.Ordinal)
-                ? GetInstance(a.RefId)?.ContainerId
-                : a.RefId;
+            // ⛔ Fixed 2026-09-06 (defect R2). Both arms tested `"item"`, which is
+            // `rpg_item_loadout_entry`'s spelling (`LoadoutReport.InstanceRefKind`) — a DIFFERENT
+            // table. `rpg_item_assignment` only ever carries `rolled` or `stock`, so a real equipped
+            // item fell down the else arm, had its instance id read as a container id, and could
+            // never set `wornRole` — which silently emptied the set block AND `ReadRefusal`. Latent
+            // while nothing wrote a rolled row; live from the day `POST /api/items/equip` shipped.
+            //
+            // `rolled` pins one copy, so the container comes from the instance; `stock` already IS a
+            // container id. An unrecognised kind is skipped rather than guessed — the same
+            // "unreadable entry is a visible hole, not a silent pass" rule
+            // `GetLoadoutEntriesValidated` applies to the preset table.
+            string? containerId;
+            if (string.Equals(a.RefKind, EquipRefKinds.Rolled, StringComparison.Ordinal))
+                containerId = GetInstance(a.RefId)?.ContainerId;
+            else if (string.Equals(a.RefKind, EquipRefKinds.Stock, StringComparison.Ordinal))
+                containerId = a.RefId;
+            else
+                continue;
             if (containerId is null) continue;
 
             worn.Add(new EquippedPiece(a.Role, containerId));
-            if (string.Equals(a.RefKind, "item", StringComparison.Ordinal)
+            if (string.Equals(a.RefKind, EquipRefKinds.Rolled, StringComparison.Ordinal)
                 && string.Equals(a.RefId, instanceId, StringComparison.Ordinal))
                 wornRole = a.Role;
         }

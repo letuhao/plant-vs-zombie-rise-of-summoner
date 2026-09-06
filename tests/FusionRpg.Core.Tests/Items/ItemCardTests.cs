@@ -295,7 +295,9 @@ public class ItemCardTests
         // would pass vacuously.
         Assert.NotEmpty(RealAtoms.Value);
         Assert.NotEmpty(AffixesById.Value);
-        Assert.Equal(98, Templates.Value.Count);
+        // 98 → 107 on 2026-09-06: the phantom-closure pass authored nine families real content already
+        // referenced, and each brought its own template row (7 into triggered.json, 2 into derived.json).
+        Assert.Equal(107, Templates.Value.Count);
         Assert.NotEmpty(BaseTypes.Value);
     }
 
@@ -1022,9 +1024,10 @@ public class ItemCardTests
     /// ⛔ <b>Why this fixture cannot use <see cref="RealAtoms"/>, stated rather than worked around.</b>
     ///
     /// <para><c>tier-bands.v1.json</c> authors a <c>channelWeightPermille</c> row for <b>14</b> channel
-    /// stems. The shipped <c>affix-families/*.json</c> corpus has <b>100</b> families, so
-    /// <c>FamilyExpansion</c> refuses <b>86</b> of them at its first gate — <i>"no authored
-    /// sharePermille for family '…'"</i> — and <b>every element-typed family is among the 86</b>.
+    /// stems. The shipped <c>affix-families/*.json</c> corpus has <b>109</b> families (100 until the
+    /// 2026-09-06 phantom-closure pass authored nine more), so
+    /// <c>FamilyExpansion</c> refuses <b>95</b> of them at its first gate — <i>"no authored
+    /// sharePermille for family '…'"</i> — and <b>every element-typed family is among the 95</b>.
     /// There is therefore no pooled-channel atom in the shipped expansion at all, and no seed can draw
     /// one. That is a real content gap in the tuning file, upstream of this module and of E30, and it
     /// is named in P2.5's todo entry rather than papered over.</para>

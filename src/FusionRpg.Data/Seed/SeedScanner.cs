@@ -25,11 +25,21 @@ public static class SeedScanner
     /// this exact entry, mechanically, so the two-halves-disagree failure cannot recur unnoticed.
     /// <c>power</c> (E44 criterion 0, spec-power-sweep.md §4.1) is where a `power-coefficient` seed
     /// file goes — `data/seed/power/coefficients.v1.json` is the canonical path the spec names, but
-    /// the folder is swept whole, the same as every other owned folder here.</summary>
+    /// the folder is swept whole, the same as every other owned folder here.
+    ///
+    /// <para><b>D4.16</b> (spec-domain-catalog.md §1) added the seven `dungeon` corpus folders this
+    /// program's own content lives under — `_registry`/`_plan`/`_containers` (the hubs') are
+    /// deliberately NOT listed, `Order` already skips `_`-prefixed entries on its own. None of the
+    /// seven exist on disk yet (confirmed: `data/seed/dungeon/` holds only the three hub folders) —
+    /// adding them here is a no-op today, since `Roots()`'s own `.Where(exists)` filter skips a
+    /// folder that is not there; it only takes effect once a real anchor is authored under one of
+    /// them.</para></summary>
     public static readonly string[] OwnedFolders =
         {
             "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools",
             "effects/affixes", "power",
+            "dungeon/domains", "dungeon/rooms", "dungeon/layouts", "dungeon/events", "dungeon/quests",
+            "dungeon/encounters", "dungeon/supplies",
         };
 
     /// <summary>

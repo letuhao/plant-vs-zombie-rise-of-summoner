@@ -85,6 +85,106 @@
     },
     {
       "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.arm-welding",
+        "atom.sust-husk"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of sediment and iron fused into a living, unyielding shell.",
+      "id": "skill.might-def-t10-n1",
+      "name": "Silt-Bound Plate",
+      "nameKey": "tree.node.might-defensive-deep-siltboundplate",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.resilience",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The very structure of the bone adapts to the weight of the struggle.",
+      "id": "skill.might-def-t2-n0",
+      "name": "Thickened Marrow",
+      "nameKey": "tree.node.thickened-marrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The very essence of life hardens into a structural foundation.",
+      "id": "skill.might-def-t2-n1",
+      "name": "Verdant Marrow",
+      "nameKey": "tree.node.verdantmarrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.sust-grit"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The skin thickens where the pressure is most constant.",
+      "id": "skill.might-def-t3-n0",
+      "name": "Calloused Grit",
+      "nameKey": "tree.node.might-defensive-shallow-calloused-grit",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
         "core"
       ],
       "affixIds": [
@@ -185,6 +285,30 @@
     },
     {
       "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While tier holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "A hollowed shell that grows thicker with every blow endured.",
+      "id": "skill.might-def-t5-n1",
+      "name": "Vessel of the Unyielding",
+      "nameKey": "tree.node.vessel-of-the-unyielding",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
         "core",
         "likely"
       ],
@@ -232,6 +356,60 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The very essence of the self thickens, turning bone and spirit into an unyielding foundation.",
+      "id": "skill.might-def-t7-n1",
+      "name": "Deepening Marrow",
+      "nameKey": "tree.node.deepening-marrow",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-riveting",
+        "atom.ward-brace"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Layers of reinforced plating fused directly to the spirit's edge.",
+      "id": "skill.might-def-t8-n1",
+      "name": "Graftplate Bastion",
+      "nameKey": "tree.node.graftplate-bastion",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
     },
     {
       "affinity": [
@@ -382,6 +560,88 @@
       "nodeKey": "n1",
       "rationale": "",
       "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.might",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The rhythm of the hunt accelerates with every strike.",
+      "id": "skill.might-off-t2-n0",
+      "name": "Primal Surge",
+      "nameKey": "tree.node.primal-surge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The scent of iron and adrenaline sharpens the instinct to strike.",
+      "id": "skill.might-off-t2-n1",
+      "name": "Apex Predator",
+      "nameKey": "tree.node.apex-predator",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The weight of the strike is matched only by the hunger that follows.",
+      "id": "skill.might-off-t3-n0",
+      "name": "Apex Predator",
+      "nameKey": "tree.node.apex-predator-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
     },
     {
       "affinity": [
@@ -652,6 +912,34 @@
       "nameKey": "tree.node.might-might-offensive-deep-mechanism",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.might",
+        "atom.savagery"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While posture holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The weight of the blow is matched only by the hunger for the next.",
+      "id": "skill.might-off-t8-n1",
+      "name": "Apex Predator",
+      "nameKey": "tree.node.apex-predator-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
       "rationale": "",
       "tier": 8
     },

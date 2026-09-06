@@ -53,13 +53,15 @@ public class RoleFamilyTableTests
     /// <summary>
     /// A corpus-count pin, and it exists to catch a family going MISSING. It is expected to move
     /// upward when the affix-authoring lane ships one: 98 at module 8's build (2026-09-04), 100 after
-    /// `g-punisher.json` landed (2026-09-06, commit 5864231). Bump it deliberately, with the corpus
-    /// counted rather than quoted from a stale note — a DROP is the defect this guards.
+    /// `g-punisher.json` landed (2026-09-06, commit 5864231), 109 after the phantom-closure pass the
+    /// same day authored the nine families real content already referenced (seven `status.apply` into
+    /// `g-affliction.json`, two `stat.derived` into `g-elem-power.json`). Bump it deliberately, with the
+    /// corpus counted rather than quoted from a stale note — a DROP is the defect this guards.
     /// </summary>
     [Fact]
     public void The_whole_shipped_affix_family_corpus_loads()
     {
-        Assert.Equal(100, LoadFamilies().Count);
+        Assert.Equal(109, LoadFamilies().Count);
     }
 
     [Fact]
@@ -67,10 +69,12 @@ public class RoleFamilyTableTests
     {
         var relocation = LoadRelocation();
         // 619 over the 98-family corpus; 631 once `g-punisher.json`'s two `sense`-legal families got
-        // their 6 surviving hybrid-core hosts each (2026-09-06). The artefact is DERIVED from the
-        // corpus, so this number tracks it -- see `RoleRelocationRowMissing` in ItemSeedValidator,
-        // the check that now refuses a corpus family with no row rather than letting it keep t5.
-        Assert.Equal(631, relocation.RowCount);
+        // their 6 surviving hybrid-core hosts each (2026-09-06); 673 once the phantom-closure pass
+        // added seven more `sense`-legal `g-affliction` families the same day, at the same 6 hosts
+        // each (+42). The artefact is DERIVED from the corpus, so this number tracks it -- see
+        // `RoleRelocationRowMissing` in ItemSeedValidator, the check that now refuses a corpus family
+        // with no row rather than letting it keep t5, and which is what caught the 42.
+        Assert.Equal(673, relocation.RowCount);
         Assert.Equal(new[] { "head-guard", "sense", "ward-array" }, relocation.DroppedRoles.OrderBy(s => s));
     }
 
@@ -143,17 +147,19 @@ public class RoleFamilyTableTests
     [Fact]
     public void Item_role_family_is_derived_with_no_authored_cells()
     {
-        // 670 (role, family) pairs come straight from the 100 families' own roles lists, before any
+        // 731 (role, family) pairs come straight from the 109 families' own roles lists, before any
         // override narrows it -- reproduced here against the raw corpus, not through Derive(), which
-        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 666).
+        // additionally applies the minor-jewel removal (2 families x 2 roles = 4 fewer pairs, 727).
         // Was 656/652 over the 98-family corpus at module 8's build; `g-punisher.json`'s two families
-        // add 7 roles each (2026-09-06). Moves with the corpus, same rule as the count pin above.
+        // added 7 roles each -> 670/666 (2026-09-06); the phantom-closure pass the same day added
+        // seven `g-affliction` families at 7 roles each (49) plus two `g-elem-power` families at 6
+        // each (12) -> +61. Moves with the corpus, same rule as the count pin above.
         var families = LoadFamilies();
         var rawPairs = families.SelectMany(f => f.Roles.Select(r => (Role: r, f.FamilyId))).Distinct().Count();
-        Assert.Equal(670, rawPairs);
+        Assert.Equal(731, rawPairs);
 
         var derivedPairs = Derive().Select(c => (c.RoleId, c.FamilyId)).Distinct().Count();
-        Assert.Equal(666, derivedPairs);
+        Assert.Equal(727, derivedPairs);
     }
 
     [Fact]

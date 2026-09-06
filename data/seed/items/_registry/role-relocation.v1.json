@@ -2042,6 +2042,258 @@
     },
     {
       "droppedRole": "sense",
+      "familyId": "atom.buttering",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.buttering",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.buttering",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.buttering",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.buttering",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.buttering",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chilling",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chilling",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chilling",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chilling",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chilling",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.chilling",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.blighting",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.blighting",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.blighting",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.blighting",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.blighting",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.blighting",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rotting",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rotting",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rotting",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rotting",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rotting",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.rotting",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.sparking",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.sparking",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.sparking",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.sparking",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.sparking",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.sparking",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.marking",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.marking",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.marking",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.marking",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.marking",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.marking",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.bonding",
+      "hostRole": "armament-primary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.bonding",
+      "hostRole": "armament-secondary",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.bonding",
+      "hostRole": "jewel-major",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.bonding",
+      "hostRole": "jewel-minor-a",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.bonding",
+      "hostRole": "jewel-minor-b",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
+      "familyId": "atom.bonding",
+      "hostRole": "manipulator",
+      "maxTier": 3
+    },
+    {
+      "droppedRole": "sense",
       "familyId": "atom.plating",
       "hostRole": "core-guard",
       "maxTier": 3

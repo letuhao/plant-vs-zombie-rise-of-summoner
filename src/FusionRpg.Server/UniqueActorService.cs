@@ -36,7 +36,16 @@ public sealed class UniqueActorService
     public UniqueEquipmentListDto? GetEquipment(string instanceId) =>
         _store.GetUniqueEquipment(instanceId);
 
-    /// <summary>Roster-only equip. Rebuilds mods_json grants from stub catalog.</summary>
+    /// <summary>Roster-only equip. Rebuilds mods_json grants from stub catalog.
+    ///
+    /// <para>⛔ <b><c>slot.claimed_by_item</c> is the symmetric half of the item route's
+    /// <c>equip.role-held-by-relic</c></b> (defect R1, fixed 2026-09-06). Two flows write
+    /// <c>rpg_item_assignment</c>; the item route refused a relic's role by name from the day it
+    /// shipped and this one refused nothing, so a <c>PUT</c> here answered 200 and quietly took a
+    /// player's equipped item off. The check itself lives in the store, inside the same lock as the
+    /// write — see <c>RefuseIfRoleHeldByAnItemUnlocked</c>. It is <b>not</b> in
+    /// <see cref="UniqueActorEndpoints"/>'s validation-reason list, so it answers <b>409</b>, matching
+    /// the 409 the mirror refusal already answers.</para></summary>
     public (bool Ok, string Reason, UniqueEquipmentListDto? Equipment) PutEquipment(
         string instanceId, string slot, string? itemId)
     {
@@ -48,6 +57,10 @@ public sealed class UniqueActorService
         {
             var eq = _store.UpsertUniqueEquipment(instanceId, slot, itemId);
             return (true, "", eq);
+        }
+        catch (UniqueEquipmentSlotClaimed)
+        {
+            return (false, "slot.claimed_by_item", _store.GetUniqueEquipment(instanceId));
         }
         catch (ArgumentException ex)
         {

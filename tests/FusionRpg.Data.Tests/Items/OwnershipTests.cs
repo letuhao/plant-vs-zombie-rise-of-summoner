@@ -179,6 +179,23 @@ public class OwnershipTests : IDisposable
     }
 
     [Fact]
+    public void A_salvaged_item_is_excluded_from_the_armoury_list_but_still_reads_by_id()
+    {
+        var instanceId = SaveInstance();
+        _store.SaveItem(new RpgItemRow
+        {
+            InstanceId = instanceId, PlayerId = "p1", AcquiredUtc = DateTime.UtcNow.ToString("O"),
+        });
+        Assert.Single(_store.ListItemsByPlayer("p1"));
+
+        // A deliberate disposition -- the row survives, only the armoury listing changes.
+        _store.SaveItem(_store.GetItem(instanceId)! with { Disposition = "salvaged" });
+
+        Assert.Empty(_store.ListItemsByPlayer("p1"));
+        Assert.Equal("salvaged", _store.GetItem(instanceId)!.Disposition);
+    }
+
+    [Fact]
     public void No_rolled_value_is_duplicated_into_rpg_item()
     {
         var instanceId = SaveInstance();

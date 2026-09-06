@@ -287,7 +287,12 @@ public class ArmouryTests : IDisposable
     [Fact]
     public void FindAssignmentHolders_names_the_cell_holding_a_pinned_copy()
     {
-        _store.SaveAssignment("spec-A", FusionRpg.Core.Items.ItemRole.ArmamentPrimary, "item", "inst-1");
+        // ⛔ Was `"item"` until 2026-09-06 (defect R2), matching the method's then-default. That is
+        // `rpg_item_loadout_entry`'s kind; this query reads `rpg_item_assignment`, whose
+        // instance-pinned kind is `rolled` — so the pair agreed while both were wrong, and every
+        // really-worn copy was reported free.
+        _store.SaveAssignment("spec-A", FusionRpg.Core.Items.ItemRole.ArmamentPrimary,
+            FusionRpg.Core.Items.EquipRefKinds.Rolled, "inst-1");
 
         var held = _store.FindAssignmentHolders(new[] { "inst-1", "inst-unheld" });
 

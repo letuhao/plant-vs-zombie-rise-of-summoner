@@ -1,5 +1,29 @@
 namespace FusionRpg.Core.Items;
 
+/// <summary>
+/// The two <c>ref_kind</c> values <c>rpg_item_assignment</c> actually carries, in one place.
+///
+/// <para>⛔ <b>This is NOT the same vocabulary as <c>rpg_item_loadout_entry</c>'s.</b> That table —
+/// module 2's saved presets — spells its instance-pinned kind <c>"item"</c>
+/// (<see cref="LoadoutReport.InstanceRefKind"/>, and <c>GetLoadoutEntriesValidated</c>'s own SQL
+/// switches on it). Two tables, two vocabularies, one word apart, and nothing named the difference
+/// until a reader in a third module tested an assignment row against the <i>preset</i> table's
+/// literal and silently saw nothing (defect R2, 2026-09-06). Both constants live here so that
+/// mistake has to be made deliberately.</para>
+/// </summary>
+public static class EquipRefKinds
+{
+    /// <summary>One rolled copy: <see cref="EquipAssignment.RefId"/> is an
+    /// <c>effect_instance.instance_id</c>. Written by <c>POST /api/items/equip</c>, and the only kind
+    /// <c>RpgStore.ApplyEquipProjection</c> turns into a binding.</summary>
+    public const string Rolled = "rolled";
+
+    /// <summary>A catalog id: <see cref="EquipAssignment.RefId"/> is a <c>container_id</c>, so it
+    /// never pins one specific copy. Written by the relic wire
+    /// (<c>PUT /api/unique/actors/{id}/equipment/{slot}</c>) and by D1 §10 M1's row migration.</summary>
+    public const string Stock = "stock";
+}
+
 /// <summary>One durable equip decision: this player put this item in this role on this specimen.
 /// <paramref name="SpecimenId"/> is the `rpg_unique_actor`'s own stable `instance_id` — a kebab-case
 /// string, matching `OwnerScope.UniqueActor`'s key exactly (`OwnerScope.cs`: "keyed on the actor's own

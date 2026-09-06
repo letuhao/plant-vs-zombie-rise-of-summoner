@@ -290,6 +290,119 @@ public class PassiveTreeEndpointsTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
     }
 
+    // ---- I8's preview endpoint (spec-tree-surface.md §7.2 part 5) -------------------------------
+
+    [Fact]
+    public async Task Preview_unknownPlayer_returns404()
+    {
+        var resp = await _http.PostAsJsonAsync("/api/passive-tree/999999/preview",
+            new { nodes = new Dictionary<string, long>() });
+        Assert.Equal(HttpStatusCode.NotFound, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Preview_missingNodes_returns400()
+    {
+        var resp = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview", new { });
+        Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Preview_negativeSoulLevel_returns400()
+    {
+        var resp = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview",
+            new { nodes = new Dictionary<string, long> { ["skill.might-off-t1-n0"] = -1 } });
+        Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Preview_unknownAptitudeId_returns400()
+    {
+        var resp = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview",
+            new { nodes = new Dictionary<string, long>(), aptitudeDelta = new Dictionary<string, long> { ["NotARealAptitude"] = 5 } });
+        Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+    }
+
+    [Fact]
+    public async Task Preview_aDeltaThatWouldGoNegative_isRefused_neverSilentlyClamped()
+    {
+        SeedAptitudes(("Might", 10));
+        var resp = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview",
+            new { nodes = new Dictionary<string, long>(), aptitudeDelta = new Dictionary<string, long> { ["Might"] = -11 } });
+        Assert.Equal(HttpStatusCode.BadRequest, resp.StatusCode);
+
+        // -10 lands exactly on zero -- legal, not a boundary-off-by-one refusal.
+        var ok = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview",
+            new { nodes = new Dictionary<string, long>(), aptitudeDelta = new Dictionary<string, long> { ["Might"] = -10 } });
+        Assert.True(ok.IsSuccessStatusCode, await ok.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Preview_neverPersists_aRepeatGetAfterPreview_seesOnlyTheOriginalCommittedState()
+    {
+        // Committed: nothing owned, Might at 10 aptitude points.
+        SeedAptitudes(("Might", 10));
+        await Post("/api/passive-tree/allocate",
+            new { playerId = _playerId, nodes = new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0 } });
+        var before = await GetState();
+
+        // Preview a hypothetical: a NEW owned node plus a big Might increase.
+        var previewResp = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview",
+            new
+            {
+                nodes = new Dictionary<string, long> { ["skill.might-off-t1-n0"] = 0, ["skill.fortitude-off-t1-n0"] = 0 },
+                aptitudeDelta = new Dictionary<string, long> { ["Might"] = 20 }
+            });
+        Assert.True(previewResp.IsSuccessStatusCode, await previewResp.Content.ReadAsStringAsync());
+        var preview = await previewResp.Content.ReadFromJsonAsync<PassiveTreeStateDto>();
+        Assert.NotNull(preview);
+
+        // The hypothetical actually took effect IN THE RESPONSE (gate(might) = 10+20 = 30 -> tier 3
+        // at reqScalePoints=5; owning fortitude's node too).
+        Assert.Equal(30, preview!.Trees.Single(t => t.TreeId == "might").AptitudePoints);
+        Assert.Equal(3, preview.Trees.Single(t => t.TreeId == "might").TierReached);
+        Assert.True(preview.SoulLevelByNodeId.ContainsKey("skill.fortitude-off-t1-n0"));
+
+        // But the COMMITTED state (a fresh GET) is completely unchanged -- neither the node nor the
+        // aptitude delta was ever written.
+        var after = await GetState();
+        Assert.Equal(before.SoulLevelByNodeId.Keys.OrderBy(k => k), after.SoulLevelByNodeId.Keys.OrderBy(k => k));
+        Assert.False(after.SoulLevelByNodeId.ContainsKey("skill.fortitude-off-t1-n0"));
+        Assert.Equal(10, after.Trees.Single(t => t.TreeId == "might").AptitudePoints);
+        Assert.Equal(1, after.Trees.Single(t => t.TreeId == "might").TierReached);
+    }
+
+    [Fact]
+    public async Task Preview_movingPointsOutOfOneForcePosturePath_closesTheOtherMatesTier_bothSeeTheSameLoweredGate()
+    {
+        // D28's own worked scenario (spec-tree-surface.md §7.2 part 5's example sentence): both Might
+        // and Fortitude sit at tier 3 today because each lends the other 20 (reqScalePoints=5: tier 3
+        // opens at 30). Pulling Fortitude's OWN base down removes the credit Might was reading, which
+        // closes Might's tier 3 in the SAME response -- proving the preview recomputes CrossUnlock's
+        // cross-tree lending, not just the one tree the delta named.
+        SeedAptitudes(("Might", 20), ("Fortitude", 20));
+        var committed = await GetState();
+        Assert.Equal(3, committed.Trees.Single(t => t.TreeId == "might").TierReached);
+
+        var previewResp = await _http.PostAsJsonAsync($"/api/passive-tree/{_playerId}/preview",
+            new
+            {
+                nodes = new Dictionary<string, long>(),
+                aptitudeDelta = new Dictionary<string, long> { ["Fortitude"] = -20 }
+            });
+        Assert.True(previewResp.IsSuccessStatusCode, await previewResp.Content.ReadAsStringAsync());
+        var preview = await previewResp.Content.ReadFromJsonAsync<PassiveTreeStateDto>();
+        Assert.NotNull(preview);
+
+        // Fortitude's own base is now 0 -- gate(might) = base(20) + credit(max(0)) = 20 -> tier 2, not 3.
+        var mightPreview = preview!.Trees.Single(t => t.TreeId == "might");
+        Assert.Equal(20, mightPreview.AptitudePoints);
+        Assert.Equal(2, mightPreview.TierReached);
+
+        var fortitudePreview = preview.Trees.Single(t => t.TreeId == "fortitude");
+        Assert.Equal(0, fortitudePreview.OwnAptitudePoints);
+    }
+
     // ---- broadcast: the exact AptitudeEndpoints.cs:115-117 mechanism, copied -------------------
 
     [Fact]

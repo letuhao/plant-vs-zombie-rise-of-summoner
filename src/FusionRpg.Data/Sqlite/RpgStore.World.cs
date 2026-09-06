@@ -161,6 +161,16 @@ public sealed partial class RpgStore
         EnsureColumn(db, "rpg_world_sectors", "project_id", "TEXT");
         EnsureColumn(db, "rpg_world_sectors", "project_turns_remaining", "INTEGER");
 
+        // base-defense `siege-construction` 15.1/15.4: `WorldSector.RubbleStock`/`IronworkStock`
+        // (decisions 16/17/34/28) landed in `WorldCanonical`'s own hash and in `SectorRowEquals`'s
+        // diff-equivalence check without ever gaining these two columns — the SAME "found by the
+        // diffing writer's own equivalence guard, not designed in" gap `development_level` below
+        // already records, caught the same way: 15.4's own faucet phase was the first turn-phase
+        // change to ever make either field non-zero for a real, committed-and-reread world. An
+        // existing saved world reads both back at 0 — exactly the world before either stock existed.
+        EnsureColumn(db, "rpg_world_sectors", "rubble_stock", "INTEGER NOT NULL DEFAULT 0");
+        EnsureColumn(db, "rpg_world_sectors", "ironwork_stock", "INTEGER NOT NULL DEFAULT 0");
+
         // base-defense world-graph-diff 3.3: found by the diffing writer's own equivalence guard,
         // not designed in — `WorldCanonical.Write`'s "intel" row has always hashed
         // `IntelSnapshot.DevelopmentLevel` (world-map W45), but `rpg_world_faction_intel` never
@@ -181,6 +191,7 @@ public sealed partial class RpgStore
 
         EnsureWorldTurnSchemaUnlocked(db);
         EnsureDelveSchemaUnlocked(db);
+        EnsureDomainsSchemaUnlocked(db);
     }
 
     /// <summary>
@@ -258,14 +269,14 @@ public sealed partial class RpgStore
                 phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
                 development_level, intel, last_seen_turn, layout_x, layout_y,
                 loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
-                recruit_stock, project_id, project_turns_remaining, revision)
+                recruit_stock, project_id, project_turns_remaining, rubble_stock, ironwork_stock, revision)
             VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
                     $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected,
-                    $recruit, $project, $projTurns, 0);
+                    $recruit, $project, $projTurns, $rubble, $ironwork, 0);
             """,
             "$w", "$s", "$type", "$climate", "$danger", "$phase", "$owner", "$stab", "$press", "$depl",
             "$dev", "$intel", "$seen", "$x", "$y", "$loam", "$intensity", "$warden", "$neglected",
-            "$recruit", "$project", "$projTurns"))
+            "$recruit", "$project", "$projTurns", "$rubble", "$ironwork"))
         using (var slotCmd = Prepared(db, tx, """
             INSERT INTO rpg_world_slots (world_id, sector_id, slot_index, slot_type_id,
                 element, state, owner_faction_id, guard_wave_id, guard_state,
@@ -284,7 +295,7 @@ public sealed partial class RpgStore
                     s.DepletionMilli, s.DevelopmentLevel, s.AuthoredIntel.ToString(), s.LastSeenTurn,
                     s.LayoutX, s.LayoutY, s.LoamStock, s.FractureIntensityMilli,
                     (object?)s.WardenBindingId, s.NeglectedTurns, s.RecruitStock,
-                    (object?)s.ProjectId, (object?)s.ProjectTurnsRemaining);
+                    (object?)s.ProjectId, (object?)s.ProjectTurnsRemaining, s.RubbleStock, s.IronworkStock);
 
                 foreach (var sl in s.Slots)
                     ExecuteWith(slotCmd,
@@ -487,7 +498,8 @@ public sealed partial class RpgStore
                            stability_milli, pressure_milli, depletion_milli, development_level,
                            intel, last_seen_turn, layout_x, layout_y,
                            loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
-                           recruit_stock, project_id, project_turns_remaining
+                           recruit_stock, project_id, project_turns_remaining,
+                           rubble_stock, ironwork_stock
                     FROM rpg_world_sectors WHERE world_id = $w ORDER BY sector_id;
                     """;
                 cmd.Parameters.AddWithValue("$w", worldId);
@@ -518,6 +530,8 @@ public sealed partial class RpgStore
                         RecruitStock = r.GetInt64(18),
                         ProjectId = r.IsDBNull(19) ? null : r.GetString(19),
                         ProjectTurnsRemaining = r.IsDBNull(20) ? null : r.GetInt32(20),
+                        RubbleStock = r.GetInt64(21),
+                        IronworkStock = r.GetInt64(22),
                         Slots = slotsBySector.TryGetValue(sectorId, out var slots)
                             ? slots
                             : new List<WorldSlot>()

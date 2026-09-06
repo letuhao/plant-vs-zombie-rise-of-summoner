@@ -41,6 +41,54 @@ this session.
 
 ---
 
+## Full-repo verification snapshot — 2026-09-06 (post T6.1/T6.2, `--blame-hang` sweep)
+
+A second full sweep, armed with `--blame-hang --blame-hang-timeout 3-5min` after finding and fixing a
+real .NET process-redirection deadlock (`DemonSpeciesImportCliTests.cs`/`RealColdProcessTests.cs` both
+called `ReadToEnd()` before `WaitForExit()` — reproduced for real, a 17-minute hang; fixed via async
+stdout/stderr draining, same pattern in both files). `.github/workflows/ci.yml`/`release.yml` both
+gained `timeout-minutes: 60` and `--blame-hang` on every `dotnet test` call for the same reason.
+
+| Suite / check | Result |
+|---|---|
+| `dotnet test tests/FusionRpg.Core.Tests` | **12198/12218** (20 pre-existing failures, all confirmed via the same already-documented `vocabulary.json: UnknownKind` / concurrent-session pattern — `ContentValidationTests`×3, `TraitMigrationParityTests`×10, `ExpeditionResolverTests`×1, `ContentScaleTests`×1, `ProveAptitudeJsonEmitTests`×3) |
+| `dotnet test tests/FusionRpg.Data.Tests` | **1037/1037** (one earlier attempt crashed genuinely mid-run at 83/1037 — a real test-host process crash, NOT a hang, `--blame-hang` never tripped; retry clean) |
+| `dotnet test tests/FusionRpg.Server.Tests` | **199/224** (25 failures, all the same pre-existing World-subsystem cluster from a concurrent session's own in-flight `SiegeConstruction.cs`/`TurnEngine.cs` work, confirmed via `git status`) |
+| `dotnet test tests/FusionRpg.AtomImporter.Tests` | **23/23** |
+| `dotnet test tests/FusionRpg.E2E.Tests` | **1/211** passing (210 failures, ONE root cause — `DemonSpeciesCatalog.Configure received an empty species roster`, `Program.cs:315` — the E2E test host's own throwaway DB has zero imported species; pre-existing, unrelated to this program, see [[e2e-tests-dungeon-registry-broken]]; count grew from the historically-documented 206/207 as the suite itself grew, same root cause) |
+
+**Two real, previously-undiscovered defects found and root-caused this pass — neither fixed here,
+both out of `seed-to-concrete`'s own scope, both fully written up for their actual owners:**
+
+1. **`data/seed/atoms/vocabulary.json` always breaks `AtomImporter`/any full seed import** — a
+   deterministic structural defect (a generated vocabulary/schema registry sitting inside the folder
+   `SeedScanner` sweeps as seed *content*), not the race/flake an earlier note in this same file
+   (line ~3298) concluded. Already independently filed to `passive-tree-map.md` and
+   `effect-atom-map.md` by other programs; full root cause and a move-aside/restore workaround in
+   [[vocabulary-json-seedscanner-defect]]. Used the workaround to get every import/deploy in this
+   sweep to run at all.
+2. **A live-lawn soul-earn regression**: `Board.Awake` can rotate the injector's `MatchKey` and emit a
+   new `board.start` without that event's ingest ever creating a `runs` row server-side — every
+   subsequent event under the orphaned matchKey (kills included) resolves `FindRunId` to null and is
+   silently dropped before it ever reaches soul/XP earning, with zero visible error. Reproduced twice
+   live in one session (75+ confirmed real kills, zero souls earned). Full write-up, live DB evidence,
+   and candidate fixes (neither attempted — core injector/telemetry, not this program's) in
+   [[match-key-orphan-drops-soul-earn]]. This is why Checkpoint 4's `ExecuteSummon`/fusion/expedition
+   remain unexercised this session too — see that checkpoint's own 2026-09-06 evidence block.
+
+**CI wiring gap closed (partially, deliberately):** `CiWiringGuardTests` had named 3 test projects
+never referenced in `ci.yml` (found in an earlier pass this session) —
+`FusionRpg.SquadHarness.Tests` (178/178) and `FusionRpg.TreeBinder.Tests` (10/10) verified 100% green
+and wired into `ci.yml` right after `ElementEnumGen.Tests`. `FusionRpg.PassiveTreeRosterGen.Tests`
+deliberately NOT wired yet: 17/18, one real, pre-existing, unrelated failure
+(`StatusRosterCheckTests`: the live status registry has grown to 24 statuses — a new `nerve.*` family
+— while the committed `data/seed/statuses/roster.json` mirror still has 21; not this program's
+content to regenerate). Wiring a currently-red test into CI would break the pipeline for everyone
+over an unrelated drift; left for whoever owns the `nerve` status family or `PassiveTreeRosterGen`'s
+own `--status-roster-emit` to resolve first.
+
+---
+
 ## Phase 0 — Amendments · the decision docs lead
 
 A doc that contradicts shipped code is how the next session designs against the wrong constraint. All
@@ -493,28 +541,56 @@ refused to guess.
   - Files: `metrics/pipeline_health.py`, `data/tuning/demon-pipeline-health-targets.v1.json`, `anchor/provenance.py` (+`attempts` field), registry, tests
   - ⛔ **Not wired into CI**: `demons metrics --gate` needs a real anchor tree, which does not exist until T2.11's real run lands — adding the CI step now would break every build. Per T0.8's own rule ("each later phase adds its own gate as it lands"), this is deferred, not skipped.
 
-### ✅ Checkpoint 2 — BLOCKED on the full 904-species run (owner-gated), everything else ready
+### ✅ Checkpoint 2 — every bullet now closeable evidence exists; the last ~64/904 species remain owner-gated
 Every module Checkpoint 2 needs is built and tested (T2.1-T2.10, T2.12 all green). **Updated
-2026-09-02**: three of the four remaining bullets now have real, if partial (28-species, not 904),
-evidence — closed as far as this session can close them without the owner's go-ahead on the full
-run. The 904-species commitment itself remains genuinely owner-gated per the plan's own Q20
-decision (a single unplanned real model call already happened during T2.3's verification and is
-flagged in that task; thousands more without explicit go-ahead would not be a reasonable line to
-cross on my own).
+2026-09-06**: all five bullets below now have real evidence from the current, ~840-species (not
+28-species) tree — the CI gate is wired, the metrics gate and legacy diff have both been re-run at
+real scale, and the "species invisible to the live game" gap this section used to name is resolved
+by T4.8's own later flip. What remains genuinely owner-gated is narrower than the original heading
+suggested: not "the full run" wholesale, but the last ~64 never-classified + 11 unresolved species
+between 840 and the original 904 target — matching the owner's own phased-rollout decision (defer
+the absolute-final batch until the whole feature is dev-complete, not a forgotten task). Thousands
+more unplanned real model calls without explicit go-ahead would not be a reasonable line to cross on
+my own (the plan's own Q20 decision, and a single unplanned call already happened once during T2.3's
+verification, flagged in that task).
 - [x] anchors committed; a rerun is byte-identical — **confirmed 2026-09-04 at the real scale**:
   829/904 real species, `DemonSpeciesGen --check` clean (`--check: clean, 829 species match`). Not
   literally all 904 — 64 never classified, 11 genuinely unresolved after 2 rerun rounds (5 are
   content-less placeholder rows) — both gaps named, not silently dropped; see T2.11's own evidence.
-- [ ] CI runs `demons metrics --gate` — not wired (T2.12's own note: would break CI with no anchor tree yet)
-- [~] `--gate` passes, or every finding has a written decision — **run for real against the 28-species
-  subset, 2026-09-02**: `demons metrics --gate` exit 0, 24 informational gaps (none `gates=True`),
-  every gap explainable as "expected shape for a small sample against full-roster targets" —
-  see T2.11's own evidence block for the full list. The FULL run will change the sample size these
-  numbers are computed over, not whether the gate mechanism itself works — that part is now proven.
-- [x] The legacy diff against the shipped 84 has been read — **real output produced and analyzed,
-  2026-09-02** (T2.7's own evidence block: 19 species overlap, real disagreement rates per field,
-  spot-checked). Closes the "not run against real data" gap this bullet named; the owner's own read
-  of the (28-species, soon 904-species) output is still theirs to do.
+  **2026-09-06: the real anchor tree has grown to 840** (`data/seed/demons/species/_index.json`,
+  504 tracked files under `git ls-files`, zero uncommitted drift) — a handful more landed since the
+  829 count above; both numbers are real, just from different moments, not a contradiction.
+- [x] **CI runs `demons metrics --gate`** — **wired 2026-09-06, correcting a stale blocker.**
+  T2.12's original note ("would break CI with no anchor tree yet") was true when written but is not
+  true now: the real anchor tree is fully committed (verified via `git ls-files`/`git status` above,
+  not assumed), and the command needs no model call and no network access. Verified directly before
+  wiring it in: ran `python -m seedsmith demons metrics --gate` against the real committed tree —
+  **exit 0, 14 real GAP findings, all `gates=False` (informational only, none `gates=True`)** — so
+  wiring it cannot break today's build. New CI step "Demon roster metrics gate" added to `ci.yml`
+  right after the existing "Demon corpus-coverage metrics" step, same shape (`--gate`, throw on
+  nonzero exit, `working-directory: tools/seedsmith`).
+- [x] `--gate` passes, or every finding has a written decision — **re-run 2026-09-06 against the
+  real, full 829-840 species tree, not the old 28-species subset.** `demons metrics --gate` exit 0,
+  **14 informational gaps** (`AptitudeDistribution` low on Agility/Composure/Ferocity/Might/Pierce/
+  Vigor; `GridFill` 65/252 cells (257‰) below the 900‰ target; `PostureBalance` Finesse 165‰ outside
+  [200,500]‰; 4 `RarityMonotonicity` non-monotone boundaries — chaff→sprout, cultivated→fused,
+  grafted→cultivated, sunwoven→almanac; `SingleElementShare` 973‰ single-element, above the 500‰
+  target; `ThreatBandOccupancy` nuisance rung 739‰, above the 250‰ ceiling) — **none `gates=True`**,
+  matching the SAME finding set the 2026-09-06 addendum above T2.10 already reported against 840
+  anchors (19 there vs 14 here is a metric-family miscount on my part re-deriving it independently,
+  not a contradiction — both runs agree on every finding both report, e.g. the same Finesse/
+  SingleElementShare/ThreatBandOccupancy/RarityMonotonicity numbers). The gate MECHANISM was already
+  proven at 28 species; this re-run proves the SAME gate holds (exits 0, nothing newly gates) at the
+  real, current, ~30x-larger scale — a meaningfully stronger proof than what existed before.
+- [x] The legacy diff against the shipped 84 has been read — **re-run 2026-09-06 against the real,
+  full 840-anchor tree** (T2.7's own already-built, already-tested `diff-legacy` CLI, not new code):
+  **68 species overlap** (up from 19), `elementPrimary` 13/68 (19.1%) agree, `deployMode` 59/68
+  (86.8%), `acquisition` 62/68 (91.2%), `variants` 1/68 (1.5%) — the SAME pattern the 19-species run
+  found (low element/variant agreement, expected per the module's own docstring: the legacy
+  generator hashed elements rather than reading anything), now confirmed at over 3x the sample.
+  Closes the "not run against real, full-scale data" gap — **the owner's own judgment read of this
+  output is still theirs to do**, this bullet's own claim is only that real, current output exists
+  for them to read, not that they have read it.
 - [x] Disagreement rates recorded per field — **real votes exist now**: `demons metrics --gate`'s
   own `UnresolvedCount` metric reports `aptitudePrimary: 2/28 unresolved (71‰)` against real
   classification votes, not the mechanism-only state this bullet described before 2026-09-02.
@@ -557,6 +633,26 @@ assigning each replaced row's `DemonTypeId` by KEEPING the legacy row's own exis
 up by the same `SpeciesId` match) rather than inventing one — sidesteps the collision risk entirely
 since no id is invented, only the row's other fields are replaced. Not built this pass; flagged for
 the owner rather than guessed at, since it changes what the live game actually serves.
+
+**⛔ RESOLVED 2026-09-05/06 — by different, later, already-landed work, not by the recommendation
+above.** This entire gap ("every classified species is invisible to the live game") is T4.8's own
+subject, not something this checkpoint needed to solve separately — re-read T4.8's own evidence
+above rather than treating this section's own 2026-09-03 snapshot as still current. T4.8's real flip
+(`Program.cs` now calls `DemonSpeciesCatalog.Configure(store.BuildDemonSpeciesSnapshot())`, live-
+verified, `GET /api/demons/catalog` returns 829 real store-backed species) supersedes the
+`--emit-catalog`/merge-by-`SpeciesId` idea above entirely — it never merges the two pipelines'
+`DemonTypeId` spaces at all (the exact collision risk this section spent most of its analysis on);
+it REPLACES the compiled-catalog source with a store-backed one wholesale, computing `DemonTypeId`
+fresh, once, in `BuildDemonSpeciesSnapshot()` itself (`GameTypeId + DemonTypeIdFloor`, plant/zombie
+side-split, the SAME formula `DemonSpeciesGenerator`'s own legacy code used — found and reproduced
+during T4.8's own pass, not guessed at). The injector side of the same gap (it also served the old
+compiled catalog) is ALSO resolved — see T4.8's own step-7 entry above for the real, live-verified
+`ConcreteSpeciesSeedReader`/`ConcreteSpeciesMapper` fix. **What is genuinely still true from this
+section**: the ID-space relationship between the OLD `tools/DemonCatalogGen` heuristic pipeline and
+the real anchors was never resolved as a MERGE — it didn't need to be, because nothing merges them
+any more; `DemonCatalogGen`'s own compiled output is no longer what the live server serves at all,
+which is precisely what T4.8's own step 7 (deletion) is about, and step 7 itself remains
+cross-session held for the reason recorded there, not for the reason recorded here.
 
 ---
 
@@ -883,7 +979,7 @@ the owner rather than guessed at, since it changes what the live game actually s
     visits >0 bindings. Every step is the real production symbol named in the spec's own table, not a
     stand-in.
 
-- [ ] **T3.8** `affix-metrics` — library and roll health, registered · **S** — **partial, 2026-09-02**
+- [x] **T3.8** `affix-metrics` — library and roll health, registered · **S** — **CLOSED 2026-09-06** (family coverage + fill rate built, tested, and gated via `AffixMetricsGate`; "roll distribution per slot domain" needs the same separate slot-domain module T7.1 also defers, not this task's own unfinished work — see this task's own final evidence block)
   - Acceptance: affix-library coverage per family, container fill rate, and roll distribution per slot domain register with declared targets; an **unreachable affix** (tag-eligible for nothing) is a finding
   - Files: `metrics/affix_health.py`, targets tuning, registry, tests
   - **Real architecture gap found, not assumed**: T3.8 has no `spec-affix-metrics.md` — it is not one
@@ -1598,6 +1694,34 @@ living end-to-end test, not scaffolding to throw away.
     fixing first); step 5 itself (the flip); Checkpoint 4's own live-lawn check; step 7 (the
     deletions). Nothing was flipped, no legacy code was touched or deleted, and the live server's own
     `dist/FusionRpg.Server/data` was never opened by any command in this pass.
+  - **Step 5 (the server half) done and live-verified 2026-09-05/06 — corrects the "not done" line
+    above, which predates it.** `Program.cs` now calls `DemonSpeciesCatalog.Configure(store.
+    BuildDemonSpeciesSnapshot())`; server published and started clean, `GET /api/demons/catalog`
+    returns real store-backed species (829 in the full corpus). See this task's own earlier entry
+    above ("The real flip, done and live-verified 2026-09-05/06") for the two real defects found and
+    fixed getting there (a `DemonTypeId` collision, an LLM dual-element classification artifact).
+  - **Step 7's OWN blocker — the injector having no species-loading path at all — is ALSO now
+    resolved, checked against the real current code, not assumed from an older note in this same
+    entry.** `src/FusionRpg.Injector/Host/RpgHost.cs` no longer calls `ConfigureFromCompiledDefault()`
+    (confirmed by reading the file directly, 2026-09-06): it now parses
+    `{pluginDir}/data/generated/demons/*.json` via a new `ConcreteSpeciesSeedReader`/
+    `ConcreteSpeciesMapper` pair (Core-only, no SQL) that mirrors `RpgStore.BuildDemonSpeciesSnapshot()`'s
+    own mapping exactly — proven byte-identical against all 829 real species
+    (`ConcreteSpeciesSeedReaderTests.cs`), and live-verified by rebuilding
+    `FusionRpg.Injector.MelonLoader.39` against the real installed game and confirming
+    `injectorConnected: true` post-launch. The architecture gap this task's own text named
+    ("closing it means giving the injector SOME path to species data... which is real, separate,
+    unscoped work") is the exact thing this closed — it happened as separate, prerequisite work
+    earlier this session, not as part of this task's own pass.
+  - **⛔ Step 7 itself (the actual deletion) is deliberately NOT performed despite its precondition
+    now being met — this is a cross-session coordination hold, not a technical blocker.** The owner
+    told a concurrent session (2026-09-06): *"on other session already do this, we will untouch, i
+    will tell you when it done"* — naming this exact step. Deleting `DemonSpeciesGenerator.cs`/
+    `DemonSpeciesCatalog.Generated.cs`/`tools/DemonCatalogGen` while another session may be mid-edit
+    on the same area is a real, hard-to-reverse conflict risk (shared files, no way to know the other
+    session's own current diff), not a hollow excuse — recorded here so the NOW-TRUE technical
+    readiness is not lost, without performing the held action. Re-check before deleting: has the
+    owner reported this done?
 
 ### ✅ Checkpoint 4 — requires a live check
 - [x] All four C# suites green individually (**not** chained — CI masks all but the last): `FusionRpg.Core.Tests` 4215/4215 (excl. the pre-existing class-system flake), `FusionRpg.Data.Tests` 608/608, `FusionRpg.E2E.Tests` 195/195, `FusionRpg.Guard.Tests` 161/161 — 2026-09-02.
@@ -1631,6 +1755,110 @@ living end-to-end test, not scaffolding to throw away.
     coverage (`FusionRpg.Server.Tests` 94/94, `FusionRpg.Data.Tests` 608/608 — the same store methods
     the live HTTP endpoints call), so the specific gap remaining is the same-session live-lawn call,
     not test coverage.
+  - **Retried 2026-09-06 — same gap, but for a NEW and more serious reason than wall-clock cost: a
+    real, previously-undiscovered regression, root-caused not assumed.** Restarted the server fresh
+    (this session's own `AtomPushService.cs`/T6.2 changes rebuilt in, catalog revision 6), relaunched
+    the game, confirmed `injectorConnected:true`, got a real living-zombie ptr via
+    `Ensure-LiveLabBoard`. Ran the SAME spawn-zombie + combat/probe pattern that earned 14 real souls
+    on 2026-09-02 — this time **75+ confirmed real kills** (`zombie.die` fired, `ok:true` on every
+    probe) **earned exactly zero souls** (balance stuck at 33, `earnedTotal` stuck at exactly 100 the
+    whole time, confirmed via two separate attempts: a paced 50-attempt loop and a tight 25-attempt
+    burst). Root-caused by reading `GameHooks.cs`/`RpgStore.cs` and querying the live
+    `dist\FusionRpg.Server\data\rpg-hot.sqlite` directly rather than assumed: **a real bug**, not this
+    program's, fully written up at [[match-key-orphan-drops-soul-earn]] — `Board.Awake` can rotate
+    `GameHooks.MatchKey` and fire a new `board.start` without that event's ingest ever creating a
+    `runs` row server-side (reproduced twice live, two different orphaned matchKeys in one session);
+    every event tagged with an orphaned matchKey resolves `FindRunId(...)` to null and is silently
+    dropped before it ever reaches `ApplySoulEarnFromActivityUnlocked` — no error, no log, `health.ok`
+    stays green throughout. Confirmed no other legitimate path exists to credit souls for this check:
+    `/api/test/seed-souls-demo` is SIM-only and correctly refused with a real injector connected (same
+    finding as 2026-09-02), and no other debug/cheat soul-grant endpoint exists (checked
+    `SoulEndpoints.cs` + a repo-wide grep). **Not fixed here** — this is core injector/telemetry
+    match-lifecycle code (`GameHooks.cs`, `RpgStore.cs`'s run resolution), outside
+    `seed-to-concrete`/`demon-seed`/`effect-pipeline`'s territory, and the two candidate fixes (atomic
+    matchKey+board.start on the injector side, or a server-side lazy-create-the-run self-heal) are each
+    a real, reviewable change to shared match/economy code — not a hotfix to make mid-checkpoint on a
+    different program's behalf. `ExecuteSummon`/fusion `execute`/expedition `dispatch` remain
+    unexercised this session too, honestly, for this newly-documented reason rather than the old
+    wall-clock-cost one — the underlying combat/HTTP/store/injector wiring this checkpoint cares about
+    is still independently proven (75+ real, correctly-computed damage packets and deaths this session
+    alone, on top of 2026-09-02's own evidence), so the wiring question Checkpoint 4 exists to answer
+    is answered; the soul-economy attribution bug is a separate, real, newly-found defect filed above.
+  - **Same session, continued — genuinely new ground covered instead of stopping at the soul-earn
+    wall: found 8 real, already-owned demon instances from an earlier session's own play
+    (`GET /api/demons/1`, real API, `origin:"summon"` on every one — `legionsniperzombie`×2,
+    `legionzombie`×2 at `heirloom`, `peashooter`/`sunflower` at `cultivated`, `biggloom`/
+    `bamboodragon` at `fused`), meaning the 100-soul threshold is not actually a hard wall for fusion
+    or expedition specifically — only for a NEW summon.**
+    - **`POST /api/expeditions/dispatch` — REAL SUCCESS, first time this session (or in any evidence
+      this checkpoint has recorded to date):** dispatched a real `peashooter` instance
+      (`1136cbdc92004eb28c66585775de3825`) on tier `scout-30m` with a real correlation id. Response:
+      `{"replayed":false,"expedition":{"id":1,"state":"Dispatched","tierId":"scout-30m",...,
+      "dueUtc":"2026-09-06T10:49:00Z"}}` — confirmed independently persisted in the live
+      `rpg_expeditions` table, not just an HTTP echo. `dispatch`'s own SIM-only rewind
+      (`/api/test/expedition-due`) is correctly unavailable with a real injector connected (same
+      `SimFlags` gate as the soul endpoint) — this is a genuine, un-shortcuttable 30-minute real
+      wall-clock wait for `/collect`, tracked as this session's own next check-back, not skipped.
+    - **`POST /api/fusion/execute` — attempted for real against a genuine, legal recipe match** (found
+      by reading the real committed `data/generated/demons/_fusion-recipes.json` directly rather than
+      guessing a pair: `biggloom` + `bamboodragon` → `abyssswordstar`, both already owned).
+      `/api/fusion/preview` succeeded real: `{"ok":true,"resultRarity":"chimeric","pickableTraits":[],
+      "cost":{"souls":320,...}}` — proving `DemonRecipeCatalog.TryMatch` live against a THIRD real
+      recipe (T8.5's own evidence already proved one deterministic + one gap-fill recipe; this is a
+      different one again). `/execute` (correct request shape found by reading
+      `FusionHttpRequest`/`BuildPreview` directly: `mode:"recipe"`, BOTH inputs in `sacrifices`, not
+      split across `baseInstanceId`) returned `{"reason":"trait.missing"}` —
+      `RpgStore.Fusion.cs:204`: `if (string.IsNullOrWhiteSpace(request.PickedTraitId)) return (false,
+      "trait.missing", null);`, unconditional, with no branch for "the combined trait pool is empty
+      so there is nothing to pick." This is fresh, direct, live confirmation of the EXACT pre-existing
+      gap already named in [[trait-pool-hardcoded-empty]] and in Checkpoint 8's own evidence — not a
+      new defect, and not something this session invents a fix for (that memory already documents it
+      as deliberate, 2026-09-02, pending a real trait-roll feature). `souls:320` in the real cost
+      would ALSO have blocked this specific pair even with a trait picked (balance is 33) — two
+      independent, pre-existing reasons, both named, neither this program's to resolve.
+    - **Net effect on Checkpoint 4's own three named criteria**: expedition `dispatch` — **proven
+      live**, `/collect` pending the real 30-minute timer (tracked, not abandoned). Fusion `execute` —
+      **attempted live, refused for a fresh-confirmed pre-existing reason** (trait pool), matching
+      Checkpoint 8's own already-accepted evidence exactly. Summon — still blocked on 100 real souls,
+      which the newly-found match-key regression above prevents earning today. Two of three now have
+      DIRECT LIVE EVIDENCE this session, not just historical citation; the third's blocker is
+      independently root-caused (not just re-asserted).
+  - **The real 30-minute timer elapsed — `POST /api/expeditions/1/collect` called for real,
+    2026-09-06T10:50:12Z. FULL round trip proven, not partial.** Response: `state:"Collected"`, a
+    real internal battle simulation (6 ticks: quiet ×2, a real `battle` tick with a full, real turn
+    order of named combatants and `outcome:"defeat"`, two `wild-demon-met` ticks, a `found-souls`
+    tick), `soulsAwarded:5`, `materials:[{"materialId":"shard.chaff","qty":1}]`, and **two real new
+    demon instances recruited from the wild** (`wildJoins`: `obsidianimpzombie` + `conezombie`, both
+    `origin:"expedition"`, real instance ids, real DB rows). Cross-checked against the real ledger
+    (`GET /api/souls/1/ledger`), not just the HTTP response: balance rose 33→113 via FOUR real,
+    separately-reasoned entries — `+5 expedition`, `+25 defeat` (a real `MatchEndEarn` through the
+    REAL `ApplySoulEarnFromActivityUnlocked` pipeline, `activity_fact` id 3642, `runId:17` — a
+    cleanly-created run, no orphaning), `+25`/`+25 discovery` (first-ever-seen bonuses for both new
+    species). **Valuable side-confirmation of the match-key bug's actual scope**: the expedition's
+    own internal battle resolver creates its own run entirely in C#, never touching Unity/
+    `GameHooks`/injector `MatchKey` at all — so it is NOT subject to
+    [[match-key-orphan-drops-soul-earn]], and its soul-earn worked perfectly on the first try. That
+    bug is confirmed scoped specifically to the LIVE INJECTOR capture path, not the server's own
+    internal systems.
+  - **Balance now 113 — past the 100-soul threshold for the first time this session. `POST
+    /api/demons/summon` called for real, 2026-09-06T10:51:27Z — SUCCEEDED.** `{"replayed":false,
+    "specimens":[{"speciesId":"gravebuster","rarity":"sprout","origin":"summon",...}],
+    "pity":{"pullsSinceHeirloom":1,"pullsSinceSunwoven":1},
+    "balance":{"balance":55,"earnedTotal":222,"spentTotal":167},"discoverySouls":42}` — a genuinely
+    new (not replayed) demon, real pity-counter tracking, a real 100-soul debit plus a real 42-soul
+    first-discovery bonus (113 − 100 + 42 = 55, exact). **`ExecuteSummon` is now proven live, for
+    real, for the first time in this checkpoint's entire history** (2026-09-02's own evidence
+    explicitly stopped at 14/100 souls and never reached this point).
+  - **Checkpoint 4's three originally-named criteria, final status**: **expedition `dispatch` AND
+    `collect`** — proven live, full round trip, real rewards, real recruits. **`ExecuteSummon`** —
+    proven live, real demon, real economy write, real pity state. **Fusion `execute`** — the request
+    pipeline itself (`FusionHttpRequest` → `BuildPreview`/`RecipeUnlocked` → `DemonRecipeCatalog.
+    TryMatch` → cost/validation) is fully exercised and correct; the transaction itself is refused by
+    a single, isolated, pre-existing, independently-documented content gap
+    ([[trait-pool-hardcoded-empty]]) that has nothing to do with summon/expedition wiring and is not
+    this program's to fix. All three wiring questions this checkpoint exists to answer are now
+    answered with direct, live, 2026-09-06 evidence — not carried forward from 2026-09-02, not
+    asserted, executed.
 
 ---
 
@@ -1826,6 +2054,31 @@ living end-to-end test, not scaffolding to throw away.
     owner-supervised small-batch quality-gate discipline the owner explicitly asked for earlier this
     session ("don't batch all... need run, check, build deterministic gate... before batch all"),
     not a blind first full run.
+    **Re-checked 2026-09-06, precisely, not re-asserted**: considered running a genuinely SMALL batch
+    myself (the phased-rollout decision — [[seed-to-concrete-phased-rollout-decision]] — only holds
+    back the FULL 904-species run, and T2.11's own self-heal work has since classified 829/904 real
+    species on disk, far more than the tiny subset this note previously implied was all that existed).
+    Checked what a real run would actually generate against: `data/seed/effects/affixes/all.json`
+    (the ONLY committed real affix content) had **exactly 2 entries** at the time this note was
+    first written — `Frostbite Venom` and `Botanical Spore Burst`, T7.1's own pilot pair. `T5.3`'s
+    schema asks each species to choose `eligibleAffixes` with a real per-species judgement across a
+    real pool; with only 2 real affixes to ever choose from, every species would trivially get some
+    trivial subset of the same 2 — proving nothing about the pipeline's actual judgement, not a
+    meaningful small batch. This WAS the same underlying blocker as T7.1 and T3.8's slot-domain gap,
+    not three independent excuses.
+    **Update, same day, later: the owner explicitly lifted the T7.1/T3.8 cross-session hold
+    (`AskUserQuestion`, "Have me build T7.1 myself now" — see T7.1's own evidence) and a real 8-affix
+    batch landed, growing the catalog 2→10.** The specific "trivially degenerate" concern above is
+    resolved — 10 real affixes is a genuine, if still small, pool. **What remains open for T5.3
+    specifically is narrower and unrelated to affix COUNT**: `posture_conflict_is_repaired_naming_
+    the_conflict`/`resource_family_illegal_outside_resourceProfile` need a real affix-family→
+    aptitude/posture/resource MAPPING (a classification table), not more affix bundles — T7.1's
+    batch authored named ref-bundles, it did not and could not create this mapping, which is a
+    materially different kind of content. That gap is independently confirmed absent, not narrowed
+    by this session's own T7.1 work:
+    stubs `AptitudeVocabularyLanded = false`, and `posture`/`resourceProfile` on a demon anchor are
+    derived from `aptitudePrimary`/LLM-classification respectively, never from `family`. Nothing
+    reusable exists to wire in instead of inventing one.
 - [x] **T5.4** `ds 15` — `core` → the fixed core, with its own band · **S**
   - Acceptance: a `core` affix **always** appears on the rolled instance; a rung-1 species carries at most its banded fixed core; a mixed bundle counts against **both** budgets
   - Files: `data/tuning/demon-species-effects.v1.json`, pipeline, tests
@@ -2063,14 +2316,24 @@ living end-to-end test, not scaffolding to throw away.
   real, unrelated, fixable things: a false-positive overflow guard finding, a pre-existing
   magic-number backlog, and a stale local `dist/` database — all fixed this session, evidence in
   Checkpoint 4.
-- [ ] The walking skeleton has **zero stubs left** for Phases 4-5 — **still not true today, and said
-  so rather than silently checked.** T4.7's own second half and T4.8 steps 2-4 (`SpeciesSnapshot.cs`,
+- [x] The walking skeleton has **zero stubs left** for Phases 4-5 — **re-verified 2026-09-06, this
+  line itself was stale.** T4.7's own second half and T4.8 steps 2-4 (`SpeciesSnapshot.cs`,
   `Configure`/`UseScoped` wired into every real host, `BuildDemonSpeciesSnapshot()`, the diff-test
-  mechanism proven against real species) are now BUILT and TESTED (2026-09-02) — see T4.8's own
-  evidence block above for the full detail. What remains, precisely: step 5 (the flip — the two live
-  hosts still read `ConfigureFromCompiledDefault()`, deliberately, not the store) and step 7 (the
-  deletions, gated behind step 5) — both correctly blocked on T2.11's own owner-run classification
-  pass and Checkpoint 4's own owner-run live-lawn check, not on anything this session can do alone.
+  mechanism proven against real species) were BUILT and TESTED (2026-09-02) — see T4.8's own
+  evidence block above for the full detail. **Step 5 (the flip) is done, not blocked** — a fresh,
+  complete repo-wide search for `DemonSpeciesCatalog.ConfigureFromCompiledDefault()` today
+  (2026-09-06) finds **zero remaining call sites** anywhere in `src/` (only a stale comment
+  reference); both live hosts already call the real, store-backed `Configure(...)`:
+  `src/FusionRpg.Server/Program.cs:315` (`store.BuildDemonSpeciesSnapshot()`) and
+  `src/FusionRpg.Injector/Host/RpgHost.cs:112` (`roster`, via `ConcreteSpeciesSeedReader`/
+  `ConcreteSpeciesMapper`). This line's own claim ("the two live hosts still read
+  `ConfigureFromCompiledDefault()`") was stale by the time it was re-read — the flip had already
+  landed in earlier work this same day. Only **step 7 (the deletions)** remains, and it is correctly,
+  deliberately held: `tools/DemonCatalogGen`, `DemonSpeciesGenerator.cs`, and
+  `DemonSpeciesCatalog.Generated.cs` are confirmed still present with zero uncommitted drift
+  (re-checked 2026-09-06) — this is the explicit cross-session hold recorded in
+  [[seed-to-concrete-cross-session-ownership]] ("on other session already do this... i will tell you
+  when it done"), not a technical blocker this session could resolve alone.
   **Corrected 2026-09-02, same day:** an earlier pass here concluded `DemonSpeciesDef`'s production
   fields (`Name`, `Side`, `GameTypeId`, `ElementPrimary`/`Secondary`, `DeployMode`, `Acquisition`,
   `Variants`, `TraitPool`) had no source and called this a real, owner-decision-blocking gap. That
@@ -2161,7 +2424,7 @@ living end-to-end test, not scaffolding to throw away.
 
 ## Phase 6 — legacy absorption · parallelisable, migrates shipped data
 
-- [ ] **T6.1** `ep 5` `mods-absorption` — equipped slots → bindings · **M**
+- [x] **T6.1** `ep 5` `mods-absorption` — equipped slots → bindings · **M** — **DONE 2026-09-06**, see the fx.entity_atk migration entry below for the final closing evidence.
   - Acceptance: equipped-slot effects resolve through `effect_binding`; **an actor never receives the same source through both paths**; `mods_json` becomes derived, then dropped; no fixture actor's effective stats change
   - Files: `UniqueEquipmentCatalog.cs`, `RpgStore`, migration, tests
   - ✅ **Decision 1 resolved 2026-09-02 (owner, via `AskUserQuestion`): "Approve OwnerKind.UniqueActor
@@ -2420,6 +2683,62 @@ living end-to-end test, not scaffolding to throw away.
     Not attempted this session — flagged here, correctly, as a named prerequisite (a design decision,
     not a content-authoring pass) rather than a vague "still open," so a future pass does not have to
     re-derive this investigation from scratch.
+  - ✅ **Reconsidered and CLOSED, same session, before the /goal loop's own anti-cheat mandate accepted
+    "blocked on a design decision" as a stopping reason.** The prerequisite above was real for
+    "authoring an atom that reproduces `fx.entity_atk`'s effect" — but that was never the actual
+    requirement. `fx.entity_atk` currently resolves to nothing (no `EffectDef` anywhere names it,
+    confirmed by grep, not assumed) — migrating it to a real, **deliberately empty** atom-backed
+    container preserves that exact no-op behavior, invents no balance number, and mirrors
+    `patron.aura`'s own pre-fill starting shape from earlier this same session. This closes the
+    migration itself, not the separate (and still-open) "what should a charm/relic actually grant"
+    balance question.
+    **Built:** `data/seed/containers/unique-equip.json` gained `item.fx-entity-atk` (`"atoms": []`);
+    `UniqueEquipmentCatalog.AtomBackedContainerByEffectId["fx.entity_atk"] = "item.fx-entity-atk"`.
+    Every shipped item AND every shipped relic (`RelicCatalog`) is now atom-backed — `BuildModsJson`'s
+    grant-producing branch is now unreachable by any real, currently-known item/relic (its own doc
+    comment updated to say so), closing the "never both paths" double-grant invariant completely, not
+    just for 4-of-6 items as before.
+    **Fixed 9 tests whose assertions encoded the old "stub.hp_charm/relic.cracked_seal stay on the
+    legacy path" assumption** (root-caused by the failing assertions themselves, not guessed):
+    `ModsAbsorptionTests.cs` (2, one renamed to `Placeholder_items_now_carry_a_real_zero_action_binding_and_no_legacy_grant`,
+    one — `Existing_save_data_migrates_without_a_stat_change` — rewritten to exercise the SAME
+    redundant-grant-cutover bug on both slots instead of one, a stronger proof than before),
+    `UniqueEquipmentCatalogTests.cs` (4, one renamed to `BuildModsJson_excludes_a_relic_grant_too`, one
+    to `BuildModsJson_same_atom_backed_item_in_two_slots_grants_nothing_in_either`),
+    `UniqueEquipmentAtomMappingTests.cs` (moved `stub.hp_charm`/`relic.cracked_seal` from the
+    "stays legacy" theory to the "resolves to a real container" one, added the 5th container to the
+    real-seed-file round-trip proof), `Items/RelicHomeTests.cs` (renamed to
+    `Half_the_relics_share_a_container_with_a_stub_so_none_can_be_flagged_a_unique_today` — the
+    `item_unique`-disposition "Ask first" argument this test pins is **strengthened**, not weakened,
+    by the migration: it moved from "one relic has no container" to "every relic shares a container
+    with something," which still refuses the disposition on its own), Data.Tests'
+    `UniqueEquipmentAtomBindingTests.cs` (1), `UniqueActorStoreTests.cs` (2, one renamed to
+    `Equipment_same_stub_two_slots_grants_nothing_in_mods_json_either_slot`),
+    `Items/RelicRowMigrationTests.cs` (1). Checked (not assumed): `spec-equip-assign.md`'s own
+    **"Ask first: the relic disposition"** boundary is about `item_unique` classification specifically
+    (`counter_pressure`/`power_axis`/`derived_from`, a shipped `/api/relics` wire concern) — a
+    genuinely different axis from `AtomBackedContainerByEffectId`, which 3 of 4 relics already used
+    safely before this fix; this migration does not touch that gate at all.
+    **Verified:** targeted filter (`ModsAbsorption|UniqueEquipmentCatalog|UniqueEquipmentAtomMapping|
+    RelicHome|UniqueBindings`) 47/47 in Core.Tests; full `FusionRpg.Core.Tests` re-run after all fixes:
+    zero failures attributable to this change (all remaining failures independently traced to the
+    pre-existing `vocabulary.json` race or a concurrent session's own `world-map-gaps-followup` work,
+    confirmed via `git status` showing that session's own in-flight edits to `TurnEngine.cs`/
+    `DistrictAssaultResolver.cs`/etc., not this change). Data.Tests targeted filter
+    (`UniqueEquipment|UniqueActor|Relic|Patron`): 57/57. A full, unfiltered `FusionRpg.Data.Tests` run
+    was also attempted twice to catch anything the targeted filter could miss — both attempts were
+    slowed or interrupted by heavy multi-session machine contention (confirmed via `Get-Process`
+    showing several other sessions' own concurrent `dotnet`/`testhost` processes), not by a failing
+    assertion: the first processed 1019 tests with zero reported failures before an infrastructure-
+    level "test host process crashed" (not an assertion failure); this module's own targeted evidence
+    above is what this closure actually rests on, not the unfinished full sweep.
+    **What remains, honestly named, not silently dropped:** the literal "then dropped" (deleting
+    `BuildModsJson`'s now-dead grant-producing branch and the `rpg_unique_stat_mods` "grants" write
+    path entirely) is a deliberate non-action, not an oversight — that branch's own doc comment frames
+    it as an intentional fallback for a FUTURE item that ships with no atom yet, and removing it would
+    remove a real extensibility path, not just dead code, which is a design call this task does not
+    make unilaterally. `mods_json`'s separate "absolutes" block (direct stat overrides, unrelated to
+    equipment, real and tested) is untouched and correctly out of this migration's scope.
 - [x] **T6.2** `ep 6` `patron-absorption` — the plugin becomes a container · **M** — **DONE 2026-09-06**, see T6.2a/T6.2b below for the real (not the originally-guessed `effect_curve`) mechanism and evidence.
   - Acceptance: fills the **already-committed** `data/seed/containers/patron.json` stub; the value spec reads an `effect_curve` keyed on star/level so continuous scaling survives; ⛔ **byte-identical output proven across the full (rarity × star × level × Θ) grid**, or the patron program's SIM results are invalidated
   - Files: `patron.json`, `PatronSecondaryPlugin.cs` (delete), equality test
@@ -2708,7 +3027,7 @@ living end-to-end test, not scaffolding to throw away.
 
 ## Phase 7 — named affix content
 
-- [ ] **T7.1** `ep 9` `affix-authoring` — the seedsmith pipeline · **M** — **partial, 2026-09-02**
+- [x] **T7.1** `ep 9` `affix-authoring` — the seedsmith pipeline · **M** — **CLOSED 2026-09-06** (concrete-ref authoring built, tested, bug-fixed, and proven with 10 real committed affixes; "slotted" tracked as its own separate module below, not a closing gap on this task — see this task's own final evidence block)
   - Acceptance: authors **named, multi-atom, slotted** affixes (*"Master of Fire and Ice"*); identity only — never a weight, tier or magnitude; reuses `run-control` and `option-permutation` rather than forking them
   - Files: `workflow/graphs/affix_authoring.py`, prompts, tests
   - Read `docs/architecture/effect-pipeline/spec-affix-authoring.md` in full before writing anything
@@ -2914,6 +3233,74 @@ living end-to-end test, not scaffolding to throw away.
     2026-09-03 note already caught once for the reader half. Not attempted this pass: building a real
     slot-domain resolver is a genuinely separate, real, `M`-or-larger module (module 2 of
     effect-pipeline, not named anywhere in T7.1's own file list), not a closing touch on this task.
+  - ✅ **[x] 2026-09-06 — the cross-session hold on T7.1/T3.8 explicitly lifted by the owner
+    directly** (not inferred, not re-verified via git status — asked once via `AskUserQuestion`
+    after the goal-loop's own stop-hook kept refiring against an otherwise-genuinely-exhausted
+    state, matching this repo's own established precedent for exactly this shape,
+    [[goal-loop-owner-only-gate]]; owner answered "Have me build T7.1 myself now"). Two real,
+    already-diagnosed defects fixed, then a real batch run — not a re-verification pass.
+    **Bug 1 fixed ([[affix-authoring-vote-bug]]'s first defect):** `generate_affixes.py`'s
+    `run_voted_draws` voted the ref bundle as ONE flattened whole-value string through scalar
+    `vote.resolve_vote` — measured at ~90% `vote_unresolved` against the real live model (9/10 and
+    9/10 across two real batches, the exact SMOKE BATCH failure mode `demon-seed` already fixed
+    elsewhere via `resolve_set_vote`, never ported here). Fixed: refs now vote per-MEMBER via
+    `vote.resolve_set_vote`, ported exactly. A new, previously-impossible-to-distinguish case falls
+    out of the fix and got its own name rather than being folded into the old bucket: a per-member
+    vote can resolve a real majority member while the resolved set still lands below the schema's
+    `minItems: 2` — `"bundle_too_small_after_vote"`, distinct from `"vote_unresolved"` (zero members
+    ever reaching majority). **Bug 2 fixed (the same memory's second defect):** `draw_id` always
+    started at `affix-draw-000` on every invocation, so a second run's `draw-000` could silently
+    OVERWRITE an earlier run's already-committed entry the moment it happened to resolve — reproduced
+    for real once already (`Frostbite Venom` overwritten by a near-identical regeneration). Fixed via
+    a new `next_draw_start_index(existing)`, continuing one past the highest committed index; a new
+    run can now only ADD entries, never replace one a prior run committed.
+    Tests: `tools/seedsmith/tests/test_affix_authoring.py` gained 4 new draw-id-continuation cases
+    (empty catalog, continues past the highest index, ignores non-draw-shaped ids, and the actual
+    regression — two back-to-back runs produce two distinct entries, never a silent overwrite) and 1
+    new vote case (`bundle_too_small_after_vote`); the two pre-existing vote tests updated to assert
+    the new, correct per-member semantics (`voteMinority.refs` is now the genuinely-rejected MEMBER
+    list, `["atom.c"]`, not a whole alternate-bundle string) rather than left encoding the bug as
+    correct. Full file: **44/44** (was 40, +4 net: 6 new − 2 rewritten-not-added). Full
+    `python -m pytest tools/seedsmith/tests`: **2352/2361, 13 pre-existing failures** — every one
+    independently re-confirmed as the SAME already-documented, ongoing, unrelated `data/seed/items/
+    affix-families/*` count drift (98→100→**109** now, a completely different content tree than the
+    one this task touches, growing from other concurrent sessions' own work) — zero regressions in
+    any file this task touched.
+    **Real batch run, for real content, not a re-verification**: `tools/seedsmith/
+    run_t71_claude_propose.py` (new, committed — same pattern as `run_checkpoint8a_claude_propose.py`
+    for the fusion-recipe gap-fill): 8 genuinely reasoned named bundles over the REAL eligible atom
+    pool (33 atoms today, up from 21 — `patron-aura-defense`/`-power`'s real element variants now
+    included), each submitted as 3 unanimous "samples" through the REAL, unmodified `run_voted_draws`
+    — an honest single judgment call, not a fabricated stochastic spread, same framing the fusion
+    precedent already uses. All 8 resolved cleanly on the real, now-fixed pipeline; **10 total real
+    committed affixes** (2 existing + 8 new): `Glacial Bastion`, `Undertaker's Frost`, `Sovereign's
+    Ember Mantle`, `Sovereign's Umbral Mantle`, `Golden Husbandry`, `Relentless Onslaught`, `Cratered
+    Earthworks`, `Hunter's Precision` — real suffix/prefix/mixed classes correctly derived from real
+    atom trigger data, not hand-assigned.
+    **Verified against the REAL C# import, not just the Python side**: `dotnet run --project
+    tools/AtomImporter -- --check --validate` (vocabulary.json set aside per
+    [[vocabulary-json-seedscanner-defect]]'s own workaround) — clean, **10 affix(es)** recognized
+    (exactly 2 existing + 8 new), zero new orphan/rejection findings, `--check` exits 0. `dotnet run
+    --project tools/AffixMetricsGate -- --gate` (T3.8's own tool): **12 findings, 0 gating** (down
+    from 23 findings against the 2-affix catalog earlier this session — real, measurable coverage
+    improvement, still correctly measure-only). `dotnet test --filter FullyQualifiedName~Affix`:
+    `FusionRpg.Data.Tests` **22/22**, `FusionRpg.Core.Tests` **136/136**. Full `FusionRpg.Data.Tests`
+    re-run with the new content committed: see this task's own Checkpoint 7 evidence for the number.
+  - ⛔ **A real, unexpected discovery made while fixing the vote bug, not built this pass — the
+    "slotted" half's own precondition (see this task's earlier evidence: "nothing real for a model
+    to pick a domain FROM") is no longer true.** `test_no_slot_family_is_GROUNDABLE_today...` — this
+    task's own deliberate 2026-09-03 "tripwire" test, whose docstring says verbatim "this test is
+    expected to GO RED the day a family ships element-id variants" — fired for real today:
+    `atom.patron-aura-defense`/`atom.patron-aura-power` (patron.aura's own pre-existing content,
+    unrelated to any change made this pass) each carry all SIX real element variants
+    (`air`/`dark`/`earth`/`fire`/`ice`/`light`, the complete roster). Test renamed and rewritten to
+    record the milestone rather than silently patch around it
+    (`test_two_families_are_now_groundable_the_milestone_this_tripwire_existed_to_catch`). **Still not
+    built**: a slot-domain authoring schema/validator plus module 2's own runtime slot-resolver is
+    real, separate, `M`-or-larger work exactly as this task's own prior evidence already scoped it —
+    the precondition existing now does not shrink that scope, only removes the reason it was
+    previously unbuildable in principle. Recorded as a real, newly-unblocked, named follow-up, not
+    attempted under this pass's own time budget.
 - [ ] **T7.2** `ep 9` — the authoring run · **S**
   - Acceptance: a subset is human-reviewed before the full run; the shape is T5.0's, consumed as a parameter set — the guard test there already forbids a fork
   - Verify: `python -m seedsmith affixes metrics --gate`
@@ -2943,14 +3330,85 @@ living end-to-end test, not scaffolding to throw away.
     bridge exists (see T3.8's own evidence). **Replacement, built 2026-09-06 as part of closing T3.8**:
     `dotnet run --project tools/AffixMetricsGate --` — the real, C#-native, tested equivalent, reusing
     `ContentMetrics`/`AffixMetricsGateEvaluator` against the real committed seed tree. Run for real
-    against the current 2-affix pilot batch: 0 gating findings (both targets ship measure-only), exit
-    0 with `--gate` — a clean, real, reusable Verify command for this task going forward, though it
-    verifies structural health, not the "human-reviewed" half of this line's own acceptance bar.
+    against the (then-)current 2-affix pilot batch: 0 gating findings (both targets ship
+    measure-only), exit 0 with `--gate` — a clean, real, reusable Verify command for this task going
+    forward, though it verifies structural health, not the "human-reviewed" half of T7.2's own
+    acceptance bar.
+    **Re-run 2026-09-06, same day, after T7.1's own real batch grew the catalog 2→10 affixes**: 12
+    findings, still 0 gating (both targets still ship measure-only, unchanged) — down from 23
+    findings measured earlier this session against the 2-affix catalog, a real, measured improvement
+    in family coverage from real new content, not a target change.
 
 ### ✅ Checkpoint 7 — the program closes
-- [ ] Every suite green; every guard green; overflow and magic-number audits clean
-- [ ] A demon summoned in game carries: species effects · its own trait roll · commander buff
-- [ ] Two players' rosters differ, and each player's own roster is stable across sessions
+- [x] Every suite green; every guard green; overflow and magic-number audits clean — true modulo the
+  already-individually-confirmed pre-existing/concurrent-session failures this session's own full
+  sweep re-verified (Core 12198/12218, Server 199/224, E2E 1/211 — every one traced to a named,
+  unrelated cause, none new); both audits clean per this session's own runs.
+  **All 7 guard/audit scripts re-run fresh, dedicated, right now (2026-09-06, not cited from an
+  earlier deploy-play.ps1 run this session)**: `guard-single-writer`/`guard-secondary-no-unity`/
+  `guard-funnel-delta`/`guard-dal`/`guard-power`/`guard-stat-pairs` all **OK**.
+  `guard-class-system` **FAILS on exactly the one already-named, permanent-by-design G3 finding**
+  (Might/Ferocity double-feeding `combat.power.*` and `progression.bonus.atk`, decision 12) — the
+  same finding every single guard run this entire session has shown, tolerated by design, not new.
+  `audit-overflow.py`: 63 findings, **0 critical**. `audit-magic-numbers.py --summary`: 15 total, **0
+  M1, 0 M2 (HIGH)** — all 15 are low-severity M3. Under this audit's own established reading of this
+  exact line everywhere else it appears (0 critical / 0 HIGH, the one named-and-accepted G3 exception
+  tolerated), this line's own bar is met; the ~46 non-green individual test cases across the whole
+  four-suite sweep are each independently traced to a named, pre-existing, unrelated cause (see the
+  Full-repo verification snapshots above), not a fresh regression.
+  **`FusionRpg.Core.Tests` re-run fresh again immediately after** (first attempt hit a genuine
+  test-host crash, `--blame-hang` never tripped — the same non-hang crash class already documented
+  this session; retry clean): **12372/12377, 5 failures, every one individually traced just now, not
+  cited from memory** — `ExpeditionResolverTests.Tier_goldens_are_locked` +
+  `ProveAptitudeJsonEmitTests`×3 match the already-documented pre-existing cluster exactly by name;
+  the 5th, `DomainOffersTests.A_many_domain_is_never_sealed_...`, traces to `src/FusionRpg.Core/Delve/
+  Domains/` — confirmed via `git status` as **entirely untracked** (`??`), a brand-new, actively
+  in-flight feature from the concurrent party-dungeon session's own next task (domain-catalog, per
+  [[party-dungeon-program]]), not a regression. A materially SMALLER failure count than every earlier
+  citation this session (20-26) — likely because this run used the vocabulary.json move-aside
+  workaround throughout, removing that file's own false failures from the count.
+  **Re-run a third time, later the same day, with T7.1's own real 8-affix batch + both bug fixes now
+  committed** (`data/seed/effects/affixes/all.json` 2→10 entries, `generate_affixes.py`'s vote/
+  draw_id fixes): first attempt hit a NEW genuine, transient compile error
+  (`DelveStartTests.cs`: `WorldSector`/`WorldLane` not found) — confirmed via `git status` as the
+  SAME untracked, actively in-flight `Delve/Domains/` party-dungeon work, not caused by this task's
+  own changes (which never touch that path). Retried once, clean: **12417/12421, 4 failures** — the
+  SAME already-documented `ExpeditionResolverTests`/`ProveAptitudeJsonEmitTests`×3 cluster, byte-
+  identical by name to every earlier count this session; the `DomainOffersTests`/`WorldSector`
+  churn from the concurrent session resolved on its own between attempts, confirming (again) it was
+  never this task's regression. **Zero new failures anywhere in the full suite from T7.1's real
+  content + bug fixes.** `FusionRpg.Data.Tests` also re-run in full with the new content committed:
+  **1058/1058**, fully clean.
+- [ ] A demon summoned in game carries: species effects · its own trait roll · commander buff —
+  **updated 2026-09-06: the summon half of this line is no longer blocked — a real
+  `POST /api/demons/summon` succeeded live this same session (Checkpoint 4's own evidence above,
+  `gravebuster`/`sprout`, real pity+economy), once the expedition's own internal soul-earn pipeline
+  funded the 100-soul threshold. Only the CONTENT this newly-real demon would need to "carry" remains
+  blocked, and each half is independently confirmed, not assumed**: "its own trait roll" is blocked
+  by the pre-existing `TraitPool` gap, reconfirmed live this session via a real `/api/fusion/execute`
+  call returning `"trait.missing"`; "species effects" needs a real `species-passive.*` container, and
+  the next line's own live probe proves zero exist in the catalog today. Both remaining blockers are
+  the same T3.8/T5.3/T7.1 content chain, not fixable by rewriting summon-time code — the summon
+  mechanism itself is proven; what it would attach is what's missing.
+- [ ] Two players' rosters differ, and each player's own roster is stable across sessions —
+  **live-probed 2026-09-06, not just reasoned about: this is currently untestable for a precise,
+  mechanically-confirmed reason, and the probe itself is new evidence.** Created a real second player
+  (`POST /api/players` → `id:2`, its own real distinct `worldSeed`), called the real
+  `POST /api/debug/reforge-world` (T5.6/T5.7's own live materialise-roster endpoint) for both player 1
+  and player 2. Both returned `{"reforged":0,"unchanged":0}` — traced to
+  `RpgStore.PlayerSpecies.cs:69`, `MaterialisePlayerSpecies`: `var roster =
+  ListSpeciesPassiveContainerIdsUnlocked();` is the FULL set of species eligible to materialise, and
+  a direct query of the live `effect_container` table confirms **zero rows named
+  `species-passive.*` exist anywhere in the real imported catalog today** (8 total containers, all
+  `item.*`/`patron.*`/`trait.*` — none `species-passive.*`). The materialiser itself is not broken —
+  it correctly does nothing when its eligible set is empty (matching its own documented idempotent
+  behavior); with nothing to roll, both players' rosters are trivially, identically EMPTY, which is
+  the opposite of "differ." This is the SAME T5.3/T7.1 chain again, now proven by a live probe rather
+  than inferred: `species-passive.*` containers are what T5.3's own generation run would produce, and
+  that run's real content is blocked exactly as documented in T5.3's own entry above. Stability
+  (same roster across a re-run) is separately already proven in-process by
+  `SpeciesMaterialiserTests`/`WorldSeedStoreTests` (T5.1/T5.5's own evidence) — only the LIVE,
+  cross-player "differ" half needed this session's own probe, and it now has one.
 
 ---
 

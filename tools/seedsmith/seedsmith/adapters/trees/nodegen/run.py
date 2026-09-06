@@ -40,6 +40,7 @@ import json
 import os
 import re
 import tempfile
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field, replace
 from pathlib import Path
@@ -395,11 +396,14 @@ _NULLISH_BLOCKED_TOKENS = frozenset({"false", "none", "null", "n/a", "na"})
 def _normalize_blocked(out: "Mapping[str, Any]") -> dict:
     """See `general_propose.derive._normalize_blocked`'s own docstring for the full real-call
     evidence and reasoning. Any member of `_NULLISH_BLOCKED_TOKENS` (any case/whitespace) is folded
-    back to the empty string here, once, right where the raw draft leaves the model boundary — never
-    inside `_node_verify_fn`, which stays a pure hard/soft classifier. `"true"` is deliberately NOT
-    normalized: no real-call evidence for that direction exists here either, and silently
-    reinterpreting it risks masking an actual decline this module has no way to tell apart from the
-    same confusion."""
+    back to the empty string here. Applied in TWO places, deliberately, not one:
+    `call_one_node_sample`'s own return (so the CALLER never misreads "none" as a genuine block) AND
+    inside `_node_verify_fn` itself (⛔ corrected 2026-09-06 — see that function's own docstring for
+    the real-call evidence a single application at the boundary was not enough: the raw, unfolded
+    value inside the self-heal loop could short-circuit `gate()` entirely before it ever ran).
+    `"true"` is deliberately NOT normalized: no real-call evidence for that direction exists here
+    either, and silently reinterpreting it risks masking an actual decline this module has no way to
+    tell apart from the same confusion."""
     if isinstance(out, Mapping) and str(out.get(BLOCKED_FIELD, "")).strip().lower() in _NULLISH_BLOCKED_TOKENS:
         return {**out, BLOCKED_FIELD: ""}
     return dict(out) if isinstance(out, Mapping) else out
@@ -409,11 +413,30 @@ def _node_verify_fn(gate: "Callable[[Mapping[str, Any]], list[str]]") -> "Callab
     """`call_with_self_heal`'s own `verify_fn(items, out) -> (hard, soft)`, closed over one node's
     `gate`. A declared `blocked` response short-circuits (an honest decline is never a defect, the
     same rule every pipeline in this repo already applies) — the caller reads `out[BLOCKED_FIELD]`
-    to tell a genuine decline from an accepted draft."""
+    to tell a genuine decline from an accepted draft.
+
+    ⛔ **Corrected 2026-09-06, real-call finding (`fortitude`, 4/40 nodes): `_normalize_blocked`
+    MUST run before this short-circuit, not only on the way out.** The original design (this
+    function's own prior docstring: "never inside `_node_verify_fn`, which stays a pure hard/soft
+    classifier") folded a nullish `blocked` token ("false"/"none"/etc) only in `call_one_node_sample`,
+    AFTER the whole self-heal loop already finished — but `verify_fn` runs INSIDE that loop, on the
+    RAW, unfolded value, every attempt. A real local model that fills `blocked: "false"` alongside a
+    fully-drafted (and, in these four real cases, internally INCONSISTENT — `affixIds` and `affinity`
+    different lengths) content payload made this line read `out.get(BLOCKED_FIELD)` as truthy,
+    short-circuiting BEFORE `gate()` ever ran — so the length mismatch was never checked at all, and
+    the malformed draft was accepted as a clean, unblocked response. Proven live: three vote samples
+    for the SAME subject each independently returned the identical malformed
+    `(affixIds=["atom.might","atom.ferocity"], affinity=["core"])` shape, all three "succeeding"
+    with `soft={}` (never exhausted), which is only possible if `gate()` never ran on any of them.
+    Normalizing here, before the check, makes `verify_fn` react to the SAME folded value
+    `call_one_node_sample` ultimately returns — a `blocked: "false"` draft is no longer treated as a
+    genuine decline, so `gate()` runs against its content fields exactly as it would if the model had
+    left `blocked` empty in the first place."""
 
     def verify_fn(_items: "Mapping[str, Any]", out: "Mapping[str, Any]"):
         if not isinstance(out, dict):
             return {"_draft": "response is not an object"}, {}
+        out = _normalize_blocked(out)
         if out.get(BLOCKED_FIELD):
             return {}, {}
         problems = gate(out)
@@ -492,6 +515,49 @@ def _derive_unique_name_key(name: str, known_name_keys: "Collection[str]") -> st
     return f"{base_key}-{suffix}"
 
 
+def _resolve_affinity_for_members(members: "Sequence[str]",
+                                  picks_by_sample: "Mapping[int, tuple[str, ...]]",
+                                  affinity_by_sample: "Mapping[int, tuple[str, ...]]",
+                                  ) -> "list[str] | None":
+    """2026-09-06 real-call finding (`fortitude`, the first real run of a second tree): §6.3's own
+    field description pairs `affinity[i]` with `affixIds[i]`, "in the same order" — but the vote
+    (§7 gate 11, `resolve_set_vote_field`/`resolve_set_vote`) resolves `affixIds` per-MEMBER, from
+    up to 3 independent samples, and returns the resolved set SORTED (`adapters.demons.anchor.vote
+    .resolve_set_vote`'s own `tuple(sorted(...))`) — never any one sample's own order, and not
+    necessarily even the same LENGTH as sample 0's own pick. The pre-fix code reused sample 0's raw
+    `affinity` array positionally, silently assuming the vote's result always matched sample 0's
+    pick exactly. Real data proved this false at scale: `fortitude` failed gate 13 on exactly this
+    mismatch on 19/40 nodes (47.5%) — not the rare edge case `might`'s own 2/40 total suggested.
+
+    The correct per-member value is resolved the SAME way `affixIds` itself was: for each member of
+    the FINAL voted set, majority-of-the-samples-that-actually-picked-this-member (their own
+    `affinity` at that member's position in THEIR OWN `affixIds`), ties broken toward the lowest
+    `sample_index` — the same tie-break convention `base_response = dict(out)` (sample 0) already
+    embodies elsewhere in this function. Returns `None` if any member has no recorded affinity at
+    all — should not happen once `resolve_set_vote`'s own 2-of-3 threshold holds (a member only
+    enters the resolved set if at least 2 samples picked it, and a sample that picked it always
+    carries a same-length `affinity` array by gate 7's own per-call contract), kept as a named
+    defensive case the caller turns into an `escalated` outcome rather than an `IndexError`."""
+    result: "list[str]" = []
+    for member in members:
+        votes: "list[tuple[int, str]]" = []
+        for sample_index, ids in picks_by_sample.items():
+            if member not in ids:
+                continue
+            values = affinity_by_sample.get(sample_index, ())
+            pos = ids.index(member)
+            if pos < len(values):
+                votes.append((sample_index, values[pos]))
+        if not votes:
+            return None
+        tally = Counter(v for _, v in votes)
+        top_count = max(tally.values())
+        winners = {v for v, c in tally.items() if c == top_count}
+        votes.sort(key=lambda t: t[0])
+        result.append(next(v for _, v in votes if v in winners))
+    return result
+
+
 def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
                   config: LlmCallerConfig = DEFAULT_CONFIG,
                   known_name_keys: "Collection[str]" = ()) -> NodeOutcome:
@@ -522,6 +588,7 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
         tree_display_name=inputs.tree_display_name, motifs=inputs.motifs)
 
     picks_by_sample: "dict[int, tuple[str, ...]]" = {}
+    affinity_by_sample: "dict[int, tuple[str, ...]]" = {}
     base_response: "dict[str, Any] | None" = None
 
     for sample_index in range(VOTE_SAMPLE_COUNT):
@@ -551,8 +618,10 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
         # this brief is answerable).
         if out.get(BLOCKED_FIELD) or _exhausted(soft):
             picks_by_sample[sample_index] = ()
+            affinity_by_sample[sample_index] = ()
         else:
             picks_by_sample[sample_index] = tuple(out.get("affixIds") or ())
+            affinity_by_sample[sample_index] = tuple(out.get("affinity") or ())
 
     assert base_response is not None  # sample 0 always returns above on blocked/escalated
 
@@ -577,8 +646,16 @@ def generate_node(subject: Subject, inputs: NodeGenerationInputs, *,
         return NodeOutcome(subject.subject_id, "unresolved",
                            detail=f"{subject.node_id}/affixIds: 1-1-1 vote, no majority")
 
+    final_affinity = _resolve_affinity_for_members(vote.values, picks_by_sample, affinity_by_sample)
+    if final_affinity is None:
+        return NodeOutcome(subject.subject_id, "escalated",
+                           detail=f"{subject.node_id}/affinity: the voted affixIds set "
+                                  f"{list(vote.values)!r} has a member no sample recorded an "
+                                  f"affinity for — cannot resolve §6.3's paired field")
+
     final_response = dict(base_response)
     final_response["affixIds"] = list(vote.values)
+    final_response["affinity"] = final_affinity
 
     persist_defects = gate(final_response)
     if persist_defects:

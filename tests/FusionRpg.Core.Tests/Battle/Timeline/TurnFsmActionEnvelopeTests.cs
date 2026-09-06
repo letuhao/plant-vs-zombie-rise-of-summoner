@@ -126,6 +126,24 @@ public class TurnFsmActionEnvelopeTests
     }
 
     [Fact]
+    public void CurrentEnvelope_returns_the_committed_envelope_while_the_run_is_active()
+    {
+        // A18f (spec-action-dispatch-generalization.md T55.1): mirrors CurrentTarget's own shape --
+        // a caller applying the resolved hit needs to know WHICH envelope this actor actually
+        // committed, not re-read a hardcoded field.
+        var rig = new Rig();
+        rig.Add("a");
+        var envelope = Strike(windup: 100, recovery: 50);
+
+        Assert.Null(rig.Runner.CurrentEnvelope("a"));   // nothing committed yet
+        rig.Commit("a", envelope, target: "b");
+        Assert.Equal(envelope, rig.Runner.CurrentEnvelope("a"));
+
+        rig.Pump();   // resolve, then recover -- the run ends
+        Assert.Null(rig.Runner.CurrentEnvelope("a"));   // same lifetime as CurrentTarget
+    }
+
+    [Fact]
     public void The_slot_is_held_across_windup_and_released_when_resolution_ends()
     {
         var rig = new Rig();

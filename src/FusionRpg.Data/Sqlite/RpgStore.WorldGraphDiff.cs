@@ -127,7 +127,8 @@ public sealed partial class RpgStore
         && a.LayoutX == b.LayoutX && a.LayoutY == b.LayoutY && a.LoamStock == b.LoamStock
         && a.FractureIntensityMilli == b.FractureIntensityMilli && a.WardenBindingId == b.WardenBindingId
         && a.NeglectedTurns == b.NeglectedTurns && a.RecruitStock == b.RecruitStock
-        && a.ProjectId == b.ProjectId && a.ProjectTurnsRemaining == b.ProjectTurnsRemaining;
+        && a.ProjectId == b.ProjectId && a.ProjectTurnsRemaining == b.ProjectTurnsRemaining
+        && a.RubbleStock == b.RubbleStock && a.IronworkStock == b.IronworkStock;
 
     static void DiffSectors(SqliteConnection db, SqliteTransaction tx, WorldState previous, WorldState next)
     {
@@ -142,14 +143,14 @@ public sealed partial class RpgStore
                 phase, owner_faction_id, stability_milli, pressure_milli, depletion_milli,
                 development_level, intel, last_seen_turn, layout_x, layout_y,
                 loam_stock, fracture_intensity_milli, warden_binding_id, neglected_turns,
-                recruit_stock, project_id, project_turns_remaining, revision)
+                recruit_stock, project_id, project_turns_remaining, rubble_stock, ironwork_stock, revision)
             VALUES ($w, $s, $type, $climate, $danger, $phase, $owner, $stab, $press, $depl,
                     $dev, $intel, $seen, $x, $y, $loam, $intensity, $warden, $neglected,
-                    $recruit, $project, $projTurns, 0);
+                    $recruit, $project, $projTurns, $rubble, $ironwork, 0);
             """,
             "$w", "$s", "$type", "$climate", "$danger", "$phase", "$owner", "$stab", "$press", "$depl",
             "$dev", "$intel", "$seen", "$x", "$y", "$loam", "$intensity", "$warden", "$neglected",
-            "$recruit", "$project", "$projTurns");
+            "$recruit", "$project", "$projTurns", "$rubble", "$ironwork");
 
         foreach (var (id, s) in after)
         {
@@ -160,7 +161,7 @@ public sealed partial class RpgStore
                 s.DepletionMilli, s.DevelopmentLevel, s.AuthoredIntel.ToString(), s.LastSeenTurn,
                 s.LayoutX, s.LayoutY, s.LoamStock, s.FractureIntensityMilli,
                 (object?)s.WardenBindingId, s.NeglectedTurns, s.RecruitStock,
-                (object?)s.ProjectId, (object?)s.ProjectTurnsRemaining);
+                (object?)s.ProjectId, (object?)s.ProjectTurnsRemaining, s.RubbleStock, s.IronworkStock);
         }
     }
 

@@ -191,6 +191,49 @@ class GenerateNodeAcceptedTests(unittest.TestCase):
             outcome = run.generate_node(_subject(), _inputs(), config=TEST_CONFIG)
         self.assertEqual(outcome.outcome, "escalated")
 
+    def test_a_nullish_blocked_value_no_longer_bypasses_content_validation(self) -> None:
+        """2026-09-06 real-call finding (`fortitude`, 4/40 nodes): a real local model sometimes fills
+        `blocked: "false"` ALONGSIDE a fully-drafted, but internally INCONSISTENT, content payload
+        (here: `affixIds` has 2 members, `affinity` has 1 — exactly the shape §6.3 forbids). Before
+        the fix, `_node_verify_fn` read the raw, un-normalized `"false"` as a genuine decline and
+        returned `({}, {})` WITHOUT ever calling `gate()` at all — so `call_with_self_heal` accepted
+        the malformed draft on its FIRST attempt and never re-prompted the model to fix it. Real data
+        proved this was not merely "eventually caught downstream" (this module's own
+        `_resolve_affinity_for_members` safety net DOES still escalate rather than corrupt data
+        either way — proven by `test_a_response_that_never_satisfies_the_gate_escalates` and friends)
+        — the actual cost was throwing away a fixable draft: a model asked to correct a NAMED defect
+        (`build_response_gate`'s own heal-retry message) often can, but never got the chance, because
+        `verify_fn` never called `gate()` in the first place. Proven here by scripting a HEAL ROUND
+        for every one of the 3 samples (malformed-with-blocked-false, then a clean corrected draft)
+        and asserting the corrected content is what actually gets used — this is only possible if the
+        fix makes `gate()` run against the malformed draft and trigger the retry `call_model` was
+        scripted to expect."""
+        def _malformed(suffix: str) -> str:
+            return json.dumps({
+                "affixIds": ["atom.a", "atom.b"], "affinity": ["core"],  # length mismatch, on purpose
+                "exclusion": {"form": "none", "propertyKeys": []},
+                "name": f"Bad Draft {suffix}", "nameKey": "tree.node.bad", "flavor": "x",
+                "rationale": "", "blocked": "false",
+            })
+
+        def _clean(suffix: str) -> str:
+            return json.dumps(_response(affix_ids=["atom.a"], name=f"Corrected Draft {suffix}"))
+
+        # One heal round per sample: [malformed, clean] x 3 (base call, vote 1, vote 2).
+        responses = [
+            _malformed("s0"), _clean("s0"),
+            _malformed("s1"), _clean("s1"),
+            _malformed("s2"), _clean("s2"),
+        ]
+        with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=responses):
+            outcome = run.generate_node(_subject(), _inputs(), config=TEST_CONFIG)
+        self.assertEqual(outcome.outcome, "accepted",
+                         f"the model was scripted to self-correct when asked; a bypassed gate() "
+                         f"never asks, so this proves the fix actually asks. detail={outcome.detail!r}")
+        self.assertEqual(outcome.record.name, "Corrected Draft s0",
+                         "the ACCEPTED content must be the corrected draft, never the malformed one "
+                         "gate() should have rejected on the first attempt")
+
     def test_a_1_1_1_vote_is_unresolved(self) -> None:
         """Three distinct single-member picks (none anti-motif-tagged, so every individual call
         passes its own per-call gate) -- no member reaches the 2-of-3 majority threshold."""
@@ -203,17 +246,19 @@ class GenerateNodeAcceptedTests(unittest.TestCase):
             outcome = run.generate_node(_subject(), _inputs(), config=TEST_CONFIG)
         self.assertEqual(outcome.outcome, "unresolved")
 
-    def test_persist_time_re_gate_catches_a_voted_composite_the_base_call_alone_would_pass(self) -> None:
-        """§7 gate 13's own reason to exist. Every INDIVIDUAL sample response is internally clean
-        (its own `affixIds` and `affinity` agree in length, and neither uses an anti-motif affix) —
-        so no per-call gate check ever rejects any of the three calls. But `resolve_set_vote` is a
-        per-MEMBER majority (§7 gate 11): `atom.a` is unanimous (3/3), `atom.b` reaches the 2-of-3
+    def test_a_voted_composite_wider_than_the_base_call_gets_its_own_resolved_affinity(self) -> None:
+        """2026-09-06 real-call finding (`fortitude`, 19/40 nodes, 47.5%): `resolve_set_vote` is a
+        per-MEMBER majority (§7 gate 11) — `atom.a` is unanimous (3/3), `atom.b` reaches the 2-of-3
         threshold from samples 1-2 alone, so the vote resolves to the TWO-member set `{a, b}` even
         though the base call (sample 0, whose OTHER fields the final record otherwise uses) only
-        ever answered with the ONE-member set `{a}` — its own `affinity` array has length 1. The
-        persisted composite (`affixIds=[a,b]`, `affinity=[core]`) is a length mismatch §6.3
-        requires never happen, and it is invisible to every per-call check, because no single call
-        ever produced it."""
+        ever answered with the ONE-member set `{a}`. Before the fix, the persisted composite blindly
+        reused sample 0's own one-entry `affinity` array against the two-member voted `affixIds`,
+        which failed gate 13's length check on EVERY tree but `might` (whose own archetype happened
+        to rarely produce this shape) — proven not a rare edge case once a second tree's real corpus
+        was generated. `_resolve_affinity_for_members` fixes this by deriving `atom.b`'s own affinity
+        from the two vote samples that actually proposed it (both `["core"]` here), so the composite
+        is internally consistent and the node is correctly `accepted`, never escalated for a defect
+        the pipeline itself introduced."""
         responses = [
             json.dumps(_response(affix_ids=["atom.a"])),               # base call, sample 0
             json.dumps(_response(affix_ids=["atom.a", "atom.b"])),      # vote sample 1
@@ -221,8 +266,38 @@ class GenerateNodeAcceptedTests(unittest.TestCase):
         ]
         with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=responses):
             outcome = run.generate_node(_subject(), _inputs(), config=TEST_CONFIG)
-        self.assertEqual(outcome.outcome, "escalated")
-        self.assertIn("persist time", outcome.detail)
+        self.assertEqual(outcome.outcome, "accepted")
+        self.assertEqual(outcome.record.affix_ids, ("atom.a", "atom.b"))
+        self.assertEqual(outcome.record.affinity, ("core", "core"))
+
+
+class ResolveAffinityForMembersTests(unittest.TestCase):
+    """Direct unit coverage of `_resolve_affinity_for_members`'s own per-member vote — the
+    generate_node-level test above only exercises the unanimous-agreement path."""
+
+    def test_a_member_only_one_sample_recorded_still_resolves_from_that_one_sample(self) -> None:
+        picks = {0: ("a",), 1: ("a", "b"), 2: ("a", "b")}
+        affinity = {0: ("core",), 1: ("core", "likely"), 2: ("core", "occasional")}
+        result = run._resolve_affinity_for_members(("a", "b"), picks, affinity)
+        self.assertEqual(result[0], "core")  # unanimous across all three samples
+        # "b" is 1-1 between samples 1 (likely) and 2 (occasional) -- ties break to the lowest
+        # sample_index, matching sample 0 already being this module's own tie-break convention.
+        self.assertEqual(result[1], "likely")
+
+    def test_a_2_of_3_affinity_majority_wins_over_the_lone_dissenter(self) -> None:
+        picks = {0: ("a",), 1: ("a",), 2: ("a",)}
+        affinity = {0: ("core",), 1: ("likely",), 2: ("likely",)}
+        result = run._resolve_affinity_for_members(("a",), picks, affinity)
+        self.assertEqual(result, ["likely"])
+
+    def test_a_member_no_sample_ever_recorded_an_affinity_for_returns_none(self) -> None:
+        # Defensive case: "c" is in the requested members but no sample's own (affixIds, affinity)
+        # pair ever names it -- should not happen once resolve_set_vote's 2-of-3 threshold holds,
+        # but the caller must escalate rather than crash if it ever does.
+        picks = {0: ("a",), 1: ("a",), 2: ("a",)}
+        affinity = {0: ("core",), 1: ("core",), 2: ("core",)}
+        result = run._resolve_affinity_for_members(("a", "c"), picks, affinity)
+        self.assertIsNone(result)
 
 
 class RecordAcceptedIdempotenceTests(unittest.TestCase):

@@ -57,6 +57,17 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- item-todo.md P4.1/module-20 web pass (2026-09-06): the item program's whole seed tree
+         (base types, affix families, rarity/tuning, sets, uniques, consumables, recipes) is loaded
+         unconditionally at startup the same way dungeon's is above, and had the identical missing-rule
+         defect — silently absent next to the exe, so `MapWorkbench`'s recipe corpus never loads and
+         every workbench route 404s/405s on a real published build despite passing every in-process
+         test. Same copy pattern as data\seed\dungeon\ above, one directory over. -->
+    <Content Include="..\..\data\seed\items\**\*.json">
+      <Link>data\seed\items\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <!-- aura-skill-todo.md Phase 5: DebugEndpoints.FindLatestLiveBoardStart carries the stale-board

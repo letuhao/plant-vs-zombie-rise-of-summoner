@@ -1,4 +1,5 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Battle.Timeline;
 
 namespace FusionRpg.Core.Battle;
@@ -8,11 +9,13 @@ namespace FusionRpg.Core.Battle;
 // BattleEngine itself (namespace FusionRpg.Core.Battle, `partial`), because the action phase needs
 // ActorState, BloodthirstyViewFor and DispatchHit, all private to BattleEngine/BattleRunState.
 //
-// ⛔ Reached ONLY when `activeProfile.UsesTimelineDispatch` is true. No entry in
-// `BattleModeProfileCatalog` sets that flag — every shipped profile (classic-round, galaxy-sync,
-// hybrid-atb, siege) takes `BattleEngine.cs`'s existing atomic do-while loop, unchanged, byte-for-byte.
-// This method exists so a synthetic, never-catalogued test profile can prove W/Commitment/AdvancePolicy
-// move for real, closing `battle-tempo-todo.md` Checkpoint B's own unmet line, without landing anything.
+// ⛔ Reached ONLY when `activeProfile.UsesTimelineDispatch` is true. STALE COMMENT CORRECTED
+// 2026-09-06 (A19 audit): as of `battle-tempo` `LAND1` (2026-09-05, decisions.md "Battle timeline
+// dispatch — landed on two [now three] profiles"), `BattleModeProfileCatalog.ClassicRound`,
+// `GalaxySync` and `HybridAtb` ALL set `UsesTimelineDispatch = true` (`BattleModeProfile.cs:221,235,251`)
+// — this method IS the live dispatch path for every shipped profile today. `BattleEngine.cs`'s atomic
+// do-while loop is now reachable only via a synthetic test profile with the flag forced back to
+// `false` (see `ActionDispatchGeneralizationTests.RunAtomic`). `siege`/`delve` were not re-checked here.
 
 public static partial class BattleEngine
 {
@@ -64,10 +67,17 @@ public static partial class BattleEngine
 
         string? Reselect(string actorKey, string? deadTargetKey)
         {
+            // A19 (T56.1): same NowTick assignment DeclareBasicAttack's own site makes -- this is
+            // the timeline-dispatch path's own point where the real current tick is known, before
+            // CostLedger (via StubIntentSource below) is ever consulted.
+            state.NowTick = localClock.Now;
             var attacker = state.ByKey[actorKey];
             var view = BloodthirstyViewFor(state, attacker);
+            // A19 (T56.1): AlwaysAffordable.Instance -> state.CostLedger, mirroring BasicAttack.cs's
+            // own identical swap -- both fallback sites must move together or one profile enforces
+            // costs while another silently doesn't.
             var source = intentSource
-                ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
+                ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, state.CostLedger);
             var intent = source.TryDeclare(actorKey, localClock.Now);
             return intent.IsNone ? null : intent.TargetKey;
         }
@@ -141,6 +151,15 @@ public static partial class BattleEngine
                 return false;
             }
 
+            // A19 (T56.2): the timeline-dispatch path's own point of no return -- `runner.TryCommit`
+            // just cleared (slot AND cooldown both taken), so this is where "committing is what costs,
+            // not landing" (spec-action-costs.md §3) happens here, mirroring RunBasicAttackStep's
+            // identical call at ITS OWN commit point (BasicAttack.cs). Deliberately NOT called inside
+            // DeclareBasicAttack above: that runs before `TryCommit`, and a slot/cooldown refusal after
+            // declare must never have already spent the actor's resources. `null` rng: same reasoning
+            // as the atomic-path call -- no authored cost today rolls a spread.
+            state.CostLedger.TryPay(attacker.Setup.Key, intent.ActionId, ActionCostTiming.OnCommit, rng: null);
+
             trace?.Turn(rounds, attacker.Setup.Key, Timeline.TurnState.Ready, Timeline.TurnState.Committed);
             return true;
         }
@@ -172,6 +191,31 @@ public static partial class BattleEngine
 
                 if ((Timeline.TimelineEventKind)ev.Kind == Timeline.TimelineEventKind.Resolve)
                 {
+                    // A19 (T56.3): a `perTick` cost row is charged "again per resolve tick" (CostLedger's
+                    // own doc comment) -- here, BEFORE `OnResolveDue`, because `OnResolveDue`'s own first
+                    // line unconditionally moves the actor Committed -> Resolving, and `ActionRunner.
+                    // Interrupt` only accepts an actor still in `Committed` (ActionRunner.cs:305). For
+                    // every action with no `perTick` row (every shipped action today) `TryPay` returns
+                    // `Success` immediately (`CostLedger.cs`'s own `rows.Count == 0` early-out) -- so
+                    // this is byte-identical here until content authors one.
+                    var committedActionId = runner.CurrentEnvelope(ev.OwnerKey)?.ActionId ?? state.BasicAttackEnvelopeCompiled.ActionId;
+                    if (state.CostLedger.TryPay(ev.OwnerKey, committedActionId, ActionCostTiming.PerTick, rng: null).Outcome == CostPayOutcome.InsufficientFunds)
+                    {
+                        // Never a bespoke cancellation branch -- reuses the exact interrupt path T12
+                        // built (`ActionRunner.Interrupt`, `InterruptCause.ResourceExhausted`, already
+                        // unit-proven in `CostLedgerTests.AFailedPerTickPaymentEndsTheActionThroughTheRealInterruptPath`).
+                        // `Interrupt` can refuse (envelope's own `Interruptible` policy does not yield to
+                        // `ResourceExhausted`, e.g. the default `Never`) -- in that case nothing was
+                        // spent (TryPay's own all-or-nothing contract) and the resolve proceeds exactly
+                        // as if payment had succeeded, matching the envelope's own stated policy rather
+                        // than inventing a stricter one here.
+                        if (runner.Interrupt(machine, localClock.Now, Timeline.InterruptCause.ResourceExhausted).Broken)
+                        {
+                            trace?.Turn(rounds, ev.OwnerKey, Timeline.TurnState.Committed, Timeline.TurnState.Charging);
+                            continue;
+                        }
+                    }
+
                     trace?.Turn(rounds, ev.OwnerKey, Timeline.TurnState.Committed, Timeline.TurnState.Resolving);
                     if (runner.OnResolveDue(machine, ev) == Timeline.ActionOutcome.Resolved)
                     {
@@ -208,8 +252,16 @@ public static partial class BattleEngine
                         // W > 1, reaction lane or not.
                         if (!actor.Active) continue;
 
+                        // A18f (spec-action-dispatch-generalization.md T55.2): the actor's own
+                        // committed envelope -- whichever action was actually selected and
+                        // committed, per ActionRunner.CurrentEnvelope's own doc comment -- not the
+                        // hardcoded basic attack. Falls back to the hardcoded field only when no
+                        // run is active (defensive; matches CurrentTarget's own null case), which is
+                        // exactly what an empty-loadout actor's own committed envelope already
+                        // equals today, so this is byte-identical for every actor with no loadout.
+                        var committedEnvelope = runner.CurrentEnvelope(ev.OwnerKey) ?? state.BasicAttackEnvelopeCompiled;
                         var step = ApplyBasicAttack(
-                            actor, target, state.BasicAttackEnvelopeCompiled, state,
+                            actor, target, committedEnvelope, state,
                             now, localClock.Now, state.Calculator, state.CritRng);
                         if (step.Outcome == AttackStepOutcome.Proceed)
                         {

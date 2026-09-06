@@ -10,6 +10,9 @@ namespace FusionRpg.Data;
 /// spelling, reused rather than re-invented.</summary>
 public sealed record MaterialSpendResult(bool Ok, string Reason, string OutcomeRef);
 
+/// <summary>One <c>rpg_material_spend_log</c> row — what a given correlation already paid, and for what.</summary>
+public sealed record MaterialSpendRecord(string RecipeId, string CostJson, string OutcomeRef, string CreatedUtc);
+
 public sealed partial class RpgStore
 {
     // ---- materials + recipes (module 14, salvage-craft) ---------------------------------------------
@@ -166,24 +169,34 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            foreach (var (materialId, qty) in grants)
-            {
-                if (!MaterialCatalog.IsKnown(materialId) && !DemonMaterialCatalog.IsKnown(materialId))
-                    throw new ArgumentException($"Unknown material id '{materialId}'.");
-                using var cmd = db.CreateCommand();
-                cmd.CommandText = """
-                    INSERT INTO rpg_demon_materials(player_id, material_id, qty, updated_utc)
-                    VALUES ($p, $m, $q, $t)
-                    ON CONFLICT(player_id, material_id) DO UPDATE SET qty = qty + $q, updated_utc = $t;
-                    """;
-                cmd.Parameters.AddWithValue("$p", playerId);
-                cmd.Parameters.AddWithValue("$m", materialId);
-                cmd.Parameters.AddWithValue("$q", qty);
-                cmd.Parameters.AddWithValue("$t", now);
-                cmd.ExecuteNonQuery();
-            }
-
+            GrantMaterialsUnlocked(db, playerId, grants, now);
             tx.Commit();
+        }
+    }
+
+    /// <summary>
+    /// The same grant on a connection the CALLER owns, so a mint (upcycle's output) or a salvage yield
+    /// lands in the same transaction as everything else the operation did. Same write boundary: an id
+    /// outside the closed vocabulary THROWS rather than creating a phantom row.
+    /// </summary>
+    internal void GrantMaterialsUnlocked(
+        SqliteConnection db, long playerId, IReadOnlyList<(string MaterialId, long Qty)> grants, string nowUtc)
+    {
+        foreach (var (materialId, qty) in grants)
+        {
+            if (!MaterialCatalog.IsKnown(materialId) && !DemonMaterialCatalog.IsKnown(materialId))
+                throw new ArgumentException($"Unknown material id '{materialId}'.");
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                INSERT INTO rpg_demon_materials(player_id, material_id, qty, updated_utc)
+                VALUES ($p, $m, $q, $t)
+                ON CONFLICT(player_id, material_id) DO UPDATE SET qty = qty + $q, updated_utc = $t;
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$m", materialId);
+            cmd.Parameters.AddWithValue("$q", qty);
+            cmd.Parameters.AddWithValue("$t", nowUtc);
+            cmd.ExecuteNonQuery();
         }
     }
 
@@ -327,6 +340,33 @@ public sealed partial class RpgStore
 
             tx.Commit();
             return new MaterialSpendResult(true, "", outcomeRef);
+        }
+    }
+
+    /// <summary>
+    /// ⭐ The recorded spend for one correlation, or <c>null</c>. <b>A caller that re-derives its cost
+    /// from the item's CURRENT state must read this first</b>, because a successful operation moves the
+    /// state the price is derived from: re-pricing a retried enhance against the new <c>+n</c> resolves
+    /// a different cost, and <see cref="TrySpendRecipe"/> would then correctly refuse it as
+    /// <c>correlation.mismatch</c> rather than replaying it. The mismatch rule is right — the fix is to
+    /// short-circuit before re-pricing, which is what this read is for (D2 §9 clause 8: a replayed
+    /// correlation returns the RECORDED result).
+    /// </summary>
+    public MaterialSpendRecord? FindMaterialSpend(long playerId, string correlationId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT recipe_id, cost_json, outcome_ref, created_utc
+                FROM rpg_material_spend_log WHERE player_id = $p AND correlation_id = $c;
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$c", correlationId.Trim());
+            using var r = cmd.ExecuteReader();
+            if (!r.Read()) return null;
+            return new MaterialSpendRecord(r.GetString(0), r.GetString(1), r.GetString(2), r.GetString(3));
         }
     }
 

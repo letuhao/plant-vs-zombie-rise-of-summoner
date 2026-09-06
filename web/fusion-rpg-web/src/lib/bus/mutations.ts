@@ -15,7 +15,8 @@ import type {
   UniqueEquipmentListDto,
   AptitudesState,
   SpeciesRespecResult,
-  PassiveTreeState
+  PassiveTreeState,
+  PreviewTreeStateRequest
 } from "./types";
 
 /**
@@ -268,6 +269,22 @@ export function useSaveTreeNodes() {
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: queryKeys.passiveTree(vars.playerId) });
     }
+  });
+}
+
+/** I8's follow-up (spec-tree-surface.md §7.2 part 5) — POST /api/passive-tree/{playerId}/preview.
+ * Deliberately a MUTATION, never a `useQuery`: this call is read-only server-side (nothing is ever
+ * persisted), but it is triggered by an explicit player action ("what would moving these points
+ * close?"), not by data this component subscribes to -- the same reason `useMutation` fits a POST
+ * body assembled on demand rather than a cache key react-query would otherwise own. No `onSuccess`
+ * invalidation: a preview changes nothing the committed `usePassiveTree` cache describes. Rejected
+ * (never silently retried) on a 400 -- `aptitudeDelta.wouldGoNegative`/`.unknownId` are real refusals
+ * the caller renders, not transient failures. */
+export function usePreviewTree() {
+  return useMutation({
+    meta: { entity: "PassiveTreePreview" },
+    mutationFn: (vars: { playerId: number; body: PreviewTreeStateRequest }) =>
+      sendJson<PassiveTreeState>(`/api/passive-tree/${vars.playerId}/preview`, "POST", vars.body)
   });
 }
 

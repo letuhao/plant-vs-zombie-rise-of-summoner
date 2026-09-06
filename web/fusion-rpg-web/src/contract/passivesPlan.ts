@@ -154,3 +154,76 @@ export function tierAttribution(report: Pick<TreeResolveReport, "aptitudePoints"
   const lentAmount = report.lenderTreeId ? Math.max(0, report.aptitudePoints - own) : 0;
   return { own, lentAmount, lenderTreeId: report.lenderTreeId };
 }
+
+// ---- §7.2 part 5: "the draft preview reports what a change would close" -----------------------
+
+/**
+ * The highest-value line the preview renders, computed by DIFFING two already-server-resolved report
+ * arrays -- never by re-deriving `CrossUnlock`/`TierGate` here (AGENTS.md "one power ladder, no
+ * private curves"; the actual resolution happens once, server-side, for each of `committed` and
+ * `preview`, via `POST /api/passive-tree/{playerId}/preview`). `committed` is the actor's real,
+ * already-fetched state (`usePassiveTree`'s own data); `preview` is that same shape recomputed by the
+ * server for a hypothetical node set plus aptitude delta.
+ *
+ * Matched by `treeId` -- a tree present in one array and not the other (should not happen; both calls
+ * resolve the same shared corpus) is simply skipped rather than treated as a change.
+ */
+export type ClosePreview = {
+  /** Tree ids whose `tierReached` would go DOWN under the hypothetical -- "closes tier N in X." */
+  closingTreeIds: string[];
+  /** Tree ids whose `tierReached` would go UP -- the positive symmetric case, "opens tier N in X." */
+  openingTreeIds: string[];
+  /** Count of nodes currently CONTRIBUTING (owned, tier-valid, not excluded) that the preview reports
+   * as newly INVALID -- summed across every tree, matching the worked example's own "4 of your traits
+   * would stop working." Never counts a node that was already not-contributing. */
+  traitsThatWouldStopWorking: number;
+};
+
+type CommittedReportForPreview = Pick<TreeResolveReport, "treeId" | "tierReached" | "contributingNodeIds">;
+type PreviewReportForPreview = Pick<TreeResolveReport, "treeId" | "tierReached" | "invalidNodeIds">;
+
+export function closePreview(
+  committed: readonly CommittedReportForPreview[],
+  preview: readonly PreviewReportForPreview[]
+): ClosePreview {
+  const previewByTreeId = new Map(preview.map((t) => [t.treeId, t]));
+  const closingTreeIds: string[] = [];
+  const openingTreeIds: string[] = [];
+  let traitsThatWouldStopWorking = 0;
+
+  for (const before of committed) {
+    const after = previewByTreeId.get(before.treeId);
+    if (!after) continue; // both calls resolve the same shared corpus; a mismatch names nothing
+
+    if (after.tierReached < before.tierReached) closingTreeIds.push(before.treeId);
+    else if (after.tierReached > before.tierReached) openingTreeIds.push(before.treeId);
+
+    const invalidAfter = new Set(after.invalidNodeIds);
+    for (const nodeId of before.contributingNodeIds) {
+      if (invalidAfter.has(nodeId)) traitsThatWouldStopWorking++;
+    }
+  }
+
+  return { closingTreeIds, openingTreeIds, traitsThatWouldStopWorking };
+}
+
+/** The one printed sentence (§7.2 part 5's own worked example shape) -- `null` when the hypothetical
+ * changes nothing, so the caller renders no line rather than an empty one. Closing always outranks
+ * opening as the highest-value line: a player is warned about what breaks before being told what's
+ * newly available, the same L6 "the failure mode is worse" ordering §7.1 states for D28 in general. */
+export function closePreviewSentence(preview: ClosePreview): string | null {
+  if (preview.closingTreeIds.length > 0) {
+    const trees = preview.closingTreeIds.join(", ");
+    if (preview.traitsThatWouldStopWorking > 0) {
+      // "traits" stays plural regardless of count -- the same convention `PassivesTab.tsx`'s own
+      // `NotWorkingCount` already uses ("N of your traits is/are not working": the noun never
+      // singularizes, only a verb would, and this sentence has none to conjugate).
+      return `Closes a tier in ${trees} — ${preview.traitsThatWouldStopWorking} of your traits would stop working.`;
+    }
+    return `Closes a tier in ${trees}.`;
+  }
+  if (preview.openingTreeIds.length > 0) {
+    return `Opens a tier in ${preview.openingTreeIds.join(", ")}.`;
+  }
+  return null;
+}

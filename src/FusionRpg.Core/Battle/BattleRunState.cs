@@ -1,4 +1,5 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
@@ -96,6 +97,11 @@ public static partial class BattleEngine
         public readonly SeededRng EssenceRng;
         public readonly SeededRng RidersRng;
 
+        /// <summary>D4.6 (spec-wild-room.md §5): `act.capture`'s own stream, "the battle's own seed,
+        /// never a second RNG" — one line beside `EssenceRng`/`RidersRng`, same reasoning: capture's
+        /// content (seal tiers, status bonuses) must not butterfly any other system's rolls.</summary>
+        public readonly SeededRng CaptureRng;
+
         /// <summary>Wave E1: riders decide their own chance on <see cref="RidersRng"/>, so the
         /// evaluator gets a scripted 0.0 rather than a second roll. Same object and same reasoning as
         /// the scripted setup-status path.</summary>
@@ -111,6 +117,13 @@ public static partial class BattleEngine
         /// wiring here when they arrive.</summary>
         public readonly Timeline.CooldownLedger Cooldowns = new();
 
+        /// <summary>D4.6 (spec-wild-room.md §5): "each failed attempt on the same target shifts [the
+        /// delta band] toward `far-above`… kept in a per-battle `CaptureAttempts` ledger beside
+        /// `CooldownLedger`." Keyed on the target alone (`attempts(target)` in the spec's own
+        /// formula takes one argument) — `CooldownLedger`'s own compound actor×slot key is a
+        /// different shape for a different question, not a template here.</summary>
+        public readonly Dictionary<string, int> CaptureAttempts = new(StringComparer.Ordinal);
+
         /// <summary>`battle-tempo` `reaction-lane` RL2: one registry per battle, mirroring
         /// `Cooldowns`' own "fresh per battle, not per actor construction elsewhere" shape. Reuses
         /// `LawnActorResourcePools` verbatim rather than a near-duplicate type — its own mechanism
@@ -120,6 +133,25 @@ public static partial class BattleEngine
         /// `wave` actor gets a pool exactly like a `squad` actor does — resource-hub-ssot.md's own
         /// rule ("one shared set... faction difference is a display label, never a branch").</summary>
         public readonly LawnActorResourcePools ResourcePools = new();
+
+        /// <summary>A19 (spec-action-costs-cooldowns-adoption.md T56.1): whichever tick the caller
+        /// currently considers "now" — `BasicAttack.cs`'s functions and `TimelineDispatch`'s
+        /// `RunTimelineActionPhase` each compute a tick locally with no single shared read `CostLedger`
+        /// (a real, previously-unbuilt dependency) can point its own `Func&lt;long&gt; nowTick` at, so
+        /// every call site that already threads a tick locally also assigns it here first. Mutable by
+        /// design — this is a live pointer into "what tick is it right now for this battle", not a
+        /// snapshot; unlike `T0` (fixed at construction), it moves every time a caller advances.</summary>
+        public long NowTick;
+
+        /// <summary>A19 (T56.1): the real, first production `CostLedger` in this repo — grep-confirmed
+        /// zero prior construction sites anywhere in `src/`. Built once here, not per-call, mirroring
+        /// `Cooldowns`/`ResourcePools`' own "one instance for the whole battle" shape. `costsByActionId`
+        /// adapts `CompiledAction.Costs` (`CompiledActionCost`) into `ActionCostRow` — structurally
+        /// compatible fields, different types, because the compiled and authored shapes serve different
+        /// callers (`ActionCostRow` also carries `AllowLethal`, which a compiled cost's own consumer
+        /// never needed until now). Empty when `actionCatalog` is null — vacuously affordable, the same
+        /// "an action with no cost table is unaffected" additive discipline this program uses everywhere.</summary>
+        public readonly CostLedger CostLedger;
 
         /// <summary>
         /// B38 — one <see cref="Timeline.ActorTurnMachine"/> per actor, for the whole battle.
@@ -213,6 +245,7 @@ public static partial class BattleEngine
             // change a full-battle butterfly -- the audit fix this wave's spec names explicitly, and
             // the same one-system-one-stream rule `essence` above already follows.
             RidersRng = SeededRng.DeriveStream(seed, "riders");
+            CaptureRng = SeededRng.DeriveStream(seed, "capture");
             StatusRng = new BattleStatusRng(seed, trace);
             Calculator = new OverlayCombatCalculator();
 
@@ -386,6 +419,7 @@ public static partial class BattleEngine
             // equipped actions" + a named warning is the honest behavior for content that cannot
             // exist in production today, not a masked bug — T19 wires the real ActionCatalog and this
             // degrade path stops firing for any actor whose loadout it can actually resolve.
+            var costsByActionId = new Dictionary<string, IReadOnlyList<ActionCostRow>>(StringComparer.Ordinal);
             foreach (var a in Actors)
             {
                 var ids = a.Setup.EquippedActionIds;
@@ -437,7 +471,27 @@ public static partial class BattleEngine
 
                 _heldActions[a.Setup.Key] = held;
                 BindContainers(a, held, containerResolver);
+
+                // A19 (T56.1): collect real cost rows for every action actually reachable in THIS
+                // battle -- ActionCatalog exposes no "all actions" enumerator (only Get(id)/Count),
+                // so building from each actor's own resolved `held` list is both sufficient (nothing
+                // outside a held loadout can ever be committed) and simpler than inventing one.
+                foreach (var action in held)
+                {
+                    if (action.Costs.Count == 0 || costsByActionId.ContainsKey(action.ActionId)) continue;
+                    var rows = new List<ActionCostRow>(action.Costs.Count);
+                    foreach (var cost in action.Costs)
+                        rows.Add(new ActionCostRow(action.ActionId, cost.ResourceId, cost.ScaledAmount, cost.When));
+                    costsByActionId[action.ActionId] = rows;
+                }
             }
+
+            CostLedger = new CostLedger(
+                costsByActionId,
+                poolsFor: key => ResourcePools.GetOrCreate(key, ByKey[key].Derived, NowTick),
+                derivedFor: key => ByKey[key].Derived,
+                rungOf: actionId => actionCatalog?.Get(actionId)?.Rung ?? 0,
+                nowTick: () => NowTick);
         }
 
         /// <summary>

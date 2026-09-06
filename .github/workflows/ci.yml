@@ -13,6 +13,13 @@ concurrency:
 jobs:
   test:
     runs-on: windows-latest
+    # 2026-09-06: a real, reproduced .NET process-redirection deadlock (fixed the same day in
+    # DemonSpeciesImportCliTests.cs/RealColdProcessTests.cs) hung a local test run for 17+ minutes
+    # with no diagnostic naming the stuck test. GitHub Actions' own default job timeout is 6 hours —
+    # a future hang of this shape would silently burn most of a day's CI minutes before failing.
+    # This bound is generous for the real runtime (normally well under it) and only exists to fail
+    # fast with SOME signal rather than run to the platform default.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -99,7 +106,7 @@ jobs:
           # (HARD by design — a violation SHOULD fail CI) and DominanceGuard's MECHANISM tests only
           # (returns without throwing, coverage populated, no clock applied — code regressions, safe to
           # block on regardless of what the verdict itself says).
-          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --filter "Category=BalanceGuard"
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min --filter "Category=BalanceGuard"
           if ($LASTEXITCODE -ne 0) { throw "balance-guard: a termination invariant or dominance-guard-mechanism test failed — see output above" }
 
       - name: Restore / test (.NET)
@@ -112,25 +119,33 @@ jobs:
           # swallowed because E2E.Tests, the last call, also happened to fail that day). Every call
           # below now checks its own exit code and throws immediately, matching every other step in
           # this file — a failure in project #3 no longer waits to be masked by project #10.
-          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Core.Tests failed" }
-          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Data.Tests failed" }
-          dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.CheatCore.Tests/FusionRpg.CheatCore.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.CheatCore.Tests failed" }
-          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Guard.Tests failed" }
-          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Launcher.Tests failed" }
-          dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.ItemSeedValidator.Tests/FusionRpg.ItemSeedValidator.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.ItemSeedValidator.Tests failed" }
-          dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.AtomImporter.Tests/FusionRpg.AtomImporter.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.AtomImporter.Tests failed" }
-          dotnet test tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.ElementEnumGen.Tests/FusionRpg.ElementEnumGen.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.ElementEnumGen.Tests failed" }
-          dotnet test tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj -c Release --verbosity minimal
+          # Wired in 2026-09-06 (seed-to-concrete) -- found never in CI via CiWiringGuardTests, verified
+          # green in isolation before adding (FusionRpg.PassiveTreeRosterGen.Tests held back: one
+          # pre-existing, unrelated content-drift failure at the time -- data/seed/statuses/roster.json
+          # is stale against a "nerve" status family another stream added; not this program's to fix).
+          dotnet test tests/FusionRpg.SquadHarness.Tests/FusionRpg.SquadHarness.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.SquadHarness.Tests failed" }
+          dotnet test tests/FusionRpg.TreeBinder.Tests/FusionRpg.TreeBinder.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          if ($LASTEXITCODE -ne 0) { throw "FusionRpg.TreeBinder.Tests failed" }
+          dotnet test tests/FusionRpg.Server.Tests/FusionRpg.Server.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.Server.Tests failed" }
-          dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.E2E.Tests/FusionRpg.E2E.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
           if ($LASTEXITCODE -ne 0) { throw "FusionRpg.E2E.Tests failed" }
 
       - name: Boundary guards (AGENTS.md — combat writes, Secondary-Unity boundary, Funnel deltas, DAL)
@@ -260,6 +275,22 @@ jobs:
           # to mean anything and would otherwise report noise here.
           python -m seedsmith report --gate --demon-dump ../../data/seed/demons/_dump
           if ($LASTEXITCODE -ne 0) { throw "demon corpus-coverage metrics found a gated finding — see output above" }
+        working-directory: tools/seedsmith
+
+      - name: Demon roster metrics gate (seed-to-concrete T2.10/T2.12/Checkpoint 2)
+        shell: pwsh
+        run: |
+          # T2.12's own original note said this would "break CI with no anchor tree yet" — stale as
+          # of 2026-09-06: the real anchor tree (data/seed/demons/species/**, 504 tracked files,
+          # 829-840 real classified species depending on which run) has been committed for a while
+          # now, and this command needs no model call and no network access, only the committed
+          # tree + data/tuning/demon-roster-targets.v1.json. Verified directly before wiring it in,
+          # not assumed: run against the real committed tree, exits 0 (14 real GAP findings, all
+          # `gates=False` informational — none `gates=True`), so wiring it in cannot break the build
+          # today. If a future roster change ever DOES trip an armed gate, that is this step doing
+          # its job, not a regression in this step itself.
+          python -m seedsmith demons metrics --gate
+          if ($LASTEXITCODE -ne 0) { throw "demon roster metrics found a gated finding — see output above" }
         working-directory: tools/seedsmith
 
       - name: Demon preflight, CI mode (seed-to-concrete T1.8 — checks 1-4/7-9, no local model)

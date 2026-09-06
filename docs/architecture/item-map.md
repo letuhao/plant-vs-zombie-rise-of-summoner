@@ -86,7 +86,7 @@ with `blocked` a legal answer.
 | Output | one of **three enum values**, never a number (`audit_schema` rejects numerics mechanically) |
 | Honesty | carries `basis`, exactly as family labels do |
 | Publication | the demon pipeline's one-way registry items already consume. ⚠ **Frame must publish independently of theme status** — `spec-demon-themes.md` makes publishing a theme for a `basis=blocked` demon a **Never**, and a species can lack a *flavour* judgement while still having a *body*. Frame is a body fact; it is not gated on theme confidence |
-| Scale | ~904 species with no hand-authoring — the property that made the classifier worth building |
+| Scale | **840** species with no hand-authoring — the property that made the classifier worth building. ⚠ Re-measured 2026-09-06 off `data/seed/demons/species/_index.json` (840 species across 502 *family* files); this row read *"~904"* until then, a stale snapshot of a corpus the demon stream regenerates. **Count it, never quote it from memory** — the plan's own standing rule |
 
 ⭐ **It also solves the conflation item-ideal §4 warns about, rather than inheriting it.**
 `DemonSpeciesDef.Side` carries faction *and* body in one field, and the roster already contains Fusion
@@ -270,7 +270,7 @@ untestable, and `enhance-reroll` needs `item-power-reads` to know what a "better
 | 2 | Set/charm atom effect distribution has no lane | **13 `set-charm-gen`** — explicitly owns it |
 | 3 | C3 and S2, two confirmed defects | **1 `durable-ownership`** |
 | 4 | `E42` gates band → number | **X2** — cross-program, does not block authoring |
-| — | **X1: `frame` on ~904 species** | ✅ **Resolved** — seedsmith's new `frame-classify` stage (§3.1). **Resolved but unbuilt**, and modules 3 and 6 key on it, so the plan opens here |
+| — | **X1: `frame` on 840 species** | ✅ **Resolved** — seedsmith's new `frame-classify` stage (§3.1). **Resolved but unbuilt** (0 of 840 anchors carry a `frame`, re-measured 2026-09-06), and modules 3 and 6 key on it, so the plan opens here. ⛔ **And the publication channel does not work as either map describes it** — §3.1 and `seedsmith-map.md:252` both say frame publishes *through the theme registry*, which has no `frame` key and no row at all for the 15 anchors at `basis: "blocked"`. Filed as an ask in `seedsmith-map.md`, "Filed by the item program (2026-09-06)"; see `item-todo.md` P0.4 |
 | 5 | Mechanical follow-through | **7 `rarity-bands`** (re-derive I12/I6) · **3 `slot-roles`** (I5 §3.7 edit, frame-mix breakpoints) · **X1** (I11's vectors) · **10 `item-card`** (light-theme palette) |
 
 ---

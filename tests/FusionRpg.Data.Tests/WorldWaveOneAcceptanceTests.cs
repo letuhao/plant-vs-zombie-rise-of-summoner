@@ -188,10 +188,37 @@ public class WorldWaveOneAcceptanceTests : IDisposable
     //       reaches a District battle at all, so that fix was a no-op for it, confirming this was a
     //       test-methodology defect and not a second production behaviour change.
     //
-    // The plan expected one re-bless. Many more were needed since — most recently entry #16 above —
+    //   17. **base-defense `siege-construction` 15.4 (`RulesetVersion` 8 → 9), 2026-09-06** — the two
+    //       raw faucets (§2: `ironwork` from a CLEARED `shard-vein` slot, `rubble` from a CLEARED
+    //       `material-seam` slot) landed in the SAME `Production` turn phase `LoamPhases` already
+    //       runs. This scenario's own turn-9 order — `Clear, ash-waste, slot 2` (entry #14's own
+    //       words: "ash-waste is first-light's only Seat-less sector") — clears exactly `ash-waste`'s
+    //       `material-seam` slot, so from turn 10 onward `WorldSector.RubbleStock` accrues there for
+    //       real for the first time. A genuine behaviour change, not a field addition — the same
+    //       command log, for any world with a cleared `shard-vein`/`material-seam` slot, now produces
+    //       a different state than version 8 did.
+    //
+    //       **A second, far more consequential defect this same wiring pass surfaced and fixed**:
+    //       `WorldSector.RubbleStock`/`IronworkStock` (added 15.1, hashed by `WorldCanonical` and
+    //       checked by `RpgStore.WorldGraphDiff.cs`'s own `SectorRowEquals` equivalence guard since
+    //       the day they landed) had **no database columns at all** — `rpg_world_sectors`' own schema,
+    //       every `INSERT`, and the read-back `SELECT` all omitted them entirely. Both fields were
+    //       silently write-only: correct in memory for the lifetime of one `TurnEngine.Step` chain,
+    //       but reset to 0 the moment any world was actually saved and reloaded, and undetectable by
+    //       anything that had not yet made either field non-zero and then committed-and-reread it in
+    //       the same operation — which is exactly what this task's own faucet phase was the first
+    //       thing ever to do. Found the same way `development_level` on `rpg_world_faction_intel`
+    //       (entry above `RpgStore.World.cs`'s own migration list) was: "found by the diffing writer's
+    //       own equivalence guard, not designed in." Fixed with the SAME `EnsureColumn` migration
+    //       pattern (`rubble_stock`/`ironwork_stock`, both `INTEGER NOT NULL DEFAULT 0` — an existing
+    //       saved world reads both back at 0, exactly the world before either stock existed) plus the
+    //       three sites that needed them: `CreateWorld`'s own initial INSERT, `DiffSectors`' own
+    //       INSERT-OR-REPLACE (both in the affected files above), and the sector read-back SELECT.
+    //
+    // The plan expected one re-bless. Many more were needed since — most recently entry #17 above —
     // each for a behaviour change or a budgeted field batch rather than a drift, and each recorded
     // here. Protecting the hash in any of them would have meant shipping something known to be wrong.
-    const string GoldenFinalHash = "258af1a0fe5fdc8cd9ead00a4f88f8483d9135c971392a4838dba0f6f813d585";
+    const string GoldenFinalHash = "b3d8319344bbbfa29ec1a732cf47719c8ba5f083a79514ec92c2d9a40b5cd4cb";
 
     readonly string _dir;
     readonly RpgStore _store;

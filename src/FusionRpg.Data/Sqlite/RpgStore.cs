@@ -836,6 +836,10 @@ public sealed partial class RpgStore : IRpgDb
                              // above — a delve world outliving a reset would leave rpg_delves
                              // pointing at a deleted rpg_worlds row. Ahead of rpg_worlds itself.
                              // loot-pack D3.22: ahead of rpg_delves for the identical reason.
+                             // party-dungeon D4.18: rpg_domain_progress names domain ids only (no FK),
+                             // but a player's own discovery/clears are per-player data the same as
+                             // every other row in this list -- ahead of rpg_delves, spec's own words.
+                             "DELETE FROM rpg_domain_progress;",
                              "DELETE FROM rpg_delve_pack_lock;",
                              "DELETE FROM rpg_delve_rooms;", "DELETE FROM rpg_delves;",
                              "DELETE FROM rpg_worlds;",

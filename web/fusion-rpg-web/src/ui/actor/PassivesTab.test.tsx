@@ -88,13 +88,18 @@ const refetch = vi.fn();
 // I7 -- Level 3's save path. Defaults to echoing the request's own tree back unchanged (no new
 // exclusion fires); individual tests override this to prove the §8 "finding" toast.
 const saveTreeNodesMutateAsync = vi.fn(async () => readyTree);
+// I8's follow-up (§7.2 part 5) -- the preview endpoint's own mutation. Defaults to echoing the
+// committed tree back unchanged (a no-op hypothetical); individual tests override this to prove a
+// real close/open sentence renders.
+const previewTreeMutateAsync = vi.fn(async () => readyTree);
 
 vi.mock("@/lib/bus", () => ({
   usePlayers: () => ({ data: { currentPlayerId: 1 } }),
   usePassiveTree: () => ({ ...treeState, refetch }),
   useAptitudes: () => ({ ...aptitudesState, refetch }),
   useSoulBalance: () => ({ ...soulsState, refetch }),
-  useSaveTreeNodes: () => ({ mutateAsync: saveTreeNodesMutateAsync, isPending: false })
+  useSaveTreeNodes: () => ({ mutateAsync: saveTreeNodesMutateAsync, isPending: false }),
+  usePreviewTree: () => ({ mutateAsync: previewTreeMutateAsync, isPending: false })
 }));
 
 describe("PassivesTab — Level 0 (Yours)", () => {
@@ -102,6 +107,8 @@ describe("PassivesTab — Level 0 (Yours)", () => {
     refetch.mockReset();
     saveTreeNodesMutateAsync.mockReset();
     saveTreeNodesMutateAsync.mockResolvedValue(readyTree);
+    previewTreeMutateAsync.mockReset();
+    previewTreeMutateAsync.mockResolvedValue(readyTree);
     treeState = { data: readyTree, isLoading: false, isError: false };
     aptitudesState = { data: aptitudesData, isLoading: false, isError: false };
     soulsState = { data: soulsData, isLoading: false, isError: false };
@@ -196,6 +203,8 @@ describe("PassivesTab — Level 1 (All paths)", () => {
     refetch.mockReset();
     saveTreeNodesMutateAsync.mockReset();
     saveTreeNodesMutateAsync.mockResolvedValue(readyTree);
+    previewTreeMutateAsync.mockReset();
+    previewTreeMutateAsync.mockResolvedValue(readyTree);
     treeState = { data: readyTree, isLoading: false, isError: false };
     aptitudesState = { data: aptitudesData, isLoading: false, isError: false };
     soulsState = { data: soulsData, isLoading: false, isError: false };
@@ -273,6 +282,8 @@ describe("PassivesTab — Level 3 (the trait)", () => {
     refetch.mockReset();
     saveTreeNodesMutateAsync.mockReset();
     saveTreeNodesMutateAsync.mockResolvedValue(readyTree);
+    previewTreeMutateAsync.mockReset();
+    previewTreeMutateAsync.mockResolvedValue(readyTree);
     treeState = { data: readyTree, isLoading: false, isError: false };
     aptitudesState = { data: aptitudesData, isLoading: false, isError: false };
     soulsState = { data: soulsData, isLoading: false, isError: false };
@@ -413,6 +424,8 @@ describe("PassivesTab — I8: the Plan", () => {
     refetch.mockReset();
     saveTreeNodesMutateAsync.mockReset();
     saveTreeNodesMutateAsync.mockResolvedValue(readyTree);
+    previewTreeMutateAsync.mockReset();
+    previewTreeMutateAsync.mockResolvedValue(readyTree);
     treeState = { data: treeWithUnlockCost, isLoading: false, isError: false };
     aptitudesState = { data: aptitudesData, isLoading: false, isError: false };
     soulsState = { data: soulsData, isLoading: false, isError: false };
@@ -569,5 +582,121 @@ describe("PassivesTab — I8: the Plan", () => {
     const sources = screen.getByTestId("tier-sources-1");
     expect(sources).toHaveTextContent("55 from might");
     expect(sources).toHaveTextContent("120 lent by fortitude");
+  });
+
+  // I8's follow-up (spec-tree-surface.md §7.2 part 5) -- "the draft preview reports what a change
+  // would close." The tool is only meaningful once a hypothetical aptitude delta CAN be tried, so
+  // these reuse the same Plan/lattice fixtures above with a non-empty aptitude wallet.
+  describe("I8's follow-up: 'what would this close' preview", () => {
+    it("renders no tool at all when the aptitude wallet is empty (honest absence, never fabricated)", async () => {
+      const user = userEvent.setup();
+      await openMightLattice(user); // aptitudesData.shares is {} by this block's own default
+      await user.click(screen.getByTestId("lattice-unlock-skill.might-off-t1-n2"));
+      expect(screen.getByTestId("passives-plan-panel")).toBeInTheDocument();
+      expect(screen.queryByTestId("passives-plan-close-preview")).not.toBeInTheDocument();
+    });
+
+    it("runs the hypothetical through the real preview endpoint and renders the highest-value closing sentence", async () => {
+      aptitudesState = {
+        data: { ...aptitudesData, shares: { Might: 10, Fortitude: 20 } },
+        isLoading: false,
+        isError: false
+      };
+      // The committed report's own "might" contributes exactly skill.might-off-t1-n0 (readyTree's
+      // fixture) -- the preview reports it newly invalid, and drops tierReached, closing a tier.
+      previewTreeMutateAsync.mockResolvedValue({
+        ...treeWithUnlockCost,
+        trees: treeWithUnlockCost.trees.map((t) =>
+          t.treeId === "might" ? { ...t, tierReached: 1, invalidNodeIds: ["skill.might-off-t1-n0"] } : t
+        )
+      });
+
+      const user = userEvent.setup();
+      await openMightLattice(user);
+      await user.click(screen.getByTestId("lattice-unlock-skill.might-off-t1-n2")); // dirty -- the Plan panel exists
+
+      expect(screen.getByTestId("passives-plan-close-preview")).toBeInTheDocument();
+      const select = screen.getByTestId("plan-preview-aptitude-select") as HTMLSelectElement;
+      expect(Array.from(select.options).map((o) => o.value)).toEqual(["Might", "Fortitude"]);
+
+      fireEvent.change(select, { target: { value: "Might" } });
+      fireEvent.change(screen.getByTestId("plan-preview-delta-input"), { target: { value: "-10" } });
+      await user.click(screen.getByTestId("plan-preview-run"));
+
+      // The draft's OWN whole node set (the merged view, including the pending unlock) travels with
+      // the hypothetical -- never just the committed set, and never re-derived client-side.
+      expect(previewTreeMutateAsync).toHaveBeenCalledWith({
+        playerId: 1,
+        body: {
+          nodes: { "skill.might-off-t1-n0": 0, "skill.might-off-t1-n2": 0 },
+          aptitudeDelta: { Might: -10 }
+        }
+      });
+
+      const sentence = await screen.findByTestId("plan-preview-sentence");
+      expect(sentence).toHaveTextContent("Closes a tier in might");
+      expect(sentence).toHaveTextContent("1 of your traits would stop working");
+    });
+
+    it("clicking Preview with the untouched default selection still runs (the visible default matches what's sent)", async () => {
+      aptitudesState = {
+        data: { ...aptitudesData, shares: { Might: 10, Fortitude: 20 } },
+        isLoading: false,
+        isError: false
+      };
+      previewTreeMutateAsync.mockResolvedValue(treeWithUnlockCost); // a no-op hypothetical
+
+      const user = userEvent.setup();
+      await openMightLattice(user);
+      await user.click(screen.getByTestId("lattice-unlock-skill.might-off-t1-n2"));
+
+      // Never touch the Select -- it visibly defaults to the first aptitude id ("Might").
+      await user.click(screen.getByTestId("plan-preview-run"));
+
+      expect(previewTreeMutateAsync).toHaveBeenCalledTimes(1);
+      const call = previewTreeMutateAsync.mock.calls[0]![0] as { body: { aptitudeDelta: Record<string, number> } };
+      expect(call.body.aptitudeDelta).toEqual({ Might: 0 });
+      await screen.findByTestId("plan-preview-sentence");
+      expect(screen.getByTestId("plan-preview-sentence")).toHaveTextContent("Nothing would change.");
+    });
+
+    it("a rejected preview (e.g. the endpoint's own aptitudeDelta.wouldGoNegative refusal) renders as an error, never a fabricated sentence", async () => {
+      aptitudesState = {
+        data: { ...aptitudesData, shares: { Might: 10 } },
+        isLoading: false,
+        isError: false
+      };
+      previewTreeMutateAsync.mockRejectedValue(new Error("aptitudeDelta.wouldGoNegative"));
+
+      const user = userEvent.setup();
+      await openMightLattice(user);
+      await user.click(screen.getByTestId("lattice-unlock-skill.might-off-t1-n2"));
+      await user.click(screen.getByTestId("plan-preview-run"));
+
+      const error = await screen.findByTestId("plan-preview-error");
+      expect(error).toHaveTextContent("aptitudeDelta.wouldGoNegative");
+      expect(screen.queryByTestId("plan-preview-sentence")).not.toBeInTheDocument();
+    });
+
+    it("Revert plan clears a stale preview result along with the rest of the draft", async () => {
+      aptitudesState = {
+        data: { ...aptitudesData, shares: { Might: 10 } },
+        isLoading: false,
+        isError: false
+      };
+      previewTreeMutateAsync.mockResolvedValue({
+        ...treeWithUnlockCost,
+        trees: treeWithUnlockCost.trees.map((t) => (t.treeId === "might" ? { ...t, tierReached: 0 } : t))
+      });
+
+      const user = userEvent.setup();
+      await openMightLattice(user);
+      await user.click(screen.getByTestId("lattice-unlock-skill.might-off-t1-n2"));
+      await user.click(screen.getByTestId("plan-preview-run"));
+      await screen.findByTestId("plan-preview-sentence");
+
+      await user.click(screen.getByTestId("passives-plan-revert"));
+      expect(screen.queryByTestId("passives-plan-panel")).not.toBeInTheDocument();
+    });
   });
 });

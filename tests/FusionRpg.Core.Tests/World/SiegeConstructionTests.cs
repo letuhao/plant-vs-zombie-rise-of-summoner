@@ -2,6 +2,7 @@ using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Siege;
+using FusionRpg.Core.World.Turn;
 using Xunit;
 
 namespace FusionRpg.Core.Tests.World;
@@ -234,5 +235,100 @@ public class SiegeConstructionTests
         // Confirms the additive schema change moves nothing: the real catalog (built at module load)
         // still validates end to end with ConstructRubbleCost/ConstructIronworkCost defaulted to 0.
         Assert.NotEmpty(StructureCatalog.All);
+    }
+
+    // ---- 15.4: the two raw faucets --------------------------------------------------------------
+
+    static WorldSector Sector(params WorldSlot[] slots) => new() { SectorId = "s1", Slots = slots };
+
+    [Fact]
+    public void An_intact_shard_vein_or_material_seam_yields_nothing()
+    {
+        var sector = Sector(
+            new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Intact },
+            new WorldSlot { SlotIndex = 1, SlotTypeId = "material-seam", GuardState = GuardState.Intact });
+
+        var (ironwork, rubble) = SiegeConstruction.Yield(sector);
+
+        Assert.Equal(0, ironwork);
+        Assert.Equal(0, rubble);
+    }
+
+    [Fact]
+    public void A_cleared_shard_vein_yields_ironwork_and_a_cleared_material_seam_yields_rubble()
+    {
+        var sector = Sector(
+            new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Cleared },
+            new WorldSlot { SlotIndex = 1, SlotTypeId = "material-seam", GuardState = GuardState.Cleared });
+
+        var (ironwork, rubble) = SiegeConstruction.Yield(sector);
+
+        // The spec's own numbers, matched to what the guards already say (GuardHeavy x4, GuardMedium x3).
+        Assert.Equal(SiegeTuningPolicy.Construction.ShardVeinYieldPerTurn, ironwork);
+        Assert.Equal(SiegeTuningPolicy.Construction.MaterialSeamYieldPerTurn, rubble);
+        Assert.True(ironwork > 0);
+        Assert.True(rubble > 0);
+    }
+
+    [Fact]
+    public void Multiple_cleared_veins_in_one_sector_sum()
+    {
+        var sector = Sector(
+            new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Cleared },
+            new WorldSlot { SlotIndex = 1, SlotTypeId = "shard-vein", GuardState = GuardState.Cleared });
+
+        var (ironwork, _) = SiegeConstruction.Yield(sector);
+
+        Assert.Equal(SiegeTuningPolicy.Construction.ShardVeinYieldPerTurn * 2, ironwork);
+    }
+
+    [Fact]
+    public void Other_slot_kinds_and_unknown_slot_type_ids_never_yield()
+    {
+        var sector = Sector(
+            new WorldSlot { SlotIndex = 0, SlotTypeId = "wildland", GuardState = GuardState.Cleared },
+            new WorldSlot { SlotIndex = 1, SlotTypeId = "not-a-real-slot-type", GuardState = GuardState.Cleared });
+
+        var (ironwork, rubble) = SiegeConstruction.Yield(sector);
+
+        Assert.Equal(0, ironwork);
+        Assert.Equal(0, rubble);
+    }
+
+    [Fact]
+    public void Production_credits_the_yield_into_the_sectors_own_stocks()
+    {
+        var world = World(Sector(
+            new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Cleared },
+            new WorldSlot { SlotIndex = 1, SlotTypeId = "material-seam", GuardState = GuardState.Cleared })
+            with { RubbleStock = 10, IronworkStock = 5 });
+
+        var next = SiegeConstruction.Production(world, new TurnReport(), "Production");
+        var sector = next.Sectors.Single();
+
+        Assert.Equal(10 + SiegeTuningPolicy.Construction.MaterialSeamYieldPerTurn, sector.RubbleStock);
+        Assert.Equal(5 + SiegeTuningPolicy.Construction.ShardVeinYieldPerTurn, sector.IronworkStock);
+    }
+
+    [Fact]
+    public void Production_leaves_a_sector_with_no_yield_byte_identical()
+    {
+        var world = World(Sector(new WorldSlot { SlotIndex = 0, SlotTypeId = "wildland" }));
+
+        var next = SiegeConstruction.Production(world, new TurnReport(), "Production");
+
+        Assert.Equal(world.Sectors.Single(), next.Sectors.Single());
+    }
+
+    [Fact]
+    public void Production_never_produces_a_negative_stock()
+    {
+        // Sanity anchor, not a real overflow test: Yield is additive-only (no subtraction anywhere in
+        // this phase), so a negative result would mean a sign error, not legitimate spend.
+        var world = World(Sector(new WorldSlot { SlotIndex = 0, SlotTypeId = "shard-vein", GuardState = GuardState.Cleared }));
+
+        var next = SiegeConstruction.Production(world, new TurnReport(), "Production");
+
+        Assert.True(next.Sectors.Single().IronworkStock >= 0);
     }
 }

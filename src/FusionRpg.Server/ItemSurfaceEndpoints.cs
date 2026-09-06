@@ -72,21 +72,35 @@ public static class ItemSurfaceEndpoints
         app.MapGet("/api/items/armoury/{playerId}", (string playerId, RpgStore store, int? limit, string? after) =>
         {
             var ordinals = store.ListRarities().ToDictionary(r => r.RarityId, r => r.Ordinal, StringComparer.Ordinal);
+            var owned = store.ListItemsByPlayer(playerId);
 
-            var entries = store.ListItemsByPlayer(playerId).Select(item =>
+            // ⛔ `Assigned` was hard-coded `false` on both records until 2026-09-06 (defect R4) —
+            // harmless while nothing could assign an item, and simply wrong from the day module 4's
+            // equip route shipped. It made the loot filter's `hideAssigned` and the armoury's
+            // `assigned` sort inert, both of which were already built and reading this field.
+            //
+            // Module 2's own read, reused rather than re-derived, and its `ref_kind` default is now
+            // the assignment table's `rolled` (defect R2's other half): a `stock` row is the relic
+            // wire's catalog id and never pins one of THESE instances. One dictionary for the whole
+            // page, so the join does not re-run per row.
+            var assigned = store.FindAssignmentHolders(
+                owned.Select(i => i.InstanceId).ToList(), EquipRefKinds.Rolled);
+
+            var entries = owned.Select(item =>
             {
                 var instance = store.GetInstance(item.InstanceId);
                 var container = instance is null ? null : store.GetContainer(instance.ContainerId);
                 var rarity = container?.Rarity ?? "";
+                var isAssigned = assigned.ContainsKey(item.InstanceId);
                 return (
                     Row: new ArmouryRowDto(
                         item.InstanceId, instance?.ContainerId ?? "", rarity,
                         rarity.Length > 0 && ordinals.TryGetValue(rarity, out var ord) ? ord : 0,
-                        Assigned: false, item.Locked, Unseen: !item.Seen, item.Stale, item.AcquiredUtc),
+                        isAssigned, item.Locked, Unseen: !item.Seen, item.Stale, item.AcquiredUtc),
                     Entry: new ArmouryEntry(
                         item.InstanceId, instance?.ContainerId ?? "", Role: "", Frame: "",
                         rarity.Length > 0 && ordinals.TryGetValue(rarity, out var o2) ? o2 : 0,
-                        item.AcquiredUtc, Assigned: false, item.Locked, Unseen: !item.Seen, item.Stale,
+                        item.AcquiredUtc, isAssigned, item.Locked, Unseen: !item.Seen, item.Stale,
                         RollQualityMilli: 0));
             }).ToList();
 

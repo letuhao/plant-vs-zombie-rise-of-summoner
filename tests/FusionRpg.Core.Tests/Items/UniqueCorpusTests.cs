@@ -535,27 +535,47 @@ public class UniqueCorpusTests
     }
 
     /// <summary>
-    /// ⛔ Five affix families named by the shipped unique corpus do not resolve to any affix-family row,
-    /// so their kind is unknown and they are excluded from `narrow`'s raw-stat subtotal rather than
-    /// guessed into it. This is module 10's already-filed phantom-family defect reaching this corpus —
-    /// named here, not re-fixed, and pinned so the set cannot grow silently.
+    /// ✅ <b>Closed 2026-09-06.</b> This used to assert that five affix families named by the shipped
+    /// unique corpus resolved to no affix-family row at all, so their kind was unknown and they were
+    /// dropped from `narrow`'s raw-stat subtotal rather than guessed into it — module 10's
+    /// phantom-family defect reaching this corpus. All five (and the four others in that set) are now
+    /// authored, so the assertion is inverted: EVERY family this corpus names resolves.
+    ///
+    /// <para>The old test walked <c>fixedAtoms</c> only, which is how it missed
+    /// <c>atom.affliction</c> — the unique corpus names it from a <c>varianceSlot</c>, a different
+    /// field. Both surfaces are walked now, plus <c>counterPressure.family</c>, so nothing a unique
+    /// can point a family at is left unchecked.</para>
     /// </summary>
     [Fact]
-    public void The_phantom_affix_families_are_named_rather_than_guessed()
+    public void Every_affix_family_the_unique_corpus_names_resolves_to_a_real_family()
     {
-        var unresolved = Corpus
-            .SelectMany(s => s.FixedAtoms)
-            .Select(a => a.Family)
-            .Where(f => !FamilyKinds.ContainsKey(f))
+        var named = Corpus
+            .SelectMany(FamiliesNamedBy)
             .Distinct(StringComparer.Ordinal)
             .OrderBy(f => f, StringComparer.Ordinal)
             .ToList();
 
-        Assert.Equal(
-            new[]
-            {
-                "atom.bonding", "atom.buttering", "atom.chilling", "atom.marking", "atom.rotting",
-            },
-            unresolved);
+        var unresolved = named.Where(f => !FamilyKinds.ContainsKey(f)).ToList();
+        Assert.Empty(unresolved);
+
+        // The five this test used to pin as unresolvable, named so a regression fails with their
+        // names in front of the reader rather than as an empty-set diff.
+        foreach (var wasPhantom in new[]
+                 { "atom.bonding", "atom.buttering", "atom.chilling", "atom.marking", "atom.rotting" })
+            Assert.Contains(wasPhantom, named, StringComparer.Ordinal);
+
+        // atom.affliction reaches this corpus through `varianceSlot`, never `fixedAtoms` — the exact
+        // shape the old walk could not see.
+        Assert.Contains("atom.affliction", named, StringComparer.Ordinal);
+        Assert.Equal("stat.derived", FamilyKinds["atom.affliction"]);
+    }
+
+    /// <summary>Every field on a unique seed that can name an affix family — `fixedAtoms`, the
+    /// `varianceSlot`, and a drawback-shaped `counterPressure`.</summary>
+    static IEnumerable<string> FamiliesNamedBy(UniqueSeed seed)
+    {
+        foreach (var atom in seed.FixedAtoms) yield return atom.Family;
+        if (seed.VarianceSlot is { Family.Length: > 0 } variance) yield return variance.Family;
+        if (seed.CounterPressure.Family is { Length: > 0 } drawback) yield return drawback;
     }
 }

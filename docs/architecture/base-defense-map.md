@@ -5,6 +5,12 @@
 outright wrong. Gate 0 taken in full; the fifth-stage `decisions.md` amendment approved alongside. Module specs live in
 [base-defense/](base-defense/), one per module id below.
 
+**AMENDED again 2026-09-06 to 30 modules**: `siege-fog` added after fog of war was reopened by the
+owner and taken through its own idea phase ([base-defense-fog-of-war-ideal.md](base-defense-fog-of-war-ideal.md))
+and spec ([spec-siege-fog.md](base-defense/spec-siege-fog.md)) — see decisions 47/48 in
+`base-defense-ideal.md` §0 for the two smaller, implementation-found gaps (`WorldLane.WardLevel`,
+`SlotDepletionMilli`) resolved the same pass without a new module.
+
 **Gate 0 was run before any spec was written — see [§ Gate 0 results](#gate-0-results-run-2026-09-04).
 Six §3 rows moved.**
 
@@ -55,12 +61,16 @@ Both sides move. Buildings are a new actor kind with no ownership; possession is
 
 ## Modules
 
-**Twenty-nine**, in two families that barely touch:
+**Thirty**, in two families that barely touch:
 
 | Family | Modules | Shape |
 |---|---|---|
-| **The siege** | 1–22 | Engine, world seam, board, AI, FE |
+| **The siege** | 1–22, 30 | Engine, world seam, board, AI, FE |
 | **Structure content** (folded in by decision 45) | 23–29 | Seed schema → corpus → catalog → **instantiate** → planner → pipeline → metrics |
+
+Module 30, `siege-fog`, was added 2026-09-06 — after the other 29 already existed, once fog of war (a
+scope item deliberately reopened by the owner) had its own idea phase and spec. It sits in the siege
+family but depends on `siege-ai`, not the reverse — see the module table and build order below.
 
 The two families meet at exactly one point: `structure-catalog-import` (25) replaces the four
 hand-authored `StructureCatalog` rows the siege ships against. **Everything else is independent**, and
@@ -118,6 +128,7 @@ levels 4–6 build on it.
 | `structure-pipeline` | The **only** module that calls a model, and it writes **identity only**. Permuted enums, declared vote set, `1-1-1` → `unresolved`, byte-identical rerun proven by hash | `structure-planner` |
 | `structure-instantiate` | **Pass 3 (P3-3)** — Law 1's missing middle layer: the game runtime rolls a **concrete per-player instance** via `Instantiator.TryInstantiate`, which has **zero production callers** today. A **wiring** module — traits and actions roll; **HP and every ordinal-derived magnitude do not** (decision 32) | `structure-catalog-import` |
 | `structure-metrics` | Every metric declares **closed or open**; **an open-loop metric never fails a build**. Skew checked at plan and at output; rarity proven not to be a power axis | `structure-pipeline` |
+| `siege-fog` | **Hidden information on the tactical board** — `FoggedBattleView`/`FoggedOccupancy`, two decorators over the already-swappable `IBattleView`/`IBoardOccupancy` seams, sharing one visibility function (vision range by kind + `LineOfFire`). Symmetric by owner decision; fog changes what a side can currently prove, never what the resolver computes. Gives `structure-schema`'s reserved `See` role its first mechanical purpose | `siege-ai`, `siege-cover` |
 
 **No cycles.** `siege-supply` and `battle-clock-profile` deliberately depend on nothing — they are the
 two unblocking changes, and both are small.
@@ -135,6 +146,7 @@ two unblocking changes, and both are small.
 6.  siege-economy · siege-ai
 7.  siege-resolver          ← ⭐ playable and CI-provable HERE, with no FE
 7b. siege-engagement                                       (needs siege-resolver)
+7c. siege-fog                                              (needs siege-ai; added 2026-09-06)
 8.  board-render
 8b. siege-stage · battle-stage                             (parallel; both need board-render)
 

@@ -215,6 +215,53 @@ public class SeedScannerTests : IDisposable
         Assert.Contains("effects/affixes", SeedScanner.OwnedFolders);
     }
 
+    // ---- D4.16 (spec-domain-catalog.md §1): the seven dungeon folders ----
+
+    [Fact]
+    public void OwnedFolders_carries_all_seven_dungeon_corpus_folders()
+    {
+        var expected = new[]
+        {
+            "dungeon/domains", "dungeon/rooms", "dungeon/layouts", "dungeon/events",
+            "dungeon/quests", "dungeon/encounters", "dungeon/supplies",
+        };
+        foreach (var folder in expected)
+            Assert.Contains(folder, SeedScanner.OwnedFolders);
+    }
+
+    [Fact]
+    public void The_seven_dungeon_folders_are_scanned_when_present_never_when_absent()
+    {
+        // "the seven folders are scanned" (D4.16's own Verify line): none exist under the real repo
+        // today (confirmed separately), so this proves the WIRING end to end against a fixture root
+        // rather than the real, still-empty data/seed/dungeon/ tree -- absent, Roots skips them
+        // (today's real behaviour); created, Roots includes them (the behaviour once content lands).
+        var beforeRoots = SeedScanner.Roots(_root, explicitRoot: false, Directory.Exists);
+        Assert.DoesNotContain(beforeRoots, r => r.Replace('\\', '/').EndsWith("dungeon/domains", StringComparison.Ordinal));
+
+        Dir("dungeon", "domains");
+        Dir("dungeon", "quests");
+
+        var afterRoots = SeedScanner.Roots(_root, explicitRoot: false, Directory.Exists);
+        Assert.Contains(afterRoots, r => r.Replace('\\', '/').EndsWith("dungeon/domains", StringComparison.Ordinal));
+        Assert.Contains(afterRoots, r => r.Replace('\\', '/').EndsWith("dungeon/quests", StringComparison.Ordinal));
+        // The five dungeon folders never created stay absent -- each folder is checked independently.
+        Assert.DoesNotContain(afterRoots, r => r.Replace('\\', '/').EndsWith("dungeon/rooms", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void The_real_repos_own_data_seed_dungeon_tree_has_none_of_the_seven_folders_yet()
+    {
+        // Pins the honest, current state this task's own evidence names: adding the seven folders to
+        // OwnedFolders is a no-op today because none of them exist on disk -- if this test ever
+        // starts failing, real dungeon content has landed and the "no-op today" claim needs revisiting.
+        var root = RepoRoot();
+        var dungeonRoot = Path.Combine(root, "data", "seed", "dungeon");
+        Assert.True(Directory.Exists(dungeonRoot));
+        var subfolders = Directory.GetDirectories(dungeonRoot).Select(Path.GetFileName).ToList();
+        Assert.Equal(new[] { "_containers", "_plan", "_registry" }, subfolders!.OrderBy(x => x, StringComparer.Ordinal));
+    }
+
     static string RepoRoot()
     {
         var dir = new DirectoryInfo(AppContext.BaseDirectory);

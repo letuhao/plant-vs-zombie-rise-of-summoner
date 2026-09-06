@@ -440,6 +440,76 @@
       "groupId": "g.economy",
       "status": "live",
       "tags": []
+    },
+    {
+      "id": "disptpl.p3-043",
+      "nameKey": "disptpl.affix.buttering",
+      "name": "{value}% chance to butter target on hit",
+      "runtimeFamily": "atom.buttering",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-044",
+      "nameKey": "disptpl.affix.chilling",
+      "name": "{value}% chance to chill target on hit",
+      "runtimeFamily": "atom.chilling",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-045",
+      "nameKey": "disptpl.affix.blighting",
+      "name": "{value}% chance to blight target on hit",
+      "runtimeFamily": "atom.blighting",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-046",
+      "nameKey": "disptpl.affix.rotting",
+      "name": "{value}% chance to rot target on hit",
+      "runtimeFamily": "atom.rotting",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-047",
+      "nameKey": "disptpl.affix.sparking",
+      "name": "{value}% chance to spark target on hit",
+      "runtimeFamily": "atom.sparking",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-048",
+      "nameKey": "disptpl.affix.marking",
+      "name": "{value}% chance to mark target on hit",
+      "runtimeFamily": "atom.marking",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
+    },
+    {
+      "id": "disptpl.p3-049",
+      "nameKey": "disptpl.affix.bonding",
+      "name": "{value}% chance to bond target on hit",
+      "runtimeFamily": "atom.bonding",
+      "plantOverrideKey": null,
+      "groupId": "g.affliction",
+      "status": "live",
+      "tags": []
     }
   ]
 }

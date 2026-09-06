@@ -31,8 +31,8 @@ public static class WildOutcome
         {
             new WeightedOption<WildOutcomeKind>(WildOutcomeKind.Joins, checked((int)row.JoinsMilli)),
             new WeightedOption<WildOutcomeKind>(WildOutcomeKind.TakesLeaves, checked((int)row.TakesLeavesMilli)),
-            new WeightedOption<WildOutcomeKind>(WildOutcomeKind.Flees, checked((int)row.AttacksMilli)),
-            new WeightedOption<WildOutcomeKind>(WildOutcomeKind.Attacks, checked((int)row.FleesMilli)),
+            new WeightedOption<WildOutcomeKind>(WildOutcomeKind.Flees, checked((int)row.FleesMilli)),
+            new WeightedOption<WildOutcomeKind>(WildOutcomeKind.Attacks, checked((int)row.AttacksMilli)),
         };
         return WeightedChoice.Pick(options, rollSeed, streamName);
     }

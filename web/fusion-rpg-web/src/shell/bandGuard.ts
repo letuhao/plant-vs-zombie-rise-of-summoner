@@ -97,7 +97,21 @@ const DIALOG_BAND_ALLOWED_PATHS = new Set([
   "ui/ConfirmDialog.tsx",
   "stages/world/confirms/CommitLegionDialog.tsx",
   "stages/world/confirms/BindWardenDialog.tsx",
-  "stages/world/confirms/ReleaseGroundDialog.tsx"
+  "stages/world/confirms/ReleaseGroundDialog.tsx",
+  // item module 20 (2026-09-06): the socket bench and the compendium are band-3 by their own spec's
+  // decision, not by a component's preference — they are the third and last push of the Relics
+  // depth budget (Relics → item → bench), and putting them back inside the panel is what the 640px
+  // measurement already ruled out. Both qualify the same way the three world dialogs above do:
+  // fully controlled (the layer's own `open` state decides visibility) and never self-opening from
+  // a background event — each opens only from an explicit button press on a selected row.
+  "layers/relics/SocketBench.tsx",
+  "layers/relics/Compendium.tsx",
+  // item modules 14/15/16 (2026-09-06): the craft bench is the workbench's write surface and sits at
+  // exactly the same depth as the socket bench above — the third push of the Relics budget, opened
+  // only by the Craft button on an already-selected armoury row, and fully controlled by the layer's
+  // own `craftOpen` state. It qualifies on the same two grounds, and for the same reason it is a
+  // dialog at all: a spend is a decision, which is what band 3 is for.
+  "layers/relics/Workbench.tsx"
 ]);
 
 const DEV_SURFACE_PREFIXES = [

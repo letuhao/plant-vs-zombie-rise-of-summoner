@@ -1,4 +1,5 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Actions.Cost;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects.Atoms;
@@ -91,9 +92,19 @@ public static partial class BattleEngine
         IIntentSource? intentSource = null)
     {
         var (outcome, target, envelope) = DeclareBasicAttack(attacker, state, now, nowTick, trace, round, intentSource);
-        return outcome == AttackStepOutcome.Proceed
-            ? ApplyBasicAttack(attacker, target!, envelope, state, now, nowTick, calculator, critRng)
-            : new AttackStep(outcome, target, 0);
+        if (outcome != AttackStepOutcome.Proceed) return new AttackStep(outcome, target, 0);
+
+        // A19 (T56.2): the atomic path's own point of no return -- OnActivate has already fired
+        // inside DeclareBasicAttack and nothing after this can un-declare the intent, so this is
+        // where "committing is what costs, not landing" (spec-action-costs.md §3) actually happens.
+        // `null` rng: every authored cost today is a Fixed ValueSpec (no spread), so ScaledAmount
+        // never rolls; a real Spread-costed action would need a dedicated cost-roll stream here,
+        // mirroring EssenceRng/RidersRng's own "never a second roll butterfly" convention -- not
+        // built speculatively ahead of content that needs it (AuraUpkeepDriver's own real caller
+        // defaults to the same `null`).
+        state.CostLedger.TryPay(attacker.Setup.Key, envelope.ActionId, ActionCostTiming.OnCommit, rng: null);
+
+        return ApplyBasicAttack(attacker, target!, envelope, state, now, nowTick, calculator, critRng);
     }
 
     /// <summary>
@@ -109,12 +120,20 @@ public static partial class BattleEngine
         if (!attacker.Active) return (AttackStepOutcome.Continue, null, ActionEnvelope.NoOp);
         if (IsCcLocked(state.Status, attacker.Setup.Key, now)) return (AttackStepOutcome.Continue, null, ActionEnvelope.NoOp);
 
+        // A19 (T56.1): CostLedger's own Func<long> nowTick reads this -- assigned here, at the one
+        // point every dispatch path (atomic and timeline) already knows the real current tick,
+        // before it is ever consulted for affordability below.
+        state.NowTick = nowTick;
+
         var view = BloodthirstyViewFor(state, attacker);
         // T6/B20: an injected source is how an interactive battle occupies the `Ready` dwell, and how a
         // replay reads its decision trace instead of re-deciding. `null` keeps the shipped AI policy,
         // which is every battle today — so this is byte-identical until a caller passes one.
+        // A19 (T56.1): AlwaysAffordable.Instance -> state.CostLedger -- the real, first production
+        // affordability check. Vacuously affordable for every action with no authored cost row
+        // (CostLedger.Check's own early return), so this is byte-identical until content opts in.
         var source = intentSource
-            ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, AlwaysAffordable.Instance);
+            ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, state.CostLedger);
         var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
         if (intent.IsNone) return (AttackStepOutcome.Break, null, ActionEnvelope.NoOp); // hazard 3: round breaks
 

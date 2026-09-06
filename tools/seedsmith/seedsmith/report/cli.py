@@ -950,6 +950,11 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                 continue
             for outcome in result.outcomes:
                 overall_outcomes[outcome.outcome] = overall_outcomes.get(outcome.outcome, 0) + 1
+            # `detail` is a real, model-authored reason (§H9's own diagnostic history: "current tree
+            # is empty", "'might' is a property/stat, not an effect id" were both only ever found by
+            # reading this field) — printed here, per non-accepted subject, so a future run's real
+            # blocks/escalations are diagnosable from the CLI's own output rather than requiring a
+            # second real-call reproduction just to see why.
             per_tree_reports.append({
                 "tree": tree_id,
                 "seedPath": str(result.seed_path) if result.seed_path else None,
@@ -957,6 +962,10 @@ def _cmd_trees_generate(args: argparse.Namespace) -> int:
                     o: sum(1 for x in result.outcomes if x.outcome == o)
                     for o in ("accepted", "blocked", "unresolved", "escalated")
                 },
+                "nonAcceptedDetail": [
+                    {"subject": o.subject_id, "outcome": o.outcome, "detail": o.detail}
+                    for o in result.outcomes if o.outcome != "accepted"
+                ],
                 "runReport": result.report.to_dict(),
             })
 
@@ -1731,7 +1740,8 @@ def build_parser() -> argparse.ArgumentParser:
     trees_plan.add_argument("--check", action="store_true",
                             help="regenerate in memory and diff against the committed plan")
     trees_plan.add_argument("--tree", default="might",
-                            help="tree id to plan (default: might, B1's own named tree)")
+                            help="tree id to plan — any of the 12 primary trees named by the roster "
+                                 "(default: might, B1's own named tree)")
     trees_plan.add_argument("--manifest", action="store_true",
                             help="operate on the top-level manifest (plan.v1.json) + its trees[], "
                                  "not just --tree alone (task C2)")

@@ -1,3 +1,6 @@
+using FusionRpg.Core.Battle.Board;
+using FusionRpg.Core.World.Turn;
+
 namespace FusionRpg.Core.World.Siege;
 
 /// <summary>
@@ -42,4 +45,62 @@ public static class SiegeConstruction
     /// </summary>
     public static long RefineGated(bool hasWorkingRefinery, long rubbleSpent, int yieldMilli) =>
         hasWorkingRefinery ? Refine(rubbleSpent, yieldMilli) : 0;
+
+    /// <summary>
+    /// §2's own faucets: `ironwork` from a CLEARED `shard-vein` slot, `rubble` from a CLEARED
+    /// `material-seam` slot — a RAW ground yield, independent of any structure (unlike
+    /// <see cref="LoamProduction"/>'s own extractor/soul-conduit model, which needs a built structure
+    /// on the slot). "You clear a guarded vein IN ORDER TO build" — the guard is the whole gate; an
+    /// intact (unguarded... unCLEARED) vein yields nothing, matching every other guarded slot's own
+    /// resource-lock convention in this program.
+    /// </summary>
+    public static (long Ironwork, long Rubble) Yield(WorldSector sector)
+    {
+        long ironwork = 0, rubble = 0;
+        foreach (var slot in sector.Slots)
+        {
+            if (slot.GuardState != GuardState.Cleared) continue;
+            if (!SlotTypeCatalog.IsKnown(slot.SlotTypeId)) continue;
+
+            var kind = SlotTypeCatalog.Get(slot.SlotTypeId).Kind;
+            if (kind == SlotKind.ShardVein) ironwork = checked(ironwork + SiegeTuningPolicy.Construction.ShardVeinYieldPerTurn);
+            else if (kind == SlotKind.MaterialSeam) rubble = checked(rubble + SiegeTuningPolicy.Construction.MaterialSeamYieldPerTurn);
+        }
+
+        return (ironwork, rubble);
+    }
+
+    /// <summary>
+    /// base-defense `siege-construction` 15.4: the turn phase that actually credits <see cref="Yield"/>
+    /// into <see cref="WorldSector.IronworkStock"/>/<see cref="WorldSector.RubbleStock"/> — mirrors
+    /// <see cref="Loam.LoamPhases.Production"/>'s own per-sector shape exactly, deliberately, rather
+    /// than inventing a second turn-phase pattern. Uncapped by design: unlike `LoamStock`
+    /// (`LoamPolicy.LoamCapacity`), neither `ConstructionTuning` nor the spec names a stock ceiling for
+    /// `rubble`/`ironwork` — AGENTS.md's own no-hard-ceilings rule, so no overflow event is possible or
+    /// reported here.
+    ///
+    /// <para><b>Deliberately scoped to the two raw faucets only.</b> <see cref="RefineGated"/>'s own
+    /// per-turn wiring (spending accumulated `rubble` into `ironwork` automatically, gated by a working
+    /// `Refinery`) is a SEPARATE, not-yet-scoped turn-phase question this method does not attempt —
+    /// `refine.perTurnCap` staying unset (decision 29) makes an automatic per-turn refine an economically
+    /// live question (an unbounded refinery could drain a sector's whole rubble stock in one pass), not
+    /// a mechanical wiring one, and 15.4's own task text names only the two faucets.</para>
+    /// </summary>
+    public static WorldState Production(WorldState world, TurnReport report, string phase)
+    {
+        var sectors = new List<WorldSector>(world.Sectors.Count);
+        foreach (var sector in world.Sectors)
+        {
+            var (ironwork, rubble) = Yield(sector);
+            sectors.Add(ironwork == 0 && rubble == 0
+                ? sector
+                : sector with
+                {
+                    IronworkStock = checked(sector.IronworkStock + ironwork),
+                    RubbleStock = checked(sector.RubbleStock + rubble),
+                });
+        }
+
+        return world with { Sectors = sectors };
+    }
 }

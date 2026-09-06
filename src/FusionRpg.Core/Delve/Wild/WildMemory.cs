@@ -50,7 +50,7 @@ public static class WildMemory
 
             return row.Resolution switch
             {
-                ResolutionJoins => 1,
+                ResolutionJoins => -1,
                 ResolutionFight or ResolutionAttacks => 1,
                 ResolutionLeave or ResolutionFlees or ResolutionTakesLeaves => 0,
                 _ => throw new ArgumentException($"Unknown wild talk resolution '{row.Resolution}'.", nameof(decisions)),

@@ -285,6 +285,43 @@ rather than by tuning.
 
 **Still open:** §8.
 
+**Round 12 — clearing two implementation-found deferrals against the plan, not ad hoc (2026-09-06).**
+Both were found as wiring gaps *during* a module's own closure (not at idea time, so §8 never named
+them), and both were left as unowned "Deferred" bullets in `base-defense-todo.md` until now — assigning
+an owner and a real task is itself a design decision small enough to record here rather than silently
+resolve in a task list no one reviews.
+
+47. **`WorldLane.WardLevel` reshaping the Approach zone asymmetrically is `siege-ai`'s to build, not
+    `siege-waves`'.** Found closing `district-layout` (6.4): `spec-district-layout.md`'s own contract
+    already requires it, `DistrictTuning.ApproachDepth`/`ApproachDepthPerWardLevel` already parse and
+    validate, but `DistrictLayout.Build`'s ring stays symmetric because nothing consumes the asymmetry
+    yet — deliberately left unreshaped rather than changed with no caller to prove it against.
+    `siege-waves` is fully closed; reopening it to reshape board geometry for a concern that isn't its
+    own would be reopening a finished module for someone else's job. `siege-ai`'s objective-fallback
+    pathing (17.4) is still open and already needs a live `BoardPathfinder` read over the same board
+    geometry — folding the asymmetric-Approach reshape into that same pass costs one extra geometry read
+    instead of a second, separate integration into a closed module.
+48. **The per-turn `SlotDepletionMilli` increment (audit F10) wires the ALREADY-BUILT
+    `BoardEconomy.AdvanceDepletionMilli`, and never touches `LoamProduction.For`.**
+    `WorldSlot.SlotDepletionMilli` is base-defense's own field (`StructurePolicy.cs:60-61`'s own comment:
+    "never touching `WorldSector.DepletionMilli`, the loam program's own field") — so base-defense, not
+    the loam-economy program, owns incrementing it, regardless of which resource a slot yields.
+    `BoardEconomy.AdvanceDepletionMilli` (`Battle/Siege/BoardEconomy.cs:73-76`, already shipped with
+    `siege-economy`) is exactly the function this needs — `(slotDepletionMilli, yieldedThisRound) → int`,
+    reusing `StructurePolicy.DepletionPerHarvestMilli`/`IsExhausted` rather than a second exhaustion
+    rule. Its own doc comment already names the gap: "applied on a harvest-not-time trigger instead of
+    the turn-phase caller `structure-state` left unwired." Turning `LoamProduction.For` itself into a
+    mutator was rejected (F10's own note) as a real design change to a hot file another program actively
+    develops — `siege-construction` instead calls the existing pure function from its OWN per-turn phase
+    (15.4's `SiegeConstruction.Production`, the same slot 15.4 already added the Ironwork/Rubble faucets
+    to), so `LoamProduction.cs` is never touched.
+
+**Fog of war, reopened by the owner against this document's own original scope, now has its own ideal
+doc** rather than a retrofit into this one: [base-defense-fog-of-war-ideal.md](base-defense-fog-of-war-ideal.md)
+(2026-09-06) — the `structure-seed-ideal.md` precedent (decision 45: its own dedicated ideal doc,
+folded into this program rather than rewritten into it). Not a decision — real open questions remain
+there for the owner before `/spec` can write one.
+
 ---
 
 ## 1. What this is

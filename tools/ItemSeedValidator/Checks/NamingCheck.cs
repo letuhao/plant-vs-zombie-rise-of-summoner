@@ -67,6 +67,8 @@ public static class NamingCheck
                     + $"kind prefixes ({string.Join(", ", prefixes)})");
         }
 
+        if (entry.File.IsExemplar) return;   // see ExemptFromGlobalUniqueness
+
         if (seen.TryGetValue(key, out var first))
             ctx.Error(entry, "NameKeyDuplicate", "seed-contract.md §6",
                 $"nameKey '{key}' is already used by {first.Label} in {first.File.RelativePath}"
@@ -75,6 +77,31 @@ public static class NamingCheck
         else
             seen[key] = entry;
     }
+
+    /// <summary>
+    /// ⛔ <b>An exemplar is exempt from the two GLOBAL-UNIQUENESS rules here, and from nothing else.</b>
+    /// This is not a new decision — <see cref="IdentityCheck"/>'s own <c>CheckUniqueness</c> already
+    /// carries it, in those words, for the id rule: <i>"An exemplar demonstrates a real partition using
+    /// its real namespace — that is what makes it a usable pattern rather than an abstract one. It
+    /// therefore claims ids the actual partition will legitimately author later, and the two are not in
+    /// conflict: the exemplar is not corpus content and is never imported. Grammar and namespace rules
+    /// still apply to it; only global uniqueness does not."</i>
+    ///
+    /// <para><c>nameKey</c> and normalized-name uniqueness are the same class of rule on the same
+    /// entries, and this file simply never got the same guard. It was invisible until an exemplar-demoed
+    /// entry was actually authored: <c>affix-family.exemplar.json</c> demonstrates
+    /// <c>atom.elemental-power</c>, the g.elem-power partition then authored it for real on 2026-09-06
+    /// (closing a phantom 21 shipped entries referenced), and the tool reported the exemplar and the
+    /// real row as a duplicate nameKey plus a name collision — the exact conflict IdentityCheck's note
+    /// says does not exist.</para>
+    ///
+    /// <para>Grammar, prefix, plural, markup and pool-word rules are UNCHANGED for exemplars, matching
+    /// that same split — an exemplar has to validate like real content, or it is not a usable pattern.
+    /// Only the two cross-entry lookups skip it, and they skip recording as well as reporting, so an
+    /// exemplar can neither be blamed nor blame a real row.</para>
+    /// </summary>
+    const string ExemptFromGlobalUniqueness =
+        "IdentityCheck.CheckUniqueness — 'the exemplar is not corpus content and is never imported'";
 
     static void CheckName(ValidationContext ctx, SeedEntry entry, Dictionary<string, SeedEntry> seen)
     {
@@ -173,6 +200,8 @@ public static class NamingCheck
     static void RecordCollision(
         ValidationContext ctx, SeedEntry entry, string name, Dictionary<string, SeedEntry> seen)
     {
+        if (entry.File.IsExemplar) return;   // see ExemptFromGlobalUniqueness
+
         var normalized = ctx.Normalizer.Normalize(name);
         if (normalized.Key.Length == 0) return;
         if (seen.TryGetValue(normalized.Key, out var first))

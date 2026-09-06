@@ -179,6 +179,15 @@ public sealed class ActionRunner
         _runs.TryGetValue(actorKey, out var run) && run.Active ? run.TargetKey : null;
 
     /// <summary>
+    /// A18f (spec-action-dispatch-generalization.md T55.1): the envelope this actor actually
+    /// committed, for the caller applying the resolved hit — the runner itself never applies damage
+    /// (this class's own header: "what an action does... belongs to the combat action program").
+    /// Mirrors <see cref="CurrentTarget"/> exactly: null under the identical conditions.
+    /// </summary>
+    public ActionEnvelope? CurrentEnvelope(string actorKey) =>
+        _runs.TryGetValue(actorKey, out var run) && run.Active ? run.Envelope : null;
+
+    /// <summary>
     /// Commits an intent: takes a slot if the action needs one, publishes a resolve handle per hit,
     /// and moves the actor into <see cref="TurnState.Committed"/>.
     /// </summary>

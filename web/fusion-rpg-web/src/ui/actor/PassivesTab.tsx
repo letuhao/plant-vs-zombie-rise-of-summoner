@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAptitudes, usePassiveTree, usePlayers, useSaveTreeNodes, useSoulBalance } from "@/lib/bus";
+import { useAptitudes, usePassiveTree, usePlayers, usePreviewTree, useSaveTreeNodes, useSoulBalance } from "@/lib/bus";
 import { Banner, Button, EmptyState, TabList } from "@/ui";
 import {
   draftFocusPreview,
@@ -10,6 +10,8 @@ import {
 } from "@/contract/passivesYours";
 import { EMPTY_PATH_BROWSE_QUERY, type PathBrowseQuery } from "@/contract/passivesBrowse";
 import {
+  closePreview,
+  closePreviewSentence,
   decodePlanCode,
   encodePlanCode,
   mergeSoulLevels,
@@ -24,7 +26,7 @@ import { PASSIVE_TREE_VOCABULARY } from "@/contract/passiveTreeVocabulary";
 import type { ElementId } from "@/contract/types";
 import { PathBrowse } from "./PathBrowse";
 import { PathLattice } from "./PathLattice";
-import { PlanPanel } from "./PlanPanel";
+import { PlanPanel, type ClosePreviewOutcome } from "./PlanPanel";
 import { TraitDetail } from "./TraitDetail";
 
 /** Reads the `?plan=` param off the CURRENT address, once, for the initial state seed -- GG-8's own
@@ -66,6 +68,7 @@ export function PassivesTab({
   const aptitudes = useAptitudes(playerId);
   const souls = useSoulBalance(playerId);
   const saveTreeNodes = useSaveTreeNodes();
+  const previewTree = usePreviewTree();
 
   // §2.2's inner tab bar, plus I4's search/category query for Level 1 — both lifted here (not into
   // PathBrowse's own state) so they survive PathBrowse itself unmounting when `subTab` flips back to
@@ -89,6 +92,14 @@ export function PassivesTab({
   // own panels closing -- the same GG-51 "the owning instance doesn't unmount" reasoning `subTab`/
   // `browseQuery` above already rely on, extended past a reload via the URL (below).
   const [plan, setPlan] = useState<Record<string, number>>(readPlanFromUrl);
+
+  // I8's follow-up (spec-tree-surface.md §7.2 part 5) -- the Plan panel's "what would this close"
+  // tool. A hypothetical aptitude id/delta the player is trying, plus the last preview result --
+  // never persisted, and reset whenever the Plan itself reverts (`revertPlan` below) so a stale
+  // sentence from a discarded draft can't linger.
+  const [previewAptitudeId, setPreviewAptitudeId] = useState<string | undefined>(undefined);
+  const [previewDelta, setPreviewDelta] = useState(0);
+  const [previewResult, setPreviewResult] = useState<ClosePreviewOutcome | null>(null);
 
   // GG-8: the Plan round-trips through the URL for the current session or a bookmark -- nothing more.
   // Explicitly NOT a "share this build" feature (spec-tree-surface.md §15 Ask-first; this task's own
@@ -141,6 +152,9 @@ export function PassivesTab({
   }
 
   const unspentAptitude = aptitudes.data.budget - aptitudes.data.spent;
+  // I8's follow-up (§7.2 part 5) -- straight off the server's own aptitude wallet, never a
+  // separately-hardcoded id list (`AptitudesPage.tsx`'s own established convention).
+  const aptitudeIds = Object.keys(aptitudes.data.shares);
   const invested = investedTrees(tree.data.trees);
   const notWorking = notWorkingTraits(tree.data.trees);
   const focus = focusReading(tree.data.trees);
@@ -203,6 +217,31 @@ export function PassivesTab({
     setPlan({});
     setOpenNodeId(null);
     setOpenTreeId(null);
+    setPreviewResult(null);
+  }
+
+  // I8's follow-up (spec-tree-surface.md §7.2 part 5) -- runs the draft's own node set plus the one
+  // hypothetical aptitude delta the player picked through the real server resolution
+  // (`POST /api/passive-tree/{playerId}/preview`, never persisted), then diffs the response against
+  // the already-fetched COMMITTED report (`closePreview`) -- a plain comparison of two server-resolved
+  // outputs, never a re-derivation of `CrossUnlock`/`TierGate` here.
+  async function runClosePreview() {
+    // Falls back to the first available aptitude id, matching the SAME default `PlanPanel`'s own
+    // Select already shows unasked (`previewAptitudeId ?? aptitudeIds[0]`) -- without this fallback,
+    // clicking Preview before ever touching the dropdown would silently no-op against a visibly
+    // selected id.
+    const effectiveAptitudeId = previewAptitudeId ?? aptitudeIds[0];
+    if (!effectiveAptitudeId || !tree.data) return;
+    setPreviewResult(null);
+    try {
+      const result = await previewTree.mutateAsync({
+        playerId,
+        body: { nodes: mergedSoulLevelByNodeId, aptitudeDelta: { [effectiveAptitudeId]: previewDelta } }
+      });
+      setPreviewResult({ sentence: closePreviewSentence(closePreview(tree.data.trees, result.trees)) });
+    } catch (err) {
+      setPreviewResult({ error: err instanceof Error ? err.message : "Couldn't preview that change." });
+    }
   }
 
   // I6 -- Level 2, pushed from either sub-tab. Falls through to the normal tab body if the selected
@@ -216,7 +255,22 @@ export function PassivesTab({
     if (openNode) {
       return (
         <div className="mt-4 flex flex-col gap-3" data-testid="passives-tab">
-          {price ? <PlanPanel price={price} dirty={dirty} onRevert={revertPlan} focus={focusPreview} /> : null}
+          {price ? (
+            <PlanPanel
+              price={price}
+              dirty={dirty}
+              onRevert={revertPlan}
+              focus={focusPreview}
+              aptitudeIds={aptitudeIds}
+              previewAptitudeId={previewAptitudeId}
+              onPreviewAptitudeIdChange={setPreviewAptitudeId}
+              previewDelta={previewDelta}
+              onPreviewDeltaChange={setPreviewDelta}
+              onRunPreview={runClosePreview}
+              isPreviewing={previewTree.isPending}
+              previewResult={previewResult}
+            />
+          ) : null}
           <TraitDetail
             node={openNode}
             report={openTree}
@@ -237,7 +291,22 @@ export function PassivesTab({
 
     return (
       <div className="mt-4 flex flex-col gap-3" data-testid="passives-tab">
-        {price ? <PlanPanel price={price} dirty={dirty} onRevert={revertPlan} focus={focusPreview} /> : null}
+        {price ? (
+          <PlanPanel
+            price={price}
+            dirty={dirty}
+            onRevert={revertPlan}
+            focus={focusPreview}
+            aptitudeIds={aptitudeIds}
+            previewAptitudeId={previewAptitudeId}
+            onPreviewAptitudeIdChange={setPreviewAptitudeId}
+            previewDelta={previewDelta}
+            onPreviewDeltaChange={setPreviewDelta}
+            onRunPreview={runClosePreview}
+            isPreviewing={previewTree.isPending}
+            previewResult={previewResult}
+          />
+        ) : null}
         <PathLattice
           tree={openTree}
           soulLevelByNodeId={mergedSoulLevelByNodeId}
@@ -257,7 +326,22 @@ export function PassivesTab({
 
   return (
     <div className="mt-4 flex flex-col gap-4" data-testid="passives-tab">
-      {price ? <PlanPanel price={price} dirty={dirty} onRevert={revertPlan} focus={focusPreview} /> : null}
+      {price ? (
+        <PlanPanel
+          price={price}
+          dirty={dirty}
+          onRevert={revertPlan}
+          focus={focusPreview}
+          aptitudeIds={aptitudeIds}
+          previewAptitudeId={previewAptitudeId}
+          onPreviewAptitudeIdChange={setPreviewAptitudeId}
+          previewDelta={previewDelta}
+          onPreviewDeltaChange={setPreviewDelta}
+          onRunPreview={runClosePreview}
+          isPreviewing={previewTree.isPending}
+          previewResult={previewResult}
+        />
+      ) : null}
       <TabList
         testId="passives-sub-tabs"
         tabs={[

@@ -1,7 +1,12 @@
-import { Button } from "@/ui";
+import { Button, NumberInput, Select } from "@/ui";
 import type { PlanPrice } from "@/contract/passivesPlan";
 import type { FocusReading } from "@/contract/passivesYours";
 import { PASSIVE_TREE_VOCABULARY } from "@/contract/passiveTreeVocabulary";
+
+/** The two shapes `onRunPreview`'s own result can settle into (passivesPlan.ts's `closePreview`/
+ * `closePreviewSentence` on success; the preview endpoint's own refusal reasons, e.g.
+ * `aptitudeDelta.wouldGoNegative`, surfaced as plain text on failure). Never both at once. */
+export type ClosePreviewOutcome = { sentence: string | null } | { error: string };
 
 /**
  * passive-tree-todo.md I8 — "The Plan object" (spec-tree-surface.md §5.1, §5.2). The draft/dirty/
@@ -17,7 +22,15 @@ export function PlanPanel({
   price,
   dirty,
   onRevert,
-  focus
+  focus,
+  aptitudeIds,
+  previewAptitudeId,
+  onPreviewAptitudeIdChange,
+  previewDelta,
+  onPreviewDeltaChange,
+  onRunPreview,
+  isPreviewing,
+  previewResult
 }: {
   price: PlanPrice;
   /** Nothing pending -- render nothing (GG-17: an empty plan is not a state worth a panel; the
@@ -36,6 +49,25 @@ export function PlanPanel({
    * from the merged soul-level map on every render -- no memoized staleness to fight.
    */
   focus?: FocusReading | null;
+  /**
+   * I8's follow-up (spec-tree-surface.md §7.2 part 5) -- "the draft preview reports what a change
+   * would close." This needs a HYPOTHETICAL aptitude reallocation (a different wallet, edited on a
+   * different tab entirely, §4.1) run through the server's own resolution
+   * (`POST /api/passive-tree/{playerId}/preview`) -- never re-derived here (AGENTS.md "one power
+   * ladder, no private curves"). `aptitudeIds` come straight off the server's own aptitude wallet
+   * (`AptitudesState.shares`'s keys), the same "never a separately-hardcoded id list" convention
+   * `AptitudesPage.tsx` already uses. Every one of these props is optional and the whole tool renders
+   * nothing when `aptitudeIds`/`onRunPreview` are absent -- an honest absence for a pre-wire fixture
+   * or a caller that hasn't loaded the aptitude wallet yet, never a fabricated control.
+   */
+  aptitudeIds?: string[];
+  previewAptitudeId?: string;
+  onPreviewAptitudeIdChange?: (aptitudeId: string) => void;
+  previewDelta?: number;
+  onPreviewDeltaChange?: (delta: number) => void;
+  onRunPreview?: () => void;
+  isPreviewing?: boolean;
+  previewResult?: ClosePreviewOutcome | null;
 }) {
   if (!dirty) return null;
 
@@ -74,6 +106,58 @@ export function PlanPanel({
       <Button size="sm" variant="ghost" type="button" data-testid="passives-plan-revert" onClick={onRevert}>
         Revert plan
       </Button>
+
+      {aptitudeIds && aptitudeIds.length > 0 && onRunPreview ? (
+        <section
+          className="mt-1 flex flex-col gap-1 border-t border-border pt-1"
+          data-testid="passives-plan-close-preview"
+        >
+          <p className="text-2xs font-bold uppercase tracking-wide text-muted">What would this close?</p>
+          <div className="flex flex-wrap items-center gap-1">
+            <Select
+              data-testid="plan-preview-aptitude-select"
+              value={previewAptitudeId ?? aptitudeIds[0]}
+              onChange={(e) => onPreviewAptitudeIdChange?.(e.target.value)}
+            >
+              {aptitudeIds.map((id) => (
+                <option key={id} value={id}>
+                  {id}
+                </option>
+              ))}
+            </Select>
+            <NumberInput
+              data-testid="plan-preview-delta-input"
+              className="w-20"
+              value={previewDelta ?? 0}
+              onChange={(v) => onPreviewDeltaChange?.(v)}
+            />
+            <Button
+              size="sm"
+              variant="ghost"
+              type="button"
+              data-testid="plan-preview-run"
+              disabled={isPreviewing}
+              title={isPreviewing ? "Already checking that hypothetical" : undefined}
+              onClick={onRunPreview}
+            >
+              {isPreviewing ? "Checking…" : "Preview"}
+            </Button>
+          </div>
+          {previewResult && "sentence" in previewResult ? (
+            <p
+              className={previewResult.sentence ? "text-xs text-bad" : "text-xs text-muted"}
+              data-testid="plan-preview-sentence"
+            >
+              {previewResult.sentence ? `⚠ ${previewResult.sentence}` : "Nothing would change."}
+            </p>
+          ) : null}
+          {previewResult && "error" in previewResult ? (
+            <p className="text-xs text-bad" data-testid="plan-preview-error">
+              {previewResult.error}
+            </p>
+          ) : null}
+        </section>
+      ) : null}
     </section>
   );
 }

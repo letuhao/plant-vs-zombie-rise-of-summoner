@@ -570,3 +570,27 @@ The grounding corrections landed with the specs they belonged to.
 | `dungeon` adapter and pipelines | `party-dungeon/spec-dungeon-seed-contract.md` (approved) | `adapters/registry.py:13-15` gains `dungeon`; seven corpus kinds under `data/seed/dungeon/`; `python -m seedsmith dungeon contract --audit \| plan \| run \| audit \| emit`; planner per-cell motif briefs; provenance `{planHash, briefHash, promptVersions, registryVersions, motifSubsetHash}`; `stale_ids`; nothing exists on disk today (`party-dungeon/spec-domain-catalog.md` §Drift 5) |
 | `uniques` extension | `party-dungeon/spec-unique-pipeline.md` §1 | one ownership level per `unique` field on `adapters/items/kinds.py:56-60`; a set-stem audit check; `adapters/items/uniques/{planner,briefs,pipelines,audit}.py` over the `frame × axis × band` grid (30 cells, 2–3 per cell, first ship 30 beside the 49 at rung 80+); `python -m seedsmith items uniques contract --audit \| plan --dry-run \| run \| audit`; tests stub the transport to raise |
 
+
+## Filed by the item program (2026-09-06)
+
+One ask, and it is a **mechanics question about §3c-bis's own publication channel**, not a request to
+change scope or schedule. Filed here rather than only in the consumer's map for the reason §3c-bis
+itself gives: a cross-program ask that lives in one document surfaces late.
+
+| Ask | Filed by | Shape |
+|---|---|---|
+| **How does `frame-classify` publish a frame for a `blocked` demon?** | `item-todo.md` P0.4 (`tasks/`), against §3c-bis above | §3c-bis says frame is *"Published through the theme registry"*, and `item-map.md:61` says the same. But `spec-demon-themes.md` §2.2 defines that registry as `speciesId → { displayName, motifs[], antiMotifs[], expression{}, basis }` — **no `frame` key** — and §2.4/§7 make *"publishes no theme"* a **Never** for a demon whose motifs are `basis = "blocked"`, so such a demon has **no row to carry a frame on**. The item side's requirement is that **frame publishes independently of theme status** (a blocked demon still has a body, and frame is not a theme). Those two cannot both hold as written. **Live today: 15 of 840 anchors sit at `basis: "blocked"`**, so it bites on the first run, not at scale |
+
+**What the item program is *not* asking for.** Not a schedule, not a priority, and not a particular
+answer — the channel is this feature's to choose, and at least three are open (a `frame` key on the
+theme row plus a frame-only row for blocked demons; a separate `frames.v1.json` registry; or frame as
+an anchor field written back to `species/`). Item-side consumers are inert and stay inert either way:
+`EquipGate.cs:80-85`'s frame arm is a proven no-op while `actor.Frame` is null, pinned by
+`The_frame_arm_is_inert_while_no_species_carries_a_frame`, and `LootPipeline.cs:318-326` falls back to
+a uniform draw. Nothing breaks while this is open; it is the **acceptance** (*"every species carries a
+frame"*) that cannot be met through the channel currently named.
+
+⚠ **One correction offered, not imposed.** `item-map.md` §3.1 and this map's §3c-bis both describe the
+species corpus at *"~904 species"*. Measured 2026-09-06 off `data/seed/demons/species/_index.json`:
+**840** species across **502** family files. The item program has corrected its own side; this map's
+number is yours to change or keep.

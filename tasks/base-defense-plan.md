@@ -1,16 +1,20 @@
 # Base defense — implementation plan
 
-**Program:** `base-defense` (the siege stage) · **29 modules** · 46 owner decisions across eleven rounds.
+**Program:** `base-defense` (the siege stage) · **30 modules** · 46 owner decisions across eleven rounds
+(plus decisions 47/48, 2026-09-06, two implementation-found gaps resolved without a new module).
 **Map:** [docs/architecture/base-defense-map.md](../docs/architecture/base-defense-map.md) — the index.
 **Specs:** [docs/architecture/base-defense/](../docs/architecture/base-defense/) — one per module id.
 **Ideal:** [base-defense-ideal.md](../docs/architecture/base-defense-ideal.md) · **Audit:**
 [_completeness-audit.md](../docs/architecture/base-defense/_completeness-audit.md) (four passes).
 **Tasks:** [base-defense-todo.md](base-defense-todo.md).
 
-**Status:** plan, 2026-09-05, updated 2026-09-05. Execution is under way — see
+**Status:** plan, 2026-09-05, updated 2026-09-06. Execution is under way — see
 [base-defense-todo.md](base-defense-todo.md) for what is actually built. Gate 0 through CP1 (Levels
 0–2) are done and evidenced there; Level 3 is next. **All three gates this plan carried are resolved
-(§7)** — none are currently blocking any task in the program.
+(§7)** — none are currently blocking any task in the program. **30th module added 2026-09-06**:
+`siege-fog` (7c), after fog of war was reopened by the owner and taken through its own idea phase and
+spec in the same pass — see `base-defense-map.md`'s own amendment note and
+[spec-siege-fog.md](../docs/architecture/base-defense/spec-siege-fog.md).
 
 ---
 
@@ -70,6 +74,7 @@ GATE A   the seam holds · zero world goldens moved
 7b.  siege-engagement
 GATE B   a siege resolves deterministically · resolver at BOTH call sites
 
+7c.  siege-fog                       (added 2026-09-06; needs siege-ai, sequenced after it on purpose)
 8.   board-render
 8b.  siege-stage · battle-stage                                  (parallel)
 

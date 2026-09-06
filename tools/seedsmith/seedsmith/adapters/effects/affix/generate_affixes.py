@@ -17,12 +17,22 @@ its **ref bundle composition** to be 3-way voted, "same machinery, same `resolve
 made exactly one model call per draw, so there was never a second or third sample to vote over.
 `run_voted_draws` below is now that caller: THREE permuted samples per draw (`permute.order_for`,
 seeded with `sample_index` INSIDE the seed per spec-option-permutation.md §3 — three votes over three
-identical option orders is one sample with extra steps), voted independently via `vote.resolve_vote`
-on `name` and on `derive.canonical_bundle_key(refs)`. A 1-1-1 split on EITHER field is `unresolved`
-and the draw is recorded, never fabricated into a persisted entry — matching this program's own
-`default_for=lambda k, o: None` discipline. `resolve_vote`/`order_for` are reused verbatim (per
-spec's own "Ask first: forking any piece of the reused machinery" boundary); no new vote-resolution
-or permutation-seeding logic is added here.
+identical option orders is one sample with extra steps), `name` voted scalar via `vote.resolve_vote`.
+`resolve_vote`/`order_for` are reused verbatim (per spec's own "Ask first: forking any piece of the
+reused machinery" boundary); no new permutation-seeding logic is added here.
+
+⛔ **Fixed 2026-09-06 (see [[affix-authoring-vote-bug]]): `refs` votes per-MEMBER
+(`vote.resolve_set_vote`), never as one flattened whole-bundle string through `resolve_vote`.** The
+original pass used `resolve_vote(canonical_bundle_key(refs))` — scalar equality over the WHOLE sorted
+bundle — which a real run against the live model measured at ~90% `vote_unresolved` (9/10 and 9/10
+across two real 10-draw batches), the exact SMOKE BATCH failure mode already found and fixed for
+`demon-seed`'s own family/signature proposals: exact agreement across an entire 2+-member set, sampled
+three times independently, is combinatorially rare even when every member was individually
+well-agreed. `resolve_set_vote` credits a member into the resolved bundle once 2 of 3 samples chose
+it, discarding nothing at the aggregation level that per-member evidence already settled. A resolved
+bundle can still land below the schema's `minItems: 2` (a real, distinct, newly-handled case — see
+`bundle_too_small_after_vote` below), which whole-bundle voting could never produce (its winning value
+was always a real 2+-member sample to begin with).
 
 Usage:
     python -m seedsmith.adapters.effects.affix.generate_affixes --dry-run   # briefs only
@@ -165,6 +175,24 @@ def load_existing() -> "dict[str, dict]":
     return {e["id"]: e for e in doc.get("entries", [])}
 
 
+def next_draw_start_index(existing: "Mapping[str, dict]") -> int:
+    """Fixed 2026-09-06 (see [[affix-authoring-vote-bug]]): `draw_id` used to always start at
+    `affix-draw-000` on every invocation, so a later run's `draw-000` silently OVERWROTE an earlier
+    run's already-accepted `affix.authored.affix-draw-000` entry the moment it happened to resolve
+    (`merged = {**existing, **fresh}` lets `fresh` win) — observed for real: the original pilot
+    "Frostbite Venom" (`generatedUtc: 2026-09-04`) was overwritten by a coincidentally
+    near-identical re-generation during a later run the same session. Every future run now continues
+    from one past the highest existing draw index, so a new batch can only ever ADD entries, never
+    silently replace one a previous run already committed."""
+    max_index = -1
+    for affix_id in existing:
+        suffix = affix_id.rsplit("affix-draw-", 1)
+        if len(suffix) != 2 or not suffix[1].isdigit():
+            continue
+        max_index = max(max_index, int(suffix[1]))
+    return max_index + 1
+
+
 def run_voted_draws(
     *,
     count: int,
@@ -172,13 +200,15 @@ def run_voted_draws(
     atom_triggers: "Mapping[str, bool]",
     provenance_base: "Mapping[str, Any]",
     theme_hint: str = "",
+    start_index: int = 0,
     call: "Callable[..., str] | None" = None,
     config: LlmCallerConfig = DEFAULT_CONFIG,
     workers: int = MAX_WORKERS,
 ) -> "tuple[dict[str, dict], dict[str, dict], dict[str, dict]]":
-    """Draws `count` affix bundles, THREE permuted samples each, and votes `name` + the ref-bundle
-    composition through the exact `resolve_vote` machinery `demon-seed`'s own `run_one_species`
-    already proved against real calls (2026-09-02) — reused here, not reimplemented.
+    """Draws `count` affix bundles, THREE permuted samples each: `name` voted scalar via
+    `vote.resolve_vote` (`demon-seed`'s own `run_one_species` machinery, 2026-09-02), the ref bundle
+    voted per-member via `vote.resolve_set_vote` (fixed 2026-09-06 — see the module docstring's own
+    [[affix-authoring-vote-bug]] note).
 
     Each sample runs the FULL `build_affix_authoring_graph` (generate -> validate -> repair ->
     persist/escalate), so a sample that never produces a schema-valid bundle contributes nothing to
@@ -186,12 +216,14 @@ def run_voted_draws(
     draft counts" discipline the graph already enforces for a single-sample run.
 
     Returns `(fresh, unresolved, results)`:
-      * `fresh` — committed entries keyed by affix id, one per draw where BOTH `name` and the ref
-        bundle resolved (3-0 or 2-1). Never contains a fabricated guess.
-      * `unresolved` — keyed by draw id, the reason a draw produced no entry: either a 1-1-1 split
-        on `name` or on the ref bundle (`"vote_unresolved"`), or fewer than `SAMPLES_PER_DRAW`
-        samples ever validated (`"insufficient_valid_samples"`) — a dead sample is not a silent
-        drop, it shows up here.
+      * `fresh` — committed entries keyed by affix id, one per draw where `name` resolved (3-0 or
+        2-1) AND the per-member ref vote resolved at least 2 members. Never contains a fabricated
+        guess.
+      * `unresolved` — keyed by draw id, the reason a draw produced no entry: a 1-1-1 split on `name`
+        or zero ref members reaching a majority (`"vote_unresolved"`); a resolved ref vote landing
+        below the schema's 2-member minimum (`"bundle_too_small_after_vote"`); or fewer than
+        `SAMPLES_PER_DRAW` samples ever validated (`"insufficient_valid_samples"`) — a dead sample is
+        not a silent drop, it shows up here.
       * `results` — the per-sample-state graph outcome, keyed by the sample's own subject id, for a
         caller's own `byOutcome` accounting (unchanged shape from before this pass).
 
@@ -202,8 +234,8 @@ def run_voted_draws(
     from ....workflow.graphs.effect_affix import build_affix_authoring_graph
     from ....workflow.runner import run_many
     from ...demons.anchor.permute import order_for
-    from ...demons.anchor.vote import resolve_vote
-    from .derive import canonical_bundle_key, derive_affix_class
+    from ...demons.anchor.vote import resolve_set_vote, resolve_vote
+    from .derive import derive_affix_class
 
     persisted: "dict[str, dict]" = {}
     app = build_affix_authoring_graph(
@@ -215,7 +247,7 @@ def run_voted_draws(
     # extra steps, exactly what spec-option-permutation.md §3 warns against.
     draw_samples: "dict[str, list[str]]" = {}
     states: "list[dict]" = []
-    for i in range(count):
+    for i in range(start_index, start_index + count):
         draw_id = f"affix-draw-{i:03d}"
         sample_ids: "list[str]" = []
         for sample_index in range(SAMPLES_PER_DRAW):
@@ -245,37 +277,54 @@ def run_voted_draws(
             continue
 
         name_vote = resolve_vote([s.get("name", "") for s in samples])
-        canonical_values = [canonical_bundle_key(s.get("refs") or []) for s in samples]
-        refs_vote = resolve_vote(canonical_values)
+        # Per-MEMBER majority, not whole-bundle string equality (the SMOKE BATCH fix, ported here
+        # 2026-09-06 — see [[affix-authoring-vote-bug]]): a real run measured ~90% unresolved under
+        # `resolve_vote(canonical_bundle_key(...))` because exact agreement across a whole 2+-member
+        # bundle, sampled independently three times, is combinatorially rare even when every member
+        # was individually well-agreed. `resolve_set_vote` credits a member the moment 2 of 3 samples
+        # pick it, the same fix `demon-seed`'s own SMOKE BATCH defect already applied.
+        refs_vote = resolve_set_vote([s.get("refs") or [] for s in samples])
 
         # Never the first sample by default (spec §4/vote.py's own explicit warning) — a 1-1-1 on
-        # EITHER voted field means this draw has no resolved identity or no resolved bundle, so it
-        # is recorded as unresolved rather than shipping one voted field next to a guessed other.
-        if name_vote.value is None or refs_vote.value is None:
+        # name, or no member reaching a majority on refs, means this draw has no resolved identity
+        # or no resolved bundle, so it is recorded as unresolved rather than shipping one voted
+        # field next to a guessed other.
+        if name_vote.value is None or refs_vote.confidence == "unresolved":
             unresolved[draw_id] = {
                 "reason": "vote_unresolved",
                 "name": {"confidence": name_vote.confidence},
-                "refs": {"confidence": refs_vote.confidence},
+                "refs": {"confidence": refs_vote.confidence, "tally": refs_vote.tally},
             }
             continue
 
-        winning_refs = next(
-            s["refs"] for s, key in zip(samples, canonical_values) if key == refs_vote.value)
+        winning_refs = list(refs_vote.values)
+        if len(winning_refs) < 2:
+            # A per-member vote can resolve fewer than 2 members even when it is not "unresolved"
+            # (e.g. one atom reaches 2/3 and every other candidate stays below threshold) — the
+            # schema's own `minItems: 2` makes a 1-member "bundle" invalid content, not a smaller
+            # valid one, so this is its own named reason rather than a silently-shipped bad entry.
+            unresolved[draw_id] = {
+                "reason": "bundle_too_small_after_vote",
+                "refs": {"confidence": refs_vote.confidence, "resolved": winning_refs,
+                         "tally": refs_vote.tally},
+            }
+            continue
+
         affix_class = derive_affix_class(
             winning_refs, has_trigger=lambda a: atom_triggers.get(a, False))
 
         provenance = dict(provenance_base)
         provenance["voteConfidence"] = {"name": name_vote.confidence, "refs": refs_vote.confidence}
-        minority: "dict[str, str]" = {}
+        minority: "dict[str, Any]" = {}
         if name_vote.minority:
             minority["name"] = name_vote.minority
         if refs_vote.minority:
-            minority["refs"] = refs_vote.minority
+            minority["refs"] = list(refs_vote.minority)
         if minority:
             provenance["voteMinority"] = minority
 
         affix_id = f"{ID_PREFIX}{draw_id}"
-        draft = {"name": name_vote.value, "refs": list(winning_refs)}
+        draft = {"name": name_vote.value, "refs": winning_refs}
         fresh[affix_id] = entry_for(
             draft, affix_id=affix_id, affix_class=affix_class, provenance=provenance)
 
@@ -321,12 +370,14 @@ def main(argv=None) -> int:
         "generatedUtc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
     }
 
+    existing = load_existing()
+    start_index = next_draw_start_index(existing)
+
     fresh, unresolved, results = run_voted_draws(
         count=args.count, eligible=eligible, atom_triggers=atom_triggers,
-        provenance_base=provenance_base, theme_hint=args.theme, config=config,
-        workers=args.workers)
+        provenance_base=provenance_base, theme_hint=args.theme, start_index=start_index,
+        config=config, workers=args.workers)
 
-    existing = load_existing()
     merged = {**existing, **fresh}
     entries = [merged[k] for k in sorted(merged)]
 

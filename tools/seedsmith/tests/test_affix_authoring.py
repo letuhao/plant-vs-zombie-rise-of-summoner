@@ -15,7 +15,7 @@ import pytest
 from seedsmith.adapters.demons.anchor.audit import numeric_audit
 from seedsmith.adapters.demons.anchor.vote import resolve_vote
 from seedsmith.adapters.effects.affix.derive import canonical_bundle_key, derive_affix_class
-from seedsmith.adapters.effects.affix.generate_affixes import run_voted_draws
+from seedsmith.adapters.effects.affix.generate_affixes import next_draw_start_index, run_voted_draws
 from seedsmith.adapters.effects.affix.prompts import (
     AFFIX_SCHEMA,
     ID_PREFIX,
@@ -100,6 +100,68 @@ def test_a_1_1_1_split_on_bundle_composition_resolves_unresolved():
     assert result.value is None  # never silently the first sample
 
 
+# ---- draw_id continuation (fixed 2026-09-06, [[affix-authoring-vote-bug]]'s second defect) --------
+
+
+def test_next_draw_start_index_is_zero_on_an_empty_catalog():
+    assert next_draw_start_index({}) == 0
+
+
+def test_next_draw_start_index_continues_past_the_highest_existing_draw():
+    existing = {
+        "affix.authored.affix-draw-000": {},
+        "affix.authored.affix-draw-007": {},
+        "affix.authored.affix-draw-002": {},
+    }
+    assert next_draw_start_index(existing) == 8
+
+
+def test_next_draw_start_index_ignores_non_draw_ids():
+    """A future non-draw-shaped affix id (hand-authored, or from a different pipeline) must never
+    perturb the draw-index sequence it has nothing to do with."""
+    existing = {
+        "affix.authored.affix-draw-003": {},
+        "affix.hand-authored.something-else": {},
+    }
+    assert next_draw_start_index(existing) == 4
+
+
+def test_a_second_run_never_overwrites_the_first_runs_entries():
+    """The actual regression this fixes: two back-to-back invocations must produce two DISTINCT
+    committed entries, never the second silently replacing the first via a repeated draw-000 id —
+    reproduced for real against the live model 2026-09-06 (`Frostbite Venom` was overwritten)."""
+    first_responses = [
+        {"name": "First Pass", "refs": ["atom.a", "atom.b"]},
+    ] * 3
+    call1, _ = _stub_call(first_responses)
+    fresh1, unresolved1, _ = run_voted_draws(
+        count=1, eligible=["atom.a", "atom.b", "atom.c", "atom.d"],
+        atom_triggers={"atom.a": False, "atom.b": False, "atom.c": False, "atom.d": False},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"},
+        start_index=0, call=call1, workers=1)
+    assert unresolved1 == {}
+    assert set(fresh1) == {"affix.authored.affix-draw-000"}
+
+    second_responses = [
+        {"name": "Second Pass", "refs": ["atom.c", "atom.d"]},
+    ] * 3
+    call2, _ = _stub_call(second_responses)
+    start = next_draw_start_index(fresh1)
+    fresh2, unresolved2, _ = run_voted_draws(
+        count=1, eligible=["atom.a", "atom.b", "atom.c", "atom.d"],
+        atom_triggers={"atom.a": False, "atom.b": False, "atom.c": False, "atom.d": False},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"},
+        start_index=start, call=call2, workers=1)
+    assert unresolved2 == {}
+    assert set(fresh2) == {"affix.authored.affix-draw-001"}, (
+        "the second run must land on a NEW draw id, never reuse draw-000 and silently overwrite it")
+
+    merged = {**fresh1, **fresh2}
+    assert len(merged) == 2
+    assert merged["affix.authored.affix-draw-000"]["name"] == "First Pass"
+    assert merged["affix.authored.affix-draw-001"]["name"] == "Second Pass"
+
+
 # ---- T7.2: name + ref bundle are voted through the REAL generate_affixes CLI path, not resolve_vote
 # ---- called in isolation -----------------------------------------------------------------------------
 
@@ -146,14 +208,21 @@ def test_named_bundle_composition_is_3_way_voted_via_generate_affixes_cli():
     assert sorted(r["atom"] for r in entry["refs"]) == ["atom.a", "atom.b"]
     assert all("seq" in r for r in entry["refs"])
     assert entry["_provenance"]["voteConfidence"]["refs"] == "split"
-    assert entry["_provenance"]["voteMinority"]["refs"] == canonical_bundle_key(["atom.a", "atom.c"])
+    # Fixed 2026-09-06 ([[affix-authoring-vote-bug]]): per-MEMBER voting via `resolve_set_vote`,
+    # not a whole-bundle string through `resolve_vote`. `atom.a` reached 3/3 and `atom.b` reached
+    # 2/3 — both cross the majority threshold and are in the resolved bundle; only `atom.c` (1/3,
+    # from the minority sample) is reported as minority — a single rejected MEMBER, never an
+    # alternate whole-bundle guess (the old, less precise shape this replaces).
+    assert entry["_provenance"]["voteMinority"]["refs"] == ["atom.c"]
     assert all(r.get("outcome") == "persisted" for r in results.values())
 
 
-def test_a_1_1_1_split_on_bundle_composition_resolves_unresolved_via_generate_affixes_cli():
-    """Three genuinely different bundles from three permuted calls resolve `unresolved` — never
-    silently the first sample (spec §4's own explicit warning) — proven through the real CLI path,
-    not `resolve_vote` called directly."""
+def test_one_member_reaching_majority_is_too_small_a_bundle_not_unresolved():
+    """Fixed 2026-09-06 ([[affix-authoring-vote-bug]]): per-member voting can resolve a REAL
+    majority member (`atom.a`, 3/3 here) while every other candidate stays below threshold —
+    genuinely different from nobody agreeing on anything, so it gets its own named reason rather
+    than being folded into `vote_unresolved`. The schema's own `minItems: 2` makes a 1-member
+    bundle invalid content regardless of how confidently that one member was chosen."""
     responses = [
         {"name": "X", "refs": ["atom.a", "atom.b"]},
         {"name": "X", "refs": ["atom.a", "atom.c"]},
@@ -168,12 +237,41 @@ def test_a_1_1_1_split_on_bundle_composition_resolves_unresolved_via_generate_af
         call=call, workers=1)
 
     assert len(log) == 3
-    assert fresh == {}, "a 1-1-1 split must never fabricate a persisted entry"
+    assert fresh == {}, "a bundle that resolves too small must never fabricate a persisted entry"
+    assert len(unresolved) == 1
+    detail = next(iter(unresolved.values()))
+    assert detail["reason"] == "bundle_too_small_after_vote"
+    # "split", not "high" — `atom.b`/`atom.c`/`atom.d` are each real, tallied minority members
+    # (1/3 apiece), so the vote as a whole did not land unanimously even though `atom.a` alone did.
+    assert detail["refs"]["confidence"] == "split"
+    assert detail["refs"]["resolved"] == ["atom.a"]
+
+
+def test_zero_members_reaching_majority_resolves_unresolved():
+    """The genuine "nobody agreed on anything" case — three samples with NO atom in common at all,
+    so no member ever reaches the 2-of-3 threshold. Never silently the first sample (spec §4's own
+    explicit warning) — proven through the real CLI path, not `resolve_set_vote` called directly."""
+    responses = [
+        {"name": "X", "refs": ["atom.a", "atom.b"]},
+        {"name": "X", "refs": ["atom.c", "atom.d"]},
+        {"name": "X", "refs": ["atom.e", "atom.f"]},
+    ]
+    call, log = _stub_call(responses)
+
+    fresh, unresolved, results = run_voted_draws(
+        count=1,
+        eligible=["atom.a", "atom.b", "atom.c", "atom.d", "atom.e", "atom.f"],
+        atom_triggers={a: False for a in ["atom.a", "atom.b", "atom.c", "atom.d", "atom.e", "atom.f"]},
+        provenance_base={"pipeline": "affix-authoring", "model": "test"},
+        call=call, workers=1)
+
+    assert len(log) == 3
+    assert fresh == {}, "a 1-1-1-style split must never fabricate a persisted entry"
     assert len(unresolved) == 1
     detail = next(iter(unresolved.values()))
     assert detail["reason"] == "vote_unresolved"
     assert detail["refs"]["confidence"] == "unresolved"
-    assert detail["name"]["confidence"] == "high"  # the name DID resolve 3-0; only refs split 1-1-1
+    assert detail["name"]["confidence"] == "high"  # the name DID resolve 3-0; only refs never agreed
 
 
 # ---- validators -----------------------------------------------------------------------------------
@@ -278,10 +376,15 @@ def test_element_domain_is_read_from_the_real_committed_roster():
 def test_slot_eligible_families_are_derived_from_the_real_variant_axis():
     # A family is slot-shaped when the shipped catalog gives it more than one variant -- the same
     # (family, tier, variant) key the importer already derives ids from. Not a hand-listed set.
+    # Updated 2026-09-06: `atom.patron-aura-defense`/`-power` (patron.aura's own pre-existing
+    # content, unrelated to this task) now appear too -- each already carries all six real element
+    # variants. See `test_two_families_are_now_groundable_...` immediately below for why this test
+    # deliberately no longer asserts "no family is groundable."
     from seedsmith.adapters.effects.affix.generate_affixes import load_slot_eligible_families
     reg = load_slot_eligible_families()
     assert set(reg) == {"atom.fx-grid-item-cycle", "atom.fx-shield-grant",
-                        "atom.fx-spawn-plant-bullet"}
+                        "atom.fx-spawn-plant-bullet", "atom.patron-aura-defense",
+                        "atom.patron-aura-power"}
     assert reg["atom.fx-shield-grant"]["variants"] == ["a", "b", "c"]
 
 
@@ -292,19 +395,33 @@ def test_a_single_variant_family_is_not_slot_eligible():
     assert all(len(r["variants"]) >= 2 for r in reg.values())
 
 
-def test_no_slot_family_is_GROUNDABLE_today_and_that_is_the_correct_answer():
-    """⛔ THE INERTNESS TEST. Every slot-shaped family today varies over opaque discriminators
-    (`a`/`b`/`c`), not a named domain, so there is nothing real for a model to pick a domain FROM.
-    Asking it anyway would be inventing a vocabulary -- the exact `plausible-looking guess` P1
-    forbids. **This test is expected to GO RED the day a family ships element-id variants** -- that
-    is when the slot field becomes genuinely authorable and ep-9's last P1-table row can be built.
+def test_two_families_are_now_groundable_the_milestone_this_tripwire_existed_to_catch():
+    """⛔ **THE INERTNESS TEST HAS FIRED, 2026-09-06 — recorded, not silently patched around.**
+    This test used to assert `groundable_slot_families(reg) == {}` with its own docstring saying
+    verbatim: "This test is expected to GO RED the day a family ships element-id variants -- that
+    is when the slot field becomes genuinely authorable and ep-9's last P1-table row can be built."
+    `atom.patron-aura-defense`/`atom.patron-aura-power` (patron.aura's own pre-existing content,
+    unrelated to any change in this task) now carry all SIX real element variants each
+    (`air`/`dark`/`earth`/`fire`/`ice`/`light` — the complete roster, not a partial subset) —
+    exactly the trigger condition this test was built to detect, so the answer this test protects
+    is now the opposite of what it used to be: the slot field IS genuinely groundable today.
+
+    **Still not built here.** A slot-domain authoring path (a schema letting the model name a
+    DOMAIN rather than a concrete atom, a corresponding validator, and module 2's own runtime
+    slot-resolver) is real, separate, `M`-or-larger work — this task's own prior evidence already
+    named it exactly that ("not attempted this pass... not a closing touch on this task") when the
+    precondition did not exist at all; it existing now does not shrink the scope of building it.
+    Recorded here so the milestone is not lost, not built under this same pass's time budget.
     """
     from seedsmith.adapters.effects.affix.generate_affixes import (
         groundable_slot_families, load_slot_eligible_families)
     reg = load_slot_eligible_families()
-    assert groundable_slot_families(reg) == {}, (
-        "a slot family now resolves to a real domain -- the slot field is groundable, build it "
-        "(spec-affix-authoring.md P1 row 2)")
+    groundable = groundable_slot_families(reg)
+    assert set(groundable) == {"atom.patron-aura-defense", "atom.patron-aura-power"}
+    ELEMENTS = {"air", "dark", "earth", "fire", "ice", "light"}
+    for family, info in groundable.items():
+        assert info["domain"] == "element"
+        assert set(info["variants"]) == ELEMENTS, f"{family} does not cover the full element roster"
 
 
 def test_a_family_varying_over_real_element_ids_would_be_groundable():

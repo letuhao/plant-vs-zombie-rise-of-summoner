@@ -1,4 +1,7 @@
 {
+  "disptpl.affix.affliction": {
+    "template": "+{value} potency to the statuses you inflict"
+  },
   "disptpl.affix.arm-hardening": {
     "template": "{value}% more defense for the whole army"
   },
@@ -8,17 +11,29 @@
   "disptpl.affix.arm-welding": {
     "template": "{value}% increased carapace"
   },
+  "disptpl.affix.blighting": {
+    "template": "{value}% chance to blight target on hit"
+  },
   "disptpl.affix.bloodletting": {
     "template": "{value}% chance to inflict bloodletting on hit"
   },
+  "disptpl.affix.bonding": {
+    "template": "{value}% chance to bond target on hit"
+  },
   "disptpl.affix.bulwark": {
     "template": "{value} more max health"
+  },
+  "disptpl.affix.buttering": {
+    "template": "{value}% chance to butter target on hit"
   },
   "disptpl.affix.carapace": {
     "template": "+{value} carapace"
   },
   "disptpl.affix.cherry-bloom": {
     "template": "{value}% chance to burst cherry bloom on hit"
+  },
+  "disptpl.affix.chilling": {
+    "template": "{value}% chance to chill target on hit"
   },
   "disptpl.affix.cleansing": {
     "template": "{value}% chance to cleanse harmful status when struck"
@@ -58,6 +73,9 @@
   },
   "disptpl.affix.elemental-defense": {
     "template": "+{value} {element} resistance"
+  },
+  "disptpl.affix.elemental-power": {
+    "template": "+{value} {element} power"
   },
   "disptpl.affix.elpw-attune": {
     "template": "attunes {element} power, enabling it to take effect"
@@ -149,6 +167,9 @@
   "disptpl.affix.lifesteal": {
     "template": "heal {value}% of damage dealt on hit"
   },
+  "disptpl.affix.marking": {
+    "template": "{value}% chance to mark target on hit"
+  },
   "disptpl.affix.martyrdom": {
     "template": "heal allies {value}% of max health when this dies"
   },
@@ -197,6 +218,9 @@
   "disptpl.affix.retribution": {
     "template": "reflect {value}% of damage taken back at attacker"
   },
+  "disptpl.affix.rotting": {
+    "template": "{value}% chance to rot target on hit"
+  },
   "disptpl.affix.savagery": {
     "template": "×{value} attack"
   },
@@ -223,6 +247,9 @@
   },
   "disptpl.affix.shld-surge": {
     "template": "{value} increased {element} shield capacity"
+  },
+  "disptpl.affix.sparking": {
+    "template": "{value}% chance to spark target on hit"
   },
   "disptpl.affix.sporing": {
     "template": "{value}% chance to infest target with spores on hit"

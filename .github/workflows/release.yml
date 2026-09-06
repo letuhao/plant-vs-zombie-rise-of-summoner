@@ -15,6 +15,11 @@ concurrency:
 jobs:
   publish:
     runs-on: windows-latest
+    # ci.yml's own 2026-09-06 fix, same reason: a real, reproduced .NET process-redirection deadlock
+    # (DemonSpeciesImportCliTests.cs/RealColdProcessTests.cs) can hang a dotnet test call with no
+    # diagnostic — bound the job so a future hang fails fast instead of idling toward GitHub Actions'
+    # own 6-hour default.
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
@@ -35,10 +40,10 @@ jobs:
       - name: Unit tests (pre-publish)
         shell: pwsh
         run: |
-          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal
-          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal
-          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal
-          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal
+          dotnet test tests/FusionRpg.Core.Tests/FusionRpg.Core.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Data.Tests/FusionRpg.Data.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Guard.Tests/FusionRpg.Guard.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
+          dotnet test tests/FusionRpg.Launcher.Tests/FusionRpg.Launcher.Tests.csproj -c Release --verbosity minimal --blame-hang --blame-hang-timeout 5min
 
       - name: Prepare injector refs
         shell: pwsh

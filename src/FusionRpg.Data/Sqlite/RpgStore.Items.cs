@@ -298,16 +298,23 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            ExecIn(db, tx, """
-                INSERT INTO rpg_item_stock (player_id, container_id, qty, updated_utc)
-                VALUES ($p, $c, MAX(0, $d), $utc)
-                ON CONFLICT(player_id, container_id) DO UPDATE SET
-                  qty = MAX(0, rpg_item_stock.qty + $d), updated_utc = excluded.updated_utc;
-                """,
-                ("$p", playerId), ("$c", containerId), ("$d", delta),
-                ("$utc", updatedUtc ?? DateTime.UtcNow.ToString("O")));
+            AdjustStockUnlocked(db, playerId, containerId, delta, updatedUtc ?? DateTime.UtcNow.ToString("O"));
             tx.Commit();
         }
+    }
+
+    /// <summary>Same write on the caller's connection, so consuming an insert commits with the socket
+    /// write that used it. See <see cref="AppendMutationOpUnlocked"/>.</summary>
+    internal void AdjustStockUnlocked(
+        SqliteConnection db, string playerId, string containerId, int delta, string updatedUtc)
+    {
+        ExecOn(db, """
+            INSERT INTO rpg_item_stock (player_id, container_id, qty, updated_utc)
+            VALUES ($p, $c, MAX(0, $d), $utc)
+            ON CONFLICT(player_id, container_id) DO UPDATE SET
+              qty = MAX(0, rpg_item_stock.qty + $d), updated_utc = excluded.updated_utc;
+            """,
+            ("$p", playerId), ("$c", containerId), ("$d", delta), ("$utc", updatedUtc));
     }
 
     public IReadOnlyList<RpgItemStockRow> ListStock(string playerId)
@@ -333,15 +340,20 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            ExecIn(db, tx, """
-                INSERT INTO rpg_item_event (event_id, instance_id, player_id, kind, detail, created_utc)
-                VALUES ($id, $inst, $player, $kind, $detail, $utc);
-                """,
-                ("$id", ev.EventId), ("$inst", ev.InstanceId), ("$player", ev.PlayerId), ("$kind", ev.Kind),
-                ("$detail", (object?)ev.Detail ?? DBNull.Value), ("$utc", ev.CreatedUtc));
+            SaveItemEventUnlocked(db, ev);
             tx.Commit();
         }
     }
+
+    /// <summary>Same write on the caller's connection, so the provenance row lands in the same
+    /// transaction as the disposition it records. See <see cref="AppendMutationOpUnlocked"/>.</summary>
+    internal void SaveItemEventUnlocked(SqliteConnection db, RpgItemEventRow ev) =>
+        ExecOn(db, """
+            INSERT INTO rpg_item_event (event_id, instance_id, player_id, kind, detail, created_utc)
+            VALUES ($id, $inst, $player, $kind, $detail, $utc);
+            """,
+            ("$id", ev.EventId), ("$inst", ev.InstanceId), ("$player", ev.PlayerId), ("$kind", ev.Kind),
+            ("$detail", (object?)ev.Detail ?? DBNull.Value), ("$utc", ev.CreatedUtc));
 
     public IReadOnlyList<RpgItemEventRow> ListItemEvents(string instanceId)
     {
@@ -466,9 +478,17 @@ public sealed partial class RpgStore
     /// <c>ItemRoles.TryParse</c> on purpose: <c>ListAssignments</c> skips a row whose role it cannot
     /// parse, which is right for projecting bindings and wrong here — a holder we failed to parse is
     /// still holding the item, and dropping it would report "free" for a copy that is worn.</para>
+    ///
+    /// <para>⛔ <b>The default was <c>LoadoutReport.InstanceRefKind</c> ("item") until 2026-09-06
+    /// (defect R2), and that is the wrong table's vocabulary.</b> This query reads
+    /// <c>rpg_item_assignment</c>, whose instance-pinned kind is
+    /// <see cref="FusionRpg.Core.Items.EquipRefKinds.Rolled"/>; <c>"item"</c> belongs to
+    /// <c>rpg_item_loadout_entry</c>, which is what the caller passes IN and what
+    /// <see cref="FusionRpg.Core.Items.LoadoutReport.Plan"/> filters on. Same instance ids, two
+    /// different columns — so the old default silently reported every worn copy as free.</para>
     /// </summary>
     public IReadOnlyDictionary<string, FusionRpg.Core.Items.LoadoutCell> FindAssignmentHolders(
-        IReadOnlyCollection<string> refIds, string refKind = FusionRpg.Core.Items.LoadoutReport.InstanceRefKind)
+        IReadOnlyCollection<string> refIds, string refKind = FusionRpg.Core.Items.EquipRefKinds.Rolled)
     {
         var held = new Dictionary<string, FusionRpg.Core.Items.LoadoutCell>(StringComparer.Ordinal);
         if (refIds.Count == 0) return held;
@@ -558,7 +578,10 @@ public sealed partial class RpgStore
         }
     }
 
-    /// <summary>Every item a player owns, regardless of whether it is currently equipped.</summary>
+    /// <summary>Every item a player still owns, regardless of whether it is currently equipped —
+    /// "still owns" excludes a deliberate disposition (`salvaged`/`transferred`/`destroyed`), which is
+    /// the whole point of the field (see <see cref="RpgItemRow.Disposition"/>). Found 2026-09-06: a
+    /// salvaged item kept listing in the armoury because this method never filtered on it.</summary>
     public IReadOnlyList<RpgItemRow> ListItemsByPlayer(string playerId)
     {
         lock (_gate)
@@ -568,7 +591,7 @@ public sealed partial class RpgStore
             cmd.CommandText = """
                 SELECT instance_id, player_id, acquired_utc, origin_kind, origin_ref, locked, seen,
                        stale, disposition, note, revision
-                FROM rpg_item WHERE player_id = $player ORDER BY acquired_utc;
+                FROM rpg_item WHERE player_id = $player AND disposition = 'owned' ORDER BY acquired_utc;
                 """;
             cmd.Parameters.AddWithValue("$player", playerId);
             using var r = cmd.ExecuteReader();
@@ -667,7 +690,7 @@ public sealed partial class RpgStore
         var scope = new OwnerScope(OwnerKind.UniqueActor, specimenId);
 
         var desired = result.Bindings
-            .Where(b => string.Equals(b.RefKind, "rolled", StringComparison.Ordinal))
+            .Where(b => string.Equals(b.RefKind, FusionRpg.Core.Items.EquipRefKinds.Rolled, StringComparison.Ordinal))
             .ToDictionary(b => b.RefId, b => b.Role, StringComparer.Ordinal);
 
         var existing = ListBindings(scope);

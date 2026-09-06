@@ -376,6 +376,10 @@ store.SeedUniqueEligible(uniqueTuning);
 // as the loot corpus below. ⛔ Entries this build cannot resolve are refused BY NAME with the module
 // that unblocks them — never silently dropped — and the count is printed so a corpus regression is
 // visible at boot.
+// ⭐ Kept rather than discarded after the import: the workbench executor resolves every price
+// through this same catalog, so the running server and the imported rows can never be two
+// different corpora.
+FusionRpg.Core.Items.Materials.MaterialRecipeCatalog? recipeCatalog = null;
 {
     var recipesDir = Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "recipes");
     if (Directory.Exists(recipesDir))
@@ -387,6 +391,7 @@ store.SeedUniqueEligible(uniqueTuning);
                     .Select(File.ReadAllText),
                 materialTuning);
             var imported = store.ImportRecipeCatalog(catalog);
+            recipeCatalog = catalog;
             Console.WriteLine($"[craft] imported {imported} recipes, refused {catalog.Refusals.Count}");
             foreach (var refusal in catalog.Refusals)
                 Console.WriteLine($"[craft]   refused {refusal.RecipeId}: {refusal.Rule} — {refusal.Detail}");
@@ -396,6 +401,23 @@ store.SeedUniqueEligible(uniqueTuning);
             Console.WriteLine($"[craft] recipe import failed — no recipes loaded: {ex.Message}");
         }
     }
+}
+
+// ⭐ item modules 14/15/16 — THE WORKBENCH EXECUTOR. All three shipped their own half of the
+// salvage → craft → enhance → socket loop and all three recorded the same blocker: nothing called
+// them against a stored item, so `TrySpendRecipe`, `AppendMutationOp` and `SetSockets` each had zero
+// production callers. This is the joint. It is registered only when the recipe corpus loaded —
+// a workbench with no prices could only ever refuse, and a route that always refuses is worse than
+// a route that is absent, because it looks wired.
+FusionRpg.Server.ItemWorkbench? itemWorkbench = null;
+if (recipeCatalog is { } workbenchRecipes)
+{
+    // ⏸ Module 6 shipped the base-type corpus but no `item_base_type` table, so socketMax comes off
+    // the seed JSON at boot. Deleted the day that table exists — see BaseTypeSocketMaxCorpus.
+    var socketMaxForBaseType = FusionRpg.Server.BaseTypeSocketMaxCorpus.Load(
+        Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types"));
+    itemWorkbench = new FusionRpg.Server.ItemWorkbench(
+        store, materialTuning, workbenchRecipes, enhancementTuning, socketTuning, socketMaxForBaseType);
 }
 // item-ideal.md, item-card (module 10): N1's item_display_template, seeded from the already-shipped
 // data/seed/items/display-templates/*.json (98 rows, one per affix family) -- never re-authored here.
@@ -529,6 +551,21 @@ Console.WriteLine(contentBoot.Status switch
 // an imported roster or coefficient row changes the content hash and nothing else (completeness
 // audit A2). A store with nothing imported behaves exactly as before.
 store.LoadContentIntoRuntime();
+// item-ideal.md, item-power-reads (module 9): the rarity-keyed power budget, with a REAL ceilingFor.
+// Runs here and not beside SeedRarityLadder above because it needs all three halves at once — the
+// imported `rarity` rows and containers (the self-healing import two blocks up), the seeded
+// `rarity_budget.power_ceiling` column, and the coefficients LoadContentIntoRuntime just published.
+// A lint, never a gate: an over-budget container is reported naming its id and the server boots
+// anyway (ContentValidation's own "a content test that fails naming the offender — and never a
+// generation input"). The `evaluated` count is the load-bearing half of the line: it was
+// structurally 0 for as long as no caller passed a ceilingFor at all.
+{
+    var rarityBudget = store.ValidateRarityPowerBudget();
+    var ceilings = store.GetRarityPowerCeilings();
+    Console.WriteLine(
+        $"[items] {rarityBudget.Render("rarity power budget")} "
+        + $"— {ceilings.PricedRungs} rung(s) priced, pinAE {ceilings.RenderPinAe()}");
+}
 // Fail fast on demon content errors: the catalogs are lazy, and a bad species surfacing on the
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
@@ -607,6 +644,14 @@ app.MapAuraCatalog();
 // and salvaging already have owners (modules 4, 16, 14), and a second write path through the
 // presentation layer is the "second surface" this module exists to prevent.
 app.MapItemSurfaces(itemSurfaceTuning, socketTuning);
+// ⭐ item modules 14/15/16 — the WRITE half, and the production caller all three named as their
+// shared blocker. Mapped only when the recipe corpus loaded: a workbench with no prices could only
+// ever refuse, and a route that always refuses is worse than an absent one because it looks wired.
+if (itemWorkbench is { } workbench) app.MapWorkbench(workbench);
+// ⭐ item module 4 (`equip-assign`) — the WRITE half, and the production caller `SaveAssignment` /
+// `RemoveAssignment` never had. Unconditional, unlike the workbench above: equipping needs no recipe
+// corpus and no price, so there is no state in which these routes could only refuse.
+app.MapItemEquip(new FusionRpg.Server.ItemEquipService(store));
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

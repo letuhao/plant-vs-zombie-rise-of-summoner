@@ -217,10 +217,27 @@ public class KindValueGuardTests
         // claim in §5.1 and are not part of what "refused" means here. `{variant}` element placeholders
         // are substituted with a real element first, mirroring what the real generation pipeline does
         // before a channel ever reaches DerivedStatRegistry.
+        // ⚠ The METHOD NAME is stale and is deliberately not renamed: spec-kind-value-guard.md §6 cites
+        // it verbatim, and that doc is the effect-atom lane's. 98 → 100 (`g-punisher.json`, commit
+        // 5864231) → 109 (the 2026-09-06 phantom-closure pass: seven `status.apply` into
+        // `g-affliction.json`, two `stat.derived` into `g-elem-power.json`). Six of the 109 are refused,
+        // so it now reads "103 of the 109". A one-line correction is owed to that doc's §6; recorded
+        // here rather than silently renamed. NOTE this test was ALREADY red before the phantom pass —
+        // it pinned 98 against a 100-family corpus, which tasks/item-todo.md §2470 records.
         var knownBad = new HashSet<string>(StringComparer.Ordinal)
         {
             "atom.elpw-pierce", "atom.elpw-focus", "atom.elpw-overflow", // combat.power.pierce/.overflow — unregistered channel families
             "atom.immunity", "atom.stalwart", // bare status.immune / status.resist — the prefix arm needs the dot
+            // Sixth, added 2026-09-06 with the family itself. `atom.affliction`'s channel is the bare
+            // family stem `status.power`, authored that way on `stalwart`/`immunity`'s own precedent
+            // (atom-family-library.md §3.2's four "not element-expanded" status-channel families leave
+            // the concrete segment to generation). It is refused HERE for the identical reason those
+            // two are — this test does a raw {variant}→fire substitution and then TryResolveChannel,
+            // where ChannelUnits.ForAuthoredChannel additionally probes a bare `status.*` stem with a
+            // concrete member. Against that probe `status.power.omni` resolves fine, which is why the
+            // validator reports no MissingUnitClass for it. Same three families, two different
+            // questions — not a new defect.
+            "atom.affliction",
         };
 
         var dir = Path.Combine(FindDataDir(), "seed", "items", "affix-families");
@@ -255,8 +272,12 @@ public class KindValueGuardTests
             }
         }
 
-        Assert.Equal(98, seen.Count);
-        Assert.Equal(56, channelBearing.Count); // 23 stat.modify + 28 stat.derived-element-expanded + 5 broken, per §5.1
+        Assert.Equal(109, seen.Count);
+        // 56 over the 98-family corpus (23 stat.modify + 28 stat.derived-element-expanded + 5 broken,
+        // per §5.1). +2 on 2026-09-06: `atom.elemental-power` (combat.power.{variant}) and
+        // `atom.affliction` (status.power). The seven new `status.apply` families bear no channel at
+        // all — they author `params.status` — so they are counted in `seen` and skipped here.
+        Assert.Equal(58, channelBearing.Count);
         Assert.Equal(knownBad.OrderBy(x => x, StringComparer.Ordinal),
             refused.OrderBy(x => x, StringComparer.Ordinal));
         // §5.1's own text says "94 of the 98 validate" — arithmetically inconsistent with its own "5
@@ -266,7 +287,9 @@ public class KindValueGuardTests
         // match. Trusting the arithmetic over the stale prose (DESIGN-GATE: verify against code, not
         // against a document that contradicts its own count) — flagged as a real, small doc correction
         // owed to spec-kind-value-guard.md §6, not silently "fixed" by asserting the wrong number here.
-        Assert.Equal(93, 98 - refused.Count);
+        // 93 of 98 at the module's build; 103 of 109 after the 2026-09-06 phantom-closure pass, which
+        // added nine families and exactly one refusal (`atom.affliction`, above).
+        Assert.Equal(103, 109 - refused.Count);
     }
 
     static object? Substitute(JsonElement el) => el.ValueKind switch

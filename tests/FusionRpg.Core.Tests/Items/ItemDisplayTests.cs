@@ -32,35 +32,88 @@ public class ItemDisplayTests
 
     // ---- N1: the already-authored template corpus --------------------------------------------
 
+    /// <summary>
+    /// 98 → 107 on 2026-09-06: the nine formerly phantom families below were authored, and each one
+    /// brought its own template row (seven into `triggered.json`, two into `derived.json`).
+    /// </summary>
     [Fact]
-    public void Ninety_eight_families_have_a_display_template()
+    public void Every_shipped_family_has_a_display_template()
     {
-        Assert.Equal(98, LoadAllTemplates().Count);
+        Assert.Equal(107, LoadAllTemplates().Count);
     }
 
     /// <summary>
-    /// ⛔ A real, pre-existing defect found while building this module's coverage check, confirmed
-    /// against `git show HEAD` to predate this session entirely: seven `implicit.family` values used
-    /// by real `base-types/infusion/**` entries (and by several `sets`/`uniques` fixed-atom lists) do
-    /// not correspond to ANY shipped `affix-families/*.json` entry, despite being listed as legal in
-    /// `classes.v1.json`'s own frozen `infusion.legalFamilies` and despite `atom-family-library.md`
-    /// §3.4 claiming all five status.apply families in that row are "shipped". `atom.affliction`
-    /// (also in that legalFamilies list) is an eighth phantom with the same shape. This is exactly
-    /// `MissingDisplayTemplate`'s job to catch — pinned here as a named, evidenced gap, not fixed by
-    /// this module (authoring the missing atoms is affix-legality/base-types' territory, not display's).
+    /// ✅ <b>Closed 2026-09-06.</b> This test used to pin the opposite: eight `implicit.family` values
+    /// used by real `base-types/infusion/**` entries (and by several `sets`/`uniques` atom lists) named
+    /// no `affix-families/*.json` entry at all, despite sitting in `classes.v2.json`'s own frozen
+    /// `infusion.legalFamilies` and despite `atom-family-library.md` §3.4 calling every one of them
+    /// "shipped". A ninth, <c>atom.elemental-power</c>, had the same shape from a different direction —
+    /// it existed only inside <c>_exemplars/affix-family.exemplar.json</c>, which
+    /// <c>SeedFile.IsExemplar</c> excludes from the corpus by construction.
+    ///
+    /// <para>All nine are now authored, and the sense of the assertion is inverted rather than the test
+    /// deleted: the set is still named explicitly, so a regression that drops one of them fails HERE,
+    /// with the same nine names in front of the reader, instead of vanishing into a count.</para>
     /// </summary>
     [Fact]
-    public void Phantom_implicit_families_used_by_real_content_have_no_display_template()
+    public void The_nine_formerly_phantom_families_now_resolve_to_a_display_template()
     {
-        string[] knownPhantoms =
+        string[] formerlyPhantom =
         {
             "atom.buttering", "atom.chilling", "atom.blighting", "atom.rotting",
             "atom.sparking", "atom.marking", "atom.bonding", "atom.affliction",
+            "atom.elemental-power",
         };
         var templated = LoadAllTemplates().Select(r => r.RuntimeFamily).ToHashSet(StringComparer.Ordinal);
 
-        foreach (var phantom in knownPhantoms)
-            Assert.DoesNotContain(phantom, templated);
+        foreach (var family in formerlyPhantom)
+            Assert.Contains(family, templated);
+    }
+
+    /// <summary>
+    /// The other half of the same fix: a template row is only half a definition, so the nine also have
+    /// to resolve against the real `affix-families/*.json` corpus. Reads the families through the same
+    /// parser the generator uses, so this cannot pass on a row the loader would refuse.
+    /// </summary>
+    [Fact]
+    public void The_nine_formerly_phantom_families_now_resolve_to_a_real_affix_family()
+    {
+        string[] formerlyPhantom =
+        {
+            "atom.buttering", "atom.chilling", "atom.blighting", "atom.rotting",
+            "atom.sparking", "atom.marking", "atom.bonding", "atom.affliction",
+            "atom.elemental-power",
+        };
+
+        var dir = Path.Combine(RepoRoot(), "data", "seed", "items", "affix-families");
+        var byId = Directory.EnumerateFiles(dir, "*.json")
+            .SelectMany(f => FusionRpg.Core.Effects.Atoms.Generation.AffixFamilyFile.Read(
+                Path.GetFileName(f), File.ReadAllText(f)))
+            .ToDictionary(e => e.Id, StringComparer.Ordinal);
+
+        // The seven status.apply families carry a status, never a channel; the two stat.derived ones
+        // carry a channel and an op. Asserted so a row that resolves but is shaped wrong still fails.
+        foreach (var family in formerlyPhantom)
+        {
+            Assert.True(byId.ContainsKey(family), $"'{family}' names no affix-family entry");
+            var entry = byId[family];
+            Assert.False(string.IsNullOrEmpty(entry.KindId));
+            Assert.False(string.IsNullOrEmpty(entry.PowerBand));
+            if (entry.KindId == "stat.derived") Assert.False(string.IsNullOrEmpty(entry.Channel));
+        }
+
+        Assert.Equal("stat.derived", byId["atom.elemental-power"].KindId);
+        Assert.Equal("combat.power.{variant}", byId["atom.elemental-power"].Channel);
+        Assert.Equal("stat.derived", byId["atom.affliction"].KindId);
+        Assert.Equal("status.power", byId["atom.affliction"].Channel);
+
+        // The seven that carry a status.apply rider, named rather than sliced off the array above.
+        string[] statusApply =
+        {
+            "atom.buttering", "atom.chilling", "atom.blighting", "atom.rotting",
+            "atom.sparking", "atom.marking", "atom.bonding",
+        };
+        Assert.All(statusApply, f => Assert.Equal("status.apply", byId[f].KindId));
     }
 
     [Fact]

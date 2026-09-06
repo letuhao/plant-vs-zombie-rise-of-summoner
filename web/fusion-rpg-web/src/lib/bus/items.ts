@@ -1,0 +1,407 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { getJson, sendJson } from "./rest";
+
+/**
+ * The item program's surfaces — the read half is `ItemSurfaceEndpoints.cs` (item module 20), the
+ * write half is `WorkbenchEndpoints.cs` (item modules 14/15/16).
+ *
+ * Self-contained the way `expeditions.ts` and `commanders.ts` are: DTOs, keys and hooks in one
+ * file, imported by path rather than through the `index.ts` barrel.
+ *
+ * ⛔ **The three READ routes stay read-only, and the write verbs do not live among them.** Module
+ * 20 carries no `MapPost` by design — a second write path through the presentation layer is the
+ * duplicate surface it exists to prevent. The mutations below post to `/api/items/workbench/*`,
+ * which is modules 14/15/16's own surface and a different file on the server for the same reason.
+ */
+
+// ---- DTOs (item module 20 wire shapes; camelCase body, PascalCase enum names) ----
+
+export type ItemSurfaceStatusDto = {
+  /** `armoury` | `equipScreen` | `itemCard` | `comparison` | `socketBench` | `compendium`. */
+  surface: string;
+  /** `Locked` | `Loading` | `Empty` | `Error` | `Ready` — the C# enum name, not camelCased. */
+  state: string;
+  /** Always present, including when the surface is already unlocked, so a "locked" render never
+   * has to discover its own key at the moment it must draw one. */
+  unlockKey: string;
+};
+
+export type ArmouryRowDto = {
+  instanceId: string;
+  containerId: string;
+  rarity: string;
+  rarityOrdinal: number;
+  assigned: boolean;
+  locked: boolean;
+  unseen: boolean;
+  stale: boolean;
+  acquiredUtc: string;
+};
+
+export type ArmouryPageDto = {
+  /** Over the WHOLE armoury, never the page. */
+  total: number;
+  /** The inbox, also over the whole armoury — an inbox you can empty by paging past it is not one. */
+  unseen: number;
+  overReviewPressure: boolean;
+  /** `RenderAll` | `Virtualize` | `SearchFirst`. */
+  renderStrategy: string;
+  rows: ArmouryRowDto[];
+};
+
+export type CombinationRowDto = {
+  comboId: string;
+  /** `strain` | `splice` | `pure` | `ring` | `eclipse` | `diversity`. */
+  shape: string;
+  /** `Active` | `OneAway` | `KnownInactive`. `Undiscovered` never reaches the wire. */
+  state: string;
+  /** `null` is ∞ — unreachable on this item. A nullable, never a sentinel. */
+  distance: number | null;
+  missingFamilies: string[];
+  missingElements: string[];
+  grantedTier: number;
+};
+
+/**
+ * The server's own per-request page bound (`ArmouryQuery.MaxLimit`). Asking for more returns the
+ * same 200 rows, so this is the largest single call, not a ceiling on what a player may own —
+ * paging past it is the `after` cursor's job.
+ */
+const ARMOURY_MAX_LIMIT = 200;
+
+export const itemKeys = {
+  surfaces: (playerId: string) => ["itemSurfaces", playerId] as const,
+  armoury: (playerId: string, after: string | null) => ["itemArmoury", playerId, after ?? "head"] as const,
+  combinations: (instanceId: string, playerId: string) => ["itemCombinations", instanceId, playerId] as const,
+  assignments: (specimenId: string) => ["itemAssignments", specimenId] as const
+};
+
+/** GG-17 / GG-44 — which designed state each of the six surfaces is in, and what unlocks it. */
+export function useItemSurfaces(playerId: number | string) {
+  const pid = String(playerId ?? "").trim();
+  return useQuery({
+    queryKey: itemKeys.surfaces(pid),
+    queryFn: () => getJson<ItemSurfaceStatusDto[]>(`/api/items/surfaces/${encodeURIComponent(pid)}`),
+    enabled: pid.length > 0 && pid !== "0",
+    staleTime: 10_000
+  });
+}
+
+/** One keyset page of the armoury, plus the inbox count and the render strategy for the whole of it. */
+export function useArmoury(playerId: number | string, after: string | null = null) {
+  const pid = String(playerId ?? "").trim();
+  const cursor = after ? `&after=${encodeURIComponent(after)}` : "";
+  return useQuery({
+    queryKey: itemKeys.armoury(pid, after),
+    queryFn: () =>
+      getJson<ArmouryPageDto>(
+        `/api/items/armoury/${encodeURIComponent(pid)}?limit=${ARMOURY_MAX_LIMIT}${cursor}`
+      ),
+    enabled: pid.length > 0 && pid !== "0",
+    staleTime: 5_000
+  });
+}
+
+/**
+ * The four-state combination list for one item — the ONE combination read, so the socket bench's
+ * preview and the compendium's rows can never come from two different functions.
+ *
+ * Without a `playerId` the reveal ledger is empty and only active rows come back, so the id is
+ * passed whenever it is known rather than treated as optional decoration.
+ */
+export function useItemCombinations(instanceId: string | null | undefined, playerId: number | string) {
+  const id = instanceId?.trim() || "";
+  const pid = String(playerId ?? "").trim();
+  return useQuery({
+    queryKey: itemKeys.combinations(id, pid),
+    queryFn: () =>
+      getJson<CombinationRowDto[]>(
+        `/api/items/${encodeURIComponent(id)}/combinations?playerId=${encodeURIComponent(pid)}`
+      ),
+    enabled: id.length > 0,
+    staleTime: 5_000,
+    retry: false
+  });
+}
+
+// ---- The workbench (item modules 14/15/16 — `WorkbenchEndpoints.cs`) ---------------------------
+
+/** One resolved cost or yield line, as the server priced it. */
+export type WorkbenchCostDto = { class: string; materialId: string; qty: number };
+
+/** One socket after the operation. `insert` is `null` for an empty socket. */
+export type WorkbenchSocketDto = { index: number; affinity: string; crafted: boolean; insert: string | null };
+
+/**
+ * `WorkbenchOutcomeDto` — what one operation did, in the one shape every verb returns.
+ *
+ * The server sends this body on **both** paths: 200 when the operation ran, 409 when a content rule
+ * refused it. `sendJson` throws on the 409 and `httpErrorMessage` lifts `reason` out of it, so a
+ * refusal reaches a caller as an `Error` carrying the server's own named rule — never a rewritten one.
+ */
+export type WorkbenchOutcomeDto = {
+  ok: boolean;
+  verb: string;
+  reason: string;
+  instanceId: string;
+  recipeId: string;
+  opSeq: number;
+  replayed: boolean;
+  outcome: string;
+  enhanceLevel: number;
+  pityCounter: number;
+  /** Per-mille. `0` for every verb that rolls nothing. */
+  successMilli: number;
+  spent: WorkbenchCostDto[];
+  granted: WorkbenchCostDto[];
+  sockets: WorkbenchSocketDto[];
+};
+
+/**
+ * The six request shapes, field-for-field against `WorkbenchEndpoints.cs`'s own records.
+ *
+ * ⛔ **`correlationId` is required by the server on every spending verb**, and the refusal says why:
+ * *"a spend without one is not retry-safe"*. It is the key both `rpg_material_spend_log` and
+ * `effect_instance_op` are unique on, so a retried request returns the recorded outcome from both
+ * instead of charging twice. Mint one with `newCorrelationId()` per user action, not per render.
+ *
+ * `playerId` is optional on every verb — the server falls back to the current player.
+ */
+export type SalvageRequest = { playerId?: number; instanceId: string };
+
+export type UpcycleRequest = { playerId?: number; recipeId: string; correlationId: string };
+
+export type EnhanceRequest = {
+  playerId?: number;
+  instanceId: string;
+  recipeId: string;
+  correlationId: string;
+  wardLoaded?: boolean;
+};
+
+export type SocketAddRequest = {
+  playerId?: number;
+  instanceId: string;
+  recipeId: string;
+  correlationId: string;
+};
+
+export type SocketInsertRequest = {
+  playerId?: number;
+  instanceId: string;
+  recipeId: string;
+  insertContainerId: string;
+  /** Omitted lets the server pick the first open socket. */
+  socketIndex?: number | null;
+  correlationId: string;
+};
+
+export type SocketImbueRequest = {
+  playerId?: number;
+  instanceId: string;
+  recipeId: string;
+  socketIndex: number;
+  element: string;
+  correlationId: string;
+};
+
+/**
+ * Everything a workbench write can move. Sockets, ownership and the combination preview all change
+ * together — a socket-insert alters the fill the compendium reads — so one helper invalidates the
+ * lot rather than each call site remembering which of the three it touched.
+ */
+export function invalidateItemQueries(qc: ReturnType<typeof useQueryClient>) {
+  void qc.invalidateQueries({ queryKey: ["itemArmoury"] });
+  void qc.invalidateQueries({ queryKey: ["itemSurfaces"] });
+  void qc.invalidateQueries({ queryKey: ["itemCombinations"] });
+  // Every verb but salvage debits materials, and salvage credits them.
+  void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
+}
+
+// ---- equip / unequip (item module 4 — `ItemEquipEndpoints.cs`) ---------------------------------
+
+/**
+ * One durable assignment: this specimen wears this thing in this role.
+ *
+ * `refKind` is `"rolled"` for an item instance the player owns and `"stock"` for a catalog id —
+ * which today means one of the four hand-authored relics, put there by the older relic flow. The
+ * two are the same table and **not** the same write path.
+ */
+export type ItemAssignmentDto = {
+  /** One of the sixteen registry role ids, e.g. `armament-primary`. */
+  role: string;
+  /** `rolled` (an item instance) or `stock` (a catalog id — a relic). */
+  refKind: string;
+  refId: string;
+  assignedUtc: string;
+};
+
+/**
+ * `ItemEquipOutcomeDto` — what one equip or unequip did.
+ *
+ * Same two-path shape the workbench uses: 200 when it happened, 409 with the named rule when a
+ * gate refused it, and the identical body either way, so `httpErrorMessage` lifts `reason` out of a
+ * refusal without a special case. `assignments` is the specimen's whole list afterwards, so a
+ * paperdoll never has to guess what moved.
+ */
+export type ItemEquipOutcomeDto = {
+  ok: boolean;
+  /** `equip` | `unequip`. */
+  verb: string;
+  reason: string;
+  specimenId: string;
+  role: string;
+  refKind: string;
+  refId: string;
+  /** The occupant this write displaced — the swapped-out piece on an equip, the removed one on an
+   * unequip. `null` when the role was empty. */
+  replaced: ItemAssignmentDto | null;
+  assignments: ItemAssignmentDto[];
+};
+
+export type ItemEquipRequest = {
+  playerId?: number;
+  specimenId: string;
+  instanceId: string;
+  role: string;
+};
+
+export type ItemUnequipRequest = {
+  playerId?: number;
+  specimenId: string;
+  role: string;
+};
+
+/**
+ * What one specimen is wearing, across all fifteen roles.
+ *
+ * ⚠ Not the same read as `useUniqueEquipment`. That one goes through
+ * `GET /api/unique/actors/{id}/equipment`, which projects the same table down to the three legacy
+ * slot words (`weapon`/`armor`/`trinket`) for the relic layer. An item can occupy any of the
+ * fifteen roles, so it needs the unprojected list.
+ */
+export function useItemAssignments(specimenId: string | null | undefined) {
+  const id = specimenId?.trim() || "";
+  return useQuery({
+    queryKey: itemKeys.assignments(id),
+    queryFn: () => getJson<ItemAssignmentDto[]>(`/api/items/assignments/${encodeURIComponent(id)}`),
+    enabled: id.length > 0,
+    staleTime: 5_000,
+    retry: false
+  });
+}
+
+/**
+ * Both writes touch the same three surfaces: the assignment list, the armoury row's `assigned`
+ * flag, and the legacy three-slot projection the relic layer reads off the very same table.
+ */
+function invalidateEquipQueries(qc: ReturnType<typeof useQueryClient>, specimenId: string) {
+  void qc.invalidateQueries({ queryKey: itemKeys.assignments(specimenId) });
+  void qc.invalidateQueries({ queryKey: ["itemArmoury"] });
+  void qc.invalidateQueries({ queryKey: ["uniqueEquipment", specimenId] });
+}
+
+/**
+ * item module 4 — put an owned item into a role on a bound specimen.
+ *
+ * ⛔ **No `correlationId`, unlike every workbench verb.** Equipping debits nothing, so there is no
+ * double-spend for an idempotency key to protect against, and the server's write upserts on
+ * `(specimen, role)` — a retry lands the same row and comes back `equip.already-in-this-role`.
+ */
+export function useEquipItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Equipment" },
+    mutationFn: (req: ItemEquipRequest) =>
+      sendJson<ItemEquipOutcomeDto>("/api/items/equip", "POST", req),
+    onSuccess: (_outcome, req) => invalidateEquipQueries(qc, req.specimenId)
+  });
+}
+
+/** item module 4 — take whatever is in a role off. One row deleted; the item stays in the armoury. */
+export function useUnequipItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Equipment" },
+    mutationFn: (req: ItemUnequipRequest) =>
+      sendJson<ItemEquipOutcomeDto>("/api/items/unequip", "POST", req),
+    onSuccess: (_outcome, req) => invalidateEquipQueries(qc, req.specimenId)
+  });
+}
+
+/** item module 14 — the converter. The item becomes `salvaged` and its yield lands, in one transaction. */
+export function useSalvageItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Item" },
+    mutationFn: (req: SalvageRequest) =>
+      sendJson<WorkbenchOutcomeDto>("/api/items/workbench/salvage", "POST", req),
+    onSuccess: () => invalidateItemQueries(qc)
+  });
+}
+
+/** item module 14 — five of grade `g` become one of grade `g+1`. The one verb with no item at all. */
+export function useUpcycleMaterials() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Materials" },
+    mutationFn: (req: UpcycleRequest) =>
+      sendJson<WorkbenchOutcomeDto>("/api/items/workbench/upcycle", "POST", req),
+    onSuccess: () => invalidateItemQueries(qc)
+  });
+}
+
+/**
+ * item module 15 — `+n → +n+1`.
+ *
+ * ⚠ A 200 here is not a success: a failed attempt still spends, still appends an op and still moves
+ * the pity counter, so the caller must read `outcome`, not the HTTP status.
+ */
+export function useEnhanceItem() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Item" },
+    mutationFn: (req: EnhanceRequest) =>
+      sendJson<WorkbenchOutcomeDto>("/api/items/workbench/enhance", "POST", req),
+    onSuccess: () => invalidateItemQueries(qc)
+  });
+}
+
+/** item module 16 — open one empty, crafted socket (priced by module 14's `bore` rows). */
+export function useSocketAdd() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Sockets" },
+    mutationFn: (req: SocketAddRequest) =>
+      sendJson<WorkbenchOutcomeDto>("/api/items/workbench/socket-add", "POST", req),
+    onSuccess: () => invalidateItemQueries(qc)
+  });
+}
+
+/** item module 16 — put a held insert into an open socket, and take it out of stock in the same write. */
+export function useSocketInsert() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Sockets" },
+    mutationFn: (req: SocketInsertRequest) =>
+      sendJson<WorkbenchOutcomeDto>("/api/items/workbench/socket-insert", "POST", req),
+    onSuccess: () => invalidateItemQueries(qc)
+  });
+}
+
+/**
+ * item module 16 — declare a crafted, empty socket's element affinity.
+ *
+ * ⏸ Wired but **unpayable**: no shipped recipe authors the `imbue` operation, so this can only ever
+ * come back `material.recipe-unknown` until module 14's corpus carries one. The bench says so in
+ * the player's own words rather than offering an action that cannot complete.
+ */
+export function useSocketImbue() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "Sockets" },
+    mutationFn: (req: SocketImbueRequest) =>
+      sendJson<WorkbenchOutcomeDto>("/api/items/workbench/socket-imbue", "POST", req),
+    onSuccess: () => invalidateItemQueries(qc)
+  });
+}

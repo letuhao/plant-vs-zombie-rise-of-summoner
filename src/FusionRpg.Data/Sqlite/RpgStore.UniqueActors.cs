@@ -955,7 +955,41 @@ public sealed partial class RpgStore
     /// <summary>Source marker on every assignment this legacy wire writes. <c>stock</c> is I13
     /// §4.4's kind for "identified by a catalog id, not by a rolled instance" — exactly what a
     /// relic or stub item is, and exactly what D1 §10 M1 specifies for the migrated rows.</summary>
-    const string LegacyEquipRefKind = "stock";
+    const string LegacyEquipRefKind = FusionRpg.Core.Items.EquipRefKinds.Stock;
+
+    /// <summary>
+    /// ⛔ <b>The symmetric half of <c>equip.role-held-by-relic</c>, added 2026-09-06 (defect R1).</b>
+    ///
+    /// <para>Since D1 §10 M1/M2 two flows write <c>rpg_item_assignment</c>: this legacy relic wire
+    /// (<c>stock</c>) and <c>POST /api/items/equip</c> (<c>rolled</c>). The item route already refused
+    /// a role a relic holds by name — <b>and this one refused nothing</b>. Measured, not assumed: with
+    /// a real blade in <c>armament-primary</c>, <c>PUT .../equipment/weapon</c> answered <b>200</b> and
+    /// the upsert replaced the row, so the player's item came off with no refusal and no notice.</para>
+    ///
+    /// <para>Enforced <b>here</b>, at the single write point, rather than in
+    /// <c>UniqueActorService</c>: it is inside the same <c>_gate</c> the write takes, so there is no
+    /// read-then-write window, and it covers <see cref="ClearUniqueEquipmentSlot"/> for free — which
+    /// matters, because the clear path <c>DELETE</c>s the very same row and would otherwise unequip an
+    /// item outright.</para>
+    ///
+    /// <para>Only <c>rolled</c> is refused. A <c>stock</c> occupant is this wire's own row and
+    /// replacing it is the wire's normal job (swapping one relic for another).</para>
+    /// </summary>
+    static void RefuseIfRoleHeldByAnItemUnlocked(
+        IReadOnlyList<FusionRpg.Core.Items.EquipAssignment> standing,
+        string instanceId, FusionRpg.Core.Items.ItemRole role, string slot)
+    {
+        foreach (var a in standing)
+        {
+            if (a.Role != role) continue;
+            if (!string.Equals(a.RefKind, FusionRpg.Core.Items.EquipRefKinds.Rolled, StringComparison.Ordinal))
+                continue;
+            throw new UniqueEquipmentSlotClaimed(
+                $"slot.claimed_by_item: '{slot}' ({FusionRpg.Core.Items.ItemRoles.Id(role)}) on specimen " +
+                $"'{instanceId}' holds item '{a.RefId}', which was equipped through the item flow — " +
+                "take it off with POST /api/items/unequip first");
+        }
+    }
 
     static void WriteLegacyEquipAssignmentUnlocked(
         SqliteConnection db, string instanceId, FusionRpg.Core.Items.ItemRole role, string itemId) =>
@@ -1069,6 +1103,11 @@ public sealed partial class RpgStore
         }
         lock (_gate)
         {
+            // Module 4's own read, reused rather than re-derived — and taken before the write
+            // connection opens so the refusal cannot half-apply. `_gate` is reentrant, and an unknown
+            // specimen simply has no assignments, so `not_found` below still answers first for one.
+            RefuseIfRoleHeldByAnItemUnlocked(ListAssignments(id), id, role, s);
+
             using var db = OpenUnlocked();
             if (ReadUniqueActorUnlocked(db, id) is null)
                 throw new InvalidOperationException("not_found");
@@ -1327,4 +1366,22 @@ public sealed partial class RpgStore
         cmd.ExecuteNonQuery();
         return (true, "", ReadUniqueActorUnlocked(db, instanceId));
     }
+}
+
+/// <summary>
+/// Raised by <see cref="RpgStore.UpsertUniqueEquipment"/> (and therefore
+/// <see cref="RpgStore.ClearUniqueEquipmentSlot"/>) when the legacy relic wire is asked to write a
+/// role that a real <c>rolled</c> item assignment already holds — defect R1, 2026-09-06.
+///
+/// <para>Its own type, on <c>WorkbenchApplyRefused</c>'s pattern, rather than another
+/// <c>ArgumentException</c>/<c>InvalidOperationException</c>: <c>UniqueActorService.PutEquipment</c>
+/// already tells those two apart by <c>ParamName</c> and by a <c>StartsWith</c> on the message, and a
+/// third refusal squeezed into that scheme would be reported as <c>not_found</c> or as one of the two
+/// 400-shaped validation reasons. This one is a genuine conflict and answers 409.</para>
+/// </summary>
+public sealed class UniqueEquipmentSlotClaimed : Exception
+{
+    public UniqueEquipmentSlotClaimed(string reason) : base(reason) => Reason = reason;
+
+    public string Reason { get; }
 }

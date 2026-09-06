@@ -22,8 +22,15 @@ import type { Pending } from "./pending";
  * v2 (2026-09-04): `SectorView.typeId` narrowed `number` → `string` to match the wire
  * (`WorldSectorDto.TypeId` is `string`, `WorldDtos.cs:66`) — see `decisions.md`'s dated ADR row.
  * A narrowing, not an addition, so it earns the bump rather than riding in free.
+ *
+ * v3 (2026-09-06): `ContainerView.sockets` and `ContainerView.set` narrowed `Pending<unknown>` →
+ * `Pending<SocketsView>` / `Pending<SetView>`. Both were declared placeholders waiting for exactly
+ * this — item module 20's own build — and nothing has ever produced a value for either, so no
+ * caller narrows underneath. It is still a narrowing rather than an addition, so it takes the bump
+ * on the same terms v2 did. ⚠ The matching dated row in `decisions.md` is owed and is the owner's
+ * to write; this note is not a substitute for it.
  */
-export const CONTRACT_VERSION = 2;
+export const CONTRACT_VERSION = 3;
 
 // ===========================================================================
 // Shared primitives — spec-magnitude-and-units.md §7
@@ -157,11 +164,337 @@ export type ContainerView = {
   implicit: Pending<DisplayLine[]>;
   affixes: Pending<DisplayLine[]>;
   enhancement: Pending<{ tier: number; nextMilestone?: DisplayLine }>;
-  sockets: Pending<unknown>; // spec-sockets-and-sets.md
-  set: Pending<unknown>; // spec-sockets-and-sets.md
+  sockets: Pending<SocketsView>;
+  set: Pending<SetView>;
   grantedAction: Pending<DisplayLine>;
   flavour?: string;
   footer: Pending<{ meanRollQualityPerMille?: number; stale: boolean; locked: boolean }>;
+};
+
+// ===========================================================================
+// 2b. Item surfaces — the six surfaces of `spec-item-surfaces.md` (item module
+//     20), over the read-only `GET /api/items/*` routes.
+//
+// Every number here is the server's. Nothing in this section is derived in
+// TypeScript: distances come from module 16's evaluator through
+// `CombinationDistance`, verdicts and unit-class grouping from
+// `DominancePresentation`, per-piece set truth from `SetDisclosure`. A view
+// type that carried a formula instead of a value would be the second
+// implementation those modules exist to prevent.
+// ===========================================================================
+
+/** `SurfaceCatalog.Id` — closed, and a seventh needs a declared unlock before it can exist. */
+export type ItemSurfaceId =
+  | "armoury"
+  | "equipScreen"
+  | "itemCard"
+  | "comparison"
+  | "socketBench"
+  | "compendium";
+
+/**
+ * GG-17's four designed states plus the named populated case. `ready` is named rather than implied
+ * so a surface cannot be written with three states and a fourth nobody handled.
+ */
+export type ItemSurfaceState = "locked" | "loading" | "empty" | "error" | "ready";
+
+export type SurfaceStatusView = {
+  surface: ItemSurfaceId;
+  state: ItemSurfaceState;
+  /** Always present, so a locked surface can always say what unlocks it (GG-44). */
+  unlockKey: string;
+};
+
+/** GG-50's three bands. No band refuses a row — they differ only in how much reaches the DOM. */
+export type RenderStrategy = "renderAll" | "virtualize" | "searchFirst";
+
+export type ArmouryRowView = {
+  instanceId: string;
+  containerId: string;
+  rarity: Rarity;
+  /**
+   * Both live on the item's BASE TYPE, and that table does not exist yet — so they are `pending`
+   * with a player-facing reason rather than answered from the container's slot, which is a
+   * different axis and would be a plausible wrong answer.
+   */
+  role: Pending<string>;
+  frame: Pending<string>;
+  assigned: boolean;
+  locked: boolean;
+  unseen: boolean;
+  stale: boolean;
+  acquiredUtc: string;
+};
+
+/** The inbox is counted over the WHOLE armoury, never the page. */
+export type ArmouryInboxView = {
+  unseen: Magnitude; // count
+  total: Magnitude; // count
+  /** A watch number, never a refusal — no row is hidden when it fires. */
+  overReviewPressure: boolean;
+};
+
+export type ArmouryPageView = {
+  inbox: ArmouryInboxView;
+  strategy: RenderStrategy;
+  rows: ArmouryRowView[];
+};
+
+/** `ArmourySortKey` — module 2's own sort axes, minus the ones whose column is not on the wire. */
+export type ArmourySortKey = "acquired" | "rarity" | "assigned" | "locked" | "unseen";
+
+/**
+ * The loot filter is a client-side VIEW rule over an already-materialised row list — never a
+ * server-side throttle on generation, and never a bag cap wearing a layout name. A `locked` row is
+ * never hidden by any combination of these.
+ */
+export type ArmouryFilterState = {
+  rarityMin: number | null;
+  rarityMax: number | null;
+  unseenOnly: boolean;
+  hideAssigned: boolean;
+  hideStale: boolean;
+  sort: ArmourySortKey;
+};
+
+export type CombinationShape = "strain" | "splice" | "pure" | "ring" | "eclipse" | "diversity";
+
+/** The four closed states, in the order the compendium renders them. */
+export type CombinationState = "active" | "one-away" | "known-inactive" | "undiscovered";
+
+export type CombinationView = {
+  comboId: string;
+  shape: CombinationShape;
+  state: CombinationState;
+  /** `null` is ∞ — unreachable on this item, which is `undiscovered` and never `one-away`. */
+  distance: number | null;
+  /** Named families for an authored recipe; empty for a generated resonance. */
+  missingFamilies: string[];
+  /** The other half: which elements a generated resonance's fill still lacks. */
+  missingElements: string[];
+  grantedTier: number;
+};
+
+export type SocketCellView = {
+  index: number;
+  affinity: string | null;
+  /** `null` is an empty cell — room, not an ingredient. */
+  insertName: string | null;
+  /** An omni insert counts toward Diversity only, and the cell has to say so. */
+  omniCountsDiversityOnly: boolean;
+};
+
+export type SocketsView = {
+  cells: SocketCellView[];
+  combinations: CombinationView[];
+};
+
+export type SetTierView = {
+  /** A threshold names the piece count it needs, never "next". */
+  piecesRequired: number;
+  active: boolean;
+  isCapability: boolean;
+};
+
+export type SetView = {
+  setId: string;
+  name: string;
+  count: number;
+  total: number;
+  /** The whole ladder always renders — inactive thresholds are the goal. */
+  ladder: SetTierView[];
+  /** Sets this piece advances, and sets where an earlier piece already claimed its role. */
+  advances: string[];
+  redundantIn: string[];
+};
+
+/**
+ * Which sets one worn piece advances, and which it is silently redundant in. A disclosure, never a
+ * refusal — wearing the second copy stays legal, and the point is that the card says why the
+ * fourth piece did not count. One shipped item routinely advances more than one set.
+ */
+export type PieceSetDisclosureView = {
+  instanceId: string;
+  itemName: string;
+  advances: string[];
+  redundantIn: string[];
+};
+
+/**
+ * The six verbs the workbench executes (item modules 14/15/16), as
+ * `POST /api/items/workbench/{verb}` names them. A closed list: `forge`, `reroll` and `transfer`
+ * are deliberately absent because no route serves them — see `Workbench.tsx`'s unavailable list,
+ * which names each one's real reason rather than showing a control that could only fail.
+ */
+export type WorkbenchVerb =
+  | "salvage"
+  | "upcycle"
+  | "enhance"
+  | "socket-add"
+  | "socket-insert"
+  | "socket-imbue";
+
+/** One resolved cost or yield line. The quantity is the server's own resolved price, never a guess. */
+export type WorkbenchCostView = {
+  /** `Substrate` | `Catalyst` | `Reagent` — the material class the server named. */
+  materialClass: string;
+  materialId: string;
+  qty: Magnitude; // count
+};
+
+/**
+ * One socket after the operation, exactly as the workbench reported it. Deliberately NOT
+ * `SocketCellView`: that view carries `omniCountsDiversityOnly`, which this payload does not
+ * answer, and inventing a value for it would be the fabricated-field defect the contract exists to
+ * prevent.
+ */
+export type WorkbenchSocketView = {
+  index: number;
+  /** `null` when the socket declares no element affinity. */
+  affinity: string | null;
+  crafted: boolean;
+  /** `null` is an empty socket — room, not an ingredient. */
+  insertContainerId: string | null;
+};
+
+/**
+ * What one workbench operation did. ⛔ **Every magnitude here is the server's**: the spend, the
+ * yield, the level and the roll chance all arrive resolved, and nothing in the client composes one.
+ *
+ * ⚠ `ok` is about whether the operation RAN, never about whether it went the player's way — a
+ * failed enhance is `ok: true` with `outcome: "failure"`, because the materials were still spent
+ * and the pity counter still moved. Rendering those two the same way is the defect the split
+ * between `ok` and `outcome` exists to stop.
+ */
+export type WorkbenchOutcomeView = {
+  ok: boolean;
+  verb: WorkbenchVerb;
+  /** The server's named rule when it refused; empty otherwise. Never rewritten in the client. */
+  reason: string;
+  instanceId: string;
+  recipeId: string;
+  opSeq: number;
+  /** A retried correlation returns the RECORDED outcome; nothing is re-priced or re-rolled. */
+  replayed: boolean;
+  /** `success` | `failure` | `failure-downgrade` | `salvaged` | `upcycled` | the verb, for sockets. */
+  outcome: string;
+  enhanceLevel: Magnitude; // count
+  pityCounter: Magnitude; // count
+  /** `null` for every verb that rolls nothing — an absent chance, never a zero one. */
+  successChance: Magnitude | null; // perMilleRatio
+  spent: WorkbenchCostView[];
+  granted: WorkbenchCostView[];
+  sockets: WorkbenchSocketView[];
+};
+
+export type DominanceVerdict = "strictly-better" | "strictly-worse" | "sidegrade" | "incomparable";
+
+/** A word AND a shape, never a colour alone — and the badge carries no colour to fall back on. */
+export type VerdictBadgeView = {
+  verdict: DominanceVerdict;
+  label: string;
+  shape: string;
+};
+
+export type ChannelDeltaView = {
+  channel: ChannelId;
+  incumbent: Magnitude;
+  candidate: Magnitude;
+  delta: Magnitude;
+};
+
+/** The unit lives in the GROUP HEADER, never in the column. An unresolvable unit gets its own group. */
+export type UnitClassGroupView = {
+  unit: UnitClass | null;
+  deltas: ChannelDeltaView[];
+};
+
+export type SidegradeTradeView = {
+  youGain: ChannelDeltaView[];
+  youGiveUp: ChannelDeltaView[];
+};
+
+export type ComparePayloadView = {
+  badge: VerdictBadgeView;
+  groups: UnitClassGroupView[];
+  /** Non-null only for a sidegrade: the verdict word alone says it is a trade, not which trade. */
+  trade: SidegradeTradeView | null;
+  /** Non-null only for an incomparable verdict — one with no explanation reads as a bug. */
+  incomparableReason: string | null;
+  meanRollQualityPerMille: number | null;
+};
+
+/** `core.v1.json`'s fifteen body roles plus the reserved commander slot. Closed, append-only. */
+export type ItemRoleId =
+  | "armament-primary"
+  | "core-guard"
+  | "ward-array"
+  | "armament-secondary"
+  | "jewel-major"
+  | "manipulator"
+  | "mantle"
+  | "head-guard"
+  | "girdle"
+  | "sense"
+  | "footing"
+  | "infusion"
+  | "retinue"
+  | "jewel-minor-a"
+  | "jewel-minor-b"
+  | "standard";
+
+export type PaperdollCellView = {
+  role: ItemRoleId;
+  /** The registry's own two frame nouns, both shown while no frame reaches the wire. */
+  humanoidName: string;
+  plantName: string;
+  hybridEligible: boolean;
+  /** `null` is an empty role, which is a designed state and not a blank. */
+  instanceId: string | null;
+  itemName: string | null;
+  rarity: Rarity | null;
+  /**
+   * Which flow put this piece here — `"item"` for an owned instance assigned through
+   * `POST /api/items/equip`, `"relic"` for one of the four hand-authored relics put there by
+   * `PUT /api/unique/actors/{id}/equipment/{slot}`. `null` on an empty cell.
+   *
+   * ⛔ Not decoration: only an item cell may be taken off from the equip screen. A relic's write
+   * path also rebuilds `mods_json` and its atom bindings, so unequipping one anywhere else would
+   * leave both standing.
+   */
+  source: "item" | "relic" | null;
+};
+
+/**
+ * One durable equip decision, as the equip screen reads it. The role is the fifteen-role vocabulary,
+ * not the relic layer's three legacy slot words.
+ */
+export type EquipAssignmentView = {
+  role: ItemRoleId;
+  /** `"item"` is a rolled instance the player owns; `"relic"` is a catalog id from the older flow. */
+  source: "item" | "relic";
+  /** An `instance_id` for an item, a `container_id` for a relic. */
+  refId: string;
+  assignedUtc: string;
+};
+
+/**
+ * What one equip or unequip did.
+ *
+ * ⚠ Unlike {@link WorkbenchOutcomeView} there is no second `outcome` axis, because equipping rolls
+ * nothing: `ok` is the whole answer, and `reason` carries the server's named rule when it is false.
+ */
+export type EquipOutcomeView = {
+  ok: boolean;
+  verb: "equip" | "unequip";
+  /** The server's named rule when it refused; empty otherwise. Never rewritten in the client. */
+  reason: string;
+  specimenId: string;
+  role: ItemRoleId | null;
+  refId: string;
+  /** The piece this write displaced — swapped out on an equip, taken off on an unequip. */
+  replaced: EquipAssignmentView | null;
+  assignments: EquipAssignmentView[];
 };
 
 // ===========================================================================

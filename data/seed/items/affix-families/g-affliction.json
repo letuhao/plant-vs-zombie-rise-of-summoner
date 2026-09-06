@@ -356,6 +356,342 @@
         "offensive"
       ],
       "notes": "SHIPPED id, kept verbatim, but DECLARED INERT today: status=\"kelp\" declares StatusPayloadKind.UnityCc with no Unity branch written anywhere (atom-catalog-ssot.md §5; classes.v1.json's own `infusion` role legality table excludes this exact family for the identical reason). Authored per this lane's brief — author against what works, flag what does not — and per atom-family-library.md §3.4's owner decision to wire the three missing branches (`ember`/`jala`/`kelp`) inside this program. This row imports and prices cleanly but binds nowhere until that branch exists."
+    },
+    {
+      "id": "atom.buttering",
+      "nameKey": "affix.buttering",
+      "name": "Butter Seal",
+      "kindId": "status.apply",
+      "params": {
+        "status": "butter"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Butter Seal"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Churned Glut"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Golden Mire"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to butter the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/humanoid/*-a.json and *-b.json implicits, unique earthen-bastion-70 \"Holding Thresher\" (powerAxis control, fixedAtoms[0] at band high)) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"butter\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (\"buttering . freezing . chilling . venomous . mesmerizing | butter . freeze . cold . poison . hypno | C | shipped\"), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.UnityCc, family \"cc\", StatusL2bCategory.Cc, Replace). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. Fully live end to end, unlike its `entangling` neighbour: EffectAtomCatalog.Generated.cs ships fx.butter_on_hit / fx.icd_butter / fx.clear_butter and MatchButterSecondaryPlugin grants it in a real match, so this is the one CC family in the file with a working injector path today. Flavour drawn from the butter/corn/gold register the shipped grant id `golden-butter` already uses, deliberately away from freezing's frost words."
+    },
+    {
+      "id": "atom.chilling",
+      "nameKey": "affix.chilling",
+      "name": "Slowing Cold",
+      "kindId": "status.apply",
+      "params": {
+        "status": "cold"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Slowing Cold"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of Leaden Limbs"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Long Winter"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to chill the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/humanoid/*-a.json and *-b.json implicits, uniques windswept-spore-50 / verdant-graft-90 / umbral-swarm-50 / earthen-bastion-70, and set frostbitten-vanguard's 2-piece capability) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"cold\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (the same C row: chilling -> cold), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.UnityCc, family \"elemental\", StatusL2bCategory.Cc, Replace). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. The set's own notes are the theme check and they agree: set.frostbitten-vanguard-001 \"Stillmarch\" reads its atom.chilling capability as \"the ground itself SLOWING anything that nears a line that has stopped retreating\" -- a slow, not a lock. That is what separates it from `atom.freezing` above, which shares the same \"elemental\" status-family mutex (freeze/cold/poison cannot coexist on one target). Words are slowing/torpor imagery on purpose: freezing already owns frost/chill/hoarfrost in this file."
+    },
+    {
+      "id": "atom.blighting",
+      "nameKey": "affix.blighting",
+      "name": "Creeping Blight",
+      "kindId": "status.apply",
+      "params": {
+        "status": "blight"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Creeping Blight"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Blasted Acre"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Black Harvest"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to blight the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/plant/a.json and b.json implicits (item.plant-glands-a-001/-a-008/-b-001/-b-002)) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"blight\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (\"blighting . rotting . sparking . marking . sporing | blight . rot . spark . pact_mark . spore | C | shipped; spread geometry is overlay data\"), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.Contagion, family \"overlay\", StatusL2bCategory.Contagion, payloads Spread + PulseHp). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. Carries atom.sporing's caveat verbatim because it is the same mechanic: atom-catalog-ssot.md SS5 records that contagion cannot spread today (the engine passes `board: null`), so the headline half is dormant while the per-tick status is live. Authored anyway on the same grounds sporing was -- the functioning half is real and the spread failure is a runtime gap, not a reason to withhold the family. Crop-disease flavour, kept clear of `rotting`'s decay register just below."
+    },
+    {
+      "id": "atom.rotting",
+      "nameKey": "affix.rotting",
+      "name": "Soft Rot",
+      "kindId": "status.apply",
+      "params": {
+        "status": "rot"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Soft Rot"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Mouldering Core"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Rotten Heart"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to rot the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/plant/a.json and b.json implicits, uniques umbral-swarm-90 and rot-bloom-30 \"Mouldreign\" (fixedAtoms[1] at band low, paired with atom.mending)) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"rot\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (the same contagion row: rotting -> rot), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.Contagion, family \"overlay\", StatusL2bCategory.Contagion, payloads Spread + PulseHp). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. Same dormant-spread caveat as `blighting`. Flavour follows the referencing content rather than the family name: rot-bloom-30's own entry is named \"Mouldreign\" and its counter-pressure note reads \"the wound knits shut the same way rot spreads\", so mould/decay is this family's established register in the shipped corpus, distinct from blighting's crop-disease words."
+    },
+    {
+      "id": "atom.sparking",
+      "nameKey": "affix.sparking",
+      "name": "Loose Spark",
+      "kindId": "status.apply",
+      "params": {
+        "status": "spark"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Loose Spark"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Arcing Coil"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Storm Chain"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to spark the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/plant/a.json and b.json implicits (item.plant-glands-a-003 at band trivial, -a-010 at low, -b-009 at high)) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"spark\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (the same contagion row: sparking -> spark), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.Contagion, family \"overlay\", StatusL2bCategory.Contagion, payloads Spread + PulseHp). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. Same dormant-spread caveat. This is the only one of the five contagion families whose referencing base types span three power bands (trivial/low/high), which is the implicit slate doing its job and has no bearing on the family-level band: the per-item band on a base type's `implicit` overrides this one."
+    },
+    {
+      "id": "atom.marking",
+      "nameKey": "affix.marking",
+      "name": "Pact Mark",
+      "kindId": "status.apply",
+      "params": {
+        "status": "pact_mark"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Pact Mark"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Sealed Debt"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Binding Brand"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to mark the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/plant/a.json and b.json implicits, unique ember-harvest-30 \"Resin of Dusk\" (powerAxis control, paired with atom.withering)) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"pact_mark\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (the same contagion row: marking -> pact_mark), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.Contagion, family \"overlay\", StatusL2bCategory.Contagion, payloads Spread + PulseHp). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. The status id is `pact_mark`, with the underscore -- StatusCatalogBootstrap.cs spells it that way and this field is a status reference, not an id this file mints, so it is copied exactly rather than kebab-cased. NOT a damage-amplifier mark: the catalog gives it Spread + PulseHp like its four contagion siblings, and `atom.expose`-style stat-debuff marking is a different, unauthored family (atom-family-library.md SS3.4's `exposing` row, blocked on a ModifyStat payload consumer). Pact/debt flavour comes from the status id itself and from ember-harvest-30's own note (\"every mark it draws is drawn from the vine's own dwindling sap, not renewed\")."
+    },
+    {
+      "id": "atom.bonding",
+      "nameKey": "affix.bonding",
+      "name": "Meld Bond",
+      "kindId": "status.apply",
+      "params": {
+        "status": "bond"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "medium",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of the Taken Meld"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Knitted Seam"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Shared Vein"
+          }
+        ]
+      },
+      "displayTemplate": "{value}% chance to bond the target on hit",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "AUTHORED 2026-09-06 to close a real corpus gap, not a new design. This family id is referenced by shipped content (base-types/infusion/humanoid/*-b.json (item.humanoid-bandolier-b-011, band trivial), uniques verdant-graft-90 \"Meldbone\" (band high) and ember-harvest-30 \"Bine of Stubble\", and set verdant-graft's 2-piece capability) and is listed in classes.v2.json implicitSlates.infusion.legalFamilies, but no affix-families/*.json entry ever defined it: atom.sporing's own notes above record why -- \"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing share this exact shape, NONE OF WHICH THIS PARTITION ALSO AUTHORS, to stay near the ~7-family target)\". The partition deferred them as already-shipped; nothing else picked them up. status=\"bond\" is not inferred from the family name -- atom-family-library.md SS3.4's family/status table names the pairing directly (\"bonding | bond | O | shipped via the nested burst packet\"), and StatusCatalogBootstrap.cs registers that exact id (StatusKind.Counter, family \"overlay\", StatusL2bCategory.Dot, payload PulseHp, Refresh). powerBand follows the rule the seven entries above already hold to without exception, read off StatusCatalogBootstrap's own StatusL2bCategory rather than invented here: Cc -> low (freezing/mesmerizing/entangling), Dot -> medium (venomous/withering/bloodletting), Contagion -> low (sporing). No magnitude is authored -- bands.v1.json's statusMagnitudeAndDuration two-ladder derives chance at r=1.75 and duration at r=1.4 from this band, and seed-contract.md SS3 forbids an author writing either. The ONE entry in this batch at `medium`, and the category is why: `bond` is the only one of the seven that is StatusL2bCategory.Dot rather than Cc or Contagion, which is the same reason venomous/withering/bloodletting sit at medium above. The set's own notes are the theme check: set.verdant-graft-003 \"Surgical Cutting\" reads it as \"the literal graft-take\", and verdant-graft-90's \"Meldbone\" calls the graft-take \"the whole reason to wear it\". Meld/knit/vein flavour is taken from those two entries rather than minted, and deliberately avoids repeating \"Graft\", which venomous (\"Venom Graft\") and bloodletting (\"of the Open Graft\") already spend in this file."
     }
   ]
 }

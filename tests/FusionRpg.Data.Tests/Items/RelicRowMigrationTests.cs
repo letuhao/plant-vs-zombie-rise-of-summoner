@@ -365,4 +365,87 @@ public class RelicRowMigrationTests : IDisposable
                 FusionRpg.Core.Effects.Atoms.OwnerKind.UniqueActor, a));
         Assert.DoesNotContain(bindings, b => b.Source == "equip-assign");
     }
+
+    // ---- R1: the relic wire's missing symmetric refusal -------------------------------------
+
+    const string LiveItem = "inst-blade-r1";
+
+    /// <summary>
+    /// ⛔ <b>Defect R1, measured 2026-09-06 and fixed here.</b> Two flows write
+    /// <c>rpg_item_assignment</c>, and only one of them refused the other. <c>POST /api/items/equip</c>
+    /// answered <c>equip.role-held-by-relic</c> from the day it shipped; this wire answered <b>200</b>
+    /// and let its upsert replace a live <c>rolled</c> row, so a player's equipped item came off with
+    /// no refusal and no notice.
+    ///
+    /// <para>Both halves are asserted, because a guard that names the rule and writes anyway is the
+    /// failure a refusal-only assertion cannot see: the refusal, <b>and</b> the item's own row
+    /// unchanged.</para>
+    /// </summary>
+    [Fact]
+    public void Equipping_a_relic_into_a_role_a_live_item_holds_is_refused_by_name()
+    {
+        var a = NewActor();
+        _store.SaveAssignment(a, ItemRole.ArmamentPrimary, EquipRefKinds.Rolled, LiveItem);
+
+        var ex = Assert.Throws<UniqueEquipmentSlotClaimed>(
+            () => _store.UpsertUniqueEquipment(a, "weapon", "relic.ashen_reliquary"));
+
+        Assert.Contains("slot.claimed_by_item", ex.Reason, StringComparison.Ordinal);
+        Assert.Equal(
+            ("armament-primary", EquipRefKinds.Rolled, LiveItem),
+            Assert.Single(ReadAssignments(a)));
+    }
+
+    /// <summary>The <c>DELETE</c> half is the same defect with a worse ending: clearing the legacy
+    /// slot runs <c>DELETE FROM rpg_item_assignment WHERE specimen_id AND role</c>, which does not
+    /// care whose row it is. Unguarded, <c>DELETE /api/unique/actors/{id}/equipment/weapon</c> would
+    /// unequip an item the relic flow never put there. Covered for free by enforcing at the single
+    /// write point, and pinned here so it stays covered.</summary>
+    [Fact]
+    public void Clearing_a_relic_slot_a_live_item_holds_never_deletes_the_items_row()
+    {
+        var a = NewActor();
+        _store.SaveAssignment(a, ItemRole.ArmamentPrimary, EquipRefKinds.Rolled, LiveItem);
+
+        Assert.Throws<UniqueEquipmentSlotClaimed>(() => _store.ClearUniqueEquipmentSlot(a, "weapon"));
+
+        Assert.Equal(
+            ("armament-primary", EquipRefKinds.Rolled, LiveItem),
+            Assert.Single(ReadAssignments(a)));
+    }
+
+    /// <summary>⚠ <b>Only <c>rolled</c> is refused, and that boundary is the point.</b> A
+    /// <c>stock</c> occupant is this wire's OWN row, so swapping one relic for another in the same
+    /// slot stays exactly what it always was — a 200 and a replaced row. A guard that refused every
+    /// occupant would break the relic flow to protect the item flow.</summary>
+    [Fact]
+    public void A_relic_still_replaces_another_relic_in_the_same_slot()
+    {
+        var a = NewActor();
+        _store.UpsertUniqueEquipment(a, "weapon", "relic.ashen_reliquary");
+
+        var after = _store.UpsertUniqueEquipment(a, "weapon", "relic.sunworn_charm");
+
+        Assert.Equal("relic.sunworn_charm", Assert.Single(after.Items).ItemId);
+        Assert.Equal(
+            ("armament-primary", EquipRefKinds.Stock, "relic.sunworn_charm"),
+            Assert.Single(ReadAssignments(a)));
+    }
+
+    /// <summary>A rolled row in a DIFFERENT role is not this write's business — the guard is keyed on
+    /// the role being written, not on "this specimen owns an item somewhere".</summary>
+    [Fact]
+    public void A_rolled_assignment_in_another_role_does_not_block_the_relic_wire()
+    {
+        var a = NewActor();
+        _store.SaveAssignment(a, ItemRole.CoreGuard, EquipRefKinds.Rolled, LiveItem);
+
+        var after = _store.UpsertUniqueEquipment(a, "weapon", "relic.ashen_reliquary");
+
+        // Both rows are surfaced — the reader projects every ref_kind, not just this wire's own.
+        Assert.Equal("relic.ashen_reliquary",
+            Assert.Single(after.Items, i => i.Slot == "weapon").ItemId);
+        Assert.Equal(LiveItem, Assert.Single(after.Items, i => i.Slot == "armor").ItemId);
+        Assert.Equal(2, ReadAssignments(a).Count);
+    }
 }

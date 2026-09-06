@@ -111,12 +111,26 @@ public sealed partial class RpgStore
     /// with the same <paramref name="correlationId"/> returns the already-recorded row rather than
     /// creating a second one. The seed is sealed by the CALLER (delve-graph-roll rolls it) and
     /// never re-derived here.
+    ///
+    /// <para>D4.21 (spec-domain-catalog.md §6 step 7) added the four optional, trailing parameters:
+    /// <paramref name="contentTermsJson"/> writes the already-existing-but-never-populated
+    /// `content_terms_json` column (confirmed by direct read: every prior caller left it `NULL`);
+    /// <paramref name="firstDecisionJson"/> seeds `decisions_json` with the `{seq:0, kind:"enter",
+    /// ...}` entry `DelveStart.Run`'s own plan carries, rather than the bare `'[]'` every existing
+    /// call leaves it at; <paramref name="packLockInstanceIds"/> and <paramref name="stockDebits"/>
+    /// compose <see cref="LockPackInstanceUnlocked"/> / <see cref="AdjustStockUnlocked"/> into THIS
+    /// SAME transaction, after `delveId` exists — "one transaction" (spec §6 step 7, verbatim), not a
+    /// second one a caller could partially fail between. All four default to their old no-op values,
+    /// so every existing caller (`DelveGraphRollRoundTripTests.cs`, `DelveScopeTests.cs`, etc.) is
+    /// byte-for-byte unaffected.</para>
     /// </summary>
     public (bool Ok, string Reason, DelveRow? Delve) CreateDelve(
         long playerId, string domainId, string raidMode, string rungId, string correlationId,
         string? parentWorldId, string worldId, string templateId, ulong seed,
         WorldState world, IReadOnlyList<DelveRoomRow> rooms,
-        RoomTypeCatalog roomCatalog, DoorTypeCatalog doorCatalog)
+        RoomTypeCatalog roomCatalog, DoorTypeCatalog doorCatalog,
+        string? contentTermsJson = null, string? firstDecisionJson = null,
+        IReadOnlyList<string>? packLockInstanceIds = null, IReadOnlyList<(string ContainerId, int Qty)>? stockDebits = null)
     {
         if (string.IsNullOrWhiteSpace(correlationId)) return (false, "correlation.missing", null);
         var corr = correlationId.Trim();
@@ -146,10 +160,11 @@ public sealed partial class RpgStore
 
             using (var cmd = Prepared(db, tx, """
                 INSERT INTO rpg_delves (player_id, world_id, domain_id, raid_mode, rung_id, seed, state,
-                                        correlation_id, entered_utc, parties_json)
-                VALUES ($p, $w, $d, $raid, $rung, $seed, $state, $corr, $now, '[]');
-                """, "$p", "$w", "$d", "$raid", "$rung", "$seed", "$state", "$corr", "$now"))
-                ExecuteWith(cmd, playerId, worldId, domainId, raidMode, rungId, seed.ToString(), DelveStates.Active, corr, now);
+                                        correlation_id, entered_utc, parties_json, decisions_json, content_terms_json)
+                VALUES ($p, $w, $d, $raid, $rung, $seed, $state, $corr, $now, '[]', $dec, $terms);
+                """, "$p", "$w", "$d", "$raid", "$rung", "$seed", "$state", "$corr", "$now", "$dec", "$terms"))
+                ExecuteWith(cmd, playerId, worldId, domainId, raidMode, rungId, seed.ToString(), DelveStates.Active, corr, now,
+                    firstDecisionJson ?? "[]", (object?)contentTermsJson);
 
             var delveId = LastInsertRowId(db, tx);
 
@@ -164,9 +179,80 @@ public sealed partial class RpgStore
                         room.ArchetypeId, room.Visited ? 1 : 0, room.Cleared ? 1 : 0, (object?)room.KeyForLaneId);
             }
 
+            if (packLockInstanceIds is not null)
+                foreach (var instanceId in packLockInstanceIds)
+                    LockPackInstanceUnlocked(db, delveId, instanceId);
+
+            if (stockDebits is not null)
+                foreach (var (containerId, qty) in stockDebits)
+                    AdjustStockUnlocked(db, playerId.ToString(), containerId, -qty, now);
+
             tx.Commit();
             var created = ReadDelveByCorrelationUnlocked(db, playerId, corr)!;
             return (true, "ok", created);
+        }
+    }
+
+    /// <summary>D4.21 (spec-domain-catalog.md §6 step 3, `member.unavailable`) — "is this actor
+    /// currently a member of ANY of this player's own `Active` delves". No existing read answered
+    /// this (`rpg_delve_pack_lock` is keyed by ITEM instance, never actor instance, confirmed by
+    /// direct read of its own schema and writer); parties are stored as `parties_json` on each
+    /// `rpg_delves` row, not a queryable column, so this scans every Active row's own JSON rather
+    /// than a single indexed WHERE — acceptable here since a player has at most a handful of
+    /// concurrently-Active delves (one per domain, spec §4).</summary>
+    public bool IsActorInAnyActiveDelve(long playerId, string instanceId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = "SELECT parties_json FROM rpg_delves WHERE player_id = $p AND state = $active;";
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$active", DelveStates.Active);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+            {
+                var parties = JsonSerializer.Deserialize<List<DelvePartyState>>(r.GetString(0)) ?? new List<DelvePartyState>();
+                if (parties.Any(p => p.Members?.Any(m => string.Equals(m.InstanceId, instanceId, StringComparison.Ordinal)) == true))
+                    return true;
+            }
+            return false;
+        }
+    }
+
+    /// <summary>D4.22 — the live `(state, delveId)` pair `DomainOffers.For`'s own `delves` parameter
+    /// needs, for one `(player, domain)`. `Active`/`Archived` are the only two states that DTO
+    /// projection reads (spec §4); a `Wiped`/`Extracted` row (or none at all) reads back `(null,
+    /// null)` — sealed-or-in-progress is a property of the LATEST row for this domain, so this picks
+    /// the most recently entered one rather than an arbitrary one when a `many` domain has several
+    /// closed delves in its own history.</summary>
+    public (string? State, long? DelveId) GetDelveStateForDomain(long playerId, string domainId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                SELECT state, delve_id FROM rpg_delves
+                WHERE player_id = $p AND domain_id = $d
+                ORDER BY entered_utc DESC LIMIT 1;
+                """;
+            cmd.Parameters.AddWithValue("$p", playerId);
+            cmd.Parameters.AddWithValue("$d", domainId);
+            using var r = cmd.ExecuteReader();
+            return r.Read() ? (r.GetString(0), r.GetInt64(1)) : (null, null);
+        }
+    }
+
+    /// <summary>D4.22 — the public form of <see cref="ReadDelveByCorrelationUnlocked"/>, for a caller
+    /// outside this file (`DelveEndpoints.cs`'s own replay lookup, matching the spec's own "a replay
+    /// returns the recorded delve" step 1) that needs the lookup WITHOUT also creating a row.</summary>
+    public DelveRow? LoadDelveByCorrelation(long playerId, string correlationId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            return ReadDelveByCorrelationUnlocked(db, playerId, correlationId);
         }
     }
 
@@ -236,9 +322,13 @@ public sealed partial class RpgStore
         }
     }
 
-    public void MarkRoom(long delveId, string sectorId, bool? visited = null, bool? cleared = null)
+    /// <summary>D4.8 (spec-wild-room.md §7): <paramref name="resolvedKind"/> lets a caller record
+    /// `rpg_delve_rooms.resolved_kind` — `'cage'` is the wild-room module's own new legal value,
+    /// written the same way `visited`/`cleared` already are, no schema change (the column has always
+    /// been a bare `TEXT`, never `CHECK`-constrained).</summary>
+    public void MarkRoom(long delveId, string sectorId, bool? visited = null, bool? cleared = null, string? resolvedKind = null)
     {
-        if (visited is null && cleared is null) return;
+        if (visited is null && cleared is null && resolvedKind is null) return;
         lock (_gate)
         {
             using var db = OpenUnlocked();
@@ -246,10 +336,15 @@ public sealed partial class RpgStore
             var sets = new List<string> { "revision = revision + 1" };
             if (visited is { } v) sets.Add($"visited = {(v ? 1 : 0)}");
             if (cleared is { } c) sets.Add($"cleared = {(c ? 1 : 0)}");
+            if (resolvedKind is not null) sets.Add("resolved_kind = $rk");
+            var paramNames = resolvedKind is not null ? new[] { "$id", "$s", "$rk" } : new[] { "$id", "$s" };
             using (var cmd = Prepared(db, tx,
                 $"UPDATE rpg_delve_rooms SET {string.Join(", ", sets)} WHERE delve_id = $id AND sector_id = $s;",
-                "$id", "$s"))
-                ExecuteWith(cmd, delveId, sectorId);
+                paramNames))
+            {
+                if (resolvedKind is not null) ExecuteWith(cmd, delveId, sectorId, resolvedKind);
+                else ExecuteWith(cmd, delveId, sectorId);
+            }
             tx.Commit();
         }
     }
@@ -271,6 +366,67 @@ public sealed partial class RpgStore
             using (var cmd = Prepared(db, tx,
                 "UPDATE rpg_delves SET decisions_json = $j, revision = revision + 1 WHERE delve_id = $id;",
                 "$j", "$id"))
+                ExecuteWith(cmd, json, delveId);
+            tx.Commit();
+        }
+    }
+
+    /// <summary>D4.14 (spec-delve-quests.md §2, §4): "the offer persists as `rpg_delves.quests_json`
+    /// (ids in draw order, `need` per quest)... `quests_json` gains the verdicts" at close. `Done`/
+    /// `Have` are `null` until `WriteQuestVerdicts` fills them in — the stored offer is the truth
+    /// D4.10's `Draw` produced; nothing here re-derives it.</summary>
+    public sealed record QuestJsonRow(string QuestId, int Need, bool? Done = null, int? Have = null);
+
+    /// <summary>Overwrites `quests_json` with the delve's own offer, in draw order — called once, at
+    /// `CreateDelve` (D4.10's own `Draw` output, `domain-catalog`'s still-unbuilt wiring).</summary>
+    public void WriteQuestOffer(long delveId, IReadOnlyList<QuestJsonRow> offer)
+    {
+        if (offer is null) throw new ArgumentNullException(nameof(offer));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var json = JsonSerializer.Serialize(offer);
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET quests_json = $q, revision = revision + 1 WHERE delve_id = $id;", "$q", "$id"))
+                ExecuteWith(cmd, json, delveId);
+            tx.Commit();
+        }
+    }
+
+    /// <summary>The stored offer, read back exactly as written — "the stored offer is truth and a
+    /// rebuild is asserted equal on load" (spec §2, verbatim) is a property of THIS round-trip, not
+    /// a claim about re-deriving the offer from the graph again.</summary>
+    public IReadOnlyList<QuestJsonRow> ReadQuestOffer(long delveId)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var json = ReadDelveJsonColumnUnlocked(db, tx, delveId, "quests_json");
+            return JsonSerializer.Deserialize<List<QuestJsonRow>>(json ?? "[]") ?? new List<QuestJsonRow>();
+        }
+    }
+
+    /// <summary>Merges each quest's own verdict into the already-stored offer — called once, at
+    /// `CloseDelve` (D4.11's own `Evaluate` output per offered quest). A quest id the stored offer
+    /// does not contain is silently ignored, never appended — the offer's own draw-order membership,
+    /// fixed at `CreateDelve`, is what `quests_json` is truth for; a verdict cannot grow the list.</summary>
+    public void WriteQuestVerdicts(long delveId, IReadOnlyDictionary<string, (bool Done, int Have)> verdictsByQuestId)
+    {
+        if (verdictsByQuestId is null) throw new ArgumentNullException(nameof(verdictsByQuestId));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var current = ReadDelveJsonColumnUnlocked(db, tx, delveId, "quests_json");
+            var rows = JsonSerializer.Deserialize<List<QuestJsonRow>>(current ?? "[]") ?? new List<QuestJsonRow>();
+            var updated = rows.Select(r => verdictsByQuestId.TryGetValue(r.QuestId, out var v)
+                ? r with { Done = v.Done, Have = v.Have }
+                : r).ToList();
+            var json = JsonSerializer.Serialize(updated);
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET quests_json = $q, revision = revision + 1 WHERE delve_id = $id;", "$q", "$id"))
                 ExecuteWith(cmd, json, delveId);
             tx.Commit();
         }

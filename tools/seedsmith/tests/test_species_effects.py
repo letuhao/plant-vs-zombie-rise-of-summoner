@@ -100,7 +100,18 @@ def test_threatBand_string_appears_nowhere_in_the_module_reading_anchors():
 # ---- the fixed core respects its rarity band -----------------------------------------------------
 
 
+#: A stub affix -> real atom ids map, standing in for a real committed affix catalog lookup.
+REFS_BY_AFFIX = {
+    "affix.a": ["atom.a1", "atom.a2"],
+    "affix.b": ["atom.b1"],
+    "affix.c": ["atom.c1"],
+}
+
+
 def test_core_affinity_lands_in_the_fixed_core():
+    """Fixed 2026-09-06: `core` flattens into the affix's OWN real atoms in the container's `atoms`
+    list (`ReadContainer` has no `fixedAffixes` field — spec §4's own table: "core |
+    effect_container_atom — always present"), never a bare affix id."""
     draft = {
         "eligibleAffixes": [
             {"affixId": "affix.a", "affinity": "core"},
@@ -108,10 +119,23 @@ def test_core_affinity_lands_in_the_fixed_core():
         ],
         "eligibilityTags": {"requireTags": [], "anyOfTags": []},
     }
-    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix")
+    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix",
+                       affix_refs_of=REFS_BY_AFFIX.__getitem__)
 
-    assert entry["fixedAffixes"] == ["affix.a"]
-    assert [p["affixId"] for p in entry["pool"]] == ["affix.b"]
+    assert [a["atom"] for a in entry["atoms"]] == ["atom.a1", "atom.a2"]
+    assert [a["seq"] for a in entry["atoms"]] == [0, 1]
+    assert [p["affix"] for p in entry["pool"]] == ["affix.b"]
+    assert "_provenance" not in entry  # no provenance supplied here
+
+
+def test_core_affix_ids_are_recorded_in_provenance_when_supplied():
+    draft = {
+        "eligibleAffixes": [{"affixId": "affix.a", "affinity": "core"}],
+        "eligibilityTags": {"requireTags": [], "anyOfTags": []},
+    }
+    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix",
+                       affix_refs_of=REFS_BY_AFFIX.__getitem__, provenance={"promptVersion": 1})
+    assert entry["_provenance"]["coreAffixIds"] == ["affix.a"]
 
 
 def test_fixed_core_respects_its_rarity_band():
@@ -154,7 +178,7 @@ def test_mixed_bundle_counts_against_both_budgets():
     def class_of(affix_id: str) -> str:
         return "Mixed" if affix_id == "affix.mixed" else "Prefix"
 
-    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=class_of)
+    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=class_of, affix_refs_of=lambda _id: [])
 
     # affix.mixed counts against BOTH; affix.prefix-only counts against prefix only.
     assert entry["prefixRolls"] == 2
@@ -166,7 +190,7 @@ def test_a_pure_suffix_pool_never_touches_the_prefix_budget():
         "eligibleAffixes": [{"affixId": "affix.suffix", "affinity": "likely"}],
         "eligibilityTags": {"requireTags": [], "anyOfTags": []},
     }
-    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Suffix")
+    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Suffix", affix_refs_of=lambda _id: [])
 
     assert entry["prefixRolls"] == 0
     assert entry["suffixRolls"] == 1
@@ -183,18 +207,31 @@ def test_schema_forbids_any_field_beyond_affixId_and_affinity():
     assert props["properties"]["affinity"]["type"] == "string"
 
 
-def test_no_numeric_field_survives_the_audit():
-    """A committed entry carries no weight, tier, magnitude or pool_rolls literal — every one of
-    those is derived downstream (species-generator or roll time), per spec §6."""
+def test_no_MODEL_INVENTED_numeric_field_survives_the_audit():
+    """Corrected 2026-09-06: spec §6's "no weight... resolved downstream" describes the MODEL never
+    inventing a magnitude (P1) — the committed container's own `pool` rows still need a real int
+    `weight` to be legal `ContainerPoolRow` content at all (confirmed: `SpeciesMaterialiser`/
+    `Instantiator.Draw` have no independent path to this module's own tuning at roll time, so
+    "resolved downstream" cannot mean "absent from the committed file"). This function is what turns
+    the model's own `affinity` ORDINAL into that weight, via a real tuning table — never a model
+    literal. What the audit actually forbids: `tier`/`magnitude`/an affix-authored weight, and any
+    weight that does NOT trace to `pool_affinity_weight_milli`'s own table."""
     draft = {
-        "eligibleAffixes": [{"affixId": "affix.a", "affinity": "core"}],
+        "eligibleAffixes": [
+            {"affixId": "affix.a", "affinity": "core"},
+            {"affixId": "affix.b", "affinity": "likely"},
+        ],
         "eligibilityTags": {"requireTags": ["element"], "anyOfTags": []},
     }
-    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix")
+    entry = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix",
+                       affix_refs_of=REFS_BY_AFFIX.__getitem__,
+                       pool_affinity_weight_milli={"likely": 700, "occasional": 300})
 
-    forbidden_keys = {"weight", "tier", "magnitude", "poolRolls", "pool_rolls"}
+    forbidden_keys = {"tier", "magnitude", "poolRolls", "pool_rolls", "affinity"}
     assert forbidden_keys.isdisjoint(entry.keys())
-    assert forbidden_keys.isdisjoint(entry["pool"][0].keys() if entry["pool"] else set())
+    assert forbidden_keys.isdisjoint(entry["pool"][0].keys())
+    # The one number that IS present traces exactly to the real tuning table, never invented here.
+    assert entry["pool"][0]["weight"] == 700
 
 
 def test_affix_ids_not_in_the_eligible_family_set_are_rejected():
@@ -220,8 +257,10 @@ def test_rerun_over_unchanged_anchors_is_byte_identical():
     }
     provenance = {"anchorHash": "abc123", "promptVersion": 1}
 
-    first = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix", provenance=provenance)
-    second = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix", provenance=provenance)
+    first = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix",
+                       affix_refs_of=REFS_BY_AFFIX.__getitem__, provenance=provenance)
+    second = entry_for(REAL_ANCHOR, draft, affix_class_of=lambda _id: "Prefix",
+                        affix_refs_of=REFS_BY_AFFIX.__getitem__, provenance=provenance)
 
     assert first == second
 

@@ -102,106 +102,133 @@ public sealed partial class RpgStore
         MutationResult result, string? newStateHash, string? originValuesJson, string appliedUtc,
         long catalogRevision = 0, int rulesVersion = 0, string costJson = "{}")
     {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var appended = AppendMutationOpUnlocked(db, instanceId, kind, correlationId, opSeed, result,
+                newStateHash, originValuesJson, appliedUtc, catalogRevision, rulesVersion, costJson);
+            // A refusal writes nothing, so a retried refusal re-evaluates -- the shipped
+            // TrySpendSouls contract, kept here too. A replay wrote nothing either.
+            if (appended.Ok && !appended.Replayed) tx.Commit();
+            return appended;
+        }
+    }
+
+    /// <summary>
+    /// The body of <see cref="AppendMutationOp"/> on a connection the CALLER owns, so the op row, the
+    /// head rewrite and a module-14 material debit can commit together —
+    /// `spec-enhance-reroll.md`'s Boundaries: <i>"commit op row, material debit and head rewrite in
+    /// one transaction"</i>. Every command comes from <c>db.CreateCommand()</c>, which inherits the
+    /// connection's active transaction, so this participates in the caller's rather than opening a
+    /// second connection against a database its own transaction already has open.
+    ///
+    /// <para><b>Internal on purpose:</b> the transaction is the caller's to commit, and the only
+    /// caller is <see cref="TrySpendAndApply"/> in this same project.</para>
+    /// </summary>
+    internal MutationAppendResult AppendMutationOpUnlocked(
+        SqliteConnection db,
+        string instanceId, MutationOpKind kind, string correlationId, long opSeed,
+        MutationResult result, string? newStateHash, string? originValuesJson, string appliedUtc,
+        long catalogRevision = 0, int rulesVersion = 0, string costJson = "{}")
+    {
         if (string.IsNullOrWhiteSpace(correlationId))
             throw new ArgumentException("a mutation op needs a correlation id — it is what makes a retry idempotent", nameof(correlationId));
 
         var resultJson = MutationCanonical.WriteResult(result);
         var kindId = MutationOpKinds.Id(kind);
 
-        lock (_gate)
+        using (var existing = db.CreateCommand())
         {
-            using var db = OpenUnlocked();
-            using var tx = db.BeginTransaction();
-
-            using (var existing = db.CreateCommand())
+            existing.CommandText = """
+                SELECT op_seq, op_kind, result_json FROM effect_instance_op
+                WHERE instance_id = $id AND correlation_id = $cid;
+                """;
+            existing.Parameters.AddWithValue("$id", instanceId);
+            existing.Parameters.AddWithValue("$cid", correlationId);
+            using var r = existing.ExecuteReader();
+            if (r.Read())
             {
-                existing.Transaction = tx;
-                existing.CommandText = """
-                    SELECT op_seq, op_kind, result_json FROM effect_instance_op
-                    WHERE instance_id = $id AND correlation_id = $cid;
-                    """;
-                existing.Parameters.AddWithValue("$id", instanceId);
-                existing.Parameters.AddWithValue("$cid", correlationId);
-                using var r = existing.ExecuteReader();
-                if (r.Read())
-                {
-                    var seq = r.GetInt32(0);
-                    var sameKind = string.Equals(r.GetString(1), kindId, StringComparison.Ordinal);
-                    var sameResult = string.Equals(r.GetString(2), resultJson, StringComparison.Ordinal);
-                    return sameKind && sameResult
-                        ? new MutationAppendResult(true, Replayed: true, seq, "replay")
-                        : new MutationAppendResult(false, Replayed: false, seq,
-                            $"correlation '{correlationId}' was already applied to '{instanceId}' with different parameters — refused, never silently applied");
-                }
+                var seq = r.GetInt32(0);
+                var sameKind = string.Equals(r.GetString(1), kindId, StringComparison.Ordinal);
+                var sameResult = string.Equals(r.GetString(2), resultJson, StringComparison.Ordinal);
+                return sameKind && sameResult
+                    ? new MutationAppendResult(true, Replayed: true, seq, "replay")
+                    : new MutationAppendResult(false, Replayed: false, seq,
+                        $"correlation '{correlationId}' was already applied to '{instanceId}' with different parameters — refused, never silently applied");
             }
-
-            int nextSeq;
-            using (var head = db.CreateCommand())
-            {
-                head.Transaction = tx;
-                head.CommandText = "SELECT mutation_seq, enhance_level FROM effect_instance WHERE instance_id = $id;";
-                head.Parameters.AddWithValue("$id", instanceId);
-                using var r = head.ExecuteReader();
-                if (!r.Read())
-                    return new MutationAppendResult(false, false, 0, $"no effect_instance '{instanceId}'");
-                nextSeq = r.GetInt32(0) + 1;
-                var level = r.GetInt32(1) + result.EnhanceLevelDelta;
-                if (level < 0)
-                    return new MutationAppendResult(false, false, nextSeq,
-                        "the op takes the enhancement level below zero");
-            }
-
-            // The one legal ceiling in the module, and it THROWS -- an absolute bound derived from
-            // the arithmetic, never a silent clamp (AGENTS.md). It bounds a retry loop and a log's
-            // length, not how strong an item may become.
-            if (nextSeq > MutationLimits.MutationSeqCap)
-                throw new OverflowException(
-                    $"instance '{instanceId}' would reach mutation_seq {nextSeq}, past the structural cap of " +
-                    $"{MutationLimits.MutationSeqCap}. This is a retry-loop bound, not a design ceiling — it refuses rather than wrapping");
-
-            ExecIn(db, tx, """
-                INSERT INTO effect_instance_op
-                  (instance_id, op_seq, op_kind, correlation_id, op_seed, result_json, applied_utc,
-                   catalog_revision, rules_version, cost_json)
-                VALUES ($id, $seq, $kind, $cid, $seed, $json, $utc, $rev, $rules, $cost);
-                """,
-                ("$id", instanceId), ("$seq", nextSeq), ("$kind", kindId), ("$cid", correlationId),
-                ("$seed", opSeed), ("$json", resultJson), ("$utc", appliedUtc),
-                ("$rev", catalogRevision), ("$rules", rulesVersion), ("$cost", costJson));
-
-            ExecIn(db, tx, """
-                UPDATE effect_instance
-                SET mutation_seq = $seq,
-                    enhance_level = enhance_level + $delta,
-                    state_hash = $hash,
-                    origin_values_json = COALESCE(origin_values_json, $origin)
-                WHERE instance_id = $id;
-                """,
-                ("$seq", nextSeq), ("$delta", result.EnhanceLevelDelta), ("$hash", (object?)newStateHash ?? DBNull.Value),
-                ("$origin", (object?)originValuesJson ?? DBNull.Value), ("$id", instanceId));
-
-            foreach (var seq in result.Suppressed)
-                ExecIn(db, tx, "UPDATE effect_instance_atom SET suppressed = 1 WHERE instance_id = $id AND seq = $seq;",
-                    ("$id", instanceId), ("$seq", seq));
-
-            tx.Commit();
-            return new MutationAppendResult(true, Replayed: false, nextSeq, "");
         }
+
+        int nextSeq;
+        using (var head = db.CreateCommand())
+        {
+            head.CommandText = "SELECT mutation_seq, enhance_level FROM effect_instance WHERE instance_id = $id;";
+            head.Parameters.AddWithValue("$id", instanceId);
+            using var r = head.ExecuteReader();
+            if (!r.Read())
+                return new MutationAppendResult(false, false, 0, $"no effect_instance '{instanceId}'");
+            nextSeq = r.GetInt32(0) + 1;
+            var level = r.GetInt32(1) + result.EnhanceLevelDelta;
+            if (level < 0)
+                return new MutationAppendResult(false, false, nextSeq,
+                    "the op takes the enhancement level below zero");
+        }
+
+        // The one legal ceiling in the module, and it THROWS -- an absolute bound derived from
+        // the arithmetic, never a silent clamp (AGENTS.md). It bounds a retry loop and a log's
+        // length, not how strong an item may become.
+        if (nextSeq > MutationLimits.MutationSeqCap)
+            throw new OverflowException(
+                $"instance '{instanceId}' would reach mutation_seq {nextSeq}, past the structural cap of " +
+                $"{MutationLimits.MutationSeqCap}. This is a retry-loop bound, not a design ceiling — it refuses rather than wrapping");
+
+        ExecOn(db, """
+            INSERT INTO effect_instance_op
+              (instance_id, op_seq, op_kind, correlation_id, op_seed, result_json, applied_utc,
+               catalog_revision, rules_version, cost_json)
+            VALUES ($id, $seq, $kind, $cid, $seed, $json, $utc, $rev, $rules, $cost);
+            """,
+            ("$id", instanceId), ("$seq", nextSeq), ("$kind", kindId), ("$cid", correlationId),
+            ("$seed", opSeed), ("$json", resultJson), ("$utc", appliedUtc),
+            ("$rev", catalogRevision), ("$rules", rulesVersion), ("$cost", costJson));
+
+        ExecOn(db, """
+            UPDATE effect_instance
+            SET mutation_seq = $seq,
+                enhance_level = enhance_level + $delta,
+                state_hash = $hash,
+                origin_values_json = COALESCE(origin_values_json, $origin)
+            WHERE instance_id = $id;
+            """,
+            ("$seq", nextSeq), ("$delta", result.EnhanceLevelDelta), ("$hash", (object?)newStateHash ?? DBNull.Value),
+            ("$origin", (object?)originValuesJson ?? DBNull.Value), ("$id", instanceId));
+
+        foreach (var seq in result.Suppressed)
+            ExecOn(db, "UPDATE effect_instance_atom SET suppressed = 1 WHERE instance_id = $id AND seq = $seq;",
+                ("$id", instanceId), ("$seq", seq));
+
+        return new MutationAppendResult(true, Replayed: false, nextSeq, "");
     }
 
     /// <summary>Set the pity counter. Separate from the append because a failed attempt moves the
     /// counter without appending a value delta, and a guarantee resets it.</summary>
     public void SetInstancePityCounter(string instanceId, int counter)
     {
-        if (counter < 0) throw new ArgumentOutOfRangeException(nameof(counter), counter, "a pity counter cannot be negative");
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            ExecIn(db, tx, "UPDATE effect_instance SET enhance_pity_counter = $c WHERE instance_id = $id;",
-                ("$c", counter), ("$id", instanceId));
+            SetInstancePityCounterUnlocked(db, instanceId, counter);
             tx.Commit();
         }
+    }
+
+    /// <summary>Same write on the caller's connection — see <see cref="AppendMutationOpUnlocked"/>.</summary>
+    internal void SetInstancePityCounterUnlocked(SqliteConnection db, string instanceId, int counter)
+    {
+        if (counter < 0) throw new ArgumentOutOfRangeException(nameof(counter), counter, "a pity counter cannot be negative");
+        ExecOn(db, "UPDATE effect_instance SET enhance_pity_counter = $c WHERE instance_id = $id;",
+            ("$c", counter), ("$id", instanceId));
     }
 
     /// <summary>The transcript, dense and in order.</summary>

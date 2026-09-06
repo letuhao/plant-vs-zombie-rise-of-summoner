@@ -271,6 +271,129 @@ public class DelveAttritionSettlementTests : IDisposable
         Assert.True(_store.GetContract(demon)!.Loyalty > before);
     }
 
+    // ---- D4.8 (spec-wild-room.md §7): MarkRoom's new resolvedKind parameter ----
+
+    [Fact]
+    public void MarkRoom_records_a_cage_resolved_kind_and_it_persists()
+    {
+        var delve = CreateDelve();
+        _store.MarkRoom(delve.DelveId, "r0c0", resolvedKind: "cage");
+
+        var room = _store.LoadDelveRooms(delve.DelveId).Single(r => r.SectorId == "r0c0");
+        Assert.Equal("cage", room.ResolvedKind);
+    }
+
+    [Fact]
+    public void MarkRoom_can_set_resolvedKind_alongside_visited_and_cleared_in_one_call()
+    {
+        var delve = CreateDelve();
+        _store.MarkRoom(delve.DelveId, "r0c0", visited: true, cleared: true, resolvedKind: "cage");
+
+        var room = _store.LoadDelveRooms(delve.DelveId).Single(r => r.SectorId == "r0c0");
+        Assert.True(room.Visited);
+        Assert.True(room.Cleared);
+        Assert.Equal("cage", room.ResolvedKind);
+    }
+
+    [Fact]
+    public void MarkRoom_with_no_arguments_at_all_writes_nothing_not_even_a_revision_bump()
+    {
+        var delve = CreateDelve();
+        var before = _store.LoadDelveRooms(delve.DelveId).Single(r => r.SectorId == "r0c0").Revision;
+
+        _store.MarkRoom(delve.DelveId, "r0c0");
+
+        var after = _store.LoadDelveRooms(delve.DelveId).Single(r => r.SectorId == "r0c0").Revision;
+        Assert.Equal(before, after);
+    }
+
+    // ---- D4.14 (spec-delve-quests.md §2, §4): quests_json read/write ----
+
+    [Fact]
+    public void WriteQuestOffer_then_ReadQuestOffer_round_trips_exactly()
+    {
+        var delve = CreateDelve();
+        var offer = new[]
+        {
+            new RpgStore.QuestJsonRow("quest.explore", 3),
+            new RpgStore.QuestJsonRow("quest.kill-boss", 0),
+        };
+
+        _store.WriteQuestOffer(delve.DelveId, offer);
+        var read = _store.ReadQuestOffer(delve.DelveId);
+
+        Assert.Equal(2, read.Count);
+        Assert.Equal("quest.explore", read[0].QuestId);
+        Assert.Equal(3, read[0].Need);
+        Assert.Null(read[0].Done); // no verdict yet
+        Assert.Null(read[0].Have);
+    }
+
+    [Fact]
+    public void The_stored_offer_is_truth_a_rebuild_never_silently_overwrites_it()
+    {
+        // "the stored offer is truth and a rebuild is asserted equal on load" (spec §2, verbatim) --
+        // ReadQuestOffer must return exactly what was WRITTEN, never something freshly recomputed,
+        // even if a caller's own re-derivation (a re-rolled pool, a re-run Draw) would now disagree.
+        var delve = CreateDelve();
+        var originalOffer = new[] { new RpgStore.QuestJsonRow("quest.explore", 3) };
+        _store.WriteQuestOffer(delve.DelveId, originalOffer);
+
+        // Simulate "the corpus changed mid-delve" -- a fresh computation would now disagree with
+        // what's already stored. ReadQuestOffer must still return the ORIGINAL, stored value.
+        var hypotheticalRebuild = new[] { new RpgStore.QuestJsonRow("quest.explore", 5) }; // never written
+        var read = _store.ReadQuestOffer(delve.DelveId);
+
+        Assert.Equal(3, read.Single().Need);
+        Assert.NotEqual(hypotheticalRebuild.Single().Need, read.Single().Need);
+    }
+
+    [Fact]
+    public void WriteQuestVerdicts_merges_into_the_stored_offer_without_growing_or_reordering_it()
+    {
+        var delve = CreateDelve();
+        _store.WriteQuestOffer(delve.DelveId, new[]
+        {
+            new RpgStore.QuestJsonRow("quest.explore", 3),
+            new RpgStore.QuestJsonRow("quest.kill-boss", 0),
+        });
+
+        _store.WriteQuestVerdicts(delve.DelveId, new Dictionary<string, (bool Done, int Have)>(StringComparer.Ordinal)
+        {
+            ["quest.kill-boss"] = (true, 1),
+        });
+
+        var read = _store.ReadQuestOffer(delve.DelveId);
+        Assert.Equal(2, read.Count); // no growth
+        Assert.Equal("quest.explore", read[0].QuestId); // no reorder
+        Assert.Null(read[0].Done); // untouched
+        Assert.True(read[1].Done);
+        Assert.Equal(1, read[1].Have);
+    }
+
+    [Fact]
+    public void WriteQuestVerdicts_for_a_quest_id_not_in_the_offer_is_silently_ignored_never_appended()
+    {
+        var delve = CreateDelve();
+        _store.WriteQuestOffer(delve.DelveId, new[] { new RpgStore.QuestJsonRow("quest.explore", 3) });
+
+        _store.WriteQuestVerdicts(delve.DelveId, new Dictionary<string, (bool Done, int Have)>(StringComparer.Ordinal)
+        {
+            ["quest.never-offered"] = (true, 1),
+        });
+
+        var read = _store.ReadQuestOffer(delve.DelveId);
+        Assert.Single(read); // still just the one originally offered quest
+    }
+
+    [Fact]
+    public void An_empty_delve_reads_an_empty_quest_offer_never_null_or_a_throw()
+    {
+        var delve = CreateDelve();
+        var read = _store.ReadQuestOffer(delve.DelveId);
+        Assert.Empty(read);
+    }
+
     [Fact]
     public void An_afflicted_member_never_wins_even_after_killing_the_boss()
     {

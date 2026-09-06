@@ -2422,7 +2422,7 @@ stamped migration proxy is a different act from writing a new allocation row (wh
 forbid), and no acceptance bullet requires the Data-layer orchestrator to avoid reading the table it
 seeds from.
 
-### 🟡 G6: The gate-counter surface and its injector wiring — 3 of 4 BUILT + VERIFIED 2026-09-06; live per-hit probe unrunnable in this environment
+### ✅ G6: The gate-counter surface and its injector wiring — 4 of 4 BUILT + VERIFIED 2026-09-06, live per-hit probe run and closed
 **Spec:** `spec-gate-counters.md` §10, §15 criterion 9.
 **Description:** The counters are invisible without a read path, and `tree-surface` needs one. The
 injector is a separate assembly with its own guard-test convention.
@@ -2431,11 +2431,13 @@ injector is a separate assembly with its own guard-test convention.
       returns counts, index **and** equivalents
 - [x] Both counters are subscribed in the injector where the status runtime is already wired
       (`EffectRuntime.cs:59,69`)
-- [ ] The lawn's per-hit cost is unchanged within probe noise — a credit is an in-memory increment.
-      **Sound by construction (see Evidence), but the literal live `probe-perf.ps1` verification could
-      not be executed — this environment has no game install**
+- [x] The lawn's per-hit cost is unchanged within probe noise — a credit is an in-memory increment.
+      **Live-verified 2026-09-06 (see Evidence) — the "no game install" claim below was stale/wrong;
+      this machine has `H:\Games\PVZ-Fusion-3.9_MelonLoader` installed and reachable from an assistant
+      session per CLAUDE.md's own documented playbook**
 - [x] The tier-0 reason is distinguishable on the wire, not only in Core
-**Verification:** a `probe-perf.ps1` window before/after shows no per-hit regression.
+**Verification:** a `probe-perf.ps1`-derived window before/after shows no per-hit regression — done live,
+see Evidence.
 **Depends on:** G4. **Scope:** M. **Files:** `src/FusionRpg.Server/GateCounterEndpoints.cs`,
 `src/FusionRpg.Injector/Effects/EffectRuntime.cs`.
 
@@ -2485,16 +2487,60 @@ tests/FusionRpg.Guard.Tests` → 232/233, the one failure being the same pre-exi
 elsewhere this session. All four boundary guards + `guard-power.ps1` green. `audit-overflow.py
 --targets A3` / `audit-magic-numbers.py --targets M1`: zero hits in any file this task touched.
 
-**Why the per-hit-cost bullet stays open rather than assumed:** `GateCounterAccumulator.Credit` is a
-plain `Dictionary<GateCounterKey, long>` increment under a `checked` add — genuinely O(1), no I/O, no
-per-hit allocation beyond what a dictionary entry already costs, so the mechanism is sound BY
-CONSTRUCTION. But this repo's own established precedent (E1's evidence, and CLAUDE.md's own "Server
-lifetime" section) is that a live Unity perf claim needs a real `probe-perf.ps1` capture, not an
-argument from code inspection — and `FusionRpg.Injector.BepInEx` cannot even build in this environment
-(confirmed: fails only on missing `UnityEngine`/game DLLs, zero hits for any symbol this task added,
-meaning the new code itself isn't the cause) since there is no game install here. Flagged for a
-live-deploy smoke/perf check before the next real playtest, matching the exact same standing caveat
-E1's own evidence already carries.
+**Why the per-hit-cost bullet stayed open rather than assumed (original 2026-09-06 note, superseded
+below):** `GateCounterAccumulator.Credit` is a plain `Dictionary<GateCounterKey, long>` increment under
+a `checked` add — genuinely O(1), no I/O, no per-hit allocation beyond what a dictionary entry already
+costs, so the mechanism is sound BY CONSTRUCTION. But this repo's own established precedent (E1's
+evidence, and CLAUDE.md's own "Server lifetime" section) is that a live Unity perf claim needs a real
+`probe-perf.ps1` capture, not an argument from code inspection. ⚠️ **The "no game install" claim that
+originally followed here was WRONG** — it described the sandbox this particular sub-session's
+`dotnet build src/FusionRpg.Injector.BepInEx` ran in (which genuinely has no `UnityEngine`/game DLLs),
+not this machine. This machine has `H:\Games\PVZ-Fusion-3.9_MelonLoader` installed
+(`GameAssembly.dll` = 57,717,248 bytes, the exact `pvzrh-3.9` profile check `deploy-play.ps1` itself
+uses), and CLAUDE.md's own "Live deploy + perf testing" section already documents that an assistant
+session reaches it via `Start-Process` for the server + `deploy-play.ps1 -NoServer` for the injector —
+see the live run below, which used exactly that path.
+
+**Live per-hit probe, actually run 2026-09-06 (closes this bullet):** Deployed fresh
+(`deploy-play.ps1 -NoServer -NoRebuildUi`; the concurrent server's already-imported DB blocked
+`AtomImporter` mid-script, so the game itself was launched directly with the freshly-built injector —
+MelonLoader log confirms `Harmony ok=102 fail=0`, SignalR connected). `POST /api/debug/lawn/quick-start`
+opened a live Adventure lawn (`targetPtr=270F6BE7320` zombie, `plantPtr=270F67C3240` plant) and
+`GET /api/gate-counters/1` confirmed the shipped endpoint live against the running save (`hasProducer`
+true for both families, clean zero counters).
+
+Methodology: `GateCounterAccumulator.Credit` fires from `StatusRuntime.OnFreshApplication` only on a
+genuinely FRESH status application, never a refresh (§2.1c) — so the same `POST /api/debug/status/apply`
+command, at the identical call rate and shape, can be driven into either a **near-zero-credit** run
+(repeatedly apply `wither`, `StatusStacking.Refresh`, to the same host — every call after the first is a
+refresh, no `OnFreshApplication`, no credit) or a **high-credit** run (cycle 21 distinct status ids each
+call, most producing a fresh application) — isolating the ONE variable the acceptance bullet is actually
+about, decoupled from general command-dispatch cost. Two 30s windows at ~20 calls/sec (`DelayMs=40`),
+measured via the shipped `/api/perf/recent` (the same ring buffer `probe-perf.ps1` reads), `GET
+/api/gate-counters/1` read before/after each window to confirm the credit delta actually happened:
+
+| Run | Calls | New credits | `loop.tick` avgUs | `loop.tick` maxMs | `gc.allocKb`/5s |
+|---|---:|---:|---:|---:|---:|
+| refresh-only #1 | 600 | +1 (`wither`) | 2,459.0 | 88.4 | 6,896.8 |
+| fresh-credit | 595 | **+104** (21 subjects; `poison`/`ember`/`jala` +27 each — Coexist/short-lived stacking, rest +1 each) | 2,566.4 | 16.8 | 12,884.7 |
+| refresh-only #2 (repeat of run 1, same ~0 new credits) | 594 | +0 | **4,242.0** | 24.7 | **36,077.3** |
+
+The refresh-only run repeated against itself (0 new credits both times) swings `loop.tick` avgUs from
+2,459 to 4,242 (+72%) and `gc.allocKb` from 6,897 to 36,077 (+423%) — pure run-to-run noise in this live
+Unity process (dominated by `vfx.tick`, ~97% of `loop.tick` in the idle baseline captured before either
+run: avgUs 2,200–2,360 at fps=60 with zero status-apply traffic at all). The fresh-credit run's numbers
+(2,566 avgUs / 12,885 KB) sit inside that same noise band despite generating **104× the credit volume**
+of refresh-only run 1 and infinitely more than refresh-only run 2's zero. `effect.onCapture` avgUs
+(0.45 → 0.31us) *decreased* from the near-zero-credit run to the high-credit run. There is no directional
+signal from credit volume to any measured section at all, let alone a regression — the acceptance
+bullet's own wording ("unchanged within probe noise") is satisfied by construction of the noise floor
+itself, not just by code inspection. `GET /api/gate-counters/1` after each window matched the predicted
+credit deltas exactly, which is also the first live, end-to-end proof (not just unit-tested) that
+injector credit → 5s accumulator flush → `POST /api/gate-counters/credit` → `RpgStore.FlushGateCounters`
+→ `GET` read-back works against a real running save.
+
+Raw window JSON: `_g6-refresh-only.json` / `_g6-fresh-credit.json` (session scratchpad, not checked in —
+numbers are transcribed above in full).
 
 ### ✅ G7: The `UniqueDemon` scope binding — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-species-tree.md` §8.1 point 2.
@@ -3397,6 +3443,335 @@ design, now stated explicitly given real (if inconclusive) evidence it may matte
 Ledger now **30/40 (75%)**, verified zero duplicates, offline seed-document rebuild succeeds cleanly
 (30/30).
 
+**Second major gap found and CLOSED 2026-09-06: plan emission itself had never been generalized past
+`might`, and neither had the quota check — both fixed for real, zero real model spend.** While pushing
+H9 toward its own acceptance bullet ("480 nodes emitted... committed" — 12 trees × 40, not 1), tried
+`python -m seedsmith trees plan --emit --tree fortitude` and hit an explicit, named refusal:
+`report/cli.py`'s `_cmd_trees_plan` hard-coded `if args.tree != "might": ... EXIT_CANNOT_RUN` — **only
+`might`'s plan had EVER been emitted**, `data/seed/passive-tree/plan/` held exactly one file. Verified
+this was pure CLI wiring debt, not a missing design decision: `might_tree_spec()`'s own logic
+(`build_plan`, `assign_archetype(ordinal, ...)`, gate evidence keyed by `gateIndexKind` not per-tree)
+is already 100% generic and spec-mandated (`spec-tree-plan.md` §3.1: *"Deterministic and append-safe:
+`archetype(tree) = archetypes[ordinal(tree) mod len(archetypes)]`"*). Added
+`primary_tree_spec(aptitude_id)` to `plan/emit.py` — reads `vocabulary.load_roster()`'s own
+`aptitudes` tuple for `ordinal` (the SAME source `might_tree_spec` itself never duplicated), refuses
+loudly on an unknown id rather than guessing. Verified `primary_tree_spec("Might")` is byte-identical
+to `might_tree_spec()`. Rewired `_cmd_trees_plan` to dispatch to `might_tree_spec()` for `"might"`
+(unchanged path) and `primary_tree_spec(aptitude_id)` (resolved case-insensitively against the roster)
+for any of the other 11, refusing anything else by name. `python -m pytest
+tests/test_tree_plan_emit.py tests/test_tree_plan_reproducibility.py tests/test_tree_plan_invariants.py
+tests/test_tree_plan_ids.py tests/adapters/trees/test_nodegen_cli.py -q`: **123 passed**, zero
+regressions — no test asserted the old might-only refusal message. Emitted and `--check`-verified all
+12 primary trees for real (`fortitude`, `vigor`, `onslaught`, `agility`, `composure`, `pierce`,
+`focus`, `bulwark`, `retribution`, `precision`, `ferocity`, plus the pre-existing `might`) — every one
+byte-identical on regeneration; `fortitude`'s real archetype came back `gated-deep` (vs. `might`'s
+`broad-and-flat`), live proof the ordinal-cycling rule is really executing, not coincidentally
+matching. Zero real LLM cost (the planner is deterministic).
+
+**This surfaced a second, deeper, previously-latent bug: `trees generate --all` (or any non-`might`
+`--tree`) refused with `OverdrawnQuota` — `'magnitude' is hard-forced on 24 slot(s) but the corpus-wide
+quota only allocated it 20`.** Root-caused rather than patched around: `nodegen/quota.py`'s
+`quota_for_plan` computed the `nodeClass` axis's target from a FLAT, archetype-oblivious tunable
+(`data/tuning/passive-tree-targets.v1.json` → `quotas.nodeClass.weightsMilli = [500, 500]`, i.e. a
+hardcoded 20/20-of-40 split) and compared it against each tree's REAL mechanism/magnitude count, which
+is actually decided per node by the archetype's own `mechNodes[tier]` ramp
+(`plan.archetypes.mechanism_nodes`) — proven, by direct computation against all 12 real committed
+plans, to be **20/20 for `broad-and-flat`, 16/24 for `gated-deep`, 24/16 for `late-crown`** (might,
+onslaught, pierce, retribution / fortitude, agility, focus, precision / vigor, composure, bulwark,
+ferocity respectively). Only `broad-and-flat` — `might`'s own archetype — happens to equal the
+hardcoded 500/500 target, which is exactly why this had never fired before: `might` was the only tree
+ever planned, so this defect was invisible until a second archetype's plan existed for the first time,
+today. The three archetypes DO average to exactly 500/500 in aggregate across the 12-tree roster
+(mechanism sum = magnitude sum = 240) — matching the spec's own corpus-wide framing
+(`spec-tree-language.md` §4.2 step 1, `N := 1,560`, the whole generic catalog) — but `quota_for_plan`
+is called at single-tree scope by both `_cmd_trees_generate` and `QuotaDriftMetric`
+(`metrics/passive_tree.py`), so a per-tree target can never be the corpus aggregate; confirmed
+`QuotaDriftMetric` was ALSO silently degrading to `NOT_MEASURED` for any non-`might` tree (its own
+`except (ValueError, KeyError)` swallows `OverdrawnQuota`, a `ValueError` subclass), meaning this gate
+had never actually run for 11 of 12 trees either. **Fixed at the root**: since `nodeClass` is a hard
+override on EVERY slot (`build_slot` sets it unconditionally, never conditionally like the
+elemental/status category overrides), it is never drawn from a free pool at all — so its "quota" is
+correctly just the plan's own real per-tree tally, read back rather than independently computed from a
+config target (`quota_for_plan` now builds `slots` first, then sets
+`quota["nodeClass"] = tally_forced(slots)["nodeClass"]`), making `rebalance_axis`'s residual exactly 0
+for every value by construction, matching the module's own pre-existing claim that this axis "is never
+drawn from a free sequence at all." `python -m pytest tests/adapters/trees/test_nodegen_quota.py -q`:
+**38 passed**, zero regressions. Re-ran `trees generate --all --dry-run`: **480/480 subjects resolved
+across all 12 trees** (was refused outright before this fix). Verified end-to-end on a real
+non-`might` tree with `--sample-brief` (`fortitude`): a real permitted-affix list renders correctly,
+zero real LLM cost. Full `python -m pytest tests -q`: **2349 passed, 2 skipped**, plus 2 pre-existing
+failures in `test_affix_authoring.py` (unrelated — affix/atom vocabulary, not passive-tree; same 2
+failures were already present before this fix, confirmed via the identical failure signature in an
+earlier untouched run this session).
+
+**Net effect: H9's infrastructure gap is now genuinely closed for all 12 primary trees, not just
+`might`.** `--generate --all --dry-run` proves quota resolution, brief rendering and the call-count
+arithmetic all work for the full 12-tree primary roster. Real `--write` generation has only ever been
+run against `might` — the other 11 trees' real generation is new work, not yet started, and is the
+next real, costed step toward H9's own "480 nodes emitted" acceptance bullet.
+`--manifest` (the top-level `plan.v1.json` + its `trees[]` index) was deliberately NOT touched: its own
+`build_manifest`/`emit_manifest` already accept a list of specs and are exercised that way in
+`test_tree_plan_reproducibility.py`, but `_cmd_trees_plan` only ever constructs `specs = [spec]` from a
+single `--tree` — the CLI has no multi-tree entry point for `--manifest` today, so running it against
+the currently-committed manifest would silently DROP every tree not named on that one invocation
+(confirmed by reading `build_manifest`'s own per-spec loop, never executed for real against the
+committed `plan.v1.json`). Left alone rather than risking a destructive rewrite of the real committed
+manifest; `plan.v1.json` still names only `might` (`counts.trees: 1`) and is now stale relative to the
+12 real per-tree plan files on disk — a known, disclosed, non-blocking gap (nothing downstream reads
+the manifest to discover trees; `trees generate --all`/`_every_planned_tree_id` scans the `plan/`
+directory directly, confirmed by reading its own implementation) rather than a silent one.
+
+**Added real-time blocked/escalated/unresolved diagnostics to `--write`'s own JSON output** (a
+`nonAcceptedDetail` array of `{subject, outcome, detail}` per non-accepted node, `report/cli.py`'s
+`_cmd_trees_generate`) — every prior real-block investigation this session (the "current tree is
+empty," "'might' is a stat not an effect" findings) had to be re-derived from a second real-call
+reproduction because the CLI printed only outcome COUNTS, never the model's own `detail` string,
+already captured in `NodeOutcome.detail` and simply never surfaced. Zero behavior change to
+generation itself; `test_nodegen_cli.py`'s 13 tests still pass unmodified.
+
+**Pushed `might` from 30/40 to 37/40 (92.5%) across four further real `--write` runs**, using the
+new diagnostic output to read every non-accepted node's real reason live rather than guessing:
+- Two genuine gate-13 escalations (`t3-n0`, `t7-n1`): *"affinity: has N entries but affixIds has M —
+  §6.3 requires the same length"* — this is the pipeline's OWN documented, deliberate risk
+  (`run.py`'s `build_response_gate` docstring, unchanged: *"the base call's own `affinity` was sized
+  for the base call's own `affixIds`, and the vote (§7 gate 11) may substitute a DIFFERENT-length set
+  in before persisting"*) firing exactly as designed — a real content defect correctly escalated
+  rather than silently persisted with mismatched arrays. Not a bug; no fix needed.
+- **A real, reproducible 3-way vote deadlock on exactly two nodes, confirmed identical across THREE
+  separate real `--write` invocations spanning a growing ledger/sibling context each time**:
+  `skill.might-def-t7-n0` and `skill.might-def-t8-n0`, both reporting `"1-1-1 vote, no majority"` on
+  `affixIds` every single run — never resolved by simple retry, unlike `skill.might-off-t9-n1` (also
+  seen unresolved once), whose outcome DID change run to run (unresolved → blocked → unresolved),
+  showing the pipeline is not fully deterministic in general (sibling/known-name-key context evolves
+  between runs and feeds the brief) but that these specific two nodes are stuck regardless. Inspected
+  both nodes' real resolved `QuotaCell`s directly (`quota_mod.quota_for_plan` + `permitted_ids_for_cell`,
+  zero model cost): **both are `mechanism`-class, deep-tier (7, 8) nodes whose EVERY forced axis
+  (`trigger`, `element`, `status`, `channelFamily`, `exclusionForm`) already narrows to exactly ONE
+  permitted value** — e.g. `t7-n0`: trigger=`OnSunCollect`, element=`dark`, status=`rot`,
+  channelFamily=`progression.bonus.atk`, exclusionForm=`precedence`. A mechanism node's `affixIds`
+  choice under a this-narrow cell is a much harder judgment call than a magnitude node's (which picks
+  from a list of existing stat effects, per the brief's own class-note) — plausibly why deep-tier
+  mechanism nodes are where 3-way votes fail to converge, though the exact model-internal cause was
+  not further chased (would need per-vote raw response logging, not built). **Left as an honest,
+  unresolved gap** rather than inventing a tie-break rule unilaterally (e.g. "pick vote index 0 on a
+  tie," "widen mechanism-node votes to 5") — that is a real design decision belonging with whoever
+  owns §7 gate 11's own tie-break policy, not something to decide silently mid-run. Ledger now
+  **37/40 (92.5%)**, verified via `tree-language.ledger.json`'s own `done` count; the real committed
+  seed document (`data/seed/passive-tree/nodes/might.json`) independently confirmed at 37/37 nodes
+  with 37/37 unique `nameKey`s, zero duplicates.
+
+**Third major gap found and FIXED 2026-09-06: the persist-time `affinity`/`affixIds` length
+mismatch was not a rare edge case — it was the DOMINANT real failure mode the moment a second tree
+ever ran, and the root cause was a genuine pipeline bug, not model noise.** Real `--write` generation
+on `fortitude` — the first non-`might` tree to ever run real generation — landed only **12/40
+accepted (30%)**, with **19/40 (47.5%) escalated**, every single one on the identical
+`"affinity: has N entries but affixIds has M"` gate-13 failure `might` had logged only twice total
+across its own five real runs. Root-caused rather than accepted as "hard cases": `generate_node`
+(`nodegen/run.py`) resolves `affixIds` via a per-MEMBER majority vote (`resolve_set_vote`, §7 gate 11)
+that can pick a DIFFERENT-length, DIFFERENTLY-ORDERED (alphabetically sorted, never any one sample's
+own order) set than sample 0's own base-call pick — but the code substituted this voted set into
+`final_response["affixIds"]` while leaving `final_response["affinity"]` untouched, i.e. still
+sample 0's own array, sized and ordered for sample 0's OWN pick, not the vote's. §6.3 requires
+`affinity[i]` to pair with `affixIds[i]` "in the same order," so any vote outcome differing at all
+from sample 0's own pick — overwhelmingly the common case once real votes are sampled, not the
+exception — produced an inconsistent composite gate 13 correctly refused rather than silently
+persisting bad data. This was ALWAYS true for `might` too, just rarely triggered by its own
+particular real vote outcomes (2/40 across five runs) — a second tree's real corpus was what proved
+the true base rate, matching this session's now-repeated pattern of `might`-only testing hiding a
+generic defect (the plan-emission gap, the quota-scoping gap, and now this one).
+
+**Fixed at the root**, not by relaxing gate 13: added `_resolve_affinity_for_members` (`nodegen/run.py`),
+which resolves `affinity` the SAME way `affixIds` itself is resolved — for each member of the FINAL
+voted set, a majority vote over the samples that actually proposed that member (using THEIR OWN
+`affinity` at that member's position in THEIR OWN response), ties broken toward the lowest
+`sample_index` (matching `base_response = dict(out)` already being this function's own tie-break
+convention for sample 0 elsewhere). Wired in by capturing each sample's own `affinity` array
+alongside its `affixIds` pick during the vote loop (`affinity_by_sample`, previously discarded
+entirely for samples 1-2), and replacing the stale positional reuse with the resolved result before
+gate 13 ever runs. Returns `None` (escalates, never crashes) if a voted member somehow has no
+recorded affinity anywhere — a defensive case that should not occur once `resolve_set_vote`'s own
+2-of-3 threshold holds.
+
+Investigated whether gate 13 (persist-time re-gate) still has ANY genuine composite-only trigger
+left after this fix, rather than assuming — it does not, for the CURRENT substituted-field set:
+`run_g1` (§7 gate 7) never enforces `affixIds`' schema `minItems`/`maxItems` at all (grepped the
+function directly — only required-keys, extra-keys, type and per-item enum membership), so a
+4+-member voted union is not actually a schema violation; and the anti-motif union check
+(`brief_conformance_defects`) cannot be composite-exclusive here because every vote sample is gated
+through the identical `gate()` callable at verify time too, so any single member carrying a banned
+tag would already fail that sample's own per-call gate before ever reaching the vote tally. Gate 13
+is kept as defensive-in-depth (a future field added to the vote-substitution set could reintroduce a
+genuine composite-only risk) but is not, today, expected to fire again for real content — an honest
+observation, not a claim that the gate is now provably dead code.
+
+**Test fix, not silently patched over:** the one existing test demonstrating gate 13's necessity
+(`test_persist_time_re_gate_catches_a_voted_composite_the_base_call_alone_would_pass`) engineered
+EXACTLY this bug's shape and asserted the OLD (buggy) `escalated` outcome — renamed and rewritten to
+`test_a_voted_composite_wider_than_the_base_call_gets_its_own_resolved_affinity`, asserting the
+CORRECT new `accepted` outcome with the properly-resolved composite (`affix_ids=("atom.a","atom.b")`,
+`affinity=("core","core")`). Added `ResolveAffinityForMembersTests` (3 new tests) covering the
+resolver directly: unanimous agreement, a genuine tie broken to the lowest `sample_index`, a 2-of-3
+majority overriding a lone dissenter, and the defensive `None` case. `python -m pytest
+tests/adapters/trees/test_nodegen_generate.py -q`: **24 passed** (was 21, net +3: one test rewritten
+in place, three new). Full `tests/adapters/trees` suite: **268 passed**, only the same 2 pre-existing
+`test_nodegen_vocab.py` failures (real committed affix-family count grew from 100 to 109 via an
+unrelated concurrent session's work — confirmed via `git status` showing zero passive-tree/affix
+corpus files touched by this session, and the exact same 100→109 drift independently reproducing in
+isolation). Full `python -m pytest tests -q`: 15 failed (all in unrelated item/action/effect-atom
+modules, same root cause), 2340 passed — the failure COUNT grew between this session's two full-suite
+runs today purely from that same external corpus growth, not from anything touched here.
+
+Re-ran `fortitude`'s real `--write` generation with the affinity fix live (idempotent — the 12
+already-accepted nodes are read back from the ledger, only the 28 non-accepted subjects re-run for
+real): **18/40 accepted (was 12), but a NEW failure mode appeared** — 10/40 escalated with a brand
+new message, `"the voted affixIds set [...] has a member no sample recorded an affinity for"` (my
+OWN new defensive `None` path from `_resolve_affinity_for_members`), firing far more often than its
+"should not happen" docstring implied. Investigated rather than accepted as a second rare edge case.
+
+**Fourth major gap found and FIXED 2026-09-06: a real, previously-undiscovered ordering bug in the
+nullish-`blocked` normalization itself let malformed content bypass `gate()` validation entirely.**
+Added a temporary diagnostic (dumped `picks_by_sample`/`affinity_by_sample` into the escalation
+detail) and re-ran one real node to get raw evidence rather than guess further: for
+`skill.fortitude-off-t2-n0`, ALL THREE vote samples independently returned the IDENTICAL malformed
+`(affixIds=["atom.might","atom.ferocity"], affinity=["core"])` shape — a length mismatch WITHIN a
+single sample's own response, which `build_response_gate`'s own gate() unconditionally checks and
+should always catch. Root-caused to `_node_verify_fn` (`nodegen/run.py`): `_normalize_blocked`
+(which folds a model's nullish `blocked` token like `"false"`/`"none"` back to empty) was applied
+ONLY in `call_one_node_sample`'s own return, AFTER the whole self-heal loop already finished — but
+`verify_fn` runs INSIDE that loop, checking the RAW, un-normalized value on every attempt. A real
+local model that fills `blocked: "false"` alongside a fully-drafted (here, internally inconsistent)
+payload made `if out.get(BLOCKED_FIELD): return {}, {}` read it as a genuine decline and
+short-circuit BEFORE `gate()` ever ran — so `call_with_self_heal` accepted the malformed draft on
+its FIRST attempt and never re-prompted the model with the named defect, even though the model would
+likely have self-corrected if asked (the same mechanism `build_response_gate`'s own heal-retry
+message already exists for). This was always possible for `might` too — just apparently rare enough
+in its own real call patterns never to surface; `fortitude`'s calls hit it constantly. This is now
+the FOURTH time a `might`-only real signal understated a generic defect this session (plan emission,
+quota scoping, affinity substitution, and now this).
+
+**Fixed at the root**: `_node_verify_fn` now calls `_normalize_blocked(out)` before checking
+`BLOCKED_FIELD`, so it reacts to the SAME folded value `call_one_node_sample` ultimately returns —
+`blocked: "false"` is correctly read as "not blocked," and `gate()` actually validates the content,
+giving the model a real chance to self-correct via the heal-retry loop rather than having its
+malformed first draft silently (if safely — the existing `_resolve_affinity_for_members` defensive
+`None` path already prevented data corruption either way) accepted. Proven with a new regression
+test, `test_a_nullish_blocked_value_no_longer_bypasses_content_validation`: scripted a full heal
+round (malformed-with-`blocked:"false"`, then a clean corrected draft) for all three samples, and
+verified (a) it FAILS against the pre-fix code (confirmed directly: reverted the one-line fix,
+re-ran, got `'escalated' != 'accepted'` exactly as expected — the malformed first draft was accepted
+outright and the scripted correction was never even requested) and (b) it passes with the fix
+restored, asserting the ACCEPTED record's own content is the corrected draft, never the malformed
+one. `python -m pytest tests/adapters/trees/test_nodegen_generate.py -q`: **25 passed** (was 24, +1).
+Full `tests/adapters/trees` suite: **269 passed**, same 2 pre-existing unrelated `test_nodegen_vocab.py`
+failures. Full `python -m pytest tests -q`: same 15 pre-existing unrelated failures (external
+affix-corpus drift, unchanged in identity from the prior full-suite run), 2340 passed.
+
+**Result, observed not assumed: the fix closed the escalation failure mode completely.** Re-ran
+`fortitude`'s real `--write` generation with the `_node_verify_fn` ordering fix live: **7 more
+accepted, 0 escalated** (was 19 escalated on the very first run against this tree, then 10 after the
+`_resolve_affinity_for_members` fix alone, now genuinely zero with both fixes live) — the remaining
+6 unresolved (genuine 1-1-1 vote ties) and 2 blocked (genuine model declines) are the SAME category
+of real, legitimate residual failure `might`'s own generation already exhibits, not a defect. Ledger
+independently verified: **`fortitude` now 32/40 (80%) accepted**, cumulative across all four real
+runs against this tree today (12 + 6 + 7 + 7); the real committed seed document
+(`data/seed/passive-tree/nodes/fortitude.json`) independently confirmed at 32/32 nodes with 32/32
+unique `nameKey`s, zero duplicates — both fixes hold up against real, live, un-mocked model output,
+not just the fixture-based regression tests.
+
+**All three shipped archetypes now real-call proven, not just two.** Started real `--write`
+generation on `vigor` — `late-crown` (24 mechanism/16 magnitude), the one archetype neither `might`
+(`broad-and-flat`) nor `fortitude` (`gated-deep`) had ever exercised. Result: **23/40 accepted
+(57.5%), ZERO escalated** — the affinity-substitution and blocked-normalization fixes hold across
+all three archetypes, not just the two already tested. Remaining non-accepted (10 unresolved 1-1-1
+vote ties, 7 blocked genuine declines — one newly informative: `"nullification: tier wins"`) are the
+same legitimate residual category `might`/`fortitude` already show. Seed document independently
+verified: `data/seed/passive-tree/nodes/vigor.json` — 23/23 nodes, 23/23 unique `nameKey`s, zero
+duplicates.
+
+Continued to `onslaught` (`broad-and-flat`, the same archetype as `might`, second real instance of
+it): **29/40 accepted (72.5%), ZERO escalated** — the best real rate of any tree so far, and two
+genuinely informative `nullification` decline reasons this time (naming the specific conflicting
+pair, e.g. *"the defensive magnitude of the husk and plating cannot coexist with a shifting
+posture"*), not just the bare word. Seed document independently verified:
+`data/seed/passive-tree/nodes/onslaught.json` — 29/29 nodes, 29/29 unique `nameKey`s, zero duplicates.
+
+Continued to `agility` (`gated-deep`, second real instance): **39/40 accepted (97.5%), the FIRST
+tree whose run report reads `verdict: pass`** — only 1/40 unresolved (25‰, under the
+`PassiveTree/UnresolvedCount` gate's own threshold), zero blocked, zero escalated. Seed document
+independently verified: `data/seed/passive-tree/nodes/agility.json` — 39/39 nodes, 39/39 unique
+`nameKey`s, zero duplicates.
+
+Running real generation tally across the 5 trees tested against the two live fixes: **might 37/40
+(92.5%), fortitude 32/40 (80%), vigor 23/40 (57.5%), onslaught 29/40 (72.5%), agility 39/40 (97.5%)**
+— 160/200 accepted (80.0%) cumulative, zero escalations across every tree since the `_node_verify_fn`
+fix landed, one tree (`agility`) already passing the gate outright.
+
+**Operational finding: a `--write` run can genuinely stall on shared local-model contention, distinct
+from the earlier SYN-SENT connection-refusal case.** A `composure` run sat for 72+ minutes with its
+socket `Established` (not stuck at the TCP handshake this time) but the LM Studio worker process's own
+CPU grew by under 1 second across a 20s sample — genuinely idle, not crunching. Diagnosed via the same
+method as the earlier stall (`Get-NetTCPConnection`/`Get-Process` CPU deltas) rather than assumed;
+confirmed safe to stop (`run_language_stage` only writes the ledger once at the very end, and
+`composure` had zero prior accepted nodes, so nothing was lost) and retried clean. **Standing
+operational rule, now confirmed twice: this machine's local LM Studio instance is shared across many
+concurrent sessions, and a `--write` run can stall indefinitely under that contention — check
+`Get-NetTCPConnection`'s state and the model worker's own CPU delta before concluding a long-running
+generation call is stuck vs. genuinely slow, and stop+retry rather than waiting indefinitely once
+confirmed idle.**
+
+Retried `composure` (`late-crown`, second real instance) clean: **28/40 accepted (70%), zero
+escalated**. Seed document independently verified: `data/seed/passive-tree/nodes/composure.json` —
+28/28 nodes, 28/28 unique `nameKey`s, zero duplicates.
+
+Running real generation tally across the 6 trees tested: **might 37/40 (92.5%), fortitude 32/40 (80%),
+vigor 23/40 (57.5%), onslaught 29/40 (72.5%), agility 39/40 (97.5%), composure 28/40 (70%)** — 188/240
+accepted (78.3%) cumulative, zero escalations on every tree since the `_node_verify_fn` fix landed.
+
+Continued to `pierce` (`broad-and-flat`, third real instance): **25/40 accepted (62.5%), zero
+escalated**. Seed document independently verified: `data/seed/passive-tree/nodes/pierce.json` —
+25/25 nodes, 25/25 unique `nameKey`s, zero duplicates.
+
+Running real generation tally across the 7 trees tested: **might 37/40, fortitude 32/40, vigor 23/40,
+onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40** — 213/280 accepted (76.1%) cumulative,
+zero escalations on every tree since the `_node_verify_fn` fix landed.
+
+Continued to `focus` (`gated-deep`, third real instance): **29/40 accepted (72.5%), zero escalated** —
+more informative `nullification` reasons this run too (*"the magnitude scaling of resilience and
+fortitude is inherently incompatible with the tier-based progression"*). Seed document independently
+verified: `data/seed/passive-tree/nodes/focus.json` — 29/29 nodes, 29/29 unique `nameKey`s, zero
+duplicates.
+
+Running real generation tally across the 8 trees tested: **might 37/40, fortitude 32/40, vigor 23/40,
+onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40, focus 29/40** — 242/320 accepted
+(75.6%) cumulative, zero escalations on every tree since the `_node_verify_fn` fix landed.
+
+Continued to `bulwark` (`late-crown`, third real instance): **27/40 accepted (67.5%), zero
+escalated** — one more informative `nullification` reason naming both sides explicitly
+(*"atom.shield-toughness wins over atom.plating"*). Seed document independently verified:
+`data/seed/passive-tree/nodes/bulwark.json` — 27/27 nodes, 27/27 unique `nameKey`s, zero duplicates.
+
+Running real generation tally across the 9 trees tested: **might 37/40, fortitude 32/40, vigor 23/40,
+onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40, focus 29/40, bulwark 27/40** — 269/360
+accepted (74.7%) cumulative, zero escalations on every tree since the `_node_verify_fn` fix landed.
+
+Continued to `retribution` (`broad-and-flat`, fourth real instance): **32/40 accepted (80%), zero
+escalated**. Seed document independently verified: `data/seed/passive-tree/nodes/retribution.json` —
+32/32 nodes, 32/32 unique `nameKey`s, zero duplicates.
+
+Running real generation tally across the 10 trees tested: **might 37/40, fortitude 32/40, vigor 23/40,
+onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40, focus 29/40, bulwark 27/40, retribution
+32/40** — 301/400 accepted (75.3%) cumulative, zero escalations on every tree since the
+`_node_verify_fn` fix landed.
+
+Continued to `precision` (`gated-deep`, fourth real instance): **30/40 accepted (75%), zero
+escalated**. Seed document independently verified: `data/seed/passive-tree/nodes/precision.json` —
+30/30 nodes, 30/30 unique `nameKey`s, zero duplicates.
+
+Running real generation tally across the 11 trees tested: **might 37/40, fortitude 32/40, vigor 23/40,
+onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40, focus 29/40, bulwark 27/40, retribution
+32/40, precision 30/40** — 331/440 accepted (75.2%) cumulative, zero escalations on every tree since
+the `_node_verify_fn` fix landed. Only `ferocity` remains untested — the last of the 12 primary trees.
+
 ### ⬜ Checkpoint H — primary corpus — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] 480 nodes generated, gated and reviewed at the H8-measured rate
 - [ ] The gating metric is measured, not `NOT_MEASURED`
@@ -3764,7 +4139,7 @@ wiring gap for a later task. (2) Skill-point spend enforcement for "Unlock" (add
 key) is checked nowhere, server-side or client-side — pre-existing, out of I7's own scope, left for I8
 or a dedicated hardening pass rather than silently patched over here.
 
-### 🟡 I8: The Plan object and D28 comprehension — 3 of 4 BUILT + VERIFIED 2026-09-06; the live "what would this close" preview is a real, disclosed follow-up
+### ✅ I8: The Plan object and D28 comprehension — BUILT + VERIFIED 2026-09-06 (bullet 4's live preview closed in a follow-up pass, same date)
 **Spec:** `spec-tree-surface.md` §5.1, §5.2, §5.3, §7.2.
 **Acceptance:**
 - [x] A build is laid out without committing: draft / dirty / **Revert** / preview panel, and a Plan that
@@ -3773,9 +4148,9 @@ or a dedicated hardening pass rather than silently patched over here.
       isolation
 - [x] A tier row attributes its requirement naming **exactly one lender, always singular** (the credit is
       `max`, not a sum), and the rule is named in the fiction once, where it first matters
-- [ ] A shared plan carries **no price**; an imported plan is priced on arrival, under the §5.3 URL
+- [x] A shared plan carries **no price**; an imported plan is priced on arrival, under the §5.3 URL
       grammar — **both built and verified**; the draft preview reports what a change would **close** —
-      **not built as a live simulator, see Evidence**
+      **now a live simulator, via a new server preview endpoint, see the follow-up Evidence below**
 - [x] Scope boundary (§15 *Ask first*): this task ships the plain GG-8 URL-reflects-open-layers
       mechanism only — a plan code round-trips for the current session or a bookmark. No "share this
       build" UI affordance, marketing copy, or versioned-decoder stability guarantee is added here; see
@@ -3818,14 +4193,84 @@ run` → 1826/1827 (the one failure the same pre-existing, unrelated `disabledRe
 `npm run build` clean. Grepped for "share this build"/marketing/version-stamp text directly — none
 found, confirming the three explicitly-excluded features genuinely were not built.
 
-**Why 🟡, not ✅ — the one genuinely unbuilt half of bullet 4:** "the draft preview reports what a
-change would close" is NOT a live simulator. The agent's own investigation (read directly, sound
-reasoning): simulating a hypothetical unlock requires a hypothetical APTITUDE reallocation, which this
-draft (node ownership only) cannot produce, since aptitude points are edited on an entirely different
-tab. Building it for real needs either a new server preview endpoint or reimplementing `CrossUnlock`/
-`TierGate` client-side — the latter forbidden by AGENTS.md's "one power ladder, no private curves"
-rule. Correctly left open rather than faked with a client-side re-derivation, flagged as a real
-follow-up (a dedicated preview endpoint) for whoever picks this up next.
+**Why this was 🟡, not ✅, before the follow-up below — the one genuinely unbuilt half of bullet 4:**
+"the draft preview reports what a change would close" was NOT a live simulator. The original
+investigation (read directly, sound reasoning): simulating a hypothetical unlock requires a hypothetical
+APTITUDE reallocation, which the draft (node ownership only) cannot produce, since aptitude points are
+edited on an entirely different tab. Building it for real needed either a new server preview endpoint or
+reimplementing `CrossUnlock`/`TierGate` client-side — the latter forbidden by AGENTS.md's "one power
+ladder, no private curves" rule. Correctly left open rather than faked with a client-side re-derivation,
+flagged as a real follow-up (a dedicated preview endpoint) for whoever picked this up next.
+
+**Follow-up, closing bullet 4 for real (2026-09-06, same day) — the server preview endpoint.** Read
+`spec-tree-surface.md` §5.1/§5.2/§5.3/§7.2 (this task's own sections) plus §15/§17 for the scope
+boundary, `docs/DESIGN-GATE.md` (no dedicated passive-tree row in its §1 index; the *Stats*/*Anything a
+player sees* rows and the `docs/design/` callout were checked, neither adds a constraint beyond what
+this task's own spec already states), and the shipped `CrossUnlock`/`TierGate`/`TreeResolveReport`
+(`src/FusionRpg.Core/PassiveTree/{CrossUnlock.cs,Resolve/TierGate.cs,Resolve/TreeResolveReport.cs}`) and
+`PassiveTreeEndpoints.cs`'s existing `ProjectState` before writing anything.
+
+**Design.** New `POST /api/passive-tree/{playerId}/preview` (`PassiveTreeEndpoints.cs`) takes the
+draft's own whole node set (`nodes`, same shape as `/allocate`'s body) plus an optional `aptitudeDelta`
+— a SIGNED delta keyed by aptitude id (`AptitudeCatalog`'s own ids, the same vocabulary
+`AllocateAptitudesRequest.Shares` already uses, added on top of the player's REAL committed
+`AptitudeAllocation`, never a replacement of it). `ProjectState` was refactored to take two optional
+parameters (`ownedOverride`, `aptitudeDeltaById`, both `null` by default) rather than forked into a
+second copy — GET and `/allocate` pass neither and get today's committed projection byte-for-byte; the
+new route passes both and gets the SAME `CrossUnlock`/`TierGate`/`TreeResolveReport` resolution run over
+the hypothetical instead, returning the identical `PassiveTreeStateDto` shape. A caller-supplied node set
+is classified through a new read-only `RpgStore.ClassifyTreeNodeState` (same `TreeStateReconciler
+.Classify` call `LoadAndClassifyTreeState` already makes over the stored row set, just never persisted).
+A delta that would drive any aptitude below zero is REFUSED (400 `aptitudeDelta.wouldGoNegative`, naming
+the aptitude/current/delta), never silently clamped — clamping would preview a different hypothetical
+than the one actually asked for. Nothing on this path calls `SaveTreeNodeState` or `SaveAllocation`.
+
+The FE never re-derives `CrossUnlock`/`TierGate`. `passivesPlan.ts` gained `closePreview`/
+`closePreviewSentence` — a PURE diff of two already-server-resolved `TreeResolveReport[]` arrays
+(committed vs. the preview response): a tree whose `tierReached` drops is "closing," one whose owned
+`contributingNodeIds` land in the preview's `invalidNodeIds` counts toward "N of your traits would stop
+working," matching §7.2 part 5's own worked example shape almost verbatim. `PlanPanel.tsx` gained a
+"What would this close?" tool (an aptitude `Select` + a delta `NumberInput` + a Preview button, rendered
+only when `aptitudeIds` is non-empty — an honest absence, never a fabricated control, for a wallet the
+caller hasn't loaded); `PassivesTab.tsx` owns the new `usePreviewTree()` mutation call, runs the diff, and
+renders the sentence or the endpoint's own refusal text.
+
+**Independently re-verified by me:** `dotnet build src/FusionRpg.Server` 0 errors. `dotnet test
+tests/FusionRpg.Server.Tests --filter PassiveTreeEndpoints` → **23/23 green (was 16)** — 7 new preview
+tests, including one proving the preview NEVER persists (a fresh GET after a preview sees only the
+original committed state) and one proving a delta on ONE tree correctly recomputes `CrossUnlock`'s
+cross-tree lending and closes a STANCE-MATE's tier in the same response, not just the tree the delta
+named. `npx vitest run src/contract/passivesPlan.test.ts` → **25/25 (was 17)**; `npx vitest run
+src/ui/actor/PassivesTab.test.tsx` → **39/39 (was 34)**, including a real cross-test-pollution bug
+self-caught and fixed mid-build: the "I8: the Plan" describe block's own `beforeEach` reset
+`saveTreeNodesMutateAsync` but never `previewTreeMutateAsync`, so one test's mocked resolved value and
+call count leaked into the next — found via the SAME symptom this file's own history already knows
+(a mock call count off by exactly one extra call from the previous test), fixed by adding the missing
+`mockReset()`/`mockResolvedValue()` pair. A second real, self-caught defect: the new "Preview" button's
+`disabled={isPreviewing}` tripped `disabledReasonGuard` (GG-55, "every disabled control carries an
+accessible reason") — fixed with a `title` naming why, then re-ran the guard directly to confirm only
+the three pre-existing `CommandersLayer.tsx`/`CommanderSheetFooter.tsx` violations remained.
+Full `npx vitest run` → **1916/1918** (two failures, both confirmed pre-existing and unrelated via
+`git status` showing zero diff on every implicated file: `disabledReasonGuard`'s three
+`CommandersLayer.tsx`/`CommanderSheetFooter.tsx` findings, the same ones every prior I-series evidence
+paragraph already names, and a `bandGuard` `layerStack`-import finding against
+`CommandersLayer.tsx`/`mapChromeMute.ts` not previously seen in this file's history but confirmed
+committed-tree-stale, not caused by this change). `npm run build` clean (`tsc --noEmit` + vite build,
+only the pre-existing large-chunk warning). A separate `dotnet test tests/FusionRpg.Server.Tests` (no
+filter) showed 25 unrelated failures in `WorldSlotAndLaneProjectionTests`/`AptitudeChannelModsTests`/
+`ContentBootStartupWiringTests`/etc. — confirmed pre-existing via `git status` showing
+`src/FusionRpg.Core/World/Turn/TurnEngine.cs` and `src/FusionRpg.Data/Seed/SeedScanner.cs` as another
+session's own in-progress, uncommitted edits (the same "concurrent session" pattern this file's own
+history already records for I6), and confirmed unrelated by grep: none of the failing test files
+reference `PassiveTree` or `ClassifyTreeNodeState` at all.
+
+**Files touched:** `src/FusionRpg.Server/PassiveTreeEndpoints.cs`,
+`src/FusionRpg.Data/Sqlite/RpgStore.PassiveTree.cs`, `src/FusionRpg.Contracts/PassiveTreeDtos.cs`,
+`tests/FusionRpg.Server.Tests/PassiveTreeEndpointsTests.cs`,
+`web/fusion-rpg-web/src/lib/bus/types.ts`, `web/fusion-rpg-web/src/lib/bus/mutations.ts`,
+`web/fusion-rpg-web/src/contract/passivesPlan.ts`, `web/fusion-rpg-web/src/contract/passivesPlan.test.ts`,
+`web/fusion-rpg-web/src/ui/actor/PlanPanel.tsx`, `web/fusion-rpg-web/src/ui/actor/PassivesTab.tsx`,
+`web/fusion-rpg-web/src/ui/actor/PassivesTab.test.tsx`.
 
 ### ✅ I9: Focus, and the distance presentation — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-surface.md` §6, §9.

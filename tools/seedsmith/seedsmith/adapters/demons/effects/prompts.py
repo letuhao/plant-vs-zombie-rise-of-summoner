@@ -114,18 +114,51 @@ def affix_ids_are_known(draft: "Mapping[str, Any]", context: "Mapping[str, Any]"
 def entry_for(
     anchor: "Mapping[str, Any]", draft: "Mapping[str, Any]", *,
     affix_class_of: "Any",  # Callable[[str], str] -> "Prefix" | "Suffix" | "Mixed"
+    affix_refs_of: "Any",  # Callable[[str], Sequence[str]] -> the affix's own real atom ids, in order
+    pool_affinity_weight_milli: "Mapping[str, int] | None" = None,
     provenance: "Mapping[str, Any] | None" = None,
 ) -> "dict[str, Any]":
-    """The committed seed entry — `core` affixes land in the fixed atom list (always present,
-    enforceable); `likely`/`occasional` land in the pool, weighted by
-    `demon-species-effects.v1.json`'s own affinity table. `prefixRolls`/`suffixRolls` are the count
-    of drawable pool groups per budget the pool ACTUALLY needs to cover its own `likely`/`occasional`
-    entries — a `Mixed`-class affix counts against BOTH budgets simultaneously (A1), never doubling
-    either count and never omitted from either. No weight, no tier, no magnitude, no `pool_rolls`
-    literal anywhere — every one of those is `species-generator`'s or resolved at roll time (spec §6).
+    """The committed seed entry.
+
+    ⛔ **Fixed 2026-09-06 — the shape below never matched the real C# `ReadContainer`/
+    `ContainerPoolRow`/`ContainerValidator` reader, found only because this task actually ran real
+    content through the real importer rather than stopping at the in-process tests (the exact "never
+    round-tripped through the real seed-file reader" trap `affix-authoring`'s own sibling `entry_for`
+    already hit once, 2026-09-05). Three real mismatches, not one:**
+    1. `ReadContainer` has no `fixedAffixes` field at all — a container's always-present half is its
+       `atoms` list (`{"seq", "atom"}` objects, `effect_container_atom` at import — spec §4's own
+       table: "`core` | `effect_container_atom` — always present"). A `core` affinity therefore
+       flattens into ITS OWN real atom refs via `affix_refs_of` (looked up from the real committed
+       affix catalog), not a bare affix id — the container never stores "this affix is fixed," only
+       the atoms that make it so, mirroring exactly how a hand-authored container like `patron.aura`
+       lists raw atoms directly.
+    2. `ContainerPoolRow` is `(AffixId, Weight, Group)` — a real int `Weight` is REQUIRED to be a
+       legal pool row at all, not "resolved at roll time": `SpeciesMaterialiser`/`Instantiator.Draw`
+       have no independent path to `demon-species-effects.v1.json`'s own tuning at roll time, so
+       spec §6's "no weight... resolved downstream" describes the MODEL never inventing a number
+       (P1), not the committed container having none — the model still only ever writes an
+       `affinity` ordinal; this function is what turns that ordinal into the real, table-derived,
+       non-invented weight via `pool_affinity_weight_milli` (`demon-species-effects.v1.json`'s own
+       `poolAffinityWeightMilli`), the same "table converts a judgement into a number, the model
+       never does" contract every other tunable table in this program already uses.
+    3. `ContainerValidator.Validate` derives a pool row's default `Group` (PoE's "at most one per
+       group" mod-family rule) from a SOLE concrete ref's own `(family, variant)` — it has nothing to
+       derive from for a multi-ref bundle and refuses the whole import rather than guess (found live,
+       running this exact output through the real importer). Every pool row whose affix has more
+       than one ref now names its own affix id as `group` explicitly — safe and non-colliding, since
+       each named bundle is already its own atomic pick.
+
+    `prefixRolls`/`suffixRolls` are the count of drawable pool groups per budget the pool ACTUALLY
+    needs to cover its own `likely`/`occasional` entries — a `Mixed`-class affix counts against BOTH
+    budgets simultaneously (A1), never doubling either count and never omitted from either.
     """
     species_id = anchor.get("speciesId", "")
-    fixed_ids = [a["affixId"] for a in draft.get("eligibleAffixes", []) if a.get("affinity") == "core"]
+    weight_table = dict(pool_affinity_weight_milli or {"likely": 700, "occasional": 300})
+
+    fixed_atoms: "list[str]" = []
+    for a in draft.get("eligibleAffixes", []):
+        if a.get("affinity") == "core":
+            fixed_atoms.extend(affix_refs_of(a["affixId"]))
     pool_entries = [a for a in draft.get("eligibleAffixes", []) if a.get("affinity") != "core"]
 
     prefix_needed = 0
@@ -137,16 +170,36 @@ def entry_for(
         if cls in ("Suffix", "Mixed"):
             suffix_needed += 1
 
+    def pool_row(a: "Mapping[str, Any]") -> "dict[str, Any]":
+        row: "dict[str, Any]" = {"affix": a["affixId"], "weight": weight_table[a["affinity"]]}
+        # `ContainerValidator.Validate` derives a default Group from a SOLE concrete ref's own
+        # (family, variant) — it has nothing to derive from for a multi-ref bundle and refuses the
+        # whole import rather than guess (found live, running this exact output through the real
+        # importer: "is a multi-ref or slot-bearing bundle and must declare an explicit pool Group").
+        # The affix's own id is a safe, non-colliding choice — each named bundle is already its own
+        # atomic pick, so grouping it under its own identity can never accidentally exclude an
+        # unrelated affix from rolling. Single-ref affixes keep the validator's own real default.
+        if len(affix_refs_of(a["affixId"])) != 1:
+            row["group"] = a["affixId"]
+        return row
+
     entry: "dict[str, Any]" = {
         "id": f"{ID_PREFIX}{species_id}",
         "kind": "species-passive",
-        "speciesId": species_id,
-        "fixedAffixes": fixed_ids,
-        "pool": [{"affixId": a["affixId"], "affinity": a["affinity"]} for a in pool_entries],
+        "atoms": [{"seq": i, "atom": atom_id} for i, atom_id in enumerate(fixed_atoms)],
+        "pool": [pool_row(a) for a in pool_entries],
         "prefixRolls": prefix_needed,
         "suffixRolls": suffix_needed,
-        "eligibilityTags": dict(draft.get("eligibilityTags") or {}),
+        "tags": dict(draft.get("eligibilityTags") or {}),
     }
     if provenance:
-        entry["_provenance"] = dict(provenance)
+        # The affix-level identity (which bundles were core vs. pool, before flattening) is real
+        # authoring information a human reviewing this file would want — kept here, never read back
+        # by the importer, so it can never silently diverge from what actually got imported.
+        entry["_provenance"] = {
+            **dict(provenance),
+            "coreAffixIds": sorted({
+                a["affixId"] for a in draft.get("eligibleAffixes", []) if a.get("affinity") == "core"
+            }),
+        }
     return entry

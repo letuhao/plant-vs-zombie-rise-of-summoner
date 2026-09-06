@@ -588,3 +588,14 @@ export type AllocateTreeNodesRequest = {
   playerId?: number;
   nodes: Record<string, number>;
 };
+
+/** POST /api/passive-tree/{playerId}/preview body — I8's follow-up (spec-tree-surface.md §7.2 part
+ * 5). `nodes` is the draft's own current whole node set, same shape as `AllocateTreeNodesRequest.nodes`.
+ * `aptitudeDelta` is a SIGNED delta keyed by aptitude id (`AptitudesState.shares`'s own vocabulary —
+ * never a separately-hardcoded id list), added server-side on top of the actor's REAL committed
+ * aptitude allocation. Never persists anything; the response is the same `PassiveTreeState` shape the
+ * committed GET returns, computed for the hypothetical inputs instead. */
+export type PreviewTreeStateRequest = {
+  nodes: Record<string, number>;
+  aptitudeDelta?: Record<string, number>;
+};

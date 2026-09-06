@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  closePreview,
+  closePreviewSentence,
   decodePlanCode,
   encodePlanCode,
   mergeSoulLevels,
@@ -178,5 +180,100 @@ describe("passivesPlan — tierAttribution: exactly one lender, always singular 
       lentAmount: 120,
       lenderTreeId: "might"
     });
+  });
+});
+
+describe("passivesPlan — closePreview / closePreviewSentence (§7.2 part 5)", () => {
+  it("nothing changes: no closing, no opening, no stopped traits", () => {
+    const committed = [{ treeId: "might", tierReached: 3, contributingNodeIds: ["skill.might-off-t1-n0"] }];
+    const preview = [{ treeId: "might", tierReached: 3, invalidNodeIds: [] }];
+    const result = closePreview(committed, preview);
+    expect(result).toEqual({ closingTreeIds: [], openingTreeIds: [], traitsThatWouldStopWorking: 0 });
+    expect(closePreviewSentence(result)).toBeNull();
+  });
+
+  // D28's own worked example shape (§7.2 part 5): "Moving 30 points out of Might closes tier 8 in
+  // Fortitude, Vigor and Onslaught -- 4 of your traits would stop working." Proven here as a pure diff
+  // of two already-resolved report arrays, never a re-derivation of CrossUnlock/TierGate.
+  it("a tier closing in a stance-mate, with owned traits newly invalid, names both", () => {
+    const committed = [
+      { treeId: "might", tierReached: 8, contributingNodeIds: [] },
+      {
+        treeId: "fortitude",
+        tierReached: 8,
+        contributingNodeIds: ["skill.fortitude-off-t7-n0", "skill.fortitude-off-t8-n0"]
+      },
+      { treeId: "vigor", tierReached: 8, contributingNodeIds: ["skill.vigor-off-t8-n0"] }
+    ];
+    const preview = [
+      { treeId: "might", tierReached: 5, invalidNodeIds: [] },
+      { treeId: "fortitude", tierReached: 6, invalidNodeIds: ["skill.fortitude-off-t7-n0", "skill.fortitude-off-t8-n0"] },
+      { treeId: "vigor", tierReached: 6, invalidNodeIds: ["skill.vigor-off-t8-n0"] }
+    ];
+
+    const result = closePreview(committed, preview);
+    expect(result.closingTreeIds).toEqual(["might", "fortitude", "vigor"]);
+    expect(result.openingTreeIds).toEqual([]);
+    expect(result.traitsThatWouldStopWorking).toBe(3);
+    expect(closePreviewSentence(result)).toBe(
+      "Closes a tier in might, fortitude, vigor — 3 of your traits would stop working."
+    );
+  });
+
+  it("'traits' stays plural even at a count of one -- no noun/verb to conjugate, matching NotWorkingCount's own convention", () => {
+    const committed = [{ treeId: "might", tierReached: 3, contributingNodeIds: ["skill.might-off-t1-n0"] }];
+    const preview = [{ treeId: "might", tierReached: 2, invalidNodeIds: ["skill.might-off-t1-n0"] }];
+    const result = closePreview(committed, preview);
+    expect(result.traitsThatWouldStopWorking).toBe(1);
+    expect(closePreviewSentence(result)).toBe("Closes a tier in might — 1 of your traits would stop working.");
+  });
+
+  it("closing with nothing owned yet in the affected tree: no trait count, still names the close", () => {
+    const committed = [{ treeId: "might", tierReached: 3, contributingNodeIds: [] }];
+    const preview = [{ treeId: "might", tierReached: 2, invalidNodeIds: [] }];
+    const result = closePreview(committed, preview);
+    expect(result.traitsThatWouldStopWorking).toBe(0);
+    expect(closePreviewSentence(result)).toBe("Closes a tier in might.");
+  });
+
+  it("opening is the symmetric positive case, and only renders when nothing closes", () => {
+    const committed = [{ treeId: "onslaught", tierReached: 2, contributingNodeIds: [] }];
+    const preview = [{ treeId: "onslaught", tierReached: 3, invalidNodeIds: [] }];
+    const result = closePreview(committed, preview);
+    expect(result.openingTreeIds).toEqual(["onslaught"]);
+    expect(result.closingTreeIds).toEqual([]);
+    expect(closePreviewSentence(result)).toBe("Opens a tier in onslaught.");
+  });
+
+  it("closing outranks opening as the highest-value line when both happen at once", () => {
+    const result = closePreview(
+      [
+        { treeId: "might", tierReached: 8, contributingNodeIds: [] },
+        { treeId: "onslaught", tierReached: 2, contributingNodeIds: [] }
+      ],
+      [
+        { treeId: "might", tierReached: 5, invalidNodeIds: [] },
+        { treeId: "onslaught", tierReached: 3, invalidNodeIds: [] }
+      ]
+    );
+    expect(closePreviewSentence(result)).toBe("Closes a tier in might.");
+  });
+
+  it("a tree present in only one array is skipped, never treated as a change", () => {
+    const result = closePreview(
+      [{ treeId: "might", tierReached: 3, contributingNodeIds: [] }],
+      [{ treeId: "fortitude", tierReached: 3, invalidNodeIds: [] }]
+    );
+    expect(result).toEqual({ closingTreeIds: [], openingTreeIds: [], traitsThatWouldStopWorking: 0 });
+  });
+
+  it("never counts a node that was already not contributing as newly stopped", () => {
+    // `invalidAfter` names a node the BEFORE report never listed as contributing (e.g. it was already
+    // excluded) -- that node must not inflate the stopped-working count.
+    const result = closePreview(
+      [{ treeId: "might", tierReached: 8, contributingNodeIds: ["skill.might-off-t1-n0"] }],
+      [{ treeId: "might", tierReached: 5, invalidNodeIds: ["skill.might-off-t9-n0"] }]
+    );
+    expect(result.traitsThatWouldStopWorking).toBe(0);
   });
 });

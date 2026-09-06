@@ -71,6 +71,49 @@ public static class PassiveTreeEndpoints
             _ = BroadcastBestEffort(hub, pid);
             return Results.Ok(ProjectState(store, powerIndex, pid));
         });
+
+        // I8's follow-up (spec-tree-surface.md §7.2 part 5) -- "the draft preview reports what a
+        // change would close." Runs the draft's own hypothetical node set plus a hypothetical
+        // aptitude-points delta through the SAME resolution ProjectState already gives the committed
+        // GET (CrossUnlock/TierGate/TreeResolveReport, unchanged), and returns the same
+        // PassiveTreeStateDto shape -- NEVER persisted (no SaveTreeNodeState, no SaveAllocation call
+        // anywhere on this path). A client diffs this response against its own already-fetched
+        // committed GET to find what newly opens or closes; that diff is a plain comparison of two
+        // already-resolved server outputs, not a re-derivation of any gating math.
+        g.MapPost("/{playerId:long}/preview", (long playerId, PreviewTreeStateRequest body, RpgStore store, IPowerIndexProvider powerIndex) =>
+        {
+            if (!store.PlayerExists(playerId)) return Results.NotFound();
+            if (body.Nodes is null) return Results.BadRequest(new { reason = "nodes.missing" });
+            foreach (var soulLevel in body.Nodes.Values)
+                if (soulLevel < 0)
+                    return Results.BadRequest(new { reason = "nodes.negativeSoulLevel" });
+
+            var scopeKey = AptitudeEndpoints.ScopeKey(playerId);
+            var committedAllocation = store.LoadAllocation(AllocationScope.Commander, scopeKey);
+
+            // Validated up front, against the REAL committed allocation -- never against a partially
+            // applied delta -- so a bad request never burns the catalog/resolve work below.
+            var aptitudeDeltaById = new Dictionary<string, long>(StringComparer.Ordinal);
+            foreach (var (aptitudeId, delta) in body.AptitudeDelta ?? new Dictionary<string, long>())
+            {
+                if (!AptitudeCatalog.IsAptitudeId(aptitudeId))
+                    return Results.BadRequest(new { reason = "aptitudeDelta.unknownId", aptitudeId });
+
+                var current = committedAllocation.PointsAt(AllocationScope.Commander, aptitudeId);
+                long hypothetical;
+                checked { hypothetical = current + delta; }
+                if (hypothetical < 0)
+                    // Aptitude points cannot go negative -- a domain bound, not a progression cap
+                    // (PS-8 governs ceilings, not "you asked to remove more than you have"). Refused
+                    // rather than clamped: clamping would silently preview a DIFFERENT delta than the
+                    // one requested.
+                    return Results.BadRequest(new { reason = "aptitudeDelta.wouldGoNegative", aptitudeId, current, delta });
+
+                aptitudeDeltaById[aptitudeId] = delta;
+            }
+
+            return Results.Ok(ProjectState(store, powerIndex, playerId, ownedOverride: body.Nodes, aptitudeDeltaById: aptitudeDeltaById));
+        });
     }
 
     static async Task BroadcastBestEffort(IHubContext<RpgHub> hub, long playerId)
@@ -84,7 +127,15 @@ public static class PassiveTreeEndpoints
         catch { /* best-effort; the injector re-syncs at its own next session start regardless */ }
     }
 
-    static PassiveTreeStateDto ProjectState(RpgStore store, IPowerIndexProvider powerIndex, long playerId)
+    /// <summary><paramref name="ownedOverride"/>/<paramref name="aptitudeDeltaById"/> are the I8
+    /// preview's own hooks (spec-tree-surface.md §7.2 part 5) -- both `null` (the GET/allocate callers
+    /// below) reproduces today's committed projection byte-for-byte; either one supplied runs the
+    /// EXACT SAME resolution (CrossUnlock/TierGate/TreeResolveReport, untouched below) over a
+    /// hypothetical input instead of the stored one, and nothing on this path ever persists.</summary>
+    static PassiveTreeStateDto ProjectState(
+        RpgStore store, IPowerIndexProvider powerIndex, long playerId,
+        IReadOnlyDictionary<string, long>? ownedOverride = null,
+        IReadOnlyDictionary<string, long>? aptitudeDeltaById = null)
     {
         var tuning = PassiveTreeTuningHub.Tuning;
         var scopeKey = AptitudeEndpoints.ScopeKey(playerId);
@@ -99,7 +150,11 @@ public static class PassiveTreeEndpoints
 
         // R3: retired/unknown node ids contribute zero and cost nothing to hold -- resolve reads the
         // LIVE-only projection, never the raw owned dictionary (TreeStateReconciler's own contract).
-        var classified = store.LoadAndClassifyTreeState(AllocationScope.Commander, scopeKey);
+        // I8 preview: a supplied draft is classified fresh (read-only, never persisted) instead of the
+        // stored row set -- same classify call, same live/retired/unknown rule either way.
+        var classified = ownedOverride is not null
+            ? store.ClassifyTreeNodeState(ownedOverride)
+            : store.LoadAndClassifyTreeState(AllocationScope.Commander, scopeKey);
         var owned = TreeStateReconciler.LiveOnly(classified);
 
         var allocation = store.LoadAllocation(AllocationScope.Commander, scopeKey);
@@ -113,7 +168,13 @@ public static class PassiveTreeEndpoints
         foreach (var tree in trees)
         {
             if (!TryParseAptitudeGate(tree.Tree.GateQuantity, out var aptitudeId)) continue;
-            baseByTree[tree.Tree.TreeId] = allocation.PointsAt(AllocationScope.Commander, aptitudeId);
+            var basePoints = allocation.PointsAt(AllocationScope.Commander, aptitudeId);
+            // I8 preview: the hypothetical delta is added here, on the SAME base every committed
+            // caller already reads -- the endpoint above has already proven this can never go
+            // negative, so no second check is needed on this path.
+            if (aptitudeDeltaById is not null && aptitudeDeltaById.TryGetValue(aptitudeId, out var delta))
+                checked { basePoints += delta; }
+            baseByTree[tree.Tree.TreeId] = basePoints;
             stanceGroupByTree[tree.Tree.TreeId] = AptitudeCatalog.Get(aptitudeId).Posture.ToString();
         }
 

@@ -583,6 +583,36 @@ itself sequences apply with-or-after module 4). Both need a live HTTP surface / 
 anything; building them now would be scaffolding with nothing to call it. The loadout **library**
 (save/list/get-entries) ships now, as the spec requires.
 
+⛔ **Re-verified 2026-09-06: the loadout-apply half of that deferral holds, the other two clauses do
+not.** Taken one at a time, because the paragraph reads as one deferral and is actually three:
+
+| Clause | Verdict, re-measured |
+|---|---|
+| `ItemEndpoints.cs` and its six routes | ✅ **Still absent** — the file does not exist and none of the six routes is mapped anywhere in `src/FusionRpg.Server/` |
+| *"building them now would be scaffolding with nothing to call it"* | ❌ **Stale.** `ItemSurfaceEndpoints.cs` (module 20's file) maps `/api/items/armoury/{playerId}` (`:72`) and calls `ArmouryQuery.ApplySort`/`ApplyPage` directly (`:96-97`). Module 2's query surface **is being served over HTTP today**, so the rationale no longer describes reality |
+| loadout **apply** waits on module 4 | ✅ **Holds** — `SaveLoadout`/`GetLoadoutEntries`/`ListLoadouts` have zero production callers, and nothing reads a loadout and writes `rpg_item_assignment` |
+
+⛔ **And the spec had already flagged the collision the second row describes — the call was never
+made, so it was made by default.** `spec-armoury.md:222-226`, verbatim: *"Module 20 declares
+`ItemSurfaceEndpoints.cs` … over three of the same reads. **Two files serving one contract is how a
+surface and its data drift apart. The data endpoints are this module's**; module 20 composes over them
+and restates none of them. **Flagged for the plan rather than resolved here**, because it is a
+sequencing call between two specs."* The plan never resolved it and module 20 shipped over the seam.
+⚠ **The outcome is not drift** — only one file exists, so nothing is serving two contracts — but
+*which* file owns `/api/items/*` was decided by whoever built first, not by the sequencing call the
+spec asked for. **Named, not silently reconciled: this is a two-spec ownership decision, and it is the
+owner's or a joint module-2/module-20 pass's, not a verification pass's.**
+
+⛔ **A REAL, REACHABLE GAP FOUND HERE AND BUILT — the loadout library shipped without two of the three
+things the spec assigns it.** The deferral swept the conflict report into the word *"apply"*, and the
+spec's own sequencing sentence puts it on the other side of that line (`spec-armoury.md:117-118`,
+verbatim): *"**The library, the conflict report and G-C ship here**, and module 2 needs nothing from
+module 4 to ship its store or its query surface."* Only the **write** was ever module 4's. Measured
+before building: `LoadoutConflict` returned **zero hits across all of `src/` and `tests/`**, and
+`GetLoadoutEntries` was a bare `SELECT` with no resolution against `rpg_item`/`rpg_item_stock` and no
+`missing` marker on its row type — so `spec-armoury.md:110-111`'s *"Entries validate on read, never
+silently drop"* was unimplemented too. Both are now built; see the addendum below.
+
 ⚠ **Found while building, corrected in place:** `effect_binding`'s `ON DELETE CASCADE` (module 1) was
 documented as "not really enforced, `DeleteInstance` is the real cascade" — wrong.
 `Microsoft.Data.Sqlite` enables `PRAGMA foreign_keys` by default, so the FK **is** live; a test using a
@@ -613,6 +643,88 @@ also 100% green in isolation) — noted, out of item-program scope. **Superseded
 argument, confirmed live in `CombatSimJsonEmitTests.cs`, and absent from every full-suite run recorded
 here since, e.g. P2.4's 2026-09-05 addendum). `TimelinePurityGuardTests` remains open and
 unfixed — still recurring as late as that same P2.4 run.
+
+---
+
+#### ⭐ P1.2-L — validate-on-read and the conflict report, BUILT 2026-09-06 (found by the final-proof pass)
+
+⛔ **How it hid: one word.** The deferral above says *"`ItemEndpoints.cs` … and loadout **apply**"*, and
+module 4 later re-deferred *"loadout **apply**"* to *"whichever later pass wires a real caller"*. Both
+notes are honest about apply. But `spec-armoury.md:116-118` splits the loadout work across that exact
+line and puts **two of the three pieces on this side of it**:
+
+> ⚠ **Sequencing, not a header dependency:** apply writes `rpg_item_assignment`, which is **module 4's**
+> table, so the apply path lands with or after module 4. **The library, the conflict report and G-C ship
+> here**, and module 2 needs nothing from module 4 to ship its store or its query surface.
+
+Only the **write** was ever module 4's. G-C shipped. The library shipped as save/list/get-entries — but
+the spec asks for two more things of the library itself, and neither existed:
+
+| `spec-armoury.md` requirement | State before this pass |
+|---|---|
+| `:110-111` *"Entries validate on read, never silently drop. An entry whose item was salvaged returns with a `missing` marker"* | ⛔ **Unbuilt.** `GetLoadoutEntries` was a bare `SELECT` over `rpg_item_loadout_entry` with no resolution against `rpg_item`/`rpg_item_stock`, and `RpgItemLoadoutEntryRow` had no field a marker could live in |
+| `:112-114` *"apply **refuses by default** with `LoadoutConflict`, listing exactly which cells hold what; `force = true` steals and **reports what it stripped**"* | ⛔ **Unbuilt.** `LoadoutConflict` returned **zero hits across all of `src/` and `tests/`** |
+| `:274` `a_loadout_entry_whose_item_was_salvaged_returns_missing` | ⛔ Absent |
+| `:275` `applying_a_loadout_whose_item_is_held_elsewhere_refuses_with_LoadoutConflict` | ⛔ Absent |
+| `:277` `loadout_membership_implies_lock` (G-C) | ✅ Shipped — `ArmouryGuardsTests.cs:33` |
+
+**Built — the report, not the write. The write stays module 4's and stays deferred.**
+
+- [x] **`LoadoutReport` (new, Core)** — `Plan(entries, targetSpecimenId, heldBy, force)` returning
+      `LoadoutPlan(Entries, Conflicts, Stripped, Refused)`. Pure and DB-free, the same shape as
+      `SalvageGuards`, so there is one place "would this apply take gear off another demon" is
+      answered. `Refused` is the **default** whenever a conflict exists; `force` flips it and every
+      cell the steal would empty comes back in `Stripped` — **never a silent strip**, and a cell
+      contested twice is stripped once
+- [x] **`LoadoutConflict` names the cell, not a count** — `(Role, RefKind, RefId, HeldBy)` where
+      `HeldBy` is the `(specimen, role)` pair. *"Why is my other demon naked"* cannot be answered from
+      a count, which is the spec's own reason for the wording
+- [x] **`RpgStore.GetLoadoutEntriesValidated(loadoutId, playerId)`** — the validate-on-read. **Every
+      stored entry comes back; the marker is the output, never a shorter list.** An `"item"` entry
+      resolves while this player still owns that instance, a `"stock"` entry while its count is above
+      zero, and an **unrecognised `ref_kind` reports `Missing`** rather than passing silently
+- [x] **`RpgStore.FindAssignmentHolders(refIds)`** — served by the already-shipped
+      `ix_rpg_item_assignment_ref`. ⭐ Reads the role as the **stored string** rather than through
+      `ItemRoles.TryParse`: `ListAssignments` skips a row whose role it cannot parse, which is right
+      for projecting bindings and **wrong here** — a holder we failed to parse is still holding the
+      item, and dropping it would report "free" for a copy that is worn
+- [x] **A stock entry never conflicts by identity** — it names a `container_id` and pins no copy
+      (`RpgItemLoadoutEntryRow`'s own rule), so two presets naming one stock id are not fighting;
+      running out is `Missing` instead. Treating it as a conflict would refuse a legal apply
+
+⏸ **Still deferred, unchanged and correctly:** the apply **write** into `rpg_item_assignment`. It is
+module 4's table, the spec sequences it there, and nothing calls it yet. This pass deliberately did not
+widen the deferral's scope to justify itself — it narrowed it to what the spec actually put on the
+other side of the line.
+
+**Verification, run fresh 2026-09-06 (never a carried-forward number):**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter LoadoutReportTests` | **10 / 0** (new — `LoadoutReportTests`) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter ArmouryTests` | **13 / 0** — 8 pre-existing + **5 new** |
+| `dotnet test tests\FusionRpg.Data.Tests` (modules 1–4 filter) | **73 / 0** |
+| `dotnet test tests\FusionRpg.Core.Tests` (modules 1–4 filter) | **173 / 0** |
+| `guard-dal` · `guard-single-writer` · `guard-funnel-delta` · `guard-secondary-no-unity` | all four **OK** |
+| `python scripts\audit-overflow.py` | **0 critical** (A1 = 0, A2 = 0); no finding in any file this change touched |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0, M2 = 0**; no finding in any file this change touched |
+
+⚠ **A build-lock note, since it shaped how these were run.** A `testhost` (PID 24756) from another
+session sat wedged for 45 minutes — **0.2 s of CPU across a 15-minute sample**, the known
+`DemonSpeciesImportCliTests` hang — holding `tests\FusionRpg.Data.Tests\bin\Debug\net8.0\`. Rather than
+kill another session's process, the Data suites were run through
+`-p:BaseOutputPath=bin-proof\`, **inside the repo** and removed afterwards. ⛔ The first attempt used a
+path under the system temp dir and **all 13 tests failed at module init** —
+`DirectoryNotFoundException: could not locate repo root above …` — because the test assembly walks up
+for the repo root. That was the harness, not the code, and it is worth recording: an output-path
+override outside the tree turns a green suite red in a way that looks exactly like a regression.
+
+**Files:** `src/FusionRpg.Core/Items/LoadoutReport.cs` (new);
+`src/FusionRpg.Data/Sqlite/RpgStore.Items.cs` (EDIT — `GetLoadoutEntriesValidated`,
+`FindAssignmentHolders`); `tests/FusionRpg.Core.Tests/Items/LoadoutReportTests.cs` (new, 10 tests);
+`tests/FusionRpg.Data.Tests/Items/ArmouryTests.cs` (EDIT — 5 new tests).
+
+---
 
 ### ✅ P1.3 — Module 3 `slot-roles` — BUILT AND VERIFIED 2026-09-04 (schema populated in full; X1 species-lookup still pending)
 
@@ -756,6 +868,135 @@ name this one, ruling-anticipated exception explicitly.
 code** — the spec marks minting a 15th code an Ask-first against a closed *spec* vocabulary; using a
 clearly-named value in this module's own (non-spec) result enum is a different, smaller thing and
 does not require that sign-off. Ratifying it as an official code is still open.
+
+---
+
+#### ⭐ P1.4-E — the equip ENDPOINT, BUILT AND PROVEN LIVE 2026-09-06 (`SaveAssignment` / `RemoveAssignment` now have a production caller)
+
+⛔ **The gap this closes, in the words this file used for it:** *"Equip is still genuinely
+unwritable: `SaveAssignment`/`RemoveAssignment` remain callerless and are module 4's, not the
+workbench's."* True when written; **false now**, and the evidence is a real request against a
+published server, not a passing unit test.
+
+**Built:**
+
+- [x] ⭐ **`src/FusionRpg.Server/ItemEquipEndpoints.cs` (new)** — `ItemEquipService` (the executor)
+      plus three routes: `POST /api/items/equip`, `POST /api/items/unequip`, and
+      `GET /api/items/assignments/{specimenId}`. Its own file for the same reason
+      `WorkbenchEndpoints.cs` is one: module 20 is read-only by construction and a write through the
+      presentation layer is the second surface it exists to prevent. Wired in `Program.cs`
+      **unconditionally** — unlike the workbench it needs no recipe corpus, so there is no state in
+      which it could only refuse
+- [x] **Every gate the spec names, in the spec's own order.** `SlotUnlock` predicate → frame →
+      level → faction, via `EquipGate.Explain`, before anything is written. Ownership of the item
+      **and** of the specimen, the item's disposition, the item's own role against the requested
+      role, and "one copy cannot be worn twice" are checked first. A refusal is **409 with the named
+      rule** and the identical body shape the workbench returns, so `httpErrorMessage` lifts `reason`
+      out of either without a special case
+- [x] ⭐ **`ref_kind = "rolled"`, and it is load-bearing.** `RpgStore.ApplyEquipProjection` only
+      turns a `"rolled"` assignment into a binding, so any other kind would persist a decision module
+      5 could never project. Pinned by its own test rather than left to a comment
+- [x] **`Locked` is deliberately NOT a refusal.** `RpgItemRow.Locked`'s own contract is *"refuse
+      salvage/transfer while true"* — it protects an item from being consumed, and wearing one
+      consumes nothing. The workbench checks it because all six of its verbs spend
+- [x] ⛔ **Two flows, one table, no shared writes.** Since P1.4-R the four relics live in
+      `rpg_item_assignment` as `ref_kind='stock'`, written by
+      `PUT /api/unique/actors/{id}/equipment/{slot}` — which also rebuilds `mods_json` and reconciles
+      the `unique-equip` atom bindings in the same call. Clobbering that cell from here would delete
+      the row and leave both derived states standing, so **a role a relic holds is refused by name**
+      (`equip.role-held-by-relic`) and the player is pointed at the flow that owns it. ⛔ **The
+      reverse is NOT true and was measured, not assumed — see defect R1 below**
+- [x] **No `correlationId`, and the asymmetry with the workbench is the design.** Every workbench
+      verb is a spend and a spend without an idempotency key is a double-spend waiting for a retry.
+      Equipping debits nothing — **no cost was invented for it**, matching module 14's ownership of
+      the priced verbs — and `SaveAssignment` upserts on `(specimen_id, role)`, so a retried equip
+      lands the same row and answers `equip.already-in-this-role`
+- [x] **The web client calls it.** `lib/bus/items.ts` gains `useItemAssignments` / `useEquipItem` /
+      `useUnequipItem` on the same pattern the workbench hooks established; `contract/types.ts` +
+      `adapt.ts` gain `EquipAssignmentView` / `EquipOutcomeView` (additive, no `CONTRACT_VERSION`
+      bump); `RelicsLayer.tsx`'s armoury tab replaces its **disabled** `Equip` with the real one plus
+      a `Take off`; `Paperdoll.tsx` now fills a cell from an item's own role as well as a relic's
+      legacy slot word and offers `Take off` **only on an item cell**
+
+**⭐ LIVE PROOF — published server, real routes, read back from outside the server:**
+
+| Step | Result, observed |
+|---|---|
+| `dotnet publish -c Release -o dist\FusionRpg.Server` (dist was stale: 17:06 binary vs a 17:34 edit) | server booted, `/health` 200 |
+| Two real items seeded by hand into `dist\FusionRpg.Server\data\` (nothing mints a concrete container yet — the same hand-seed the workbench proof needed) | `GET /api/items/armoury/1` → `total=2` |
+| `POST /api/unique/actors` (real route) | specimen `387bbbbf…` bound, level 1 |
+| `POST /api/items/equip` blade → `armament-primary` | **200**, `refKind:"rolled"`, `assignments:[{…}]` |
+| `GET /api/items/assignments/{spec}` — fresh connection | one row, the blade |
+| ⭐ **Independent OS process** reading the running server's own SQLite file (`ListAssignments`, no `Init()`, no write) | `armament-primary \| rolled \| 10b41112… \| 2026-09-06T10:55:40Z` |
+| `POST /api/items/equip` helm → `armament-primary` | **409** `equip.role-mismatch: '…' is a 'head-guard' item, not a 'armament-primary'` — and the helm has **no `item_generation` row**, so this fired off the container-slot fallback, live |
+| same copy onto a second specimen | **409** `equip.already-worn: … is already in 'armament-primary' on specimen '387bbbbf…'` |
+| unknown specimen | **409** `equip.specimen-unknown` |
+| retry of the successful equip | **200** `equip.already-in-this-role`, still one row |
+| `POST /api/items/unequip` | **200**, `replaced` names the blade; read-back `[]`; the item is **still owned** in the armoury (module 1's R1) |
+| unequip the now-empty role | **409** `equip.role-empty` |
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Server.Tests --filter ItemEquipEndpointsTests` — **red first** (routes deliberately unmapped in the fixture) | **17 failed / 1 passed** — the 1 is the in-process unlock-predicate test, which never goes over HTTP |
+| the same filter with the routes mapped | **18 / 18 green** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **1058 passed / 0 failed** |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **12369 passed / 20 failed** — every red is `data/seed/atoms/vocabulary.json`'s empty `kind` (already-recorded uncommitted drift) or the battle/class/power streams; **zero** in `Items.*`, and Core.Tests does not reference `FusionRpg.Server` at all |
+| `dotnet test tests\FusionRpg.Server.Tests` (full) | **224 passed / 25 failed** — all 25 are `World*` / `ContentBoot` / `AptitudeChannelMods` / `DistrictAssault`, one root cause: `BattleTuningRejection: missing or non-object 'speciesTempo'`, because those fixtures load `battle.v2.json` while the **battle-tempo** stream's loader now requires it (`ZombossAdaptiveSeamTests.cs:19` already records `grep -c speciesTempo data/tuning/battle.v2.json → 0`). Not this work's, and not fixed here |
+| `npm run build` / `npm run test` | build exit 0; **1926 passed / 2 failed (229 files)** — the same two guard reds this file already recorded, both listing only files this pass never touched (`stages/world/mapChromeMute.ts`; `CommandersLayer.tsx` ×2 + `CommanderSheetFooter.tsx`). The two violations this pass *did* add were caught by `disabledReasonGuard` and fixed before finishing |
+| `guard-dal` / `guard-single-writer` / `guard-secondary-no-unity` / `guard-funnel-delta` | all four **OK** |
+| `audit-overflow.py` / `audit-magic-numbers.py --summary` | 0 critical / **0 M1, 0 M2** — this pass adds no magnitude arithmetic and no balance literal |
+
+**Files:** `src/FusionRpg.Server/ItemEquipEndpoints.cs` (new);
+`src/FusionRpg.Server/Program.cs` (EDIT — `app.MapItemEquip(...)`);
+`tests/FusionRpg.Server.Tests/ItemEquipEndpointsTests.cs` (new, 18);
+`web/fusion-rpg-web/src/lib/bus/items.ts`, `src/contract/types.ts`, `src/contract/adapt.ts`,
+`src/layers/relics/{RelicsLayer,Paperdoll}.tsx` (EDIT);
+`web/fusion-rpg-web/src/layers/relics/equip.test.tsx` (new, 10).
+
+⛔ **What this does NOT claim, stated because the honest half is the point.**
+
+- [ ] ⏸ **An equipped item still changes no number.** `spec-equip-assign.md` is explicit that the
+      runtime binding is rebuilt as a full projection **at deploy**, never patched at assign time, so
+      this endpoint deliberately does not call `ApplyEquipProjection` (module 5) or
+      `ApplyEquippedGrants` (module 19) — **and both of those still have zero production callers**
+      (`grep` 2026-09-06: only `tests/`). Assign is durable and real; bind is a named wiring gap in
+      two other modules. Equipping persists, and nothing yet reads the assignment at deploy
+- [ ] ⏸ **The role is typed, not derived.** No route serves an item's own role (`ArmouryRowDto.Role`
+      is `""` while module 6 has no `item_base_type` table), so the surface offers a role picker and
+      the server corrects a wrong pick by name. Same shape and same reason as the craft bench's typed
+      `recipeId`
+
+⛔ **Defects found while doing this, named rather than fixed (none is this slice's to own):**
+
+- **R1 — the relic route silently clobbers an item assignment, and it was measured.** With the blade
+  in `armament-primary`, `PUT /api/unique/actors/{spec}/equipment/weapon` with `relic.ashen_reliquary`
+  returned **200** and module 4's own read then showed `armament-primary | stock |
+  relic.ashen_reliquary`. The item is not destroyed — it returns to the armoury — but it is
+  **unequipped with no refusal and no notice.** This route refuses the reverse direction by name; the
+  relic route has no matching arm. **Owner: the relic flow / D1's `M3`**, which is the step that moves
+  the legacy wire off three slot words in the first place
+- **R2 — module 10's card reads assignments with the wrong `ref_kind`.**
+  `RpgStore.ItemCard.cs:363,369` tests `a.RefKind == "item"`, but module 4's instance-backed kind is
+  `"rolled"` (`EquipProjector.cs:6`, and `ApplyEquipProjection` filters on `"rolled"`). So a card's
+  set block and its `wornRole` — and therefore `ReadRefusal` — can never see an item this endpoint
+  assigned. **Latent until today** (nothing wrote a rolled row), **live now.** Same shape:
+  `FindAssignmentHolders` defaults to `LoadoutReport.InstanceRefKind = "item"`, so module 2's
+  `LoadoutReport.Plan` conflict detection misses rolled assignments unless a caller passes `"rolled"`
+  (this endpoint does). **Owner: modules 10 and 2**
+- **R3 — the FE and Core disagree about `trinket`.** `Paperdoll.tsx`'s `RELIC_SLOT_TO_ROLE` maps
+  `trinket → jewel-major`; Core's `LegacyEquipSlots` maps `trinket → jewel-minor-a`, and the
+  migration already wrote `jewel-minor-a` rows. A one-word edit either way **moves stored data**, so
+  it is named here and left to D1's `M3`. Recorded in `Paperdoll.tsx`'s own comment too
+- **R4 — `ArmouryRowDto.Assigned` is hardcoded `false`** (`ItemSurfaceEndpoints.cs:85,89`), which was
+  harmless while nothing could be assigned and is simply wrong now. The armoury filter's
+  `hideAssigned` therefore filters nothing. **Owner: module 20** — one join against
+  `rpg_item_assignment`, which now has real rows to join to
+- **✅ P5.4 defect 1 is FIXED, verified live rather than assumed.** `FusionRpg.Server.csproj` now
+  carries the `data\seed\items\**\*.json` content rule, so on a **published** server the recipe
+  corpus loads and `MapWorkbench` runs: `POST /api/items/workbench/salvage` answered **409
+  `item.unknown`** (mapped, real) where this file recorded a 405
 
 ---
 
@@ -1696,9 +1937,13 @@ Seeded by `RpgStore.SeedUniqueEligible`, again its own method so this module's s
 dependency on a later module's tuning file (modules 14/15/16's precedent). §10.7 leaves the owner one
 number to move if a `sprout`-rung joke unique is ever wanted.
 
-**Not this module's job, named so nobody re-derives it here:** the `ceilingFor` reader / `pinAE`
-live-pricing (module 9); the D11 dominance lint leaving channel-split mode (module 6, consumes the
-seeded `power_ceiling` row); ~~`socket_min`/`socket_max` and `reroll_cost_mult` budget keys~~
+**Not this module's job, named so nobody re-derives it here:** ~~the `ceilingFor` reader / `pinAE`
+live-pricing (module 9)~~ — ✅ **BUILT 2026-09-06 by module 9**, exactly where this line said it
+belonged (`src/FusionRpg.Core/Items/Power/RarityPowerCeiling.cs`, `pinAE = 46,000` priced off this
+module's own seeded `almanac` row through `ActorPowerCache.Compose`; see P2.4 and the final-proof
+section's "one real hole"); the D11 dominance lint leaving channel-split mode (module 6, consumes the
+seeded `power_ceiling` row — **still open**: every input now exists, `FrameDominanceGuard` still has
+only `RunChannelSplit`); ~~`socket_min`/`socket_max` and `reroll_cost_mult` budget keys~~
 (**all three resolved — `reroll_cost_mult` 2026-09-05 by module 15, `socket_min`/`socket_max`
 2026-09-05 by module 16; see the two addenda above**; ~~`salvage_yield`~~ **resolved 2026-09-04**);
 ~~a light-theme palette for the ten rung colours (module 20 `item-surfaces`)~~ — **✅ RESOLVED
@@ -1765,6 +2010,10 @@ wrong about the atoms existing). Pinned as a named, evidenced regression test at
 `ItemDisplayTests.Phantom_implicit_families_used_by_real_content_have_no_display_template` (module 10).
 Not this module's to fix — authoring the missing atom-family entries is `affix-legality` (module 8) or
 an even earlier authoring-wave gap.
+✅ **CLOSED 2026-09-06** — all seven are now real `g-affliction.json` entries (`status.apply`, statuses
+`butter`/`cold`/`blight`/`rot`/`spark`/`pact_mark`/`bond` per `atom-family-library.md` §3.4), each with a
+display template. The registry was never wrong; the atoms just did not exist. See module 10's P2.5
+bullet for the full evidence, the ninth family, and the before/after counts.
 
 ⚠ **Two bullets below corrected against the real, fully-read `spec-base-types.md` (492 lines), not the
 draft this list was written from:**
@@ -1910,6 +2159,14 @@ itself an eighth phantom family (see P2.2's addendum): legal per the registry, r
 `affix-families/*.json` entry. The lift itself is correct (the registry SHOULD allow it once it exists);
 what's missing is the atom content. Not a defect in this module's own work, named here for the same
 reason it is named at P2.2.
+✅ **CLOSED 2026-09-06, and the group was wrong here.** `atom.affliction` is authored — but in
+`g-elem-power.json`, **not** `g-affliction.json`. It is a `stat.derived` channel family
+(`channel: status.power`, `op: Flat`), not a `status.apply` rider: `naming.v1.json`
+`idNamespaces.affixFamilies` gives `g.elem-power` `existingFamilies = [elemental_power, affliction]`,
+`ssot-affixes.md` §4.1's own row says the same, and `atom-family-library.md` §3.2 names its channel
+(*"affliction (`status.power.*` by category)"*). Its `roles` are therefore the six `elem-pw` roles, not
+`infusion`'s slate — the registry lift that put it in `infusion.legalFamilies` is about implicit
+legality, a different axis. See module 10's P2.5 bullet for the full evidence.
 
 - [x] **`item_role_family` derived, zero authored cells.** `RoleFamilyTable.Derive` walks the 98
       families' own `roles`/`frames` (656 raw pairs, matching the spec's own corpus measurement
@@ -2241,9 +2498,109 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
       (P1.5, above) found this same file refuses every `stat.derived` affix family; this measurement is
       the complete 86-family picture that finding was one slice of. One gap, two independent
       discoveries, cross-referenced so neither reads as a second defect.
-- [ ] ⏸ **⛔ Found, not fixed: 8 phantom implicit families with no display template at all**
-      (`atom.buttering`, `chilling`, `blighting`, `rotting`, `sparking`, `marking`, `bonding`,
-      `affliction`) — pinned as a named regression test
+- [x] ✅ **CLOSED 2026-09-06 — the phantom families are authored. NINE, not eight.**
+      All nine are now real `affix-families/*.json` entries with matching display templates, and the
+      two pinning tests are inverted from "expect a rejection" to "expect resolution". **The count is
+      nine because `atom.elemental-power` is the same defect from a third direction** — see the P5.2
+      addendum below, which found it independently; it is folded into this one bullet rather than
+      tracked as a separate item. Full evidence and the reasoning for each choice:
+
+      **Nothing was named from the family name.** Every mapping is read off a source:
+
+      | Family | `kindId` / `params` | Grounded in |
+      |---|---|---|
+      | `atom.buttering` | `status.apply` / `status: butter` | `atom-family-library.md` §3.4's family→status table, row 1 |
+      | `atom.chilling` | `status.apply` / `status: cold` | same row; and `set.frostbitten-vanguard-001`'s own note reads it as *"the ground itself SLOWING"* — a slow, not `freezing`'s lock |
+      | `atom.blighting` | `status.apply` / `status: blight` | §3.4's contagion row |
+      | `atom.rotting` | `status.apply` / `status: rot` | same row; `rot-bloom-30`'s *"Mouldreign"* supplies the flavour register |
+      | `atom.sparking` | `status.apply` / `status: spark` | same row |
+      | `atom.marking` | `status.apply` / `status: pact_mark` | same row — underscore kept verbatim, it is a status reference not a minted id |
+      | `atom.bonding` | `status.apply` / `status: bond` | §3.4's *"bonding \| bond \| O \| shipped via the nested burst packet"*; `set.verdant-graft-003` calls it *"the literal graft-take"* |
+      | `atom.affliction` | `stat.derived` / `channel: status.power`, `op: Flat` | `atom-family-library.md` §3.2: *"4 status-channel families (not element-expanded): affliction (`status.power.*` by category)"*. **It is in `g.elem-power`, not `g.affliction`** — `naming.v1.json` and `ssot-affixes.md` §4.1 both say so |
+      | `atom.elemental-power` | `stat.derived` / `channel: combat.power.{variant}`, `op: Flat` | copied **verbatim** from `_exemplars/affix-family.exemplar.json`'s own entry |
+
+      **`powerBand` is derived, not chosen.** The seven shipped `g.affliction` entries follow one rule
+      without exception, read off `StatusCatalogBootstrap.cs`'s `StatusL2bCategory`: `Cc → low`
+      (freezing/mesmerizing/entangling), `Dot → medium` (venomous/withering/bloodletting),
+      `Contagion → low` (sporing). Applying it: buttering/chilling `low` (Cc), blighting/rotting/
+      sparking/marking `low` (Contagion), **bonding `medium`** — the one outlier, and the category is
+      why (`bond` is the only `Dot` of the seven). `atom.elemental-power` keeps the exemplar's `medium`;
+      `atom.affliction` mirrors `stalwart`, its own registered `CounterpartOf` counterpart, at `medium`.
+      **No magnitude is authored anywhere** — no `channelWeightPermille` row was added, matching every
+      other `status.apply`/`stat.derived` family (only the 14 `stat.modify` stems carry one), so
+      `FamilyExpansion` refuses all nine at its share gate exactly as it refuses their 86 siblings.
+
+      **Root cause, for each half.** The seven were deferred, not missed: `atom.sporing`'s own notes say
+      *"one of the five contagion families in the group (blighting/rotting/sparking/marking/sporing
+      share this exact shape, **none of which this partition also authors**, to stay near the ~7-family
+      target)"* — the partition treated them as already-shipped and nothing picked them up.
+      `atom.elemental-power` has a different cause and it is recorded in `g-elem-power.json`'s own
+      `_meta.partitionScopeNote`: the brief scoped that file to *"~5 further families beyond the two
+      already in the exemplar"*, but `SeedFile.IsExemplar` excludes `_exemplars/` from the corpus by
+      construction (eleven checks skip it: *"a pattern, not corpus content"*), so the definition lived
+      nowhere a loader reads. `atom.affliction` was explicitly flagged-and-deferred by that same note,
+      which could not resolve its variant axis alone; §3.2's *"not element-expanded"* plus the
+      `stalwart`/`immunity` bare-stem precedent settle it, so no new `generate` directive was invented.
+
+      **The 21 `atom.elemental-power` references were NOT repointed, deliberately.** The element is that
+      family's `variants` COLUMN, and the atom table's unique key is `(family_id, tier, variant)` —
+      there is no per-element family to point at, and minting six would collide on that key. Its
+      defensive mirror `atom.elemental-defense` is already a single real family in `g-ward.json` with
+      exactly this shape. Authoring the one family was the fix; the references were always correct.
+
+      **Files changed** — `data/seed/items/affix-families/g-affliction.json` (7→14 entries),
+      `.../g-elem-power.json` (5→7), `data/seed/items/display-templates/triggered.json` (42→49),
+      `.../derived.json` (33→35), `content/display/en.json` (99→108 keys),
+      `data/seed/items/_registry/role-relocation.v1.json` (631→673 rows: the 7 new `sense`-legal
+      families × the same 6 hybrid-core hosts every shipped `g.affliction` sibling already carries —
+      caught by `RoleRelocationRowMissing`, host list read off `atom.freezing` rather than retyped).
+
+      **Validator** — `dotnet run --project tools/ItemSeedValidator` before: 178 errors / 271 warnings
+      over 1450 entries. After: **178 / 271 over 1468 entries, and the two reports diff to nothing but
+      the entry count.** `MissingDisplayTemplate` stays at 2 (the punishers), `MissingUnitClass` at 3,
+      `IdOutsideNamespace` at 2 — none of the nine trips any of them.
+
+      **Tests** — `ItemDisplayTests.Phantom_implicit_families_used_by_real_content_have_no_display_template`
+      → `The_nine_formerly_phantom_families_now_resolve_to_a_display_template` (8 names → 9, sense
+      inverted), plus a new `..._now_resolve_to_a_real_affix_family` asserting kind/channel/band through
+      the real `AffixFamilyFile` parser. `UniqueCorpusTests.The_phantom_affix_families_are_named_rather_than_guessed`
+      → `Every_affix_family_the_unique_corpus_names_resolves_to_a_real_family`, and it now walks
+      `varianceSlot` and `counterPressure` as well as `fixedAtoms` — **the old walk was `fixedAtoms`-only,
+      which is exactly how it missed `atom.affliction`**, whose only reference in that corpus is
+      `ember-harvest-30` *"Resin of Dusk"*'s `varianceSlot`. Counts moved:
+      `ItemDisplayTests` 98→107 templates · `ItemCardTests:298` 98→107 · `ConsumableCorpusTests`
+      `PhantomFamilies` → empty, `DoesNotContain`→`Contains`, 100→109 families ·
+      `RoleFamilyTableTests` 100→109, 631→673, 670→731 raw pairs, 666→727 derived ·
+      `KindValueGuardTests` 98→109 seen, 56→58 channel-bearing, `knownBad` += `atom.affliction`,
+      93→103 validating.
+
+      ⚠ **`KindValueGuardTests` was already red before this pass** (it pinned 98 against a 100-family
+      corpus after `g-punisher.json` landed — §7301 below records it). Fixed here since the same number
+      moved anyway. Its method name still says "98"; **not renamed**, because
+      `spec-kind-value-guard.md` §6 cites it verbatim — a one-line correction is owed to that doc.
+
+      ⛔ **One validator defect this surfaced and fixed** — `NamingCheck` had no `IsExemplar` guard, so
+      authoring the entry the exemplar demonstrates produced `NameKeyDuplicate` + `NameCollision`
+      against the exemplar itself. `IdentityCheck.CheckUniqueness` already carries that exemption in
+      writing, for the id rule, in these words: *"the exemplar is not corpus content and is never
+      imported... Grammar and namespace rules still apply to it; only global uniqueness does not."*
+      Applied the identical split to the two cross-entry lookups in `NamingCheck` (grammar, prefix,
+      plural, markup and pool rules unchanged for exemplars). Latent since the exemplar was written;
+      only reachable once a partition authored what its exemplar demoed.
+
+      ⛔ **Two stale claims named, not fixed (other lanes' content).** (1) The D6 quarantine has
+      **ended** — `AtomKindRegistry.cs:572` declares `stat.derived` `RuntimeSupportMatrix(Full, Full,
+      Partial)` since 2026-09-02, yet all five existing `g-elem-power.json` entries and all seven in
+      `g-ward.json` still say *"quarantined None/None/None until E12"* in their `notes`. The two new
+      entries state the verified state instead. (2) `disptpl.p2-009` renders `atom.stalwart`
+      (`status.resist`, the DEFENDER side) as *"+{value} status potency"*, which is the attacker-side
+      reading — `atom.affliction` is what `status.power` actually is, and it uses distinct wording.
+
+      ⛔ **Left open on purpose: `atom.elpw-amplify`.** The exemplar's OTHER demonstration entry, absent
+      from the corpus for the identical reason. **Not authored** — nothing references it, and adding an
+      unreferenced rollable family is a content decision, not a gap closure. Named for the owner.
+
+      Original finding, kept for history — pinned as a named regression test
       (`Phantom_implicit_families_used_by_real_content_have_no_display_template`), addended onto
       modules 6 and 8's own entries above since it predates and is outside all three modules' scope.
       ⭐ **Confirmed from a second direction 2026-09-05 by module 17 (P5.1):** five of the eight —
@@ -2375,10 +2732,9 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
       - ⚠ A kind that carries **no** channel (`status.apply`, `board.action`, `resource.delta`, …) is
         never reported as missing a unit — the rule is about *"a channel with a reader"*, and firing on
         30-plus perfectly good rows is how a check teaches everyone to ignore it. Asserted, not assumed
-- [ ] ⏸ **`patronView.ts`'s own call site — not updated.** `FormatPerMille` is the shared conversion
-      module 20/the web layer are meant to call instead of owning a second copy; the TypeScript side
-      of that wiring is explicitly module 20 `item-surfaces`' work, out of this module's (Core-only)
-      scope. **Cross-referenced into P5.4 (module 20).**
+- [x] ✅ **`patronView.ts`'s own call site — CLOSED 2026-09-06 by module 20's web pass**, as filed.
+      The private `pct` closure is gone; `auraLabel` calls the shared per-mille conversion through
+      `formatMagnitude`, output byte-identical. See P5.4.
 
 **Verification, run and green:**
 
@@ -2442,7 +2798,7 @@ body unchanged); `tools/ItemSeedValidator/Checks/DisplayCheck.cs` (new);
 
 Closes the **two** residual bullets P2.5b left in this module's own scope: `GetItemCardInput` (an
 instance id in, a rendered card out) and the `InstanceProducer.Compose` half of the renderer. The
-third residual — `patronView.ts` — is untouched and stays module 20's.
+third residual — `patronView.ts` — was module 20's and is **closed 2026-09-06** on its web pass.
 
 ##### The DAL read path — `RpgStore.GetItemCardInput`
 
@@ -2521,7 +2877,21 @@ channel, gated by `IsPooledChannel` through the shipped `ChannelRefJson`);
 
 **Verify:** `dotnet test tests\FusionRpg.Data.Tests --filter Items.ItemCardStoreTests`
 
-> ### ⚠ CHECKPOINT 2 — met on the card criterion as of 2026-09-06; **two** criteria still open
+> ### ⚠ CHECKPOINT 2 — the budget criterion CLOSED 2026-09-06; **one** criterion still open
+> ⭐ **Update 2026-09-06 (module 9 `ceilingFor` build pass) — read this before the correction below,
+> which it partly supersedes.** The missing reader is built and wired:
+> `src/FusionRpg.Core/Items/Power/RarityPowerCeiling.cs` implements
+> `power_ceiling(rung) = pinAE × ladderShareMilli(rung) / 1000` and
+> `src/FusionRpg.Data/Sqlite/RpgStore.ItemPower.cs` is the rarity-keyed
+> `ContentValidation.Budget`'s **first production caller**, invoked from `Program.cs` right after
+> `LoadContentIntoRuntime()`. So the two criteria this box previously collapsed into one have now
+> genuinely separated, and only one of them is still open:
+>
+> | Criterion | State | Evidence |
+> |---|---|---|
+> | `ContentValidation.cs:73` fixed, so a green Budget means something | ✅ **MET** | `ceilingFor` returns a real ceiling for all ten rungs; `RarityPowerBudgetStoreTests`' red-first pair takes `ContentReport.Evaluated` from **0 → 1** over the same real content |
+> | The D11 dominance lint runs in its **real** form | ⛔ **STILL OPEN — but the blocker changed** | Every *input* corner-matrix needs now exists (`PowerScalar.Of`, a seeded + priced `power_ceiling`). What is missing is the mode itself: `FrameDominanceGuard` still exposes only `RunChannelSplit`, and `neither_frame_wins_every_corner_for_any_role` still appears in no `.cs`. That is a guard method plus a fixture, not a missing ceiling |
+>
 > ⛔ **Corrected 2026-09-06 by the modules 6-9 final-proof pass — criterion 1 was NOT met, and the
 > box was counting one module-9 gap twice: once as "met", once as "open".** The old text read *"The
 > dominance lint runs in its **real** form (`power_ceiling` seeded), so D11 stops degrading silently —
@@ -2541,11 +2911,14 @@ channel, gated by `IsPooledChannel` through the shipped `ChannelRefJson`);
 > declared (`BaseTypeCorpusTests`, 25 tests, re-run green 2026-09-06).
 > `ContentValidation.cs:73` (**not `:71`** — the skip moved two lines; `item-plan.md`'s risk row and
 > `spec-rarity-bands.md:379` both still cite the old number) fixed, so a green Budget means something —
-> **still owed to module 9**, per module 6's todo entry (P2.2), tracing back to module 7's (P2.1).
-> Sharper than previously recorded: the rarity-keyed `ContentValidation.Budget` overload has **zero
-> production callers** today — the only one (`RpgStore.ActionCatalog.cs:105`) uses the rung-keyed
-> sibling — so no consumer passes a `ceilingFor` at all, and module 9's `pinAE`-based reader
-> (`spec-rarity-bands.md:403-412`) does not exist in `src/FusionRpg.Core/Items/Power/`.
+> ✅ **MET 2026-09-06.** ~~**still owed to module 9**, per module 6's todo entry (P2.2), tracing back to
+> module 7's (P2.1). Sharper than previously recorded: the rarity-keyed `ContentValidation.Budget`
+> overload has **zero production callers** today — the only one (`RpgStore.ActionCatalog.cs:105`) uses
+> the rung-keyed sibling — so no consumer passes a `ceilingFor` at all, and module 9's `pinAE`-based
+> reader (`spec-rarity-bands.md:403-412`) does not exist in `src/FusionRpg.Core/Items/Power/`.~~ Every
+> clause of that was true when written and none of it is now: the reader exists, the overload has a
+> production caller, and `:73` receives a non-null ceiling for the one rarity-bearing container the
+> shipped corpus holds. See the **one real hole** subsection for the full evidence table.
 > **An item card renders a real item — now MET** (P2.5b, 2026-09-06). It renders a real rolled instance
 > end to end: real affix families → `FamilyExpansion` → `AffixLibraryGenerator` →
 > `Instantiator.TryInstantiate` → all eleven §4.1 blocks, with real sockets
@@ -2555,10 +2928,14 @@ channel, gated by `IsPooledChannel` through the shipped `ChannelRefJson`);
 > ⭐ **And as of P2.5c (2026-09-06) it renders that item FROM SQL**: `RpgStore.GetItemCardInput` takes
 > an instance id and returns the assembled `ItemCardInput`, byte-identical to a hand-assembled one over
 > the same stored state, so `item_display_template`'s boot seeding finally has a production reader.
-> ⏸ **Still deferred and named:** `patronView.ts`'s call site, which is module 20's — and, outside this
-> module entirely, the three corpus facts no table carries (module 6's base-type rows, the gem catalog,
-> and the `rarity.*`/`set.*`/`combo.*` string keys `content/display/en.json` does not define), each
-> named on `ItemCardCorpus`'s own fields rather than guessed.
+> ✅ **`patronView.ts`'s call site — closed 2026-09-06** by module 20's web pass (the private `pct`
+> closure is gone; `auraLabel` calls the shared per-mille conversion, output byte-identical).
+> ⏸ **Still deferred and named**, outside this module entirely: the three corpus facts no table carries
+> (module 6's base-type rows, the gem catalog, and the `rarity.*`/`set.*`/`combo.*` string keys
+> `content/display/en.json` does not define), each named on `ItemCardCorpus`'s own fields rather than
+> guessed. ⚠ **And one found from the web side 2026-09-06:** `GetItemCardInput` / `ItemCardRenderer`
+> have **no `MapGet`** — nothing serves a rendered card, so the new `ItemCard.tsx` renders its
+> blocks' pending state. Three read-only routes, owner module 20.
 
 ---
 
@@ -3844,7 +4221,7 @@ tests); `tools/seedsmith/tests/test_demon_themes.py` (EDIT — the themeKey unio
 
 ## Phase 4 — economy and depth
 
-### ✅ P4.1 — Module 14 `salvage-craft` — BUILT AND VERIFIED 2026-09-04 (the `rpg_demon_materials` rename, the ten missing shard display rows, and the seven `reroll` corpus recipes explicitly deferred with owners named)
+### ✅ P4.1 — Module 14 `salvage-craft` — BUILT AND VERIFIED 2026-09-04; **step 5 (`perform`) WIRED and both owned verbs live 2026-09-06** — `upcycle` and `salvage` run through the workbench executor (the `rpg_demon_materials` rename, the ten missing shard display rows, the seven `reroll` corpus recipes and `forge`'s missing base-type container explicitly deferred with owners named)
 
 - [x] ⛔ **The 10× re-key, done — and the field is named so the mistake cannot be made again.**
       `RecipeContext.TargetRungIndex` / `SalvageInput.RungIndex` are the rung **index** 0–9 on
@@ -4143,12 +4520,31 @@ throws.
       rises strictly with the target across all ten rungs, and Θ is not an input anywhere — and the
       tier half waits on **module 15**, which owns the per-affix operations that would price on it.
       The `material_recipe.qty_curve_id` column ships so the seam exists.
-- [ ] ⏸ **Step 5 (`perform`) is an injected delegate, not yet wired to a production mutation.**
-      `TrySpendRecipe` runs the owning module's mutation inside the same transaction and the tests
-      exercise the seam (including the forced-throw rollback), but the mints and mutations themselves
-      belong to modules 14's own forge executor and 15/16 — a **wiring gap** with named owners, not a
-      wall. Nothing in this module's scope produces an `effect_container` instance yet, because a
-      per-base-type item container is a thing no module has authored.
+- [x] ✅ **Step 5 (`perform`) is WIRED to production mutations. CLOSED 2026-09-06.**
+      `RpgStore.TrySpendAndApply` (`src/FusionRpg.Data/Sqlite/RpgStore.Workbench.cs`) runs
+      `TrySpendRecipe` with a real `perform` that appends module 15's op, writes module 16's
+      `item_socket` rows and mints module 14's own upcycle output — all inside the one transaction.
+      `TrySpendRecipe` now has production callers: `ItemWorkbench.Upcycle` / `.Enhance` /
+      `.SocketAdd` / `.SocketInsert` / `.SocketImbue`.
+      ⭐ **Module 14's own two verbs, both live:** `upcycle` (spend grade `g` substrate, mint grade
+      `g+1` — `POST /api/items/workbench/upcycle`) and `salvage` (`SalvagePolicy.Yield` → grant +
+      disposition `salvaged`, `POST /api/items/workbench/salvage`). Salvage deliberately does **not**
+      run through `TrySpendRecipe`: it is the credit side, and a zero-cost row in a table named for
+      spends would smear the two directions together. Its idempotency is the item's own disposition —
+      `UPDATE … WHERE disposition = 'owned'` inside the same transaction — which needs no new table
+      and no new `op_kind` (the namespace is closed at ten).
+      ⏸ **`forge` is still the one module-14 verb that cannot run**, for exactly the reason recorded
+      here: nothing produces an `effect_container` for a base type, so `recipe.001`'s
+      `outputRef: item.humanoid-torso-a-001` has no container to mint. Module 6 shipped the 740-entry
+      corpus as seed JSON and **no `item_base_type` table**. Unchanged, and still module 6's.
+- [ ] ⏸ **Module 6's missing `item_base_type` table now has a second consumer, and a named stopgap.**
+      The workbench needs a base type's own `socketMax` to bore a socket, and there is nowhere at
+      runtime to read it. `BaseTypeSocketMaxCorpus` (`src/FusionRpg.Server/WorkbenchEndpoints.cs`)
+      reads it straight off the shipped seed JSON at boot and says in its own doc comment that it is
+      deleted the day the table exists. With **no** lookup supplied, `socket-add` refuses by name
+      (`socket.base-type-socket-max-unavailable`) rather than guessing a ceiling — `LootPipeline
+      .Sockets`'s own rule, *"half a socket rule would grant the wrong count, which is worse than
+      granting none"*. **Owner: module 6.**
 - [ ] ⏸ **No `forge-gem` or `imbue` recipe exists to author against.** Both have priced reference rows
       and both are in the operation vocabulary; neither has a content row, because gems are
       **module 16**'s and D24's `socket-imbue` `op_kind` is **module 15**'s. The rows exist so those
@@ -4177,7 +4573,7 @@ live under `src/FusionRpg.Core/Items/Materials/` rather than flat in `Items/`, m
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.MaterialVocabularyTests|FullyQualifiedName~Items.MaterialCorpusTests|FullyQualifiedName~Items.SalvagePolicyTests"`; `dotnet test tests\FusionRpg.Data.Tests --filter MaterialSpendTests`; `dotnet run --project tools\ItemSeedValidator`
 
-### ✅ P4.2 — Module 15 `enhance-reroll` — BUILT AND VERIFIED 2026-09-05 (the `Mixed`-affix reroll **now BUILT** — see the 2026-09-05 addendum — the workbench executor and module 1's two §9 defects explicitly handled)
+### ✅ P4.2 — Module 15 `enhance-reroll` — BUILT AND VERIFIED 2026-09-05; **the workbench executor BUILT 2026-09-06 and `enhance` is wired end to end** (the `Mixed`-affix reroll **now BUILT** — see the 2026-09-05 addendum — module 1's two §9 defects explicitly handled; reroll and transfer stay unwired with a stated reason each)
 
 ⛔ **The four things module 14 filed here are all answered.** Each is resolved or carried with its
 reason, in the order P4.1 filed them:
@@ -4377,13 +4773,26 @@ caller's, because it is D4's content decision. `--targets M1` reports nothing in
 
 **Deferred, with owners named:**
 
-- [ ] ⏸ **No workbench executor — the operations are decided here and performed by a caller that does
-      not exist yet.** `EnhancePolicy.Resolve`, `RerollPolicy.*`, `TransferPolicy.Resolve` and
-      `CraftPityCounter` are pure decisions; `RpgStore.AppendMutationOp` commits one. What is missing
-      is the thing that calls the decision, spends module 14's materials through `TrySpendRecipe`'s
-      `perform` delegate and writes the head — the same **wiring gap** P4.1 named at its own step 5,
-      with the same owner. Nothing here is inert by design: every piece has a test driving it, and the
-      seam module 14 built is the one it plugs into.
+- [x] ✅ **The workbench executor is BUILT — `enhance` is wired end to end. CLOSED 2026-09-06.**
+      **Before:** `EnhancePolicy.Resolve`, `RerollPolicy.*`, `TransferPolicy.Resolve` and
+      `CraftPityCounter` were pure decisions with no caller, and `RpgStore.AppendMutationOp` had zero
+      production callers.
+      **After:** `ItemWorkbench.Enhance` (`src/FusionRpg.Server/ItemWorkbench.cs`) resolves the target
+      off a real stored item, calls `EnhancePolicy.Resolve` on the op's own named RNG stream
+      (`SeededRng.DeriveStream(DeriveOpSeed(instance, correlation), "item.enhance")`), prices it
+      through module 14's `temper` rows, and commits the debit and `AppendMutationOp` in **one
+      transaction** via the new `RpgStore.TrySpendAndApply`. Reachable at
+      `POST /api/items/workbench/enhance`. A failed attempt spends and moves the pity counter, exactly
+      as §4 says; both outcomes append an op.
+      ⚠ **Still not wired here, and each for a stated reason rather than for lack of time:**
+      **reroll** — `RerollPolicy` ships validators (`ValidateTargets`/`TargetsFor`/`ValidatePostOp`)
+      and the cost function, but no `Resolve`; a real redraw goes through `Instantiator.DrawBudget`
+      against an item container with an **authored affix pool**, and no such `effect_container` ships
+      (the same content gap that blocks `forge` — P4.1's own note). **Transfer** — I6 §7.4 prices it as
+      *"one dedicated module-14 material"*, and there is no `transfer` verb in the closed ten;
+      **adding an operation verb is ask-first** (module 14's Boundaries), so it is a decision, not a
+      task. **Owner: this module, once an item container with a pool exists (reroll) and once the
+      owner rules on a transfer verb.**
 - [x] ✅ **A reroll calls `Instantiator.DrawBudget` with a count and an exclusion set, and the `Mixed`
       refusal is gone with its reason. RESOLVED 2026-09-05 — see the addendum below.**
       **Before:** the spec's one behavioural ask of the instantiator (`count` and `excludeGroups` on
@@ -4566,7 +4975,7 @@ plus `MutationPreview.cs` for §10's single read, which the spec describes but d
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items.EnhancePolicyTests|FullyQualifiedName~Items.RerollPolicyTests|FullyQualifiedName~Items.MutationReplayTests"`;
 `dotnet test tests\FusionRpg.Data.Tests --filter InstanceOpTests`; `dotnet run --project tools\ItemSeedValidator`
 
-### ✅ P4.3 — Module 16 `sockets` — BUILT AND VERIFIED 2026-09-05 (the `gem`/`combo` container kinds, `bind_ordinal` and the 102 explicitly deferred to their real owners — all three upstream, none skipped)
+### ✅ P4.3 — Module 16 `sockets` — BUILT AND VERIFIED 2026-09-05; **the socket write is WIRED 2026-09-06** — `socket-add`/`-insert`/`-imbue` debit and persist through the workbench executor (the `gem`/`combo` container kinds, `bind_ordinal` and the 102 explicitly deferred to their real owners — all three upstream, none skipped)
 
 ⛔ **Addendum 2026-09-04, found while building module 11 (`drop-volume`).** Two things filed from
 there: (1) the shipped seedsmith drop-table corpus already references **41 `insert` entries** that
@@ -4822,12 +5231,23 @@ live rather than hypothetical.
       Module 20 implemented the multiset distance and pinned it over all 24 permutations of a
       four-insert fill. **Nothing here changes; the record is that D41 reached module 20 correctly and
       its spec did not.** See P5.4
-- [ ] ⏸ **The workbench executor that debits and appends a socket op.** Pricing is module 14's and
-      already shipped — `bore`, `imbue`, `socket` and `upcycle` all carry cost rows, D24's
-      `imbue == bore` equality is checked at load, and `socket` costs a flat ten souls at every rung.
-      `AppendMutationOp` and `TrySpendRecipe` are both shipped too, so the call site that joins them to
-      `SetSockets` is a composition rather than a design — the same carry module 15 recorded for its
-      own executor, deliberately not duplicated here
+- [x] ✅ **The workbench executor that debits and appends a socket op is BUILT. CLOSED 2026-09-06.**
+      Pricing was module 14's and already shipped; `AppendMutationOp` and `TrySpendRecipe` were
+      shipped too; what was missing was the call site joining them to `SetSockets`, and it now exists:
+      `ItemWorkbench.SocketAdd` / `.SocketInsert` / `.SocketImbue`
+      (`src/FusionRpg.Server/ItemWorkbench.cs`) → `RpgStore.TrySpendAndApply` → `SetSocketsUnlocked`
+      inside module 14's own spend transaction. `SetSockets` no longer has zero production callers.
+      **`item_socket` stays the SSOT and the `socket-*` op stays the audit receipt beside it** (D2
+      clause 13) — the host's `state_hash` is carried forward unchanged rather than recomputed,
+      because socketing touches no host atom row.
+      ⚠ **Two honest limits, both content and both named upstream:** `socket-imbue` is **wired but
+      unpayable** — no recipe row authors the `imbue` verb, so it refuses `material.recipe-unknown`
+      until module 14's deferred corpus re-author lands one; and `socket-insert` describes the insert
+      by **container id alone**, because X7 (`ContainerKind.Gem`) has not landed, so no `gem.*`
+      container and no insert *instance* can exist. That is the same approximation the shipped read
+      path already makes (`ItemSurfaceEndpoints.cs:120`); the executor consumes one unit of the gem
+      from `rpg_item_stock` in the same transaction, which is the strongest ownership claim the
+      shipped schema supports today. Both close the day their upstream lands
 - [ ] ⏸ **P3.2's ask that this module reuse `ThresholdEvaluator`/`ThresholdConsumer<T>` for resonance
       counting — found unaddressed during the module-22 consistency pass, not during this build.**
       `ResonanceGenerator`/`CombinationEvaluator` count inserts and grant at breakpoints at the host
@@ -5196,29 +5616,146 @@ boot and validates every combo recipe on the seed path against the derived grid)
 `python -m seedsmith check ..\..\data\seed\items --adapter items --metric Registration/IngredientUnsatisfiable`;
 `dotnet test tests\FusionRpg.Core.Tests --filter StrainSplice`
 
-> ### ⏸ CHECKPOINT 4 — **every piece of the loop is built and proven; NOTHING JOINS THEM. Corrected
-> 2026-09-06 — the box previously read "✅ … is a closed loop on one item", which this phase's own
-> three bodies contradict: P4.1's step 5, P4.2's first deferred row and P4.3's last one each name the
-> same missing workbench executor.**
+### ✅ P4.5 — ⭐ **The workbench executor** (modules 14 + 15 + 16's shared blocker) — BUILT AND VERIFIED 2026-09-06
+
+**What it closes.** Modules 14, 15 and 16 each shipped a real, tested Core half and each independently
+named the same missing piece: a production caller that runs those policies against a stored item.
+`TrySpendRecipe`, `AppendMutationOp` and `SetSockets` all had **zero production callers** — every hit
+outside their declarations was a test. They have callers now.
+
+**Shape chosen: ONE shared executor with per-verb methods, not parallel per-verb executors.** That is
+what the three specs describe rather than a preference. `spec-salvage-craft.md` §"The spend
+transaction" is a *single* six-step, gate-serialised transaction — `replay → resolve → gate → spend →`
+**`perform`** `→ log` — whose step 5 is explicitly *"the owning module's mutation or mint, in the SAME
+transaction"*: one pattern, a pluggable body per verb. Its SC7 line says it from the other end —
+*"adding an operation verb is code, because a verb needs **an executor** and a module that owns it."*
+`spec-enhance-reroll.md`'s Boundaries repeat the atomicity: *"commit op row, material debit and head
+rewrite in one transaction."* Three parallel copies of debit-then-act-then-persist would each have to
+re-derive that, and the day two of them disagreed one would be spending without recording.
+
+**Where each half lives, and why the split is where it is.** The *decision* is the executor's; the
+*transaction* is the store's. A caller outside `FusionRpg.Data` cannot hold the transaction — it would
+need a `SqliteConnection`, which `guard-dal.ps1` forbids by name, and re-entering the store from
+inside `perform` would open a second connection against a database its own write transaction already
+holds. So the composite is in the DAL and the decision arrives as **data**:
+
+| Layer | File | Role |
+|---|---|---|
+| Server | `src/FusionRpg.Server/ItemWorkbench.cs` (new) | the executor: resolve target + ownership → let Core decide → resolve the price → apply |
+| Server | `src/FusionRpg.Server/WorkbenchEndpoints.cs` (new) | six `MapPost` routes + `BaseTypeSocketMaxCorpus` (module 6 stopgap) |
+| Data | `src/FusionRpg.Data/Sqlite/RpgStore.Workbench.cs` (new) | `TrySpendAndApply` (debit + mutation + socket write + mint + stock, one transaction) and `TrySalvageItem` |
+| Data | `RpgStore.InstanceOps.cs` · `RpgStore.Sockets.cs` · `RpgStore.Materials.cs` · `RpgStore.Items.cs` (EDIT) | `…Unlocked` variants so each write can join the caller's transaction — **one copy of each SQL statement**, the public methods now delegate |
+| Server | `Program.cs` (EDIT) | keeps the imported `MaterialRecipeCatalog` (so the running server and the imported rows cannot be two corpora), builds the executor, maps it — **only when the corpus loaded**, because a route that always refuses looks wired |
+
+**The six verbs, and who owns each.** `salvage` + `upcycle` (14) · `enhance` (15) ·
+`socket-add` + `socket-insert` + `socket-imbue` (16). `correlationId` is **required**, not optional:
+every verb is a spend, and a spend without an idempotency key is a double-spend waiting for a network
+retry.
+
+⛔ **A real ordering bug the tests found, not the reading.** A successful operation moves the very
+state its price is derived from — `temper` costs `15 × (n+1)` — so re-pricing a *retried* enhance
+against the item's new `+n` resolves a different cost and `TrySpendRecipe` correctly refuses it as
+`correlation.mismatch` instead of replaying it. The mismatch rule is right and stays; the fix is to
+short-circuit **before** re-pricing. `RpgStore.FindMaterialSpend` + `ItemWorkbench.Replay` now return
+the **recorded** cost and the item's **current persisted** state, re-deciding and re-pricing nothing —
+D2 §9 clause 8, and the same discipline clause 4 puts on replay.
+
+⚠ **One real divergence found and NAMED rather than papered over: D2 clause 1 vs. what ships.**
+Clause 1 says `effect_instance_atom.values_json` is the SSOT and enhancement rewrites in place — but
+`AppendMutationOp` records `MutationResult.Values` in `result_json` and **never applies them to
+`effect_instance_atom`**, and the shipped card composes the gain from the persisted `enhance_level`
+over the rung's `enhance_cap` instead (`RpgStore.ItemCard.cs:256-261`). Two models, one stored fact.
+The executor therefore records an enhance with an **empty** `Values` list: writing values as well would
+double-count the gain on every surface that reads the card. **Not fixed here** — reconciling them
+spans module 15's ledger and module 10's card read, and picking either side silently is how a
+magnitude ends up applied twice. **Owner: module 15, with module 10.**
+
+⚠ **Also named, not fixed:** `data/seed/atoms/vocabulary.json` is refused by the importer
+(`UnknownKind — kind ''`) and the file is **clean against HEAD**, so this is a committed defect, not
+working-tree drift. It is why `ContentBootStartupWiringTests`' two "imports the real seed tree" cases
+are red. Nothing in this build touches a seed file. **Owner: whoever owns `--atom-vocab-emit`.**
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Server.Tests --filter ItemWorkbenchEndpointsTests` | **19 passed / 0 failed** (new) — every verb through the real HTTP surface against a real store |
+| red-first, by mutation rather than by ordering | removing the debit (`TrySpendRecipe` handed no lines) turns **7 of 19** red; removing the persist (no op append, no socket write) turns **6 of 19** red; both restored, back to 19/19 |
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~Items."` | **900 passed / 0 failed** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | ⭐ **1037 passed / 0 failed** — fully green |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **12238 passed / 21 failed** — **zero in `Items.*`**. All 21 are `Atoms.ContentValidationTests` (3), `Battle.TraitMigrationParityTests` (12), `ClassSystem.ProveAptitudeJsonEmitTests` (3), `Delve.Quests` (1), `Expeditions` (1), `Power.ContentScaleTests` (1) — the concurrent battle-tempo / class-system / seedsmith streams' in-flight work, checked by name against `git status` (`BattleRunState.cs`, `ActionRunner.cs`, `BasicAttack.cs`, `TimelineDispatch.cs`, `WildMemory.cs`, `SiegeConstruction.cs`, `TurnEngine.cs`, `affix-families/g-affliction.json`, `g-elem-power.json` all mid-edit) |
+| `dotnet test tests\FusionRpg.Server.Tests` (full) | **199 passed / 25 failed** — **zero in the item program**. 2 are `ContentBootStartupWiringTests` (the committed `vocabulary.json` defect above, reproduced independently with `dotnet run --project tools\AtomImporter -- --check --validate`), 22 are `World*` / `DistrictAssault*` (the world stream's, sources mid-edit) and 1 is `AptitudeChannelModsTests.RealBattle_*` (the battle stream's) |
+| `guard-single-writer` · `guard-secondary-no-unity` · `guard-funnel-delta` · `guard-dal` | all four **OK** |
+| `.\scripts\guard-power.ps1` | **OK** — one ladder, pin holds, no private `f(level)` |
+| `python scripts\audit-overflow.py` | **0 critical**, 63 findings, **none** in `RpgStore.Workbench.cs`, `ItemWorkbench.cs` or `RpgStore.InstanceOps.cs` |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0** overall; nothing in any file this build touched |
+
+⚠ **Three transient build breaks from the concurrent stream, all cleared by retry and none in a file
+this build touched** — `BattleRunState.cs`'s `Cost.CostLedger` missing its `using` (four polls before
+it compiled), and `MSB3027`/`MSB3021` on `FusionRpg.Core.dll` / `FusionRpg.Data.dll` locked by another
+session's `testhost` (three retries). The same pattern P3.1 and P4.1 both recorded.
+
+**Files:** `src/FusionRpg.Data/Sqlite/RpgStore.Workbench.cs`, `src/FusionRpg.Server/ItemWorkbench.cs`,
+`src/FusionRpg.Server/WorkbenchEndpoints.cs`,
+`tests/FusionRpg.Server.Tests/ItemWorkbenchEndpointsTests.cs` (all new);
+`src/FusionRpg.Data/Sqlite/{RpgStore.InstanceOps.cs, RpgStore.Sockets.cs, RpgStore.Materials.cs,
+RpgStore.Items.cs}` and `src/FusionRpg.Server/Program.cs` (EDIT).
+
+**Verify:** `dotnet test tests\FusionRpg.Server.Tests --filter ItemWorkbenchEndpointsTests`;
+`dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~Items."`; `.\scripts\guard-dal.ps1`
+
+> ### ✅ CHECKPOINT 4 — **MET. The loop is closed on one item, and one test drives it end to end.**
+> **Corrected twice on 2026-09-06.** It first read ✅ while this phase's own three bodies contradicted
+> it (P4.1's step 5, P4.2's first deferred row, P4.3's last one — all naming the same missing
+> workbench executor); it was corrected to ⏸ that morning. **The executor was then built the same
+> day, and the box is ✅ again — this time with the joined path under test rather than by assertion.**
 >
 > **What holds.** All four legs exist as decisions plus committed state, each with its own green
 > suite: salvage (`SalvagePolicy`), craft/spend (`MaterialRecipeCatalog` → `RpgStore.TrySpendRecipe`),
 > enhance/reroll/transfer (`EnhancePolicy`/`RerollPolicy`/`TransferPolicy` → `RpgStore.AppendMutationOp`)
 > and socket (`SocketOperations` → `RpgStore.SetSockets`). Re-run 2026-09-06: module 14 **48/48**,
-> module 15 **66/66**, module 16 **72/72**, module 21 **22/22**, `Items.*` DAL **189/189**.
+> module 15 **66/66**, module 16 **72/72**, module 21 **22/22**, `Items.*` DAL **189/189**;
+> `Items.*` Core **900/900** and `Data.Tests` **1037/1037** after the executor landed.
 >
-> ⛔ **What does not.** `TrySpendRecipe`, `AppendMutationOp` and `SetSockets` have **zero production
-> callers** — grepped across `src/` 2026-09-06, every hit is a test. No path, production or test,
-> runs salvage → craft → enhance → socket on one item, so the loop is a set of composable parts
-> proven individually, not one runnable circuit. That is a **wiring gap with three modules naming the
-> same owner**, not an architectural wall — and confirmed genuinely shared, not stale: none of the
-> three has silently built it.
+> ⭐ **And what now joins them.** `ItemWorkbench` (`src/FusionRpg.Server/ItemWorkbench.cs`) is the
+> executor all three modules named, and `RpgStore.TrySpendAndApply`
+> (`src/FusionRpg.Data/Sqlite/RpgStore.Workbench.cs`) is its atomic write — module 14's own six-step
+> spend transaction with the owning module's mutation as step 5, exactly as
+> `spec-salvage-craft.md` §"The spend transaction" specifies it. **`TrySpendRecipe`,
+> `AppendMutationOp` and `SetSockets` all have production callers now**, reachable at
+> `POST /api/items/workbench/{salvage|upcycle|enhance|socket-add|socket-insert|socket-imbue}`.
+> `ItemWorkbenchEndpointsTests` (19 tests, `tests/FusionRpg.Server.Tests/`) drives every verb through
+> the real HTTP surface against a real store, and
+> **`TheWholeLoopRunsOnOneItem_craftEnhanceSocketSalvage` is Checkpoint 4's own criterion as a test**:
+> bore → enhance → insert → salvage on ONE instance, each step debiting real balances and each step's
+> state read back from the store afterwards (three dense op rows at seq 1/2/3, three spend-log rows,
+> `enhance_level` 1, the socket filled, then disposition `salvaged` with the yield credited).
+> Red-first proved by mutation, not by ordering: removing the debit turns **7** of the 19 red and
+> removing the persist turns **6** red; both restored green.
 >
-> ⚠ **`CraftingHorizonReport` computes; it does not print.** The class exposes `V1Reach` / `LinearRow`
-> / `CappedRow` / `AsymptoteRow` / `Row` / `FirstThetaReachingRealms` returning `CraftingHorizonRow`
-> records, has no renderer and no production caller. §4b's whole table reproducing off the shipped
-> `power-scale.v2.json`, and Θc = 123, are real and asserted in `EnhancePolicyTests` — "prints"
-> overstated a verified computation.
+> ⏸ **What still does not hold, stated narrowly rather than rounded up:**
+> - **`forge` cannot mint.** No `effect_container` exists for a base type (module 6 shipped the
+>   740-entry corpus as seed JSON and no `item_base_type` table), so `recipe.001`'s
+>   `outputRef: item.humanoid-torso-a-001` has nothing to instantiate. The "craft" leg of the loop is
+>   therefore **a priced crafting operation on an existing item** (`bore`, `upcycle`), not a mint.
+> - **`reroll` and `transfer` have no executor.** `RerollPolicy` ships validators and a cost function
+>   but no `Resolve`, and a redraw needs an item container with an authored affix pool — the same
+>   content gap as `forge`. `transfer` needs a cost, and I6 §7.4's *"one dedicated module-14
+>   material"* has no verb in the closed ten; adding one is **ask-first**.
+> - **`socket-imbue` is wired but unpayable** — no recipe row authors the `imbue` verb.
+> - **`Restore` is still declared and unimplemented** (`MutationOpKind.Restore`), unchanged.
+>
+> ⚠ **`CraftingHorizonReport` computes; it still does not print, and the specs do not name a caller.**
+> The class exposes `V1Reach` / `LinearRow` / `CappedRow` / `AsymptoteRow` / `Row` /
+> `FirstThetaReachingRealms` returning `CraftingHorizonRow` records, has no renderer and **no
+> production caller**. §4b's whole table reproducing off the shipped `power-scale.v2.json`, and
+> Θc = 123, are real and asserted in `EnhancePolicyTests:346`. **Deliberately left that way
+> 2026-09-06:** `spec-enhance-reroll.md` §4b's consequence row says only *"ours, and it ships … so the
+> figure moves when the dials move instead of being a number in a doc"* — it names no surface and no
+> route, and §10's other consumer is the **mutation preview**, which is a player surface and therefore
+> module 20's. Hanging it off the workbench's write routes would be inventing a consumer and adding
+> the "second surface" module 20 exists to prevent. `MutationPreview` is unrendered for the same
+> reason. **Owner: module 20, when a workbench UI exists.**
 >
 > ⚠ **The plan's own Checkpoint 4 caveat was dropped from this box and is restored here:**
 > **N ≈ 0.19 realms at v1 depth is a recorded constraint, not a bug to engineer away** — both ways of
@@ -5411,6 +5948,14 @@ validators**, not a from-scratch build — checked before assuming, exactly as m
       rather than guessed into it**, because guessing would make an unresolved reference look like a
       balance failure. This is **module 10's already-filed phantom-family defect** (P2.5's list of eight)
       reaching this corpus; pinned here as a set so it cannot grow
+      ✅ **CLOSED 2026-09-06** — all five are authored, and the pin is inverted:
+      `The_phantom_affix_families_are_named_rather_than_guessed` →
+      `Every_affix_family_the_unique_corpus_names_resolves_to_a_real_family`. ⚠ **The old walk read
+      `fixedAtoms` only, and that is why it saw five rather than six**: `atom.affliction` reaches this
+      corpus through `ember-harvest-30` *"Resin of Dusk"*'s `varianceSlot`, a field it never looked at.
+      The replacement walks `fixedAtoms`, `varianceSlot` and `counterPressure.family`. The `narrow`
+      raw-stat subtotal is unchanged — the five are `status.apply`, which was never in
+      `UniqueValidator.RawStatKinds`, and `atom.affliction` is priced through a variance slot, not `raw`
 
 **⏸ Deferred, each with its owner named — none silently skipped:**
 
@@ -5727,6 +6272,14 @@ from-scratch build — checked before assuming, exactly as modules 6/7/8/10/17 w
       family the corpus does not have. ⚠ `atom.elemental-defense` **is** real and is what the other two
       element-bearing consumables use; the near-miss is part of why this went unnoticed.
       **Cross-referenced into P2.5 above**
+      ✅ **CLOSED 2026-09-06.** Authored into `g-elem-power.json` with the exemplar's own fields copied
+      verbatim — the exemplar IS the maintained definition, it simply never reached a file a loader
+      reads. **The 11 rows were NOT repointed**: the element is this family's `variants` column and the
+      atom key is `(family_id, tier, variant)`, so there is no per-element family to aim them at and
+      minting six would collide — `atom.elemental-defense` being one real family with the same shape is
+      the direct precedent. `Exactly_one_phantom_family_is_named_by_the_corpus...` →
+      `The_corpus_names_no_phantom_family_and_elemental_power_resolves`; `PhantomFamilies` is now empty
+      and the kind matches its mirror's. The 11-row and 2-row counts are asserted unchanged
 - [x] ⛔ **One shipped comment still asserts something false about `rpg_item_stock`; the other was
       already corrected 2026-09-05.** `PredicateNode.cs:10-12` now reads *"the table... EXISTS —
       `RpgStore.Items.cs:96` creates it and `:302` upserts it (this comment said "unbuilt" until
@@ -6423,7 +6976,7 @@ naming.
 `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ItemGrantStore"`;
 `dotnet run --project tools\ItemSeedValidator`
 
-### ✅ P5.4 — Module 20 `item-surfaces` ⭐ — THE DECIDING HALF BUILT AND VERIFIED 2026-09-05 (the eight `.tsx` render files, the `docs/web/spec.md` amendment and the gap board explicitly deferred — one of the three is genuinely this module's own and is named as such, not laundered onto someone else)
+### ✅ P5.4 — Module 20 `item-surfaces` ⭐ — Core + the three read-only routes BUILT AND VERIFIED 2026-09-05; ⭐ **the eight `.tsx` render files BUILT AND VERIFIED 2026-09-06** (the `docs/web/spec.md` amendment and the gap board remain deferred, each with the owner named)
 
 ⭐ **Three of this module's pieces already existed and were ADOPTED rather than rebuilt — the same
 "authored but never wired" pattern half this program's modules have hit.** Verified by reading the
@@ -6539,9 +7092,164 @@ are pinned: `A_matched_affinity_changes_a_strains_result_not_its_distance` and
       presentation layer is the *"second surface"* this module exists to prevent. Wired in `Program.cs`
       beside the other eight item tuning loads
 
-**⏸ Deferred, with the owner named — and the FIRST one is this module's own, said plainly:**
+**✅ THE WEB CLIENT — BUILT 2026-09-06, the deferral below is closed.** The refactor that blocked it
+settled: `git status --porcelain -- web/fusion-rpg-web/` was clean and the last commit touching that
+tree (`3b4ddd1`) had already landed the world-stage shell move, so composing against it no longer
+risked the merge conflict the deferral was written to avoid.
 
-- [ ] ⏸ ⛔ **The eight `.tsx` files ARE THIS MODULE'S OWN WORK AND THEY ARE NOT BUILT.** `ArmouryList`,
+| File | Renders | Reads |
+|---|---|---|
+| `web/fusion-rpg-web/src/lib/bus/items.ts` (new) | — | the three read-only routes, as `useItemSurfaces` / `useArmoury` / `useItemCombinations`. Self-contained (DTOs + keys + hooks in one file), matching `expeditions.ts`'s precedent rather than widening the barrel |
+| `layers/relics/ArmouryList.tsx` (new) | the held rows, the four designed states, GG-50's three bands (render-all / `@tanstack/react-virtual` window / search-first), and the row predicate | `GET /api/items/armoury/{playerId}` + `GET /api/items/surfaces/{playerId}` |
+| `layers/relics/ArmouryFilter.tsx` (new) | the loot filter and the inbox count, over module 2's `ArmouryFilter`/`ArmourySortKey` axes | — (a client-side view rule; the route offers no filter parameters) |
+| `layers/relics/Paperdoll.tsx` (new) | all sixteen roles from `core.v1.json`'s registry, both frame nouns per cell, filled and empty | the shipped equipment payload, mapped through the three relic slot words |
+| `layers/relics/ItemCard.tsx` (new) | **all eleven blocks** of §4.1, identity (1–6) in its own above-the-fold zone and detail (7–11) after it; rarity as pips + word + colour | module 10's shape via `ContainerView`; every number through `formatMagnitude` |
+| `layers/relics/CompareView.tsx` (new) | stack-first at 640px, unit-class **group headers**, the verdict word+shape, the sidegrade trade, and the **permanent** no-single-score footnote (asserted to contain no button) | `DominancePresentation`'s shape via `ComparePayloadView` — never recomputed here |
+| `layers/relics/SocketBench.tsx` (new) | band-3; the fill, what is firing, what is one insert away with the exact remedy named | `GET /api/items/{instanceId}/combinations` |
+| `layers/relics/Compendium.tsx` (new) | band-3; the three rendered states in order, plus the per-piece set disclosure | the same combination route + `SetDisclosure`'s shape via `PieceSetDisclosureView` |
+| `layers/relics/RelicsLayer.tsx` (EDIT) | the body swap — a fourth `armoury` tab, `Paperdoll` as the equipped tab, `CompareView` + `ItemCard` as the held tab's comparison, and the two band-3 dialogs pushed from a selected row. **No route added; the three existing tabs and every shipped testid are unchanged** | as before, plus the above |
+| `contract/types.ts` (EDIT) | `SocketsView` / `SetView` replace `Pending<unknown>`, plus 20 sibling view types (surface status, armoury row/page/filter, combination, compare payload, paperdoll cell, per-piece set disclosure) | — |
+| `contract/adapt.ts` (EDIT) | `adaptItemSurfaces`, `adaptArmouryRow`, `adaptArmouryPage`, `adaptCombination(s)`, `adaptArmouryItem`, and the full ten-rung `RARITY_LADDER` (the four-rung relic copy is now a slice of it, not a second table) | — |
+| `layers/relics/itemSurfaces.test.tsx` (new) | 13 tests — locked-row exemption, sort, the adapters, the eleven blocks, the footnote's absent dismiss control, the sixteen paperdoll cells | — |
+| `shell/bandGuard.ts` (EDIT) | the two band-3 dialogs added to `DIALOG_BAND_ALLOWED_PATHS`, with the same by-construction justification the three world dialogs carry (fully controlled, never self-opening) | — |
+
+⭐ **The WRITE pass — built and proven live 2026-09-06, after the workbench executor landed.** The
+files above were composed against three read-only routes because that was all the server had; the
+six `POST /api/items/workbench/*` verbs landed later the same day and nothing called them. This pass
+is that call. **No server file was touched** — the executor is a fixed contract here.
+
+| File | Adds | Writes to |
+|---|---|---|
+| `lib/bus/items.ts` (EDIT) | `WorkbenchOutcomeDto`/`WorkbenchCostDto`/`WorkbenchSocketDto`, the six request types field-for-field against `WorkbenchEndpoints.cs`'s own records, six `useMutation` hooks with `meta.entity` (so the shipped `MutationCache` toast names them), and `invalidateItemQueries` | `POST /api/items/workbench/{salvage\|upcycle\|enhance\|socket-add\|socket-insert\|socket-imbue}` |
+| `layers/relics/Workbench.tsx` (new) | `CraftBench` (band-3): strengthen, refine, break down; `WorkbenchResult` and `WorkbenchRefusal` shared with the socket bench; `useWorkbenchFeedback`; `UnavailableVerbs` | salvage / upcycle / enhance |
+| `layers/relics/SocketBench.tsx` (EDIT) | the two real socket verbs under the existing preview, plus the honest imbue state. **Nothing already shipped was changed** — every previous testid still renders | socket-add / socket-insert |
+| `layers/relics/RelicsLayer.tsx` (EDIT) | a `Craft` button beside `Sockets`, the `CraftBench` mount, and a **disabled** armoury `Equip` naming why an item cannot be worn | — (the Held tab's relic equip is untouched) |
+| `contract/types.ts` (EDIT) | `WorkbenchVerb`, `WorkbenchCostView`, `WorkbenchSocketView`, `WorkbenchOutcomeView`. **No `CONTRACT_VERSION` bump** — all four are additions, and the file's own rule bumps only on a narrowing or a rename | — |
+| `contract/adapt.ts` (EDIT) | `adaptWorkbenchOutcome` — labels the unit class of every server-sent quantity and composes none of them; `""` affinity/insert become `null`; `successMilli` becomes `null` on the five verbs that roll nothing, because a zero chance and an absent one are different sentences | — |
+| `shell/bandGuard.ts` (EDIT) | `layers/relics/Workbench.tsx` added to `DIALOG_BAND_ALLOWED_PATHS` on the same two grounds the socket bench already carries | — |
+| `layers/relics/workbench.test.tsx` (new) | 17 tests. ⭐ **Every response fixture is a body captured verbatim from the real executor**, not a shape invented to match the adapter, and each hook is asserted to post the exact URL and body those bodies came back from — so the request and the response are pinned to the same real exchange | — |
+
+⭐ **The end-to-end proof, run against a real server and a real stored item.** An isolated instance
+(own port, own copy of the data dir, the owner's running server untouched) with the item seed corpus
+present, then five real writes and an **independent read-only** re-read of the database:
+
+| Write | Server's own answer | What the second read showed |
+|---|---|---|
+| `upcycle` `recipe.005` | `ok`, spent 5 × `substrate.humanoid.crude`, granted 1 × `substrate.humanoid.sound` | balance 500 → 495, the output row created |
+| the **same** `correlationId` again | `replayed: true`, the **recorded** cost, `granted: []` | balances **unchanged** — the idempotency key holds, no double spend |
+| `socket-add` `recipe.019` ×2 | `ok`, 200 souls + 12 substrate + 1 catalyst each; sockets `[0]` then `[0,1]` | `item_socket` carries two `crafted=1` rows; two `socket-add` rows in `effect_instance_op` |
+| a **third** `socket-add` | 409 `ContentRuleViolated: socket.no-free-socket … socketMax of 2` | nothing spent |
+| `enhance` `recipe.012` | `ok`, `outcome: success`, `enhanceLevel: 1`, `successMilli: 1000` | `effect_instance.enhance_level = 1`, `mutation_seq = 3`, an `enhance` op row |
+| `salvage` | `ok`, `outcome: salvaged`, granted 1 × `shard.grafted` + 4 × `substrate.humanoid.crude` | disposition `salvaged`; a later verb on it returns 409 `item.not-owned: … is 'salvaged'` |
+
+Souls 100000 → 99585 and four `rpg_material_spend_log` rows, all read back on a connection that never
+went through the write path. **Every quantity above is the server's resolved price** — the client
+sends no cost and shows none it was not given.
+
+⛔ **Three real defects found while proving this. Named, not fixed — all three are server-side and
+this pass touched no server file.**
+
+1. ✅ **FIXED 2026-09-06, same session.** The workbench routes did not exist on a built server —
+   `Program.cs` reads the recipe corpus from `{exeDir}/data/seed/items/recipes` at boot and maps the
+   workbench **only if it loaded** (`if (itemWorkbench is { } workbench)`), but `FusionRpg.Server.csproj`
+   had **no content rule for `data/seed/items/**`** — it copied `data/tuning/**` and
+   `data/seed/dungeon/**` and stopped. Verified live before the fix: `POST /api/items/workbench/upcycle`
+   → **405** (only the SPA fallback matched the path) while `POST /api/players` → 400 and
+   `GET /api/items/surfaces/1` → 200 on the same host — the same defect class already recorded for the
+   dungeon tree, one directory over, silently disabling everything modules 14/15/16 shipped. **Fix:**
+   added the same `data/seed/items/**/*.json` content-copy rule to `FusionRpg.Server.csproj`, matching
+   `data/seed/dungeon/**`'s existing pattern exactly. **Re-verified after a real rebuild+republish to
+   `dist/`:** `data/seed/items/` now exists next to the published exe, and the same `upcycle` call
+   against the freshly-published server returns **400** (a real bad-request, i.e. the route is
+   registered and the corpus loaded) instead of 405. `dotnet test tests/FusionRpg.Server.Tests`
+   re-measured after the fix: **206 passed / 25 failed** — all 25 in `WorldUpkeepBreakdownProjectionTests`
+   (world-map/loam-economy, unrelated), zero new failures from the content-copy change.
+2. ✅ **FIXED 2026-09-06, same session.** A salvaged item still listed in the armoury —
+   `RpgStore.ListItemsByPlayer` selected on `player_id` with **no disposition filter**, so after a
+   `salvage`, `GET /api/items/armoury/1` still returned `total: 1` with the salvaged row. **Fix:** the
+   query now adds `AND disposition = 'owned'` — the field's own doc comment already names
+   `salvaged`/`transferred`/`destroyed` as the other three states, so this is enforcing an existing
+   contract, not inventing one. `GetItem` (the by-id lookup) is untouched — the row survives with its
+   disposition marker, only the armoury listing changes. New test,
+   `A_salvaged_item_is_excluded_from_the_armoury_list_but_still_reads_by_id`
+   (`OwnershipTests.cs`): proven red before the fix (asserted `Empty`, got the salvaged row back),
+   green after. Full `dotnet test tests/FusionRpg.Data.Tests` re-run: **1041 passed / 0 failed**, zero
+   regressions.
+3. ⛔ **No read route serves the craft-recipe corpus.** 23 recipes import into `material_recipe` at
+   boot and nothing exposes them — `GET /api/recipes` is the PvZ **fusion** table (`parent_a`,
+   `parent_b`, `result`), a different thing. So four of the six verbs need a `recipeId` the client
+   has no way to discover, and the bench asks the player to type one rather than shipping a second
+   copy of the corpus in the browser. A wrong id is corrected by the server's own
+   `material.recipe-unknown`. **Owner: module 14, one read-only route** — and it is the single
+   change that would most improve this surface.
+
+⏸ **Honest residuals the UI states rather than hides**, each verified against the shipped corpus and
+the running executor rather than taken from a comment:
+
+- **forge** — no route. Listed as unavailable with its reason (nothing has authored an
+  `effect_container` for a base type, so a forge recipe has nothing to mint).
+- **reroll** — no route, no resolver. Listed as unavailable.
+- **transfer** — no route, and it needs an ask-first operation verb the workbench does not carry.
+  Listed as unavailable.
+- **socket-imbue** — the route is real and mapped, and **no shipped recipe authors the `imbue`
+  operation** (the corpus is 30 rows across forge/upcycle/elevate/temper/reroll-one/reroll-all/bore/
+  socket). Confirmed live: the verb answers 409 `material.recipe-unknown`. The bench therefore draws
+  it **disabled with the reason on the control and in the copy** rather than as a button that could
+  only fail.
+- **equip an item** — still no route of any kind (`ItemSurfaceEndpoints.cs` has no `MapPost`/`MapPut`,
+  the workbench has no equip verb, and module 4's assignment writes have no production caller). The
+  armoury tab draws a **disabled** `Equip` saying so. ⛔ **Deliberately NOT merged with the Held tab's
+  relic equip**, which is a different system and still calls its own real
+  `PUT /api/unique/actors/{instanceId}/equipment/{slot}` — untouched by this pass.
+
+**Verified (write pass):** `npm run build` **exit 0**; `npm run check:bundle` OK (entry 135.1 KB gz
+against the 180 KB budget; the `RelicsLayer` chunk 48.58 KB); `npm run test` **1915 passed / 3 failed
+of 1918**. ⚠ **All three reds are other programs' files and none is in this pass's diff** — two are
+the pre-existing `disabledReasonGuard` rows (`layers/commanders/CommandersLayer.tsx` ×2,
+`ui/actor/CommanderSheetFooter.tsx`) plus a new `ui/actor/PlanPanel.tsx` from the passive-tree stream
+editing the tree concurrently, one is `bandGuard`'s `stages/world/mapChromeMute.ts` from the
+world-stage stream, and one is that stream's own `PassivesTab.test.tsx`. The baseline before this
+pass was 1886/1888 with two reds; the guard violation this pass **did** introduce
+(`Workbench.tsx` as an unvetted band-3 owner) was fixed by registering it in the allowlist, and
+`bandGuard`'s dialog-owner test is green again.
+
+**Verified:** `npm run build` (tsc `--noEmit` under `strict` + `noUnusedLocals`, then vite) **exit 0**;
+`npm run check:bundle` OK (entry 134.8 KB gz against a 180 KB budget; the `RelicsLayer` chunk is
+38.25 KB); `npm run test` **1886/1888**, the two reds pre-existing and in files this pass never
+touched (see the defect list below). Live: Vite dev on `127.0.0.1:5173` boots clean and transforms the
+new modules (`/src/layers/relics/ArmouryList.tsx` → 200), and the running server answers
+`/api/items/surfaces/1` with the six statuses and `/api/items/armoury/1` with
+`{total:0,unseen:0,overReviewPressure:false,renderStrategy:"RenderAll",rows:[]}` — the exact shapes
+these components are typed against.
+
+⛔ **What is genuinely NOT wired, said plainly rather than implied by a `Pending`:** **no route serves
+module 10's rendered `DisplayModel`, `DominancePresentation`'s payload, or `SetDisclosure`'s
+per-piece result.** All three are built and green in Core and none has a `MapGet`. So `ItemCard`'s
+requirement/affix/enhancement/socket/set/granted-action blocks and `CompareView`'s delta table render
+their **pending** state with player-facing copy, not fabricated numbers — which is the contract
+working as designed, but it means the visible card today is identity + flags + rarity, not a full
+card. **Owner: this module**, and it is three read-only routes, not a design question. The
+`item.card.*` / `item.compare.*` message catalog is likewise unwritten, so a rendered line falls back
+to its own key's last segment.
+
+⛔ **`CONTRACT_VERSION` bumped 2 → 3.** `sockets`/`set` went `Pending<unknown>` → `Pending<SocketsView>`
+/ `Pending<SetView>`, which is a **narrowing** by the file's own rule even though both were declared
+placeholders no producer has ever filled. The bump is in the file with a dated note; ⚠ **the matching
+row in `decisions.md` is owed and is the owner's** — this pass did not write into that file.
+
+⚠ **Two shipped-route gaps found while typing against them, named not fixed** (both this module's own
+server file): `ArmouryPageDto` **drops `ArmouryPage.NextAfterKey`**, so the route accepts an `after`
+cursor but never tells a client what the next one is — paging past the first 200 is unreachable from
+the web today; and `CombinationRowDto` drops `MissingIngredient.MinTier`/`Quantity` and the row's
+`AllAttuned`, so the bench can name *which* family is missing but not *how many* of it, and cannot
+show the attunement half of the affinity rule the spec asks for.
+
+**⏸ Still deferred, with the owner named:**
+
+- [x] ✅ ~~⛔ **The eight `.tsx` files ARE THIS MODULE'S OWN WORK AND THEY ARE NOT BUILT.**~~ **BUILT
+      2026-09-06 — see the evidence table above.** The deferral's original text is kept verbatim below,
+      because its last paragraph is the brief the build was executed against and every clause of it
+      held: *"`ArmouryList`,
       `ArmouryFilter`, `Paperdoll`, `ItemCard`, `CompareView`, `SocketBench`, `Compendium` and the
       `RelicsLayer` body swap, plus `contract/types.ts`'s `SocketsView`/`SetView` and `adaptRelic`.
       **Not laundered onto another module:** the reason is that the web tree is being actively
@@ -6561,13 +7269,16 @@ are pinned: `A_matched_affinity_changes_a_strains_result_not_its_distance` and
       `GET /api/items/armoury/{playerId}`; the verdict word/shape, the sidegrade trade, the unit-class
       grouping and the footnote key from `DominancePresentation`; the per-piece set disclosure from
       `SetDisclosure`. **No layout decision in the spec was re-litigated** — comparison stacks at
-      640px, the bench and compendium are band-3, identity blocks 1–6 above the fold
-- [ ] ⏸ **`patronView.ts`'s own call site — module 10's cross-referenced hand-off, NOT picked up here.**
-      P2.5 filed it by name: `FormatPerMille` is the shared conversion this module (or the web layer)
-      is meant to call instead of `patronView.ts` owning a second `pct` closure. Not one of the eight
-      `.tsx` files above — `patronView.ts` lives in `features/demons/`, not `layers/relics/` — and this
-      pass touched no TypeScript file, so the call site is unchanged. **Owner: this module, on the same
-      web pass as the eight `.tsx` files above.**
+      640px, the bench and compendium are band-3, identity blocks 1–6 above the fold*"
+- [x] ✅ **`patronView.ts`'s own call site — CLOSED 2026-09-06 on the web pass, exactly as this bullet
+      predicted.** `auraLabel`'s private `pct` closure
+      (`` `${(milli / 10).toFixed(1).replace(/\.0$/, "")}%` ``) is deleted; it now calls the shared
+      conversion as `formatMagnitude({ unit: "perMilleRatio", value: milli, op: "flat" })`, which routes
+      through `i18n/magnitude.ts`'s own per-mille arm — the same one-decimal, trailing-zero-trimmed
+      rule `ItemDisplayRenderer.FormatPerMille` applies server-side. **Byte-identical output**, so the
+      vitest pins on `auraLabel` pass untouched: `pct(75)` was `"7.5%"` and is `"7.5%"`.
+      ⭐ **`op: "flat"`, not `"increased"`** — the label composes its own `+` per clause, and the signed
+      arm would print it twice. **There is now exactly one per-mille formatter in the web tree.**
 - [ ] ⏸ **`docs/web/spec.md` §399's success criterion 7 is NOT amended — the spec puts it under
       "Ask first" and it is another program's document.** The collision is real and re-verified
       today: `ssot-presentation.md` §1 cedes component code to the web spec, `docs/web/spec.md:137-144`
@@ -6946,22 +7657,62 @@ CharmCarryCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/CharmCarryStoreTes
 > **The gate:** *a player can see, compare, equip, socket and craft an item in the web control room
 > without reading a database.*
 >
-> ⛔ **Zero of the five verbs hold today, and P5.4 — the module that owns this checkpoint — says so in
-> its own body.** Its first deferral reads *"the eight `.tsx` files **ARE THIS MODULE'S OWN WORK AND
-> THEY ARE NOT BUILT**"* and its server bullet reads *"⛔ **There is no `MapPost` in the file,
+> ⛔ **Originally: zero of the five verbs held, and P5.4 — the module that owns this checkpoint — said
+> so in its own body.** Its first deferral read *"the eight `.tsx` files **ARE THIS MODULE'S OWN WORK
+> AND THEY ARE NOT BUILT**"* and its server bullet reads *"⛔ **There is no `MapPost` in the file,
 > deliberately**"*. The box was never reconciled with the section directly above it — the same
 > header-versus-body shape already corrected once in Checkpoint 1, and the same
 > conjunctive-gate failure named at the end of the rigor pass below (*"easy to verify each clause
-> exists … and still round the whole sentence up"*). Every row re-verified 2026-09-06:
+> exists … and still round the whole sentence up"*).
+>
+> ⭐ **Re-scored 2026-09-06 (later the same day) after the web client landed** — P5.4's own deferral is
+> closed and the eight `.tsx` files exist. **The gate is still NOT MET**, and the reason has moved from
+> *"nothing renders"* to two narrower, separately-owned things: **(a)** no route serves module 10's
+> `DisplayModel` / `DominancePresentation` / `SetDisclosure`, so the surfaces render honest pending
+> blocks rather than a full card — **this module's, three read-only routes**; and **(b)** equip, socket
+> and craft need the **server-side workbench executor**, which is a separately-dispatched piece and
+> not a UI question at all. The *"an item"* clause is unchanged and remains the deepest one. Every row
+> re-verified 2026-09-06:
 >
 > | Gate clause | Met? | Evidence, checked this session |
 > |---|---|---|
 > | **an item** (the subject of all five verbs) | ⛔ **no** | **No concrete `effect_container` row exists for any item.** The seed→concrete generator is deferred identically by modules 12, 13, 16, 17, 18, 21 and 22 — the corpora are seeds (a family and a band, never a magnitude). There is nothing yet to see, compare, equip, socket or craft |
-> | **see** | ⛔ **no** | `GET /api/items/surfaces/{playerId}` and `/api/items/armoury/{playerId}` ship (`ItemSurfaceEndpoints.cs:49,72`, mapped `Program.cs:609`) — and **nothing in `web/` calls them**: a grep for `api/items` over `web/fusion-rpg-web/src/` returns **zero** hits. None of `ArmouryList`, `ArmouryFilter`, `Paperdoll`, `ItemCard`, `Compendium` exists on disk |
-> | **compare** | ⛔ **no** | `CompareView.tsx` absent. `DominancePresentation` ships and is green, but it is Core-only — no renderer reads it |
-> | **equip** | ⛔ **no** for an item | `ItemSurfaceEndpoints.cs` carries **no `MapPost` and no `MapPut`**, by design, and module 4's `RpgStore.SaveAssignment` / `RemoveAssignment` still have **zero callers outside `tests/`** (re-verified). The one equipment write the web can reach is `UniqueActorEndpoints.cs:85` `PUT /api/unique/actors/{instanceId}/equipment/{slot}`, which `RelicsLayer.tsx` calls — that is T14's **four hand-authored relics**, not an item this program produces |
-> | **socket** | ⛔ **no** | `SocketBench.tsx` absent; no socket write route exists anywhere in `src/FusionRpg.Server/` |
-> | **craft** | ⛔ **no** | No craft/salvage write route exists; modules 14/15/16 all name the same not-yet-built workbench executor as their shared blocker |
+> | **see** | ⚠ **the UI holds; the payload is thin** — 2026-09-06 | ⭐ **The client exists as of this date.** `ArmouryList`, `ArmouryFilter`, `Paperdoll`, `ItemCard` and `Compendium` are on disk under `layers/relics/`, wired through `lib/bus/items.ts` to `GET /api/items/armoury/{playerId}` and `/api/items/surfaces/{playerId}`, and proven live (both routes answer the running server, and Vite dev transforms the modules clean). ⛔ **What it can show is still identity + rarity + flags**, because no route serves module 10's rendered `DisplayModel` — the card's affix/socket/set/enhancement blocks render their honest pending state. **A player can now see their items; they cannot yet read one.** Owner: this module, one read-only route |
+> | **compare** | ⚠ **the UI holds; the payload does not** — 2026-09-06 | `CompareView.tsx` exists: stack-first at 640px, unit-class group headers, the verdict word+shape, the sidegrade trade, the permanent footnote (test-asserted to carry no dismiss control). ⛔ **`DominancePresentation` is still Core-only** — no `MapGet` serves its payload, so the delta table renders pending rather than fabricating deltas client-side. Owner: this module |
+> | **equip** | ⛔→⭐ **the verb is now REAL and was driven end to end; the clause still fails on "an item"** | ⭐ **Built and proven 2026-09-06 (fourth pass) — see P1.4-E.** `ItemEquipEndpoints.cs` maps `POST /api/items/equip`, `POST /api/items/unequip` and `GET /api/items/assignments/{specimenId}`, and `SaveAssignment` / `RemoveAssignment` have a production caller for the first time. Driven against a **published** server: a real item went into `armament-primary` on a real bound specimen (200), and an **independent OS process** reading the running server's own SQLite file saw `armament-primary \| rolled \| 10b41112…`; unequip emptied the role and left the item owned. Four refusals were exercised live and each answered 409 with its own named rule — `equip.role-mismatch`, `equip.already-worn`, `equip.specimen-unknown`, `equip.role-empty`. The armoury tab's `Equip` is no longer disabled and `Paperdoll` now offers `Take off` on an item cell. ⛔ **Still not met** for the same reason as socket and craft: there is no *generated* item to equip (the row below), and the proof had to hand-seed two. ⏸ And an equipped item **changes no number yet** — bind is a deploy-time projection and `ApplyEquipProjection` (module 5) / `ApplyEquippedGrants` (module 19) still have zero production callers. ⛔ The relic write (`UniqueActorEndpoints.cs:85`) stays a separate, deliberately unmerged system; this route refuses a relic's role by name, **and the reverse is not true — measured defect R1 in P1.4-E** |
+> | **socket** | ⚠→⭐ **the UI now calls the real route, PROVEN against a real item; the clause still fails on "an item" ONLY — defect 1 is now closed** | ⭐ **Wired 2026-09-06 (third pass).** `SocketBench.tsx` calls `POST /api/items/workbench/socket-add` and `/socket-insert` through `lib/bus/items.ts`, and it was **driven end to end**: two real bores opened `item_socket` rows `[0]` and `[1]` on a real stored item at the server's own price (200 souls + 12 substrate + 1 catalyst each), a third was refused `socket.no-free-socket … socketMax of 2`, and an independent read-only re-read of the database showed both sockets persisted with `crafted=1`. `socket-imbue` is drawn **disabled with its real reason**: no shipped recipe authors the operation, confirmed live as 409 `material.recipe-unknown`. ✅ **Defect 1 is FIXED and re-verified live 2026-09-06 (fourth pass):** `FusionRpg.Server.csproj` now carries the `data\seed\items\**\*.json` content rule, and on a freshly **published** server `POST /api/items/workbench/salvage` answers **409 `item.unknown`** — mapped and real, not the 405 this file recorded. ⛔ **Still not met**, now for one reason only: there is no generated item to socket (the row below) |
+> | **craft** | ⚠→⭐ **the UI now calls the real routes, PROVEN end to end; the clause still fails on "an item" and on defect 3 — defect 1 is now closed** | ⭐ **Wired 2026-09-06 (third pass).** `Workbench.tsx`'s `CraftBench` calls `POST /api/items/workbench/{salvage\|upcycle\|enhance}`. Proven against a real server: `upcycle` spent 5 and granted 1 with the balance moving 500 → 495; the **same `correlationId` replayed** returned the recorded cost and spent nothing further; `enhance` took the item to `+1` with `enhance_level = 1` persisted; `salvage` flipped the disposition and granted the yield, after which a further verb was refused by name. Every quantity shown is the server's. ⛔ **Still not met** for the same two reasons as **socket**, plus **defect 3**: no route lists the craft recipes, so the bench asks the player to type a `recipeId` |
+>
+> ⚠ ~~**The distinction the three ⛔ rows turn on:** … Until [the executor] lands, those three verbs
+> stay ⛔ no matter how much UI is added, and the UI that exists for them (the paperdoll, the bench)
+> is honestly presentational rather than a button wired to nothing.~~ **Superseded 2026-09-06 (third
+> pass).** The executor landed and **the UI now calls it** — socket and craft are no longer
+> presentational, and both were driven end to end against a real stored item with the persisted
+> result read back independently (P5.4's proof table). What remains is narrower and differently
+> owned, so it is worth naming precisely rather than leaving the old sentence to imply a UI gap that
+> is closed:
+>
+> - **"an item"** is still the deepest failure and is unchanged — nothing generates a concrete
+>   `effect_container`, so the proof above had to seed one by hand. Owner: the seed→concrete generator.
+> - ~~**The routes are absent on a built server** (P5.4 defect 1)~~ ✅ **CLOSED 2026-09-06 (fourth
+>   pass), verified live rather than declared:** `FusionRpg.Server.csproj` carries the
+>   `data\seed\items\**\*.json` content rule now, and a freshly published server answers
+>   `POST /api/items/workbench/salvage` with **409 `item.unknown`** — the executor is mapped and
+>   reachable outside a hand-patched deployment.
+> - ~~**equip** alone is still genuinely unwritable — no route, anywhere, for putting an item in a
+>   role.~~ ✅ **CLOSED 2026-09-06 (fourth pass) — P1.4-E.** `POST /api/items/equip` and
+>   `/api/items/unequip` exist, the web armoury tab calls them, and one real item was put in a role
+>   on a real specimen against a published server with the row read back by an **independent OS
+>   process**. ⏸ What remains under this verb is narrower and belongs to two other modules: an
+>   equipped item **changes no number** until something calls `ApplyEquipProjection` (module 5) or
+>   `ApplyEquippedGrants` (module 19) at deploy, and both still have zero production callers.
+> - **compare** and the full **card** still wait on module 20's own three read-only routes.
+>
+> ⛔ **Do not re-mark this ✅** until an item exists and the card/compare payload routes land. **Two**
+> named things now, each with an owner — down from four, and neither of the two is equip.
+> ⚠ **The `see` and `compare` rows above are unchanged by this pass** and were not re-scored: nothing
+> in the equip work touches `DisplayModel` / `DominancePresentation`, and rounding the gate up on the
+> strength of a different verb is exactly the conjunctive-gate failure this box was corrected for.
 > | *without reading a database* | ✅ n/a | Nothing here requires one — the clause is satisfied vacuously and is not what fails |
 >
 > ✅ **What DID land, and it is the half the plan called deciding:** the eight Core files under
@@ -6969,11 +7720,14 @@ CharmCarryCorpusTests.cs}`, `tests/FusionRpg.Data.Tests/Items/CharmCarryStoreTes
 > routes wired at boot — **32/32 green, re-run 2026-09-06**. The gap is composition, not design: P5.4
 > lists what each `.tsx` file reads and from where.
 >
-> ⛔ **The blocker is real and is the owner's, not an oversight.** The web tree is mid-refactor by the
-> world-stage stream and the owner's own standing note is *"map FE frozen pre-refactor — do not add UI
-> to it."* **Owner: module 20, on the web pass that unfreezes** — plus module 4's equip endpoint and
-> the workbench executor for the three write verbs, and the seed→concrete generator for the subject
-> of the sentence. **Do not re-mark this ✅ until a `.tsx` render pass and those write paths land.**
+> ⛔ ~~**The blocker is real and is the owner's, not an oversight.** The web tree is mid-refactor by the
+> world-stage stream … **Do not re-mark this ✅ until a `.tsx` render pass and those write paths land.**~~
+> **Superseded 2026-09-06 (fourth pass).** The `.tsx` render pass landed (third pass) and **all three
+> write paths now land too** — the workbench executor, its six verbs' UI, and module 4's equip
+> endpoint with its own UI. The owner's *"map FE frozen"* note is about `stages/world/`, and nothing
+> in this or the previous pass touched it. What is left of this checkpoint is the seed→concrete
+> generator (**the subject of the sentence**) and module 20's own two payload routes — no longer a
+> write-path gap of any kind.
 
 ---
 
@@ -7134,7 +7888,7 @@ correctly is not the same as its conclusion following, or the cited code still s
 | ⏸ `rpg_demon_materials` → `rpg_materials` rename | ⚠ **still open, and the line list drifted a THIRD time** | Fresh grep 2026-09-06: **11 SQL sites in 5 files — the count holds** — but `RpgStore.cs` is now **596** (DDL; P4.1 recorded 575, itself a correction of the spec) and **806** (reset; recorded 754, itself a correction of 714, itself of the spec's 697). The other nine sites are unmoved (`Expeditions.cs` 233/253, `Fusion.cs` 395, `ShardRungs.cs` 48/71/89, `Materials.cs` 153/175/293). Also **one doc mention never counted**: `RpgStore.cs:660`. `RpgStore.cs` is mid-edit by a concurrent stream, so these numbers will drift again — the durable facts are *11 sites, 5 files, all inside `src/FusionRpg.Data/`* |
 | ⏸ Ten missing shard display rows | ⚠ still open, **unchanged** | `materials/materials.json` = **21** rows (`substrate 8 · essence 6 · shard 4 · catalyst 3`); the four shard rows are still `shard.common/rare/epic/legendary` and **zero** of the ten `shard.{rung}` ids ship |
 | ⏸ Tier-axis pricing; no `forge-gem`/`imbue` recipe; sixth spend class ask-first | ✅ all still true | No shipped recipe authors a `qty_curve_id`; `MaterialClass` still 5, `CatalystVerbs` still 3 |
-| ⏸ Step 5 `perform` not wired to a production mutation | ✅ still true — **and now measured, not asserted** | `TrySpendRecipe` has **zero production callers**: every hit outside its own declaration (`RpgStore.Materials.cs:210`) is a test or a doc comment |
+| ⏸ Step 5 `perform` not wired to a production mutation | ⏸→✅ **CLOSED later the same day** | Was true and measured when this pass ran: `TrySpendRecipe` had zero production callers. The executor landed 2026-09-06 — `ItemWorkbench.Upcycle`/`.Enhance`/`.SocketAdd`/`.SocketInsert`/`.SocketImbue` all call it through `RpgStore.TrySpendAndApply`. See P4.1 |
 
 ### Module 15 `enhance-reroll` (P4.2)
 
@@ -7144,7 +7898,7 @@ correctly is not the same as its conclusion following, or the cited code still s
 | `op_kind` namespace is a closed ten | ✅ holds | `MutationOp.cs:13-47` — `Enhance · RerollValue · RerollAffix · EnhanceTransferOut · EnhanceTransferIn · Restore · SocketAdd · SocketInsert · SocketRemove · SocketImbue`, exactly 10 |
 | `Mixed`-affix reroll built; `reroll.mixed-affix-undefined` deleted | ✅ holds | Zero occurrences repo-wide except two comments *recording the deletion* (`RerollPolicy.cs:92`, `RerollPolicyTests.cs:162`); `Instantiator.cs:255` is `public static BudgetDraw DrawBudget(` — the spec's `count`/`excludeGroups` ask is really public |
 | `CraftingHorizonReport` ships and reproduces §4b | ⚠ **computes; it does not print** | Six public members returning `CraftingHorizonRow` records (`:46/:50/:61/:71/:81/:105`); **no renderer, no production caller** — the only non-self references are `EnhancePolicyTests.cs`. §4b's table and Θc = 123 are genuinely asserted (`EnhancePolicyTests.cs:346`). Folded into the Checkpoint 4 correction above |
-| ⏸ **No workbench executor** | ✅ **genuine, current, and shared** | `AppendMutationOp` has zero production callers (declaration `RpgStore.InstanceOps.cs:100`, all other hits tests). Confirmed against modules 14 and 16 below: all three name the same missing thing, **none has silently built it**, and no test drives the joined path |
+| ⏸ **No workbench executor** | ⏸→✅ **genuine when measured, BUILT the same day** | `AppendMutationOp` had zero production callers (declaration `RpgStore.InstanceOps.cs:100`, all other hits tests), and all three modules named the same missing thing. `ItemWorkbench.Enhance` is now its production caller and `ItemWorkbenchEndpointsTests` drives the joined path. ⏸ **reroll and transfer are still unwired** and each for a stated reason — see P4.2 |
 | ⏸ `Restore` declared, unimplemented; module 20 is not the trigger | ✅ still true | `MutationOpKind.Restore` at `MutationOp.cs:31`; no implementation anywhere |
 | ⏸ Milestone atoms unauthored; no endpoint/DTO/UI | ✅ still true | — |
 | ⚠ `spec-enhance-reroll.md` §2's satisfied conditional | ✅ still as recorded | Left authored; antecedent false, statement not wrong |
@@ -7162,7 +7916,7 @@ correctly is not the same as its conclusion following, or the cited code still s
 | ⏸ `bind_ordinal` on `effect_binding` — E6's | ✅ still absent | DDL at `RpgStore.AtomInstances.cs:83-94` is exactly the nine columns P4.3 lists; no `bind_ordinal` |
 | ⏸ 25 legacy `sockword.*` unmigrated | ✅ still true | `socket-words/sockwords.json` = **25** entries, ingredient counts `{2: 15, 3: 10}` — P4.3's and T4's figures both exact |
 | ⏸ Wave-1 inserts held; combo-vs-set budget (module 9); `ThresholdEvaluator` reuse (P3.2) | ✅ all still open with the owners named | — |
-| ⏸ The workbench executor that debits and appends a socket op | ✅ **genuine** | `SetSockets` has zero production callers (declaration `RpgStore.Sockets.cs:104`, all other hits tests) |
+| ⏸ The workbench executor that debits and appends a socket op | ⏸→✅ **genuine when measured, BUILT the same day** | `SetSockets` had zero production callers (declaration `RpgStore.Sockets.cs:104`, all other hits tests). `ItemWorkbench.SocketAdd`/`.SocketInsert`/`.SocketImbue` are now its production callers, writing inside module 14's spend transaction. See P4.3 |
 
 ### Module 21 `strain-splice-gen` (P4.4)
 
@@ -7346,7 +8100,937 @@ covers it; said here rather than implied.
 
 ---
 
-## The scope boundary — D26, with its reason
+## Final-proof mapping — Phase 3, modules 11-13 (2026-09-06)
+
+Every claim in P3.1, P3.2, P3.3 and the Checkpoint 3 box, re-read against the spec it promised and
+then against the code, the corpus or the artefact it cites. **Nothing was accepted because it was
+quoted correctly** — that is the lesson the three earlier rigor passes wrote into this file, and it is
+the one that paid here: four of the six findings below are citations that were true when written and
+are wrong now, and one is a question this file still calls open that the code answered a day earlier.
+
+**Everything cited was run this session.** Commands and counts:
+
+| Command | Result, this session |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "…DropVolume\|…LootPipeline\|…WorldSectorLootSource\|…ThresholdGrant"` | **127 passed / 0 failed** |
+| …split: `DropVolume\|LootPipeline` · `WorldSectorLootSource` · `ThresholdGrant` | **64** · **13** · **50**, all green |
+| `dotnet test tests\FusionRpg.Data.Tests --no-build --filter "…DropTableStore\|…ItemSetStore"` | **20 passed / 0 failed** (12 + 8) |
+| `cd tools\seedsmith; python -m pytest tests/test_item_gen_wiring.py tests/test_set_charm_gen.py -q` | **107 passed, 275 subtests** — the exact figure P3.3's own fix block records |
+| `python -m seedsmith check ..\..\data\seed\items --adapter items --gate` | **61 gap / 80 note / 23 not_measured** — exact |
+| `python -m seedsmith check … --metric Linkage/SetCompletability` | **30 gap** — exact |
+| `python -m seedsmith items generate --kind set --population build --dry-run` | `toGenerate 36 · held 0 · complete true · gatesMissingAThreshold []` — exact |
+| `python -m seedsmith items generate --kind set --population species --dry-run` | `toGenerate 53 · held 31 (basis=name) · complete false`; `themeCoverage {species 840, themes 84, uncovered 772, orphaned 16}` — every number exact |
+| `dotnet run --project tools\ItemSeedValidator` | ⚠ **178 errors / 120 partitions**, not the cited 165 — see finding 6 |
+| `dotnet run --project tools\AtomImporter -- --check --validate` | ⛔ **RED, 1 error, nothing imported** — see finding 5 |
+
+⚠ **`FusionRpg.Data.Tests` needed `--no-build`**: the first attempt died on `MSB3027`, another
+session's `testhost (24756, 65896)` holding `FusionRpg.Data.dll`. Same pattern P3.1 and its addendum
+both already record. Not a failure, and no other session's process was killed to get past it.
+
+### Module 11 `drop-volume`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| D38 — flat 5 % kill, two rolls, `scalesWithTheta` ships `false` | ✅ holds | `data/tuning/item-drop-volume.v1.json` read whole: `dropChanceOnKillMilli: 50`, `scalesWithTheta: false`. Both cited tests exist and are inside the green 64 |
+| Volume linear in Θ, no private curve, `long`, ÷1000 last | ✅ holds | `Volume_uses_no_private_curve`, `Overflow_throws_it_never_wraps` — both present, both green |
+| No cap anywhere; `FloorMilli` structural and says so | ✅ holds | `floorNote` reads verbatim *"STRUCTURAL, not a progression ceiling (AGENTS.md) … It is a LOWER bound; there is deliberately NO upper bound"*. The three grep-guards exist and pass |
+| Correction 1 — 8 rows exact at Θ = 20 | ✅ holds | `data/seed/loot/tables.v1.json` parses to **10 tables / 8 sources**, exact; `DropVolumeCorpusTests` green |
+| Pity re-solved: 43 / 83 / 221 on rung ids, no `r4`/`r6` | ✅ holds | All three thresholds read off the tuning file; both pity tests green |
+| `almanac` has a deterministic source | ✅ holds, ⛔ **its pointer did not** | `data/seed/containers/first-clear-grants.json` exists and is a container-kind seed file. **Finding 1** |
+| Nine entry kinds, divergence recorded in the enum's own doc comment | ✅ holds | `DropEntryKind` has exactly nine members; the doc comment above it states *"Nine values, not seven"* and names `entry-shapes.md` §9 |
+| No new reason code; 35 names | ✅ holds | `AtomRejection.cs`'s enum parsed: **exactly 35** names, `None` and `ContentRuleViolated` among them |
+| Correction 3 — `warpath-20h` is four waves | ✅ holds | `ExpeditionResolver.cs:202` is `{ rift-warband, rift-onslaught, rift-onslaught, rift-tyrant }` — four, at the cited line |
+| Correction 4 — step 10 stream is `roll_seed`-derived | ✅ holds | `LootStreams.Sockets = "item.socket"`; its doc comment cites `spec-sockets.md:143-145`, and that spec line reads `DeriveStream(roll_seed, "item.socket")` |
+| `item_generation` has no `socket_count` | ✅ **still** holds after module 16 shipped | `Item_generation_has_no_socket_count_column` green; `RpgStore.Loot.cs:17` states the absence is the design |
+| 40/day filed as a filter; `CountEquipmentMinted` a measurement only | ✅ holds | `LootFilterView` exists (`Items/Surfaces/LootFilterRule.cs:58`) and is used by `ItemSurfaceEndpoints.cs:93`. `CountEquipmentMinted` has **zero** production callers — only `RpgStore.Loot.cs` declaring it and four test assertions |
+| `world-sector` source built; `MapLevel` in `Core/Power`, one ladder | ✅ holds | `PowerIndexComposer.MapLevel` at `:97`, exactly one production caller (`WorldSectorLootSource.cs:63`); `inventory.json` row 23's `locationNote` is repointed to the code, dated 2026-09-05 |
+| ⏸ Smart loot deferred (X1 + X4) | ✅ still true | The test exists — note the shipped name is `Smart_loot_is_off_…` (capital S); the todo spells it lowercase |
+| ⏸ seedsmith band→row generator not built | ✅ still true | `data/seed/items/drop-tables/` is still the authored shape, `data/seed/loot/` still the generated one |
+| ⏸ No `pvz-run` source, by refusal | ✅ still true | Both tests present and green |
+| ⏸ `Instantiator` seam has no production caller | ✅ still true, **with a sharper reason now** | No `LootPipeline.Resolve` call exists anywhere in `src/`. **Finding 4c** |
+| X4 / X7 cross-reference text | ⚠ **X7 count stale** | **Finding 2** |
+
+### Module 12 `threshold-grants`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| One evaluator, three consumers, no forked copy | ✅ holds | All 23 cited test names exist, one match each; the whole `ThresholdGrant` filter is **50 / 50** green |
+| D3 `Min` over two budget-weighted buckets; the 230‰ fixture | ✅ holds | `A_six_six_split_…_concedes_230_not_400_permille` present and green; `item-frame-mix.v1.json`'s own note carries the same six-role arithmetic |
+| Recovery curve shape enforced at load, four rule ids | ✅ holds | The tuning file's `shapeNote` states all four properties; knots are `0/100/200/300/400 → 800/850/900/950/1000`, i.e. exactly `f(m) = 800 + m/2` |
+| Knot list is the tunable; tiers derived from it | ✅ holds | `tiers.derivedNote` says so; `Breakpoints_come_from_tuning_not_from_code` green |
+| `minorityMilli > 400` throws, bound derived | ✅ holds | `budgetTotalMilli 800` / `parityMinorityMilli 400` in the file, with the derivation written beside them |
+| No `maxActiveSets`; seven partial sets legal | ✅ holds | Both tests present and green |
+| Counting per role, proven twice | ✅ holds | Both tests present; the SQL half is inside the green 20 |
+| D33(a) `unique-actor:` scope; `player:` refused in code | ✅ holds, **and the quotes are literal** | `StatApplyScope.cs:82-83` really is `if (key.StartsWith("player:")) return true; // stub → match-wide apply`, and `:92` really does report `player:` as match-wide |
+| ssot-sets §4.2's three tables; the real 30-set corpus round-trips | ✅ holds | Corpus counted from disk: **30 sets / 180 members / 86 tiers** — exact |
+| Charm classes 21 / 32 / 7; `ap_cost` 1×21 2×21 3×11 5×7 | ✅ **exact** | Counted from disk under the loader's own rule (which skips `resonance.json`): 60 defs, 21 / 32 / 7, ap 1×21 · 2×21 · 3×11 · 5×7 |
+| Defect 3 — the three hybrid-role sources now agree | ✅ holds | `core.v1.json` is `registryVersion 2`; the pinning test is green |
+| Defect 4 — 154 / 25 / max 3 shared members, picked up by module 20 | ✅ holds | `SetDisclosure` exists and cites `SetEvaluator.Hits`' dedupe; test green |
+| ⏸ X7 not landed | ✅ conclusion true, ⚠ **enumeration stale** | **Finding 2** |
+| ⏸ Nothing calls the evaluator from a production path | ✅ true **for the grant path**, ⚠ imprecise as a headline | `ThresholdEvaluator.Evaluate`/`Reconcile` have no production caller. But `SetEvaluator.Progress` **does** — `RpgStore.ItemCard.cs:377`, module 10's card. The bullet's body is right (the missing caller is the *equip transaction*, and binding waits on X7); only its headline over-claims |
+| ⏸ Module 16 should reuse `ThresholdEvaluator` — "still open" | ⛔ **STALE — answered before the re-check ran** | **Finding 4a. Fixed: the bullet is now closed in place.** |
+| ⏸ D33(b) filed against `buff-debuff-scope` | ✅ still true | `StatApplyScope` still has no atom field; `unique-actor:` still falls through to `return false`, which the bullet already says is correct |
+
+### Module 13 `set-charm-gen`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| Twelve-role cap applied inside the schema | ✅ holds | Both tests green inside the 107 |
+| `audit_schema`-clean by construction, no allow-list escape | ✅ holds | Green |
+| Tuning file + a parser that refuses rather than defaults | ✅ holds | `data/tuning/set-charm-gen.v1.json` read whole |
+| Vocabularies counted from the live corpus | ✅ mechanism holds, ⚠ **numbers moved** | **Finding 3.** Live: 100 families · 44 capability → **62** picks · 56 stat → 242 picks. The dry-run CLI prints `capabilityPicks = 62` itself |
+| AE budget integer per-mille, apportionment exact | ✅ holds | Green |
+| The id defect refused at the minting function | ✅ holds | Green |
+| `build-themes.v1.json` derived, 36 rows | ✅ holds | Parsed: `themes` = **36** |
+| `Distribution/CellOccupancy` — 28 cells, median 1, max 2, 26 singletons | ✅ holds | Re-run this session: identical |
+| D17's dead tail protected | ✅ holds | Grepped the tuning file: no `maxGeneratedSets` / `maxSpeciesSets` / `rosterCap` |
+| Defect 1 — D30's 18 legacy sets still open | ✅ **exact** | Counted from `data/seed/items/sets/**`: **18** sets name a dropped role, **10** `head-guard`, **11** `sense`, **3** both. `Linkage/SetCompletability` re-run: **30 gap** |
+| Defect 2 — the species denominator is 840, not 386 | ✅ holds | `_index.json` holds **840** species. ⚠ Family files are **502** referenced / **503** on disk against the recorded 495 — the entry already says the tree is being rewritten and both move; the load-bearing 840 is unchanged |
+| Defect 3 — 16 orphaned themes | ✅ **exact** | `themeCoverage.orphaned` = **16** |
+| Defect 4 — MinHash over-reports; fixed for this module only | ✅ holds | `setgen/dedup.py` present; the shared metric is untouched |
+| Defect 5 — mitigation #2 does not hold on `jewel-minor-a` | ✅ holds | Re-measured: `retinue` 7, `footing` 13, `jewel-minor-a` **62 of 62** |
+| The generation graph wired 2026-09-06; replay transport; no live endpoint | ✅ holds | `workflow/graphs/item_set.py`, `setgen/{answers,seedfile,authored}.py` all present |
+| The 3+3 v1 sample and its results | ✅ **holds row by row** | `tools/seedsmith/_sample-runs/2026-09-06-item-gen/` exists. Every cell of the diversity table checks against the JSON: `Fallweight of the Sledgevine` / `deathblast`+earth / mixed frames; `Ramparts of the Turned Earth` / `terraforming` / all plant; `Plumb and Ballast` / `terraforming` / two-and-two; all three top thresholds three families wide. Charms: 3 × `signet`, 3 × `survivability`, ids `charm.surv-util-021…023`. `run-charms.log` carries `axis Gini 800permille over 3 charms (ceiling 133)`, `cleared: false`, `verdict: fail` |
+| The five defects found, and ALL FIVE FIXED + re-sampled | ✅ **holds, verified in code not prose** | `threshold_ladder` called live: `2→(2,)`, `3→(2,3)`, `4→(2,4)`, **`5→(2,4)`**, `6→(2,4,6)` — defect 4's fix is real. `charm.ringLayerFamilies` (6 named) + `ringLayerKinds ["status.apply"]` resolve to **13** families, exactly as claimed. `Module13DefectsFixedTests` exists at `test_item_gen_wiring.py:422`. v2 sample on disk: `charm.econ-021` (minor/economy), `charm.off-ctrl-021` (standard/offense), `charm.off-ctrl-022` (signet/control) — **3 axes, 3 classes, 2 partition files** — and `might-balance` really does emit `atom.elpw-pierce` with `params.element: omni`. The floor-aware Gini line is in `run-charms.log` verbatim, still `verdict: fail` |
+| The v2 "after" numbers | ⚠ **three cells moved** | **Finding 3** |
+| Class-mix observation *"the shipped 70 are minor 31 …"* | ⛔ **wrong denominator** | **Finding 4b. Fixed in place.** |
+| ⏸ The generative authoring pass is not run | ✅ still true, untouched | Out of scope for this pass by instruction; nothing here changes it |
+| ⏸ P0.2 / P0.3 gate the species half | ✅ still true | `held 31 (basis=name)`, `complete: false` |
+| ⏸ `naming.v1.json` v3 is an ask-first on a frozen registry | ✅ **exact, all four moving parts** | File is `registryVersion 4, frozen: true`; `NamespaceAllocation.cs:~220` really does `Regex.Matches(note, @"charm\.res-[a-z]+-(\d+)")` and splice the raw digit string — **no `int.Parse` anywhere in the file** — and the note's worked examples are still unpadded (`2`, `3`) |
+| ⏸ `demon.*` themeKeys do not resolve in `ItemSeedValidator` | ✅ still true | `RegistrySet.ThemeIds` is still `theme.*` ∪ `build.*` |
+| ⏸ `CellOccupancy` promotion, X4/X7, live transport, `baseType` | ✅ still true | `PROMOTION_TRIGGER` asserted; X4 still specced-and-unbuilt; X7 see finding 2; no `llm_caller` import on the replay path |
+
+### Checkpoint 3 — the box re-read
+
+**It holds, and "half held" is still the honest framing.** Its module-11 half (a drop table produces
+an item at a level, rarity matching the published bands) and its module-12 half (a set bonus at its
+breakpoint at `unique-actor:` scope, no atom at `player:`) are both carried by tests I ran green this
+session. Its held half is still held for both stated reasons: the generation run is unauthorised, and
+X7 has landed **no** D27 container kind. One refinement worth recording — when the box was written the
+generator was *"built and tested"*; since the v2 sample it is **built, tested and demonstrated**, with
+3 sets and 3 charms persisting at attempt 1 and the shipped distributor accepting them. What
+Checkpoint 3 waits on is now purely authorisation and X7, not machinery.
+
+### Findings
+
+**1 ⛔ FIXED — module 11's own tuning file pointed at a file that has never existed.**
+`data/tuning/item-drop-volume.v1.json`'s `unguardedTopRungNote` named the almanac's deterministic
+source as `data/seed/loot/first-clear.v1.json`. There is no such file and there never was — the grant
+is `data/seed/containers/first-clear-grants.json`, and P3.1's own bullet explains *why* it lives under
+`containers/` (a `SeedScanner.OwnedFolders` entry, so it imports through the standard path). A balance
+pass reading that note would have gone looking in the wrong tree for the one row that makes rung 100
+reachable. **Corrected in place**, with the real container id and the reason. Re-ran
+`DropVolume|LootPipeline` with a full rebuild afterwards: **64 / 64 green.**
+
+**2 ⛔ FIXED — the X7 citation is stale in all three modules, in two different ways.**
+`ContainerRow.cs` ships **seven** `ContainerKind` values and `PrefixOf` has **seven** arms — `Enemy`
+landed as party-dungeon D2.6's own reviewed addition (`spec-encounter-generator.md` §6), it is in
+`HEAD`, and the enum's doc comment now opens *"The seven container kinds."* P3.1, P3.2 and P3.3 all
+still said six. Separately, **the ask is five, not four**: `effect-atom-map.md` §20 — filed by this
+program **today** — lists `gem` · `set` · `charm` · `combo` · **`consumable`**. P3.1's defect 2 already
+names the fifth; P3.2's and P3.3's bullets did not. ⭐ **The conclusion is unchanged and the correction
+strengthens it**: `Enemy` is a worked precedent that the closed-vocabulary ask-first path is
+**traversable**, so X7 is a wiring/process gap with a demonstrated route, not a frozen wall. Corrected
+in place at all four in-scope sites. ⚠ **Named, not fixed:** `effect-atom-map.md` §20's own row also
+says *"`ContainerRow.cs:7-14` ships exactly six kinds"* — that is effect-atom's document, and this pass
+does not edit another program's map.
+
+**3 ⛔ FIXED — module 13's vocabulary numbers drifted by two families, and the shipped test had
+already self-corrected while the todo had not.** `data/seed/items/affix-families/g-punisher.json`
+(added in `5864231`, 2026-09-06 11:55; the **action** program's pairing-tier fix) added `atom.chill-punisher`
+and `atom.rot-punisher`. Live today: **100 families · 44 capability families → 62 picks · 242 stat
+picks**, charm pool **263 picks over 83 families**, §3.6 exclusion **13 of 100**. The todo said 98 /
+42 / 60 / 261 / 81 / 13-of-98. `test_set_charm_gen.py:164-186` was corrected the same day and asserts
+62 / 100 / 44 / 56 with the reason in its docstring — **so the machinery caught it and only the prose
+was stale**, which is the whole argument for *"counted from the corpus, never transcribed."* The
+exclusion *size* (13) is unchanged, and 13 is the cell that carried the finding. Corrected in the
+bullet and in the before/after table. Also tidied one stale prose denominator in
+`test_set_charm_gen.py`'s `capability_families_carry_roles` docstring (it still read "60" three times
+beside an assertion that is derived); re-measured `retinue` 7 and `footing` 13 as unchanged before
+touching it, and re-ran: **107 passed, 275 subtests.**
+
+**4 ⛔ FIXED — conclusions that did not follow from their own citations.**
+**(a) P3.2's module-16-reuse question was answered a day before it was called open.** The 2026-09-05
+re-check read P4.3's *todo section*, correctly found no mention of `ThresholdEvaluator`, and concluded
+*"whether this was a deliberate decline or an unnoticed miss is still open."* The answer was in P4.3's
+**code**: `CombinationEvaluator.cs:18-21` says *"Reusing module 12's shape, not its machine"* and then
+quotes module 12's own *"would make the scope a parameter of a thing whose whole identity is its
+scope"* reasoning back at it. **Provenance, by git rather than by mtime:** the comment entered the
+tree in `4e9e8bd` (2026-09-05 05:05) — the same day as the re-check, and the commit that was `HEAD`
+when this pass started. Whether it landed an hour before or after the re-check is unknowable and does
+not matter: it is committed, it answers the question, and a grep of `Items/Sockets/` would have found
+it. This is the pass's own lesson in miniature — the citation was real and accurately quoted, and the
+conclusion still did not follow, because the evidence that settled it was one directory away from the
+document being read. **Bullet closed in place.**
+**(b) P3.3's charm-class comparison used a 70-row denominator that includes 10 non-charms.** Ten of
+`charms/`'s 70 rows are `resonance.json`'s resonance containers — all `minor`, all 1 AP, and the same
+section calls them *"not charms a player carries."* They are what turns 21 `minor` into 31. The
+authored population is **60** (21 / 32 / 7), so the signet base rate is **11.7 %, not 10 %**. Both
+sides of the build already draw the line explicitly — `ThresholdGrantCorpusTests` skips the file, and
+the Python test is literally named `…_excluding_the_ten_resonance_rows` — so this was prose reaching
+for the wrong one of two numbers the code already distinguishes. The 70-row denominator **is** right
+where the wiring tests use it (family coverage over everything the folder ships). Corrected in place;
+the finding is unchanged and slightly stronger.
+**(c) A related sharpening, no edit needed.** P3.1's *"the `Instantiator` seam has no production
+caller"* is still literally true, but the landscape moved: party-dungeon's
+`Delve/Loot/DelveLoot.InstantiateBossFirstClearGrant` (2026-09-06) **does** call the real
+`Instantiator.TryInstantiate` on module 11's own `LootStreams.RollSeed`, deliberately as a *separate*
+function, and records why — editing `LootPipeline.cs:225-231` is marked ask-first because it moves
+every manifest golden carrying a `FirstClearGrant`. So the wiring gap now has a **named ask-first
+blocker with a worked parallel implementation**, not merely an absent caller.
+
+**5 ⛔ NAMED, NOT FIXED — `AtomImporter --check --validate` is red today, and it is not this
+program's.** All three module sections cite it as *"clean, exit 0."* Run this session it returns
+`1 error(s) — the files were refused; nothing was imported`, on
+`data/seed/atoms/vocabulary.json: UnknownKind — kind ''`. That file is **tracked and committed** (last
+changed in `50fcdf8`, 2026-09-06 09:54), and its own `_meta.note` says *"Generated by `tools/PassiveTreeRosterGen
+--atom-vocab-emit`"* — a **passive-tree** artefact sitting in `data/seed/atoms/`, which is a
+`SeedScanner.OwnedFolders` entry, so the importer reads it as a seed file and refuses the whole
+import. Not a module 11/12/13 regression (their runs were green before the file landed), and not this
+program's to fix — it belongs to whoever owns `PassiveTreeRosterGen`'s output path, or to effect-atom's
+importer contract if a generated non-seed file is meant to be legal there. Recorded because a later
+session running any of the three cited **Verify** lines will see red and could mis-attribute it.
+⚠ The Module-5 final-proof section above independently reached the same file as the input to 12
+failing `TraitMigrationParityTests` — two passes, same root cause, so it is stable and reproducible
+rather than a flake.
+
+✅ **Filed 2026-09-06** — to both real owners, per the established convention: `passive-tree-map.md`'s
+own "Filed by the item program" section (the artefact-placement half) and `effect-atom-map.md` §20's
+third row (the whole-batch-refusal robustness half). Two independent fixes, either one closing today's
+break.
+
+**6 ⚠ NAMED — the `ItemSeedValidator` baseline moved 165 → 178.** All three sections cite *"165
+errors — identical to the module-6/8/11/12 baseline."* It is **178 across 120 partitions** today. The
+mix is dominated by `MetaRegistryVersionBehind` and `MetaRegistryVersionMismatch` — registry metadata
+drift, the visible instances reading *"authored against classes v2, v4 is loaded"* — i.e. the
+`classes.v1.json` v4 regeneration that Checkpoint 0 owns and that is **deliberately held pending owner
+authorisation**. Not re-litigated here and not attributed to modules 11/12/13: none of the visible
+error classes is one of their content rules, and the partition count (120) is unchanged. Stated so the
+next session compares against 178, or re-derives it, rather than against a number that predates the v4
+load. ⭐ **Independently corroborated:** the Phase 2 final-proof section in this same file measured
+**178** as well, from a different run and a different starting question, and reached the same verdict
+(*"the 165 both P2.2 and P2.3 record has drifted to 178 from other lanes' corpus edits"*). Two
+unrelated passes landing on the same number makes 178 the baseline, not a one-off reading.
+
+**Files changed by this pass:** `data/tuning/item-drop-volume.v1.json` (finding 1),
+`tools/seedsmith/tests/test_set_charm_gen.py` (finding 3, docstring only), this file.
+**Not touched, by instruction:** the `classes.v1.json` v4 generation run, and anything under
+`data/seed/items/`.
+
+⚠ **`HEAD` moved twice while this pass ran** — `4e9e8bd` → `2002823` → `5864231` → `3b4ddd1`
+(2026-09-06 14:37), the owner committing from their own terminal — which swept the two code edits
+above into a commit before this section was written. That is why every provenance claim here is dated
+by `git log`/`git log -S` rather than by file mtime: on a tree three programs are writing at once,
+mtime and commit date disagree by hours, and mtime is the one that lies about ordering. No git write
+command was run from this session.
+
+---
+
+## Final-proof mapping — Phase 5, modules 17,18,19,20,22 (2026-09-06)
+
+Every checkbox in P5.1–P5.5 was re-read against `tasks/item-plan.md` §"Phase 5" and the five
+`docs/architecture/item/spec-*.md` files, then the cited file was **opened** and the cited test
+**re-run in this session**. The rule from the three prior passes was applied literally: *a citation
+being real and quoted correctly is not the same as its conclusion following, or the cited code still
+saying what is claimed.* Four of the six findings below are that exact shape — the citation is real,
+the code moved under it.
+
+**Suites re-run this session, none inherited** (`Core.Tests` rebuilt clean; `Data.Tests` run
+`--no-build` against binaries stamped 13:47–13:49 today, **after** every item source in the tree —
+two live `testhost` processes from a concurrent session held `FusionRpg.Core.dll` and were left alone):
+
+| Command | Result | Claimed |
+|---|---|---|
+| `Core.Tests --filter "…Items.Unique"` | **61 / 0** | 61 ✅ |
+| `Core.Tests --filter "…Consumable\|…DraughtManifest"` | **89 / 1**, then **90 / 0** after the fix below | 78 (grown) |
+| `Core.Tests --filter "…ActionUsability"` | **38 / 0** | 25 of the 113 ✅ |
+| `Core.Tests --filter "…Items.ItemGrantedActionTests"` | **50 / 0** | 50 ✅ |
+| `Core.Tests --filter Items.ItemSurfaceTests` | **32 / 0** | 32 ✅ |
+| `Core.Tests --filter CharmCarry` | **48 / 0** | 48 ✅ |
+| `Data.Tests --filter "…ItemUnique"` / `"…RunDraught\|…StockSpend"` / `"…ItemGrantStore"` / `CharmCarry` | **7 / 27 / 14 / 19**, all 0 failed | 7 / 27 / 14 / 19 ✅ |
+| `Data.Tests --filter "…Tests.Items."` (whole DAL half) | ⭐ **189 / 0** | — |
+| `Core.Tests --filter "…Tests.Items."` (whole Core half) | **871 / 3** → the 3 are all `RoleFamilyTableTests`, one root cause, named below | — |
+| `dotnet run --project tools\ItemSeedValidator` | **178 errors / 120 partitions** — *not* the 170 all five modules record. Fully attributed below; **module 17's own 4 `UniqueFrameImpossible` are unchanged** | 170 ⚠ |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0, M2 = 0, M4 = 0, exit 0**; 16 M3 (was 13), `items` domain 1 | ✅ |
+| `python scripts\audit-overflow.py` | **0 critical**, 63 findings, **zero** under `Items/{Uniques,Consumables,Grants,Surfaces,Thresholds}` | ✅ |
+| `guard-dal` · `guard-single-writer` · `guard-funnel-delta` · `guard-secondary-no-unity` | ✅ **all four OK** | ✅ |
+
+### Module 17 `uniques`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| G1's premise, the nine rule ids, devices 1/2/4, the parity metric, `unique_eligible`, `item_unique` | ✅ holds | `Items.Unique` **61/0**, `ItemUnique` **7/0**. All eight `Items/Uniques/*.cs`, `RpgStore.ItemUniques.cs`, `data/tuning/uniques.v1.json` present; `SeedUniqueEligible` at `RpgStore.ItemUniques.cs:202`, called `Program.cs:334`; `unique_eligible` registered `RarityBudgetKeys.cs:78` |
+| The three structural limits carry the AGENTS.md exemption comment | ✅ holds | `UniqueRow.cs:62/71/82`, class doc `:46-49` states the exemption in those words |
+| 144 seeds = 18 partitions × 8 | ✅ holds | 18 files under `data/seed/items/uniques/`, `entries` length 8 each, counted |
+| U1 — `KindCount` | ⚠ **stale** | **17**, not the 16 this row states (`AtomKindRegistry.cs:36`); `structure.place` landed 2026-09-06. Row annotated above. **No test moved** — the shipped assert is `KindCount == All.Count` |
+| U2/U3 — 35 `AtomRejectionReason` members incl. `ContentRuleViolated`; `PrefixRolls`/`SuffixRolls`, no `PoolRolls` | ✅ holds | `AtomRejection.cs:7-129` (35, `ContentRuleViolated` `:128`); `ContainerRow.cs:129/132`, zero `PoolRolls` |
+| `UniqueFrameCheck` wired, 4 findings on 3 rows | ✅ holds | `Validator.cs:76`; validator prints exactly **4** `UniqueFrameImpossible` today |
+| `naming.v1.json` stale in four places (the filed defect) | ✅ **still true, still unfixed** | `partitionCount: 20` `:295`, `agentsEach "~15 uniques"` `:296`, `themeSource "…15 themes"` `:299`, `totalCombinations "20…"` `:346`; `themes.v1.json` really holds 13 |
+| ⏸ `Override` op / `damage.convert` / seed→concrete / `item_base_type` FK | ✅ blockers still true | `AtomRowValidator.cs:34` is still `flat\|increased\|more`; the `Override` refusal is at `AtomKindRegistry.cs:342-350` (doc says `:336` — drift); no kind id contains "convert"; **no `CREATE TABLE … item_base_type` exists anywhere in `src/FusionRpg.Data`** |
+| ⏸ *"Sim stays `None` for `stat.derived` — the one real remaining runtime limit"* | ⛔ **STALE — corrected in place above** | `AtomKindRegistry.cs:572` is `(Full, Full, **Partial**)`, flipped in commit `50fcdf8` today (E5). The limit narrowed, it did not vanish: the fold sums and never reads `.Op`, so `Replace`/`Flag` compose as `Flat`. **The bullet's conclusion no longer follows** |
+| ⏸ Relic content ask (the one this pass was told not to re-open) | — | Untouched. The migration closure in P1.4-R is out of this slice by instruction and is not contradicted here |
+
+### Module 18 `consumables` (+ the `use_context = battle` follow-up)
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| No scalar effect column; `OnActivate` not `OnUse`; `TriggerOptional` on `stat.modify` alone; the manifest gate; the `checked` `long` cost; the derived grade; the invisible-nerf guard | ✅ holds | **90/0** after the fix. `AtomKind.cs:109-113` = 13 triggers incl. `OnActivate` `:102`; `TriggerOptional` set only at `AtomKindRegistry.cs:514`; `status.clear` Battle `None` (`:676-685`, doc cites `:644` — drift) and carries only `AtomTriggers.Events` |
+| Five kinds carry `AllTriggers` (C2's correction) | ✅ holds | `stat.modify` `:508`, `resource.delta` `:608`, `status.apply` `:663`, `shield.grant` `:715`, `ui.present` `:930` — today's working-tree edit adds `structure.place` with `AtomTriggers.Actions`, not `AllTriggers` |
+| C3 — `shield.grant` Battle `Full`, Sim `None` | ✅ holds | `AtomKindRegistry.cs:714` |
+| C4 — `rpg_item_stock` ships; `PredicateNode.cs` corrected | ✅ holds | `RpgStore.Items.cs:96` DDL, `:302` upsert, `:305` `MAX(0, …)`; `PredicateNode.cs:10-12` now says **EXISTS** |
+| ⛔ `CrossProgramLandedFlags.cs:37` still asserts `rpg_item_stock` "remains unbuilt" | ✅ **the named defect is still real** | Verbatim at `:37-39`; today's working-tree diff on that file only **appends** a new flag and does not touch it. Correctly left to the action program |
+| The one live corpus defect (`consumable.k2-015`, `atom.cleansing` → `status.clear`) and the ninth phantom family | ✅ holds | 60 rows across k1/k2/k3 counted; `k2-015` family `atom.cleansing`, class `draught`, context `dispatch` |
+| *"`OnUse` … the string appears nowhere in the module"* | ⚠ **self-contradictory — wording corrected above** | It appears twice, as prose, at `ConsumableValidator.cs:168` and `:205` — necessarily so, because the same bullet promises the refusal message names it. The enforceable fact (no trigger constant) holds |
+| ⏸ `ContainerKind.Consumable` — *"`ContainerRow.cs:7` ships six values"* | ⚠ **stale count, conclusion intact — corrected above** | **Seven** today (`Enemy`, `ContainerRow.cs:17`; the file's own doc at `:4` says "seven"). Neither `consumable` nor `charm` is among them, so the refusal still stands |
+| `contextsAuthored = ["menu","dispatch","battle"]`, `lawn` refused, the four-row `use_context` table | ⚠ **moved today by ANOTHER program — named, not adopted** | Working tree: `["menu","dispatch","battle","rest","curio"]`; `ConsumableDef.cs` widened `UseContext` four → **six** (`Rest`, `Curio`, both → `Array.Empty<RuntimeId>()`) under party-dungeon's **D3.24**. `lawn` still refused, so the ruling survives. Two loose ends are theirs: the tuning file's `_contextsAuthoredNote` still explains three contexts, and the recorded "four-row table" decision is now six |
+| ⏸ `StockQty` returns `int` (the named narrowing) | ✅ still true, still correctly deferred | `RpgStore.Consumables.cs:355`, self-named `:350-354`; `TrySpendStock` `:314` is `long` end to end |
+| ⏸ `consumableSlots` absent on every `girdle`; no production `rpg_run_draught` writer; `CostLedger` one caller | ✅ blockers still true | `consumableSlots` has **zero** hits in all of `data/seed/`; `TrySpendDraughts` has **0** callers in `src/`+`tools/`; `CostLedger.TryPay`'s only production caller is `AuraUpkeepDriver.cs:39` |
+| ⏸ X7 | ✅ **consistent with the fresh filing** | See the Checkpoint/X7 note below |
+
+### Module 19 `granted-actions`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| `item_granted_action`'s six columns, the Never-list grep, the nine import rules + three cross-row checks, the derived `grant_id`, `ApplyEquippedGrants` | ✅ holds | `ItemGrantedActionTests` **50/0**, `ItemGrantStore` **14/0**; all four `Items/Grants/*.cs` + `RpgStore.ItemGrants.cs` present |
+| G1 — the cap is "uncapped by design" | ✅ holds | `CapPolicy.cs:31` `HeldCap`, `:39` `EquippedSkillCap`; **zero** occurrences of `GrantedCap` |
+| G2 — `InterruptCause` has three members, none an inventory concept | ✅ holds | `ActionRunner.cs:50/51/54` — `CrowdControl`, `Damage`, `ResourceExhausted` |
+| R2 picked up — `GrantedActionPrice` gates on optional tuning | ✅ holds | `ItemPowerReads.cs:64` signature, `Over` computed `:75-77`; `item-power.v1.json:6` `grantedActionShareCapMilli: null` |
+| G6 — `RpgStore.Actions.cs` line citations | ⚠ **drifted again** | `UpsertGrant` **`:524`**, `ListGrants` **`:550`**, `WithdrawGrantsBySource` **`:576`** — each **+9** on the numbers G6 itself corrected. Cosmetic; every method is real and at the shape described. (`Program.cs`'s item-power parse likewise moved `:164` → `:192-193`) |
+| ⏸ X3 — no production `ActionSeeder.Generate(` | ✅ **still true** (settled by D36; re-checked only as a fact, not re-opened) | 8 repo hits: 1 in this doc, 1 an assertion string in the guard test, 6 real calls in `ActionSeedingTests`. **Zero** in `src/` or `tools/` |
+| ⏸ No equip endpoint calls `ApplyEquippedGrants`; module 4's own write has none either | ✅ **still true** | `ApplyEquippedGrants` has **0** callers in `src/`+`tools/`; `SaveAssignment` `:499` / `RemoveAssignment` `:519` have **zero** callers outside `tests/` |
+| ⏸ Mid-run equip unlanded | ✅ still true | `UniqueActorService.cs:45-46` still refuses on `phase.not_roster`, and `ClearEquipment` `:64-66` routes through it — verified on the **modified** working-tree copy |
+| ⏸ `ContentHashRegistry` V9 carries no item table | ✅ still true | `ContentHashRegistry.cs:37` `CurrentSchemaVersion = 9`; zero occurrences of `item_unique`, `consumable_def`, `item_set`, `item_display_template`, `item_granted_action` |
+| ⏸ `item_granted_action.container_id` has no FK (module 6's table) | ✅ still true | No `item_base_type` table exists |
+
+### Module 20 `item-surfaces` ⭐ (given the extra scrutiny the plan's *"not optional"* asks for)
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| The four "already existed, adopted not rebuilt" rows | ✅ **all four true** | `RelicsLayer.tsx` is a `PanelShell` with three tabs (`held`/`equipped`/`storage`, `:10`, `:96`, `:107-130`) fed by `useRelics()` `:81` → `/api/relics` (`RelicEndpoints.cs:23`); `ContainerView` carries **eleven** blocks with `Pending<T>` (`types.ts:151-164`); `adaptRelic` (`adapt.ts:157`) returns `absent()` **7×** and `pendingWithReason` **1×**; `CombinationEvaluator.Preview` `:130` / `PreviewWithOneMore` `:139` are called, not re-implemented; `RarityPalette.cs:87-137` really ships the Machado/Oliveira/Fonseca deuteranope **and** protanope transforms |
+| ⛔ The D41 unordered-recipe finding | ✅ **holds, and D41 is real** | `spec-sockets.md` §D41 quotes the owner verbatim; `ComboIngredient` is `(FamilyId, MinTier, Quantity)` with **no position field** (`SocketModel.cs:113`); the DDL comment states *"No `position` column on the ingredient table (D41)"* |
+| ⛔ The second divergence — distance follows the evaluator on Pure | ✅ **holds** | `sockets.v1.json:55` `attunedEffectiveCountBonus: 1`, and `:57`'s own note documents the Pure-only two-arm split in the same terms |
+| The eight Core files, the tuning file, the three read-only routes | ✅ holds | **32/0**; `ItemSurfaceEndpoints.cs:49/72/107` are three `MapGet` and there is **no `MapPost` or `MapPut` in the file**; `Program.cs:261` parses the tuning, `:609` maps the routes |
+| ~~⏸ **The eight `.tsx` files are not built**~~ | ✅ **BUILT 2026-09-06 — no longer true** | All seven components plus the `RelicsLayer` body swap exist under `layers/relics/`; `SocketsView`/`SetView` are in `types.ts` (`CONTRACT_VERSION` 2 → 3); `lib/bus/items.ts` calls all three routes, so the `api/items` grep is no longer zero. `npm run build` exit 0, `npm run test` 1886/1888 (both reds pre-existing and in untouched files), Vite dev boots clean on 5173 and both live routes answer. ⛔ **The checkpoint's blocker moved, it did not vanish** — see Checkpoint 5's re-scored table |
+| ✅ `patronView.ts` hand-off | ✅ **CLOSED 2026-09-06** | The private `pct` closure is deleted; `auraLabel` calls the shared per-mille conversion through `formatMagnitude`. Output byte-identical, existing pins green. Exactly one per-mille formatter in the web tree |
+| ⏸ `docs/web/spec.md` §399 criterion 7 unamended | ✅ still true | Still claims *"the item card's eleven blocks"* as web-program work |
+| ⏸ Armoury `role`/`frame` empty, gap board unbuilt — both blocked on module 6's table | ✅ still true | No `item_base_type` table exists |
+
+### Module 22 `charm-carry`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| The D33(a) finding and its resolution against the ruling | ✅ **holds, and both sources are real** | `item-ideal.md:1388` carries D33(a) verbatim; `ssot-charms.md` §3.1's banner `:134-137` withdraws option C, while §3.8's row `:335` **still says `player:{id}`** — the divergence this module recorded is real and still unfixed (also stale at `:70`, `:116`, `:152`, `:171`) |
+| Five tables + the partial unique index | ✅ holds | `RpgStore.Charms.cs:50/68/81/106/119`; `ix_charm_run_hold_active … WHERE active = 1` at `:98-99`. `CharmCarry` **48/0** Core, **19/0** Data |
+| The soft capacity ladder, no hard ceiling, the axis/copy caps as composition bounds | ✅ holds | `capacityLadder [6,8,10,12,14,16,18,20]`; a ceiling key is refused at load |
+| *"`bindingOwnerKind` is refused **by name** for `player` / `match` / `entity`"* | ⚠ **slight over-claim** | `CharmAttunementTuning.cs:175` is a **whitelist** on `"unique-actor"` — all three are refused, but the message `:177-180` names only `player` and `match`. `entity` is refused generically, not by name |
+| The corpus facts (20/10/10/10/10 axes, exactly 7 `unique_carry` signets, `frameHint: any` on all 60, 10 resonance rows) | ✅ **all re-counted and exact** | 4 files under `data/seed/items/charms/`: 20 + 20 + 20 charms + 10 resonance; axis split `economy 20, control 10, offense 10, survivability 10, utility 10`; 7 `uniqueCarry: true`, all `signet`, all `apCost 5`; `frameHint: "any"` on 70/70 |
+| `players` has no level column | ✅ still true | `RpgStore.cs:100-105` — `(id, name, created_utc, world_seed)` |
+| ⏸ No production run-sealer | ✅ still true | `OpenCharmRunHold` / `CloseCharmRunHold` / `TrySpendDraughts` all have **0** callers in `src/`+`tools/` |
+| ⏸ X7 | ✅ consistent — see below |
+
+### ⛔ CHECKPOINT 5 — the finding this pass exists for
+
+**The box read "✅" with no caveat and its own owning module contradicts it, in its own body, two
+paragraphs earlier.** `A player can see, compare, equip, socket and craft an item in the web control
+room` — **zero of the five verbs hold**, and there is no concrete item to apply them to. Corrected in
+place above with a clause-by-clause evidence table. The short unconditional shape was exactly the
+tell: a five-clause conjunctive gate is easy to round up to the one clause that is satisfied (the Core
++ server half, which genuinely did land and is genuinely green at 32/32).
+
+⭐ **Where it stands after 2026-09-06's four passes — still NOT MET, and the reason has narrowed
+twice.** Three of the five verbs (**equip**, **socket**, **craft**) now have a real route, a real
+caller from the web control room, and a live end-to-end proof each. What blocks the gate is no longer
+any of them:
+
+1. ⛔ **"an item"** — nothing mints a concrete `effect_container`, so every one of those three proofs
+   had to hand-seed its subject. Owner: the seed→concrete generator, deferred identically by modules
+   12, 13, 16, 17, 18, 21 and 22.
+2. ⛔ **see / compare** — module 20's own `DisplayModel` and `DominancePresentation` still have no
+   route, so the card and the delta table render honest pending blocks.
+
+Neither is a write-path gap and neither is a UI gap. **Two owners, both named.** ⛔ Do not read
+"three of five verbs are real" as four-fifths of a conjunctive gate: a sentence with an unsatisfiable
+subject is false however many of its verbs work.
+
+### X7 — modules 18 and 22 checked against the fresh filing
+
+`effect-atom-map.md` **§20 is new today and uncommitted** (*"Filed by the item program (2026-09-06)"*),
+records X7 as an **open ask** — not accepted, not declined, not built; `X7` appears nowhere in
+`tasks/effect-atom-todo.md` or `docs/architecture/effect-atom/`. **Modules 18 and 22's own text is
+consistent with it**: both say the kind is unavailable, both refuse by name rather than drifting into
+a fallback, both name effect-atom/the owner. ⚠ **Two factual slips inside the new §20 row itself,
+named and not edited** (it is another program's map, and the row is one line): it says
+`ContainerRow.cs:7-14` *"ships exactly six kinds"* — it ships **seven**, at `:11-17` — and it
+attributes all **five** requested kinds to **D27**, which mints only **four** (`gem`·`set`·`charm`·
+`combo`; `consumable` is explicitly not one — `spec-consumables.md:148`). The item program's own
+`item-map.md` row X7 states the four-plus-one split correctly; only the newly-filed row collapses it.
+**Owner: whoever filed §20** — a two-token correction before it is committed.
+
+### ⛔ Fixed this pass
+
+- **`Items.ConsumableCorpusTests.Exactly_one_phantom_family_…` was RED** — `Assert.Equal(98,
+  FamilyKinds.Count)` against a shipped **100**. Root cause: the owner committed
+  `data/seed/items/affix-families/g-punisher.json` (`5864231`, 2026-09-06 **11:55**) adding
+  `atom.chill-punisher` and `atom.rot-punisher` — the affix-authoring lane's content, landed **after**
+  the rigor pass's *"Final regression … zero `Items.*`"* row was measured. Re-measured to **100** with
+  the reason and the date in the comment, **and** with the answer to the Phase-4 pass's own caution
+  (*"check whether 100 is the intended corpus size"*): it is the **shipped** count but not a blessed
+  one — `ItemSeedValidator` refuses both new rows with `IdOutsideNamespace` and
+  `MissingDisplayTemplate`, so they may yet be re-authored. Every other assertion in the test was
+  already passing and is untouched. **90/0 after the fix.**
+- **Checkpoint 5's box**, above.
+- **Five stale claims annotated in place** in P5.1/P5.2/P5.5 (`stat.derived` Sim, `KindCount`, the
+  `OnUse` self-contradiction, `ContainerRow` six → seven ×2, `contextsAuthored`).
+
+### ⛔ Named, not fixed — with owners
+
+| Finding | Owner | Why not fixed here |
+|---|---|---|
+| `Items.RoleFamilyTableTests` ×**3** still red — `Ninety_eight_families_are_shipped` (98→**100**), `Item_role_family_is_derived_with_no_authored_cells` (656→**670** raw, and its 652 derived assert will move too), `The_relocation_artefact_…_with_zero_orphans` (619→**631**). Same single root cause as the consumables red above | **module 8 `affix-legality`** | Outside this slice, and the first one encodes the number **in its test name** — re-blessing it is a rename, which is a judgement call for that module's owner, not a number swap. (The Phase-4 pass named the first two; the third only appears after a rebuild) |
+| `ItemSeedValidator` baseline **170 → 178**, fully attributed: **+3** `MissingUnitClass` and **+2** `MissingDisplayTemplate` from `tools/ItemSeedValidator/Checks/DisplayCheck.cs`, a **brand-new check the owner added today** (`5864231`+`2002823`, both 11:55); **+2** `IdOutsideNamespace` and **+1** `MetaRegistryVersionMismatch` from the new `g-punisher` partition | owner / affix-authoring | New-check output and new content, neither the item program's. **Module 17's own 4 `UniqueFrameImpossible` are unchanged and still the same three rows** |
+| `effect-atom-map.md` §20's two slips (six vs seven kinds; five kinds attributed to D27's four) | whoever filed §20 | Another program's map; one line; uncommitted |
+| `data/tuning/consumables.v1.json`'s `_contextsAuthoredNote` not updated for `rest`/`curio`; module 18's recorded *"four-row `use_context` table"* is now six | **party-dungeon (`Delve`)** | Their in-flight edit to module 18's files (D3.24). Do not fix another program's change |
+| `ssot-charms.md` §3.8 (+ `:70`, `:116`, `:152`, `:171`) still says `player:{id}` against its own §3.1 banner | lane doc owner | Already correctly recorded by module 22; re-verified still unfixed |
+| Citation line drift (cosmetic, no behaviour): `AtomKindRegistry` `:336`→`:342`, `:644`→`:676`; `RpgStore.Actions` `:515/541/567`→`:524/550/576`; `Program.cs` `:164`→`:192`; `ActionCompiler` `:97`→`:100`; `types.ts` `:135-149`→`:151-164`; `adapt.ts` `:124-144`→`:157+` | — | Every cited symbol is real and at the described shape |
+
+⚠ **Baseline discipline.** Every red was checked against `git status` and `git log` **before**
+attribution. All three remaining `Items.*` failures trace to one owner commit at 11:55 today, in a
+directory with **no** working-tree edit. `Data.Tests` could not be rebuilt (two live `testhost`
+processes from a concurrent session, 21–23 min of CPU each, held `FusionRpg.Core.dll`) — they were
+**left running**, and the `--no-build` runs used binaries stamped later than every item source in the
+tree, said here rather than implied. The full `Core.Tests`/`Guard.Tests` suites were **not** re-run:
+the file's own final-regression table covers them and the machine is under concurrent load.
+
+**Files changed by this pass:** `tests/FusionRpg.Core.Tests/Items/ConsumableCorpusTests.cs`, this file.
+
+---
+
+## Final-proof mapping — Phase 2, modules 6-9 (2026-09-06)
+
+Every checkbox and claim in **P2.1 (7 `rarity-bands`), P2.2 (6 `base-types`), P2.3 (8 `affix-legality`)
+and P2.4 (9 `item-power-reads`)**, plus Checkpoint 2's box, re-derived against live code and data.
+Applying the lesson the rigor-pass section above ends on: *a citation being real and quoted correctly
+is not the same as its conclusion following, or the cited code still saying what is claimed.* So every
+row below was **re-measured**, not re-read. **Out of scope by instruction and untouched:** module 10
+entirely, and modules 6/8's eight phantom-implicit-family bullets (a concurrent agent owns those).
+
+### Module 7 `rarity-bands` (P2.1) — every claim holds
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| E1: `ssot-rarity` §3.8 scoped to **drop** pity, ordering note intact | ✅ | `ssot-rarity.md:276-278` reads verbatim, "lands before D7" present |
+| E2: `core.v1.json` v2, twelve-role hybrid core at 800‰ | ✅ | Counted, not quoted: `registryVersion 2`; 15 roles, **12** `hybridEligible`, their `budgetWeightMilli` sums **exactly 800**, all 15 sum 1000 |
+| E3: the two non-summing §3.3 rows fixed before seeding | ✅ | `ladder.v1.json` sprout `0/1`, heirloom `1/2` — the floors of §3.3's corrected sub-table (`sprout` 0–1 / 1–1, `heirloom` 1–2 / 2–2). All ten rungs' floors **and** tier windows match the doc row for row |
+| Ten rungs seeded via the standard import path; `rarity_budget` SC7-enforced in the store | ✅ | `RarityBandsStoreTests` **14/14** (run this pass) |
+| I12 drop weights (`chaff` 40,700, `almanac` 700) and I6 enhance caps live in tuning | ✅ | `data/tuning/item-rarity.v1.json` read directly — both exact |
+| `power_ceiling` seeded on all ten rungs as the ladder share | ✅ | Shares are `0/22/51/84/173/243/492/632/818/1000`, identical to `spec-rarity-bands.md:415-424`'s published table; `SeedRarityLadder_writes_all_five_ready_keys_for_every_rung` green |
+| Overlap simulator: seed `20260822`, 2×10⁵ rolls/rung | ✅ | `RarityOverlapSimulator.cs:34` `Seed = 20260822UL`, `:37` `RollsPerRung = 200_000`; `TierCount`/`TierBand`/`TierMidpoint` public as the module-17 addendum claims |
+| Two shipped-store defects closed | ✅ | `RpgStore.Containers.cs:151,163` refuse a renumbered ordinal with `rarity.ladder-mutated`; `ContainerValidator.cs:175` raises `rarity.unknown` and **is** wired at both call sites (`RpgStore.Import.cs:290`, `UpsertContainer`) |
+| `enhanceCapAsymptoteK: 8` removed as a dead second source | ✅ | Gone; replaced by `enhanceCapAsymptoteNote` naming `enhancement.v1.json`'s `asymptoteK` |
+| All ten budget keys `HasDecidedShape: true` | ✅ | `RarityBudgetKeys.cs` — `power_ceiling`'s consumer is recorded as "item-power-reads (9)", which is the module that has not built the reader (see below) |
+
+### Module 6 `base-types` (P2.2) — holds, with two citation slips
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| 15 families lifted from the global exclusion; `atom.susceptibility` stays | ✅ | Diffed `classes.v1.json` → `v2`: **exactly 15** lifted, 17 remain, `atom.susceptibility` among them. `v1` still `registryVersion 3` and on disk; `v2` is 4 |
+| "**All eight** roles the fix actually touches" | ⚠ **nine** | Measured: 9 roles changed (`armament-primary`, `ward-array`, `manipulator`, `mantle`, `head-guard`, `sense`, `footing`, `infusion`, `standard`). The bullet's own sentence enumerates those same nine (4 named "beside the five"). The list is right; the count word is wrong, twice, in one bullet |
+| `AtomKindRegistry.cs:534` shows `RuntimeSupportMatrix(Full, Full, None)` on `stat.derived` | ⚠ **stale citation, conclusion survives** | Live line is **`:572`** and reads `(Full, Full, **Partial**)`. The record is `(Lawn, Battle, Sim)`, so the Sim arm moved `None → Partial` (effect-atom's mechanism-wiring E5, 2026-09-06). The bullet's conclusion — the D6 quarantine is lifted — holds *more* strongly, not less |
+| 740-entry corpus migrated in place; `socketMax` filled and reshaped per (role, frame) | ✅ **exact** | 740 entries across 62 files; **zero** omit `socketMax`; distribution `0×253 · 1×255 · 2×148 · 3×68 · 4×16`, and the sixteen 4s are **8 `armament-primary` + 8 `core-guard`** — every number in the bullet reproduced |
+| `socketCeiling(role)` forward-seeded; module 16 carried all 15 rows unchanged | ✅ | `data/tuning/sockets.v1.json` is `version 2` with 15 `socketCeiling` rows |
+| `ItemSeedValidator` on `classes.v2.json` + `FrameDirectionCheck`/`SocketMaxCheck` | ✅ | Full sweep run this pass: **zero** findings from `FrameDirectionCheck`, `SocketMaxCheck` or `ImplicitFamilyNotLegalForRole` |
+| `frame-lean.v1.json`: ten `(ladder, frame)` blocks, eight authored, `standard` null | ✅ | 5 ladders × 2 frames = 10 declared, `standard` pair explicitly `null`; every humanoid block `burst`, every plant `sustain`; channels are `maxHp`/`atk`/`combat.dodge.omni`/`combat.crit.damage.omni`/`combat.crit.resist.damage.omni` — no `plating`/`carapace` |
+| Channel-split dominance lint green for all twelve hybrid-core roles | ✅ | `BaseTypeCorpusTests` re-run green this pass |
+| `item_category` ten rows, six `declareOnly` | ✅ | Counted: 10 rows, 6 `declareOnly` |
+| ⏸ `ImplicitFlavourDrift` warning not wired | ✅ **blocker current** | Zero occurrences of `ImplicitFlavourDrift` in any `.cs`; it exists only in `spec-base-types.md` and this file |
+| ⏸ `ContentValidation.cs:73`'s null-ceiling skip is module 9's | ✅ **blocker current, and this bullet's line number is the correct one** | `:73` is `if (ceilingFor(container.Rarity!) is not { } ceiling) continue;`. Checkpoint 2, `item-plan.md`'s risk row and `spec-rarity-bands.md:379` all say `:71`, which is now the `foreach` brace |
+
+### Module 8 `affix-legality` (P2.3) — **two real defects found and fixed**
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| `item_role_family` derived: 98 families, 656 raw → 652 pairs | ⛔ **WAS RED — fixed** | `RoleFamilyTableTests.Ninety_eight_families_are_shipped` failed 98 vs **100**, and `Item_role_family_is_derived_with_no_authored_cells` failed 656 vs **670**. Cause: commit `5864231` (2026-09-06, "update some GUI") added `affix-families/g-punisher.json` — 2 new families, 7 roles each. Pins moved to 100 / 670 / 666 with a comment saying which direction is the defect |
+| `family-overrides.v1.json` removes `bulwark`/`savagery` from the minor jewels only | ✅ | Exactly 4 removed pairs, both minor jewels, `jewel-major` untouched |
+| `role-relocation.v1.json`: 619 rows, **0 orphans** | ⛔ **WAS INCOMPLETE — fixed** | The same two new families are legal on the dropped `sense` role and had **no relocation row**, so both silently kept `max_tier = 5` on all six surviving hybrid-core hosts while every other `sense`-legal family sits at 3. Regenerated: the rule reproduces the shipped 619 rows **byte-identically and in order** and adds exactly the 12 required — 631 rows, diff is +72 lines / −0 |
+| Nothing catches that | ⛔ **root cause — fixed** | `RoleFamilyCheck` only walked the file asking "does the corpus still have this?"; it never asked the reverse. Added `CheckRelocationCoverage` → `RoleRelocationRowMissing`, reading the dropped-role list from the file's own `_meta` rather than a second hardcoded copy, behind the existing `isLikelyFullSweep` guard. Control pair added (`RoleRelocationCoverageTests`) so the check is asserted, not merely covered |
+| `IlvlTierLadder` = D29's `1/1/8/18/32` + collapsing envelope | ✅ | `IlvlTierLadderTests` green |
+| `AffixFilters` reads runtime **live** from `AtomKindRegistry` | ✅ code — ⚠ **the claim beside it is now false** | The code is right and needs no change: it is `SupportIn(target) != None`. But `stat.derived`'s Sim arm is `Partial` since 2026-09-06, so `RuntimeAllows("stat.derived", Sim)` returns **true** — *"Sim stays refused, the half of the D6 lift that did not happen"* (P2.3 bullet 4) and `item-plan.md`'s *"`Sim` stays `None` for `stat.derived`"* are both superseded. The suite already tracks it (`A_stat_derived_affix_is_now_allowed_for_a_sim_target_via_the_partial_fold`); only the prose lagged. `AffixFilters.cs`'s own stale XML doc corrected this pass |
+| The naming function (`ItemNameComposer`) | ✅ | `ItemNameComposerTests` green |
+| `nameWords` re-keyed; **27** irregular (non-3-word) families | ✅ **exact** | Measured 27 non-3-word families out of the corpus — the number lands precisely. 23 variant-keyed, 4 band-keyed |
+| "the **two** families with no `variants` field at all (`stalwart`, `immunity`)" | ⚠ **four** | `atom.bulwark` and `atom.tempo-stampede` (1 word each) also carry no `variants`. Classification outcome unchanged — all four are band-keyed — and P2.3's *own* `NameWordCheck` bullet already names those two by id, so the fact is recorded, just not in this sentence |
+| The two documented `wordPlant` overrides applied | ✅ | Exactly two rows in the whole corpus: `atom.sunbloom` suffix C, `atom.mending` prefix C. `atom.evasion` correctly left unapplied |
+| `seed-contract.md`'s affix-family example updated | ✅ | New `{variant, word}` shape shipped (⚠ its narrative "75 … 23 families" is 77/23 after `g-punisher`) |
+| ⏸ Distribution metrics · ⏸ rare two-word draw · ⏸ D8 aptitude gate inert | ✅ **all three blockers current** | No `distribution.py` CI upload step; `ItemNameComposer`'s `rareNameDraw` is still an injected delegate with no production supplier; `AllocationScope` still has 4 members |
+| `naming.v1.json` stale in four places (module 17's filing) | ✅ **still stale** | `partitionCount: 20`, `totalCombinations: "20 …"`, `agentsEach: "~15 uniques"`, `themeSource: "… (15 themes)"` against `bandAssignment`'s 4 groups / 18 partitions and `themes.v1.json`'s **13** |
+
+### Module 9 `item-power-reads` (P2.4) — built claims hold; **two deferrals have stale reasons, and one obligation is absent entirely**
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| All four reads are pure call sites; nothing declared under `Items/Power/` | ✅ | `ItemPowerReadsTests` **16/16** this pass, reflection test included |
+| R1 share is coefficient-insensitive, proven by test | ✅ | Green |
+| R2 via `PowerVector.FromCategory(Offense, 1000).ScaleMilli`, `Unpriced` never `0` | ✅ | Green |
+| R3 band pinned to `ContentValidation.DriftTolerancePercent` at tuning-load time | ✅ | `ItemPowerTuning.cs:42-45` throws on mismatch; `DriftTolerancePercent = 25` at `ContentValidation.cs:44` |
+| R4 refuses by name, doubly guarded on `AllocationScope`'s member count | ✅ | Green |
+| Tuning parsed and validated at boot | ✅ | `Program.cs:186-190` |
+| SC9's correction already in `enrichment-contract.md` | ✅ | Dated correction present |
+| ⏸ R2's live granted-action consumer not built | ✅ **blocker current** | `ActionSeeder.Generate` still has **zero** production callers — every call site is in `ActionSeedingTests`, and `ItemGrantedActionRow.cs:111` / `ItemGrantValidator.cs:123` both still say so |
+| ⏸ R3's card-rendering caller — *"module 10 `item-card`, **which does not exist yet**"* | ⚠ **reason stale, gap real and now one line wide** | Module 10 shipped 2026-09-04 and was extended twice on 2026-09-06. `ItemCard.cs:187-190` **declares** `CardPowerDisplay? Power` and cites module 9 by name — and **nothing anywhere assigns it**. The only production caller of `ItemPowerReads.CardPower` in the tree is `MutationPreview.Preview` (`MutationPreview.cs:42`), which is itself reached only from `MutationReplayTests`. Left to module 10's composer, per scope |
+| ⏸ Chaff-chassis watch *"unanswerable before module 21 exists"* | ⚠ **reason stale, gap real** | Module 21's machinery shipped 2026-09-05; what is missing is its generative run. `data/seed/items/` has no strain/splice content at all, so there is still nothing to price. The watch stands; its wording should read "before Splice content is generated", which is a model-call run someone must schedule, not a module that must exist |
+| The `power_ceiling` **consumer** module 7 and `spec-base-types.md` both assign to module 9 | ✅ **BUILT 2026-09-06** (was ⛔ ABSENT, and not listed as deferred anywhere) | `src/FusionRpg.Core/Items/Power/RarityPowerCeiling.cs` + `src/FusionRpg.Data/Sqlite/RpgStore.ItemPower.cs`; `RarityPowerCeilingTests` **25/25**, `RarityPowerBudgetStoreTests` **6/6**. See below |
+
+### ✅ The one real hole: module 9's `ceilingFor` reader was never built — BUILT AND WIRED 2026-09-06
+
+⭐ **Closed by the build pass that follows this section's own diagnosis.** The finding below is kept
+verbatim because it is the reason the work happened and because two of its three consequences were
+right; the state it describes is no longer current. **What landed:**
+
+| # | Piece | Where |
+|---|---|---|
+| 1 | The reader, exactly as `spec-rarity-bands.md:403-412` specifies it — `power_ceiling(rung) = pinAE × ladderShareMilli(rung) / 1000` | `src/FusionRpg.Core/Items/Power/RarityPowerCeiling.cs` (`RarityPowerCeilings` + `RarityCeilingRead`) |
+| 2 | `pinAE` — one reference `almanac` slate (its own seeded count-band floor of **5** affixes, each one AE at the midpoint of the middle tier of its authored t4–t5 window) priced through `ActorPowerCache.Compose`, **the same function `ContentValidation.Budget` prices a real container with**. No second cost function, no second magnitude table: the count comes from the seeded ladder, the magnitude from the shipped `UniqueBudget.ReferenceMagnitude` → `RarityOverlapSimulator.TierMidpoint` | same file |
+| 3 | The **first production caller** of the rarity-keyed `ContentValidation.Budget` overload | `src/FusionRpg.Data/Sqlite/RpgStore.ItemPower.cs` (`GetRarityPowerCeilings`, `ListContainerIdsWithRarity`, `ValidateRarityPowerBudget`), called from `Program.cs` immediately after `LoadContentIntoRuntime()` |
+
+**The numbers, measured not asserted.** `pinAE = 46,000` points (5 × 92 hp on one channel = 460 hp;
+`maxHp`'s reference scale is 10 and its coefficient 1000‰). Against the shipped ‰ column that gives
+`chaff 0 · sprout 1,012 · grafted 2,346 · cultivated 3,864 · fused 7,958 · chimeric 11,178 ·
+heirloom 22,632 · firstseed 29,072 · sunwoven 37,628 · almanac 46,000`, and `almanac`'s ceiling is
+`pinAE` itself because its share is 1000‰. All ten are pinned in `RarityPowerCeilingTests`.
+
+**`ContentValidation.cs:73` now receives a real ceiling for real content — proven red-first.**
+`RarityPowerBudgetStoreTests` imports the ten real ladder rows, the real
+`atom.fx-passive-atk-flat.t1` and the real `item.first-clear-almanac-seed` container (⭐ **as of
+today the ONLY container in the shipped seed tree that names a rarity** — confirmed by reading the
+live `dist/` database: 1 rarity-bearing container, `almanac`, against 10 seeded rarity rows and all
+ten `power_ceiling` budget rows), then asserts `ContentReport.Evaluated` is **0** without the seeded
+column and **1** with it. `Evaluated` is the assertion on purpose: a green `Ok` was always available
+and never meant anything.
+
+**Discipline notes, because this is a magnitude path.** `long` throughout; `pinAE × share` is widened
+before multiplying and `checked`; the `/1000` is `PowerMath.DivRound`, last and exactly once. The
+narrowing to the overload's `Func<string,int?>` is `checked((int)…)` and **throws** — a silent
+`(int)` cast on a magnitude is a cap wearing a cast's clothes, and the rarity overload's `int?` next
+to its rung-keyed sibling's `long?` is a real width asymmetry rather than a deliberate choice.
+`provisional` rides in the result object and is **measured** off the live coefficient table (all-flat
+at 1000‰ ⇒ X6 has not landed), so it clears itself when a fitted table ships; `RenderPinAe()` is the
+only printer and cannot emit the absolute figure without the flag. `audit-overflow.py` and
+`audit-magic-numbers.py` both report **zero findings of any class** in the two new files.
+
+**What this does NOT close, stated precisely.** Consequence 3 below is still open and its two named
+fixtures still appear in no `.cs`. Every *input* the `corner-matrix` mode needs now exists
+(`PowerScalar.Of`, a seeded and now-priced `power_ceiling`); what is missing is the mode itself —
+`FrameDominanceGuard` exposes `RunChannelSplit` and nothing else. So the D11 lint has **not** left
+channel-split mode, Checkpoint 2's dominance criterion is **still open**, and its blocker is now a
+guard method plus a fixture rather than a missing reader. This section's closing claim that *"the
+whole of the remaining work is one reader plus two fixtures"* holds: the reader is done, the two
+fixtures are not.
+
+⛔ **Named, not fixed — another module's.** `tools/AtomImporter/ValidationGate.cs:20` still prints
+`"budget: skipped — no ceiling data source exists yet (rarity table has no budget column)"`. Both
+halves of that sentence are now false. It is effect-atom **E24**'s line
+(`tasks/effect-atom-todo.md:432` records the same reasoning), so this pass left it alone rather than
+editing another program's gate. ⛔ **And one more, in module 7's own file:**
+`data/tuning/item-rarity.v1.json` carries `coefficientTableId: "flat-1000-v1"`, which
+`ItemRarityTuning.Parse` never reads — the same "second source of truth a balance pass could edit
+with no effect" class as the `enhanceCapAsymptoteK` row already removed from that file on 2026-09-05.
+This pass measures the provisional flag off `PowerTables` directly (strictly better evidence than a
+hand-maintained id string) and did not add a parser for it.
+
+---
+
+**The original finding, kept for the record:**
+
+`spec-rarity-bands.md:403-412` specifies it exactly — `power_ceiling(rung) = pinAE × ladderShareMilli(rung) / 1000`, where the seeded ‰ column is the coefficient-independent half and `pinAE` (the price of one reference `almanac` slate through `ActorPowerCache.Compose`) is the only coefficient-dependent term, with the result carrying a `provisional` flag *"in the result object — never in a comment."* Module 7 seeded the share and explicitly named the reader as module 9's (P2.1: *"the `pinAE` pricing and the `provisional`-flagged `ceilingFor` reader are module 9's own job"*). **It does not exist.** A whole-tree grep of `src/FusionRpg.Core/Items/` finds one `CeilingFor` and it is `SocketTuning`'s socket ceiling — a different axis entirely.
+
+Three consequences, all previously invisible because each document only checked its own side:
+
+1. **`ContentValidation.Budget`'s rarity-keyed overload has zero production callers.** The only caller in the tree, `RpgStore.ActionCatalog.cs:105`, uses the **rung-keyed** sibling with `ceilingForRung`. So the `:73` skip is not merely "unfixed" — nothing reaches it. Checkpoint 2's open criterion is correct and understated.
+2. **The D11 lint cannot leave channel-split mode**, which makes Checkpoint 2's *first* criterion the same gap as its last one (corrected in that box this pass).
+3. **Two named fixtures do not exist anywhere in the tree.** `spec-base-types.md:426` requires `neither_frame_wins_every_corner_for_any_role` — *"registered here as a failing-by-default fixture so its absence is visible"* — and `spec-rarity-bands.md:530` requires `the_d11_lint_leaves_channel_split_mode_once_power_ceiling_is_seeded`, *"asserted at the consumer."* Neither name appears in any `.cs`. Module 6's P2.2 says the corner-matrix mode "stays a named, owed fixture **there**"; **`spec-item-power-reads.md` never accepted the handoff** — its seven success criteria never mention the dominance lint, the corner matrix or `power_ceiling` — and P2.4 never mentions it either. A one-sided deferral into a document that was never asked, which is the mutual-deferral shape from Pass 3 with the return leg missing rather than contradictory.
+
+⛔ **Named, not built.** Pricing `pinAE` picks a reference slate and touches the power ladder, and registering a deliberately-red fixture reddens a suite shared with five concurrent programs. Both are module 9 build tasks with a design input, not verification fixes. **The whole of the remaining work is one reader plus two fixtures**, and it closes Checkpoint 2 completely.
+
+*(End of the original finding. The reader half landed 2026-09-06 — see the top of this subsection. The
+reference slate it picks is the seeded `almanac` row's own count band and tier window, so the "design
+input" turned out to be a read rather than a choice. The two fixtures are still owed.)*
+
+### Verification, run for the `ceilingFor` build pass (2026-09-06)
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter RarityPowerCeilingTests` | **25 / 25 passed** (new) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter RarityPowerBudgetStoreTests` | **6 / 6 passed** (new) — includes the red-first `Evaluated` 0 → 1 pair |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **12,192 passed / 26 failed.** ⛔ None is this pass's: the two new files are *additive* (no existing Core file was edited), no failure names `RarityPowerCeiling`, and the set is live concurrent-stream churn — `ContentValidationTests`/`TraitMigrationParityTests`/`KindValueGuardTests`/`ContentScaleTests` all fail on the same root cause (`data/seed/atoms/vocabulary.json: UnknownKind — kind ''`, a generated vocab file with no `kind` sitting inside a scanned seed folder), plus `ClassSystem.ProveAptitudeJsonEmit` ×3, `Demons.*` ×4, `ExpeditionResolverTests.Tier_goldens_are_locked` and `ItemCardTests`. The `RoleFamilyTableTests` trio that failed in an earlier run of this same session had *stopped* failing by the second run — the corpus is being edited live |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | ✅ **1,037 / 1,037 passed, 0 failed** — the 3 failures the previous pass recorded (2 `DemonSpeciesImportCliTests`, 1 `AtomStoreTests.An_unknown_trigger_is_rejected`) are gone |
+| `dotnet build src\FusionRpg.Server` | succeeds — the new boot call compiles |
+| `dotnet run --project tools\ItemSeedValidator` | **178 errors, unchanged** — identical to the previous pass's baseline; no seed content was touched |
+| `guard-single-writer` · `guard-secondary-no-unity` · `guard-funnel-delta` · `guard-dal` | **all four OK** |
+| `python scripts\audit-overflow.py` · `audit-magic-numbers.py --summary` | **0 critical** · **0 M1/M2**, and **zero findings of any class in either new file** |
+| Live `dist/` database, read-only probe | 10 `rarity` rows · all ten `rarity_budget.power_ceiling` rows matching `spec-rarity-bands.md:415-424` byte for byte · **1** container naming a rarity (`almanac`) — so the boot lint's real population today is exactly one container, and it is priced |
+
+⚠ **Two concurrent sessions were editing `src/FusionRpg.Data` and `src/FusionRpg.Server` throughout
+this pass** — `ExecOn` (undefined for ~5 minutes) and `RpgStore.DeriveOpSeed` (internal, unreachable
+from the Server for ~3) both broke the build transiently and both were fixed by their own session
+while this one waited. Neither is this pass's, and neither is still broken.
+
+**Files:** `src/FusionRpg.Core/Items/Power/RarityPowerCeiling.cs` (new);
+`src/FusionRpg.Data/Sqlite/RpgStore.ItemPower.cs` (new);
+`src/FusionRpg.Server/Program.cs` (EDIT — one boot block after `LoadContentIntoRuntime()`);
+`tests/FusionRpg.Core.Tests/Items/RarityPowerCeilingTests.cs` (new, 25);
+`tests/FusionRpg.Data.Tests/Items/RarityPowerBudgetStoreTests.cs` (new, 6).
+
+### What this pass changed
+
+| File | Change |
+|---|---|
+| `data/seed/items/_registry/role-relocation.v1.json` | Regenerated from the corpus by its own `_meta.source` rule: 619 → **631** rows. The 619 existing rows are reproduced identically and in order (+72 lines, −0) |
+| `tools/ItemSeedValidator/Checks/RoleFamilyCheck.cs` | New `CheckRelocationCoverage` → `RoleRelocationRowMissing`: a corpus family legal on a dropped role with no row is now an error |
+| `tests/FusionRpg.ItemSeedValidator.Tests/RoleRelocationCoverageTests.cs` (new) + `SeedFixture.cs` | Control pair for that check — the missing case errors, the covered case does not |
+| `tests/FusionRpg.Core.Tests/Items/RoleFamilyTableTests.cs` | Corpus pins moved 98→100, 656→670, 652→666, 619→631; the `Ninety_eight_…` method renamed, each pin commented with which direction is the defect |
+| `src/FusionRpg.Core/Items/AffixFilters.cs` | Stale XML doc corrected — `stat.derived` is `Full/Full/Partial`, so this predicate now admits Sim |
+| Checkpoint 2's box (above) | First criterion corrected from "met" to open, with the reason |
+
+⛔ **Named, not fixed — another lane's.** `g-punisher.json`'s own two families already raise four
+`ItemSeedValidator` errors of their own (`IdOutsideNamespace` ×2 — ids outside any wave-1 partition
+prefix — and `MissingDisplayTemplate` ×2) plus two `Unreferenced` warnings. That is the
+affix-authoring lane's content to answer for; this pass only made the *derived* artefacts consistent
+with it.
+
+### Verification, run this pass
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter` (all 13 test classes P2.1-P2.4 cite) | **126 / 126 passed** — was 124/2 before the fixes. The total matches the four sections' own claimed counts summed (40 + 25 + 45 + 16) exactly |
+| `dotnet test tests\FusionRpg.Core.Tests --filter FullyQualifiedName~FusionRpg.Core.Tests.Items` | **874 / 874 passed**, 0 failed |
+| `dotnet test tests\FusionRpg.Data.Tests --filter Items.RarityBandsStoreTests` | **14 / 14 passed** (`--no-build`; another session's `testhost` held the output DLLs — the assembly under test is untouched by this pass) |
+| `dotnet test tests\FusionRpg.ItemSeedValidator.Tests` | **73 / 73 passed** (71 + the new control pair) |
+| `dotnet run --project tools\ItemSeedValidator` | **178 errors, unchanged before and after the fix**, and **zero** `RoleRelocationRowMissing`. ⚠ The 165 both P2.2 and P2.3 record has drifted to 178 from other lanes' corpus edits; none of the 13 is from a module-6 or module-8 check |
+
+---
+
+## Final-proof mapping — Phase 0 residual + Phase 1 (2026-09-06)
+
+**Scope: P0.2, P0.3, P0.4 and modules 1–4.** P0.1, P0.5, Checkpoint 0, module 10 and modules 6/8's
+phantom-family bullets were re-verified the same day by a concurrent pass and are untouched here; P1.5
+is a separate pass's and is out of scope, so where Checkpoint 1 leans on it this pass says so rather
+than re-deriving it.
+
+**The standard applied**, taken from this file's own three prior passes and their own diagnosis of why
+they missed things: *verifying that a citation is real and quoted correctly is not the same as
+verifying that its conclusion follows, or that the cited code still says what is claimed.* So every
+`[x]` was re-read against the module's spec **and** the current code, every line number was opened,
+every test name was grepped, a sample of suites was **run this session** (no pass count below is
+carried forward), and every `[ ]`/⏸ had **the specific blocker it names** re-checked against reality
+rather than against its own description of itself.
+
+⭐ **Headline: modules 1–4 are substantively sound — every table, type, guard, gate and migration they
+claim exists and behaves as claimed. What did not hold was the evidence layer:** nine stale or wrong
+citations, one Verify command that certified nothing while exiting 0, one unstated wiring gap, and one
+genuinely missing feature that a single word in a deferral had swept out of scope. Phase 0's three
+residual boxes are all correctly open; two of them were open for reasons that no longer describe the
+world.
+
+### P0.2 — `theme-refresh`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| Republish `themes.v1.json` over the whole corpus | ⏸ **Correctly open** | Live `coverage_report()`: `species=840 themes=84 uncovered=772 orphaned=16 complete=False`. No `theme-refresh` stage exists — 5 hits in `tools/seedsmith`, all prose saying "unbuilt"; no CLI verb under `demons` (`report/cli.py:1556-1637`) |
+| Staleness check both ways | ⏸ Open | The two-way shape is right: 16 orphans confirmed by name (`cherrygatling`, `cherrypaperzombie`, `cornpot`, `dancepolzombie`, `dolldiamond`, … + `ironpeazombie`), all absent from `_index.json`, all present in the registry |
+| *"840 species across 503 family files"* | ⚠ **Corrected → 502** | The shipped counting rule (`species_family_file_count`) excludes `_`-prefixed files; 503 counted `zombie/_needs-review.json`. 840 species re-confirmed exactly |
+| `the_theme_registry_covers_every_shipped_species` | ✅ Real, green, asserts the gap | `tests/test_set_charm_gen.py:451` — `assertFalse(coverage.complete)`. Sibling at `:460` asserts `840 > 502` |
+| Sizing: *"a republish"* | ⛔ **NEW — it is not a republish** | `adapters/demons/generate_themes.py:31-59` builds from `_generated/motif-assignments.json`, which holds **exactly 84 entries** off the legacy 84-entry `data/seed/demons/demon/` corpus. `--rebuild` reproduces the same 84. **P0.2 needs motif derivation re-anchored onto `species/_index.json` first** — an upstream re-source, and the demon stream's file, so named not fixed |
+| — | ⚠ Load-bearing detail recorded | Index keys are PascalCase, theme `speciesId`s lowercase. `coverage_report` folds case (`themes.py:222-227`); a naive case-sensitive checker reports **0 covered / 84 orphans** — every row wrong. Now stated in `themes.py`'s own docstring |
+| Stale prose in our own code | ⚠ **Fixed** | `setgen/themes.py:18` said *"84 themes against **386** shipped species"* in the present tense — the exact wrong denominator this section's own ⛔ block exists to kill, sitting in the module that detects it. Corrected to 840 (68 real + 16 orphans), and the dated `496 family files` re-measured to 502 |
+
+### P0.3 — `theme-enrich`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| LLM stage raising `basis: "name"` → `"text"` | ⏸ **Correctly open** | Measured now: **53 `text` / 31 `name`** of 84; `holdback_report()` → `held_by_reason={'basis=name': 31}`. No stage exists (same search as P0.2) |
+| `audit_schema` confirms no number is emitted | ⏸ Open with the stage | Gated on the stage existing; `family-extract` and `motif-derive` both ship and both carry `basis` end to end (`motifs.py:190`), so the contract to copy is real |
+| **Verify line** naming `no_theme_reaches_generation_at_basis_name` | ⛔ **DEFECT — fixed** | The test is real (`test_set_charm_gen.py:437`) and correctly quoted, **and it cannot detect whether P0.3 was done**: `generatable()` filters `basis=name` out by construction (`GENERATABLE_BASES = {"text","derived"}`), so the assertion is **vacuously true at 31 name-basis themes or at zero**. The real completion gate is `the_held_population_is_reported_rather_than_silently_skipped` (`:445`), which **goes red when P0.3 succeeds**. Verify line corrected |
+
+### P0.4 — `X1 frame-classify`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| LLM stage emitting `humanoid`/`plant`/`hybrid` | ⏸ **Correctly open** | No frame stage: `anchor/prompts.py` declares 8 stage ids, none frame; no `frame*` module under `adapters/demons/`; `corpus/__init__.py:2` says outright *"no frame … appears anywhere in this package"* |
+| *"every species carries a frame"* | ⏸ Open, **0 of 840** | Counted across all 502 family files: `frame` appears on **zero** anchors. `DemonSpeciesDef` has **no `Frame` member** (`DemonSpeciesCatalog.cs:9-34`) |
+| `Side`'s faction/body conflation | ⏸ Open, and real | `DemonSpeciesCatalog.cs:11-12` — `Side` documented as *"portrait/**body** source"*, one field carrying both meanings, exactly as claimed |
+| *"Frame publishes independently of theme status"* | ⛔ **NEW DEFECT — the citation is right and the conclusion cannot be reached** | `spec-demon-themes.md` §2.4/§7 are theme-scoped exactly as claimed. **But** `seedsmith-map.md:252` and `item-map.md:61` both publish frame *through the theme registry*, whose §2.2 schema has **no `frame` key** and which gives a `basis="blocked"` demon **no row at all**. **15 of 840 anchors are `blocked` today.** Not ours to resolve — **filed** as `seedsmith-map.md`, "Filed by the item program (2026-09-06)"; `item-map.md` §3.1's X1 row now carries the same warning |
+| The four worked examples | ⚠ **Corrected — one cannot exist** | Exact ids in the compiled 84-species `DemonSpeciesCatalog.Generated.cs`, but the acceptance measures the **840-anchor** corpus: three match only case-insensitively (`PeaShooterZombie`, `CherryNutZombie`, `BucketNutZombie`) and **`ironpeazombie` has no anchor at all** — it is one of P0.2's own 16 orphans. A run could never emit a frame for it |
+| Downstream consumers stay inert | ✅ Confirmed, stronger than claimed | `EquipGate.cs:80-85`'s frame arm is structurally unreachable while `actor.Frame` is null, and **no production code constructs a `SpecimenActor` at all** — every construction site is a test. `LootPipeline.cs:318-326` falls back to a uniform draw |
+| X1's status in the owning program | ⚠ Recorded, unchanged | `seedsmith-map.md` §3c-bis says *"**Proposed, not built**"*; `tasks/seedsmith-todo.md` and `-plan.md` carry **no `frame-classify` task at all**. (Their `:2001` "X1" is an unrelated id collision.) Neither accepted nor declined since 2026-09-03 |
+
+### Module 1 — `durable-ownership`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| `rpg_item` DDL, all 11 columns, no magnitude | ✅ Holds | `RpgStore.Items.cs:79-94` — every named column present, PK + FK give the 1:1, only numerics are three booleans-as-INTEGER and `revision` |
+| Orphan sweep tests **both** roots | ✅ Holds, in both methods | Identical predicate at `RpgStore.AtomInstances.cs:657-661` and `:679-688` — `NOT EXISTS(effect_binding) AND NOT EXISTS(rpg_item)` |
+| D9 / D32 — per-atom test, `ValuesJson` not authoritative | ✅ Holds | `ResolveBindings` reads the live catalog (`:448-450`, rows at `:509`), never `instance.CatalogRevision`; the only gate is the `kind_id`-only digest (`:500-507`, `AtomIdentityDigest.cs:23-30`) |
+| `ContentRuleViolated` is the 34th reason | ✅ Still 34 | 35 members incl. `None`, pinned by `AtomKindRegistryTests.cs:49`; no other program has added one. `ContentRuleNamespaces` at `AtomRejection.cs:138-164` |
+| Empty-name check placed **last** in `Validate` | ✅ Holds — ordering re-checked, not assumed | `AtomRowValidator.cs:205-208` is the final statement pair, after all eleven earlier checks |
+| `ON DELETE CASCADE` genuinely enforced | ✅ Holds | No `PRAGMA foreign_keys` is executed anywhere in `src/`; `SqliteConnectionFactory.cs:15-20` never sets the keyword, so the driver default stands. Empirically pinned by `ArmouryTests.cs:173` |
+| All ten cited test names | ✅ All exist | file:line confirmed for each; suites re-run below |
+| **Verify:** `Core.Tests --filter BindResolution` | ⛔ **DEFECT — fixed** | `BindResolutionTests.cs` exists **only** in Data.Tests — this section's own **Files** line says so, so the section contradicted itself. Run verbatim: *"No test matches the given testcase filter"*, **exit 0**. A verification step that certifies nothing while passing. Repointed; both commands re-run (**17 / 0** and **14 / 0**) |
+| *"(Data.Tests + Core.Tests)"* for `An_empty_atom_name_is_rejected_at_load` | ⚠ Fixed | Data.Tests only (`OwnershipTests.cs:135`); no Core.Tests copy exists |
+| Doc drift on the R1 fix | ⚠ **Fixed** | `CountOrphanInstances`'s XML summary still read *"An instance is reachable only through a binding"* — the **pre-R1** sentence, contradicted by its own SQL two lines below and describing the exact data-loss defect R1 removed. Rewritten |
+
+### Module 2 — `armoury`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| Five tables, player-scoped, no per-specimen bags | ✅ Holds | `RpgStore.Items.cs:96-141` |
+| `InventoryCeiling = 20_000` with its exemption comment, enforced once | ✅ Holds | `:258` with the exemption block at `:250-257`; the only enforcement is `AcquireItem` (`:268`) |
+| `MaxLimit = 200` page clamp | ⚠ **House-rule gap — fixed** | A real clamp (`ArmouryQuery.cs:79`, applied at `:118`) shipped **bare**. The repo's rule exempts a runtime cap *and requires it to say so*. Comment added: per-request cap, not a progression ceiling, structural not tunable. ⚠ It also sits in `ArmouryTests.cs:108`'s grep blind spot (`Cap\|Ceiling\|MaxRows\|RowLimit` misses `MaxLimit`) |
+| Four salvage guards, first-match-wins | ✅ Holds | `SalvageGuards.cs:51-54` in G-A…G-D order, 7 tests |
+| `Incomparable` verdict, no invented scalar | ✅ Holds | `ArmouryCompare.cs:10-17`, `:70-73`; the reflection test asserts no `Score`/`Rating`/`Power` (`ArmouryCompareTests.cs:26-33`) |
+| Deferral: `ItemEndpoints.cs` absent | ✅ Still true | File does not exist; none of the six routes is mapped |
+| Deferral rationale: *"nothing to call it"* | ⛔ **Stale** | `ItemSurfaceEndpoints.cs:72` serves `/api/items/armoury/{playerId}` and calls `ArmouryQuery.ApplySort`/`ApplyPage` (`:96-97`) — module 2's query surface is live over HTTP today |
+| Ownership of `/api/items/*` | ⛔ **NEW — a decision made by default** | `spec-armoury.md:222-226` flagged this exact collision and said *"**Flagged for the plan** rather than resolved here, because it is a sequencing call between two specs."* The plan never made it; module 20 shipped over the seam. **Not drift** (only one file exists) but the ownership was settled by build order. **Named, not reconciled** — a two-spec decision |
+| Deferral: loadout **apply** waits on module 4 | ✅ Still true | Zero production callers of the loadout DAL; nothing reads a loadout and writes `rpg_item_assignment` |
+| *"The loadout library ships now, **as the spec requires**"* | ⛔ **DEFECT — over-claimed; BUILT this pass** | The spec puts *"the library, **the conflict report** and G-C"* on module 2's side of the sequencing line (`:116-118`) — only the **write** was module 4's. `LoadoutConflict` had **zero hits repo-wide** and `GetLoadoutEntries` did no validation. Both built: `LoadoutReport` + `GetLoadoutEntriesValidated` + `FindAssignmentHolders`, 15 new tests, **10 / 0** and **13 / 0**. Full account: **P1.2-L** above |
+| Unnamed spec gaps (named, not built) | ⛔ **NEW — the section does not mention them** | `rpg_item_rule` is **DDL only** (no CRUD, no reader, no writer — two hits in all of `src/`); no salvage **`Commit`** (only `Preview`, so `commit_salvages_exactly_the_previewed_ids` has no code to test); `BestInRole` is a **caller-supplied bool** with the spec's ranking heuristic unimplemented; no **gap board**; no **`stock_eligible`** column or FK; no **canonical stock instance**; no soft-delete **undo window**; and `ApplyPage` takes a bare `instance_id` with a linear scan where `:204-210` specifies an opaque `"<sortValue>\|<instance_id>"` keyset composite. None is a regression; all are module-2 scope the checkboxes read as complete |
+
+### Module 3 — `slot-roles`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| `ItemRole` 15 roles + `standard`, parser pure | ✅ Holds | `ItemRole.cs:11-32` (16 members incl. `Standard`); `ItemRoleRegistry.Parse` (`:88`) uses `JsonDocument.Parse` only — no `File.*`, no path |
+| `core.v1.json` at `registryVersion: 2` with D30's flips | ✅ Holds | `jewel-minor-b` eligible; `head-guard`/`sense` not; hybrid `meaning` prose names 12 |
+| Twelve-role hybrid core at 800‰ | ✅ Holds exactly | 15 rows sum 1000; the 12 `hybridEligible` sum **800**; all three jewels and `footing` present; `head-guard`/`sense`/`ward-array` absent (90+60+50 = 200) |
+| Seedsmith constants agree character-for-character | ✅ Re-verified programmatically | `registries.py:114-118` `HYBRID_FRAME_CITATION` string-equals the registry prose exactly; `HYBRID_FRAME_EXCLUDED_ROLES` (`:122`) and `linkage.py:30` `NON_HYBRID_ROLES` both set-equal the `hybridEligible:false` set |
+| 20 `standard` entries retired | ✅ Holds — and the guard was half-blind, **fixed** | All 20 carry `enabled:false` **and** a non-empty `retiredReason`. `Every_shipped_standard_base_type_is_retired` asserted only `enabled`; `seed-contract.md` §7.2 is *"retire, don't delete"*, and a retirement with no stated reason is a deletion with the row left behind. `retiredReason` assert added |
+| `SlotUnlock` defaults always-open | ✅ Holds | `SlotUnlock.cs:31-32` — `_rule is null \|\| _rule.Evaluate(...)`, no hard-coded `true` |
+| *"18 findings"* from the gate | ⛔ **Wrong unit — fixed in three files** | Measured live: **30** `Linkage/SetCompletability` findings over **18 distinct** sets (10 sets claim two off-core roles, `set.verdant-graft-005` claims four); exit 1; suite `61 gap, 80 note, 23 not_measured`. 18 is the **set** count. ⭐ Checkpoint 0's own table already said *"30 GAP findings over exactly those 18"* — **this file disagreed with itself for two days.** Corrected here, in `item-plan.md` and in `spec-slot-roles.md:274` |
+| CI line citation | ⚠ **Todo right, plan wrong — plan fixed** | Gate command is `ci.yml:231` (step name `:211`). `item-plan.md`'s `ci.yml:220` is prose inside the step's comment block |
+| *"`item_role_frame` — schema, and **fully populated**"* | ⛔ **NEW — unstated wiring gap** | `SeedRoles` (`RpgStore.Items.cs:187`) really does write 48 rows from the registry with no transcribed literals — **and it has zero production callers.** Not in `Init()`, not in any importer; its only callers are in `SlotRolesTests.cs`. **Both tables are empty in a deployed database.** Inert rather than broken (no production reader either), and deliberately **not wired blind**: `SeedRoles` takes the registry JSON, not a path, so wiring it is a runtime-data-location decision, not a mechanical call. Recorded in P1.3 |
+| X1 species→frame lookup deferral | ✅ Still correctly open | 0 of 840 anchors carry a frame; `DemonSpeciesDef` has no `Frame` member |
+| Spec test coverage | ⚠ Two unaccounted | Of `spec-slot-roles.md:314-331`'s 16, five are absent; three are covered elsewhere or fall under X1, but **`no_affix_family_is_orphaned_by_the_three_drops`** and **`the_generator_never_emits_a_standard_base_type`** are unaccounted — the spec calls the latter *"D14's actual instruction — the half that is true and testable today"* |
+
+### Module 4 — `equip-assign`
+
+| Requirement | Status | Evidence verified fresh |
+|---|---|---|
+| `rpg_item_assignment`; binding rebuilt as a projection | ✅ Holds | `EquipProjector.Project`, proven by the out-of-band delete + re-project test |
+| Frame arm ships **inert**, proven not assumed | ✅ Holds, stronger than claimed | `EquipGate.cs:80-85`; and no production code constructs a `SpecimenActor` at all — every site is a test, all passing `Frame: null` bar one deliberate negative |
+| `Admits` vs `Projectable` disagreement asserted | ✅ Holds | `A_lapsed_level_req_reports_a_shortfall_and_keeps_the_binding` (`EquipAssignTests.cs:28`) |
+| `UnassistedAttributes` cycle rule, structural proof | ✅ Holds | `An_equippable_grant_cannot_flip_an_admission` (`:108`) |
+| `RoleLocked` is internal, not I13's 15th code | ✅ Holds | `EquipGate.cs:16`; enum doc says *"**Not** I13 §6's official closed list"*; `spec-equip-assign.md:96` confirms **fourteen** and `:249` marks the fifteenth **Ask first** |
+| M1 migration one-way + idempotent + wired into `Init` | ✅ All three hold | `RpgStore.UniqueActors.cs:1001/1010` — only a `SELECT` touches the legacy table; `if (!taken.Add(...)) continue;` skips an occupied cell; called at `RpgStore.cs:91` |
+| `rpg_item_assignment` in `Reset()` | ✅ Holds | `RpgStore.cs:799`, ahead of the legacy delete |
+| `LegacyEquipSlots` closed, bidirectional, structural | ✅ Holds in full | `LegacyEquipSlots.cs:38-43`; `TryToLegacy` **refuses** the other twelve; the structural-not-tunable comment answers `tunables-ssot.md`'s own test |
+| Retirement guard's two-file allowlist | ✅ Still matches | Six files name `rpg_unique_equipment`; four are comment-only and stripped; the two allowlisted are the only real mentions, and the migration's single post-strip mention is a `SELECT`. ⚠ `ProductionSources()` does not scan Launcher/CheatCore/Secondary — none names it today |
+| D1 M4 blocked on *"no concrete unique container minted"* | ✅ **Still true** | `data/seed/containers/` holds four seeds, none derived from the unique corpus; `data/seed/items/uniques/` has 18 **seed** files with no container id; `LegacyEquipRefKind = "stock"` is the only `ref_kind` any writer produces, so **nothing writes `"rolled"`** and M4's replacement path has no source |
+| Relic-as-unique blocker's three stated facts | ⛔ **Two were stale — fixed in two places** | *"only **3 of 4** relics resolve to a container"* and *"`relic.cracked_seal` has **no container at all**"* are both false since T6.1's 2026-09-06 migration: `item.fx-entity-atk` (`data/seed/containers/unique-equip.json:60`, zero atoms) backs it, mapped at `UniqueEquipmentCatalog.cs:69`. **All four resolve; two share with a stub.** The shipped test already said so; the todo **and** `RelicCatalog.cs`'s doc comment were the two holdouts. ⭐ The blocker got **harder**, so the deferral was never wrongly held open — it was defended with facts a reader could check and find false |
+| Test name `No_relic_owns_a_container_of_its_own_…` | ⛔ **Stale — fixed** | Renamed to `Half_the_relics_share_a_container_with_a_stub_so_none_can_be_flagged_a_unique_today` (`RelicHomeTests.cs:192`) when the "no container" case stopped existing. ⚠ **P5.1 (module 17) still cites the old name** — out of this pass's scope, named for whoever owns module 17 |
+| `RpgStore.cs:411` = the legacy DDL | ⛔ **Wrong — fixed** | `:411` is `last_ptr TEXT,` inside `rpg_unique_actors`; the DDL is `:432-437`. Claim right, address wrong |
+| `RelicCatalog.cs:15-53` = four definitions | ⛔ **Wrong — fixed** | `:15-53` is doc-comment prose ending mid-relic; the list is `RelicCatalog.Items` at `:37-75`. Count of four re-confirmed |
+| Claimed test counts 13 / 12 / 3 | ✅ All exact | `RelicHomeTests` **13 cases** from 9 methods (2 `[Theory]` × 3), `RelicRowMigrationTests` **12**, `LegacyEquipTableRetirementGuardTests` **3** — counted by `--list-tests`, not by grepping attributes |
+| Spec test coverage | ✅ Substantively complete | 15 of 17 ship (`EquipAssignTests` 9 + `AssignmentStoreTests` 6, both matching exactly), migration pair covered. Only `no_caller_of_UniqueEquipmentCatalog_remains` is absent — **a stated decision under D1 M4**, with the catalog's four live jobs documented, not a gap |
+
+### Suites, run this session — no number below is carried forward
+
+| Command | Result |
+|---|---|
+| `Core.Tests --filter` (Armoury · SlotRoles · EquipAssign · RelicHome · LoadoutReport · AtomKindRegistry) | **173 / 0** |
+| `Data.Tests --filter` (Ownership · BindResolution · Armoury · SlotRoles · AssignmentStore · RelicRowMigration · AtomInstances) | **73 / 0** |
+| `Core.Tests --filter LoadoutReportTests` (new) | **10 / 0** |
+| `Data.Tests --filter ArmouryTests` (8 existing + 5 new) | **13 / 0** |
+| `Guard.Tests --filter LegacyEquipTableRetirement` | **3 / 0** |
+| `Data.Tests --filter AtomInstances` / `--filter BindResolution` (P1.1's corrected Verify) | **17 / 0** · **14 / 0** |
+| `guard-dal` · `guard-single-writer` · `guard-funnel-delta` · `guard-secondary-no-unity` | all four **OK** |
+| `python scripts\audit-overflow.py` | **0 critical**, A1 = 0, A2 = 0 — nothing in any touched file |
+| `python scripts\audit-magic-numbers.py --summary` | **M1 = 0, M2 = 0** — nothing in any touched file |
+| `seedsmith check --adapter items --gate` | exit 1, `61 gap, 80 note, 23 not_measured` — the D30-anticipated 30/18, unchanged |
+
+⚠ **Two environment effects worth recording, neither a regression.** A wedged `testhost` from another
+session (PID 24756 — **0.2 s CPU across a 15-minute sample**, the known `DemonSpeciesImportCliTests`
+hang) held the Data test output for 45 minutes, and a separate CS2012 compiler-lock race hit
+Core.Tests. Neither process was killed; the Data suites ran through an **in-repo**
+`-p:BaseOutputPath=bin-proof\` (removed afterwards) and Core was retried. ⛔ The first attempt put that
+output under the system temp dir and **all 13 tests failed at module init** with
+`DirectoryNotFoundException: could not locate repo root above …`. That is the harness, not the code —
+and it is exactly the shape of red that gets mistaken for a regression.
+
+### What this pass adds to the "why the passes keep missing things" ledger
+
+Passes 1–3 each ended by naming the same root cause: *a citation that is real and quoted correctly
+reads as verified, even when its conclusion was never re-derived.* This pass hit that shape three more
+times, and one of them is a **new variant worth naming separately**:
+
+- **P0.3's Verify line** — a real test, correctly named, that is **structurally incapable of failing**
+  for the reason it is cited. Not stale, not misquoted: tautological. No amount of checking *that the
+  test exists and passes* would have caught it; only reading what `generatable()` filters would.
+- **P0.4's publication channel** — the spec text is quoted correctly and the Never really is
+  theme-scoped. The conclusion still does not reach, because a **third** document supplies the channel
+  and that channel cannot carry the payload. Two documents agreeing is not the same as the mechanism
+  existing.
+- **P1.2's `LoadoutConflict`** — ⭐ **the new variant: a deferral that is correct about the thing it
+  names, and wrong about its own scope.** *"Deferred: loadout apply"* is true. But the spec's
+  sequencing sentence puts the library and the conflict report on the *other* side of the line, and
+  the deferral quietly took them along. Every prior pass checked whether deferrals were *still*
+  blocked; none checked whether a deferral had **annexed** work that was never blocked at all. The
+  mutual-deferral sweep after Pass 3 would not have found this either — only one module ever claimed
+  it, and it claimed it correctly. **The generalisable check: when a deferral names a noun, re-read
+  the spec sentence that noun came from and confirm nothing else in that sentence went with it.**
+
+⛔ **What this pass did NOT do, said plainly.** It did not re-verify P0.1, P0.5, Checkpoint 0, module
+10, modules 6/8's phantom-family bullets or P1.5 — all out of scope by instruction. It did not build
+module 2's eight unbuilt spec features, wire `SeedRoles`, resolve the `/api/items/*` ownership call,
+re-anchor motif derivation, or answer the frame-channel question: the first is module-sized, the next
+two are decisions rather than code, and the last two are other programs'. Each is named above with its
+evidence and its owner rather than left implied. **No git write command was run by this pass.** ⚠ The
+owner committed `3b4ddd1 "update some mechanisms"` at 14:37 while it was in flight, which swept up the
+in-progress `LoadoutReport` work — noted only so the history reads coherently.
+
+---
+
+## FINAL PROOF — consolidated requirement-to-evidence mapping (2026-09-06)
+
+This section exists because a checklist that cites real evidence per item is not the same thing as one
+map, read end to end, from every requirement to its proof — the gap the six "Final-proof mapping"
+sections above exist to close, and this is their index. Nothing below is new evidence; everything
+points at evidence already recorded, above, by name.
+
+### All 22 modules
+
+| Module | Status | Evidence |
+|---|---|---|
+| 1 `durable-ownership` | ✅ built, verified, re-verified 2026-09-06 | P1.1 + Final-proof/Phase 0+1 |
+| 2 `armoury` | ✅ built, verified; **the loadout library's missing half built 2026-09-06** (`LoadoutReport`, `GetLoadoutEntriesValidated`, `FindAssignmentHolders`, 15 tests) | P1.2 + Final-proof/Phase 0+1 |
+| 3 `slot-roles` | ✅ built, verified. ⚠ named, not fixed: `SeedRoles` has zero production callers — module 3's own tables are empty in a deployed DB | P1.3 + Final-proof/Phase 0+1 |
+| 4 `equip-assign` | ✅ built, verified; relic-migration mutual-deferral closed 2026-09-06. ⭐ **The equip ENDPOINT landed later the same day (P1.4-E)** — `POST /api/items/equip` + `/unequip` + `GET /api/items/assignments/{specimenId}`, so `SaveAssignment`/`RemoveAssignment` have a production caller and the web armoury tab's `Equip` is real; proven against a published server with the row read back by an independent OS process. ⏸ **What remains, named:** an equipped item changes no number until module 5's `ApplyEquipProjection` / module 19's `ApplyEquippedGrants` get a deploy-time caller (both still zero), and defect **R1** — the relic route silently overwrites an item assignment in the three aliased roles (measured; owner is D1's `M3`) | P1.4 + P1.4-R + P1.4-E |
+| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ⛔ One item genuinely open: Injector-side `BindGrant`, environment-blocked | P1.5 + Final-proof/Module 5 + Checkpoint 1 |
+| 6 `base-types` | ✅ built, verified, re-verified 2026-09-06 | P2.2 + Final-proof/Phase 2 |
+| 7 `rarity-bands` | ✅ built, verified, re-verified 2026-09-06 in full | P2.1 + Final-proof/Phase 2 |
+| 8 `affix-legality` | ✅ built, verified; **a real validation blind spot found and closed 2026-09-06** (`RoleFamilyCheck` never checked corpus→file; today's new `g-punisher.json` families were silently violating D3's role-relocation rule) | P2.3 + Final-proof/Phase 2 |
+| 9 `item-power-reads` | ✅ **`ceilingFor`/`pinAE` reader built 2026-09-06**, wired as production caller, red-first proven. Checkpoint 2's `:73` criterion now met; its dominance criterion open for a different, more precisely identified reason | P2.4 + Final-proof/Phase 2 + Checkpoint 2 |
+| 10 `item-card` | ✅ built, verified; Card/Compare levels, DAL read path and `Compose`-instance coverage all landed 2026-09-06, including a real render bug fixed (element-typed affixes couldn't render under any minter) | P2.5, P2.5b, P2.5c |
+| 11 `drop-volume` | ✅ built, verified, re-verified 2026-09-06; one stale tuning-file citation fixed | P3.1 + Final-proof/Phase 3 |
+| 12 `threshold-grants` | ✅ built, verified, re-verified 2026-09-06; one stale "still open" bullet closed (already answered in shipped code) | P3.2 + Final-proof/Phase 3 |
+| 13 `set-charm-gen` | ✅ machinery built and proven 2026-09-06 (generation wiring, 3+3 authorized sample, 5 defects found and fixed). ⛔ Full corpus run genuinely held — see Checkpoint 0 | P3.3 + Final-proof/Phase 3 |
+| 14 `salvage-craft` | ✅ Core-layer built, verified. ✅ **Production caller BUILT 2026-09-06** — the workbench executor, shared with 15/16 (`ItemWorkbench` + `RpgStore.TrySpendAndApply`); `upcycle` and `salvage` live. ⏸ `forge` still cannot mint: no base-type `effect_container` (module 6) | P4.1 + Final-proof/Phase 4 |
+| 15 `enhance-reroll` | ✅ Core-layer built, verified, Mixed-affix reroll landed. ✅ `enhance` has a real production caller via the same workbench executor. ⏸ `reroll`'s `Resolve` and `transfer`'s ask-first verb still unbuilt (named, not this pass's) | P4.2 + Final-proof/Phase 4 |
+| 16 `sockets` | ✅ built, verified. ✅ `socket-add`/`socket-insert` have real production callers via the same workbench executor. ⏸ `socket-imbue` wired but unpayable — no `imbue` recipe row in seed data | P4.3 + Final-proof/Phase 4 |
+| 17 `uniques` | ✅ built, verified, re-verified 2026-09-06 | P5.1 + Final-proof/Phase 5 |
+| 18 `consumables` | ✅ built, verified; one regression fixed (affix-family corpus 98→100 drift) | P5.2 + Final-proof/Phase 5 |
+| 19 `granted-actions` | ✅ GATE GA2 built, verified, re-verified 2026-09-06; X3 correctly resolved as no-ask (D36) | P5.3 + Final-proof/Phase 5 |
+| 20 `item-surfaces` | ✅ server-side surfaces (REST routes) built, verified. ✅ **The web client now exists — built 2026-09-06**, all seven components + the `RelicsLayer` body swap, calling all three `api/items` routes through `lib/bus/items.ts`; build/typecheck/tests/dev-server all green. ⭐ **The write wiring landed later the same day** — `SocketBench` and the new `CraftBench` call all six `/api/items/workbench/*` verbs through `lib/bus/items.ts`, proven end to end against a real stored item with the persisted result read back independently (P5.4's proof table). ⛔ **What remains, all named:** no route serves module 10's `DisplayModel` / `DominancePresentation` / `SetDisclosure` (this module's, three read-only routes); **a salvaged item still lists in the armoury** (`ListItemsByPlayer` has no disposition filter, defect 2, this module's); **no route lists the craft recipes**, so the bench asks for a typed `recipeId` (defect 3, module 14's); and new — **`ArmouryRowDto.Assigned` is hardcoded `false`** (`ItemSurfaceEndpoints.cs:85,89`, defect **R4**), which was harmless while nothing could be assigned and is wrong now that equip is real, so the filter's `hideAssigned` filters nothing. ✅ ~~the workbench routes are unmapped on a built server (defect 1)~~ **FIXED and re-verified live 2026-09-06** — the `data\seed\items\**\*.json` content rule is in `FusionRpg.Server.csproj` and a published server answers `POST /api/items/workbench/salvage` with 409 `item.unknown`, not 405. ✅ ~~**Equip is still genuinely unwritable**~~ **CLOSED the same day by module 4's own P1.4-E** — `ItemEquipEndpoints.cs` is a separate file for the same read-only reason this module's is, so nothing here gained a write | P5.4 + Final-proof/Phase 5 + Checkpoint 5 + P1.4-E |
+| 21 `strain-splice-gen` | ✅ machinery built and verified, re-verified 2026-09-06 | P4.4 + Final-proof/Phase 3/4 |
+| 22 `charm-carry` | ✅ built, verified, re-verified 2026-09-06 | P5.5 + Final-proof/Phase 5 |
+
+### All 6 checkpoints — corrected status, 2026-09-06
+
+| # | Before today | After today's rigor pass | What's still open |
+|---|---|---|---|
+| 0 | ✅ "CLOSED... resolved by DECLINE" (over-claimed — the decline mechanism doesn't cover this clause) | ⚠ **ONE of three clauses met.** Registries: only `core.v1.json` bumped. External deps: 4/7 resolved, 3/7 now **filed** (not just named) at `effect-atom-map.md` §20 ×2, `world-map-program.md` — awaiting response. `classes.v1.json` v4: genuinely held for user authorization | The registry bump (user decision) + 3 filed asks (other programs' decisions) |
+| 1 | ⭐ "all four criteria met (closed)" — contradicted by its own body two sentences later | ⭐ Every criterion reachable in this environment now met, including a same-day crash fix | Injector `BindGrant` (environment-blocked) |
+| 2 | ⚠ "real form — met" for its first criterion (over-claimed) | ✅ **Built 2026-09-06** — `ceilingFor`/`pinAE` reader wired as production caller, red-first proven, `:73` criterion met | The dominance criterion: `FrameDominanceGuard` still exposes only `RunChannelSplit`, both named fixtures still appear in no `.cs` |
+| 3 | ⏸ "HALF HELD" — accurate from the start | ⏸ unchanged, still accurate | The generation run (same as Checkpoint 0) |
+| 4 | ✅ unconditional (false — zero production callers for the core loop) | ⏸→✅ Corrected twice 2026-09-06: the three writers had zero production callers, then the executor landed and `TheWholeLoopRunsOnOneItem_craftEnhanceSocketSalvage` drives bore → enhance → insert → salvage on one item | Met. Residuals named in the box: `forge` cannot mint, reroll/transfer unwired, `imbue` unpayable, `CraftingHorizonReport` unrendered |
+| 5 | ✅ unconditional (false — no web client exists at all) | ⚠ Corrected, then **re-scored four times 2026-09-06** as each piece landed: web client built and personally screenshot-verified live; workbench wired to craft/socket, proven end to end; equip/unequip built as a new real route (`ItemEquipEndpoints.cs`), proven live on a published server via an independent DB read, with real refusals (role-mismatch, already-worn, specimen-unknown). **Still NOT MET — narrowed from four blockers to two, neither a write-path or UI gap**: (1) nothing mints a concrete `effect_container` in production, so every proof so far hand-seeded its subject item; (2) module 20's `DisplayModel`/`DominancePresentation` still have no route, so see/compare's payload stays thin | A real item generator/drop path (module 11's own, out of this pass) + the three read-only display routes (module 20's own) |
+
+**Five of six checkpoints needed correction today; only Checkpoint 3 was accurate from the start.** All
+five corrections are the same failure shape, now named three times in this file: a citation is real and
+quoted correctly, but nobody re-checked whether it actually *entails* the summary rounded up from it.
+
+### The defect tally, this final pass alone (8 dispatched agents, 2026-09-06)
+
+Real defects found and fixed: the geared-corner-run crash (critical — was silently breaking Checkpoint
+1's headline proof), the `RoleFamilyCheck` corpus→file validation blind spot, module 2's missing
+loadout-library half, two false-green `Verify` commands (P1.1, P0.3), module 11's dead tuning-file
+reference, P3.3's charm-class denominator, a consumable-corpus regression, plus roughly a dozen citation
+corrections (six→seven container kinds, 98→100 affix families, stale test names, line-number drift) —
+each independently found by 2-3 agents converging on the same root cause, which is itself evidence they
+are real rather than noise. Two more real, LIVE production defects found and filed to their actual
+owners rather than fixed here: `effect-pipeline`'s `AffixTags.cs` silently deriving the wrong tag set
+(`effect-atom-map.md` §20), and `AtomImporter` refusing its entire batch on one misplaced `passive-tree`
+file (`effect-atom-map.md` §20 + `passive-tree-map.md`) — the latter a **total content-import failure**,
+reproduced directly, that would hit any real deploy running `--validate` today.
+
+### What remains genuinely open, complete list, nothing hidden
+
+**Structural — outside what a coding session can close, correctly held rather than forced:**
+1. `classes.v1.json` v4's full generation run — held for explicit user authorization beyond the
+   already-authorized evaluation sample (Checkpoint 0).
+2. Injector-side `BindGrant` call site — needs a real PVZ Fusion game install (Checkpoint 1).
+3. Three cross-program asks (X7 container kinds, D28/E43 family tags, X5 content ladder) — filed
+   2026-09-06 to their real owners' own maps, awaiting their accept/decline/build (Checkpoint 0).
+4. The `vocabulary.json`/`AtomImporter` production defect — filed to `passive-tree` and `effect-atom`,
+   not this program's file to fix.
+5. `effect-pipeline`'s `AffixTags.cs` defect — filed, not this program's file to fix.
+
+**Closed since this section was first written:**
+6. ✅ The 9 phantom implicit atom families — **all 9 now real, authored families**, each grounded in a
+   real source (`atom-family-library.md` §3.4's family→status table, cross-referenced existing content),
+   never guessed from a name. `elemental-power` decided as its own real family (not a mis-wire) with a
+   real precedent (`atom.elemental-defense`'s one-family-many-variants shape). No magnitude invented —
+   `powerBand` derived from the 7 shipped siblings' own pattern. Both pinning tests widened; a real test
+   gap found in the process (`UniqueCorpusTests` only walked `fixedAtoms`, missing `varianceSlot` — the
+   reason it saw 5 of 6 rather than all of them). `ItemSeedValidator` 178/271 before AND after — the two
+   reports diff to nothing but entry count. See modules 6/8's own addenda for full detail.
+7. ✅ Module 9's `ceilingFor`/`pinAE` reader — **built, wired as the rarity-keyed `ContentValidation.Budget`'s
+   first production caller**, red-first proof (`ContentReport.Evaluated` 0→1 on real content). Checkpoint
+   2's `:73` criterion now MET; its dominance criterion stays open for a separately, more precisely
+   identified reason (`FrameDominanceGuard` still exposes only `RunChannelSplit`). See P2.4 and
+   Checkpoint 2 for full detail.
+
+8. ✅ The shared workbench executor (modules 14/15/16) — **built** (`ItemWorkbench` + `RpgStore.TrySpendAndApply`,
+   one shared executor per the specs' own single-transaction pattern), wired at
+   `POST /api/items/workbench/{salvage|upcycle|enhance|socket-add|socket-insert|socket-imbue}`.
+   **Checkpoint 4 → MET**: `TheWholeLoopRunsOnOneItem_craftEnhanceSocketSalvage` drives bore → enhance →
+   insert → salvage on one real item through the real endpoints. Residuals named narrowly: `forge`
+   cannot mint (no base-type `effect_container`), `reroll`/`transfer` unbuilt, `imbue` unpayable (no
+   recipe row).
+9. ✅ Module 20's web UI — **built** (`ArmouryList`/`ArmouryFilter`/`Paperdoll`/`ItemCard`/`CompareView`/
+   `SocketBench`/`Compendium` + the `RelicsLayer` body swap), **and personally screenshot-verified live**
+   against the real running dev server and real player data: all four Relics tabs (Held/Armoury/Equipped/
+   Storage) render real content or an honest empty/pending state — no fabricated numbers anywhere. Along
+   the way, found and fixed a transient, already-documented server-lifetime issue (a server started from
+   an assistant tool call dies when that call's process tree is cleaned up) — restarted correctly via
+   `Start-Process`, unrelated to the new UI code.
+10. ✅ UI-to-workbench wiring — **built**: Craft/socket actions now call the real workbench routes, proven
+    end to end against an isolated server copy (upcycle debit, idempotent correlationId replay, two real
+    socket writes, a correctly-refused third, enhance and salvage persisted — all confirmed via an
+    independent read-only DB connection). Found three real server-side defects while proving it, two
+    fixed the same session:
+    - ✅ **Fixed** — the entire workbench feature was **absent on any real published build**:
+      `FusionRpg.Server.csproj` had no content-copy rule for `data/seed/items/**` (the same defect class
+      already recorded for the dungeon tree), so the recipe corpus never loaded next to the exe and
+      `MapWorkbench` silently skipped registration. Added the missing rule, rebuilt and republished to
+      `dist/`, confirmed live: the same call went from HTTP 405 (route absent) to HTTP 400 (route present,
+      bad test payload). `Server.Tests` re-run after: 206/25, zero new failures (all 25 pre-existing,
+      unrelated `WorldUpkeepBreakdownProjectionTests`).
+    - ✅ **Fixed** — a salvaged item still listed in the armoury (`ListItemsByPlayer` had no disposition
+      filter). Added `AND disposition = 'owned'`, enforcing the field's own already-documented contract.
+      New test genuinely proven red before the fix, green after; full `Data.Tests` re-run: 1041/0.
+    - ⏸ **Left as a named, non-blocking UX gap**: no read route lists the craft-recipe corpus, so the
+      bench asks for a typed `recipeId` (a wrong one is refused, not silently accepted). Real fix needs
+      exposing the Core-side `MaterialRecipeCatalog` through a new route — small, but not investigated
+      deeply enough this pass to build without guessing its shape; left honestly open rather than rushed.
+
+12. ✅ Item equip/unequip — **built** (`ItemEquipEndpoints.cs`: `POST /api/items/equip`, `/unequip`,
+    `GET /api/items/assignments/{specimenId}`), gates in the spec's own order via `EquipGate.Explain`,
+    wired into the web UI's Paperdoll (`Take off` on item cells only — correctly not touching the
+    relic write path it can't see into). Proven live on a published server via an independent OS
+    process reading the real SQLite DB, including real refusals (`equip.role-mismatch`,
+    `equip.already-worn`, `equip.specimen-unknown`, `equip.role-empty`). Four real defects found while
+    proving it, in flight for R1/R2/R4, R3 correctly held as ask-first (a genuine stored-data-mapping
+    decision — `Paperdoll.tsx`'s `trinket→jewel-major` vs Core's `LegacyEquipSlots`' `trinket→jewel-minor-a`
+    — see the dated note wherever the R1-4 agent leaves it): (R1) the older relic-equip route silently
+    overwrote a live item assignment, (R2) `ItemCard.cs` read the wrong `ref_kind` literal (`"item"`
+    instead of the real, shipped `"rolled"`), (R4) `ArmouryRowDto.Assigned` was hardcoded `false`. A
+    fifth, structural finding restated rather than newly discovered: `ApplyEquipProjection`/
+    `ApplyEquippedGrants` still have zero production callers, so an equipped item persists but changes
+    no in-battle number yet — the same Injector-side gap Checkpoint 1 already names.
+
+**Named, scoped, owned, not dispatched this pass:**
+13. Eight unbuilt module-2 spec features (module-sized, not this pass's to absorb), `SeedRoles`'s zero
+    production callers, `/api/items/*` ownership (a decision, not code), motif-assignment re-sourcing
+    and the frame-publication-channel question (filed to `seedsmith-map.md`) — each named with its
+    owner in Phase 0+1's own final-proof section, none silently dropped.
 
 ⛔ **The item system is purely generate → drop → apply.** The owner's reason, which the fidelity audit
 found had been dropped from every spec that carried the rule:

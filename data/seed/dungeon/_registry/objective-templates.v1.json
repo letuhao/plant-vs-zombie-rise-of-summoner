@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "registryVersion": 1,
   "objectiveTemplates": {
-    "explore-rooms": { "targetKind": "room-kind", "sinkAvoidance": false },
+    "explore-rooms": { "targetKind": "none", "sinkAvoidance": false },
     "cleanse-fights": { "targetKind": "room-kind", "sinkAvoidance": false },
     "gather-curio-kind": { "targetKind": "curio-kind", "sinkAvoidance": false },
     "kill-boss": { "targetKind": "boss", "sinkAvoidance": false },

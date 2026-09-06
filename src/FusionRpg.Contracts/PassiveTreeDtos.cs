@@ -145,3 +145,28 @@ public sealed class AllocateTreeNodesRequest
     [JsonPropertyName("playerId")] public long? PlayerId { get; set; }
     [JsonPropertyName("nodes")] public Dictionary<string, long>? Nodes { get; set; }
 }
+
+/// <summary>
+/// Task I8's follow-up (spec-tree-surface.md §7.2 part 5) — "the draft preview reports what a change
+/// would close." Closing this needed a HYPOTHETICAL aptitude reallocation run through the SAME
+/// server-side resolution the committed allocation uses (`CrossUnlock`/`TierGate`), never a client-side
+/// re-derivation (AGENTS.md "one power ladder, no private curves"): aptitude points are edited on a
+/// different tab entirely (§4.1) and the committed draft this surface tracks is node ownership only.
+///
+/// <para><c>Nodes</c> is the draft's OWN current whole node set (mirrors <see cref="AllocateTreeNodesRequest.Nodes"/>'s
+/// shape exactly) — required, since a preview with no node set is just "what does my aptitude delta do
+/// to gates," which is still meaningful but the endpoint always needs a concrete set to resolve
+/// contributing/invalid nodes against.</para>
+/// <para><c>AptitudeDelta</c> is a SIGNED delta keyed by aptitude id (`AptitudeCatalog`'s own ids — the
+/// same vocabulary <c>AllocateAptitudesRequest.Shares</c> already uses), added on top of the player's
+/// REAL committed <c>AptitudeAllocation</c> — never a replacement of it. Optional; an absent or empty
+/// delta previews the node set alone against the actor's real aptitude spend. A delta that would drive
+/// any aptitude's hypothetical total below zero is refused (aptitude points cannot go negative; this is
+/// a domain bound, not a progression cap) rather than silently clamped, since clamping would preview a
+/// DIFFERENT hypothetical than the one the delta actually asked for.</para>
+/// </summary>
+public sealed class PreviewTreeStateRequest
+{
+    [JsonPropertyName("nodes")] public Dictionary<string, long>? Nodes { get; set; }
+    [JsonPropertyName("aptitudeDelta")] public Dictionary<string, long>? AptitudeDelta { get; set; }
+}

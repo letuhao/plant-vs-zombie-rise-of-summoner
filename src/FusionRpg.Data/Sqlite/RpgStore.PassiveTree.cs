@@ -234,6 +234,24 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>I8's preview endpoint (spec-tree-surface.md §7.2 part 5) — classifies a CALLER-SUPPLIED
+    /// node set (a draft that has never been through <see cref="SaveTreeNodeState"/>, and never will
+    /// be) against the live catalog, read-only. Same <see cref="TreeStateReconciler.Classify"/> call
+    /// <see cref="LoadAndClassifyTreeState"/> makes over the STORED row set — this is the one-line
+    /// difference that lets a hypothetical draft run through the exact same live/retired/unknown rule
+    /// without a round trip through <c>rpg_tree_node_state</c> first. No row is read or written for
+    /// the node set itself; only the catalog tables are consulted.</summary>
+    public IReadOnlyList<ClassifiedTreeNode> ClassifyTreeNodeState(IReadOnlyDictionary<string, long> ownedNodeIdToSoulLevel)
+    {
+        if (ownedNodeIdToSoulLevel is null) throw new ArgumentNullException(nameof(ownedNodeIdToSoulLevel));
+
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            return TreeStateReconciler.Classify(ownedNodeIdToSoulLevel, id => ReadCatalogStatusUnlocked(db, tx: null, id));
+        }
+    }
+
     // ---- C10: tree respec (spec-tree-state.md §5, §5.1) --------------------------------------
 
     void EnsureTreeRespecSchemaUnlocked(SqliteConnection db)

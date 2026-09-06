@@ -384,24 +384,48 @@ def quota_for_plan(plan: object, targets: object, *, category: str,
     the full 39-tree/1,560-node corpus lands, because nothing here assumes a specific tree count.
 
     Every axis's member list comes from `plan.property_vocabulary` (B1's own fresh count off the
-    real mirrors — `axis_members`); every axis's weights come from `targets` (`axis_weights_milli`).
-    Neither is read a second time from anywhere else.
+    real mirrors — `axis_members`); every axis's weights come from `targets` (`axis_weights_milli`)
+    — **except `nodeClass`**, found real (2026-09-06, generalizing plan emission past `might`):
+    `nodeClass` is never drawn from a free pool at all (`build_slot` forces it on EVERY slot,
+    unconditionally — see its own docstring), and the archetype's own `mechNodes[tier]` ramp
+    (`plan.archetypes.mechanism_nodes`) decides the exact per-tree mechanism/magnitude split, which
+    is NOT 50/50 for two of the three shipped archetypes (`gated-deep` is 16/24, `late-crown` is
+    24/16 — only `broad-and-flat`, `might`'s own archetype, happens to land on 20/20). A flat,
+    archetype-oblivious `targets.node_class_weights_milli` (calibrated once, against `might`, the
+    only tree ever planned before this fix) can never simultaneously match all three splits at
+    single-tree scope — confirmed live: `quota_for_plan("fortitude"/"agility"/"focus"/"precision",
+    ...)` raised `OverdrawnQuota` the moment a second, non-broad-and-flat primary tree's plan was
+    ever emitted and generation was attempted, 100% reproducing with real committed plan data. The
+    three archetypes DO average to exactly 500/500 milli in aggregate across a 3k-cycle roster
+    (`might`+`onslaught`+`pierce`+`retribution`=broad-and-flat, etc. — 12 primary trees: mechanism
+    sum = 240, magnitude sum = 240), which is what the spec's own corpus-wide framing (§4.2 step 1,
+    `N := 1,560`, the whole generic catalog) actually describes — but `quota_for_plan` is called at
+    single-tree scope by both `_cmd_trees_generate` and `QuotaDriftMetric`, so a single-tree target
+    for `nodeClass` must equal that TREE's OWN archetype-driven distribution, never the corpus
+    aggregate. Since `nodeClass` is 100% forced already, its "quota" is trivially the plan's own real
+    tally — read back below, never independently computed — so `rebalance_axis`'s residual is
+    exactly 0 for every value, by construction, matching "this axis is never drawn from a free
+    sequence at all" (this module's own docstring, unchanged).
     """
     total = len(plan.nodes)
-    quota: "dict[str, dict[str, int]]" = {}
-    order: "dict[str, tuple[str, ...]]" = {}
-    for axis in AXES:
-        members = axis_members(axis, plan.property_vocabulary)
-        weights = axis_weights_milli(axis, targets, members)
-        axis_ord = axis_order(axis, targets, members)
-        quota[axis] = axis_marginals(weights, axis_ord, total)
-        order[axis] = axis_ord
-
     slots = [
         build_slot(node, category=category, forced_element=forced_element,
                   forced_status=forced_status)
         for node in plan.nodes
     ]
+    node_class_tally = tally_forced(slots)["nodeClass"]
+
+    quota: "dict[str, dict[str, int]]" = {}
+    order: "dict[str, tuple[str, ...]]" = {}
+    for axis in AXES:
+        members = axis_members(axis, plan.property_vocabulary)
+        axis_ord = axis_order(axis, targets, members)
+        order[axis] = axis_ord
+        if axis == "nodeClass":
+            quota[axis] = {value: node_class_tally.get(value, 0) for value in axis_ord}
+            continue
+        weights = axis_weights_milli(axis, targets, members)
+        quota[axis] = axis_marginals(weights, axis_ord, total)
     return assign_quota_cells(slots, quota, order)
 
 
