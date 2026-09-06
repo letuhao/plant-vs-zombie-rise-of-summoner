@@ -3,8 +3,8 @@
 **Program:** `actor-hud` · **Plan:** [actor-hud-plan.md](actor-hud-plan.md) ·
 **Map:** [docs/architecture/actor-hud-map.md](../docs/architecture/actor-hud-map.md)
 
-**Program status (2026-08-31):** **Implementation complete.** All modules shipped; specs signed off below.
-**Remaining gate:** LIVE manual only — Unity eyeball + `prove-actor-hud-live.ps1` (optional polish, not code work).
+**Program status (2026-08-31):** **Implementation complete** for the six ship modules.
+**Open amend (2026-09-07):** catalog-token **H1–H3** (see Post-ship). LIVE manual remains optional polish.
 
 ---
 
@@ -156,11 +156,20 @@ Spec: [spec-shield-slot-migration.md](../docs/architecture/actor-hud/spec-shield
 
 ---
 
-## Post-ship (optional)
+## Post-ship
+
+### Catalog-token amend (required — ideal §4.1)
+
+- [ ] **H1** Core resolve API from injected status/resource catalogs (`hudToken`/`color`/`displayName`)
+- [ ] **H2** Unity + Phaser + fold Inspector consume H1
+- [ ] **H3** Delete `StatusInitials` / hashed RGB; guard against id-slice player tokens
+- Coordinate with actor-sheet T16 (FE catalog fetch) — HUD owns renderer resolve; no second writer
+
+### Optional
 
 - [ ] Boss tier signal from expeditions → builder emits `boss`
 - [ ] HP sliver when owner enables tunable
-- [ ] Status icon art pass (replace initials)
+- [ ] Authored glyph *art* upgrades (sprites replacing text tokens) — only after H1–H3; not a substitute for catalog resolve
 - [ ] Perf probe B2 before/after published in research
 - [x] LIVE harness script — `scripts/prove-actor-hud-live.ps1`
 

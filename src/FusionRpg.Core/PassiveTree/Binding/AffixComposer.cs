@@ -17,9 +17,11 @@ public static class AffixComposer
 {
     /// <summary>Resolves 1..3 affix ids, in the order given, to their atom refs in `seq` order
     /// within each affix. Refuses (never silently drops) a missing affix id, a missing atom id, or
-    /// an atom whose kind is not one of the 16 registered — including the 17th, conversion, kind
-    /// D16 never shipped: any atom claiming to write an element-conversion payload is refused by
-    /// name here, not bound as if it were ordinary content.</summary>
+    /// an atom whose kind is not one of the 17 registered — including the 18th, conversion, kind
+    /// D16 never shipped (renumbered from 16/17th 2026-09-07: `AtomKindRegistry.KindCount` grew to
+    /// 17 for unrelated reasons since this was first written, per `spec-element-conversion.md`/D56):
+    /// any atom claiming to write an element-conversion payload is refused by name here, not bound
+    /// as if it were ordinary content.</summary>
     public static IReadOnlyList<ResolvedAtom> Resolve(
         IReadOnlyList<string> affixIds,
         IReadOnlyDictionary<string, AffixRow> affixesById,
@@ -51,14 +53,16 @@ public static class AffixComposer
 
     static ResolvedAtom ParseAtom(string affixId, AtomRow row)
     {
-        // The 17th atom kind (D16): conversion is not implemented anywhere in AtomKindRegistry's
-        // 16 rows, and quotas.exclusionForm/conversionState allocate it zero nodes upstream
-        // (tree-plan/tree-language) — this is the defensive backstop if one ever reaches here
-        // anyway. Checked BEFORE the registry lookup so the message names the real reason, not a
-        // generic "unregistered kind".
+        // The 18th atom kind (D16; renumbered from "17th" 2026-09-07 — AtomKindRegistry.KindCount
+        // grew to 17 for unrelated reasons since this was written, so a still-unbuilt conversion
+        // kind is now the 18th, not the 17th; see spec-element-conversion.md/D56): conversion is
+        // not implemented anywhere in AtomKindRegistry's 17 rows, and quotas.exclusionForm/
+        // conversionState allocate it zero nodes upstream (tree-plan/tree-language) — this is the
+        // defensive backstop if one ever reaches here anyway. Checked BEFORE the registry lookup so
+        // the message names the real reason, not a generic "unregistered kind".
         if (row.KindId.Contains("convert", StringComparison.OrdinalIgnoreCase))
             throw new BindRefusal(
-                $"affix '{affixId}' atom '{row.AtomId}' has kind '{row.KindId}' — the 17th atom kind " +
+                $"affix '{affixId}' atom '{row.AtomId}' has kind '{row.KindId}' — the 18th atom kind " +
                 "(element conversion, D16) is not implemented; conversion nodes are refused by design, " +
                 "never silently bound");
 

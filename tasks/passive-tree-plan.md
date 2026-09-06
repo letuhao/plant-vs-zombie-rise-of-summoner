@@ -12,8 +12,10 @@ folded into an existing task's acceptance criteria, or tracked in the non-blocki
 named default.
 
 **Updated 2026-09-07 — build is well underway, not "awaiting review."** Phases A-E are built and
-verified. Phase F is partial (F1/F4/F5 done; F2/F3 done pending a real production-scale sweep; F6
-done and revealed a real gap — see the new **F7** task below). Phase G's gate-side work shipped and is
+verified. Phase F is partial (F1/F4/F5 done; F2/F3 done pending a real production-scale sweep; F6 done
+and revealed a real gap; **F7 closed the same day — the fold-back model is confirmed NOT representative
+of the real pipeline, a structural bias, not a units gap — and opened F8** to rebuild it; F8 not started).
+Phase G's gate-side work shipped and is
 live-probed; its remaining two checkpoint bullets wait on content, not design. Phase H is partial
 (H1-H8 done; H9 has generated 379 of 480 primary-tree nodes, bind+commit+review still to run). Phase I
 is fully built (I1-I10), with only the owner-only eyeball bullet left. Phase J has two new,
@@ -45,14 +47,16 @@ coefficients, and the resolver folds them into combat as ordinary channel contri
 35,280 nodes across 882 trees when complete (D51, 2026-09-06: 24 statuses, not 21 — was 35,160/879)
 — but the plan reaches a playable single tree long before that, deliberately.
 
-**81+ tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
+**82+ tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
 more than about five files. (E1b — the L2b resist feedback path — and F1b — squad-harness's own OQ2,
 measuring the shipped commander-replicated allocation shape alongside D21's — were added after this
 count was first written, both closing a coverage-audit gap rather than changing scope. **F7 — added
 2026-09-07, reconciling `squad-harness`'s tree-power model against the real direct-channel pipeline —
 and J11/J12 — added 2026-09-06/07, the two new module specs' own build tasks — are the same kind of
-addition: closing a gap the audit/build process found, not new scope invented ahead of it.** F8 is
-conditional on F7's own finding and is not counted until opened.)
+addition: closing a gap the audit/build process found, not new scope invented ahead of it.** F7's own
+investigation, closed the same day, found the fold-back model is not representative (a real, structural
+bias, not a units gap) and **opened F8** to rebuild it on the real direct-channel shape — no longer
+conditional, now a real, scoped, not-yet-built task.)
 
 | Phase | What it lands | Tasks |
 |---|---|---|
@@ -61,7 +65,7 @@ conditional on F7's own finding and is not counted until opened.)
 | C — the plan corpus, the catalog and the store | Corpus invariants, migration, the store's own hardening | 11 (C1–C11) ✅ |
 | D — the binder and the resolver completed | Channel legality, the soul track, cross-unlock, the report | 8 (D1–D8) ✅ |
 | E — mechanism wiring | G1–G3 across Core, the injector, Battle and Sim | 7 (E1, E1b, E2–E6) ✅ |
-| F — `squad-harness` and the measurements | The tool, A10a, S2–S4, and reconciling the tree-power model against the real pipeline | 8 (F1, F1b, F2–F7) 🟡 |
+| F — `squad-harness` and the measurements | The tool, A10a, S2–S4, and reconciling the tree-power model against the real pipeline | 9 (F1, F1b, F2–F8) 🟡 F1–F7 done (F7 an investigation, no code), F8 not started |
 | G — the gate quantities | The two counters, the index, the surface, D43's seed | 8 (G1–G8) 🟡 gate-side shipped; checkpoint waits on J1's content |
 | H — generation machinery and the primary corpus | The 24 gates, their runner, the metrics, 480 nodes | 9 (H1–H9) 🟡 H1–H8 done, H9 partial (379/480) |
 | I — the player surface | The wire, and the spec's levels 0 / 0b / 1 / 2 / 3 | 10 (I1–I10) ✅ owner eyeball pending |
@@ -195,13 +199,24 @@ own `KMilli` rate is a known, invertible linear map for whichever channel a node
 **per representative channel**, matching this program's own `combat.power.fire`/`combat.power.omni`
 worked-example convention (`spec-tree-binder.md` §3.4) — not a single universal constant, and not by
 having the harness read a corpus that mostly doesn't exist yet (its own spec forbids that, for good
-reason: purity and speed against unbuilt content). **F7 does this investigation and reconciliation
-before F4/F5's expensive real-production-scale sweeps run** (a coverage audit corrected this from
-"F2/F3" — F2/F3 never call `TreeModel` at all; only F4/F5/F6 do), so those sweeps validate the right
-mechanism instead of the aptitude-fold-back shortcut at high trial counts. If F7 finds the fold-back
-model itself doesn't represent the real pipeline even qualitatively (the more likely outcome, given
-the two paths' difference is exact, not approximate), it opens F8 as a scoped rebuild rather than
-forcing a reconciliation that doesn't exist.
+reason: purity and speed against unbuilt content).
+
+**F7 ran this investigation 2026-09-07 and found the reconciliation does not exist — not a units gap,
+a mechanism gap.** `TreeModel.Resolve`'s fold-back adds points onto a tree's OWN `AllocationScope.
+Commander` entry, which the real battle resolver (`AptitudeResolver.Resolve`) reads through
+`AptitudeAllocation.Share` — `Total(id)/GrandTotal()`, a **zero-sum ratio across every aptitude the
+actor holds**. Growing one tree's fold-back bonus therefore also shrinks every OTHER tree's share
+(the denominator grows), a cross-tree coupling the real `TreeAtomSource` direct-channel path has no
+analog for at all (one node's contribution never touches any other tree's). Worse, the coupling is
+**asymmetric between the exact two build shapes `concentration`/`crossunlock` compare**: a corner
+build's one already-near-saturated share barely moves under a fold-back bonus while every other
+share it holds still shrinks; a spread build's several non-saturated shares move much more under the
+identical bonus. This is a bias on the specific axis being measured, not background noise a bigger
+sample averages out. **F8 opened** (`tasks/passive-tree-todo.md`) to rebuild `TreeModel`'s power
+contribution as independent, per-channel modifiers with no shared-total normalization — mirroring
+`BoundDerivedAtom`'s own shape — and to re-run F4's `concentration`/`crossunlock` sweeps and F5's
+`soultrack` sweep against it. F4/F5's own already-reported win-share numbers are flagged, not treated
+as settled, until F8 lands.
 
 Tasks F1, F1b, F2–F7 (F8 conditional on F7's own finding). **Checkpoint F: A10a produces `D` with a
 half-width, and D42's two dials are republished — with F7's own honest label if the republish is

@@ -108,14 +108,14 @@ public class AffixComposerTests
     }
 
     [Fact]
-    public void A_conversion_kind_atom_is_refused_with_the_17th_kind_reason()
+    public void A_conversion_kind_atom_is_refused_with_the_18th_kind_reason()
     {
         var affix = new AffixRow("affix.synthetic", null,
             new[] { new AffixRefRow(0, "atom.synthetic-convert") });
         var conversionAtom = new AtomRow
         {
             AtomId = "atom.synthetic-convert",
-            KindId = "element.convert", // not one of the 16 registered kinds, by design (D16)
+            KindId = "element.convert", // not one of the 17 registered kinds, by design (D16)
             FamilyId = "atom.synthetic-convert",
             Tier = 1,
             Name = "synthetic",
@@ -127,7 +127,7 @@ public class AffixComposerTests
 
         var ex = Assert.Throws<BindRefusal>(() =>
             AffixComposer.Resolve(new[] { affix.AffixId }, affixes, atoms));
-        Assert.Contains("17th atom kind", ex.Message);
+        Assert.Contains("18th atom kind", ex.Message);
         Assert.Contains("D16", ex.Message);
     }
 
@@ -152,7 +152,7 @@ public class AffixComposerTests
         var ex = Assert.Throws<BindRefusal>(() =>
             AffixComposer.Resolve(new[] { affix.AffixId }, affixes, atoms));
         Assert.Contains("not.a.real.kind", ex.Message);
-        Assert.DoesNotContain("17th atom kind", ex.Message);
+        Assert.DoesNotContain("18th atom kind", ex.Message);
     }
 
     [Fact]

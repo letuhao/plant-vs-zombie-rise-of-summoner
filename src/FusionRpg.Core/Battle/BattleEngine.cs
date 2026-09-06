@@ -604,6 +604,10 @@ public static partial class BattleEngine
                         // `Break` ends the whole action phase (hazard 3), exactly as before — it must
                         // escape BOTH loops, or a round that should end early would keep going.
                         if (step.Outcome == AttackStepOutcome.Break) { phaseBroken = true; break; }
+                        // A builder that found no live target instead placed a structure (15.3d) — the
+                        // round keeps going for the other actors, exactly like a normal completed action,
+                        // but there is no target to dispatch a hit against.
+                        if (step.Outcome == AttackStepOutcome.ActedWithNoTarget) { anyActed = true; continue; }
 
                         state.DispatchHit(attacker, step.Target!, step.SignedDelta, rounds);
                         economy.OnActionResolved(EconomyKey(attacker), Timeline.ActionResolutionOutcome.Normal);

@@ -710,6 +710,13 @@ D35.
     row wins over any spec, so amending it is an owner call, not a side effect of this spec.
 ```
 
+**Superseded since this checklist was written, kept unedited above as the historical record of this
+session's own verification.** Two of the counted-from-code figures have since grown: statuses 21→24
+(D51, 2026-09-06, three `nerve.*` statuses accepted) and atom kinds 16→17 (an unrelated addition,
+`structure.place`, landed the same day D56 specced the still-unbuilt 18th — see
+[`spec-element-conversion.md`](spec-element-conversion.md) §0). Neither growth changes any conclusion
+this checklist reached; both are corpus-size inputs, not findings the checklist itself depended on.
+
 ## Related
 
 - [passive-tree-map.md](../passive-tree-map.md) — the module index

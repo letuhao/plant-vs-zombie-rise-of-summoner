@@ -5,12 +5,13 @@ Source: [actor-hud-ideal.md](actor-hud-ideal.md) (strengthened 2026-08-30) ·
 [actor-hud-data-pipeline-audit-2026-08-30.md](../research/actor-hud-data-pipeline-audit-2026-08-30.md) ·
 [10-actor-hud.html](../design/10-actor-hud.html) · [vfx/spec-unit-frame.md](vfx/spec-unit-frame.md).
 
-**Status: implemented 2026-08-31** — all six modules shipped. Specs signed off in [actor-hud-todo.md](../../tasks/actor-hud-todo.md).
-**Placement SSOT (reconciled 2026-09-05):** Unity Band B = UnitFrame **Body** + `worldYOffset` (center-bottom,
-like old shield bar). Visual correction (glyphs, pips, Body root) tracked on todo.
-**Catalog amend (2026-09-07):** glyphs / initials / colors resolve from injected `status-catalog` /
-`resource-catalog` — see [actor-hud-ideal.md](actor-hud-ideal.md) §4.1. Geometry stays in
-`actor-hud.v{n}.json`. Do not reintroduce `StatusInitials(id)` or hashed RGB as player tokens.
+**Status: shipped 2026-08-31 + open catalog-token amend (2026-09-07).** Six modules landed; CI/E2E
+acceptance green. Specs signed off for the ship. **Open:** player tokens must resolve from injected
+`status-catalog` / `resource-catalog` ([actor-hud-ideal.md](actor-hud-ideal.md) §4.1) — amend track
+**H1–H3** in [actor-hud-todo.md](../../tasks/actor-hud-todo.md). Geometry stays in
+`actor-hud.v{n}.json`. Do not treat `StatusInitials(id)` or hashed RGB as player SSOT.
+**Placement SSOT (reconciled 2026-09-05):** Unity Band B = UnitFrame **Body** + `worldYOffset`
+(center-bottom, like old shield bar).
 
 Module specs live in [actor-hud/](actor-hud/), one per module id, written in dependency order once this
 map is approved.
@@ -144,9 +145,14 @@ Inspector to `hud.resources.shield`; fold may derive shield from either during t
 | **vfx / UnitFrame** | HUD attaches via `UnitFrameResolver` only — no ad-hoc `BodyWorld` / bounds reads |
 | **commander-surface** | Band A chip only; no per-tile commander badge |
 | **shield-system-spec** | `ShieldRuntime` unchanged; world bar presentation migrates to HUD shield slot |
-| **status-ssot** | Strip `id` values ⊆ closed vocabulary |
+| **status-ssot** | Strip `id` values ⊆ closed vocabulary; **display** from `status-catalog` (`hudToken`/`color`) |
 | **element-hub-ssot** | Shield segment colors; element ring on status tokens |
-| **actor-sheet** | Full numbers on ActorPanel — HUD never replaces six-tab sheet |
+| **actor-sheet** | Full numbers on ActorPanel — HUD never replaces the sheet. Catalog *inject* is
+  actor-surface-catalog; HUD owns Unity/Phaser/fold **resolve** (H1–H3), not a second catalog writer |
+| **lawn-interactive** | Band B **click opens the occupancy dock**, not a third HUD ([lawn T12](../../tasks/lawn-interactive-plan.md)).
+  Full three-row HUD on the **topmost** stack occupant only (v1). Bound **unique identity pip** may
+  show on under-stack sprites via cell-stack; that pip is lawn paint, not a second Band B chrome.
+  Match strip / spawn tray / combat book are lawn Band 1–2 — not this program |
 
 ---
 

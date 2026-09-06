@@ -3,6 +3,24 @@
 /** Structural mirror of `data/tuning/actor-hud.v1.json` `statusStripMax` (web does not load tuning file v1). */
 export const STATUS_STRIP_MAX = 3;
 
+export type HudTokenResolve = { hudToken: string; color: string; displayName: string };
+
+type ActorSurfaceStatusRow = {
+  id: string;
+  hudToken?: string;
+  color?: string;
+  displayName?: string;
+};
+
+declare global {
+  interface Window {
+    /** Injected from GET /api/catalogs/actor-surface when available (H2). */
+    __fusionRpgActorSurface?: {
+      statuses?: ActorSurfaceStatusRow[];
+    };
+  }
+}
+
 export const ELEMENT_COLORS_HEX: Record<string, string> = {
   fire: "#e07040",
   ice: "#60a8e0",
@@ -42,10 +60,31 @@ export function elementColorPhaser(element: string): number {
   return ELEMENT_COLORS[element.toLowerCase()] ?? ELEMENT_COLORS.physical;
 }
 
+/** Legacy id-slice — not SSOT. Prefer resolveStatusHudToken. */
 export function statusInitials(id: string): string {
   const parts = id.split("_").filter(Boolean);
-  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  if (parts.length >= 2) return (parts[0]![0]! + parts[1]![0]!).toUpperCase();
   return id.slice(0, 2).toUpperCase();
+}
+
+/**
+ * H2 resolve: catalog hudToken/color when actor-surface is injected; else designed placeholder
+ * (GG-62) — never treat id-slice as SSOT.
+ */
+export function resolveStatusHudToken(id: string): HudTokenResolve {
+  const row = window.__fusionRpgActorSurface?.statuses?.find((s) => s.id === id);
+  if (row?.hudToken && row.color) {
+    return {
+      hudToken: row.hudToken,
+      color: row.color,
+      displayName: row.displayName ?? id
+    };
+  }
+  return {
+    hudToken: "·",
+    color: "#a89880",
+    displayName: id
+  };
 }
 
 export function tierBadgeLetter(tier: string): string {

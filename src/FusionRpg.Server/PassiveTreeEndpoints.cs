@@ -29,20 +29,32 @@ namespace FusionRpg.Server;
 /// does not have yet.</para>
 ///
 /// <para><b>Gate-quantity resolution, the one real ambiguity this task closes with a stated default.</b>
-/// Of the 39 shared trees, only the 12 Primary ones have a producer today — their `gateQuantity` reads
-/// `"aptitude.&lt;Id&gt;@Commander"`, resolved against this player's own `AptitudeAllocation`. The
-/// other 27 (`element_mastery`, `status_applied.&lt;id&gt;`) have no points-producing pipeline yet —
-/// `gate-counters`' raw counters exist (`RpgStore.GateCounters.cs`) but the count-to-points mastery
-/// curve does not (spec-tree-surface.md §9.1, D37: "a WAIT, not a permanent hole"). Every such tree
-/// resolves `GateState = Unproduced`, base points `0`, exactly as spec-tree-resolve.md §3.3 already
-/// states — never a workaround, never a private formula.</para>
+/// Of the 42 shared trees (D51, 2026-09-06: 24 statuses not 21, was 39), only the 12 Primary ones have
+/// a `TreeRecord` in the catalog today — their `gateQuantity` reads `"aptitude.&lt;Id&gt;@Commander"`,
+/// resolved against this player's own `AptitudeAllocation`. The other 30 (`element_mastery`,
+/// `status_applied.&lt;id&gt;`) never reach this loop yet at all — `passive-tree-todo.md` task J1's
+/// missing plan-emission factory functions mean they have no generated content and therefore no
+/// catalog row, gate state notwithstanding.</para>
+///
+/// <para><b>⚠ Stale as written 2026-09-06, left uncorrected on purpose — fix lands with J1, not here.</b>
+/// This paragraph originally said the 30 non-Primary trees "have no points-producing pipeline yet."
+/// That stopped being true 2026-09-06 (task G6): `ElementMasterySource`/`StatusAppliedSource` are real,
+/// live-probed producers today. <see cref="AptitudeGatePattern"/>/<c>TryParseAptitudeGate</c> below
+/// were never taught to recognize their gate-quantity shapes, though — only
+/// <c>aptitude.&lt;Id&gt;@Commander</c> resolves `Wired`. Harmless today (no elemental/status
+/// `TreeRecord` exists to exercise the other branch), but it will render every one of those 30 trees
+/// as `GateState = Unproduced` — wrongly, since their real gate is already wired — the moment J1 ships
+/// their content. Tracked as J1's own acceptance bullet (`passive-tree-todo.md`), fixed there rather
+/// than speculatively here against gate-quantity shapes this endpoint cannot yet test end-to-end.</para>
 /// </summary>
 public static class PassiveTreeEndpoints
 {
-    // "aptitude.Might@Commander" -- the only gate-quantity shape with a real producer today (§9.1's
-    // own table: 12 Primary paths, Commander scope, "shipped and wired"). Anything else -- including
-    // a well-formed "aptitude.X@DemonType" this surface simply doesn't serve yet -- resolves
-    // Unproduced rather than guessing at a scope this endpoint was never asked to support.
+    // "aptitude.Might@Commander" -- the only gate-quantity shape THIS ENDPOINT recognizes as wired
+    // (12 Primary paths, Commander scope). NOT the only shape with a real producer any more --
+    // element_mastery/status_applied have had one since G6 (2026-09-06) -- this pattern was simply
+    // never extended to them, tracked as J1's own acceptance bullet (see the class doc comment above).
+    // A well-formed "aptitude.X@DemonType" also resolves Unproduced here, deliberately: the other
+    // three scopes need a specimen picker this surface does not have yet.
     static readonly Regex AptitudeGatePattern = new(@"^aptitude\.(?<id>[A-Za-z]+)@Commander$", RegexOptions.Compiled);
 
     public static void MapPassiveTree(this WebApplication app)

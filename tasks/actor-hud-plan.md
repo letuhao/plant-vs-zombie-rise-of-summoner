@@ -6,9 +6,10 @@
 [docs/research/actor-hud-data-pipeline-audit-2026-08-30.md](../docs/research/actor-hud-data-pipeline-audit-2026-08-30.md) ·
 **Tasks:** [actor-hud-todo.md](actor-hud-todo.md)
 
-**Status:** implemented 2026-08-31 — all modules shipped; CI + guard acceptance green.
-**Placement SSOT (2026-09-05):** Unity Body + `worldYOffset` (center-bottom). Visual correction code
-landed (glyphs, pips, Body root). LIVE eyeball remains — see [actor-hud-todo.md](actor-hud-todo.md).
+**Status:** shipped 2026-08-31 — modules + CI/E2E green. **Open amend (2026-09-07):** catalog-token
+resolve **H1–H3** (ideal §4.1) — see below. LIVE eyeball remains optional polish on
+[actor-hud-todo.md](actor-hud-todo.md).
+**Placement SSOT (2026-09-05):** Unity Body + `worldYOffset` (center-bottom).
 
 ---
 
@@ -212,8 +213,25 @@ LIVE (owner terminal):
 | vfx / UnitFrame | Shipped — consume resolver |
 | commander-surface | Band A only — no conflict |
 | shield-system-spec | Runtime stable — presentation migrates |
-| status-ssot | Closed ids for strip |
-| actor-sheet | No overlap — panel for full stats |
+| status-ssot / actor-surface-catalog | Closed ids; inject `hudToken`/`color` for H1–H3 |
+| actor-sheet | Panel for full stats; T16 FE catalog fetch — HUD owns render resolve (no double writer) |
+| lawn-interactive | Click→dock (lawn T12); topmost HUD; under-stack unique pip is cell-stack |
+
+---
+
+## Post-ship amend — catalog tokens (H1–H3)
+
+**Depends on:** actor-surface-catalog host inject (`status-catalog` / `resource-catalog`). Until inject
+lands, specs forbid initials-as-SSOT; code may still carry legacy helpers.
+
+| Task | Work | Owner vs actor-sheet T16 |
+|------|------|--------------------------|
+| **H1** | Core resolve API: `id → { hudToken, color, displayName }` from injected hubs; tests; no File I/O | HUD core |
+| **H2** | Unity / Phaser / fold Inspector consumers call H1; stop painting from id-slice maps | HUD renderers |
+| **H3** | Delete `StatusInitials` / hashed RGB paths; guard that player tokens cannot come from id-slice | HUD + guard |
+
+Actor-sheet **T16** wires FE sheet/HUD *fetch* of actor-surface DTO where the web control room needs
+it; it does **not** replace H1–H3 injector/Unity resolve.
 
 ---
 
@@ -225,6 +243,7 @@ LIVE (owner terminal):
 | Perf regression from two tick paths | Event invalidation + remove TickSync in P5 |
 | Phaser/Unity drift | Single fold SSOT; E2E on Phaser; Unity manual |
 | Boss tier scope creep | v1 omit `boss`; tier frame for unique/elite only |
+| Initials sneak back as SSOT | H3 delete + DESIGN-GATE / ideal §4.1 |
 
 ---
 

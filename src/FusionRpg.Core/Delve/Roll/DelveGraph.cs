@@ -36,9 +36,17 @@ public sealed record DomainAnchor(
 /// resolved through <c>tuning</c> at roll time — <c>none</c> is legal for the three density bands
 /// (spec §1: "with `none` legal").
 /// </summary>
+/// <param name="RaidModes">The seed contract's own 8th field (spec-dungeon-seed-contract.md §1.3:
+/// "subset of `solo · pair · quad`, never empty") — absent from this record until D4.30's own
+/// real-content pass (`layouts.py`) needed a real consumer for it (`DomainOffers`/`DelveStart`'s own
+/// already-named `RaidModesForLayout` gap, D4.19/D4.21). Defaulted to `null` so this stays a
+/// source-compatible addition: `DelveGraphRoll.Roll` itself never reads raid modes (a domain's own
+/// `raidMode` request is validated one layer up, in `DelveStart.Run`), and the two existing
+/// positional test call sites (`DelveGraphRollTests.cs`) keep compiling unchanged.</param>
 public sealed record LayoutTemplate(
     string LayoutId, string SizeBand, string WidthBand, string Branchiness,
-    string GateDensity, string SecretDensity, string OneWayDensity);
+    string GateDensity, string SecretDensity, string OneWayDensity,
+    IReadOnlyList<string>? RaidModes = null);
 
 /// <summary>
 /// The per-room facts a <see cref="World.WorldSector"/> has no field for (spec-delve-graph-roll.md

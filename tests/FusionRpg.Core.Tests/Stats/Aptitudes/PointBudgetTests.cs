@@ -41,11 +41,11 @@ public class PointBudgetTests
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         while (dir != null)
         {
-            var candidate = Path.Combine(dir.FullName, "data", "tuning", "aptitudes.v7.json");
+            var candidate = Path.Combine(dir.FullName, "data", "tuning", "aptitudes.v8.json");
             if (File.Exists(candidate)) return candidate;
             dir = dir.Parent;
         }
-        throw new InvalidOperationException("could not locate data/tuning/aptitudes.v7.json above " + AppContext.BaseDirectory);
+        throw new InvalidOperationException("could not locate data/tuning/aptitudes.v8.json above " + AppContext.BaseDirectory);
     }
 
     static AptitudeTuning ShippedTuningWithSkillScopes() =>

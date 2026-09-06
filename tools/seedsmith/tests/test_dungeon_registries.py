@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from seedsmith.adapters.dungeon.registries import (  # noqa: E402
     BAND_NAMES,
+    DEMONS_REGISTRY_DIR,
     REGISTRY_DIR,
     load_band_display_names,
     load_bands,
@@ -24,20 +25,28 @@ from seedsmith.adapters.dungeon.registries import (  # noqa: E402
     load_disposition,
     load_door_kinds,
     load_interaction_verbs,
+    load_motifs,
     load_objective_templates,
     load_override_tags,
     load_raid_modes,
     load_room_kinds,
+    load_theme_ids,
+    load_themes,
     load_versions,
     load_vocabularies,
 )
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 LIVE_DUNGEON_REGISTRY_ROOT = REPO_ROOT / "data" / "seed" / "dungeon" / "_registry"
+LIVE_DEMONS_REGISTRY_ROOT = REPO_ROOT / "data" / "seed" / "demons" / "_registry"
 
 
 def _raw(name: str) -> dict:
     return json.loads((LIVE_DUNGEON_REGISTRY_ROOT / name).read_text(encoding="utf-8"))
+
+
+def _raw_demons(name: str) -> dict:
+    return json.loads((LIVE_DEMONS_REGISTRY_ROOT / name).read_text(encoding="utf-8"))
 
 
 class RegistryDirTests(unittest.TestCase):
@@ -146,10 +155,65 @@ class BandTests(unittest.TestCase):
 
 
 class VersionTests(unittest.TestCase):
-    def test_nine_files_all_report_registryVersion_1_at_launch(self) -> None:
+    def test_nine_dungeon_files_plus_two_cross_program_theme_files_report_registryVersion_1_at_launch(self) -> None:
+        # D1.10's own themes/motifs cross-read (2026-09-07) adds two more tracked versions
+        # (`demons.themes`, `demons.motifs`) alongside the nine dungeon-native files — 9 -> 11,
+        # named here rather than silently bumping the count.
         versions = load_versions()
-        self.assertEqual(len(versions), 9)
+        self.assertEqual(len(versions), 11)
+        self.assertIn("demons.themes", versions)
+        self.assertIn("demons.motifs", versions)
         self.assertTrue(all(v == 1 for v in versions.values()))
+
+
+class ThemeTests(unittest.TestCase):
+    """D1.10 (2026-09-07 correction): `theme` reads the demon-seed program's own already-shipped,
+    already-reviewed registry as a frozen cross-program input — never a dungeon-authored vocabulary
+    (`spec-dungeon-seed-contract.md:44`: "`themes.v1.json` (84 rows)")."""
+
+    def test_demons_registry_dir_resolves_to_the_real_committed_folder(self) -> None:
+        self.assertEqual(DEMONS_REGISTRY_DIR, LIVE_DEMONS_REGISTRY_ROOT)
+        self.assertTrue(DEMONS_REGISTRY_DIR.is_dir())
+
+    def test_eighty_four_themes_matching_the_spec_s_own_cited_row_count(self) -> None:
+        themes = load_themes()
+        self.assertEqual(len(themes), 84)
+        self.assertEqual(set(themes), set(_raw_demons("themes.v1.json")["themes"]))
+
+    def test_every_theme_id_is_demon_prefixed_never_the_legacy_theme_prefix(self) -> None:
+        # THEME_PREFIX in adapters/demons/themes.py is "demon." specifically so it can never
+        # collide with the items corpus's own legacy `theme.*` ids (spec-demon-themes.md §2.2a).
+        for theme_id in load_themes():
+            self.assertTrue(theme_id.startswith("demon."), theme_id)
+
+    def test_load_theme_ids_is_a_frozenset_of_every_theme_key(self) -> None:
+        ids = load_theme_ids()
+        self.assertIsInstance(ids, frozenset)
+        self.assertEqual(ids, frozenset(load_themes()))
+
+    def test_a_retired_theme_still_resolves_never_filtered_out(self) -> None:
+        # spec-demon-themes.md §6: "A demon that leaves the roster: its theme is retired, still
+        # resolvable — never deleted." At least the shipped corpus's own retired rows (if any)
+        # must still be legal vocabulary members, not silently dropped by this reader.
+        themes = load_themes()
+        retired = {tid for tid, row in themes.items() if row.get("retired")}
+        self.assertTrue(retired.issubset(load_theme_ids()))
+
+
+class MotifTests(unittest.TestCase):
+    def test_motif_count_matches_the_raw_file(self) -> None:
+        motifs = load_motifs()
+        self.assertIsInstance(motifs, frozenset)
+        self.assertEqual(motifs, frozenset(_raw_demons("motifs.v1.json")["motifs"]))
+
+    def test_every_themes_own_motifs_are_members_of_the_flat_union(self) -> None:
+        # The flat file is supposed to be exactly the union of every theme's own motifs -- proven
+        # here rather than assumed, so a future hand-edit drift is caught by this test, not by a
+        # downstream planner silently rejecting a real theme's own real motif.
+        flat = load_motifs()
+        for theme_id, row in load_themes().items():
+            for motif in row.get("motifs", []):
+                self.assertIn(motif, flat, f"{theme_id}'s own motif {motif!r} missing from the flat union")
 
 
 class VocabularyAgreementTests(unittest.TestCase):
@@ -172,6 +236,12 @@ class VocabularyAgreementTests(unittest.TestCase):
         raw_bands = _raw("bands.v1.json")["bands"]
         for band_name, row in raw_bands.items():
             self.assertEqual(vocab[band_name], set(row["members"]), f"band '{band_name}' disagrees")
+
+        raw_themes = set(_raw_demons("themes.v1.json")["themes"])
+        self.assertEqual(vocab["theme"], raw_themes)
+
+        raw_motifs = set(_raw_demons("motifs.v1.json")["motifs"])
+        self.assertEqual(vocab["motif"], raw_motifs)
 
     def test_every_registry_file_is_read_by_at_least_one_loader(self) -> None:
         # A file this reader forgot would be invisible to every dungeon pipeline downstream —

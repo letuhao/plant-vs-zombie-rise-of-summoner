@@ -116,6 +116,15 @@ matters more than search**, because 38 of the 42 are irrelevant to any given bui
    be planned or generated, just for a different reason — rule 5 should key on whatever `gateState`
    plus J1's own readiness ends up reporting, not solely on `gateState`, once J1 ships.
 
+   **Confirmed 2026-09-07, traced to the real code, and tracked — not just a theoretical risk.**
+   `PassiveTreeEndpoints.cs`'s `AptitudeGatePattern`/`TryParseAptitudeGate` (backing I2/I4's
+   `ProjectState`) only recognizes `aptitude.<Id>@Commander` as `Wired`; `element_mastery.<id>@Aspect`
+   and `status_applied.<id>` never reach that check today because no `TreeRecord` exists for them yet
+   (J1's own blocker), so this is currently silent. The instant J1 imports content for those 30 trees,
+   this rule-5 renderer would show them all as `Unproduced`/gateless even though their real gate has
+   been `Wired` since G6 — a wrong-content bug, not a crash. Fixed alongside J1 itself, tracked as that
+   task's own acceptance bullet in `passive-tree-todo.md`, not deferred further.
+
 Then search and category filters. **Categories are five** — `primary | elemental | status | family |
 species` (R7) — and species never enters this browse (§3), so the filter offers four here. Query state belongs to the layer and survives closing it (GG-51).
 
@@ -1079,6 +1088,12 @@ whenever the property exists; the surface does not depend on it existing.
     is a spec and does not edit them. Both are booked — one as this module's own
     work, one as ask-first because it is another program's file.
 ```
+
+**Superseded 2026-09-06 by D51, kept unedited above as the historical record of this checklist's own
+session.** The "840 species / 40 nodes / 879 trees" and "35,160 denominator" figures the checklist
+verified were correct that day; D51 grew statuses 21→24 the same day, moving the corpus to 882 trees /
+35,280 nodes. Nothing in the checklist's own conclusions (the GUI-principle checks, the D37-D41 fold,
+the correction bookings) depended on the exact figure, so none of them are affected.
 
 **Did a GUI principle have to bend? No.** One was mis-applied by doc 07 and is corrected here
 (GG-50 → GG-61 for a single lattice), and one live defect was found in a surface this design sits

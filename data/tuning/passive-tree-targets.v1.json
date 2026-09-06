@@ -11,7 +11,7 @@
     },
     "trigger": {
       "weightScheme": "uniform",
-      "_note": "11 authorable triggers, read from atoms/vocabulary.json (A3) -- member names never listed here (a 12th trigger changes the grid by construction)."
+      "_note": "11 authorable triggers, read from passive-tree/vocabulary.json (A3) -- member names never listed here (a 12th trigger changes the grid by construction)."
     },
     "element": {
       "weightScheme": "uniform",

@@ -929,8 +929,8 @@ regression, not a slot; join tree state onto the unpaged `ListDemonRoster`; mult
 
 ## Success criteria
 
-- [ ] A player with 2,000 actors and 40 owned nodes each stores 80,000 rows, not 3.1 million — proven
-      by a test that counts rows after a realistic build.
+- [ ] A player with 2,000 actors and 40 owned nodes each stores 80,000 rows, not ≈3.4 million (D51:
+      was ≈3.1 million at 1,560) — proven by a test that counts rows after a realistic build.
 - [ ] `TotalCostOf` is order-independent, proven by test over shuffled purchase orders.
 - [ ] Reward-per-skill-point is flat at every tier for the shipped price **at constant width**, and
       provably not flat for `first = step`.

@@ -99,7 +99,7 @@ lands (`SeedCatalogMatchesCode` → “injected catalog matches live registry”
 | Catalog file | Fields | Sibling number file (unchanged role) |
 |---|---|---|
 | `aptitude-catalog` | id, posture, ordinal, displayName, role, reading | `aptitudes.v7.json` edges/economy |
-| `derived-stat-catalog` | family, axis, compose, unitClass, displayName, reading, icon, gauge, sheetGroup, capRef | `derived-stats.v2.json` cap *values* |
+| `derived-stat-catalog` | family, axis, compose, unitClass, displayName, reading, icon, gauge, sheetGroup, capRef, **expand axis / policy** (element or resource construction — same shape Core uses) | `derived-stats.v2.json` cap *values*. **Not** one JSON row per registered channel: families expand to the live id set (registry **268** today). Mirror tests assert expand(catalog) ⊆ / aligns with `AllRegistered`, not `entries.length === 268` |
 | `status-catalog` | id, kind, categories, stacking, payloadKinds, displayName, reading, hudToken, color | `status.v1.json` policy |
 | `resource-catalog` | id, class, exhaustion, actionCost, plant/zombie labels, icon, color, meterKind | — |
 | `element-catalog` | id, displayName, ordinal, color; omni presentation row | element/combat matrix values |
@@ -166,8 +166,8 @@ JSON keys camelCase on the wire; C# records PascalCase. Ordinals append-only.
 |---|---|
 | Core unit | Parse happy path; reject unknown kind; reject missing key; aptitude–channel collision |
 | Server | Endpoint returns all sections; 503/500 if hub unconfigured |
-| Mirror | Injected catalog matches live registry counts (replaces seed-only `SeedCatalogMatchesCode`) |
-| FE (later shell) | Guard: no `ResourceId` five-string union; iterates catalog |
+| Mirror | Injected catalog **expand** aligns with live registry (replaces seed-only `SeedCatalogMatchesCode`). Family entry count alone must **not** be compared to 268 |
+| FE (later shell) | Guard: no `ResourceId` five-string union; iterates catalog; derived expand/join covered under `derived-tab` |
 
 ---
 
@@ -189,6 +189,8 @@ JSON keys camelCase on the wire; C# records PascalCase. Ordinals append-only.
 - [ ] `GET /api/catalogs/actor-surface` returns tabs + all rosters with displayNames
 - [ ] Unknown kind / missing file fails host startup naming the key
 - [ ] Copy-only publish does not move combat goldens
+- [ ] Expand mirror: catalog families + axis produce the registered channel id set (268 today); no
+      “entries must equal AllRegistered.Count” false invariant
 - [ ] FE guard: no `ResourceId` five-string roster; `channelLabel` uses catalog `displayName`
 - [ ] HUD path can resolve `hudToken`/`color` without id-slicing (wiring may land with shell/HUD amend)
 

@@ -107,7 +107,10 @@ public static class DelveEndpoints
         ComposeRungs: (_, _) => throw new NotImplementedException("RungOffer.For needs PowerTuning/DungeonTuning/DomainThetaInputs/ParentWorldTerms -- ParentWorldTerms has never been built from live state anywhere (D4.21's own finding)."),
         RungLabelFor: _ => throw new NotImplementedException("No rung display-name registry exists anywhere in this codebase (D4.19's own finding)."),
         BossDisplayNameFor: _ => throw new NotImplementedException("No almanac keyed by a demon species id exists -- only PVZ's own (side, type_id) shape (D4.19's own finding)."),
-        RaidModesForLayout: _ => throw new NotImplementedException("No LayoutTemplateCatalog exists -- layout.raidModes is tagged PLANNED even in seedsmith's own schema (D4.19/D4.21's own finding)."),
+        // Real, 2026-09-07: LayoutTemplateCatalog now exists (data/seed/dungeon/layouts/*.json,
+        // six entries) -- an unknown layoutId returns empty (RaidModesFor's own documented
+        // behavior), never throws, matching every caller's own "not offered" handling.
+        RaidModesForLayout: layoutId => FusionRpg.Core.Delve.Roll.LayoutTemplateHub.Catalog.RaidModesFor(layoutId),
         ProvisionableFor: _ => throw new NotImplementedException("provisionable[] pricing is delve-stage's own not-yet-specified concern (spec-delve-stage.md §18 ask 6, Phase 5 unbuilt)."));
 
     /// <summary>Every delegate <see cref="DelveStart.Run"/> needs beyond the real reads above.
@@ -126,7 +129,7 @@ public static class DelveEndpoints
                 new HashSet<int>())
             : PlayerClears.None,
         ComposeRungs: (_, _) => throw new NotImplementedException("see BuildDomainOfferLive's own ComposeRungs."),
-        RaidModesForLayout: _ => throw new NotImplementedException("see BuildDomainOfferLive's own RaidModesForLayout."),
+        RaidModesForLayout: layoutId => FusionRpg.Core.Delve.Roll.LayoutTemplateHub.Catalog.RaidModesFor(layoutId),
         PartyShapeForRaidMode: mode => DungeonTuningHub.Tuning.RaidModes.TryGetValue(mode, out var t) ? (t.Parties, t.SquadSlots) : null,
         MemberIsOwnedRosterBound: id => store.GetUniqueActor(id) is { Phase: "Roster" },
         MemberIsRecovering: id => store.GetUniqueActor(id) is { Phase: "Recovering" },

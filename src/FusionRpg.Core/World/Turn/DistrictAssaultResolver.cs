@@ -95,7 +95,8 @@ public sealed class DistrictAssaultResolver : IBattleResolver
         }
         var constructionBoard = new ConstructionBoardContext(
             boardState, spec.Rows, SiegeTuningPolicy.District.CoreSideMilli,
-            SiegeTuningPolicy.District.RampartThickness, slotByCell);
+            SiegeTuningPolicy.District.RampartThickness, slotByCell,
+            sectorRubble: board.RubbleStock, sectorIronwork: board.IronworkStock);
 
         var attackerKeys = new List<string>();
         var attackerSetups = BuildAnimateSetups(attacker, AttackerSide, attackerKeys);

@@ -624,13 +624,15 @@ public class AptitudeMatrixTests
     {
         var (raw, _, _, _) = ParseIndependently();
 
-        // The six families audit-reader-census.py reports with no shipped reader at all. Named here so
+        // The five families audit-reader-census.py reports with no shipped reader at all. Named here so
         // that a family GAINING a reader (good news) also turns this red and forces the number to be
-        // re-stated rather than silently diverging from _meta.measurable.
+        // re-stated rather than silently diverging from _meta.measurable. move.range moved OUT of this
+        // list 2026-09-07 (A9 movement-actions, BasicAttack.cs's ApplyBasicAttack) -- exactly the event
+        // this comment names.
         var readerLessFamilies = new[]
         {
             "resource.efficiency", "skill.cooldown", "skill.effectiveness",
-            "move.range", "progression.xpRate", "progression.breakthroughSuccess",
+            "progression.xpRate", "progression.breakthroughSuccess",
         };
 
         var readerLess = raw.Where(e => readerLessFamilies.Any(f => e.Channel.StartsWith(f, StringComparison.Ordinal))).ToList();
@@ -643,7 +645,7 @@ public class AptitudeMatrixTests
 
         Assert.Equal(int.Parse(m.Groups[1].Value), readerLess.Count);
         Assert.Equal(int.Parse(m.Groups[2].Value), raw.Count);
-        Assert.Equal(26, readerLess.Count);
+        Assert.Equal(25, readerLess.Count);
 
         // ...and every one of them genuinely resolves. Reader-less is NOT the same as inert: the points
         // are spent, the value is composed, and nothing downstream consumes it.

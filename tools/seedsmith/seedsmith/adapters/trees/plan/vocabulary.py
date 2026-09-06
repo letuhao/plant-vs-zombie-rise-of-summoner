@@ -109,7 +109,7 @@ def load_property_vocabulary(tier_count: int, seed_root: "Path | None" = None) -
     aptitude_doc = _read_json(root / "aptitudes" / "roster.json")
     postures = tuple(sorted({e["posture"] for e in aptitude_doc["entries"]}))
 
-    atom_vocab = _read_json(root / "atoms" / "vocabulary.json")
+    atom_vocab = _read_json(root / "passive-tree" / "vocabulary.json")
     attach_points = tuple(sorted(atom_vocab["attachPoints"]))
     kinds = tuple(sorted(k["id"] for k in atom_vocab["kinds"]))
     triggers = tuple(sorted(t["id"] for t in atom_vocab["triggers"]))

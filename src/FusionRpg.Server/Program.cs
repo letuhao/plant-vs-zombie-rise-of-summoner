@@ -83,6 +83,19 @@ FusionRpg.Core.Dungeon.Tuning.EncounterTuningHub.Configure(
     FusionRpg.Core.Dungeon.Tuning.EncounterTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "encounter.v1.json")), dungeonRegistries));
 FusionRpg.Core.Dungeon.Registry.DungeonRegistryHub.Configure(dungeonRegistries);
+// LayoutTemplateHub after DungeonRegistryHub -- Load reads BandCatalog.All/RaidModeCatalog.All,
+// both configured by the call above (D4.30's real prerequisite chain, 2026-09-07: closes D4.19/
+// D4.21's own named "no LayoutTemplateCatalog exists" gap now that real content exists).
+{
+    var layoutRows = FusionRpg.Core.Delve.Roll.LayoutSeedFile.LoadAll(
+        Path.Combine(AppContext.BaseDirectory, "data", "seed", "dungeon", "layouts"));
+    var layoutLoad = FusionRpg.Core.Delve.Roll.LayoutTemplateCatalog.Load(
+        layoutRows, FusionRpg.Core.Dungeon.Registry.BandCatalog.All, FusionRpg.Core.Dungeon.Registry.RaidModeCatalog.All);
+    if (layoutLoad.Rejections.Count > 0)
+        throw new InvalidOperationException(
+            "data/seed/dungeon/layouts/*.json failed to load: " + string.Join("; ", layoutLoad.Rejections));
+    FusionRpg.Core.Delve.Roll.LayoutTemplateHub.Configure(layoutLoad.Catalog);
+}
 FusionRpg.Core.SimDefaults.Configure(
     FusionRpg.Core.SimTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "sim.v1.json"))));
@@ -142,6 +155,11 @@ FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
 FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
     FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));
+// A10 battle-board (spec-battle-board.md §1): a normal encounter's own seeded, bounded board size --
+// siege gets its GridSpec from DistrictLayout, never from this roll, so this is a separate tunable.
+FusionRpg.Core.Battle.Board.BattleBoardTuningPolicy.Configure(
+    FusionRpg.Core.Battle.Board.BattleBoardTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "battle-board.v1.json"))));
 // base-defense-todo.md 25.4: structure-catalog-import reads the committed corpus instead of the C#
 // literal — the same AppContext.BaseDirectory-relative pattern the dungeon registry above already
 // uses (`dungeonRegistryDir`), with the matching .csproj copy rule (FusionRpg.Server.csproj) so a
@@ -170,7 +188,7 @@ FusionRpg.Core.Power.PowerTuningHub.Configure(
 FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
         // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk. passive-tree D55 (2026-09-06): v6 -> v7, published via tools/tuning/publish.py -- demonType/aspect/uniqueDemon skillPointsPerThetaMilliByScope moved from the borrowed-placeholder {4,4,6} to the {3,4,4,6}-ratio-derived {15,15,22} against the already-settled commander=11 (spec-tree-state.md open question 3) -- v6 stays on disk.
-        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v7.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v8.json"))));
 // Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
 // sees one, so the rung ladder has no reason to load there.
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(

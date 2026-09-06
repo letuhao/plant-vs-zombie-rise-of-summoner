@@ -379,7 +379,10 @@ A node is 1..3 affixes inside a `skill` container; `AffixComposer` maps affix �
       through the shipped helper
 - [x] `CoefficientBinder`'s source contains no `tierWeight`, `weightTotal` or `w[t]` — a source-shape
       test, because a value test cannot see this defect
-- [x] A conversion node is **refused** with the 17th-kind reason, not silently bound
+- [x] A conversion node is **refused** with the 18th-kind reason, not silently bound (renumbered from
+      "17th" 2026-09-07 — a coverage audit found `AtomKindRegistry.KindCount` had grown to 17 for
+      unrelated reasons since this was written, making a still-unbuilt conversion kind the 18th, not
+      the 17th; fixed in `AffixComposer.cs`/`BindInputNode.cs` and their tests, re-verified green)
 **Verification:** the worked example in §3.4 reproduces exactly — share 45 → 3,038, the sibling at
 46 → 3,105.
 **Depends on:** B1, B2, B3. **Scope:** M. **Files:**
@@ -403,12 +406,20 @@ kMicro formula is scoped to magnitude-class (channel-writing) atoms — a mechan
 `status.apply` is resolved successfully but is not priced by this formula, which is dimensionally
 about a share of `P(Θ)` on a specific channel and has no meaning for a boolean status application.
 
-**Conversion refusal, scoped honestly.** No "conversion" atom kind exists in `AtomKindRegistry`'s 16
-rows (D16), and `tree-plan`/`tree-language`'s quota already allocates zero nodes to it upstream — so
-this is a defensive backstop, not a path exercised by real content today. Implemented as: any
-resolved atom whose `kindId` contains "convert" is refused citing D16/the 17th kind by name; any
-other unregistered kind is refused generically. Both are tested against synthetic fixtures, since no
-real conversion-shaped atom exists to test against (by design).
+**Conversion refusal, scoped honestly.** No "conversion" atom kind existed in `AtomKindRegistry`'s 16
+rows (D16) when this was written, and `tree-plan`/`tree-language`'s quota already allocates zero nodes
+to it upstream — so this is a defensive backstop, not a path exercised by real content today.
+Implemented as: any resolved atom whose `kindId` contains "convert" is refused citing D16/the kind by
+name; any other unregistered kind is refused generically. Both are tested against synthetic fixtures,
+since no real conversion-shaped atom exists to test against (by design).
+
+**Renumbered 17th → 18th, 2026-09-07.** A coverage audit found `AtomKindRegistry.KindCount` had grown
+to **17** for reasons unrelated to conversion since this task was verified (2026-09-06) — so a
+still-unbuilt conversion kind is now the **18th**, not the 17th, and the shipped refusal message in
+`AffixComposer.cs` (plus a doc comment in `BindInputNode.cs` and four test assertions across
+`AffixComposerTests.cs`, `TreeBinderRunTests.cs` and `ReportWriterTests.cs`) still said "17th." Fixed
+all of them the same session the audit found it; re-verified green: `AffixComposerTests`/
+`TreeBinderRunTests` 19/19, `FusionRpg.TreeBinder.Tests` 14/14.
 
 **⛔ Not built: `tools/TreeBinder/`'s CLI (`--explain`, `--check`) and the full node-level
 orchestration tying `AffixComposer` + `CoefficientBinder` + `ChannelAnchor` into `BoundNode` records
@@ -775,7 +786,11 @@ line above it, and `PointBudget.SkillPointsFor` as the sibling of `PointsFor`. W
 budget reads `Θ_player` and fifty demons own the generic catalog at the calibration point.
 **Acceptance:**
 - [x] `pointEconomy.skillPointsPerThetaMilliByScope` ships in `aptitudes.v{n+1}.json` with
-      `commander = 11`; the other three carry a stated guess, labelled unmeasured
+      `commander = 11`; the other three carry a stated guess, labelled unmeasured (**closed 2026-09-06
+      by D55, shipped in `aptitudes.v7.json`: `demonType = 15`, `aspect = 15`, `uniqueDemon = 22`,
+      proportional to the sibling `{3,4,4,6}` ratio against commander's `11` — still explicitly a
+      shipped guess, not a measurement, per the spec's own posture; `squad-harness` may move any of
+      the three later without reopening this spec**)
 - [x] `SkillPointsFor` is the same shape as `PointsFor`: `checked`, `long`, no cap, negative source
       rejected
 - [x] A missing rate is a load rejection naming it
@@ -848,8 +863,10 @@ becoming a pure penalty.
       that can return false — each named, each with the PS-8 exemption comment beside it
 - [x] A seam test proves the battle path never loops the single-key loader, and tree state is not
       joined onto the unpaged `ListDemonRoster`
-- [x] 2,000 actors × 40 nodes stores 80,000 rows, not 3.1 million, proven by a row count; `long` on both
-      sides, `checked` products, `GetInt64` never `GetInt32`
+- [x] 2,000 actors × 40 nodes stores 80,000 rows, not ≈3.4 million (D51, 2026-09-06: 24 statuses not
+      21, 1,680-node generic catalog, was ≈3.1 million against the 1,560-node corpus: 2,000 × 1,680 =
+      3,360,000 vs 2,000 × 1,560 = 3,120,000), proven by a row count; `long` on both sides, `checked`
+      products, `GetInt64` never `GetInt32`
 **Verification:** the row-count proof runs against a generated fixture; the three greps fail when the
 construction is reintroduced.
 **Depends on:** B5. **Scope:** M.
@@ -2057,7 +2074,17 @@ confirmed via `git status` that F4 never touched it; not this task's regression.
 bullets name a numeric bar a real trial-volume finding must clear (contrast F3's "`D`'s 95% lower bound
 above 3.0pp"); all three are about the model's own mechanism correctness (half-widths always reported,
 1000 always includable, ownership cost always distinguishable), which small-trial-count smoke runs
-through the real `BattleEngine` are sufficient to prove. Genuinely ✅, not 🟡.
+through the real `BattleEngine` are sufficient to prove. Genuinely ✅, not 🟡, **for what this task's own
+acceptance actually asked** — the three bullets above are still true today, unchanged.
+
+**⚠ Flagged 2026-09-07 by F7 — the model itself, not this task's mechanism-correctness bullets.** Any
+`concentration.fmaxMilli`/`crossunlock` win-share NUMBER this task's own sweeps produced (via
+`ConcentrationSweep`/`CrossUnlockSweep`, both calling `TreeModel.Resolve`'s aptitude fold-back) was
+measured through a mechanism F7 found is not representative of the real game — see F7 and the new F8.
+This task's OWN acceptance (half-widths reported, 1000 includable, ownership cost distinguishable) does
+not depend on the fold-back being realistic and stays met; any DOWNSTREAM conclusion drawn from a
+specific sweep number (e.g. "concentration hurts by X‰") is what F8 re-runs and either confirms or
+corrects. Do not cite this task's own win-share numbers as representative until F8 lands.
 
 ### ✅ F5: S3 — the soul track in the model — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-squad-harness.md` §11 S3.
@@ -2103,7 +2130,18 @@ read matching real production code exactly), which the agent's live 5-trial CLI 
 values from one seed stream, cross-checked against an isolated single-Θ run for byte-identical
 agreement) and the D3-match unit tests are sufficient to prove. Genuinely ✅, not 🟡. `soulTrack.
 thetaPerSoulLevelMilli`/`concentration.wMilli` remain PROPOSALS from small-trial evidence only — nothing
-was written to `data/tuning`, matching this whole program's own standing rule.
+was written to `data/tuning`, matching this whole program's own standing rule. **This task's own three
+acceptance bullets are unaffected by F7's finding below** — they never depended on the fold-back
+mechanism at all; the `SoulTrack.ThetaNode` derivation-match tests call the real production function
+directly, not through `TreeModel`'s aptitude fold-back.
+
+**⚠ Flagged 2026-09-07 by F7 — the CROSSOVER SWEEP's win-share numbers, not this task's own three
+bullets.** `SoulTrackSweep`'s Θ=300 crossover check runs through `TreeModel.Resolve`'s points track
+(reused, per this task's own Evidence above), which inherits F4's same aptitude-fold-back mechanism —
+F7 found that mechanism is not representative of the real game (a zero-sum cross-tree coupling via
+`AptitudeAllocation.Share` with no real-pipeline analog). The `soulTrack.wMilli`/`thetaPerSoulLevelMilli`
+PROPOSALS this task produced were therefore measured through the same non-representative mechanism.
+F8 re-runs this sweep against the corrected model.
 
 ### 🟡 F6: S4 — the budget mode, and D42's two dials — mechanism BUILT + VERIFIED 2026-09-06; both dials structurally unresolvable by this harness, not just under-measured
 **Spec:** `spec-squad-harness.md` §11 S4; `spec-tree-plan.md` open question 1; `spec-tree-binder.md` §3.6.
@@ -2171,7 +2209,7 @@ should be revised to accept a structural refusal as equivalent to "cannot separa
 future task needs to give this harness (or a different one) real access to the plan/catalog units these
 two dials actually live in.
 
-### ⬜ F7: Reconcile `TreeModel`'s aptitude-fold-back against the real direct-channel pipeline — NOT STARTED, added 2026-09-07
+### ✅ F7: Reconcile `TreeModel`'s aptitude-fold-back against the real direct-channel pipeline — INVESTIGATION CLOSED 2026-09-07, opened F8
 **Spec:** `spec-squad-harness.md` §4, §11 S4 (amended); `spec-tree-resolve.md` §2.1-2.2, §5.3;
 `spec-tree-binder.md` §3.1-3.4.
 **Description:** F6 (above) ran S4 for real and found `ProposeTreeTotalPoints`/`ProposeTreeShareMilli`
@@ -2196,7 +2234,7 @@ worked-example convention (`spec-tree-binder.md` §3.4) — not a single univers
 having the harness read a corpus that mostly doesn't exist yet (its own §13 "Never" list forbids that,
 for good reason: purity and speed against unbuilt content).
 **Acceptance:**
-- [ ] Confirmed (or refuted) with evidence, not assumed: does `TreeModel`'s aptitude-fold-back model
+- [x] Confirmed (or refuted) with evidence, not assumed: does `TreeModel`'s aptitude-fold-back model
       still produce *representative* F4/F5 conclusions (does concentration hurt, does cross-unlock
       reverse an ordering, does the soul track behave linearly) despite not matching the real
       direct-channel path? **Corrected 2026-09-07 — a coverage audit found this bullet originally
@@ -2208,34 +2246,89 @@ for good reason: purity and speed against unbuilt content).
       real-production-scale sweeps (`spec-squad-harness.md` §12) would spend real machine time
       validating the wrong mechanism at high trial counts — F2/F3's own real sweeps are unaffected and
       do not need to wait on this task. Answer this **before** F4/F5's production sweeps run, not after.
-- [ ] If confirmed representative: build the reconciliation for F6's two dials only, as a small, pure
-      function — pick the representative channel (§3.4's convention), read its real `AptitudeEdge.KMilli`
-      from the shipped `aptitudes.v7.json`, and derive algebraically what `treeShareMilli` would need to
-      be for a node on that channel to produce the same `P(Θ)`-domain effect `b` produces via the
-      aptitude path, at the same `Θ`. Report it the way every other flagged number in this program
-      ships: a value, an explicit "analytical, representative-channel, not corpus-wide" label, and
-      either a half-width or an honest "no half-width — analytical, not sampled" note (F2's own
-      convention).
-- [ ] If NOT confirmed representative (the more likely outcome, given the two paths' difference is
-      exact, not approximate): do not force a reconciliation that doesn't exist. Open **F8** with a
-      concrete rebuild scope (model tree power using the real `TreeAtomSource`/`AtomDerivedSubsystem`
-      shape in memory — still no live catalog or `RpgStore` read, synthetic `LoadedTree`/`NodeAtom`
-      records the same way B1's own fixtures already do) rather than attempting the rebuild inside F7.
-- [ ] Whichever outcome, state it plainly — this bullet is not satisfied by silence either way.
-**Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests` stays at its 173/173 baseline (or
-grows, never shrinks); the reconciliation function (or F8's own scope doc) is checked against the real
-`AptitudeTuning.cs`/`CoefficientBinder.cs` source cited above, not a re-derivation.
-**Depends on:** F6. **Scope:** M — investigation plus either a small pure function or a follow-up
-task definition, not a rebuild inside this task.
 
-### ⬜ Checkpoint F — measurement — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked; bullet 3 re-pointed at F7 2026-09-07)
+      **Answered 2026-09-07, traced to the real code: NOT representative — a structural bias, not a
+      unit mismatch.** `TreeModel.Resolve` (`TreeModel.cs:276-281`) folds tree power in as
+      `effective += AptitudeAllocation.Single(AllocationScope.Commander, treeId, t.AptitudePoints +
+      F·W_i/1000)` — MORE POINTS on the SAME tree's own aptitude entry. That allocation then feeds the
+      real battle resolver, `AptitudeResolver.Resolve`/`ResolveForBattle`
+      (`src/FusionRpg.Core/Stats/Aptitudes/AptitudeResolver.cs:35-115`), which reads
+      `allocation.Share(edge.Source)` — and `AptitudeAllocation.Share` (`AptitudeAllocation.cs:81-85`)
+      is `Total(aptitudeId) / GrandTotal()`, a **ZERO-SUM ratio across every aptitude the actor holds**.
+      Adding fold-back points to tree `i` therefore does two things the real game never does: (1) it
+      raises tree `i`'s own share and hence its own combat-channel contribution (the intended effect),
+      **and (2) it simultaneously grows `GrandTotal()`, diluting every OTHER tree's share and therefore
+      every other tree's combat-channel contribution too** — a cross-tree coupling with zero analog in
+      the real pipeline, where `TreeAtomSource.BoundAtomsFor` writes a flat/increased modifier straight
+      to one channel, completely independent of any other tree's own contribution. (Confirmed the
+      shipped `shareExponentMilli = 1000` — exactly linear, `share^1.0` — so this is not a superlinear-
+      concentration artifact riding on top; the zero-sum coupling exists regardless of that exponent.)
+      **Why this specifically confounds F4's own question:** a CORNER build's one dominant aptitude
+      starts near `share ≈ 1.0` already, so a fold-back bonus barely moves ITS OWN share further but
+      still shrinks the (already-small) shares of every other aptitude it holds; a SPREAD build starts
+      with several comparable, non-saturated shares, where the identical fold-back bonus shifts relative
+      shares far more. The two build shapes being compared respond asymmetrically to an artifact that
+      has no real-game counterpart — exactly the axis "does concentration help or hurt" is trying to
+      measure. This is not a scaling difference correctable by a constant; it changes which shape wins.
+- [ ] N/A — not confirmed representative (see above), so no reconciliation is built here.
+- [x] **F8 opened** (below) with a concrete rebuild scope, since the fold-back model was not confirmed
+      representative — the branch this plan's own text flagged as the more likely outcome.
+- [x] Stated plainly: **NOT representative.** F4's `concentration`/`crossunlock` win-share numbers and
+      F5's soul-track crossover finding were measured through a fold-back mechanism with a real,
+      structural, corner-vs-spread-asymmetric bias that the shipped game does not have. Both tasks'
+      own entries are flagged below, not silently left as settled ✅ conclusions.
+**Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests` stays green (no code changed by this
+investigation) — re-run fresh 2026-09-07: **178/178 green** (the 173 figure quoted earlier in this file
+was this suite's own count as of F6; 5 more tests landed since, from other work in this program — no
+regression, confirmed by running it directly rather than trusting the inherited number). F8's own scope
+is checked against the real `AptitudeResolver.cs`/`AptitudeAllocation.cs`/`TreeAtomSource.cs` source
+cited above, not a re-derivation.
+**Depends on:** F6. **Scope:** M — investigation only; this task built no code by design (the plan's
+own scope line: "not a rebuild inside this task").
+
+### ⬜ F8: Rebuild `TreeModel`'s power contribution on the real direct-channel shape — NOT STARTED, opened 2026-09-07 by F7's own investigation
+**Spec:** `spec-squad-harness.md` §4, §11 S2/S3 (to be amended); `src/FusionRpg.Core/PassiveTree/Resolve/TreeAtomSource.cs`; `AtomDerivedSubsystem`.
+**Description:** F7 found `TreeModel.Resolve`'s aptitude-fold-back (`effective += AptitudeAllocation.
+Single(...)`) is not a unit-space variant of the real pipeline but a **different mechanism** — it
+routes tree power through `AptitudeAllocation.Share`'s zero-sum ratio, which cross-couples every tree
+an actor holds in a way the real `TreeAtomSource`/`AtomDerivedSubsystem` direct-channel path never
+does, and that coupling is asymmetric between concentrated and spread allocations — the exact axis
+`concentration`/`crossunlock` measure. This task replaces the fold-back with an in-memory model of the
+real shape: each owned node contributes a flat/increased modifier to ITS OWN channel (mirroring
+`BoundDerivedAtom`), summed independently per channel, with **no shared-total normalization across
+trees at all** — never folded back through `AptitudeAllocation`.
+**Acceptance:**
+- [ ] `TreeModel`'s per-actor resolution produces one set of `BattleChannelMod`-shaped contributions
+      (channel, amount) per owned node, built from synthetic `LoadedTree`/`NodeAtom` records the same
+      way B1's own fixtures already do (`spec-squad-harness.md` §13's "Never" list: still no live
+      catalog or `RpgStore` read) — never an `AptitudeAllocation` mutation
+- [ ] A test proves the new model has **no cross-tree coupling**: giving tree A more owned nodes never
+      changes tree B's own contribution, for a fixed tree B allocation — the property the old fold-back
+      structurally could not have
+- [ ] F4's `concentration`/`crossunlock` sweeps and F5's `soultrack` sweep are re-run against the new
+      model (small-trial smoke runs are sufficient — matching F4's own "mechanism correctness, not a
+      production-scale bar" acceptance shape); the reported win-shares are compared against the old
+      fold-back's own numbers and the delta (if any) is stated, not silently assumed unchanged
+- [ ] F4/F5's own todo.md entries are updated with the new model's results, and their flags from F7
+      are resolved (either the conclusion holds under the corrected model, or it's corrected)
+**Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests` — the new no-cross-coupling test is
+the one that would have caught F7's own finding; the existing 178 tests (count as of F7, 2026-09-07;
+re-check the live total when this task starts) are updated, not broken, where they asserted the old
+fold-back's specific numbers.
+**Depends on:** F7. **Scope:** M — a real model rebuild, but scoped to a pure in-memory function plus
+re-running already-built sweep CLIs, not new sweep machinery.
+
+### ⬜ Checkpoint F — measurement — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked; bullet 3 re-pointed at F7 2026-09-07, then at F8 once F7 closed)
 - [ ] A10a produces `D` with a half-width, at the effect size the spec names
 - [ ] If UNRESOLVED or FAIL: **stop and review** — phase H's corpus is budgeted on this premise
 - [ ] `treeShareMilli` and `budget.treeTotalPoints` are re-derived and republished as
       `passive-tree.v2.json` (D42), with their `UNMEASURED` markers removed — **F6 already ran S4 and
       found this cannot happen from corpus-wide sampled data (structural, not a trial-count gap); F7
-      is what actually closes this bullet, either with a representative-channel-derived value (labeled
-      as such, not corpus-measured) or by opening F8 as a named follow-up**
+      investigated the reconciliation this needed and found the fold-back model itself is not
+      representative (a real, structural, corner-vs-spread-asymmetric bias, not a units mismatch) —
+      opened F8 to rebuild the model on the real direct-channel shape. This bullet now waits on F8,
+      not F7 — a representative-channel-derived value cannot be trusted from a model F7 found to be
+      measuring the wrong mechanism.**
 
 ---
 
@@ -3004,7 +3097,7 @@ the module's own docstrings, not silently assumed to work end-to-end. Wiring the
 own Files line names only `metrics/passive_tree.py`, and none of the four acceptance bullets require
 CLI registration; that wiring is a separate, later integration task.
 
-### 🟡 H5: The two `tree-review` corpus metrics — 2 of 3 BUILT + VERIFIED 2026-09-06; HiddenFileCount mechanism correct, real-data condition not yet demonstrable
+### 🟡 H5: The two `tree-review` corpus metrics — 2 of 3 BUILT + VERIFIED 2026-09-06; HiddenFileCount mechanism correct, no real seed-root wiring yet (sharpened 2026-09-07 — `tree_seed_roots` confirmed still `()` everywhere outside its own test)
 **Spec:** `spec-tree-review.md` §4.1, §4.2, §7.
 **Description:** `PassiveTree/TreeEqualValue`'s **content-side** half — over `tree-binder`'s prices
 rather than the plan's budget column, which is C1's half — plus `PassiveTree/DeepMechanismValue`
@@ -3018,6 +3111,17 @@ skip, reporting `visitedFileCount`, with a canary fixture root).
       currently true of today's real data, see Evidence**; the canary-finding behavior itself is proven
 - [x] the same run finds the canary parked entry — a green at `visitedFileCount == 0` is distinguishable
       from a green over forty empty files
+- [ ] **`PassiveTreePlanCtx.tree_seed_roots` is populated with the real seed directories somewhere a
+      real run reaches — confirmed 2026-09-07, still empty.** `tree_seed_roots` defaults to `()`
+      (`passive_tree.py:156`) and `HiddenFileCountMetric` is instantiated in exactly one place
+      repo-wide: the test file. No production call site sets `tree_seed_roots` or runs this metric for
+      real yet — it is a correctly-built, fully-tested class with zero wiring, which is a sharper
+      statement than "not demonstrable against real data" above: there is currently no real invocation
+      to demonstrate it against. `spec-species-tree.md` §2.1 rule 2 additionally requires this module's
+      **own** seed roots (`data/seed/passive-tree/species/`, once J5/J6 generate anything under it) be
+      included in whatever list gets built — tracked here since this task owns the metric, not
+      duplicated into J5's own acceptance, so there is one place this gets wired rather than two
+      half-done ones
 **Verification:** a fixture root with one `_`-prefixed file is found; a corpus with one over-priced tree
 fails `TreeEqualValue`.
 **Depends on:** H4, C1, D2. **Scope:** M. **Files:**
@@ -4137,7 +4241,7 @@ is a verbatim copy, and a tree spend flow would be the third.
 `TreeResolveReport` per shared-corpus tree; POST `/allocate` takes one whole `nodeId -> soulLevel` map),
 `PassiveTreeDtos.cs`, and extended the existing `RpgStore.TreeCatalog.cs` with
 `ListTreeCatalogTrees()`/`LoadTreeCatalog(...)` (batched, 3 flat queries, no per-node round trips —
-scales to the full 35,160-node corpus). Extracted `useAllocationDraft.ts` (draft/dirty/spent/
+scales to the full 35,280-node corpus, D51: was 35,160). Extracted `useAllocationDraft.ts` (draft/dirty/spent/
 withinBudget/save/revert) from `ProgressionTab.tsx`'s own admitted verbatim-copy logic; both
 `AptitudesPage.tsx` and `ProgressionTab.tsx` now consume it, no third copy.
 
@@ -4271,8 +4375,8 @@ to confirm both self-caught guard violations are genuinely fixed, not just claim
 
 ### ✅ I5: Level 0b — the bloodline pin and the Codex route — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-surface.md` §2.2 Level 0b, §3.
-**Description:** The species tree's spend route and its read route. 879 is never a collection anywhere —
-a bloodline is pinned to its creature's sheet.
+**Description:** The species tree's spend route and its read route. 882 (D51: was 879) is never a
+collection anywhere — a bloodline is pinned to its creature's sheet.
 **Acceptance:**
 - [x] A bloodline is pinned to its creature's sheet and **never enters a browse**
 - [x] The Demon Codex read route reaches a species tree from the creature, not from a list
@@ -4844,9 +4948,24 @@ gate state notwithstanding. Also the count grew: D51 accepted 24 statuses (was 2
       `--tree` resolution
 - [ ] 30 trees × 40 nodes emitted, generated, bound, gated
 - [ ] The same gate bar as H9: every gate green, the gating metric measured
-**Verification:** `--check` green; all 30 resolve above tier 0 on a seeded save.
+- [ ] **Server-side `gateState`, fixed alongside this task, not after it — a coverage audit found this
+      2026-09-07, confirmed by reading the code, still latent because no elemental/status `TreeRecord`
+      exists to trigger it yet.** `PassiveTreeEndpoints.cs`'s `AptitudeGatePattern`/`TryParseAptitudeGate`
+      (used by I2/I4's `ProjectState`) only matches `aptitude.<Id>@Commander` — the 12 primary trees.
+      `element_mastery.<id>@Aspect` and `status_applied.<id>` gate quantities have had a real producer
+      since G6 (2026-09-06), but this endpoint's own `isWired` check was never taught to recognize
+      either shape. The moment this task's 30 trees get a `TreeRecord` (i.e. right after generation is
+      imported), Level 1 (`spec-tree-surface.md` §9.1 rule 5, I4) would wrongly render all 30 as
+      `Unproduced`/gateless even though their real gate is already `Wired` — a silent, wrong-content
+      bug, not a crash, so nothing today would catch it without this bullet. Fix: extend the gate-shape
+      recognition to the other two `gateIndexKind` shapes (mirroring `gate-counters`' own
+      `IGateQuantitySource` registrations), verified against a live save once these trees exist
+**Verification:** `--check` green; all 30 resolve above tier 0 on a seeded save; a save with an
+elemental/status node owned shows `gateState: "wired"` in `GET /api/passive-tree/{playerId}`, not
+`"unproduced"`.
 **Depends on:** Checkpoint G, Checkpoint H, C2. **Scope:** M (a run) — the factory functions themselves
 are S/XS each (mechanical, one existing pattern to copy twice); the generation run is the real cost.
+The gate-state fix is XS (one regex/switch, `PassiveTreeEndpoints.cs`).
 
 ### J2: The three-tier sampling design and the acceptance numbers
 **Spec:** `spec-tree-review.md` §3.1, §3.2, §6.3.
@@ -5044,14 +5163,38 @@ reading/writing the column and leaves it in the schema, harmless (spec §2b).
       `TreeBinderExplain.cs:102-103`) and `RpgStore.TreeCatalog.cs`'s `INSERT`/`SELECT`
       (`:310-319`, `:419,429-435`) updated in the same change — no `soul_curve_id` column drop
 - [ ] `PassiveTreeCatalogLoader.cs`'s `SoulCurveIdPattern` validation removed with the field
-- [ ] `PassiveTreeCatalogLoaderTests.cs`/`CatalogHardeningTests.cs`'s now-pointless round-trip
-      assertions removed, not left asserting a field that no longer exists
+      (`PassiveTreeCatalogLoader.cs:36-45,316-326`)
+- [ ] **All four `SoulCurveId`-dependent tests in `CatalogHardeningTests.cs` removed, not just the two
+      round-trip ones** — confirmed by reading the file directly (2026-09-07): `TreeJsonWithSoulCurveId`
+      (the shared fixture builder), `A_well_formed_curve_reference_is_accepted`,
+      `A_null_soulCurveId_is_accepted_the_field_is_optional`,
+      `A_formula_or_expression_is_refused_never_accepted_as_a_reference` (a `[Theory]`, 4 cases), and
+      `A_soulCurveId_missing_the_curve_prefix_is_refused`. **The risk naming this bullet exists for:**
+      the fixture builder emits raw JSON text (`$$"""..."""` string interpolation), not a typed C#
+      object, so the two validation-refusal tests have **no compile-time coupling** to
+      `NodeAtom.SoulCurveId` at all — removing the property only breaks the two round-trip tests at
+      **compile time** (they access `loaded!.Nodes[0].Atoms[0].SoulCurveId` directly); the two
+      refusal tests would keep compiling and go red only at **runtime**, once
+      `PassiveTreeCatalogLoader` stops refusing a malformed `soulCurveId` it no longer validates. A
+      "fix the compile errors" pass that stops at the two obvious ones ships two now-meaningless red
+      tests instead of deleting them
+- [ ] **No `catalog_revision` bump** — the catalog's own committed content shape is unaffected; only
+      an internal, always-`NULL`, never-consumed field stops being populated (spec §2b, §3)
+- [ ] **`tree-review`'s `provenance-supersede` gate is never invoked for this change** — it changes no
+      coefficient and no committed magnitude, only a field nothing ever read; treating it as a
+      magnitude retune would be the wrong classification (spec §3)
+- [ ] **A byte-for-byte regression check**: re-running `tools/TreeBinder` (or the equivalent generator)
+      over an unchanged seed corpus produces an output identical to before this change except for the
+      `soul_curve_id` values now written (always absent/never populated) — proving the field's removal
+      touches nothing else in the generated catalog
 - [ ] `spec-tree-catalog.md` §1(a)'s layer table and §OQ1 (both already updated by this spec's own
       landing) stay in sync — no further doc work once the code change ships
 **Verification:** spec §4's own testing strategy — build fails loudly on any missed reference (no
-`SoulCurveId` left uncompiled); a source-shape test confirms the SQL no longer names `soul_curve_id`.
+`SoulCurveId` left uncompiled); a source-shape test confirms the SQL no longer names `soul_curve_id`;
+`dotnet test tests/FusionRpg.Core.Tests --filter CatalogHardeningTests` has exactly the tests that
+existed minus the four named above — no orphaned red test, no weakened assertion in their place.
 **Depends on:** none (spec-only prerequisite is done). **Scope:** S — a field removal touching four
-already-identified files, no schema migration required.
+already-identified files (plus the one test file's four tests), no schema migration required.
 
 ### ⬜ Checkpoint J — ship — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] Full corpus reviewed; escalations resolved through the ladder, not by hand edits
@@ -5086,7 +5229,7 @@ deleted) so the table stays the complete historical record, matching this file's
 | Does D15's equal-budget rule change once S4's evidence lands? | Keep the equal-budget rule | **S4 (F6) has now run and found a structural non-resolution, not an answer — see the new task F7 (`tasks/passive-tree-plan.md` Phase F). This row stays open, re-pointed at F7 instead of F6.** |
 | ~~Is tree respec priced off its own soul counter or the species counter?~~ | **CLOSED 2026-09-06 by D45: its own, separate counter.** | — |
 | The `DemonsPage.tsx:367-388` volume defect the Codex route hangs off | I5 ships without the Codex entry point and the route is added after | Owner — another program's file — **still open** |
-| ~~What does "the tier below is unlocked" mean for the skill-wallet calibration?~~ | **CLOSED 2026-09-06 by D44: ≥1 node owned in the tier below, same branch** (preserves D10's two-branch identity, rewards a single-branch dive) — matches what was already the working assumption, now settled rather than provisional. | — |
+| ~~What does "the tier below is unlocked" mean?~~ | **CLOSED 2026-09-06 by D44: ≥1 node owned in the tier below, same branch** (preserves D10's two-branch identity, rewards a single-branch dive). **This row's own original framing — "for the skill-wallet calibration" — was investigated 2026-09-07 and does not hold: `TierGate.Reached` (`src/FusionRpg.Core/PassiveTree/Resolve/TierGate.cs:16-30`), read directly, takes one scalar `aptitudePoints` with no branch or node-ownership parameter at all, and `spec-tree-state.md` §2.2's own `firstPoints`/`stepPoints` derivation is calibrated only against tier width `k`, never against a tier-below-unlock condition. D44's reading stands as the answer to the concept it names — it just was never coupled to the skill wallet or to `firstPoints`/`stepPoints`, and no recompute of either is owed. Full trace in `spec-tree-state.md`'s own closure note.** | — |
 | Auto-drafting a species-derived starter plan when a creature is bound (`spec-tree-surface.md` §15) | Do not auto-draft — I5/I8 ship with no starter-plan generation; the player lays out their own build from an empty draft | Owner, after I8 ships — **still open** |
 | Shipping shareable build codes as a marketed feature (stable catalog-version stamp + decoder guarantee), vs. the plain URL-reflects-open-layers mechanism I8 already builds under GG-8 | I8 ships only the GG-8 behavior (see I8's scope-boundary bullet); no "share" UI affordance until this is answered | Owner, before any "share" UI is added — **still open** |
 

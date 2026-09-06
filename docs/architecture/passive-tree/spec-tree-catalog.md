@@ -253,8 +253,8 @@ operational mistakes rather than doing the work."*
 > actually changed go back through the review pipeline — is a claim about *identity survival across a
 > regeneration*, and it is true only because the key comes out of the seed rather than out of a
 > counter. Recompute the key from position and every insertion re-mints the ids after it, every
-> unchanged node reads as new, and `O(diff)` silently becomes `O(corpus)` — 35,160 nodes back through
-> review for a one-node insert, with no error anywhere to say why.
+> unchanged node reads as new, and `O(diff)` silently becomes `O(corpus)` — 35,280 nodes (D51: was
+> 35,160) back through review for a one-node insert, with no error anywhere to say why.
 
 That is the difference between a stable id and an ordinal wearing a slug's clothes.
 

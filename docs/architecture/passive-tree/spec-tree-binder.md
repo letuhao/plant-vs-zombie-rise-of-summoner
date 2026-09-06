@@ -968,6 +968,13 @@ module does about an exclusion, which is nothing, and says so because the neighb
     amending it is an owner call, not a side effect of this spec.
 ```
 
+**Superseded since this checklist was written, kept unedited above as the historical record of this
+session's own verification.** Two of the counted-from-code figures have since grown: statuses 21→24
+(D51, 2026-09-06, three `nerve.*` statuses accepted) and atom kinds 16→17 (an unrelated addition,
+`structure.place`, landed the same day D56 specced the still-unbuilt 18th — see
+[`spec-element-conversion.md`](spec-element-conversion.md) §0). Neither growth changes any conclusion
+this checklist reached; both are corpus-size inputs, not findings the checklist itself depended on.
+
 ## Filed 2026-09-06 — a real gap between this spec and the shipped affix-family data
 
 Found while checking whether the passive-tree program is actually wired end to end: this spec's own

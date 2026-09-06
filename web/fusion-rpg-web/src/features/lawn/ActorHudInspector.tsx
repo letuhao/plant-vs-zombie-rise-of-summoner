@@ -2,7 +2,7 @@ import type { ActorHudSnapshot } from "./lawnViewModel";
 import {
   TIER_BORDER,
   elementColorHex,
-  statusInitials,
+  resolveStatusHudToken,
   tierBadgeLetter
 } from "@/game/systems/actorHudDisplayTokens";
 
@@ -74,16 +74,20 @@ export function ActorHudInspector({ hud }: Props) {
 
       {statuses.length || overflow.statusCount > 0 ? (
         <div className="flex flex-wrap items-center gap-1">
-          {statuses.map((s) => (
-            <span
-              key={s.id}
-              className={`inline-flex min-w-[18px] items-center justify-center rounded-sm border border-border-control bg-panel-raised px-1 font-mono text-[9px] font-bold ${magnitudeClass(s.magnitudeBand)} ${s.cc ? "border-lawn-hot" : ""}`}
-              data-testid={`actor-hud-status-${s.id}`}
-              title={`${s.id} (${s.magnitudeBand})${s.cc ? " CC" : ""}`}
-            >
-              {statusInitials(s.id)}
-            </span>
-          ))}
+          {statuses.map((s) => {
+            const token = resolveStatusHudToken(s.id);
+            return (
+              <span
+                key={s.id}
+                className={`inline-flex min-w-[18px] items-center justify-center rounded-sm border border-border-control bg-panel-raised px-1 font-mono text-[9px] font-bold ${magnitudeClass(s.magnitudeBand)} ${s.cc ? "border-lawn-hot" : ""}`}
+                data-testid={`actor-hud-status-${s.id}`}
+                style={{ color: token.color }}
+                title={`${token.displayName} (${s.magnitudeBand})${s.cc ? " CC" : ""}`}
+              >
+                {token.hudToken}
+              </span>
+            );
+          })}
           {overflow.statusCount > 0 ? (
             <span
               className="inline-flex min-w-[14px] items-center justify-center rounded-full border border-border-control bg-panel-raised px-1 font-mono text-[8px] font-bold"

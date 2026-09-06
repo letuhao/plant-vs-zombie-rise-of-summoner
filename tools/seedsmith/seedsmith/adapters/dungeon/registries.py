@@ -17,6 +17,17 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parents[5]
 REGISTRY_DIR = REPO_ROOT / "data" / "seed" / "dungeon" / "_registry"
 
+#: `theme`'s own vocabulary has no dungeon-registries home (spec-dungeon-seed-contract.md:44:
+#: `` `themes.v1.json` (84 rows) ``; `party-dungeon-ideal.md:838`: "the frozen theme registry
+#: under `data/seed/demons/_registry/`") — a frozen CROSS-PROGRAM input the dungeon adapter reads,
+#: never authors (`spec-dungeon-seed-contract.md:143`'s own "frozen inputs" list names
+#: `themes/motifs/families` alongside `registries.v1`), the same shape `dropBand` already crosses
+#: from the item registry into `dungeon-loot` on the C# side. Second-reader propagation of
+#: `spec-demon-themes.md`'s own one-way publish — see this adapter's own D1.10 todo entry for the
+#: full citation trail; `adapters/items/registries.py:33-55`'s `load_theme_keys()` is the direct
+#: precedent for this exact cross-program read.
+DEMONS_REGISTRY_DIR = REPO_ROOT / "data" / "seed" / "demons" / "_registry"
+
 _REGISTRY_FILES = (
     "room-kinds.v1.json", "door-kinds.v1.json", "override-tags.v1.json",
     "objective-templates.v1.json", "difficulty-rungs.v1.json", "disposition.v1.json",
@@ -29,9 +40,20 @@ def _load(name: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
+def _load_demons(name: str) -> dict:
+    path = DEMONS_REGISTRY_DIR / name
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
 def load_versions() -> dict[str, int]:
-    """`registryVersion` per file, read fresh — never hardcoded (items/registries.py precedent)."""
-    return {name.removesuffix(".v1.json"): _load(name)["registryVersion"] for name in _REGISTRY_FILES}
+    """`registryVersion` per file, read fresh — never hardcoded (items/registries.py precedent).
+    Includes the two cross-program demon registries `theme`/`motif` read as frozen inputs, prefixed
+    `demons.` so a version bump on either side is independently named in provenance/`stale_ids()`
+    rather than colliding with a same-named dungeon-native file."""
+    versions = {name.removesuffix(".v1.json"): _load(name)["registryVersion"] for name in _REGISTRY_FILES}
+    versions["demons.themes"] = _load_demons("themes.v1.json")["registryVersion"]
+    versions["demons.motifs"] = _load_demons("motifs.v1.json")["registryVersion"]
+    return versions
 
 
 def load_room_kinds() -> dict[str, dict]:
@@ -77,6 +99,30 @@ def load_raid_modes() -> "frozenset[str]":
     return frozenset(_load("raid-modes.v1.json")["raidModes"])
 
 
+def load_themes() -> "dict[str, dict]":
+    """The demon-seed program's own published theme registry (`spec-demon-themes.md`), read as a
+    frozen cross-program vocabulary — this adapter is a SECOND reader alongside
+    `adapters/items/registries.py:33-55`'s own `load_theme_keys()`, never a second publisher: no
+    row here is ever written back, matching the source registry's own "publish one-way" boundary.
+    A retired theme's own row still resolves (a demon that leaves the roster keeps its published
+    theme, per `spec-demon-themes.md`'s own row) — legal to reference, never filtered out here."""
+    return dict(_load_demons("themes.v1.json")["themes"])
+
+
+def load_theme_ids() -> "frozenset[str]":
+    """The legal `theme` vocabulary for a dungeon domain anchor — every id in the registry,
+    `demon.*`-prefixed, retired or not (see `load_themes`'s own doc comment on retirement)."""
+    return frozenset(load_themes())
+
+
+def load_motifs() -> "frozenset[str]":
+    """The flat union of every theme's own motifs (`data/seed/demons/_registry/motifs.v1.json`) —
+    the vocabulary `dungeon-seed-contract.md`'s own planner motif briefs (D1.9) partition per cell,
+    never re-derived from `load_themes()`'s own per-theme lists here (the committed file is
+    already the union, kept in sync by the demon program's own `generate_motifs.py`)."""
+    return frozenset(_load_demons("motifs.v1.json")["motifs"])
+
+
 # The twenty band vocabularies this registry owns (spec-dungeon-registries.md "bands.v1.json" row)
 # — kept as an explicit list so a missing or an extra band in the committed file is a loud
 # assertion failure in the test, never a silent `KeyError` three modules downstream.
@@ -115,6 +161,8 @@ def load_vocabularies() -> dict[str, "frozenset[str]"]:
         "disposition": load_disposition(),
         "interactionVerb": frozenset(load_interaction_verbs()),
         "raidMode": load_raid_modes(),
+        "theme": load_theme_ids(),
+        "motif": load_motifs(),
     }
     vocab.update(load_bands())
     return vocab

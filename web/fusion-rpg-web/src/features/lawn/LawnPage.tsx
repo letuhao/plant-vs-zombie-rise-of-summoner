@@ -14,13 +14,14 @@ import {
   useSetDefaultCommander,
   useSpawnExtraIntent,
   useSpeciesIndex,
-  useUniqueActor
+  useUniqueActor,
+  useUniqueActors
 } from "@/lib/bus";
 import type { LawnSelectPayload } from "@/game/EventBus";
 import { cn } from "@/lib/cn";
 import { claimStageEscape } from "@/shell/keymap";
 import { useDevModeLive } from "@/dev/useDevModeLive";
-import { adaptCommanderSheet } from "@/contract/adapt";
+import { adaptCommanderSheet, adaptActor } from "@/contract/adapt";
 import { Page } from "@/layouts/Page";
 import { Split } from "@/layouts/Split";
 import {
@@ -38,10 +39,16 @@ import {
 } from "@/ui";
 import { LawnGameHost } from "./LawnGameHost";
 import { ActorHudInspector } from "./ActorHudInspector";
-import { LawnHud } from "./LawnHud";
 import { LawnOccupantList } from "./LawnOccupantList";
 import { LawnStatsModal } from "./LawnStatsModal";
 import { ActorPanel, type ActorRungState } from "@/ui/actor";
+import { LawnMatchHud } from "@/ui/lawn/LawnMatchHud";
+import { CellOccupancyDock } from "@/ui/lawn/CellOccupancyDock";
+import { SpawnTray } from "@/ui/lawn/SpawnTray";
+import { CommanderActionBar } from "@/ui/lawn/CommanderActionBar";
+import { encodeLawnSel, type LawnCollectionRow } from "@/ui/lawn/adaptOccupant";
+import { logLawnInteractive } from "@/ui/lawn/lawnInteractiveObserve";
+import { setLawnKeyboardMuted } from "@/game/focusGate";
 import {
   canEnterSpawnTargeting,
   idleInteraction,
@@ -121,6 +128,10 @@ export function LawnPage() {
   const [statusName, setStatusName] = useState("butter");
   const [actionError, setActionError] = useState<string | null>(null);
   const [actionOk, setActionOk] = useState<string | null>(null);
+  const [spawnTrayOpen, setSpawnTrayOpen] = useState(false);
+  const [dockSelectionKey, setDockSelectionKey] = useState<string | null>(null);
+  const [sheetRow, setSheetRow] = useState<LawnCollectionRow | null>(null);
+  const [armedOrderId, setArmedOrderId] = useState<string | null>(null);
 
   const spawnExtra = useSpawnExtraIntent();
   const debugPost = useLawnDebugPost();
@@ -168,7 +179,7 @@ export function LawnPage() {
   const selectedMarker =
     !selected && interaction.ptr ? findMarker(model, interaction.ptr) : undefined;
 
-  const uniqueQ = useUniqueActor(selected?.instanceId);
+  const uniqueQ = useUniqueActor(sheetRow?.instanceId ?? selected?.instanceId);
 
   const onSelect = useCallback(
     (payload: LawnSelectPayload) => {
@@ -198,20 +209,31 @@ export function LawnPage() {
     [model.phase]
   );
 
-  // T28 — the debug Spawn/Inspector/toolbar apparatus below stays exactly as it is (GG-41: a
-  // developer surface doesn't get deleted for a player-facing pass), gated behind the same
-  // developer-mode flag T12 already built rather than shown to every player by default. The new
-  // `LawnHud` and the deploy-targeting banner (T22, a real player feature) are unconditional.
+  // Developer Spawn/Inspector stays GG-41. Player chrome: LawnMatchHud + dock + tray + action bar.
   const devMode = useDevModeLive();
   const living = listOccupants(model);
   const livingCount = living.length;
   const deployedChips = useMemo(
     () =>
       living
-        .filter((o) => o.side === "plant")
-        .map((o) => ({ ptr: o.ptr, side: o.side, typeId: o.typeId, typeName: o.typeName })),
+        .filter((o) => Boolean(o.instanceId))
+        .map((o) => ({
+          ptr: o.ptr,
+          side: o.side,
+          typeId: o.typeId,
+          typeName: o.typeName,
+          instanceId: o.instanceId
+        })),
     [living]
   );
+  const uniqueActorsQ = useUniqueActors(playerId);
+  const deployableActors = useMemo(() => {
+    const items = uniqueActorsQ.data?.items ?? [];
+    const bound = new Set(
+      living.filter((o) => o.instanceId).map((o) => o.instanceId as string)
+    );
+    return items.filter((a) => !bound.has(a.instanceId));
+  }, [uniqueActorsQ.data?.items, living]);
   const picked = pickPhaserOccupants(
     living,
     PHASER_OCCUPANT_BUDGET,
@@ -223,6 +245,30 @@ export function LawnPage() {
   const targetRow = interaction.row;
   const targetCol = interaction.col;
   const hasCell = targetRow != null && targetCol != null;
+  const dockOpen =
+    !spawnTrayOpen &&
+    (interaction.mode === "TileSelected" || interaction.mode === "OccupantSelected") &&
+    hasCell;
+  const cellOccupants =
+    hasCell && targetRow != null && targetCol != null
+      ? model.cells.get(`${targetRow},${targetCol}`) ?? []
+      : [];
+  const selectionLabel =
+    hasCell && targetRow != null && targetCol != null
+      ? `Lane ${targetRow + 1} · Column ${targetCol + 1}`
+      : undefined;
+
+  useEffect(() => {
+    const mute =
+      dockOpen ||
+      spawnTrayOpen ||
+      Boolean(sheetRow) ||
+      commanderSheetOpen ||
+      interaction.mode === "ActionTargeting";
+    setLawnKeyboardMuted(mute);
+    return () => setLawnKeyboardMuted(false);
+  }, [dockOpen, spawnTrayOpen, sheetRow, commanderSheetOpen, interaction.mode]);
+
   const matchCommanderChip = model.matchCommander;
   const commanderListRow = matchCommanderChip
     ? commandersQuery.data?.commanders.find((row) => row.id === matchCommanderChip.id)
@@ -1096,17 +1142,67 @@ export function LawnPage() {
         ) : undefined
       }
     >
-      <LawnHud
+      <LawnMatchHud
         sun={model.economy?.sun}
         wave={model.economy?.wave}
         maxWave={model.economy?.maxWave}
         hugeWave={model.economy?.hugeWave}
+        phase={model.phase}
+        connection={devMode ? "connected" : "optional"}
+        selectionLabel={selectionLabel}
         matchCommander={matchCommanderChip}
         deployed={deployedChips}
         onOpenCommanderSheet={
           matchCommanderChip && commanderListRow ? () => setCommanderSheetOpen(true) : undefined
         }
+        onField={() => {
+          setSpawnTrayOpen(true);
+          setInteraction((prev) => reduceInteraction(prev, { type: "enterSpawnTargeting" }, model.phase));
+        }}
       />
+
+      <div className="flex min-h-0 items-stretch gap-0" data-testid="lawn-board-chrome">
+        <CellOccupancyDock
+          open={dockOpen}
+          occupants={cellOccupants}
+          cellLabel={selectionLabel ?? "Cell"}
+          selectionKey={dockSelectionKey}
+          onClose={() => {
+            setDockSelectionKey(null);
+            setSheetRow(null);
+            setInteraction(idleInteraction());
+          }}
+          onSelectRow={(row) => {
+            setDockSelectionKey(row.key);
+            setSheetRow(row);
+            logLawnInteractive("sheet.push", { key: row.key, sel: encodeLawnSel(row) });
+            if (row.instanceId) {
+              setSearchParams((p) => {
+                const next = new URLSearchParams(p);
+                if (hasCell && targetRow != null && targetCol != null) {
+                  next.set("cell", `${targetRow},${targetCol}`);
+                }
+                next.set("sel", row.instanceId!);
+                return next;
+              });
+            }
+          }}
+        />
+        <SpawnTray
+          open={spawnTrayOpen}
+          actors={deployableActors}
+          canSpawn={canSpawn}
+          lockedReason={!canSpawn ? `Fielding disabled in ${model.phase}` : undefined}
+          onClose={() => {
+            setSpawnTrayOpen(false);
+            setInteraction((prev) => reduceInteraction(prev, { type: "cancelArmed" }, model.phase));
+          }}
+          onPick={(instanceId) => {
+            setSpawnTrayOpen(false);
+            navigate(`/lawn?deploy=${encodeURIComponent(instanceId)}`);
+          }}
+        />
+        <div className="min-w-0 flex-1" style={dockOpen || spawnTrayOpen ? { marginLeft: 0 } : undefined}>
 
       {actionError ? (
         <Banner tone="error" className="mb-3" data-testid="lawn-action-error">
@@ -1193,7 +1289,37 @@ export function LawnPage() {
           <LawnGameHost model={model} interaction={interaction} viewMode="large" onSelect={onSelect} />
         </div>
       )}
+
+      <CommanderActionBar
+        slots={[]}
+        armedId={armedOrderId}
+        onArm={(slot) => {
+          setArmedOrderId(slot.id);
+          setInteraction((prev) =>
+            reduceInteraction(prev, { type: "enterActionTargeting", actionId: slot.id }, model.phase)
+          );
+        }}
+      />
+        </div>
+      </div>
     </Page>
+
+    {sheetRow?.instanceId ? (
+      <ActorPanel
+        state={
+          uniqueQ.data
+            ? { kind: "ready", data: adaptActor(uniqueQ.data) }
+            : selected?.instanceId === sheetRow.instanceId && uniqueQ.isLoading
+              ? { kind: "loading" }
+              : { kind: "empty" }
+        }
+        open={Boolean(sheetRow)}
+        onOpenChange={(open) => {
+          if (!open) setSheetRow(null);
+        }}
+        role="creature"
+      />
+    ) : null}
 
     {commanderSheetState && commanderListRow && matchCommanderChip ? (
       <ActorPanel

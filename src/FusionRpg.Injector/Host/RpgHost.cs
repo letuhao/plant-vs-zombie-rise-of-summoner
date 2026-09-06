@@ -153,7 +153,7 @@ public static class RpgHost
         FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
             FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
                 // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34). D55 (2026-09-06): v6 -> v7, demonType/aspect/uniqueDemon given real rates {15,15,22} -- v6 stays on disk.
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v7.json"))));
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v8.json"))));
         FusionRpg.Core.Hud.ActorHudTuningHub.Configure(
             FusionRpg.Core.Hud.ActorHudTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-hud.v1.json"))));

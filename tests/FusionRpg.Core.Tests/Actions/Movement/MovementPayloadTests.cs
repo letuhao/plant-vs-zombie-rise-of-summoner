@@ -326,15 +326,17 @@ public class MovementPayloadTests
     // ---- §4 case 4: an inertness test that tells the truth (AC10) ----------------------------
 
     [Fact]
-    public void Inertness_move_range_and_skill_cooldown_effectiveness_movement_have_no_production_reader_today()
+    public void Inertness_skill_cooldown_effectiveness_movement_have_no_production_reader_today_move_range_now_does()
     {
-        // This is deliberately a test that FAILS the day someone wires a reader for one of these three
-        // channels -- forcing this spec (and this module's own report) to be updated rather than a
-        // stale "no reader" claim quietly rotting (AC10, §4 case 4). It reads the registry's own
-        // UnitClassNote, the same field DerivedStatRegistry.cs already documents "No reader:" on.
+        // RENAMED and REWRITTEN, not deleted (matching action-todo.md's own T60.2 precedent for exactly
+        // this shape of change) -- this test was deliberately built to FAIL the day someone wires a
+        // reader for one of these three channels (AC10, §4 case 4), and move.range gaining one
+        // 2026-09-07 (A9 movement-actions, BasicAttack.cs's ApplyBasicAttack) is precisely that event.
+        // The two channels this module still ships no reader for keep the original assertion; move.range
+        // gets the corrected one.
         var registry = Channels();
 
-        AssertNoReader(registry, DerivedStatChannels.MoveRange);
+        AssertHasReader(registry, DerivedStatChannels.MoveRange);
         AssertNoReader(registry, DerivedStatChannels.SkillCooldown(DerivedStatChannels.ActionCategoryMovement));
         AssertNoReader(registry, DerivedStatChannels.SkillEffectiveness(DerivedStatChannels.ActionCategoryMovement));
 
@@ -343,6 +345,14 @@ public class MovementPayloadTests
             Assert.True(registry.TryGet(channel, out var def), $"'{channel}' is not even registered");
             Assert.NotNull(def.UnitClassNote);
             Assert.Contains("No reader", def.UnitClassNote, StringComparison.Ordinal);
+        }
+
+        static void AssertHasReader(DerivedStatRegistry registry, string channel)
+        {
+            Assert.True(registry.TryGet(channel, out var def), $"'{channel}' is not even registered");
+            Assert.NotNull(def.UnitClassNote);
+            Assert.Contains("Reader", def.UnitClassNote, StringComparison.Ordinal);
+            Assert.DoesNotContain("No reader", def.UnitClassNote, StringComparison.Ordinal);
         }
     }
 

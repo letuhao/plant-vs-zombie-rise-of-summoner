@@ -2939,8 +2939,11 @@ tested, and verified for real, not re-deferred.
 
 ## Deferred — specced, not scheduled
 
-- [ ] **A9 movement-actions** — waits on `A10`. One row, no new runtime.
-- [ ] **A10 battle-board** — owner deferral; built with the board map / battle area.
+- [x] **A9 movement-actions** — **BUILT, TESTED, VERIFIED 2026-09-07.** Owner authorized lifting the
+  "not in wave 1" deferral the same day, after the action program's own scope was otherwise complete —
+  see `action-plan.md` §5 for the full record of both A9's and A10's authorization, design, and evidence.
+- [x] **A10 battle-board** — **BUILT, TESTED, VERIFIED 2026-09-07.** Owner-authorized (see A9's own
+  entry, same authorization). Full record: `action-plan.md` §5.
 - [x] **A8's reaction lane** — **CLOSED 2026-08-31 by its own evidence, not by new work.** It said
   it waits on timeline **B6**; B6 shipped 2026-08-28, and B6's own entry records the answer:
   *"`A8 defence-actions` (guard) ended up **not** needing this lane at all; it ships as a stance

@@ -47,6 +47,7 @@ public class LawnDeployRosterSnapshotTests
     {
         var snap = LawnDeployRosterSessionCache.BuildFromSessionCache();
         Assert.Same(LawnDeployRosterSnapshot.Empty, snap);
+        Assert.True(LawnDeployRosterSessionCache.LastBuildWasCacheMiss);
     }
 
     [Fact]
@@ -58,6 +59,20 @@ public class LawnDeployRosterSnapshotTests
         Assert.Equal(2, snap.Eligible.Count);
         Assert.Contains(snap.Eligible, e => e.InstanceId == "a" && e.SpeciesId == "abyssswordstar");
         Assert.Contains(snap.Eligible, e => e.InstanceId == "b" && e.SpeciesId == "legionzombie");
+        Assert.False(LawnDeployRosterSessionCache.LastBuildWasCacheMiss);
+    }
+
+    /// <summary>A real player with zero eligible demons is NOT a cache miss — the flag distinguishes
+    /// "never fetched yet" from "fetched, and it's genuinely empty" (e.g. everything owned is the
+    /// active Patron). Mirrors why the analogous commander-snapshot flag exists.</summary>
+    [Fact]
+    public void Cache_poll_after_apply_with_zero_eligible_is_not_a_cache_miss()
+    {
+        LawnDeployRosterSessionCache.Apply(Array.Empty<LawnDeployRosterEntry>());
+
+        var snap = LawnDeployRosterSessionCache.BuildFromSessionCache();
+        Assert.Empty(snap.Eligible);
+        Assert.False(LawnDeployRosterSessionCache.LastBuildWasCacheMiss);
     }
 
     /// <summary>The active Patron never appears in <see cref="LawnDeployRosterEntry"/> — this is

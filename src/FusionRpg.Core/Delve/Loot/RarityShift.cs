@@ -131,4 +131,66 @@ public static class RarityShift
 
         return new Dictionary<string, DropTableRow>(tables, StringComparer.Ordinal) { [tableId] = patched };
     }
+
+    /// <summary>
+    /// `delve-quests` D4.12 (spec-delve-quests.md §4 step 3, verbatim: *"`ceilRung` zeroes every rung
+    /// above it in `RarityWeightShift` — 'row kept, never drawn'"*). Distinct in kind from
+    /// <see cref="ToWeightShift"/>: a ceiling never redistributes weight — the quest reward's own spec
+    /// text makes no "sums to zero" claim the way the floor-and-shift's does — it only deletes the top
+    /// end, so the delta needed is simply enough to zero each rung above the ceiling outright
+    /// (<c>-w(o)</c>), and nothing at or below it.
+    /// </summary>
+    public static IReadOnlyDictionary<int, int> ToCeilingShift(IReadOnlyList<RarityRung> ladder, string ceilRung)
+    {
+        if (ladder is null) throw new ArgumentNullException(nameof(ladder));
+        if (ladder.Count == 0) throw new ArgumentException("ladder must not be empty", nameof(ladder));
+        if (ceilRung is null) throw new ArgumentNullException(nameof(ceilRung));
+
+        var ceilOrdinal = RarityDraw.OrdinalOf(ladder, ceilRung);
+        var delta = new Dictionary<int, int>();
+        foreach (var rung in ladder)
+            delta[rung.Ordinal] = rung.Ordinal > ceilOrdinal ? checked(-rung.DropWeightPer100k) : 0;
+        return delta;
+    }
+
+    /// <summary>
+    /// `delve-quests` D4.12: the quest-reward WINDOW composer — a floor and a ceiling, never a shift.
+    /// A quest's own <c>QuestRewardWindow</c> carries no `shiftRungs` at all (unlike a room, which
+    /// always has a rung's own shift to fold in via <see cref="Apply"/>) — the two functions patch the
+    /// same two fields on the same table shape, but never the same axis, so this is a genuinely
+    /// separate composer rather than a special case of <see cref="Apply"/>. Patches the ONE table at
+    /// <paramref name="tableId"/> exactly like <see cref="Apply"/> does — every other table in
+    /// <paramref name="tables"/>, and every other entry's own <see cref="DropTableEntryRow.RarityFloor"/>
+    /// source, untouched.
+    /// </summary>
+    /// <param name="composedFloorRung">Already the strongest of every floor source the caller holds
+    /// (<see cref="ComposeFloor"/>) — folded here with each entry's OWN authored floor, never
+    /// overriding it.</param>
+    public static IReadOnlyDictionary<string, DropTableRow> ApplyWindow(
+        IReadOnlyDictionary<string, DropTableRow> tables, IReadOnlyList<RarityRung> ladder,
+        string tableId, string? composedFloorRung, string ceilRung)
+    {
+        if (tables is null) throw new ArgumentNullException(nameof(tables));
+        if (ladder is null) throw new ArgumentNullException(nameof(ladder));
+        if (tableId is null) throw new ArgumentNullException(nameof(tableId));
+        if (ceilRung is null) throw new ArgumentNullException(nameof(ceilRung));
+
+        if (!tables.TryGetValue(tableId, out var table))
+            return tables;
+
+        var ceilingShift = ToCeilingShift(ladder, ceilRung);
+        var patched = table with
+        {
+            Groups = table.Groups.Select(g => g with
+            {
+                Entries = g.Entries.Select(e => e with
+                {
+                    RarityFloor = ComposeFloor(ladder, e.RarityFloor, composedFloorRung),
+                    RarityWeightShift = ceilingShift,
+                }).ToList(),
+            }).ToList(),
+        };
+
+        return new Dictionary<string, DropTableRow>(tables, StringComparer.Ordinal) { [tableId] = patched };
+    }
 }

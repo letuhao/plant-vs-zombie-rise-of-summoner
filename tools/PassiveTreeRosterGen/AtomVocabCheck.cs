@@ -8,7 +8,7 @@ public sealed record AtomVocabMirror(
     IReadOnlyList<(string Id, bool Authorable)> Triggers);
 
 /// <summary>
-/// Whether `data/seed/atoms/vocabulary.json` still agrees with the shipped
+/// Whether `data/seed/passive-tree/vocabulary.json` still agrees with the shipped
 /// <see cref="AttachPoint"/> enum, <see cref="AtomKindRegistry"/> and <see cref="AtomTriggers"/>
 /// (task A3) — 7 attach points, 16 kinds, 13 triggers (11 authorable — `OnGranted`/`OnRemoved` are
 /// runtime lifecycle states, never authorable, per `AtomTriggers.Lifecycle`'s own doc comment).

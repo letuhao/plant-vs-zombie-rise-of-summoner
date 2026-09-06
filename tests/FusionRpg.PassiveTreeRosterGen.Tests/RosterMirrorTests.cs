@@ -153,7 +153,7 @@ public class AtomVocabCheckTests
     [Fact]
     public void The_real_shipped_mirror_file_agrees_with_the_live_registries()
     {
-        var path = LiveSeedPath("atoms", "vocabulary.json");
+        var path = LiveSeedPath("passive-tree", "vocabulary.json");
         if (!File.Exists(path)) return;
         using var doc = System.Text.Json.JsonDocument.Parse(File.ReadAllText(path));
         var attachPoints = doc.RootElement.GetProperty("attachPoints").EnumerateArray()

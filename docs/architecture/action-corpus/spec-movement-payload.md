@@ -49,7 +49,7 @@ standalone payload.
 
 | Thing | Evidence |
 |---|---|
-| **`move.range` has no production reader.** It is registered and reserved, and nothing consumes it | `DerivedStatRegistry.cs:237` (registration) and `Balance/Guards/DominanceGuard.cs:103` (reserved list) are its only two mentions outside the constant itself |
+| **CLOSED 2026-09-07 (action program, A9 `movement-actions`): `move.range` now has a real production reader.** `BasicAttack.cs`'s `ApplyBasicAttack` reads it directly to bound how many cells a `Category = Movement` action moves an actor toward the nearest living enemy — `DerivedStatRegistry.cs`'s own `UnitClassNote` and `data/seed/derived-stats/catalog.json`'s citation were both updated the same day. `DominanceGuard.cs:103`'s reserved-list entry is UNCHANGED and correctly so — that list scopes the offline closed-form balance predictor, a different question from whether the real battle engine reads the channel | `BasicAttack.cs:282` (reader); `DerivedStatRegistry.cs` (updated `UnitClassNote`); `scripts/audit-reader-census.py` (re-run 2026-09-07, confirms `READER (direct)`) |
 | **`skill.cooldown.*` / `skill.effectiveness.*` have no production reader either** — registration plus the same reserved list | `DerivedStatRegistry.cs:177-180`; `DominanceGuard.cs:118-119`; no cooldown resolver reads them (`src/FusionRpg.Core/Actions/Duration/` contains no reference) |
 | `Instantiator.TryInstantiate` — doc-comment references only, no production caller | `Instantiator.cs:92`; `InstanceProducer.cs:22`, `Resolver.cs:28`, `RpgStore.AtomInstances.cs:104` |
 | `OnActivate` is authorable but raised nowhere in the injector | `decisions.md:97` (amended 2026-09-03); `effect-atom-map.md:337` (E33) |
@@ -227,17 +227,25 @@ the Unity CC executor for status, FA10 Add for HP. A movement payload needs **no
    `freeze` row, and the seeded default is exactly the **13** non-`UnityCc` ids of
    `StatusCatalogBootstrap.cs:16-58`. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** —
    §2's `statuses` note derives it from `HasStandalonePayload`'s no-board rule.
-5c. **This module ships no channel reader.** `move.range`, `skill.cooldown.*` and
-   `skill.effectiveness.*` stay declared-and-inert, and the payload paths that carry real effect today
-   are the status paths. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** — §6 hazard 1.
-   AC10's report is what keeps that honest, and §4's inertness test is what makes it expire.
+5c. **This module ships no channel reader — still true, and still not this module's job.** ⛔
+   **UPDATED 2026-09-07**: `move.range` gained a real reader from a DIFFERENT program (action, A9
+   `movement-actions`, `BasicAttack.cs`'s `ApplyBasicAttack`) — this module still shipped none itself,
+   exactly as decided. `skill.cooldown.*`/`skill.effectiveness.*` remain declared-and-inert; the payload
+   paths that carry real effect today are the status paths plus, now, `move.range` via the sibling
+   program. ⛔ **DECIDED 2026-09-03 (owner removed themselves as a gate)** — §6 hazard 1.
+   AC10's report is what keeps that honest, and §4's inertness test is what makes it expire — it did,
+   for `move.range`, on 2026-09-07 (`MovementPayloadTests.cs`, renamed and rewritten, not deleted).
 6. `ActionValidator` rejects a `category = Movement` action for which `HasStandalonePayload` is false, and
    the rejection names the action id and the reason.
 7. A movement action with a legal payload validates and compiles with `boardAvailable = false`.
 8. No code path in this module assigns any Unity field; `guard-single-writer.ps1` stays green.
 9. The full test module passes with the transport stubbed to raise.
-10. The module's own report states, in plain words, that `move.range`, `skill.cooldown.*` and
-    `skill.effectiveness.*` currently have no production reader — no acceptance claim implies otherwise.
+10. The module's own report states, in plain words, that `skill.cooldown.*` and `skill.effectiveness.*`
+    currently have no production reader — no acceptance claim implies otherwise. ⛔ **UPDATED
+    2026-09-07**: `move.range` is removed from this criterion's list — it gained a real reader from
+    the action program's own A9 `movement-actions` (`BasicAttack.cs:282`), a different program than
+    this one, so this criterion's own scope (what THIS module ships) is unaffected; only the channel's
+    real-world status changed.
 
 ## 6. Dependencies and cross-program hazards
 
@@ -252,17 +260,26 @@ the Unity CC executor for status, FA10 Add for HP. A movement payload needs **no
 
 **Hazards.**
 
-1. **Three registered channels with no reader.** A movement payload written entirely in `move.range` is
-   inert today. The honest framing is a **wiring gap with three named lines**.
+1. **Two registered channels with no reader, one that gained one.** ⛔ **UPDATED 2026-09-07**: `move.range`
+   gained a real reader — `BasicAttack.cs`'s `ApplyBasicAttack` (action program, A9 `movement-actions`),
+   NOT this module, exactly as the decision below already anticipated ("reversible in the right
+   direction... adding a reader later... changes no tuning file, no policy signature and no seed"). A
+   movement payload written entirely in `skill.cooldown.movement`/`skill.effectiveness.movement` is
+   still inert today; one written in `move.range` is not, as long as that payload's magnitude is meant
+   to change how far the actor moves rather than something a status/buff already carries.
 
    **⛔ DECIDED 2026-09-03 (owner removed themselves as a gate) — A-M1 ships payloads over paths that
    already have consumers, and ships NO reader.** The hazard said *"the plan should decide"*; nothing
-   downstream of it did, and an undecided hazard is an unbuildable module.
+   downstream of it did, and an undecided hazard is an unbuildable module. Still true after the
+   2026-09-07 update: A-M1 itself shipped no reader for any of the three; move.range's came from a
+   sibling program reading a channel this module merely publishes.
 
-   **Verified 2026-09-03, the state that forces the choice:** `move.range`, `skill.cooldown.*` and
-   `skill.effectiveness.*` are registered and have **zero production readers** — their only mentions
-   outside the constants are the registrations (`DerivedStatRegistry.cs:237`, `:177-180`) and
-   `DominanceGuard`'s reserved list (`:103`, `:118-119`).
+   **Verified 2026-09-03, updated 2026-09-07:** `skill.cooldown.*` and `skill.effectiveness.*` remain
+   registered with **zero production readers** (`DerivedStatRegistry.cs:177-180`; `DominanceGuard`'s
+   reserved list `:118-119`). `move.range` (`DerivedStatRegistry.cs:237`) now has one
+   (`BasicAttack.cs:282`); `DominanceGuard.cs:103`'s reserved-list entry for it is unchanged and
+   correctly so — that list scopes the offline closed-form balance predictor, a different question from
+   whether the real battle engine reads the channel.
 
    **Why not ship a reader here:**
 

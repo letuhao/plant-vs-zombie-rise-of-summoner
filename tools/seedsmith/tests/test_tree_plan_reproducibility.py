@@ -55,7 +55,7 @@ _MIRROR_RELATIVE_PATHS = (
     Path("aptitudes") / "roster.json",
     Path("elements") / "roster.json",
     Path("statuses") / "roster.json",
-    Path("atoms") / "vocabulary.json",
+    Path("passive-tree") / "vocabulary.json",
     Path("derived-stats") / "catalog.json",
     Path("passive-tree") / "gate-evidence.v1.json",
 )
@@ -304,7 +304,7 @@ class ManifestTests(unittest.TestCase):
         first entry names a real path (not just "something changed")."""
         plan_emit.emit_manifest([self.spec], self.tuning, seed_root=self.seed_root, tuning_root=self.tuning_root)
 
-        vocab_path = self.seed_root / "atoms" / "vocabulary.json"
+        vocab_path = self.seed_root / "passive-tree" / "vocabulary.json"
         doc = json.loads(vocab_path.read_text(encoding="utf-8"))
         original = doc["attachPoints"][0]
         self.assertNotIn(original[:-1] + "s", doc["attachPoints"])  # the flip must be a real change

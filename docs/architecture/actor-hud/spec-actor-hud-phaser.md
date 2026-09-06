@@ -79,7 +79,7 @@ Called from occupant sync after position update, alongside existing `setHpDispla
 | `identity.levelBand` | `levelBadge` Text | mono font, small |
 | `identity.role` | `rolePip` Text/icon | demon vs vanilla |
 | `resources.shield.stacks` | `shieldBar` rectangles | element colors |
-| `statuses[]` | `statusToken_*` Text | 2-letter tokens |
+| `statuses[]` | `statusToken_*` Text/icon | Catalog `hudToken` + `color` (ideal §4.1); never id-slice |
 | `overflow.statusCount` | `overflowPip` Text | `+N` |
 
 Named children for test hooks: `hudIdentity`, `hudShield`, `hudStatus0`, `hudOverflow`.
@@ -99,6 +99,8 @@ Use same cap as tunable `statusStripMax` (passed via model or constant from shar
 - No Unity/injector code.
 - Do not duplicate fold logic — if `hud` missing, fold bug not phaser workaround.
 - No raw channel ids in player-visible text (GG-23).
+- Status glyphs from catalog resolve (H2); no `StatusInitials` / hash RGB as SSOT (H3 deletes).
+- Full Band B chrome on **topmost** stack occupant only — under-stack unique pip is lawn cell-stack.
 
 ---
 

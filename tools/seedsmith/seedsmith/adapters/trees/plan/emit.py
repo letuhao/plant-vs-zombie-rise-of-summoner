@@ -446,7 +446,7 @@ _MANIFEST_INPUT_FILES: "tuple[tuple[str, ...], ...]" = (
     ("aptitudes", "roster.json"),
     ("elements", "roster.json"),
     ("statuses", "roster.json"),
-    ("atoms", "vocabulary.json"),
+    ("passive-tree", "vocabulary.json"),
     ("derived-stats", "catalog.json"),
     ("demons", "_registry", "families.v1.json"),  # optional — F=0 is a declared `_pending`, not a refusal
     ("passive-tree", "gate-evidence.v1.json"),     # task C2's own new input (R-G1's evidence row)

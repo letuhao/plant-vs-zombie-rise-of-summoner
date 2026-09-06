@@ -64,15 +64,62 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
   - **What actually landed:** D1.6–D1.9/D1.11 (schemas, ownership, audit, adapter registration, derived ordering,
     planner cells/id-minting, canonical emit, byte-identical rerun, staleness, the offline guarantee) are built and
     tested — 47 new passing tests, full seedsmith suite green (1747 total). **`pipelines.py` itself is not built.**
-    It needs a dungeon motif registry that does not exist yet (no `data/seed/dungeon/_registry/motifs*.json` is
-    committed) and real prompt content per field — both are a content-authoring pass, not missing infrastructure:
-    the permutation/vote/checkpoint mechanics it would use (`seedsmith/pipeline/`, `planner/feasibility.py`,
-    `planner/demand.py`) already exist generically and are proven to work for the sibling adapters. Consequence:
-    no dungeon seed content has been generated. Downstream C# modules (`delve-graph-roll`, `encounter-generator`,
-    `event-deck`, `delve-quests`, `domain-catalog`) will read hand-authored fixture content matching the
-    now-verified schema instead, exactly as their own specs already do for tests ("tests construct inline").
-    Follow-up: author the motif registry, write the prompts, build `pipelines.py` + `briefs.py` on top of the
-    proven planner/emit/provenance layer, then run a real first-ship content pass.
+    Consequence: no dungeon seed content has been generated. Downstream C# modules (`delve-graph-roll`,
+    `encounter-generator`, `event-deck`, `delve-quests`, `domain-catalog`) will read hand-authored fixture content
+    matching the now-verified schema instead, exactly as their own specs already do for tests ("tests construct
+    inline").
+  - **Correction, 2026-09-07 — the "motif registry does not exist" half of this finding was wrong, found by
+    reading the ideal doc and the seed contract's own field table together rather than trusting the earlier
+    grep-for-a-dungeon-path-only search.** `spec-dungeon-seed-contract.md:44` names the domain's own `theme`
+    field's vocabulary explicitly: `` `themes.v1.json` (84 rows) ``. `party-dungeon-ideal.md:838` independently
+    names the SAME source: *"the frozen theme registry under `data/seed/demons/_registry/`."* `data/seed/demons/
+    _registry/themes.v1.json` **exists, is already shipped by the demon-seed program, and has exactly 84 top-level
+    entries** (counted directly, not estimated) — a species-keyed flavor-motif registry (`demon.bucketnutzombie`:
+    motifs `铁头功`/`僵尸`, anti-motifs `屋顶`/`植物`/…), plus a sibling `motifs.v1.json` (135 flat motifs, the
+    union). `spec-dungeon-seed-contract.md:143` lists `themes/motifs/families` among the adapter's own **frozen
+    inputs** — a cross-corpus vocabulary the dungeon adapter reads, never a corpus it authors, the SAME shape
+    `dropBand` already has crossing from the item registry into `dungeon-loot` (D3.1's own citation). **This
+    means D1.10 does not need a content-design pass to invent a motif vocabulary — it needs a small, mechanical
+    registries.py extension reading an already-reviewed, already-committed 84-row file**, not a multi-session
+    authoring undertaking. `tools/seedsmith/seedsmith/adapters/items/registries.py:33-55`'s own
+    `load_theme_keys()` is the direct precedent for exactly this cross-program read (reads the SAME demon theme
+    concept as a frozen vocabulary for the ITEMS adapter, ids prefixed `demon.*`, collision-free with the items
+    corpus's own legacy `theme.*` ids by construction).
+  - **A real, small, genuinely open question this correction surfaces, not silently resolved either way:**
+    `docs/architecture/seedsmith/spec-demon-themes.md`'s own §7 Boundaries table marks **"Ask first: … any
+    second file outside `adapters/demons/`"** — today exactly one file outside that adapter reads this registry
+    (`adapters/items/registries.py`, the ONE exception §8's own success criterion #5 names by count). Wiring
+    `adapters/dungeon/registries.py` as a SECOND reader is the identical "vocabulary addition, not a concept
+    leak" shape `spec-demon-themes.md` itself already blesses for items — and `spec-dungeon-seed-contract.md`'s
+    own approved text already assumes it happens — but it is a propagation that was never actually made
+    (`party-dungeon-map.md`'s own "Propagations owed" list, checked directly, does not name `spec-demon-themes.md`
+    anywhere) and it does cross another program's own explicitly-written boundary, however low-risk the actual
+    change (a JSON read, reversible, no content committed by reading it). Recorded here rather than silently
+    built past or silently deferred; the low-risk, spec-consistent default is to proceed as the second reader,
+    matching the items precedent exactly, and to add the missed propagation line to `party-dungeon-map.md` and
+    `spec-demon-themes.md` §7 once built.
+  - **Built, 2026-09-07 — the registries.py extension above, done and tested (the schema-side half of D1.10's
+    real remaining scope, `pipelines.py`/`briefs.py` themselves still not built):** `adapters/dungeon/
+    registries.py` gains `DEMONS_REGISTRY_DIR`, `load_themes()`/`load_theme_ids()`/`load_motifs()` (mirroring
+    `adapters/items/registries.py:33-55`'s own `load_theme_keys()` precedent exactly — a second, explicitly-named
+    reader, never a second publisher: no row is ever written back) and two new tracked keys in `load_versions()`
+    (`demons.themes`/`demons.motifs`, so a version bump on the demon side is named in provenance/`stale_ids()`
+    rather than silently invisible to dungeon content). `schema.py`'s `_dungeon_registries()` gains `"theme"`;
+    `build_domain_schema`'s own `theme` enum now defaults to the real 84-id vocabulary instead of the single
+    placeholder `"theme.example"` it shipped with. Verified end to end with a real smoke test (84 themes load,
+    135 motifs load, the domain schema's own `theme` enum genuinely has 84 members). 8 new tests (`ThemeTests`/
+    `MotifTests` in `test_dungeon_registries.py`) plus 2 real, expected count-drift fixes (`load_versions()` 9 →
+    11 keys, `DungeonAdapter().registries()` same count) — both named with the real delta, not silently bumped.
+    Full seedsmith suite: dungeon-specific tests 74/74 green in isolation; the full suite's own 13 failures are
+    the SAME already-documented, unrelated concurrent-session `data/seed/atoms/vocabulary.json` drift (confirmed
+    `D`-deleted via `git status`, none touching a dungeon file), zero new failures.
+  - Files (this update): `tools/seedsmith/seedsmith/adapters/dungeon/{registries,schema}.py`,
+    `tools/seedsmith/tests/{test_dungeon_registries,test_dungeon_contract}.py`.
+  - Real remaining scope for D1.10 itself, unchanged in kind, smaller in size now that the vocabulary question
+    is settled: build `pipelines.py` + `briefs.py` (the actual permute/vote/self-heal AI-pipeline machinery,
+    mirroring `adapters/items/uniques/{briefs,pipelines}.py`'s own proven D4.29 shape) on top of the now-real
+    theme/motif input, then run a real first-ship content pass for quest/event/encounter/room/domain, in the
+    seed contract's own layer order.
 - [x] **D1.11** Provenance, `stale_ids` and the byte-identical rerun
   - Acceptance: every emitted anchor carries `{planHash, briefHash, promptVersions, registryVersions, motifSubsetHash}`; `stale_ids()` names what a registry bump invalidates; a rerun with the same inputs is byte-identical, proven by hash; `--dry-run` prints the call budget before any run
   - Verify: `test_dungeon_idempotency.py`, `test_dungeon_budget.py`
@@ -766,16 +813,49 @@ task below names the members it adds so the seams stay clean.
   - **Honestly NOT built**: actually rolling the reward (the "rewarded once, at `CloseDelve(Extracted)`, through `LootPipeline`... banked at the close, never through a pack" half) needs `RollRoom`/`Apply` to exist first — this is D4.14's own store-wiring job layered on top of the SAME upstream gap, not something `QuestReward.Request` itself can complete. "The rungs above zeroed" (the ceil half of the window) is similarly deferred — `QuestRewardWindow.CeilRung` is the correct INPUT that step will need, not yet applied to anything.
   - Verify: `tests/FusionRpg.Core.Tests/Delve/Quests/QuestRewardTests.cs`, 8 tests — **the literal "a reward golden"**: an exact `LootSourceRow`/correlation-id/composed-floor/ceil-rung golden for a known quest+domain+theta; floor composition taking the stronger of two floor sources; the domain's own `cache` binding read, never another kind's table (`fight`'s own table proven distinct and unused); `thetaRun` genuinely read, not hardcoded; refusals on a missing `cache` binding and an unknown `rewardBand`; null-argument guards; and **the literal "a test that no quest grants an unlock"** — a reflection check that `QuestRewardRequest`/`QuestRewardWindow`/`LootSourceRow` carry no field whose name contains "unlock"/"gate"/"door", the load-bearing form of spec §6's "a quest's only outputs are a `QuestVerdict` and, at extraction, one `LootRequest`." Mutation-tested the `cache`-binding lookup (swapped to `fight`) and the floor-composition call (dropped the quest's own `window.FloorRung` argument): both caught independently (isolated one at a time after the first masked the second on the same golden test), confirmed via `cp`/`diff` byte-identical restore, green again after. `dotnet test --filter "Delve.Quests"` → 66/66 green. `audit-magic-numbers.py --summary` unchanged at 15.
   - Files: `src/FusionRpg.Core/Delve/Quests/QuestReward.cs`, `tests/FusionRpg.Core.Tests/Delve/Quests/QuestRewardTests.cs`
-  - **Dated update, 2026-09-07 — re-verified against real code, not re-guessed:** this task's own "genuinely
-    blocked" finding above cites `DelveLoot.RollRoom` and `RarityShift.Apply` as absent from the tree —
-    confirmed by grep that **both now exist** (`DelveLoot.cs:76`, `RarityShift.cs:107`), shipped when D3.11/
-    D3.14 were resumed and closed later the same day this entry was written. The claim was accurate when
-    made; it was never revisited afterward. **Not yet re-verified whether this unblocks the reward-rolling
-    half** (calling a `RollRoom`-shaped orchestration from `CloseDelve(Extracted)`, banked never through a
-    pack) — `RarityShift.Apply` only composes a **floor**-and-shift; the ceiling half this task's own
-    `QuestRewardWindow.CeilRung` needs (zeroing every rung *above* it) is a different shape nothing has
-    built yet, so this is a narrowed gap, not a cleared one. Worth a dedicated re-attempt before assuming it
-    still needs `domain-catalog` content, which is a separate, larger blocker this task never actually had.
+  - **Dated update, 2026-09-07 — re-attempted for real, not just re-verified.** The original "genuinely
+    blocked" finding above cited `DelveLoot.RollRoom`/`RarityShift.Apply` as absent from the tree — both
+    now exist (shipped when D3.11/D3.14 were resumed and closed later the same day this entry was
+    written, never revisited afterward). Confirmed the claim was accurate when made and simply went
+    stale, then closed two of this task's own three remaining pieces:
+    - **"The rungs above zeroed"** — built `RarityShift.ToCeilingShift`/`.ApplyWindow`
+      (`RarityShift.cs`): a ceiling is a genuinely different operation from `Apply`'s own rung/room-kind
+      SHIFT (spec, verbatim: *"ceilRung zeroes every rung above it in RarityWeightShift — row kept,
+      never drawn"*) — it deletes the top end outright rather than redistributing it, so it needed its
+      own function, not a variant call to `ToWeightShift`. 20 new tests in `RarityShiftTests.cs`
+      (28 → 48), mutation-tested (the `>` vs `>=` boundary at the ceiling rung itself — caught by name,
+      `cp`-restored byte-identical, confirmed against a real concurrent-session mid-write compile break
+      in `BasicAttack.cs` worked around non-destructively the same way, restored byte-identical after).
+    - **"Rolled through `LootPipeline`"** — built `DelveLoot.RollQuestReward` (`DelveLoot.cs`), mirroring
+      `RollRoom`'s own orchestration on the reserved `dungeon:loot:quest:{questId}` stream (never a
+      room's `{r}:{c}` root) and composing the window via `ApplyWindow`, never `Apply`. 9 new tests in a
+      new `DelveLootRollQuestRewardTests.cs`, using the REAL shipped ladder (a hand-built one throws —
+      `RarityDraw.Draw`'s pity mechanism unconditionally reads `sunwoven`) — including a 60-seed sweep
+      proving no drawn grant is ever above the window's own ceiling, the load-bearing property.
+    - **Still genuinely not built, and now precisely named rather than vaguely "blocked on content":**
+      "rewarded once, at `CloseDelve(Extracted)`... banked, never through a pack." Traced the real
+      banking path a NORMAL (non-delve) drop already uses (`RpgStore.Loot.cs`'s own `PersistLoot`, zero
+      production callers, exercised only by `ItemEquipEndpointsTests.cs`-style tests): `SaveInstance` →
+      `AcquireItem` → `PersistLoot`, three calls, each self-locking its own transaction today. Confirmed
+      via `RpgStore.Delve.cs:786`'s own existing comment (`ApplyPackSettlementUnlocked`'s doc, D3.22) that
+      this codebase's own established fix for exactly this shape is inlining the equivalent SQL as an
+      `Unlocked` variant composable on `CloseDelve`'s own transaction (the same reason `AwardSouls`
+      cannot be called from inside `CloseDelve` either) — so the real remaining piece is extracting a
+      `PersistLootUnlocked` (mirroring D2.23's own `ApplyContractResultsUnlocked` extraction precedent)
+      plus `Unlocked` siblings for `SaveInstance`/`AcquireItem`, then wiring `CloseDelve` to roll+bank
+      each `Done`-verdict quest reward. Not attempted here — a real, separate, now well-understood
+      Data-layer task (touching `RpgStore.AtomInstances.cs`/`RpgStore.Items.cs`/`RpgStore.Loot.cs`), not
+      a five-minute finish, and it still needs a real `DelveReport` assembled from live store rows (rooms/
+      decisions/events) to evaluate a REAL quest verdict — nothing has built that assembler either.
+    - Verified clean: `RarityShift|DelveLootRollQuestReward` filter 49/49; `audit-magic-numbers.py
+      --summary` unchanged at 14 (0 in either touched file); `audit-overflow.py` unchanged at 64/0-critical
+      (0 in either touched file). A full-suite sweep was blocked mid-pass by a concurrent session's own
+      in-progress edit to `src/FusionRpg.Core/Actions/BasicAttack.cs` (confirmed via `git status` as `M`,
+      not mine), worked around non-destructively for the targeted filter above (swapped in the committed
+      version, verified, restored the in-progress version byte-identical via `diff`); once that edit
+      landed on its own moments later, a real `Delve|Items` sweep ran clean: **2413/2413, zero failures**.
+    - Files (this update): `src/FusionRpg.Core/Delve/Loot/{RarityShift,DelveLoot}.cs`,
+      `tests/FusionRpg.Core.Tests/Delve/Loot/{RarityShiftTests.cs,DelveLootRollQuestRewardTests.cs (new)}`.
 - [ ] **D4.13** Preflight, coverage and refusals — **PARTIALLY BUILT 2026-09-06 (`QuestRefusal` full; three of `QuestPreflight`'s own row/pool checks buildable without `domain-catalog` are built and tested; the full `Run(corpus, domains, layouts, tuning)` 256-seed sweep and the live `QuestCoverage.Report` measurement both need `domain-catalog`'s own types, D4.15+, genuinely unbuilt — named, not silently skipped)**
   - Read first: `spec-delve-quests.md` §8 and the Testing strategy's "Metrics (G4 input)" paragraph in full. Confirmed via grep that `domain-catalog`'s own `DomainAnchor`/`LayoutTemplate`/corpus types do not exist anywhere in the tree — `QuestPreflight.Run`'s own full signature and the 256-seed satisfiability sweep both need them, so neither is buildable this task; this is a real, later-module dependency (D4.15+), not a gap in THIS task's own work. Noticed §8's own bulleted refusal list substantially OVERLAPS `QuestCatalog.Load`'s own already-shipped validation (D4.9): "a template not in the registry," "a `targetRef` mismatching `targetKind`," "a `countBand`... not `none`," and "a tree failing `TryCompile`" are ALL already refused by `Load` itself — re-checking them in `QuestPreflight` would be a second check for the same defect, so this task builds only the THREE checks `Load` structurally cannot make: a raw predicate-tree leaf scan (`RoomKindIs boss`), a cross-field floor/ceil ordinal compare, and a pool-wide non-sink-anchor count.
   - Built: `src/FusionRpg.Core/Delve/Quests/QuestRefusal.cs` — the exception type spec §8 names throughout ("every refusal is a thrown `QuestRefusal` naming domain, quest and rule"), matching `EncounterRefusal`'s own established "one exception type per module" shape. `src/FusionRpg.Core/Delve/Quests/QuestPreflight.cs` — `TreeUsesLeaf` (a plain recursive And/Or/Not/Leaf walk, deliberately taking a caller-supplied `Func<PredicateNode.Leaf,bool>` rather than guessing at `RoomKindIs`'s own compiled integer encoding of "boss"); `CheckNoRoomKindIsBoss`/`CheckFloorNotAboveCeil`/`CheckEnoughNonSinkAnchors`, each throwing the real `QuestRefusal` with its own named rule id. `src/FusionRpg.Core/Delve/Quests/QuestCoverage.cs` — `WithinRegressionBand(completionMilli, minMilli, maxMilli)`, the ONE pure, already-testable claim the acceptance line makes directly ("a regression band, never a target" — a two-sided inclusive range, flagging drift in EITHER direction, not just a floor).

@@ -189,8 +189,10 @@ resolver never sees a specimen level or a mastery count. A tree whose gate quant
 yet is not blocked here either: it resolves to zero aptitude points, which resolves to tier 0, which
 resolves to no contribution. **Inert, not broken.**
 
-**"Inert" was the state 27 of the 39 shared trees would have resolved in** — 6 elemental and 21
-status, 1,080 of the 1,560 shared nodes (ideal §13.4), while their gate quantity had no counter.
+**"Inert" was the state 27 of the 39 shared trees would have resolved in** (D51, 2026-09-06: 24
+statuses not 21, corpus later grew to 30 of 42 trees / 1,200 of 1,680 shared nodes — the counts below
+are as they stood the day this was written) — 6 elemental and 21 status, 1,080 of the 1,560 shared
+nodes (ideal §13.4), while their gate quantity had no counter.
 ~~A permanently-tier-0 tree~~ **A tier-0 tree became a sequencing state, not a permanent one
 (D37):** [`gate-counters`](spec-gate-counters.md) shipped those counters in wave 0 (carrier on both
 `elementMastery`/`statusApplied`, live-probed 2026-09-06, task G6), so **all 42 trees are reachable
@@ -653,7 +655,7 @@ D21 gives every actor its own state, so the memo is not optional.
 | 4 | `Cross_unlock_cannot_compound_across_k_trees` | A four-of-one-stance build's total credit is bounded by its own largest tree |
 | 5 | `A_tree_with_no_stance_group_gets_no_credit` | Element/status trees resolve with `credit = 0` |
 | 6 | `F_never_exceeds_Fmax_at_any_resource_level` | Swept over degenerate shapes at four magnitudes of nodes and souls. §5.1's proof, made executable |
-| 6a | `F_is_bounded_by_one_below_and_Fmax_above_for_every_share_vector` | **Both** bounds, over generated vectors — 1 tree, 39 trees, one-hot, uniform, and long-tailed. Test 6 asserts only the ceiling; §5.1's proof is two-sided and a floor breach is the one that would silently *shrink* a build |
+| 6a | `F_is_bounded_by_one_below_and_Fmax_above_for_every_share_vector` | **Both** bounds, over generated vectors — 1 tree, 42 trees (D51, 2026-09-06: 24 statuses not 21, was 39), one-hot, uniform, and long-tailed. Test 6 asserts only the ceiling; §5.1's proof is two-sided and a floor breach is the one that would silently *shrink* a build |
 | 6b | `H_stays_within_zero_and_one_and_reads_zero_when_empty` | The Herfindahl bound the `F` proof rests on, asserted on `H_nodes`, `H_souls` and the blend separately — so a broken term cannot hide inside a blend that still lands in range |
 | 6c | `H_is_identical_for_two_shuffled_purchase_orders` | The same final node set, bought in reverse order under D25's rising price, produces a byte-identical `H`. §5.1's correction, and the property that makes `F` a build's value rather than a route's |
 | 7 | `Empty_allocation_reads_H_zero_and_F_one` | Never `1/n`. `AptitudeAllocation.cs:19-22`'s rule, applied here |
@@ -800,7 +802,7 @@ cheaper to answer once the harness can measure it.
 | **D33** squad scope | Not this module's to answer; every number it reads is a tunable the harness can move |
 | **D34** `skillPointsPerTheta` becomes per-scope | It prices the **purchase wallet** in `tree-state`. This module never reads it, because the gate is aptitude points (§3.3) |
 | **D36** the D25 curve is specified | Its `ssot-power-scale.md` row is `tree-state`'s to add, not this module's |
-| **D37** the two missing gate quantities get `gate-counters` | §3.3 — a tree whose counter has not shipped resolves inert and **says which kind of zero it is**; the wait is now bounded and owned, and all 39 trees are reachable |
+| **D37** the two missing gate quantities get `gate-counters` | §3.3 — a tree whose counter has not shipped resolves inert and **says which kind of zero it is**; the wait is now bounded and owned, and all 42 trees are reachable (D51, 2026-09-06: 24 statuses not 21, was 39) |
 | **D39** `H` reads the final allocation, self-spent only | §5.1 — the build you hold, not the route you took, so two players following one guide get the same `F`. §5.2 parks the F4 breadth exploit with a stated revisit trigger, which closes §15.1 |
 | **D40** all three exclusion forms kept; nullification printed loudly | §13 and test 17 — a nullified node is **inert, not unlocked**: it contributes zero, both sides print the rule, and the winner is named. The forms are `tree-language`'s to author; this module only stops the contribution |
 | **PS-3** contests read `Θ`, magnitudes read `P(Θ)` | §6.1, line by line |

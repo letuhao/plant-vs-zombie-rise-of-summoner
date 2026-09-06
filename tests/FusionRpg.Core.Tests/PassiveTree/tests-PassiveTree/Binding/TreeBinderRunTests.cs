@@ -126,7 +126,7 @@ public class TreeBinderRunTests
         Assert.Equal("skill.might-off-t7-b3", refusal.NodeId);
         Assert.Equal(64L, refusal.UnspentBudgetShareMilli);
         Assert.False(refusal.DeliberateHole);
-        Assert.Contains("17th atom kind", refusal.Reason);
+        Assert.Contains("18th atom kind", refusal.Reason);
         Assert.Equal(64L, report.TotalUnspentBudgetShareMilli);
 
         // §7.2 item 3: FAIL, never a silent partial success.

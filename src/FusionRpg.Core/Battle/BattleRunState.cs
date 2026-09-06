@@ -1,5 +1,6 @@
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Cost;
+using FusionRpg.Core.Actions.Movement;
 using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Combat;
@@ -613,6 +614,34 @@ public static partial class BattleEngine
         public GridPos? PositionOf(string actorKey) =>
             _board is null ? null : _board.Positions.TryGetValue(actorKey, out var p) ? p : null;
 
+        /// <summary>
+        /// A9 `movement-actions` (spec-movement-actions.md §3): resolves `AnchorSource.ChosenCell` as
+        /// "move toward the nearest living enemy" (owner-confirmed 2026-09-07 -- no spec anywhere
+        /// resolved it before this). No board, no opposing actor with a real position, or already
+        /// adjacent all resolve to zero cells moved -- never a throw, since none of those are a caller
+        /// error for a movement action (the same "byte-identical when inert" posture <see cref="UseRunner"/>
+        /// and every other A24/A25-era wiring this session added already follows).
+        /// </summary>
+        public int TryMoveTowardNearestEnemy(string actorKey, int maxCells)
+        {
+            if (_board is null) return 0;
+            if (!_board.Positions.TryGetValue(actorKey, out var from)) return 0;
+
+            var mySide = ByKey[actorKey].Setup.Side;
+            GridPos? nearestPos = null;
+            var nearestDistance = int.MaxValue;
+            foreach (var candidate in Actors)
+            {
+                if (!candidate.Active || candidate.Setup.Side == mySide) continue;
+                if (!_board.Positions.TryGetValue(candidate.Setup.Key, out var candidatePos)) continue;
+                var d = GridDistance.Chebyshev(from, candidatePos);
+                if (d < nearestDistance) { nearestDistance = d; nearestPos = candidatePos; }
+            }
+            if (nearestPos is not { } target) return 0;
+
+            return MoveAction.MoveToward(_board, actorKey, target, maxCells);
+        }
+
         public EntityFacts FactsOf(string actorKey)
         {
             var a = ByKey[actorKey];
@@ -1010,5 +1039,18 @@ public static partial class BattleEngine
     {
         var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, board: board);
         return (state.PositionOf(actorKey), state.CombatBoardSnapshot);
+    }
+
+    /// <summary>
+    /// Test-only seam, same shape and same reason as <see cref="PositionAndSnapshotForTest"/>: A9
+    /// `movement-actions`' own nearest-enemy orchestration (<see cref="BattleRunState.TryMoveTowardNearestEnemy"/>)
+    /// reads <c>Actors</c>/<c>ByKey</c>, which live on the private/nested <see cref="BattleRunState"/>.
+    /// </summary>
+    internal static (int CellsMoved, GridPos? FinalPosition) TryMoveTowardNearestEnemyForTest(
+        BattleSetup setup, ulong seed, string actorKey, int maxCells, Board.BoardState board)
+    {
+        var state = new BattleRunState(setup, seed, trace: null, onEffectHostReady: null, board: board);
+        var moved = state.TryMoveTowardNearestEnemy(actorKey, maxCells);
+        return (moved, state.PositionOf(actorKey));
     }
 }

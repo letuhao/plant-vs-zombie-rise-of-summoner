@@ -4,6 +4,7 @@ using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Loadout;
 using FusionRpg.Core.Actions.Rungs;
 using FusionRpg.Core.Battle;
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Demons.Contracts;
 using FusionRpg.Core.Effects.Atoms;
@@ -136,7 +137,8 @@ public sealed class WebMatchService
                     containerResolver: replayContainerResolver,
                     onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, replayContainerDefs),
                     runnerBindings: replayRunnerBindings,
-                    containersWithRunnerCoverage: replayRunnerCoverage),
+                    containersWithRunnerCoverage: replayRunnerCoverage,
+                    board: NormalBattleBoard.Build(storedSetup.Squad.Select(a => a.Key).ToList(), storedSetup.Wave.Select(a => a.Key).ToList(), entry.Seed)),
                 playerId, storedSetup);
             // FR3: BattleTrace is a class -- `replayTrace` reflects the resolve that just ran, no
             // second return path needed.
@@ -193,7 +195,8 @@ public sealed class WebMatchService
                     containerResolver: replayContainerResolver,
                     onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, replayContainerDefs),
                     runnerBindings: replayRunnerBindings,
-                    containersWithRunnerCoverage: replayRunnerCoverage),
+                    containersWithRunnerCoverage: replayRunnerCoverage,
+                    board: NormalBattleBoard.Build(storedSetup.Squad.Select(a => a.Key).ToList(), storedSetup.Wave.Select(a => a.Key).ToList(), entry.Seed)),
                 playerId, storedSetup);
             var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport, replayTurnOrder));
@@ -327,7 +330,8 @@ public sealed class WebMatchService
             containerResolver: freshContainerResolver,
             onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, freshContainerDefs),
             runnerBindings: freshRunnerBindings,
-            containersWithRunnerCoverage: freshRunnerCoverage) with
+            containersWithRunnerCoverage: freshRunnerCoverage,
+            board: NormalBattleBoard.Build(setup.Squad.Select(a => a.Key).ToList(), setup.Wave.Select(a => a.Key).ToList(), seed)) with
         {
             ContentHash = _store.ComputeContentHash().ToCompact(),
         };

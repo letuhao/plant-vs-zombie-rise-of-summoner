@@ -1,0 +1,13 @@
+{
+  "branchiness": "linear",
+  "gateDensity": "none",
+  "layoutId": "layout.short-narrow-linear-001",
+  "oneWayDensity": "none",
+  "raidModes": [
+    "solo",
+    "pair"
+  ],
+  "secretDensity": "sparse",
+  "sizeBand": "short",
+  "widthBand": "narrow"
+}

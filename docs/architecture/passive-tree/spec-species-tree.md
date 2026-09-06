@@ -81,8 +81,10 @@ sentence (§6) — and inherits the rest verbatim.
 | Entries in `_`-prefixed files | **1** — a stale duplicate, §2.1 |
 
 **840 species, not 841.** Every passive-tree document that says 841 counted the stale duplicate. The
-corrected figures: **33,600 species nodes** (840 × 40), a **35,160-node** whole corpus over **879
-trees**, and — pleasingly exactly — **100,800 node generation calls** (§7).
+corrected figures: **33,600 species nodes** (840 × 40), a **35,280-node** whole corpus over **882
+trees** (D51, 2026-09-06: 24 statuses not 21, was 35,160/879), and — pleasingly exactly — **100,800
+node generation calls** (§7, unaffected by D51 — a pure function of the 840-species/species-only
+count, not the shared corpus).
 
 The skew D17 locks against, recomputed over the 840 indexed entries:
 
@@ -125,6 +127,15 @@ because a pipeline that locks against a distribution should be able to count it.
    module's own seed roots too, and a parked entry makes a lot unshippable. The review queue this
    pipeline creates must be *counted by the report that certifies it*, or parking something in it
    removes it from every metric.
+
+   **Confirmed 2026-09-07: not yet true of anything, not species-specific.**
+   `PassiveTreePlanCtx.tree_seed_roots` (`metrics/passive_tree.py:156`) defaults to `()` and is set by
+   nothing in production — `HiddenFileCountMetric` is instantiated in exactly one place repo-wide, its
+   own test. `spec-tree-review.md`'s own task (`passive-tree-todo.md` H5) owns wiring a real roots list
+   at all; this rule's requirement — that this module's seed roots (`data/seed/passive-tree/species/`,
+   once J5/J6 generate anything under it) are included in that list — is tracked as H5's own acceptance
+   bullet rather than a separate one here, so there is one place this gets wired, not two half-done
+   ones. Neither `spec-species-tree.md`'s own J5/J6 tasks currently mention `HiddenFileCount` at all.
 
 ### 3. The build-favour lock (D17)
 

@@ -1,9 +1,14 @@
 # Lawn interactive GUI — shared components and the character sheet
 
-**Status:** Design draft, 2026-09-06. **Not a spec to build against until owner review.** No code
-authorized. **Audit fold same day** — five perspectives (UX, DPLP, character-sheet systems, GG-9 FE,
-demon vocabulary). Findings that changed the draft are in §16; do not implement from the first
-pass of plate E aptitude names or the adventure-spell label.
+**Status:** Design draft, 2026-09-06. **Not a build authority.** Player-surface landing for lawn
+stage chrome. **Architecture capability map (SPECIFY):**
+[lawn-interactive-map.md](../architecture/lawn-interactive-map.md) · module specs under
+[lawn-interactive/](../architecture/lawn-interactive/). ActorSheet tabs are a **sibling** program
+([actor-sheet-map.md](../architecture/actor-sheet-map.md)) — do not implement lawn chrome from this
+file alone, and do not park lawn work inside `tasks/actor-sheet-*`. **Audit fold same day** — five
+perspectives (UX, DPLP, character-sheet systems, GG-9 FE, demon vocabulary). Findings that changed
+the draft are in §16; do not implement from the first pass of plate E aptitude names or the
+adventure-spell label.
 
 **Where it lives:** `docs/design/` on purpose. This is a *player surface* contract — same folder as
 `spec-derived-stat-sheet.md`, `spec-equip-and-paperdoll.md`, `spec-action-layer.md`. Visual
@@ -566,9 +571,23 @@ Still owner:
 
 ## 15. Next
 
-Owner review of this file + [12-lawn-stage.html](12-lawn-stage.html) + **[13-actor-sheet.html](13-actor-sheet.html)**
-(complete inventories). Then `/idea` only after the HTML lists are accepted. **Do not implement from
-number boxes or from the first-pass plate E.**
+Owner review of this landing **and** the architecture map/specs/plan:
+
+- [lawn-interactive-map.md](../architecture/lawn-interactive-map.md)
+- [lawn-interactive/](../architecture/lawn-interactive/) (`spec-actor-collection` …
+  `spec-commander-action-bar`)
+- Prefixed plan/todo: [lawn-interactive-plan.md](../../tasks/lawn-interactive-plan.md) ·
+  [lawn-interactive-todo.md](../../tasks/lawn-interactive-todo.md) (T0–T13; idea coverage matrix)
+- Sibling ActorSheet: [actor-sheet-map.md](../architecture/actor-sheet-map.md) (eight tabs +
+  catalogs; expand/join for 268 channels) — plan parked until Draft approved
+- Sibling Band B HUD catalog-token amend: [actor-hud-plan.md](../../tasks/actor-hud-plan.md)
+  **H1–H3** (ideal §4.1 — resolve `hudToken`/`color`; delete `StatusInitials` / hash RGB). Lawn T12
+  owns click→dock wiring; HUD owns token resolve.
+
+Visual: [12-lawn-stage.html](12-lawn-stage.html) + **[13-actor-sheet.html](13-actor-sheet.html)**.
+
+**IMPLEMENT lawn only after owner accepts the lawn plan.** Do not implement from number boxes or
+from the first-pass plate E. ActorSheet plan stays parked behind its own Draft gate.
 
 ---
 

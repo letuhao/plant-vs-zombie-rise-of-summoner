@@ -109,6 +109,61 @@ public static class DelveLoot
     }
 
     /// <summary>
+    /// `delve-quests` D4.12/D4.14 (spec-delve-quests.md §4 steps 2-3): rolls a completed quest's own
+    /// reward, synthesizing a `LootRequest` on the reserved `dungeon:loot:quest:{questId}` stream
+    /// (never `dungeon:loot:{r}:{c}` — a quest is not a room, so it gets its own root) and composing
+    /// the quest's own floor+ceiling WINDOW via <see cref="RarityShift.ApplyWindow"/> — never
+    /// <see cref="RarityShift.Apply"/>'s rung/room-kind SHIFT shape, which a quest reward never uses
+    /// (<see cref="Quests.QuestRewardWindow"/> carries no `shiftRungs` at all). Mirrors
+    /// <see cref="RollRoom"/>'s own two-Θ-reads discipline: content via <paramref name="reward"/>'s own
+    /// `Source.ContentLevel` (Θ_run, set by <see cref="Quests.QuestReward.Request"/>), count via
+    /// <paramref name="thetaActor"/> — never swapped, each read exactly once, at its own call site.
+    ///
+    /// <para><b>Deliberately does not bank the result</b> — spec §4 step 4, verbatim: "the grant banks
+    /// at the close... owned then, never in a pack," the SAME `dungeon-clear`-relic shape
+    /// <see cref="InstantiateBossFirstClearGrant"/>'s own doc comment already defers for the identical
+    /// reason: the real banking write (`SaveInstance` + `AcquireItem` + `RpgStore.Loot.cs`'s own
+    /// `PersistLoot` — three calls, each currently self-locking its own transaction) needs a `CloseDelve`
+    /// -composable `Unlocked` path none of the three has yet. This function returns the rolled
+    /// <see cref="LootManifest"/>; banking it is that Data-layer task's own job, not this Core-layer
+    /// function's.</para>
+    /// </summary>
+    public static AtomRejection RollQuestReward(
+        Quests.QuestRewardRequest reward,
+        string questId,
+        ulong delveSeed,
+        string playerId,
+        int thetaActor,
+        LootContentView view,
+        DropVolumeTuning drops,
+        LootPityState pity,
+        Func<LootGrant, int, LootMintResult> mintAt,
+        long catalogRevision,
+        long dropTableRevision,
+        out LootManifest? manifest)
+    {
+        manifest = null;
+        if (reward is null) throw new ArgumentNullException(nameof(reward));
+        if (questId is null) throw new ArgumentNullException(nameof(questId));
+        if (view is null) throw new ArgumentNullException(nameof(view));
+        if (mintAt is null) throw new ArgumentNullException(nameof(mintAt));
+
+        var seed = SeededRng.DeriveStream(delveSeed, $"dungeon:loot:quest:{questId}").NextULong();
+        var request = new LootRequest(playerId, reward.Source.SourceKind, reward.Source.SourceId, seed,
+            thetaActor, catalogRevision, dropTableRevision);
+
+        var bound = view with
+        {
+            Sources = new Dictionary<string, LootSourceRow>(StringComparer.Ordinal) { [reward.Source.Key] = reward.Source },
+            Tables = RarityShift.ApplyWindow(view.Tables, view.Ladder, reward.Source.TableId,
+                reward.Window.ComposedFloorRung, reward.Window.CeilRung),
+            Mint = grant => mintAt(grant, reward.Source.ContentLevel),
+        };
+
+        return LootPipeline.Resolve(request, bound, drops, pity, out manifest);
+    }
+
+    /// <summary>
     /// Spec's own "wiring gaps" table, verbatim: "host instantiates it through `TryInstantiate` at
     /// `Θ_boss` on `DeriveStream(manifest.LootSeed, LootStreams.RollSeed(grant.Index))` — the
     /// pipeline's own stream at the grant's own index."

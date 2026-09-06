@@ -331,6 +331,10 @@ Meters and icons use the locked presentation libs — **`recharts`**, **`react-t
 - Aptitude is a **source share**, never a derived channel id.
 - Allocation is the **sum of scopes**; `share` is on the sum. Aspect scope is **reverted**.
 - Combat families expand over the injected element axis the same way the generator does.
+- `derived-stat-catalog` is a **family** list (~tens of entries). Live registry is **268** channels
+  today (`CatalogResolves268`). The sheet joins expand(family) → `/api/actors/{id}/derived`
+  `Channels` — it does not require one catalog row per channel, and must not truncate the matrix
+  because “200+ is too many for the backend.”
 - `omni` column is visually first and separated.
 - Spark fill-to-100% only for pools, bounded ratios, and registry caps (D14 / GG-64).
 

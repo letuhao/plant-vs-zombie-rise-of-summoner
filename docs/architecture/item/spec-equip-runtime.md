@@ -67,6 +67,73 @@ CombatSim cannot read item effects, so item balance cannot be simulated there un
 > Nothing in this module was flipped to get there — the kind was re-opened by its own consumer
 > landing, which is exactly the order D6 requires.
 
+### ⭐ Amended 2026-09-07 — the "Never: second delivery path" boundary is revised, for a concrete reason
+
+**What changed since this spec was written.** This module's own design (§ above, and the code-style
+example below) deliberately scoped `EquipAtomSource` to `stat.derived` only, and its own Boundaries
+section forbade adding a second delivery path for a value `DerivedComposer` already folds. That was a
+reasonable call **on the assumption that equip content would be authored as `stat.derived`.** It
+wasn't: measured directly against the shipped corpus, virtually all real equip content — the entire
+109-family affix corpus and every relic atom in `unique-equip.json` — is `stat.modify`, not
+`stat.derived`. Module 4/5's binding half now works correctly (`RpgStore.MaterializeRolledEquipRuntime`,
+2026-09-07 — a rolled item's `effect_binding` rows are real and correctly scoped), but
+`EquipAtomSource.EquippedDerived`'s `stat.derived`-only filter silently drops every one of them, so an
+equipped item still changes zero battle numbers for any content that actually ships.
+
+**Why "just re-author the content as `stat.derived`" is not the fix.** `AtomDerivedSubsystem.TryParseOp`
+is a closed four-op set (`flat`/`increased`/`replace`/`flag`). Measured directly: the shipped
+`family-expand.g-life.json` and `family-expand.g-attack.json` corpora both author real rows with
+`"op": "more"` — an op `TryParseOp` does not recognise and `EquipAtomSource.ModsFor`'s own doc comment
+already names as a content error to skip. Re-authoring that content away from `more` would be a real
+balance change to already-shipped, already-verified content, not a technical rename — and widening
+`DerivedComposer`'s own op vocabulary would touch a shared system every OTHER `stat.derived` consumer
+in the repo depends on, for equip's benefit alone.
+
+**Why the second path is not new machinery.** `stat.modify` already has a real, shipped, tested
+consumption path with **no relationship to `EquipAtomSource`/`BattleStatComposer` at all**:
+`AtomCompiler.Compile` → `EffectDefDto`/`EffectGrantDto` → `BattleEffects.ExecModifyStat` →
+`BattleStatModifierLedger` → `ActorState.LiveAtk`/`Derived` — and it already handles `flat`/
+`increased`/`more` correctly (`AtomCompiler.ToOpcodeShape`). It is exactly the mechanism
+`ActionContainerEffectResolverFactory.Build`/`RegisterInto` already drives for action-granted atoms,
+proven live at three real production call sites (`WebMatchService.cs:134,192,328`, inside
+`BattleEngine.Resolve`'s `onEffectHostReady` hook) — atom-kind-agnostic by construction (`Build` calls
+plain `AtomCompiler.Compile`, no kind special-casing). The gap is narrow: nothing has ever pointed that
+same compiler/registration pattern at a specimen's EQUIP bindings instead of (or alongside) its
+action-container bindings.
+
+**The revised boundary.** "Never add a second delivery path" now reads: **never add a delivery path
+for a value the FIRST path (the `stat.derived` composer-fold) can already carry correctly.** A second
+path for a value the first path structurally cannot carry (a closed op vocabulary refusing real,
+shipped content) is not a duplicate — it is the value's only path. The two producers read disjoint atom
+kinds (`stat.derived` vs `stat.modify`) off the SAME binding set (module 4's projection); neither can
+double-count the other's contribution because neither iterates the other's kind.
+
+**New objective for this amendment, additive to the module's original one:** a specimen's equipped
+`stat.modify` atoms reach the same real battle a granted action's atoms already do, through the same
+already-proven compiler/registration pattern — fed by `ResolveBindings` at `UniqueActor` scope, which
+module 4/5's 2026-09-07 fix already populates correctly for both rolled and relic equip.
+
+**New/edited files (this amendment only):**
+```text
+src/FusionRpg.Data/Sqlite/ActionContainerEffectResolverFactory.cs
+                                                  EDIT (or a sibling factory) — also resolve a
+                                                  specimen's UniqueActor-scoped equip bindings, not only
+                                                  action-container bindings that today's Build(_store)
+                                                  reads
+src/FusionRpg.Server/WebMatchService.cs          EDIT — the three real onEffectHostReady call sites
+                                                  (lines 134, 192, 328) register the equip-sourced defs
+                                                  alongside the existing action-sourced ones
+```
+The exact internal shape of "also resolve equip bindings" (extend `Build`'s own query vs. a parallel
+factory merged at the call site) is a build-time discovery, not a spec-blocking decision — either
+satisfies this amendment's objective as stated.
+
+**New test, additive to the table below:**
+| Test | Asserts |
+|---|---|
+| ⭐ `an_equipped_items_stat_modify_atom_reaches_a_real_battle_through_the_compiler_path` | the actual payoff for real content — a real affix atom (`op: "increased"` or `"more"`), not a synthetic `stat.derived` fixture, changes `DamageDealt`/a derived channel geared vs. bare, mirroring `BattleLiveStatModifiersTests`'s own existing proof shape for the non-equip case |
+| `equip_sourced_and_action_sourced_defs_coexist_in_one_battle_without_collision` | the two `RegisterInto` sources (equip, action-granted) don't clash on `EffectHost` registration |
+
 ### ⭐ D29 — this module is the gate for the first geared corner run
 
 **Item balance is validated by the class-system's existing two guards**, not by an item-specific
@@ -133,6 +200,8 @@ public IReadOnlyList<BattleChannelMod> ModsFor(long specimenId) =>
 | `sim_runtime_stays_None_and_the_spec_says_why` | the deliberate gap, asserted not assumed |
 | `the_geared_corner_run_prints_coverage_with_its_verdict` | D29 / `spec-balance-guard.md` §2.1 |
 | `termination_stays_green_with_gear` | ⭐ **HARD** — the one guard no later layer can repair |
+| ⭐ `an_equipped_items_stat_modify_atom_reaches_a_real_battle_through_the_compiler_path` | **added 2026-09-07** — the actual payoff for real content (see the amendment above) |
+| `equip_sourced_and_action_sourced_defs_coexist_in_one_battle_without_collision` | **added 2026-09-07** |
 
 ## Boundaries
 
@@ -141,9 +210,12 @@ rather than patch; print coverage with any balance verdict.
 
 **Ask first:** flipping the `Sim` runtime for `stat.derived` — it needs a real consumer first.
 
-**Never:** add a second delivery path for a value `DerivedComposer` already folds
-(`AtomDerivedSubsystem`'s own reasoning). Never let an item's contribution reach an actor outside the
-projection — two writers is the defect the single-writer guard exists to catch.
+**Never:** add a delivery path for a value the FIRST path can already carry correctly — the original
+concern this rule protected against. ⚠ **Revised 2026-09-07**: this does NOT forbid a second path for a
+DIFFERENT atom kind the first path structurally cannot carry (`stat.derived`'s closed four-op vocabulary
+refusing real, shipped `more`-op content) — that is the value's only path, not a duplicate. It still
+forbids exactly what it always did: two writers for the same kind, or an item's contribution reaching an
+actor outside the projection.
 
 ## Success criteria
 
@@ -153,3 +225,7 @@ projection — two writers is the defect the single-writer guard exists to catch
 - [ ] All four boundary guards green.
 - [ ] The first geared corner run executes, **termination stays green**, and dominance reports with
       its coverage line.
+- [ ] ⭐ **Added 2026-09-07.** A real, shipped `stat.modify` affix atom (not a synthetic fixture),
+      including one authored with `op: "more"`, measurably changes a number in a real battle when its
+      item is equipped — this is the criterion that makes "item is playable" true for the content that
+      actually exists, not just for `stat.derived`'s narrower slice.

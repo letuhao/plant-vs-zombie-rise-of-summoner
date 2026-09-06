@@ -14,9 +14,12 @@
 2. **`actorHud` on wire** matches Core DTO camelCase (dump spec).
 3. **Inspector is expansion, not a second layout** — same `Occupant.hud` fields rendered as chip row +
    compact labels; demote duplicate KeyValue shield/chips when `hud` present (audit §2.3).
-4. **Status ids:** extend observe chip set to all 13 `StatusVfxIdentity.CustomIds` (today 9 in
-   `OBSERVE_CHIPS`).
+4. **Status ids:** strip membership is live instances whose ids are in the injected **status-catalog**
+   (ideal §4.1). Shipped fold extended `OBSERVE_CHIPS` to custom VFX ids — that list is a **migration
+   mirror**, not the long-term roster SSOT. After catalog inject, iterate catalog; snapshot ids ⊆ catalog.
 5. **`ptr` / `instanceId` debug rows** stay in Inspector for dev — not primary player readout (GG-23).
+6. **Token paint:** Inspector/Phaser status glyphs resolve `hudToken`/`color`/`displayName` from the
+   same catalogs as Unity (H2). Do not hardcode initials maps as player SSOT.
 
 ---
 
@@ -121,14 +124,16 @@ export type Occupant = {
 
 Inspector **must prefer `hud`** when present; legacy KeyValue is fallback only during transition.
 
-### OBSERVE_CHIPS extension
+### OBSERVE_CHIPS extension (shipped; catalog supersedes roster)
 
-Replace hardcoded 9-id set with 13 custom ids from SSOT list (mirror `StatusVfxIdentity.CustomIds`):
+Shipped: extend hardcoded chip set to 13 custom ids from `StatusVfxIdentity.CustomIds`:
 
 `wither`, `blight`, `rot`, `spark`, `spore`, `pact_mark`, `leech`, `expose`, `shatter`, `bond`,
 `rally`, `command`, `charm_pulse`
 
-Keep vanilla engine chips (`butter`, `freeze`, etc.) in fold for hypno/CC until HUD strip owns them.
+**Amend:** once `status-catalog` injects, FE/Inspector iterate the catalog for membership and
+`hudToken`/`color`; keep vanilla engine chips only as needed until HUD strip owns them. Do not grow
+a parallel FE union as the roster.
 
 ### Inspector (`ActorHudInspector`)
 
@@ -136,7 +141,7 @@ When `selected.hud` present:
 
 - Render identity row: tier frame, role pip, level badge (reuse design tokens / small components)
 - Resource row: shield segments by element color
-- Status strip: tokens + `+N` overflow
+- Status strip: catalog tokens + `+N` overflow
 - **Hide or collapse** redundant KeyValue `Shield` and `Chips` rows that duplicate `hud`
 
 When `selected.hud` absent: fall back to existing KeyValue (transition period).

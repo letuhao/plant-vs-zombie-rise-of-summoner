@@ -1,10 +1,13 @@
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Actions.Cost;
+using FusionRpg.Core.Battle.Board;
+using FusionRpg.Core.Battle.Siege;
 using FusionRpg.Core.Battle.Timeline;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.World;
 
 namespace FusionRpg.Core.Battle;
 
@@ -67,6 +70,15 @@ public static partial class BattleEngine
         Break,
         /// <summary>A hit landed; the caller applies it and runs the trait tail.</summary>
         Proceed,
+        /// <summary>
+        /// base-defense `siege-construction`/`siege-ai` (2026-09-07, session 5): the actor had no
+        /// combat target (what would otherwise be <see cref="Break"/>'s own "hazard 3" case) but
+        /// placed a structure instead — <see cref="ConstructionActivation.Fire"/> already ran the
+        /// ENTIRE effect synchronously, so there is nothing left to dispatch (no target, no damage).
+        /// The pass continues to the next actor rather than breaking the whole round, and counts as
+        /// this actor having acted (<c>anyActed = true</c>) since something real happened.
+        /// </summary>
+        ActedWithNoTarget,
     }
 
     readonly record struct AttackStep(AttackStepOutcome Outcome, ActorState? Target, long SignedDelta);
@@ -135,7 +147,20 @@ public static partial class BattleEngine
         var source = intentSource
             ?? new StubIntentSource(view, state.Cooldowns, NoStanceHeld.Instance, state.CostLedger);
         var intent = source.TryDeclare(attacker.Setup.Key, nowTick);
-        if (intent.IsNone) return (AttackStepOutcome.Break, null, ActionEnvelope.NoOp); // hazard 3: round breaks
+        if (intent.IsNone)
+        {
+            // base-defense siege-ai/siege-construction (2026-09-07, session 5, owner-authorized
+            // default policy): before conceding hazard 3's own round-break, give an actor holding the
+            // `Built` acquisition path one last option -- construction is tried ONLY when combat
+            // found nothing at all, matching ActionTagPreference.Rank's own already-shipped ordering
+            // (Construct ranks last, "the least urgent default"). A no-op for every actor that does
+            // not hold ConstructionActions.BuiltActionId (every battle before this session) or whose
+            // battle never wired a ConstructionBoard (every non-siege battle kind) -- both checked
+            // before touching anything, so this is provably byte-identical until both are true.
+            if (TryDeclareBuilt(attacker, state, nowTick, out var builtIntent))
+                return builtIntent;
+            return (AttackStepOutcome.Break, null, ActionEnvelope.NoOp); // hazard 3: round breaks
+        }
 
         var target = state.ByKey[intent.TargetKey!];
         var bodyguard = FindAdjacentWithTrait(state.Actors, target, "loyal");
@@ -172,6 +197,60 @@ public static partial class BattleEngine
     }
 
     /// <summary>
+    /// base-defense `siege-construction`/`siege-ai` (2026-09-07, session 5, owner-authorized): the
+    /// live construction decision this program's own `ConstructionAi.ChooseBuiltSite` proved
+    /// standalone. Returns `true` (with a ready-to-return outcome tuple) when it found and fired a
+    /// legal, affordable `Built`-path placement; `false` when nothing changed — the caller's own
+    /// existing `Break` fires unaltered in that case. Deliberately scoped to `Built` only: `Assembled`/
+    /// `Summoned`/`Laboured` cost through the ordinary `ActionCostRow`/`CostLedger` mechanism already
+    /// (no world-scoped budget to source here), and `Built` is the one path `ConstructionAi`/
+    /// `ConstructionCost` were built for.
+    /// </summary>
+    static bool TryDeclareBuilt(
+        ActorState attacker, BattleRunState state, long nowTick,
+        out (AttackStepOutcome Outcome, ActorState? Target, ActionEnvelope Envelope) result)
+    {
+        result = (AttackStepOutcome.Break, null, ActionEnvelope.NoOp);
+
+        // Every battle without a wired siege board (every non-siege battle kind, and every siege
+        // battle before DistrictAssaultResolver's own onEffectHostReady hook runs) reads null here —
+        // a quiet no-op, the same posture ExecPlaceStructure's own unwired case already establishes.
+        var constructionBoard = state.Host.ConstructionBoard;
+        if (constructionBoard is null) return false;
+
+        var held = state.HeldActionsOf(attacker.Setup.Key);
+        var holdsBuilt = false;
+        for (var i = 0; i < held.Count; i++)
+        {
+            if (!string.Equals(held[i].ActionId, ConstructionActions.BuiltActionId, StringComparison.Ordinal)) continue;
+            holdsBuilt = true;
+            break;
+        }
+        if (!holdsBuilt) return false;
+
+        if (!constructionBoard.Board.Positions.TryGetValue(attacker.Setup.Key, out var builderPos))
+            return false; // off-board -- cannot measure adjacency to build
+
+        // Content-scope reality, not a shortcut: `moat` is the ONE real structure the shipped
+        // `Built` action's own atom names (ConstructionActions.cs's own hardcoded `structureId`) —
+        // a fuller roster is structure-corpus's own future content job, not invented here.
+        var moat = StructureCatalog.Get("moat");
+        var choice = ConstructionAi.ChooseBuiltSite(
+            new[] { moat }, builderPos, constructionBoard.Board, constructionBoard.Board.Spec,
+            constructionBoard.BoardSide, constructionBoard.CoreSideMilli, constructionBoard.RampartThickness,
+            constructionBoard.RemainingRubble, constructionBoard.RemainingIronwork,
+            requiredSlotKindSatisfiedAt: (def, cell) =>
+                constructionBoard.SlotByCell.TryGetValue(cell, out var slot) && slot.Kind == def.RequiredSlotKind);
+        if (choice is null) return false; // nothing affordable and legal right now
+
+        constructionBoard.SpendBuilt(choice.Value.Structure);
+        ConstructionActivation.Fire(state.Host, attacker.Setup.Key, choice.Value.Cell.Row, choice.Value.Cell.Col, nowTick);
+
+        result = (AttackStepOutcome.ActedWithNoTarget, null, ActionEnvelope.NoOp);
+        return true;
+    }
+
+    /// <summary>
     /// `timeline-dispatch` (D14) back half: `calculator.Compute` → `OnDamageDealt` → cooldown arm.
     /// Everything `RunBasicAttackStep` did after resolving the target, verbatim, against a target
     /// that is now a parameter (already resolved — by <see cref="DeclareBasicAttack"/> on the atomic
@@ -191,6 +270,19 @@ public static partial class BattleEngine
         var category = state.ActionCatalog?.Get(envelope.ActionId)?.Category ?? ActionCategory.Attack;
         if (category != ActionCategory.Attack)
         {
+            // A9 (spec-movement-actions.md §3): "destination legality is A10's, not a second rule" --
+            // this is the ONLY new behavior a Movement-category action adds to the existing
+            // Defense/Support/Status dispatch below; every existing atom-granted effect still resolves
+            // through the unconditional OnActivate path exactly as before. Byte-identical for every
+            // actor shipped today: move.range defaults to 0 (nothing grants it yet), and
+            // TryMoveTowardNearestEnemy returns 0 cells moved without touching the board at all when
+            // maxCells <= 0 -- confirmed by reading MoveAction.MoveToward directly, not assumed.
+            if (category == FusionRpg.Core.Actions.ActionCategory.Movement)
+            {
+                var moveRange = (int)Math.Round(attacker.Derived.Get(FusionRpg.Core.Stats.Derived.DerivedStatChannels.MoveRange));
+                if (moveRange > 0) state.TryMoveTowardNearestEnemy(attacker.Setup.Key, moveRange);
+            }
+
             // Defense/Support/Movement/Status: the hit/crit roll is meaningless for a non-attack
             // action (it was never supposed to "miss") -- calculator.Compute is never called, so its
             // own OnDamageDealt trigger never fires either (there is no hit to trigger it; OnActivate,

@@ -219,18 +219,31 @@ public class PassiveTreeTuningTests
         Assert.Throws<PassiveTreeTuningRejection>(() => PassiveTreeTuningLoader.Parse("{ not json"));
     }
 
-    /// <summary>D42: both dials carry an UNMEASURED marker in the shipped file's own `_meta`, so a
-    /// reader of the raw JSON — not only of this test — sees the caveat.</summary>
+    /// <summary>D42: the dials still awaiting a real measurement carry an UNMEASURED marker in the
+    /// shipped file's own `_meta`, so a reader of the raw JSON — not only of this test — sees the
+    /// caveat.</summary>
     [Fact]
-    public void TreeTotalPoints_and_treeShareMilli_are_marked_UNMEASURED_in_the_shipped_file()
+    public void TreeTotalPoints_and_soulTrack_are_marked_UNMEASURED_in_the_shipped_file()
     {
         Assert.Contains("UNMEASURED", ValidJson);
         using var doc = JsonDocument.Parse(ValidJson);
         var meta = doc.RootElement.GetProperty("_meta");
         var noteUnmeasured = meta.GetProperty("noteUnmeasured").GetString()!;
         Assert.Contains("treeTotalPoints", noteUnmeasured);
-        Assert.Contains("treeShareMilli", noteUnmeasured);
         Assert.Contains("soulTrack.thetaPerSoulLevelMilli", noteUnmeasured);
+    }
+
+    /// <summary>D53 (2026-09-06): `treeShareMilli` is no longer a placeholder — 1000 (100%) is the
+    /// real, decided value, and the shipped note must not call it UNMEASURED any more (a coverage
+    /// audit found this exact "decided but never propagated" gap 2026-09-07).</summary>
+    [Fact]
+    public void TreeShareMilli_is_1000_and_no_longer_listed_as_unmeasured()
+    {
+        using var doc = JsonDocument.Parse(ValidJson);
+        Assert.Equal(1000, doc.RootElement.GetProperty("treeShareMilli").GetInt64());
+        var noteUnmeasured = doc.RootElement.GetProperty("_meta").GetProperty("noteUnmeasured").GetString()!;
+        Assert.DoesNotContain("treeShareMilli is UNMEASURED", noteUnmeasured);
+        Assert.DoesNotContain("treeTotalPoints, treeShareMilli", noteUnmeasured);
     }
 
     /// <summary>

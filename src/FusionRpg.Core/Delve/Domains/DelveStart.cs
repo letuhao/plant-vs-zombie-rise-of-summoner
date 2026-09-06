@@ -33,8 +33,10 @@ public sealed record DelveStartPlan(
 /// six-refusal-group orchestrator. Every delegate here stands in for a REAL dependency this session's
 /// own research confirmed by reading the file directly, not guessed:
 /// <list type="bullet">
-/// <item><see cref="RaidModesForLayout"/> — no `LayoutTemplateCatalog` exists; `layout.raidModes` is
-/// tagged `"PLANNED"` even in seedsmith's own Python schema.</item>
+/// <item><see cref="RaidModesForLayout"/> — CLOSED 2026-09-07: `LayoutTemplateCatalog` now exists
+/// (D4.30's real prerequisite chain) and `DelveEndpoints.cs`'s own `BuildDelveStartLive` wires it
+/// for real; kept as a caller-supplied delegate here since Core still never reads the seed
+/// directory itself.</item>
 /// <item><see cref="MemberIsInAnotherActiveDelve"/> — `rpg_delve_pack_lock` is keyed by ITEM instance,
 /// never actor instance; no existing read answers "is this actor in a delve" (a real, buildable gap
 /// left to the Data-layer caller since it needs `rpg_delves.parties_json` scanned across every Active

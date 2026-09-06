@@ -12,6 +12,13 @@ public static class LawnDeployRosterSessionCache
     static IReadOnlyList<LawnDeployRosterEntry> _eligible = Array.Empty<LawnDeployRosterEntry>();
     static long _cacheRevision;
 
+    /// <summary>True when the last <see cref="BuildFromSessionCache"/> returned <see cref="LawnDeployRosterSnapshot.Empty"/>
+    /// because <see cref="Apply"/> has never landed yet (the injector's own <c>StartAsync</c> refresh
+    /// chain had not reached the roster call by <c>board.start</c>) — distinct from a real player
+    /// genuinely owning zero eligible demons, which also returns an empty list but leaves this false.
+    /// Mirrors <see cref="Commanders.MatchCommanderSessionCache.LastBuildUsedFallback"/>'s own role.</summary>
+    public static bool LastBuildWasCacheMiss { get; private set; }
+
     public static long CacheRevision
     {
         get { lock (Gate) return _cacheRevision; }
@@ -35,7 +42,12 @@ public static class LawnDeployRosterSessionCache
     {
         lock (Gate)
         {
-            if (!_hasCache) return LawnDeployRosterSnapshot.Empty;
+            if (!_hasCache)
+            {
+                LastBuildWasCacheMiss = true;
+                return LawnDeployRosterSnapshot.Empty;
+            }
+            LastBuildWasCacheMiss = false;
             return new LawnDeployRosterSnapshot(_eligible, _cacheRevision);
         }
     }
@@ -48,6 +60,7 @@ public static class LawnDeployRosterSessionCache
             _hasCache = false;
             _eligible = Array.Empty<LawnDeployRosterEntry>();
             _cacheRevision = 0;
+            LastBuildWasCacheMiss = false;
         }
     }
 }

@@ -110,6 +110,8 @@ public static class DistrictAssaultPhase
             WorldSeed = seed,
             SectorTypeId = sector.TypeId,
             DevelopmentLevel = sector.DevelopmentLevel,
+            RubbleStock = sector.RubbleStock,
+            IronworkStock = sector.IronworkStock,
             AttackerEdge = DistrictLayout.EntryEdgeFor(world, attacker, sector.SectorId),
             Slots = sector.Slots
                 .Select(slot => new SlotProjection

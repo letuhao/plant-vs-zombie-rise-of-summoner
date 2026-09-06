@@ -122,8 +122,20 @@ public sealed class BattleEffectHost
     /// which is every existing caller until `DistrictAssaultResolver` sets it — `structure.place` then
     /// refuses quietly rather than throwing, the same posture <see cref="ExecApplyStatus"/>'s own
     /// unwired case already establishes.
+    ///
+    /// <para><b>Gained a public getter 2026-09-07 (siege-ai), unlike its write-only siblings above.</b>
+    /// Every other forward on this host (`Status`/`StatusRng`/`Ledger`/`ResolveStatTarget`) is
+    /// deliberately write-only because only `BattleEffectSink`'s own private executor methods ever
+    /// need to read them back. This one now has a genuinely different, real caller:
+    /// `BasicAttack.DeclareBasicAttack`'s own construction-choice branch needs to READ the board
+    /// BEFORE deciding whether to fire anything, not just hand it to an executor that fires
+    /// unconditionally — a need that did not exist when this property was first wired.</para>
     /// </summary>
-    public ConstructionBoardContext? ConstructionBoard { set => _sink.ConstructionBoard = value; }
+    public ConstructionBoardContext? ConstructionBoard
+    {
+        get => _sink.ConstructionBoard;
+        set => _sink.ConstructionBoard = value;
+    }
 
     /// <summary>passive-tree G2 (spec-mechanism-wiring.md §4.2): the one forward this host needs so a
     /// live mid-battle trigger can add a contribution, matching `BattleDerivedModifierLedger.Add`'s own

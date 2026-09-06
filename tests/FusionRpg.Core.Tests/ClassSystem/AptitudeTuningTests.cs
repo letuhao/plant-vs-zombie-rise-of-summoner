@@ -27,7 +27,7 @@ public class AptitudeTuningTests
     static string ShippedJson() =>
         // passive-tree D55 (2026-09-06): v6 -> v7, hosts moved with it (RpgHost.cs/Program.cs) --
         // kept in sync so "the shipped file" here stays the one actually loaded in production.
-        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v7.json"));
+        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v8.json"));
 
     // ── six-resource coverage (resource-hub-ssot.md, Phase 0 2026-09-02) ─────────────────────────
 
@@ -87,7 +87,7 @@ public class AptitudeTuningTests
         var tuning = AptitudeTuningLoader.Parse(ShippedJson());
 
         Assert.Equal(1, tuning.SchemaVersion);
-        Assert.Equal(7, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor; v6 (passive-tree C6, 2026-09-06) added pointEconomy.skillPointsPerThetaMilliByScope; v7 (D55, 2026-09-06) gave demonType/aspect/uniqueDemon their real rates
+        Assert.Equal(8, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor; v6 (passive-tree C6, 2026-09-06) added pointEconomy.skillPointsPerThetaMilliByScope; v7 (D55, 2026-09-06) gave demonType/aspect/uniqueDemon their real rates; v8 (A9 movement-actions, 2026-09-07) refreshed _meta.measurable's reader census now that move.range has its first reader
         Assert.Equal(3, tuning.Grant.AptitudePointsPerThetaMilli);
         Assert.Equal(1, tuning.Grant.SkillPointsPerThetaMilli);
         Assert.Equal(11, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.Commander]); // D38: 10.40 corner-share, rounded up

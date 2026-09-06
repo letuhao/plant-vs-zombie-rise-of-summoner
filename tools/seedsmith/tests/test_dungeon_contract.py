@@ -237,11 +237,16 @@ class AdapterRegistrationTests(unittest.TestCase):
         self.assertEqual(DungeonAdapter().channels(), [])
 
     def test_registries_returns_a_real_registry_set(self) -> None:
+        # 9 dungeon-native files + 2 cross-program theme files (`demons.themes`/`demons.motifs`,
+        # D1.10's 2026-09-07 correction: `theme` reads the demon-seed program's own already-shipped
+        # registry rather than a dungeon-authored one) = 11.
         registries = DungeonAdapter().registries()
         self.assertIsInstance(registries, RegistrySet)
-        self.assertEqual(len(registries.versions), 9)
+        self.assertEqual(len(registries.versions), 11)
         self.assertTrue(registries.is_legal("roomKind", "boss"))
         self.assertFalse(registries.is_legal("roomKind", "not-a-real-kind"))
+        self.assertTrue(registries.is_legal("theme", "demon.allpeater"))
+        self.assertFalse(registries.is_legal("theme", "not-a-real-theme"))
 
 
 if __name__ == "__main__":

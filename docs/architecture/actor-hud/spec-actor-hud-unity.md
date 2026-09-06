@@ -16,8 +16,10 @@
    the resolver.
 2. **Shield row** reuses segment grammar from the retired ShieldBarPool — element-colored segments +
    **stack pips** mandatory; bar W/H from `actor-hud` tuning (not live `vfx.v3` `render.shieldBar`).
-3. **Status row** uses **TextMesh (or equivalent) 2-letter almanac tokens** (plate mock `SP`, `WI`
-   style); not sustain VFX duplication. Display token rules shared with Phaser via Core.
+3. **Status row** uses TextMesh (or equivalent) glyphs from catalog **`hudToken`** + authored
+   **`color`** (ideal §4.1) — not sustain VFX duplication, not `StatusInitials(id)`, not hashed RGB.
+   Until H2 wires catalog resolve, may show a designed placeholder; must not re-document initials as
+   SSOT. Display resolve shared with Phaser via Core.
 4. **Identity row** draws **tier letter + level digits** (not blank colored quads).
 5. **Coexist with VfxDirector** — sustain auras remain on body/feet/crown; HUD root is Body+offset;
    row local Y stacks upward from the shield slot.
@@ -65,7 +67,7 @@ dotnet test tests\FusionRpg.Guard.Tests --filter ActorHud
 | `src/FusionRpg.Injector/Hud/ActorHudPool.cs` | slot pool, Body+offset root, pip slots |
 | `src/FusionRpg.Injector/Hud/ActorHudRowIdentity.cs` | tier letter, level digits, role pip |
 | `src/FusionRpg.Injector/Hud/ActorHudRowResources.cs` | shield segments + stack pips |
-| `src/FusionRpg.Injector/Hud/ActorHudRowStatuses.cs` | 2-letter tokens + overflow |
+| `src/FusionRpg.Injector/Hud/ActorHudRowStatuses.cs` | Catalog `hudToken`/`color` resolve + overflow (H2) |
 | `src/FusionRpg.Injector/Hud/ActorHudDirector.cs` | tick sync entry |
 | `src/FusionRpg.Injector/Fx/VfxDirector.cs` | call `ActorHudDirector` on live match path |
 | `tests/FusionRpg.Guard.Tests/ActorHudUnityGuardTests.cs` | placement + UnitFrame guards |
@@ -79,7 +81,7 @@ dotnet test tests\FusionRpg.Guard.Tests --filter ActorHud
 ```text
 UnitFrame Body anchor (X = bounds center via resolver) + worldYOffset (default -0.35)
   local Y ≈ 0     — Resource row: shield track + element segments + stack pips
-  local Y > 0     — Status strip: 2-letter tokens | +N overflow
+  local Y > 0     — Status strip: catalog hudToken glyphs | +N overflow
   local Y higher  — Identity: tier letter | role pip | level digits
 ```
 
@@ -100,7 +102,8 @@ Row Y offsets and bar W/H from `actor-hud` tuning (fractions of span and/or fixe
 
 ### Status tokens
 
-- TextMesh (or sprite) with 2-letter almanac token v1 — Core `ActorHudDisplayTokens` SSOT
+- TextMesh (or sprite) with catalog `hudToken` + `color` — Core resolve from injected status-catalog
+  (H1/H2). Legacy `ActorHudDisplayTokens.StatusInitials` is **not** the SSOT (delete in H3).
 - CC corner accent when `cc: true`
 - Overflow pip when `overflow.statusCount > 0`
 
@@ -127,7 +130,7 @@ Row Y offsets and bar W/H from `actor-hud` tuning (fractions of span and/or fixe
 | Test | Assert |
 |------|--------|
 | Guard UnitFrame Body | ActorHudPool uses Body + worldYOffset; no Crown-only root |
-| Guard tokens | Core display tokens match Phaser initials |
+| Guard tokens | Core catalog resolve matches Phaser glyphs (same hudToken/color) |
 | LIVE eyeball | Bar under unit; statuses readable; level digits visible |
 
 ---

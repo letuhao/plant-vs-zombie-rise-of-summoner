@@ -1,7 +1,9 @@
 # Passive tree — capability map
 
-**Status:** in use, 2026-09-05. All eleven module specs written against it — see `passive-tree/spec-*.md`. Source: [passive-tree-ideal.md](passive-tree-ideal.md) — 36 owner decisions, 16 research
-documents in [../research/passive-tree/](../research/passive-tree/).
+**Status:** in use, 2026-09-05. All fourteen module specs written against it (12 original plus
+`element-conversion` and `soul-curve-resolution`, both added 2026-09-06/07 — table below) — see
+`passive-tree/spec-*.md`. Source: [passive-tree-ideal.md](passive-tree-ideal.md) — 36 owner decisions,
+research documents in [../research/passive-tree/](../research/passive-tree/).
 
 This is the index of what exists for this program. **Never guess which spec is active from a
 filename** — read this table.

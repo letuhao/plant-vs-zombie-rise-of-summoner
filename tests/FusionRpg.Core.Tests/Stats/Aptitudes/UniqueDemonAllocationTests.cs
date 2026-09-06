@@ -5,7 +5,7 @@ namespace FusionRpg.Core.Tests.Stats.Aptitudes;
 
 /// <summary>passive-tree G7 (spec-species-tree.md §8.1 point 2) — the `UniqueDemon`-scope twin of
 /// <see cref="SpeciesAllocationTests"/>, one test per test there, same shared-tuning convention
-/// (`SpeciesAllocationTests`'s own `RepoRoot()`/real-`aptitudes.v7.json` precedent) — only
+/// (`SpeciesAllocationTests`'s own `RepoRoot()`/real-`aptitudes.v8.json` precedent) — only
 /// `PointEconomy.AptitudePointsPerThetaMilliByScope[UniqueDemon]` is actually read by this code
 /// path (the sibling table D55 did not touch).</summary>
 public class UniqueDemonAllocationTests
@@ -22,7 +22,7 @@ public class UniqueDemonAllocationTests
     }
 
     static readonly AptitudeTuning RealTuning = AptitudeTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v7.json")));
+        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v8.json")));
 
     static long UniqueDemonRate => RealTuning.PointEconomy.AptitudePointsPerThetaMilliByScope[AllocationScope.UniqueDemon];
 

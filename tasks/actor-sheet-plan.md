@@ -1,80 +1,81 @@
-# Plan: actor-sheet program
+# Plan: actor-sheet program (catalog-era)
 
-Source: [actor-sheet-map.md](../docs/architecture/actor-sheet-map.md) (5 modules, approved) and its
-five specs under [actor-sheet/](../docs/architecture/actor-sheet/), all grounded against current code
-2026-08-29 — not just the draft plate (see each spec's own Assumptions section for what grounding
-corrected before this plan was drafted).
+Source: [actor-sheet-map.md](../docs/architecture/actor-sheet-map.md) · Ideal:
+[actor-sheet-ideal.md](../docs/architecture/actor-sheet-ideal.md) · Specs under
+[actor-sheet/](../docs/architecture/actor-sheet/).
 
-Task list: [actor-sheet-todo.md](actor-sheet-todo.md). Paths are prefixed per this repo's
-parallel-programs convention — `tasks/plan.md`/`tasks/todo.md` belong to the perf stream.
+Task list: [actor-sheet-todo.md](actor-sheet-todo.md). Prefixed pair only — never
+`tasks/plan.md` / `tasks/todo.md`.
+
+**Supersedes** the 2026-08-29 six-tab plan (trail; all tasks closed). Do not implement trail specs.
+
+---
+
+## Spec gate — no implementation (2026-09-07)
+
+**Repo standard:** SPECIFY → PLAN → TASKS → IMPLEMENT. Module specs are still **Draft — pending
+owner review** (`No build authorized until approved`).
+
+A prior session violated that gate by writing this plan **and** starting install/catalog/code work
+before owner-approved specs. **Parked:** do not continue T0–T16 implementation until the owner
+approves the catalog-era ActorSheet specs (and derived expand/join locks). Accidental early
+artifacts are not authorization to finish the build:
+
+- npm presentation libs; draft `data/tuning/*-catalog*.json`
+- Core `src/FusionRpg.Core/ActorSurface/*` loaders/hubs + `ActorSurfaceCatalog` tests (T2-shaped;
+  landed while SPECIFY was re-entered) — **do not proceed to T3 Server/Injector wiring** until
+  specs are approved
+
+Lawn stage chrome is a **separate** program:
+[lawn-interactive-map.md](../docs/architecture/lawn-interactive-map.md) — not part of this plan.
 
 ---
 
 ## 1. Shape of the work
 
-**5 modules, 5 tasks, 2 checkpoints.** Every task is one complete build-and-verify path, not a
-horizontal layer.
+**10 live modules · T0–T16 · 5 checkpoints.** Vertical slices; one `ActorPanel.tsx` editor at a time.
+**Tasks remain listed for after SPECIFY approval only.**
 
 ```text
-T1  actor-sheet-shell     (foundational — every other tab mounts into this)
-    |
-T2  gear-tab              \
-T3  locked-preview-tabs    |  independent of each other and of T4/T5,
-T4  derived-stats-tab      |  sequenced smallest-first below
-T5  progression-tab       /
+T0  npm presentation libs
+T1–T4  actor-surface-catalog (JSON → Core → hosts/API → FE labels)
+T5–T7  actor-sheet-shell (size → widgets → eight-tab chrome)
+T8–T10 condition · aptitudes · derived
+T11–T15 status · shield · elements · kit · paths
+T16 HUD resolve from status-catalog
 ```
-
-### 1.1 Why this order
-
-`actor-sheet-shell` (T1) goes first because nothing else has anywhere to mount without it, and because
-it's the smallest real lift — Overview's content relocates unchanged, it isn't rebuilt. T2-T5 are
-genuinely independent (each fills exactly one of the empty tab slots T1 leaves behind, touching no
-other tab's content) and are sequenced smallest-first (`gear-tab` is a two-file empty-state;
-`progression-tab` is the largest, reusing an existing page's full allocation logic) so a real
-regression, if one turns up, surfaces early rather than late.
-
-### 1.2 What's explicitly not in this plan
-
-Building real resource meters or a "Standing" power-vector for Overview (never built as React code,
-`ActorView` has no HP field to bind one to regardless). The full derived-stat sheet behind
-`derived-stats-tab`'s doorway (that's `spec-derived-stat-sheet.md`'s own scope). A real action or
-passive-skill *system* (both tabs ship fully locked, previewing nothing that resolves). The other three
-aptitude-allocation scopes (demon-type/aspect/unique-demon — commander scope only, matching what's
-already built). Promote, at the owner's own instruction. All restated from the map's own exclusion
-list so the boundary travels with the plan.
-
----
 
 ## 2. Architecture decisions
 
-- **The tab bar is `TabList` + a `kind`-discriminated render** — the exact shape already proven in
-  `ui/scope/ActorMenuScopePicker.tsx` this same session, not a new switching pattern.
-- **Locked content reuses `Rail.tsx`'s own real locked-state convention** (disabled, dimmed, a `title`
-  naming the reason) — not the design plate's `.actionslot`/`rail button.is-locked` CSS, which has no
-  React equivalent anywhere in the tree (confirmed by grep).
-- **`progression-tab` calls the exact same hooks `AptitudesPage.tsx` already calls**
-  (`useAptitudes`/`useSaveAptitudes`) and the same `NumberInput` control — never a second allocation
-  implementation with its own edge-case bugs.
-- **Every "not real yet" field (`channelSummary`, `equipSlots`) renders via the existing `PendingNote`
-  pattern** — the same discipline `ActorPanel.tsx` already applies today, just relocated under the
-  right tabs, never replaced with a fabricated table.
-- **No dead links.** `derived-stats-tab`'s "Open full sheet" button ships disabled with a real reason —
-  confirmed by grep that the full sheet's own component doesn't exist in the tree yet.
+- T7.2 host inject; Core `Parse` + `Configure` only.
+- First catalog publish byte-faithful from C# + seeds — no combat golden drift.
+- Keep `ActorPanel`; export alias `ActorSheet`. Buy-before-build presentation libs.
+- Pending honesty — never fabricate Standing / xpToNext / shields / equip.
+- Paths kind wraps PassivesTab; xyflow read-only on push (not Phaser / not `#/world`).
+- Commander leftover v1; leftover footer only on Aptitudes / dirty draft.
+- Size `min(1800px, 96vw)` × `min(960px, 92vh)`.
+- **Derived:** catalog holds **families**; combat families **expand** over omni + injected elements
+  to join `GET /api/actors/{id}/derived` (268 registered channels in Core). Never treat ~33 family
+  rows as the channel ceiling.
 
-## 3. Risks and mitigations
+## 3. Out of scope
 
-| Risk | Impact | Mitigation |
-|---|---|---|
-| `ActorPanel.tsx` growing a `switch`-shaped render across 5 sequential edits (T1 then T2-T5 each touching the same file) could produce merge-shaped friction if tasks aren't done one at a time | Low | This session's own established discipline already builds one task at a time, never two in parallel — the file is only ever edited by one task at a time in practice |
-| `progression-tab`'s aptitude logic duplicating `AptitudesPage.tsx` verbatim (per the spec's own note) could drift out of sync if one is changed later without the other | Medium (named in the spec, not hidden) | The spec itself flags extracting a shared `useAptitudeAllocation()` hook as a fast-follow if duplication grows past ~20 lines — not mandated up front, but not silently ignored either |
-| No E2E coverage is scoped in this plan (unit-only tasks) | Medium | Matches this program's own spec-writing pace — E2E gets added during `/goal` execution, same as every other program this session, not deferred indefinitely |
+Trail specs · Promote · UniqueDemon allocate POST · action corpus · Phaser Path VFX · Band B enlarge ·
+**lawn-interactive** (own map).
 
-## 4. Open questions
+## 4. Risks
 
-- Whether the standalone "Primary Stats" rail entry retires once `progression-tab` ships, or stays as
-  a shortcut — owner call, doesn't block any task above.
-- Whether `locked-preview-tabs` should preview every designed-but-unbuilt action, or only the ones a
-  given specimen's kind could ever hold — owner call, doesn't block building the locked-grid mechanism
-  itself (T3's own placeholder list is illustrative either way).
-- `Release`/`Deploy` closing the panel (T1) is the named minimal fix — a real mutation for either stays
-  out of scope until a spec names what they should actually do.
+| Risk | Mitigation |
+|---|---|
+| Spec gate skipped again | No IMPLEMENT until owner ticks Draft specs |
+| Family catalog under-displays vs 268 | Expand combat × elements; join `/derived` |
+| ActorPanel thrash | One task edits it at a time |
+
+## 5. Non-blocking follow-ups
+
+Commander HUD chip → sheet · UniqueDemon allocate · lawn-interactive plan:
+[lawn-interactive-plan.md](lawn-interactive-plan.md) (separate program; not this checklist).
+
+## 6. Verification (when unlocked)
+
+FE focused tests + build · `dotnet test … --filter ActorSurfaceCatalog` · guards after host wiring.

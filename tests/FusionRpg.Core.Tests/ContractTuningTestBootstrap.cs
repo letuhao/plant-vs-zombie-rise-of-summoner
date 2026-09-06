@@ -85,6 +85,9 @@ internal static class ContractTuningTestBootstrap
         // base-defense siege-board (2026-09-05): values transcribed from the real, shipped
         // data/tuning/siege.v1.json, matching this file's own stated convention.
         SiegeTuningPolicy.Configure(DefaultSiege);
+        // A10 battle-board (2026-09-07): values transcribed from the real, shipped
+        // data/tuning/battle-board.v1.json, matching this file's own stated convention.
+        BattleBoardTuningPolicy.Configure(DefaultBattleBoard);
         // battle-tempo action-timing (2026-09-05): the bootstrap's own new gap this session's
         // base-defense work found and closed -- BattleRunState's constructor now unconditionally
         // reads ActionTimingPolicy.Tuning, and this Configure call was missing from every test
@@ -431,6 +434,9 @@ internal static class ContractTuningTestBootstrap
             AutoResolveHandicapMilli: 1000, RetargetLatencyTicks: 0, AggressionRange: 2,
             MaxCandidatesScored: 32),
         Fog: new FusionRpg.Core.Battle.Board.FogTuning(Enabled: true, DefaultVisionRangeTiles: 6));
+
+    public static readonly BattleBoardTuning DefaultBattleBoard = new(
+        SchemaVersion: 1, Version: 1, MinSide: 5, MaxSide: 9);
 
     public static readonly BattleTuning DefaultBattle = new(
         SchemaVersion: 1, Version: 1,

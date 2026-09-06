@@ -9222,8 +9222,8 @@ points at evidence already recorded, above, by name.
 | 1 `durable-ownership` | ✅ built, verified, re-verified 2026-09-06 | P1.1 + Final-proof/Phase 0+1 |
 | 2 `armoury` | ✅ built, verified; **the loadout library's missing half built 2026-09-06** (`LoadoutReport`, `GetLoadoutEntriesValidated`, `FindAssignmentHolders`, 15 tests) | P1.2 + Final-proof/Phase 0+1 |
 | 3 `slot-roles` | ✅ built, verified. ⚠ named, not fixed: `SeedRoles` has zero production callers — module 3's own tables are empty in a deployed DB | P1.3 + Final-proof/Phase 0+1 |
-| 4 `equip-assign` | ✅ built, verified; relic-migration mutual-deferral closed 2026-09-06. ⭐ **The equip ENDPOINT landed later the same day (P1.4-E)** — `POST /api/items/equip` + `/unequip` + `GET /api/items/assignments/{specimenId}`, so `SaveAssignment`/`RemoveAssignment` have a production caller and the web armoury tab's `Equip` is real; proven against a published server with the row read back by an independent OS process. ✅ **R1 fixed** — the older relic route silently overwriting a live item assignment (and, found in the same fix, an even worse sibling: `ClearUniqueEquipmentSlot`'s unqualified `DELETE` would have unequipped the item outright). Both now refuse `409 slot.claimed_by_item`, proven live (`PUT`/`DELETE` on a claimed role → 409, row byte-unchanged; a free role still 200). ⏸ **What remains, named:** an equipped item changes no number until module 5's `ApplyEquipProjection` / module 19's `ApplyEquippedGrants` get a deploy-time caller (both still zero — the same Injector-side gap Checkpoint 1 names) | P1.4 + P1.4-R + P1.4-E |
-| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ⛔ One item genuinely open: Injector-side `BindGrant`, environment-blocked | P1.5 + Final-proof/Module 5 + Checkpoint 1 |
+| 4 `equip-assign` | ✅ built, verified; relic-migration mutual-deferral closed 2026-09-06. ⭐ **The equip ENDPOINT landed later the same day (P1.4-E)** — `POST /api/items/equip` + `/unequip` + `GET /api/items/assignments/{specimenId}`, so `SaveAssignment`/`RemoveAssignment` have a production caller and the web armoury tab's `Equip` is real; proven against a published server with the row read back by an independent OS process. ✅ **R1 fixed** — the older relic route silently overwriting a live item assignment (and, found in the same fix, an even worse sibling: `ClearUniqueEquipmentSlot`'s unqualified `DELETE` would have unequipped the item outright). Both now refuse `409 slot.claimed_by_item`, proven live (`PUT`/`DELETE` on a claimed role → 409, row byte-unchanged; a free role still 200). ✅ **2026-09-07 — the "what remains" gap CLOSED**: `RpgStore.MaterializeRolledEquipRuntime` (new) calls `ApplyEquipProjection`/`ApplyEquippedGrants` from `WebMatchService.BuildSquad` — squad build IS this module's own "deploy" moment (`ssot-inventory.md:132` names it as one of exactly two triggers). ⚠ Re-investigated rather than accepted as "the same Injector-side gap Checkpoint 1 names" (that framing conflated two unrelated mechanisms — see Checkpoint 1's own corrected row): this was a plain missing-caller wiring gap, not environment-blocked, and needed no game install. Two more real defects found and fixed in the process: `EquippedActionIdsFor`'s grant-read scope had been moved `Entity`→`UniqueActor` by a same-day concurrent fix (for durable unlock-ladder grants) which would have silently orphaned item-granted-action writes — fixed by merging both scopes; and `ApplyEquippedGrants` alone cannot detect "this item was unequipped since the last call" (it only withdraws sources still present in the CURRENT assignment list) — added the missing diff-against-stored-state withdrawal, proven by a real equip→battle→unequip→battle-again round trip. Red-first per new behavior; full suites after: Data **1119/1** (1 pre-existing `ItemUniqueStoreTests` failure, unrelated), Server **289/25** (all 25 pre-existing, unrelated `World*`/`Aptitude`/`ContentBootStartupWiring`/`DistrictAssault` — a same-day concurrent world-stage stream, confirmed via TRX, zero new) | P1.4 + P1.4-R + P1.4-E + P1.4-G (2026-09-07) |
+| 5 `equip-runtime` | ✅ built, verified; geared-corner-run crash found and fixed 2026-09-06 (a same-day concurrent commit broke it; termination/dominance evidence reproduces exactly after the fix). ✅ **`ApplyEquipProjection` now has a real production caller (2026-09-07, see module 4's own row)** — the module's own payoff (an equipped rolled item's `stat.derived` atoms reach `BattleStatComposer` through the already-shipped `EquipAtomSource` resolver) is proven live end to end. ⚠ **Correction, 2026-09-07:** the single open item this row named — "Injector-side `BindGrant`, environment-blocked" — was a misattribution, found while wiring the fix above. `BindGrant` (`UniqueOwnerBinder.cs`) is a real, already-wired, already-live mechanism with its own Harmony-hooked production callers (`MatchHost.Apply` → `GameHooks.cs`) — but for an entirely different thing, a demon specimen's own bound-loadout stat mods, never item equip. It has no relationship to this module's gap, so citing it as this module's blocker was the same "citation is real but doesn't entail the conclusion" pattern this file names three times elsewhere. **What is genuinely, separately true and still open:** verifying `BindGrant`'s own live behavior end-to-end needs a real attached game process — that limit is real, it is just not this module's | P1.5 + Final-proof/Module 5 + Checkpoint 1 |
 | 6 `base-types` | ✅ built, verified, re-verified 2026-09-06 | P2.2 + Final-proof/Phase 2 |
 | 7 `rarity-bands` | ✅ built, verified, re-verified 2026-09-06 in full | P2.1 + Final-proof/Phase 2 |
 | 8 `affix-legality` | ✅ built, verified; **a real validation blind spot found and closed 2026-09-06** (`RoleFamilyCheck` never checked corpus→file; today's new `g-punisher.json` families were silently violating D3's role-relocation rule) | P2.3 + Final-proof/Phase 2 |
@@ -9247,7 +9247,7 @@ points at evidence already recorded, above, by name.
 | # | Before today | After today's rigor pass | What's still open |
 |---|---|---|---|
 | 0 | ✅ "CLOSED... resolved by DECLINE" (over-claimed — the decline mechanism doesn't cover this clause) | ⚠ **ONE of three clauses met.** Registries: only `core.v1.json` bumped. External deps: 4/7 resolved, 3/7 now **filed** (not just named) at `effect-atom-map.md` §20 ×2, `world-map-program.md` — awaiting response. `classes.v1.json` v4: genuinely held for user authorization | The registry bump (user decision) + 3 filed asks (other programs' decisions) |
-| 1 | ⭐ "all four criteria met (closed)" — contradicted by its own body two sentences later | ⭐ Every criterion reachable in this environment now met, including a same-day crash fix | Injector `BindGrant` (environment-blocked) |
+| 1 | ⭐ "all four criteria met (closed)" — contradicted by its own body two sentences later | ⭐ Every criterion reachable in this environment now met, including a same-day crash fix, **plus module 4/5's equip→combat wiring closed 2026-09-07** (see module 4/5's own rows) | Nothing this module's — `BindGrant`'s own live-process verification is real but belongs to a different mechanism entirely (module 5's corrected row) |
 | 2 | ⚠ "real form — met" for its first criterion (over-claimed) | ✅ **Built 2026-09-06** — `ceilingFor`/`pinAE` reader wired as production caller, red-first proven, `:73` criterion met | The dominance criterion: `FrameDominanceGuard` still exposes only `RunChannelSplit`, both named fixtures still appear in no `.cs` |
 | 3 | ⏸ "HALF HELD" — accurate from the start | ⏸ unchanged, still accurate | The generation run (same as Checkpoint 0) |
 | 4 | ✅ unconditional (false — zero production callers for the core loop) | ⏸→✅ Corrected twice 2026-09-06: the three writers had zero production callers, then the executor landed and `TheWholeLoopRunsOnOneItem_craftEnhanceSocketSalvage` drives bore → enhance → insert → salvage on one item | Met. Residuals named in the box: `forge` cannot mint, reroll/transfer unwired, `imbue` unpayable, `CraftingHorizonReport` unrendered |
@@ -9275,20 +9275,43 @@ reproduced directly, that would hit any real deploy running `--validate` today.
 
 **Structural — outside what a coding session can close, correctly held rather than forced:**
 1. `classes.v1.json` v4's full generation run — held for explicit user authorization beyond the
-   already-authorized evaluation sample (Checkpoint 0).
-2. Injector-side `BindGrant` call site — needs a real PVZ Fusion game install (Checkpoint 1).
+   already-authorized evaluation sample (Checkpoint 0). ⚠ **Re-checked 2026-09-07, still correctly
+   held, for MORE concrete reasons than before**: `AtomImporter --check --validate` was reproduced
+   failing outright (fixed the same day, see item 4 below, but was real at check time); even after that
+   fix, only 25/109 affix families pass the FULL draw-eligibility gate chain (84 refused at other
+   gates: no `op`, unlisted `op`, no `BattleRuleset` curve, or quarantined) — a full ~904-piece run today
+   would still overwhelmingly redraw the same 25 families, not the diversity the run is meant to buy;
+   and `classes.v1.json` itself is still `registryVersion 3` with 4 of its own named prerequisites
+   unstarted (plus a stale `frozenNote` still reading "FROZEN v2").
+2. Injector-side `BindGrant`'s own live-process verification — needs a real PVZ Fusion game install
+   (Checkpoint 1). ⚠ **Corrected 2026-09-07**: this item was previously conflated with module 4/5's
+   equip→combat wiring gap (both cited under Checkpoint 1). They are unrelated mechanisms — `BindGrant`
+   is a demon specimen's own bound-loadout stat mods, already wired and live; module 4/5's gap was a
+   plain missing-caller wiring defect, now closed (see module 4/5's own rows), needed no game install
+   at all. What remains here is narrowly `BindGrant`'s own behavior, unrelated to item equip.
 3. Three cross-program asks (X7 container kinds, D28/E43 family tags, X5 content ladder) — filed
    2026-09-06 to their real owners' own maps, awaiting their accept/decline/build (Checkpoint 0).
-4. The `vocabulary.json`/`AtomImporter` production defect — filed to `passive-tree` and `effect-atom`,
-   not this program's file to fix.
-5. `effect-pipeline`'s `AffixTags.cs` defect — filed, not this program's file to fix.
-5a. The seed→concrete item generator — Checkpoint 5's sole remaining blocker. Not this program's:
+   Re-checked 2026-09-07 against both target maps directly: unchanged, no response yet.
+4. `effect-pipeline`'s `AffixTags.cs` defect — filed, not this program's file to fix.
+4a. The seed→concrete item generator — Checkpoint 5's sole remaining blocker. Not this program's:
     seven OTHER item modules (12, 13, 16, 17, 18, 21, 22) independently defer to the identical gap, and
     the owner has already made an explicit, separate, dated decision about it (phased rollout,
     small-batch-then-playtest before the full run) — a decision this program did not make and has no
     standing to revisit.
 
 **Closed since this section was first written:**
+0. ✅ **The `vocabulary.json`/`AtomImporter` production defect (2026-09-07).** Root cause was NOT a
+   stray misplaced file — `data/seed/atoms/vocabulary.json` was `PassiveTreeRosterGen`'s own documented,
+   deliberate output location, colliding with `SeedScanner.OwnedFolders`' unrelated, whole-folder sweep
+   of `atoms/`. Fixed by relocating it to `data/seed/passive-tree/` (unswept, confirmed by reading
+   `OwnedFolders` directly), updating every real code/test consumer (9 files: the tool, its check mode,
+   a roster-mirror test, the seedsmith Python reader, a seedsmith reproducibility test, the manifest's
+   own provenance-hash inputs, a tuning-file note, and the committed manifest's own provenance path) —
+   `docs`/`tasks` prose references left alone on purpose. `AtomImporter --check --validate`: refusing
+   (`UnknownKind`, exit 1) → clean import, exit 0, reproduced directly both before and after. Found and
+   reported, not force-fixed: the move surfaced a genuine, pre-existing, unrelated content drift
+   (7→8 attach points from base-defense's `Siege`/`structure.place` work) — filed as its own item, not
+   folded into this fix.
 6. ✅ The 9 phantom implicit atom families — **all 9 now real, authored families**, each grounded in a
    real source (`atom-family-library.md` §3.4's family→status table, cross-referenced existing content),
    never guessed from a name. `elemental-power` decided as its own real family (not a mis-wire) with a

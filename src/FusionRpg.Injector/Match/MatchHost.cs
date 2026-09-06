@@ -169,7 +169,12 @@ public static class MatchHost
                     CheatState.RefreshCommanderAllocationCache();
                     // demon-lawn-deploy T2.1: same Hot/Cold fix, same board.start moment — a
                     // Cold-plane roster/patron read frozen once, never re-queried mid-match.
-                    LawnDeployRosterSnapshotHolder.BeginMatch(LawnDeployRosterSessionCache.BuildFromSessionCache());
+                    var lawnRoster = LawnDeployRosterSessionCache.BuildFromSessionCache();
+                    if (LawnDeployRosterSessionCache.LastBuildWasCacheMiss)
+                    {
+                        try { RpgHost.Log.Warning("lawn deploy roster: cache miss — empty roster frozen for this match"); } catch { }
+                    }
+                    LawnDeployRosterSnapshotHolder.BeginMatch(lawnRoster);
                     // demon-lawn-deploy T2.4: a fresh per-run "already fired" tracker for the trigger
                     // evaluator, same board.start moment as everything else above.
                     LawnDeployEventRunStateHolder.BeginMatch();

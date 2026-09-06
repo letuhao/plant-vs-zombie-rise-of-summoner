@@ -5,7 +5,7 @@ import {
   STATUS_STRIP_MAX,
   TIER_STROKE,
   elementColorPhaser,
-  statusInitials,
+  resolveStatusHudToken,
   tierBadgeLetter
 } from "./actorHudDisplayTokens";
 
@@ -132,11 +132,12 @@ export function setHudDisplay(
     const slotCount = visibleStatuses.length + (hud.overflow.statusCount > 0 ? 1 : 0);
     let sx = -((slotCount - 1) * 12) / 2;
     visibleStatuses.forEach((status, i) => {
+      const token = resolveStatusHudToken(status.id);
       statusRow.add(
         scene.add
-          .text(sx, 0, statusInitials(status.id), {
+          .text(sx, 0, token.hudToken, {
             fontSize: "7px",
-            color: "#f2ead8",
+            color: token.color,
             backgroundColor: "#3a3228"
           })
           .setOrigin(0.5)

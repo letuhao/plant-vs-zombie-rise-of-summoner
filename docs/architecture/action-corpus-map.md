@@ -1,8 +1,9 @@
 # Capability map: `action-corpus`
 
 **Status:** proposed 2026-09-03 from [action-corpus-ideal.md](action-corpus-ideal.md), whose idea phase
-closed the same day (§43). **Not approved. No module spec may be written until it is** —
-`seedsmith-design`'s own rule: *"capability map — approved before any module spec."*
+closed the same day (§43). **APPROVED 2026-09-07** — owner authorized building the ten model-free
+modules first, in this map's own stated build order (§5), before any model-calling stage. Module specs
+may now be written as each module's turn comes, per `seedsmith-design`'s own "recurse per module" rule.
 
 **Program prefix:** `action-corpus`. Module specs → `docs/architecture/action-corpus/spec-<module-id>.md`;
 plan → `tasks/action-corpus-plan.md` + `tasks/action-corpus-todo.md`.

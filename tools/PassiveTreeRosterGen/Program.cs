@@ -3,7 +3,7 @@ using FusionRpg.Tools.PassiveTreeRosterGen;
 
 // Task A3 (tasks/passive-tree-todo.md) — the two roster mirrors `tree-plan` owes:
 //   data/seed/statuses/roster.json     (21 statuses, from StatusCategoryRegistry)
-//   data/seed/atoms/vocabulary.json    (7 attach points / 16 kinds / 13 triggers, 11 authorable)
+//   data/seed/passive-tree/vocabulary.json (7 attach points / 16 kinds / 13 triggers, 11 authorable)
 //
 // Same --check/--emit contract as tools/ElementEnumGen: the mirror is GENERATED FROM the live C#
 // registry (which is authoritative); --check compares an existing mirror against the live registry
@@ -94,7 +94,7 @@ if (mode == "status-check")
 
 if (mode == "atom-vocab-check")
 {
-    var vocabFile = Path.Combine(seedRoot, "atoms", "vocabulary.json");
+    var vocabFile = Path.Combine(seedRoot, "passive-tree", "vocabulary.json");
     if (!File.Exists(vocabFile))
     {
         Console.Error.WriteLine($"EXIT_CANNOT_RUN: missing {vocabFile}");
@@ -122,7 +122,7 @@ if (mode == "atom-vocab-check")
     var report = AtomVocabCheck.Run(mirror);
     if (report.IsOk)
     {
-        Console.WriteLine($"data/seed/atoms/vocabulary.json agrees with the live registries " +
+        Console.WriteLine($"data/seed/passive-tree/vocabulary.json agrees with the live registries " +
                            $"({mirror.AttachPoints.Count} attach point(s), {mirror.Kinds.Count} kind(s), " +
                            $"{mirror.Triggers.Count} trigger(s)).");
         return 0;

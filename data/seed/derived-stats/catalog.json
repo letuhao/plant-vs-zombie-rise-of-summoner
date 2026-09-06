@@ -621,8 +621,8 @@
       "cap": null,
       "unitClass": null,
       "statClass": "Pool",
-      "note": "H.6, 2026-08-24. Pool (H.9 Q4, same reasoning as resource). Moved here from notRegistered -- action-map.md's own promise ('registers in actor-hub-ssot.md SS3 with resource.*') is now kept.",
-      "unitClassNote": "No reader: the battle grid is deferred (action-map.md: \"with no board, every range check passes\"), so no range check exists to consume this channel yet."
+      "note": "H.6, 2026-08-24. Pool (H.9 Q4, same reasoning as resource). Moved here from notRegistered -- action-map.md's own promise ('registers in actor-hub-ssot.md SS3 with resource.*') is now kept. Reader VERIFIED 2026-09-07 (A9 movement-actions): BasicAttack.cs's ApplyBasicAttack reads this to bound how many cells a Movement-category action moves an actor toward the nearest living enemy.",
+      "unitClassNote": "Reader: A9 movement-actions (BasicAttack.cs's ApplyBasicAttack, 2026-09-07) reads this to bound how many cells a Movement-category action moves an actor toward the nearest living enemy."
     },
     {
       "family": "progression.xpRate",

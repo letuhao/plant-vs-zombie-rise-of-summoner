@@ -18,13 +18,18 @@
 4. **Tunables** live in `data/tuning/actor-hud.v1.json` — loaded via existing tuning hub pattern
    ([tunables-ssot.md](../tunables-ssot.md)).
 5. **Status strip cap** and row offsets are tunable; priority order is structural (documented in code comment).
+6. **Display tokens from catalogs (amend 2026-09-07):** player-visible status/resource glyphs resolve
+   from injected `status-catalog` / `resource-catalog` (`hudToken`, `color`, `displayName`) —
+   [actor-hud-ideal.md](../actor-hud-ideal.md) §4.1. **`StatusInitials(id)` and hashed RGB are not
+   SSOT** — they are legacy until H1–H3 delete them. Until catalogs inject, unknown id → designed
+   placeholder (GG-62), never id-slice English.
 
 ---
 
 ## Objective
 
-Provide the shared **Actor HUD vocabulary**: snapshot DTOs, slot priority, overflow math, and level-band
-display mapping used by dump, fold, Unity, and Phaser.
+Provide the shared **Actor HUD vocabulary**: snapshot DTOs, slot priority, overflow math, level-band
+display mapping, and (after H1) catalog **resolve** helpers used by dump, fold, Unity, and Phaser.
 
 **Success:** Given fixture statuses + cap, `Prioritize` returns CC-first order with overflow count;
 given Θ, `PowerBandDisplay` returns stable display int for badge.
@@ -132,9 +137,11 @@ Use power ladder SSOT; **never** emit raw Θ on lawn. Caller (dump builder) supp
 
 ## Boundaries
 
-- No Unity types, no injector references.
+- No Unity types, no injector references; no File I/O (hosts inject catalogs; Core resolves from hub).
 - No status id validation beyond non-empty string — closed vocabulary enforced in dump builder.
 - Boss tier enum value exists but builder **must not emit** until expedition signal wired.
+- **Never** authorize `StatusInitials` / hash RGB as the player token path after H3.
+- Catalog *membership* inject is actor-surface-catalog; this module owns resolve API shape only.
 
 ---
 

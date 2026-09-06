@@ -1333,8 +1333,8 @@ dotted form and gets a load refusal for a reason the grammar never explains.
 > nodes whose content actually changed go back through the pipeline — is a claim about *identity
 > surviving a regeneration*, and it is true only because the key comes out of the seed rather than out
 > of a counter. Recompute it from position and one inserted tier-1 node re-mints every id after it,
-> every unchanged node reads as new, and `O(diff)` silently becomes `O(corpus)`: **35,160 nodes back
-> through review for a one-node insert, with no error anywhere to say why.**
+> every unchanged node reads as new, and `O(diff)` silently becomes `O(corpus)`: **35,280 nodes (D51:
+> was 35,160) back through review for a one-node insert, with no error anywhere to say why.**
 
 Under D24 a re-minted id is a **migration, not a balance pass**. That is the whole reason
 `topology.tierCount`, `branchCount` and `nodesPerBranch` sit in **Ask first**, and the reason
@@ -1371,7 +1371,7 @@ none. Determinism is unaffected — a re-emit against the same committed plan is
 is exactly what `--check` asserts — but *reproducibility from the rosters alone is not claimed and
 must not be*. A from-scratch emit into an empty directory is a **re-mint of the whole corpus**, which
 under D24 is a migration. `--emit` refuses to mint a key for a node that already has one, so the
-mistake is a refusal rather than a silent 35,160-node rename.
+mistake is a refusal rather than a silent 35,280-node rename (D51: was 35,160).
 
 **Determinism hazards, specified rather than discovered:**
 
@@ -1516,7 +1516,7 @@ yields `F = 1.0012` and passes every test either spec currently writes.
 | D34 | `skillPointsPerTheta` becomes per-scope | Not here. `tree-state` |
 | D35 | Status trees gate on their own quantity | §7 — `gateQuantity: "status_applied.<id>"`, deliberately outside `AllocationScope` |
 | D36 | The unlock-cost curve | Not here. `tree-state` |
-| D37 | The two missing gate quantities are built inside this program | §7, §7.1, `R-G2`'s wave table and §9 item 7 — `gate-counters` owns them, the corpus order is a schedule, and all 39 trees are reachable |
+| D37 | The two missing gate quantities are built inside this program | §7, §7.1, `R-G2`'s wave table and §9 item 7 — `gate-counters` owns them, the corpus order is a schedule, and all 42 trees are reachable (D51, 2026-09-06: 24 statuses not 21, was 39) |
 | D38 | `g = 11` at commander scope, tunable | Not here. `aptitudes.v5.json` owns the key; this module names it in §Tunables and states no value for it |
 | D39 | `H` reads the final allocation, self-spent only | Not here. `tree-resolve`. Nothing in the plan is order-sensitive, so nothing here changes |
 | D40 | All three exclusion forms kept; nullification printed loudly | §6's `exclusionForm` axis and §Tunables — the rung is reachable, the ~2% target stands, and `tree-review` censuses and enforces the presentation |
@@ -1670,3 +1670,11 @@ doc 02 §9.1 (resolved in §Tunables, with the reason).
     dependency on `mechNodes[]`/`nodeKey` is recorded. Open question 2 is closed -- the deep-tier
     behavioural sample REPORTS -- and question 1 is left open, because nobody has answered it.
 ```
+
+**Superseded since this checklist was written, kept unedited above as the historical record of this
+session's own verification.** Two of the counted-from-code figures have since grown: statuses 21→24
+(D51, 2026-09-06, three `nerve.*` statuses accepted) and atom kinds 16→17 (an unrelated addition,
+`structure.place` on base-defense's new `Siege` attach point, landed the same day D56 specced the
+still-unbuilt 18th — see [`spec-element-conversion.md`](spec-element-conversion.md) §0). Neither growth
+changes any conclusion this checklist reached; both are corpus-size inputs, not findings the checklist
+itself depended on.

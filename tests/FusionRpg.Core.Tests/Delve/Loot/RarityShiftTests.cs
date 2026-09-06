@@ -283,4 +283,155 @@ public class RarityShiftTests
 
         Assert.Equal(RarityShift.ToWeightShift(Ladder, 2), result["t1"].Groups[0].Entries[0].RarityWeightShift);
     }
+
+    // ---- ToCeilingShift (D4.12): a ceiling deletes the top end, it never redistributes ----------------
+
+    [Fact]
+    public void ToCeilingShift_null_or_empty_ladder_or_null_ceilRung_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => RarityShift.ToCeilingShift(null!, "staple"));
+        Assert.Throws<ArgumentException>(() => RarityShift.ToCeilingShift(Array.Empty<RarityRung>(), "staple"));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.ToCeilingShift(Ladder, null!));
+    }
+
+    [Fact]
+    public void ToCeilingShift_an_unknown_ceilRung_throws()
+    {
+        Assert.Throws<KeyNotFoundException>(() => RarityShift.ToCeilingShift(Ladder, "does-not-exist"));
+    }
+
+    [Fact]
+    public void ToCeilingShift_at_seldom_zeroes_only_exceptional()
+    {
+        var shift = RarityShift.ToCeilingShift(Ladder, "seldom"); // ordinal 40
+        Assert.Equal(1000, NewWeight(shift, 10, 1000)); // at/below the ceiling: unchanged
+        Assert.Equal(300, NewWeight(shift, 20, 300));
+        Assert.Equal(90, NewWeight(shift, 30, 90));
+        Assert.Equal(25, NewWeight(shift, 40, 25));  // the ceiling rung itself is KEPT, never zeroed
+        Assert.Equal(0, NewWeight(shift, 50, 7));    // strictly above the ceiling: zeroed outright
+    }
+
+    [Fact]
+    public void ToCeilingShift_never_redistributes_the_deleted_weight_unlike_ToWeightShift()
+    {
+        // The load-bearing difference from ToWeightShift's own "top absorbing" conservation: a
+        // ceiling's own deltas need not sum to zero -- the deleted weight is gone, not moved.
+        var shift = RarityShift.ToCeilingShift(Ladder, "frequent"); // ordinal 20
+        Assert.NotEqual(0, shift.Values.Sum());
+        Assert.Equal(-(90 + 25 + 7), shift.Values.Sum());
+    }
+
+    [Fact]
+    public void ToCeilingShift_at_the_top_rung_zeroes_nothing()
+    {
+        var shift = RarityShift.ToCeilingShift(Ladder, "exceptional"); // the ladder's own top ordinal
+        Assert.All(shift.Values, d => Assert.Equal(0, d));
+    }
+
+    [Fact]
+    public void ToCeilingShift_at_the_bottom_rung_zeroes_everything_above_it()
+    {
+        var shift = RarityShift.ToCeilingShift(Ladder, "staple"); // the ladder's own bottom ordinal
+        Assert.Equal(1000, NewWeight(shift, 10, 1000)); // the ceiling rung itself: kept
+        Assert.Equal(0, NewWeight(shift, 20, 300));
+        Assert.Equal(0, NewWeight(shift, 30, 90));
+        Assert.Equal(0, NewWeight(shift, 40, 25));
+        Assert.Equal(0, NewWeight(shift, 50, 7));
+    }
+
+    // ---- ApplyWindow (D4.12): the quest-reward composer -- a floor and a ceiling, never a shift ------
+
+    [Fact]
+    public void ApplyWindow_null_arguments_throw()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+        Assert.Throws<ArgumentNullException>(() => RarityShift.ApplyWindow(null!, Ladder, "t1", null, "seldom"));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.ApplyWindow(tables, null!, "t1", null, "seldom"));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.ApplyWindow(tables, Ladder, null!, null, "seldom"));
+        Assert.Throws<ArgumentNullException>(() => RarityShift.ApplyWindow(tables, Ladder, "t1", null, null!));
+    }
+
+    [Fact]
+    public void ApplyWindow_on_an_unknown_table_id_returns_the_map_unchanged()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+        var result = RarityShift.ApplyWindow(tables, Ladder, "does-not-exist", "occasional", "seldom");
+        Assert.Same(tables, result);
+    }
+
+    [Fact]
+    public void ApplyWindow_leaves_every_other_table_untouched_same_instance()
+    {
+        var t1 = SampleTable("t1");
+        var t2 = SampleTable("t2");
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = t1, ["t2"] = t2 };
+
+        var result = RarityShift.ApplyWindow(tables, Ladder, "t1", "occasional", "seldom");
+
+        Assert.Same(t2, result["t2"]);
+        Assert.NotSame(t1, result["t1"]);
+    }
+
+    [Fact]
+    public void ApplyWindow_sets_the_ceiling_shift_exactly_as_ToCeilingShift_would()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+
+        var result = RarityShift.ApplyWindow(tables, Ladder, "t1", null, "seldom");
+
+        Assert.Equal(RarityShift.ToCeilingShift(Ladder, "seldom"), result["t1"].Groups[0].Entries[0].RarityWeightShift);
+    }
+
+    [Fact]
+    public void ApplyWindow_composes_the_entrys_own_floor_with_the_composed_floor_stronger_wins()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1", entryFloor: "frequent") };
+
+        var result = RarityShift.ApplyWindow(tables, Ladder, "t1", "occasional", "exceptional");
+
+        Assert.Equal("occasional", result["t1"].Groups[0].Entries[0].RarityFloor); // occasional (30) beats frequent (20)
+    }
+
+    /// <summary>Same "entry wins" proof `Apply`'s own pair already established (a composed-floor-always-
+    /// highest fixture cannot tell "entry floor included" from "entry floor silently dropped").</summary>
+    [Fact]
+    public void ApplyWindow_composes_the_entrys_own_floor_with_the_composed_floor_entry_wins()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1", entryFloor: "seldom") };
+
+        var result = RarityShift.ApplyWindow(tables, Ladder, "t1", "occasional", "exceptional");
+
+        Assert.Equal("seldom", result["t1"].Groups[0].Entries[0].RarityFloor); // seldom (40) beats occasional (30)
+    }
+
+    [Fact]
+    public void ApplyWindow_with_no_composed_floor_and_no_entry_floor_leaves_the_entry_unfloored()
+    {
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = SampleTable("t1") };
+
+        var result = RarityShift.ApplyWindow(tables, Ladder, "t1", null, "exceptional");
+
+        Assert.Null(result["t1"].Groups[0].Entries[0].RarityFloor);
+    }
+
+    [Fact]
+    public void ApplyWindow_writes_the_same_composed_ceiling_onto_every_entry_in_the_table()
+    {
+        var table = SampleTable("t1") with
+        {
+            Groups = new[]
+            {
+                new DropTableGroupRow("g1", 0, 1, new[] { new DropTableEntryRow(0, DropEntryKind.Equipment, "", 100) }),
+                new DropTableGroupRow("g2", 1, 1, new[] { new DropTableEntryRow(0, DropEntryKind.Equipment, "", 100) }),
+            },
+        };
+        var tables = new Dictionary<string, DropTableRow> { ["t1"] = table };
+
+        var result = RarityShift.ApplyWindow(tables, Ladder, "t1", null, "occasional");
+
+        var shift1 = result["t1"].Groups[0].Entries[0].RarityWeightShift;
+        var shift2 = result["t1"].Groups[1].Entries[0].RarityWeightShift;
+        Assert.Equal(RarityShift.ToCeilingShift(Ladder, "occasional"), shift1);
+        Assert.Equal(shift1, shift2);
+    }
 }

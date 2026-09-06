@@ -38,7 +38,7 @@ path and its importer) are outside that scope and outside every other task.
 | C4 | §2.2 `NodeRecord` shape — `nodeClass`, `affixIds[]` 1..3, `budgetShareMilli` carried verbatim (R4/R5) | PARTIAL | A2 names `affixIds` 1..3 only; `nodeClass` and `budgetShareMilli` unnamed, though A4 reads the latter |
 | C5 | §2.2 / D40 `exclusionForm` enum, and the refusal when form and `excludeProps` disagree | PARTIAL | Named in A2's Description, absent from its acceptance criteria |
 | C6 | §2.3 `NodeAtom` shape — `kMicro` `long`, `unitClass` stored, 11 authorable triggers, `whenJson` | PARTIAL | A2 covers `kMicro is long`; the rest unnamed |
-| C7 | §2.3 `soulCurveId` — a curve reference, never a formula (D3) | MISSING | No task mentions the soul track's curve reference |
+| C7 | §2.3 `soulCurveId` — a curve reference, never a formula (D3) | MISSING | No task mentions the soul track's curve reference. **Superseded 2026-09-06 by D58 — see [`spec-soul-curve-resolution.md`](../../architecture/passive-tree/spec-soul-curve-resolution.md): the field is retired, not built. Kept here unrewritten as the historical record of what this row originally found.** |
 | C8 | §2.4 `scaleAxis` stored as a function of `UnitClass`; the axis/class agreement refusal; a sigmoid channel never carries the `PTheta` axis | MISSING | No task. This is the refusal that catches a **silent** failure (§2.4) |
 | C9 | §2.5 the potency ceiling is `budgetShareMilli > potency.maxNodeShareMilli`, both ‰ of one branch | MISSING | A2 asserts the **superseded** `kMicro`-vs-ceiling form the spec calls a dimensional error (§6) |
 | C10 | §2.5 `--check` proves the emitted `kMicro` is what the derivation chain produces; `--explain` prints the chain | MISSING | D4's `--check` is the plan's byte-identity gate, not the kMicro reproduction proof. No `--explain` anywhere |
@@ -281,7 +281,11 @@ catalog property, read and never re-declared.
 **Rank 7 — the entire second progression track is unbuilt.**
 **Description:** `Θ_node = Θ_actor + (thetaPerSoulLevelMilli · soulLevel)/1000`, derived at the read
 site and never persisted; the coefficient never moves; `soulCurveId` carried on `NodeAtom` as a curve
-reference.
+reference. **Superseded 2026-09-06 by D58 — the curve-reference framing above is the pre-decision
+reading.** [`spec-soul-curve-resolution.md`](../../architecture/passive-tree/spec-soul-curve-resolution.md)
+found `soulCurveId` has zero real consumers and retires the field entirely rather than building
+toward it; the rest of this task (the `Θ_node` formula itself, `kMicro` invariance, linearity, the
+`long`/overflow acceptance bullets below) is unaffected and stands as written.
 **Acceptance:**
 - [ ] `kMicro` is byte-identical at soul level 0 and 50; only `Θ_node` moves
 - [ ] `thetaPerSoulLevelMilli = 1000` is one `Θ` per level, and the per-mille divide happens once,

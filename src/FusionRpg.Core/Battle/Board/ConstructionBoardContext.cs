@@ -1,4 +1,5 @@
 using FusionRpg.Core.Actions;
+using FusionRpg.Core.Battle.Siege;
 using FusionRpg.Core.World;
 
 namespace FusionRpg.Core.Battle.Board;
@@ -33,15 +34,50 @@ public sealed class ConstructionBoardContext
     /// deltas.</summary>
     public List<StructurePlacementRecord> Placed { get; } = new();
 
+    /// <summary>
+    /// `Built`'s own world-scoped budget for THIS battle only — seeded once from the sector's real
+    /// current stock by whoever builds this context (<c>DistrictAssaultResolver</c>), spent down as
+    /// <see cref="SpendBuilt"/> fires. Deliberately the sector's RAW stock, not a live
+    /// <see cref="BoardEconomy.SiegeDepot"/> instance: <c>SiegeDepot</c> is a pure, immutable value
+    /// type with no live per-battle tracker anywhere in production today (confirmed by grep — its own
+    /// `Seed*`/`Credit*`/`Spend*` methods all return a NEW instance; nothing holds one across a real
+    /// battle) — threading ITS OWN board-earned/world-seed split through here is real, separate,
+    /// un-started work, named rather than silently built halfway. This is the honest v1: the SAME
+    /// number `ConstructionCost`'s own doc comment always assumed a caller would supply.
+    /// </summary>
+    public long RemainingRubble { get; private set; }
+    public long RemainingIronwork { get; private set; }
+
     public ConstructionBoardContext(
         BoardState board, int boardSide, int coreSideMilli, int rampartThickness,
-        IReadOnlyDictionary<GridPos, (int SlotIndex, SlotKind Kind)> slotByCell)
+        IReadOnlyDictionary<GridPos, (int SlotIndex, SlotKind Kind)> slotByCell,
+        long sectorRubble = 0, long sectorIronwork = 0)
     {
         Board = board ?? throw new ArgumentNullException(nameof(board));
         BoardSide = boardSide;
         CoreSideMilli = coreSideMilli;
         RampartThickness = rampartThickness;
         SlotByCell = slotByCell ?? throw new ArgumentNullException(nameof(slotByCell));
+        if (sectorRubble < 0) throw new ArgumentOutOfRangeException(nameof(sectorRubble));
+        if (sectorIronwork < 0) throw new ArgumentOutOfRangeException(nameof(sectorIronwork));
+        RemainingRubble = sectorRubble;
+        RemainingIronwork = sectorIronwork;
+    }
+
+    /// <summary>True when <paramref name="def"/>'s own `Built` cost fits the REMAINING battle
+    /// budget — reuses <see cref="ConstructionCost.CanAffordBuilt"/> verbatim (Law 1), never a second
+    /// affordability rule.</summary>
+    public bool CanAffordBuilt(StructureDef def) => ConstructionCost.CanAffordBuilt(RemainingRubble, RemainingIronwork, def);
+
+    /// <summary>Debits <paramref name="def"/>'s own `Built` cost from the remaining battle budget —
+    /// reuses <see cref="ConstructionCost.SpendBuilt"/> verbatim (Law 1). Throws exactly when that
+    /// pure function would (spending past the balance is a caller bug, matching `SiegeDepot`'s own
+    /// "never a silent floor" precedent), leaving the balance untouched on failure.</summary>
+    public void SpendBuilt(StructureDef def)
+    {
+        var (rubble, ironwork) = ConstructionCost.SpendBuilt(RemainingRubble, RemainingIronwork, def);
+        RemainingRubble = rubble;
+        RemainingIronwork = ironwork;
     }
 }
 

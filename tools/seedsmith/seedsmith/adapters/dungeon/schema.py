@@ -55,6 +55,7 @@ def _dungeon_registries() -> dict:
         "raidMode": _reg.load_raid_modes(),
         "disposition": _reg.load_disposition(),
         "bands": _reg.load_bands(),
+        "theme": _reg.load_theme_ids(),
     }
 
 
@@ -163,7 +164,7 @@ def build_domain_schema(*, planned_values: "dict[str, Any] | None" = None) -> di
         "domainId": _planned_const("domainId", "string", pv.get("domainId", "<planned:domainId>")),
         "name": {"type": "string", "description": _desc("name")},
         "flavor": {"type": "string", "description": _desc("flavor")},
-        "theme": _enum("theme", pv.get("themeCandidates", ("theme.example",))),
+        "theme": _enum("theme", pv.get("themeCandidates", reg["theme"])),
         "climate": _enum("climate", ELEMENTS, const=True),
         "dangerBand": _enum("dangerBand", ("shallow", "mid", "deep", "abyssal"), const=True),
         "permadeathFromRung": {"anyOf": [{"type": "string", "enum": ["none"]}, {"type": "string"}], "description": _desc("permadeathFromRung")},

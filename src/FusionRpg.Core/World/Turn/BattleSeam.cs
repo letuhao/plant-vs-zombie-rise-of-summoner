@@ -106,6 +106,18 @@ public sealed record BoardProjection
     public int DevelopmentLevel { get; init; }
 
     /// <summary>
+    /// base-defense `siege-construction`/`siege-ai` (2026-09-07, session 5): the sector's own
+    /// `Built`-path budget, additive and defaulted to 0 (every battle kind that predates this field —
+    /// every non-district one — constructs the identical record it always did, and a district assault
+    /// with no live construction wiring reads these as 0 too, which is correct: nothing could ever
+    /// have earned a nonzero balance without this field existing). Threaded through so a live,
+    /// in-battle construction decision (`ConstructionBoardContext.CanAffordBuilt`/`SpendBuilt`) can
+    /// read the sector's REAL current stock rather than the vacuous zero it silently read before this.
+    /// </summary>
+    public long RubbleStock { get; init; }
+    public long IronworkStock { get; init; }
+
+    /// <summary>
     /// base-defense `siege-resolver`: the sector's own type id, additive and defaulted to `""`.
     /// `DistrictLayout.Build` reads it (via `SectorTypeCatalog`) to decide the Fortress rampart bonus —
     /// omitting it would silently drop that bonus for every district assault, which is a worse defect

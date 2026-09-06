@@ -253,11 +253,12 @@ public sealed class DerivedStatRegistry
                       UnitClassNote: "No shipped reader for any non-hp resource id -- active restoration for stamina/hunger/spirit/qi/poise has no consumer until the action layer grants one (action-map.md)."));
         }
 
-        // H.6 -- movement. Pool (Q4, same reasoning as resource). Unit stays null: no range-check
-        // consumer exists yet (the battle grid is deferred -- action-map.md: "with no board, every
-        // range check passes"), and CombatSim marks this family reserved too.
+        // H.6 -- movement. Pool (Q4, same reasoning as resource). Unit stays null: A9 movement-actions
+        // (BasicAttack.cs's ApplyBasicAttack, 2026-09-07) is the first and only reader, and it consumes
+        // the value as a cell count, not through any registered UnitClass -- no dedicated board-distance
+        // unit exists yet, a separate question from whether a reader exists at all.
         Register(new(DerivedStatChannels.MoveRange, DerivedComposeKind.FlatSum, 0, Class: StatClass.Pool,
-                     UnitClassNote: "No reader: the battle grid is deferred (action-map.md), so no range check exists to consume this channel yet."));
+                     UnitClassNote: "Reader: A9 movement-actions (BasicAttack.cs's ApplyBasicAttack, 2026-09-07) reads this to bound how many cells a Movement-category action moves an actor toward the nearest living enemy."));
 
         // H.7 -- progression. xpRate: Class null, matching progression.power/progression.realm — a
         // rate/magnitude the counterbalance rule does not apply to ("Non-combat" row, H.0); FlatSum,
