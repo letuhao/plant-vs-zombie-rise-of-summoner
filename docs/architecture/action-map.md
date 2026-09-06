@@ -835,3 +835,66 @@ acceptance tests test something real.
 | `act.capture` — the second code-backed action after `act.attack` | `party-dungeon/spec-wild-room.md` §5 | a corpus `ActionRow` (`Kind = Skill`, `Relation = Enemy`, `Mode = Single`, E3 conditions `HpBelowMilli(Target) ∧ HoldsStock(Self, seal)`) whose resolver `CaptureAction.Resolve` lives in the action layer; the runner gains one id → resolver row beside `act.attack` (`BattleEngine.cs:553`); the seal is its cost — A3's item-cost row gates it |
 | a `battle` supply use riding an action's item-cost row (A3) | `party-dungeon/spec-supplies-and-objects.md` §3 | `GrantsActionId` names the action; the item is the cost — the A3 row is the gate for battle use only |
 
+## 14. Reopening 2026-09-06 — A21–A23, closing the content-to-battle gap
+
+**Why now.** A17–A20 (§12) proved the battle engine correctly dispatches, costs, and cools down
+*whichever* action an actor's real loadout selects — end to end, with real production-proven wiring
+from `rpg_action_grant` through `BattleEngine.Resolve`. The question that follows: does any real
+player ever hold a real, generated, granted action today? **Traced directly, not assumed: no.**
+
+Three built-and-tested pieces have **zero non-test callers** anywhere in `src/`: `ActionEligibility.Candidates`
+(`Actions/Eligibility/ActionEligibility.cs`, A-E1, 2026-09-03), `ActionSeeder.Generate` (A13/T31,
+2026-08-28), and `RpgStore.UpsertAction`/`UpsertCost` (A1/T30, 2026-08-28). `ExecuteSummon`
+(`RpgStore.Summons.cs:28-174`, the only production entry point that mints a new specimen) writes
+exactly three things — `rpg_unique_actors`, `rpg_demon_profiles`, a contract-slot bind — and grants
+**zero actions**. This is not action-specific: `Instantiator.TryInstantiate`, the shared per-player
+roll SDK every content type (items, demons, actions) is meant to use, has **zero production callers
+for any content type** (`effect-pipeline-ideal.md` §"WIRING GAP — nothing produces an instance").
+
+**The one place this exact pattern already runs in production**: `PUT /actors/{id}/equipment/{slot}` →
+`RpgStore.UpsertUniqueEquipment` → `ReconcileUniqueEquipmentAtomBindingsUnlocked` →
+`RpgStore.ProduceAndBind` (`RpgStore.AtomInstances.cs:321-361`) — derives `rollSeed` from the
+player's own `WorldSeed` plus a source tag and a discriminator, is idempotent by content, withdraws
+stale bindings by `source` before producing new ones, and writes `effect_instance` +
+`effect_instance_atom` + `effect_binding` in one transaction. **A21 borrows the "idempotent, one
+transaction" discipline, not the per-player seed** — `action-map.md` §10.5a already settled *"a
+granted action has no instance and no rolls"*, so A21's own container roll is seeded from the brief's
+own stable id (content-level, shared by every holder), never a per-player `WorldSeed`; equipment
+varies per player on purpose, a granted action does not (spec-action-instance-and-grant.md §Objective
+point 3). `ExecuteSummon` granting zero actions is **correct today, not itself the gap** — a fresh
+specimen has earned nothing yet by the unlock ladder's own design; the real gap is that nothing ever
+advances a specimen's `EarnCount` in the first place (§14's A21 row).
+
+**A real, load-bearing defect found while designing A21, in already-shipped A19 code, not new work**:
+`spec-rung-semantics.md` §3.1 (drafted 2026-09-03, before A19 was built) is explicit that cost/cooldown
+scaling must read the **holder's** `effectiveRung` (`min(earnCount, cap)`, per-actor, per-action) —
+`StructureBudgetGuard` correctly reads the **authored** `Rung` instead, because structure is a property
+of the content, not the holder, but cost is the opposite case. `BattleRunState.cs:493`'s
+`CostLedger` wiring (T56.1, this program's own immediately-prior session) reads
+`actionCatalog?.Get(actionId)?.Rung` — the **authored** value — for cost/cooldown scaling. **Latent
+today for the same reason every other gap on this page is latent**: no real holder ever has unlock-ladder
+state to diverge from the authored rung, since nothing grants real content yet. A21 is precisely what
+creates that state, so this stops being latent the day A21 ships. **A23 below fixes it first.**
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A23** | `cost-scaling-holder-rung` | `CostLedger`'s `rungOf` delegate resolves the actor's own `EffectiveRung` (`UnlockLadder.EffectiveRung(earnCount, tuning)`, via that actor's `UnlockState`/`HeldUnlock.EarnCountAtAcceptance` for the action) instead of the action's authored `Rung`, falling back to the authored `Rung` when the actor holds no unlock record for it (every intrinsic/basic action, which is never "earned") | A11, A19 (both built) |
+| **A21** | `action-instance-and-grant` | Two parts. **(1) Import, once, content-seeded**: the already-accepted seedsmith corpus (`data/seed/actions/committed-round-{1,2}.json`, 24 rows, currently read nowhere in `src/`) rolls each brief's named `atomFamilies` into a concrete container (seeded from the brief's own stable id, never a per-player seed — a granted action has no instance and no roll, per §10.5a), composes a full `ActionRow`/`ActionCostRow` from it plus a new per-category timing/cost template, and persists via `UpsertContainer`/`UpsertAction`/`UpsertCost`, idempotently. **(2) Grant, per specimen, on its own level gain**: inside `AwardUniqueActorXpUnlocked`'s existing transaction (`RpgStore.UniqueActors.cs:1333`, the real per-specimen level-transition write — corrected mid-spec-audit from an earlier, wrong assumption that the player/species-scoped `ILevelChangeHandler` seam applied here), roll `ActionEligibility.Candidates` minus already-held against `UnlockState.TryAccept`, and grant a success via the already-proven `RpgStore.UpsertGrant` | A11, A12, A13, A15, A16, A23 (all built except A23) |
+| **A22** | `action-resolution-by-category` | `TimelineDispatch`/`ApplyBasicAttack` branch on `CompiledAction.Category`: a non-Attack action skips the attack roll and arms its cooldown unconditionally, instead of every action resolving attack-shaped regardless of category. Named 2026-09-06 by A18f's own spec-audit (`spec-action-dispatch-generalization.md`'s "⛔ Real, load-bearing gap"); dormant only because no real non-Attack action has reached a battle yet — the seedsmith corpus already authors 10 of 19 accepted rows non-Attack | A18f (built) |
+
+**Build order: A23 → A21 → A22.** A23 first because A21 is what exposes it — shipping A21 against
+the unfixed rung wiring would ship real content that mis-prices itself from day one. A22 last: it
+is real and already scoped from A18f's own audit, but nothing makes it *urgent* until A21 lands real
+non-Attack content — it can build in parallel with either, but has no reason to block them.
+
+### 14.1 Checkpoints
+
+- **⛔ Checkpoint I — cost scales by holder, not by content.** A23: two actors holding the same
+  action at different earn-counts pay different scaled costs; `StructureBudgetGuard`'s own use of
+  the authored rung is pinned as unchanged.
+- **⛔ Checkpoint J — a real player can hold a real, generated action.** A21: leveling a real specimen
+  can grant it a real, persisted, costed action that a real battle can equip and resolve — closing
+  the gap this section opened with.
+- **⛔ Checkpoint K — a non-Attack action stops borrowing the attack roll.** A22: a real Support/
+  Defense/Movement/Status action neither rolls to hit nor gates its cooldown on landing.
+

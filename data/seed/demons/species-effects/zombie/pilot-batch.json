@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "kind": "container",
+  "_meta": {
+    "pipeline": "species-effects",
+    "partition": "pilot-batch"
+  },
+  "entries": [
+    {
+      "id": "species-passive.conezombie",
+      "kind": "species-passive",
+      "atoms": [],
+      "pool": [
+        {
+          "affix": "affix.authored.affix-draw-002",
+          "weight": 300,
+          "group": "affix.authored.affix-draw-002"
+        }
+      ],
+      "prefixRolls": 0,
+      "suffixRolls": 1,
+      "tags": {
+        "requireTags": [],
+        "anyOfTags": []
+      },
+      "_provenance": {
+        "pipeline": "species-effects",
+        "model": "claude-sonnet-5",
+        "note": "reasoned directly, no live LM Studio endpoint reachable in this environment — see tools/seedsmith/run_t53_claude_propose.py",
+        "coreAffixIds": []
+      }
+    }
+  ]
+}

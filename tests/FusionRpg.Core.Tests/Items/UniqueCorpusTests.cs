@@ -166,6 +166,66 @@ public class UniqueCorpusTests
     }
 
     /// <summary>
+    /// D4.23 (spec-unique-pipeline.md §5 point 5, decision 13) — the todo's own literal count test:
+    /// 144 anchors, 95 disabled, 49 live at rung ≥ 80, no anchor's OWN rung/rarity changed. Split by
+    /// rarity name, matching the spec's own "from disk" tally exactly (grafted 20 · cultivated 20 ·
+    /// fused 20 · chimeric 20 · heirloom 15 = 95 below; firstseed 9 · sunwoven 23 · almanac 17 = 49 at
+    /// or above) rather than by the seed files' own rung-BAND grouping, which spans two rarities per
+    /// band (`-70` files mix `heirloom`, disabled, with `firstseed`, not) — the exact split this test
+    /// would silently get wrong if it filtered by filename/partition instead of by rarity ordinal.
+    /// </summary>
+    [Fact]
+    public void The_144_anchors_split_95_disabled_49_live_by_rung_floor_no_rarity_moved()
+    {
+        Assert.Equal(144, Corpus.Count);
+
+        var disabled = Corpus.Where(s => !s.Enabled).ToList();
+        var live = Corpus.Where(s => s.Enabled).ToList();
+        Assert.Equal(95, disabled.Count);
+        Assert.Equal(49, live.Count);
+
+        // Every disabled anchor is below the new floor; every live one meets it -- "enabled" tracks
+        // the floor exactly, it is not an independent flag that happens to agree today.
+        Assert.All(disabled, s => Assert.True(Ordinals[s.RarityId] < Tuning().RungFloorOrdinal));
+        Assert.All(live, s => Assert.True(Ordinals[s.RarityId] >= Tuning().RungFloorOrdinal));
+
+        // The exact rarity tally the spec cites "from disk" -- pinned by name so a future edit that
+        // silently re-runs an anchor (rather than disabling it) changes one of these counts.
+        var byRarity = Corpus.GroupBy(s => s.RarityId).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+        Assert.Equal(20, byRarity["grafted"]);
+        Assert.Equal(20, byRarity["cultivated"]);
+        Assert.Equal(20, byRarity["fused"]);
+        Assert.Equal(20, byRarity["chimeric"]);
+        Assert.Equal(15, byRarity["heirloom"]);
+        Assert.Equal(9, byRarity["firstseed"]);
+        Assert.Equal(23, byRarity["sunwoven"]);
+        Assert.Equal(17, byRarity["almanac"]);
+
+        // "no anchor's rung changed": every disabled seed keeps the SAME rarity id it always had --
+        // this is a structural guarantee here (nothing in the disable pass touches "rarity"), not a
+        // snapshot comparison, but the rarity-tally assertions above are the same claim from the data
+        // side: the 95/49 counts by name match the pre-D4.23 rarity distribution exactly.
+        Assert.All(Corpus, s => Assert.False(string.IsNullOrEmpty(s.RarityId)));
+    }
+
+    /// <summary>
+    /// "The 64 `unique` table rows are re-pointed" (todo's own acceptance line) — the map's own drift
+    /// note (spec-unique-pipeline.md §9) corrects this: 64 is the source-locked COUNT, and "the lock
+    /// lives in which table references the id" (ideal :1521-1524) — a source-locked unique's binding
+    /// is not a field on the anchor at all, it is which DOMAIN table names its id. No domain table
+    /// exists yet (D4.16's own import arm is unbuilt, `domain-catalog`), so there is nothing to
+    /// re-point today: this pins the COUNT the eventual re-pointing acts on, honestly, rather than
+    /// asserting a re-pointing this task cannot perform.
+    /// </summary>
+    [Fact]
+    public void Sixty_four_anchors_are_source_locked_the_count_a_future_domain_binding_repoints()
+    {
+        Assert.Equal(64, Corpus.Count(s => s.Acquisition == UniqueAcquisition.SourceLocked));
+        Assert.Equal(40, Corpus.Count(s => s.Acquisition == UniqueAcquisition.Deterministic));
+        Assert.Equal(40, Corpus.Count(s => s.Acquisition == UniqueAcquisition.Drop));
+    }
+
+    /// <summary>
     /// `naming.v1.json`'s own `idVsContainerIdNote` left this derivation open "for wave-1b". Every
     /// derived id is a legal container id under the shipped grammar, and they are all distinct.
     /// </summary>
@@ -257,7 +317,11 @@ public class UniqueCorpusTests
         var high = Corpus.Where(s => Ordinals[s.RarityId] >= 90).ToList();
         Assert.NotEmpty(high);
         Assert.DoesNotContain(high, s => s.Acquisition == UniqueAcquisition.Drop);
-        Assert.All(Corpus, s => Assert.True(Ordinals[s.RarityId] >= Tuning().RungFloorOrdinal));
+        // D4.23: the floor now holds for every CURRENTLY OFFERED anchor, not every anchor in the
+        // corpus outright -- 95 of the 144 sit below the raised floor on purpose (enabled: false,
+        // "never re-runged, never deleted", spec-unique-pipeline.md §5 point 5) and are exempted from
+        // this exact check by UniqueCorpusValidator's own matching skip, not just by this assertion.
+        Assert.All(Corpus.Where(s => s.Enabled), s => Assert.True(Ordinals[s.RarityId] >= Tuning().RungFloorOrdinal));
     }
 
     /// <summary>

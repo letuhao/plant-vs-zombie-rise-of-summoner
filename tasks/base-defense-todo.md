@@ -53,8 +53,10 @@ world-stage effort per this repo's own convention — not board-render, never to
 transiently carried real type errors, then were clean again on the next check seconds later — confirmed
 external the same way (git-untracked, unrelated files, self-resolving) before trusting the final green
 `tsc` run. `board-render`'s full suite ended at 129/129 green in `src/game`, with `check:bundle`'s
-entry-chunk budget unchanged across all eight tasks. `siege-stage` (Level 8b) is now IN PROGRESS —
-2 of 7 tasks done (21.1's own evidence found the spec's "six rows matching the four that exist" framing
+entry-chunk budget unchanged across all eight tasks. `siege-stage` (Level 8b) reached IN PROGRESS —
+2 of 7 tasks done — then was PAUSED 2026-09-06 by owner decision, 21.3 onward and all of `battle-stage`
+blocked pending a cross-program Phaser refactor (real, measured duplication found across the lawn/world
+scenes; see `siege-stage`'s own module section below for the evidence). 21.1's own evidence found the spec's "six rows matching the four that exist" framing
 stale against real code — only 2 of 6 shell integration points are real per-stage tables today, not 6 —
 and corrected the approach before implementing; a live browser check was attempted per CLAUDE.md and
 genuinely blocked by an unrelated, pre-existing party-dungeon server-startup crash, confirmed structural
@@ -1040,11 +1042,20 @@ deleted, because the fix (19.5) is the direct continuation of this exact paragra
   - Files: `web/fusion-rpg-web/src/game/board/keyboardNav.ts` (new), `keyboardNav.test.ts` (new), `noClientPrediction.test.ts` (new)
 
 ### `siege-stage` (8b) — [spec](../docs/architecture/base-defense/spec-siege-stage.md)
-> **Module status: IN PROGRESS — 2 of 7 tasks done.** Started 2026-09-06, tasks 21.1-21.2. Remaining:
-> 21.3 (the real stage under `stages/siege/`, copying `world`'s shape), 21.4 (pre-battle deployment),
-> 21.5 (pause/resume — ⛔ has its own external prerequisite, a `decisions_json` writer owned by
-> `spec-interactive-turns.md`; see this task's own note on what to do if it's still missing), 21.6
-> (rounds/turns HUD), 21.7 (one resolver path for played vs auto-resolved sieges).
+> **Module status: IN PROGRESS, then PAUSED 2026-09-06 by owner decision — 2 of 7 tasks done, 21.3-21.7
+> BLOCKED pending a cross-program Phaser refactor.** Started 2026-09-06, tasks 21.1-21.2 (both pure
+> shell/routing, no Phaser — unaffected). Owner-directed pause, not a technical finding of this module's
+> own: an Explore-agent audit run the same day (prompted by "does the siege board build on Phaser or
+> plain web UI") confirmed real, load-bearing duplication across the existing lawn/world Phaser scenes
+> — two independent camera implementations (91 vs 313 lines), three independent grid-rendering
+> implementations (lawn's own, world's own, plus `board-render`'s own generic layer, which **has zero
+> importers anywhere in `src/`** despite being built for exactly this), two unrelated entity-sync stacks
+> (563 vs 1,217 lines), two pick/input implementations, and two duplicated React host components. Only
+> `createGame()` is genuinely shared today. Building 21.3 onward now would near-certainly add a THIRD
+> parallel stack rather than converging on one — so the owner chose to pause here and track a proper
+> reusable-component refactor as its own initiative first (name/scope not yet decided; **not started
+> this pass** — logged only, per owner's own choice not to begin its idea phase yet). **Resume 21.3 once
+> that refactor exists and names what siege should actually build against.**
 - [x] **21.1 · Route + six shell rows, zero branches** — IMPLEMENTED 2026-09-06
   - **The spec's own "matching the four that exist" framing was found stale against real code, and corrected before implementing rather than after** (DESIGN-GATE.md's own rule: read → verify against code → propose). An Explore-agent survey of all six named integration points found only 2 of 6 are real per-stage tables today: `railState.ts`'s union (real) and the JSX route tree (real, but `battle` itself has zero routes — 3 of 4 ids). The other three — a "default-layer map", an "Esc/back-target map", and an i18n label catalog — **do not exist for any stage, `battle` included**: Lawn/Sanctum/World each hand-roll their own bespoke, inconsistent per-stage logic instead. `spec-battle-stage.md:82-85`'s own text confirms this reading (`battle-stage` is explicitly tasked with filling those same five rows for `battle`, not this module retrofitting them for every existing stage). So this task builds siege's own row into each of the six points using whichever REAL mechanism already exists for that point (generalizing where a mechanism is already generic, adding siege's own entry where it isn't) — it does not invent three new shared tables and force lawn/sanctum/world onto them, which would be real, unrequested scope creep into shared, working shell code.
   - Evidence, one per integration point:
@@ -1062,22 +1073,28 @@ deleted, because the fix (19.5) is the direct continuation of this exact paragra
   - The three costs (stage-count assertion → 5, the GG-7 row, and the IA + `game-gui-principles.md` D2 corrections) turned out to be the SAME work as three of 21.1's own six shell rows, not a separate pass — `STAGE_IDS`, the GG-7-exclusion proof, and the doc edits are all evidenced under 21.1 rather than duplicated here. Not folded silently: this line exists so the cost is still checkable on its own against the spec's own cost table, per `IA_docs_name_five_stages`'s own stated purpose ("so cost 2 cannot be silently skipped").
   - Verify: see 21.1 — `informationArchitectureDocs.test.ts` (4/4) is this cost's own dedicated docs assertion.
   - Files: see 21.1
-- [ ] **21.3** Stage under `stages/siege/` copying `world`'s shape; **no `*Dto`** (`contractGuard.ts:57`) · Verify: `WEB` · Files: `src/stages/siege/`
-- [ ] **21.4** Pre-battle deployment (decision 37) — player-placed, AI places by policy at the same step · Verify: auto-resolve still needs no UI · Files: `src/stages/siege/`
-- [ ] **21.5** ⛔ **Pause = persisted decision log replayed on resume** (decision 46) · Acceptance: **no board state stored**; resume survives a **server restart**; no timeout on a paused single-player siege · Verify: scan the persisted row for cells/HP/initiative · Files: `src/stages/siege/`, session wiring
+- [ ] **21.3** ⛔ **PAUSED 2026-09-06 — blocked on the cross-program Phaser refactor (see module header)**. Stage under `stages/siege/` copying `world`'s shape; **no `*Dto`** (`contractGuard.ts:57`) · Verify: `WEB` · Files: `src/stages/siege/`
+- [ ] **21.4** ⛔ **PAUSED — same reason as 21.3, and depends on it existing.** Pre-battle deployment (decision 37) — player-placed, AI places by policy at the same step · Verify: auto-resolve still needs no UI · Files: `src/stages/siege/`
+- [ ] **21.5** ⛔ **PAUSED — same reason.** **Pause = persisted decision log replayed on resume** (decision 46) · Acceptance: **no board state stored**; resume survives a **server restart**; no timeout on a paused single-player siege · Verify: scan the persisted row for cells/HP/initiative · Files: `src/stages/siege/`, session wiring
   - Note, non-blocking (owner ruling 2026-09-05): a `decisions_json` writer is `spec-interactive-turns.md`'s (T10), not this program's — raised there as a follow-up, but this task does not wait for it. If it still doesn't exist when 21.5 is reached, build the minimal writer this task needs scoped to `siege-stage`'s own pause/resume, rather than freezing on another program's schedule; hand it off to T10 later if that program wants to own it going forward
-- [ ] **21.6** Rounds and turns **never** the same number on any wire; leaving mid-siege is **not** a withdrawal; `long` HP as `bigint` · Verify: `WEB` · Files: `src/stages/siege/hud/`
-- [ ] **21.7 · Played and auto-resolved sieges run ONE resolver path**
+- [ ] **21.6** ⛔ **PAUSED — same reason.** Rounds and turns **never** the same number on any wire; leaving mid-siege is **not** a withdrawal; `long` HP as `bigint` · Verify: `WEB` · Files: `src/stages/siege/hud/`
+- [ ] **21.7 · Played and auto-resolved sieges run ONE resolver path** — ⛔ **PAUSED — same reason.**
   - Acceptance: the FE **supplies `SiegeIntentSource`'s played-side delegate**; it does not implement a parallel resolution path. *"The player is defending"* and *"nobody is watching"* differ by **one nullable field** — a separate interactive resolver would drift from the auto-resolver within a release, and the divergence would surface as *"the replay doesn't match"*. Entering keeps the world stage **mounted underneath** (GG-1's *"closed back to the same state"*)
   - Verify: `WEB` — same resolver with the delegate present and null; world stage state survives a siege
   - Files: `src/stages/siege/`
 
 ### `battle-stage` (8b) — [spec](../docs/architecture/base-defense/spec-battle-stage.md)
-- [ ] **22.1** Route **`#/battle/{battleId}`** + **five** shell rows — the id already exists in `railState.ts:31`, so this is the only module in the program that adds a stage **without** adding an id · Verify: `WEB`; **zero declared-but-unbuilt stage ids remain** · Files: shell
-- [ ] **22.2** `projectReportToBoard` — synthetic two-rank layout for a boardless report, real cells for a siege · Acceptance: ⛔ **the synthetic layout imports nothing from `Core`'s board namespace** · Verify: import scan · Files: `src/stages/battle/`
-- [ ] **22.3** Playback only — **never re-resolves** · Verify: `WEB`; all battle goldens byte-identical (FE-only module) · Files: `src/stages/battle/playback/`
+> **Module status: NOT STARTED, PAUSED 2026-09-06 before any task began** — same cross-program Phaser
+> refactor block as `siege-stage` above. This module's own spec explicitly builds on `board-render`'s
+> generic layer (`projectReportToBoard` in 22.2), which is exactly the code the Phaser audit found has
+> zero real consumers today — starting here first would make the SAME unconsumed-generic-layer problem
+> worse, not better.
 
-- [ ] **CP5 · Checkpoint** — both stages ship; lawn byte-identical after all five extractions; entry chunk unchanged
+- [ ] **22.1** ⛔ **PAUSED.** Route **`#/battle/{battleId}`** + **five** shell rows — the id already exists in `railState.ts:31`, so this is the only module in the program that adds a stage **without** adding an id · Verify: `WEB`; **zero declared-but-unbuilt stage ids remain** · Files: shell
+- [ ] **22.2** ⛔ **PAUSED.** `projectReportToBoard` — synthetic two-rank layout for a boardless report, real cells for a siege · Acceptance: ⛔ **the synthetic layout imports nothing from `Core`'s board namespace** · Verify: import scan · Files: `src/stages/battle/`
+- [ ] **22.3** ⛔ **PAUSED.** Playback only — **never re-resolves** · Verify: `WEB`; all battle goldens byte-identical (FE-only module) · Files: `src/stages/battle/playback/`
+
+- [ ] **CP5 · Checkpoint** — ⛔ **BLOCKED on the Phaser refactor pause above**, not a checkpoint failure of its own. both stages ship; lawn byte-identical after all five extractions; entry chunk unchanged
 
 ---
 

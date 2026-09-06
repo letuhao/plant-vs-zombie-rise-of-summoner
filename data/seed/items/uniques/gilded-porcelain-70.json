@@ -59,7 +59,8 @@
       "flavorKey": "flavor.unique.dollhand",
       "iconKey": "icon.unique.dollhand",
       "notes": "Role armament-primary / axis survivability, row 1 of the brief's 8-row table. baseType item.humanoid-main-hand-a-002 ('Slashing Clipper', class blade, band a) confirmed present in data/seed/items/base-types/humanoid-armament-primary-a.json. Name is naming.v1.json's 'fusion' pattern using uniqueSetSeedPools['gilded-porcelain']'s own atomic seed word 'Dollhand' (whole-token resolution, rule 2a \u2014 never decomposed). RUNTIME HONESTY: atom.martyrdom is resource.delta, one of the shipped kinds but lawn-live/battle-pending per the same caveat seed-contract.md \u00a710's own unique example carries for atom.searing-strike \u2014 authored now, exactly as that worked example authorizes.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-002",
@@ -139,7 +140,8 @@
       "flavorKey": "flavor.unique.shelfwarden",
       "iconKey": "icon.unique.shelfwarden",
       "notes": "Role ward-array / axis utility, row 3. baseType item.humanoid-shoulders-b-005 ('Articulated Yoke', class scale, band b) confirmed in humanoid-ward-array-b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Shelfwarden'. atom.gardener (spawn.entity, tag utility) has no ward-array in its g-on-death.json roles list \u2014 fixed core, not pool-filtered, same device as the other rule-broken capabilities in this file. The two raw armour atoms (arm-riveting fixed, arm-welding variance) are g-armour's zombie-side Increased siblings, both role-legal on ward-array and both distinct from atom.plating/atom.carapace's excluded Flat channel.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-004",
@@ -220,7 +222,8 @@
       "flavorKey": "flavor.unique.glazeface",
       "iconKey": "icon.unique.glazeface",
       "notes": "Role sense / axis offense, row 5. baseType item.humanoid-face-b-004 ('Articulated Mask', class scale, band b) confirmed in humanoid-sense-b.json. Name is the 'fusion' pattern on uniqueSetSeedPools['gilded-porcelain']'s atomic seed 'Glazeface' \u2014 a direct fit for the face role. element 'dark' is one of the six concrete ids in core.v1.json elements (fire/ice/air/earth/light/dark) plus omni; gilded-porcelain carries no elementAffinity of its own so any concrete element is legal here. RUNTIME HONESTY: atom.searing-strike is resource.delta, lawn-live/battle-pending per the same caveat seed-contract.md \u00a710's own unique example (unique.ember-014) carries for the identical family.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-006",
@@ -300,7 +303,8 @@
       "flavorKey": "flavor.unique.cordial-of-the-kilnborn",
       "iconKey": "icon.unique.cordial-of-the-kilnborn",
       "notes": "Role infusion / axis control, row 7. baseType item.humanoid-bandolier-a-006 ('Treated Tin', class leather, band a) confirmed in infusion/humanoid/base-types-infusion-humanoid-a.json. Name is the 'of-construct' pattern: Base 'Cordial' (invented noun fitting a bandolier's vials) + concept 'Kilnborn' from uniqueSetSeedPools['gilded-porcelain'] (ofConcept surface form). atom.mesmerizing (status.apply) is legal for armament-primary/secondary/manipulator/jewel-major/jewel-minor/sense per g-affliction.json, not infusion \u2014 fixed core, not pool-filtered, per ssot-uniques.md \u00a73.7 device 2. The two raw armour atoms are g-armour's role-legal zombie-side Increased siblings on infusion, distinct families, satisfying DuplicateAtomInContainer.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.gilded-porcelain-70-008",

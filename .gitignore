@@ -138,3 +138,4 @@ src/FusionRpg.Server/data/rpg-media.sqlite
 # data/seed/passive-tree/_review/ are the review's own permanent record and stay tracked.
 /.review/
 data-out.txt
+*.bak-*

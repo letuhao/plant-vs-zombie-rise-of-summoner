@@ -419,7 +419,8 @@ internal static class ContractTuningTestBootstrap
             ObstructionPowerMilli: 700, ObstructionFloorMilli: 250, MeleeLockPowerMilli: 500),
         Construction: new ConstructionTuning(
             ShardVeinYieldPerTurn: 4, MaterialSeamYieldPerTurn: 3,
-            RefineRubblePerIronwork: 4, RefineYieldMilli: 600, RefinePerTurnCap: -1),
+            RefineRubblePerIronwork: 4, RefineYieldMilli: 600, RefinePerTurnCap: -1,
+            LabourMoatStaminaCost: 30, LabourMoatHungerCost: 15, LabourMoatTurns: 2, SummonQiCost: 25),
         Economy: new EconomyTuning(
             NodeYieldPerRoundLoam: 5, NodeYieldPerRoundIronwork: 3,
             DepotSeedMilli: 1000, CaptureRecoveryMilli: 1000),

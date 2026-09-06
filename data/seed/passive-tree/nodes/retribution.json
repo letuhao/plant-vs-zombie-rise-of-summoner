@@ -19,7 +19,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active — tier wins.",
+        "printedText": "Inert while tier is active \u2014 tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -43,7 +43,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while branch is active — branch wins.",
+        "printedText": "Inert while branch is active \u2014 branch wins.",
         "propertyKeys": [
           "branch"
         ]
@@ -51,7 +51,7 @@
       "flavor": "The more the earth trembles, the more firmly the roots take hold.",
       "id": "skill.retribution-def-t1-n1",
       "name": "Deep Rooted",
-      "nameKey": "tree.node.deep-rooted",
+      "nameKey": "tree.node.deep-rooted-2",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
       "rationale": "",
@@ -75,7 +75,7 @@
       "flavor": "The impact of the blow is not lost, but absorbed and recirculated through the marrow.",
       "id": "skill.retribution-def-t10-n0",
       "name": "Kinetic Osmosis",
-      "nameKey": "tree.node.kinetic-osmosis",
+      "nameKey": "tree.node.kinetic-osmosis-2",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
       "rationale": "",
@@ -99,7 +99,7 @@
       "flavor": "The weight of the shield becomes the strength of the soul.",
       "id": "skill.retribution-def-t2-n1",
       "name": "Bastion's Weight",
-      "nameKey": "tree.node.bastion-s-weight",
+      "nameKey": "tree.node.bastion-s-weight-2",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
       "rationale": "",
@@ -147,7 +147,7 @@
       "flavor": "The rhythm of the impact dictates the speed of the recovery.",
       "id": "skill.retribution-def-t4-n0",
       "name": "Cyclical Aegis",
-      "nameKey": "tree.node.cyclical-aegis",
+      "nameKey": "tree.node.cyclical-aegis-2",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
       "rationale": "",
@@ -267,7 +267,7 @@
       "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the defender.",
       "id": "skill.retribution-def-t7-n0",
       "name": "Kinetic Recoil",
-      "nameKey": "tree.node.kinetic-recoil",
+      "nameKey": "tree.node.kinetic-recoil-6",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
       "rationale": "",
@@ -441,7 +441,7 @@
       "flavor": "The rhythm of the strike dictates the fury of the blood.",
       "id": "skill.retribution-off-t1-n1",
       "name": "Sanguine Onslaught",
-      "nameKey": "tree.node.sanguine-onslaught",
+      "nameKey": "tree.node.sanguine-onslaught-2",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
       "rationale": "",

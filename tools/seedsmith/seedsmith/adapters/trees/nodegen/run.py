@@ -751,7 +751,26 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     # run), the model kept falling back to an identical generic templated key. `known_name_keys`
     # tracks every nameKey already spoken for so `generate_node` can override the model's own choice
     # deterministically -- see `_derive_unique_name_key`'s own docstring for the full reasoning.
+    #
+    # 2026-09-06, second real-call finding (found the moment a SECOND tree's real generation ran):
+    # `nameKey` is spec-mandated "deduplicated corpus-wide" (spec-tree-language.md's own field table,
+    # row `name`/`nameKey`), not per-tree -- but this set used to be seeded only from
+    # `plan.already_done`, this TREE's own already-accepted subjects (`plan_run` filters `done` down
+    # to subject ids prefixed with THIS tree's own id). Two different trees running the same day
+    # independently minted the identical key from an identical model-chosen name (e.g.
+    # `tree.node.primal-surge` landed in `might`, `vigor` AND `ferocity`'s own committed seed
+    # documents, unrelated runs, none aware of the others) -- 46 real cross-tree collisions confirmed
+    # across the 12 trees committed so far, none of them EVER checked against each other because
+    # `known_name_keys` never left this tree's own scope. Fixed by seeding from the WHOLE ledger
+    # (`done`, already read in full above -- every tree's entries, not re-read here), never only this
+    # tree's own filtered subset. `tree_siblings` (below) stays correctly TREE-scoped -- that is a
+    # separate mechanism serving a separate purpose (giving the model local "don't repeat yourself"
+    # context, spec's own §6.2), not the hard corpus-wide uniqueness constraint this set enforces.
     known_name_keys: "set[str]" = set()
+    for entry in done.values():
+        existing_name_key = entry.get("record", {}).get("nameKey")
+        if existing_name_key:
+            known_name_keys.add(existing_name_key)
     for subject_id in plan.already_done:
         entry = done[subject_id]
         node = entry["record"]

@@ -17,7 +17,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active — tier wins.",
+        "printedText": "Inert while tier is active \u2014 tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -51,7 +51,7 @@
       "flavor": "The weight of the shell becomes a second skin, drawing strength from the very impact it withstands.",
       "id": "skill.bulwark-def-t10-n2",
       "name": "Graftplate Bastion",
-      "nameKey": "tree.node.graftplate-bastion",
+      "nameKey": "tree.node.graftplate-bastion-2",
       "nodeClass": "mechanism",
       "nodeKey": "n2",
       "rationale": "",
@@ -75,7 +75,7 @@
       "flavor": "The more layers applied, the harder the shell becomes.",
       "id": "skill.bulwark-def-t2-n0",
       "name": "Layered Bastion",
-      "nameKey": "tree.node.layered-bastion",
+      "nameKey": "tree.node.layered-bastion-3",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
       "rationale": "",
@@ -93,7 +93,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "printedText": "Inert while atomKind is active \u2014 atomKind wins.",
         "propertyKeys": [
           "atomKind"
         ]
@@ -127,7 +127,7 @@
       "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the shield.",
       "id": "skill.bulwark-def-t4-n0",
       "name": "Kinetic Recoil",
-      "nameKey": "tree.node.kinetic-recoil",
+      "nameKey": "tree.node.kinetic-recoil-5",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
       "rationale": "",
@@ -255,7 +255,7 @@
       "flavor": "The momentum of a deflected blow is not lost, but redirected into the next defensive posture.",
       "id": "skill.bulwark-def-t9-n1",
       "name": "Kinetic Reciprocation",
-      "nameKey": "tree.node.kinetic-reciprocation",
+      "nameKey": "tree.node.kinetic-reciprocation-5",
       "nodeClass": "mechanism",
       "nodeKey": "n1",
       "rationale": "",
@@ -581,7 +581,7 @@
       "flavor": "The shield vibrates with raw, uncontained energy, bleeding power through the cracks.",
       "id": "skill.bulwark-off-t7-n0",
       "name": "Elemental Overload",
-      "nameKey": "tree.node.elemental-overload",
+      "nameKey": "tree.node.elemental-overload-2",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
       "rationale": "",

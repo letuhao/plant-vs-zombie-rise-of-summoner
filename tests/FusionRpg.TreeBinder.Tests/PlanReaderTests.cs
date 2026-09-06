@@ -1,3 +1,4 @@
+using System.Linq;
 using FusionRpg.Core.PassiveTree.Catalog;
 using FusionRpg.Core.PassiveTree.State;
 using FusionRpg.Tools.TreeBinder;
@@ -88,5 +89,105 @@ public class PlanReaderTests
     public void Branches_is_the_structural_constant_2_D29()
     {
         Assert.Equal(2L, PlanReader.Branches);
+    }
+}
+
+/// <summary>2026-09-06 real-run finding: `spec-tree-binder.md` §3.1's own IN table has always said
+/// `affixIds[]` comes "from tree-language", never from the plan — but `Program.cs` only ever read
+/// the plan file, so a real run against real generated content (379 nodes across 12 trees) refused
+/// EVERY node. `ReadPlanNodesWithSeed` is the fix: the plan's own fields stay authoritative
+/// (`budgetShareMilli`, `deliberateHole`), and `affixIds`/`exclusionForm` are overlaid from
+/// `nodes/&lt;treeId&gt;.json`'s own real content, matched by node id.</summary>
+public class ReadPlanNodesWithSeedTests
+{
+    static PassiveTreeTuning Tuning() => PassiveTreeTuningLoader.Parse("""
+    {
+      "schemaVersion": 1, "version": 1,
+      "tierLadder": { "reqScalePoints": 5 },
+      "budget": { "treeTotalPoints": 1000, "branchSplitMilli": 500 },
+      "treeShareMilli": 1000, "treeBudgetMilli": 1000,
+      "potency": { "maxNodeShareMilli": 182, "minTerminalWidth": 1, "bandEdgesMilli": [46,91,137,182] },
+      "mechanism": { "rampStartMilli": 0, "rampEndMilli": 1000 },
+      "archetype": { "rewardSpreadMaxRatioMilli": 6000 },
+      "exclusion": { "targetShareMilli": 20 },
+      "archetypeAssignment": "ordinal-round-robin",
+      "designTarget": { "thetaAllIn": 92 },
+      "concentration": { "fmaxMilli": 1200, "wMilli": 500 },
+      "soulTrack": { "thetaPerSoulLevelMilli": 1000 },
+      "unlockCost": { "firstPoints": 5, "stepPoints": 2 },
+      "respec": { "basePrice": 50, "escalationPermille": 500 },
+      "gateCounters": { "masteryCurveFirstCount": 23, "masteryCurveStepCount": 23,
+        "elementMasteryRatePoints": 4, "statusMasteryRatePoints": 4, "flushIntervalMs": 5000 }
+    }
+    """);
+
+    const string PlanTwoNodes = """
+    {"nodes":[{"id":"skill.t-off-t1-n0","budgetShareMilli":10},
+              {"id":"skill.t-off-t1-n1","budgetShareMilli":10}]}
+    """;
+
+    [Fact]
+    public void A_null_seed_behaves_exactly_like_the_plan_only_reader()
+    {
+        // `record` equality on `IReadOnlyList<string>` is reference equality (List<T> has no value
+        // equality), so two independently-built empty lists never `Equals` -- compare the fields
+        // that matter instead of the whole record.
+        var withSeed = PlanReader.ReadPlanNodesWithSeed(PlanTwoNodes, seedJson: null, Tuning());
+        var planOnly = PlanReader.ReadPlanNodes(PlanTwoNodes, Tuning());
+        Assert.Equal(planOnly.Count, withSeed.Count);
+        for (var i = 0; i < planOnly.Count; i++)
+        {
+            Assert.Equal(planOnly[i].NodeId, withSeed[i].NodeId);
+            Assert.Equal(planOnly[i].BudgetShareMilli, withSeed[i].BudgetShareMilli);
+            Assert.Equal(planOnly[i].AffixIds, withSeed[i].AffixIds);
+            Assert.Equal(planOnly[i].ExclusionForm, withSeed[i].ExclusionForm);
+            Assert.Equal(planOnly[i].DeliberateHole, withSeed[i].DeliberateHole);
+        }
+    }
+
+    [Fact]
+    public void A_generated_nodes_real_affixIds_and_exclusion_form_override_the_plans_own_defaults()
+    {
+        var seedJson = """
+        {"nodes":[{"id":"skill.t-off-t1-n0","affixIds":["atom.a","atom.b"],
+                   "exclusion":{"form":"reroute","propertyKeys":["posture"]}}]}
+        """;
+
+        var nodes = PlanReader.ReadPlanNodesWithSeed(PlanTwoNodes, seedJson, Tuning());
+
+        var generated = nodes.Single(n => n.NodeId == "skill.t-off-t1-n0");
+        Assert.Equal(new[] { "atom.a", "atom.b" }, generated.AffixIds);
+        Assert.Equal(ExclusionForm.Reroute, generated.ExclusionForm);
+    }
+
+    [Fact]
+    public void A_node_the_seed_never_mentions_keeps_the_plan_only_empty_defaults()
+    {
+        // The real, common shape: a partially-generated tree. The un-generated node must still
+        // refuse cleanly (empty affixIds), never silently inherit another node's content.
+        var seedJson = """
+        {"nodes":[{"id":"skill.t-off-t1-n0","affixIds":["atom.a"]}]}
+        """;
+
+        var nodes = PlanReader.ReadPlanNodesWithSeed(PlanTwoNodes, seedJson, Tuning());
+
+        var ungenerated = nodes.Single(n => n.NodeId == "skill.t-off-t1-n1");
+        Assert.Empty(ungenerated.AffixIds);
+        Assert.Equal(ExclusionForm.None, ungenerated.ExclusionForm);
+    }
+
+    [Fact]
+    public void The_plans_own_budgetShareMilli_and_deliberateHole_are_never_overridden_by_the_seed()
+    {
+        var plan = """
+        {"nodes":[{"id":"skill.t-off-t1-n0","budgetShareMilli":77,"deliberateHole":true}]}
+        """;
+        var seedJson = """{"nodes":[{"id":"skill.t-off-t1-n0","affixIds":["atom.a"]}]}""";
+
+        var node = Assert.Single(PlanReader.ReadPlanNodesWithSeed(plan, seedJson, Tuning()));
+
+        Assert.Equal(77L, node.BudgetShareMilli);
+        Assert.True(node.DeliberateHole);
+        Assert.Equal(new[] { "atom.a" }, node.AffixIds);
     }
 }

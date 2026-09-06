@@ -54,7 +54,8 @@
         "mechanical"
       ],
       "notes": "Compound name: adjective 'Conscripted' from themeAdjectivePools['rusted-legion'], base noun 'Cleaver' reused from nounPools['armament-primary.humanoid'] (the base type's own head noun \u2014 a compound-pattern unique is free to reuse it, the adjective is what makes it a different name). Control axis via atom.mesmerizing (status.apply, status hypno) \u2014 SHIPPED and a working UnityCc row per g-affliction.json's own note, unlike the kelp/ember/scalding branches this theme's sibling set avoided for the same reason. No element param anywhere, per the theme's avoid-elemental-magic rule.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-002",
@@ -89,7 +90,8 @@
         "mechanical"
       ],
       "notes": "Of-construct name: base 'Keg' reused from nounPools['core-guard.humanoid'] (the base type's own noun), concept 'Requisition' from conceptPools['rusted-legion']. Utility axis via atom.cleansing (status.clear, OnDamageTaken) \u2014 SHIPPED, no Unity-branch gap, per g-sustain.json. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-003",
@@ -125,7 +127,8 @@
         "utility"
       ],
       "notes": "Compound name: adjective 'Scavenged' from themeAdjectivePools['rusted-legion'], base noun 'Shrug' reused from nounPools['ward-array.humanoid'] (the base type's own noun). Economy axis via atom.econ-muster (resource.economy, OnSpawn, currency points) \u2014 the same family sets/rusted-legion.json's own 2-piece capability uses on 'Ranked Garrison', reused here on a fixed unique core rather than a set threshold: fixed core atoms are never drawn from the role pool (ssot-uniques.md \u00a73.5 rung 2), so econ-muster's own roles list (girdle/jewel-major/jewel-minor only) does not gate it here. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-004",
@@ -159,7 +162,8 @@
         "signature"
       ],
       "notes": "Of-construct name: base 'Lanyard' reused from nounPools['jewel-major.humanoid'] (the base type's own noun), concept 'Roster' from conceptPools['rusted-legion'], with 'the' per the pattern's optional article. Offense axis via atom.dooming (board.action, op doom, OnDeath) \u2014 SHIPPED, the single biggest blast in the shipped board.action set (atom-family-library.md \u00a73.5); held at 'high' rather than the family's own pool-default 'extreme' band, since a unique's fixed core is sized directly by its author (seed-contract.md \u00a710), not drawn against a tier window. Tagged 'signature' as this partition's flagship. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-005",
@@ -193,7 +197,8 @@
         "defensive"
       ],
       "notes": "Compound name: adjective 'Weary' from themeAdjectivePools['rusted-legion'], base noun 'Mask' reused from nounPools['sense.humanoid'] (the base type's own noun). Survivability axis via atom.regeneration (resource.delta, OnTimer) \u2014 SHIPPED, no gap, per g-sustain.json. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-006",
@@ -227,7 +232,8 @@
         "utility"
       ],
       "notes": "Of-construct name: base 'Tread' reused from nounPools['footing.humanoid'] (the base type's own noun), concept 'Drill' from conceptPools['rusted-legion'] \u2014 marching discipline as the control fiction. Control axis via atom.gravemaking (grid.spawn, gridItemType Grave, OnDeath) \u2014 LIVE-proven per atom-family-library.md \u00a73.5; a grave underfoot is area denial, which is why this sits on the control axis even though the family's own file tags it 'utility'. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-007",
@@ -263,7 +269,8 @@
         "utility"
       ],
       "notes": "Fusion name: the whole-token atomic seed 'Surplusward' from uniqueSetSeedPools['rusted-legion'], used exactly as the exemplar's own 'Thornmantle' uses a seed word \u2014 never decomposed into 'surplus' + 'ward'. Utility axis via atom.sust-freshgraft (status.clear, OnSpawn) \u2014 SHIPPED, a self-cleanse the instant the wearer deploys, per g-sustain.json. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.rusted-legion-50-008",
@@ -297,7 +304,8 @@
         "utility"
       ],
       "notes": "Of-construct name: base 'Whistle' reused from nounPools['retinue.humanoid'] (the base type's own noun), concept 'Duty' from conceptPools['rusted-legion']. Economy axis via atom.econ-bounty (resource.economy, OnDeath, currency points) \u2014 RUNTIME HONESTY: the write path is real and tested (g-economy.json's own capPerMatch finding against AtomKindRegistry/AtomRunner), but the 'points' currency has no confirmed downstream consumer yet, the same gap that family's own entry states. No element param.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     }
   ]
 }

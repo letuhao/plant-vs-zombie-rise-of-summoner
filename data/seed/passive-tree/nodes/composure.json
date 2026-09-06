@@ -45,7 +45,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while aptitude is active — aptitude wins.",
+        "printedText": "Inert while aptitude is active \u2014 aptitude wins.",
         "propertyKeys": [
           "aptitude"
         ]
@@ -155,7 +155,7 @@
       "flavor": "The skin hardens into a layered rind, absorbing the impact of every blow.",
       "id": "skill.composure-def-t4-n1",
       "name": "Thickened Bark",
-      "nameKey": "tree.node.thickened-bark",
+      "nameKey": "tree.node.thickened-bark-4",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
       "rationale": "",
@@ -229,7 +229,7 @@
       "flavor": "The impact of a blow is not lost, but redirected into the rhythm of the defense.",
       "id": "skill.composure-def-t7-n0",
       "name": "Kinetic Reciprocation",
-      "nameKey": "tree.node.kinetic-reciprocation",
+      "nameKey": "tree.node.kinetic-reciprocation-3",
       "nodeClass": "mechanism",
       "nodeKey": "n0",
       "rationale": "",
@@ -331,7 +331,7 @@
       "flavor": "A steady hand finds the gap in the armor before the blood even hits the floor.",
       "id": "skill.composure-off-t1-n0",
       "name": "Vigilant Edge",
-      "nameKey": "tree.node.vigilant-edge",
+      "nameKey": "tree.node.vigilant-edge-3",
       "nodeClass": "magnitude",
       "nodeKey": "n0",
       "rationale": "",
@@ -457,7 +457,7 @@
       "flavor": "The rhythm of the strike dictates the flow of the fray.",
       "id": "skill.composure-off-t3-n1",
       "name": "Relentless Momentum",
-      "nameKey": "tree.node.relentless-momentum",
+      "nameKey": "tree.node.relentless-momentum-2",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
       "rationale": "",

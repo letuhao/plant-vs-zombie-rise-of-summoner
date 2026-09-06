@@ -126,7 +126,10 @@ public static class UniqueValidator
             CheckIdentitySpread(u, entry, atom, tuning, fails);
 
         // ---- rung eligibility (§4.1) and reachability (§4.5 rule 1, UNCHANGED by D7) --------------
-        if (!tuning.IsRungEligible(rungOrdinal))
+        // D4.23: u.Enabled (already modeled, spec-unique-pipeline.md §5 point 5) exempts a retired
+        // row from this check the same way UniqueCorpusValidator's own seed-level check is exempted —
+        // one rule, checked consistently at both the seed and the row layer.
+        if (u.Enabled && !tuning.IsRungEligible(rungOrdinal))
             fails.Add(Rule(UniqueRules.RungIneligible, u,
                 $"rung '{rung.RarityId}' is ordinal {rungOrdinal}, below the floor of {tuning.RungFloorOrdinal} " +
                 "(unique_eligible = 0) — the two rungs below it are rungs whose whole meaning is the absence " +

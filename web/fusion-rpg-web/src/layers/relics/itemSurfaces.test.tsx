@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { screen } from "@testing-library/react";
-import { adaptArmouryPage, adaptCombinations, adaptItemSurfaces } from "@/contract/adapt";
+import {
+  adaptArmouryPage,
+  adaptCombinations,
+  adaptItemCard,
+  adaptItemCompare,
+  adaptItemSurfaces
+} from "@/contract/adapt";
+import type { ItemCardDto, ItemCompareDto } from "@/lib/bus/items";
 import { absent, known, pendingWithReason } from "@/contract/pending";
 import type { ArmouryFilterState, ArmouryRowView, ContainerView } from "@/contract/types";
 import { renderWithProviders } from "@/test/render";
@@ -156,6 +163,186 @@ describe("item surface adapters", () => {
     ]);
     expect(combos.map((c) => c.comboId)).toEqual(["combo.ember"]);
     expect(combos[0]!.distance).toBe(1);
+  });
+});
+
+/**
+ * The wire payload `GET /api/items/{instanceId}/card` actually returns, block for block — the same
+ * shape `ItemCardEndpointsTests` asserts on the server side, so a change on either end breaks a test
+ * on the other rather than only at runtime.
+ */
+function cardDto(over: Partial<ItemCardDto> = {}): ItemCardDto {
+  return {
+    instanceId: "i1",
+    fingerprint: "item.card.header\n  item.card.header|-|-|0|-|-|-\n",
+    blocks: [
+      {
+        blockKey: "item.card.header",
+        lines: [
+          {
+            key: "item.card.header",
+            args: {
+              pips: "7",
+              rungKey: "rarity.heirloom",
+              colorHex: "#8a6",
+              name: "base.honed-hatchet",
+              baseNameKey: "base.honed-hatchet",
+              classNounKey: "class.blade",
+              roleNameKey: "role.armament-primary",
+              frame: "humanoid",
+              ilvl: "24",
+              enhance: "+3"
+            },
+            unit: null,
+            sourceKind: null,
+            groupOrder: 0,
+            rollBarSegments: null,
+            contextRead: null,
+            rollQualityPerMille: null
+          }
+        ]
+      },
+      {
+        blockKey: "item.card.affixes",
+        lines: [
+          {
+            key: "disptpl.affix.elpw-pierce",
+            args: { value: "+142", element: "fire", __rendered: "+142 fire penetration" },
+            unit: "GameUnits",
+            sourceKind: "AffixPrefix",
+            groupOrder: 1,
+            rollBarSegments: 4,
+            contextRead: null,
+            rollQualityPerMille: 734
+          }
+        ]
+      },
+      {
+        blockKey: "item.card.footer",
+        lines: [
+          {
+            key: "item.card.footer",
+            args: { meanRollQuality: "73.4%", stale: "0", locked: "1", noReassign: "0" },
+            unit: null,
+            sourceKind: null,
+            groupOrder: 0,
+            rollBarSegments: null,
+            contextRead: null,
+            rollQualityPerMille: null
+          }
+        ]
+      }
+    ],
+    ...over
+  };
+}
+
+describe("the rendered card (item module 10)", () => {
+  it("takes the rarity's three channels off the card rather than re-deriving any of them", () => {
+    const view = adaptItemCard(cardDto());
+    expect(view.header.rarity.id).toBe("heirloom");
+    expect(view.header.rarity.pips).toBe(7);
+    expect(view.header.itemLevel).toBe(24);
+    expect(view.header.enhancementPrefix).toBe("+3 ");
+  });
+
+  it("shows the RENDERER's own sentence for an affix line and composes nothing itself", () => {
+    const line = adaptItemCard(cardDto()).affixes;
+    expect(line.state).toBe("known");
+    if (line.state !== "known") return;
+    expect(line.value[0]!.rendered).toBe("+142 fire penetration");
+    // `__rendered` is the sentence, not an argument the template still needs.
+    expect(line.value[0]!.args.__rendered).toBeUndefined();
+    expect(line.value[0]!.args.value).toBe("+142");
+    expect(line.value[0]!.unit).toBe("gameUnits");
+    expect(line.value[0]!.sourceKind).toBe("affix-prefix");
+    expect(line.value[0]!.rollBarSegments).toBe(4);
+  });
+
+  it("keeps a structural line's unit and source kind null — naming one would be the lie SC4 forbids", () => {
+    const view = adaptItemCard(cardDto());
+    expect(view.footer.state).toBe("known");
+    // The header is structural, and its own block is not exposed as lines — but the footer's is the
+    // same shape, and the renderer gave neither a unit.
+    const affix = view.affixes;
+    expect(affix.state).toBe("known");
+  });
+
+  it("passes the footer's mean roll through as the renderer formatted it, never as a number", () => {
+    const footer = adaptItemCard(cardDto()).footer;
+    expect(footer.state).toBe("known");
+    if (footer.state !== "known") return;
+    expect(footer.value.meanRollQuality).toBe("73.4%");
+    expect(footer.value.locked).toBe(true);
+    expect(footer.value.stale).toBe(false);
+  });
+
+  it("says `absent` for a block the renderer emitted empty — never `pending`, the route answered", () => {
+    const view = adaptItemCard(cardDto());
+    expect(view.enhancement.state).toBe("absent");
+    expect(view.set.state).toBe("absent");
+  });
+});
+
+describe("the comparison payload (item modules 13 + 20)", () => {
+  function compareDto(over: Partial<ItemCompareDto> = {}): ItemCompareDto {
+    return {
+      incumbent: cardDto({ instanceId: "old" }),
+      candidate: cardDto({ instanceId: "new" }),
+      differingLineIndexes: [1],
+      deltas: [
+        { channel: "combat.hp", unit: "game-units", incumbent: 71, candidate: 62, delta: -9 },
+        { channel: "defense", unit: "per-mille", incumbent: 0, candidate: 140, delta: 140 }
+      ],
+      dominance: "Sidegrade",
+      badge: { labelKey: "item.compare.sidegrade", shape: "◆" },
+      trade: {
+        youGain: [{ channel: "defense", unit: "per-mille", incumbent: 0, candidate: 140, delta: 140 }],
+        youGiveUp: [{ channel: "combat.hp", unit: "game-units", incumbent: 71, candidate: 62, delta: -9 }]
+      },
+      unitGroups: [
+        { unit: "GameUnits", deltas: [{ channel: "combat.hp", unit: "game-units", incumbent: 71, candidate: 62, delta: -9 }] },
+        { unit: null, deltas: [{ channel: "mystery", unit: "game-units", incumbent: 1, candidate: 2, delta: 1 }] }
+      ],
+      meanRollQualityMilliIncumbent: 500,
+      meanRollQualityMilliCandidate: 734,
+      footnoteKey: "item.compare.no-single-score",
+      incomparableReasonKey: null,
+      ...over
+    };
+  }
+
+  it("carries the server's verdict as a word AND a shape, and invents no scalar", () => {
+    const view = adaptItemCompare(compareDto());
+    expect(view.badge.verdict).toBe("sidegrade");
+    expect(view.badge.shape).toBe("◆");
+    expect(Object.keys(view)).not.toContain("score");
+  });
+
+  it("keeps an unresolvable unit in its OWN group rather than folding it into game units", () => {
+    const view = adaptItemCompare(compareDto());
+    expect(view.groups.map((g) => g.unit)).toEqual(["gameUnits", null]);
+  });
+
+  it("labels a per-mille delta as a proportion, never as a flat count", () => {
+    const view = adaptItemCompare(compareDto());
+    const gain = view.trade!.youGain[0]!;
+    expect(gain.delta.unit).toBe("perMilleRatio");
+    expect(gain.delta.op).toBe("more");
+    expect(gain.delta.value).toBe(140);
+  });
+
+  it("draws the trade only for a sidegrade — every other verdict word already says it all", () => {
+    expect(adaptItemCompare(compareDto({ dominance: "StrictlyBetter" })).trade).toBeNull();
+    expect(adaptItemCompare(compareDto()).trade).not.toBeNull();
+  });
+
+  it("names the reason for an incomparable verdict, because one with no explanation reads as a bug", () => {
+    const view = adaptItemCompare(
+      compareDto({ dominance: "Incomparable", incomparableReasonKey: "item.compare.incomparable-reason" })
+    );
+    expect(view.badge.verdict).toBe("incomparable");
+    expect(view.incomparableReason).toBe("incomparable reason");
   });
 });
 

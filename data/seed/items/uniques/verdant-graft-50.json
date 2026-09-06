@@ -55,7 +55,8 @@
         "signature"
       ],
       "notes": "A muzzle that keeps working after it is spent: atom.gardener's OnDeath trigger plants one last seedling where the graft finally gave out. Role-legal for armament-primary, but a spawn rider is not a shape the rolled pool draws often on this slot, which is the whole point of hand-placing it.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-002",
@@ -91,7 +92,8 @@
         "signature"
       ],
       "notes": "A scavenged keg strapped to the chest, rigged to hold grafted sap rather than anything a quartermaster issued. atom.econ-endure's role list is girdle / jewel-major / jewel-minor only \u2014 illegal for core-guard's rolled pool. Deliberately item.humanoid-torso-b-001 rather than any item.plant-stem base type: the plant-stem-a role/frame is already pinned by a set member elsewhere in the corpus (ssot-sets.md \u00a73.8, a unique may never double up with a set on the same base-type identity).",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-003",
@@ -133,7 +135,8 @@
         "signature"
       ],
       "notes": "A plant graft implanted on a humanoid shoulder, not armour bolted onto it \u2014 origin=rooted on a humanoid frame is deliberate, per verdant-graft's own register. atom.retribution's role list excludes ward-array; a pauldron that hits back is not a shape the rolled pool ever offers this slot.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-004",
@@ -169,7 +172,8 @@
         "signature"
       ],
       "notes": "Petals stitched shut around the graft's own dying gift: when this bloom falls, it feeds the squad rather than just the wearer. Both families are role-legal on jewel-major; the unique's value here is the fixed pairing, not a rule break.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-005",
@@ -205,7 +209,8 @@
         "signature"
       ],
       "notes": "The bract's ichor is scent, not blood: whatever it touches either follows or festers. atom.mesmerizing and atom.venomous are both role-legal on sense; kept at low band deliberately, per that family's own sizing note.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-006",
@@ -241,7 +246,8 @@
         "signature"
       ],
       "notes": "A rootstock grown from two natures grafted end to end, shedding whatever the soil tries to leave in it. Both families are role-legal on footing.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-007",
@@ -277,7 +283,8 @@
         "signature"
       ],
       "notes": "Neither Vitality nor atom.econ-graze is on infusion's rolled role list \u2014 a gland sac that banks sun with every strike lands is not a shape the pool would ever hand this slot on its own.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.verdant-graft-50-008",
@@ -313,7 +320,8 @@
         "signature"
       ],
       "notes": "A cutting implanted into the retinue line: when it falls, something new roots where it fell. Neither Might nor atom.summoner is on retinue's rolled role list, which is exactly what makes a runner that raises its own reinforcement a unique rather than a stronger runner.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     }
   ]
 }

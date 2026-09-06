@@ -60,7 +60,8 @@
       "flavorKey": "flavor.unique.frostbitten-sledge",
       "flavor": "It swings on the half-beat, same as everyone else in the column.",
       "notes": "control axis, armament-primary (main-hand), row 1 of the eight allocated to this partition. baseType item.humanoid-main-hand-b-003 (Lumbering Sledge) resolves in humanoid-armament-primary-b.json; role armament-primary is on the AllowedRoles list and is not jewel-minor. Core is 2 fixed atoms + 1 variance slot (3 total, under the 4-atom cap including the inherited base stat). Name is themeAdjectivePools['frostbitten-vanguard']('frostbitten') + nounPools['armament-primary.humanoid']('sledge'), a pattern base types never draw from (base types are barred from theme pools). Tagged 'signature' as this partition's one flagship entry (notability axis, tags.v1.json) - a curation flag, not a power claim. Not a set member: sets/frostbitten-vanguard.json's armament-primary members (Stillmarch, Winterhold) name a role only, never a pinned baseType, so no collision is possible.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-002",
@@ -99,7 +100,8 @@
       "flavorKey": "flavor.unique.stiffened-harness",
       "flavor": "The straps never loosened. Neither did anything else.",
       "notes": "utility axis, core-guard (torso), row 2. baseType item.humanoid-torso-b-006 (Ponderous Cage) resolves in humanoid-core-guard-b.json. Name is themeAdjectivePools['frostbitten-vanguard']('stiffened') + nounPools['core-guard.humanoid']('harness'); the noun pool is drawn independently of the specific baseType chosen, per poolAccess.uniquePartition ('any nounPools entry'). Core is 2 fixed atoms + 1 variance slot. Sets claim core-guard by role only (Stillmarch, Icebound) - no pinned baseType to collide with.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-003",
@@ -139,7 +141,8 @@
       "flavorKey": "flavor.unique.arrested-yoke",
       "flavor": "Meant to carry the load forward. It carries it in place.",
       "notes": "economy axis, ward-array (shoulders), row 3 - the one role of the eight that no set in sets/frostbitten-vanguard.json claims at all. baseType item.humanoid-shoulders-b-007 (Soldered Girder) resolves in humanoid-ward-array-b.json. atom.midas's own roles list (girdle/jewel-major/jewel-minor) does not include ward-array, which is legal here per ssot-uniques.md \u00a73.5 rung 2: fixed atoms sit outside the drawn pool, so no affix_pool_tag filters them. Name is themeAdjectivePools('arrested') + nounPools['ward-array.humanoid']('yoke') - a yoke also reads as logistics/burden-bearing, which is the economy-axis tie-in.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-004",
@@ -180,7 +183,8 @@
       "flavorKey": "flavor.unique.frozen-torc",
       "flavor": "Command passed through it once. It has not passed since.",
       "notes": "offense axis, jewel-major (neck), row 4. baseType item.humanoid-neck-b-004 (Substantial Collar) resolves in humanoid-jewel-major-b.json. element 'ice' is themes.v1.json's sole elementAffinity for frostbitten-vanguard and one of the six concrete elements in core.v1.json - resolves the atom.searing-strike '{variant}' placeholder, the only field a fixedAtoms entry needs to supply for a variant family. Name is themeAdjectivePools('frozen') + nounPools['jewel-major.humanoid']('torc'); 'torc' is also a class-ladder adjective-pool key (jewel.humanoid.torc) but here it is used as the NOUN from nounPools['jewel-major.humanoid'], a distinct pool.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-005",
@@ -222,7 +226,8 @@
       "flavorKey": "flavor.unique.numbed-visor",
       "flavor": "Nothing gets in past the ice. Nothing gets out either.",
       "notes": "survivability axis, sense (face), row 5. baseType item.humanoid-face-b-008 (Corrugated Face) resolves in humanoid-sense-b.json. element 'ice' fills atom.warded's variant placeholder, matching the theme's sole elementAffinity - the same family/params pairing sets/frostbitten-vanguard.json's Coldstride threshold already uses on a different container. Name is themeAdjectivePools('numbed') + nounPools['sense.humanoid']('visor').",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-006",
@@ -261,7 +266,8 @@
       "flavorKey": "flavor.unique.brittle-tread",
       "flavor": "One more step and it would have shattered. It never took the step.",
       "notes": "control axis, footing (feet), row 6. baseType item.humanoid-feet-b-011 (Galvanised Tread) resolves in base-types/footing/humanoid/b.json. Distinct role/axis pair from row 1 (armament-primary/control), so no UniqueAxisCollision at this rung band. Name is themeAdjectivePools('brittle') + nounPools['footing.humanoid']('tread'); a different adjective from 'unique.umbral-swarm-50-006' Massed Tread (a different rung band's own partition), so no name collision.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-007",
@@ -299,7 +305,8 @@
       "flavorKey": "flavor.unique.torpid-canteen",
       "flavor": "Whatever is inside stopped moving before the marching did.",
       "notes": "utility axis, infusion (bandolier), row 7. baseType item.humanoid-bandolier-b-012 (Leaden Cooler) resolves in base-types-infusion-humanoid-b.json. Name is themeAdjectivePools('torpid') + nounPools['infusion.humanoid']('canteen').",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.frostbitten-vanguard-30-008",
@@ -337,7 +344,8 @@
       "flavorKey": "flavor.unique.horn-of-muster",
       "flavor": "It calls the roll. Fewer answer every winter.",
       "notes": "economy axis, retinue (horn), row 8 of 8 - the last of the eight roles allocated to this partition (UniqueRuleCheck.AllowedRoles). baseType item.humanoid-horn-a-004 (Dinged Bell) resolves in base-types/retinue/humanoid/a.json. Name uses the <Base> of <Concept> pattern: nounPools['retinue.humanoid']('horn') + conceptPools['frostbitten-vanguard']('muster') - atom.econ-muster's own family id happens to share the word, which is the intentional tie-in, not a coincidence to flag.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     }
   ]
 }

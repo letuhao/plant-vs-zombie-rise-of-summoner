@@ -57,7 +57,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-002",
@@ -96,7 +97,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-003",
@@ -134,7 +136,8 @@
         "sturdy",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-004",
@@ -173,7 +176,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-005",
@@ -210,7 +214,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-006",
@@ -250,7 +255,8 @@
         "sturdy",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-007",
@@ -288,7 +294,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.umbral-swarm-50-008",
@@ -326,7 +333,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     }
   ]
 }

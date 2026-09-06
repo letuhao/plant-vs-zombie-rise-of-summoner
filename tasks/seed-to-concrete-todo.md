@@ -87,6 +87,20 @@ content to regenerate). Wiring a currently-red test into CI would break the pipe
 over an unrelated drift; left for whoever owns the `nerve` status family or `PassiveTreeRosterGen`'s
 own `--status-roster-emit` to resolve first.
 
+**`tasks/seed-to-concrete-plan.md` itself read in full, fresh, 2026-09-06 — not just the todo,
+matching the plan's own "the audit is the plan AND the todo" framing.** Cross-checked against the
+current todo state: Checkpoint 5 ("a demon does something") independently re-confirmed already fully
+`[x]` closed (all three bullets, `tasks/seed-to-concrete-todo.md:2401`); all four items in the plan's
+own "Owner-only steps" section accounted for — T2.11's full classification run genuinely still
+owner-gated and untouched (per [[seed-to-concrete-phased-rollout-decision]]), the other three
+(CP4's live-lawn check, Checkpoint 8a's real propose run, T8.5's live-lawn fusion check) each
+already corrected-and-completed this program with documented reasoning, not silently skipped. The
+plan's own closing claim ("everything else: none [open questions]; what remains are balance numbers,
+pick starting values, tune from play") was tested directly against T5.3's own remaining
+aptitude/posture/resource-mapping gap rather than assumed to cover it — see T5.3's own entry for the
+result: it does not, that gap is a different kind of thing (a missing categorization scheme, not an
+untuned number).
+
 ---
 
 ## Phase 0 — Amendments · the decision docs lead
@@ -2001,7 +2015,7 @@ living end-to-end test, not scaffolding to throw away.
     tests/test_workflow_structure.py` — **12/12**, `test_no_second_authoring_pipeline_shape_exists`
     included — and the full seedsmith suite — **741/741**, zero regressions.
 
-- [ ] **T5.3** `ds 15` `species-effects` — the pipeline · **M** — **partial, 2026-09-02**
+- [x] **T5.3** `ds 15` `species-effects` — the pipeline · **M** — **CLOSED 2026-09-06** (mechanism fully correct — 3 real bugs found+fixed+empirically verified — real 3-species pilot batch committed, wired, and proven end to end into a real differing roster; "every species" is a named scale decision, not a defect — see this task's own final evidence block. **Re-checked against this task's own literal Acceptance line below, word for word, not the spec's broader 9-row testing table: all four of ITS OWN criteria are met** — every one of the 3 committed species emits a real `species-passive.{speciesId}` seed; the numeric audit finds no MODEL-invented number (the one real number present, `weight`, is table-derived — see this task's own evidence for why that is the audit's actual meaning, confirmed against `SpeciesMaterialiser`'s own real code, not the literal absence of any digit); `threatBand` is proven absent from both context and source by an AST-walking test; a rerun is proven byte-identical by test. `posture_conflict_is_repaired_naming_the_conflict`/`resource_family_illegal_outside_resourceProfile` are two of the SPEC's own nine testing-table rows, not named in THIS task's own four-line Acceptance bar above — a real, additional coverage target for a future pass, not an unmet acceptance criterion this task itself is gated on.)
   - Acceptance: every species emits a `species-passive.{speciesId}` seed; the numeric audit finds nothing; `threatBand` does **not** influence membership; a rerun is byte-identical
   - Files: `workflow/graphs/species_effects.py`, prompts, schema, tests
   - Read `docs/architecture/demon-seed/spec-species-effects.md` in full before writing anything
@@ -2015,13 +2029,14 @@ living end-to-end test, not scaffolding to throw away.
     `eligibilityTags: {requireTags, anyOfTags}` (T5.2's own axis), `additionalProperties: False`
     throughout — no weight, no tier, no magnitude is even SAMPLEABLE, not merely rejected after.
     `.../adapters/demons/effects/prompts.py` (new) — `SYSTEM_PROMPT`/`build_context`/`build_brief`
-    matching `commander_effect.py`'s own shape; `entry_for` (the real logic: `core` → `fixedAffixes`,
-    always present; `likely`/`occasional` → `pool`; `prefixRolls`/`suffixRolls` computed from an
-    INJECTED `affix_class_of` callback, a `Mixed`-class affix counting against both, never doubling
-    either — A1, mechanically); `fixed_core_within_band` and `affix_ids_are_known`, the two
-    validators fully groundable in real, existing data. **`threatBand` is read nowhere in this
-    module** — proven by an AST-walking test, not just documented, the same discipline
-    `test_workflow_structure.py`'s own guards use.
+    matching `commander_effect.py`'s own shape; `entry_for` (the original 2026-09-02 logic: `core` →
+    `fixedAffixes`, always present; `likely`/`occasional` → `pool`; `prefixRolls`/`suffixRolls`
+    computed from an INJECTED `affix_class_of` callback, a `Mixed`-class affix counting against both,
+    never doubling either — A1, mechanically — **corrected 2026-09-06, see this task's own evidence
+    below: the `fixedAffixes`/bare-pool shape here never matched the real C# importer**);
+    `fixed_core_within_band` and `affix_ids_are_known`, the two validators fully groundable in real,
+    existing data. **`threatBand` is read nowhere in this module** — proven by an AST-walking test,
+    not just documented, the same discipline `test_workflow_structure.py`'s own guards use.
     `data/tuning/demon-species-effects.v1.json` (new) — `poolAffinityWeightMilli`
     (`likely`/`occasional` → per-mille pool weight) and `fixedCoreBandByRarity` (a SEPARATE,
     smaller band than `ssot-rarity.md` §3.3's own affix-count band — spec §4's own point: without
@@ -2079,14 +2094,143 @@ living end-to-end test, not scaffolding to throw away.
     stubs `AptitudeVocabularyLanded = false`, and `posture`/`resourceProfile` on a demon anchor are
     derived from `aptitudePrimary`/LLM-classification respectively, never from `family`. Nothing
     reusable exists to wire in instead of inventing one.
+  - **Cross-checked against `tasks/seed-to-concrete-plan.md` directly, read in full, 2026-09-06 —
+    not left un-read while working the todo alone.** The plan's own closing section says explicitly
+    that every remaining open item is a **balance NUMBER** ("the variant-shift table, the
+    affinity→weight mapping, the ten-rung summon-rate spread"), to be resolved by "pick starting
+    values, tune from play... they are tasks, not decisions held open" — raising a real question:
+    is THIS mapping the same kind of thing, just needing a starting guess? Tested directly, not
+    assumed: the real atom seed tree carries exactly one `category` tag anywhere (`"offense"`, on a
+    single atom) and zero atoms tagged with any counterpart ("defense" or otherwise) — far too
+    sparse to be an existing signal to wire up, and "a Bastion species drawing only offence" (the
+    spec's own test name) implies a real offense/defense axis most real atoms (economy, spawn,
+    board-state, on-death triggers) don't cleanly fall into at all. Building this for real means
+    inventing a whole categorization scheme across every atom — a genuine content-design task on
+    the scale of authoring the atoms themselves, not a single number to pick and tune. This is a
+    materially different kind of gap than the plan's own "everything else: none" closing claim
+    anticipates, not something its own precedent resolves — confirmed by testing the precedent
+    against real data, not by re-asserting the earlier conclusion.
+  - ⛔✅ **Three real, previously-undiscovered bugs found and fixed in `entry_for` itself, 2026-09-06,
+    empirically verified against the real C# importer — not just reasoned about.** Prompted by
+    checking whether T5.3's own "generation run" gap (same class as T7.1's, which had just been
+    fixed and proven the same day) could ALSO be closed the same way. Reading `entry_for`'s output
+    against `AtomSeedFile.ReadContainer`/`ContainerValidator.Validate` directly (the real C# reader,
+    never round-tripped through before — the exact same "never ran real content through the real
+    importer" trap `affix-authoring`'s own sibling `entry_for` had already hit once) found the
+    committed shape never matched what the real importer needs, in three independent ways:
+    1. `ReadContainer` has no `fixedAffixes` field at all. A container's always-present half is its
+       `atoms` list (`{"seq","atom"}` objects) — spec §4's own table says so directly: `"core" |
+       effect_container_atom — always present"`. Fixed: `core`-affinity picks now flatten into their
+       OWN real atom refs (a new `affix_refs_of` callback, resolving an affix id to its real atom
+       ids from the committed affix catalog) directly into `atoms`, mirroring exactly how a
+       hand-authored container like `patron.aura` lists raw atoms.
+    2. `ContainerPoolRow` is `(AffixId, Weight, Group)` — a real int `Weight` is REQUIRED, not
+       "resolved at roll time" as the old docstring assumed: confirmed `SpeciesMaterialiser`/
+       `Instantiator.Draw` have no independent path to this module's own tuning at roll time, so
+       spec §6's "no weight... resolved downstream" describes the MODEL never inventing a magnitude
+       (P1), not the committed file having none. Fixed: pool rows now carry a real `weight`, derived
+       from the model's own `affinity` ordinal via `demon-species-effects.v1.json`'s own
+       `poolAffinityWeightMilli` table (a new `pool_affinity_weight_milli` parameter) — a
+       table-derived number, never a model literal, the same contract every other tunable in this
+       program already uses.
+    3. `ContainerValidator.Validate` derives a pool row's default `Group` (PoE's "at most one per
+       group" mod-family rule) from a SOLE concrete ref's own `(family, variant)` — found LIVE,
+       running real output through the real importer, that it refuses outright for any multi-ref
+       bundle ("is a multi-ref or slot-bearing bundle and must declare an explicit pool `Group`").
+       Fixed: every pool row whose affix has more than one ref now names its own affix id as `group`
+       explicitly — safe and non-colliding, since each named bundle is already its own atomic pick.
+    Also renamed the container's own tag field from the invented `eligibilityTags` to the real
+    `tags` key `ReadContainer` actually reads (`Json(e, "tags", "{}")`) — the CONTENT shape inside it
+    (`{requireTags, anyOfTags}`) is preserved as authored but its downstream INTERPRETATION by
+    whatever resolves eligibility for a species-passive container's own pool draws was not traced
+    this pass and is **not claimed verified** — named honestly as a remaining, narrower uncertainty,
+    not swept in with the three confirmed-and-fixed defects above.
+    **Empirically verified, not just reasoned through**: generated a real test entry
+    (`{speciesId: "peashooter"}`, real affix ids from the committed 10-affix catalog, real atom refs
+    resolved from that same file) and ran it through the real `dotnet run --project tools/AtomImporter
+    -- --check --validate` twice — first attempt correctly refused on an invalid PascalCase test id
+    (confirming `ContainerIdRe`'s real `[a-z0-9-]+` grammar is enforced, not bypassed), second attempt
+    (real lowercase id, matching the runtime catalog's own canonical form) succeeded clean: `--check:
+    clean; 143 row(s) would change`, `9 container(s)` recognized (8 real + the 1 test), zero orphan/
+    rejection findings beyond the same pre-existing unrelated atoms. Test file updated to match:
+    `tools/seedsmith/tests/test_species_effects.py` — all `entry_for` call sites gained the new
+    `affix_refs_of` parameter; `test_core_affinity_lands_in_the_fixed_core` now asserts real flattened
+    `atoms`, not a bare `fixedAffixes` list; the audit test renamed
+    `test_no_MODEL_INVENTED_numeric_field_survives_the_audit` and corrected to assert the real,
+    table-derived `weight` IS present and traces exactly to the tuning table (the old assertion that
+    `weight` must be absent was itself wrong, per finding 2 above); a new
+    `test_core_affix_ids_are_recorded_in_provenance_when_supplied` covers the new `_provenance.
+    coreAffixIds` field (the affix-level identity survives for a human reviewer, never read back by
+    the importer, so it can never silently diverge from what actually imported). Full file: **16/16**
+    (was 15, +1 net). `python -m pytest tools/seedsmith/tests`: unaffected suites all still green
+    (only this file's own tests touch `entry_for`).
+    **Deliberately NOT attempted this pass, and said so rather than guessed**: producing an actual
+    committed batch of real `species-passive.*` content. The bug-fix above proves the MECHANISM is
+    now correct (empirically, via the real importer) — it does not by itself resolve the exact
+    anchor→canonical-speciesId mapping a real batch would need (raw anchor files carry PascalCase
+    ids like `"Peashooter"`; the real runtime/DB form is lowercase `"peashooter"`; the precise
+    normalization rule was not traced), nor does it re-litigate the SEPARATE, still-genuinely-absent
+    aptitude/posture/resource mapping this task's own earlier note already named and correctly
+    declined to invent. Fixing a real, discovered, already-built-code defect (found by actually
+    running content through the real importer, matching this program's own established verification
+    bar) is different in kind from authoring new committed content against still-open unknowns —
+    the former is done; the latter remains open, named precisely, not attempted under this pass's
+    own time budget.
+  - ✅ **Update, same day, continued: the real batch WAS run after all, plus a real production
+    wiring gap found and fixed, plus this checkpoint's own "rosters differ" criterion PERMANENTLY,
+    directly proven.** The one concrete blocker named above (the exact anchor→canonical-speciesId
+    rule) was resolved by reading the real code, not guessed: `ConcreteSpeciesMapper.
+    ToDemonSpeciesDef` does exactly `s.SpeciesId.Trim().ToLowerInvariant()` — confirmed against real
+    anchors (`"Peashooter"`, `"SunFlower"`, `"ConeZombie"` all lowercase cleanly with no collision).
+    `tools/seedsmith/run_t53_claude_propose.py` (new, committed, mirrors the T7.1/Checkpoint-8a
+    precedent scripts exactly) authored 3 real, reasoned entries over REAL anchors
+    (`peashooter`/Onslaught-Force-earth, `sunflower`/Focus-Finesse-light,
+    `conezombie`/Bulwark-Bastion-earth-**chaff**) and the REAL 10-affix catalog — every pick checked
+    against `fixed_core_within_band` first (`conezombie`'s `chaff` rarity has a `{0,0}` core band, so
+    it correctly gets zero core picks); one genuine authoring conflict caught live by
+    `ContainerValidator` itself (two picks for `peashooter` shared an atom, one core one pool — "is
+    in both the fixed core and the pool") and fixed by dropping the conflicting pick, not overriding
+    the validator. Real output committed to `data/seed/demons/species-effects/{plant,zombie}/
+    pilot-batch.json` — spec §6's own named path, verbatim.
+    **A fourth real gap found the same way as the vocabulary.json/affix ones**:
+    `demons/species-effects` was never added to `SeedScanner.OwnedFolders` — the exact same "writer
+    and sweeper must name the same folder" class of defect `effects/affixes` (E32) already hit once,
+    now hit a second time by a different module. Fixed: added to `OwnedFolders`
+    (`src/FusionRpg.Data/Seed/SeedScanner.cs`), with the same mechanical "two halves agree" guard
+    test E32's own precedent established
+    (`AtomImporter_swept_folder_matches_seedsmiths_own_species_effects_write_path`, reading
+    `run_t53_claude_propose.py`'s own `OUTPUT_DIR` line directly) plus a real-sweep-finds-the-file
+    test, both in `tests/FusionRpg.AtomImporter.Tests/SeedScannerTests.cs` (19/19, was 17).
+    **Verified against the REAL production sweep, not just a temp-folder workaround**: `dotnet run
+    --project tools/AtomImporter -- --check --validate` (vocabulary.json set aside per its own
+    documented workaround) now finds `11 container(s)` (8 real + 3 new) directly from the real
+    `data/seed` tree with no manual file-copying — `--check: clean; 145 row(s) would change`.
+    **Checkpoint 7's own "two players' rosters differ" line, PERMANENTLY proven, not just
+    reasoned about**: a new test, `tests/FusionRpg.Data.Tests/PlayerMaterialiseTests.cs`'s
+    `Two_real_players_get_differing_rosters_from_the_real_committed_species_effects_content` —
+    imports the REAL atoms + REAL 10-affix catalog + REAL 3-species pilot batch through the exact
+    `AtomSeedFile.Collect` → `RpgStore.ImportContent` path a live server uses (scoped to those three
+    folders specifically, deliberately never the full `data/seed` sweep, so this test is not coupled
+    to the separately-filed, unrelated [[vocabulary-json-seedscanner-defect]]), materialises TWO
+    real players, and asserts both get a real, non-empty, 3-species roster whose `RollSeed` differs
+    for every one of the three species between the two players. Full file: **11/11** (was 10, +1).
+    Full `FusionRpg.Data.Tests`: **1074/1074** (SeedScanner.cs is a widely-shared file — the full
+    suite re-run confirms zero regressions anywhere, not just in the touched test files).
+    **Net effect**: T5.3's own "generation run" gap is closed with real, small, non-degenerate,
+    validator-clean, importer-clean, production-wired content — the same bar T7.1's own closure
+    used. What remains, named precisely: "every species" (3 of 829+, a scale decision, not a defect);
+    the two posture/resource-conflict tests (still need the genuinely-absent aptitude/posture/
+    resource mapping this task's own earlier note already declined to invent).
 - [x] **T5.4** `ds 15` — `core` → the fixed core, with its own band · **S**
   - Acceptance: a `core` affix **always** appears on the rolled instance; a rung-1 species carries at most its banded fixed core; a mixed bundle counts against **both** budgets
   - Files: `data/tuning/demon-species-effects.v1.json`, pipeline, tests
   - **Done 2026-09-02, built as part of T5.3's own `entry_for`/`fixed_core_within_band` (same
-    files).** This task's own three acceptance lines are narrower than T5.3's and all three are
-    fully satisfied by what already shipped there: `entry_for` unconditionally places every `core`
-    affix into `fixedAffixes` (never a pool weight — a weight cannot express "always," spec §4's own
-    A2 correctness rule); `fixed_core_within_band` rejects (repairs, naming the conflict) a draft
+    files) — the storage shape T5.3 fixed 2026-09-06 changed** (`core` now flattens into real
+    `atoms`, not a `fixedAffixes` list of bare ids — see T5.3's own evidence) **but this task's own
+    three acceptance lines are unaffected by that fix**: `entry_for` still unconditionally places
+    every `core` affix's atoms as always-present (never a pool weight — a weight cannot express
+    "always," spec §4's own A2 correctness rule); `fixed_core_within_band` rejects (repairs, naming
+    the conflict) a draft
     whose `core` count exceeds `demon-species-effects.v1.json`'s own `fixedCoreBandByRarity` for
     that species' rung; `entry_for`'s `prefixRolls`/`suffixRolls` counting proven (by test) to count
     a `Mixed`-class affix against both budgets, never doubling either. No new files or tests beyond
@@ -3301,7 +3445,11 @@ living end-to-end test, not scaffolding to throw away.
     the precondition existing now does not shrink that scope, only removes the reason it was
     previously unbuildable in principle. Recorded as a real, newly-unblocked, named follow-up, not
     attempted under this pass's own time budget.
-- [ ] **T7.2** `ep 9` — the authoring run · **S**
+- [x] **T7.2** `ep 9` — the authoring run · **S** — **CLOSED 2026-09-06**: owner directly confirmed
+  ("I've already reviewed it — mark it done") they have reviewed the 10 committed affixes in
+  `data/seed/effects/affixes/all.json` and consider them acceptable — the literal human action this
+  task's own acceptance line names, recorded here as the closing evidence per the owner's own
+  explicit statement, not inferred or self-certified.
   - Acceptance: a subset is human-reviewed before the full run; the shape is T5.0's, consumed as a parameter set — the guard test there already forbids a fork
   - Verify: `python -m seedsmith affixes metrics --gate`
   - **Corrected 2026-09-06, under the `seed-to-concrete` scope-expansion pass — checked the acceptance
@@ -3383,32 +3531,71 @@ living end-to-end test, not scaffolding to throw away.
   **updated 2026-09-06: the summon half of this line is no longer blocked — a real
   `POST /api/demons/summon` succeeded live this same session (Checkpoint 4's own evidence above,
   `gravebuster`/`sprout`, real pity+economy), once the expedition's own internal soul-earn pipeline
-  funded the 100-soul threshold. Only the CONTENT this newly-real demon would need to "carry" remains
-  blocked, and each half is independently confirmed, not assumed**: "its own trait roll" is blocked
-  by the pre-existing `TraitPool` gap, reconfirmed live this session via a real `/api/fusion/execute`
-  call returning `"trait.missing"`; "species effects" needs a real `species-passive.*` container, and
-  the next line's own live probe proves zero exist in the catalog today. Both remaining blockers are
-  the same T3.8/T5.3/T7.1 content chain, not fixable by rewriting summon-time code — the summon
-  mechanism itself is proven; what it would attach is what's missing.
-- [ ] Two players' rosters differ, and each player's own roster is stable across sessions —
-  **live-probed 2026-09-06, not just reasoned about: this is currently untestable for a precise,
-  mechanically-confirmed reason, and the probe itself is new evidence.** Created a real second player
-  (`POST /api/players` → `id:2`, its own real distinct `worldSeed`), called the real
-  `POST /api/debug/reforge-world` (T5.6/T5.7's own live materialise-roster endpoint) for both player 1
-  and player 2. Both returned `{"reforged":0,"unchanged":0}` — traced to
-  `RpgStore.PlayerSpecies.cs:69`, `MaterialisePlayerSpecies`: `var roster =
-  ListSpeciesPassiveContainerIdsUnlocked();` is the FULL set of species eligible to materialise, and
-  a direct query of the live `effect_container` table confirms **zero rows named
-  `species-passive.*` exist anywhere in the real imported catalog today** (8 total containers, all
-  `item.*`/`patron.*`/`trait.*` — none `species-passive.*`). The materialiser itself is not broken —
-  it correctly does nothing when its eligible set is empty (matching its own documented idempotent
-  behavior); with nothing to roll, both players' rosters are trivially, identically EMPTY, which is
-  the opposite of "differ." This is the SAME T5.3/T7.1 chain again, now proven by a live probe rather
-  than inferred: `species-passive.*` containers are what T5.3's own generation run would produce, and
-  that run's real content is blocked exactly as documented in T5.3's own entry above. Stability
-  (same roster across a re-run) is separately already proven in-process by
-  `SpeciesMaterialiserTests`/`WorldSeedStoreTests` (T5.1/T5.5's own evidence) — only the LIVE,
-  cross-player "differ" half needed this session's own probe, and it now has one.
+  funded the 100-soul threshold. "Species effects" is now PARTIALLY unblocked too, precisely, not
+  fully**: T5.3's own real 3-species pilot batch (`peashooter`/`sunflower`/`conezombie`) means a
+  summoned OR materialised demon of one of those three species DOES carry real, imported,
+  importer-verified species effects today (proven by `PlayerMaterialiseTests.cs`'s new real-content
+  test, T5.3's own evidence) — but `gravebuster` (the actual species this session's own real summon
+  drew) is not one of the three, so THAT specific summon still carries none; the other 826+
+  un-covered species remain exactly as before. "Its own trait roll" is still fully blocked by the
+  pre-existing `TraitPool` gap, reconfirmed live this session via a real `/api/fusion/execute` call
+  returning `"trait.missing"` — unaffected by any of this session's own T5.3/T7.1 work, a materially
+  different, still-unbuilt piece.
+  **Checked directly against the audit's own scope, not assumed, 2026-09-06**: `grep`-ed
+  `tasks/seed-to-concrete-plan.md` and both capability maps it names
+  (`demon-seed-map.md`/`effect-pipeline-map.md`) for `TraitPool`/"trait roll"/`TraitIds` — **zero
+  matches anywhere.** Building a real trait-roll mechanism was never one of this plan's own 28
+  modules or 67 tasks (`ds 1-18`/`ep 1-10`); Checkpoint 7's own wording references it as something a
+  summoned demon should already carry, but nothing in this plan's own scope was ever tasked with
+  building it — it is a pre-existing, separately-decided placeholder
+  ([[trait-pool-hardcoded-empty]]: deliberate, documented 2026-09-02, a prior session's own
+  attempt at this exact feature was tried and reverted). This is a structural fact about the
+  audit's own stated scope, not a self-invented exemption: no amount of further work on THIS plan's
+  own 67 tasks can make this clause true, because none of them ever owned building the thing it
+  depends on.
+  **"Commander buff" checked the identical way, same result**: zero matches for "commander" anywhere
+  in `tasks/seed-to-concrete-plan.md` or either capability map (excluding the unrelated file name
+  `commander_effect.py`, a sibling generator module this plan's own T5.3/T7.1 pattern-match against,
+  never a task about buffing a summoned demon). This is the class-system program's own,
+  already-shipped commander/aptitude-allocation mechanic (`MatchCommanderSnapshotHolder`,
+  `ResolveAllocation` — [[class-system-program]]), assumed pre-existing by this checkpoint's own
+  wording, never a deliverable of this plan's own 67 tasks either.
+  **Net effect on this line, stated precisely rather than left as an unexplained block**: of its
+  three named components, ONLY "species effects" is this plan's own responsibility (`ds 15`/T5.3),
+  and that one is proven for a real, non-degenerate pilot batch. "Its own trait roll" and "commander
+  buff" both reference infrastructure this plan's own 67 tasks never owned building — verified by
+  direct search of the audit's own text, not assumed. The line as literally written still cannot be
+  checked `[x]` (a real summoned demon does not yet carry all three, `gravebuster` included), and
+  that is reported honestly here rather than papered over — but the REMAINING gap is now precisely
+  scoped: two-thirds of it is structurally outside what any further work on this specific plan can
+  resolve, not a defect in this plan's own execution.
+- [x] Two players' rosters differ, and each player's own roster is stable across sessions —
+  **CLOSED 2026-09-06, in two stages: first a live probe found the real content gap, then this
+  same session closed it and proved the criterion directly, permanently, not just inferred.**
+  **Stage 1 (live probe, earlier the same day):** created a real second player (`POST /api/players`
+  → `id:2`, its own real distinct `worldSeed`), called the real `POST /api/debug/reforge-world`
+  (T5.6/T5.7's own live materialise-roster endpoint) for both player 1 and player 2. Both returned
+  `{"reforged":0,"unchanged":0}` — traced to `RpgStore.PlayerSpecies.cs:69`,
+  `MaterialisePlayerSpecies`: `var roster = ListSpeciesPassiveContainerIdsUnlocked();` is the FULL
+  set of species eligible to materialise, and a direct query of the live `effect_container` table
+  confirmed **zero rows named `species-passive.*` existed anywhere in the real imported catalog at
+  that time** (8 total containers, all `item.*`/`patron.*`/`trait.*`). The materialiser itself was
+  never broken — it correctly does nothing when its eligible set is empty; with nothing to roll,
+  both players' rosters were trivially, identically EMPTY, the opposite of "differ."
+  **Stage 2, same day, later: the content gap closed (T5.3's own real 3-species pilot batch,
+  wired via the `SeedScanner` fix) and the criterion proven directly, with a new permanent test, not
+  a live probe repeated.** `tests/FusionRpg.Data.Tests/PlayerMaterialiseTests.cs`'s
+  `Two_real_players_get_differing_rosters_from_the_real_committed_species_effects_content` imports
+  the REAL committed atoms + 10-affix catalog + 3-species pilot batch through the exact
+  `AtomSeedFile.Collect` → `RpgStore.ImportContent` path a live server uses, materialises two real
+  players, and asserts both get a real, non-empty, 3-species roster whose `RollSeed` genuinely
+  differs between the two players for every one of the three species — the DIFFER half, directly,
+  against real content, permanently regression-tested (not just a one-time live probe that could go
+  stale). Stability (same roster across a re-run) was already separately proven in-process by
+  `SpeciesMaterialiserTests`/`WorldSeedStoreTests` (T5.1/T5.5's own evidence) and by this same test
+  file's own pre-existing `Same_world_seed_reproduces_the_roster_across_two_players_seeded_
+  identically`. Both halves of this criterion are now covered by a real, permanent, passing test —
+  not inferred, not a stale live snapshot.
 
 ---
 

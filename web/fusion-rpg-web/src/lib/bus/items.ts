@@ -69,12 +69,135 @@ export type CombinationRowDto = {
  */
 const ARMOURY_MAX_LIMIT = 200;
 
+// ---- the rendered card (item module 10, served by `ItemCardEndpoints.cs`) ----------------------
+
+/**
+ * One rendered line — module 10's `DisplayLine`, unchanged.
+ *
+ * `unit` and `sourceKind` arrive as the C# enum NAMES (`GameUnits`, `AffixPrefix`), the same
+ * `.ToString()` convention the surface and combination routes already use, and both are nullable
+ * because a structural line (a header, a footer, a requirement clause) carries no magnitude and
+ * declares no source kind.
+ *
+ * `args` is a flat string map. `args.__rendered` is the renderer's own finished sentence for the
+ * line; every other key is the frozen argument the template used to compose it.
+ */
+export type DisplayLineDto = {
+  key: string;
+  args: Record<string, string>;
+  unit: string | null;
+  sourceKind: string | null;
+  groupOrder: number;
+  /** `null` when the line has no luck to show. Already decided server-side. */
+  rollBarSegments: number | null;
+  contextRead: string | null;
+  rollQualityPerMille: number | null;
+};
+
+export type DisplayBlockDto = { blockKey: string; lines: DisplayLineDto[] };
+
+/** `fingerprint` is `DisplayModel.Fingerprint()` — the byte-identity the determinism test asserts on. */
+export type ItemCardDto = {
+  instanceId: string;
+  blocks: DisplayBlockDto[];
+  fingerprint: string;
+};
+
+export type ChannelDeltaDto = {
+  channel: string;
+  unit: string;
+  incumbent: number;
+  candidate: number;
+  delta: number;
+};
+
+/** A word AND a shape, never a colour alone — and there is no colour field to fall back on. */
+export type VerdictBadgeDto = { labelKey: string; shape: string };
+
+export type ItemCompareDto = {
+  incumbent: ItemCardDto;
+  candidate: ItemCardDto;
+  /** Positions in the FLATTENED line sequence where the two cards do not render the same thing. */
+  differingLineIndexes: number[];
+  deltas: ChannelDeltaDto[];
+  /** `StrictlyBetter` | `StrictlyWorse` | `Sidegrade` | `Incomparable`. */
+  dominance: string;
+  badge: VerdictBadgeDto;
+  trade: { youGain: ChannelDeltaDto[]; youGiveUp: ChannelDeltaDto[] };
+  /** The unit lives in the GROUP, never in a column. `unit: null` is its own group, never folded in. */
+  unitGroups: { unit: string | null; deltas: ChannelDeltaDto[] }[];
+  meanRollQualityMilliIncumbent: number;
+  meanRollQualityMilliCandidate: number;
+  /** Permanent. There is no server flag and no client control that can hide it. */
+  footnoteKey: string;
+  /** Non-null only for an incomparable verdict — one with no explanation reads as a bug. */
+  incomparableReasonKey: string | null;
+};
+
 export const itemKeys = {
   surfaces: (playerId: string) => ["itemSurfaces", playerId] as const,
   armoury: (playerId: string, after: string | null) => ["itemArmoury", playerId, after ?? "head"] as const,
   combinations: (instanceId: string, playerId: string) => ["itemCombinations", instanceId, playerId] as const,
-  assignments: (specimenId: string) => ["itemAssignments", specimenId] as const
+  assignments: (specimenId: string) => ["itemAssignments", specimenId] as const,
+  card: (instanceId: string, specimenId: string) => ["itemCard", instanceId, specimenId || "anon"] as const,
+  compare: (candidateId: string, incumbentId: string, specimenId: string) =>
+    ["itemCompare", candidateId, incumbentId, specimenId || "anon"] as const
 };
+
+function specimenQuery(specimenId: string): string {
+  return specimenId.length > 0 ? `?specimenId=${encodeURIComponent(specimenId)}` : "";
+}
+
+/**
+ * ⭐ The eleven rendered blocks of one item — module 10's `DisplayModel`, over the read-only route
+ * item module 20 added on 2026-09-06.
+ *
+ * `specimenId` is optional and adds the three wearer-shaped blocks (requirements, the gate's refusal,
+ * set progress). Leaving it out is a different card, not a poorer one: an item in the bag advances no
+ * set and refuses nothing.
+ *
+ * `retry: false` because every refusal this route gives is a content decision, not a blip — an
+ * unknown instance is a 404 and an unrenderable one is a 409, and retrying either just spends time.
+ */
+export function useItemCard(instanceId: string | null | undefined, specimenId?: string | null) {
+  const id = instanceId?.trim() || "";
+  const spec = specimenId?.trim() || "";
+  return useQuery({
+    queryKey: itemKeys.card(id, spec),
+    queryFn: () => getJson<ItemCardDto>(`/api/items/${encodeURIComponent(id)}/card${specimenQuery(spec)}`),
+    enabled: id.length > 0,
+    staleTime: 5_000,
+    retry: false
+  });
+}
+
+/**
+ * ⭐ Incumbent versus candidate — both rendered cards plus `DominancePresentation`'s verdict, trade
+ * and unit-class grouping.
+ *
+ * ⛔ **Nothing here is computed in the browser.** The verdict, the grouping, the trade split and the
+ * footnote all arrive already decided; a delta table assembled client-side would be the second
+ * implementation module 13 exists to prevent.
+ */
+export function useItemCompare(
+  candidateId: string | null | undefined,
+  incumbentId: string | null | undefined,
+  specimenId?: string | null
+) {
+  const candidate = candidateId?.trim() || "";
+  const incumbent = incumbentId?.trim() || "";
+  const spec = specimenId?.trim() || "";
+  return useQuery({
+    queryKey: itemKeys.compare(candidate, incumbent, spec),
+    queryFn: () =>
+      getJson<ItemCompareDto>(
+        `/api/items/${encodeURIComponent(candidate)}/compare/${encodeURIComponent(incumbent)}${specimenQuery(spec)}`
+      ),
+    enabled: candidate.length > 0 && incumbent.length > 0 && candidate !== incumbent,
+    staleTime: 5_000,
+    retry: false
+  });
+}
 
 /** GG-17 / GG-44 — which designed state each of the six surfaces is in, and what unlocks it. */
 export function useItemSurfaces(playerId: number | string) {
@@ -214,6 +337,10 @@ export function invalidateItemQueries(qc: ReturnType<typeof useQueryClient>) {
   void qc.invalidateQueries({ queryKey: ["itemArmoury"] });
   void qc.invalidateQueries({ queryKey: ["itemSurfaces"] });
   void qc.invalidateQueries({ queryKey: ["itemCombinations"] });
+  // Enhancing, socketing and salvaging all move what the card renders — the enhancement block, the
+  // socket cells, the footer's flags — so the rendered card and any comparison built on it go too.
+  void qc.invalidateQueries({ queryKey: ["itemCard"] });
+  void qc.invalidateQueries({ queryKey: ["itemCompare"] });
   // Every verb but salvage debits materials, and salvage credits them.
   void qc.invalidateQueries({ queryKey: ["demonMaterials"] });
 }
@@ -299,6 +426,9 @@ function invalidateEquipQueries(qc: ReturnType<typeof useQueryClient>, specimenI
   void qc.invalidateQueries({ queryKey: itemKeys.assignments(specimenId) });
   void qc.invalidateQueries({ queryKey: ["itemArmoury"] });
   void qc.invalidateQueries({ queryKey: ["uniqueEquipment", specimenId] });
+  // The card's requirement block and set progress are facts about a WEARER, so equipping moves them.
+  void qc.invalidateQueries({ queryKey: ["itemCard"] });
+  void qc.invalidateQueries({ queryKey: ["itemCompare"] });
 }
 
 /**

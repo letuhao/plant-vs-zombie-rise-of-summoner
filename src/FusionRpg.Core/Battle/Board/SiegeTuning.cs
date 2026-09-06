@@ -38,7 +38,19 @@ public sealed record EconomyTuning(
 /// </summary>
 public sealed record ConstructionTuning(
     long ShardVeinYieldPerTurn, long MaterialSeamYieldPerTurn,
-    long RefineRubblePerIronwork, int RefineYieldMilli, long RefinePerTurnCap);
+    long RefineRubblePerIronwork, int RefineYieldMilli, long RefinePerTurnCap,
+    /// <summary>Laboured's own moat (spec-siege-construction.md §5) — stamina, hunger and build turns.
+    /// A flat, whole-unit cost, not per-mille: `stamina`/`hunger` are bounded actor resources spent in
+    /// whole units by every other action-cost precedent in this codebase (§3 of the audit's own
+    /// investigation), not a ratio of a max.</summary>
+    int LabourMoatStaminaCost, int LabourMoatHungerCost, int LabourMoatTurns,
+    /// <summary>Summoned's own `qi` cost (spec-siege-construction.md §4). A flat amount rather than the
+    /// spec's own "per-mille of max qi" framing — deliberately simplified 2026-09-06: `ActionCostRow`'s
+    /// `ValueSpec` supports a flat value directly and unconditionally; a percent-of-max spec needs a
+    /// resolver this session did not verify exists for a non-curved cost. Named here rather than
+    /// silently matching the spec's literal wording. Revisit if a real percent-of-max mechanism is
+    /// ever confirmed to exist for `ActionCostRow`.</summary>
+    int SummonQiCost);
 
 /// <summary>
 /// base-defense `siege-waves` (spec-siege-waves.md). <see cref="BatchIntervalTicks"/>/
@@ -274,6 +286,18 @@ public static class SiegeTuningLoader
             var refinePerTurnCap = Long(construction, "refinePerTurnCap");
             if (refinePerTurnCap < -1)
                 throw new SiegeTuningRejection($"siege tuning: construction.refinePerTurnCap must be -1 (unset) or >= 0; got {refinePerTurnCap}");
+            var moatStaminaCost = Int(construction, "labourMoatStaminaCost");
+            if (moatStaminaCost < 0)
+                throw new SiegeTuningRejection($"siege tuning: construction.labourMoatStaminaCost must be >= 0; got {moatStaminaCost}");
+            var moatHungerCost = Int(construction, "labourMoatHungerCost");
+            if (moatHungerCost < 0)
+                throw new SiegeTuningRejection($"siege tuning: construction.labourMoatHungerCost must be >= 0; got {moatHungerCost}");
+            var moatTurns = Int(construction, "labourMoatTurns");
+            if (moatTurns < 0)
+                throw new SiegeTuningRejection($"siege tuning: construction.labourMoatTurns must be >= 0; got {moatTurns}");
+            var summonQiCost = Int(construction, "summonQiCost");
+            if (summonQiCost < 0)
+                throw new SiegeTuningRejection($"siege tuning: construction.summonQiCost must be >= 0; got {summonQiCost}");
 
             var economy = Obj(root, "economy");
             var nodeYieldLoam = Long(economy, "nodeYieldPerRoundLoam");
@@ -367,6 +391,10 @@ public static class SiegeTuningLoader
                 Construction: new ConstructionTuning(
                     ShardVeinYieldPerTurn: shardVeinYield,
                     MaterialSeamYieldPerTurn: materialSeamYield,
+                    LabourMoatStaminaCost: moatStaminaCost,
+                    LabourMoatHungerCost: moatHungerCost,
+                    LabourMoatTurns: moatTurns,
+                    SummonQiCost: summonQiCost,
                     RefineRubblePerIronwork: rubblePerIronwork,
                     RefineYieldMilli: refineYieldMilli,
                     RefinePerTurnCap: refinePerTurnCap),

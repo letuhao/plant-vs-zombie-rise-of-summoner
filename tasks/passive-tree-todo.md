@@ -3770,7 +3770,86 @@ escalated**. Seed document independently verified: `data/seed/passive-tree/nodes
 Running real generation tally across the 11 trees tested: **might 37/40, fortitude 32/40, vigor 23/40,
 onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40, focus 29/40, bulwark 27/40, retribution
 32/40, precision 30/40** — 331/440 accepted (75.2%) cumulative, zero escalations on every tree since
-the `_node_verify_fn` fix landed. Only `ferocity` remains untested — the last of the 12 primary trees.
+the `_node_verify_fn` fix landed.
+
+Continued to `ferocity` (`late-crown`, fourth and final real instance — completed as a background run
+that outlived the session process and was verified after resume, per this task's own "never claim
+verification before observing its result" rule): **31/40 accepted (77.5%), zero escalated**. Seed
+document independently re-verified after resume: `data/seed/passive-tree/nodes/ferocity.json` —
+31/31 nodes, 31/31 unique `nameKey`s, zero duplicates.
+
+**All 12 primary trees now have real generation data — every archetype tested at least 4 times,
+zero escalations anywhere since the fix landed.** Final tally, re-derived directly from the real
+ledger's own `done` counts, not accumulated arithmetic: **might 37/40, fortitude 32/40, vigor 23/40,
+onslaught 29/40, agility 39/40, composure 28/40, pierce 25/40, focus 29/40, bulwark 27/40, retribution
+32/40, precision 30/40, ferocity 31/40 — 362/480 accepted (75.4%) across the full 12-tree primary
+corpus**, zero duplicate `nameKey`s in any of the 12 committed seed documents. Remaining 118/480 are
+100% legitimate residual outcomes (genuine 1-1-1 vote ties and genuine model declines, several with
+informative `nullification` reasons naming the specific conflicting pair) — never a single escalation
+since the `_node_verify_fn` ordering fix, across 480 real subjects spanning all three shipped
+archetypes four times over.
+
+**Second retry pass started — every tree but `might`/`fortitude`/`agility` had only been attempted
+once, and repeated real `--write` runs already proved they measurably shrink the residual (`might`
+30→37, `fortitude` 12→32).** `vigor` round 2: **+12 accepted, 0 escalated**, now **35/40 (87.5%)** —
+the run report itself now reads `verdict: pass` (2/40 unresolved, 50‰, under the gate's own
+threshold). Seed document independently verified: `data/seed/passive-tree/nodes/vigor.json` — 35/35
+nodes, 35/35 unique `nameKey`s, zero duplicates. `pierce` round 2: **+5 accepted, 0 escalated**, now
+**30/40 (75%)**.
+
+**Fourth major gap found and FIXED 2026-09-06 — a real, previously-invisible spec violation the
+owner's own question about parallel generation surfaced.** Asked directly whether different trees
+could safely generate in parallel or share a dependency — investigating this properly (not just
+answering from the sibling-mechanism reasoning already on record) meant checking whether ANY
+cross-tree state exists, and it does: `nameKey`. `spec-tree-language.md`'s own field table is
+explicit — `name`/`nameKey` are "deduplicated **corpus-wide**", not per-tree. But
+`run_language_stage`'s `known_name_keys` was only ever seeded from `plan.already_done`, which
+`plan_run` filters down to THIS tree's own subject ids (`f"{tree_plan.tree_id}:{node.node_id}"`
+prefix) — two different trees' generation runs never saw each other's already-taken keys, even
+though every tree's `--write` run reads and writes the SAME shared ledger file. Checked the real
+committed data directly rather than assuming: **46 real cross-tree `nameKey` collisions already
+existed across the 12 committed trees** (e.g. `tree.node.primal-surge` independently landed in
+`might`, `vigor` AND `ferocity`; `tree.node.kinetic-recoil` in six different trees) — a genuine,
+silent spec violation, not a hypothetical risk, and importantly **not specific to parallel execution
+at all**: it reproduces identically whether trees run in parallel or one after another, since
+`known_name_keys` never carried over between separate `run_language_stage` calls either way.
+
+Fixed at the root: `known_name_keys` is now seeded from the WHOLE ledger (`done`, already read in
+full by `run_language_stage` before this point — no second read), not only the current tree's own
+filtered subset; `tree_siblings` (the "don't repeat yourself" brief-context mechanism, a separate
+concern per spec's own §6.2) correctly stays tree-scoped, since only `nameKey` carries the
+corpus-wide requirement. Added `CrossTreeNameKeyDedupTests` (2 new tests) proving a second tree
+naming the same thing gets a suffixed key instead of colliding, and a third tree still finds a free
+slot after two others already took the name — confirmed both tests correctly FAIL without the fix
+(temporarily reverted it, re-ran, restored) before trusting them as real coverage, not just written
+to pass. `python -m pytest tests/adapters/trees -q`: **271 passed** (was 269), same 2 pre-existing
+unrelated affix-corpus-count failures only. Full `python -m pytest tests -q` showed a transient batch
+of unrelated failures on the first run (`data/seed/atoms/vocabulary.json` mid-move by a concurrent
+session's own already-documented workaround, confirmed via `git status` and gone on immediate re-run)
+— re-ran clean: only the same long-standing unrelated affix-family-count cluster.
+
+**Remediated the 46 already-committed collisions in the real data, not just fixed the code going
+forward.** Applied the identical deterministic scheme the fix now applies live: for each colliding
+key, sort occurrences by roster ordinal (this session's established "first writer wins" convention),
+the lowest-ordinal tree keeps the bare key, every later one gets the next free numeric suffix —
+computed against the FULL corpus keyspace so a remediation rename can never step on an already-taken
+suffix from that tree's own unrelated, genuine intra-tree dedup (confirmed on a real case: `focus`'s
+colliding `rooted-resolve` correctly skipped `-2`, already `composure`'s own real intra-tree
+duplicate, landing on `-3`). Backed up the ledger and every one of the 10 affected trees' seed
+documents first (`*.bak-2026-09-06-crosstree`), applied 72 renames across 46 groups, then verified
+directly: **0 cross-file collisions remain, 379 total nodes across all 12 trees = 379 unique
+`nameKey`s, every tree's node count in the seed document matches the ledger's own count exactly**
+(nothing lost, nothing duplicated). Only `nameKey` values changed — `name`/`flavor`/`affixIds`/every
+other field is untouched, so no real generated content (nor its real API cost) was discarded.
+
+**Answer to the owner's actual question, for the record:** multiple trees do NOT have a content
+dependency on each other in the sibling sense (§6.2's "do not repeat" pool is correctly tree-scoped,
+by design) — but they DID share the `nameKey` uniqueness requirement without enforcing it, which is
+now fixed. With that fixed, running several trees' generation concurrently is safe with respect to
+CONTENT correctness; the still-open, separate question is RESOURCE contention against the shared
+local LM Studio instance (the earlier `--workers 2` real-model regression finding, unrelated to this
+one and still unresolved) — trees were run sequentially, one at a time, throughout this whole pass,
+never testing multi-tree concurrency for real.
 
 ### ⬜ Checkpoint H — primary corpus — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] 480 nodes generated, gated and reviewed at the H8-measured rate

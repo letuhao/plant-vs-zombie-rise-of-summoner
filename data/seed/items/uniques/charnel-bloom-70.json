@@ -95,7 +95,8 @@
       "iconKey": "icon.unique.vest-of-the-ossuary",
       "flavorKey": "flavor.unique.vest-of-the-ossuary",
       "flavor": "Stitched from grave-linen and stiffened with what the linen used to hold.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-003",
@@ -133,7 +134,8 @@
       "iconKey": "icon.unique.mournvine",
       "flavorKey": "flavor.unique.mournvine",
       "flavor": "It grows toward whatever screamed last.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-004",
@@ -209,7 +211,8 @@
       "iconKey": "icon.unique.mask-of-the-wake",
       "flavorKey": "flavor.unique.mask-of-the-wake",
       "flavor": "Worn to the vigil, kept after everyone else went home.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-006",
@@ -250,7 +253,8 @@
       "iconKey": "icon.unique.blighted-taproot",
       "flavorKey": "flavor.unique.blighted-taproot",
       "flavor": "It doesn't grip the soil so much as remember what's buried in it.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-007",
@@ -288,7 +292,8 @@
       "iconKey": "icon.unique.bloodgarland",
       "flavorKey": "flavor.unique.bloodgarland",
       "flavor": "A wreath meant for a grave, repurposed for a body that isn't ready for one yet.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.charnel-bloom-70-008",
@@ -326,7 +331,8 @@
       "iconKey": "icon.unique.runner-of-the-barrow",
       "flavorKey": "flavor.unique.runner-of-the-barrow",
       "flavor": "Send it ahead. It already knows where the ground gives way.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     }
   ]
 }

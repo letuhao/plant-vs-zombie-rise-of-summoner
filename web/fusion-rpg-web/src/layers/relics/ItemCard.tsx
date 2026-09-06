@@ -82,13 +82,30 @@ function isMagnitude(value: Magnitude | string): value is Magnitude {
  * A rendered line binds to a key and its arguments, never to a finished sentence, so a translator
  * can reorder without touching a number.
  *
- * ⚠ The `item.card.*` message catalog does not exist yet — no route serves a rendered card, so no
- * line reaches this component today. Until it does, the key's own last segment is shown as the
- * label and every argument that is a magnitude goes through `formatMagnitude`. That is a legible
- * placement for a real line, never an invented number: nothing here computes a value.
+ * ⭐ **`line.rendered` is the renderer's own sentence** — `ItemDisplayRenderer` composed it from
+ * `item_display_template` and the frozen magnitude, and it is what a real affix line shows. This
+ * component prefers it and computes nothing.
+ *
+ * ⚠ A STRUCTURAL line (the header, a requirement clause, the footer) has no template and therefore
+ * no sentence. For those the key's own last segment is the label and the args are listed as they
+ * arrived — a legible placement for a real line, never an invented number. The `item.card.*` message
+ * catalog is still owed by the content side; that is why a key is showing rather than a word.
  */
 function LineRow({ line }: { line: DisplayLine }) {
   const label = line.key.split(".").slice(-1)[0]!.replace(/-/g, " ");
+  if (line.rendered) {
+    return (
+      <p className="flex items-baseline justify-between gap-3" data-source-kind={line.sourceKind ?? undefined}>
+        <span className="text-text">{line.rendered}</span>
+        {line.rollQualityPerMille === undefined ? null : (
+          <span className="shrink-0 font-mono text-xs text-muted">
+            {formatMagnitude({ unit: "perMilleRatio", value: line.rollQualityPerMille, op: "flat" })}
+          </span>
+        )}
+      </p>
+    );
+  }
+
   const parts = Object.entries(line.args).map(([name, value]) =>
     isMagnitude(value) ? formatMagnitude(value) : `${name}: ${value}`
   );
@@ -167,17 +184,7 @@ export function ItemCard({
         {/* 2. Requirements — red when unmet, and it names which number gates. */}
         <Block title="Requirements" testId={`${testId}-requirements`}>
           {item.requirements.state === "known" ? (
-            item.requirements.value.length === 0 ? (
-              <p className="text-xs text-muted">None</p>
-            ) : (
-              item.requirements.value.map((req) => (
-                <p key={req.attribute} className={req.met ? "text-text" : "text-bad"}>
-                  {req.attribute} {formatMagnitude({ unit: "count", value: req.required })} (
-                  {formatMagnitude({ unit: "count", value: req.composed })} composed) —{" "}
-                  {formatMagnitude({ unit: "count", value: req.gating })} gates
-                </p>
-              ))
-            )
+            <Lines lines={item.requirements.value} />
           ) : (
             <Unfilled
               state={item.requirements.state}
@@ -326,7 +333,7 @@ export function ItemCard({
         {/* 9. Granted action. */}
         <Block title="Grants" testId={`${testId}-granted-action`}>
           {item.grantedAction.state === "known" ? (
-            <LineRow line={item.grantedAction.value} />
+            <Lines lines={item.grantedAction.value} />
           ) : (
             <Unfilled
               state={item.grantedAction.state}
@@ -346,13 +353,10 @@ export function ItemCard({
         <Block title="Details" testId={`${testId}-footer`} collapsible>
           {item.footer.state === "known" ? (
             <p className="text-xs text-muted">
-              {item.footer.value.meanRollQualityPerMille === undefined
+              {/* The renderer's own formatted percentage, not a number re-formatted here. */}
+              {item.footer.value.meanRollQuality === undefined
                 ? "Nothing rolled"
-                : `Mean roll ${formatMagnitude({
-                    unit: "perMilleRatio",
-                    value: item.footer.value.meanRollQualityPerMille,
-                    op: "flat"
-                  })}`}
+                : `Mean roll ${item.footer.value.meanRollQuality}`}
               {item.footer.value.locked ? " · locked" : ""}
               {item.footer.value.stale ? " · out of date" : ""}
             </p>

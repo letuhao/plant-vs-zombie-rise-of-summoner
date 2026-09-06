@@ -1,8 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRelics, useUniqueActors, useUniqueEquipment, usePutUniqueEquipment } from "@/lib/bus";
-import { useArmoury, useEquipItem, useItemAssignments, useUnequipItem } from "@/lib/bus/items";
-import { PLAYER_PENDING, adaptArmouryItem, adaptArmouryPage, adaptEquipAssignments, adaptRelic } from "@/contract/adapt";
-import { absent, pendingWithReason } from "@/contract/pending";
+import {
+  useArmoury,
+  useEquipItem,
+  useItemAssignments,
+  useItemCard,
+  useItemCombinations,
+  useItemCompare,
+  useUnequipItem
+} from "@/lib/bus/items";
+import {
+  PLAYER_PENDING,
+  adaptArmouryItem,
+  adaptArmouryPage,
+  adaptCombinations,
+  adaptEquipAssignments,
+  adaptItemCard,
+  adaptItemCompare,
+  adaptRelic
+} from "@/contract/adapt";
+import { absent, known, pendingWithReason } from "@/contract/pending";
 import type { ArmouryRowView, ItemRoleId, PieceSetDisclosureView } from "@/contract/types";
 
 type RelicDto = Parameters<typeof adaptRelic>[0];
@@ -222,12 +239,46 @@ export function RelicsLayer({
   };
 
   /**
-   * The card for a selected armoury row. Almost every block comes back unfilled and says so: no
-   * route serves a rendered card yet, so filling one here would mean composing magnitudes in the
-   * browser, which is the one thing this surface must never do. The rarity, the flags and the
-   * identity are real — they came off the row the list already has.
+   * ⭐ item module 10's rendered card, over `GET /api/items/{instanceId}/card` — the route that
+   * landed 2026-09-06 and turned every block below the header from "pending" into real content.
+   *
+   * The specimen is passed whenever one is selected: requirements, the equip gate's refusal and set
+   * progress are facts about a WEARER, and asking without one is a different card, not a poorer one.
+   *
+   * The combination rows come from the dedicated combinations route rather than from the card,
+   * because `CombinationView` also carries the shape and the granted tier and only that route
+   * reports them. React Query dedupes it against the compendium's identical call.
    */
-  const armouryCard = armouryRow ? adaptArmouryItem(armouryRow, nameFor(armouryRow.containerId)) : null;
+  const cardQuery = useItemCard(armouryRow?.instanceId ?? null, actorId || null);
+  const combinationsQuery = useItemCombinations(armouryRow?.instanceId ?? null, playerId);
+  const combinations = useMemo(
+    () => (combinationsQuery.data ? adaptCombinations(combinationsQuery.data) : []),
+    [combinationsQuery.data]
+  );
+
+  /**
+   * The incumbent this selection would displace: whatever ITEM the specimen already wears in the
+   * role the equip control is aimed at. `null` when that role is empty, when the selection is
+   * already worn, or when the incumbent is a relic — the compare route takes two rolled instances,
+   * and a relic is a catalog id on the other flow's write path.
+   */
+  const compareIncumbentId =
+    armouryRow && !wornRoleOfSelection
+      ? assignments.find((a) => a.source === "item" && a.role === equipRole)?.refId ?? null
+      : null;
+  const compareQuery = useItemCompare(armouryRow?.instanceId ?? null, compareIncumbentId, actorId || null);
+
+  /**
+   * ⚠ The fallback, and it is still honest rather than empty: while the card route is in flight — or
+   * when it refuses, which it does by name for a container module 6's base-type corpus does not
+   * carry — the row's own identity, rarity and flags are real and every other block says "not shown
+   * yet" instead of showing a number nobody computed.
+   */
+  const armouryCard = cardQuery.data
+    ? adaptItemCard(cardQuery.data, combinations)
+    : armouryRow
+      ? adaptArmouryItem(armouryRow, nameFor(armouryRow.containerId))
+      : null;
 
   /** No route reports which sets a worn piece advances yet, and the relic catalog declares none. */
   const setDisclosure = absent<PieceSetDisclosureView[]>();
@@ -402,7 +453,20 @@ export function RelicsLayer({
 
                 {armouryCard ? (
                   <div className="flex flex-col gap-2" data-testid="armoury-detail">
-                    <ItemCard item={armouryCard} testId="armoury-card" />
+                    {/* ⭐ GG-47: the comparison is the DEFAULT presentation when a candidate is
+                      * selected against an occupied role — not a tooltip and not an extra click. Both
+                      * cards, the verdict, the trade and the unit-class grouping arrive from
+                      * `GET /api/items/{id}/compare/{incumbentId}` already decided. With no incumbent
+                      * there is nothing to weigh, and the single card is the whole answer. */}
+                    {compareQuery.data ? (
+                      <CompareView
+                        candidate={adaptItemCard(compareQuery.data.candidate, combinations)}
+                        incumbent={adaptItemCard(compareQuery.data.incumbent)}
+                        payload={known(adaptItemCompare(compareQuery.data))}
+                      />
+                    ) : (
+                      <ItemCard item={armouryCard} testId="armoury-card" />
+                    )}
                     <div className="flex flex-wrap gap-2">
                       <Button size="sm" variant="ghost" data-testid="armoury-open-bench" onClick={() => setBenchOpen(true)}>
                         Sockets

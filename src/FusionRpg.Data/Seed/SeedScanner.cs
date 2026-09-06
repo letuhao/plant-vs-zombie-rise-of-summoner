@@ -33,11 +33,18 @@ public static class SeedScanner
     /// seven exist on disk yet (confirmed: `data/seed/dungeon/` holds only the three hub folders) —
     /// adding them here is a no-op today, since `Roots()`'s own `.Where(exists)` filter skips a
     /// folder that is not there; it only takes effect once a real anchor is authored under one of
-    /// them.</para></summary>
+    /// them.</para>
+    ///
+    /// <para><b>`demons/species-effects`</b> (T5.3, spec-species-effects.md §6) added 2026-09-06,
+    /// the exact same "two halves must name the same folder" discipline `effects/affixes` above
+    /// already established — `tools/seedsmith/run_t53_claude_propose.py`'s own `OUTPUT_DIR` writes
+    /// here. Unlike the dungeon folders above, this one is NOT a no-op today: a real pilot batch
+    /// (`plant/pilot-batch.json`, `zombie/pilot-batch.json`) is already committed under it.</para>
+    /// </summary>
     public static readonly string[] OwnedFolders =
         {
             "atoms", "containers", "curves", "rarity", "elements", "channel-policy", "channel-pools",
-            "effects/affixes", "power",
+            "effects/affixes", "power", "demons/species-effects",
             "dungeon/domains", "dungeon/rooms", "dungeon/layouts", "dungeon/events", "dungeon/quests",
             "dungeon/encounters", "dungeon/supplies",
         };

@@ -93,56 +93,82 @@ public sealed class SiegeDepot
     readonly long _worldSeedLoam;
     readonly long _boardIronwork;
     readonly long _worldSeedIronwork;
+    readonly long _boardRubble;
+    readonly long _worldSeedRubble;
 
     public long Loam => checked(_boardLoam + _worldSeedLoam);
     public long Ironwork => checked(_boardIronwork + _worldSeedIronwork);
+
+    /// <summary>base-defense `siege-construction` (2026-09-06): the bulk material `Built` also spends
+    /// (decisions 16/17/34) — found never wired into this class at all despite the module's own
+    /// docs assuming it (zero references to a Rubble field anywhere in this file before this change).
+    /// Same shape as <see cref="Ironwork"/> exactly: board-earned first, world-seeded second.</summary>
+    public long Rubble => checked(_boardRubble + _worldSeedRubble);
     public long LoamSpentFromWorld { get; }
     public long IronworkSpentFromWorld { get; }
+    public long RubbleSpentFromWorld { get; }
 
     SiegeDepot(long boardLoam, long worldSeedLoam, long boardIronwork, long worldSeedIronwork,
-        long loamSpentFromWorld, long ironworkSpentFromWorld)
+        long boardRubble, long worldSeedRubble,
+        long loamSpentFromWorld, long ironworkSpentFromWorld, long rubbleSpentFromWorld)
     {
         if (boardLoam < 0) throw new ArgumentOutOfRangeException(nameof(boardLoam));
         if (worldSeedLoam < 0) throw new ArgumentOutOfRangeException(nameof(worldSeedLoam));
         if (boardIronwork < 0) throw new ArgumentOutOfRangeException(nameof(boardIronwork));
         if (worldSeedIronwork < 0) throw new ArgumentOutOfRangeException(nameof(worldSeedIronwork));
+        if (boardRubble < 0) throw new ArgumentOutOfRangeException(nameof(boardRubble));
+        if (worldSeedRubble < 0) throw new ArgumentOutOfRangeException(nameof(worldSeedRubble));
         _boardLoam = boardLoam;
         _worldSeedLoam = worldSeedLoam;
         _boardIronwork = boardIronwork;
         _worldSeedIronwork = worldSeedIronwork;
+        _boardRubble = boardRubble;
+        _worldSeedRubble = worldSeedRubble;
         LoamSpentFromWorld = loamSpentFromWorld;
         IronworkSpentFromWorld = ironworkSpentFromWorld;
+        RubbleSpentFromWorld = rubbleSpentFromWorld;
     }
 
     /// <summary>The defender's seed: a FRACTION (`depotSeedMilli`) of the sector's own stockpile is
     /// reachable during the siege — never the whole stock, and never the attacker's number.</summary>
-    public static SiegeDepot SeedFromSectorStock(long sectorLoam, long sectorIronwork, int depotSeedMilli)
+    public static SiegeDepot SeedFromSectorStock(long sectorLoam, long sectorIronwork, long sectorRubble, int depotSeedMilli)
     {
         if (sectorLoam < 0) throw new ArgumentOutOfRangeException(nameof(sectorLoam));
         if (sectorIronwork < 0) throw new ArgumentOutOfRangeException(nameof(sectorIronwork));
+        if (sectorRubble < 0) throw new ArgumentOutOfRangeException(nameof(sectorRubble));
         if (depotSeedMilli is <= 0 or > 1000) throw new ArgumentOutOfRangeException(nameof(depotSeedMilli));
-        return new SiegeDepot(0, checked(sectorLoam * depotSeedMilli / 1000), 0, checked(sectorIronwork * depotSeedMilli / 1000), 0, 0);
+        return new SiegeDepot(0, checked(sectorLoam * depotSeedMilli / 1000), 0, checked(sectorIronwork * depotSeedMilli / 1000),
+            0, checked(sectorRubble * depotSeedMilli / 1000), 0, 0, 0);
     }
 
     /// <summary>The attacker's seed: whatever the legion carried in, unscaled — finite, and never
-    /// ironwork (decision 27's whole reason for four acquisition paths: an attacker has no empire
-    /// stockpile to draw from at all).</summary>
+    /// ironwork or rubble (decision 27's whole reason for four acquisition paths: an attacker has no
+    /// empire stockpile to draw from at all).</summary>
     public static SiegeDepot SeedFromCarriedLoam(long carriedLoam)
     {
         if (carriedLoam < 0) throw new ArgumentOutOfRangeException(nameof(carriedLoam));
-        return new SiegeDepot(0, carriedLoam, 0, 0, 0, 0);
+        return new SiegeDepot(0, carriedLoam, 0, 0, 0, 0, 0, 0, 0);
     }
 
     public SiegeDepot CreditLoam(long amount)
     {
         if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
-        return new SiegeDepot(checked(_boardLoam + amount), _worldSeedLoam, _boardIronwork, _worldSeedIronwork, LoamSpentFromWorld, IronworkSpentFromWorld);
+        return new SiegeDepot(checked(_boardLoam + amount), _worldSeedLoam, _boardIronwork, _worldSeedIronwork, _boardRubble, _worldSeedRubble,
+            LoamSpentFromWorld, IronworkSpentFromWorld, RubbleSpentFromWorld);
     }
 
     public SiegeDepot CreditIronwork(long amount)
     {
         if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
-        return new SiegeDepot(_boardLoam, _worldSeedLoam, checked(_boardIronwork + amount), _worldSeedIronwork, LoamSpentFromWorld, IronworkSpentFromWorld);
+        return new SiegeDepot(_boardLoam, _worldSeedLoam, checked(_boardIronwork + amount), _worldSeedIronwork, _boardRubble, _worldSeedRubble,
+            LoamSpentFromWorld, IronworkSpentFromWorld, RubbleSpentFromWorld);
+    }
+
+    public SiegeDepot CreditRubble(long amount)
+    {
+        if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+        return new SiegeDepot(_boardLoam, _worldSeedLoam, _boardIronwork, _worldSeedIronwork, checked(_boardRubble + amount), _worldSeedRubble,
+            LoamSpentFromWorld, IronworkSpentFromWorld, RubbleSpentFromWorld);
     }
 
     public SiegeDepot SpendLoam(long amount)
@@ -152,7 +178,7 @@ public sealed class SiegeDepot
         var fromBoard = Math.Min(_boardLoam, amount);
         var fromWorld = amount - fromBoard;
         return new SiegeDepot(checked(_boardLoam - fromBoard), checked(_worldSeedLoam - fromWorld), _boardIronwork, _worldSeedIronwork,
-            checked(LoamSpentFromWorld + fromWorld), IronworkSpentFromWorld);
+            _boardRubble, _worldSeedRubble, checked(LoamSpentFromWorld + fromWorld), IronworkSpentFromWorld, RubbleSpentFromWorld);
     }
 
     public SiegeDepot SpendIronwork(long amount)
@@ -162,7 +188,18 @@ public sealed class SiegeDepot
         var fromBoard = Math.Min(_boardIronwork, amount);
         var fromWorld = amount - fromBoard;
         return new SiegeDepot(_boardLoam, _worldSeedLoam, checked(_boardIronwork - fromBoard), checked(_worldSeedIronwork - fromWorld),
-            LoamSpentFromWorld, checked(IronworkSpentFromWorld + fromWorld));
+            _boardRubble, _worldSeedRubble, LoamSpentFromWorld, checked(IronworkSpentFromWorld + fromWorld), RubbleSpentFromWorld);
+    }
+
+    public SiegeDepot SpendRubble(long amount)
+    {
+        if (amount < 0) throw new ArgumentOutOfRangeException(nameof(amount));
+        if (amount > Rubble) throw new InvalidOperationException($"SiegeDepot: cannot spend {amount} rubble against a balance of {Rubble}.");
+        var fromBoard = Math.Min(_boardRubble, amount);
+        var fromWorld = amount - fromBoard;
+        return new SiegeDepot(_boardLoam, _worldSeedLoam, _boardIronwork, _worldSeedIronwork,
+            checked(_boardRubble - fromBoard), checked(_worldSeedRubble - fromWorld),
+            LoamSpentFromWorld, IronworkSpentFromWorld, checked(RubbleSpentFromWorld + fromWorld));
     }
 
     /// <summary>

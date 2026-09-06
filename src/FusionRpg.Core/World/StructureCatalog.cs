@@ -1,3 +1,4 @@
+using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.World.Siege;
 
 namespace FusionRpg.Core.World;
@@ -26,7 +27,15 @@ public enum StructureKind
     /// `IronworkStock` at a lossy, gated rate — the third thing a structure can do, following
     /// <see cref="Storage"/>'s own precedent. Gated by a WORKING BUILDING on a slot, not a cooldown, so
     /// the refine rate is something a player builds toward rather than waits out.</summary>
-    Refinery
+    Refinery,
+
+    /// <summary>base-defense `siege-obstacles`/`siege-construction` (2026-09-06): does none of the
+    /// above — no yield, no capacity, no refine. Occupies its cell and blocks (via
+    /// <see cref="StructureDef.BlocksMovement"/>/<see cref="StructureDef.BlocksLineOfFire"/>) and
+    /// nothing else. The fourth thing a structure can do is deliberately "nothing economic" — every
+    /// obstacle row (`ObstacleKind` on <see cref="StructureDef.Obstacle"/> says WHICH obstacle; this
+    /// says the row has no OTHER behavior to gate on `Kind`), the first of which is the moat.</summary>
+    Obstacle
 }
 
 /// <summary>One structure type. Mirrors <see cref="SlotTypeDef"/>'s own shape exactly.</summary>
@@ -190,6 +199,11 @@ public static class StructureCatalog
     // validated non-empty for EVERY structure, obstacle or not, without breaking startup.
     static readonly IReadOnlyList<AcquisitionPath> BuiltOnly = new[] { AcquisitionPath.Built };
 
+    // base-defense `siege-construction` §5 (corrected 2026-09-06): the moat is an ordinary
+    // Rampart-obstacle StructureDef built via the Laboured path -- NOT a terrain override, per
+    // spec-siege-obstacles.md's own "a cell you cannot enter and cannot stand on IS a wall" rule.
+    static readonly IReadOnlyList<AcquisitionPath> LabouredOnly = new[] { AcquisitionPath.Laboured };
+
     static readonly IReadOnlyList<StructureDef> Seed = new StructureDef[]
     {
         new()
@@ -278,6 +292,27 @@ public static class StructureCatalog
             BuildTurns = Loam.LoamPolicy.HatcheryBuildTurns,
             // FlatYieldPerTurn unset (0) — a hatchery produces more recruits, not more loam.
             AcquisitionPaths = BuiltOnly
+        },
+        new()
+        {
+            // base-defense `siege-construction` §5 / `siege-obstacles` §5.18 (corrected 2026-09-06):
+            // dug, piled, felled — stamina and hunger, no stockpile (Laboured's own cost, authored on
+            // the ACTION that builds it, never here — see spec-siege-construction.md §5's own "the
+            // cost source differs, never the atom's/structure's concern"). Tier 1, the ladder's lowest
+            // rung: a dug ditch is the most basic obstacle a legion can raise, not a fortified wall.
+            // The FIRST obstacle row this catalog has ever shipped — `siege-obstacles`' own "closed"
+            // status was the mechanism (ObstacleKind, LineOfFire, cover math), not content.
+            StructureId = "moat",
+            Name = "Moat",
+            Kind = StructureKind.Obstacle,
+            RequiredSlotKind = SlotKind.Wildland,
+            Cost = 0, // never built peacetime; siege-time Laboured spends stamina/hunger, not loam
+            BuildTurns = SiegeTuningPolicy.Construction.LabourMoatTurns,
+            MaterialTier = 1,
+            BlocksMovement = true,
+            BlocksLineOfFire = true,
+            Obstacle = ObstacleKind.Rampart,
+            AcquisitionPaths = LabouredOnly
         }
     };
 

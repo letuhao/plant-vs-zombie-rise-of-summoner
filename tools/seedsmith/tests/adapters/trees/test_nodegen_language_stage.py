@@ -43,6 +43,20 @@ def _accepted_response(node_key: str = "test-node") -> dict:
     }
 
 
+def _named_response(name: str) -> dict:
+    """Like `_accepted_response`, but with an EXACT `name` the caller controls — needed to test
+    `_derive_unique_name_key`'s own real behavior (it derives the persisted key from `name`, never
+    the response's own claimed `nameKey`), where `_accepted_response`'s templated
+    `f"Test Node {node_key}"` would not reproduce two different trees' models independently choosing
+    the literal SAME name."""
+    return {
+        "affixIds": ["atom.a"], "affinity": ["core"],
+        "exclusion": {"form": "none", "propertyKeys": []},
+        "name": name, "nameKey": "tree.node.irrelevant-the-model-doesnt-control-this",
+        "flavor": "A steady line.", "rationale": "", "blocked": "",
+    }
+
+
 def _inputs_for(_subject: run.Subject) -> run.NodeGenerationInputs:
     return run.NodeGenerationInputs(
         tree_display_name="Might", tree_reading="the way of raw force",
@@ -540,6 +554,56 @@ class RunLanguageStageMultiNodeTests(unittest.TestCase):
         doc = json.loads(result.seed_path.read_text(encoding="utf-8"))
         ids = [n["id"] for n in doc["nodes"]]
         self.assertEqual(ids, sorted(ids))
+
+
+class CrossTreeNameKeyDedupTests(unittest.TestCase):
+    """2026-09-06 real-call finding: `nameKey` is spec-mandated "deduplicated corpus-wide"
+    (spec-tree-language.md's own field table), not per-tree — but `known_name_keys` used to be seeded
+    only from `plan.already_done`, ONE tree's own accepted subjects. Two different real trees run the
+    same day independently minted the identical `tree.node.primal-surge` key from the same
+    model-chosen name, unaware of each other (46 real collisions found across the 12 trees committed
+    so far). Reproduced here with two synthetic trees sharing the SAME ledger file — the real
+    production shape, where every tree's `--write` run reads and writes the one shared
+    `tree-language.ledger.json`."""
+
+    def setUp(self) -> None:
+        self.seed_root = Path(tempfile.mkdtemp())
+        write_plan(self.seed_root, "tree-a", node_count=1)
+        write_plan(self.seed_root, "tree-b", node_count=1)
+        self.plan_a = plan_read.load("tree-a", self.seed_root)
+        self.plan_b = plan_read.load("tree-b", self.seed_root)
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+    def test_a_second_tree_naming_the_same_thing_gets_a_suffixed_key_not_a_collision(self) -> None:
+        same_name_payload = json.dumps(_named_response("Primal Surge"))
+        with patch("seedsmith.pipeline.llm_caller.call_model", return_value=same_name_payload):
+            first = run.run_language_stage(self.plan_a, _inputs_for, ledger_path=self.ledger_path,
+                                           seed_root=self.seed_root, config=TEST_CONFIG)
+        self.assertEqual(first.outcomes[0].record.name_key, "tree.node.primal-surge")
+
+        with patch("seedsmith.pipeline.llm_caller.call_model", return_value=same_name_payload):
+            second = run.run_language_stage(self.plan_b, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG)
+        # The bug: before the fix, tree-b never saw tree-a's key at all (different tree's own
+        # `plan.already_done`), so it would have persisted the SAME bare `tree.node.primal-surge` --
+        # a real, silent corpus-wide collision. The fix: tree-b's key is suffixed instead.
+        self.assertEqual(second.outcomes[0].record.name_key, "tree.node.primal-surge-2")
+        self.assertNotEqual(second.outcomes[0].record.name_key, first.outcomes[0].record.name_key)
+
+    def test_a_third_tree_still_finds_a_free_suffix_after_two_others_already_took_the_name(self) -> None:
+        same_name_payload = json.dumps(_named_response("Primal Surge"))
+        write_plan(self.seed_root, "tree-c", node_count=1)
+        plan_c = plan_read.load("tree-c", self.seed_root)
+
+        for plan in (self.plan_a, self.plan_b, plan_c):
+            with patch("seedsmith.pipeline.llm_caller.call_model", return_value=same_name_payload):
+                run.run_language_stage(plan, _inputs_for, ledger_path=self.ledger_path,
+                                       seed_root=self.seed_root, config=TEST_CONFIG)
+
+        ledger = run.read_ledger(self.ledger_path)
+        keys = {entry["record"]["nameKey"] for entry in ledger.values()}
+        self.assertEqual(keys, {"tree.node.primal-surge", "tree.node.primal-surge-2",
+                                "tree.node.primal-surge-3"})
 
 
 if __name__ == "__main__":

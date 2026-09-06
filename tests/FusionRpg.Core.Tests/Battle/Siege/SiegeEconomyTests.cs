@@ -113,7 +113,7 @@ public class SiegeEconomyTests
     [Fact]
     public void Board_income_never_reaches_world_stock()
     {
-        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 1000, sectorIronwork: 0, depotSeedMilli: 1000);
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 1000, sectorIronwork: 0, sectorRubble: 0, depotSeedMilli: 1000);
         depot = depot.CreditLoam(500).CreditLoam(500).CreditLoam(9000); // earn heavily
         Assert.Equal(0, depot.LoamSpentFromWorld); // spend nothing
     }
@@ -121,7 +121,7 @@ public class SiegeEconomyTests
     [Fact]
     public void Only_spend_crosses_back()
     {
-        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 100, sectorIronwork: 0, depotSeedMilli: 1000);
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 100, sectorIronwork: 0, sectorRubble: 0, depotSeedMilli: 1000);
         depot = depot.CreditLoam(30); // total balance 130, 100 world-seeded + 30 board-earned
         depot = depot.SpendLoam(80); // 30 from board, 50 from world
         Assert.Equal(50, depot.LoamSpentFromWorld);
@@ -131,7 +131,7 @@ public class SiegeEconomyTests
     [Fact]
     public void Board_income_is_spent_before_world_stock()
     {
-        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 100, sectorIronwork: 0, depotSeedMilli: 1000);
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 100, sectorIronwork: 0, sectorRubble: 0, depotSeedMilli: 1000);
         depot = depot.CreditLoam(40);
         depot = depot.SpendLoam(40); // exactly the board-earned amount
         Assert.Equal(0, depot.LoamSpentFromWorld);
@@ -148,18 +148,20 @@ public class SiegeEconomyTests
     [Fact]
     public void Depot_seed_milli_scales_the_defenders_reachable_stock()
     {
-        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 1000, sectorIronwork: 1000, depotSeedMilli: 250);
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 1000, sectorIronwork: 1000, sectorRubble: 1000, depotSeedMilli: 250);
         Assert.Equal(250, depot.Loam);
         Assert.Equal(250, depot.Ironwork);
+        Assert.Equal(250, depot.Rubble);
     }
 
     [Fact]
     public void Defender_budget_seeds_from_the_sectors_own_stock()
     {
-        var sector = new WorldSector { SectorId = "s1", LoamStock = 400, IronworkStock = 60 };
-        var depot = SiegeDepot.SeedFromSectorStock(sector.LoamStock, sector.IronworkStock, depotSeedMilli: 1000);
+        var sector = new WorldSector { SectorId = "s1", LoamStock = 400, IronworkStock = 60, RubbleStock = 25 };
+        var depot = SiegeDepot.SeedFromSectorStock(sector.LoamStock, sector.IronworkStock, sector.RubbleStock, depotSeedMilli: 1000);
         Assert.Equal(400, depot.Loam);
         Assert.Equal(60, depot.Ironwork);
+        Assert.Equal(25, depot.Rubble);
     }
 
     [Fact]
@@ -236,5 +238,51 @@ public class SiegeEconomyTests
         var recovered = SiegeDepot.RecoveredOnCapture(stored: 400, structureHp: 400, maxHp: 400, captureRecoveryMilli: 1000);
         captor = captor.CreditIronwork(recovered);
         Assert.Equal(400, captor.Ironwork);
+    }
+
+    // -- Rubble (2026-09-06): `SiegeDepot` had never tracked this stock at all, despite `Built`'s own
+    // ConstructRubbleCost existing on every StructureDef — same shape as Loam/Ironwork throughout.
+
+    [Fact]
+    public void Rubble_credits_and_spends_board_income_before_world_seed()
+    {
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 0, sectorIronwork: 0, sectorRubble: 100, depotSeedMilli: 1000);
+        depot = depot.CreditRubble(30); // total balance 130, 100 world-seeded + 30 board-earned
+        depot = depot.SpendRubble(30); // exactly the board-earned amount
+        Assert.Equal(0, depot.RubbleSpentFromWorld);
+        Assert.Equal(100, depot.Rubble); // world-seeded portion untouched
+    }
+
+    [Fact]
+    public void Rubble_spend_past_board_income_crosses_into_world_seed()
+    {
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 0, sectorIronwork: 0, sectorRubble: 100, depotSeedMilli: 1000);
+        depot = depot.CreditRubble(30);
+        depot = depot.SpendRubble(80); // 30 from board, 50 from world
+        Assert.Equal(50, depot.RubbleSpentFromWorld);
+        Assert.Equal(50, depot.Rubble);
+    }
+
+    [Fact]
+    public void Rubble_spend_past_the_balance_is_rejected()
+    {
+        var depot = SiegeDepot.SeedFromSectorStock(sectorLoam: 0, sectorIronwork: 0, sectorRubble: 10, depotSeedMilli: 1000);
+        Assert.Throws<InvalidOperationException>(() => depot.SpendRubble(11));
+    }
+
+    [Fact]
+    public void Rubble_never_reaches_the_attackers_carried_loam_seed()
+    {
+        var depot = SiegeDepot.SeedFromCarriedLoam(500);
+        Assert.Equal(0, depot.Rubble);
+    }
+
+    [Fact]
+    public void Recovered_credits_rubble_into_the_captors_depot()
+    {
+        var captor = SiegeDepot.SeedFromCarriedLoam(0);
+        var recovered = SiegeDepot.RecoveredOnCapture(stored: 200, structureHp: 200, maxHp: 200, captureRecoveryMilli: 1000);
+        captor = captor.CreditRubble(recovered);
+        Assert.Equal(200, captor.Rubble);
     }
 }

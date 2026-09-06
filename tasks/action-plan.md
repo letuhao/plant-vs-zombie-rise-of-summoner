@@ -284,6 +284,51 @@ code before any implementation:
 | A19 | [spec-action-costs-cooldowns-adoption.md](../docs/architecture/action/spec-action-costs-cooldowns-adoption.md) | Real `CostLedger` affordability + spend at commit; `perTick` costs interrupt on shortfall |
 | A20 | [spec-synthetic-loadout-harness.md](../docs/architecture/action/spec-synthetic-loadout-harness.md) | The balance-comparison tool this whole reopening exists to eventually serve |
 
+## 4d. A23, A21, A22 (2026-09-06, Phase 14) — a real player can hold a real, playable action
+
+A 2026-09-06 audit of "is the action system actually playable" (ahead of writing any of these three
+specs) found every downstream mechanism (A17–A20: dispatch, costs, cooldowns, loadout resolution,
+battle) real and proven, and every upstream mechanism (eligibility, generation, import, grant) real,
+tested, and **never called in production** — a repo-wide pattern, not action-specific
+(`effect-pipeline-ideal.md`'s own "nothing produces an instance" finding). Full evidence:
+`action-map.md` §14.
+
+**Two of the three specs went through a real, load-bearing correction mid-write, each caught by
+verifying against code rather than trusting the first plausible design** — see each spec's own
+"⛔ Corrected" sections:
+
+- `spec-action-instance-and-grant.md` (A21) first assumed content should roll per-player like
+  equipment (`ActionSeeder` + a `WorldSeed`-derived seed). Re-reading `action-map.md` §10.5a's own
+  *"a granted action has no instance and no rolls"* showed the roll happens **once, at import**,
+  producing shared content every holder receives identically — a materially simpler design.
+- The same spec then hooked `ILevelChangeHandler`/`LevelChangePipeline` as the grant trigger — until
+  checking `LevelChangeEvent`'s own fields showed it carries no specimen identity at all (it is
+  player/species-mastery-scoped). A specific summoned demon's own level lives on a completely
+  different, callback-free path, `RpgStore.AwardUniqueActorXpUnlocked`, corrected to hook there.
+- `spec-cost-scaling-holder-rung.md` (A23) is a genuinely new module, not anticipated when A19 was
+  built: `spec-rung-semantics.md` §3.1 already decided that cost/cooldown scaling must read the
+  **holder's** earn-count-derived rung, never the content's authored one — but this program's own
+  immediately-prior session wired `CostLedger` to read the authored rung (`BattleRunState.cs:493`).
+  Real, confirmed defect in already-shipped code, latent only because nothing has real holder
+  progression yet — which is exactly what A21 creates, so A23 builds first.
+
+**Build order: A23 → A21 → A22** (A22 can build in parallel with either once A18f exists — nothing
+about it depends on real content existing yet, but nothing makes it *urgent* until A21 ships real
+non-Attack rows either). Tasks: `action-todo.md` Phase 14 (T58–T60). Module specs, all written and
+adversarially audited against real code before any implementation:
+
+| id | Spec | Owns |
+|---|---|---|
+| A23 | [spec-cost-scaling-holder-rung.md](../docs/architecture/action/spec-cost-scaling-holder-rung.md) | `CostLedger`'s `rungOf` reads the holder's `EffectiveRung`, not the content's authored `Rung` — a wiring correction to already-shipped A19 code |
+| A21 | [spec-action-instance-and-grant.md](../docs/architecture/action/spec-action-instance-and-grant.md) | Import the already-authored corpus once; grant a real, generated action to a real specimen on its own level gain |
+| A22 | [spec-action-resolution-by-category.md](../docs/architecture/action/spec-action-resolution-by-category.md) | A non-Attack action skips the attack roll and arms its cooldown unconditionally, instead of every action resolving attack-shaped |
+
+**No pre-work gates.** Per §0.1's own standing rule, nothing here blocks starting on an external
+decision: the per-category envelope/cost template (A21 §2) ships with a stated default per
+`action-corpus-ideal.md` §36's own "default now, re-tune later" precedent, exactly like every other
+number in this plan; the corpus import is idempotent by construction, so there is no "only one chance
+to get it right" moment to gate on.
+
 ## 5. Deferred, and why
 
 | Module | Waits on |
@@ -292,6 +337,6 @@ code before any implementation:
 | `A10` battle-board | owner deferral — built with the board map |
 | `A8`'s reaction lane | timeline **B6** — the *stance* half ships in P7 |
 | seedsmith | **after this program**, as a dev tool |
-| `action-resolution-by-category` | **not scheduled, no module id assigned yet.** Named 2026-09-06 by A18f's own spec-audit: a non-attack-category Skill (pure buff/heal/status, no attack roll) needs `ActionRunner` to thread `Category` alongside `Envelope` and `TimelineDispatch` to branch resolution — arm cooldown unconditionally, skip `calculator.Compute`, rely on `OnActivate`'s atoms alone. **Do not equip a non-attack-category action on a real actor before this lands** — A18f's own acceptance bar explicitly does not cover it |
+| `action-resolution-by-category` | **Scheduled as A22, Phase 14 (§4d).** No longer an unscheduled deferral. |
 | rung-table coverage for rung 0 | **not scheduled, no module id assigned yet.** Found 2026-09-06 while building T56.1's acceptance test: `CostLedger.ScaledAmount` (`CostLedger.cs:150-151`) throws `ArgumentOutOfRangeException` for any action compiled at `Rung: 0`, because `RungPolicy.Table` has no row for rung 0 — only ever latent before this task because `CostLedger` had zero real callers until T56.1. Every fixture across this program's own tests (`ActionSelectionAdoptionTests.Dummy()` included) authors `Rung: 0` for simplicity, so this throws for the first REAL rung-0 action that authors a cost row. Needs either a rung-0 row in the table (if rung 0 is meant to be a legal "no rung" action) or a documented invariant that every action-authoring path must assign `Rung >= 1` |
 | `cooldown-arming-double-call` | **not scheduled, no module id assigned yet.** Found 2026-09-06 by T56.4's RED/GREEN/revert cycle, and found to be BIGGER than first recorded when T57.4 (A20) hit the same false-GREEN shape with a different fixture: `ApplyBasicAttack` (`BasicAttack.cs:217`) arms an envelope's cooldown UNCONDITIONALLY on every landed hit, with no `envelope.StartsAt` check at all — independent of, and redundant with, ALL THREE of `ActionRunner`'s own `StartsAt`-gated arming sites (`ActionRunner.cs:236` Commit, `:361` Resolve — the enum's own declared default, `:289` RecoveryEnd). Since `CooldownLedger.Start` is a plain overwrite (not additive), whichever of these fires LAST wins, and for any action resolved through `ApplyBasicAttack` (every shipped action today) that is always `ApplyBasicAttack`'s own call — making `StartsAt`'s three-way distinction close to decorative for landed-hit-shaped actions; only `RecoveryEnd` (which fires later than resolve) could ever observably differ, and no shipped content authors that combination yet. Needs either gating `ApplyBasicAttack`'s call behind `envelope.StartsAt == CooldownStart.Resolve` (matching `ActionRunner`'s own three-way split) or a documented decision that `ApplyBasicAttack`'s call is intentionally the authoritative one and `StartsAt` only matters for an action that never reaches it (e.g. one that always fizzles) |

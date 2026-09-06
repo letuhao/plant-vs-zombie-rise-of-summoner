@@ -27,6 +27,10 @@ public sealed record UniqueCounterPressureSeed(
 /// Per the seed-to-concrete rule the corpus emits bands and families; a runtime generator rolls the
 /// concrete atoms. This module validates the seed and prices it; it does not roll it.
 /// </summary>
+/// <param name="Enabled">D4.23 (spec-unique-pipeline.md §5 point 5, verbatim: "The 95 are
+/// `enabled: false`; `rungFloorOrdinal = 80` re-seeds `unique_eligible` with no code change") — a
+/// retired anchor, never re-runged, never deleted. Defaults `true` so the 49 shipped rows that never
+/// set the JSON field, and every hand-built test fixture predating this field, keep their old meaning.</param>
 public sealed record UniqueSeed(
     string SeedId,
     string ContainerId,
@@ -42,7 +46,8 @@ public sealed record UniqueSeed(
     UniqueAcquisition Acquisition,
     string? FlavourKey,
     string Partition,
-    string RungBand)
+    string RungBand,
+    bool Enabled = true)
 {
     /// <summary>
     /// <c>PrefixRolls + SuffixRolls</c> as the seed declares it: the variance slot is the one draw, so
@@ -202,7 +207,7 @@ public static class UniqueCorpus
         return new UniqueSeed(
             seedId, containerId, Str(e, "nameKey"), Str(e, "name"), frame, Str(e, "baseType"),
             Str(e, "rarity"), Str(e, "powerAxis"), fixedAtoms, variance, cp, acquisition,
-            OptStr(e, "flavorKey"), partition, band);
+            OptStr(e, "flavorKey"), partition, band, OptBool(e, "enabled", @default: true));
     }
 
     static string Str(JsonElement parent, string key)
@@ -214,4 +219,9 @@ public static class UniqueCorpus
 
     static string? OptStr(JsonElement parent, string key) =>
         parent.TryGetProperty(key, out var el) && el.ValueKind == JsonValueKind.String ? el.GetString() : null;
+
+    static bool OptBool(JsonElement parent, string key, bool @default) =>
+        parent.TryGetProperty(key, out var el) && el.ValueKind is JsonValueKind.True or JsonValueKind.False
+            ? el.GetBoolean()
+            : @default;
 }

@@ -424,14 +424,32 @@ public class UniqueTests
         var t = Tuning();
         Assert.False(t.IsRungEligible(10));
         Assert.False(t.IsRungEligible(20));
-        Assert.True(t.IsRungEligible(30));
-        Assert.True(t.IsRungEligible(100));
+        // D4.23 moved the real floor 30 -> 80 (spec-unique-pipeline.md §5 point 5) -- boundary values
+        // read off the real tuning's own floor rather than a hardcoded 30, so this stays correct
+        // whichever ordinal a future balance pass authors here.
+        Assert.False(t.IsRungEligible(t.RungFloorOrdinal - 10));
+        Assert.True(t.IsRungEligible(t.RungFloorOrdinal));
+        Assert.True(t.IsRungEligible(t.RungFloorOrdinal + 100));
 
         var atom = Atom("atom.unique-a", 2);
         var fails = UniqueValidator.Validate(
             Row(), Container(new ContainerAtomRow(1, atom.AtomId)),
             Grafted with { RarityId = "sprout" }, 20, "armament-primary", Lookup(atom), t);
         Assert.True(Fired(fails, UniqueRules.RungIneligible));
+    }
+
+    /// <summary>D4.23 (spec-unique-pipeline.md §5 point 5) — "the 95 are enabled: false ... never
+    /// re-runged, never deleted": a disabled row below the floor is NOT flagged ineligible, the exact
+    /// exemption this task added to this check.</summary>
+    [Fact]
+    public void A_disabled_rung_below_the_floor_is_not_flagged_ineligible()
+    {
+        var t = Tuning();
+        var atom = Atom("atom.unique-a", 2);
+        var fails = UniqueValidator.Validate(
+            Row() with { Enabled = false }, Container(new ContainerAtomRow(1, atom.AtomId)),
+            Grafted with { RarityId = "sprout" }, 20, "armament-primary", Lookup(atom), t);
+        Assert.False(Fired(fails, UniqueRules.RungIneligible));
     }
 
     [Fact]

@@ -2098,6 +2098,183 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5.
 
 ---
 
+## Phase 14 — A23, A21, A22 (2026-09-06) — a real player can hold a real, playable action
+
+Module specs: [spec-cost-scaling-holder-rung.md](../docs/architecture/action/spec-cost-scaling-holder-rung.md) (A23),
+[spec-action-instance-and-grant.md](../docs/architecture/action/spec-action-instance-and-grant.md) (A21),
+[spec-action-resolution-by-category.md](../docs/architecture/action/spec-action-resolution-by-category.md) (A22).
+Plan: `action-plan.md` §4d. **Build order: A23 → A21 → A22** — A23 first because A21 is what exposes
+its defect to real content; A22 can build in parallel with either once started, since nothing about
+it depends on A21's content existing.
+
+Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further per task-sizing rules).
+
+### A23 — cost-scaling-holder-rung
+
+- [ ] **T58.1** Widen `CostLedger`'s `rungOf` signature · **S** · Deps: none
+  - `Func<string, int>` → `Func<string actorKey, string actionId, int>` (`CostLedger.cs:47,55`); both
+    internal call sites (`Check`, `TryPay`) pass `actorKey` through, already in scope. Update
+    `CostLedgerTests.cs`'s `MakeLedger` helper to accept (and every existing test to ignore) the new
+    parameter.
+  - Acceptance: every existing `CostLedgerTests.cs` case passes unchanged — the signature widens,
+    behavior does not, for any caller not yet using the new parameter.
+  - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~CostLedgerTests"`
+
+- [ ] **T58.2** The holder-vs-authored resolution rule · **M** · Deps: T58.1
+  - `BattleRunState` gains a `Func<string, UnlockState>` seam (defaulting to `_ => UnlockState.Empty()`
+    for every existing caller — byte-identical). `CostLedger`'s new `rungOf` resolves: look up the
+    actor's `UnlockState.Held` for a `HeldUnlock` matching the action id → if found,
+    `UnlockLadder.EffectiveRung(match.EarnCountAtAcceptance, tuning).Value`; else the existing
+    authored-rung fallback (`actionCatalog?.Get(actionId)?.Rung ?? 0`).
+  - Acceptance: an actor with a real `UnlockState` entry for an action resolves the holder's
+    `EffectiveRung`; an actor with none (every existing fixture, every intrinsic action) resolves the
+    authored `Rung`, unchanged from today.
+  - Verify: new `CostLedgerTests.cs` cases for both branches; `--filter "FullyQualifiedName~CostLedgerTests"`
+
+- [ ] **T58.3** Integration proof through a real battle · **S** · Deps: T58.2
+  - Two synthetic actors (`SyntheticLoadoutBuilder`), same action, hand-built `UnlockState`s at
+    different `EarnCountAtAcceptance`, run through real `BattleEngine.Resolve` calls — their resolved
+    costs must differ. `StructureBudgetGuard.Check`'s own use of the authored rung asserted unchanged
+    in the same pass (A23's boundary: never touch it).
+  - Acceptance: matches `spec-cost-scaling-holder-rung.md` criteria 2 and 3 exactly.
+  - Verify: `--filter "FullyQualifiedName~ActionCostsCooldownsAdoptionTests"` (extended) or a new
+    dedicated test class; full A17-A23 regression sweep.
+
+### ✅ Checkpoint I — cost scales by holder, not by content
+
+- [ ] T58.1–T58.3 all green, full `Core.Tests` suite green, `StructureBudgetGuard`'s own rung read
+  pinned unchanged by a direct test (spec criterion 1).
+
+### A21 — action-instance-and-grant
+
+- [ ] **T59.1** The per-category envelope/cost template · **S** · Deps: Checkpoint I
+  - `data/tuning/action-corpus-templates.v1.json` — one row per `ActionCategory`
+    (`Attack`/`Defense`/`Support`/`Movement`/`Status`): `WindupTicks`/`RecoveryTicks`/`CooldownTicks`,
+    `Class = CooldownClass.Specific` (T56.4's own found lesson — `None` silently no-ops both the check
+    and the arm), `CooldownChannel`/`EffectivenessChannel` matching the category, one
+    `(resourceId, baseAmountAtRung1, timing)` cost row. Ships with a stated default per
+    `action-corpus-ideal.md` §36's "default now, re-tune later" precedent — no gate.
+  - Acceptance: every one of the 5 categories has a complete row; a loader rejects a missing category
+    naming which one, matching `tunables-ssot.md`'s own reject-not-default discipline.
+  - Verify: a new `ActionCorpusTemplateTests.cs` (Core) covering load + the reject-on-missing case.
+
+- [ ] **T59.2** `UnlockState` persistence · **M** · Deps: none (parallel with T59.1)
+  - `RpgStore.ActionUnlocks.cs` (new): `rpg_actor_unlock_state(owner_kind, owner_key, earn_count)` +
+    `rpg_actor_held_unlock(owner_kind, owner_key, unlock_id, earn_count_at_acceptance)`, reusing
+    `OwnerScope`/`OwnerKind.UniqueActor`. Round-trips through `UnlockState.FromPersisted`/`.EarnCount`/
+    `.Held` unchanged — pure persistence for an already-tested class, no new game logic.
+  - Acceptance: a saved `UnlockState` reads back identical (`EarnCount`, every `HeldUnlock`); two
+    owners are isolated; a no-row owner reads back `UnlockState.Empty()`.
+  - Verify: new `ActionUnlocksStoreTests.cs` (Data.Tests); `guard-dal.ps1` clean.
+
+- [ ] **T59.3** Corpus import — composition (Core, pure) · **M** · Deps: T59.1
+  - A brief (`id`/`scope`/`scopeKey`/`category`/`rungBand`/`atomFamilies`/`targetMode`/`relation`) →
+    a concrete atom subset (via the same `Instantiator.Draw` `ActionSeeder` already wraps, seeded from
+    the brief's own stable `id` — never a per-player seed) → a full `ActionRow`/`ActionCostRow[]` +
+    container-atom list, composed against T59.1's template. Pure, no `RpgStore` call — a hand-built
+    brief fixture in, a composed row out.
+  - Acceptance: same brief composed twice is byte-identical; `Rung == RungBand.Collapse()`
+    (`ActionRow.cs:104`); an unauthored/missing category template rejects naming it, never defaults
+    silently.
+  - Verify: new `ActionCorpusImportTests.cs` (Core) against hand-built brief fixtures, not the live
+    corpus file.
+
+- [ ] **T59.4** Corpus import — persistence (Data/Server) · **M** · Deps: T59.2, T59.3
+  - Wires T59.3's composition to real `RpgStore.UpsertContainer` (+ atom rows) →
+    `RpgStore.UpsertAction` → `RpgStore.UpsertCost`, idempotent by `ActionId` (T30's own
+    revision-bump guard — a re-import of an unchanged brief moves zero revisions). Runs as a
+    `FusionRpg.Server` startup step, gated behind a config flag defaulting **on**. Never touches a
+    live game/injector session.
+  - Acceptance: importing a fixture set twice moves zero revisions on the second pass (spec criterion
+    1); the importer never runs against an injector-connected session (asserted directly, not assumed).
+  - Verify: new `ActionCorpusImporterTests.cs` (Data.Tests) against a real SQLite database, run twice.
+
+- [ ] **T59.5** Real corpus content-quality check · **S** · Deps: T59.4
+  - Import the REAL `data/seed/actions/committed-round-{1,2}.json` (24 rows) through T59.4's real
+    importer and assert every resulting `ActionRow` clears `StructureBudgetGuard.Check` at its own
+    authored rung — a real content-quality check against the shipped corpus, not just the schema.
+  - Acceptance: matches `spec-action-instance-and-grant.md` criterion 2 exactly; zero rows exceed
+    their own declared structure budget.
+  - Verify: extends `AuthoredEligibilityResolvesTests.cs`'s own precedent of reading the real files.
+
+### ✅ Checkpoint J.1 — real content exists
+
+- [ ] T59.1–T59.5 all green; `rpg_action`/`rpg_action_cost` hold the real, imported corpus in a real
+  database, re-import proven idempotent, every row clears its own structure budget.
+
+- [ ] **T59.6** `ActionUnlockGrantService` (Core, pure) · **M** · Deps: Checkpoint J.1
+  - Pure, DB-free roll-and-grant logic mirroring `UnlockDiscardService`'s own injected-delegate seam:
+    given a loaded `UnlockState`, the eligible catalog (`ActionEligibility.Candidates`), and a seeded
+    RNG, resolves candidates minus already-held, picks one deterministically
+    (`SeededRng.DeriveStream(specimenWorldSeed, $"unlock:{instanceId}:{state.EarnCount}")`), calls
+    `UnlockState.TryAccept`, and reports the outcome plus the updated state for the caller to persist
+    and grant.
+  - Acceptance: deterministic for a fixed seed/state; an empty candidate set is a legal no-op, never a
+    throw; a poison-delegate test proves grant/persist are never called on a missed or empty-pool roll.
+  - Verify: new `ActionUnlockGrantServiceTests.cs` (Core), mirroring `UnlockDiscardServiceTests.cs`'s
+    own fake-delegate style.
+
+- [ ] **T59.7** Wire the grant into `AwardUniqueActorXpUnlocked`'s transaction · **M** · Deps: T59.6
+  - `AwardUniqueActorXpUnlocked` (`RpgStore.UniqueActors.cs:1333`) gains a trailing `LevelsGained: int`
+    on its return tuple (`level - row.Level`) — additive, zero call-site rewrite needed for callers
+    that ignore it. Both production callers (`UniqueActorService.AwardXp`, the expedition reward
+    apply) invoke `ActionUnlockGrantService` once per level gained when `LevelsGained > 0`, in the
+    SAME transaction/connection, with real `RpgStore`-backed delegates (load/save `UnlockState` via
+    T59.2, grant via the already-proven `RpgStore.UpsertGrant`).
+  - Acceptance: a level gain that crosses N thresholds in one award attempts N rolls, each pricing
+    independently; a failed XP-award transaction never leaves a persisted `UnlockState` change behind
+    (same-transaction atomicity, spec's own stated reason).
+  - Verify: new `AwardUniqueActorXpUnlocked`-focused cases in `RpgStore` Data.Tests; a multi-level-gain
+    case exercising N rolls in one call.
+
+- [ ] **T59.8** End-to-end proof · **S** · Deps: T59.7
+  - Summon a real specimen (`ExecuteSummon`) → repeatedly award XP until an unlock lands (a controlled
+    RNG stream, not a real random wait) → `WebMatchService.BuildSquad` → `BattleEngine.Resolve` equips
+    and can activate the generated, imported action — the same shape `BuildSquadEquippedActionsTests.cs`
+    (T22) already proved for a manually-granted action, ending in a real, generated, imported one this
+    time.
+  - Acceptance: matches `spec-action-instance-and-grant.md` criterion 4 exactly.
+  - Verify: extends `BuildSquadEquippedActionsTests.cs` (Server.Tests); full A17-A23 regression sweep
+    plus a full `Core.Tests`/`Data.Tests`/`Server.Tests` run.
+
+### ✅ Checkpoint J — a real player can hold a real, generated action
+
+- [ ] T59.1–T59.8 all green. No shipped golden moved (every golden's `EquippedActionIds` stays unset
+  or hand-constructed — the import changes what `rpg_action` contains, not any golden's own
+  `BattleSetup`). A20's harness never triggers a real import (spec criterion 5).
+
+### A22 — action-resolution-by-category
+
+- [ ] **T60.1** Thread `Category` into `ApplyBasicAttack` and branch · **M** · Deps: A18f (built)
+  - `BattleRunState` stores the `ActionCatalog?` it already receives as a constructor parameter
+    (captured today only in a closure, never kept — `BattleRunState.cs:232,493`) as a field. Inside
+    `ApplyBasicAttack`, resolve `state.ActionCatalog?.Get(envelope.ActionId)?.Category` and branch:
+    `null`/`Attack` — unchanged (hit roll, cooldown gated on landing); `Defense`/`Support`/`Movement`/
+    `Status` — skip `calculator.Compute` entirely, arm the cooldown unconditionally on resolve.
+  - Acceptance: matches `spec-action-resolution-by-category.md` criteria 1–3 exactly; `Attack`/`null`
+    content byte-identical to today.
+  - Verify: extends `ActionDispatchGeneralizationTests.cs` with one case per non-Attack category, using
+    the same `BattleGoldenTests.CloseSetup()`-based trace-diff technique T56.3/T56.4 already proved
+    reliable (declared-but-never-landed for the hit-roll skip; a refused second commit for the
+    unconditional cooldown arm).
+
+- [ ] **T60.2** Correct T55.4's own planted-violation test · **S** · Deps: T60.1
+  - `T55_4_a_non_attack_category_action_still_deals_attack_shaped_damage_today` asserted TODAY'S wrong
+    behavior on purpose (A18f's own acceptance bar explicitly excluded non-Attack actions). Rewrite it
+    to assert the CORRECTED behavior — renamed to reflect the fix, not deleted, so the history of what
+    changed and why survives in the test file itself (spec's own acceptance criterion 3).
+  - Acceptance: the test's own name and body reflect current, correct behavior; no orphaned
+    "still wrong today" assertion survives once the fix lands.
+  - Verify: `--filter "FullyQualifiedName~ActionDispatchGeneralizationTests"`; full A17-A23 regression
+    sweep plus a full `Core.Tests` run.
+
+### ✅ Checkpoint K — a non-Attack action stops borrowing the attack roll
+
+- [ ] T60.1–T60.2 all green. Full `Core.Tests` suite green. Zero goldens moved (every existing
+  fixture is `Attack`/`null`-category, unreachable by the new branch until real content exercises it).
+
+---
+
 ## Deferred — specced, not scheduled
 
 - [ ] **A9 movement-actions** — waits on `A10`. One row, no new runtime.

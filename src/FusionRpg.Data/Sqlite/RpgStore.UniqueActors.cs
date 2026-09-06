@@ -975,7 +975,7 @@ public sealed partial class RpgStore
     /// <para>Only <c>rolled</c> is refused. A <c>stock</c> occupant is this wire's own row and
     /// replacing it is the wire's normal job (swapping one relic for another).</para>
     /// </summary>
-    static void RefuseIfRoleHeldByAnItemUnlocked(
+    static void RefuseIfRoleHeldByAnItem(
         IReadOnlyList<FusionRpg.Core.Items.EquipAssignment> standing,
         string instanceId, FusionRpg.Core.Items.ItemRole role, string slot)
     {
@@ -1106,7 +1106,7 @@ public sealed partial class RpgStore
             // Module 4's own read, reused rather than re-derived — and taken before the write
             // connection opens so the refusal cannot half-apply. `_gate` is reentrant, and an unknown
             // specimen simply has no assignments, so `not_found` below still answers first for one.
-            RefuseIfRoleHeldByAnItemUnlocked(ListAssignments(id), id, role, s);
+            RefuseIfRoleHeldByAnItem(ListAssignments(id), id, role, s);
 
             using var db = OpenUnlocked();
             if (ReadUniqueActorUnlocked(db, id) is null)

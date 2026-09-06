@@ -243,6 +243,85 @@ public class PlayerMaterialiseTests : IDisposable
         Assert.True(outcome.ElapsedMs < 5000,
             $"materialising 20 species took {outcome.ElapsedMs}ms — spec §5 calls out the write as the " +
             "unmeasured cost; this is the measurement, on a small roster since a real ~900-species " +
-            "catalog is not shipped content yet (T5.3's own real generation run is still deferred).");
+            "catalog is not shipped content yet (a real, small pilot batch landed 2026-09-06 — see " +
+            "the test below — the full-scale run remains deferred).");
+    }
+
+    /// <summary>
+    /// seed-to-concrete Checkpoint 7's own closing line ("two players' rosters differ, and each
+    /// player's own roster is stable across sessions"), proven end to end against REAL committed
+    /// content for the first time (2026-09-06) — every test above uses <c>SeedSpecies</c>, a
+    /// synthetic fixture; this imports the REAL `data/seed/effects/affixes/all.json` (T7.1's own real
+    /// 10-affix catalog) and the REAL `data/seed/demons/species-effects/**` pilot batch (T5.3's own
+    /// real 3-species content, `entry_for`'s bug-fixed output) through the exact same
+    /// `AtomSeedFile.Collect` → `RpgStore.ImportContent` path a live server uses, not a hand-built row.
+    ///
+    /// <para>Scoped to atoms + affixes + species-effects only (never the full `data/seed` tree) so
+    /// this test is not coupled to [[vocabulary-json-seedscanner-defect]] — a real, separately-filed,
+    /// unrelated `SeedScanner` defect that would otherwise refuse this same import for a reason that
+    /// has nothing to do with what this test proves.</para>
+    /// </summary>
+    [Fact]
+    public void Two_real_players_get_differing_rosters_from_the_real_committed_species_effects_content()
+    {
+        var repoRoot = FindRepoRoot();
+        var atomFiles = Directory.GetFiles(Path.Combine(repoRoot, "data", "seed", "atoms"), "*.json")
+            .Where(f => !Path.GetFileName(f).Equals("vocabulary.json", StringComparison.OrdinalIgnoreCase));
+        var affixFiles = Directory.GetFiles(Path.Combine(repoRoot, "data", "seed", "effects", "affixes"), "*.json");
+        var speciesEffectFiles = Directory.GetFiles(
+            Path.Combine(repoRoot, "data", "seed", "demons", "species-effects"), "*.json", SearchOption.AllDirectories);
+
+        var files = atomFiles.Concat(affixFiles).Concat(speciesEffectFiles)
+            .Select(f => (Path: f, Json: File.ReadAllText(f)));
+
+        var collected = AtomSeedFile.Collect(files);
+        Assert.True(collected.IsOk, string.Join("; ", collected.Errors));
+
+        var outcome = _store.ImportContent(collected.Content);
+        Assert.True(outcome.IsOk, string.Join("; ", outcome.Errors));
+
+        var p1 = _store.CreatePlayer("RealContentOne");
+        var p2 = _store.CreatePlayer("RealContentTwo");
+        Assert.NotEqual(p1.WorldSeed, p2.WorldSeed);
+
+        var m1 = _store.MaterialisePlayerSpecies(p1.Id, PinTheta, Tuning);
+        var m2 = _store.MaterialisePlayerSpecies(p2.Id, PinTheta, Tuning);
+        Assert.True(m1.IsOk, m1.Rejection.ToString());
+        Assert.True(m2.IsOk, m2.Rejection.ToString());
+        Assert.Equal(3, m1.Written); // peashooter, sunflower, conezombie — this pilot batch's own three
+        Assert.Equal(3, m2.Written);
+
+        var roster1 = _store.ListPlayerSpecies(p1.Id);
+        var roster2 = _store.ListPlayerSpecies(p2.Id);
+        Assert.Equal(3, roster1.Count);
+        Assert.Equal(3, roster2.Count);
+
+        // Each player's own roster is non-empty and real (an instance actually exists per row) —
+        // the "species effects" half of Checkpoint 7's demon-summon line, independent of trait roll
+        // or commander buff, which remain their own, separately-tracked gaps.
+        Assert.All(roster1, r => Assert.NotNull(_store.GetInstance(r.InstanceId)));
+        Assert.All(roster2, r => Assert.NotNull(_store.GetInstance(r.InstanceId)));
+
+        // "differ": every one of the three real species rolled a different RollSeed for the two
+        // players (real, independent per-player world seeds — T5.1), matching the already-proven
+        // synthetic-fixture property above (Two_world_seeds_produce_different_instance_content), now
+        // shown against real content too.
+        foreach (var speciesId in new[] { "peashooter", "sunflower", "conezombie" })
+        {
+            var i1 = _store.GetInstance(roster1.Single(r => r.SpeciesId == speciesId).InstanceId)!;
+            var i2 = _store.GetInstance(roster2.Single(r => r.SpeciesId == speciesId).InstanceId)!;
+            Assert.NotEqual(i1.RollSeed, i2.RollSeed);
+        }
+    }
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (Directory.Exists(Path.Combine(dir.FullName, "data", "seed"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new DirectoryNotFoundException("data/seed");
     }
 }

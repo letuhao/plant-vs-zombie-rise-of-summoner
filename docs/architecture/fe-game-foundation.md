@@ -440,6 +440,11 @@ Projection field shapes and feed priority remain in [lawn-projector.md](lawn-pro
 
 **Still out:** Full gear shop polish (W12), ActiveBound mid-run equip, full ECS, FE physics, Server on combat path, client prediction.
 
+**Cross-island Phaser audit (2026-09-06):** lawn + world islands, unused `board-render` grid kernel,
+and the paused siege/battle canvas work are mapped in
+[fe-phaser-architecture-audit.md](fe-phaser-architecture-audit.md). **Idea (not a spec):**
+[phaser-kernel-ideal.md](phaser-kernel-ideal.md).
+
 ### Architecture compliance (W6 self-check)
 
 | Invariant | Hold |

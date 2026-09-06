@@ -652,6 +652,20 @@ if (itemWorkbench is { } workbench) app.MapWorkbench(workbench);
 // `RemoveAssignment` never had. Unconditional, unlike the workbench above: equipping needs no recipe
 // corpus and no price, so there is no state in which these routes could only refuse.
 app.MapItemEquip(new FusionRpg.Server.ItemEquipService(store));
+// ⭐ item modules 10 + 20 — the SEE and COMPARE surfaces. `ItemCardRenderer.Render`,
+// `ItemCardCompare.Compare` and `DominancePresentation` all shipped tested with zero callers outside
+// `tests/`, which is why every block of the web card rendered its honest "pending" state. These two
+// read-only routes are their production caller. Unconditional, like the equip routes: an item card
+// needs no recipe corpus and no price, so there is no state in which they could only refuse.
+//
+// ⏸ The two corpora are the same boot-time stopgap `BaseTypeSocketMaxCorpus` already is — module 6
+// shipped the base-type corpus and module 16 the gem corpus as seed JSON, neither as a table.
+app.MapItemCard(new FusionRpg.Server.ItemCardService(store, new ItemCardCorpus(
+    FusionRpg.Server.ItemBaseTypeCorpus.Load(
+        Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types")),
+    FusionRpg.Server.GemInsertCorpus.Load(
+        Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "gems")),
+    socketTuning, itemSurfaceTuning, enhancementTuning)));
 PatronEndpoints.RefreshRuntimeState(app.Services.GetRequiredService<RpgStore>()); // SIM plugins read it
 
 app.MapGet("/health", (RpgStore store, EventIngest ingest) => ingest.Decorate(store.ToHealth(SimFlags.Enabled)));

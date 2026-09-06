@@ -123,7 +123,11 @@ public static class UniqueCorpusValidator
             }
             else
             {
-                if (!tuning.IsRungEligible(ordinal.Value))
+                // D4.23 (spec-unique-pipeline.md §5 point 5): "the 95 are enabled: false ... never
+                // re-runged, never deleted" -- a disabled anchor sits inertly below a raised floor
+                // rather than failing import. Every OTHER per-row and cross-row check still runs: a
+                // disabled anchor is still expected to be a well-formed row, only not currently offered.
+                if (s.Enabled && !tuning.IsRungEligible(ordinal.Value))
                     findings.Add(Find(s, UniqueRules.RungIneligible,
                         $"rung '{s.RarityId}' is ordinal {ordinal}, below the floor of {tuning.RungFloorOrdinal}"));
 

@@ -58,7 +58,8 @@
       "flavorKey": "flavor.unique.holding-thresher",
       "flavor": "It does not spray to kill. It sprays to keep them exactly where they already made the mistake of standing.",
       "notes": "armament-primary/control, row 1 of 8. baseType item.plant-muzzle-b-002 (role armament-primary, class nozzle, band b) resolved against data/seed/items/base-types/plant-armament-primary-b.json. atom.buttering is a shipped status.apply family (butter), used here as a control rider on a weapon role rather than the raw-damage rider a generator pool would normally weight toward that slot \u2014 a generator-level role/family preference, not a machine rule, and fixed atoms are not drawn from the pool.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-002",
@@ -98,7 +99,8 @@
       "flavorKey": "flavor.unique.broad-bole",
       "flavor": "Wide enough that two zombies could not get their hands around it together, if either still had the reach to try.",
       "notes": "core-guard/utility, row 2 of 8. baseType item.plant-stem-b-008 (role core-guard, class heartwood, band b) resolved against data/seed/items/base-types/plant-stem-b.json.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-003",
@@ -138,7 +140,8 @@
       "flavorKey": "flavor.unique.armature-of-the-redoubt",
       "flavor": "Every stalk it shelters keeps producing. A wall that also pays rent.",
       "notes": "ward-array/economy, row 3 of 8. baseType item.plant-sheath-b-004 (role ward-array, class heartwood, band b) resolved against data/seed/items/base-types/plant-ward-array-b.json. atom.sunbloom is the shipped resource.economy family (on-kill sun, capPerMatch implemented in the runner per atom-family-library.md \u00a73.5) placed on a shoulder-armour role instead of the pool's usual economy carrier \u2014 a generator preference, not a machine rule.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-004",
@@ -219,7 +222,8 @@
       "flavorKey": "flavor.unique.involucre-of-the-berm",
       "flavor": "Bracts folded tight as a berm's slope, closing back over whatever they lose the moment they lose it.",
       "notes": "sense/survivability, row 5 of 8. baseType item.plant-bract-b-005 (role sense, class heartwood, band b) resolved against data/seed/items/base-types/plant-bract-b.json. RUNTIME HONESTY: atom.regeneration is a resource.delta family (OnTimer), lawn-live and battle-unsupported today per the effect-atom authoring spec's exemplar note \u2014 this item works on the lawn and rejects in battle until battle grows a grant path for that kind.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-006",
@@ -298,7 +302,8 @@
       "flavorKey": "flavor.unique.cistern-of-loam",
       "flavor": "Holds more than it needs, on the theory that a siege eventually asks for everything you saved.",
       "notes": "infusion/utility, row 7 of 8. baseType item.plant-glands-b-003 (role infusion, class heartwood, band b) resolved against data/seed/items/base-types/infusion/plant/b.json.",
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.earthen-bastion-70-008",

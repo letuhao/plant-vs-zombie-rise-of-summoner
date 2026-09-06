@@ -14,12 +14,13 @@ using FusionRpg.Tools.TreeBinder;
 // directly in tests/FusionRpg.TreeBinder.Tests. This file's only job is argument parsing, real-content
 // wiring, and printing the report.
 //
-// Honest scope note: `tree-language` (the module that authors `affixIds[]` per node) has not shipped
-// yet, so `data/seed/passive-tree/plan/*.v1.json`'s nodes carry no `affixIds` today. A real run
-// against that content refuses every node ("a node's affixIds must be 1..3, got 0") -- which is the
-// truthful state of the pipeline, not a bug in this tool. `--explain` and `--check` are proven
-// against worked-example-shaped fixtures in the test project; this CLI reads whatever content exists
-// and reports it as-is, never fabricating tree-language's job.
+// 2026-09-06: `tree-language` (H9) now ships real content for 12 trees at
+// `data/seed/passive-tree/nodes/<treeId>.json` -- this CLI reads it via `PlanReader
+// .ReadPlanNodesWithSeed` (`--seed`'s own `nodes/` subfolder, matched by tree id), the fix for the
+// gap the note below used to describe. A tree tree-language has not touched at all still refuses
+// every node, correctly -- and a PARTIALLY generated tree (most real trees today) binds every
+// already-accepted node and refuses only the not-yet-generated ones, each with its own unspent
+// budget reported, exactly as a genuine content gap should read.
 //
 // Exit codes: 0 clean/Pass, 1 Fail/stale/mismatch, 2 could not start.
 
@@ -74,11 +75,14 @@ if (planFiles.Length == 0)
     return 2;
 }
 
+var nodesDir = Path.Combine(seedRoot, "nodes");
 var allNodesByTree = new Dictionary<string, List<BindInputNode>>(StringComparer.Ordinal);
 foreach (var planFile in planFiles)
 {
     var treeId = Path.GetFileNameWithoutExtension(planFile).Split('.')[0];
-    allNodesByTree[treeId] = PlanReader.ReadPlanNodes(File.ReadAllText(planFile), treeTuning);
+    var seedFile = Path.Combine(nodesDir, $"{treeId}.json");
+    var seedJson = File.Exists(seedFile) ? File.ReadAllText(seedFile) : null;
+    allNodesByTree[treeId] = PlanReader.ReadPlanNodesWithSeed(File.ReadAllText(planFile), seedJson, treeTuning);
 }
 
 if (mode == "explain")

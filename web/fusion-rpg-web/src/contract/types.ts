@@ -29,8 +29,28 @@ import type { Pending } from "./pending";
  * caller narrows underneath. It is still a narrowing rather than an addition, so it takes the bump
  * on the same terms v2 did. ⚠ The matching dated row in `decisions.md` is owed and is the owner's
  * to write; this note is not a substitute for it.
+ *
+ * v4 (2026-09-06): `DisplayLine` and two `ContainerView` fields reshaped the day
+ * `GET /api/items/{instanceId}/card` started serving module 10's real `DisplayModel`, because three
+ * of the placeholder shapes turned out to be wrong about what a rendered line IS:
+ *
+ * - `DisplayLine.unit` / `.sourceKind` widened to `| null`. **The null is load-bearing**, not a gap:
+ *   a STRUCTURAL line (the header, a requirement clause, the footer) carries no magnitude, so it has
+ *   no unit and declares no source kind. Naming one anyway is the exact lie SC4 exists to prevent,
+ *   and it is why the C# record made both nullable in the first place.
+ * - `DisplayLine.rollPolicy` → `rollBarSegments?`. The bar decision is `ItemDisplayRenderer.BarFor`'s
+ *   and it is already made by the time a line exists — re-deriving it here from a policy would be a
+ *   second implementation of the one rule that says `Fixed` has no luck to show and `OnApply` shows a
+ *   band. `rendered` was added for the same reason: the renderer composes the sentence, the browser
+ *   does not.
+ * - `ContainerView.requirements` and `.grantedAction` became `Pending<DisplayLine[]>`. Both were
+ *   authored as bespoke shapes (`RequirementLine[]`, ONE line) before the card existed; the card
+ *   emits `{key, args}` leaves for both, and an item may grant more than one action.
+ *
+ * `RequirementLine` is retired with this bump — it had no producer and now has no consumer. ⚠ The
+ * matching dated row in `decisions.md` is owed and is the owner's to write.
  */
-export const CONTRACT_VERSION = 3;
+export const CONTRACT_VERSION = 4;
 
 // ===========================================================================
 // Shared primitives — spec-magnitude-and-units.md §7
@@ -104,14 +124,32 @@ export type RollPolicy = "fixed" | "onInstantiate" | "onApply";
 export type DisplayLine = {
   key: string;
   args: Record<string, Magnitude | string>;
-  unit: UnitClass;
+  /**
+   * `null` for a STRUCTURAL line — the header, a requirement clause, a set name, the footer. Those
+   * carry no magnitude, so they have no unit, and naming one would be the lie SC4 exists to prevent.
+   */
+  unit: UnitClass | null;
   /** Absent means no context part (no "vs neutral" / "vs <specimen>" clause). */
   context?: ContextRead;
-  rollPolicy: RollPolicy;
-  /** Only when rollPolicy === "onInstantiate". */
+  /**
+   * The roll-quality bar, already decided by `ItemDisplayRenderer.BarFor`: absent when the line has
+   * no luck to show (a `fixed` value never rolled; an `onApply` value shows a band the hit rolls).
+   * Re-deriving it here from a roll policy would be a second implementation of that one rule.
+   */
+  rollBarSegments?: number;
+  /** Only for a value the ITEM rolled — absent for `fixed` and for an `onApply` band. */
   rollQualityPerMille?: number;
-  sourceKind: SourceKind;
+  /** `null` for the same reason `unit` is: a structural line is not an atom line. */
+  sourceKind: SourceKind | null;
   groupOrder: number;
+  /**
+   * The renderer's own finished sentence for this line, composed from the display template and the
+   * frozen magnitude. Present whenever the line came from a template; absent for a structural line,
+   * which has no template. ⛔ **The browser never composes this** — that is the whole reason a
+   * template lives in `item_display_template` and the magnitude formatting lives in
+   * `ItemDisplayRenderer`.
+   */
+  rendered?: string;
 };
 
 export type Rarity = {
@@ -147,28 +185,33 @@ export type ContainerHeader = {
   enhancementPrefix?: string; // "+10 "
 };
 
-export type RequirementLine = {
-  attribute: string;
-  composed: number;
-  gating: number;
-  required: number;
-  met: boolean;
-};
-
 export type ContainerView = {
   instanceId: string;
   kind: ContainerKind;
   header: ContainerHeader;
-  requirements: Pending<RequirementLine[]>;
+  /**
+   * The level clause, each attribute clause, and the gate's refusal when there is one — all as
+   * rendered lines, because that is what the card emits. I11's rule that a clause names WHICH number
+   * gates lives in the line's own args (`need` / `unassisted` / `bonus` / `gates`), not in a shape
+   * this file re-derives.
+   */
+  requirements: Pending<DisplayLine[]>;
   baseStats: DisplayLine[];
   implicit: Pending<DisplayLine[]>;
   affixes: Pending<DisplayLine[]>;
   enhancement: Pending<{ tier: number; nextMilestone?: DisplayLine }>;
   sockets: Pending<SocketsView>;
   set: Pending<SetView>;
-  grantedAction: Pending<DisplayLine>;
+  /** Plural: an item may carry more than one grant, and block 9 renders every one of them. */
+  grantedAction: Pending<DisplayLine[]>;
   flavour?: string;
-  footer: Pending<{ meanRollQualityPerMille?: number; stale: boolean; locked: boolean }>;
+  /**
+   * `meanRollQuality` is the renderer's own formatted percentage (`ItemDisplayRenderer.FormatPerMille`),
+   * not a raw per-mille: block 11 computes the mean from the same per-atom read the bars above it use
+   * and formats it there, and parsing that string back into a number here to re-format it would be
+   * the second implementation the one-producer rule forbids. Absent when nothing on the item rolled.
+   */
+  footer: Pending<{ meanRollQuality?: string; stale: boolean; locked: boolean }>;
 };
 
 // ===========================================================================

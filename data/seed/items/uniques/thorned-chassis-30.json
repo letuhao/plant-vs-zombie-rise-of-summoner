@@ -53,7 +53,8 @@
       "flavorKey": "flavor.unique.gearthorn",
       "flavor": "Somewhere under the gear teeth, a vine still grows toward the light. The bellows just decided the vine's sap made a better coolant than water ever did.",
       "notes": "armament-primary/utility row. baseType item.plant-muzzle-a-009 ('Spraying Bellows', class nozzle) is grepped verbatim from data/seed/items/base-types/plant-armament-primary-a.json, not derived from the role name. Name is a whole-token fusion from uniqueSetSeedPools['thorned-chassis'] (canonicalId 'gearthorn'), used atomically per naming.v1.json rule 2a; unused by any set or charm in this theme (sets/thorned-chassis.json used 'junkbramble' and 'ironstem', charms used neither). atom.cleansing (status.clear) is legal to fix here even though it sits on mantle's implicit slate, not armament-primary's: a unique's fixed core is never drawn from the role-filtered affix pool (seed-contract.md's fixed-core mechanism, same reasoning as unique.exemplar.json's rung-2 break), and atom.cleansing itself binds today (not stat.derived, not quarantined). powerAxis 'utility' matches the actual effect rather than the role's conventional identity, which is the point of a unique per ssot-uniques.md #3.5.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-002",
@@ -92,7 +93,8 @@
       "flavorKey": "flavor.unique.ledger-of-salvage",
       "flavor": "Every dent it takes gets a line entry. The apron stopped being armor around the fourth ledger page.",
       "notes": "core-guard/economy row. baseType item.humanoid-torso-a-004 ('Secondhand Apron') grepped from data/seed/items/base-types/humanoid-core-guard-a.json. Of-construct name: invented ordinary base noun 'Ledger' (an authored, unregistered noun, the same pattern set.thorned-chassis-001 used for 'Yoke' and set.thorned-chassis-004 used for 'Cordon') plus concept 'salvage' from conceptPools['thorned-chassis']; 'salvage' is unused by any thorned-chassis set or charm entry to date. atom.midas is legal for jewel-major/girdle's implicit slates, not core-guard's; fixed here as an off-role identity pick, same license as the unique.exemplar.json worked example. Both fixedAtoms are Flat/Increased stat-channel families (midas is resource.economy Flat-shaped, vitality is primaryChannel Flat) - no More-op family, no defense-channel family.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-003",
@@ -126,7 +128,8 @@
       "flavorKey": "flavor.unique.bolted-bramble",
       "flavor": "The bolts hold the plating on. The thorns underneath were never anybody's idea but the plant's.",
       "notes": "ward-array/offense row. baseType item.plant-sheath-a-009 ('Warped Casing') grepped from data/seed/items/base-types/plant-ward-array-a.json. Compound name: adjective 'Bolted' from themeAdjectivePools['thorned-chassis'] (previously paired only with 'Sprig' in charms/off-ctrl.json's charm.off-ctrl-012 - a different noun, so this pairing does not collide) plus invented ordinary noun 'Bramble'. atom.warded is ward-array's own legal implicit family (classes.v1.json implicitSlates.ward-array), so the shield half is in-role; atom.retribution is armament-secondary's family, fixed here off-role for the offense signature, same fixed-core license as elsewhere in this file. Both families are shipped and bindable today (warded is shield.grant, not one of the three quarantined shield stat.derived families).",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-004",
@@ -160,7 +163,8 @@
       "flavorKey": "flavor.unique.muffler-of-the-linkage",
       "flavor": "Chain-linked and choked tight, it does one thing without complaint: it keeps the wearer walking after the fight most collars would have ended at.",
       "notes": "jewel-major/survivability row. baseType item.humanoid-neck-a-008 ('Punched Muffler') grepped from data/seed/items/base-types/humanoid-jewel-major-a.json; 'Muffler' is that same file's own nounPools['jewel-major.humanoid'] entry, reused here as the of-construct base per naming.v1.json's 'any nounPools entry' allowance for uniques. Concept 'linkage' from conceptPools['thorned-chassis'], unused elsewhere in this theme's sets/charms. Both fixedAtoms (vitality, fortitude) are jewel-major's own legal implicit families (classes.v1.json), so this entry stays fully in-role, unlike the others in this file.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-005",
@@ -194,7 +198,8 @@
       "flavorKey": "flavor.unique.wired-glume",
       "flavor": "Somebody ran a copper lead into the husk to see what it would do. It answered by learning to aim.",
       "notes": "sense/control row. baseType item.plant-bract-a-006 ('Layered Bracteole') grepped from data/seed/items/base-types/plant-bract-a.json. Compound name: adjective 'Wired' from themeAdjectivePools['thorned-chassis'] (unused elsewhere in this theme's sets/charms) plus noun 'Glume' from nounPools['sense.plant'] (the same file's own pool). atom.sporing is infusion's legal family, fixed here off-role for the control signature; it is a fully shipped status.apply family, not one of the Unity-CC-branch-blocked ones (embering/scalding/entangling). Tagged combat-posture 'offensive' rather than 'utility', matching this corpus's own precedent for axis:'control' charms (data/seed/items/charms/off-ctrl.json tags every control-axis entry 'offensive').",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-006",
@@ -228,7 +233,8 @@
       "flavorKey": "flavor.unique.cogcreeper",
       "flavor": "It leaves two kinds of tracks: bootprints, and whatever took root three steps behind them.",
       "notes": "footing/utility row. baseType item.humanoid-feet-a-009 ('Oiled Cleat') grepped from data/seed/items/base-types/footing/humanoid/a.json. Name is a whole-token fusion from uniqueSetSeedPools['thorned-chassis'] (canonicalId 'cogcreeper'), used atomically; unused by any set or charm in this theme. atom.gardener (spawn.entity) is retinue's legal family, fixed here off-role for the utility signature; per classes.v1.json's retinue note it is standalone-safe (works both on the lawn and in battle), so this is not a runtime-pending pick. Same precedent as data/seed/items/charms/surv-util.json's charm.surv-util-008, which tags an axis:'utility' atom.gardener entry 'utility'.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-007",
@@ -262,7 +268,8 @@
       "flavorKey": "flavor.unique.resin-of-the-engine",
       "flavor": "The gland still makes poison, out of habit. What actually pays the bills is what it makes instead.",
       "notes": "infusion/economy row. baseType item.plant-glands-a-007 ('Slender Resin') grepped from data/seed/items/base-types/infusion/plant/a.json; 'Resin' reuses that same file's own head noun. Of-construct name: Base 'Resin' plus concept 'engine' from conceptPools['thorned-chassis'], unused elsewhere in this theme's sets/charms (sets used 'chassis' and 'overhaul'; charms used neither). atom.sunbloom is girdle's legal family, fixed here off-role for the economy signature; atom.venomous is infusion's own legal family, kept in-role at trivial band as the flavour tether. Both are fully shipped resource.economy / status.apply families.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     },
     {
       "id": "unique.thorned-chassis-30-008",
@@ -296,7 +303,8 @@
       "flavorKey": "flavor.unique.spiked-megaphone",
       "flavor": "One blast and something answers. Nobody who built it ever confirmed whether it was calling for help or ordering an attack, but by the third blast it stopped mattering.",
       "notes": "retinue/offense row. baseType item.humanoid-horn-a-007 ('Twisted Horn') grepped from data/seed/items/base-types/retinue/humanoid/a.json. Compound name: adjective 'Spiked' from themeAdjectivePools['thorned-chassis'] (unused elsewhere in this theme's sets/charms) plus noun 'Megaphone' from that same file's nounPools['retinue.humanoid']. atom.summoner is retinue's own legal implicit family (classes.v1.json), standalone-safe per that role's note, so this entry stays fully in-role; powerAxis is 'offense' rather than the role's usual 'board presence' framing because a summoned attacker reads as damage output, matching this partition's assigned (role, axis) allocation.",
-      "acquisition": "drop"
+      "acquisition": "drop",
+      "enabled": false
     }
   ]
 }

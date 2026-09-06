@@ -3,8 +3,12 @@ import type { DemonProfileDto } from "@/lib/bus/demons";
 import type {
   ArmouryPageDto,
   ArmouryRowDto,
+  ChannelDeltaDto,
   CombinationRowDto,
+  DisplayLineDto,
   ItemAssignmentDto,
+  ItemCardDto,
+  ItemCompareDto,
   ItemEquipOutcomeDto,
   ItemSurfaceStatusDto,
   WorkbenchCostDto,
@@ -28,13 +32,17 @@ import type {
   ActorView,
   ArmouryPageView,
   ArmouryRowView,
+  ChannelDeltaView,
   CombinationShape,
   CombinationState,
   CombinationView,
   CommanderListRow,
   CommanderListView,
+  ComparePayloadView,
   ContainerView,
   ContractView,
+  DisplayLine,
+  DominanceVerdict,
   EquipAssignmentView,
   EquipOutcomeView,
   ForceView,
@@ -52,9 +60,16 @@ import type {
   RunResult,
   RunView,
   SectorView,
+  SetTierView,
+  SetView,
   SlotView,
+  SocketCellView,
+  SocketsView,
+  SourceKind,
   SurfaceStatusView,
   TurnEventView,
+  UnitClass,
+  UnitClassGroupView,
   WorkbenchCostView,
   WorkbenchOutcomeView,
   WorkbenchSocketView,
@@ -727,6 +742,282 @@ export function adaptArmouryItem(row: ArmouryRowView, relicName?: string): Conta
     set: pendingWithReason(PLAYER_PENDING.itemSet),
     grantedAction: pendingWithReason(PLAYER_PENDING.itemGrantedAction),
     footer: known({ stale: row.stale, locked: row.locked })
+  };
+}
+
+// ===========================================================================
+// item module 10 — the rendered card, and the comparison built on two of them
+//
+// ⛔ Nothing below composes a sentence, formats a magnitude, decides a verdict
+// or groups a delta. All four already happened in `ItemCardRenderer`,
+// `ArmouryCompare` and `DominancePresentation`; this section renames their
+// output into view types and does no arithmetic at all.
+// ===========================================================================
+
+/** `item.card.header` etc — the block keys `CardBlocks` declares, in the order it declares them. */
+const CARD_BLOCK = {
+  header: "item.card.header",
+  requirements: "item.card.requirements",
+  baseStats: "item.card.base-stats",
+  implicit: "item.card.implicit",
+  affixes: "item.card.affixes",
+  enhancement: "item.card.enhancement",
+  sockets: "item.card.sockets",
+  set: "item.card.set",
+  grantedAction: "item.card.granted-action",
+  flavour: "item.card.flavour",
+  footer: "item.card.footer"
+} as const;
+
+/** C# `UnitClass` member names → the contract's own camelCase vocabulary. Closed, both ends. */
+const UNIT_CLASS_BY_WIRE: Record<string, UnitClass> = {
+  GameUnits: "gameUnits",
+  GameUnitsPerSecond: "gameUnitsPerSecond",
+  SigmoidPoints: "sigmoidPoints",
+  SigmoidMultiplierPoints: "sigmoidMultiplierPoints",
+  StatusPotencyPoints: "statusPotencyPoints",
+  PerMilleRatio: "perMilleRatio",
+  Milliseconds: "milliseconds",
+  Count: "count",
+  Flag: "flag",
+  LadderIndex: "ladderIndex",
+  AptitudePoints: "aptitudePoints",
+  ReciprocalPoints: "reciprocalPoints",
+  LoamUnits: "loamUnits"
+};
+
+/** C# `SourceKind` member names → §4.4's twelve kebab-case values. */
+const SOURCE_KIND_BY_WIRE: Record<string, SourceKind> = {
+  Base: "base",
+  Implicit: "implicit",
+  AffixPrefix: "affix-prefix",
+  AffixSuffix: "affix-suffix",
+  Enhancement: "enhancement",
+  SocketInsert: "socket-insert",
+  Resonance: "resonance",
+  Word: "word",
+  SetThreshold: "set-threshold",
+  GrantedAction: "granted-action",
+  UniqueIdentity: "unique-identity",
+  UniqueVariance: "unique-variance"
+};
+
+/** `ArmouryCompare`'s own two labels. A channel it could not classify falls back to `null`'s group. */
+const DELTA_UNIT_BY_WIRE: Record<string, UnitClass> = {
+  "game-units": "gameUnits",
+  "per-mille": "perMilleRatio"
+};
+
+const DOMINANCE_BY_WIRE: Record<string, DominanceVerdict> = {
+  StrictlyBetter: "strictly-better",
+  StrictlyWorse: "strictly-worse",
+  Sidegrade: "sidegrade",
+  Incomparable: "incomparable"
+};
+
+/**
+ * A display key's last segment, shown where the key itself would be.
+ *
+ * ⚠ **A placement, never a translation.** `content/display/en.json` carries no row for
+ * `base.*` / `class.*` / `rarity.*` / `item.compare.*` yet — a named wiring gap in the string corpus,
+ * owned by the content side — so the honest thing to show is the key's own tail rather than an
+ * invented English word. The same rule `ItemCard`'s `LineRow` already applies to a line's label.
+ */
+function keyTail(key: string | undefined): string {
+  if (!key) return "";
+  return key.split(".").slice(-1)[0]!.replace(/-/g, " ");
+}
+
+function adaptDisplayLine(dto: DisplayLineDto): DisplayLine {
+  const { __rendered: rendered, ...args } = dto.args;
+  const line: DisplayLine = {
+    key: dto.key,
+    // Every arg stays a STRING: the renderer already formatted each magnitude into the sentence it
+    // composed, and re-typing one as a `Magnitude` here would invite a second formatting pass.
+    args,
+    unit: dto.unit ? UNIT_CLASS_BY_WIRE[dto.unit] ?? null : null,
+    sourceKind: dto.sourceKind ? SOURCE_KIND_BY_WIRE[dto.sourceKind] ?? null : null,
+    groupOrder: dto.groupOrder
+  };
+  if (rendered) line.rendered = rendered;
+  if (dto.rollBarSegments !== null) line.rollBarSegments = dto.rollBarSegments;
+  if (dto.rollQualityPerMille !== null) line.rollQualityPerMille = dto.rollQualityPerMille;
+  if (dto.contextRead) line.context = { reference: "neutral", text: dto.contextRead };
+  return line;
+}
+
+function blockLines(dto: ItemCardDto, blockKey: string): DisplayLineDto[] {
+  return dto.blocks.find((b) => b.blockKey === blockKey)?.lines ?? [];
+}
+
+function linesOf(dto: ItemCardDto, blockKey: string): DisplayLine[] {
+  return blockLines(dto, blockKey).map(adaptDisplayLine);
+}
+
+/** `known` when the block rendered something, `absent` when it rendered nothing. Never `pending`:
+ * the route answered, so "not shown yet" is no longer one of the possibilities. */
+function blockPending(dto: ItemCardDto, blockKey: string): Pending<DisplayLine[]> {
+  const lines = linesOf(dto, blockKey);
+  return lines.length > 0 ? known(lines) : absent<DisplayLine[]>();
+}
+
+function rarityFromCard(args: Record<string, string>): Rarity {
+  const id = (args.rungKey ?? "").replace(/^rarity\./, "");
+  const rung = RARITY_LADDER.find((r) => r.id === id);
+  if (rung) return rung;
+  // A rung the shipped ladder does not carry: the card still states all three redundant channels
+  // itself, so those are used rather than a different rung's.
+  return {
+    ...RARITY_LADDER[0]!,
+    display: keyTail(args.rungKey),
+    colour: args.colorHex ?? RARITY_LADDER[0]!.colour,
+    pips: Number(args.pips ?? "0")
+  };
+}
+
+function adaptSockets(dto: ItemCardDto, combinations: CombinationView[]): Pending<SocketsView> {
+  const cells: SocketCellView[] = blockLines(dto, CARD_BLOCK.sockets)
+    .filter((l) => l.key === "item.card.socket.cell")
+    .map((l) => ({
+      index: Number(l.args.index ?? "0"),
+      affinity: l.args.affinityKey ? keyTail(l.args.affinityKey) : null,
+      insertName: l.args.empty === "1" ? null : keyTail(l.args.insertKey),
+      omniCountsDiversityOnly: l.args.omniDiversityOnly === "1"
+    }));
+
+  if (cells.length === 0 && combinations.length === 0) return absent<SocketsView>();
+  return known({ cells, combinations });
+}
+
+function adaptSet(dto: ItemCardDto): Pending<SetView> {
+  const lines = blockLines(dto, CARD_BLOCK.set);
+  const header = lines.find((l) => l.key === "item.card.set.header");
+  if (!header) return absent<SetView>();
+
+  const name = keyTail(header.args.nameKey);
+  const ladder: SetTierView[] = lines
+    .filter((l) => l.key === "item.card.set.threshold")
+    .map((l) => ({
+      piecesRequired: Number(l.args.pieces ?? "0"),
+      active: l.args.active === "1",
+      isCapability: l.args.capability === "1"
+    }));
+
+  const redundant = header.args.redundant === "1";
+  return known({
+    setId: (header.args.nameKey ?? "").replace(/^set\./, ""),
+    name,
+    count: Number(header.args.count ?? "0"),
+    total: Number(header.args.total ?? "0"),
+    ladder,
+    // The card's set block is the set THIS piece touches, and module 12's disclosure flag says which
+    // of the two ways it touches it. One name either way — never both, never neither.
+    advances: redundant ? [] : [name],
+    redundantIn: redundant ? [name] : []
+  });
+}
+
+/**
+ * ⭐ One rendered card, as the eleven-block container the item card draws — the adapter for
+ * `GET /api/items/{instanceId}/card`.
+ *
+ * `combinations` comes from the caller that has already read `GET /api/items/{id}/combinations`: the
+ * card's own socket block renders the combination SENTENCES, but `CombinationView` also carries the
+ * shape and the granted tier, which only that route reports. Passing them in keeps the card from
+ * triggering a second read of its own, and leaving them out is honest rather than empty-by-guess.
+ */
+export function adaptItemCard(dto: ItemCardDto, combinations: CombinationView[] = []): ContainerView {
+  const header = blockLines(dto, CARD_BLOCK.header)[0]?.args ?? {};
+  const enhancement = blockLines(dto, CARD_BLOCK.enhancement)[0];
+  const footer = blockLines(dto, CARD_BLOCK.footer)[0]?.args ?? {};
+  const flavour = blockLines(dto, CARD_BLOCK.flavour)[0];
+
+  const view: ContainerView = {
+    instanceId: dto.instanceId,
+    kind: "item",
+    header: {
+      name: keyTail(header.name),
+      rarity: rarityFromCard(header),
+      baseTypeAndClassNoun: [keyTail(header.baseNameKey), keyTail(header.classNounKey)]
+        .filter((s) => s.length > 0)
+        .join(" · ")
+    },
+    requirements: blockPending(dto, CARD_BLOCK.requirements),
+    baseStats: linesOf(dto, CARD_BLOCK.baseStats),
+    implicit: blockPending(dto, CARD_BLOCK.implicit),
+    affixes: blockPending(dto, CARD_BLOCK.affixes),
+    enhancement: enhancement
+      ? known({
+          tier: Number(enhancement.args.level ?? "0"),
+          nextMilestone: adaptDisplayLine(enhancement)
+        })
+      : absent(),
+    sockets: adaptSockets(dto, combinations),
+    set: adaptSet(dto),
+    grantedAction: blockPending(dto, CARD_BLOCK.grantedAction),
+    footer: known({
+      // `""` is block 11's own "nothing on this item rolled", not a missing read.
+      ...(footer.meanRollQuality ? { meanRollQuality: footer.meanRollQuality } : {}),
+      stale: footer.stale === "1",
+      locked: footer.locked === "1"
+    })
+  };
+
+  if (header.frame) view.header.frameBadge = header.frame;
+  if (header.ilvl) view.header.itemLevel = Number(header.ilvl);
+  // Absent at +0 rather than present as "+0": a zero enhancement is not a thing the item has.
+  if (header.enhance) view.header.enhancementPrefix = header.enhance + " ";
+  if (flavour) view.flavour = keyTail(flavour.args.flavourKey);
+
+  return view;
+}
+
+function adaptChannelDelta(dto: ChannelDeltaDto): ChannelDeltaView {
+  const unit = DELTA_UNIT_BY_WIRE[dto.unit] ?? "gameUnits";
+  // `more` is the per-mille reading for a value that is already a delta from zero — a stat
+  // modifier's own "+400‰ more". `flat` would render a proportion as if it were an absolute.
+  const op = unit === "perMilleRatio" ? ("more" as const) : undefined;
+  const magnitude = (value: number): Magnitude =>
+    op ? { unit, value, channel: dto.channel, op } : { unit, value, channel: dto.channel };
+
+  return {
+    channel: dto.channel,
+    incumbent: magnitude(dto.incumbent),
+    candidate: magnitude(dto.candidate),
+    delta: magnitude(dto.delta)
+  };
+}
+
+/**
+ * ⭐ The comparison payload — `DominancePresentation`'s verdict, trade and unit-class grouping, plus
+ * module 13's deltas, exactly as the server decided them.
+ *
+ * ⛔ **No synthesized scalar reaches this view, and there is no field one could hide in.** The
+ * footnote that says why is the server's own constant key.
+ */
+export function adaptItemCompare(dto: ItemCompareDto): ComparePayloadView {
+  const verdict = DOMINANCE_BY_WIRE[dto.dominance] ?? "incomparable";
+  const groups: UnitClassGroupView[] = dto.unitGroups.map((g) => ({
+    // An unresolvable unit keeps its OWN group; folding it into `gameUnits` is the exact guess SC4
+    // forbids, and the server already made the same choice on the way out.
+    unit: g.unit ? UNIT_CLASS_BY_WIRE[g.unit] ?? null : null,
+    deltas: g.deltas.map(adaptChannelDelta)
+  }));
+
+  return {
+    badge: { verdict, label: keyTail(dto.badge.labelKey), shape: dto.badge.shape },
+    groups,
+    // Only a sidegrade is a trade. For every other verdict the split is real but says nothing the
+    // verdict word has not already said, so it is not drawn.
+    trade:
+      verdict === "sidegrade"
+        ? {
+            youGain: dto.trade.youGain.map(adaptChannelDelta),
+            youGiveUp: dto.trade.youGiveUp.map(adaptChannelDelta)
+          }
+        : null,
+    incomparableReason: dto.incomparableReasonKey ? keyTail(dto.incomparableReasonKey) : null,
+    meanRollQualityPerMille: dto.meanRollQualityMilliCandidate
   };
 }
 

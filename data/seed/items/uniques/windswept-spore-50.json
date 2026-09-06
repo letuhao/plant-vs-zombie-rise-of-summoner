@@ -54,7 +54,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-002",
@@ -89,7 +90,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-003",
@@ -124,7 +126,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-004",
@@ -159,7 +162,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-005",
@@ -197,7 +201,8 @@
         "offensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-006",
@@ -232,7 +237,8 @@
         "defensive",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-007",
@@ -267,7 +273,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     },
     {
       "id": "unique.windswept-spore-50-008",
@@ -302,7 +309,8 @@
         "utility",
         "signature"
       ],
-      "acquisition": "source-locked"
+      "acquisition": "source-locked",
+      "enabled": false
     }
   ]
 }

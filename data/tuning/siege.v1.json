@@ -81,7 +81,11 @@
     "materialSeamYieldPerTurn": 3,
     "refineRubblePerIronwork": 4,
     "refineYieldMilli": 600,
-    "refinePerTurnCap": -1
+    "refinePerTurnCap": -1,
+    "labourMoatStaminaCost": 30,
+    "labourMoatHungerCost": 15,
+    "labourMoatTurns": 2,
+    "summonQiCost": 25
   },
   "economy": {
     "_note": "base-defense siege-economy (spec-siege-economy.md). nodeYieldPerRound is flat per node per round -- deliberately NOT on P(Theta) (principle P2: a node's yield is a property of the ground, so it cannot outrun the sinks it feeds). depotSeedMilli is how much of the DEFENDER's sector stockpile is actually reachable during a siege -- a bounded ratio, exempt from the progression-ceiling rule. captureRecoveryMilli is a scaling factor on top of the HP proportion (F11) -- 1000 = the HP proportion applies unscaled.",

@@ -67,7 +67,7 @@
       "branch": "defensive",
       "exclusion": {
         "form": "nullification",
-        "printedText": "Inert while tier is active — tier wins.",
+        "printedText": "Inert while tier is active \u2014 tier wins.",
         "propertyKeys": [
           "tier"
         ]
@@ -745,7 +745,7 @@
       "flavor": "The hunt is not merely a struggle, but a calculated escalation of force.",
       "id": "skill.fortitude-off-t5-n1",
       "name": "Apex Predator",
-      "nameKey": "tree.node.apex-predator",
+      "nameKey": "tree.node.apex-predator-4",
       "nodeClass": "magnitude",
       "nodeKey": "n1",
       "rationale": "",

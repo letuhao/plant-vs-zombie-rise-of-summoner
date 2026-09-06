@@ -968,35 +968,154 @@ published server, not a passing unit test.
       the server corrects a wrong pick by name. Same shape and same reason as the craft bench's typed
       `recipeId`
 
-⛔ **Defects found while doing this, named rather than fixed (none is this slice's to own):**
+⛔ **Defects found while doing this. R1/R2/R4 are now FIXED (2026-09-06, see P1.4-F below); R3 is
+still open and is ask-first.**
 
-- **R1 — the relic route silently clobbers an item assignment, and it was measured.** With the blade
-  in `armament-primary`, `PUT /api/unique/actors/{spec}/equipment/weapon` with `relic.ashen_reliquary`
-  returned **200** and module 4's own read then showed `armament-primary | stock |
-  relic.ashen_reliquary`. The item is not destroyed — it returns to the armoury — but it is
-  **unequipped with no refusal and no notice.** This route refuses the reverse direction by name; the
-  relic route has no matching arm. **Owner: the relic flow / D1's `M3`**, which is the step that moves
-  the legacy wire off three slot words in the first place
-- **R2 — module 10's card reads assignments with the wrong `ref_kind`.**
-  `RpgStore.ItemCard.cs:363,369` tests `a.RefKind == "item"`, but module 4's instance-backed kind is
-  `"rolled"` (`EquipProjector.cs:6`, and `ApplyEquipProjection` filters on `"rolled"`). So a card's
-  set block and its `wornRole` — and therefore `ReadRefusal` — can never see an item this endpoint
-  assigned. **Latent until today** (nothing wrote a rolled row), **live now.** Same shape:
-  `FindAssignmentHolders` defaults to `LoadoutReport.InstanceRefKind = "item"`, so module 2's
-  `LoadoutReport.Plan` conflict detection misses rolled assignments unless a caller passes `"rolled"`
-  (this endpoint does). **Owner: modules 10 and 2**
-- **R3 — the FE and Core disagree about `trinket`.** `Paperdoll.tsx`'s `RELIC_SLOT_TO_ROLE` maps
-  `trinket → jewel-major`; Core's `LegacyEquipSlots` maps `trinket → jewel-minor-a`, and the
-  migration already wrote `jewel-minor-a` rows. A one-word edit either way **moves stored data**, so
-  it is named here and left to D1's `M3`. Recorded in `Paperdoll.tsx`'s own comment too
-- **R4 — `ArmouryRowDto.Assigned` is hardcoded `false`** (`ItemSurfaceEndpoints.cs:85,89`), which was
-  harmless while nothing could be assigned and is simply wrong now. The armoury filter's
-  `hideAssigned` therefore filters nothing. **Owner: module 20** — one join against
-  `rpg_item_assignment`, which now has real rows to join to
+- [x] ⭐ **R1 — the relic route silently clobbered an item assignment, and it was measured.
+      FIXED 2026-09-06.** With the blade in `armament-primary`,
+      `PUT /api/unique/actors/{spec}/equipment/weapon` with `relic.ashen_reliquary` returned **200**
+      and module 4's own read then showed `armament-primary | stock | relic.ashen_reliquary`. The item
+      was not destroyed — it returned to the armoury — but it came off with **no refusal and no
+      notice.** This route refused the reverse direction by name; the relic route had no matching arm
+- [x] ⭐ **R2 — module 10's card read assignments with the wrong `ref_kind`. FIXED 2026-09-06.**
+      `RpgStore.ItemCard.cs:363,369` tested `a.RefKind == "item"`, but module 4's instance-backed kind
+      is `"rolled"` (`EquipProjector.cs:6`, and `ApplyEquipProjection` filters on `"rolled"`). So a
+      card's set block and its `wornRole` — and therefore `ReadRefusal` — could never see an item this
+      endpoint assigned. **Latent until the equip route shipped, live from that day.** Same shape:
+      `FindAssignmentHolders` defaulted to `LoadoutReport.InstanceRefKind = "item"`, so module 2's
+      `LoadoutReport.Plan` conflict detection missed rolled assignments unless a caller passed
+      `"rolled"` (this endpoint did)
+- [ ] ⛔ **R3 — the FE and Core disagree about `trinket`. STILL OPEN 2026-09-06 — ask-first, a human
+      picks the side.** Re-verified against current code this pass, both sides unchanged:
+      | Side | File:line | `trinket` maps to | Which paperdoll cell that is |
+      |---|---|---|---|
+      | Web FE | `web/fusion-rpg-web/src/layers/relics/Paperdoll.tsx:60` (`RELIC_SLOT_TO_ROLE`) | `jewel-major` | `neck` / `pollen` (`Paperdoll.tsx:32`) |
+      | Core | `src/FusionRpg.Core/Items/LegacyEquipSlots.cs:42` (`Pairs`) | `jewel-minor-a` | `ring-1` / `graft-1` (`Paperdoll.tsx:41`) |
+      **Live symptom, not just an inconsistency:** the relic wire returns only the legacy `slot`, never
+      a role (`ListUniqueEquipmentUnlocked` projects back through `LegacyEquipSlots`), so
+      `Paperdoll.tsx:87` falls through to `RELIC_SLOT_TO_ROLE` and **draws a trinket relic in the neck
+      cell while its stored row says `jewel-minor-a` (ring-1).**
+      **Why this is not a one-word edit, and why nobody should pick it alone:** editing *Core* re-homes
+      data already on disk — D1 §10 M1's migration and every relic equip since 2026-09-06 wrote
+      `jewel-minor-a` rows; editing the *FE* leaves storage alone but moves where a player sees their
+      trinket, and "trinket" reads more like a neck amulet than a ring. Either side is defensible and
+      each has a different cost. **Resolver: the owner, alongside D1's `M3`** (the step that widens the
+      wire off three slot words and would let the payload carry the real role, dissolving the map
+      entirely). Recorded in `Paperdoll.tsx`'s own comment too. ⛔ **Deliberately not picked by this
+      pass** — it is the one item of the four that changes how existing stored data reads
+- [x] ⭐ **R4 — `ArmouryRowDto.Assigned` was hardcoded `false`** (`ItemSurfaceEndpoints.cs:85,89`),
+      which was harmless while nothing could be assigned and simply wrong once it could.
+      The armoury filter's `hideAssigned` therefore filtered nothing. **FIXED 2026-09-06**
 - **✅ P5.4 defect 1 is FIXED, verified live rather than assumed.** `FusionRpg.Server.csproj` now
   carries the `data\seed\items\**\*.json` content rule, so on a **published** server the recipe
   corpus loads and `MapWorkbench` runs: `POST /api/items/workbench/salvage` answered **409
   `item.unknown`** (mapped, real) where this file recorded a 405
+
+---
+
+#### ⭐ P1.4-F — R1 / R2 / R4 closed, CLOSED 2026-09-06 (R3 deliberately left open)
+
+The three defects P1.4-E named as "not this slice's to own" are all this **program's** own files, so
+per the standing audit rule they are fixed here rather than re-named. R3 is not, and §R3 above says
+why in full.
+
+**⛔ The root of R1 and R2 is the same thing, and naming it once is what stops the third instance:**
+`rpg_item_assignment` and `rpg_item_loadout_entry` are two tables with two `ref_kind` vocabularies
+that differ by one word — `rolled`/`stock` versus `item`/`stock`. Nothing named that difference, so
+one module read the assignment table with the *preset* table's literal (R2) and another defaulted a
+parameter to it (R2's second half). Both are now impossible to write by accident: the two real values
+live in `EquipRefKinds` (`src/FusionRpg.Core/Items/EquipProjector.cs`), whose doc comment states the
+distinction, and every production reader and writer of that table goes through it.
+
+- [x] ⭐ **R1 — the relic wire now refuses a role a real item holds, by name.** Enforced in
+      `RpgStore.UpsertUniqueEquipment` (`RefuseIfRoleHeldByAnItem`) rather than in the service, for two
+      reasons that are not stylistic: it is **inside the same `_gate` the write takes**, so there is no
+      read-then-write window, and it covers `ClearUniqueEquipmentSlot` for free — which mattered more
+      than the upsert did, because the clear path runs an unqualified
+      `DELETE … WHERE specimen_id AND role` and would have taken a player's item off outright.
+      The refusal reuses **module 4's own read** (`ListAssignments`), never a second copy of the query.
+      Reason `slot.claimed_by_item`, shaped like this route's existing `phase.not_roster` and
+      deliberately **absent** from `UniqueActorEndpoints.IsValidationReason`, so it answers **409** —
+      the same status the mirror refusal (`equip.role-held-by-relic`) already answered. Carried as its
+      own exception type (`UniqueEquipmentSlotClaimed`, on `WorkbenchApplyRefused`'s pattern) because
+      `PutEquipment` tells its two existing exceptions apart by `ParamName` and a `StartsWith` on the
+      message, and a third squeezed into that scheme would have surfaced as `not_found`.
+      ⚠ **Only `rolled` is refused** — a `stock` occupant is this wire's own row and swapping one relic
+      for another is still a 200. A guard that protected the item flow by breaking the relic flow would
+      have been the worse defect, so that boundary has its own test on both sides
+- [x] ⭐ **R2 — the card reads the kind the equip route actually writes.**
+      `RpgStore.ItemCard.cs`'s two `"item"` tests are now `EquipRefKinds.Rolled`, and the arm that used
+      to fall through — treating an instance id as a container id — is now an **explicit three-way**:
+      `rolled` resolves through the instance, `stock` is already a container id, and an unrecognised
+      kind is **skipped**, which is the same "an unreadable entry is a visible hole, not a silent pass"
+      rule `GetLoadoutEntriesValidated` applies to the preset table. `FindAssignmentHolders`'s default
+      moved from `LoadoutReport.InstanceRefKind` to `EquipRefKinds.Rolled` for the same reason — it
+      queries the assignment table. ⚠ `LoadoutReport.InstanceRefKind` is **left as `"item"` on purpose**:
+      that constant describes `rpg_item_loadout_entry`, where `"item"` is correct, and
+      `LoadoutReport.Plan` still filters on it
+- [x] ⭐ **R4 — `Assigned` is real, on both records.** `ItemSurfaceEndpoints`' armoury route joins once
+      per page through `FindAssignmentHolders(ownedIds, EquipRefKinds.Rolled)` — module 2's own read,
+      not a new query — and fills `ArmouryRowDto.Assigned` **and** `ArmouryEntry.Assigned`. Both
+      mattered: the DTO drives the web filter, the entry drives `LootFilterRule.HideAssigned` and the
+      `assigned` sort key server-side. The `rolled` filter is load-bearing here too — a relic's `stock`
+      row names a catalog id and must never light up an instance's row
+- [ ] ⛔ **R3 stays open and is the owner's call.** See §R3 above for both mappings, the live
+      wrong-cell symptom and why neither side is safely editable alone
+
+**⛔ Red-first, one defect at a time — each production hunk was reverted, the suite re-run, and
+restored:**
+
+| Defect | Production hunk reverted | Red observed |
+|---|---|---|
+| R1 (DAL) | the `RefuseIfRoleHeldByAnItem` call commented out | **2 failed / 14 passed** — both new refusal tests, `Assert.Throws() Failure: No exception was thrown`, i.e. the relic write silently succeeded |
+| R1 (HTTP) | same | **2 failed** — `Equip_thenTheRelicRouteOverTheSameRole_…`, `Equip_thenTheRelicRoutesDelete_…` |
+| R2 | `"item"` restored in `ItemCard.cs` ×2 + the `FindAssignmentHolders` default | **7 failed** — the 2 new ones plus 5 **existing** tests that had been passing only because their fixture seeded the same wrong literal |
+| R4 | `isAssigned` forced back to `false` | **2 failed** — `Armoury_reportsAssignedFor…`, `Armoury_dropsAssignedAgain…` |
+
+⚠ **R2's blast radius was test fixtures agreeing with the bug.** `ItemCardStoreTests` seeded
+`ref_kind="item"` and its hand-assembled control re-read `"item"`; `ArmouryTests` seeded `"item"` to
+match the method default it was exercising. Three fixtures corrected to the real kind — which is why
+five previously-green tests turn red the moment the production literal goes back.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | **1074 passed / 0 failed** |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **12402 passed / 20 failed** — every red is the atom-corpus cluster (`ContentValidation`, `ContentScale`), `TraitMigrationParity` (battle-tempo), `ProveAptitudeJsonEmit` (class-system) or `ExpeditionResolver`. **Zero in `Items.*`**, and none touches a file this pass edited |
+| `dotnet test tests\FusionRpg.Server.Tests` (full) | **236 passed / 25 failed** — all 25 are `World*` / `ContentBoot` / `AptitudeChannelMods` / `DistrictAssault`, the recorded `battle.v2.json` `speciesTempo` cluster. **Zero `Item*`, zero `UniqueActor*`** |
+| `…ItemEquipEndpointsTests` (18 before → **24** after) | 24 / 24 |
+| `…RelicRowMigrationTests` (12 before → **16** after) | 16 / 16 |
+| targeted re-run after the `RefuseIfRoleHeldByAnItem` rename | Data 88 / 88, Server 48 / 48 |
+
+**⭐ LIVE PROOF — published server, real routes, real pre-existing state.** `dist` was stale (17:52
+binary vs an 18:5x edit), so republished; the blade this morning's P1.4-E proof equipped was **still
+in `armament-primary`**, which made it the honest fixture:
+
+| Step | Result, observed |
+|---|---|
+| `GET /api/items/armoury/1` — before touching anything | ⭐ **R4 live**: blade `"assigned":true`, helm `"assigned":false`. Both were hard-coded `false` this morning |
+| `PUT /api/unique/actors/387bbbbf…/equipment/weapon` ← `relic.ashen_reliquary` | ⭐ **409 `slot.claimed_by_item`** (this morning: **200**, and the row was clobbered) |
+| `DELETE /api/unique/actors/387bbbbf…/equipment/weapon` | ⭐ **409 `slot.claimed_by_item`** |
+| `GET /api/items/assignments/387bbbbf…` after both | **unchanged** — `armament-primary \| rolled \| 10b41112…`, `assignedUtc` still `10:58:15.95`, so nothing was rewritten rather than rewritten-identically |
+| `PUT …/equipment/armor` ← `relic.tidewrack_band` (a free role) | **200** — the relic wire still works |
+| `DELETE …/equipment/armor` (the relic's own `stock` row) | **200** — the boundary holds: only `rolled` is refused |
+
+**Files:** `src/FusionRpg.Core/Items/EquipProjector.cs` (EDIT — new `EquipRefKinds`);
+`src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs` (EDIT — guard + `UniqueEquipmentSlotClaimed`);
+`src/FusionRpg.Data/Sqlite/RpgStore.ItemCard.cs`, `src/FusionRpg.Data/Sqlite/RpgStore.Items.cs`,
+`src/FusionRpg.Server/UniqueActorService.cs`, `src/FusionRpg.Server/UniqueActorEndpoints.cs`,
+`src/FusionRpg.Server/ItemSurfaceEndpoints.cs`, `src/FusionRpg.Server/ItemEquipEndpoints.cs` (EDIT);
+`tests/FusionRpg.Data.Tests/Items/RelicRowMigrationTests.cs` (+4),
+`tests/FusionRpg.Data.Tests/Items/ItemCardStoreTests.cs` (+2, fixture corrected),
+`tests/FusionRpg.Data.Tests/Items/ArmouryTests.cs` (fixture corrected),
+`tests/FusionRpg.Server.Tests/ItemEquipEndpointsTests.cs` (+6, host now also maps the relic and
+armoury routes — an asymmetry between two routes can only be proven with both reachable).
+
+⚠ **No web file was touched, and that is the finding, not an omission.** R4 read as a UI defect, but
+`adapt.ts:638` already forwarded `dto.assigned` and `ArmouryList.tsx:60` already filtered on it. The
+filter was inert purely because the server always said `false`. So `npm run build` / `npm run test`
+were **not run** — there is no web diff to test.
 
 ---
 
@@ -9017,14 +9136,33 @@ reproduced directly, that would hit any real deploy running `--validate` today.
     relic write path it can't see into). Proven live on a published server via an independent OS
     process reading the real SQLite DB, including real refusals (`equip.role-mismatch`,
     `equip.already-worn`, `equip.specimen-unknown`, `equip.role-empty`). Four real defects found while
-    proving it, in flight for R1/R2/R4, R3 correctly held as ask-first (a genuine stored-data-mapping
-    decision — `Paperdoll.tsx`'s `trinket→jewel-major` vs Core's `LegacyEquipSlots`' `trinket→jewel-minor-a`
-    — see the dated note wherever the R1-4 agent leaves it): (R1) the older relic-equip route silently
-    overwrote a live item assignment, (R2) `ItemCard.cs` read the wrong `ref_kind` literal (`"item"`
-    instead of the real, shipped `"rolled"`), (R4) `ArmouryRowDto.Assigned` was hardcoded `false`. A
-    fifth, structural finding restated rather than newly discovered: `ApplyEquipProjection`/
-    `ApplyEquippedGrants` still have zero production callers, so an equipped item persists but changes
-    no in-battle number yet — the same Injector-side gap Checkpoint 1 already names.
+    proving it — **R1, R2, R4 now FIXED**, R3 correctly held as ask-first:
+    - ✅ **R1 fixed** — the older relic-equip route silently overwrote a live item assignment. The guard
+      landed in `RpgStore.UpsertUniqueEquipment` itself, inside the same `_gate` as the write (no
+      read-then-write race window), which also caught a **worse, previously-undiscovered sibling bug**:
+      `ClearUniqueEquipmentSlot` ran an unqualified `DELETE` that would have unequipped the item
+      outright, not just conflicted with it. Both now refuse with `409 slot.claimed_by_item`; the mirror
+      direction (item route refusing a relic-held slot) already existed. Relic-replaces-relic is
+      untouched, still 200. Live proof: `PUT`/`DELETE` on a claimed role → `409`, assignment row
+      byte-unchanged; a free role still 200.
+    - ✅ **R2 fixed** — `ItemCard.cs` read `ref_kind == "item"`; module 4's real, shipped value is
+      `"rolled"`. New `EquipRefKinds` (Core) names both real values (`Rolled`/`Stock`); `LoadoutReport`'s
+      own `"item"` literal is untouched on purpose — it describes a different table (the preset list,
+      not a live assignment). Found while fixing: **5 existing tests were passing only because their own
+      fixtures seeded the same wrong literal** — a real, masked defect, not a new one.
+    - ✅ **R4 fixed** — `ArmouryRowDto.Assigned` now filled from a real join (`FindAssignmentHolders`).
+      No web change needed; the client already read the field correctly, it just always received `false`.
+    - ⏸ **R3 confirmed real, left open, dated.** `Paperdoll.tsx`'s `trinket→jewel-major` (neck) disagrees
+      with Core's `LegacyEquipSlots`' `trinket→jewel-minor-a` (ring-1) — live symptom: a trinket relic
+      draws in the neck cell while its stored row says ring-1. Either side could be "correct"; changing
+      either moves how existing stored data reads. Owner + D1's `M3` named as resolver.
+    - Evidence: red-first per defect (R1: 2+2 red; R2: 7 red — 2 new + the 5 masked; R4: 2 red). Full
+      suites after: Data **1074/1074**; Core **12402/20** and Server **236/25**, every red the same
+      pre-existing atom-corpus/battle-tempo/class-system/world-projection cluster, zero new, zero in
+      `Items.*`/`UniqueActor*`. 4 guards OK, overflow 0 critical, magic-numbers 0.
+    - A fifth, structural finding restated rather than newly discovered: `ApplyEquipProjection`/
+      `ApplyEquippedGrants` still have zero production callers, so an equipped item persists but changes
+      no in-battle number yet — the same Injector-side gap Checkpoint 1 already names.
 
 **Named, scoped, owned, not dispatched this pass:**
 13. Eight unbuilt module-2 spec features (module-sized, not this pass's to absorb), `SeedRoles`'s zero
