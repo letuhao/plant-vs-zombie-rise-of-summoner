@@ -377,6 +377,31 @@ class NodeOutcome:
     detail: str = ""
 
 
+#: 2026-09-06 real-call finding (`might`, tier-4 mechanism node, LM Studio local model): asked to
+#: leave `blocked` as the empty string, the model instead wrote a full, valid draft (real `affixIds`,
+#: `name`, `flavor`, all schema-legal) with `"blocked": "none"` — read as "I understand this means
+#: not-blocked" filtered through a field NAME that shapes like a boolean/nullable rather than the
+#: literal empty-string convention `schema.py`'s own description states. The EXACT same finding
+#: `general_propose.derive._NULLISH_BLOCKED_TOKENS`'s own docstring already measured and named
+#: (2026-09-04, a different real local model, "false"/"none") — this module simply never adopted that
+#: fix. Reused verbatim rather than re-derived (`family_propose`/`signature_propose` already keep
+#: their own identical copy too, cross-referencing the same evidence).
+_NULLISH_BLOCKED_TOKENS = frozenset({"false", "none", "null", "n/a", "na"})
+
+
+def _normalize_blocked(out: "Mapping[str, Any]") -> dict:
+    """See `general_propose.derive._normalize_blocked`'s own docstring for the full real-call
+    evidence and reasoning. Any member of `_NULLISH_BLOCKED_TOKENS` (any case/whitespace) is folded
+    back to the empty string here, once, right where the raw draft leaves the model boundary — never
+    inside `_node_verify_fn`, which stays a pure hard/soft classifier. `"true"` is deliberately NOT
+    normalized: no real-call evidence for that direction exists here either, and silently
+    reinterpreting it risks masking an actual decline this module has no way to tell apart from the
+    same confusion."""
+    if isinstance(out, Mapping) and str(out.get(BLOCKED_FIELD, "")).strip().lower() in _NULLISH_BLOCKED_TOKENS:
+        return {**out, BLOCKED_FIELD: ""}
+    return dict(out) if isinstance(out, Mapping) else out
+
+
 def _node_verify_fn(gate: "Callable[[Mapping[str, Any]], list[str]]") -> "Callable":
     """`call_with_self_heal`'s own `verify_fn(items, out) -> (hard, soft)`, closed over one node's
     `gate`. A declared `blocked` response short-circuits (an honest decline is never a defect, the
@@ -414,12 +439,13 @@ def call_one_node_sample(*, node_id: str, sample_index: int, brief_text: str,
     returns `None` on exhaustion (F9's own rule, `actions.validate_heal.derive.default_for_none`):
     handing back the BRIEF's own value would make an escalated field look like the model answered
     it, which this pipeline refuses to do."""
-    return call_with_self_heal(
+    out, soft = call_with_self_heal(
         {"nodeId": node_id, "sampleIndex": sample_index}, brief_mod.SYSTEM_PROMPT,
         lambda _items: brief_text, _node_verify_fn(gate),
         config=config, schema=schema, default_for=lambda _key, _original: None,
         build_heal_user=lambda items, out, hard: _node_heal_user(brief_text, out, hard),
     )
+    return _normalize_blocked(out), soft
 
 
 def _exhausted(soft: "Mapping[str, str]") -> bool:

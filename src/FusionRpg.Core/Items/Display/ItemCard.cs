@@ -78,9 +78,22 @@ public readonly record struct CardSocketCell(
 /// <see cref="CombinationDistance.Evaluate"/> — module 16's own single evaluator, called once — so the
 /// card cannot promise a resonance the evaluator would not fire.
 /// </summary>
+/// <param name="IsWord">
+/// §4.1 block 7 orders socket content as <i>cells → active resonances → <b>the word</b> → near-misses</i>,
+/// and §4.4 keeps <c>word</c> and <c>resonance</c> as separate source kinds. A <b>socket word</b> is
+/// not a <see cref="ComboShape"/>: it is a separate authored corpus
+/// (<c>data/seed/items/socket-words/sockwords.json</c>, <c>runtimeId: gem.word-*</c>, ordered
+/// <c>position</c>-bearing ingredients) which <c>ResonanceGenerator</c> does not produce and
+/// <c>CombinationDistance</c> does not evaluate.
+/// <para>⏸ <b>So nothing sets this today, and that is a named wiring gap, not a default.</b> The flag
+/// exists rather than being inferred from the shape because inferring it would be a guess:
+/// <see cref="ComboShape.Strain"/>/<see cref="ComboShape.Splice"/> are the item's IDENTITY (module
+/// 21's authored output), not its word, and rendering them as one would put the wrong label on 102
+/// rows. When a Core reader for <c>sockwords.json</c> lands, its rows arrive here with this set.</para>
+/// </param>
 public readonly record struct CardCombination(
     string NameKey, ComboShape Shape, CombinationDisplayState State, int? Distance,
-    int GrantedTier, bool AllAttuned, IReadOnlyList<string> MissingKeys);
+    int GrantedTier, bool AllAttuned, IReadOnlyList<string> MissingKeys, bool IsWord = false);
 
 /// <summary>One rung of a set's threshold ladder. The WHOLE ladder always renders (§4.3) — an
 /// inactive threshold is the goal, and hiding it removes the goal.</summary>
@@ -268,11 +281,20 @@ public static class ItemCardRenderer
                 if (row.Seq == 0) { baseRows.Add(new Placed(row, atom, SourceKind.Base)); continue; }
                 if (row.Seq == 1) { implicitRows.Add(new Placed(row, atom, SourceKind.Implicit)); continue; }
 
-                affixRows.Add(new Placed(row, atom, input.Unique is null
-                    ? SourceKind.Base
-                    : RollOf(atom) == RollPolicy.OnInstantiate
-                        ? SourceKind.UniqueVariance
-                        : SourceKind.UniqueIdentity));
+                // Fixed core past the implicit. On an ORDINARY item that is more base stat, and it
+                // belongs in block 3 -- a `base` line in the affix block would say a rolled affix is
+                // what the base type guarantees. On a UNIQUE it is the item's identity, which §4.4
+                // splits by roll policy: the Fixed ones are `unique-identity`, and the one
+                // OnInstantiate atom is `unique-variance` and is the only line on that card with a bar.
+                if (input.Unique is null)
+                {
+                    baseRows.Add(new Placed(row, atom, SourceKind.Base));
+                    continue;
+                }
+
+                affixRows.Add(new Placed(row, atom, RollOf(atom) == RollPolicy.OnInstantiate
+                    ? SourceKind.UniqueVariance
+                    : SourceKind.UniqueIdentity));
                 continue;
             }
 
@@ -440,7 +462,7 @@ public static class ItemCardRenderer
             {
                 ["level"] = input.EnhanceLevel.ToString(CultureInfo.InvariantCulture),
                 // Per-mille NEVER renders as per-mille (§2.4) -- the shared conversion, not a second one.
-                ["gain"] = ItemDisplayRenderer.FormatPerMille(checked((int)input.EnhanceGainMilli)),
+                ["gain"] = ItemDisplayRenderer.FormatPerMille(input.EnhanceGainMilli),
             }, UnitClass.PerMilleRatio, SourceKind.Enhancement, 0),
         };
     }
@@ -470,14 +492,15 @@ public static class ItemCardRenderer
                 ["omniDiversityOnly"] = cell.OmniCountsDiversityOnly ? "1" : "0",
             }, null, SourceKind.SocketInsert, cell.Index));
 
-        // Active first, then one-away, then known-inactive; within a state, the catalog's own order.
+        // §4.1 block 7's order: active resonances, then THE WORD, then near-misses, then the rest.
+        // Within a state, the catalog's own order; within `active`, resonances before the word.
         foreach (var state in new[]
                  {
                      CombinationDisplayState.Active,
                      CombinationDisplayState.OneAway,
                      CombinationDisplayState.KnownInactive,
                  })
-            foreach (var combo in input.Combinations.Where(c => c.State == state))
+            foreach (var combo in input.Combinations.Where(c => c.State == state).OrderBy(c => c.IsWord ? 1 : 0))
             {
                 var args = new Dictionary<string, string>(StringComparer.Ordinal)
                 {
@@ -493,10 +516,7 @@ public static class ItemCardRenderer
                 }
 
                 lines.Add(new DisplayLine("item.card.socket.combination", args, null,
-                    combo.Shape == ComboShape.Strain || combo.Shape == ComboShape.Splice
-                        ? SourceKind.Word
-                        : SourceKind.Resonance,
-                    0));
+                    combo.IsWord ? SourceKind.Word : SourceKind.Resonance, 0));
             }
 
         return lines;
@@ -599,7 +619,7 @@ public static class ItemCardRenderer
                 ? ""
                 // Integer mean, rounded away from zero exactly once, through the engine's own divide.
                 : ItemDisplayRenderer.FormatPerMille(
-                    checked((int)ItemDisplayRenderer.RoundAwayFromZero(rolled.Sum(r => (long)r), rolled.Count))),
+                    ItemDisplayRenderer.RoundAwayFromZero(rolled.Sum(r => (long)r), rolled.Count)),
             ["stale"] = input.Stale ? "1" : "0",
             ["locked"] = input.Locked ? "1" : "0",
             ["noReassign"] = input.NoReassign ? "1" : "0",

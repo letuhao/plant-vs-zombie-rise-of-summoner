@@ -214,6 +214,52 @@ class MechanismBeforeMagnitudeSiblingTests(unittest.TestCase):
         self.assertNotIn("(none yet)", rendered[0])
 
 
+class NullishBlockedTokenTests(unittest.TestCase):
+    """2026-09-06 real-call finding (`might`, tier-4 mechanism node, LM Studio local model): asked to
+    leave `blocked` as the empty string, the model wrote a full valid draft with `"blocked": "none"`
+    instead — the exact same real-call finding `general_propose.derive._NULLISH_BLOCKED_TOKENS`'s own
+    docstring already measured for a different local model (2026-09-04, "false"/"none"), this module
+    simply never adopted. Proven here with fakes (zero real cost): a response that is otherwise fully
+    valid, but carries a nullish token in `blocked`, must be ACCEPTED, not read as a genuine decline."""
+
+    def setUp(self) -> None:
+        self.seed_root = Path(tempfile.mkdtemp())
+        write_plan(self.seed_root, "t1", node_count=1)
+        self.plan = plan_read.load("t1", self.seed_root)
+        self.ledger_path = self.seed_root / "_runs" / "ledger.json"
+
+    def _response_with_blocked(self, token: str) -> str:
+        payload = _accepted_response()
+        payload["blocked"] = token
+        return json.dumps(payload)
+
+    def test_a_full_valid_draft_with_blocked_none_is_accepted_not_declined(self) -> None:
+        with patch("seedsmith.pipeline.llm_caller.call_model",
+                  return_value=self._response_with_blocked("none")):
+            result = run.run_language_stage(self.plan, _inputs_for, ledger_path=self.ledger_path,
+                                            seed_root=self.seed_root, config=TEST_CONFIG)
+        self.assertEqual(result.outcomes[0].outcome, "accepted",
+                         f"a real, valid draft must not be misread as a decline just because "
+                         f"`blocked` held a nullish word instead of the empty string; detail="
+                         f"{result.outcomes[0].detail!r}")
+
+    def test_every_measured_nullish_token_is_folded_case_and_whitespace_insensitively(self) -> None:
+        for token in ("none", "None", "  NONE  ", "false", "False", "null", "n/a", "na", "N/A"):
+            with self.subTest(token=token):
+                out = run._normalize_blocked({"blocked": token, "x": 1})
+                self.assertEqual(out["blocked"], "", f"{token!r} must fold to the empty string")
+                self.assertEqual(out["x"], 1, "every OTHER field must pass through untouched")
+
+    def test_a_genuine_decline_reason_is_never_normalized_away(self) -> None:
+        real_reason = "magnitude node requires an existing effect to scale; none of the permitted list fits"
+        out = run._normalize_blocked({"blocked": real_reason})
+        self.assertEqual(out["blocked"], real_reason)
+
+    def test_true_is_deliberately_left_alone_no_real_call_evidence_for_that_direction(self) -> None:
+        out = run._normalize_blocked({"blocked": "true"})
+        self.assertEqual(out["blocked"], "true")
+
+
 class RunLanguageStageMultiNodeTests(unittest.TestCase):
     """A tree with more than one node: only the UNRESOLVED ones are ever regenerated on a rerun,
     and the seed document's own node ORDER is a pure function of `node_id` — never dict/insertion

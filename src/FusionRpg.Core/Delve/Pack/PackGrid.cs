@@ -13,10 +13,13 @@ public enum PackItemOrigin
 /// shape's own <c>cells: [{r, c, w, h, kind, refId, qty, origin}]</c> array (spec-loot-pack.md
 /// §Structure). <see cref="GrantIndex"/>/<see cref="RefId"/> are what <c>PackArranger.Arrange</c>
 /// (D3.20) sorts by; carried here too since a placed item keeps its own identity regardless of which
-/// module last touched the grid.
+/// module last touched the grid. <see cref="RarityOrdinal"/>/<see cref="ItemLevel"/> are `null` for
+/// anything without a rarity axis (materials, currency, keys) — `PackAutopilot`'s own
+/// `valuePerCellMilli` (D3.21, spec §6) is the only reader.
 /// </summary>
 public sealed record PackItem(
-    string Kind, string RefId, string? InstanceId, long Qty, int W, int H, int GrantIndex, PackItemOrigin Origin);
+    string Kind, string RefId, string? InstanceId, long Qty, int W, int H, int GrantIndex, PackItemOrigin Origin,
+    int? RarityOrdinal = null, int? ItemLevel = null);
 
 /// <summary>One placed occupant of a grid cell (row, col) plus the <see cref="PackItem"/> anchored
 /// there — only the anchor cell (its own top-left corner) carries the item; the remaining cells of a
@@ -92,4 +95,19 @@ public sealed class PackGrid
     /// this method does not re-check, matching the arranger's own pure, single-pass scan.</summary>
     public PackGrid With(PackItem item, int row, int col) =>
         new(Rows, Cols, _cells.Append(new PackCell(row, col, item)).ToList());
+
+    /// <summary>The `itemKey` identity a `pack.move`/`pack.drop` decision names — an instance for
+    /// equipment, the shared container id for a fungible stack (§3: "a cell holds one stack of one
+    /// fungible container_id", so a stack has no per-unit instance to key on).</summary>
+    public static string KeyOf(PackItem item) => item.InstanceId ?? item.RefId;
+
+    /// <summary>The anchor cell currently holding `itemKey`, or null if this grid does not carry it —
+    /// D3.21 (`PackMoves`) uses this to find what a move/drop decision refers to before touching it.</summary>
+    public PackCell? Find(string itemKey) => _cells.FirstOrDefault(c => KeyOf(c.Item) == itemKey);
+
+    /// <summary>Removes the cell keyed by <paramref name="itemKey"/> — the other half of a move (pick
+    /// up, then place elsewhere via <see cref="With"/>). A no-op grid-shape-wise if the key is not
+    /// present; the caller (`PackMoves`) is the one that knows whether that should refuse.</summary>
+    public PackGrid Remove(string itemKey) =>
+        new(Rows, Cols, _cells.Where(c => KeyOf(c.Item) != itemKey).ToList());
 }

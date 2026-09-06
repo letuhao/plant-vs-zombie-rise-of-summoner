@@ -110,7 +110,11 @@ public static class PatronEndpoints
         PatronRuntimeState.Set(playerId, computed?.Aura);
     }
 
-    static (PatronRow Row, PatronAura Aura)? Compute(RpgStore store, long playerId)
+    // patron-absorption (spec-patron-absorption.md, 2026-09-06): widened from `private` to `internal`
+    // so AtomPushService.Build's own externalRefs callback can reuse this EXACT logic (patron row →
+    // profile/actor → the player's own Θ → PatronPolicy.Aura) rather than a second copy that could
+    // silently disagree with what this endpoint itself reports.
+    internal static (PatronRow Row, PatronAura Aura)? Compute(RpgStore store, long playerId)
     {
         var row = store.GetPatron(playerId);
         if (row == null) return null;

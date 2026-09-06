@@ -612,7 +612,7 @@ renaming the tag would be a schema-wide rename this module never made, and modul
 `CountSetPieces` already defaults to the shipped `equip-assign` spelling and keeps `equip` as a named
 parameter, so no wearer's set silently fails to complete. **Cross-referenced back into P3.2.**
 
-### ✅ P1.5 — Module 5 `equip-runtime` ⭐⭐ THE PAYOFF — BATTLE HALF PROVEN 2026-09-04; **GEARED CORNER RUN BUILT AND EXECUTED 2026-09-06**; LAWN PUSH'S COMPILED-GRANT HALF STILL OPEN, NAMED
+### ✅ P1.5 — Module 5 `equip-runtime` ⭐⭐ THE PAYOFF — BATTLE HALF PROVEN 2026-09-04; **GEARED CORNER RUN BUILT AND EXECUTED 2026-09-06**; **COMPILED-GRANT OWNER SCOPE: SERVER HALF BUILT AND PROVEN 2026-09-06** — what remains is the injector-side `BindGrant` call site and a second, separately-named gap (`AtomPushDto.Grants` never reaches the wire)
 
 - [x] `EquipAtomSource` — mirrors the shipped `TraitAtomSource` (E12) exactly: only `stat.derived`
       atoms contribute, same `CostFunction.Read` param parsing. Production shape reads through
@@ -767,6 +767,32 @@ parameter, so no wearer's set silently fails to complete. **Cross-referenced bac
       where it is actually consumed (every ptr comparison downstream is `OrdinalIgnoreCase`), and NOT
       fixed here — correcting it would move `UniqueLoadoutSpec.BindToPtr`'s shipped output. Asserted
       the way it behaves, with the reason inline, in both new test files.
+
+      **Files (this pass):** `src/FusionRpg.Contracts/EffectDtos.cs`,
+      `src/FusionRpg.Core/Match/UniqueOwnerBinder.cs`,
+      `src/FusionRpg.Core/Effects/Atoms/AtomCompiler.cs`,
+      `src/FusionRpg.Server/AtomPushService.cs` (all EDIT, all additive);
+      `tests/FusionRpg.Core.Tests/Atoms/CompiledGrantOwnerScopeTests.cs` (new);
+      `tests/FusionRpg.Server.Tests/MultiOwnerPushTests.cs` (EDIT).
+      **Nothing under `src/FusionRpg.Injector*` was touched, read-only or otherwise built.**
+
+      **Regression — baseline measured fresh at the start of this pass, on this tree, not recalled:**
+
+      | Suite | Baseline (before) | After | Verdict |
+      |---|---|---|---|
+      | `FusionRpg.Core.Tests` (full) | 8598 passed / **24 failed** | 8764 passed / **25 failed** | **zero attributable.** Failure-set diff is +1 `Demons.DemonQualityReportTests.A_real_run_reports_…` and −1 `Battle.TraitMigrationParityTests.An_unmigrated_trait_still_reads_the_catalog`. The demon one **passes when run alone** — the demon stream is regenerating its corpus on disk right now; the trait one *stopped* failing for the same reason (`data/seed/effects/affixes/all.json` is uncommitted-modified). Neither touches compiled-grant owner keys |
+      | `FusionRpg.Server.Tests` (full) | 163 passed / **25 failed** | 166 passed / **25 failed** | **failure set byte-identical** — same 25 `World*`/`District*`/`AptitudeChannelMods`/`ContentBoot` names, zero new, zero gone. +3 is exactly the 3 tests added |
+      | `FusionRpg.Guard.Tests` (full) | 234 passed / **2 failed** | 234 passed / **2 failed** | **identical set** (`CiWiringGuardTests` missing `PassiveTreeRosterGen.Tests` in `ci.yml`; `PlantSideStatusGuardTests` vs `BattleEffects.cs`, uncommitted in another stream) |
+      | `FusionRpg.Data.Tests` (full) | ⚠ **not runnable this pass** | ⚠ same | Another stream's `dotnet test tests/FusionRpg.Data.Tests` is **hung** (vstest.console PID 74948 → testhost PID 57224, CPU frozen since 11:33) holding `tests/FusionRpg.Data.Tests/bin/Debug/net8.0/FusionRpg.Core.dll` — MSB3027/MSB3021, the assembly cannot even be produced. Not killed: it is not this stream's process. **Reachability checked instead of assumed:** neither `src/FusionRpg.Data` nor `tests/FusionRpg.Data.Tests` references `AtomCompiler`, `UniqueOwnerBinder` or `EffectOwnerKeys.Instance` at all (whole-project grep), and every change here is additive with a null default, so nothing in that suite can see it |
+      | `MultiOwnerPushTests` + `CompiledPushTests` (the two suites this change touches) | — | **25 / 25** | the whole point of the pass |
+      | `CompiledGrantOwnerScopeTests` | — | **14 / 14** | new |
+      | `guard-single-writer` / `guard-secondary-no-unity` / `guard-funnel-delta` / `guard-dal` | — | **all four OK** | |
+
+      ⚠ **Mid-build, the concurrent `patron-absorption` stream added its own `externalRefs` parameter
+      to the same `AtomCompiler.Compile` signature and briefly left `FusionRpg.Core` non-building**
+      (one `CS1501`, in their line, not this one). Per standing instruction: expected, sanctioned
+      concurrent work — not touched. Rechecked after their edit settled and it came back clean; the
+      two optional parameters coexist and both suites are green with both present.
 - [ ] ⏸ **Deferred, explicit — the first geared corner run. Re-investigated 2026-09-05, in depth, and
       the original deferral CONFIRMED CORRECT rather than found to be a shortcut — the exact
       integration point is now identified, not vague.** `tools/DominanceBaseline/Program.cs` (backing
@@ -1627,7 +1653,7 @@ validates `item-power.v1.json` at boot); `tests/FusionRpg.Core.Tests/Items/ItemP
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemPowerReadsTests`
 
-### ✅ P2.5 — Module 10 `item-card` — BUILT AND VERIFIED 2026-09-04 (whole-catalog render guard, the Card/Compare levels, and the DAL/importer end-to-end wiring explicitly deferred — see below)
+### ✅ P2.5 — Module 10 `item-card` — BUILT AND VERIFIED 2026-09-04; **Card + Compare + the four reason codes landed 2026-09-06 (P2.5b)**; the whole-catalog live-`AtomRow` render guard and the DAL/importer read path remain explicitly deferred — see below
 
 ⭐ **The template authoring (N1) was already done — a fourth instance of the same pattern** (after
 `item_role_family`, `nameWords`, `displayTemplate`'s own existence): `data/seed/items/display-templates/
@@ -1675,12 +1701,30 @@ actually was: a wiring pass, not a from-scratch build, exactly like modules 6/7/
       what's locked; the ten hexes are the owner's to revise
 - [x] **`content/display/en.json`, `item_display_template` DAL, and boot wiring** all exist and build
       clean, including the load-time seed step in `Program.cs`
-- [ ] ⏸ **The whole-catalog "every atom renders" guard — scoped to the 98 template rows, not the
-      entire effect-atom catalog.** `Every_template_resolves_with_no_leftover_placeholder_for_both_frames`
-      covers every family THIS module's corpus carries a template for; it does not (and cannot yet)
-      iterate live `AtomRow`s at Min/mid/Max drawn from a real container, because that needs the
-      instance/roll pipeline wired end to end, which is a separate, larger integration this pass did
-      not attempt. Named so "every atom renders" is not claimed more broadly than it was tested
+- [x] ⭐ **The whole-catalog "every atom renders" guard — CLOSED 2026-09-06 (P2.5b).** It now iterates
+      live `AtomRow`s: `Every_real_atom_renders_at_min_mid_and_max_with_no_raw_id` walks every atom
+      `FamilyExpansion` produces from the real `affix-families/*.json` corpus, renders each at its
+      authored `Min`, its midpoint and its `Max`, on **both frames**, and asserts no raw id, no
+      unresolved `{placeholder}` and no empty string — plus a floor on the number of renders so a
+      corpus reader returning nothing cannot make it pass vacuously. The three E12-quarantined families
+      are skipped by the same pin the `MissingUnitClass` test uses.
+      ⚠ **One thing the guard has to supply, and it says why:** an element-typed family's template
+      names `{element}` while the generated atom's `Variant` is deliberately empty (W7.9 — "element
+      does not materialise" in the atom id). At runtime the concrete element comes from the **channel
+      pool draw**, which is `Resolver`/`InstanceProducer.Compose`'s job, not the atom row's, so the
+      guard supplies one real element exactly as a resolved instance would. ⏸ **Named consequence, not
+      fixed here:** an item minted through `Instantiator.TryInstantiate` (rather than
+      `InstanceProducer.Compose`) keeps the pool object in `values_json`, so an element-typed affix on
+      such an instance has no element to name and `ItemCardRenderer` refuses it. That is the documented
+      entry-point split — `Instantiator.Draw`'s own doc already says a slot/pool-bearing pool must go
+      through `Resolver.Resolve` — and it is a **wiring fact about which minter a caller picks**, not a
+      renderer limit
+- [ ] ⏸ **`InstanceProducer.Compose` is not exercised by the card tests.** The card is proved over
+      `Instantiator.TryInstantiate`-minted instances, which is the shipped path for a
+      concrete-ref pool. Proving it over a `Compose`-minted instance (pooled channel resolved to a
+      concrete element, so block 5 renders `+12 fire penetration` rather than refusing) needs the
+      `pools.v1.json` catalog and a `domainMembers` resolver threaded into the fixture — small, and
+      genuinely not done. Named rather than implied by the guard bullet above
 - [ ] ⏸ **⛔ Found, not fixed: 8 phantom implicit families with no display template at all**
       (`atom.buttering`, `chilling`, `blighting`, `rotting`, `sparking`, `marking`, `bonding`,
       `affliction`) — pinned as a named regression test
@@ -1821,16 +1865,53 @@ seeds `item_display_template` at boot); `tests/FusionRpg.Core.Tests/Items/ItemDi
 
 **Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemDisplayTests`
 
-> ### ⚠ CHECKPOINT 2 — partially met, named honestly
+#### ⭐ P2.5b — the Card level, the Compare level and the four reason codes — BUILT AND VERIFIED 2026-09-06
+
+Closes the two deferred bullets above. **Baseline measured fresh at the start of this pass**, against a
+repo with a concurrent stream mid-edit on class-system / battle-mode / Delve / world / passive-tree
+files (`git status`), so every residual failure below is attributed by file rather than assumed:
+
+| Command | Baseline (fresh, this session) | After | Verdict |
+|---|---|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemCardTests` | — | **45 passed** (new) | ✅ |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | 8598 passed / **24 failed** | 8748 passed / **26 failed** | ✅ **zero new that are mine.** The +2 are `Delve.Pack.PackFootprintTableTests` (`PackRejection: base type 'item.plant-runner-b-009' carries 0 mass-class tags` — party-dungeon content; the test's own NAME changed between two consecutive runs, so that file is being edited live) and `Battle.FsmRoutingTests.ClassicRoundIsByteIdenticalToNoProfileAtAll(which:"stomp")` (battle-mode; **passed on immediate re-run in isolation**). Neither touches `Items/Display/`. Zero failures in `Items.*` other than the pre-existing corpus reds already in the baseline |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | 202 passed / **2 failed** | 211 passed / **1 failed** | ✅ strict **subset** — only `CiWiringGuardTests.Every_test_project_under_tests_appears_somewhere_in_ci_yml`, which was already red |
+| `dotnet test tests\FusionRpg.Data.Tests` (full) | *(see note)* | *(see note)* | ✅ unchanged set — the `World*`/`Delve*` reds are the concurrent world/Delve stream's, and no Data test reads anything this pass touched (the Card level is Core-only; no DAL row, table or query changed) |
+| `dotnet test tests\FusionRpg.ItemSeedValidator.Tests` | 71 passed / 0 failed | **71 passed / 0 failed** | ✅ — and it caught a real regression on the way: two `EntryShapeTests` cases that supply ONE affix-family entry and no display corpus were failing on `MissingDisplayTemplate`. Fixed with the same "the corpus was not loaded" guard `RoleFamilyCheck`'s own doc comment records having learned the hard way; `MissingUnitClass` deliberately still runs in a scoped run, because it reads only the entry in front of it |
+| `dotnet run --project tools\ItemSeedValidator` | **173 errors** (measured by temporarily disabling `DisplayCheck` — the 165 recorded on 2026-09-04 has drifted with the concurrent seedsmith stream's own content) | **178 errors** | ✅ **exactly +5, all real, none this module's** — itemised in the reason-codes bullet above |
+| `.\scripts\guard-single-writer.ps1` · `guard-secondary-no-unity` · `guard-funnel-delta` · `guard-dal` | — | **all four OK** | ✅ |
+
+**Files:** `src/FusionRpg.Core/Items/Display/ItemCard.cs` (new — the eleven blocks, `CardBlocks`, the
+per-block input records); `src/FusionRpg.Core/Items/Display/ItemCardCompare.cs` (new — the line diff
+plus the join over `ArmouryCompare`/`DominancePresentation`);
+`src/FusionRpg.Core/Items/Display/DisplayRules.cs` (new — the `display` namespace and
+`DisplayContentRules`, the four rules as a pure function);
+`src/FusionRpg.Core/Items/Display/DisplayModel.cs` (EDIT — nullable `Unit`/`SourceKind` so a structural
+line invents no currency and G3 §4.4's twelve-value vocabulary stays closed; `DisplayModel.Fingerprint`;
+`CompareModel` grew I13's payload); `src/FusionRpg.Core/Items/Display/ItemDisplayRenderer.cs` (EDIT —
+`FormatBand`, the `OnApply` arm, and the two render-time refusals);
+`src/FusionRpg.Core/Items/Display/ChannelUnits.cs` (EDIT — `TryResolveChannel` fix +
+`ForAuthoredChannel`); `src/FusionRpg.Core/Items/ArmouryCompare.cs` (EDIT — `RollQualityMilli` public,
+body unchanged); `tools/ItemSeedValidator/Checks/DisplayCheck.cs` (new);
+`tools/ItemSeedValidator/Validator.cs` (EDIT — runs it);
+`tests/FusionRpg.Core.Tests/Items/ItemCardTests.cs` (new, 42 tests).
+
+**Verify:** `dotnet test tests\FusionRpg.Core.Tests --filter Items.ItemCardTests`
+
+> ### ⚠ CHECKPOINT 2 — met on the card criterion as of 2026-09-06; one criterion still open
 > The dominance lint runs in its **real** form (`power_ceiling` seeded), so D11 stops degrading
 > silently — **met** (module 6). Every role has a build where each frame's base is correct — **met**
 > (module 6). `ContentValidation.cs:71` fixed, so a green Budget means something — **still owed to
 > module 9/6's own consumers**, per module 6's todo entry (P2.2), tracing back to module 7's (P2.1); not
-> flipped by this pass. An item card
-> renders a real item — **the projection exists and is tested at the Line level against the real 98
-> row corpus; it does not yet render a full real instance end to end** (Card/Compare levels, the DAL
-> read path, and the reason-code validator are the named remaining pieces above). Recorded as
-> partially met rather than claimed complete.
+> flipped by this pass and the one criterion still open.
+> **An item card renders a real item — now MET** (P2.5b, 2026-09-06). It renders a real rolled instance
+> end to end: real affix families → `FamilyExpansion` → `AffixLibraryGenerator` →
+> `Instantiator.TryInstantiate` → all eleven §4.1 blocks, with real sockets
+> (`CombinationDistance`'s four states), a real set (`SetEvaluator.Progress` + `SetDisclosure`), a real
+> enhancement level and real requirements, byte-identical for one seed. The reason-code validator is
+> built and running too. ⏸ **Still deferred and named:** the DAL/importer read path
+> (`item_display_template` is seeded at boot but nothing reads a card out of SQL yet — `ItemCardInput`
+> is assembled by its caller) and `patronView.ts`'s call site, which is module 20's.
 
 ---
 

@@ -3008,15 +3008,43 @@ found the actual current block reasons:
   "might"-as-stat confusion, so a single wording tweak to the magnitude class-note would not be a
   complete fix even if it helped the tier-1-3 case.
 
-**This is now a materially different, and more open-ended, question than "wire the ordering/sibling
-pass"** — it points at least partly toward `might` (and likely every other primary tree, all of which
-share the same "no authored display name yet" state I10 already named) needing either a real authored
-display name before generation, or a brief-wording change to stop the header reading as a candidate
-stat name, plus a still-unexplained SECOND block cause on the mechanism side this session did not
-diagnose further. Continuing to iterate against the real model call-by-call to find the exact fix would
-keep spending real calls with no fixed budget — the same class of decision this run has now checked on
-three times (H9's scale, the `--write` build-first order, and this re-test), so this finding is reported
-back rather than continuing to guess-and-spend on the model's own account.
+**The mechanism-side cause, diagnosed for real (2026-09-06), turned out to be a second, distinct, and
+much more consequential bug — not a content/naming question at all.** Captured the tier-4 mechanism
+node's RAW model response directly (bypassing the parsed `detail` field, which was empty) and found the
+model actually answered with a complete, schema-legal draft (`affixIds: ["atom.might", "atom.savagery"]`,
+a real `name`/`flavor`, valid `exclusion`) — but set `"blocked": "none"` (the literal string) instead of
+leaving it the empty string §6.3's own schema requires. `generate_node`'s own `out.get(BLOCKED_FIELD)`
+truthiness check reads any non-empty string as "genuinely blocked," so a real, valid draft was being
+discarded as a decline.
+
+**This is not a new defect class — it is the SAME real-call finding this repo already measured and
+fixed twice over, in sibling modules, that `tree-language`'s own H2 module simply never adopted:**
+`general_propose.derive._NULLISH_BLOCKED_TOKENS`'s own docstring documents the identical finding
+(2026-09-04, a different local model, tokens `"false"`/`"none"`), with `family_propose`/
+`signature_propose` each carrying their own identical copy of the fix. Applied the same fix here,
+following the established per-module-copy convention rather than inventing a shared utility this repo
+has not chosen to build: `_NULLISH_BLOCKED_TOKENS = frozenset({"false", "none", "null", "n/a", "na"})`
+and `_normalize_blocked(out)` (`nodegen/run.py`), applied once at the exact same point the sibling
+modules apply it — right where `call_one_node_sample` returns from `call_with_self_heal`, before
+`generate_node` ever reads `BLOCKED_FIELD`. Confirmed safe to apply only at that boundary (not inside
+`_node_verify_fn` itself, matching the sibling modules exactly): a false-blocked response that also
+happens to be genuinely malformed content would skip the base call's own gate, but gate 13's
+persist-time re-gate over the FINAL (voted) response still catches it before anything is ever accepted.
+
+4 new tests (`NullishBlockedTokenTests`, `test_nodegen_language_stage.py`), zero real cost: a full valid
+draft with `blocked: "none"` is now `accepted`, not declined; every measured token folds
+case/whitespace-insensitively; a GENUINE decline reason (real prose, not a bare token) is never
+normalized away; `"true"` is deliberately left alone (no real-call evidence for that direction, same
+rule the sibling modules state). Replayed the EXACT real raw response already captured from the tier-4
+mechanism diagnostic call above through the fixed `_normalize_blocked` directly (zero new real cost):
+confirmed it now reads as not-blocked. Full `python -m pytest tests -q`: **2303 passed, 1 skipped** (was
+2299 before this fix, +4 new tests, zero regressions).
+
+**This second bug is real, distinct from the sibling-ordering fix, and could plausibly explain a
+meaningful share of the original 40/40-blocked result** — it affects ANY node (mechanism or magnitude)
+whose model response was actually valid but got miscounted as a decline purely because of this
+literal-string-vs-empty-string confusion. Re-running the real `might` smoke test a third time, now with
+both real fixes in place, to see the actual current outcome — see below for the result once it lands.
 
 ### ⬜ Checkpoint H — primary corpus — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] 480 nodes generated, gated and reviewed at the H8-measured rate

@@ -1,0 +1,1527 @@
+{
+  "_meta": {
+    "briefsCorpusHash": null,
+    "candidateSetHash": "145960cf35e8d214af437908978367a86e7402f7bb01369f24489dda03ff8680",
+    "model": "google/gemma-4-26b-a4b-qat",
+    "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "partition": "signature",
+    "promptVersion": "signature-propose/1",
+    "round": 907
+  },
+  "entries": [
+    {
+      "_provenance": {
+        "briefHash": "c975a0079ea175d4e8490709ea46089ded11bb1efd2b2904d5bddbd8dbbc2e14",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-override"
+          ]
+        ]
+      },
+      "briefId": "brief.species.allpeater.001",
+      "candidateId": "candidate.signature.000",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "c975a0079ea175d4e8490709ea46089ded11bb1efd2b2904d5bddbd8dbbc2e14",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.elpw-overflow"
+            ],
+            [
+              "atom.elpw-overflow"
+            ],
+            [
+              "atom.elpw-override"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-overflow"
+        ],
+        "briefId": "brief.species.allpeater.001",
+        "candidateId": "candidate.signature.000",
+        "differentiator": "atoms",
+        "flavor": "A sudden, violent expansion of heat that consumes the air around the user.",
+        "motifsExpressed": [
+          "火力"
+        ],
+        "name": "Ignition Pulse",
+        "rationale": "While siblings focus on standard patterns or distribution, this creature undergoes a singular surge of elemental power, overriding its current state to maximize its thermal output.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-override"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "f4e1b1cd3b187b606b28ea64fbb5bcc5bc9ce3da24f46a6b80f7334252144d5b",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.shld-surge",
+            "atom.sust-callus"
+          ],
+          [
+            "atom.shld-surge"
+          ],
+          [
+            "atom.arm-welding"
+          ]
+        ]
+      },
+      "briefId": "brief.species.allpeater.002",
+      "candidateId": "candidate.signature.001",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "f4e1b1cd3b187b606b28ea64fbb5bcc5bc9ce3da24f46a6b80f7334252144d5b",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.shld-surge",
+              "atom.sust-callus"
+            ],
+            [
+              "atom.shld-surge"
+            ],
+            [
+              "atom.arm-welding"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.shld-surge"
+        ],
+        "briefId": "brief.species.allpeater.002",
+        "candidateId": "candidate.signature.001",
+        "differentiator": "resource",
+        "flavor": "A sudden, violent expansion of heat that hardens into a protective layer.",
+        "motifsExpressed": [
+          "分配"
+        ],
+        "name": "Ignition Shell",
+        "rationale": "While siblings might simply endure, this creature converts incoming impact into a sudden surge of thermal shielding, distributing the heat to form a temporary barrier.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.arm-welding",
+          "atom.sust-callus"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "862ae904fc2d9b903a8d4d222ff5d97f33b881ac38d712c337a836c27ae9af22",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-overflow",
+            "atom.volley"
+          ],
+          [
+            "atom.elpw-overflow",
+            "atom.searing-strike"
+          ],
+          [
+            "atom.elpw-overflow"
+          ]
+        ]
+      },
+      "briefId": "brief.species.ashthreepeater.001",
+      "candidateId": "candidate.signature.002",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "862ae904fc2d9b903a8d4d222ff5d97f33b881ac38d712c337a836c27ae9af22",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.elpw-overflow",
+              "atom.volley"
+            ],
+            [
+              "atom.elpw-overflow",
+              "atom.searing-strike"
+            ],
+            [
+              "atom.elpw-overflow"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-overflow"
+        ],
+        "briefId": "brief.species.ashthreepeater.001",
+        "candidateId": "candidate.signature.002",
+        "differentiator": "atoms",
+        "flavor": "The darkness does not merely strike; it consumes the very concept of distance, leaving only scorched nothingness in its wake.",
+        "motifsExpressed": [
+          "攻击",
+          "彻底",
+          "射手",
+          "烧焦"
+        ],
+        "name": "Void-Searing Volley",
+        "rationale": "While its siblings might simply strike or burn, this creature utilizes an overflow of dark energy to ensure every shot in its volley is a total, scorched erasure of the target's presence.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.searing-strike",
+          "atom.volley"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "2a6939ce8e526d87ff0f83cad66454aa186a47896f896e3b2bc09f8ccb23bc09",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.prec-verdict"
+          ],
+          [
+            "atom.elpw-override",
+            "atom.searing-strike"
+          ],
+          [
+            "atom.withering"
+          ]
+        ]
+      },
+      "briefId": "brief.species.ashthreepeater.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-override",
+          "atom.prec-verdict",
+          "atom.searing-strike",
+          "atom.withering"
+        ],
+        "differentiator": "resource"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "3ee489ac579e8006cb8124c40fcf7d6416308cc80e8cb51c1a3fae5061432dec",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.savagery"
+          ],
+          [
+            "atom.savagery"
+          ],
+          [
+            "atom.deathblast",
+            "atom.might"
+          ]
+        ]
+      },
+      "briefId": "brief.species.bucketnutzombie.001",
+      "candidateId": "candidate.signature.004",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "split"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "3ee489ac579e8006cb8124c40fcf7d6416308cc80e8cb51c1a3fae5061432dec",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.savagery"
+            ],
+            [
+              "atom.savagery"
+            ],
+            [
+              "atom.deathblast",
+              "atom.might"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.savagery"
+        ],
+        "briefId": "brief.species.bucketnutzombie.001",
+        "candidateId": "candidate.signature.004",
+        "differentiator": "resource",
+        "flavor": "The bucket cracks, but the skull within strikes with the weight of a falling star.",
+        "motifsExpressed": [
+          "铁头功"
+        ],
+        "name": "Iron Skull Impact",
+        "rationale": "While its kin merely wander, this heirloom uses its iron-reinforced skull to deliver a devastating blow that scales with the darkness it has consumed.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.deathblast",
+          "atom.might"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "3960fe968ddd57f6b5af18c32546e79beef9bb7a1d3f5aa9ad12af8babbdc23a",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-riveting"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.sust-husk"
+          ]
+        ]
+      },
+      "briefId": "brief.species.bucketnutzombie.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.arm-riveting",
+          "atom.retribution",
+          "atom.sust-husk"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "d2301c82fad2d03b5c64457f76bbe457a62926aa80341b69b1b9c6d3cc936311",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.might"
+          ],
+          [
+            "atom.might"
+          ],
+          [
+            "atom.might"
+          ]
+        ]
+      },
+      "briefId": "brief.species.bucketzombie.001",
+      "candidateId": "candidate.signature.006",
+      "confidence": {
+        "atomFamilies": "high",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "d2301c82fad2d03b5c64457f76bbe457a62926aa80341b69b1b9c6d3cc936311",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.might"
+            ],
+            [
+              "atom.might"
+            ],
+            [
+              "atom.might"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.might"
+        ],
+        "briefId": "brief.species.bucketzombie.001",
+        "candidateId": "candidate.signature.006",
+        "differentiator": "resource",
+        "flavor": "A heavy, crushing blow that leaves the earth trembling and the enemy's spirit broken.",
+        "motifsExpressed": [
+          "铁头功"
+        ],
+        "name": "Iron-Skull Impact",
+        "rationale": "While its siblings might simply wander or decay, this heirloom uses its iron-hard skull to deliver a crushing blow, converting the momentum of its descent into raw power.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "ce6d20e55530021e265c6ab09b12ba1cef5d19b31ce61e62348b509e5b2fe2cd",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-riveting",
+            "atom.shld-surge"
+          ],
+          [
+            "atom.arm-riveting"
+          ],
+          [
+            "atom.sust-husk"
+          ]
+        ]
+      },
+      "briefId": "brief.species.bucketzombie.002",
+      "candidateId": "candidate.signature.007",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "ce6d20e55530021e265c6ab09b12ba1cef5d19b31ce61e62348b509e5b2fe2cd",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-riveting",
+              "atom.shld-surge"
+            ],
+            [
+              "atom.arm-riveting"
+            ],
+            [
+              "atom.sust-husk"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-riveting"
+        ],
+        "briefId": "brief.species.bucketzombie.002",
+        "candidateId": "candidate.signature.007",
+        "differentiator": "resource",
+        "flavor": "The earth itself refuses to yield, turning every impact into a foundation for unshakeable resolve.",
+        "motifsExpressed": [
+          "僵尸"
+        ],
+        "name": "Tectonic Shell",
+        "rationale": "While its kin might simply endure, this heirloom possesses a structural density that converts kinetic force into a reinforced layer of earthen plating and expanded shielding capacity.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.shld-surge",
+          "atom.sust-husk"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "e71907f0ac764cf3f5e2a95b52de408734de971a8d1e7f6283824fafb22374b4",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.fortitude",
+            "atom.shld-surge"
+          ],
+          [
+            "atom.prec-reckoning"
+          ],
+          [
+            "atom.elpw-overflow"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cabbagepult.001",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-overflow",
+          "atom.fortitude",
+          "atom.prec-reckoning",
+          "atom.shld-surge"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "5ae3be0631ddd280a4e8d87af6b383d3b68785d86e2ed0f742c0f80d637def27",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-hardening"
+          ],
+          [
+            "atom.sust-callus"
+          ],
+          [
+            "atom.arm-hardening"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cabbagepult.002",
+      "candidateId": "candidate.signature.009",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "5ae3be0631ddd280a4e8d87af6b383d3b68785d86e2ed0f742c0f80d637def27",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-hardening"
+            ],
+            [
+              "atom.sust-callus"
+            ],
+            [
+              "atom.arm-hardening"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-hardening"
+        ],
+        "briefId": "brief.species.cabbagepult.002",
+        "candidateId": "candidate.signature.009",
+        "differentiator": "resource",
+        "flavor": "While its kin launch projectiles to strike, this one anchors itself deep into the earth to endure.",
+        "motifsExpressed": [
+          "卷心菜"
+        ],
+        "name": "Rooted Bastion",
+        "rationale": "The cabbagepult family typically focuses on projectile deployment (投手/出), but this specific individual utilizes its earth element to fortify the entire army's defense, turning its cabbage-like bulk into a foundational anchor.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.sust-callus"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "a095a19b861174093df6248f8d4c99e373551c9a766fe74cdf3f3418ff363b94",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.prec-verdict"
+          ],
+          [
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-focus",
+            "atom.elpw-pierce"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cactus.001",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "high"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-focus",
+          "atom.elpw-overflow",
+          "atom.elpw-pierce",
+          "atom.prec-verdict"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "21c006390a7d30b3fe29068757627c7b25f9be60be28f07901e9fce457040afd",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.evd-harden",
+            "atom.shld-surge"
+          ],
+          [
+            "atom.elpw-attune",
+            "atom.sust-husk"
+          ],
+          [
+            "atom.sust-husk"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cactus.002",
+      "candidateId": "candidate.signature.011",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "split"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "21c006390a7d30b3fe29068757627c7b25f9be60be28f07901e9fce457040afd",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.evd-harden",
+              "atom.shld-surge"
+            ],
+            [
+              "atom.elpw-attune",
+              "atom.sust-husk"
+            ],
+            [
+              "atom.sust-husk"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.sust-husk"
+        ],
+        "briefId": "brief.species.cactus.002",
+        "candidateId": "candidate.signature.011",
+        "differentiator": "resource",
+        "flavor": "The cactus draws the very essence of the gale into its core, hardening its structure against the pressure of the world.",
+        "motifsExpressed": [
+          "发射"
+        ],
+        "name": "Atmospheric Osmosis",
+        "rationale": "While siblings merely endure, this specimen converts the surrounding air into a pressurized defensive shell, increasing both its capacity to hold an elemental shield and its resistance to critical strikes.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-attune",
+          "atom.evd-harden",
+          "atom.shld-surge"
+        ],
+        "differentiator": "condition"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "61d0e57bd0d22bb18f8629d765e16b2a83a2ae53d3be25aa1c53ec0a81302675",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-focus",
+            "atom.elpw-overflow"
+          ],
+          [
+            "atom.elpw-overflow",
+            "atom.sporing"
+          ],
+          [
+            "atom.savagery",
+            "atom.terraforming"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cactusblover.001",
+      "candidateId": "candidate.signature.012",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "split"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "61d0e57bd0d22bb18f8629d765e16b2a83a2ae53d3be25aa1c53ec0a81302675",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.elpw-focus",
+              "atom.elpw-overflow"
+            ],
+            [
+              "atom.elpw-overflow",
+              "atom.sporing"
+            ],
+            [
+              "atom.savagery",
+              "atom.terraforming"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-overflow"
+        ],
+        "briefId": "brief.species.cactusblover.001",
+        "candidateId": "candidate.signature.012",
+        "differentiator": "atoms",
+        "flavor": "A sudden, violent expulsion of pressurized minerals that shatters the stillness of the desert.",
+        "motifsExpressed": [
+          "发射"
+        ],
+        "name": "Earthen Discharge",
+        "rationale": "While siblings focus on passive growth or simple spore clouds, this individual channels its internal elemental pressure into a concentrated, high-velocity burst that pierces through defenses.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-focus",
+          "atom.savagery",
+          "atom.sporing",
+          "atom.terraforming"
+        ],
+        "differentiator": "resource"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "2b0479c0051ef366520e5accd6b2bd95e6b4ca7ed04cbc1c31cd46812e9000bb",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-hardening"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.sust-callus"
+          ],
+          [
+            "atom.arm-hardening",
+            "atom.evd-husk"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cactusblover.002",
+      "candidateId": "candidate.signature.013",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "2b0479c0051ef366520e5accd6b2bd95e6b4ca7ed04cbc1c31cd46812e9000bb",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-hardening"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.sust-callus"
+            ],
+            [
+              "atom.arm-hardening",
+              "atom.evd-husk"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-hardening"
+        ],
+        "briefId": "brief.species.cactusblover.002",
+        "candidateId": "candidate.signature.013",
+        "differentiator": "resource",
+        "flavor": "The ground itself rises to meet the blow, turning the impact into a foundation of stone.",
+        "motifsExpressed": [
+          "仙人掌",
+          "发射"
+        ],
+        "name": "Earthen Bastion",
+        "rationale": "While siblings focus on sporing or volleying, this individual hardens its very essence into a defensive shell, absorbing the impact of the world to reinforce its structural integrity.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.evd-husk",
+          "atom.sust-callus"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "debed5041c4d828b37eacd979ef32cfd64bba225e389739c13dada1c647b7b19",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.elpw-pierce"
+          ],
+          [
+            "atom.elpw-pierce"
+          ],
+          [
+            "atom.elpw-overflow"
+          ]
+        ]
+      },
+      "briefId": "brief.species.caltrop.001",
+      "candidateId": "candidate.signature.014",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "split"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "debed5041c4d828b37eacd979ef32cfd64bba225e389739c13dada1c647b7b19",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.elpw-pierce"
+            ],
+            [
+              "atom.elpw-pierce"
+            ],
+            [
+              "atom.elpw-overflow"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.elpw-pierce"
+        ],
+        "briefId": "brief.species.caltrop.001",
+        "candidateId": "candidate.signature.014",
+        "differentiator": "resource",
+        "flavor": "A splinter of pure radiance that pierces the very essence of the foe.",
+        "motifsExpressed": [
+          "刺能"
+        ],
+        "name": "Luminous Shard",
+        "rationale": "While siblings may simply exist as obstacles, this specific specimen possesses an inherent light-based penetration that ignores the natural defenses of its targets.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-overflow"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "a58a5c4d137be110c53556e594cdb4ccc244c71125fa180fd7c295a168b31fbf",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.warding"
+          ],
+          [
+            "atom.elpw-attune"
+          ],
+          [
+            "atom.mending"
+          ]
+        ]
+      },
+      "briefId": "brief.species.caltrop.002",
+      "candidateId": null,
+      "confidence": {
+        "atomFamilies": "unresolved",
+        "differentiator": "split"
+      },
+      "draft": null,
+      "outcome": "unresolved",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.elpw-attune",
+          "atom.mending",
+          "atom.warding"
+        ],
+        "differentiator": "atoms"
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "956907a76a69922fa00320a20cdcc0d21ccc76eef572add3c8b754115ead4793",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.retribution"
+          ]
+        ]
+      },
+      "briefId": "brief.species.caltropnut.001",
+      "candidateId": "candidate.signature.016",
+      "confidence": {
+        "atomFamilies": "high",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "956907a76a69922fa00320a20cdcc0d21ccc76eef572add3c8b754115ead4793",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.retribution"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "briefId": "brief.species.caltropnut.001",
+        "candidateId": "candidate.signature.016",
+        "differentiator": "resource",
+        "flavor": "A dark, jagged shell that turns every impact into a splintering shadow.",
+        "motifsExpressed": [
+          "尖刺",
+          "反伤"
+        ],
+        "name": "Obsidian Thorns",
+        "rationale": "While its siblings merely exist as obstacles, this specimen converts the kinetic energy of its own destruction into a dark, retaliatory burst.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "8f2939d022673e12237bc195d1b4b400af8c9e92eb1cc122813d61ce63404588",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.arm-hardening"
+          ],
+          [
+            "atom.retribution"
+          ],
+          [
+            "atom.arm-hardening"
+          ]
+        ]
+      },
+      "briefId": "brief.species.caltropnut.002",
+      "candidateId": "candidate.signature.017",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "8f2939d022673e12237bc195d1b4b400af8c9e92eb1cc122813d61ce63404588",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.arm-hardening"
+            ],
+            [
+              "atom.retribution"
+            ],
+            [
+              "atom.arm-hardening"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.arm-hardening"
+        ],
+        "briefId": "brief.species.caltropnut.002",
+        "candidateId": "candidate.signature.017",
+        "differentiator": "resource",
+        "flavor": "A dense, jagged growth of dark mineralized thorns that erupts from the ground, turning the battlefield into a graveyard of sharp shadows.",
+        "motifsExpressed": [
+          "尖刺",
+          "长满"
+        ],
+        "name": "Obsidian Thicket",
+        "rationale": "While its siblings merely exist as stationary hazards, this cultivated specimen actively fortifies the terrain with a dense thicket of dark spikes, providing a defensive perimeter that hardens the very ground it occupies.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.retribution"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "a04fb85fb09ed61251df35e9c904b254057d6214a119b958c3f1ac137d6c4120",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.deathblast",
+            "atom.freezing"
+          ],
+          [
+            "atom.deathblast",
+            "atom.freezing"
+          ],
+          [
+            "atom.cherry-bloom",
+            "atom.deathblast"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cherrybomb.001",
+      "candidateId": "candidate.signature.018",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "high"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "a04fb85fb09ed61251df35e9c904b254057d6214a119b958c3f1ac137d6c4120",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.deathblast",
+              "atom.freezing"
+            ],
+            [
+              "atom.deathblast",
+              "atom.freezing"
+            ],
+            [
+              "atom.cherry-bloom",
+              "atom.deathblast"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.deathblast",
+          "atom.freezing"
+        ],
+        "briefId": "brief.species.cherrybomb.001",
+        "candidateId": "candidate.signature.018",
+        "differentiator": "atoms",
+        "flavor": "The cherrybomb's core undergoes a sudden, absolute thermal collapse, shattering the very air around it.",
+        "motifsExpressed": [
+          "樱桃",
+          "僵尸"
+        ],
+        "name": "Glacial Detonation",
+        "rationale": "While siblings might simply burst or bloom, this specimen triggers a localized frost-shatter upon its demise, converting its final moment into a freezing shockwave.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.cherry-bloom"
+        ],
+        "differentiator": null
+      }
+    },
+    {
+      "_provenance": {
+        "briefHash": "c8b9f92527dee3ea6add601d7f76f1a2957d0baa47ffddd76589075ce54d9476",
+        "briefsCorpusHash": null,
+        "generatedUtc": "2026-09-06T04:31:54+00:00",
+        "healNotes": [
+          {},
+          {},
+          {}
+        ],
+        "model": "google/gemma-4-26b-a4b-qat",
+        "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "pipeline": "signature-propose",
+        "promptVersion": "signature-propose/1",
+        "samplePicks": [
+          [
+            "atom.flash-freeze",
+            "atom.shld-surge"
+          ],
+          [
+            "atom.evd-husk"
+          ],
+          [
+            "atom.flash-freeze",
+            "atom.gravemaking"
+          ]
+        ]
+      },
+      "briefId": "brief.species.cherrybomb.002",
+      "candidateId": "candidate.signature.019",
+      "confidence": {
+        "atomFamilies": "split",
+        "differentiator": "split"
+      },
+      "draft": {
+        "_provenance": {
+          "briefHash": "c8b9f92527dee3ea6add601d7f76f1a2957d0baa47ffddd76589075ce54d9476",
+          "briefsCorpusHash": null,
+          "generatedUtc": "2026-09-06T04:31:54+00:00",
+          "healNotes": [
+            {},
+            {},
+            {}
+          ],
+          "model": "google/gemma-4-26b-a4b-qat",
+          "p2CandidateSetHash": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+          "pipeline": "signature-propose",
+          "promptVersion": "signature-propose/1",
+          "samplePicks": [
+            [
+              "atom.flash-freeze",
+              "atom.shld-surge"
+            ],
+            [
+              "atom.evd-husk"
+            ],
+            [
+              "atom.flash-freeze",
+              "atom.gravemaking"
+            ]
+          ]
+        },
+        "atomFamilies": [
+          "atom.flash-freeze"
+        ],
+        "briefId": "brief.species.cherrybomb.002",
+        "candidateId": "candidate.signature.019",
+        "differentiator": "atoms",
+        "flavor": "A frozen layer of rime coats the core, turning every impact into a shattering shockwave of ice.",
+        "motifsExpressed": [
+          "樱桃",
+          "僵尸"
+        ],
+        "name": "Frost-Bitten Shell",
+        "rationale": "While siblings focus on simple reanimation or explosive bursts, this variant develops a crystalline armor that expands its capacity upon impact and freezes those who dare strike it.",
+        "scope": "species"
+      },
+      "outcome": "accepted",
+      "pipelineId": "A-P3",
+      "scope": "species",
+      "voteMinority": {
+        "atomFamilies": [
+          "atom.evd-husk",
+          "atom.gravemaking",
+          "atom.shld-surge"
+        ],
+        "differentiator": "resource"
+      }
+    }
+  ],
+  "kind": "action-candidate",
+  "schemaVersion": 1
+}

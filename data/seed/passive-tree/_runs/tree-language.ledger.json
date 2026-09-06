@@ -1,4 +1,33 @@
 {
   "schemaVersion": 1,
-  "done": {}
+  "done": {
+    "might:skill.might-def-t4-n0": {
+      "record": {
+        "id": "skill.might-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reciprocity",
+        "nameKey": "tree.node.defensive-mid-mechanism-01",
+        "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the shell.",
+        "rationale": ""
+      }
+    }
+  }
 }

@@ -1,11 +1,10 @@
 # Capability map: world map runtime
 
-**Status:** Phaser host shipped (R0–R16). Parent success criteria are **not** closed — see
-completion module **`world-map-gaps`** (defects **D1–D32**). Do not treat
-[tasks/world-map-runtime-todo.md](../../tasks/world-map-runtime-todo.md) “complete” as true until
-that module’s success criteria hold.
+**Status:** **complete** 2026-09-06 — Phaser host (R0–R16) + gaps (G0–G15 / D1–D32) closed;
+CPG-D proven. [tasks/world-map-runtime-todo.md](../../tasks/world-map-runtime-todo.md) and
+[tasks/world-map-runtime-gaps-todo.md](../../tasks/world-map-runtime-gaps-todo.md) match.
 [spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md) remains the HOW.
-[spec-world-map-gaps.md](world-map-runtime/spec-world-map-gaps.md) is the defect register.
+[spec-world-map-gaps.md](world-map-runtime/spec-world-map-gaps.md) is the defect register (historical).
 
 **Program id:** `world-map-runtime`.
 

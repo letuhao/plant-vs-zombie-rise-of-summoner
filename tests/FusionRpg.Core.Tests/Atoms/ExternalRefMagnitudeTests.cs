@@ -159,7 +159,10 @@ public class ExternalRefMagnitudeTests
     [Fact]
     public void An_externalRef_amount_on_stat_modify_is_accepted_at_load()
     {
-        var atom = StatModifyAtom("""{"channel":"combat.power.fire","op":"flat","amount":{"externalRef":"patron.auraMilli"}}""");
+        // A plain stat channel, matching PowerLadderMagnitudeTests' own working example — this test
+        // is about externalRef being legal on stat.modify, not about combat.power.* specifically
+        // (which stat.modify itself does not accept; that is a derived channel, stat.derived's own).
+        var atom = StatModifyAtom("""{"channel":"atk","op":"flat","amount":{"externalRef":"patron.auraMilli"}}""");
 
         Assert.True(AtomRowValidator.Validate(atom, kindId => null).IsOk);
     }

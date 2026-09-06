@@ -45,6 +45,56 @@ public sealed class AtomPushService
     public AtomPushService(RpgStore store) => _store = store ?? throw new ArgumentNullException(nameof(store));
 
     /// <summary>
+    /// `patron-absorption` (spec-patron-absorption.md, 2026-09-06) — the live callback
+    /// <see cref="ValueSpec.ExternalRef"/> atoms resolve through. Backed by
+    /// <see cref="PatronEndpoints.Compute"/>, the SAME real logic that endpoint itself reports (patron
+    /// row → profile/actor → the player's own Θ → <c>PatronPolicy.Aura</c>) — never a second
+    /// derivation. Computed fresh on every call, never persisted, so a promotion or a switch is
+    /// reflected on the very next push with nothing to refresh or go stale.
+    ///
+    /// <para>`patron.aura`'s own 12 atoms (one per real element × power/defense,
+    /// <c>data/seed/atoms/patron-aura.json</c>) are all authored statically — every player gets the
+    /// same 12 atoms pushed, and only the ONE or TWO matching the pushed player's own patron element(s)
+    /// resolve non-zero here; every other element's ref resolves to a harmless `0` (a flat `+0`
+    /// contributes nothing, the additive identity — not a value this method invents, the same shape
+    /// `AuraMilli`'s own zero-for-absent-secondary already has).</para>
+    /// </summary>
+    Func<string, long> BuildExternalRefs(IReadOnlyList<OwnerScope> owners)
+    {
+        return refId =>
+        {
+            var playerOwner = owners.FirstOrDefault(o => o.Kind == OwnerKind.Player);
+            if (playerOwner == default || !long.TryParse(playerOwner.Key, out var playerId))
+                return 0;
+
+            var computed = PatronEndpoints.Compute(_store, playerId);
+            if (computed is not { } c)
+                return 0; // no patron set — every patron-aura ref resolves to 0, never an error
+
+            var (_, aura) = c;
+            return refId switch
+            {
+                _ when TryElementSuffix(refId, "patron.auraPowerMilli.", out var el) =>
+                    ForElement(el, aura.ElementPrimary, aura.PowerMilli, aura.ElementSecondary, aura.SecondaryPowerMilli),
+                _ when TryElementSuffix(refId, "patron.auraDefenseMilli.", out var el) =>
+                    ForElement(el, aura.ElementPrimary, aura.DefenseMilli, aura.ElementSecondary, aura.SecondaryDefenseMilli),
+                _ => throw new InvalidOperationException($"unknown externalRef id: {refId}"),
+            };
+        };
+
+        static bool TryElementSuffix(string refId, string prefix, out string element)
+        {
+            element = refId.StartsWith(prefix, StringComparison.Ordinal) ? refId[prefix.Length..] : "";
+            return element.Length > 0;
+        }
+
+        static long ForElement(string element, string primary, long primaryMilli, string? secondary, long secondaryMilli) =>
+            string.Equals(element, primary, StringComparison.Ordinal) ? primaryMilli
+            : secondary is not null && string.Equals(element, secondary, StringComparison.Ordinal) ? secondaryMilli
+            : 0;
+    }
+
+    /// <summary>
     /// The full set for one owner, or an empty up-to-date reply when the receiver already holds this
     /// catalog revision.
     /// </summary>
@@ -152,7 +202,8 @@ public sealed class AtomPushService
             revision,
             curves: id => _store.GetCurve(id),
             ownerLevel: ownerLevel ?? 1,
-            grantOwnerKeys: id => ownersByAtom.TryGetValue(id, out var keys) ? keys : null);
+            grantOwnerKeys: id => ownersByAtom.TryGetValue(id, out var keys) ? keys : null,
+            externalRefs: BuildExternalRefs(owners));
 
         var byAtomId = catalog.Runtime.ToDictionary(e => e.AtomId, StringComparer.Ordinal);
         var bindings = new List<RunnerBinding>();

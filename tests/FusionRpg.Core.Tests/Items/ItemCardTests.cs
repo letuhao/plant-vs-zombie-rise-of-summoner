@@ -4,6 +4,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Atoms.Generation;
 using FusionRpg.Core.Items;
 using FusionRpg.Core.Items.Display;
+using FusionRpg.Core.Items.Power;
 using FusionRpg.Core.Items.Sockets;
 using FusionRpg.Core.Items.Surfaces;
 using FusionRpg.Core.Items.Thresholds;
@@ -908,6 +909,109 @@ public class ItemCardTests
         Assert.True(longer > shorter);
         for (var i = shorter; i < longer; i++)
             Assert.Contains(i, model.DifferingLineIndexes);
+    }
+
+    // ================================================================================================
+    //  The whole-catalog guard — over LIVE AtomRows, not just the 98 template rows
+    // ================================================================================================
+
+    /// <summary>
+    /// ⭐ **`every_atom_in_the_catalog_renders` — the spec's own "test that stops half the items
+    /// reading as raw ids", now over real atoms rather than over templates alone.**
+    ///
+    /// <para>P2.5 deferred this because it *"cannot yet iterate live `AtomRow`s at Min/mid/Max drawn
+    /// from a real container"*. It can now: `FamilyExpansion` produces them from the real corpus, and
+    /// every one is rendered at its authored <c>Min</c>, its midpoint and its <c>Max</c> — no raw id,
+    /// no unresolved <c>{placeholder}</c>, no empty string, on BOTH frames.</para>
+    ///
+    /// <para>An element-typed family's template names <c>{element}</c> while the generated atom's
+    /// <c>Variant</c> is deliberately empty (W7.9: "element does not materialise" in the atom id). At
+    /// runtime the concrete element arrives from the channel POOL draw, which is
+    /// <c>Resolver</c>/<c>InstanceProducer.Compose</c>'s job rather than the atom row's — so the guard
+    /// supplies one real element, exactly as the resolved instance would.</para>
+    /// </summary>
+    [Fact]
+    public void Every_real_atom_renders_at_min_mid_and_max_with_no_raw_id()
+    {
+        var quarantined = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "atom.elpw-focus", "atom.elpw-overflow", "atom.elpw-pierce",
+        };
+
+        var rendered = 0;
+        foreach (var atom in RealAtoms.Value)
+        {
+            if (quarantined.Contains(atom.FamilyId)) continue;          // pinned above, E12's own gap
+            if (LookupTemplate(atom.FamilyId) is not { Status: "live" } template) continue;
+
+            using var doc = JsonDocument.Parse(atom.ParamsJson);
+            var channel = doc.RootElement.TryGetProperty("channel", out var c) && c.ValueKind == JsonValueKind.String
+                ? c.GetString() : null;
+            var unit = channel is null ? null : ChannelUnits.ForAuthoredChannel(channel);
+
+            long min = 0, max = 0;
+            if (doc.RootElement.TryGetProperty("amount", out var amt) && amt.ValueKind == JsonValueKind.Object)
+            {
+                min = amt.GetProperty("min").GetInt64();
+                max = amt.GetProperty("max").GetInt64();
+            }
+
+            foreach (var value in new[] { min, min + (max - min) / 2, max })
+                foreach (var frame in new[] { "humanoid", "plant" })
+                {
+                    var line = ItemDisplayRenderer.Line(
+                        template, atom, frame, value, SourceKind.AffixPrefix, 0, unit,
+                        elementVariant: "fire", roll: RollPolicy.OnApply, bandMax: max);
+
+                    var text = line.Args["__rendered"];
+                    Assert.False(string.IsNullOrWhiteSpace(text), $"{atom.AtomId} rendered nothing");
+                    Assert.DoesNotContain('{', text);
+                    Assert.DoesNotContain('}', text);
+                    Assert.DoesNotContain(atom.AtomId, text, StringComparison.Ordinal);
+                    Assert.DoesNotContain(atom.FamilyId, text, StringComparison.Ordinal);
+                    rendered++;
+                }
+        }
+
+        // A guard that iterated nothing would pass forever.
+        Assert.True(rendered >= 100, $"only {rendered} renders exercised -- the corpus reader returned too little");
+    }
+
+    [Fact]
+    public void The_power_row_renders_under_rule_p_two_significant_figures_with_its_band()
+    {
+        // Module 9's own CardPower render, carried onto the header -- never a second power computation.
+        var power = new CardPowerDisplay(Shown: true, RoundedValue: 1300, BandPercent: 25);
+        var header = ItemCardRenderer.Render(FullCard() with { Power = power }).Blocks
+            .Single(b => b.BlockKey == CardBlocks.Header).Lines[0];
+
+        Assert.Equal(power.Render(), header.Args["power"]);
+        Assert.Contains("±25%", header.Args["power"]);
+
+        // Suppressed by its own tuning flag emits NO row rather than an empty one (§10 Q7).
+        var suppressed = ItemCardRenderer.Render(FullCard() with { Power = CardPowerDisplay.Suppressed })
+            .Blocks.Single(b => b.BlockKey == CardBlocks.Header).Lines[0];
+        Assert.DoesNotContain("power", suppressed.Args.Keys);
+    }
+
+    /// <summary>G3 §8.6 as a guard: `ItemDisplayRenderer.Line` is the only thing that produces a
+    /// `DisplayLine` carrying a rendered SENTENCE. Everything else in the module emits structural
+    /// lines (`{key, args}` with no template behind them), which is a different job.</summary>
+    [Fact]
+    public void No_second_line_producer_exists()
+    {
+        var dir = Path.Combine(RepoRoot(), "src", "FusionRpg.Core", "Items", "Display");
+        var offenders = new List<string>();
+
+        foreach (var file in Directory.GetFiles(dir, "*.cs"))
+        {
+            if (Path.GetFileName(file) is "ItemDisplayRenderer.cs" or "DisplayTemplates.cs") continue;
+            var text = File.ReadAllText(file);
+            if (text.Contains("DisplayTemplates.Render(", StringComparison.Ordinal))
+                offenders.Add(Path.GetFileName(file));
+        }
+
+        Assert.Empty(offenders);
     }
 
     // ================================================================================================

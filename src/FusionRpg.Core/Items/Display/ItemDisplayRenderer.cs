@@ -13,7 +13,14 @@ public static class ItemDisplayRenderer
     // ---- Rule 1 — the shipped percent conversion, adopted, not reinvented -------------------------
     // web/fusion-rpg-web/src/features/demons/patronView.ts:23 (verified): (milli/10).toFixed(1),
     // trailing ".0" stripped. One convention; patronView is asked to call this instead of owning it.
-    public static string FormatPerMille(int milli)
+    /// <remarks><c>long</c>, not <c>int</c> (widened 2026-09-06): a per-mille magnitude is something
+    /// <c>contentScale</c> can touch, and AGENTS.md's rule is <c>long</c> for every magnitude. It was
+    /// <c>int</c>, which forced a <c>checked((int))</c> narrowing at both call sites in
+    /// <see cref="FormatValue"/> — a throw is the correct failure, but not needing one is better. The
+    /// <c>double</c> below is a FORMATTING step at the display boundary, not arithmetic on a
+    /// magnitude: it is the shipped <c>patronView</c> conversion adopted verbatim (Rule 1), it feeds
+    /// nothing back, and Rule 3 forbids it feeding back.</remarks>
+    public static string FormatPerMille(long milli)
     {
         var tenths = milli / 10.0;
         var text = tenths.ToString("F1");
@@ -25,7 +32,8 @@ public static class ItemDisplayRenderer
     public static long RoundAwayFromZero(long numerator, long denominator) =>
         CurveTable.DivRoundHalfAway(numerator, denominator);
 
-    public static string FormatMilliseconds(int ms) =>
+    /// <remarks><c>long</c> for the same reason <see cref="FormatPerMille"/> is.</remarks>
+    public static string FormatMilliseconds(long ms) =>
         ms < 1000 ? $"{ms} ms" : $"{ms / 1000.0:F1} s";
 
     /// <summary>Rule P for a sigmoid CONTEXT read (not the power scalar, which is module 9's own
@@ -132,8 +140,8 @@ public static class ItemDisplayRenderer
     static string FormatValue(UnitClass unit, long value) => unit switch
     {
         UnitClass.GameUnits or UnitClass.GameUnitsPerSecond or UnitClass.Count or UnitClass.LadderIndex => value.ToString(),
-        UnitClass.PerMilleRatio => FormatPerMille(checked((int)value)),
-        UnitClass.Milliseconds => FormatMilliseconds(checked((int)value)),
+        UnitClass.PerMilleRatio => FormatPerMille(value),
+        UnitClass.Milliseconds => FormatMilliseconds(value),
         UnitClass.Flag => value != 0 ? "" : throw new DisplayTemplateRejection("a Flag unit atom rendered a line but is not set"),
         UnitClass.SigmoidPoints or UnitClass.SigmoidMultiplierPoints or UnitClass.StatusPotencyPoints
             or UnitClass.ReciprocalPoints or UnitClass.AptitudePoints => value.ToString(),

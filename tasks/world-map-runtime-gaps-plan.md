@@ -6,7 +6,7 @@
 **Parent HOW:** [docs/architecture/world-map-runtime/spec-world-map-runtime.md](../docs/architecture/world-map-runtime/spec-world-map-runtime.md)
 **Tasks:** [world-map-runtime-gaps-todo.md](world-map-runtime-gaps-todo.md)
 
-**Status:** Plan ready 2026-09-06 — awaiting owner review before Implement.
+**Status:** **COMPLETE** 2026-09-06 — CPG-A…D closed; D1–D32 done (hover deferred).
 **Paths written:** `tasks/world-map-runtime-gaps-plan.md` · `tasks/world-map-runtime-gaps-todo.md`.
 Never `tasks/plan.md` / `tasks/todo.md`.
 

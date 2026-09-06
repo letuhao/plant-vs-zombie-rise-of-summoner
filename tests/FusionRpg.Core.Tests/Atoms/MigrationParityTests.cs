@@ -187,11 +187,16 @@ public class MigrationParityTests
     }
 
     [Fact]
-    public void The_patron_aura_marker_is_a_container_with_no_atoms()
+    public void The_patron_aura_container_now_carries_the_real_migration_atoms()
     {
-        // Irregular 1: a Passive with no triggers and no actions, whose magnitudes live in
-        // PatronRuntimeState. The grant is the lifecycle anchor and nothing more — inventing atoms
-        // for it would be the patron spec's call, not this module's.
+        // Updated 2026-09-06 (patron-absorption, T6.2b) — this test's own earlier name/assertion
+        // ("...with_no_atoms") was the LOCKED invariant that correctly refused an UNPLANNED fill
+        // before the real migration existed (see this test file's own history and
+        // patron-aura-not-atom-backed's memory note). That lock did its job: it is being lifted here
+        // deliberately, by the real migration itself (spec-patron-absorption.md's own 2026-09-06
+        // amendment), not silently. `patron.aura` is no longer "a Passive with no triggers and no
+        // actions" — it carries 12 real stat.derived atoms (one per element × power/defense), each
+        // resolved via the new externalRef ValueSpec marker, never an invented magnitude.
         var dir = Path.Combine(RepoRoot(), "data", "seed", "containers");
         var files = Directory.GetFiles(dir, "*.json").Select(f => (f, File.ReadAllText(f))).ToArray();
 
@@ -199,8 +204,8 @@ public class MigrationParityTests
 
         Assert.True(collected.IsOk, string.Join("; ", collected.Errors));
         var marker = collected.Content.Containers.Single(c => c.ContainerId == "patron.aura");
-        Assert.Empty(marker.Atoms);
-        Assert.Empty(marker.Pool);
+        Assert.Equal(12, marker.Atoms.Count);
+        Assert.Empty(marker.Pool); // still fixed-core only — deterministic per (rarity, star, level, Θ), never rolled
     }
 
     // ---- the fixture corpus, both paths ------------------------------------------------------------

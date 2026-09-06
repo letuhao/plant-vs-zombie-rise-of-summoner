@@ -66,6 +66,7 @@ task and test.
 | **A-S3** | `dedup-select` | t1/t2 hash sets (**hard**); t3 LlamaIndex (**advisory only**). Pure, fixed order, index built from the round's own candidates and discarded | No | A-S4 |
 | **A-S5** | `coverage-report` | Thin cells → next round's targets. **Declares closed-loop or open-loop per metric**; an open-loop metric never contributes to a pass | No | A-S3 |
 | **A-S6** | `innate-picker` | Promotes one action per species to `ActionKind.Innate`. **Model-free permanently** (§34) — the innate is a free sixth slot outside `LoadoutSet.MaxSize = 5`, so choosing it is a magnitude decision Law 2 puts out of the model's reach. Ranking weights live in `data/tuning/` | No | A-S3 |
+| **A-S7** | `coverage-assignment` | ⭐ **Added 2026-09-06, real finding.** A prompt-level "underused, consider this" cue was built (roster-balance FC3) and proven, by a real run, to move nothing — 59/100 families used before and after three real batches. This module makes coverage a **guarantee, not a request**: assigns one required family per brief (round-robin over the population sorted by CURRENT real usage, recomputed every round — never a persisted cursor) and **deterministically splices it into the accepted candidate's `atomFamilies` after voting**, bypassing the model for that one slot only. A brief already carrying a pairing role (A-S1's own `enabler`/`payoff`) gets no second, separate assignment — its pairing family already IS the coverage target, and today's real gap (`atom.chill-punisher`/`atom.rot-punisher` still 0-usage after real runs) is the same underlying defect: a pairing role was only ever a prompt cue too, never enforced | A-S1, roster-balance `usage-stats` (FC1) |
 
 ### 4.1 Modules that come along with action generating
 
@@ -93,10 +94,12 @@ between programs.
 
   A-S0 ─► A-T1
     │
-    └──► A-S1 ─┬─► A-P1 ─┐
-               ├─► A-P2 ─┼─► A-S4 ─► A-S3 ─┬─► A-S5 ─► (round n+1 targets)
-               │    └──► A-P3 ─┘           └─► A-S6 ─► data/seed/actions/
-               └─► (rung windows, family-access sets)
+    └──► A-S1 ─► A-S7 ─┬─► A-P1 ─┐
+                        ├─► A-P2 ─┼─► A-S4 ─► A-S3 ─┬─► A-S5 ─► (round n+1 targets)
+                        │    └──► A-P3 ─┘           └─► A-S6 ─► data/seed/actions/
+                        └─► (rung windows, family-access sets)
+                 ▲
+     roster-balance `usage-stats` (FC1, cross-program) ──┘   (real usage counts A-S7 reads fresh)
 
   A-M1 ──────────────────────────────────► A-M2   (needs effect-atom E33)
 ```
@@ -139,6 +142,7 @@ picker are all inspectable against real data, and the only unknown left is the j
 | Binding production | **effect-pipeline module 4** `instance-producer` | `effect_binding` has **zero rows**; without it the corpus is authored into a runtime nothing reaches |
 | Species anchors (motifs, family, theme) | **seedsmith D2/D5** | 84 motif, **53 family**. Rarity for the rest is unspecced |
 | Rung window in the caps register | **A-G1** (was: power) | ✅ **Done 2026-09-04.** `ssot-power-scale.md` §11.2 now carries the `powerBudgetMilli` row §5 constraint 2 promised |
+| Real per-family usage counts | **roster-balance** `usage-stats` (FC1, `docs/research/action-corpus/_usage-*.json`) | A-S7 reads the latest report fresh every round — never a persisted rotation cursor, same "recompute from real data, never a snapshot" discipline `set-charm-gen.v1.json`'s own tuning note already states. Degrades to "every family equally due" when no report exists yet |
 | `restriction` axis detection | **effect-atom** (per-atom payload/target data) | ⛔ **Still absent, and not A-G1's to close alone.** `StructureBudgetGuard.SpentAxes` reads only `rpg_action` + `rpg_action_cost` + `rpg_action_effect_scope` — none carry per-atom payload/target data, so `restriction` (action-ideal.md §8.7: a self-debuff, `status.apply` scoped to `caster`) cannot be detected from here. A-G1 (spec-tier-access-gate.md §3.3, AC8) makes this explicit via `StructureBudgetGuard.UndetectableAxes()` rather than reporting `0` |
 
 ## 8. What stays out

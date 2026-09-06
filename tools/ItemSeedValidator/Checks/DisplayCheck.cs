@@ -88,6 +88,16 @@ public static class DisplayCheck
         var findings = DisplayContentRules.Check(
             families.Select(f => f.Fact).ToList(), templates, LoadStringKeys(ctx), registry);
 
+        // ⛔ "No template rows loaded" means the display corpus was not part of THIS run -- it does not
+        // mean 98 families lost their templates. A scoped run (a single-fixture unit test, most
+        // obviously) supplies one affix-family entry and nothing else, and reporting every one of them
+        // as untemplated would fail that test for a reason with nothing to do with what it is testing.
+        // Exactly the lesson RoleFamilyCheck's own `if (familyRoles.Count == 0) return;` records, and
+        // it cost two of this tool's own tests before it was applied here. MissingUnitClass survives:
+        // it reads only the entry in front of it, so it is right in a scoped run too.
+        if (templates.Count == 0)
+            findings = findings.Where(f => f.RuleId == DisplayRules.MissingUnitClass).ToList();
+
         var familyEntries = families.ToDictionary(f => f.Fact.FamilyId, f => f.Entry, StringComparer.Ordinal);
 
         foreach (var finding in findings)

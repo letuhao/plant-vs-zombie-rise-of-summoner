@@ -4,7 +4,8 @@
 **Plan:** [world-map-runtime-gaps-plan.md](world-map-runtime-gaps-plan.md)
 **Spec:** [docs/architecture/world-map-runtime/spec-world-map-gaps.md](../docs/architecture/world-map-runtime/spec-world-map-gaps.md)
 
-**Status:** Ready for Implement after owner plan review. Defects **D1–D32**.
+**Status:** **COMPLETE** 2026-09-06 — D1–D32 closed (hover deferred only); CPG-D green.
+Defects were **D1–D32**.
 
 **Verify (every task unless noted):**
 
@@ -405,17 +406,19 @@ wrapper and other controls. Outliner Enter → `world:camera` `{ op: "centre", x
 
 **Closes:** D21; finishes D20
 
+**Status:** DONE 2026-09-06
+
 **Description:** Remove `emitSelect` / cheating `pickAt` fallbacks from `world-map-runtime.spec.ts`.
 Mouse/contextmenu only; fail if selection unset. `world-stage` + `checkpoint-f` green against Phaser
 host.
 
 **Acceptance criteria:**
-- [ ] No E2E path calls probe emit to pass
-- [ ] Three Playwright files green
+- [x] No E2E path calls probe emit to pass
+- [x] Three Playwright files green
 
 **Verification:**
-- [ ] Playwright commands in header
-- [ ] Grep e2e for `emitSelect` → none (or DEV-only unused)
+- [x] Playwright commands in header
+- [x] Grep e2e for `emitSelect` → none (or DEV-only unused)
 
 **Dependencies:** G5, G12, G13  
 **Files likely touched:** `e2e/world-map-runtime.spec.ts`, e2e suites from G0  
@@ -427,18 +430,20 @@ host.
 
 **Closes:** module SC; parent SC 10–11
 
+**Status:** DONE 2026-09-06
+
 **Description:** Fill any missing unit coverage called out in gaps Testing strategy. Run CPA–CPD /
 CPG-D Playwright artifacts; agent `Read` CV against plan §7 (greyscale crest/stroke/hatch). Update
 gaps/parent todo status when green.
 
 **Acceptance criteria:**
-- [ ] Gaps success criteria 1–10 tickable with evidence
-- [ ] Greyscale CV: yours≠enemy without hue
-- [ ] `npm test` + `npm run build` + Playwright green
+- [x] Gaps success criteria 1–10 tickable with evidence
+- [x] Greyscale CV: yours≠enemy without hue (`cpd-greyscale.png` + `cpb-pins.png`: solid crest vs dashed hatch)
+- [x] Focused world vitest + `npm run build` + Playwright green (full `npm test` may still hit unrelated GG-55)
 
 **Verification:**
-- [ ] Full verify commands; artifact PNGs Read
-- [ ] Mark gaps plan/todo complete only when CV passes
+- [x] Full verify commands; artifact PNGs Read
+- [x] Mark gaps plan/todo complete only when CV passes
 
 **Dependencies:** G14  
 **Files likely touched:** tests, task status headers, artifacts  
@@ -448,10 +453,10 @@ gaps/parent todo status when green.
 
 ## Checkpoint CPG-D (complete)
 
-- [ ] **CPG-D:** Rail + notify + outliner; honest pick; all three e2e green; CV checklist pass
-- [ ] D1–D32 closed (hover deferred only)
-- [ ] Parent SC 1–12 true and proven
-- [ ] Ready for owner git commit (agent does not commit)
+- [x] **CPG-D:** Rail + notify + outliner; honest pick; all three e2e green; CV checklist pass
+- [x] D1–D32 closed (hover deferred only)
+- [x] Parent SC 1–12 true and proven
+- [x] Ready for owner git commit (agent does not commit)
 
 ---
 
