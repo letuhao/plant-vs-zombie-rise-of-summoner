@@ -1,7 +1,11 @@
 # Spec: world-map-runtime
 
-**Status: Specify complete 2026-09-06 — open questions locked; build authorized at R0/R1
-([world-map-runtime-plan.md](../../../tasks/world-map-runtime-plan.md)).** Module id
+**Status: Specify complete 2026-09-06 — HOW locked.** Shipped R0–R16 did **not** close success
+criteria 1–11; completion contract is
+[spec-world-map-gaps.md](spec-world-map-gaps.md) (Specify awaiting owner review).
+
+**Status (original):** Specify complete 2026-09-06 — open questions locked; build authorized at R0/R1
+([world-map-runtime-plan.md](../../../tasks/world-map-runtime-plan.md)). Module id
 `world-map-runtime` in the [world-map-runtime capability map](../world-map-runtime-map.md).
 
 **Ideal:** [world-map-runtime-ideal.md](../world-map-runtime-ideal.md).
@@ -24,9 +28,10 @@ where code lives.** It does not respecify HUD copy, inspector fields, or `step()
 ## Objective
 
 Put the player on the rift the way Endless Space 2 puts them on a galaxy: **typed pins, typed
-starlanes, a camera they drag and wheel, detail in a panel.** Live `#/world` still paints inspector
-cards onto a frozen SVG `viewBox` (`WorldStage.tsx:77`, `:217` hardcoded `zoom="map"`). That is a
-flowchart, and T3's "drop xyflow, therefore SVG" is the decision that produced it.
+starlanes, a camera they drag and wheel, detail in a panel.** The player map HOW is Phaser
+dual-plane under `src/game/world/` (T3 amended by R16). The SVG `viewBox` camera and React
+`WorldScene` composer are **retired leftovers** — closing them is
+[spec-world-map-gaps.md](spec-world-map-gaps.md) D19, not a second architecture choice.
 
 **User.** The summoner on World — adventure and empire loops
 ([the-loops.md](../../guide/the-loops.md) §4–§5). Not a level author. Not a graph-editor user.
@@ -35,7 +40,7 @@ flowchart, and T3's "drop xyflow, therefore SVG" is the decision that produced i
 destroys it when the inspector opens (GG-11). Pins match §O. The inspector still shows the §A card.
 Phaser never calls `lib/bus`. React never holds GameObject refs. **One map camera** owns every
 map-plane overlay (range, routes, supply, lifelines, lenses, blocked marks) — React SVG overlays
-must not float over a Phaser camera.
+must not float over a Phaser camera. Parent SC 1–12 vs shipped code: see the gaps coverage matrix.
 
 ---
 
@@ -328,7 +333,7 @@ Do **not** widen `LawnBusEvent`. Add a parallel union and `worldBusOn` / `worldB
 |---|---|---|
 | `world:model` | React → Phaser | `{ generation, modelSeq, model }` — `model` is adapted sectors/lanes/forces **plus** any lens-4 lifeline/supply inputs the overlays need; **not** a DTO |
 | `world:select` | Phaser → React | `{ generation, kind: "sector" \| "lane" \| "force" \| "empty", id? }` |
-| `world:camera` | React → Phaser | `{ generation, op: "pan" \| "zoom" \| "fit", ... }` |
+| `world:camera` | React → Phaser | `{ generation, op: "pan" \| "zoom" \| "fit" \| "centre", ... }` — `centre` is world coords for Outliner Enter (gaps D25); arrows stay pan-only |
 | `world:lens` | React → Phaser | `{ generation, lens }` — picker stays React; drawing is Phaser |
 | `world:interaction` | React → Phaser | `{ generation, selectedId, targeting?, ignoreRects? }` — selection halo, route preview from `worldSelection` **points**, chrome occlusion |
 | `world:ready` | Phaser → React | `{ generation }` — host flushes buffered model |
@@ -598,8 +603,8 @@ Magnitudes on the pin (net loam) stay `long` via `world-numbers`. This module do
    allowed; hex guard still skips `game/` and snapshot is the colour bridge.
 8. No React map overlays remain on the stage (Range / Supply / Lifeline / Fog-wrapping-SectorNode);
    Phaser draws them.
-9. SVG `WorldScene` composer and unused `camera.ts` host are gone (or unreachable behind a dead
-   export that CI fails).
+9. SVG `WorldScene` composer and unused `camera.ts` / `cameraGestures.ts` are **gone** (hard delete —
+   gaps D19; no dead-export escape hatch).
 10. `npm test` and `npm run build` green. (**No `npm run lint`** — `web/fusion-rpg-web/package.json`
     has no lint script.)
 11. Phase checkpoints CPA–CPD green: Playwright `e2e/world-map-runtime.spec.ts` + PNG artifacts +

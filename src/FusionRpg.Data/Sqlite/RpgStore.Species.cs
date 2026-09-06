@@ -222,35 +222,12 @@ public sealed partial class RpgStore
             var s = GetSpecies(id);
             if (s is null) continue; // deleted between the two reads — a fresh Configure call retries
 
-            snapshot.Add(new Core.Demons.DemonSpeciesDef
-            {
-                SpeciesId = s.SpeciesId.Trim().ToLowerInvariant(),
-                Name = s.Name ?? s.SpeciesId,
-                Side = s.Side,
-                GameTypeId = s.GameTypeId,
-                // Found running the real flip 2026-09-05: GameTypeId is independently numbered per
-                // side in the source game, so a plant and a zombie can share the same raw id (real
-                // example: BigWallNut/plant and BlackTrainZombie/zombie both carry GameTypeId 255) —
-                // without a side split this collided on the same DemonTypeId and
-                // DemonSpeciesCatalog.Validate correctly refused to start. The old generator
-                // (DemonSpeciesGenerator.cs) already carries the fix for this exact hazard — the same
-                // "zombie 10000+, plant 60000+" wide split, reproduced here rather than invented anew.
-                DemonTypeId = Core.Demons.DemonSpeciesCatalog.DemonTypeIdFloor
-                    + (s.Side == "plant" ? 50_000 : 0) + s.GameTypeId,
-                ElementPrimary = s.ElementPrimary,
-                ElementSecondary = s.ElementSecondary,
-                BaseRarity = s.Rarity,
-                DeployMode = s.DeployMode,
-                Acquisition = s.Acquisition,
-                Variants = s.Variants,
-                TraitPool = Array.Empty<string>(),
-                // battle-tempo tempo-content -- carries the already-authored, already-persisted
-                // interval into the compiled roster battle actually reads. Confirmed 2026-09-05 (a
-                // real, one-line gap found via review): the Core-side roster never copied this field
-                // before, so no battle path could reach it despite ConcreteSpecies carrying it since
-                // species generation.
-                AttackIntervalMs = s.AttackIntervalMs,
-            });
+            // T6.1-adjacent (2026-09-06, catalog-runtime's Injector flip): this mapping now lives in
+            // Core.Demons.Generation.ConcreteSpeciesMapper, shared with the Injector's own
+            // ConcreteSpeciesSeedReader-sourced path, so the two hosts compute the identical roster
+            // from the identical shape rather than risking a second copy silently drifting the way
+            // AttackIntervalMs itself once did (missing from this exact block until 2026-09-05).
+            snapshot.Add(Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef(s));
         }
         return snapshot;
     }

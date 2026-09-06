@@ -13,10 +13,21 @@ which is the generator's own internal spelling and appears nowhere in the corpus
 
 ⚠ **A member's `baseType` is NOT emitted, and that is a named gap rather than a guess.** The shipped
 rows bind each member to a concrete base type (`item.humanoid-head-b-007`); nothing in module 13
-chooses one, because which rung of which ladder a set piece sits on is a design decision no part of
-the generator has been given. Emitting a plausible id here would be deterministic code inventing
-content, which is P1 inverted. The row carries the (role, frame) pair the model chose and the run
-report names the binding step as unwired.
+chooses one.
+
+⛔ **Corrected 2026-09-06 — this header used to say emitting one "would be deterministic code
+inventing content, which is P1 inverted," and that is not what the spec says.**
+`spec-set-charm-gen.md`'s emit table assigns it here: *"the model emits `members[]`: (role, frame)
+pairs | deterministic code resolves the concrete `baseType` id, **by lookup**."* Module 6's corpus is
+shipped and complete — 560 base types over 27 (frame, role) pairs. What is missing is the **lookup
+key**: 24 candidates per pair, each with its own name, class, band, tags, implicit atom and flavour,
+and the shipped 30 sets picked among them with no derivable pattern (`set.frostbitten-vanguard-001`
+binds `main-hand-b-011` / `torso-a-002` / `neck-a-003` / `feet-a-003`). So the honest statement is
+**this module owes the binding and the design input for it has not been given** — not that the
+binding belongs somewhere else. Tracked in `tasks/item-todo.md`, P3.3.
+
+The row carries the (role, frame) pair the model chose and the run report names the binding step as
+unwired.
 """
 from __future__ import annotations
 

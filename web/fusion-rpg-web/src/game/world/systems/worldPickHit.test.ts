@@ -1,34 +1,32 @@
 import { describe, expect, it } from "vitest";
+import { DRAG_THRESHOLD_PX, PIN_DISC_PX } from "../objects/pinConstants";
+import { hitRadiusWorld, nearestSectorId } from "./worldPickHit";
 
-/** Mirrors worldPickSystem.resolveSectorHit distance logic for regression (bounds were screen-space). */
-function nearestPin(
-  pins: Array<{ id: string; x: number; y: number }>,
-  worldX: number,
-  worldY: number,
-  hitR = 28
-): string | null {
-  let best: string | null = null;
-  let bestDist = hitR * hitR;
-  for (const p of pins) {
-    const dx = p.x - worldX;
-    const dy = p.y - worldY;
-    const d2 = dx * dx + dy * dy;
-    if (d2 <= bestDist) {
-      bestDist = d2;
-      best = p.id;
-    }
-  }
-  return best;
-}
+describe("world pick hit radius (gaps D6)", () => {
+  it("uses PIN_DISC_PX CSS half-disc divided by camera zoom", () => {
+    expect(hitRadiusWorld(1)).toBe(PIN_DISC_PX / 2);
+    expect(hitRadiusWorld(2)).toBe(PIN_DISC_PX / 4);
+    expect(hitRadiusWorld(0.5)).toBe(PIN_DISC_PX);
+  });
 
-describe("world pick hit uses world-space distance (not screen getBounds)", () => {
-  it("selects the nearest pin within hit radius", () => {
+  it("selects the nearest pin within the zoom-scaled hit disk", () => {
     const pins = [
       { id: "homeworld", x: 110, y: 95 },
       { id: "ash-waste", x: 990, y: 95 }
     ];
-    expect(nearestPin(pins, 112, 97)).toBe("homeworld");
-    expect(nearestPin(pins, 990, 95)).toBe("ash-waste");
-    expect(nearestPin(pins, 500, 500)).toBeNull();
+    const r1 = hitRadiusWorld(1);
+    expect(nearestSectorId(pins, 112, 97, r1)).toBe("homeworld");
+    expect(nearestSectorId(pins, 990, 95, r1)).toBe("ash-waste");
+    expect(nearestSectorId(pins, 500, 500, r1)).toBeNull();
+    // At zoom 2 the world-space disk shrinks — a point 30wu away misses.
+    expect(nearestSectorId(pins, 110 + 30, 95, hitRadiusWorld(2))).toBeNull();
+  });
+});
+
+describe("world pick ignore / drag rules (gaps D4/D5)", () => {
+  it("treats a drag past threshold as suppress-pick", () => {
+    const shouldSuppress = (dx: number, dy: number) => Math.hypot(dx, dy) >= DRAG_THRESHOLD_PX;
+    expect(shouldSuppress(2, 2)).toBe(false);
+    expect(shouldSuppress(DRAG_THRESHOLD_PX, 0)).toBe(true);
   });
 });

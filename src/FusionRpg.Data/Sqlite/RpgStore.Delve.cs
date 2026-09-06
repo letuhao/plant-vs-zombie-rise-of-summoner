@@ -263,14 +263,22 @@ public sealed partial class RpgStore
     /// method never re-derives wipe from member state, matching D2.21's own "a wipe is its own
     /// settlement path" (the room loop that ends the delve is the one place that already knows every
     /// party's live state; re-deriving it here from a stale `parties_json` snapshot would be a second,
-    /// possibly-disagreeing source of truth). The per-module settlements this seam once deferred
-    /// entirely (loot earn, quest verdicts, domain unlocks) still are — none of those modules exist
-    /// yet — but party-dungeon D2.23 (spec-delve-attrition.md §7, §9) landed the attrition half: when
-    /// <paramref name="tuning"/> is supplied, one transaction also decides and applies every member's
-    /// Retire/Recover/Roster outcome, credits contract loyalty once, persists cross-delve pools, and
-    /// decrements every OTHER delve-recovering actor this player owns. <paramref name="tuning"/> is
-    /// <c>null</c> for the pre-D2.23 caller shape (attrition settlement skipped, byte-identical to
-    /// before this task).
+    /// possibly-disagreeing source of truth). <paramref name="tuning"/> is the single opt-in switch for
+    /// every extraction-time settlement this seam has grown since D2.21: <c>null</c> keeps the
+    /// pre-D2.23 caller shape byte-identical (only the trailing state UPDATE runs). Supplying it runs,
+    /// in this SAME transaction:
+    /// <list type="number">
+    /// <item>D2.23's attrition settlement (spec-delve-attrition.md §7, §9) — every member's
+    /// Retire/Recover/Roster outcome, contract loyalty credited once, persisted cross-delve pools, and
+    /// every OTHER delve-recovering actor this player owns aged one delve.</item>
+    /// <item>D3.16's own souls settlement (spec-dungeon-loot.md §7, `:213-219`) — see
+    /// <see cref="ApplyLootEarnUnlocked"/>.</item>
+    /// </list>
+    /// The spec's own full stated hook order is pack settlement, attrition settlement, loot earn, quest
+    /// verdicts, then domain unlocks (spec-dungeon-loot.md's own Structure-table row for this file). Only
+    /// the middle two exist today — pack settlement (`loot-pack`), quest verdicts (`delve-quests`) and
+    /// domain unlocks (`domain-catalog`) are separate, still-unbuilt modules, named here as an honest gap
+    /// rather than silently skipped.
     /// </summary>
     public bool CloseDelve(long delveId, string finalState, bool archiveNow, FusionRpg.Core.Dungeon.Tuning.DungeonTuning? tuning = null)
     {
@@ -284,7 +292,10 @@ public sealed partial class RpgStore
             {
                 var delve = ReadDelveUnlocked(db, delveId);
                 if (delve is not null)
+                {
                     SettleExtractionUnlocked(db, delve, finalState, tuning, now);
+                    ApplyLootEarnUnlocked(db, delve, finalState, now);
+                }
             }
 
             using (var cmd = Prepared(db, tx,
@@ -378,6 +389,60 @@ public sealed partial class RpgStore
         if (lostMembers.Count > 0) ApplyContractResultsUnlocked(db, delve.PlayerId, lostMembers, won: false, DateTimeOffset.Parse(now));
     }
 
+    /// <summary>
+    /// D3.16 (spec-dungeon-loot.md §7, `:213-219`) — the souls half of <see cref="CloseDelve"/>'s own
+    /// extraction settlement, called right after <see cref="SettleExtractionUnlocked"/> in the SAME
+    /// transaction. Reads <c>PowerTuningHub.Tuning</c> directly (matching
+    /// <c>ApplySoulEarnFromActivityUnlocked</c>'s own established convention in RpgStore.Souls.cs) —
+    /// never the <see cref="FusionRpg.Core.Dungeon.Tuning.DungeonTuning"/> that <see cref="CloseDelve"/>
+    /// itself takes, which is a different tuning object entirely.
+    ///
+    /// <para>Spec, verbatim: "Extracted → §2's two AwardSouls rows, then souls_unbanked := 0; Wiped →
+    /// souls_unbanked := 0, no award." A wipe forfeits the WHOLE at-risk pot, not just the victory
+    /// bonus — "souls earned in a delve are at risk until extraction; a wipe forfeits them with the
+    /// haul; an extraction banks them once" (spec §7's own closing rule).</para>
+    ///
+    /// <para>Writes go through <see cref="AppendSoulLedgerUnlocked"/> directly, never the public,
+    /// self-locking <see cref="AwardSouls"/> — calling <c>AwardSouls</c> here would open a SECOND,
+    /// independently-committing transaction nested inside this one, breaking the "single transaction,
+    /// all-or-nothing" requirement this method exists to satisfy. Each append is dedupe-keyed by delve
+    /// id ("the dedupe keys make a replayed close idempotent", spec §7) and guarded by
+    /// <see cref="GuardSoulAwardOrThrow"/> first — the same overflow-headroom check <c>AwardSouls</c>
+    /// itself uses ("shared by every path that can credit a balance"); this is a new such path.</para>
+    /// </summary>
+    void ApplyLootEarnUnlocked(SqliteConnection db, DelveRow delve, string finalState, string now)
+    {
+        if (string.Equals(finalState, DelveStates.Extracted, StringComparison.Ordinal))
+        {
+            var tuning = FusionRpg.Core.Power.PowerTuningHub.Tuning;
+            var earn = FusionRpg.Core.Delve.Loot.DelveSoulLedger.AtExtraction(
+                delve.SoulsUnbanked, delve.ThetaRun, won: true, tuning);
+            var balance = ReadSoulBalanceUnlocked(db, delve.PlayerId).Balance;
+
+            if (earn.Kills > 0)
+            {
+                GuardSoulAwardOrThrow(balance, earn.Kills);
+                if (AppendSoulLedgerUnlocked(db, delve.PlayerId, 0, earn.Kills,
+                        FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Kill, "delve", delve.DelveId.ToString(),
+                        $"delve:{delve.DelveId}:kills", now))
+                    balance += earn.Kills;
+            }
+
+            if (earn.Victory > 0)
+            {
+                GuardSoulAwardOrThrow(balance, earn.Victory);
+                AppendSoulLedgerUnlocked(db, delve.PlayerId, 0, earn.Victory,
+                    FusionRpg.Core.Demons.SoulEarnPolicy.Reasons.Victory, "delve", delve.DelveId.ToString(),
+                    $"delve:{delve.DelveId}:victory", now);
+            }
+        }
+
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "UPDATE rpg_delves SET souls_unbanked = 0, revision = revision + 1 WHERE delve_id = $id;";
+        cmd.Parameters.AddWithValue("$id", delve.DelveId);
+        cmd.ExecuteNonQuery();
+    }
+
     /// <summary>"The party cleared at least half the rooms on its route" (spec §9) and "the boss was
     /// killed" — both read directly off `rpg_delve_rooms.cleared`, since clearing a `boss`-kind room
     /// IS defeating its encounter. A route naming a sector this delve has no room for is skipped, not
@@ -455,6 +520,119 @@ public sealed partial class RpgStore
                 "$j", "$id"))
                 ExecuteWith(cmd, json, delveId);
 
+            tx.Commit();
+            return ReadDelveUnlocked(db, delveId);
+        }
+    }
+
+    /// <summary>
+    /// D3.16 (spec-dungeon-loot.md §7, `:213-214`) — kills accrue here room by room, never straight to
+    /// the bank ("Kills accrue to `souls_unbanked` (§7), never the bank"). <paramref name="roomKey"/> is
+    /// a caller-supplied descriptive tag, the same style as <see cref="SpendUnbanked"/>'s own
+    /// <c>sinkKey</c> (spec-wild-room.md `:125`'s cited call, `SpendUnbanked(delveId, price,
+    /// "wild:{r}:{c}")`) — there is no per-room ledger to dedupe it against. "The dedupe keys" the souls
+    /// section names (spec §7) are the two <see cref="CloseDelve"/>-time ledger keys guarding a REPLAYED
+    /// CLOSE, not a replayed accrual; the room loop that calls this already owns not calling it twice
+    /// for the same room, the same way it already owns not calling <see cref="WritePartyMembers"/>
+    /// twice for a stale snapshot.
+    ///
+    /// <para><c>checked</c>: `souls_unbanked` is a magnitude (CLAUDE.md's numeric-overflow rule) with no
+    /// existing guard to mirror the way <c>rpg_soul_balances.balance</c> has
+    /// <see cref="GuardSoulAwardOrThrow"/> — this method is the one true owner of this column's
+    /// arithmetic, so it throws on overflow itself before any write, rather than risking a silent
+    /// SQL-level wrap.</para>
+    /// </summary>
+    public DelveRow? AccrueUnbanked(long delveId, long delta, string roomKey)
+    {
+        if (delta < 0) throw new ArgumentOutOfRangeException(nameof(delta));
+        if (string.IsNullOrWhiteSpace(roomKey)) throw new ArgumentException("roomKey required", nameof(roomKey));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var delve = ReadDelveUnlocked(db, delveId);
+            if (delve is null) return null;
+            var next = checked(delve.SoulsUnbanked + delta);
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET souls_unbanked = $v, revision = revision + 1 WHERE delve_id = $id;",
+                "$v", "$id"))
+                ExecuteWith(cmd, next, delveId);
+            tx.Commit();
+            return ReadDelveUnlocked(db, delveId);
+        }
+    }
+
+    /// <summary>
+    /// D3.16 (spec-dungeon-loot.md §7, `:214-215`) — the wild-altar and merchant-pull sink, "refuses on
+    /// shortfall" against the delve's OWN at-risk pot, never the player's bank
+    /// (<see cref="TrySpendSouls"/>'s own, separate pot). The standalone, self-locking form for a caller
+    /// with nothing else to compose the spend with; <see cref="SpendUnbankedUnlocked"/> is the
+    /// composable half spec's own text asks for twice ("one transaction with the purchase",
+    /// spec-dungeon-loot.md `:215`; spec-wild-room.md `:202`'s altar-pull price and `:355-357`'s
+    /// "no-slot refuses before any soul moves" property) — an altar pull or merchant buy that also
+    /// instantiates an item needs the spend and the instantiation in ONE transaction.
+    /// </summary>
+    public (bool Ok, string Reason, long SoulsUnbanked) SpendUnbanked(long delveId, long price, string sinkKey)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var result = SpendUnbankedUnlocked(db, delveId, price, sinkKey);
+            tx.Commit();
+            return result;
+        }
+    }
+
+    /// <summary>The composable primitive behind <see cref="SpendUnbanked"/> — takes an existing
+    /// connection so a future caller (the wild altar's `PullPrice`, a merchant `PullPrice`/`OfferFloor`
+    /// buy) can spend and instantiate its own grant in one transaction, matching the
+    /// <see cref="AppendSoulLedgerUnlocked"/> composability shape every other soul-moving path already
+    /// has. No explicit <c>SqliteTransaction</c> parameter: Microsoft.Data.Sqlite auto-attaches a
+    /// command to whatever transaction is active on <paramref name="db"/>
+    /// (<see cref="DecrementAllRecoveringForPlayerUnlocked"/> already relies on the same behavior).</summary>
+    (bool Ok, string Reason, long SoulsUnbanked) SpendUnbankedUnlocked(SqliteConnection db, long delveId, long price, string sinkKey)
+    {
+        if (price <= 0) throw new ArgumentOutOfRangeException(nameof(price));
+        if (string.IsNullOrWhiteSpace(sinkKey)) throw new ArgumentException("sinkKey required", nameof(sinkKey));
+
+        var delve = ReadDelveUnlocked(db, delveId);
+        if (delve is null) return (false, "delve.not-found", 0);
+        if (delve.SoulsUnbanked < price) return (false, "delve.souls-insufficient", delve.SoulsUnbanked);
+
+        var next = delve.SoulsUnbanked - price;
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "UPDATE rpg_delves SET souls_unbanked = $v, revision = revision + 1 WHERE delve_id = $id;";
+            cmd.Parameters.AddWithValue("$v", next);
+            cmd.Parameters.AddWithValue("$id", delveId);
+            cmd.ExecuteNonQuery();
+        }
+        return (true, "", next);
+    }
+
+    /// <summary>
+    /// D3.16 (spec-dungeon-loot.md §7, `:215-216`) — the depth watermark: <c>theta_run = MAX(theta_run,
+    /// thetaRoom)</c>, the seam a later contracts-on-Θ follow-up reads via <c>MAX(theta_run) WHERE
+    /// state = 'Extracted'</c> (`:199`). <paramref name="row"/>/<paramref name="col"/> match the spec's
+    /// own cited call shape (<c>RecordClear(delveId, r, c, thetaRoom)</c>, `:215`) but this method's own
+    /// write needs only <paramref name="thetaRoom"/> — marking the room ITSELF cleared is
+    /// <see cref="MarkRoom"/>'s job already (the one existing writer of `rpg_delve_rooms.cleared`;
+    /// duplicating that write here would give the same column two owners). <paramref name="row"/>/
+    /// <paramref name="col"/> are accepted so a room-clear caller can pass its own `(r, c, thetaRoom)`
+    /// straight through without pre-formatting anything itself; this method does not need them for its
+    /// own write today.
+    /// </summary>
+    public DelveRow? RecordClear(long delveId, int row, int col, int thetaRoom)
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET theta_run = MAX(theta_run, $t), revision = revision + 1 WHERE delve_id = $id;",
+                "$t", "$id"))
+                ExecuteWith(cmd, thetaRoom, delveId);
             tx.Commit();
             return ReadDelveUnlocked(db, delveId);
         }

@@ -159,6 +159,12 @@ public static class AtomRowValidator
                 return Fail(AtomRejectionReason.BadValueSpec,
                     $"{def.Name}: clampedLevelScale is only authorable on stat.modify/stat.derived, not {row.KindId}");
 
+            // patron-absorption (spec-patron-absorption.md, 2026-09-06): same scope, same reason —
+            // externalRef only resolves inside AtomCompiler.ResolvedParams' own compiled-atom path.
+            if (spec.ExternalRef is not null && row.KindId is not ("stat.modify" or "stat.derived"))
+                return Fail(AtomRejectionReason.BadValueSpec,
+                    $"{def.Name}: externalRef is only authorable on stat.modify/stat.derived, not {row.KindId}");
+
             var curveCheck = ValidateCurve(def.Name, spec, curveInput);
             if (!curveCheck.IsOk) return curveCheck;
         }

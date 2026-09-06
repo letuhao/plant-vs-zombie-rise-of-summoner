@@ -1,5 +1,8 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+// The owner-key grammar a durable grant is stamped with, and its matching ownerKind, live with the
+// binder that consumes them — one place, so the producer and the rewrite can never drift apart.
+using FusionRpg.Core.Match;
 using FusionRpg.Core.Power;
 
 namespace FusionRpg.Core.Effects.Atoms;
@@ -20,10 +23,32 @@ public static class AtomCompiler
     /// Compile one catalog revision.
     ///
     /// <para>Atoms are grouped by <c>COALESCE(icd_key, atom_id)</c> first: a group becomes <b>one</b>
-    /// grant carrying the union of its triggers, which is how a multi-trigger def keeps a single ICD
+    /// def carrying the union of its triggers, which is how a multi-trigger def keeps a single ICD
     /// clock after being split into several atoms (definitions §14.1). The runtime never learns a new
     /// key — <c>EffectDef.Triggers</c> has always been a list.</para>
     /// </summary>
+    /// <param name="grantOwnerKeys">
+    /// item-ideal.md, equip-runtime (module 5) — the owner keys each atom's COMPILED (passive) grant
+    /// must carry, keyed by <c>atom_id</c>. <b>Null (the default) is the shipped behaviour verbatim:</b>
+    /// one grant per ICD group at <see cref="EffectOwnerKeys.Match"/>, with the grant id it has always
+    /// had. Supplied, it is what lets one live specimen's passive gear stay scoped to that specimen
+    /// instead of reaching the whole match — see <see cref="OwnerKeysFor"/> for the one shape it
+    /// deliberately declines to scope.
+    ///
+    /// <para>The compiler never learns what an owner IS: a caller that knows the bindings (today
+    /// <c>AtomPushService.Build</c>, via <see cref="UniqueOwnerBinder.OwnerKeyForDurableGrant"/>) hands
+    /// it finished key strings. Dedup by ICD key is untouched — the def is still one per group, and
+    /// this only decides how many grants point at it.</para>
+    /// </param>
+    /// <param name="externalRefs">
+    /// `patron-absorption` (spec-patron-absorption.md, 2026-09-06): resolves a <c>ValueSpec.ExternalRef</c>
+    /// marker to a real number — the exact same shape <paramref name="curves"/> already has. The
+    /// compiler never learns what a ref id MEANS; a caller that knows (today
+    /// <c>AtomPushService.Build</c>, backed by a live <c>RpgStore.Patron.cs</c> lookup calling the real
+    /// <c>PatronPolicy.AuraMilli</c> for whichever player the push is for) hands back the number.
+    /// Null (the default) means an atom carrying <c>ExternalRef</c> throws when compiled — never
+    /// silently prices at zero.
+    /// </param>
     public static CompiledCatalog Compile(
         IEnumerable<AtomRow> atoms,
         RuntimeId runtime,
@@ -34,7 +59,9 @@ public static class AtomCompiler
         bool hostIsPlanner = false,
         int ownerLevel = 1,
         int? ownerTheta = null,
-        PowerTuning? powerTuning = null)
+        PowerTuning? powerTuning = null,
+        Func<string, IReadOnlyCollection<string>?>? grantOwnerKeys = null,
+        Func<string, long>? externalRefs = null)
     {
         var defs = new List<EffectDefDto>();
         var compiled = new List<EffectGrantDto>();
@@ -69,9 +96,10 @@ public static class AtomCompiler
             if (allCompilable && live.Count > 0)
             {
                 var compilable = live.Select(v => v.Atom).ToList();
-                var (def, grant) = EmitDefAndGrant(group.Key, compilable, curves, ownerLevel, ownerTheta, powerTuning);
+                var (def, grants) = EmitDefAndGrant(
+                    group.Key, compilable, curves, ownerLevel, ownerTheta, powerTuning, grantOwnerKeys, externalRefs);
                 defs.Add(def);
-                compiled.Add(grant);
+                compiled.AddRange(grants);
                 compiledIds.AddRange(compilable.Select(m => m.AtomId));
             }
             else
@@ -83,7 +111,8 @@ public static class AtomCompiler
     }
 
     /// <summary>
-    /// One grant for a whole ICD group, carrying the <b>union</b> of its members' triggers.
+    /// One def for a whole ICD group, carrying the <b>union</b> of its members' triggers, and one
+    /// grant per owner that sourced it.
     ///
     /// <para>A triggerless <c>stat.modify</c> / <c>stat.derived</c> must be emitted as
     /// <c>EffectType.Passive</c>. <c>EffectDef.EffectType</c> defaults to <c>Triggered</c>, and the
@@ -91,9 +120,11 @@ public static class AtomCompiler
     /// <c>OnGranted</c> — so a triggerless atom compiled with the default would never apply at all
     /// (definitions §14.2).</para>
     /// </summary>
-    static (EffectDefDto Def, EffectGrantDto Grant) EmitDefAndGrant(
+    static (EffectDefDto Def, IReadOnlyList<EffectGrantDto> Grants) EmitDefAndGrant(
         string icdKey, IReadOnlyList<AtomRow> members, Func<string, CurveTable?>? curves, int ownerLevel,
-        int? ownerTheta, PowerTuning? powerTuning)
+        int? ownerTheta, PowerTuning? powerTuning,
+        Func<string, IReadOnlyCollection<string>?>? grantOwnerKeys = null,
+        Func<string, long>? externalRefs = null)
     {
         // The UNION of the group's triggers, on ONE def. This is what keeps a multi-trigger def's
         // single ICD clock after it was split into several atoms: EffectDef.Triggers has always been
@@ -122,7 +153,7 @@ public static class AtomCompiler
         {
             if (OpcodeOf(member.KindId) is not { } action) continue;
 
-            var pars = ResolvedParams(member, curves, ownerLevel, ownerTheta, powerTuning);
+            var pars = ResolvedParams(member, curves, ownerLevel, ownerTheta, powerTuning, externalRefs);
             if (!seen.Add(action + "|" + Fingerprint(pars))) continue;
 
             actions.Add(new EffectDefActionDto { Seq = seq++, Action = action, Params = pars });
@@ -164,17 +195,80 @@ public static class AtomCompiler
             if (filters.Count > 0) overlay["filters"] = filters;
         }
 
-        var grant = new EffectGrantDto
-        {
-            GrantId = "atom:" + icdKey,
-            EffectId = def.EffectId,
-            PluginId = "atom",
-            Priority = 0,
-            Overlay = overlay.Count == 0 ? null : overlay,
-        };
+        // One grant per owner that sourced this group. With no owner map that is exactly one grant at
+        // `match`, with the id and every other field this method has always emitted.
+        var grants = new List<EffectGrantDto>();
+        foreach (var ownerKey in OwnerKeysFor(members, grantOwnerKeys))
+            grants.Add(new EffectGrantDto
+            {
+                GrantId = GrantIdFor(icdKey, ownerKey),
+                EffectId = def.EffectId,
+                OwnerKind = UniqueOwnerBinder.OwnerKindForDurableGrant(ownerKey),
+                OwnerKey = ownerKey,
+                PluginId = "atom",
+                Priority = 0,
+                // Copied per grant rather than shared: two grants aliasing one dictionary would let a
+                // later mutation of one silently rewrite the other's chance / icd_ms / filters.
+                Overlay = overlay.Count == 0
+                    ? null
+                    : new Dictionary<string, object?>(overlay, StringComparer.Ordinal),
+            });
 
-        return (def, grant);
+        return (def, grants);
     }
+
+    /// <summary>
+    /// The owner keys a compiled group's grants carry.
+    ///
+    /// <para><b>The group is the unit, not the atom</b>, because the def is per ICD group and a grant
+    /// points at a def. So the keys come from the group's members — and only when every member agrees
+    /// on the same owner set.</para>
+    ///
+    /// <para><b>The one shape this declines to scope, and why.</b> A group whose members were sourced
+    /// by DIFFERENT owners (owner A wears atom X, owner B wears atom Y, and the two share an authored
+    /// <c>icd_key</c>) compiles to ONE def carrying the union of X's and Y's actions — that is what an
+    /// ICD group is. Handing that def to both owners would give each the other's action; today's
+    /// single match-wide grant at least does it once rather than twice. Neither is right, and making
+    /// it right needs a def per owner, which would collide on <c>EffectDefDto.EffectId</c> — the ICD
+    /// key IS the def's identity. So a heterogeneous group falls back to the shipped behaviour
+    /// verbatim rather than amplifying it, and the real fix is a content rule (do not share an
+    /// <c>icd_key</c> across containers held by different owners), not a compiler change.</para>
+    /// </summary>
+    static IReadOnlyList<string> OwnerKeysFor(
+        IReadOnlyList<AtomRow> members, Func<string, IReadOnlyCollection<string>?>? grantOwnerKeys)
+    {
+        var matchOnly = new[] { EffectOwnerKeys.Match };
+        if (grantOwnerKeys is null || members.Count == 0) return matchOnly;
+
+        List<string>? agreed = null;
+        foreach (var member in members)
+        {
+            var supplied = grantOwnerKeys(member.AtomId);
+
+            // Ordinal sort, so "the same owners" is one comparison and the bake stays byte-identical
+            // for a revision no matter what order the caller collected the bindings in.
+            var keys = supplied is null || supplied.Count == 0
+                ? matchOnly.ToList()
+                : supplied.Distinct(StringComparer.Ordinal)
+                          .OrderBy(k => k, StringComparer.Ordinal)
+                          .ToList();
+
+            if (agreed is null) { agreed = keys; continue; }
+            if (!agreed.SequenceEqual(keys, StringComparer.Ordinal)) return matchOnly;
+        }
+
+        return agreed is null ? matchOnly : agreed;
+    }
+
+    /// <summary>
+    /// <c>atom:{icdKey}</c> for the match-scoped grant — unchanged, because a held grant is looked up
+    /// by this id — and <c>atom:{icdKey}@{ownerKey}</c> for an owner-scoped one, which is what keeps
+    /// two owners' grants on the same def from colliding in the bag's id-keyed store.
+    /// </summary>
+    static string GrantIdFor(string icdKey, string ownerKey) =>
+        string.Equals(ownerKey, EffectOwnerKeys.Match, StringComparison.Ordinal)
+            ? "atom:" + icdKey
+            : "atom:" + icdKey + "@" + ownerKey;
 
     /// <summary>
     /// E26: one <see cref="EffectDefDto"/> per translatable <see cref="RunnerEntry"/>, so
@@ -410,7 +504,7 @@ public static class AtomCompiler
 
     static Dictionary<string, object?> ResolvedParams(
         AtomRow atom, Func<string, CurveTable?>? curves, int ownerLevel, int? ownerTheta = null,
-        PowerTuning? powerTuning = null)
+        PowerTuning? powerTuning = null, Func<string, long>? externalRefs = null)
     {
         var kind = AtomKindRegistry.Get(atom.KindId);
         var pars = Read(atom.ParamsJson);
@@ -485,6 +579,24 @@ public static class AtomCompiler
             {
                 var unclamped = checked((long)spec.ClampedLevelScaleBaseMilli + ownerLevel);
                 result[key] = (int)Math.Clamp(unclamped, 0, spec.ClampedLevelScaleCapMilli);
+                continue;
+            }
+
+            // patron-absorption (spec-patron-absorption.md, 2026-09-06): "referenced, not
+            // re-expressed" — the compiler never learns what the ref MEANS, it only ever invokes the
+            // callback a caller handed it (the exact same shape `curves` already has). Throws rather
+            // than guesses when no callback was supplied, or the callback does not recognise this
+            // specific id — an externalRef atom is unauthorable content until a real caller supplies
+            // both, never silently priced at zero, matching powerLadder's own established rule.
+            if (spec.ExternalRef is not null)
+            {
+                if (externalRefs is null)
+                    throw new InvalidOperationException(
+                        $"{atom.AtomId}: an externalRef value spec ('{spec.ExternalRef}') was compiled " +
+                        "with no externalRefs callback supplied — AtomCompiler.Compile needs one to " +
+                        "resolve it, never a silent default.");
+
+                result[key] = checked((int)externalRefs(spec.ExternalRef));
                 continue;
             }
 

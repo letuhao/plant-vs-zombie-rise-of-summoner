@@ -1,6 +1,7 @@
 import { Button } from "@/ui";
 import type { PlanPrice } from "@/contract/passivesPlan";
 import type { FocusReading } from "@/contract/passivesYours";
+import { PASSIVE_TREE_VOCABULARY } from "@/contract/passiveTreeVocabulary";
 
 /**
  * passive-tree-todo.md I8 — "The Plan object" (spec-tree-surface.md §5.1, §5.2). The draft/dirty/
@@ -48,10 +49,10 @@ export function PlanPanel({
         {price.newTraits} new {price.newTraits === 1 ? "trait" : "traits"}
       </p>
       <p className="text-sm text-text" data-testid="plan-skill-points">
-        {price.skillPoints} skill points
+        {price.skillPoints} {PASSIVE_TREE_VOCABULARY.currency.skillPoints}
       </p>
       <p className="text-sm text-text" data-testid="plan-souls">
-        {price.souls} souls
+        {price.souls} {PASSIVE_TREE_VOCABULARY.currency.souls}
       </p>
 
       {/* §6: "One line, on Level 0 and in the plan preview" -- same sentence shape as

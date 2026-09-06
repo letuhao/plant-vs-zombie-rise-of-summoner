@@ -1,5 +1,6 @@
 import type { TreeResolveReport } from "@/lib/bus";
 import { notWorkingTraits, type NotWorkingTrait } from "./passivesYours";
+import { PASSIVE_TREE_VOCABULARY } from "./passiveTreeVocabulary";
 
 /**
  * passive-tree-todo.md I7 — Level 3 ("the trait, and both tracks", spec-tree-surface.md §4, §8).
@@ -59,7 +60,9 @@ export function exclusionRuleText(form: ExclusionForm, winnerNodeId: string, los
     case "precedence":
       return `${winnerNodeId} and ${loserNodeId} exclude each other. If both are taken, ${winnerNodeId} takes precedence.`;
     case "reroute":
-      return `${winnerNodeId} and ${loserNodeId} exclude each other. If both are taken, ${loserNodeId}'s points reroute to ${winnerNodeId}.`;
+      // I10: never the bare word "points" (§15) -- the trait's own wallet is skill points (§4.1:
+      // "buys a trait"), named through the vocabulary module rather than spelled out here.
+      return `${winnerNodeId} and ${loserNodeId} exclude each other. If both are taken, ${loserNodeId}'s ${PASSIVE_TREE_VOCABULARY.currency.skillPoints} reroute to ${winnerNodeId}.`;
   }
 }
 

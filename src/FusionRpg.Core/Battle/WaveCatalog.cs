@@ -1,3 +1,4 @@
+using System.Text.Json;
 using FusionRpg.Core.Demons;
 
 namespace FusionRpg.Core.Battle;
@@ -39,8 +40,33 @@ public static class WaveCatalog
     // Lazy, not `static readonly ... = Build()` (T4.7, catalog-runtime §3a): first touch must happen
     // after DemonSpeciesCatalog.Configure runs, not at an unpredictable point tied to class-load
     // order. Behaviour-preserving today — the source is still the compiled roster either way.
+    //
+    // base-defense siege-waves §3.5 (task 12.4, 2026-09-06): production now calls Configure with the
+    // roster parsed from data/tuning/waves.v1.json (WaveCatalogLoader.Parse), the same
+    // Loader.Parse(File.ReadAllText(...)) -> Xyz.Configure(...) shape already used for
+    // SiegeTuningPolicy/BattleResourceTuningLoader/etc. — never a second hand-written array beside
+    // this one. `All`'s own lazy fallback to the compiled `Build()` roster is UNCHANGED and stays the
+    // default for any caller that never configures (every test written before this task, and any
+    // future one that only needs a deterministic roster, not the authored data file specifically) —
+    // so this migration moves the CONTENT out of code without moving the ACCESS CONTRACT.
     static IReadOnlyList<WaveDef>? _all;
     public static IReadOnlyList<WaveDef> All => _all ??= Build();
+
+    /// <summary>Overrides the roster with a data-sourced one (normally `WaveCatalogLoader.Parse`'s
+    /// result). Throws on an empty snapshot — a wave-less roster is a load error, not a valid content
+    /// state, matching `DemonSpeciesCatalog.Configure`'s own precedent for the same failure shape.</summary>
+    public static void Configure(IReadOnlyList<WaveDef> snapshot)
+    {
+        if (snapshot is null || snapshot.Count == 0)
+            throw new ArgumentException(
+                "WaveCatalog.Configure received an empty wave roster — data/tuning/waves.v1.json is " +
+                "missing, empty, or failed to parse.", nameof(snapshot));
+        _all = snapshot;
+    }
+
+    /// <summary>Test-only escape hatch back to the compiled roster — mirrors
+    /// `DemonSpeciesCatalog.ConfigureFromCompiledDefault`'s own name and role.</summary>
+    public static void ConfigureFromCompiledDefault() => _all = Build();
 
     public static WaveDef Get(string waveId) =>
         All.FirstOrDefault(w => string.Equals(w.WaveId, waveId, StringComparison.Ordinal))
@@ -87,7 +113,10 @@ public static class WaveCatalog
     public static bool IsKnown(string? waveId) =>
         waveId != null && All.Any(w => string.Equals(w.WaveId, waveId, StringComparison.Ordinal));
 
-    static IReadOnlyList<WaveDef> Build()
+    /// <summary>Widened from `private` so `WaveCatalogLoaderTests` can compare the data-sourced
+    /// roster against this one directly, without mutating the shared `_all`/`Configure` state a
+    /// parallel test run could race on (siege-waves 12.4).</summary>
+    internal static IReadOnlyList<WaveDef> Build()
     {
         // Ordered, stable species pools by rarity band. Renamed to the ten-rung ladder's own
         // ids (seed-to-concrete T4.1) via the SAME band each old value migrated to
@@ -119,10 +148,13 @@ public static class WaveCatalog
         };
     }
 
-    static List<DemonSpeciesDef> Band(DemonRarity rarity) =>
+    /// <summary>Widened from `private` for `WaveCatalogLoader`'s own use (siege-waves 12.4) — the
+    /// data-sourced roster picks by the SAME ordered rarity band, never a second selection rule.</summary>
+    internal static List<DemonSpeciesDef> Band(DemonRarity rarity) =>
         DemonSpeciesCatalog.All.Where(s => s.BaseRarity == rarity).OrderBy(s => s.SpeciesId, StringComparer.Ordinal).ToList();
 
-    static IReadOnlyList<BattleActorSetup> Enemies(int theta, params (List<DemonSpeciesDef> Pool, int Count)[] picks)
+    /// <summary>Widened from `private` for `WaveCatalogLoader`'s own use (siege-waves 12.4).</summary>
+    internal static IReadOnlyList<BattleActorSetup> Enemies(int theta, params (List<DemonSpeciesDef> Pool, int Count)[] picks)
     {
         var list = new List<BattleActorSetup>();
         var n = 0;
@@ -151,4 +183,78 @@ public static class WaveCatalog
 
         return list;
     }
+}
+
+public sealed class WaveCatalogRejection : Exception
+{
+    public WaveCatalogRejection(string message) : base(message) { }
+}
+
+/// <summary>
+/// base-defense `siege-waves` §3.5 (task 12.4): parses `data/tuning/waves.v1.json` into the same
+/// `WaveDef` shape `WaveCatalog.Build()`'s own compiled array produces — the migration moves WHICH
+/// waves exist and their rarity-band picks into data; the species-selection RULE itself
+/// (`WaveCatalog.Band`/`Enemies`, ordered-by-id, deterministic) stays in code, reused verbatim rather
+/// than re-derived, so "same catalog ⇒ same waves" holds exactly as it did before this task.
+/// </summary>
+public static class WaveCatalogLoader
+{
+    public static IReadOnlyList<WaveDef> Parse(string json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+            throw new WaveCatalogRejection("wave roster: empty document");
+
+        JsonDocument doc;
+        try { doc = JsonDocument.Parse(json); }
+        catch (JsonException ex) { throw new WaveCatalogRejection($"wave roster: not valid JSON — {ex.Message}"); }
+
+        using (doc)
+        {
+            if (!doc.RootElement.TryGetProperty("waves", out var wavesEl) || wavesEl.ValueKind != JsonValueKind.Array)
+                throw new WaveCatalogRejection("wave roster: missing or non-array 'waves' property");
+
+            var result = new List<WaveDef>();
+            foreach (var w in wavesEl.EnumerateArray())
+            {
+                var waveId = RequireString(w, "waveId");
+                var name = RequireString(w, "name");
+                var contentIndex = RequireInt(w, "contentIndex");
+                var profile = w.TryGetProperty("profile", out var profileEl) && profileEl.ValueKind == JsonValueKind.String
+                    ? profileEl.GetString()
+                    : null;
+                var width = w.TryGetProperty("w", out var wEl) && wEl.ValueKind == JsonValueKind.Number
+                    ? wEl.GetInt32()
+                    : (int?)null;
+
+                if (!w.TryGetProperty("picks", out var picksEl) || picksEl.ValueKind != JsonValueKind.Array || picksEl.GetArrayLength() == 0)
+                    throw new WaveCatalogRejection($"wave '{waveId}': missing or empty 'picks' array");
+
+                var picks = new List<(List<DemonSpeciesDef> Pool, int Count)>();
+                foreach (var p in picksEl.EnumerateArray())
+                {
+                    var rarityText = RequireString(p, "rarity", waveId);
+                    if (!DemonRarityIds.TryParse(rarityText, out var rarity))
+                        throw new WaveCatalogRejection($"wave '{waveId}': unknown rarity '{rarityText}'");
+                    var count = RequireInt(p, "count", waveId);
+                    if (count <= 0)
+                        throw new WaveCatalogRejection($"wave '{waveId}': pick count must be > 0, got {count}");
+                    picks.Add((WaveCatalog.Band(rarity), count));
+                }
+
+                result.Add(new WaveDef(waveId, name, contentIndex, WaveCatalog.Enemies(contentIndex, picks.ToArray()), profile, width));
+            }
+
+            return result;
+        }
+    }
+
+    static string RequireString(JsonElement el, string prop, string? waveId = null) =>
+        el.TryGetProperty(prop, out var v) && v.ValueKind == JsonValueKind.String && !string.IsNullOrWhiteSpace(v.GetString())
+            ? v.GetString()!
+            : throw new WaveCatalogRejection($"wave roster{(waveId is null ? "" : $" '{waveId}'")}: missing or empty '{prop}'");
+
+    static int RequireInt(JsonElement el, string prop, string? waveId = null) =>
+        el.TryGetProperty(prop, out var v) && v.ValueKind == JsonValueKind.Number
+            ? v.GetInt32()
+            : throw new WaveCatalogRejection($"wave roster{(waveId is null ? "" : $" '{waveId}'")}: missing or non-numeric '{prop}'");
 }

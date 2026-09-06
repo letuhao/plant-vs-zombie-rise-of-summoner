@@ -162,23 +162,28 @@ class RoleCapTests(unittest.TestCase):
 # The vocabularies, counted from the live corpus
 # --------------------------------------------------------------------------------------------
 class VocabularyTests(unittest.TestCase):
-    def test_the_capability_vocabulary_is_60_picks_and_the_stat_vocabulary_is_242(self) -> None:
-        """Both counted from `data/seed/items/affix-families/*.json`, not transcribed. The spec's
-        own arithmetic: 39 element-free + 3x7 variant = 60; 2 + 31x7 + 23 stat.modify = 242."""
-        self.assertEqual(VOCAB.capability_count, 60)
+    def test_the_capability_vocabulary_is_62_picks_and_the_stat_vocabulary_is_242(self) -> None:
+        """⛔ CORRECTED 2026-09-06: 62, not 60 -- `atom.chill-punisher`/`atom.rot-punisher`
+        (g-punisher.json, the action-corpus pairing-tier fix) are two more `resource.delta`
+        families, so two more capability picks; neither is a stat kind, so stat_count is
+        unaffected. Both counted from `data/seed/items/affix-families/*.json` live, not
+        transcribed -- this file's own `set-charm-gen.v1.json` tuning note says exactly why
+        ("never derive a design proportion from a snapshot of a generated corpus"), which is
+        the reason this is a test correction and not a tuning-file edit."""
+        self.assertEqual(VOCAB.capability_count, 62)
         self.assertEqual(VOCAB.stat_count, 242)
 
     def test_the_pick_counts_are_reproduced_from_the_families_rather_than_asserted(self) -> None:
         families = vocab_mod.load_families()
-        self.assertEqual(len(families), 98)
+        self.assertEqual(len(families), 100)  # 98 + the 2 punisher families, 2026-09-06
         caps = [f for f in families if f["kindId"] in TUNING.capability_kinds]
         stats = [f for f in families if f["kindId"] in TUNING.stat_kinds]
-        self.assertEqual(len(caps), 42)
+        self.assertEqual(len(caps), 44)
         self.assertEqual(len(stats), 56)
         variant = [f for f in caps
                    if (f.get("variants") or {}).get("generate") == TUNING.variant_generator]
         self.assertEqual(len(variant), 3)
-        self.assertEqual(len(caps) - len(variant) + len(variant) * TUNING.variant_expansion, 60)
+        self.assertEqual(len(caps) - len(variant) + len(variant) * TUNING.variant_expansion, 62)
 
     def test_a_family_whose_kind_is_neither_capability_nor_stat_is_refused_not_dropped(self) -> None:
         with self.assertRaises(ValueError) as caught:

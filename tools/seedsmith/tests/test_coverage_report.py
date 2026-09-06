@@ -216,7 +216,7 @@ class ThinCellHiddenTests(unittest.TestCase):
         """Acceptance #4."""
         cov = _simple_ctx([], quota_by_scope_category={})
         groups = cr.build_cell_groups(cov.accepted_rows, cov.quota_by_scope_category)
-        entries = cr.cell_entries(groups)
+        entries = cr.cell_entries(groups, round_no=1)
         # 3 scopes x 5 categories x 3 pairingRoles
         self.assertEqual(len(entries), 45)
         for e in entries:
@@ -250,16 +250,17 @@ class UnpairedPayoffTests(unittest.TestCase):
         cov_ok = _simple_ctx(rows_ok, pairing_table={k: tuple(v) for k, v in pairing_table.items()})
         self.assertEqual(cr.enabler_payoff_coverage_findings("m", cov_ok), [])
 
-    def test_pairing_reach_is_honestly_zero_against_the_real_pairings_file(self) -> None:
-        """Acceptance #7c: the real pairings.json's 5 (well, 2-key, several-enabler) ids sit
-        entirely outside the 98-family namespace today — pairingReach must say so in those
-        words, never show a misleadingly empty section."""
+    def test_pairing_reach_is_honestly_nonzero_against_the_real_pairings_file(self) -> None:
+        """⛔ CORRECTED 2026-09-06 -- was `..._is_honestly_zero...`, true only while pairings.json
+        named ids outside the namespace. `atom.chill-punisher`/`atom.rot-punisher` are now real
+        (g-punisher.json) -- pairingReach must say so, never keep reporting the stale zero."""
         pairing_table = json.loads(PAIRINGS_PATH.read_text(encoding="utf-8"))
         cov = _simple_ctx([], pairing_table={k: tuple(v) for k, v in pairing_table.items()})
         findings = cr.pairing_reach_findings("m", cov)
         self.assertEqual(len(findings), 1)
-        self.assertIn("zero reach while pairings.json still carries its", findings[0].message)
-        self.assertEqual(findings[0].evidence["reachablePayoffKeys"], [])
+        self.assertIn("2/100 authored affix families are reachable payoff keys", findings[0].message)
+        self.assertEqual(set(findings[0].evidence["reachablePayoffKeys"]),
+                         {"atom.chill-punisher", "atom.rot-punisher"})
 
 
 # ---------------------------------------------------------------------------------------------

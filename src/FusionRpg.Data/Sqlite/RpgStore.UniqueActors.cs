@@ -507,91 +507,112 @@ public sealed partial class RpgStore
     /// Observe capture events: ack → ActiveBound; die/end → Recovering → Roster.
     /// Fail-closed; never throws.
     /// </summary>
-    public void ObserveUniqueActorEvents(IEnumerable<(string Kind, string? MatchKey, string PayloadJson)> events)
+    /// <returns>
+    /// T6.1 (2026-09-06, `mods-absorption`): the distinct player ids whose OWN <see
+    /// cref="UniqueActorPhases.ActiveBound"/> roster changed (grew or shrank) while processing this
+    /// batch — empty when nothing transitioned. Callers use this to re-push
+    /// <see cref="AtomPushService.OwnersForPlayer"/>'s union for exactly the affected players, the
+    /// same real gap T6.1's own audit entry named: nothing re-triggered the Hello-time union mid
+    /// session, so an item equipped or unequipped after connecting never reached the runner.
+    /// </returns>
+    public IReadOnlyList<long> ObserveUniqueActorEvents(IEnumerable<(string Kind, string? MatchKey, string PayloadJson)> events)
     {
+        var affected = new List<long>();
         try
         {
             foreach (var e in events)
-                ObserveUniqueActorEvent(e.Kind, e.MatchKey, e.PayloadJson ?? "{}");
+                foreach (var pid in ObserveUniqueActorEvent(e.Kind, e.MatchKey, e.PayloadJson ?? "{}"))
+                    if (!affected.Contains(pid))
+                        affected.Add(pid);
         }
         catch
         {
             /* fail-closed */
         }
+        return affected;
     }
 
-    void ObserveUniqueActorEvent(string kind, string? matchKey, string payloadJson)
+    static readonly IReadOnlyList<long> NoPlayers = Array.Empty<long>();
+
+    /// <returns>Every player id whose ActiveBound roster changed as a result of this one event —
+    /// almost always zero or one, but a shared `match_key` recovering more than one specimen at once
+    /// is handled without assuming they all belong to the same player.</returns>
+    IReadOnlyList<long> ObserveUniqueActorEvent(string kind, string? matchKey, string payloadJson)
     {
-        if (string.IsNullOrWhiteSpace(kind)) return;
+        if (string.IsNullOrWhiteSpace(kind)) return NoPlayers;
         if (string.Equals(kind, "pvz.spawn.extra.ack", StringComparison.OrdinalIgnoreCase))
         {
             var corr = TryString(payloadJson, "correlationId");
             var ptr = TryString(payloadJson, "ptr");
             if (!string.IsNullOrWhiteSpace(corr) && !string.IsNullOrWhiteSpace(ptr))
-                TryAckUniqueSpawn(corr!, ptr!, matchKey);
-            return;
+            {
+                var ack = TryAckUniqueSpawn(corr!, ptr!, matchKey);
+                if (ack.Ok && ack.Actor is not null) return new[] { ack.Actor.PlayerId };
+            }
+            return NoPlayers;
         }
 
         if (string.Equals(kind, "plant.die", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(kind, "zombie.die", StringComparison.OrdinalIgnoreCase))
         {
             var ptr = TryString(payloadJson, "ptr");
-            if (!string.IsNullOrWhiteSpace(ptr))
-                TryRecoverActiveByPtr(ptr!);
-            return;
+            return !string.IsNullOrWhiteSpace(ptr) ? TryRecoverActiveByPtr(ptr!) : NoPlayers;
         }
 
         if (string.Equals(kind, "board.end", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(kind, "match.result", StringComparison.OrdinalIgnoreCase))
         {
-            if (!string.IsNullOrWhiteSpace(matchKey))
-                TryRecoverActiveByMatchKey(matchKey!);
+            return !string.IsNullOrWhiteSpace(matchKey) ? TryRecoverActiveByMatchKey(matchKey!) : NoPlayers;
         }
+
+        return NoPlayers;
     }
 
-    void TryRecoverActiveByPtr(string ptr)
+    IReadOnlyList<long> TryRecoverActiveByPtr(string ptr)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT instance_id FROM rpg_unique_actors
+                SELECT instance_id, player_id FROM rpg_unique_actors
                 WHERE phase = $phase AND last_ptr = $ptr;
                 """;
             cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.ActiveBound);
             cmd.Parameters.AddWithValue("$ptr", ptr);
-            var ids = new List<string>();
+            var rows = new List<(string Id, long PlayerId)>();
             using (var r = cmd.ExecuteReader())
             {
                 while (r.Read())
-                    ids.Add(r.GetString(0));
+                    rows.Add((r.GetString(0), r.GetInt64(1)));
             }
-            foreach (var id in ids)
+            foreach (var (id, _) in rows)
                 RecoverToRosterUnlocked(db, id);
+            return rows.Select(x => x.PlayerId).Distinct().ToList();
         }
     }
 
-    void TryRecoverActiveByMatchKey(string matchKey)
+    IReadOnlyList<long> TryRecoverActiveByMatchKey(string matchKey)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
             cmd.CommandText = """
-                SELECT instance_id FROM rpg_unique_actors
+                SELECT instance_id, player_id FROM rpg_unique_actors
                 WHERE phase = $phase AND match_key = $mk;
                 """;
             cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.ActiveBound);
             cmd.Parameters.AddWithValue("$mk", matchKey);
-            var ids = new List<string>();
+            var rows = new List<(string Id, long PlayerId)>();
             using (var r = cmd.ExecuteReader())
             {
                 while (r.Read())
-                    ids.Add(r.GetString(0));
+                    rows.Add((r.GetString(0), r.GetInt64(1)));
             }
-            foreach (var id in ids)
+            foreach (var (id, _) in rows)
                 RecoverToRosterUnlocked(db, id);
+            return rows.Select(x => x.PlayerId).Distinct().ToList();
         }
     }
 

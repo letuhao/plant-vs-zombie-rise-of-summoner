@@ -155,7 +155,7 @@ def regenerate(*, actions_root: Path = ACTIONS_ROOT, demons_root: Path = DEMONS_
     review_findings = run_all(open_registry, ctx)
 
     groups = cr.build_cell_groups(cov.accepted_rows, cov.quota_by_scope_category)
-    entries = cr.cell_entries(groups)
+    entries = cr.cell_entries(groups, round_no=round_no)
     targets = cr.next_round_targets(groups=groups, subject_counts=cov.subject_category_counts,
                                     accepted_rows=cov.accepted_rows, round_no=round_no)
     entries = entries + targets

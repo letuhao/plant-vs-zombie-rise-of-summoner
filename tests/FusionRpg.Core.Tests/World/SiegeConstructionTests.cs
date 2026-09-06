@@ -203,4 +203,36 @@ public class SiegeConstructionTests
         Assert.True(attackerVerdict);
         Assert.Equal(attackerVerdict, defenderVerdict);
     }
+
+    [Fact]
+    public void Construct_costs_default_to_zero_so_every_shipped_row_is_unaffected()
+    {
+        var def = new StructureDef { StructureId = "test.default-cost", Name = "Test", AcquisitionPaths = new[] { AcquisitionPath.Built } };
+        Assert.Equal(0, def.ConstructRubbleCost);
+        Assert.Equal(0, def.ConstructIronworkCost);
+    }
+
+    [Theory]
+    [InlineData(-1, 0)]
+    [InlineData(0, -1)]
+    public void A_negative_construct_cost_is_rejected_at_load(long rubble, long ironwork)
+    {
+        var bad = new StructureDef
+        {
+            StructureId = "test.negative-cost",
+            Name = "Test",
+            ConstructRubbleCost = rubble,
+            ConstructIronworkCost = ironwork,
+            AcquisitionPaths = new[] { AcquisitionPath.Built }
+        };
+        Assert.Throws<InvalidOperationException>(() => StructureCatalog.Validate(new[] { bad }));
+    }
+
+    [Fact]
+    public void Every_shipped_structure_still_validates_with_the_new_fields_present()
+    {
+        // Confirms the additive schema change moves nothing: the real catalog (built at module load)
+        // still validates end to end with ConstructRubbleCost/ConstructIronworkCost defaulted to 0.
+        Assert.NotEmpty(StructureCatalog.All);
+    }
 }

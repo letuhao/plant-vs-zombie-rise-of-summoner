@@ -76,6 +76,9 @@ public static class Validator
         UniqueFrameCheck.Run(ctx);
         RoleFamilyCheck.Run(ctx);
         NameWordCheck.Run(ctx);
+        // spec-item-card.md's four display reason codes, raised through Core's own
+        // ContentRuleViolated{display.*} namespace -- see Checks/DisplayCheck.cs.
+        DisplayCheck.Run(ctx);
         LintCheck.Run(ctx);
 
         // Partitions are assigned by IdentityCheck, after some findings were already recorded.

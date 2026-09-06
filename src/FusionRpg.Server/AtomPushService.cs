@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.Match;
 using FusionRpg.Data;
 
 namespace FusionRpg.Server;
@@ -112,6 +113,13 @@ public sealed class AtomPushService
         var distinct = new Dictionary<string, AtomRow>(StringComparer.Ordinal);
         var acceptedBindings = new List<(BindingRow Binding, IReadOnlyList<AtomRow> Rows)>();
 
+        // item-ideal.md, equip-runtime (module 5): which owners each atom's COMPILED (passive) grant
+        // belongs to. The RUNNER path already carried per-owner identity on RunnerBinding.OwnerKey;
+        // the compiled path carried none at all, so a live specimen's passive stat.derived/stat.modify
+        // gear reached MATCH scope — every plant and zombie on the lawn, not the one wearing it.
+        // Sorted so a given revision bakes identical bytes regardless of binding enumeration order.
+        var ownersByAtom = new Dictionary<string, SortedSet<string>>(StringComparer.Ordinal);
+
         foreach (var owner in owners)
         {
             var resolution = _store.ResolveBindings(owner, ctx, ownerLevel);
@@ -122,8 +130,19 @@ public sealed class AtomPushService
                     continue;
 
                 acceptedBindings.Add((binding, rows));
+
+                // Off the BINDING's own scope, never the requested owner's: a resolution can surface a
+                // binding at a scope the caller did not name (match-wide rows), and stamping the
+                // requested owner onto one of those would scope a shared effect to whoever asked first.
+                var ownerKey = UniqueOwnerBinder.OwnerKeyForDurableGrant(binding.Scope);
+
                 foreach (var row in rows)
+                {
                     distinct[row.AtomId] = row;
+                    if (!ownersByAtom.TryGetValue(row.AtomId, out var keys))
+                        ownersByAtom[row.AtomId] = keys = new SortedSet<string>(StringComparer.Ordinal);
+                    keys.Add(ownerKey);
+                }
             }
         }
 
@@ -132,7 +151,8 @@ public sealed class AtomPushService
             ctx.Runtime,
             revision,
             curves: id => _store.GetCurve(id),
-            ownerLevel: ownerLevel ?? 1);
+            ownerLevel: ownerLevel ?? 1,
+            grantOwnerKeys: id => ownersByAtom.TryGetValue(id, out var keys) ? keys : null);
 
         var byAtomId = catalog.Runtime.ToDictionary(e => e.AtomId, StringComparer.Ordinal);
         var bindings = new List<RunnerBinding>();

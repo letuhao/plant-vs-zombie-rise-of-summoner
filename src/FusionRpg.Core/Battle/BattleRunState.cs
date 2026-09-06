@@ -160,6 +160,22 @@ public static partial class BattleEngine
             DerivedLedger.Recompose(actorKey, actor.BaseDerived, actor.Derived);
         }
 
+        /// <summary>passive-tree G2 (spec-mechanism-wiring.md §4.2): the per-round half of the recompose
+        /// seam. `RecomposeDerived` above stays explicit/per-actor for a live toggle event (aura-skill
+        /// T13's own job); this is the one new call site `BattleEngine.Resolve`'s round loop makes, once
+        /// per actor, at the start of every `RoundEventKind` — so a mechanism that changed
+        /// `DerivedLedger` after construction (a status applied mid-battle, a gate quantity crossing a
+        /// threshold) is composed into `Derived` before the round's regen/initiative/attacks read it,
+        /// rather than only ever being visible in the NEXT battle. Provably safe to call every round
+        /// even when nothing changed: `BattleDerivedModifierLedger.Recompose` always rebuilds from
+        /// `BaseDerived`, never from `Derived`'s own prior value, so repeated calls with an unchanged
+        /// ledger are byte-identical no-ops (`BattleDerivedModifierLedgerTests.An_empty_ledger_recomposes_nothing`).</summary>
+        public void RecomposeDerivedForAllActors()
+        {
+            foreach (var a in Actors)
+                RecomposeDerived(a.Setup.Key);
+        }
+
         readonly List<ShieldEventRec> _shieldEventScratch = new();
         readonly Dictionary<string, IReadOnlyList<CompiledAction>> _heldActions = new(StringComparer.Ordinal);
 
@@ -272,11 +288,21 @@ public static partial class BattleEngine
             // here too -- just returning the wider interface.
             Host.Ledger = Ledger;
             Host.ResolveStatTarget = key => ByKey.TryGetValue(key, out var a) ? a : null;
+
+            // G2 (spec-mechanism-wiring.md §4.2): forwards straight to DerivedLedger.Add, the one
+            // write this ledger has — a live mid-battle trigger (T13's still-unbuilt aura toggle, or a
+            // test simulating one) calls this through `onEffectHostReady` the same way every other
+            // Battle-adoption trigger reaches this host's own collaborators.
+            Host.AddDerivedContribution = DerivedLedger.Add;
             onEffectHostReady?.Invoke(Host);
 
+            // passive-tree G1 (spec-gate-counters.md §7 P1, R9): the pulse site — every status
+            // DoT/HoT delta Status.Tick delivers reaches HP through exactly this sink, so this is the
+            // one call P1's defaulted `origin` parameter existed for. Deferred while BattleEngine.cs/
+            // BattleRunState.cs were under another session's concurrent edit; both are clean now.
             PulseSink = new BattlePulseSink((hostPtr, amount, effectId, components) =>
                 ByKey.TryGetValue(hostPtr, out var owner)
-                    ? ApplyHp(owner, amount, effectId, components)
+                    ? ApplyHp(owner, amount, effectId, components, origin: DamageOrigin.StatusPulse)
                     : new DamageApplyResult(DamageApplyOutcome.SinkRefused, 0, 0));
 
             foreach (var a in Actors)
@@ -512,13 +538,14 @@ public static partial class BattleEngine
 
         public DamageApplyResult ApplyHp(
             ActorState owner, long amount, string effectId,
-            ElementPayloadComponent[]? components = null, ActorState? attacker = null, string? grantId = null)
+            ElementPayloadComponent[]? components = null, ActorState? attacker = null, string? grantId = null,
+            DamageOrigin origin = DamageOrigin.DirectHit)
         {
             var result = DamageApplyPipeline.Apply(
                 owner.Setup.Key, amount, hitCount: 1,
                 components ?? Array.Empty<ElementPayloadComponent>(),
                 attacker?.Derived, owner.Derived, ShieldGate, HpSink,
-                pluginId: "battle", effectId: effectId, grantId: grantId);
+                pluginId: "battle", effectId: effectId, grantId: grantId, origin: origin);
             owner.ShieldAbsorbed += result.AbsorbedAmount;
             return result;
         }

@@ -1,10 +1,11 @@
 # Capability map: world map runtime
 
-**Status:** Map + module spec strengthened 2026-09-06. Open questions **locked** same day; human
-visual gates replaced by Playwright + agent CV checkpoints.
-[tasks/world-map-runtime-plan.md](../../tasks/world-map-runtime-plan.md) ·
-[tasks/world-map-runtime-todo.md](../../tasks/world-map-runtime-todo.md).
-**Build authorized** — start at **R0** / **R1**.
+**Status:** Phaser host shipped (R0–R16). Parent success criteria are **not** closed — see
+completion module **`world-map-gaps`** (defects **D1–D32**). Do not treat
+[tasks/world-map-runtime-todo.md](../../tasks/world-map-runtime-todo.md) “complete” as true until
+that module’s success criteria hold.
+[spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md) remains the HOW.
+[spec-world-map-gaps.md](world-map-runtime/spec-world-map-gaps.md) is the defect register.
 
 **Program id:** `world-map-runtime`.
 
@@ -14,8 +15,9 @@ visual gates replaced by Playwright + agent CV checkpoints.
 **Visual catalog:** [design/11-world-stage.html](../design/11-world-stage.html) **§O** (map pin,
 LOD, dual-plane, focus, safe-area). Inspector card remains §A / §J.
 
-**Does not reopen:** [world-map-program.md](world-map-program.md) turn engine, [world-stage-map.md](world-stage-map.md)
-HUD / inspector / commands / playback, recruitment, fog *rules*.
+**Does not reopen:** [world-map-program.md](world-map-program.md) turn engine, recruitment, fog
+*rules*, inspector fields. [world-stage-map.md](world-stage-map.md) HUD **design** stays; `world-map-gaps`
+may **compose** already-built Rail / NotifyRail / Outliner on `WorldStage` (wiring, not a redesign).
 
 ---
 
@@ -44,13 +46,27 @@ not a product.
 
 | Slice | Responsibility | Depends on |
 |---|---|---|
-| **Host** | `createWorldGame`, `WorldGameHost`, `world:*` bus, CSS-token snapshot, `modelSeq`, destroy checklist | existing `createGame`, `allocGameGeneration` |
+| **Host** | `createWorldGame`, `WorldGameHost`, `world:*` bus, CSS-token snapshot, `modelSeq`, destroy checklist; sibling `legions` + `playerFactionId` on the published model (gaps D15/D26) | existing `createGame`, `allocGameGeneration` |
 | **Objects** | Sector pin / lane / force factories from `sectorChannels` / `laneChannels` / `fogTreatments` (fog-on-pin density); registry | Host types; channel modules (stay Phaser-free; `game/` may import them) |
 | **Scene** | `WorldMapScene`, Phaser camera (incl. edge-scroll), zoom LOD, pick with chrome occlusion, **all** lens/route/range/supply/lifeline/blocked drawing | Host + objects |
 
-**Build order:** Host → Objects → Scene (plus **R0** e2e harness before / with Host).
+**Build order (original):** Host → Objects → Scene (plus **R0** e2e harness before / with Host).
 
-**Module spec:** [world-map-runtime/spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md).
+**Module specs:**
+
+| Module id | Responsibility | Depends on |
+|---|---|---|
+| `world-map-runtime` | HOW: dual-plane Phaser map, `world:*`, factories, four systems | DPLP, world-contract, channel modules |
+| `world-map-gaps` | Close parent SC 1–12 against shipped code; compose Rail / NotifyRail / Outliner; host sibling `legions` + `playerFactionId` on `world:model` | `world-map-runtime` (already on disk) |
+
+**Build order now:** `world-map-gaps` only (parent slices already exist). Defects **D1–D32** in that
+spec. **Plan:** [tasks/world-map-runtime-gaps-plan.md](../../tasks/world-map-runtime-gaps-plan.md) ·
+[tasks/world-map-runtime-gaps-todo.md](../../tasks/world-map-runtime-gaps-todo.md) — implement after
+owner review of Plan (Specify already complete).
+
+**Does not reopen:** turn engine, fog *rules*, `WorldStateDto.Revision`, a fifth Phaser system,
+xyflow, Phaser UIScene. Chrome on World is **composition of already-built** `world-hud` occupants,
+not a HUD redesign.
 
 ---
 

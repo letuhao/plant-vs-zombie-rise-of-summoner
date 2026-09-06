@@ -1,4 +1,5 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats;
 
 namespace FusionRpg.Core.Match;
@@ -9,6 +10,29 @@ namespace FusionRpg.Core.Match;
 /// </summary>
 public static class UniqueOwnerBinder
 {
+    /// <summary>
+    /// The PRODUCER half of the same grammar <see cref="BindOwnerKey"/> consumes: the owner key a
+    /// durable, server-side grant carries before any live pointer exists.
+    ///
+    /// <para><b>Only <see cref="OwnerKind.UniqueActor"/> gets a scoped key.</b> That scope names one
+    /// persistent actor, so a passive modifier sourced from it must not reach the whole match — and
+    /// <c>instance:{id}</c> is the one key the hot path refuses outright, which is what makes an
+    /// unbound one fail loudly instead of applying to the wrong scope.</para>
+    ///
+    /// <para>Every other scope answers <see cref="EffectOwnerKeys.Match"/>, unchanged. A
+    /// <see cref="OwnerKind.Player"/> has no single live entity to scope a passive buff to, so
+    /// match-wide is correct there rather than merely tolerated; <see cref="OwnerKind.Entity"/> and the
+    /// type scopes are already resolved elsewhere and are deliberately not widened here.</para>
+    /// </summary>
+    public static string OwnerKeyForDurableGrant(OwnerScope scope) =>
+        scope.Kind == OwnerKind.UniqueActor && !string.IsNullOrWhiteSpace(scope.Key)
+            ? StatApplyScope.Normalize(EffectOwnerKeys.Instance(scope.Key))
+            : EffectOwnerKeys.Match;
+
+    /// <summary>The <c>ownerKind</c> that belongs beside a key from <see cref="OwnerKeyForDurableGrant"/>.</summary>
+    public static string OwnerKindForDurableGrant(string? ownerKey) =>
+        StatApplyScope.IsInstanceOwnerKey(ownerKey) ? EffectOwnerKeys.InstanceKind : "match";
+
     public static string ToEntityKey(string? instanceId, string ptr)
     {
         if (string.IsNullOrWhiteSpace(ptr))

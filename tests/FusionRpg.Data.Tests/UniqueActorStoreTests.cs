@@ -96,6 +96,92 @@ public class UniqueActorStoreTests : IDisposable
         Assert.Null(_store.GetUniqueActor(b.InstanceId)!.LastPtr);
     }
 
+    // ---- T6.1 (2026-09-06): ObserveUniqueActorEvents now reports which players' ActiveBound roster
+    // changed, so a caller can re-push the atom union for exactly those players -------------------
+
+    [Fact]
+    public void An_ack_event_reports_the_actors_own_player_as_affected()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 4);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-report", "m-report").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("pvz.spawn.extra.ack", "m-report", """{"correlationId":"corr-report","ptr":"0xREPORT"}""")
+        });
+
+        Assert.Equal(new[] { _playerId }, affected);
+    }
+
+    [Fact]
+    public void A_recover_event_reports_the_same_player_as_the_ack_that_bound_it()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 5);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-rec", "m-rec").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-rec", "0xREC", "m-rec").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("plant.die", "m-rec", """{"ptr":"0xREC"}""")
+        });
+
+        Assert.Equal(new[] { _playerId }, affected);
+    }
+
+    [Fact]
+    public void An_event_naming_an_unknown_ptr_or_correlation_reports_no_affected_player()
+    {
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("pvz.spawn.extra.ack", "m-none", """{"correlationId":"no-such-corr","ptr":"0xNONE"}"""),
+            ("plant.die", "m-none", """{"ptr":"0xNONE"}"""),
+        });
+
+        Assert.Empty(affected);
+    }
+
+    [Fact]
+    public void A_batch_touching_the_same_player_twice_reports_that_player_once()
+    {
+        var a = _store.CreateUniqueActor(_playerId, "plant", 4);
+        var b = _store.CreateUniqueActor(_playerId, "zombie", 6);
+        Assert.True(_store.TryBeginUniqueDeploy(a.InstanceId, "corr-dup-a", "m-dup").Ok);
+        Assert.True(_store.TryBeginUniqueDeploy(b.InstanceId, "corr-dup-b", "m-dup").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("pvz.spawn.extra.ack", "m-dup", """{"correlationId":"corr-dup-a","ptr":"0xDUPA"}"""),
+            ("pvz.spawn.extra.ack", "m-dup", """{"correlationId":"corr-dup-b","ptr":"0xDUPB"}"""),
+        });
+
+        Assert.Equal(new[] { _playerId }, affected);
+    }
+
+    [Fact]
+    public void A_shared_match_key_recovering_two_specimens_reports_their_distinct_players_once_each()
+    {
+        var otherPlayerId = _store.CreatePlayer("second-player").Id;
+        var mine = _store.CreateUniqueActor(_playerId, "plant", 4);
+        Assert.True(_store.TryBeginUniqueDeploy(mine.InstanceId, "corr-multi-mine", "m-multi").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-multi-mine", "0xMINE", "m-multi").Ok);
+
+        // A second player's own row sharing the same match_key — realistic today only as a fixture
+        // (this repo's own lawn is single-player-per-match), but the query itself has no player
+        // filter, so the return value must not silently assume one player per match_key either.
+        var theirs = _store.CreateUniqueActor(otherPlayerId, "zombie", 9);
+        Assert.True(_store.TryBeginUniqueDeploy(theirs.InstanceId, "corr-multi-theirs", "m-multi").Ok);
+        Assert.True(_store.TryAckUniqueSpawn("corr-multi-theirs", "0xTHEIRS", "m-multi").Ok);
+
+        var affected = _store.ObserveUniqueActorEvents(new (string Kind, string? MatchKey, string PayloadJson)[]
+        {
+            ("match.result", "m-multi", "{}")
+        });
+
+        Assert.Equal(2, affected.Count);
+        Assert.Contains(_playerId, affected);
+        Assert.Contains(otherPlayerId, affected);
+    }
+
     [Fact]
     public void Retire_from_Roster_and_illegal_from_Deploying()
     {

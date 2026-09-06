@@ -61,8 +61,8 @@ describe("exclusionRuleText -- all three D40 forms render a real, distinct sente
     expect(exclusionRuleText("precedence", "winner", "loser")).toMatch(/winner takes precedence/);
   });
 
-  it("reroute names the loser's points moving to the winner", () => {
-    expect(exclusionRuleText("reroute", "winner", "loser")).toMatch(/loser's points reroute to winner/);
+  it("reroute names the loser's skill points moving to the winner -- never the bare word 'points' (I10, §15)", () => {
+    expect(exclusionRuleText("reroute", "winner", "loser")).toMatch(/loser's skill points reroute to winner/);
   });
 
   it("every form's sentence is distinct -- never the same string for two forms", () => {

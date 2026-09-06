@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "kind": "affix-family",
+  "_meta": {
+    "batch": "affix-g-punisher",
+    "partition": "affix-families/g.punisher",
+    "contractVersion": 1,
+    "registryVersions": {
+      "core": 1,
+      "bands": 1,
+      "themes": 1,
+      "tags": 3,
+      "classes": 2,
+      "naming": 4,
+      "words": 4
+    },
+    "exemplarVersion": 1,
+    "promptVersion": 1,
+    "model": "claude-sonnet-5",
+    "authoredUtc": "2026-09-06T00:00:00Z",
+    "sourceRef": "spec-distribution-planner.md#6 (\"DECIDED 2026-09-03 -- NAMED DELIVERABLE: rewrite pairings.json into the 98-family namespace\")"
+  },
+  "entries": [
+    {
+      "id": "atom.chill-punisher",
+      "nameKey": "affix.chill-punisher",
+      "name": "Frost Reckoning",
+      "kindId": "resource.delta",
+      "params": {
+        "when": "OnDamageDealt"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Frost Reckoning"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Shattering Chill"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Absolute Frost"
+          }
+        ]
+      },
+      "displayTemplate": "{value} bonus damage against a frozen target",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "NEW family, the FIRST payoff half `pairings.json` names ('atom.chill-punisher') to actually exist in the 98-family namespace -- spec-distribution-planner.md's own DECIDED-but-unexecuted deliverable, closed here. Enabler: `atom.freezing` (g-affliction.json, status=freeze, a real working UnityCc row, not one of the inert/partial appliers). Priced and banded (`resource.delta`, `powerBand: low`, params identical to `atom.hit-followthrough`'s own shape in g-on-hit.json) as an UNCONDITIONAL on-hit bonus, because the family-authoring layer (this schema) has no gate/predicate field -- confirmed by reading AtomCompiler.cs and every existing family file: `when` here is a bare event-hook string (`OnDamageDealt`), never the `{predicate, chance, icd_ms}` shape `AtomRow.WhenJson` supports at the compiled-atom-row layer. The engine already has a real, tested leaf for this exact check -- `PredicateNode.LeafId.HasStatus` (`src/FusionRpg.Core/Effects/Atoms/PredicateNode.cs:34`) -- but no shipped content anywhere uses it yet, and wiring a family-authoring-time predicate through to it is real, separate, unscoped work. Until that lands this family is priced honestly as what it does today (an unconditional bonus, same cost as `hit-followthrough`), not what its name promises -- the same shape `atom.entangling`'s own note already uses for its own binds-nowhere gap. `EnablerPayoffPairings` itself does not require runtime status-gating to be real: it is a content-PLANNING table only (co-occurrence of payoff+enabler in the same brief pool), never a predicate-tree parse, so this family unblocks the pairing tier today regardless of when the predicate wiring lands."
+    },
+    {
+      "id": "atom.rot-punisher",
+      "nameKey": "affix.rot-punisher",
+      "name": "Blighted Reckoning",
+      "kindId": "resource.delta",
+      "params": {
+        "when": "OnDamageDealt"
+      },
+      "frames": [
+        "humanoid",
+        "plant"
+      ],
+      "side": "both",
+      "roles": [
+        "armament-primary",
+        "armament-secondary",
+        "manipulator",
+        "jewel-major",
+        "jewel-minor-a",
+        "jewel-minor-b",
+        "sense"
+      ],
+      "powerBand": "low",
+      "nameWords": {
+        "suffix": [
+          {
+            "band": "A",
+            "tierRange": "t1-t2",
+            "word": "of Blighted Reckoning"
+          },
+          {
+            "band": "B",
+            "tierRange": "t3",
+            "word": "of the Festering Wound"
+          },
+          {
+            "band": "C",
+            "tierRange": "t4-t5",
+            "word": "of the Creeping Rot"
+          }
+        ]
+      },
+      "displayTemplate": "{value} bonus damage against an afflicted target",
+      "tags": [
+        "offensive"
+      ],
+      "notes": "NEW family, the SECOND payoff half `pairings.json` names ('atom.rot-punisher') to actually exist in the 98-family namespace -- same deliverable as `atom.chill-punisher` above, same file, same reasoning for `kindId`/`powerBand`/the honest unconditional-today pricing, same `PredicateNode.HasStatus` real-but-unwired mechanism. Enablers (four, matching the EXISTING pairings.json many-to-one shape for this exact key -- 'rot-punisher -> [rot-applier, blight-applier]' before this rewrite): `atom.venomous` (poison), `atom.withering` (wither, g-affliction.json's own 'fully functional... no missing payload half'), `atom.bloodletting` (leech, PARTIAL -- tick half only, still real), `atom.sporing` (spore, base tick real, spread mechanic dormant). Deliberately excludes `atom.entangling` (kelp) -- declared INERT in g-affliction.json's own note, 'binds nowhere' at runtime -- and `atom.mesmerizing` (hypno) -- thematically CC, not affliction/DoT, left unpaired rather than forced into a mismatched group; both remain legally usable, real, un-payoff'd enablers, named here rather than silently dropped."
+    }
+  ]
+}

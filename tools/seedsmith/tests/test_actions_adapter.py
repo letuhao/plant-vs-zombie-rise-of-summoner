@@ -142,9 +142,12 @@ class ClosedVocabularyTests(unittest.TestCase):
 class FamilyAndPairingVocabularyTests(unittest.TestCase):
     """The two data-derived (not C#-derived) vocabularies §2's "DECIDED" section adds."""
 
-    def test_ninety_eight_atom_families(self) -> None:
+    def test_one_hundred_atom_families(self) -> None:
+        # ⛔ CORRECTED 2026-09-06: 100, not 98 -- g-punisher.json added atom.chill-punisher/
+        # atom.rot-punisher, the action-corpus pairing-tier fix (spec-distribution-planner.md's
+        # own DECIDED-but-unexecuted deliverable, closed).
         regs = ActionsAdapter().registries()
-        self.assertEqual(len(regs.vocabularies["atomFamily"]), 98)
+        self.assertEqual(len(regs.vocabularies["atomFamily"]), 100)
 
     def test_pairing_keys_match_the_live_pairings_file(self) -> None:
         pairings_path = REPO_ROOT / "data" / "seed" / "actions" / "pairings.json"

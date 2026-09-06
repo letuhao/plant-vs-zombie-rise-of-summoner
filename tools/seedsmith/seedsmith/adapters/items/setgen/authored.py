@@ -34,7 +34,8 @@ from .seedfile import (SeedFileMeta, axis_group_map, charm_entry, next_charm_seq
 from .tuning import SetCharmGenTuning
 from .verdict import GATING_METRICS, RunReport, Verdict
 from .vocab import Vocabulary
-from ..charmgen.rules import axis_gini_permille
+from ..charmgen.rules import (CHARM_AXES, axis_gini_permille, min_axis_gini_permille,
+                              smallest_measurable_axis_population)
 from ..registries import load_versions
 
 #: The batch driver never reaches these — they are the graph's, injected at build time. Imported
@@ -266,14 +267,25 @@ def _measure(entries: "list[dict]", *, kind: str, tuning: SetCharmGenTuning,
     else:
         axes = [e["axis"] for e in entries if "axis" in e]
         gini = axis_gini_permille(axes)
+        floor = min_axis_gini_permille(len(axes))
         counts: "dict[str, int]" = {}
         for axis in axes:
             counts[axis] = counts.get(axis, 0) + 1
-        metrics["axis"] = {"gini": gini, "counts": counts}
+        metrics["axis"] = {"gini": gini, "counts": counts, "floorAtThisPopulation": floor,
+                           "distinctAxes": len(counts)}
+        # ⚠ The floor is printed beside the measurement for the same reason the near-duplicate row
+        # carries "granularity-bound": below five charms the ceiling is unreachable at ANY
+        # diversity, so a bare "400 against 133" reads as a collapse when it is the flattest a
+        # batch this size can be. `cleared` is still the real comparison — nothing is softened.
+        reachable_at = smallest_measurable_axis_population(tuning.charm_axis_gini_max_permille)
+        reach = ("" if floor <= tuning.charm_axis_gini_max_permille
+                 else f"; the ceiling is unreachable below {reachable_at} charms")
         report.record("Distribution/Inequality:charm-axis", ran=bool(axes),
                       cleared=gini <= tuning.charm_axis_gini_max_permille,
-                      detail=(f"axis Gini {gini}permille over {len(axes)} charms "
-                              f"(ceiling {tuning.charm_axis_gini_max_permille})"))
+                      detail=(f"axis Gini {gini}permille over {len(axes)} charms on "
+                              f"{len(counts)} of {len(CHARM_AXES)} axes "
+                              f"(ceiling {tuning.charm_axis_gini_max_permille}, floor at this "
+                              f"population {floor}{reach})"))
         report.record("Distribution/CellOccupancy", ran=False, cleared=False,
                       detail="cell occupancy is a set metric; no set in this batch")
 

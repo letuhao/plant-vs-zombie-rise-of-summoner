@@ -6,9 +6,9 @@ import { AppShell } from "./AppShell";
 import { SaveSelect } from "./SaveSelect";
 import { TitleScreen } from "./TitleScreen";
 
-// GG-38: entry loads the Sanctum only. Lawn (Phaser) and World (the SVG stage) are the two
-// heaviest dependencies in the tree (tech-stack.md §2) and neither is needed to reach the Sanctum
-// — each becomes its own chunk, fetched only when its route is actually visited.
+// GG-38: entry loads the Sanctum only. Lawn (Phaser) and World (Phaser dual-plane map island) are the
+// two heaviest dependencies in the tree (tech-stack.md §2 / T3) and neither is needed to reach the
+// Sanctum — each becomes its own chunk, fetched only when its route is actually visited.
 const DemonsPage = lazy(() => import("@/features/demons/DemonsPage").then((m) => ({ default: m.DemonsPage })));
 const LawnStage = lazy(() => import("@/stages/lawn/LawnStage").then((m) => ({ default: m.LawnStage })));
 const ActorLadderDemoPage = lazy(() =>

@@ -2,6 +2,7 @@ import { Button } from "@/ui";
 import { useToastStack } from "@/shell/toastStack";
 import { cellStateFor } from "@/contract/passivesLattice";
 import { exclusionPrintFor, newlyInertFindings, traitNotWorking } from "@/contract/passivesTrait";
+import { PASSIVE_TREE_VOCABULARY } from "@/contract/passiveTreeVocabulary";
 import { useAllocationDraft } from "@/hooks/useAllocationDraft";
 
 // `ui/` never binds to a REST DTO type directly (contractGuard.ts's guard 2) -- same pattern
@@ -134,9 +135,9 @@ export function TraitDetail({
 
       <p className="text-xs text-muted" data-testid="passives-trait-state" data-state={state}>
         {state === "owned"
-          ? `Depth ${currentDepth}`
+          ? `${PASSIVE_TREE_VOCABULARY.track.depthLabel} ${currentDepth}`
           : state === "available"
-            ? "Available to unlock"
+            ? `Available to ${PASSIVE_TREE_VOCABULARY.track.unlockVerb}`
             : "Locked -- open more tiers to reach this trait"}
       </p>
 
@@ -173,7 +174,8 @@ export function TraitDetail({
       {state === "owned" ? (
         <div className="flex flex-col gap-1" data-testid="passives-trait-deepen">
           <p className="text-2xs text-muted">
-            Planned depth <span data-testid="passives-trait-planned-depth">{currentDepth}</span>
+            Planned {PASSIVE_TREE_VOCABULARY.track.depthNoun}{" "}
+            <span data-testid="passives-trait-planned-depth">{currentDepth}</span>
           </p>
           <div className="flex items-center gap-1">
             <Button

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "done": {
+    "charm-species-demon.allpeater": {
+      "entryId": "charm.off-ctrl-021",
+      "attempts": 1
+    },
+    "charm-species-demon.ashthreepeater": {
+      "entryId": "charm.econ-021",
+      "attempts": 1
+    },
+    "charm-species-demon.bucketnutzombie": {
+      "entryId": "charm.off-ctrl-022",
+      "attempts": 1
+    }
+  }
+}

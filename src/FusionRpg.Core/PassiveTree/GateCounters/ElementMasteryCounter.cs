@@ -43,12 +43,13 @@ public readonly record struct ElementMasteryCreditInput(
 /// <item><b>(d) Direct hits, never DoT pulses.</b> <see cref="DamageOrigin.StatusPulse"/> earns
 /// nothing -- crediting a pulse would let one applied status earn an elemental credit every tick for
 /// its whole duration, double-paying for the one application <c>status_applied</c> already credited
-/// (§2.2d). <b>Wiring the real pulse call site to pass <see cref="DamageOrigin.StatusPulse"/> is
-/// tracked separately (G1's deferred item) -- `BattleEngine.cs`/`BattleRunState.cs` are under
-/// concurrent edit by another session this task routed around, per R9. This class enforces the
-/// exclusion correctly the moment the caller passes the right origin; until that one line lands at the
-/// pulse site, every hit still reaches here as `DirectHit` by the enum's own default, which is the
-/// same "defaulted parameter, zero lines at existing call sites" shape P1 was built for.</b></item>
+/// (§2.2d). <b>The real pulse call site now passes <see cref="DamageOrigin.StatusPulse"/></b> --
+/// `BattleRunState.cs`'s `PulseSink` (Battle) and `StatusEffectBridge.cs`'s `StatusFunnelPulseSink`
+/// (injector) both pass it explicitly (G1's once-deferred item, closed once `BattleEngine.cs`/
+/// `BattleRunState.cs` came free of the concurrent edit this task originally routed around, per R9).
+/// Every hit through either production pulse path now reaches this counter correctly excluded; a hit
+/// through any OTHER caller of `DamageApplyPipeline.Apply`/`ApplyPacketToFunnel` still defaults to
+/// `DirectHit`, which is correct for every one of them (they are not pulses).</item>
 /// </list>
 ///
 /// No <c>StatusCategoryRegistry</c>-style roster validation exists here on purpose:

@@ -15,6 +15,7 @@ import {
 } from "@/stages/world/lenses/lensCatalog";
 import type { HealthState, Ownership } from "@/stages/world/render/sectorChannels";
 import { healthOf, ownershipOf } from "@/stages/world/render/sectorHealthAndOwnership";
+import { supplyEnvelopeFor } from "@/stages/world/render/supplyEnvelope";
 import type { LaneView, SectorView } from "@/contract/types";
 
 export type OverlayDrawCounts = {
@@ -39,7 +40,7 @@ export type PendingRouteOrder = {
 
 export type TargetingPlanInput = {
   reachable?: RangeTarget[] | null;
-  blocked?: { sectorId: string; reason: string } | null;
+  blocked?: { sectorId: string; reason: string; treatment?: "blocked" | "inert" } | null;
   pending?: PendingRouteOrder[] | null;
 };
 
@@ -63,8 +64,24 @@ export type RouteSegCmd = {
   dash: "dashed";
 };
 export type DestFlagCmd = { kind: "destination-flag"; x: number; y: number };
-export type BlockedMarkCmd = { kind: "blocked-mark"; x: number; y: number; reason: string };
-export type SupplyCutoffCmd = { kind: "supply-cutoff"; x: number; y: number };
+export type BlockedMarkCmd = {
+  kind: "blocked-mark";
+  x: number;
+  y: number;
+  reason: string;
+  /** Distinct blocked (hatch+✕+caption) vs inert (calm ellipsis) — gaps D29. */
+  treatment: "blocked" | "inert";
+};
+export type SupplyCutoffCmd = {
+  kind: "supply-cutoff";
+  x: number;
+  y: number;
+  /** GG-23 words — never the mark alone (gaps D16). */
+  word: "cut off";
+};
+export type SupplyEnvelopeCmd =
+  | { kind: "supply-envelope"; mode: "hull"; points: Array<{ x: number; y: number }> }
+  | { kind: "supply-envelope"; mode: "per-lane"; nodes: Array<{ x: number; y: number }> };
 export type LifelineHaloCmd = {
   kind: "lifeline-halo";
   x: number;
@@ -95,6 +112,7 @@ export type OverlayCommand =
   | DestFlagCmd
   | BlockedMarkCmd
   | SupplyCutoffCmd
+  | SupplyEnvelopeCmd
   | LifelineHaloCmd
   | LensMarkCmd;
 
@@ -189,7 +207,13 @@ export function planBlockedMark(
   if (!blocked) return null;
   const pos = sectorPositionFromModel(model, blocked.sectorId);
   if (!pos) return null;
-  return { kind: "blocked-mark", x: pos.x, y: pos.y, reason: blocked.reason };
+  return {
+    kind: "blocked-mark",
+    x: pos.x,
+    y: pos.y,
+    reason: blocked.reason,
+    treatment: blocked.treatment ?? "blocked"
+  };
 }
 
 export function planSupplyCutoffs(model: OverlayModelSlice | null | undefined, lens: string): SupplyCutoffCmd[] {
@@ -201,7 +225,41 @@ export function planSupplyCutoffs(model: OverlayModelSlice | null | undefined, l
     const ownership = ownershipOf(sector, model?.playerFactionId ?? null);
     if (ownership !== "yours") continue;
     const pos = sectorCenter(sector.layoutX, sector.layoutY);
-    out.push({ kind: "supply-cutoff", x: pos.x, y: pos.y });
+    out.push({ kind: "supply-cutoff", x: pos.x, y: pos.y, word: "cut off" });
+  }
+  return out;
+}
+
+/** Fed-component envelopes for supply lens (gaps D28) — hull or per-lane from supplyEnvelope.ts. */
+export function planSupplyEnvelopes(
+  model: OverlayModelSlice | null | undefined,
+  lens: string
+): SupplyEnvelopeCmd[] {
+  if (lens !== "supply") return [];
+  const sectors = model?.sectors ?? [];
+  if (sectors.length === 0) return [];
+
+  const byComponent = new Map<string, Array<{ x: number; y: number }>>();
+  for (const sector of sectors) {
+    const cid = sector.component?.componentId;
+    if (cid == null) continue;
+    const list = byComponent.get(cid) ?? [];
+    list.push(sectorCenter(sector.layoutX, sector.layoutY));
+    byComponent.set(cid, list);
+  }
+
+  const allPositions = sectors.map((s) => sectorCenter(s.layoutX, s.layoutY));
+  const out: SupplyEnvelopeCmd[] = [];
+  for (const [, members] of byComponent) {
+    const foreign = allPositions.filter(
+      (p) => !members.some((m) => m.x === p.x && m.y === p.y)
+    );
+    const envelope = supplyEnvelopeFor(members, foreign);
+    if (envelope.kind === "hull") {
+      out.push({ kind: "supply-envelope", mode: "hull", points: envelope.points });
+    } else {
+      out.push({ kind: "supply-envelope", mode: "per-lane", nodes: members });
+    }
   }
   return out;
 }
@@ -371,6 +429,9 @@ export function planWorldOverlay(input: PlanWorldOverlayInput): {
   const cutoffs = planSupplyCutoffs(input.model, input.lens);
   counts.supplyCutoffs = cutoffs.length;
   commands.push(...cutoffs);
+
+  const envelopes = planSupplyEnvelopes(input.model, input.lens);
+  commands.push(...envelopes);
 
   const lifelines = planLifelineHalos(input.model, input.lens);
   counts.lifelineHalos = lifelines.length;

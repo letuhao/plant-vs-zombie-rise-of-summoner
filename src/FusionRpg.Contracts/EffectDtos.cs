@@ -109,15 +109,31 @@ public static class EffectTypes
 
 /// <summary>
 /// Owner key grammar: <c>match</c>, <c>plant:{typeId}</c>, <c>zombie:{typeId}</c>, <c>entity:{ptr}</c>, <c>player:{id}</c>.
+///
+/// <para><c>instance:{id}</c> is the one DURABLE key in the grammar and the one the hot path refuses
+/// (<c>EffectBag.Grant</c> throws on it) — it names a persistent actor that has no live pointer yet, so
+/// it only ever travels between the Server and a deploy binder. <c>UniqueOwnerBinder</c> rewrites it to
+/// <see cref="Entity"/> once the pointer exists.</para>
 /// </summary>
 public static class EffectOwnerKeys
 {
     public const string Match = "match";
 
+    /// <summary>The <c>ownerKind</c> that accompanies an <see cref="Instance"/> key, matching the shape
+    /// <c>UniqueEquipmentCatalog.Grant</c> / <c>RelicCatalog.TryGetGrant</c> already ship.</summary>
+    public const string InstanceKind = "instance";
+
     public static string PlantType(int typeId) => "plant:" + typeId;
     public static string ZombieType(int typeId) => "zombie:" + typeId;
     public static string Entity(string ptr) => "entity:" + ptr;
     public static string Player(long id) => "player:" + id;
+
+    /// <summary>
+    /// A durable actor key. Deliberately NOT resolvable on the hot path: <c>StatApplyScope.Matches</c>
+    /// returns false for it and <c>EffectBag.Grant</c> throws, so a producer that stamps one and never
+    /// binds it fails loudly rather than applying to the wrong scope.
+    /// </summary>
+    public static string Instance(string instanceId) => "instance:" + instanceId;
 }
 
 public sealed class EffectEventDto

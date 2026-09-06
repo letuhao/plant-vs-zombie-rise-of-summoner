@@ -67,10 +67,16 @@ export type WorldSelectPayload = {
 
 export type WorldCameraPayload = {
   generation: number;
-  op: "pan" | "zoom" | "fit";
+  op: "pan" | "zoom" | "fit" | "centre";
   dx?: number;
   dy?: number;
+  /** Absolute zoom target (HUD +/− may instead use `factor`). */
   scale?: number;
+  /** Relative zoom multiplier about viewport centre (gaps D9). */
+  factor?: number;
+  /** World coords for `op: "centre"` (gaps D25). */
+  x?: number;
+  y?: number;
   /** Fit padding / safe insets in screen px. */
   padLeft?: number;
   padRight?: number;

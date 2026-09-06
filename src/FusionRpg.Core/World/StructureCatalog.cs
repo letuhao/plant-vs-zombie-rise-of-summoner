@@ -68,6 +68,19 @@ public sealed record StructureDef
     public long FlatYieldPerTurn { get; init; }
 
     /// <summary>
+    /// base-defense `siege-construction` §2 (decision 27's `Built` path): rubble spent to place this
+    /// structure during an active siege. Distinct from <see cref="Cost"/> — peacetime `Build` spends
+    /// the founding legion's own `CarriedLoam`; siege-time `Built` spends the SECTOR's world-scoped
+    /// `RubbleStock`/`IronworkStock` instead (decision 18: construction-only, never loam-denominated).
+    /// Defaults to 0, so every structure minted before this task can still be sieged-constructed for
+    /// free until a real cost is authored — a structurally honest default, not a guessed number.
+    /// </summary>
+    public long ConstructRubbleCost { get; init; }
+
+    /// <summary>See <see cref="ConstructRubbleCost"/> — the worked-material half of the same cost.</summary>
+    public long ConstructIronworkCost { get; init; }
+
+    /// <summary>
     /// base-defense `structure-state` (decision 32): the MATERIAL TIER ordinal, not a hit-point count.
     ///
     /// <para><b>An ordinal, because a model picks it.</b> "we will use llm to generate variant like
@@ -292,6 +305,10 @@ public static class StructureCatalog
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has no display name.");
             if (s.Cost < 0)
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has negative cost.");
+            if (s.ConstructRubbleCost < 0)
+                throw new InvalidOperationException($"Structure '{s.StructureId}' has negative construct rubble cost.");
+            if (s.ConstructIronworkCost < 0)
+                throw new InvalidOperationException($"Structure '{s.StructureId}' has negative construct ironwork cost.");
             if (s.YieldMultiplierMilli < 0)
                 throw new InvalidOperationException($"Structure '{s.StructureId}' has a negative yield multiplier.");
             if (s.FlatYieldPerTurn < 0)

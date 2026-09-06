@@ -21,6 +21,10 @@ public static class ActionTagPreference
         [ActionTag.Defensive] = 5,
         [ActionTag.Movement] = 6,
         [ActionTag.Utility] = 7,
+        // Ranked last: placing a structure is the least urgent choice for a stub AI to default to
+        // mid-fight — a real construction order comes from a deliberate caller, not from this
+        // fallback preference (base-defense siege-construction, 2026-09-06).
+        [ActionTag.Construct] = 8,
     };
 
     /// <summary>An action's own rank is its BEST (lowest) tag rank — an offensive-tagged heal is

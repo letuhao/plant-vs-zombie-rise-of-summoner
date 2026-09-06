@@ -1,4 +1,6 @@
 using FusionRpg.Contracts;
+using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Match;
 using FusionRpg.Data;
 using Microsoft.AspNetCore.SignalR;
@@ -181,7 +183,61 @@ public sealed class UniqueActorService
             if (string.IsNullOrWhiteSpace(e.Kind)) continue;
             mapped.Add((e.Kind, e.MatchKey, RpgStore.PayloadToJson(e.Payload)));
         }
-        _store.ObserveUniqueActorEvents(mapped);
+        var affectedPlayers = _store.ObserveUniqueActorEvents(mapped);
+        foreach (var playerId in affectedPlayers)
+            _ = PushAtomUnionAsync(playerId);
+    }
+
+    /// <summary>
+    /// T6.1 (2026-09-06, `mods-absorption`) — the real remaining gap the audit found: the Hello-time
+    /// owner union (<see cref="AtomPushService.OwnersForPlayer"/>) never re-fired mid-session, so a
+    /// unique actor that deployed (or recovered) after Hello never actually reached the runner. Fires
+    /// on exactly the phase transitions <see cref="RpgStore.ObserveUniqueActorEvents"/> reports
+    /// (bind ↔ ActiveBound), reusing the SAME union Hello already builds — never a second, divergent
+    /// list — and sends it as an atoms-only <c>effects.grants.apply</c> (no `grants` key: a mid-match
+    /// equip/unequip never touches the player's own session Effect-bag grants, only the compiled atom
+    /// push those grants travel beside at Hello).
+    /// </summary>
+    async Task PushAtomUnionAsync(long playerId)
+    {
+        AtomPushDto atoms;
+        try
+        {
+            var owners = AtomPushService.OwnersForPlayer(_store, playerId);
+            atoms = new AtomPushService(_store).Build(owners, new BindContext(RuntimeId.Lawn), matchSeed: 0);
+        }
+        catch (Exception ex)
+        {
+            // Matches BuildApplyCommand's own rule: a failed atom push must never throw into an
+            // unrelated caller (here, event ingestion) — log and drop, the next real trigger retries.
+            Console.Error.WriteLine("[atom-push] mid-session re-push failed: " + ex.Message);
+            return;
+        }
+
+        // The injector's own RunEffectsGrantsApply (CheatCommandRunner.cs:777-814) refuses the WHOLE
+        // command — including the atom half, InstallAtomPush is never reached — when "grants" is
+        // absent or not an array: "effects.grants.apply: missing grants[]". An empty array (not an
+        // absent key) is what makes this genuinely a no-op for the session grant snapshot while still
+        // letting the atom push through — found by reading the real consumer before shipping an
+        // atoms-only payload that would have silently done nothing.
+        var payload = new Dictionary<string, object?>
+        {
+            ["grants"] = Array.Empty<object>(),
+            ["defs"] = atoms.Defs,
+            ["runnerBindings"] = atoms.RunnerBindings,
+            ["catalogRevision"] = atoms.CatalogRevision,
+            ["contentHash"] = atoms.ContentHash,
+            ["matchSeed"] = atoms.MatchSeed,
+            ["matchKey"] = atoms.MatchKey,
+            ["upToDate"] = atoms.UpToDate,
+        };
+
+        await SendInjectorCommand(_hub, _inbox, new CommandDto
+        {
+            Id = Guid.NewGuid().ToString("N"),
+            Name = EffectGrantRehydrate.ApplyCommandName,
+            Payload = payload,
+        }).ConfigureAwait(false);
     }
 
     Task NotifyBindingClearAsync(string? instanceId, string? correlationId)

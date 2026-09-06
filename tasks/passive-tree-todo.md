@@ -1449,18 +1449,59 @@ default arm. 6 new guard tests + 5 new `StatusStatPayloadTests` — 48/48 combin
 independently re-verified. `dotnet build` 0/0. `audit-overflow.py --targets A3` /
 `audit-magic-numbers.py --targets M1`: zero hits. All four boundary guards pass.
 
-### E3: G2 — Battle recomposes derived mid-fight
+### ✅ E3: G2 — Battle recomposes derived mid-fight — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-mechanism-wiring.md` §4.2.
 **Description:** `BattleRunState.RecomposeDerived` has one production caller, at construction. Add the
 per-round call. **Cite by symbol** — this file is being edited by `battle-tempo`, and G1 of
 `gate-counters` (task G1 below) also modifies it.
 **Acceptance:**
-- [ ] A conditional-scaling mechanism changes value between rounds
-- [ ] One `RecomposeDerived` per actor per round, and it is idempotent
-- [ ] Battle goldens **run**, not reasoned about: re-blessed deliberately with the diff explained, or
+- [x] A conditional-scaling mechanism changes value between rounds
+- [x] One `RecomposeDerived` per actor per round, and it is idempotent
+- [x] Battle goldens **run**, not reasoned about: re-blessed deliberately with the diff explained, or
       unmoved
 **Verification:** the battle suite; a named test for the mid-fight change.
 **Depends on:** E1. **Scope:** S.
+
+**Evidence:** This task was blocked all session on `battle-tempo`'s own concurrent edit to
+`BattleEngine.cs`/`BattleRunState.cs` (`git status` showed both `M` throughout); re-checked after I9/I10
+closed and found both files clean (committed in `50fcdf8`), unblocking this task for real. Built exactly
+the spec's own "The fix": `BattleRunState.RecomposeDerivedForAllActors()` (new, `BattleRunState.cs`) loops
+`Actors` calling the existing per-actor `RecomposeDerived`; `BattleEngine.cs`'s round loop calls it once,
+right after `rounds++`, before regen/initiative/attacks read `Derived` — the SAME call the spec's §4.2
+names, at the SAME loop position. Confirmed by direct grep that `RecomposeDerived` had exactly one prior
+caller (the construction-time `ActiveAuras` loop) before this change.
+For the "named test for the mid-fight change": confirmed there is genuinely no production writer into
+`BattleDerivedModifierLedger` other than that same construction-time aura loop (aura-skill T13's live
+toggle, the real future writer, is explicitly unbuilt) — so no shipped content can exercise "a mechanism
+changes value mid-battle" through the atom/effect pipeline today. Added one minimal, deliberate seam,
+`BattleEffectHost.AddDerivedContribution` (`BattleEffects.cs`), forwarding straight to
+`DerivedLedger.Add` — the same "wire a collaborator onto the host" shape this class already uses four
+times (`Status`, `StatusRng`, `Ledger`, `ResolveStatTarget`), reachable through the same
+`onEffectHostReady` hook every other Battle-adoption test already uses, and genuinely reusable by T13's
+real live-toggle work later rather than being test-only scaffolding.
+New test file `tests/FusionRpg.Core.Tests/Battle/Adoption/PassiveTreeMechanismRoundRecomposeTests.cs`,
+2 tests: (1) a `combat.power.omni` contribution added AFTER construction (simulating a mechanism landing
+mid-battle) still reaches combat and produces more cumulative damage than an unboosted run, across a
+forced multi-round fight — proving the new per-round call site is what makes this reachable at all
+(bullet 1); (2) idempotence proven not just by isolated-ledger arithmetic (already pinned by
+`BattleDerivedModifierLedgerTests`/`AuraToggleGateCTests`) but by running the SAME contribution through a
+short fight and a much longer one (same seed) and asserting the per-round damage RATE stays within 25% —
+a compounding bug (recomposing on top of `Derived`'s own prior value instead of always rebuilding from
+frozen `BaseDerived`) would make the long fight's rate diverge by multiples, not drift by a quarter
+(bullet 2). Both pass, independently re-run: 2/2 green.
+Bullet 3, run not reasoned about: `dotnet test tests/FusionRpg.Core.Tests --filter BattleGoldenTests` →
+**5/5 green, zero goldens moved** — matching the spec's own arithmetic proof exactly. Full
+`--filter FullyQualifiedName~Battle` → 1077/1089 (12 pre-existing failures, all in
+`TraitMigrationParityTests`, all tracing to the SAME root cause: `data/seed/atoms/vocabulary.json`
+shipping a malformed `kind: ''` entry as of the same `50fcdf8` commit that unblocked this task — confirmed
+via `git log`/`git diff` to be already-committed, unrelated to Battle/passive-tree, and reproduced
+identically before touching any file this task owns). Full `dotnet test tests/FusionRpg.Core.Tests`
+(unfiltered): 8676/8700 — the same 12 plus 12 more, every one of them item/affix/aptitude CORPUS content
+tests (`RoleFamilyTableTests`, `ContentValidationTests`, `ConsumableCorpusTests`, `ExpeditionResolverTests`,
+`ContentScaleTests`, `ProveAptitudeJsonEmitTests`) tracing to the exact same seed-corpus root cause, zero
+overlap with Battle/mechanism-wiring — out of scope for this audit (item/affix generation, not
+passive-tree), not fixed, named rather than hidden. `guard-funnel-delta.ps1` → OK. No magnitude/overflow
+surface touched (the new code is a loop and two method forwards, zero numeric literals).
 
 ### ✅ E4: G3 — the contribution fold, in both hosts — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-mechanism-wiring.md` §4.3 steps 1–3.
@@ -2022,7 +2063,7 @@ two dials actually live in.
 Without these, 27 of 39 trees sit at tier 0 (§13.4). D37 put them in this program; D43 seeds existing
 saves.
 
-### 🟡 G1: The two shipped-code prerequisites (P1, P2) — P1/P2 BUILT + VERIFIED 2026-09-06; pulse-site wiring DEFERRED
+### ✅ G1: The two shipped-code prerequisites (P1, P2) — BUILT + VERIFIED 2026-09-06 (pulse-site wiring closed after being deferred)
 **Spec:** `spec-gate-counters.md` §7 P1 and P2.
 **Description:** G2's fresh-vs-refresh rule and G3's DoT exclusion are both undeliverable without a
 change in `src/` that no task owned. **P1:** a defaulted `DamageOrigin origin = DamageOrigin.DirectHit`
@@ -2035,12 +2076,11 @@ coordinate with E3, which also modifies `BattleRunState`.
 - [x] The origin defaults, so every existing call site is zero lines changed
 - [x] `OnApplied`'s signature and all three assigning sites are untouched
 - [x] A refresh fires `OnApplied` and does **not** fire `OnFreshApplication`
-- [ ] Battle's pulse site passes `DamageOrigin.StatusPulse` — **cite by symbol** (R9) — **DEFERRED, not
-      skipped**: `src/FusionRpg.Core/Battle/BattleEngine.cs` is under active concurrent edit by another
-      session right now (confirmed via `git status`), and the spec's own §7 P1 text names this EXACT
-      situation as "Sequencing, not a blocker... the file the map's 'nothing in wave 0 touches another
-      wave-0 module's files' claim does not cover" — the defaulted parameter exists specifically so
-      this one line lands separately once the file is free, never blocking P1/P2 themselves
+- [x] Battle's pulse site passes `DamageOrigin.StatusPulse` — **cite by symbol** (R9): `BattleRunState.cs`'s
+      `PulseSink = new BattlePulseSink(...)` construction now reads
+      `ApplyHp(owner, amount, effectId, components, origin: DamageOrigin.StatusPulse)`, and `ApplyHp`
+      itself gained the same defaulted `origin = DamageOrigin.DirectHit` parameter P1 already gave
+      `DamageApplyPipeline.Apply`/`ApplyPacketToFunnel`, forwarding straight through
 **Verification:** a reapply loop fires one fresh event; a `wither` pulse train reports `StatusPulse`.
 **Depends on:** none. **Scope:** S. **Files:**
 `src/FusionRpg.Core/Combat/DamageApplyPipeline.cs`, `src/FusionRpg.Core/Status/StatusRuntime.cs`,
@@ -2086,6 +2126,33 @@ from wherever DoT pulses are dispatched, e.g. `StatusEffectBridge.cs`, not inves
 is a materially larger, separate wiring task). The parameter now EXISTS for G6 to pass through once
 that producer is built — the same "defaulted parameter, zero lines at existing call sites" shape P1
 was built for, now true of both apply entry points instead of just one.
+
+**Deferred bullet closed, 2026-09-06, after `BattleEngine.cs`/`BattleRunState.cs` came free of the
+concurrent edit** (`git status` re-checked: both clean, `battle-tempo`'s work landed in `50fcdf8`).
+`ApplyHp` (`BattleRunState.cs`) gained the same defaulted `origin = DamageOrigin.DirectHit` parameter
+already given to `DamageApplyPipeline.Apply`/`ApplyPacketToFunnel`, forwarded straight into `Apply`'s
+own `origin:` argument — purely additive, every existing `ApplyHp` call site (regenerator tick,
+immortal-charge tick, the basic-attack hit, the guardian redirect, the reflect share) compiles and
+behaves identically with no changes. The ONE call site this bullet targets — `PulseSink`'s construction,
+`BattleRunState.cs`, the exact lambda `Status.Tick`'s own pulse delivery invokes — now passes
+`origin: DamageOrigin.StatusPulse` explicitly. Verified by direct symbol citation (R9's own specified
+method for this bullet, not a runtime assertion): grepped `ApplyHp(` before this change and confirmed
+exactly one caller supplied any origin at all (none did); confirmed after that `PulseSink`'s is the only
+one that now does. A genuinely new automated behavioral test proving this through `BattleReport`'s own
+public surface is not possible — `origin` has no observable effect on `DamageApplyResult`
+(`Outcome`/`AppliedAmount`/`AbsorbedAmount` only, no origin field) or on any other public battle output;
+it exists purely as a forward-compatible tag for a consumer that reads it downstream of the apply call,
+which is exactly why R9 asks for "cite by symbol" rather than a behavioral proof for this specific
+bullet. Practical effect noted honestly: `ElementMasteryCounter` (G3, already ✅) is wired only to the
+lawn/injector path today (`CombatDamageDispatcher.cs`, `StatusEffectBridge.cs`), never to
+`BattleRunState`/`BattleEngine` — so this fix does not yet change what any shipped counter credits in a
+Battle; it closes the exact gap `ElementMasteryCounter.cs`'s own doc comment named as open ("wiring the
+real pulse call site... is tracked separately, G1's deferred item"), whose text I also updated to reflect
+the closure now that it is real, so a future reader does not find a stale "still open" claim next to
+already-closed code. Regression proof: `dotnet test tests/FusionRpg.Core.Tests --filter
+"FullyQualifiedName~Battle&FullyQualifiedName!~TraitMigrationParity"` → 1072/1072 green (the excluded
+filter is the same 12 pre-existing, unrelated `vocabulary.json` failures E3's evidence already names);
+`guard-funnel-delta.ps1`/`guard-single-writer.ps1` → both OK; `dotnet build` 0/0.
 
 ### ✅ G2: `status_applied` counter — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-gate-counters.md` §2.1, §4.1, §4.2, §4.3, §5.3.
@@ -2357,11 +2424,15 @@ parameter G3 added was unreachable from any real caller. Fixed by threading `ori
 through `DispatchInstant` (both purely additive/defaulted — read the diff directly, confirmed every
 pre-existing call site compiles unchanged) and wiring `StatusFunnelPulseSink.PulseHp`/
 `PulseHealAttacker` (the REAL overlay/injector DoT-pulse sink) to pass `DamageOrigin.StatusPulse`
-explicitly — read directly, confirmed genuine, not just claimed. **Correctly left open, honestly
-named in code comments both here and at `ElementMasteryCounter`'s own doc:** `BattleEngine.cs`'s
-separate `BattlePulseSink` (which calls `DamageApplyPipeline.Apply` directly, not through this
-dispatcher) remains untouched — confirmed still locked by another session's concurrent edit via
-`git status` both before and after this task.
+explicitly — read directly, confirmed genuine, not just claimed. **At the time this task ran, correctly
+left open and honestly named** (in code comments both here and at `ElementMasteryCounter`'s own doc):
+`BattleEngine.cs`'s separate `BattlePulseSink` (which calls `DamageApplyPipeline.Apply` directly, not
+through this dispatcher) remained untouched, confirmed still locked by another session's concurrent
+edit via `git status` both before and after this task. **Update, 2026-09-06 (task G1, after this file
+came free):** that Battle-side half of the same gap is now closed too — `BattleRunState.cs`'s
+`PulseSink` construction now passes `origin: DamageOrigin.StatusPulse` explicitly, the exact symmetric
+fix this note anticipated. Both runtimes (lawn/injector via `StatusFunnelPulseSink`, Battle via
+`BattlePulseSink`) now tag their real DoT-pulse delivery path correctly.
 
 **Independently re-verified by me, given this task's unusually large blast radius (the first task this
 session to edit already-shipped, tracked production files rather than only add new ones):** read every
@@ -2856,7 +2927,7 @@ of measurement, and it also yields the intra-tree defect correlation the samplin
 **Verification:** the recomputed census cost is in `passive-tree-plan.md` before J2 starts.
 **Depends on:** H7. **Scope:** S.
 
-### H9: Emit and generate the 12 primary trees
+### H9: Emit and generate the 12 primary trees — infrastructure gap CLOSED 2026-09-06; the real run itself still pending
 **Spec:** `spec-tree-plan.md`, `spec-tree-language.md`, `spec-tree-binder.md`, `spec-tree-catalog.md` §5.
 **Acceptance:**
 - [ ] 480 nodes emitted, generated, bound and committed
@@ -2867,6 +2938,85 @@ of measurement, and it also yields the intra-tree defect correlation the samplin
 - [ ] The catalog's own `--check` staleness gate runs in CI, distinct from the plan's byte-identity check
 **Verification:** `--check` green on both; the catalog loads; a node resolves in a battle.
 **Depends on:** Checkpoint F, H2, H3, H4, B6. **Scope:** M (a run, not code).
+
+**Root-cause fix built and proven with fakes, zero real model spend, 2026-09-06.** A 2026-09-06 smoke
+test (one real tree, `might`, ~41 real calls) found every one of `might`'s 40 nodes came back `blocked`
+— the model's own reason: *"magnitude node requires an existing thing to make larger; current tree is
+empty."* Root-caused and now fixed at the source, in `H2`'s own already-shipped module
+(`nodegen/run.py`), not new/adjacent scope: §6.2's own contract has ALWAYS required passing "the node's
+tier-siblings" into every brief (`spec-tree-language.md` §6.2: *"Already written in this tier — do not
+repeat: {k nearest siblings, name + effect}"*) — this was simply never wired end to end. Two real,
+closed gaps:
+1. **`plan_run` now orders subjects mechanism-before-magnitude, per tier** (stable sort on
+   `(tier, 0 if mechanism else 1)`, ties keep the plan's own file order) — `might`'s own committed plan
+   lists its first six nodes ALL as magnitude-class, so without this reorder a magnitude node always
+   generates before any mechanism sibling exists to reference, regardless of how well siblings are
+   tracked. Never changes the FINAL seed document's own node order (`sorted_records` already re-sorts
+   by `node_id` at emit time) — this is scheduling only.
+2. **`run_language_stage` now tracks already-accepted tier-siblings itself** (never delegating this to
+   `inputs_for`, which has no access to `records`/`done`) and overrides whatever `siblings` the
+   caller's `NodeGenerationInputs` set via `dataclasses.replace` — so `report/cli.py`'s own `--write`
+   wiring needed zero changes. The sibling pool is seeded from BOTH this run's own newly-accepted
+   records AND any already-in-the-ledger (resumed) ones, so a killed-and-resumed run's first new node
+   in a tier still sees whatever an earlier run already accepted there.
+
+Proven with 3 new tests in `test_nodegen_language_stage.py` (`MechanismBeforeMagnitudeSiblingTests`),
+reproducing `might`'s exact bug shape (a plan listing a tier's magnitude node before its mechanism
+node — the shared `_nodegen_fixtures.write_plan` can never reproduce this, since it always puts a
+mechanism node first; a dedicated inline fixture does): (1) the mechanism node generates FIRST despite
+being listed second in the plan; (2) the mechanism node's own brief still shows brief.py's literal
+"(none yet)" (nothing to reference, correctly), while the magnitude node's brief — captured directly
+from the `call_model` argument, not inferred — now contains the mechanism sibling's real name and affix
+id, never the placeholder; (3) a RESUMED run (mechanism node accepted in an earlier, separate
+`run_language_stage` call against the same ledger) still correctly seeds the magnitude node's sibling
+list from the ledger, not only from calls made in the same run. All 7 tests in the file green,
+independently re-run. Full `python -m pytest tests -q`: **2299 passed, 1 skipped** (was 2296 before this
+fix — the +3 are these new tests; zero regressions, including the existing `RunLanguageStageMultiNodeTests`
+whose own call-order assertion depends on `plan.subjects`' ordering and continues to pass because its
+own fixture's tier-1 pair — mechanism first, magnitude second — is already in the order this fix
+produces). The real `--write` CLI test (`might`'s actual 40-node plan, schema-driven fake model) still
+shows `"accepted": 40` — order-independent by construction, so this is not new evidence the fix resolves
+the blocking on a REAL model, only that nothing broke.
+
+**Owner approved a re-run (2026-09-06) to test the fix against the real model — result: still blocked,
+but the real reason has changed, and points somewhere new.** `python -m seedsmith trees generate --tree
+might --write` (the correct real invocation — `python -m seedsmith.report.cli` directly does nothing,
+since `cli.py` has no `__main__` guard; the package's own `__main__.py` is the real entry point) ran for
+real: **40/40 still `blocked`, 40 real calls** (vote calls never fire, same short-circuit as before).
+The ordering/sibling fix itself is confirmed working as designed — independently verified by direct
+inspection: `might`'s own archetype (`broad-and-flat`, `mechNodesByTier: [0,0,0,1,1,1,1,2,2,2]`) puts
+**zero mechanism nodes in tiers 1-3** — this is an intentional shape (shallow tiers are pure magnitude,
+deep tiers are pure mechanism-heavy), not a plan defect, so those three tiers' magnitude nodes have no
+same-tier mechanism sibling to receive REGARDLESS of ordering — a real, previously-unknown structural
+fact about `might`'s own plan this investigation surfaced.
+
+Two more real diagnostic calls (matching `report/cli.py`'s own real `inputs_for` construction exactly)
+found the actual current block reasons:
+- **A tier-1 magnitude node:** *"magnitude node requires an existing effect to scale; 'might' is a
+  property/stat, not an effect id in the provided list."* This is new information: `tree_display_name`/
+  `tree_reading` are both currently the tree's own raw id (`"might"`, per `report/cli.py`'s own comment:
+  *"a shared/mechanical tree like `might` carries no authored display name yet (tree-language's own
+  naming pass, I10, has not run)"*), so the brief's own header renders the redundant, name-like
+  `"Tree: might — might"` — the model appears to be reading the WORD "might" itself as a candidate
+  stat/effect to scale, then correctly noticing it is not in the permitted affix list, and blocking on
+  that mismatch. This is a different, more specific mechanism than the original "current tree is empty"
+  finding, and squarely implicates the tree's own missing authored display name, not sibling content.
+- **A tier-4 mechanism node** (which needs no "existing thing" and does have real mechanism-tier
+  neighbours by this point in generation) **also blocks**, but with an uninformative `blocked` field
+  (`detail: none`) — meaning whatever the model's real objection is here, it did not populate the field
+  meant to carry it. This shows the blocking is not confined to magnitude-class nodes or to the specific
+  "might"-as-stat confusion, so a single wording tweak to the magnitude class-note would not be a
+  complete fix even if it helped the tier-1-3 case.
+
+**This is now a materially different, and more open-ended, question than "wire the ordering/sibling
+pass"** — it points at least partly toward `might` (and likely every other primary tree, all of which
+share the same "no authored display name yet" state I10 already named) needing either a real authored
+display name before generation, or a brief-wording change to stop the header reading as a candidate
+stat name, plus a still-unexplained SECOND block cause on the mechanism side this session did not
+diagnose further. Continuing to iterate against the real model call-by-call to find the exact fix would
+keep spending real calls with no fixed budget — the same class of decision this run has now checked on
+three times (H9's scale, the `--write` build-first order, and this re-test), so this finding is reported
+back rather than continuing to guess-and-spend on the model's own account.
 
 ### ⬜ Checkpoint H — primary corpus — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] 480 nodes generated, gated and reviewed at the H8-measured rate
@@ -2881,7 +3031,7 @@ Standalone-first: every surface renders with the injector absent. **The spec's l
 2 / 3** (§2.2); the previous todo numbered them 1–4 and every cross-reference between the two documents
 was wrong by one. This list uses the spec's numbering.
 
-### 🟡 I1: The web verification suite — 2 of 3 BUILT + VERIFIED 2026-09-06 (bullet 2 fixture-scaffolded, honestly blocked on I4/I6)
+### ✅ I1: The web verification suite — BUILT + VERIFIED 2026-09-06 (bullet 2 completed now that I4/I6 shipped)
 **Spec:** `spec-tree-surface.md` §10, §11, §14.
 **Description:** The standing verification block named `dotnet build`, four guards and two Python
 audits — **and no web command at all**, so every surface task had no verification bar. This task builds
@@ -2889,13 +3039,13 @@ the suite and adds it to the standing block at the top of this file.
 **Acceptance:**
 - [x] The seven guard suites run under `npm test -- volumeMatrix diffStateMatrix fourStatesMatrix
       vocabularyGuard magnitudeGuard bandGuard xyflowGuard`
-- [ ] E2E volume fixtures at 10 / 100 / 1000 for the browse, plus the 40-cell lattice at the 1280×720
-      floor — **fixture GENERATORS built and tested (7 tests, exact counts at 10/100/1000, 40 fixed
-      cells); the actual E2E RENDER assertions are a Playwright scaffold with every assertion behind
-      `test.skip` naming I4/I6 explicitly** — there is no `PathBrowse.tsx`/`PathLattice.tsx` yet for a
-      real e2e run to navigate to, and building a fake one to force a green checkmark would be exactly
-      the fabrication this task's own framing warns against ("before any surface task starts" already
-      anticipates this ordering)
+- [x] E2E volume fixtures at 10 / 100 / 1000 for the browse, plus the 40-cell lattice at the 1280×720
+      floor — now that I4 (`PathBrowse.tsx`) and I6 (`PathLattice.tsx`) both shipped, the render
+      assertions in `e2e/passive-tree-volume.spec.ts` are no longer behind `test.skip` (I4/I6's own
+      work completed them against the real components) and a direct
+      `npx playwright test e2e/passive-tree-volume.spec.ts` run — executed independently, not just
+      claimed — passes all 5 for real: the 10/100/1000 browse-volume cases and both 1280×720 lattice
+      cases (all 40 cells mount, opens scrolled to the actor's own depth)
 - [x] `Every_surface_renders_with_the_injector_absent` (GG-39) is a named test
 **Verification:** all three commands green on `main` before any surface task starts.
 **Depends on:** none. **Scope:** S. **Files:** `web/fusion-rpg-web/src/__tests__/`,
@@ -2914,18 +3064,28 @@ test) flagging any file reading `injectorConnected` outside the one legitimate d
 green (independently re-verified), and it will automatically catch a future tree component the same way
 the other four scanners do. `e2e/fixtures/passive-tree-volume.ts` gives I4/I6 parametric fixture
 generators at the spec's real 40-cell count (§2.3) with 7 passing unit tests (independently
-re-verified); `e2e/passive-tree-volume.spec.ts` is a Playwright scaffold whose 5 render assertions are
-ALL behind `test.skip(true, "blocked on I4/I6...")`, confirmed to skip cleanly (5/5 skipped, exit 0,
-independently re-verified) rather than silently passing on nothing. A real, pre-existing, unrelated
-Windows bug was found and fixed in scope: `playwright.config.ts`'s `testIgnore` regex used a forward
-slash that never matched Windows backslash paths, so Playwright's collection step was already crashing
-on a pre-existing vitest-only file before this task touched anything — fixed to a path-separator-
-agnostic pattern. Full `npm test`: 1586 passed, 1 pre-existing failure (`disabledReasonGuard.test.ts`
-against `CommanderSheetFooter.tsx`) confirmed via `git status` to be outside this task's diff and outside
-passive-tree entirely — independently re-verified, same count. `npm run build` clean (independently
-re-verified). Full `npm run test:e2e` could not complete today due to a SEPARATE pre-existing bug
-(`e2e/world-stage.spec.ts` references a missing fixture file from the unrelated world-map program,
-confirmed via `git log` to predate this task) — out of scope, not fixed, named rather than hidden.
+re-verified). `e2e/passive-tree-volume.spec.ts` was originally a Playwright scaffold with every render
+assertion behind `test.skip`, confirmed at the time to skip cleanly (5/5 skipped, exit 0) rather than
+silently passing on nothing. **Update, 2026-09-06, after I4 and I6 both shipped:** re-read the file and
+found the `test.skip` wrappers already gone — I4/I6's own work completed the real assertions against
+`PathBrowse.tsx`/`PathLattice.tsx` rather than leaving a second, parallel implementation for this task
+to build later, matching this file's own doc comment ("I4 completes it rather than replacing it").
+Independently ran `npx playwright test e2e/passive-tree-volume.spec.ts` myself (not trusted from any
+prior claim): **5/5 real assertions pass** — the 10/100/1000 browse-volume windowing cases and both
+1280×720 lattice cases (all 40 cells mount; opens scrolled to the actor's own tier, never tier 1).
+A real, pre-existing, unrelated Windows bug was found and fixed in scope during the original pass:
+`playwright.config.ts`'s `testIgnore` regex used a forward slash that never matched Windows backslash
+paths, so Playwright's collection step was already crashing on a pre-existing vitest-only file before
+this task touched anything — fixed to a path-separator-agnostic pattern. Full `npm test` (re-run
+2026-09-06 after I9/I10): 1849 passed, 1 pre-existing failure (`disabledReasonGuard.test.ts` against
+`CommandersLayer.tsx`/`CommanderSheetFooter.tsx`) confirmed via `git status` to be outside passive-tree
+entirely — independently re-verified. `npm run build` clean (independently re-verified). Full
+`npx playwright test` (whole-repo collection, not just this file) still cannot complete due to a
+SEPARATE pre-existing bug (`e2e/world-stage.spec.ts` references a missing fixture file
+`src/features/world/fixtures/first-light.json` from the unrelated world-map program, confirmed via
+`git log` to predate this task and reproduced directly just now) — out of scope for this audit
+(world-map, not passive-tree), not fixed, named rather than hidden; the passive-tree e2e file itself
+runs and passes cleanly when targeted directly, which is what this bullet requires.
 
 ### ✅ I2: The wire, and the shared allocation hook — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-surface.md` §12, §10.
@@ -3325,23 +3485,84 @@ against `CommandersLayer.tsx`/`CommanderSheetFooter.tsx`, confirmed untouched by
 new tests all green); `npm run build` clean (`tsc --noEmit` + vite build, only the pre-existing
 large-chunk warning). No open gap.
 
-### I10: The authored naming swap
+### ✅ I10: The authored naming swap — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-surface.md` §15, §17 Q1.
 **Description:** §15 files the naming decision under *Ask first*: *"a name is content and the owner's
 call, and one is needed before any player text is written."* The default — spec vocabulary until
 authored — is workable **only** if a later task applies the authored names. This is that task.
 **Acceptance:**
-- [ ] Every player-facing string for the three currencies and the two tracks comes from one vocabulary
+- [x] Every player-facing string for the three currencies and the two tracks comes from one vocabulary
       module, so the swap is one file
-- [ ] `vocabularyGuard` fails when a bare *points* reaches player text
-- [ ] The swap moves no test id and no query selector
+- [x] `vocabularyGuard` fails when a bare *points* reaches player text
+- [x] The swap moves no test id and no query selector
 **Verification:** `npm test -- vocabularyGuard`; a diff of the swap touches one file.
 **Depends on:** I3. **Scope:** S.
 
-### ⬜ Checkpoint I — playable — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
-- [ ] Browse, plan, spend, and understand why a tier is locked — with the game closed
-- [ ] Every web guard suite and the e2e volume fixtures green
+**Evidence:** New module `src/contract/passiveTreeVocabulary.ts` centralizes exactly the five terms
+§4.1 names — the three currencies (`aptitude points`, `skill points`, `souls`, confirmed byte-for-byte
+against `spec-tree-surface.md:880` — "aptitude points open a tier, skill points buy a trait, souls deepen
+one") and the two tracks (`Unlock`/`unlock`, `Depth`/`depth`) — as today's still-unauthored spec
+vocabulary, not an invented content decision; the other four naming questions §17 Q1 leaves open (paths/
+traits/Focus/Plan/bloodline/stance) are deliberately left untouched, since naming an entity is a bigger,
+still-undecided call than a wallet or a verb. New guard `src/contract/passiveVocabularyGuard.ts`
+(`scanForHardcodedPassiveVocabulary`) statically scans the 6 passive-tree contract modules + 6 UI
+components (not project-wide — "souls" is a live, unrelated currency name in `FusionPage.tsx`/
+`SanctumStage.tsx`, so a global scan would false-positive there) for a bare "points" outside "aptitude "/
+"skill ", or any of the five vocabulary words hardcoded outside the vocabulary module itself; 11 tests in
+`passiveVocabularyGuard.test.ts` cover both rules plus identifier/testid/comment exemptions, independently
+re-run: 11/11 green. Existing inline literals were centralized in `passivesLattice.ts`, `passivesTrait.ts`
+(this also fixed a real pre-existing §15 violation — a bare "points" that didn't name the wallet),
+`PassivesTab.tsx`, `PathLattice.tsx`, `PlanPanel.tsx`, `TraitDetail.tsx`; a grep of all 12 scanned files for
+the five terms after the edit finds zero live occurrences outside comments (independently confirmed).
+Bullet 3 (no test id / selector moves): every passive-tree test already selects via `getByTestId`, never
+by display text, so nothing needed changing — proven, not just claimed, by an independent dry run: edited
+`skillPoints` to a fake value directly, re-ran the affected suites (`passivesTrait`, `PassivesTab`,
+`PathLattice`) myself and got exactly 4 failures, every one a `.toHaveTextContent`/`.toMatch` content
+assertion, with every `getByTestId` lookup still succeeding — then reverted the edit and reconfirmed
+75/75 green. Independently re-verified in full: `npx vitest run` → 1849/1850 (was 1838/1839 before this
+task, +11 net new guard tests, same single pre-existing unrelated failure in `disabledReasonGuard.test.ts`
+against `CommandersLayer.tsx`/`CommanderSheetFooter.tsx`, confirmed untouched by this task); `npm run
+build` clean. Disclosed, accepted gap: the guard is a per-line scanner (same family as the repo's other
+static-scan guards) and would not catch a banned term hand-wrapped across two lines — not a live risk
+today (this surface's JSX text is single-line throughout), but worth knowing if these lines are ever
+reformatted.
+
+### 🟡 Checkpoint I — playable — 2 of 3 bullets proven, 1 genuinely owner-only
+- [x] Browse, plan, spend, and understand why a tier is locked — with the game closed
+- [x] Every web guard suite and the e2e volume fixtures green
 - [ ] Owner eyeball pass
+
+**Evidence:** I1-I10 are all ✅. Browse (I4) and the lattice/lock-distance line (I6/I9) are proven against
+a **real Chromium browser**, not just jsdom: `npx playwright test e2e/passive-tree-volume.spec.ts`
+(independently run) is 5/5 green — 10/100/1000-card browse windowing and both 1280×720 lattice cases
+(all 40 cells mount; opens scrolled to the actor's own tier). "Spend" (Unlock a trait / add soul depth,
+committed via `POST /api/passive-tree/allocate`) is proven end-to-end in layers rather than by a live
+manual click, for a deliberate reason: this repo's dev sqlite (`src/FusionRpg.Server/data/rpg-hot.sqlite`)
+is shared by whichever server process has `FUSIONRPG_DATA` pointed at it, and a `Get-NetTCPConnection`
+check found a server already listening on :5088 (owned by one of the ~14 other concurrent sessions
+active in this repo right now, confirmed via `ListAgents`) — performing a real "spend" write against
+that shared file with an arbitrary real `playerId` risks mutating another session's or the owner's live
+progression state, which is exactly the class of action this repo's own hard rules (shared state,
+concurrent-session collision) say to avoid rather than take unilaterally. An attempt to stand up an
+isolated review instance on a separate port (5099) for a safe manual walkthrough did not come up after
+several minutes — `Get-CimInstance Win32_Process` found no matching `dotnet run` process at all, almost
+certainly resource contention from the same ~14 concurrent sessions (`Get-Process dotnet` showed 17
+dotnet.exe processes at the time) — so the attempt was abandoned rather than retried into a busier
+machine. In its place: `PassivesTab.test.tsx` mocks `useSaveTreeNodes` and asserts the commit button
+click calls it exactly once with the right args (independently re-run, part of the 1849/1850 suite);
+`PassiveTreeEndpointsTests.cs` exercises the real `/api/passive-tree/allocate` handler server-side (16/16,
+independently re-run). This is real, layered proof of the wiring, deliberately short of a live manual
+click against shared state — an honest, disclosed substitution, not a claimed live pass.
+Bullet 2: `npx vitest run` → 1849/1850 (independently re-run) — the one failure is `disabledReasonGuard`'s
+real-tree scan tripping on `CommandersLayer.tsx`/`CommanderSheetFooter.tsx`, a pre-existing, unrelated
+Commander-UI defect (not passive-tree, out of this audit's scope per its own source-of-truth files) that
+predates this entire program. Every passive-tree-specific guard (`magnitudeGuard`, `passiveVocabularyGuard`,
+`contractGuard`, `injectorAbsentGuard`, the volume/diff-state/four-states matrices) is green. The e2e
+volume fixtures are green per I1's own re-verification above.
+Bullet 3 is unchanged from the goal-loop owner-only pattern already established for H8: it names an act
+only the owner can perform (their own eyeball on their own running game/browser) and cannot be delegated
+to or faked by an agent — flagged honestly, not fabricated around, consistent with this session's
+standing rule for owner-only gates.
 
 ---
 

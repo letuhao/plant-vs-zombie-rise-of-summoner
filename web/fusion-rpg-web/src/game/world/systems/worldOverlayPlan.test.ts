@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { GRID_X, GRID_Y, sectorCenter } from "../layout";
 import {
   planBlockedMark,
+  planLensMarks,
   planLifelineHalos,
   planQueuedRoutes,
   planRangeRings,
@@ -122,7 +123,26 @@ describe("worldOverlayPlan", () => {
     const mark = planBlockedMark(model, { blocked: { sectorId: "x", reason: "path.empty" } });
     expect(mark?.kind).toBe("blocked-mark");
     expect(mark?.reason).toBe("path.empty");
+    expect(mark?.treatment).toBe("blocked");
     expect(mark?.x).toBe(sectorCenter(2, 1).x);
+  });
+
+  it("plans inert blocked marks when targeting says inert (gaps D29)", () => {
+    const model: OverlayModelSlice = {
+      sectors: [sector({ sectorId: "x", layoutX: 0, layoutY: 0 })]
+    };
+    const mark = planBlockedMark(model, {
+      blocked: { sectorId: "x", reason: "ward.unavailable", treatment: "inert" }
+    });
+    expect(mark?.treatment).toBe("inert");
+  });
+
+  it("keeps ownership lens marks empty — pin paint-ops are SSOT (gaps D18)", () => {
+    const model: OverlayModelSlice = {
+      playerFactionId: "player",
+      sectors: [sector({ sectorId: "home", layoutX: 0, layoutY: 0, ownerFactionId: "player" })]
+    };
+    expect(planLensMarks(model, "ownership")).toEqual([]);
   });
 
   it("plans supply cut-offs only for owned sectors outside a component when lens=supply", () => {

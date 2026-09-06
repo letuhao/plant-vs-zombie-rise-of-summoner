@@ -1,6 +1,9 @@
 import Phaser from "phaser";
 import { worldBusEmit, type WorldIgnoreRect } from "../../EventBus";
 import type { WorldRegistry } from "../entities/WorldRegistry";
+import { worldCameraSystem } from "./worldCameraSystem";
+import { hitRadiusWorld, nearestSectorId } from "./worldPickHit";
+import { cssToGamePoint, gameToCssPoint } from "./worldPickCoords";
 
 const WIRE_KEY = "worldPick";
 
@@ -22,27 +25,19 @@ function inIgnoreRect(x: number, y: number, rects: WorldIgnoreRect[]): boolean {
 }
 
 function resolveSectorHit(
+  scene: Phaser.Scene,
   registry: WorldRegistry,
   worldX: number,
   worldY: number
 ): string | null {
-  // Hit radius in world units — PIN_DISC_PX is screen-ish at zoom 1; use half-disc in world space.
-  const hitR = 28;
-  let best: string | null = null;
-  let bestDist = hitR * hitR;
-  for (const id of registry.sectorIds()) {
+  const hitR = hitRadiusWorld(scene.cameras.main.zoom);
+  const pins = registry.sectorIds().flatMap((id) => {
     const go = registry.getSector(id);
-    if (!go || !go.active) continue;
+    if (!go || !go.active) return [];
     const container = go as Phaser.GameObjects.Container;
-    const dx = container.x - worldX;
-    const dy = container.y - worldY;
-    const d2 = dx * dx + dy * dy;
-    if (d2 <= bestDist) {
-      bestDist = d2;
-      best = id;
-    }
-  }
-  return best;
+    return [{ id, x: container.x, y: container.y }];
+  });
+  return nearestSectorId(pins, worldX, worldY, hitR);
 }
 
 function wire(
@@ -55,27 +50,47 @@ function wire(
 
   const s: PickWireState = { generation, getIgnoreRects, offs: [] };
   scene.data.set(WIRE_KEY, s);
-  let handledPick = false;
 
-  const emitEmpty = () => {
-    worldBusEmit("world:select", { generation, kind: "empty" });
+  /**
+   * Phaser pointerup + DOM pointerup both fire for one mouse click. Sector select toggles,
+   * so a second emit of the same id clears selection (gaps D21 honest pick). One gesture → one emit.
+   */
+  let pickConsumed = false;
+
+  const emitSelect = (payload: { kind: string; id?: string }) => {
+    if (pickConsumed) return;
+    pickConsumed = true;
+    worldBusEmit("world:select", { generation, ...payload });
+  };
+
+  const emitEmpty = () => emitSelect({ kind: "empty" });
+
+  /** ignoreRects are authored in canvas CSS px (gaps D7). */
+  const blockedByChromeOrDragCss = (cssX: number, cssY: number): boolean => {
+    if (inIgnoreRect(cssX, cssY, getIgnoreRects())) return true;
+    if (worldCameraSystem.isPickSuppressed(scene)) return true;
+    return false;
+  };
+
+  const pointerToCss = (pointer: Phaser.Input.Pointer) => {
+    const canvas = scene.game.canvas as HTMLCanvasElement;
+    return gameToCssPoint(pointer.x, pointer.y, scene.scale.width, scene.scale.height, canvas.clientWidth, canvas.clientHeight);
+  };
+
+  const onPointerDown = () => {
+    pickConsumed = false;
   };
 
   const onPointerUp = (pointer: Phaser.Input.Pointer) => {
-    if (handledPick) {
-      handledPick = false;
-      return;
-    }
     if (pointer.rightButtonReleased()) return;
-    const sx = pointer.x;
-    const sy = pointer.y;
-    if (inIgnoreRect(sx, sy, getIgnoreRects())) return;
+    const css = pointerToCss(pointer);
+    if (blockedByChromeOrDragCss(css.x, css.y)) return;
 
     const reg = (scene.data.get("worldRegistry") as WorldRegistry | undefined) ?? registry;
     if (reg) {
-      const sectorId = resolveSectorHit(reg, pointer.worldX, pointer.worldY);
+      const sectorId = resolveSectorHit(scene, reg, pointer.worldX, pointer.worldY);
       if (sectorId) {
-        worldBusEmit("world:select", { generation, kind: "sector", id: sectorId });
+        emitSelect({ kind: "sector", id: sectorId });
         return;
       }
     }
@@ -85,7 +100,10 @@ function wire(
 
   const onContextMenu = (pointer: Phaser.Input.Pointer) => {
     pointer.event?.preventDefault?.();
-    if (inIgnoreRect(pointer.x, pointer.y, getIgnoreRects())) return;
+    const css = pointerToCss(pointer);
+    if (inIgnoreRect(css.x, css.y, getIgnoreRects())) return;
+    // Context clear is its own gesture — allow even if a left-pick already consumed.
+    pickConsumed = false;
     emitEmpty();
   };
 
@@ -98,56 +116,49 @@ function wire(
     return undefined;
   };
 
-  const onGameObjectUp = (
-    _pointer: Phaser.Input.Pointer,
-    go: Phaser.GameObjects.GameObject
-  ) => {
+  const onGameObjectUp = (pointer: Phaser.Input.Pointer, go: Phaser.GameObjects.GameObject) => {
+    const css = pointerToCss(pointer);
+    if (blockedByChromeOrDragCss(css.x, css.y)) return;
+
     const name = namedAncestor(go);
     if (name?.startsWith("pin:")) {
-      handledPick = true;
-      const id = name.slice("pin:".length);
-      worldBusEmit("world:select", { generation, kind: "sector", id });
+      emitSelect({ kind: "sector", id: name.slice("pin:".length) });
       return;
     }
     if (name?.startsWith("force:")) {
-      handledPick = true;
-      const id = name.slice("force:".length);
-      worldBusEmit("world:select", { generation, kind: "force", id });
+      emitSelect({ kind: "force", id: name.slice("force:".length) });
       return;
     }
     if (name?.startsWith("lane:")) {
-      handledPick = true;
-      const id = name.slice("lane:".length);
-      worldBusEmit("world:select", { generation, kind: "lane", id });
+      emitSelect({ kind: "lane", id: name.slice("lane:".length) });
     }
   };
 
   /** DOM path — Playwright / WebView often miss Phaser's synthetic pointer stream. */
   const onDomPointerUp = (ev: PointerEvent) => {
     if (ev.button !== 0) return;
+    if (pickConsumed) return;
     const canvas = scene.game.canvas as HTMLCanvasElement | undefined;
     if (!canvas) return;
     const rect = canvas.getBoundingClientRect();
-    const sx = ((ev.clientX - rect.left) / rect.width) * canvas.width;
-    const sy = ((ev.clientY - rect.top) / rect.height) * canvas.height;
-    // Prefer CSS pixel space used by Phaser Scale Manager (not backing-store pixels).
     const cssX = ev.clientX - rect.left;
     const cssY = ev.clientY - rect.top;
-    void sx;
-    void sy;
-    if (inIgnoreRect(cssX, cssY, getIgnoreRects())) return;
-    const world = scene.cameras.main.getWorldPoint(cssX, cssY);
+    if (blockedByChromeOrDragCss(cssX, cssY)) return;
+
+    const game = cssToGamePoint(cssX, cssY, scene.scale.width, scene.scale.height, rect.width, rect.height);
+    const world = scene.cameras.main.getWorldPoint(game.x, game.y);
     const reg = (scene.data.get("worldRegistry") as WorldRegistry | undefined) ?? registry;
     if (reg) {
-      const sectorId = resolveSectorHit(reg, world.x, world.y);
+      const sectorId = resolveSectorHit(scene, reg, world.x, world.y);
       if (sectorId) {
-        worldBusEmit("world:select", { generation, kind: "sector", id: sectorId });
+        emitSelect({ kind: "sector", id: sectorId });
         return;
       }
     }
     emitEmpty();
   };
 
+  scene.input.on("pointerdown", onPointerDown);
   scene.input.on("pointerup", onPointerUp);
   scene.input.on("pointerupoutside", onPointerUp);
   scene.input.on("contextmenu", onContextMenu);
@@ -156,6 +167,7 @@ function wire(
   canvasEl?.addEventListener("pointerup", onDomPointerUp);
 
   s.offs.push(
+    () => scene.input.off("pointerdown", onPointerDown),
     () => scene.input.off("pointerup", onPointerUp),
     () => scene.input.off("pointerupoutside", onPointerUp),
     () => scene.input.off("contextmenu", onContextMenu),

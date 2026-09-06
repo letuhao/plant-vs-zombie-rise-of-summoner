@@ -132,6 +132,18 @@ public static class ArmouryCompare
     }
 
     /// <summary>
+    /// One atom's roll quality in ‰, for a caller that has the pair but no <see cref="CompareResult"/>.
+    ///
+    /// <para><b>Public since item module 10's Card pass (2026-09-06).</b> The card's roll bar and the
+    /// comparison's roll-quality column are the same number, and G3 §8.6's one-producer rule applies to
+    /// it exactly as it applies to a line: a second position-in-band computation is how "the tooltip
+    /// says a good roll and the compare screen says a bad one" happens. Body unchanged — only the
+    /// visibility and the parameter shape moved.</para>
+    /// </summary>
+    public static int RollQualityMilli(AtomRow atom, string valuesJson) =>
+        RollQualityMilliOf(new CompareAtom(atom, valuesJson));
+
+    /// <summary>
     /// 1000‰ for a <c>Fixed</c> spec (<c>min == max</c>, or "amount" is a plain number rather than a
     /// <c>{min,max}</c> object) — nothing rolled, so there is nothing to grade against. Otherwise the
     /// rolled value's position in <c>[min, max]</c>, clamped, so a malformed or content-edited bound

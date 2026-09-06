@@ -8,8 +8,9 @@ export type OutlinerProps = {
   groups: readonly OutlinerGroup[];
   selectedId: string | null;
   onSelect: (id: string, kind: OutlinerRowKind) => void;
-  /** world-stage W93 — fired only by `⏎`, never by a click or an arrow: a request the caller applies
-   * to its own camera state (`camera.ts`'s `centreOn`) and never reads back from here. */
+  /** world-stage W93 / gaps D25 — fired only by `⏎`, never by a click or an arrow: the caller emits
+   * `world:camera` `{ op: "centre", x, y }` from `sectorCenter` (not arrow pin-hop) and never reads
+   * back from here. */
   onCentreRequest: (row: OutlinerRowData) => void;
   /** For a test to swap in a bare placeholder without every fact `LegionRow`/`SectorRow` (W92) render
    * — defaults to the real per-kind row body. */

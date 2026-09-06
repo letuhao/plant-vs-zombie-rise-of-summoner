@@ -38,7 +38,7 @@ from __future__ import annotations
 import json
 import os
 import tempfile
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any, Callable, Mapping, Sequence
 
@@ -290,6 +290,20 @@ def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None
     cannot satisfy, and this module never resolves a quota cell (`quota.py`/H3's job) — so `held` is
     always `[]` here, present in the shape only so H3 has somewhere to put one without changing
     `RunPlan`'s own fields.
+
+    **Ordering (§6.2's sibling-passing shape, closed 2026-09-06):** subjects are stably sorted
+    `(tier, 0 if mechanism else 1)` — every mechanism node in a tier generates before that tier's
+    magnitude nodes, never reordering ACROSS tiers or within the same `(tier, class)` group (Python's
+    `sorted` is stable, so ties keep the plan's own file order). This exists so
+    `run_language_stage`'s own tier-sibling tracking (below) has something real to pass a magnitude
+    node the first time it renders — a magnitude node is defined as "makes an EXISTING thing larger"
+    (`brief.py`'s own class note), and a tree plan is free to list its magnitude nodes before any
+    mechanism node in the same tier (confirmed: `might`'s own committed plan does, for its first six
+    nodes) — without this reorder, a magnitude node would ALWAYS render with an empty sibling list
+    regardless of how well `run_language_stage` tracks acceptance, which is the exact "current tree is
+    empty" gap the 2026-09-06 smoke test surfaced. This does not change what the FINAL seed document's
+    own node order is — `run_language_stage`'s own `sorted_records = sorted(..., key=... node_id)`
+    already re-sorts by `node_id` at emit time, so generation order is a pure scheduling detail.
     """
     done = ledger if ledger is not None else read_ledger()
     subjects: "list[Subject]" = []
@@ -304,6 +318,7 @@ def plan_run(tree_plan: "plan_read.TreePlan", *, ledger: "dict[str, dict] | None
             node_key=node.node_key, branch=node.branch, tier=node.tier,
             node_class=node.node_class,
         ))
+    subjects.sort(key=lambda s: (s.tier, 0 if s.node_class == "mechanism" else 1))
     return RunPlan(subjects=subjects, held=[], already_done=already)
 
 
@@ -529,6 +544,16 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     rerun over unchanged inputs makes zero model calls and re-emits byte-identical bytes (the
     historical defect this whole task exists to catch: "the commander-effect generator rewrote all
     84 entries every run").
+
+    **Tier-sibling tracking (§6.2, closed 2026-09-06).** This function, not `inputs_for`, owns
+    "already-accepted TIER siblings" — populating it needs `records`/`done`, data only this loop
+    holds. Whatever `siblings` the caller's own `inputs_for(subject)` sets is REPLACED with the real,
+    freshly-tracked tuple for that subject's tier (via `dataclasses.replace`); a caller is never
+    expected to track this itself. The pool is seeded from resumed (`plan.already_done`) records too,
+    so a resumed run's first newly-generated node in a tier still sees whatever an EARLIER run already
+    accepted there, not just what this call accepts. Combined with `plan_run`'s own
+    mechanism-before-magnitude ordering, a magnitude node normally has at least one real sibling to
+    read by the time it renders, rather than always seeing brief.py's own "(none yet)" placeholder.
     """
     from . import verdict  # local import — avoids a module-level cycle with `verdict.py`'s own
                             # re-export of A2's `targets` module, which nothing here otherwise needs
@@ -537,24 +562,32 @@ def run_language_stage(tree_plan: "plan_read.TreePlan",
     plan = plan_run(tree_plan, ledger=done)
 
     records: "dict[str, NodeSeedRecord]" = {}
+    tier_siblings: "dict[int, list[brief_mod.SiblingSummary]]" = {}
     for subject_id in plan.already_done:
         entry = done[subject_id]
         node = entry["record"]
-        records[subject_id] = build_node_record(
+        record = build_node_record(
             node["id"], node["nodeKey"], node["branch"], node["tier"], node["nodeClass"], {
                 "affixIds": node["affixIds"], "affinity": node["affinity"],
                 "exclusion": node["exclusion"], "name": node["name"], "nameKey": node["nameKey"],
                 "flavor": node["flavor"], "rationale": node.get("rationale", ""),
             })
+        records[subject_id] = record
+        tier_siblings.setdefault(record.tier, []).append(
+            brief_mod.SiblingSummary(record.node_id, record.name, record.affix_ids))
 
     outcomes: "list[NodeOutcome]" = []
     unresolved_count = 0
     for subject in plan.subjects:
-        outcome = generate_node(subject, inputs_for(subject), config=config)
+        base_inputs = inputs_for(subject)
+        siblings_here = tuple(tier_siblings.get(subject.tier, ()))
+        outcome = generate_node(subject, replace(base_inputs, siblings=siblings_here), config=config)
         outcomes.append(outcome)
         if outcome.outcome == "unresolved":
             unresolved_count += 1
         if outcome.outcome == "accepted" and outcome.record is not None:
+            tier_siblings.setdefault(subject.tier, []).append(brief_mod.SiblingSummary(
+                outcome.record.node_id, outcome.record.name, outcome.record.affix_ids))
             done = record_accepted(done, subject.subject_id, outcome.record)
             records[subject.subject_id] = outcome.record
 

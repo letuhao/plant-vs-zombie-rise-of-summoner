@@ -96,11 +96,29 @@ public enum RollPolicy
 /// The ceiling — matches <c>PatronPolicy.AuraClampMilli</c>'s own role. Required whenever
 /// <see cref="ClampedLevelScale"/> is set, never silently defaulted.
 /// </param>
+/// <param name="ExternalRef">
+/// `patron-absorption` (`spec-patron-absorption.md`'s own 2026-09-06 amendment) — the "referenced,
+/// not re-expressed" shape that spec decided on: some magnitudes are not safely RE-DERIVABLE as an
+/// atom formula at all, because the real value is per-player-varying and already computed by a
+/// SHIPPED function elsewhere (`PatronPolicy.AuraMilli`) — reproducing it as composed
+/// <see cref="PowerLadder"/>/<see cref="ClampedLevelScale"/> atoms would satisfy the letter of "an
+/// atom carries the number" while leaving TWO independently-expressed formulas that are only
+/// PROVABLY equal by a sweep, never by construction, and can drift the moment either is tuned alone.
+/// A closed, literal, reviewed string id (never a free-form expression or a reflected method name),
+/// resolved by <c>AtomCompiler.ResolvedParams</c> via a caller-supplied
+/// <c>externalRefs: Func&lt;string, long&gt;?</c> callback — the exact same shape
+/// <c>curves: Func&lt;string, CurveTable?&gt;</c> already has, so <c>AtomCompiler</c> itself never
+/// imports <c>PatronPolicy</c> or anything domain-specific; it only ever invokes whatever callback it
+/// was handed. Mutually exclusive with every other `ValueSpec` shape. Compiling an atom that carries
+/// this marker with no callback supplied (or an id the callback does not recognise) throws, naming
+/// the ref id — never silently prices at zero, matching every other marker's own rule.
+/// </param>
 public readonly record struct ValueSpec(
     int Min, int Max, RollPolicy Roll, string? CurveId = null,
     string? EventField = null, int MultiplierMilli = 1000,
     bool PowerLadder = false, int PowerLadderKMilli = 0, long PowerLadderKMicro = 0,
-    bool ClampedLevelScale = false, int ClampedLevelScaleBaseMilli = 0, int ClampedLevelScaleCapMilli = 0)
+    bool ClampedLevelScale = false, int ClampedLevelScaleBaseMilli = 0, int ClampedLevelScaleCapMilli = 0,
+    string? ExternalRef = null)
 {
     /// <summary>The closed set of fields an event-linked spec may read. One member today.</summary>
     public static readonly IReadOnlyCollection<string> EventFields = new[] { "damage" };
@@ -125,9 +143,9 @@ public readonly record struct ValueSpec(
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
                     $"unknown eventField '{EventField}' — the closed set is: {string.Join(", ", EventFields)}");
 
-            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || PowerLadder || ClampedLevelScale)
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || PowerLadder || ClampedLevelScale || ExternalRef is not null)
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
-                    "eventField is exclusive of min/max/roll/curve/powerLadder/clampedLevelScale — author only " +
+                    "eventField is exclusive of min/max/roll/curve/powerLadder/clampedLevelScale/externalRef — author only " +
                     "{\"eventField\": ..., \"multiplierMilli\": ...}");
 
             return AtomRejection.Ok;
@@ -135,9 +153,9 @@ public readonly record struct ValueSpec(
 
         if (PowerLadder)
         {
-            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || ClampedLevelScale)
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || ClampedLevelScale || ExternalRef is not null)
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
-                    "powerLadder is exclusive of min/max/roll/curve/eventField/clampedLevelScale — author only " +
+                    "powerLadder is exclusive of min/max/roll/curve/eventField/clampedLevelScale/externalRef — author only " +
                     "{\"powerLadder\": true, \"kMilli\": ...}");
 
             return AtomRejection.Ok;
@@ -145,13 +163,25 @@ public readonly record struct ValueSpec(
 
         if (ClampedLevelScale)
         {
-            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null)
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null || ExternalRef is not null)
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
-                    "clampedLevelScale is exclusive of min/max/roll/curve/eventField/powerLadder — author only " +
+                    "clampedLevelScale is exclusive of min/max/roll/curve/eventField/powerLadder/externalRef — author only " +
                     "{\"clampedLevelScale\": true, \"baseMilli\": ..., \"capMilli\": ...}");
             if (ClampedLevelScaleCapMilli < 0)
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
                     $"clampedLevelScale capMilli must be >= 0, got {ClampedLevelScaleCapMilli}");
+
+            return AtomRejection.Ok;
+        }
+
+        if (ExternalRef is not null)
+        {
+            if (ExternalRef.Length == 0)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, "externalRef must not be empty");
+            if (Min != 0 || Max != 0 || Roll != RollPolicy.Fixed || CurveId is not null)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "externalRef is exclusive of min/max/roll/curve/eventField/powerLadder/clampedLevelScale — author only " +
+                    "{\"externalRef\": \"...\"}");
 
             return AtomRejection.Ok;
         }

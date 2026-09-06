@@ -79,4 +79,81 @@ describe("WorldGameHost", () => {
     expect(createWorldGame).toHaveBeenCalledTimes(1);
     expect(destroyWorldGame).not.toHaveBeenCalled();
   });
+
+  it("bumps modelSeq when ownerFactionId changes with identical intel (gaps D1)", () => {
+    const models: Array<{ modelSeq: number }> = [];
+    worldBusOn("world:model", (raw) => {
+      models.push(raw as { modelSeq: number });
+    });
+
+    const sector = {
+      sectorId: "homeworld",
+      typeId: "wildland",
+      climate: null,
+      ownerFactionId: "dave",
+      intel: "Watched" as const,
+      intelAge: 0,
+      phase: "Held",
+      dangerBand: { unit: "count" as const, value: 0 },
+      developmentLevel: { unit: "count" as const, value: 0 },
+      stability: { unit: "perMilleRatio" as const, op: "flat" as const, value: 1000 },
+      pressure: { unit: "perMilleRatio" as const, op: "flat" as const, value: 0 },
+      fractureIntensity: { unit: "perMilleRatio" as const, op: "absolute" as const, value: 1000 },
+      habitable: true,
+      layoutX: 0,
+      layoutY: 0,
+      loam: {
+        production: { unit: "loamUnits" as const, value: 0 },
+        upkeep: { unit: "loamUnits" as const, value: 0 },
+        net: { unit: "loamUnits" as const, value: 0 },
+        stock: { unit: "loamUnits" as const, value: 0 },
+        capacity: { state: "pending" as const, reason: "x" },
+        upkeepBreakdown: {
+          base: { unit: "loamUnits" as const, value: 0 },
+          garrison: { unit: "loamUnits" as const, value: 0 },
+          development: { unit: "loamUnits" as const, value: 0 },
+          danger: { unit: "loamUnits" as const, value: 0 },
+          intensityMilli: { unit: "perMilleRatio" as const, op: "absolute" as const, value: 1000 }
+        }
+      },
+      component: {
+        componentId: null,
+        production: { unit: "loamUnits" as const, value: 0 },
+        upkeep: { unit: "loamUnits" as const, value: 0 },
+        net: { unit: "loamUnits" as const, value: 0 },
+        stock: { unit: "loamUnits" as const, value: 0 }
+      },
+      willReleaseNextTurn: false,
+      lifelineCost: { state: "pending" as const, reason: "x" },
+      lifeline: { state: "pending" as const, reason: "x" },
+      wardenBindingId: { state: "pending" as const, reason: "x" },
+      neglectedTurns: { state: "pending" as const, reason: "x" }
+    };
+
+    const modelA: AdaptedWorldState = {
+      sectors: [sector],
+      lanes: [],
+      slotsBySectorId: {},
+      forcesBySectorId: {}
+    };
+    const modelB: AdaptedWorldState = {
+      ...modelA,
+      sectors: [{ ...sector, ownerFactionId: "zomboss" }]
+    };
+
+    const { rerender } = render(
+      <WorldGameHost model={modelA} playerFactionId="dave" overlayEpoch={0} onSelect={() => {}} />
+    );
+    const generation = createWorldGame.mock.calls[0]![0].generation as number;
+    act(() => {
+      worldBusEmit("world:ready", { generation });
+    });
+    expect(models).toHaveLength(1);
+
+    rerender(
+      <WorldGameHost model={modelB} playerFactionId="dave" overlayEpoch={0} onSelect={() => {}} />
+    );
+    expect(models).toHaveLength(2);
+    expect(models[1]!.modelSeq).toBe(2);
+  });
 });

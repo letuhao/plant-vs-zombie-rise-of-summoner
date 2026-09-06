@@ -23,14 +23,14 @@
         "pipeline": "affix-authoring",
         "model": "google/gemma-4-26b-a4b-qat",
         "promptVersion": "affix-authoring/1",
-        "generatedUtc": "2026-09-06T02:52:48+00:00",
+        "generatedUtc": "2026-09-06T02:54:32+00:00",
         "voteConfidence": {
           "name": "split",
           "refs": "split"
         },
         "voteMinority": {
-          "name": "Frostbite Sentinel",
-          "refs": "atom.fx-freeze-on-hit.t1,atom.fx-shield-grant.a.t1"
+          "name": "Frostbite Strike",
+          "refs": "atom.fx-cold-on-hit.t1,atom.fx-freeze-on-hit.t1"
         }
       }
     },

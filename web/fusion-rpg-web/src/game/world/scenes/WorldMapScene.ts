@@ -14,6 +14,7 @@ import { worldCameraSystem } from "../systems/worldCameraSystem";
 import { worldPickSystem } from "../systems/worldPickSystem";
 import { worldOverlaySystem } from "../systems/worldOverlaySystem";
 import { zoomTier, type ZoomTier } from "../zoomTier";
+import { worldToCameraScreen, gameToCssPoint } from "../systems/worldPickCoords";
 
 /**
  * Persistent world map while #/world is mounted.
@@ -112,7 +113,9 @@ export class WorldMapScene extends Phaser.Scene {
         const p = raw as { generation?: number; lens?: string };
         if (p.generation !== this.generation) return;
         this.lens = p.lens ?? "ownership";
-        console.info("[world-scene]", { event: "lens", generation: this.generation, lens: this.lens });
+        if (import.meta.env.DEV) {
+          console.info("[world-scene]", { event: "lens", generation: this.generation, lens: this.lens });
+        }
         worldOverlaySystem({
           scene: this,
           theme: this.theme,
@@ -126,57 +129,59 @@ export class WorldMapScene extends Phaser.Scene {
     );
 
     worldPickSystem.wire(this, this.generation, () => this.interaction?.ignoreRects ?? []);
-    worldCameraSystem.wirePointer(this, () => this.refreshLod());
+    worldCameraSystem.wirePointer(
+      this,
+      () => this.refreshLod(),
+      () => this.interaction?.ignoreRects ?? []
+    );
 
     worldBusEmit("world:ready", { generation: this.generation });
 
-    // Observability — host and e2e can probe mount generation + pin screen coords.
+    // Observability — DEV/Playwright may read pin coordinates. Must not emit select (gaps D3).
     if (typeof window !== "undefined") {
+      const allowProbe =
+        import.meta.env.DEV ||
+        (window as unknown as { __PLAYWRIGHT?: boolean }).__PLAYWRIGHT === true;
       const w = window as unknown as {
         __fusionRpgWorldGen?: number;
         __fusionRpgWorldProbe?: {
           generation: number;
           pinScreen: (sectorId: string) => { x: number; y: number } | null;
           pinCount: () => number;
-          emitSelect?: (kind: string, id: string) => void;
-          pickAt?: (cssX: number, cssY: number) => string | null;
+          centreOn?: (sectorId: string) => boolean;
         };
       };
+      // Still set for legacy e2e until G14; production Fit/pan must not rely on this (gaps D2).
       w.__fusionRpgWorldGen = this.generation;
-      w.__fusionRpgWorldProbe = {
-        generation: this.generation,
-        pinCount: () => this.worldRegistry.sectorIds().length,
-        pinScreen: (sectorId: string) => {
-          const go = this.worldRegistry.getSector(sectorId) as Phaser.GameObjects.Container | undefined;
-          if (!go) return null;
-          const bounds = go.getBounds?.();
-          if (!bounds) return null;
-          return { x: bounds.centerX, y: bounds.centerY };
-        },
-        emitSelect: (kind: string, id: string) => {
-          worldBusEmit("world:select", {
-            generation: this.generation,
-            kind: kind as "sector" | "force" | "lane" | "empty",
-            id
-          });
-        },
-        /** Hit-test at canvas CSS coords — same math as DOM pointerup pick. */
-        pickAt: (cssX: number, cssY: number) => {
-          const world = this.cameras.main.getWorldPoint(cssX, cssY);
-          for (const id of this.worldRegistry.sectorIds()) {
-            const go = this.worldRegistry.getSector(id) as Phaser.GameObjects.Container | undefined;
-            if (!go) continue;
-            const dx = go.x - world.x;
-            const dy = go.y - world.y;
-            if (dx * dx + dy * dy <= 28 * 28) {
-              worldBusEmit("world:select", { generation: this.generation, kind: "sector", id });
-              return id;
-            }
+      if (allowProbe) {
+        w.__fusionRpgWorldProbe = {
+          generation: this.generation,
+          pinCount: () => this.worldRegistry.sectorIds().length,
+          pinScreen: (sectorId: string) => {
+            const go = this.worldRegistry.getSector(sectorId) as Phaser.GameObjects.Container | undefined;
+            if (!go) return null;
+            // Match Phaser camera matrix (origin × zoom) — naive (world-scroll)*zoom misses when zoom ≠ 1.
+            const cam = this.cameras.main;
+            const game = worldToCameraScreen(go.x, go.y, cam.scrollX, cam.scrollY, cam.zoom, cam.width, cam.height);
+            const canvas = this.game.canvas as HTMLCanvasElement;
+            return gameToCssPoint(
+              game.x,
+              game.y,
+              this.scale.width,
+              this.scale.height,
+              canvas.clientWidth,
+              canvas.clientHeight
+            );
+          },
+          /** Bring a pin into view before an honest mouse pick (Playwright only). */
+          centreOn: (sectorId: string) => {
+            const go = this.worldRegistry.getSector(sectorId) as Phaser.GameObjects.Container | undefined;
+            if (!go) return false;
+            this.cameras.main.centerOn(go.x, go.y);
+            return true;
           }
-          worldBusEmit("world:select", { generation: this.generation, kind: "empty" });
-          return null;
-        }
-      };
+        };
+      }
     }
   }
 
@@ -191,6 +196,14 @@ export class WorldMapScene extends Phaser.Scene {
     worldCameraSystem.unwire(this);
     this.worldRegistry.clear(this);
     worldOverlaySystem.clear(this);
+    if (typeof window !== "undefined") {
+      const w = window as unknown as {
+        __fusionRpgWorldGen?: number;
+        __fusionRpgWorldProbe?: unknown;
+      };
+      delete w.__fusionRpgWorldGen;
+      delete w.__fusionRpgWorldProbe;
+    }
   }
 
   private refreshLod(): void {

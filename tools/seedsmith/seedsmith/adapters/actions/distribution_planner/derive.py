@@ -542,7 +542,18 @@ def plan_subject(*, scope: str, scope_key: "str | None", count: int, weights: We
     structure_enforced = RESTRICTION_AXIS not in structure_axes
 
     allowed_universe = frozenset(allowed_families)
-    pairing_assignments = assign_pairing_roles(count, allowed_universe, pairing_table)
+    # ⛔ Species scope never pairs (2026-09-06 finding). `assign_pairing_roles` greedily claims a
+    # subject's FIRST two ordinals for the first reachable payoff -- fine for `family`/`general`
+    # (few subjects, a shared audience a pairing theme can legitimately dominate a slice of), but
+    # a species subject's own `count` is small enough (today: 2) that the first reachable payoff
+    # consumes its ENTIRE budget, forcing every one of ~84 species into the IDENTICAL pairing and
+    # crowding out the per-species distinctiveness the game-design docs name as the point of
+    # species scope at all (seedsmith-design Step 2, "distinctness is carried by abilities").
+    # Species subjects always stay `role: none`; pairing content lives at family/general scope.
+    pairing_assignments = (
+        [PairingAssignment("none", None, None) for _ in range(count)] if scope == "species"
+        else assign_pairing_roles(count, allowed_universe, pairing_table)
+    )
 
     id_key = scope_key if scope_key is not None else "general"
     briefs: "list[dict]" = []

@@ -1,6 +1,6 @@
 import type Phaser from "phaser";
 import type { AdaptedWorldState } from "@/contract/adapt";
-import type { LaneView, SectorView } from "@/contract/types";
+import type { ForceView, LaneView, LegionView, SectorView } from "@/contract/types";
 import { channelsFor } from "@/stages/world/render/sectorChannels";
 import { fogTreatmentFor } from "@/stages/world/render/fogTreatments";
 import { ownershipOf, healthOf } from "@/stages/world/render/sectorHealthAndOwnership";
@@ -10,11 +10,12 @@ import { sectorCenter } from "../layout";
 import type { ZoomTier } from "../zoomTier";
 import type { WorldRegistry } from "../entities/WorldRegistry";
 import { createSectorPin } from "../objects/sectorPin";
-import { createLaneStroke } from "../objects/laneStroke";
+import { createLaneStroke, pointOnLane } from "../objects/laneStroke";
 import { createForceMarker } from "../objects/forceMarker";
 
 export type SyncWorldModel = AdaptedWorldState & {
   playerFactionId?: string | null;
+  legions?: readonly LegionView[];
 };
 
 export type SyncWorldSystemInput = {
@@ -70,7 +71,8 @@ function upsertSectorPin(
   registry: WorldRegistry,
   sector: SectorView,
   tier: ZoomTier,
-  playerFactionId: string | null
+  playerFactionId: string | null,
+  slotsBySectorId: Record<string, { slotIndex: number; slotTypeId: string }[]>
 ): void {
   const ownership = ownershipOf(sector, playerFactionId);
   const health = healthOf(sector, ownership);
@@ -82,6 +84,11 @@ function upsertSectorPin(
   });
   const fog = fogTreatmentFor(sector.intel, sector.intelAge);
   const { x, y } = sectorCenter(sector.layoutX, sector.layoutY);
+  const slots = (slotsBySectorId[sector.sectorId] ?? []).map((s) => ({
+    slotIndex: s.slotIndex,
+    slotTypeId: s.slotTypeId
+  }));
+  const netLoam = ownership === "yours" ? sector.loam.net.value : null;
 
   registry.getSector(sector.sectorId)?.destroy();
 
@@ -91,7 +98,9 @@ function upsertSectorPin(
     fog,
     zoom: tier,
     x,
-    y
+    y,
+    slots,
+    netLoam
   });
   pin.setDepth(0);
   registry.setSector(sector.sectorId, pin);
@@ -126,6 +135,45 @@ function upsertLane(
   registry.setLane(lane.laneId, stroke);
 }
 
+function forceFromLegion(legion: LegionView): ForceView {
+  return {
+    entityId: legion.entityId,
+    ownerFactionId: legion.ownerFactionId,
+    kind: legion.kind,
+    exact: true,
+    strength: { unit: "gameUnits", value: legion.members.length }
+  };
+}
+
+function legionWorldPosition(
+  legion: LegionView,
+  sectorsById: Map<string, SectorView>,
+  lanesById: Map<string, LaneView>
+): { x: number; y: number } | null {
+  if (legion.position.kind === "sector") {
+    const sector = sectorsById.get(legion.position.sectorId);
+    if (!sector) return null;
+    const c = sectorCenter(sector.layoutX, sector.layoutY);
+    return { x: c.x, y: c.y - 20 };
+  }
+
+  const lane = lanesById.get(legion.position.laneId);
+  if (!lane) return null;
+  const from = sectorsById.get(lane.fromSectorId);
+  const to = sectorsById.get(lane.toSectorId);
+  if (!from || !to) return null;
+  const a = sectorCenter(from.layoutX, from.layoutY);
+  const b = sectorCenter(to.layoutX, to.layoutY);
+  // Orient progress toward towardSectorId.
+  const toward = legion.position.towardSectorId;
+  const forward = toward === lane.toSectorId;
+  const x0 = forward ? a.x : b.x;
+  const y0 = forward ? a.y : b.y;
+  const x1 = forward ? b.x : a.x;
+  const y1 = forward ? b.y : a.y;
+  return pointOnLane(x0, y0, x1, y1, legion.position.progress.value);
+}
+
 function upsertForces(
   scene: Phaser.Scene,
   theme: WorldTheme,
@@ -135,6 +183,26 @@ function upsertForces(
 ): void {
   const playerFactionId = model.playerFactionId ?? null;
   const nextForceIds = new Set<string>();
+  const lanesById = new Map(model.lanes.map((l) => [l.laneId, l]));
+  const legionIds = new Set((model.legions ?? []).map((l) => l.entityId));
+
+  // Exact legions win over forcesBySectorId for the same entityId (gaps D15).
+  for (const legion of model.legions ?? []) {
+    const pos = legionWorldPosition(legion, sectorsById, lanesById);
+    if (!pos) continue;
+    const id = legion.entityId;
+    nextForceIds.add(id);
+    registry.getForce(id)?.destroy();
+    const marker = createForceMarker(scene, theme, {
+      id,
+      force: forceFromLegion(legion),
+      ownership: legion.ownerFactionId === playerFactionId ? "yours" : "enemy",
+      x: pos.x,
+      y: pos.y
+    });
+    marker.setDepth(5);
+    registry.setForce(id, marker);
+  }
 
   for (const [sectorId, forces] of Object.entries(model.forcesBySectorId ?? {})) {
     const sector = sectorsById.get(sectorId);
@@ -142,6 +210,7 @@ function upsertForces(
     const { x: cx, y: cy } = sectorCenter(sector.layoutX, sector.layoutY);
 
     forces.forEach((force, index) => {
+      if (legionIds.has(force.entityId)) return;
       const id = force.entityId;
       nextForceIds.add(id);
       registry.getForce(id)?.destroy();
@@ -178,7 +247,15 @@ export function syncWorldSystem(input: SyncWorldSystemInput): number | null {
   const nextSectorIds = new Set(model.sectors.map((s) => s.sectorId));
   destroyAbsent(input.registry, input.registry.sectorIds(), nextSectorIds, "sector");
   for (const sector of model.sectors) {
-    upsertSectorPin(input.scene, input.theme, input.registry, sector, input.tier, playerFactionId);
+    upsertSectorPin(
+      input.scene,
+      input.theme,
+      input.registry,
+      sector,
+      input.tier,
+      playerFactionId,
+      model.slotsBySectorId ?? {}
+    );
   }
 
   const nextLaneIds = new Set(model.lanes.map((l) => l.laneId));

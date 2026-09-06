@@ -30,6 +30,32 @@ function lerp(ax: number, ay: number, bx: number, by: number, t: number): { x: n
   return { x: ax + (bx - ax) * t, y: ay + (by - ay) * t };
 }
 
+/**
+ * Paint-ops covering every LaneChannels field (gaps D14).
+ * Stroke/gap drawn by Graphics; markers as mid-lane text ops.
+ */
+export type LanePaintOp =
+  | { op: "stroke"; style: LaneChannels["strokeStyle"]; token: LaneChannels["token"]; severedGap: boolean }
+  | { op: "marker"; kind: "arrow" | "no-supply" | "gate" | "severed" | "ward" | "hazard"; text: string; dx: number };
+
+export function lanePaintOps(channels: LaneChannels): readonly LanePaintOp[] {
+  const ops: LanePaintOp[] = [
+    {
+      op: "stroke",
+      style: channels.strokeStyle,
+      token: channels.token,
+      severedGap: channels.severedGap
+    }
+  ];
+  if (channels.arrowheads) ops.push({ op: "marker", kind: "arrow", text: "➤", dx: 0 });
+  if (channels.noSupplyMark) ops.push({ op: "marker", kind: "no-supply", text: "⊘", dx: 14 });
+  if (channels.gateGlyph) ops.push({ op: "marker", kind: "gate", text: channels.gateGlyph, dx: -14 });
+  if (channels.severedGlyph) ops.push({ op: "marker", kind: "severed", text: channels.severedGlyph, dx: 0 });
+  if (channels.wardBadge) ops.push({ op: "marker", kind: "ward", text: channels.wardBadge, dx: 24 });
+  if (channels.hazardBadge) ops.push({ op: "marker", kind: "hazard", text: channels.hazardBadge, dx: -24 });
+  return ops;
+}
+
 function drawStroke(
   g: Phaser.GameObjects.Graphics,
   channels: LaneChannels,
@@ -62,7 +88,7 @@ function drawStroke(
     const gap = style === "long-dash" ? 8 : 4;
     const dx = x1 - x0;
     const dy = y1 - y0;
-    const len = Math.hypot(dx, dy);
+    const len = Math.hypot(dx, dy) || 1;
     const ux = dx / len;
     const uy = dy / len;
     let dist = 0;
@@ -107,20 +133,38 @@ export type LaneStrokeInput = {
   y1: number;
 };
 
-/** Draw a lane between two pin centres using `laneChannels` stroke language. */
+/** Draw a lane between two pin centres using LaneChannels paint-ops. */
 export function createLaneStroke(
   scene: Phaser.Scene,
   theme: WorldTheme,
   input: LaneStrokeInput
-): Phaser.GameObjects.Graphics {
+): Phaser.GameObjects.Container {
   const channels = laneChannelsFor(input.kind, input.state);
+  const ops = lanePaintOps(channels);
+  const container = scene.add.container(0, 0);
+  container.setName(`lane:${input.id}`);
+
   const g = scene.add.graphics();
-  g.setName(`lane:${input.id}`);
+  container.add(g);
   const color = laneColor(theme, channels.token);
   const width = strokeWidthFor(input.widthMilli);
   drawStroke(g, channels, color, width, input.x0, input.y0, input.x1, input.y1);
-  g.setDepth(-10);
-  return g;
+
+  const midX = (input.x0 + input.x1) / 2;
+  const midY = (input.y0 + input.y1) / 2;
+  for (const op of ops) {
+    if (op.op !== "marker") continue;
+    const t = scene.add.text(midX + op.dx, midY, op.text, {
+      fontFamily: theme.fontFamily,
+      fontSize: "12px",
+      color: theme.ink
+    });
+    t.setOrigin(0.5);
+    container.add(t);
+  }
+
+  container.setDepth(-10);
+  return container;
 }
 
 /** Midpoint along a straight lane — v1 linear, no easing. */

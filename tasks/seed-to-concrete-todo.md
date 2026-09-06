@@ -2106,6 +2106,56 @@ living end-to-end test, not scaffolding to throw away.
   Server's own flip, and not attempted this pass. **Precise remaining state**: step 5 is HALF done
   (Server yes, Injector no); step 7's deletion stays correctly blocked behind the Injector half too,
   since `ConfigureFromCompiledDefault()` cannot be deleted while a real host still calls it.
+  - ✅ **Injector half built, tested, and LIVE-VERIFIED, 2026-09-06** — closing step 5 for real.
+    `src/FusionRpg.Core/Demons/Generation/ConcreteSpeciesSeedReader.cs` (new) — a pure, Core-only
+    parser reading the exact shape `ConcreteSpeciesSerializer.Canonical` writes, straight into a
+    `ConcreteSpecies`, no SQL. `ConcreteSpeciesMapper.ToDemonSpeciesDef` (new, same file) — the
+    `ConcreteSpecies` → `DemonSpeciesDef` mapping extracted VERBATIM out of
+    `RpgStore.BuildDemonSpeciesSnapshot()`'s own inline block (which now calls this same method) —
+    one mapping, two callers, so the Server and Injector can never silently disagree on it the way
+    `AttackIntervalMs` itself once did (missing from that exact block until 2026-09-05). `Name` is
+    deliberately left for the caller to default (`Name ?? SpeciesId`) — `ConcreteSpecies.Name`'s own
+    doc comment says it is resolved from `almanac_seed`, a database join this reader correctly never
+    performs; checked that no real Injector-side code reads `.Name` off a species today, so the
+    resulting divergence from the Server's own (rare, when `almanac_seed` actually names a species
+    differently) is real but inconsequential for what the Injector does with this data.
+    **Proven two ways**: `tests/FusionRpg.Core.Tests/Demons/ConcreteSpeciesSeedReaderTests.cs` (new,
+    6 tests) — shape round-trip (every field `Canonical` writes, including the `[Flags]`
+    comma-joined `Acquisition` case and a null secondary element), a missing-field refusal naming the
+    field, AND the real proof: parsed all ~829 real `data/generated/demons/*.json` files, imported
+    them into a real temp `RpgStore` (`ImportSpecies` + `BuildDemonSpeciesSnapshot()`, the Server's
+    own real path), and diffed against the SAME files run through the Injector's own
+    reader+mapper path via the existing `SpeciesDiff.Compare`/`Coverage` mechanism
+    (`SpeciesCatalogDiffTests`' own established tool, run here at the full real scale instead of two
+    hand-picked anchors) — **zero non-`name` differences, zero coverage gaps, across all 829
+    species**, first real run. `FusionRpg.Core.Tests` full sweep unaffected elsewhere.
+    **Wired for real**: `FusionRpg.Injector.MelonLoader.39.csproj`/`FusionRpg.Injector.MelonLoader.csproj`/
+    `FusionRpg.Injector.BepInEx.csproj` (all three real host projects — none had ANY `data/generated`
+    content rule before, checked directly rather than assumed) each gained a
+    `<Content Include="...\data\generated\demons\*.json" Exclude="...\_*.json">` rule mirroring their
+    own existing `data\tuning\**\*.json` rule exactly. `RpgHost.cs:92`'s own
+    `ConfigureFromCompiledDefault()` call replaced with a real read of
+    `{pluginDir}/data/generated/demons/*.json` through the new reader+mapper, throwing loudly (naming
+    the fix) on a missing/stale-build plugin folder rather than silently falling back — matching
+    `DemonSpeciesCatalog.Configure`'s own established "fail loudly at load" rule.
+    **Live-lawn proof, not just a build**: rebuilt `FusionRpg.Injector.MelonLoader.39` for real
+    against the actual default game (`FUSIONRPG_ML_GAMEDIR` env var, `H:\Games\PVZ-
+    Fusion-3.9_MelonLoader`, CLAUDE.md's own documented default) — a genuine, non-cached full
+    recompile (confirmed via `-v normal` output showing real `CoreCompile`, not a "skipping, up to
+    date" no-op), which itself copied all 829 real species files into the game's own `Mods\data\
+    generated\demons\` folder. Launched the real game (`Start-Process`, this session's own
+    already-established assistant-safe pattern), polled `GET /health` until `injectorConnected`
+    flipped from `false` to `true` — it did, cleanly, with a real heartbeat timestamp, meaning
+    `RpgHost.Initialize` ran the new species-loading block, threw nothing, and completed its own
+    (much longer) remaining configuration sequence afterward. This is the strongest available signal
+    short of watching a specific demon on screen: a thrown exception here would have failed the WHOLE
+    mod's init and the injector would never have reached the heartbeat/connect step at all.
+    **What remains, correctly scoped**: step 7 (deleting `ConfigureFromCompiledDefault()`'s own public
+    surface) can now proceed — no real host calls it anymore (grepped: only the two `.Generated.cs`-
+    adjacent test bootstraps and `DemonSpeciesGenerator`'s own consumers still touch the compiled
+    roster directly, which is legitimate — a compiled fallback constant is not the same as a host
+    reading it as its live catalog) — not deleted this pass to keep this change reviewable on its own
+    merits first.
 
 ---
 
@@ -2283,6 +2333,58 @@ living end-to-end test, not scaffolding to throw away.
     ALONE, without a safe way to grant the atom-backed replacement, would leave an atom-backed actor
     granting NEITHER path: a regression, not progress. The two must land together, and the second
     half now depends on the design question above being answered first.
+  - ✅ **The design question resolved and built, 2026-09-06 — real gap turned out narrower than the
+    "genuinely a design question" framing above concluded.** Re-read `AtomPushService.Build`'s OWN
+    multi-owner overload (`src/FusionRpg.Server/AtomPushService.cs:41-108`) before proposing anything
+    new, per this session's own read-before-propose discipline — found it ALREADY compiles one
+    catalog over the UNION of every owner's accepted bindings, each `RunnerBinding` tagged with its
+    own `OwnerKey` so two owners sharing an atom compile once, not twice, and `RpgHub.cs`'s own Hello
+    handler (`BuildApplyCommand`) ALREADY calls it with `[Player] + every ActiveBound UniqueActor`
+    (its own comment: *"the live lawn push, previously Player-scope only"*) — this closed BEFORE
+    T6.1 was even opened, just never reflected in this task's own text. **The real, narrower gap**:
+    that union only ever gets (re)built at Hello — nothing re-triggered it mid-session, so a unique
+    actor bound AFTER connecting never reached the runner. `AtomPushInstaller`'s own replace-not-
+    accumulate semantics (the actual wall named above) is a non-issue once the SERVER always sends
+    the CURRENT FULL union in one push — there is never a need to accumulate on the receiving side.
+    **Built**: `AtomPushService.OwnersForPlayer(store, playerId)` (new, static) — the union logic
+    extracted verbatim from `BuildApplyCommand`'s own inline loop, which now calls this same method
+    (behaviour-preserving refactor, not a rewrite). `RpgStore.ObserveUniqueActorEvents` (`RpgStore.
+    UniqueActors.cs`) now returns `IReadOnlyList<long>` — every player whose OWN ActiveBound roster
+    changed this batch (ack → bound, die/board-end/match-result → recovered), reusing
+    `TryAckUniqueSpawn`'s/the recover queries' own already-resolved player id rather than a second
+    lookup; a shared `match_key` recovering more than one player's specimen is handled without
+    assuming one player per match (tested). `UniqueActorService.ObserveEvents` calls
+    `PushAtomUnionAsync(playerId)` for each affected player — rebuilds the SAME union via
+    `AtomPushService.OwnersForPlayer`, sends an atoms-only `effects.grants.apply` (no session-grants
+    change; a mid-match equip never touches the player's own Effect-bag snapshot).
+    **Real bug caught before shipping, by reading the actual injector consumer rather than assuming
+    an atoms-only payload would work**: `CheatCommandRunner.RunEffectsGrantsApply`
+    (`src/FusionRpg.Injector/CheatCommandRunner.cs:777-786`) refuses the WHOLE command — never
+    reaching `InstallAtomPush`, so the atom half is silently dropped too — when `"grants"` is absent
+    or not a JSON array. Fixed by always sending `"grants": []` (a real empty array, not an absent
+    key) alongside the atom fields; `RunEffectGrant`'s own loop over an empty array is a correct
+    no-op, so this cannot touch the player's session grants.
+    **Tests**: `tests/FusionRpg.Data.Tests/UniqueActorStoreTests.cs` gained 5 cases (ack reports the
+    actor's own player; a recover reports the same player the ack bound; an unknown ptr/correlation
+    reports nobody; a batch touching one player twice reports it once; a shared match_key recovering
+    two DIFFERENT players' specimens reports both, once each) — full file **35/35**.
+    `tests/FusionRpg.Server.Tests/UniqueActorAtomRepushTests.cs` (new) — a REAL in-process host (real
+    `/api/unique/actors` create+deploy, the real inline `/api/events` shape `Program.cs:842` uses,
+    real `EventIngest` background drain, real `InjectorCommandInbox`): an ack event lands a real
+    atom-push command in the inbox; a subsequent recover event lands a fresh one; the shipped payload
+    always carries `grants: []` (the regression test for the bug above) — **3/3 passed**, first real
+    run. `dotnet test tests/FusionRpg.Server.Tests --filter "CompiledPushTests|MultiOwnerPushTests|
+    UniqueActor"` (everything this change touches or could plausibly regress): **25/25 passed**.
+    Full `FusionRpg.Server.Tests` sweep: 163/188 passed — the 25 failures are two DIFFERENT,
+    externally-caused, pre-existing breaks (`vocabulary.json` missing `"kind"`, `battle.v{n}.json`
+    missing `speciesTempo`), confirmed by their own error text and by `git status` showing other
+    sessions' own concurrent edits to unrelated World/Aptitude/tuning files — the exact
+    `concurrent-sessions-heavy-machine-load` pattern already documented this session, re-verified
+    rather than assumed, zero overlap with anything this task touched.
+    **What remains, correctly scoped now**: T6.1's own acceptance line ("mods_json becomes derived,
+    then dropped") still needs `RebuildUniqueModsFromEquipmentUnlocked`'s own double-grant filter —
+    real, scoped, buildable, but a SEPARATE change from the re-push mechanism this pass closed; not
+    attempted this pass to keep this change reviewable on its own.
 - [ ] **T6.2** `ep 6` `patron-absorption` — the plugin becomes a container · **M**
   - Acceptance: fills the **already-committed** `data/seed/containers/patron.json` stub; the value spec reads an `effect_curve` keyed on star/level so continuous scaling survives; ⛔ **byte-identical output proven across the full (rarity × star × level × Θ) grid**, or the patron program's SIM results are invalidated
   - Files: `patron.json`, `PatronSecondaryPlugin.cs` (delete), equality test
@@ -2442,6 +2544,77 @@ living end-to-end test, not scaffolding to throw away.
     magnitude genuinely needs a compile-time owner Θ/level read next — just not this task, as
     currently scoped. This is the patron spec's own call (per the locked test's own words), not a
     unilateral one to make mid-task.
+  - ▶ **Owner direction, 2026-09-06: proceed with the migration** — "the patron is made before battle
+    engine and effect atom, cause it inconsistent with other features, so we should make it follow the
+    architecture." Investigated before building anything (this task's own established discipline):
+    read `spec-patron-absorption.md` (module 6's own governing spec, missed by an earlier pass this
+    session and read properly now) in full, and found it had ALREADY decided, 2026-09-03, that the
+    magnitude must be **referenced, not re-expressed** — `PatronPolicy.AuraMilli` stays the single
+    source of truth, called directly, rather than reproduced via composed `powerLadder`/
+    `clampedLevelScale` atoms (which would satisfy the letter of "an atom carries the number" while
+    reopening exactly the "two formulas, provably equal only by a sweep, not by construction" risk
+    that spec's own text already rejected once). Found the real, production-proven precedent this
+    absorption can lean on — `BattlefieldOwnSideReactor.BuildGrant`
+    (`src/FusionRpg.Core/Battle/BattlefieldOwnSideReactor.cs`), named directly in
+    `GrantedDerivedAtomReader`'s own doc as *"the only production grant path"* that *"makes a real
+    aura reach a lawn entity"* — an `EffectId`-only, no-overlay grant, the SAME shape
+    `PatronSecondaryPlugin`'s own current grant already has. Full reasoning, the new `externalRef`
+    marker proposal, and the per-player rarity/star/level/Θ freeze problem (not named in the spec's
+    own original text) are now recorded in `spec-patron-absorption.md`'s own **Amendment 2026-09-06**
+    section — read that section in full before starting any of the three tasks below; it is the
+    design these acceptance criteria are checked against.
+  - ⚠️ **Corrected 2026-09-06, same day, before any code was written** — the plan above (a THIRD
+    task freezing a per-player computed number onto a new atom) was found wrong by tracing the data
+    flow, not by building it and hitting a wall: freezing a number onto a NEW ATOM PER PLAYER pollutes
+    the SHARED atom/container catalog and bumps the GLOBAL `catalog_revision` on every patron
+    designation or level-up — forcing every OTHER connected player's client to needlessly re-sync for
+    a change that touches only one player. `effect_binding` (T6.1's own equipment precedent) avoids
+    this by keeping the SHARED atom fixed and varying only a per-player binding row — but Patron's
+    aura has no fixed value to bind to; it is different for every player's own patron. **Simpler,
+    correct design: resolve `externalRef` via a CALLBACK, computed fresh at push time from live data,
+    never written to the catalog at all** — mirroring the existing `curves: Func<string, CurveTable?>`
+    parameter `AtomCompiler.Compile` already takes. `AtomPushService.Build` already has `_store`
+    access and already knows which player a push is for; it computes that player's own current
+    patron's real `AuraMilli` value (rarity/star/level/Θ, looked up live, always current, never
+    stale) and hands it to `AtomCompiler.Compile` as a new callback parameter, the same shape
+    `curves` already has — no new DB write path, no per-player row, no catalog-revision churn, and
+    `AtomCompiler` itself stays exactly as pure as it is today (a callback, not a store handle).
+    This removes the per-player freeze task entirely — two tasks close this, not three.
+  - [ ] **T6.2a** — the `externalRef` `ValueSpec` marker · **S** · 2-3 files
+    - Acceptance: `{"externalRef": "patron.auraMilli"}` parses to a `ValueSpec` resolved in
+      `AtomCompiler.ResolvedParams` by invoking a caller-supplied `externalRefs: Func<string, long>?`
+      callback (default `null`; an atom carrying `externalRef` with no callback supplied throws,
+      naming the ref id — mirrors `powerLadder`'s own "missing context throws" rule, never silently
+      prices at zero); mutually exclusive with every other `ValueSpec` shape
+      (`min`/`max`/`roll`/`curve`/`eventField`/`powerLadder`/`clampedLevelScale`), matching every
+      existing marker's own `Validate()` discipline. `AtomCompiler` itself never imports
+      `PatronPolicy` or anything Patron-specific — it only ever calls the callback it is handed,
+      staying exactly as domain-agnostic as it is today.
+    - Files: `ValueSpec.cs` (new `ExternalRef` field), `AtomJson.cs` (parse), `AtomCompiler.cs`
+      (`Compile`'s new `externalRefs` parameter, `ResolvedParams` resolution), `AtomRowValidator.cs`
+      (kind restriction, mirroring `powerLadder`/`clampedLevelScale`'s own `stat.modify`/
+      `stat.derived`-only scope).
+    - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter ExternalRef`
+  - [ ] **T6.2b** — the real absorption + the ⛔ grid-equality gate · **M** · depends on T6.2a
+    - Acceptance: `patron.aura`'s committed container carries real `stat.derived` atoms (one per
+      element slot) using the new `externalRef` marker; `AtomPushService.Build` supplies the
+      `externalRefs` callback, backed by a live lookup of the pushed player's own current patron
+      (`RpgStore.Patron.cs`'s existing `rpg_patron` row → that specimen's own rarity/star/level →
+      `PatronPolicy.AuraMilli`, the SAME unchanged function, called directly — never re-derived) —
+      absent when the player has no patron set, so the atom contributes nothing rather than throwing
+      for the common case; `PatronSecondaryPlugin` grants through `InstanceProducer`/the container
+      instead of computing `AuraMilli` inline (mirroring `BattlefieldOwnSideReactor`'s own no-overlay
+      grant shape); the full `(rarity × star × level × Θ)` grid is byte-identical between the OLD
+      inline path and the NEW container-resolved path — not a sample, the spec's own ⛔ gate,
+      literally; every existing patron SIM test still passes unmodified; only THEN — sequenced after
+      the equality gate is green, matching this program's own established "deletion gated behind
+      proof" order (T8.5's own precedent) — delete `PatronAuraOverlay.cs` and retire
+      `PatronRuntimeState.MatchAura`'s combat-read role.
+    - Files: `data/seed/containers/patron.json`, `AtomPushService.cs` (the callback wiring),
+      `PatronSecondaryPlugin.cs`, `PatronAbsorptionGridEqualityTests.cs` (new),
+      `PatronAuraOverlay.cs` (deleted, last).
+    - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "PatronAbsorption|PatronPolicy"`,
+      full SIM E2E patron suite, `guard-secondary-no-unity.ps1`.
 
 ### ✅ Checkpoint 6
 - [ ] Exactly **one** effect path reaches an actor, except `AuraContentCatalog` — deferred by its owning program, with evidence

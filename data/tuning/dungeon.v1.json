@@ -488,28 +488,28 @@
   "pack": {
     "footprint": {
       "role": {
-        "weapon": 2,
-        "offhand": 1,
-        "helm": 1,
-        "chest": 3,
-        "gloves": 1,
-        "boots": 1,
-        "belt": 1,
-        "amulet": 1,
-        "ring": 1,
-        "charm": 1,
-        "relic": 2,
-        "consumable": 1,
-        "material": 1,
-        "quest": 1,
-        "key": 1
+        "armament-primary": 3,
+        "armament-secondary": 2,
+        "core-guard": 4,
+        "ward-array": 3,
+        "mantle": 3,
+        "head-guard": 2,
+        "girdle": 2,
+        "footing": 2,
+        "manipulator": 2,
+        "sense": 1,
+        "infusion": 1,
+        "jewel-major": 1,
+        "jewel-minor-a": 1,
+        "jewel-minor-b": 1,
+        "retinue": 1
       },
       "massStep": {
-        "featherweight": -1,
-        "light": 0,
+        "light": -1,
+        "medium-light": 0,
         "medium": 0,
-        "heavy": 1,
-        "colossal": 2
+        "medium-heavy": 1,
+        "heavy": 1
       },
       "consumableClass": {
         "restore": 1,
@@ -530,11 +530,10 @@
         "utility": 6
       },
       "materialClass": {
-        "common": 20,
-        "uncommon": 10,
-        "rare": 5,
-        "epic": 3,
-        "legendary": 1
+        "shard": 20,
+        "substrate": 20,
+        "essence": 20,
+        "catalyst": 10
       }
     },
     "provision": {

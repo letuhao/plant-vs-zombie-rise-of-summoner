@@ -177,18 +177,7 @@ public static class MovementPhase
 
         foreach (var contact in ContactResolver.SectorContacts(next, movedIds))
         {
-            var request = new BattleRequest
-            {
-                BattleId = BattleKinds.IdFor(turn, BattleKinds.Sector, contact.SectorId,
-                    contact.AttackerEntityId, contact.DefenderEntityId),
-                Kind = BattleKinds.Sector,
-                LocationId = contact.SectorId,
-                TimeMilli = TurnEventQueue.TurnEndMilli,
-                AttackerEntityId = contact.AttackerEntityId,
-                DefenderEntityId = contact.DefenderEntityId,
-                DefenderStationary = contact.DefenderStationary
-            };
-
+            var request = BuildContactRequest(next, turn, seed, contact);
             requests[request.BattleId] = request;
             queue.Schedule(TurnEventQueue.TurnEndMilli, contact.AttackerEntityId,
                 TurnEventKinds.Contact, request.BattleId);
@@ -221,6 +210,80 @@ public static class MovementPhase
         return new MovementResult(
             next,
             visited.ToDictionary(kv => kv.Key, kv => (IReadOnlySet<string>)kv.Value, StringComparer.Ordinal));
+    }
+
+    /// <summary>
+    /// base-defense `siege-engagement`'s own named, deferred gap, closed 2026-09-06: a CONTINUING
+    /// siege (turn 2+, no fresh `assault` order) reached this generic sector-contact path, which
+    /// always built a <see cref="BattleKinds.Sector"/> request — <see cref="Turn.DistrictAssaultResolver"/>'s
+    /// own delegation guard then correctly (per its own contract) routed that away to the placeholder
+    /// resolver, so a siege silently stopped being a real board fight the moment its attacker held
+    /// still for even one turn. Fixed by building the SAME <see cref="Turn.BattleKinds.District"/>
+    /// request <see cref="Turn.DistrictAssaultPhase"/> already builds for a fresh order, whenever the
+    /// contact sector is currently under siege (<see cref="Turn.SiegeEngagement.IsUnderSiege"/>) —
+    /// reusing <see cref="Turn.DistrictAssaultPhase.BuildBoard"/> verbatim rather than re-deriving the
+    /// projection a second time. Every OTHER sector (unowned, or owned but not besieged — the whole
+    /// existing open-field game) is completely untouched: `IsUnderSiege` requires an owner and a
+    /// hostile presence, which is exactly what <see cref="ContactResolver.SectorContacts"/> already
+    /// required to yield this contact at all, so this is a pure re-routing, never a new trigger
+    /// condition.
+    ///
+    /// <para><b>Attacker/defender here means "who does not own the ground" vs "who does"</b> — NOT
+    /// <paramref name="contact"/>'s own movement-based split (which answers "who moved this turn,"
+    /// a different question `Sector`-kind battles use for their own cover/stance framing, but the
+    /// wrong one for which side is the Core-holder in a district fight — the same distinction
+    /// <see cref="Turn.DistrictAssaultPhase.Run"/> already draws from its own `assault` command's
+    /// issuer). For a genuinely continuing siege neither side moved, so this recomputes the roles
+    /// from ownership instead of trusting a movement split that would otherwise be arbitrary
+    /// (`ContactResolver.FirstHostilePair`'s own first-in-ordinal-order tie-break, not a meaningful
+    /// attacker signal when nobody moved).</para>
+    /// </summary>
+    static BattleRequest BuildContactRequest(WorldState world, int turn, ulong seed, SectorContact contact)
+    {
+        var sector = world.Sectors.FirstOrDefault(s =>
+            string.Equals(s.SectorId, contact.SectorId, StringComparison.Ordinal));
+
+        if (sector is not null && Turn.SiegeEngagement.IsUnderSiege(world, contact.SectorId))
+        {
+            var a = world.Entities.FirstOrDefault(e => string.Equals(e.EntityId, contact.AttackerEntityId, StringComparison.Ordinal));
+            var b = world.Entities.FirstOrDefault(e => string.Equals(e.EntityId, contact.DefenderEntityId, StringComparison.Ordinal));
+
+            // One of the pair owns this ground (sector.OwnerFactionId) and the other does not --
+            // IsUnderSiege already proved a hostile force is present, so exactly one of a/b is that
+            // intruder regardless of which one ContactResolver happened to call "attacker".
+            var (attacker, defender) =
+                a is not null && !string.Equals(a.OwnerFactionId, sector.OwnerFactionId, StringComparison.Ordinal)
+                    ? (a, b)
+                    : (b, a);
+
+            if (attacker is not null)
+            {
+                return new BattleRequest
+                {
+                    BattleId = BattleKinds.IdFor(turn, BattleKinds.District, sector.SectorId,
+                        attacker.EntityId, defender?.EntityId),
+                    Kind = BattleKinds.District,
+                    LocationId = sector.SectorId,
+                    TimeMilli = TurnEventQueue.TurnEndMilli,
+                    AttackerEntityId = attacker.EntityId,
+                    DefenderEntityId = defender?.EntityId,
+                    DefenderStationary = defender is not null,
+                    Board = Turn.DistrictAssaultPhase.BuildBoard(world, sector, attacker, seed),
+                };
+            }
+        }
+
+        return new BattleRequest
+        {
+            BattleId = BattleKinds.IdFor(turn, BattleKinds.Sector, contact.SectorId,
+                contact.AttackerEntityId, contact.DefenderEntityId),
+            Kind = BattleKinds.Sector,
+            LocationId = contact.SectorId,
+            TimeMilli = TurnEventQueue.TurnEndMilli,
+            AttackerEntityId = contact.AttackerEntityId,
+            DefenderEntityId = contact.DefenderEntityId,
+            DefenderStationary = contact.DefenderStationary
+        };
     }
 
     /// <summary>

@@ -86,25 +86,7 @@ public static class DistrictAssaultPhase
                 AttackerEntityId = entity.EntityId,
                 DefenderEntityId = defender?.EntityId,
                 DefenderStationary = defender is not null,
-                Board = new BoardProjection
-                {
-                    SectorId = sector.SectorId,
-                    WorldSeed = seed,
-                    SectorTypeId = sector.TypeId,
-                    DevelopmentLevel = sector.DevelopmentLevel,
-                    AttackerEdge = DistrictLayout.EntryEdgeFor(next, entity, sector.SectorId),
-                    Slots = sector.Slots
-                        .Select(slot => new SlotProjection
-                        {
-                            SlotIndex = slot.SlotIndex,
-                            SlotTypeId = slot.SlotTypeId,
-                            StructureId = slot.StructureId,
-                            OwnerFactionId = slot.OwnerFactionId,
-                            State = slot.State,
-                            StructureHp = slot.StructureHp,
-                        })
-                        .ToList(),
-                },
+                Board = BuildBoard(next, sector, entity, seed),
             };
 
             next = BattleReporting.Fight(next, request, resolver, report, phase, seed);
@@ -112,6 +94,35 @@ public static class DistrictAssaultPhase
 
         return next;
     }
+
+    /// <summary>
+    /// The <see cref="BoardProjection"/> for a district assault against <paramref name="sector"/>,
+    /// entered by <paramref name="attacker"/>. Widened to `internal` (siege-engagement, 2026-09-06) so
+    /// `MovementPhase`'s own contact loop can build the SAME projection for a CONTINUING siege — one
+    /// that fires with no fresh `assault` order — rather than re-deriving this construction a second
+    /// time. Never call this for a sector <paramref name="attacker"/> already owns; the caller is
+    /// responsible for that check (this method has no ownership opinion of its own).
+    /// </summary>
+    internal static BoardProjection BuildBoard(WorldState world, WorldSector sector, WorldEntity attacker, ulong seed) =>
+        new()
+        {
+            SectorId = sector.SectorId,
+            WorldSeed = seed,
+            SectorTypeId = sector.TypeId,
+            DevelopmentLevel = sector.DevelopmentLevel,
+            AttackerEdge = DistrictLayout.EntryEdgeFor(world, attacker, sector.SectorId),
+            Slots = sector.Slots
+                .Select(slot => new SlotProjection
+                {
+                    SlotIndex = slot.SlotIndex,
+                    SlotTypeId = slot.SlotTypeId,
+                    StructureId = slot.StructureId,
+                    OwnerFactionId = slot.OwnerFactionId,
+                    State = slot.State,
+                    StructureHp = slot.StructureHp,
+                })
+                .ToList(),
+        };
 
     static void Drop(TurnReport report, string phase, WorldCommand command, string reason) =>
         report.Add(phase, TurnReportKinds.CommandDropped, command.CommandId, reason);

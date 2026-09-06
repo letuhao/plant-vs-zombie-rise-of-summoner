@@ -1,4 +1,4 @@
 {
-  "atom.chill-punisher": ["atom.chill-applier"],
-  "atom.rot-punisher": ["atom.rot-applier", "atom.blight-applier"]
+  "atom.chill-punisher": ["atom.freezing"],
+  "atom.rot-punisher": ["atom.venomous", "atom.withering", "atom.bloodletting", "atom.sporing"]
 }

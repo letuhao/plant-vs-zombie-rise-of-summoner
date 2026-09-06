@@ -445,6 +445,13 @@ public static partial class BattleEngine
                 // RoundEventKind — steps 1 (regen only — status delivery moved off this call in
                 // B16), 2 (initiative + attacks), 3/4 (death cleanup + shield upkeep).
                 rounds++;
+                // passive-tree G2 (spec-mechanism-wiring.md §4.2): recompose Derived from DerivedLedger
+                // once per actor, at the very start of the round, before regen/initiative/attacks read
+                // it. The only other call site is construction-time (the ActiveAuras loop); this is the
+                // per-round half, so a mechanism that changed the ledger after construction actually
+                // takes effect. Provably a no-op for every battle whose ledger hasn't changed since the
+                // last call (BattleRunState.RecomposeDerivedForAllActors's own doc comment).
+                state.RecomposeDerivedForAllActors();
                 state.RunRegeneratorPulses();
                 state.Host.Flush();
                 trace?.Phase(rounds, "post-flush");

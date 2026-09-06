@@ -9,9 +9,11 @@ an exhausted subject escalates without taking the batch with it, and a clean bat
 file somewhere it was told to. It does not judge the CONTENT — that is what the run report's
 distinctness metrics are for, and they are measured over a real batch in the module's todo entry.
 
-⚠ **Four assertions here pin measured defects in module 13's OWN machinery rather than in this
-wiring.** They are written as "this is the state today", with the number, so that fixing the defect
-turns them red and the fix cannot land silently. Each names its defect in the docstring.
+⭐ **`Module13DefectsFixedTests` at the bottom is the five defects this wiring MEASURED in module
+13's own machinery on 2026-09-06, now asserted in their fixed state.** They were first written as
+"this is the state today", with the numbers, so that a fix could not land silently — the fix landed
+the same day and the assertions were inverted rather than deleted. The before-numbers stay in the
+docstrings, because a fix whose evidence has been deleted cannot be re-checked.
 """
 from __future__ import annotations
 
@@ -26,7 +28,7 @@ from seedsmith.adapters.items.charmgen import rules as charm_rules  # noqa: E402
 from seedsmith.adapters.items.setgen import answers as answers_mod  # noqa: E402
 from seedsmith.adapters.items.setgen import authored as authored_mod  # noqa: E402
 from seedsmith.adapters.items.setgen import brief as brief_mod  # noqa: E402
-from seedsmith.adapters.items.setgen import distribute, emit  # noqa: E402
+from seedsmith.adapters.items.setgen import cells, distribute, emit  # noqa: E402
 from seedsmith.adapters.items.setgen import schema as schema_mod  # noqa: E402
 from seedsmith.adapters.items.setgen import seedfile as seedfile_mod  # noqa: E402
 from seedsmith.adapters.items.setgen import tuning as tuning_mod  # noqa: E402
@@ -77,13 +79,19 @@ def _legal_set_stat() -> str:
     raise AssertionError("no stat family survives the set-tier rules")
 
 
+def _legal_charm_families() -> "list[str]":
+    """Element-free families from the pool the brief actually prints. Resolved, never pinned."""
+    seen: "list[str]" = []
+    for pick in charm_rules.charm_pool(TUNING, VOCAB.all_picks):
+        if pick.variant is None and pick.family not in seen:
+            seen.append(pick.family)
+    if len(seen) < 2:
+        raise AssertionError("the charm pool has fewer than two element-free families")
+    return seen
+
+
 def _legal_charm_family() -> str:
-    excluded = graph_mod.jewel_minor_for(VOCAB)
-    for pick in VOCAB.stat:
-        if (pick.variant is None and pick.family not in excluded
-                and pick.family not in charm_rules.NON_FLAT_FAMILIES):
-            return pick.family
-    raise AssertionError("no stat family survives ssot-charms §3.6")
+    return _legal_charm_families()[0]
 
 
 def _clean_set_answer() -> dict:
@@ -316,9 +324,7 @@ class BatchTests(unittest.TestCase):
         import tempfile
         with tempfile.TemporaryDirectory() as tmp:
             plan = _charm_plan()
-            families = [p.family for p in VOCAB.stat
-                        if p.variant is None and p.family not in graph_mod.jewel_minor_for(VOCAB)
-                        and p.family not in charm_rules.NON_FLAT_FAMILIES]
+            families = _legal_charm_families()
             answer = {**_clean_charm_answer(), "charmClass": "signet",
                       "families": [families[0]], "drawback": {"family": families[1]}}
             result = authored_mod.run_batch(
@@ -413,73 +419,178 @@ class BatchTests(unittest.TestCase):
             self.assertIs(result.report.verdict, Verdict.NOT_MEASURED)
 
 
-class MeasuredDefectsInModule13Tests(unittest.TestCase):
-    """⛔ Four states measured 2026-09-06 while wiring the graph. Each is a defect in module 13's
-    OWN machinery, pinned here with its number so a fix turns this red instead of landing silently.
-    None of them is fixed by this wiring — see the todo entry for the argument."""
+class Module13DefectsFixedTests(unittest.TestCase):
+    """⭐ Five defects were measured in module 13's OWN machinery on 2026-09-06 while wiring the
+    graph, pinned here as "this is the state today", and **fixed on the same day**. Each test below
+    now asserts the FIXED state with the same defect number, so a regression reads as the original
+    defect coming back rather than as an anonymous failure.
 
-    def test_the_charm_brief_offers_a_pool_it_will_then_refuse(self):
-        """DEFECT 1. `build_charm_brief` prints `vocabulary.stat` unnarrowed — 242 picks — but
-        `distribute_charm` refuses every family legal on a jewel-minor role (ssot-charms §3.6).
-        56 of 242 picks survive, across 14 families, and every one is armour or shield."""
-        excluded = graph_mod.jewel_minor_for(VOCAB)
-        legal = [p for p in VOCAB.stat
-                 if p.family not in excluded and p.family not in charm_rules.NON_FLAT_FAMILIES]
-        self.assertEqual(len(VOCAB.stat), 242)
-        self.assertEqual(len(legal), 56)
-        self.assertEqual(len({p.family for p in legal}), 14)
+    The before-numbers are kept in the docstrings on purpose: they are the measurement, and a fix
+    whose evidence has been deleted cannot be re-checked.
+    """
+
+    def test_the_charm_brief_offers_exactly_the_pool_the_distributor_accepts(self):
+        """DEFECT 1, FIXED. `build_charm_brief` printed `vocabulary.stat` truncated to the first 60
+        of 242 picks, while `distribute_charm` accepted 56 picks across 14 families — every one
+        armour or shield. Brief and distributor now read the same expression,
+        `charmgen.rules.charm_pool`, and it is printed whole."""
+        pool = charm_rules.charm_pool(TUNING, VOCAB.all_picks)
         shown = brief_mod.build_charm_brief(_species_theme(), TUNING, VOCAB)
-        illegal_shown = [p.pick_id for p in VOCAB.stat[:60] if p in set(VOCAB.stat) - set(legal)]
-        self.assertTrue(illegal_shown, "the brief's visible pool should contain refused picks")
-        for pick in illegal_shown[:3]:
-            self.assertIn(pick, shown)
+        self.assertGreater(len(pool), 56)
+        for pick in pool:
+            self.assertIn(f"  - {pick.pick_id}\n", shown + "\n")
+        self.assertNotIn("...and", shown, "the charm pool is never truncated")
+        excluded = graph_mod.jewel_minor_for(TUNING, VOCAB)
+        for pick in VOCAB.all_picks:
+            if pick.family in excluded or pick.family in charm_rules.NON_FLAT_FAMILIES:
+                with self.subTest(pick=pick.pick_id):
+                    self.assertNotIn(f"  - {pick.pick_id}\n", shown + "\n")
 
-    def test_no_charm_on_four_of_the_five_axes_is_authorable_from_the_brief(self):
-        """DEFECT 1, restated as its consequence. Every surviving family is defensive, so an
-        `offense` / `control` / `utility` / `economy` charm cannot be authored — yet those are four
-        of the five shipped axes and 48 of the 70 shipped charm rows."""
-        excluded = graph_mod.jewel_minor_for(VOCAB)
-        legal = {p.family for p in VOCAB.stat
-                 if p.family not in excluded and p.family not in charm_rules.NON_FLAT_FAMILIES}
-        offensive = {"atom.might", "atom.ferocity", "atom.savagery"}
-        self.assertEqual(legal & offensive, set())
-        self.assertTrue(all(f.startswith(("atom.sh", "atom.arm-", "atom.plating", "atom.carapace",
-                                          "atom.warding", "atom.resilience")) for f in legal),
-                        sorted(legal))
+    def test_a_charm_on_every_one_of_the_five_axes_is_authorable_from_the_brief(self):
+        """DEFECT 1's consequence, FIXED. The surviving pool was 14 families, all defensive, so
+        `offense` / `control` / `utility` / `economy` were unauthorable — four of the five shipped
+        axes and 48 of the 70 shipped rows. The pool now spans every tag the family corpus has."""
+        pool = charm_rules.charm_pool(TUNING, VOCAB.all_picks)
+        families = {p.family for p in pool}
+        self.assertIn("atom.might", families, "an offense charm needs an offense family")
+        self.assertIn("atom.midas", families, "an economy charm needs an economy family")
+        self.assertIn("atom.cleansing", families, "a utility charm needs a utility family")
+        self.assertIn("atom.vitality", families, "a survivability charm needs a defensive family")
+        # ssot-charms §3.6's own charm family list, every one of which the old rule refused.
+        for named in ("atom.vitality", "atom.might", "atom.mending", "atom.regeneration",
+                      "atom.sunbloom", "atom.midas", "atom.cleansing"):
+            with self.subTest(family=named):
+                self.assertIn(named, families)
 
-    def test_the_shipped_charm_corpus_draws_from_a_pool_the_brief_never_offers(self):
-        """DEFECT 2. 22 of the 29 distinct families the 70 shipped charms use are CAPABILITY
-        families (`atom.freezing`, `atom.searing-strike`, …). The charm brief offers only
-        `vocabulary.stat`, so a generated charm population cannot resemble the authored one."""
+    def test_the_charm_pool_now_covers_the_families_the_shipped_corpus_uses(self):
+        """DEFECT 2, FIXED. 22 of the 29 distinct families the 70 shipped charms use are CAPABILITY
+        families; the brief offered `vocabulary.stat` only, so a generated population could not
+        resemble the authored one. The pool is drawn from both buckets now.
+
+        ⚠ Two named divergences survive on purpose and are asserted rather than smoothed away:
+        three families the shipped charms use are declared by no `affix-families/*.json` file, and
+        11 of the families it uses are ssot-charms §3.6's ring layer — 20 of the 70 shipped rows,
+        which is shipped content standing against §3.6, not a generator defect. The generator
+        refuses to author more of it; changing the corpus is a separate, content-owning decision.
+        """
         charms_dir = REPO_ROOT / "data" / "seed" / "items" / "charms"
-        families: "set[str]" = set()
+        used: "set[str]" = set()
+        rows_on_ring = 0
         for path in sorted(charms_dir.glob("*.json")):
             doc = json.loads(path.read_text(encoding="utf-8"))
             for entry in doc.get("entries") or []:
                 for atom in entry.get("fixedAtoms") or []:
-                    families.add(atom["family"])
+                    used.add(atom["family"])
         capability = {p.family for p in VOCAB.capability}
         stat = {p.family for p in VOCAB.stat}
-        self.assertGreater(len(families & capability), len(families & stat),
-                           "the shipped corpus is capability-led; the brief is stat-only")
-        self.assertEqual(families - capability - stat,
-                         {"atom.commanding", "atom.exposing", "atom.rallying"},
+        self.assertGreater(len(used & capability), len(used & stat),
+                           "the shipped corpus is capability-led, and the pool must be too")
+        undeclared = used - capability - stat
+        self.assertEqual(undeclared, {"atom.commanding", "atom.exposing", "atom.rallying"},
                          "three charm families are declared by no affix-family file")
+        pool = {p.family for p in charm_rules.charm_pool(TUNING, VOCAB.all_picks)}
+        ring = charm_rules.ring_layer_families(TUNING, VOCAB.all_picks)
+        self.assertEqual(used - undeclared - pool, used & ring,
+                         "the only shipped families the pool omits are §3.6's ring layer")
+        self.assertEqual(len(ring), 13)
+        self.assertEqual(len(used & ring), 11)
+        for path in sorted(charms_dir.glob("*.json")):
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            for entry in doc.get("entries") or []:
+                if any(a["family"] in ring for a in entry.get("fixedAtoms") or []):
+                    rows_on_ring += 1
+        self.assertEqual(rows_on_ring, 20, "shipped rows standing against §3.6, counted not guessed")
 
-    def test_a_four_member_set_has_no_three_piece_threshold(self):
-        """DEFECT 3. The schema offers `pieces` from `[2, 3, 4, 6]`, and the brief asks the model
-        for 'the piece counts', but `threshold_ladder` DERIVES the ladder from the member count and
-        refuses anything else. A 4-member set may only carry 2 and 4 — nothing in the brief says
-        so, and all three sets in the first real batch picked 3 and were refused."""
-        self.assertEqual(distribute.threshold_ladder(TUNING, 4), (2, 4))
-        self.assertIn(3, TUNING.legal_threshold_pieces)
+    def test_the_set_brief_names_the_derived_piece_counts_and_the_schema_agrees(self):
+        """DEFECT 3, FIXED. The schema offered `pieces` from `[2, 3, 4, 6]` and the brief said
+        "the piece counts", while `threshold_ladder` derived `(2, 4)` from the member count and
+        refused everything else — all three sets in the first real batch picked 3 and were refused.
+        The enum, the row count and the brief all read the ladder now."""
+        ladder = distribute.threshold_ladder(TUNING, TUNING.typical_members)
+        self.assertEqual(ladder, (2, 4))
+        node = schema_mod.set_schema(TUNING)["properties"]["thresholds"]
+        self.assertEqual(node["items"]["properties"]["pieces"]["enum"], [2, 4])
+        self.assertEqual((node["minItems"], node["maxItems"]), (2, 2))
+        text = brief_mod.build_set_brief(_build_theme(), TUNING, VOCAB)
+        self.assertIn("exactly 2 entries, at 2 and 4 pieces", text)
+        self.assertIn("not yours to choose", text)
 
-    def test_a_five_member_set_is_unauthorable(self):
-        """DEFECT 4. `threshold_ladder(5)` is `(2,)` — one threshold — while `set_schema` requires
-        `minItems: 2` on `thresholds`. A five-member set cannot satisfy both, and nothing refuses
-        the member count itself."""
-        self.assertEqual(distribute.threshold_ladder(TUNING, 5), (2,))
-        self.assertEqual(schema_mod.set_schema(TUNING)["properties"]["thresholds"]["minItems"], 2)
+    def test_a_five_member_set_is_authorable(self):
+        """DEFECT 4, FIXED. `threshold_ladder(5)` was `(2,)` — one threshold — against a schema
+        that required `minItems: 2`, so a five-member set could satisfy neither, and nothing refused
+        the member count either. §3.4 says the top threshold is `<=` the member count, not `=`, so
+        the ladder now takes the highest legal count the set can reach.
+
+        The two-member end is fixed by the same change from the other side: its ladder is legitimately
+        one row, and the schema is now sized from the ladder instead of assuming two.
+        """
+        self.assertEqual(distribute.threshold_ladder(TUNING, 5), (2, 4))
+        five = schema_mod.set_schema(TUNING, member_count=5)["properties"]["thresholds"]
+        self.assertEqual((five["minItems"], five["maxItems"]), (2, 2))
+        self.assertEqual(five["items"]["properties"]["pieces"]["enum"], [2, 4])
+        two = schema_mod.set_schema(TUNING, member_count=2)["properties"]["thresholds"]
+        self.assertEqual((two["minItems"], two["maxItems"]), (1, 1))
+        for count in (2, 3, 4, 5, 6):
+            with self.subTest(members=count):
+                ladder = distribute.threshold_ladder(TUNING, count)
+                node = schema_mod.set_schema(TUNING, member_count=count)["properties"]["thresholds"]
+                self.assertEqual(node["minItems"], len(ladder))
+                self.assertEqual(node["items"]["properties"]["pieces"]["enum"], list(ladder))
+
+    def test_cell_occupancy_reads_the_element_the_corpus_actually_writes(self):
+        """DEFECT 5, FIXED. `cells.threshold_capability` read a `variant` key; the corpus writes
+        `params.element` (`set.frostbitten-vanguard-002`/`-003`, `set.sunwoven-almanac-003`), so
+        `atom.deathblast.fire` and `atom.deathblast.ice` collapsed into one cell.
+
+        ⚠ Found while fixing it, and fixed with it: `threshold_families` dropped the element the
+        same way, on the higher-threshold atoms — which is where a GENERATED set puts most of its
+        element-narrowed picks.
+        """
+        fire = {"family": "atom.deathblast", "powerBand": "low", "params": {"element": "fire"}}
+        ice = {"family": "atom.deathblast", "powerBand": "low", "params": {"element": "ice"}}
+        self.assertEqual(cells.threshold_capability({"capability": fire}), "atom.deathblast.fire")
+        self.assertEqual(cells.threshold_capability({"capability": ice}), "atom.deathblast.ice")
+        self.assertEqual(cells.threshold_families({"atoms": [fire, ice]}),
+                         ("atom.deathblast.fire", "atom.deathblast.ice"))
+        # The generator's own internal spelling still resolves — both shapes are read.
+        self.assertEqual(cells.threshold_capability(
+            {"capability": {"family": "atom.deathblast", "variant": "fire"}}),
+            "atom.deathblast.fire")
+        both = [{"thresholds": [{"pieces": 2, "capability": fire}]},
+                {"thresholds": [{"pieces": 2, "capability": ice}]}]
+        self.assertEqual(cells.cell_report(both).cells, 2,
+                         "two elements of one family are two cells, not one")
+
+    def test_the_axis_gini_report_names_its_own_floor(self):
+        """Found while re-sampling the fixes, and fixed with them (not one of the five).
+
+        Three charms over five axes is `[1,1,1,0,0]` at best — **400‰, against a 133‰ ceiling** —
+        so the first sample's *"axis Gini 800‰ against a 133‰ ceiling"* and a perfectly diverse
+        batch's *"400‰ against a 133‰ ceiling"* read identically, though one is a total collapse and
+        the other is as flat as `n` allows. The floor is reported beside the measurement, the way
+        `SemanticDedup/NearDuplicate` already says "granularity-bound below ~200 entries".
+        """
+        self.assertEqual(charm_rules.min_axis_gini_permille(1), 800)
+        self.assertEqual(charm_rules.min_axis_gini_permille(3), 400)
+        self.assertEqual(charm_rules.min_axis_gini_permille(5), 0)
+        self.assertEqual(charm_rules.min_axis_gini_permille(0), 0)
+        self.assertEqual(
+            charm_rules.smallest_measurable_axis_population(TUNING.charm_axis_gini_max_permille), 5)
+        # A one-axis collapse and a maximally spread batch must not print the same line.
+        collapsed = charm_rules.axis_gini_permille(["survivability"] * 3)
+        spread = charm_rules.axis_gini_permille(["offense", "control", "economy"])
+        self.assertEqual((collapsed, spread), (800, 400))
+
+    def test_the_element_read_does_not_move_the_shipped_corpus_numbers(self):
+        """The same fix, measured where it matters: the live set corpus reports identically before
+        and after, so the gate baseline does not move. Latent at 30 sets, real at ~904."""
+        entries = []
+        for path in sorted((REPO_ROOT / "data" / "seed" / "items" / "sets").glob("*.json")):
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            entries.extend(doc.get("entries") or [])
+        report = cells.cell_report(entries)
+        self.assertEqual((report.population, report.cells, report.maximum, report.singletons),
+                         (30, 28, 2, 26))
 
 
 if __name__ == "__main__":

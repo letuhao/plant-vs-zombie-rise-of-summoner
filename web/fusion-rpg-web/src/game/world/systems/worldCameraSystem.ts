@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import type { WorldCameraPayload } from "../../EventBus";
+import type { WorldCameraPayload, WorldIgnoreRect } from "../../EventBus";
 import {
   DRAG_THRESHOLD_PX,
   EDGE_SCROLL_MARGIN_PX,
@@ -11,12 +11,15 @@ const STATE_KEY = "worldCamera";
 
 type CameraWireState = {
   dragging: boolean;
+  /** Set when a drag crosses threshold; pick consumes it on pointerup (gaps D4). */
+  pickSuppress: boolean;
   dragStartX: number;
   dragStartY: number;
   camStartX: number;
   camStartY: number;
   pointerX: number;
   pointerY: number;
+  getIgnoreRects: () => WorldIgnoreRect[];
   onLod?: () => void;
   offs: Array<() => void>;
 };
@@ -30,12 +33,14 @@ function state(scene: Phaser.Scene): CameraWireState {
   if (!s) {
     s = {
       dragging: false,
+      pickSuppress: false,
       dragStartX: 0,
       dragStartY: 0,
       camStartX: 0,
       camStartY: 0,
       pointerX: 0,
       pointerY: 0,
+      getIgnoreRects: () => [],
       offs: []
     };
     scene.data.set(STATE_KEY, s);
@@ -47,23 +52,39 @@ function clampZoom(z: number): number {
   return Phaser.Math.Clamp(z, MIN_SCALE, MAX_SCALE);
 }
 
+function inIgnoreRect(x: number, y: number, rects: WorldIgnoreRect[]): boolean {
+  for (const r of rects) {
+    if (x >= r.left && x <= r.left + r.width && y >= r.top && y <= r.top + r.height) return true;
+  }
+  return false;
+}
+
 function applyPan(scene: Phaser.Scene, dx: number, dy: number): void {
   const cam = scene.cameras.main;
   cam.scrollX -= dx / cam.zoom;
   cam.scrollY -= dy / cam.zoom;
 }
 
-function applyZoomAboutPointer(scene: Phaser.Scene, pointer: Phaser.Input.Pointer, factor: number): void {
+function applyZoomAboutScreenPoint(
+  scene: Phaser.Scene,
+  screenX: number,
+  screenY: number,
+  nextZoom: number
+): void {
   const cam = scene.cameras.main;
   const prevZoom = cam.zoom;
-  const nextZoom = clampZoom(prevZoom * factor);
   if (nextZoom === prevZoom) return;
-
-  const worldBefore = cam.getWorldPoint(pointer.x, pointer.y);
+  const worldBefore = cam.getWorldPoint(screenX, screenY);
   cam.setZoom(nextZoom);
-  const worldAfter = cam.getWorldPoint(pointer.x, pointer.y);
+  const worldAfter = cam.getWorldPoint(screenX, screenY);
   cam.scrollX += worldBefore.x - worldAfter.x;
   cam.scrollY += worldBefore.y - worldAfter.y;
+}
+
+function applyZoomAboutPointer(scene: Phaser.Scene, pointer: Phaser.Input.Pointer, factor: number): void {
+  const cam = scene.cameras.main;
+  const nextZoom = clampZoom(cam.zoom * factor);
+  applyZoomAboutScreenPoint(scene, pointer.x, pointer.y, nextZoom);
 }
 
 function applyFit(scene: Phaser.Scene, payload: WorldCameraPayload): void {
@@ -93,25 +114,40 @@ function applyCommand(scene: Phaser.Scene, payload: WorldCameraPayload): void {
       applyPan(scene, payload.dx ?? 0, payload.dy ?? 0);
       break;
     case "zoom": {
-      const target = payload.scale ?? cam.zoom;
-      cam.setZoom(clampZoom(target));
+      // HUD +/− zoom about viewport centre; absolute `scale` or relative `factor` (gaps D9).
+      const next =
+        payload.scale != null
+          ? clampZoom(payload.scale)
+          : clampZoom(cam.zoom * (payload.factor ?? 1));
+      applyZoomAboutScreenPoint(scene, scene.scale.width / 2, scene.scale.height / 2, next);
       break;
     }
     case "fit":
       applyFit(scene, payload);
+      break;
+    case "centre":
+      if (payload.x != null && payload.y != null) {
+        cam.centerOn(payload.x, payload.y);
+      }
       break;
     default:
       break;
   }
 }
 
-function wirePointer(scene: Phaser.Scene, onLod: () => void): void {
+function wirePointer(
+  scene: Phaser.Scene,
+  onLod: () => void,
+  getIgnoreRects: () => WorldIgnoreRect[] = () => []
+): void {
   const s = state(scene);
   s.onLod = onLod;
+  s.getIgnoreRects = getIgnoreRects;
 
   const onDown = (pointer: Phaser.Input.Pointer) => {
     if (pointer.rightButtonDown()) return;
     s.dragging = false;
+    s.pickSuppress = false;
     s.dragStartX = pointer.x;
     s.dragStartY = pointer.y;
     s.camStartX = scene.cameras.main.scrollX;
@@ -129,6 +165,7 @@ function wirePointer(scene: Phaser.Scene, onLod: () => void): void {
     if (!s.dragging) {
       if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
       s.dragging = true;
+      s.pickSuppress = true;
     }
     scene.cameras.main.scrollX = s.camStartX - dx / scene.cameras.main.zoom;
     scene.cameras.main.scrollY = s.camStartY - dy / scene.cameras.main.zoom;
@@ -136,6 +173,7 @@ function wirePointer(scene: Phaser.Scene, onLod: () => void): void {
 
   const onUp = () => {
     s.dragging = false;
+    // pickSuppress stays until consumePickSuppress (gaps D4).
   };
 
   const onWheel = (_pointer: Phaser.Input.Pointer, _gos: unknown, _dx: number, dy: number) => {
@@ -165,9 +203,17 @@ function unwire(scene: Phaser.Scene): void {
   scene.data.remove(STATE_KEY);
 }
 
+/** True while the current gesture was a drag past threshold (gaps D4). Cleared on next pointerdown. */
+function isPickSuppressed(scene: Phaser.Scene): boolean {
+  const s = scene.data.get(STATE_KEY) as CameraWireState | undefined;
+  return !!s?.pickSuppress;
+}
+
 function tickEdgeScroll(scene: Phaser.Scene, delta: number): void {
   const s = scene.data.get(STATE_KEY) as CameraWireState | undefined;
   if (!s) return;
+  // Edge-scroll no-ops inside ignoreRects (gaps D7).
+  if (inIgnoreRect(s.pointerX, s.pointerY, s.getIgnoreRects())) return;
   const w = scene.scale.width;
   const h = scene.scale.height;
   const m = EDGE_SCROLL_MARGIN_PX;
@@ -188,5 +234,6 @@ export const worldCameraSystem = {
   applyCommand,
   wirePointer,
   unwire,
-  tickEdgeScroll
+  tickEdgeScroll,
+  isPickSuppressed
 };

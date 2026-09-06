@@ -35,6 +35,48 @@ Source vision: the demon gameplay design note (external; its **ideals** are adop
 
 **Hard constraints carried over:** in-run demon behavior is Unity-owned — personality influences *overlay* decisions (obedience checks, deploy gating, effect grants), never zombie pathing/AI. All combat mutation stays on the Funnel/Writer path. No server round-trip on the hit path: capture *resolution* is Cold, capture *conditions* are read Hot.
 
+## Vocabulary: general demon, unique demon, and the two aura roles (added 2026-09-06)
+
+**Written because the terms below get guessed wrong, the same reason the player guide keeps its own
+"blind spots" tables — read this once before designing anything that touches more than one of them.**
+Two axes are independent and get conflated if read as one: *what a demon IS* (general vs. unique) and
+*what ROLE it has been given* (none, Commander, Patron, or — in a Delve specifically — party member).
+
+### Axis 1 — what the demon is
+
+| | **General demon** | **Unique demon** |
+|---|---|---|
+| Spawned by | The PvZ engine itself (a normal lawn plant/zombie) | The RPG layer — summon, fusion, gacha, capture |
+| Identity | Species only — no `instanceId`, nothing persists between spawns | A real specimen: `UniqueActor`, its own `instanceId`, phase FSM |
+| Stats | Species progression only (primary stats, the general passive tree) | Species stats **plus** its own equipment (T6.1), passive build, and (once built) its own aspect/action slots |
+| Where it's used | Anywhere a large, disposable, or engine-spawned population is needed — a lawn run's own zombie wave, and (per the owner's own 2026-09-06 framing) **siege defenders and world-map legions** | Anywhere an individually-meaningful, player-invested demon belongs — your own roster, a designated Commander or Patron, a Delve party |
+| Scale model | **Troop-stack shaped**: one general-demon *type* × a count, the same "multiply one unit by N" shape `base-defense-ideal.md`'s own research already cites (Heroes 3's troop stacks, 7 slots, up to 9,999 each) — not N individually-tracked rows. This is *why* it exists as a distinct kind: a legion or a siege garrison at army scale cannot be N separate `UniqueActor` rows | Never army-scale by design — a roster is dozens, not thousands |
+
+**The "why" in one line:** you cannot build a legion or a siege garrison out of a million individually
+-tracked `UniqueActor` rows — general demons are the lightweight, count-based representation that
+scales, unique demons are the individually-customized representation that doesn't need to.
+
+### Axis 2 — the two passive-aura roles (both assignable only to a unique demon)
+
+**Commander and Patron are structurally the same shape — designate one demon, receive one continuous,
+passive, side-wide aura for the run — and are easy to conflate for exactly that reason. Neither one
+ever fights.** They differ in *what* the aura is and *which loop* it belongs to:
+
+| | **Commander** | **Patron** |
+|---|---|---|
+| Scope | The lawn run (`commanders.md`) | The match (`spec-patron-demon.md`) |
+| What it grants | One active leadership aura (`commander-auras.md` — "one active at a time") **plus** aptitude spend reaching the side | A specific elemental combat bonus (`combat.power.{element}`/`combat.defense.{element}`), scaled by the demon's own rarity/star/level/Θ |
+| Cost | Not soul-priced (aptitude spend is its own economy) | First pick free; each switch costs 100 souls |
+| Fusion interaction | Not documented as locked | The active patron is **unconsumable** — fusion refuses it as a sacrifice or input |
+| Status | WIP (pick + aptitude spend exist thin; full aura fantasy still catching up) | SIM shipped; LIVE gate open; magnitude-delivery migration to the atom system in flight (`patron-absorption`, T6.2) |
+
+**What Commander and Patron are *not*:** an active combat participant. That concept is real, but it
+belongs to a third, separate context — a **Delve party member** (`party-dungeon-ideal.md`) — a unique
+demon that actively fights, can go `Downed`, inside a dungeon run specifically. A Delve party member is
+not a lawn-run role at all, and neither Commander nor Patron ever join a fight the way a party member
+does. Do not use "commander" to mean "the demon fighting for me" — that is a party member, in a Delve,
+a different loop from the lawn Commander/Patron pick entirely.
+
 
 > ### ⛔ Two rows below are stale as of 2026-09-01 — read before building either
 >

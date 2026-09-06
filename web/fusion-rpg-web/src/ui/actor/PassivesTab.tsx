@@ -20,6 +20,7 @@ import {
   type UnlockCostRates
 } from "@/contract/passivesPlan";
 import { isKnown, type Pending } from "@/contract/pending";
+import { PASSIVE_TREE_VOCABULARY } from "@/contract/passiveTreeVocabulary";
 import type { ElementId } from "@/contract/types";
 import { PathBrowse } from "./PathBrowse";
 import { PathLattice } from "./PathLattice";
@@ -280,7 +281,7 @@ export function PassivesTab({
           {invested.length === 0 ? (
             <EmptyState
               testId="passives-empty"
-              title={`You have ${unspentAptitude} aptitude points.`}
+              title={`You have ${unspentAptitude} ${PASSIVE_TREE_VOCABULARY.currency.aptitudePoints}.`}
               hint="Pick a path to open your first tier."
               action={
                 <Button size="sm" variant="ghost" data-testid="passives-browse-affordance" onClick={() => setSubTab("all")}>
@@ -321,9 +322,15 @@ export function PassivesTab({
           <section data-testid="passives-currencies">
             <p className="text-2xs font-bold uppercase tracking-wide text-muted">Unspent</p>
             <ul className="mt-1 flex flex-col gap-0.5 text-sm text-text">
-              <li data-testid="passives-currency-aptitude">{unspentAptitude} aptitude points — opens a tier</li>
-              <li data-testid="passives-currency-skill">{tree.data.skillPointsAvailable} skill points — buys a trait</li>
-              <li data-testid="passives-currency-souls">{souls.data.balance} souls — deepens a trait</li>
+              <li data-testid="passives-currency-aptitude">
+                {unspentAptitude} {PASSIVE_TREE_VOCABULARY.currency.aptitudePoints} — opens a tier
+              </li>
+              <li data-testid="passives-currency-skill">
+                {tree.data.skillPointsAvailable} {PASSIVE_TREE_VOCABULARY.currency.skillPoints} — buys a trait
+              </li>
+              <li data-testid="passives-currency-souls">
+                {souls.data.balance} {PASSIVE_TREE_VOCABULARY.currency.souls} — deepens a trait
+              </li>
             </ul>
           </section>
         </>

@@ -224,3 +224,33 @@ def gini_permille(counts: "list[int]") -> int:
 def axis_gini_permille(axes: "list[str]") -> int:
     counts = Counter(axes)
     return gini_permille([counts.get(a, 0) for a in CHARM_AXES])
+
+
+def min_axis_gini_permille(population: int) -> int:
+    """The flattest axis Gini a population of this size can reach — the metric's own floor.
+
+    ⚠ **Below five charms the 133‰ ceiling is unreachable at any diversity**, exactly the way the
+    5‰ near-duplicate rate is unmeasurable below ~200 entries: three charms over five axes is
+    `[1,1,1,0,0]` at best, which is 400‰. A run report that prints only *"400‰ against 133‰"* reads
+    as a collapse when it is in fact as flat as `n` allows, so the floor is reported beside the
+    measurement. It is a granularity note, never a softened gate — `cleared` is still the real
+    comparison.
+    """
+    if population <= 0:
+        return 0
+    axes = len(CHARM_AXES)
+    base, extra = divmod(population, axes)
+    return gini_permille([base + 1] * extra + [base] * (axes - extra))
+
+
+def smallest_measurable_axis_population(ceiling_permille: int, *, search_limit: int = 1000) -> int:
+    """The smallest charm count whose FLOOR is at or under `ceiling_permille`.
+
+    Computed, not asserted: the ceiling is a tunable and the axis list is closed, so the population
+    at which the gate becomes reachable moves with the tuning file rather than with a comment.
+    `0` means no population up to `search_limit` can reach it, which would itself be the finding.
+    """
+    for population in range(1, search_limit + 1):
+        if min_axis_gini_permille(population) <= ceiling_permille:
+            return population
+    return 0

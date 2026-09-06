@@ -86,10 +86,31 @@ public static class RpgHost
         FusionRpg.Core.Stats.Derived.DerivedStatPolicy.Configure(
             FusionRpg.Core.Stats.Derived.DerivedStatTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "derived-stats.v2.json"))));
-        // T4.7 step 2 / T4.8 (catalog-runtime): behaviour-preserving today — the SAME compiled
-        // roster `DemonSpeciesCatalog.All` always read, now routed through Configure. NOT the
-        // store-backed flip (SpeciesSnapshot.cs's own doc comment says why).
-        FusionRpg.Core.Demons.DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        // catalog-runtime's Injector-side flip (seed-to-concrete, 2026-09-06): both of step 5's own
+        // preconditions are now satisfied and evidenced — the 829-species real classification run
+        // (T2.11, 2026-09-04) and the live-lawn/diff-test proof (Checkpoint 4; re-proven this session
+        // via T8.5's mint-demon check) — so this host reads the same real committed tree the Server
+        // already flipped to, via the Core-only path that never needs SQL: every
+        // data/generated/demons/<SpeciesId>.json this project's own .csproj now copies alongside the
+        // built mod, parsed by ConcreteSpeciesSeedReader and mapped by ConcreteSpeciesMapper — the
+        // SAME mapper RpgStore.BuildDemonSpeciesSnapshot() calls, proven field-for-field identical
+        // against the real 829-species tree (ConcreteSpeciesSeedReaderTests). Throws loudly on a
+        // missing/empty tree rather than silently falling back to the compiled default, matching
+        // DemonSpeciesCatalog.Configure's own established "fail loudly at load, name the fix" rule.
+        {
+            var speciesDir = System.IO.Path.Combine(_pluginDir, "data", "generated", "demons");
+            if (!System.IO.Directory.Exists(speciesDir))
+                throw new InvalidOperationException(
+                    $"Species seed tree not found at '{speciesDir}'. Rebuild this project — its own " +
+                    ".csproj now copies data/generated/demons/*.json alongside the mod — or point " +
+                    "FUSIONRPG at a plugin folder that has been rebuilt since 2026-09-06.");
+            var roster = System.IO.Directory.EnumerateFiles(speciesDir, "*.json")
+                .Where(p => !System.IO.Path.GetFileName(p).StartsWith('_'))
+                .Select(FusionRpg.Core.Demons.Generation.ConcreteSpeciesSeedReader.ParseFile)
+                .Select(FusionRpg.Core.Demons.Generation.ConcreteSpeciesMapper.ToDemonSpeciesDef)
+                .ToList();
+            FusionRpg.Core.Demons.DemonSpeciesCatalog.Configure(roster);
+        }
         FusionRpg.Core.Overlay.OverlayTuningHub.Configure(
             FusionRpg.Core.Overlay.OverlayTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "overlay.v1.json"))));

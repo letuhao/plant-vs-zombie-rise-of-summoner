@@ -123,9 +123,12 @@ class LiveCorpusIntegrationTests(unittest.TestCase):
         cls.adapter = ItemsAdapter()
 
     def test_loads_the_expected_entry_and_file_counts(self) -> None:
-        self.assertEqual(len(self.corpus.entries), 1430)
+        # ⛔ CORRECTED 2026-09-06: 1432/122, not 1430/121 -- g-punisher.json (2 new
+        # `atom.chill-punisher`/`atom.rot-punisher` families, the action-corpus pairing-tier fix)
+        # is a new file with 2 new entries in the same live corpus this test loads.
+        self.assertEqual(len(self.corpus.entries), 1432)
         seen_files = {e.path for e in self.corpus.entries.values()}
-        self.assertEqual(len(seen_files), 121)
+        self.assertEqual(len(seen_files), 122)
 
     def test_exactly_nine_empty_partitions_and_no_others(self) -> None:
         ctx = Ctx(corpus=self.corpus, adapter=self.adapter)

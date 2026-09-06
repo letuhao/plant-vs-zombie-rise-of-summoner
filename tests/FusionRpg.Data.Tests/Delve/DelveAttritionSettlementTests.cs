@@ -15,7 +15,14 @@ namespace FusionRpg.Data.Tests.Delve;
 /// <summary>D2.23 (spec-delve-attrition.md §1, §7, §9) — `CloseDelve`'s attrition settlement, the
 /// `members[]` writer, cross-delve pool persistence, the recovery counter (including every OTHER
 /// delve this player owns), and the recovery ritual. Reads the real, shipped dungeon tuning/registry
-/// files — a fixture copy could drift from what ships.</summary>
+/// files — a fixture copy could drift from what ships.
+///
+/// <para>Also D3.16 (spec-dungeon-loot.md §7) — `souls_unbanked`/`theta_run`, `Accrue`/`Spend`/
+/// `RecordClear`, and `CloseDelve`'s own loot-earn hook. Tested in THIS file, not a separate one,
+/// specifically for the cross-hook, single-transaction property the two settlements share: an
+/// ordering/atomicity proof needs a genuine attrition-observable effect (a downed-once member's own
+/// Recover transition) alongside a genuine souls-observable one, and this file already owns the
+/// demon-minting fixture (<see cref="MintBoundDemon"/>) that effect needs.</para></summary>
 public class DelveAttritionSettlementTests : IDisposable
 {
     readonly string _dir;
@@ -482,5 +489,216 @@ public class DelveAttritionSettlementTests : IDisposable
         _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
 
         Assert.True(_store.GetContract(demon)!.Loyalty < before);
+    }
+
+    // ===========================================================================================
+    // D3.16 (spec-dungeon-loot.md §7) -- souls_unbanked/theta_run store surface, CloseDelve's loot-earn hook.
+    // ===========================================================================================
+
+    // ---- AccrueUnbanked ----
+
+    [Fact]
+    public void AccrueUnbanked_adds_to_souls_unbanked_across_multiple_calls()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 40, "r0c0");
+        var updated = _store.AccrueUnbanked(delve.DelveId, 60, "r1c0");
+        Assert.Equal(100, updated!.SoulsUnbanked);
+    }
+
+    [Fact]
+    public void AccrueUnbanked_throws_on_overflow_and_writes_nothing()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, long.MaxValue - 10, "r0c0");
+
+        Assert.Throws<OverflowException>(() => _store.AccrueUnbanked(delve.DelveId, 20, "r1c0"));
+
+        Assert.Equal(long.MaxValue - 10, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
+    }
+
+    [Fact]
+    public void AccrueUnbanked_rejects_a_negative_delta()
+    {
+        var delve = CreateDelve();
+        Assert.Throws<ArgumentOutOfRangeException>(() => _store.AccrueUnbanked(delve.DelveId, -1, "r0c0"));
+    }
+
+    [Fact]
+    public void AccrueUnbanked_rejects_an_empty_roomKey()
+    {
+        var delve = CreateDelve();
+        Assert.Throws<ArgumentException>(() => _store.AccrueUnbanked(delve.DelveId, 10, " "));
+    }
+
+    [Fact]
+    public void AccrueUnbanked_returns_null_for_an_unknown_delve()
+    {
+        Assert.Null(_store.AccrueUnbanked(999_999, 10, "r0c0"));
+    }
+
+    // ---- SpendUnbanked ----
+
+    [Fact]
+    public void SpendUnbanked_deducts_and_returns_the_new_balance()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 100, "r0c0");
+
+        var (ok, reason, left) = _store.SpendUnbanked(delve.DelveId, 40, "wild:0:0");
+
+        Assert.True(ok);
+        Assert.Equal("", reason);
+        Assert.Equal(60, left);
+        Assert.Equal(60, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
+    }
+
+    [Fact]
+    public void SpendUnbanked_refuses_on_shortfall_and_changes_nothing()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 50, "r0c0");
+
+        var (ok, reason, left) = _store.SpendUnbanked(delve.DelveId, 100, "wild:0:0");
+
+        Assert.False(ok);
+        Assert.Equal("delve.souls-insufficient", reason);
+        Assert.Equal(50, left);
+        Assert.Equal(50, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
+    }
+
+    [Fact]
+    public void SpendUnbanked_rejects_a_non_positive_price()
+    {
+        var delve = CreateDelve();
+        Assert.Throws<ArgumentOutOfRangeException>(() => _store.SpendUnbanked(delve.DelveId, 0, "wild:0:0"));
+    }
+
+    // ---- RecordClear ----
+
+    [Fact]
+    public void RecordClear_keeps_the_max_never_lowers_the_watermark()
+    {
+        var delve = CreateDelve();
+        Assert.Equal(0, delve.ThetaRun);
+
+        _store.RecordClear(delve.DelveId, 0, 0, 30);
+        var afterLower = _store.RecordClear(delve.DelveId, 1, 0, 10);
+        Assert.Equal(30, afterLower!.ThetaRun);
+
+        var afterHigher = _store.RecordClear(delve.DelveId, 2, 0, 50);
+        Assert.Equal(50, afterHigher!.ThetaRun);
+    }
+
+    // ---- CloseDelve's own loot-earn hook ----
+
+    [Fact]
+    public void CloseDelve_Extracted_pays_kills_and_victory_then_zeroes_the_unbanked_pot()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 500, "r0c0");
+        _store.RecordClear(delve.DelveId, 2, 0, 30);
+        var balanceBefore = _store.GetSoulBalance(1).Balance;
+        var tuning = FusionRpg.Core.Power.PowerTuningHub.Tuning;
+        var expected = FusionRpg.Core.Delve.Loot.DelveSoulLedger.AtExtraction(500, 30, won: true, tuning);
+        Assert.True(expected.Kills > 0);
+        Assert.True(expected.Victory > 0); // both must be non-zero for this test's own assertions to mean anything
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var reloaded = _store.LoadDelve(delve.DelveId)!;
+        Assert.Equal(0, reloaded.SoulsUnbanked);
+        var balanceAfter = _store.GetSoulBalance(1).Balance;
+        Assert.Equal(balanceBefore + expected.Kills + expected.Victory, balanceAfter);
+
+        var ledger = _store.ListSoulLedger(1, limit: 10).Items;
+        Assert.Contains(ledger, e => e.Reason == SoulEarnPolicy.Reasons.Kill && e.Delta == expected.Kills && e.RefId == delve.DelveId.ToString());
+        Assert.Contains(ledger, e => e.Reason == SoulEarnPolicy.Reasons.Victory && e.Delta == expected.Victory && e.RefId == delve.DelveId.ToString());
+    }
+
+    [Fact]
+    public void CloseDelve_Wiped_forfeits_the_unbanked_pot_with_no_award()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 500, "r0c0");
+        var balanceBefore = _store.GetSoulBalance(1).Balance;
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Wiped, archiveNow: false, _tuning);
+
+        Assert.Equal(0, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
+        Assert.Equal(balanceBefore, _store.GetSoulBalance(1).Balance);
+    }
+
+    [Fact]
+    public void CloseDelve_without_tuning_leaves_souls_unbanked_untouched()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 500, "r0c0");
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false); // no tuning -- pre-D2.23 shape
+
+        Assert.Equal(500, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
+    }
+
+    [Fact]
+    public void CloseDelve_replayed_close_does_not_double_pay()
+    {
+        var delve = CreateDelve();
+        _store.AccrueUnbanked(delve.DelveId, 500, "r0c0");
+        _store.RecordClear(delve.DelveId, 2, 0, 30);
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        var balanceAfterFirst = _store.GetSoulBalance(1).Balance;
+        var ledgerCountAfterFirst = _store.ListSoulLedger(1, limit: 100).Items.Count;
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        Assert.Equal(balanceAfterFirst, _store.GetSoulBalance(1).Balance);
+        Assert.Equal(ledgerCountAfterFirst, _store.ListSoulLedger(1, limit: 100).Items.Count);
+    }
+
+    // ---- ordering + atomicity across CloseDelve's own hooks (spec's own "one stated order") ----
+
+    [Fact]
+    public void CloseDelve_runs_attrition_settlement_and_loot_earn_together_in_one_call()
+    {
+        var delve = CreateDelve(rungId: "hard"); // "hard" sits below domain.permadeathFromRung
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.AccrueUnbanked(delve.DelveId, 500, "r0c0");
+        _store.RecordClear(delve.DelveId, 2, 0, 30);
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        // Attrition settlement's own effect landed...
+        Assert.Equal(UniqueActorPhases.Recovering, _store.GetUniqueActor(demon)!.Phase);
+        // ...and loot earn's own effect landed too, from the SAME single CloseDelve call.
+        Assert.Equal(0, _store.LoadDelve(delve.DelveId)!.SoulsUnbanked);
+        Assert.Contains(_store.ListSoulLedger(1, limit: 10).Items, e => e.Reason == SoulEarnPolicy.Reasons.Kill);
+    }
+
+    [Fact]
+    public void CloseDelve_rolls_back_attrition_settlement_when_loot_earn_overflows()
+    {
+        var demon = MintBoundDemon();
+        var delve = CreateDelve(rungId: "hard");
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.AccrueUnbanked(delve.DelveId, 100, "r0c0"); // Kills=100
+
+        // Push player 1's balance to within 10 of the int64 ceiling -- headroom becomes 10, less than
+        // the 100-soul Kills earn CloseDelve is about to try to credit, so GuardSoulAwardOrThrow throws
+        // partway through the SAME transaction attrition settlement's own writes already landed in.
+        var currentBalance = _store.GetSoulBalance(1).Balance;
+        _store.AwardSouls(1, RpgStore.MaxSoulAwardFrom(currentBalance) - 10, "top-up", "top-up-key");
+
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning));
+
+        // Every hook's writes in this one transaction rolled back together -- not just loot earn's own.
+        Assert.Equal(UniqueActorPhases.Roster, _store.GetUniqueActor(demon)!.Phase);
+        Assert.Null(_store.GetUniqueActorRecovery(demon));
+        var reloaded = _store.LoadDelve(delve.DelveId)!;
+        Assert.Equal(DelveStates.Active, reloaded.State);
+        Assert.Equal(100, reloaded.SoulsUnbanked);
     }
 }

@@ -33,8 +33,16 @@ public enum ActionCategory
 }
 
 /// <summary>
-/// The eight closed action tags (spec-action-model.md §2). `A7` selects on these and never on
+/// The nine closed action tags (spec-action-model.md §2). `A7` selects on these and never on
 /// internals — adding one is a reviewed change, because the stub AI's preference key reads this set.
+///
+/// <para><see cref="Construct"/> added base-defense `siege-construction` (owner decision, 2026-09-06):
+/// the four structure-acquisition paths (`Built`/`Assembled`/`Summoned`/`Laboured`) are ordinary
+/// actions under <see cref="ActionCategory.Support"/>, not a new category or a nested sub-category —
+/// `Summoned` already fits the existing <see cref="Summon"/> tag; `Built`/`Assembled`/`Laboured` share
+/// this one rather than reusing <see cref="Utility"/>, since "does this place a structure" is a real
+/// distinction `A7`'s own selection and any future construction-specific filter would otherwise have
+/// no tag to key on.</para>
 /// </summary>
 public enum ActionTag
 {
@@ -46,6 +54,7 @@ public enum ActionTag
     Movement,
     Summon,
     Utility,
+    Construct,
 }
 
 /// <summary>
@@ -159,6 +168,7 @@ public static class ActionTags
         ActionTag.Movement => "movement",
         ActionTag.Summon => "summon",
         ActionTag.Utility => "utility",
+        ActionTag.Construct => "construct",
         _ => "",
     };
 
@@ -174,6 +184,7 @@ public static class ActionTags
             case "movement": tag = ActionTag.Movement; return true;
             case "summon": tag = ActionTag.Summon; return true;
             case "utility": tag = ActionTag.Utility; return true;
+            case "construct": tag = ActionTag.Construct; return true;
             default: tag = default; return false;
         }
     }

@@ -5,6 +5,7 @@ import type { LegionView } from "@/contract/types";
 import { PerMilleFigure } from "@/ui/world/PerMilleFigure";
 import { unresolvedLegions } from "./unresolvedLegions";
 import { useWorldVerbs } from "./worldVerbs";
+import { isWorldMapChromeMuted } from "@/stages/world/mapChromeMute";
 
 export type UnresolvedCountProps = {
   legions: readonly LegionView[];
@@ -44,7 +45,16 @@ export function UnresolvedCount({ legions, pending, displayNames, onFocus }: Unr
   // registered callback thin and stable while always reading this render's real values.
   const cycleNextRef = useRef(cycleNext);
   cycleNextRef.current = cycleNext;
-  useWorldVerbs([{ key: "w", id: "world-turn-cycle", handler: () => cycleNextRef.current() }]);
+  useWorldVerbs([
+    {
+      key: "w",
+      id: "world-turn-cycle",
+      handler: () => {
+        if (isWorldMapChromeMuted()) return;
+        cycleNextRef.current();
+      }
+    }
+  ]);
 
   if (current) {
     const label = legionLabel(current.entityId, displayNames[current.entityId] ?? null);

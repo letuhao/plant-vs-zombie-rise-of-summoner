@@ -12,6 +12,7 @@ import {
   tierRows
 } from "@/contract/passivesLattice";
 import { tierAttribution, type TierAttribution } from "@/contract/passivesPlan";
+import { PASSIVE_TREE_VOCABULARY } from "@/contract/passiveTreeVocabulary";
 
 // `ui/` never binds to a REST DTO type directly (contractGuard.ts's guard 2) -- the same pattern
 // `PathBrowse.tsx:16-19` and `BloodlineTree.tsx:6-8` already use: derive the shape from a `contract/`
@@ -225,7 +226,7 @@ function TierRow({
           </span>
         ) : (
           <span className="text-muted" data-testid={`lattice-tier-need-${tier}`}>
-            opens at {distance.need} aptitude points · you have {distance.have}
+            opens at {distance.need} {PASSIVE_TREE_VOCABULARY.currency.aptitudePoints} · you have {distance.have}
             {!reached && actorTheta != null ? ` · your power is ${actorTheta} today` : ""}
           </span>
         )}
@@ -316,7 +317,11 @@ function TraitCell({
           -- the real node id stands in, matching the honest placeholder `passivesYours.ts` already
           uses for `winnerNodeId`. */}
       <p className="truncate font-display">{cell.node.nodeId}</p>
-      {cell.state === "owned" ? <p className="text-muted">Depth {cell.soulLevel}</p> : null}
+      {cell.state === "owned" ? (
+        <p className="text-muted">
+          {PASSIVE_TREE_VOCABULARY.track.depthLabel} {cell.soulLevel}
+        </p>
+      ) : null}
     </>
   );
 
@@ -351,7 +356,9 @@ function TraitCell({
           onUnlock!(cell.node.nodeId);
         }}
       >
-        {nextUnlockPrice != null ? `Unlock · ${nextUnlockPrice} skill points` : "Unlock"}
+        {nextUnlockPrice != null
+          ? `${PASSIVE_TREE_VOCABULARY.track.unlockLabel} · ${nextUnlockPrice} ${PASSIVE_TREE_VOCABULARY.currency.skillPoints}`
+          : PASSIVE_TREE_VOCABULARY.track.unlockLabel}
       </button>
     </div>
   );

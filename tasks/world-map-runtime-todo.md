@@ -1,6 +1,8 @@
 # Tasks: world-map-runtime
 
-**Status:** **implementation complete** 2026-09-06 (R0–R16 + CPA–CPD Playwright+CV). Owner git commit pending.
+**Status:** **not complete** — R0–R16 landed a Phaser host; parent SC 1–12 remain open under
+[world-map-runtime-gaps-todo.md](world-map-runtime-gaps-todo.md) (D1–D32). Owner git commit of R0–R16
+history is separate from gaps closure.
 
 Plan: [world-map-runtime-plan.md](world-map-runtime-plan.md)  
 **Map:** [world-map-runtime-map.md](../docs/architecture/world-map-runtime-map.md)  

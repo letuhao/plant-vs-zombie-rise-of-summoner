@@ -380,9 +380,11 @@ class CategoryRelationTests(unittest.TestCase):
 class PoolTests(unittest.TestCase):
     """Spec §3 step 7, acceptance #6/#6b."""
 
-    def test_allowed_is_all_98_and_forbidden_is_the_pair_union(self) -> None:
+    def test_allowed_is_all_the_namespace_and_forbidden_is_the_pair_union(self) -> None:
+        # 100, not 98, since 2026-09-06: `atom.chill-punisher`/`atom.rot-punisher` landed as real
+        # families (spec-distribution-planner.md's own DECIDED-but-unexecuted deliverable, closed).
         allowed, forbidden = dp.build_pool(FAMILY_IDS, (("atom.keen-edge", "atom.cruelty"),))
-        self.assertEqual(len(allowed), 98)
+        self.assertEqual(len(allowed), 100)
         self.assertEqual(set(allowed), FAMILY_IDS)
         self.assertEqual(forbidden, ("atom.cruelty", "atom.keen-edge"))
 
@@ -400,8 +402,9 @@ class PoolTests(unittest.TestCase):
             dp.validate_atom_family_namespace([FIXTURE_ATOM_ID], FAMILY_IDS)
         self.assertIn(FIXTURE_ATOM_ID, str(ctx.exception))
 
-    def test_namespace_count_is_exactly_98(self) -> None:
-        self.assertEqual(len(FAMILY_IDS), 98)
+    def test_namespace_count_is_exactly_100(self) -> None:
+        # 98 authored + `atom.chill-punisher`/`atom.rot-punisher` (2026-09-06 payoff-family fix).
+        self.assertEqual(len(FAMILY_IDS), 100)
 
     def test_multiplicative_conflict_refused_for_flat_pair(self) -> None:
         with self.assertRaises(ValueError) as ctx:
@@ -452,18 +455,32 @@ class PairingRoleTests(unittest.TestCase):
         assignments = dp.assign_pairing_roles(3, frozenset({"atom.precision"}), self.FAKE_TABLE)
         self.assertTrue(all(a.role == "none" for a in assignments))
 
-    def test_real_pairings_json_is_unreachable_today(self) -> None:
+    def test_real_pairings_json_is_reachable_today(self) -> None:
+        """⛔ CORRECTED 2026-09-06 -- the deliverable this test used to guard against DID land:
+        `atom.chill-punisher`/`atom.rot-punisher` are now real, authored families
+        (g-punisher.json), so `pairings.json`'s two keys are no longer disjoint from the
+        namespace. Inverted from `test_real_pairings_json_is_unreachable_today` rather than
+        deleted, so the real, current fact stays asserted instead of silently dropped."""
         real_keys = load_pairing_keys()
-        self.assertTrue(real_keys.isdisjoint(FAMILY_IDS),
-                        "pairings.json now overlaps the 98-family namespace -- the rewrite named "
-                        "in spec §3 step 6 may have landed; re-check the scoping decision")
+        self.assertFalse(real_keys.isdisjoint(FAMILY_IDS),
+                         "pairings.json no longer reaches the namespace -- g-punisher.json's two "
+                         "families may have been removed; re-check")
+        self.assertEqual(real_keys, {"atom.chill-punisher", "atom.rot-punisher"})
 
-    def test_against_the_real_corpus_every_brief_gets_role_none(self) -> None:
+    def test_against_the_real_corpus_species_scope_always_stays_none(self) -> None:
+        """⛔ CORRECTED 2026-09-06 -- was `..._every_brief_gets_role_none`, true only while
+        pairings.json was unreachable. Now that two payoffs are real, family/general scope DOES
+        pair (by design -- see `plan_subject`'s species-scope guard); species scope must not,
+        since a species subject's own count (2) is small enough that pairing would force EVERY
+        one of ~84 species into the identical pair, destroying per-species distinctiveness."""
         if not OUTPUT_PATH.is_file():
             self.skipTest("round-1.json not yet generated in this checkout")
         doc = json.loads(OUTPUT_PATH.read_text(encoding="utf-8"))
-        roles = {e["pairing"]["role"] for e in doc["entries"]}
-        self.assertEqual(roles, {"none"})
+        species_roles = {e["pairing"]["role"] for e in doc["entries"] if e["scope"] == "species"}
+        self.assertEqual(species_roles, {"none"})
+        other_roles = {e["pairing"]["role"] for e in doc["entries"] if e["scope"] != "species"}
+        self.assertIn("payoff", other_roles)
+        self.assertIn("enabler", other_roles)
 
     def test_planted_violation_unpaired_payoff_refused(self) -> None:
         group = [

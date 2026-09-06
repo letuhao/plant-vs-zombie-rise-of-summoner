@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "_meta": {
+    "batch": "set-gen-might-offense",
+    "partition": "sets/might-offense",
+    "contractVersion": 1,
+    "registryVersions": {
+      "bands": 1,
+      "core": 2,
+      "naming": 4,
+      "tags": 4,
+      "classes": 3,
+      "themes": 1
+    },
+    "exemplarVersion": 1,
+    "promptVersion": "set-charm-gen/1",
+    "model": "claude-opus-5",
+    "authoredUtc": "2026-09-06T00:00:00Z",
+    "sourceRef": "docs/architecture/item/spec-set-charm-gen.md"
+  },
+  "entries": [
+    {
+      "id": "set.might-offense-001",
+      "nameKey": "set.long-arm-of-the-fall",
+      "name": "The Long Arm of the Fall",
+      "themeKey": "build.might-offense",
+      "members": [
+        {
+          "role": "armament-primary",
+          "frame": "humanoid"
+        },
+        {
+          "role": "core-guard",
+          "frame": "humanoid"
+        },
+        {
+          "role": "manipulator",
+          "frame": "humanoid"
+        },
+        {
+          "role": "footing",
+          "frame": "humanoid"
+        }
+      ],
+      "thresholds": [
+        {
+          "pieces": 2,
+          "capability": {
+            "family": "atom.deathblast",
+            "powerBand": "low",
+            "params": {
+              "element": "dark"
+            }
+          }
+        },
+        {
+          "pieces": 4,
+          "atoms": [
+            {
+              "family": "atom.might",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.ferocity",
+              "powerBand": "high"
+            },
+            {
+              "family": "atom.elpw-focus",
+              "powerBand": "high",
+              "params": {
+                "element": "dark"
+              }
+            }
+          ]
+        }
+      ],
+      "flavor": "Every piece of it is heavier than it looks and hangs a little lower than it should. The swing is not the point. The point is what the ground does after.",
+      "tags": [],
+      "notes": "Generated from an authored answer against promptVersion set-charm-gen/1. Member baseType binding is NOT resolved here — module 13 builds no base-type chooser, and inventing one would be deterministic code writing identity."
+    }
+  ]
+}

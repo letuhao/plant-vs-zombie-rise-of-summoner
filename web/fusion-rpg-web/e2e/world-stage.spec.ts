@@ -1,13 +1,18 @@
+/**
+ * world-stage e2e — Phaser dual-plane host + React inspector/HUD (gaps G14 / D20).
+ * No SVG sector cards (`world-scene-sector-*`, `sector-node-*`, viewBox). Pin picks use
+ * `__fusionRpgWorldProbe.pinScreen` + mouse only — never emitSelect / pickAt emit.
+ */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { test, expect, type Page, type Route } from "@playwright/test";
 
 const fixture = JSON.parse(
-  readFileSync(fileURLToPath(new URL("../src/features/world/fixtures/first-light.json", import.meta.url)), "utf8")
+  readFileSync(fileURLToPath(new URL("../src/stages/world/fixtures/first-light.json", import.meta.url)), "utf8")
 );
 
 const twoHearths = JSON.parse(
-  readFileSync(fileURLToPath(new URL("../src/features/world/fixtures/two-hearths.json", import.meta.url)), "utf8")
+  readFileSync(fileURLToPath(new URL("../src/stages/world/fixtures/two-hearths.json", import.meta.url)), "utf8")
 );
 
 const health = {
@@ -34,6 +39,13 @@ async function fulfillJson(route: Route, body: unknown) {
   await route.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(body) });
 }
 
+/** Preview builds gate the probe on `__PLAYWRIGHT` (DEV is false under `vite preview`). */
+async function enableWorldProbe(page: Page) {
+  await page.addInitScript(() => {
+    (window as unknown as { __PLAYWRIGHT?: boolean }).__PLAYWRIGHT = true;
+  });
+}
+
 async function mockWorld(page: Page) {
   await page.route("**/hub/rpg**", (route) => route.abort());
   await page.route("**/health", (route) => fulfillJson(route, health));
@@ -44,10 +56,7 @@ async function mockWorld(page: Page) {
   await page.route("**/api/world/first-light/state**", (route) => fulfillJson(route, fixture));
 }
 
-/** `two-hearths`, with one sector aged into `Scouted` memory and one into `Rumored` — the exact
- * shape W50's own stale-fog legibility check needs, and the same technique `e2e/world.spec.ts`'s
- * own `worldState({staleAge})` helper already uses (mutate the byte-pinned fixture for one named
- * test scenario, never invent a new one). */
+/** `two-hearths` with one Scouted + one Rumored sector for inspector intel / stale-fog checks. */
 function twoHeartsWorldState() {
   const state = JSON.parse(JSON.stringify(twoHearths)) as typeof twoHearths;
   for (const sector of state.sectors) {
@@ -63,9 +72,7 @@ function twoHeartsWorldState() {
   return state;
 }
 
-/** A maximal sector — every inspector block populated, matching W57's own "8 slots, 4 forces, a
- * warden, a construction in progress" density case — grafted onto the real `two-hearths` fixture
- * rather than a hand-built double, so the rest of the world (lanes, other sectors) stays real. */
+/** Maximal sector density for inspector scroll / dock bound (W57). */
 function maximalWorldState() {
   const state = JSON.parse(JSON.stringify(twoHearths)) as typeof twoHearths;
   const sector = state.sectors.find((s: { sectorId: string }) => s.sectorId === "d-flank-2")!;
@@ -111,10 +118,7 @@ async function mockTwoHearths(page: Page) {
   await page.route("**/api/world/two-hearths/state**", (route) => fulfillJson(route, twoHeartsWorldState()));
 }
 
-/** `two-hearths` with `z-outpost`'s one and only lane severed, isolating it entirely from the rest
- * of the map — the real "genuinely no route" case `reachableFromLegion`/`routeForLegion` already
- * refuse honestly, used here to prove the client-side blocked-target path (world-stage W71) rather
- * than only the reachable one. */
+/** `z-outpost` isolated by severing its only lane — for the unreachable-march refusal path. */
 function severedTwoHeartsWorldState() {
   const state = twoHeartsWorldState();
   const lane = state.lanes.find((l: { laneId: string }) => l.laneId === "l-zf2-zo");
@@ -133,150 +137,210 @@ async function mockSeveredTwoHearths(page: Page) {
   await page.route("**/api/world/two-hearths/state**", (route) => fulfillJson(route, severedTwoHeartsWorldState()));
 }
 
-/**
- * The scene-composition wiring, proven in a real browser (closed 2026-09-04 — the gap W50/W57/W65/
- * W71 each named): a real sector renders from real state and is clickable, through the actual
- * `#/world-stage` route, not merely a jsdom component render.
- */
-test.describe("the new stage draws real sectors and they are clickable", () => {
-  test("a known sector renders and clicking it selects it", async ({ page }) => {
-    await mockWorld(page);
-    await page.goto("/#/world-stage");
+async function gotoWorld(page: Page, mock: (page: Page) => Promise<void> = mockWorld) {
+  await enableWorldProbe(page);
+  await mock(page);
+  await page.goto("/#/world-stage");
+  await expect(page.getByTestId("world-game-host")).toBeVisible({ timeout: 30_000 });
+  await page.waitForFunction(
+    () => {
+      const w = window as unknown as { __fusionRpgWorldProbe?: { pinCount: () => number } };
+      return (w.__fusionRpgWorldProbe?.pinCount?.() ?? 0) > 0;
+    },
+    { timeout: 30_000 }
+  );
+}
 
-    const homeworld = page.getByTestId("world-scene-sector-homeworld");
-    await expect(homeworld).toBeVisible();
-    await expect(page.getByTestId("sector-node-homeworld")).toBeVisible();
+/** Mouse-only pin pick via probe screen coords. Does not assert selection (reselect / march targets). */
+async function mouseClickPin(page: Page, sectorId: string) {
+  const canvas = page.locator("canvas").first();
+  await expect(canvas).toBeVisible();
+  await page.evaluate((id) => {
+    const w = window as unknown as {
+      __fusionRpgWorldProbe?: { centreOn?: (s: string) => boolean };
+    };
+    w.__fusionRpgWorldProbe?.centreOn?.(id);
+  }, sectorId);
+  await page.waitForTimeout(150);
+  const box = await canvas.boundingBox();
+  expect(box).toBeTruthy();
+  const pt = await page.evaluate((id) => {
+    const w = window as unknown as {
+      __fusionRpgWorldProbe?: { pinScreen: (s: string) => { x: number; y: number } | null };
+    };
+    return w.__fusionRpgWorldProbe?.pinScreen(id) ?? null;
+  }, sectorId);
+  expect(pt, `pinScreen(${sectorId})`).toBeTruthy();
+  expect(pt!.x).toBeGreaterThan(0);
+  expect(pt!.y).toBeGreaterThan(0);
+  expect(pt!.x).toBeLessThan(box!.width);
+  expect(pt!.y).toBeLessThan(box!.height);
 
-    await homeworld.click();
-    await expect(page.getByTestId("world-stage-svg")).toHaveAttribute("data-selected-sector", "homeworld");
+  // Honest pick: mouse only — no probe emitSelect / pickAt fallback (gaps D21).
+  await page.mouse.click(box!.x + pt!.x, box!.y + pt!.y);
+}
+
+async function clickPin(page: Page, sectorId: string) {
+  // Fit so authored pins sit in the visible canvas before mouse pick.
+  await page.getByTestId("world-map-fit").click();
+  await page.waitForTimeout(250);
+  await mouseClickPin(page, sectorId);
+  await expect(page.getByTestId("world-game-host")).toHaveAttribute("data-selected-sector", sectorId, {
+    timeout: 8_000
+  });
+}
+
+async function clearSelectionByContextMenu(page: Page) {
+  const canvas = page.locator("canvas").first();
+  const box = await canvas.boundingBox();
+  expect(box).toBeTruthy();
+  await page.mouse.click(box!.x + box!.width * 0.55, box!.y + box!.height * 0.45, { button: "right" });
+  await expect(page.getByTestId("world-game-host")).toHaveAttribute("data-selected-sector", "", {
+    timeout: 5_000
+  });
+}
+
+test.describe("Phaser host loads and pins are pickable", () => {
+  test("loads world-stage with Phaser host, HUD, rail — not SVG sector cards", async ({ page }) => {
+    await gotoWorld(page);
+
+    await expect(page.getByTestId("world-game-host")).toBeVisible();
+    await expect(page.getByTestId("world-game-canvas")).toBeAttached();
+    await expect(page.getByTestId("world-hud")).toBeVisible();
+    await expect(page.getByTestId("rail")).toBeVisible();
+    await expect(page.locator("canvas").first()).toBeVisible({ timeout: 15_000 });
+
+    await expect(page.getByTestId("world-stage-svg")).toHaveCount(0);
+    await expect(page.getByTestId("sector-node-homeworld")).toHaveCount(0);
+    await expect(page.getByTestId("world-scene-sector-homeworld")).toHaveCount(0);
+
+    const pinCount = await page.evaluate(() => {
+      const w = window as unknown as { __fusionRpgWorldProbe?: { pinCount: () => number } };
+      return w.__fusionRpgWorldProbe?.pinCount() ?? 0;
+    });
+    expect(pinCount).toBe(fixture.sectors.length);
   });
 
-  // Ported from the old `#/world` page's own `e2e/world.spec.ts` (retired when `#/world` started
-  // serving this stage, world-stage routing work 2026-09-05) — the one assertion there that this
-  // file did not already cover under its own testids: a sector nobody has scouted renders as a
-  // silhouette with no name, real-browser fidelity for `sectorChannels.ts`'s `shape: "unknown"`
-  // branch rather than only the jsdom coverage `WorldScene.test.tsx` already has.
-  test("ground nobody has seen is a silhouette without a name", async ({ page }) => {
-    await mockWorld(page);
-    await page.goto("/#/world-stage");
+  test("clicking a pin selects it and opens the inspector", async ({ page }) => {
+    await gotoWorld(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    const dark = page.getByTestId("sector-node-black-gate");
-    await expect(dark).toBeVisible();
-    await expect(dark).toHaveAttribute("data-shape", "unknown");
-    await expect(dark).not.toContainText("Black Gate");
-    await expect(dark).toContainText("unexplored");
+    await clickPin(page, "homeworld");
+    const inspector = page.getByTestId("sector-inspector");
+    await expect(inspector).toBeVisible({ timeout: 10_000 });
+    await expect(inspector).toContainText("homeworld");
+    await expect(page.getByTestId("world-game-host")).toHaveAttribute("data-selected-sector", "homeworld");
   });
 
-  test("clicking the same sector again deselects it (world-stage W65)", async ({ page }) => {
-    await mockWorld(page);
-    await page.goto("/#/world-stage");
+  test("unexplored ground opens as Unknown in the inspector (no named card)", async ({ page }) => {
+    await gotoWorld(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    // `ash-waste` (layoutX 4 → x=880px), not `homeworld` (layoutX 0 → x=0px): with the inspector
-    // open, its own dock — `left-[92px] w-[380px]`, `92px`–`472px` — visually covers a sector
-    // authored at the map's own origin, and a *second* click there hits the dock, not the sector
-    // underneath it (Playwright: "element ... subtree intercepts pointer events", found live, not
-    // assumed). That is a real map-layout gap (the camera doesn't yet reserve the chrome budget
-    // `spec-world-hud.md` §1 already specifies — `world-hud`'s own frame is a separate, still-
-    // unmounted piece), not a defect in the reselect-toggle logic itself, which is what this test
-    // actually proves; a sector clear of the dock's own footprint is the honest way to prove it
-    // through a real click rather than quietly asserting past the real finding.
-    const ashWaste = page.getByTestId("world-scene-sector-ash-waste");
-    await ashWaste.click();
-    await expect(page.getByTestId("world-stage-svg")).toHaveAttribute("data-selected-sector", "ash-waste");
-
-    await ashWaste.click();
-    await expect(page.getByTestId("world-stage-svg")).toHaveAttribute("data-selected-sector", "");
+    await clickPin(page, "black-gate");
+    const headerEl = page.getByTestId("identity-header");
+    await expect(headerEl).toBeVisible();
+    await expect(headerEl).toHaveAttribute("data-intel", "Unknown");
+    await expect(headerEl).toContainText("unexplored");
+    await expect(headerEl).not.toContainText("Black Gate");
   });
 
-  test("clicking a sector opens the real inspector, and closing it deselects (world-stage W57/W65)", async ({ page }) => {
-    await mockWorld(page);
-    await page.goto("/#/world-stage");
+  test("clicking the same pin again deselects it (world-stage W65)", async ({ page }) => {
+    await gotoWorld(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    await page.getByTestId("world-scene-sector-homeworld").click();
+    // Prefer a pin clear of the left dock footprint (same rationale as the old ash-waste pick).
+    await clickPin(page, "ash-waste");
+    await expect(page.getByTestId("sector-inspector")).toBeVisible();
+
+    // Second click toggles off — use raw mouse (clickPin would require selected-sector still set).
+    await mouseClickPin(page, "ash-waste");
+    await expect(page.getByTestId("world-game-host")).toHaveAttribute("data-selected-sector", "", {
+      timeout: 5_000
+    });
+    await expect(page.getByTestId("sector-inspector")).toHaveCount(0);
+  });
+
+  test("closing the inspector deselects; right-click empty map also clears", async ({ page }) => {
+    await gotoWorld(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
+
+    await clickPin(page, "homeworld");
     const inspector = page.getByTestId("sector-inspector");
     await expect(inspector).toBeVisible();
-    await expect(inspector).toContainText("homeworld");
 
     await page.getByTestId("sector-inspector-close").click();
     await expect(inspector).not.toBeVisible();
-    await expect(page.getByTestId("world-stage-svg")).toHaveAttribute("data-selected-sector", "");
+    await expect(page.getByTestId("world-game-host")).toHaveAttribute("data-selected-sector", "");
+
+    await clickPin(page, "homeworld");
+    await expect(page.getByTestId("sector-inspector")).toBeVisible();
+    await clearSelectionByContextMenu(page);
+    await expect(page.getByTestId("sector-inspector")).toHaveCount(0);
   });
 
-  test("Esc closes the inspector and only the inspector — the map's own camera/selection survive the cycle (world-stage W65)", async ({ page }) => {
-    await mockWorld(page);
-    await page.goto("/#/world-stage");
+  test("Esc closes the inspector; the Phaser host survives (world-stage W65 / GG-11)", async ({ page }) => {
+    await gotoWorld(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    const svg = page.getByTestId("world-stage-svg");
-    const viewBoxBefore = await svg.getAttribute("viewBox");
+    const host = page.getByTestId("world-game-host");
+    await expect(host).toBeVisible();
 
-    await page.getByTestId("world-scene-sector-homeworld").click();
+    await clickPin(page, "homeworld");
     await expect(page.getByTestId("sector-inspector")).toBeVisible();
 
     await page.keyboard.press("Escape");
     await expect(page.getByTestId("sector-inspector")).not.toBeVisible();
-    // The stage itself is still mounted (GG-11) and its own camera viewBox is untouched by the
-    // open/close cycle — proven directly, not merely assumed, by comparing the real attribute.
-    await expect(svg).toHaveAttribute("viewBox", viewBoxBefore!);
+    await expect(host).toBeVisible();
   });
 });
 
 /**
- * The stale-fog legibility check (world-stage W50), run on `two-hearths` per its own acceptance
- * (not `first-light` — six sectors was reshaped precisely because one march lit the whole map).
- * The question is not "can you tell them apart" but "can you still plan a march against them" —
- * the wash must never wash out the static facts a march decision actually needs (climate, danger,
- * ownership, the stamp naming how stale the memory is).
+ * Stale-fog legibility (W50) — map fog stamps lived on SVG SectorNode; on Phaser the readable
+ * surface for age wording is the inspector identity row (and ground facts stay visible under wash).
  */
-test.describe("stale-fog legibility on two-hearths (world-stage W50)", () => {
-  test("a Scouted and a Rumored sector both keep their static facts and stamp readable under the wash", async ({ page }) => {
-    await mockTwoHearths(page);
-    await page.goto("/#/world-stage");
+test.describe("stale intel via inspector on two-hearths (world-stage W50)", () => {
+  test("Scouted and Rumored sectors keep static facts and age wording in the inspector", async ({ page }) => {
+    await gotoWorld(page, mockTwoHearths);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    const scouted = page.getByTestId("world-scene-sector-d-flank-2");
-    const rumored = page.getByTestId("world-scene-sector-d-outpost");
-    await expect(scouted).toBeVisible();
-    await expect(rumored).toBeVisible();
+    await clickPin(page, "d-flank-2");
+    const scoutedHeader = page.getByTestId("identity-header");
+    await expect(scoutedHeader).toHaveAttribute("data-intel", "Scouted");
+    await expect(page.getByTestId("identity-intel-row")).toContainText("scouted — 4 nights old");
+    await expect(page.getByTestId("ground-block")).toHaveAttribute("data-intel", "Scouted");
+    await expect(page.getByTestId("ground-block")).toBeVisible();
 
-    // The wash is on; the stamp naming staleness is real, visible text, not merely implied by tint.
-    await expect(scouted.getByTestId("fog-stamp")).toHaveText("seen 4 turns ago");
-    await expect(rumored.getByTestId("fog-stamp")).toHaveText("hearsay");
-    await expect(scouted.getByTestId("fog-wrapper")).toHaveAttribute("data-wash", "parchment");
-    await expect(rumored.getByTestId("fog-wrapper")).toHaveAttribute("data-wash", "torn");
+    await clearSelectionByContextMenu(page);
 
-    // Real rendered screenshots of both cards at their native on-screen size — read and judged
-    // directly (this session, 2026-09-04) rather than a hand-rolled compositing calculation
-    // guessing what the browser actually painted. Recorded result: see the W50 evidence in
-    // tasks/world-stage-todo.md.
-    await scouted.screenshot({ path: "e2e/.artifacts/w50-scouted.png" });
-    await rumored.screenshot({ path: "e2e/.artifacts/w50-rumored.png" });
+    await clickPin(page, "d-outpost");
+    await expect(page.getByTestId("identity-header")).toHaveAttribute("data-intel", "Rumored");
+    await expect(page.getByTestId("identity-intel-row")).toContainText("rumoured — 8 nights old");
+    await expect(page.getByTestId("ground-block")).toHaveAttribute("data-intel", "Rumored");
   });
 });
 
 /**
- * The GG-61 proof (world-stage W57) — a maximal sector renders inside the dock's own bound with
- * the body scrolling, and the stage behind it never scrolls to compensate, at both named floors.
- * Proven through the real, now-wired inspector rather than left as a jsdom-only claim.
+ * GG-61 / W57 — maximal inspector density; body scrolls, document does not.
  */
 for (const [width, height] of [
   [1280, 720],
   [1440, 900]
 ] as const) {
-  test(`a maximal sector's inspector stays inside its own bound at ${width}x${height}, body scrolling, stage untouched (world-stage W57)`, async ({ page }) => {
+  test(`a maximal sector's inspector stays inside its own bound at ${width}x${height} (world-stage W57)`, async ({
+    page
+  }) => {
     await page.setViewportSize({ width, height });
-    await mockMaximal(page);
-    await page.goto("/#/world-stage");
+    await gotoWorld(page, mockMaximal);
 
-    await page.getByTestId("world-scene-sector-d-flank-2").click();
+    await clickPin(page, "d-flank-2");
     const inspector = page.getByTestId("sector-inspector");
     await expect(inspector).toBeVisible();
-    // Every block's real content is what makes this a *maximal* density case, not a placeholder.
     await expect(inspector).toContainText("e-dave-warden-1");
-    await expect(inspector).toContainText("240"); // the exact legion's own real strength
-    await expect(inspector).toContainText("Guarded by guard"); // the guard, named as a force
+    await expect(inspector).toContainText("240");
+    await expect(page.getByTestId("force-row-e-guard-1")).toBeVisible();
 
     const inspectorBox = await inspector.boundingBox();
     expect(inspectorBox).not.toBeNull();
-    // DockShell's own bound is `inset-y-0` — full viewport height, never more.
     expect(inspectorBox!.height).toBeLessThanOrEqual(height + 1);
 
     const bodyOverflow = await page.evaluate(() => {
@@ -295,13 +359,10 @@ for (const [width, height] of [
 
 test("the same maximal sector holds its bound at 200% text scale (world-stage W57)", async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 720 });
-  await mockMaximal(page);
-  await page.goto("/#/world-stage");
-  // A real 200% text-zoom reflow, not merely a larger viewport — `rem`-based sizing is what GG-56/
-  // the type floor actually promise to survive, and only reflowing root font-size proves it.
+  await gotoWorld(page, mockMaximal);
   await page.addStyleTag({ content: "html { font-size: 200% !important; }" });
 
-  await page.getByTestId("world-scene-sector-d-flank-2").click();
+  await clickPin(page, "d-flank-2");
   const inspector = page.getByTestId("sector-inspector");
   await expect(inspector).toBeVisible();
 
@@ -320,21 +381,15 @@ test("the same maximal sector holds its bound at 200% text scale (world-stage W5
   expect(documentOverflow).toBe(false);
 });
 
-/**
- * world-stage W34: the stage route is measured against the viewport, not the page. Sweeps both
- * named floors — the 1280×720 minimum and the 1440×900 the plan's own numbers cite — and asserts
- * the *document* never scrolls and nothing overflows horizontally, which is what GG-36 actually
- * forbids (`overflow-auto` dressed as a feature).
- */
 for (const [width, height] of [
   [1280, 720],
   [1440, 900]
 ] as const) {
   test(`the stage route never grows the document past the viewport at ${width}x${height}`, async ({ page }) => {
     await page.setViewportSize({ width, height });
-    await page.goto("/#/world-stage");
+    await gotoWorld(page);
 
-    await expect(page.getByTestId("world-stage-svg")).toBeVisible();
+    await expect(page.getByTestId("world-game-host")).toBeVisible();
 
     const { scrollHeight, viewportHeight, hasHorizontalOverflow } = await page.evaluate(() => {
       const doc = document.scrollingElement ?? document.documentElement;
@@ -351,80 +406,41 @@ for (const [width, height] of [
 }
 
 /**
- * The queued-order path (world-stage W71) — the real wiring gap this program named four times
- * (W50/W57/W65/W71) closed for good: a force actually rendered at its own sector, selectable,
- * showing its reachable range, filing a march that is visibly queued without moving anything, and
- * taking it back cleanly. `first-light`'s own `e-dave-legion-1` stands at `homeworld`, connected by
- * open lanes to `ember-hollow` and `frost-mire` (1 hop each) and onward to `ash-waste` (2),
- * `black-gate` (3) and `verdant-shelf` (4) — every other sector on this small map is reachable.
+ * Queued-order path (W71) — force pick via Outliner (React), destination via honest pin mouse.
+ * SVG legion-marker / range-ring / destination-flag / lane-queued DOM is retired.
  */
-test.describe("the queued order — filed, drawn, and takeable back (world-stage W71)", () => {
-  test("select a force, see its range, file a march, watch it queue without moving the marker, then take it back", async ({
-    page
-  }) => {
-    await mockWorld(page);
-    await page.goto("/#/world-stage");
+test.describe("the queued order — filed via outliner + pin (world-stage W71)", () => {
+  test("select a force, file a march, see it queue, then take it back", async ({ page }) => {
+    await gotoWorld(page);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    const marker = page.getByTestId("legion-marker-e-dave-legion-1");
-    await expect(marker).toBeVisible();
-    await expect(marker).toHaveAttribute("data-selected", "false");
+    await page.getByTestId("outliner-row-e-dave-legion-1").click();
+    await expect(page.getByTestId("queued-orders-empty")).toBeVisible();
 
-    // The `transform` attribute is the one place this marker's actual position lives — checked
-    // directly rather than via `boundingBox()`, which also reflects the selected-ring's own thicker
-    // stroke (a real, deliberate cosmetic change on selection) and would make an honest "never
-    // moved" proof look like a false failure.
-    const transformBeforeSelecting = await marker.getAttribute("transform");
-    expect(transformBeforeSelecting).toMatch(/^translate\(/);
-
-    // Select the force — its range lights up, hop numbers and all.
-    await marker.click();
-    await expect(marker).toHaveAttribute("data-selected", "true");
-    await expect(page.getByTestId("range-ring-ember-hollow")).toHaveAttribute("data-hops", "1");
-    await expect(page.getByTestId("range-hop-number-ember-hollow")).toHaveText("1");
-    await expect(page.getByTestId("range-ring-ash-waste")).toHaveAttribute("data-hops", "2");
-
-    // Selecting the force must not itself have moved it.
-    expect(await marker.getAttribute("transform")).toBe(transformBeforeSelecting);
-
-    // Click a reachable destination — this files the march.
-    await page.getByTestId("world-scene-sector-ember-hollow").click();
+    // Destination pin — files the march (does not select the sector while a force is selected).
+    await mouseClickPin(page, "ember-hollow");
 
     const commandId = "t0-move-e-dave-legion-1";
-    await expect(page.getByTestId("queued-orders")).toBeVisible();
+    await expect(page.getByTestId("queued-orders")).toBeVisible({ timeout: 5_000 });
     await expect(page.getByTestId(`queued-order-${commandId}`)).toBeVisible();
     await expect(page.getByTestId(`queued-order-label-${commandId}`)).toContainText("Ember Hollow");
-    await expect(page.getByTestId(`destination-flag-${commandId}`)).toBeVisible();
-    await expect(page.getByTestId("lane-queued-l-home-ember")).toBeVisible();
 
-    // The token itself never moved — filing an order is not the same act as the turn resolving.
-    expect(await marker.getAttribute("transform")).toBe(transformBeforeSelecting);
+    // Host must not have treated the destination as a sector selection while targeting.
+    await expect(page.getByTestId("world-game-host")).toHaveAttribute("data-selected-sector", "");
 
-    // Take it back — the queue empties and the destination flag disappears with it.
     await page.getByTestId(`queued-order-take-back-${commandId}`).click();
     await expect(page.getByTestId("queued-orders-empty")).toBeVisible();
-    await expect(page.getByTestId(`destination-flag-${commandId}`)).toHaveCount(0);
-
-    // The marker, one final time, is still exactly where it always was.
-    expect(await marker.getAttribute("transform")).toBe(transformBeforeSelecting);
   });
 
-  test("clicking a genuinely unreachable sector while a force is selected shows the refusal, and queues nothing", async ({
-    page
-  }) => {
-    await mockSeveredTwoHearths(page);
-    await page.goto("/#/world-stage");
+  test("an unreachable destination queues nothing", async ({ page }) => {
+    await gotoWorld(page, mockSeveredTwoHearths);
+    await page.setViewportSize({ width: 1280, height: 720 });
 
-    await page.getByTestId("legion-marker-e-dave-legion-1").click();
-    await expect(page.getByTestId("legion-marker-e-dave-legion-1")).toHaveAttribute("data-selected", "true");
+    await page.getByTestId("outliner-row-e-dave-legion-1").click();
+    await mouseClickPin(page, "z-outpost");
 
-    // `z-outpost`'s only lane (`l-zf2-zo`) is severed in this fixture — no route exists from
-    // `d-home` no matter how far the legion could otherwise march.
-    await page.getByTestId("world-scene-sector-z-outpost").click();
-
-    const blocked = page.getByTestId("blocked-target");
-    await expect(blocked).toBeVisible();
-    await expect(blocked).toHaveAttribute("data-kind", "blocked");
-    await expect(page.getByTestId("blocked-target-caption")).toHaveText("Order refused — no route given.");
+    // BlockedTarget was an SVG overlay; refusal still must not enqueue.
     await expect(page.getByTestId("queued-orders-empty")).toBeVisible();
+    await expect(page.getByTestId("queued-order-t0-move-e-dave-legion-1")).toHaveCount(0);
   });
 });

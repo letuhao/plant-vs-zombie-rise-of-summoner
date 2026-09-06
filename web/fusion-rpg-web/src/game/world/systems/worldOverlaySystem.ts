@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import type { WorldInteractionPayload } from "../../EventBus";
+import { reasonFor } from "@/stages/world/inspector/reasonFor";
 import type { WorldTheme } from "../snapshotTheme";
 import type { WorldRegistry } from "../entities/WorldRegistry";
 import type { ZoomTier } from "../zoomTier";
@@ -12,6 +13,8 @@ import {
 } from "./worldOverlayPlan";
 
 const ROOT_NAME = "world-overlay-root";
+const TEXT_KEY = "worldOverlayTexts";
+const TYPE_FLOOR_PX = 12;
 
 export type WorldOverlayInput = {
   scene: Phaser.Scene;
@@ -34,7 +37,37 @@ function rootGraphics(scene: Phaser.Scene): Phaser.GameObjects.Graphics {
   return g;
 }
 
+function clearOverlayTexts(scene: Phaser.Scene): void {
+  const prev = scene.data.get(TEXT_KEY) as Phaser.GameObjects.Text[] | undefined;
+  if (prev) {
+    for (const t of prev) t.destroy();
+  }
+  scene.data.set(TEXT_KEY, []);
+}
+
+function addOverlayText(
+  scene: Phaser.Scene,
+  theme: WorldTheme,
+  x: number,
+  y: number,
+  text: string,
+  fontSizePx = TYPE_FLOOR_PX
+): void {
+  if (fontSizePx < TYPE_FLOOR_PX) return;
+  const t = scene.add.text(x, y, text, {
+    fontFamily: theme.fontFamily,
+    fontSize: `${fontSizePx}px`,
+    color: theme.ink
+  });
+  t.setOrigin(0.5);
+  t.setDepth(51);
+  const list = (scene.data.get(TEXT_KEY) as Phaser.GameObjects.Text[] | undefined) ?? [];
+  list.push(t);
+  scene.data.set(TEXT_KEY, list);
+}
+
 function clear(scene: Phaser.Scene): void {
+  clearOverlayTexts(scene);
   const g = scene.children.getByName(ROOT_NAME) as Phaser.GameObjects.Graphics | null;
   g?.clear();
   g?.destroy();
@@ -123,7 +156,12 @@ function drawHatch(
   }
 }
 
-function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: OverlayCommand): void {
+function drawCommand(
+  scene: Phaser.Scene,
+  g: Phaser.GameObjects.Graphics,
+  theme: WorldTheme,
+  cmd: OverlayCommand
+): void {
   switch (cmd.kind) {
     case "selection-halo": {
       g.lineStyle(3, sun(theme), 0.95);
@@ -134,7 +172,6 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
       const color = cmd.hops <= 2 ? plant(theme) : panel(theme);
       g.lineStyle(2, color, 0.75);
       if (cmd.dash === "dashed") {
-        // Approximate dashed ring with short arcs via many segments.
         const steps = 32;
         for (let i = 0; i < steps; i += 2) {
           const a0 = (i / steps) * Math.PI * 2;
@@ -146,6 +183,7 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
       } else {
         g.strokeCircle(cmd.x, cmd.y, cmd.radius);
       }
+      addOverlayText(scene, theme, cmd.x, cmd.y, String(cmd.hops));
       break;
     }
     case "route-segment": {
@@ -161,12 +199,16 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
       break;
     }
     case "blocked-mark": {
+      if (cmd.treatment === "inert") {
+        addOverlayText(scene, theme, cmd.x, cmd.y, "…");
+        break;
+      }
       g.lineStyle(3, ink(theme), 0.95);
       const r = 16;
       g.lineBetween(cmd.x - r, cmd.y - r, cmd.x + r, cmd.y + r);
       g.lineBetween(cmd.x + r, cmd.y - r, cmd.x - r, cmd.y + r);
-      // Hatch density behind the cross (non-colour channel).
       drawHatch(g, cmd.x, cmd.y, r + 4, 0.6, panel(theme));
+      addOverlayText(scene, theme, cmd.x, cmd.y + 22, reasonFor(cmd.reason));
       break;
     }
     case "supply-cutoff": {
@@ -176,12 +218,32 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
       g.lineBetween(cmd.x + r, cmd.y - r, cmd.x - r, cmd.y + r);
       g.lineStyle(2, ink(theme), 0.7);
       g.strokeCircle(cmd.x, cmd.y, r + 4);
+      addOverlayText(scene, theme, cmd.x, cmd.y + 18, cmd.word);
+      break;
+    }
+    case "supply-envelope": {
+      g.lineStyle(2, plant(theme), 0.55);
+      g.fillStyle(plant(theme), 0.12);
+      if (cmd.mode === "hull" && cmd.points.length >= 3) {
+        g.beginPath();
+        g.moveTo(cmd.points[0]!.x, cmd.points[0]!.y);
+        for (let i = 1; i < cmd.points.length; i++) {
+          g.lineTo(cmd.points[i]!.x, cmd.points[i]!.y);
+        }
+        g.closePath();
+        g.fillPath();
+        g.strokePath();
+      } else if (cmd.mode === "per-lane") {
+        for (const n of cmd.nodes) {
+          g.fillStyle(plant(theme), 0.45);
+          g.fillCircle(n.x, n.y, 4);
+        }
+      }
       break;
     }
     case "lifeline-halo": {
       const w = cmd.weight === "thick" ? 4 : 2;
       g.lineStyle(w, sun(theme), 0.9);
-      // Dashed ring — weight + dash are the non-colour channels.
       const steps = 40;
       for (let i = 0; i < steps; i += 2) {
         const a0 = (i / steps) * Math.PI * 2;
@@ -190,10 +252,10 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
         g.arc(cmd.x, cmd.y, 22, a0, a1, false);
         g.strokePath();
       }
-      // Diamond pip at centre.
       g.fillStyle(sun(theme), 0.95);
       g.fillTriangle(cmd.x, cmd.y - 7, cmd.x + 6, cmd.y, cmd.x, cmd.y + 7);
       g.fillTriangle(cmd.x, cmd.y - 7, cmd.x - 6, cmd.y, cmd.x, cmd.y + 7);
+      if (cmd.caption) addOverlayText(scene, theme, cmd.x, cmd.y + 28, cmd.caption);
       break;
     }
     case "lens-mark": {
@@ -248,6 +310,7 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
           g.lineBetween(cmd.x + ox - 6, cmd.y, cmd.x + ox, cmd.y - 7);
         }
       }
+      if (cmd.label) addOverlayText(scene, theme, cmd.x, cmd.y + 26, cmd.label);
       break;
     }
     default:
@@ -256,6 +319,7 @@ function drawCommand(g: Phaser.GameObjects.Graphics, theme: WorldTheme, cmd: Ove
 }
 
 function drawWorldOverlay(input: WorldOverlayInput): OverlayDrawCounts {
+  clearOverlayTexts(input.scene);
   const g = rootGraphics(input.scene);
   const model = asModel(input.model);
   const targeting = (input.interaction?.targeting ?? null) as TargetingPlanInput | null;
@@ -274,14 +338,16 @@ function drawWorldOverlay(input: WorldOverlayInput): OverlayDrawCounts {
     lens: input.lens
   });
 
-  for (const cmd of commands) drawCommand(g, input.theme, cmd);
+  for (const cmd of commands) drawCommand(input.scene, g, input.theme, cmd);
 
-  console.info("[world-overlay]", {
-    event: "draw",
-    lens: input.lens,
-    tier: input.tier,
-    ...counts
-  });
+  if (import.meta.env.DEV) {
+    console.info("[world-overlay]", {
+      event: "draw",
+      lens: input.lens,
+      tier: input.tier,
+      ...counts
+    });
+  }
 
   return counts;
 }

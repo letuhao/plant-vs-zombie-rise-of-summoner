@@ -80,6 +80,17 @@ public sealed class BattleEffectHost
     /// <see cref="IBattleHpTarget"/>.</summary>
     public Func<string, IBattleStatTarget?>? ResolveStatTarget { set => _sink.ResolveStatTarget = value; }
 
+    /// <summary>passive-tree G2 (spec-mechanism-wiring.md §4.2): the one forward this host needs so a
+    /// live mid-battle trigger can add a contribution, matching `BattleDerivedModifierLedger.Add`'s own
+    /// signature exactly (actorKey, channel, sourceId, value) — every other trigger this class forwards
+    /// (Status/StatusRng/Ledger above) is a full object handed to the private sink; this one is
+    /// narrower (a single method, not the whole ledger) because nothing inside `BattleEffectHost` needs
+    /// to CONSULT the ledger the way `BattleEffectSink` consults `Ledger` for `stat.modify` — only to
+    /// ADD to it, exactly the one operation aura-skill T13's still-unbuilt live toggle will need to
+    /// call. Get-set (unlike the set-only forwards above) because a caller needs to INVOKE it, not just
+    /// hand it to a private sink.</summary>
+    public Action<string, string, string, double>? AddDerivedContribution { get; set; }
+
     /// <summary>Deltas actually applied in the last flush window (clamped to [0, MaxHp]).</summary>
     public IReadOnlyList<BattleAppliedHpDelta> LastApplied => _sink.Applied;
 

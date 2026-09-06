@@ -38,6 +38,7 @@ from .signature_propose.derive import (
     propose_signature_action,
 )
 from .signature_propose.prompts import build_brief, build_context
+from .usage_direction.weights import latest_usage_report_path, weights_from_usage_report
 from .vocab import load_family_glossary
 
 __all__ = ["run", "regenerate", "load_signature_briefs", "ACTIONS_ROOT", "PAIRINGS_PATH", "CANDIDATES_DIR"]
@@ -46,6 +47,7 @@ REPO_ROOT = Path(__file__).resolve().parents[5]
 ACTIONS_ROOT = REPO_ROOT / "data" / "seed" / "actions"
 PAIRINGS_PATH = ACTIONS_ROOT / "pairings.json"
 CANDIDATES_DIR = ACTIONS_ROOT / "_candidates" / "signature"
+USAGE_REPORTS_DIR = REPO_ROOT / "docs" / "research" / "action-corpus"
 
 PROMPT_VERSION = "signature-propose/1"
 
@@ -79,7 +81,8 @@ def load_signature_briefs(briefs_path: Path) -> "list[dict]":
 def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
               candidates_dir: Path = CANDIDATES_DIR, count: int = 1, dry_run: bool = True,
               round_no: int = 1, endpoint: str = "http://localhost:1234/v1/chat/completions",
-              model: str = "google/gemma-4-26b-a4b-qat", write: bool = True) -> dict:
+              model: str = "google/gemma-4-26b-a4b-qat", write: bool = True,
+              usage_reports_dir: "Path | None" = USAGE_REPORTS_DIR) -> dict:
     """Pure-ish computation (`dry_run=True` makes zero model calls and writes nothing regardless
     of `write`) plus, on a real run, up to `count * 3 * (MAX_HEAL + 1)` model calls and one file
     write. Returns a summary dict; never prints itself, matching
@@ -104,11 +107,22 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
     #: `vocab.load_family_glossary`'s own docstring.
     family_glossary = load_family_glossary()
 
+    # ⛔ Real gap closed 2026-09-06: this entrypoint never threaded roster-balance's own FC3
+    # `usage_weights` fix through to real calls -- proven correct against FC1's report, but
+    # inert here since nothing ever passed it in. Read the latest FC1 report (never required --
+    # `weights_from_usage_report` degrades to `None`/`{}` exactly like an omitted
+    # `family_glossary`, so a checkout with no report yet renders byte-identical to today).
+    usage_weights: "dict[str, int] | None" = None
+    if usage_reports_dir is not None:
+        report_path = latest_usage_report_path(usage_reports_dir)
+        if report_path is not None:
+            usage_weights = weights_from_usage_report(json.loads(report_path.read_text(encoding="utf-8")))
+
     if dry_run:
         sample_brief_text = ""
         if selected:
             context = build_context(selected[0], sample_index=0, pairing_table=pairing_table,
-                                    family_glossary=family_glossary)
+                                    family_glossary=family_glossary, usage_weights=usage_weights)
             sample_brief_text = build_brief(context)
         return {
             "dryRun": True,
@@ -140,7 +154,8 @@ def regenerate(*, briefs_path: Path, pairings_path: Path = PAIRINGS_PATH,
         prov["briefHash"] = _brief_hash(brief)
         candidate = propose_signature_action(
             brief, candidate_id=candidate_id, pairing_table=pairing_table,
-            family_glossary=family_glossary, config=config, provenance=prov,
+            family_glossary=family_glossary, usage_weights=usage_weights,
+            config=config, provenance=prov,
         )
         row = candidate_row(candidate)
         rows.append(row)

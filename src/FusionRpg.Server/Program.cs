@@ -532,7 +532,15 @@ store.LoadContentIntoRuntime();
 // Fail fast on demon content errors: the catalogs are lazy, and a bad species surfacing on the
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
-_ = FusionRpg.Core.Battle.WaveCatalog.All;
+// base-defense siege-waves §3.5 (task 12.4, 2026-09-06): wave composition moved out of a hand-written
+// WaveCatalog.cs array into data/tuning/waves.v1.json — species selection by rarity band still
+// happens in Core (WaveCatalog.Band/Enemies, reused verbatim by the loader), only WHICH waves exist
+// and their picks are now data. Must run after DemonSpeciesCatalog.Configure above: Band() reads
+// DemonSpeciesCatalog.All. Same Loader.Parse(File.ReadAllText(...)) -> Configure(...) shape as every
+// other data/tuning/*.json load in this file.
+FusionRpg.Core.Battle.WaveCatalog.Configure(
+    FusionRpg.Core.Battle.WaveCatalogLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "waves.v1.json"))));
 // ds 18 fusion-recipe-runtime §3 step 4 — THE FLIP, 2026-09-06: recipes now load from the committed
 // seed fusion-recipe-reconcile owns writing, not a live BuildDeterministicOnly() recomputation
 // (T8.4's own transitional call). Today's committed file carries 695 real deterministic recipes

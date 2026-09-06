@@ -236,8 +236,8 @@ test.describe("Checkpoint F.4 — every old route redirects; none 404", () => {
     expect(response?.ok()).toBe(true);
     await expect(page).toHaveURL(/#\/world$/);
 
-    // The real stage, not merely "didn't 404" — its own SVG camera root is visible.
-    await expect(page.getByTestId("world-stage-svg")).toBeVisible();
+    // The real stage, not merely "didn't 404" — Phaser host is visible (not legacy SVG camera).
+    await expect(page.getByTestId("world-game-host")).toBeVisible();
 
     // The legacy `WorldPage`'s own markers never render — it is deleted, not merely unreached.
     await expect(page.getByTestId("chunk-fallback-world")).not.toBeVisible();

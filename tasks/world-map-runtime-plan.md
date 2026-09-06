@@ -7,8 +7,10 @@
 **Catalog:** [docs/design/11-world-stage.html](../docs/design/11-world-stage.html) §O
 **Tasks:** [world-map-runtime-todo.md](world-map-runtime-todo.md)
 
-**Status:** **implementation complete** 2026-09-06. Open questions locked; CPA–CPD proven via
-Playwright + agent CV. Owner git commit pending.
+**Status:** **not complete** — R0–R16 Phaser host shipped, but parent SC 1–12 are **not** closed.
+Completion is [world-map-runtime-gaps-plan.md](world-map-runtime-gaps-plan.md) /
+[world-map-runtime-gaps-todo.md](world-map-runtime-gaps-todo.md) (D1–D32). Do not treat CPA–CPD
+as done until gaps CPG-D is green.
 
 **Paths written:** `tasks/world-map-runtime-plan.md` · `tasks/world-map-runtime-todo.md`.
 Never `tasks/plan.md` / `tasks/todo.md`.

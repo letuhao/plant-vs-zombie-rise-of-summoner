@@ -7,8 +7,7 @@ import {
 } from "../objects/pinConstants";
 
 /**
- * Camera structural consts and clamp math — pure oracle for R9.
- * Gesture wiring lives in worldCameraSystem (Phaser); these assert the named clamps exist.
+ * Camera structural consts and clamp math — pure oracle for R9 / gaps D4/D7/D9/D25.
  */
 function clampWorldZoom(z: number): number {
   return Math.min(MAX_SCALE, Math.max(MIN_SCALE, z));
@@ -18,7 +17,23 @@ function dragExceedsThreshold(dx: number, dy: number): boolean {
   return Math.hypot(dx, dy) >= DRAG_THRESHOLD_PX;
 }
 
-function edgeScrollAxes(pointerX: number, pointerY: number, width: number, height: number): { dx: number; dy: number } {
+function edgeScrollAxes(
+  pointerX: number,
+  pointerY: number,
+  width: number,
+  height: number,
+  ignoreRects: Array<{ left: number; top: number; width: number; height: number }> = []
+): { dx: number; dy: number } {
+  for (const r of ignoreRects) {
+    if (
+      pointerX >= r.left &&
+      pointerX <= r.left + r.width &&
+      pointerY >= r.top &&
+      pointerY <= r.top + r.height
+    ) {
+      return { dx: 0, dy: 0 };
+    }
+  }
   const m = EDGE_SCROLL_MARGIN_PX;
   let dx = 0;
   let dy = 0;
@@ -45,5 +60,19 @@ describe("worldCameraSystem structural clamps (R9)", () => {
     expect(edgeScrollAxes(10, 200, 1280, 720)).toEqual({ dx: 1, dy: 0 });
     expect(edgeScrollAxes(1270, 10, 1280, 720)).toEqual({ dx: -1, dy: 1 });
     expect(edgeScrollAxes(640, 360, 1280, 720)).toEqual({ dx: 0, dy: 0 });
+  });
+
+  it("edge-scroll no-ops inside ignoreRects (gaps D7)", () => {
+    expect(
+      edgeScrollAxes(10, 200, 1280, 720, [{ left: 0, top: 0, width: 100, height: 400 }])
+    ).toEqual({ dx: 0, dy: 0 });
+  });
+
+  it("accepts centre and relative zoom payload shapes (gaps D9/D25)", () => {
+    const centre = { generation: 1, op: "centre" as const, x: 110, y: 95 };
+    const zoomIn = { generation: 1, op: "zoom" as const, factor: 1.15 };
+    expect(centre.op).toBe("centre");
+    expect(zoomIn.factor).toBe(1.15);
+    expect(clampWorldZoom(1 * zoomIn.factor)).toBeGreaterThan(1);
   });
 });

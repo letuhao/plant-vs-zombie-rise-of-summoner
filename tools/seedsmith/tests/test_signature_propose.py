@@ -965,7 +965,7 @@ class DryRunEntrypointTests(unittest.TestCase):
         # round differed against" -- sourced from A-S2's own envelope meta
         # (`acceptedRoundCorpusHash`, added to `generate_brief_assembly.py` for exactly this).
         def fake_propose(brief, *, candidate_id, pairing_table=None, family_glossary=None,
-                        config=None, provenance=None):
+                        usage_weights=None, config=None, provenance=None):
             return Candidate(
                 brief_id=brief["briefId"], outcome="accepted",
                 entry=entry_for(make_draft(), candidate_id=candidate_id, brief_id=brief["briefId"],

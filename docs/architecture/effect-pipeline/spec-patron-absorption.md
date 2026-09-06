@@ -152,3 +152,117 @@ gate's status change as a side effect of this module (it stays exactly as open o
 - [ ] The full `(rarity × star × level × Θ)` grid is byte-identical before and after, proven by test.
 - [ ] Every existing patron SIM test still passes.
 - [ ] The open LIVE gate's status is unchanged by this module — no new risk introduced to it.
+
+## Amendment 2026-09-06 — the mechanism for "referenced, not re-expressed," and a second real gap this
+## spec's own text did not yet name
+
+Owner direction, `seed-to-concrete` T6.2: retire `PatronSecondaryPlugin`'s bespoke combat-math path
+**if and only if** battle-engine + the atom/container system genuinely already cover what it does —
+architectural consistency, not a rewrite for its own sake (Patron predates both; the spec's own §"the
+mechanism already exists" text is what makes this achievable without inventing new runtime).
+
+### What is now confirmed, read directly rather than assumed
+
+- **A real, PRODUCTION precedent for "grant an `EffectId`, no overlay, let the compiled def's own
+  `ModifyDerivedStat` action rows carry the magnitude" already exists and reaches a live lawn entity**:
+  `BattlefieldOwnSideReactor.BuildGrant` (`src/FusionRpg.Core/Battle/BattlefieldOwnSideReactor.cs`) —
+  named directly in `GrantedDerivedAtomReader`'s own doc comment as *"the only production grant path"*
+  that *"makes a real aura reach a lawn entity."* `PatronSecondaryPlugin`'s own current grant
+  (`EffectId`, no overlay, `OwnerKey: Match`) already matches this shape exactly — the delivery half
+  this spec already designed is not hypothetical, it is the same shape a real feature already proves
+  live. `GrantedDerivedAtomReader`'s own "scope grammar" explicitly includes `match` as a first-class
+  scope alongside `plant:{typeId}`/`entity:{ptr}` — Patron's own match-wide grant is a supported shape,
+  not an edge case to special-case around.
+- **`fx.patron_aura`'s own compiled def has zero `ModifyDerivedStat` action rows today** — confirmed
+  (not assumed) by reading `data/seed/containers/patron.json` directly: `"atoms": []`. This — not a
+  missing delivery mechanism — is the entire remaining gap on the *delivery* side.
+- **`PowerLadder`/`ClampedLevelScale` (`ValueSpec`, built 2026-09-02, the same day as this file's own
+  correction) are real, tested, reusable infrastructure — and this spec's own "referenced, not
+  re-expressed" decision, dated one day later (2026-09-03), still stands and is NOT overturned by their
+  existence.** They were built as general-purpose compile-time-bake infrastructure (real value for
+  future magnitudes that need it), not specifically to reopen this module's own already-decided
+  question. Composing them to *reproduce* `AuraMilli`'s formula as two independent atom expressions
+  would satisfy the letter of "an atom carries the number" while reintroducing exactly the risk this
+  file's own §"why this and not add Star to CurveInput" already rejected: two independently-expressed
+  formulas are only *provably* equal by a sweep, never by construction, and drift silently the moment
+  either copy is tuned alone. This amendment does not reopen that decision — it names the mechanism the
+  original text left unspecified for actually *referencing* the function.
+
+### The real remaining gap #1: how "referenced, not re-expressed" is mechanically expressed
+
+No `ValueSpec` marker today can say "the value is whatever this named external function currently
+returns" — `powerLadder`/`clampedLevelScale` both *compute* a number at compile time from owner
+context; neither *delegates* to an arbitrary named formula. **Proposed: a third, equally closed
+marker**, `{"externalRef": "patron.auraMilli"}` — a literal, closed, reviewed string id (never a
+free-form expression or a class/method name reflected at runtime, matching every other closed-marker
+precedent in this file's own vocabulary), resolved by `AtomCompiler.ResolvedParams` via a small,
+explicit `Dictionary<string, Func<ExternalRefContext, long>>` registry (one entry, `"patron.auraMilli"
+→ ctx => PatronPolicy.AuraMilli(ctx.Rarity, ctx.Star, ctx.Level, ctx.PTheta, ctx.PowerTuning)`) —
+literally calling the same function, so the byte-identity gate is satisfied by construction, matching
+this file's own already-decided reasoning exactly, now made buildable. Compiling an `externalRef` atom
+whose id is not in the registry throws, naming the unknown ref — never silently prices at zero
+(matching `powerLadder`'s own established "missing context throws" rule).
+
+### The real remaining gap #2: rarity/star/level/Θ are PER-PLAYER, not per-authored-content
+
+Not named anywhere in this file's original text, found this session while scoping the actual
+implementation: `AuraMilli`'s four inputs (`rarity`, `star`, `level`, `pTheta`) all belong to
+**whichever specific demon a given player has currently designated as patron** — genuinely different
+per player, and changing over that demon's own lifetime (promotion changes `star`; leveling changes
+`level`). `AtomCompiler.Compile`'s own `ownerLevel`/`ownerTheta` parameters
+(`src/FusionRpg.Core/Effects/Atoms/AtomCompiler.cs:27-35`) are each a single value for the WHOLE
+compile call — they answer "what is the level/Θ of the ONE owner this push is for," which is exactly
+right for a species' own base stats or one demon's own equipment, but Patron's aura is resolved
+**inside a push that may also carry the player's own, unrelated level/Θ** (the same multi-owner union
+`AtomPushService.OwnersForPlayer` now builds, `seed-to-concrete` T6.1) — the patron demon's own
+rarity/star/level/Θ are not the same numbers as the player's.
+
+**Corrected the same day, before any code was written** — freezing these four inputs onto a
+per-player `effect_binding`/atom row (the original plan here) was found wrong by tracing the data
+flow: a per-player-varying VALUE written onto the SHARED atom/container catalog bumps the GLOBAL
+`catalog_revision` on every designation or level-up, forcing every OTHER connected player to needlessly
+re-sync for a change that touches only one player. `mods-absorption` (T6.1) avoids this for equipment
+because the ATOM's own value is genuinely SHARED (every copy of an item grants the same flat bonus) —
+Patron's aura has no such shared value; it is different for every player's own patron, so there is
+nothing to freeze onto a catalog row that stays valid to reuse across a player-agnostic push.
+
+**Decided instead: resolve `externalRef` via a CALLBACK, computed fresh at push time, never written
+anywhere.** `AtomCompiler.Compile` gains one new parameter, `externalRefs: Func<string, long>? = null`
+— the exact same shape `curves: Func<string, CurveTable?>` already has, keeping `AtomCompiler` itself
+exactly as pure and domain-agnostic as it is today (it only ever invokes a callback it was handed; it
+never imports `PatronPolicy` or anything Patron-specific). `AtomPushService.Build` — which already has
+`_store` access and already knows which player a push is for — supplies this callback, backed by a
+LIVE lookup: that player's current `rpg_patron` row → the designated specimen's own current
+rarity/star/level → `PatronPolicy.AuraMilli` (unchanged, called directly) → the real number, computed
+fresh on every single push, always current, never stale, and never persisted anywhere the shared
+catalog's own revision could see it. No new DB write path, no freeze/refresh/withdraw lifecycle to get
+right, no per-player row at all.
+
+### Revised project structure
+
+```text
+data/seed/containers/patron.json                     edit — patron.aura's atoms carry ONE
+                                                        stat.derived atom per element slot, ValueSpec
+                                                        {"externalRef": "patron.auraMilli"} — the
+                                                        formula is referenced, never re-expressed
+src/FusionRpg.Core/Effects/Atoms/ValueSpec.cs         edit — the new ExternalRef field + Validate()
+src/FusionRpg.Core/Effects/Atoms/AtomCompiler.cs      edit — Compile's new externalRefs callback
+                                                        parameter; ResolvedParams invokes it
+src/FusionRpg.Server/AtomPushService.cs               edit — supplies the callback, backed by a live
+                                                        RpgStore.Patron.cs lookup for the pushed player
+src/FusionRpg.Core/Effects/Plugins/PatronSecondaryPlugin.cs   edit — grants through InstanceProducer
+                                                        instead of computing AuraMilli inline
+tests/FusionRpg.Core.Tests/Atoms/ExternalRefMagnitudeTests.cs   new — the marker mechanism, mirroring
+                                                        PowerLadderMagnitudeTests' own shape
+tests/FusionRpg.Core.Tests/Effects/PatronAbsorptionGridEqualityTests.cs   new — the ⛔ acceptance gate
+```
+
+### Revised testing strategy (additive to the table above)
+
+| Test | Asserts |
+|---|---|
+| `an_externalRef_atom_resolves_via_the_supplied_callback` | `externalRef` calls whatever callback `Compile` was handed, not a re-derivation |
+| `an_externalRef_atom_with_no_callback_supplied_throws_naming_the_ref_id` | closed vocabulary, never silently zero |
+| `atompushservice_supplies_the_real_patron_auraMilli_for_a_player_with_a_patron_set` | the live lookup, real `_store` round trip, calls the real unchanged `PatronPolicy.AuraMilli` |
+| `a_player_with_no_patron_set_contributes_nothing_rather_than_throwing` | the common case (no patron) is not an error |
+| `two_pushes_after_a_promotion_reflect_the_new_star_immediately` | fresh-every-push means no staleness and no refresh step is needed — proves the design's own main claim |

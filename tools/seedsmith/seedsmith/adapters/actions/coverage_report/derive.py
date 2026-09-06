@@ -193,15 +193,22 @@ def build_cell_groups(
     return sorted(out, key=lambda g: g.id)
 
 
-def cell_entries(groups: "Sequence[CellGroup]") -> "list[dict]":
+def cell_entries(groups: "Sequence[CellGroup]", *, round_no: int) -> "list[dict]":
     """One `kindOfEntry: 'cell'` row per (group x pairingRole) — spec §2's JSONC shape. `quota`
     and `thin` are the GROUP's own verdict, shared identically across its three role rows (module
-    docstring)."""
+    docstring).
+
+    ⛔ `round_no` folded into the id (2026-09-06 finding): `CellGroup.id` carries no round number,
+    so two rounds' reports emit the IDENTICAL cell id (`cell.family.attack.1-7.enabler`) — real,
+    reproduced regression: writing a real `coverage-round-903.json` alongside the already-committed
+    `coverage-round-2.json` made `Corpus.load` raise a duplicate-id error over the whole actions
+    tree. `round-2`'s own already-shipped report is left in its old (unqualified) format rather
+    than rewritten — it is still the only report at that id shape, so nothing collides with it."""
     entries: "list[dict]" = []
     for g in groups:
         for role in sorted(PAIRING_ROLES):
             entries.append({
-                "id": f"{g.id}.{role}",
+                "id": f"cell.round-{round_no}.{g.scope}.{g.category}.{_band_str(g.rung_band)}.{role}",
                 "kindOfEntry": "cell",
                 "scope": g.scope,
                 "category": g.category,

@@ -114,6 +114,22 @@ public static class AtomJson
             return spec.Validate();
         }
 
+        // patron-absorption (spec-patron-absorption.md, 2026-09-06): {"externalRef": "patron.auraMilli"}
+        // — "referenced, not re-expressed." Resolved by AtomCompiler via a caller-supplied callback,
+        // never a formula this layer knows about.
+        if (el.TryGetProperty("externalRef", out var refEl))
+        {
+            if (refEl.ValueKind != JsonValueKind.String)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, "'externalRef' must be a string");
+            var refId = refEl.GetString();
+            if (string.IsNullOrEmpty(refId))
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "externalRef must not be empty");
+
+            spec = new ValueSpec(0, 0, RollPolicy.Fixed, ExternalRef: refId);
+            return spec.Validate();
+        }
+
         if (!TryInt(el, "min", out var min))
             return AtomRejection.Fail(AtomRejectionReason.BadValueSpec, "value spec needs an integer 'min'");
         if (!TryInt(el, "max", out var max))

@@ -1,5 +1,6 @@
 import type { TreeNodeSummary, TreeResolveReport } from "@/lib/bus";
 import { GATELESS_CONDITION_TEXT } from "./passivesBrowse";
+import { PASSIVE_TREE_VOCABULARY } from "./passiveTreeVocabulary";
 
 /**
  * passive-tree-todo.md I6 — Level 2 ("the lattice", spec-tree-surface.md §2.3, §9, §9.1 rules 1-2).
@@ -127,7 +128,8 @@ export function tierDistance(tier: number, report: TreeResolveReport, reqScalePo
  * render plain JSX text, never a `t\`...\`` tag -- that tag is spec-illustrative pseudocode, not a
  * real helper in this tree).
  *
- * Never the bare word "points" alone (§4.1, test 33) -- always "aptitude points," naming the wallet.
+ * Never the bare word "points" alone (§4.1, test 33) -- always "aptitude points," naming the wallet
+ * (I10: read from `passiveTreeVocabulary.ts`, the one place that word is spelled out).
  */
 export function lockedTierReason(args: {
   short: number;
@@ -136,8 +138,9 @@ export function lockedTierReason(args: {
   need: number;
 }): string {
   const { short, pathName, lenderPathName, need } = args;
+  const { aptitudePoints } = PASSIVE_TREE_VOCABULARY.currency;
   if (lenderPathName) {
-    return `Opens at ${need} aptitude points. ${short} more in ${pathName}, or ${short} more in ${lenderPathName}.`;
+    return `Opens at ${need} ${aptitudePoints}. ${short} more in ${pathName}, or ${short} more in ${lenderPathName}.`;
   }
-  return `Opens at ${need} aptitude points. ${short} more in ${pathName}.`;
+  return `Opens at ${need} ${aptitudePoints}. ${short} more in ${pathName}.`;
 }

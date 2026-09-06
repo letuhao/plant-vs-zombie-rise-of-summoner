@@ -222,41 +222,47 @@ One validator, four callers:
 **Deployment costs a unit action** (decision 5) on every path, including `Assembled`. Unpacking is
 still a turn you did not spend attacking.
 
-### 7. ⛔ A new order kind passes FIVE plumbing sites — §7 cost 3
+### 7. ⛔ No new `WorldCommandKinds` member — all four paths are unit actions
 
-> ⛔ **Correction, 2026-09-06.** This section originally named the new order kind
-> `WorldCommandKinds.Assault`, throughout. That identifier is **already taken** — `siege-seam`'s task
-> 7.3 shipped `WorldCommandKinds.Assault = "assault"` for a different, earlier-level concept ("attack
-> the district around a hostile sector's Seat", `WorldCommand.cs:74-81`). This spec's own research
-> did not cross-reference that module before naming this one, even though both are base-defense
-> modules. **The real new order kind is `WorldCommandKinds.Construct`** — every reference below, and
-> the `Construct_command_survives_the_api_round_trip` test name in §Testing (renamed from this
-> section's own first draft), refer to this new kind, not the pre-existing one. Verified non-colliding
-> against the full existing list (`StandFast`/`Move`/`Clear`/`Claim`/`Stance`/`Sustain`/`Build`/`Cede`/`BindWarden`/`Raise`/
-> `Develop`/`Assault`) before picking it — `Build` was also considered and is ALSO already taken
-> (`spec-loam-structures.md`'s peacetime, one-slot, owned-sector founding), which is the same class of
-> naming trap this correction avoids repeating.
-
-`WorldCommandKinds.Construct` is **not one line.** §7 cost 3, and the store's own comment records what
-happens when a site is missed:
-
-> *"Adding one to `WorldCommand` and forgetting it here loses it in the round trip … which is exactly
-> how `stance` was found missing."*
-
-| # | Site | Note |
-|---|---|---|
-| 1 | `WorldCommandKinds` | the constant |
-| 2 | The `WorldCommand` field | the payload |
-| 3 | `RpgStore.CommandPayload` | persistence |
-| 4 | `WorldCommandRequest` | the API request type |
-| 5 | The `WorldEndpoints` submit mapping | the wire |
-
-**`bind-warden` currently fails sites 4 and 5** — a shipped precedent for the exact failure, so this is
-a live gap rather than a hypothetical. Plus an admission arm and a resolver.
-
-**A round-trip test is the acceptance**, not a checklist: submit the command through the API, commit
-the turn, read it back, assert it survived. That is the one test the five-site list cannot be silently
-half-done under.
+> ⛔ **Correction, 2026-09-06, superseding an earlier same-day correction.** This section originally
+> claimed a new order kind was needed (first drafted as `WorldCommandKinds.Assault`, then corrected to
+> `WorldCommandKinds.Construct` once the naming collision with `siege-seam`'s own `Assault` was found).
+> **Both were wrong about the mechanism, not just the name.** §9 and §10 of this SAME spec state,
+> twice, in plain prose, that **all four paths — Built included — are unit actions**: decision 5,
+> *"pre battle and in battle, deployment cost unit action"*, and §Testing's own
+> `Every_path_costs_a_unit_action` line names `Built` explicitly, not just the other three. A
+> `WorldCommand` resolves once per world turn, outside any battle — no live board exists then, and a
+> `WorldEntity` has no board-cell position outside an active `BattleEngine.Resolve` call (confirmed
+> directly), so `ConstructionPlacement.CanPlace`'s own adjacency rule cannot be evaluated from a
+> world-command resolver at all. Brought to the owner rather than guessed at a second time — confirmed
+> 2026-09-06: **no new `WorldCommandKinds` member exists for construction. All four paths, Built
+> included, are ordinary unit actions sharing `ConstructionPlacement.CanPlace` (§6), exactly as §9's own
+> "the action system... paths 2, 3 and 4 are ordinary actions" already said** — Built simply completes
+> that sentence rather than being the one exception to it.
+>
+> **Category and tag, decided the same pass**: none of the four paths had an `ActionCategory`/`ActionTag`
+> assignment anywhere in this program's docs before now (confirmed absent). Investigated the existing,
+> explicitly-closed two-vocabulary system first (`spec-action-seeding.md` §3: `ActionCategory` ×
+> `ActionTag`, *"inventing a third vocabulary is the exact defect the atom program exists to stop"*)
+> rather than proposing a new `SupportSubCategory` layer, even though `StatusKind`×`StatusL2bCategory`
+> is a real precedent for exactly that shape elsewhere. **Decided: `ActionCategory.Support` for all
+> four; `Summoned` reuses the existing `ActionTag.Summon`; `Built`/`Assembled`/`Laboured` share one new
+> tag, `ActionTag.Construct`** (a reviewed addition to the existing 8-value enum — not a new enum, not
+> a nested sub-category; `ActionEnums.cs`).
+>
+> **What this removes from this spec's own remaining task list**: the five-plumbing-sites checklist
+> below, `bind-warden`'s citation as a precedent, and the round-trip-test acceptance were all specific
+> to a world-command mechanism that turned out not to exist for this module. They are struck rather
+> than silently deleted, so a future reader sees what was ruled out and why:
+>
+> ~~A new order kind passes FIVE plumbing sites (`WorldCommandKinds` / the `WorldCommand` field /
+> `RpgStore.CommandPayload` / `WorldCommandRequest` / the `WorldEndpoints` submit mapping), citing
+> `bind-warden`'s own documented failure at sites 4-5, with a round-trip API test as the acceptance.~~
+> **What replaces it**: an atom (`structure.assemble`, `structure.summon`) or a terrain-override action
+> (Laboured's moat) for the three already-scoped as "ordinary actions" in §3-§5, plus `Built`'s own
+> action needing a battle→world seam delta this spec does not yet name (no existing `BattleOutcome`/
+> `BattleSideOutcome` field carries "a structure was placed here" back to `WorldSlot` today) — real,
+> deferred work, not a five-site checklist to re-run.
 
 ### 8. A builder killed mid-build loses everything — no refund
 
@@ -283,16 +289,21 @@ games only ever refund the voluntary case.
 turn. And **`build` passes all five plumbing sites**, unlike `bind-warden` — a new order kind inherits
 a working reference implementation rather than a hunt."*
 
-**Read it before writing `WorldCommandKinds.Construct`.** §7 cost 3's five sites are a checklist; this
-file is a worked example of all five done correctly.
+**Read for the peacetime `Build` shape's own discipline** (ten refusal gates, debit-then-write,
+resolving where a same-turn claim is already visible) even though §7's correction means siege-time
+`Built` does NOT reuse this file's own `WorldCommandKinds`-resolved mechanism — it is a unit action
+(§7), so its own resolution lives in the action/atom system instead, not in a new `Snapshot`-phase
+resolver modeled on this one. What DOES carry over unchanged from reading this file: the "no ownership
+check on siege-time placement" contrast (peacetime `Build` HAS one, `build.not-yours`; decision 4
+forbids one for `Built`), and the ten-gates discipline as a model for how many distinct ways a
+placement attempt can legitimately fail.
 
-Two of its properties change under decision 14 and must be changed deliberately, not inherited:
-
-1. *"Build costs no action and no movement today"* — `BuildResolver` never touches
-   `MovementRemaining`. Decision 14 makes build cost an action.
-2. *"There is no per-entity order cap anywhere … **One legion may file 200 builds in a turn**"*
-   (`MaxCommandsPerSubmit = 200`). Pricing build in a unit's action closes this for the board; the
-   **world-scope** hole stays open and is named here so it is not mistaken for closed.
+One property of `BuildResolver` changes under decision 14 and must be changed deliberately, not
+inherited: *"there is no per-entity order cap anywhere … **One legion may file 200 builds in a
+turn**"* (`MaxCommandsPerSubmit = 200`) — pricing every path in a unit's own action economy (§9/§10)
+closes this for the siege board structurally (an actor has a bounded number of actions per engagement);
+the **world-scope** peacetime hole stays open regardless and is named here so it is not mistaken for
+closed by this correction.
 
 ### 10. Pre-battle and in-battle both
 
@@ -372,7 +383,8 @@ canonical rows · deployment costs an action on every path.
 | `Neither_stock_reaches_fusion_or_crafting` | **decision 18**, by guard rather than convention |
 | `Both_stocks_die_with_the_map` | world-scoped, never account-scoped |
 | `Nothing_can_be_built_in_the_core` | decision 10, both sides, both phases |
-| `Construct_command_survives_the_api_round_trip` | **§7 cost 3's five sites**, as one test rather than a checklist |
+| `Built_Assembled_Summoned_Laboured_all_resolve_as_unit_actions` | §7's correction — none reaches `TurnEngine.Step` as a `WorldCommand` |
+| `Support_category_and_the_right_tag_are_authored_on_every_construction_action` | `Summon` for Summoned, `Construct` for the other three — §7's category/tag decision |
 | `Ironwork_round_trips_as_long_through_sqlite` | |
 | `Build_cost_overflows_loudly` | `OverflowException`, not a wrapped negative |
 | `Interrupted_build_refunds_nothing` | §5.19 — `InterruptRefundMilli = 0` on an involuntary interrupt |
