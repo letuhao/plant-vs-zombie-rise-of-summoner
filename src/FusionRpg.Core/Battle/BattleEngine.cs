@@ -26,7 +26,11 @@ public static partial class BattleEngine
         {
             Setup = setup;
             SideIndex = sideIndex;
-            Hp = setup.MaxHp;
+            // party-dungeon D2.11: a delve carry-in HP, when the caller set one -- null for every
+            // existing setup (expeditions, web matches, sieges, every test), so this is byte-identical
+            // to the old `Hp = setup.MaxHp` for all of them. "One hp seat": this IS the actor's HP,
+            // never a second value a resource pool could drift out of sync with.
+            Hp = setup.CurrentHp ?? setup.MaxHp;
             Derived = BattleStatComposer.Compose(setup);
             // aura-skill T4: a defensive copy, frozen the instant Derived is born — the one stable
             // baseline BattleDerivedModifierLedger.Recompose adds dynamic contributions on top of.
@@ -62,6 +66,14 @@ public static partial class BattleEngine
         public long ShieldAbsorbed;
         public bool Retreated;
         public int ImmortalCharges;
+
+        /// <summary>party-dungeon D2.21: sticky for the whole battle, set once by the death-cleanup
+        /// site's Downed transition and never cleared even if a later revive takes the actor
+        /// `Downed -> Charging` — "the FIRST Downed transition sets downedOnce" reads this, not the
+        /// machine's current state, precisely because a revive would otherwise erase the signal.
+        /// False for every actor outside `DownedOnDeplete` (no site ever sets it).</summary>
+        public bool WentDowned;
+
         public bool Alive => Hp > 0;
 
         /// <summary>Still fighting: alive and not retreated.</summary>
@@ -488,8 +500,13 @@ public static partial class BattleEngine
                 // releases around each sequential action and can never refuse, because with atomic
                 // resolution a battle is already serialised regardless of W (ActionSlots' own doc).
                 var economy = battleEconomy;
+                // party-dungeon D2.11: a raid's own parties each get an INDEPENDENT PerSide budget
+                // rather than sharing one across the whole "squad" side -- PartyIndex is null for
+                // every existing caller, so this is byte-identical to "side:" + Side for all of them.
                 string EconomyKey(ActorState a) =>
-                    economy.Scope == Timeline.TurnEconomyScope.PerSide ? "side:" + a.Setup.Side : a.Setup.Key;
+                    economy.Scope != Timeline.TurnEconomyScope.PerSide ? a.Setup.Key
+                    : a.Setup.PartyIndex is { } partyIndex ? $"side:{a.Setup.Side}:p{partyIndex}"
+                    : "side:" + a.Setup.Side;
 
                 foreach (var a in order) economy.ResetForNewTurn(EconomyKey(a), roundClock.Now);
 
@@ -596,13 +613,32 @@ public static partial class BattleEngine
 
                 // 3) Death cleanup happens inline (Hp gate); 4) shield upkeep AFTER dispatch —
                 // an expiring shield still absorbed this round's damage (shield spec order).
+                //
+                // party-dungeon D2.21: behind DownedOnDeplete, a PartyIndex-carrying actor at Hp <= 0
+                // goes to TurnState.Downed instead of the withdraw-entity/clear-shields path below —
+                // "still present, targetable, and revivable" (spec-delve-attrition.md §6), so nothing
+                // here wipes its status bag or shields while it is only downed, not dead. Every wave
+                // actor, and every actor under every other profile (DownedOnDeplete false on all of
+                // them), keeps today's exact path — the branch below is unreachable for them.
                 foreach (var a in state.Actors)
                 {
-                    if (!a.Alive)
+                    if (a.Alive) continue;
+
+                    if (activeProfile.DownedOnDeplete && a.Setup.PartyIndex is not null)
                     {
-                        state.Status.WithdrawEntity(a.Setup.Key);
-                        state.Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
+                        var machine = state.MachineFor(a.Setup.Key);
+                        var fromState = machine.State;
+                        if (fromState != Timeline.TurnState.Downed)
+                        {
+                            machine.TransitionTo(Timeline.TurnState.Downed);
+                            trace?.Turn(rounds, a.Setup.Key, fromState, Timeline.TurnState.Downed);
+                            a.WentDowned = true;
+                        }
+                        continue;
                     }
+
+                    state.Status.WithdrawEntity(a.Setup.Key);
+                    state.Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
                 }
 
                 trace?.Phase(rounds, "shield-upkeep");
@@ -663,7 +699,7 @@ public static partial class BattleEngine
                 a.Hp, a.DamageDealt, a.Kills, a.Alive, a.Retreated,
                 a.Has("genius") ? 1000 + geniusDef.SpecimenXpBonusMilli : 1000,
                 a.ShieldAbsorbed)
-            { EquippedActionIds = a.Setup.EquippedActionIds }).ToList()
+            { EquippedActionIds = a.Setup.EquippedActionIds, WentDowned = a.WentDowned }).ToList()
         };
     }
 

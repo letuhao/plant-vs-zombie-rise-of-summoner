@@ -461,6 +461,18 @@ public static class AtomCompiler
                         "supplied — AtomCompiler.Compile needs both to resolve it, never a silent default.");
 
                 var pThetaValue = new PowerLadder(powerTuning).Value(theta);
+
+                // B3 (spec-tree-binder.md §3.5, §7): tree-binder's kMicro is per-million, not
+                // per-mille — at per-mille, gated-deep stores kMilli=0 for 12 of 40 nodes (silently
+                // inert). Non-zero KMicro selects this WIDENED path; the existing KMilli path below
+                // is completely untouched, so every authored (JSON-sourced) powerLadder atom keeps
+                // its existing int-refusal ceiling and behavior exactly as shipped.
+                if (spec.PowerLadderKMicro != 0)
+                {
+                    result[key] = checked(spec.PowerLadderKMicro * pThetaValue / 1_000_000);
+                    continue;
+                }
+
                 result[key] = checked((int)((long)spec.PowerLadderKMilli * pThetaValue / 1000));
                 continue;
             }

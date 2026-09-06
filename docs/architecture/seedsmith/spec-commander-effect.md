@@ -5,10 +5,20 @@ Depends on `motif-prose-filter`, `workflow-runtime`, `quality-gates`. **The firs
 
 `R#` = [audit](review/audit-agent-runtime-proposal.md).
 
-**Status: SEALED — approved by the owner 2026-09-01. Authorized to build.**
-**Amended 2026-09-06:** added a corpus-wide near-duplicate check on `doctrine` (§6, §8) — the sealed
-version had no distribution/diversity gate at corpus scale, only per-item quality checks, despite the
-spec's own §9 probe already reproducing the failure mode at single-demon scale.
+**Status: SEALED — approved by the owner 2026-09-01. Authorized to build. BUILT 2026-09-01 (G4,
+`seedsmith-plan.md` Part 5) — 84 commander effects committed, `data/seed/demons/commander-effect/all.json`.**
+
+**Amended and built 2026-09-06:** the sealed version had no distribution/diversity gate on
+`doctrine` at corpus scale, only per-item quality checks — despite the spec's own §9 probe already
+reproducing the failure mode at single-demon scale (Jaccard mean 0.52 across 3 generations). Checked
+against the real, already-committed 84-entry corpus: it already had **two near-duplicate doctrine
+pairs** (Jaccard 0.52 and, below the calibrated threshold, 0.41) with nothing watching it. Closed by
+adding `KindSpec.dedup_fields` (`adapters/base.py`, additive, same shape as `motif_expression`) and
+extending `SemanticDedup` (`seedsmith/metrics/dedup.py`) to run its near-duplicate pipeline over a
+kind's declared prose field, not just `name`. `commander-effect`'s `KindSpec` now sets
+`dedup_fields=frozenset({"doctrine"})`. 7 new tests in `test_constraint_exemplar_dedup.py`
+(`ProseDedupTests`), including a known-answer test pinned against the live corpus. Full mechanism:
+`spec-analytics.md` §6.2b.
 
 ---
 
@@ -183,7 +193,7 @@ rule.
 | Same corpus generated twice (mock) | byte-identical files |
 | Zero real model calls | `MockModelServer` only |
 | ⛔ **Quality, measured separately** | on the first real run: report shoehorning rate by reading a **stratified sample**, not by quoting the validator pass rate (`quality-gates` §2.4) |
-| ⛔ **Corpus-wide near-duplicate check on `doctrine`** | added 2026-09-06, closing a gap this spec's own §9 probe already evidenced: 3 generations for one demon produced pairwise Jaccard 0.42 / 0.68 / 0.45 (mean 0.52) — the thesaurus failure, not resolved by "one per demon" alone, because it constrains *repeats for one demon*, not *convergence across many*. `metrics` runs the shared `spec-analytics.md` §6.2 pipeline (5-gram shingles → MinHash → Jaccard, LSH-banded) over every committed `doctrine` string corpus-wide, the same shape the item corpus's Appendix A row 16 (Semantic dedup) already owns. A synthetic fixture with two doctrines above the similarity threshold fails the check naming both ids |
+| ⛔ **Corpus-wide near-duplicate check on `doctrine`** | **BUILT 2026-09-06**, closing a gap this spec's own §9 probe already evidenced: 3 generations for one demon produced pairwise Jaccard 0.42 / 0.68 / 0.45 (mean 0.52) — the thesaurus failure, not resolved by "one per demon" alone, because it constrains *repeats for one demon*, not *convergence across many*. `SemanticDedup` (`spec-analytics.md` §6.2b) runs a direct all-pairs Jaccard over every committed `doctrine` string corpus-wide via `KindSpec.dedup_fields`, the same shape the item corpus's Appendix A row 16 (Semantic dedup) already owns — **run against the live corpus, it already found two real pairs** (`doublecherry`~`doubleshooter`, Jaccard 0.52) that shipped unnoticed. `ProseDedupTests` in `test_constraint_exemplar_dedup.py` pins both the synthetic case and this exact live pair as a known-answer regression test |
 
 The **quality** and **near-duplicate** rows are the ones this module must not skip. Tier-2 pass rate is
 already known to be 100% on bad content, and per-item `motif_coverage` cannot see convergence across
@@ -213,9 +223,10 @@ near-copy of the same sentence.
 5. Re-run produces zero new writes.
 6. **Quality reported from a read sample, separately from the pass rate.**
 7. Full seedsmith suite green; `check --adapter demons` shows the reduced gap count.
-8. **Corpus-wide near-duplicate rate on `doctrine` is reported before the real run ships**, using the
-   shared MinHash/Jaccard pipeline — not inferred from the single-demon probe in §9, which measured
-   repeats for one demon, never convergence across many.
+8. **BUILT 2026-09-06.** Corpus-wide near-duplicate rate on `doctrine` is measurable via
+   `SemanticDedup` (direct Jaccard, not the single-demon probe in §9, which measured repeats for one
+   demon, never convergence across many). The already-shipped 84-entry corpus reports one pair —
+   `doublecherry`~`doubleshooter`, Jaccard 0.52 — a known, accepted finding rather than a silent gap.
 
 ---
 

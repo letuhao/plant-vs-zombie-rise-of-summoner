@@ -1,6 +1,9 @@
 /**
  * Generation-scoped Mediator between React host and Phaser scenes.
  * Foreign generation events are dropped by subscribers (RT-02 / RT-11).
+ *
+ * Lawn and world use **separate** listener maps so `worldBusClearAll` never wipes lawn
+ * subscribers (and the reverse). They share `allocGameGeneration()`.
  */
 
 export type LawnBusEvent =
@@ -46,15 +49,83 @@ export type LawnResizedPayload = {
   height: number;
 };
 
+export type WorldBusEvent =
+  | "world:model"
+  | "world:select"
+  | "world:camera"
+  | "world:lens"
+  | "world:interaction"
+  | "world:ready"
+  | "world:resized"
+  | "world:destroyed";
+
+export type WorldSelectPayload = {
+  generation: number;
+  kind: "sector" | "lane" | "force" | "empty";
+  id?: string;
+};
+
+export type WorldCameraPayload = {
+  generation: number;
+  op: "pan" | "zoom" | "fit";
+  dx?: number;
+  dy?: number;
+  scale?: number;
+  /** Fit padding / safe insets in screen px. */
+  padLeft?: number;
+  padRight?: number;
+  padTop?: number;
+  padBottom?: number;
+};
+
+export type WorldLensPayload = {
+  generation: number;
+  lens: string;
+};
+
+export type WorldIgnoreRect = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+};
+
+export type WorldInteractionPayload = {
+  generation: number;
+  selectedId?: string | null;
+  selectedKind?: "sector" | "lane" | "force" | null;
+  targeting?: unknown;
+  ignoreRects?: WorldIgnoreRect[];
+};
+
+export type WorldModelPayload = {
+  generation: number;
+  /** Host monotonic dirty flag — not a wire DTO revision. */
+  modelSeq: number;
+  /** Adapted world view (+ overlay inputs) — opaque at the bus edge. */
+  model: unknown;
+};
+
+export type WorldResizedPayload = {
+  generation: number;
+  width: number;
+  height: number;
+};
+
 type Handler = (payload: unknown) => void;
 
-const listeners = new Map<LawnBusEvent, Set<Handler>>();
+const lawnListeners = new Map<LawnBusEvent, Set<Handler>>();
+const worldListeners = new Map<WorldBusEvent, Set<Handler>>();
 
-export function lawnBusOn(event: LawnBusEvent, handler: Handler): () => void {
-  let set = listeners.get(event);
+function on<E extends string>(
+  map: Map<E, Set<Handler>>,
+  event: E,
+  handler: Handler
+): () => void {
+  let set = map.get(event);
   if (!set) {
     set = new Set();
-    listeners.set(event, set);
+    map.set(event, set);
   }
   set.add(handler);
   return () => {
@@ -62,19 +133,45 @@ export function lawnBusOn(event: LawnBusEvent, handler: Handler): () => void {
   };
 }
 
-export function lawnBusEmit(event: LawnBusEvent, payload: unknown): void {
-  const set = listeners.get(event);
+function emit<E extends string>(map: Map<E, Set<Handler>>, event: E, payload: unknown): void {
+  const set = map.get(event);
   if (!set) return;
   for (const h of [...set]) h(payload);
 }
 
-/** Test / destroy helper — clears all bus listeners. */
+export function lawnBusOn(event: LawnBusEvent, handler: Handler): () => void {
+  return on(lawnListeners, event, handler);
+}
+
+export function lawnBusEmit(event: LawnBusEvent, payload: unknown): void {
+  emit(lawnListeners, event, payload);
+}
+
+/** Test / destroy helper — clears lawn bus listeners only. */
 export function lawnBusClearAll(): void {
-  listeners.clear();
+  lawnListeners.clear();
+}
+
+export function worldBusOn(event: WorldBusEvent, handler: Handler): () => void {
+  return on(worldListeners, event, handler);
+}
+
+export function worldBusEmit(event: WorldBusEvent, payload: unknown): void {
+  emit(worldListeners, event, payload);
+}
+
+/** Test / destroy helper — clears world bus listeners only (lawn untouched). */
+export function worldBusClearAll(): void {
+  worldListeners.clear();
 }
 
 let nextGeneration = 1;
 
 export function allocGameGeneration(): number {
   return nextGeneration++;
+}
+
+/** Test helper — reset generation counter. */
+export function resetGameGenerationForTests(): void {
+  nextGeneration = 1;
 }

@@ -224,7 +224,20 @@ still a turn you did not spend attacking.
 
 ### 7. ⛔ A new order kind passes FIVE plumbing sites — §7 cost 3
 
-`WorldCommandKinds.Assault` is **not one line.** §7 cost 3, and the store's own comment records what
+> ⛔ **Correction, 2026-09-06.** This section originally named the new order kind
+> `WorldCommandKinds.Assault`, throughout. That identifier is **already taken** — `siege-seam`'s task
+> 7.3 shipped `WorldCommandKinds.Assault = "assault"` for a different, earlier-level concept ("attack
+> the district around a hostile sector's Seat", `WorldCommand.cs:74-81`). This spec's own research
+> did not cross-reference that module before naming this one, even though both are base-defense
+> modules. **The real new order kind is `WorldCommandKinds.Construct`** — every reference below, and
+> the `Construct_command_survives_the_api_round_trip` test name in §Testing (renamed from this
+> section's own first draft), refer to this new kind, not the pre-existing one. Verified non-colliding
+> against the full existing list (`StandFast`/`Move`/`Clear`/`Claim`/`Stance`/`Sustain`/`Build`/`Cede`/`BindWarden`/`Raise`/
+> `Develop`/`Assault`) before picking it — `Build` was also considered and is ALSO already taken
+> (`spec-loam-structures.md`'s peacetime, one-slot, owned-sector founding), which is the same class of
+> naming trap this correction avoids repeating.
+
+`WorldCommandKinds.Construct` is **not one line.** §7 cost 3, and the store's own comment records what
 happens when a site is missed:
 
 > *"Adding one to `WorldCommand` and forgetting it here loses it in the round trip … which is exactly
@@ -270,7 +283,7 @@ games only ever refund the voluntary case.
 turn. And **`build` passes all five plumbing sites**, unlike `bind-warden` — a new order kind inherits
 a working reference implementation rather than a hunt."*
 
-**Read it before writing `WorldCommandKinds.Assault`.** §7 cost 3's five sites are a checklist; this
+**Read it before writing `WorldCommandKinds.Construct`.** §7 cost 3's five sites are a checklist; this
 file is a worked example of all five done correctly.
 
 Two of its properties change under decision 14 and must be changed deliberately, not inherited:
@@ -359,7 +372,7 @@ canonical rows · deployment costs an action on every path.
 | `Neither_stock_reaches_fusion_or_crafting` | **decision 18**, by guard rather than convention |
 | `Both_stocks_die_with_the_map` | world-scoped, never account-scoped |
 | `Nothing_can_be_built_in_the_core` | decision 10, both sides, both phases |
-| `Assault_command_survives_the_api_round_trip` | **§7 cost 3's five sites**, as one test rather than a checklist |
+| `Construct_command_survives_the_api_round_trip` | **§7 cost 3's five sites**, as one test rather than a checklist |
 | `Ironwork_round_trips_as_long_through_sqlite` | |
 | `Build_cost_overflows_loudly` | `OverflowException`, not a wrapped negative |
 | `Interrupted_build_refunds_nothing` | §5.19 — `InterruptRefundMilli = 0` on an involuntary interrupt |

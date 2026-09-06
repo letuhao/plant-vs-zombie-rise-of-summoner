@@ -49,8 +49,12 @@ public static class DropTableValidator
     /// </summary>
     public const string UndesignedSourceKind = "pvz-run";
 
+    // D3.10 (spec-dungeon-loot.md §1, :108-109): three real, designed kinds -- `dungeon-room` (fights,
+    // caches, elites, the boss room), `dungeon-clear` (the boss's own first-clear grant, source id =
+    // the domain), `dungeon-quest` (a completed quest's own reward). Each also gains a `LootCorrelation
+    // .Derive` arm (`LootPipeline.cs`) -- neither list is complete without the other.
     public static readonly IReadOnlyList<string> KnownSourceKinds =
-        new[] { "web-wave", "expedition-tier", "world-sector", UndesignedSourceKind };
+        new[] { "web-wave", "expedition-tier", "world-sector", UndesignedSourceKind, "dungeon-room", "dungeon-clear", "dungeon-quest" };
 
     public static AtomRejection Validate(
         IReadOnlyList<LootSourceRow> sources,

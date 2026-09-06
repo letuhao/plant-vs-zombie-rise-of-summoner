@@ -22,6 +22,15 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// <param name="Stock1Qty">Interned stock slot 1.</param>
 /// <param name="Stock2Qty">Interned stock slot 2.</param>
 /// <param name="Stock3Qty">Interned stock slot 3.</param>
+/// <param name="Band">`event-deck` D3.7 (<see cref="LeafId.BandIs"/>): a raw ordinal, e.g. the room's
+/// `DangerBand` when this is the `Target` side of an event's facts. 0 when the caller has none to
+/// report — the same harmless default <see cref="Stock0Qty"/> already uses for a non-event context.</param>
+/// <param name="RoomKind">D3.7 (<see cref="LeafId.RoomKindIs"/>): a raw room-kind ordinal, `Target` side.</param>
+/// <param name="HaulCount">D3.7 (<see cref="LeafId.HaulAtLeast"/>): occupied pack cells, `Self` side —
+/// the party's own count, populated once by whoever builds the facts (`loot-pack`'s future job; 0 is a
+/// legitimate "no pack yet" reading, never a sentinel).</param>
+/// <param name="DownedCount">D3.7 (<see cref="LeafId.PartyDownedCount"/>): standing-party downed
+/// members, `Self` side.</param>
 public readonly record struct EntityFacts(
     int Side,
     int TypeId,
@@ -35,7 +44,11 @@ public readonly record struct EntityFacts(
     int Stock0Qty = 0,
     int Stock1Qty = 0,
     int Stock2Qty = 0,
-    int Stock3Qty = 0);
+    int Stock3Qty = 0,
+    int Band = 0,
+    int RoomKind = 0,
+    int HaulCount = 0,
+    int DownedCount = 0);
 
 /// <summary>
 /// The narrow, readonly window a compiled predicate evaluates against: the bound actor and the other
@@ -98,4 +111,16 @@ public struct FactReader
             _ => 0,
         };
     }
+
+    /// <summary>D3.7 (<see cref="LeafId.BandIs"/>): the raw band ordinal.</summary>
+    public int Band(Subject s) => Pick(s).Band;
+
+    /// <summary>D3.7 (<see cref="LeafId.RoomKindIs"/>): the raw room-kind ordinal.</summary>
+    public int RoomKind(Subject s) => Pick(s).RoomKind;
+
+    /// <summary>D3.7 (<see cref="LeafId.HaulAtLeast"/>): occupied pack cells.</summary>
+    public int HaulCount(Subject s) => Pick(s).HaulCount;
+
+    /// <summary>D3.7 (<see cref="LeafId.PartyDownedCount"/>): standing-party downed member count.</summary>
+    public int DownedCount(Subject s) => Pick(s).DownedCount;
 }

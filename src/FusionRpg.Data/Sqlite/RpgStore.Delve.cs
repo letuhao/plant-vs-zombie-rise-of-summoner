@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Core.Delve;
+using FusionRpg.Core.Delve.Attrition;
 using FusionRpg.Core.World;
 using FusionRpg.Core.World.Intel;
 using FusionRpg.Core.World.Movement;
@@ -9,9 +10,16 @@ namespace FusionRpg.Data;
 
 /// <summary>One party's route/pity/haul, one element of <c>rpg_delves.parties_json</c> per
 /// <c>PartyIndex</c> — a single JSON array on the header, not a third table (spec-delve-scope.md
-/// §1: "a raid is one, two or four parties written in one transaction with the delve").</summary>
+/// §1: "a raid is one, two or four parties written in one transaction with the delve").
+///
+/// <para><b><see cref="Members"/></b> — delve-attrition D2.23 (spec-delve-attrition.md §1, §7:
+/// "each [party] gains `members[]`, one record per demon, read and written only through
+/// `RpgStore.Delve.cs`"). Nullable, not <see cref="Array.Empty{T}"/>: a party written before this
+/// field existed deserializes to <c>null</c> rather than a lossy empty list a caller could mistake
+/// for "this party genuinely has no members."</para></summary>
 public sealed record DelvePartyState(
-    long EntityId, IReadOnlyList<string> Route, IReadOnlyDictionary<string, int> Pity, IReadOnlyList<string> Haul);
+    long EntityId, IReadOnlyList<string> Route, IReadOnlyDictionary<string, int> Pity, IReadOnlyList<string> Haul,
+    IReadOnlyList<DelveMemberState>? Members = null);
 
 public sealed record DelveRow(
     long DelveId, long PlayerId, string WorldId, string DomainId, string RaidMode, string RungId,
@@ -251,20 +259,34 @@ public sealed partial class RpgStore
 
     /// <summary>
     /// Closes a delve — <c>Active -&gt; Extracted|Wiped -&gt; Archived</c> for a <c>once</c> domain
-    /// (spec-delve-scope.md §7). This module writes only the state/timestamp transition; the
-    /// per-module settlements (loot earn, attrition retire/recover, quest verdicts, domain unlocks)
-    /// are each their own module's own writer, called in the order that module's own spec states —
-    /// none of those modules exist yet as of this task, so this is the seam they attach to, not a
-    /// finished pipeline. `won` and the once/many archive split are the CALLER's decision (the
-    /// attrition and domain-catalog specs own that logic); this method only persists the outcome.
+    /// (spec-delve-scope.md §7). <paramref name="finalState"/> is the CALLER's own decision — this
+    /// method never re-derives wipe from member state, matching D2.21's own "a wipe is its own
+    /// settlement path" (the room loop that ends the delve is the one place that already knows every
+    /// party's live state; re-deriving it here from a stale `parties_json` snapshot would be a second,
+    /// possibly-disagreeing source of truth). The per-module settlements this seam once deferred
+    /// entirely (loot earn, quest verdicts, domain unlocks) still are — none of those modules exist
+    /// yet — but party-dungeon D2.23 (spec-delve-attrition.md §7, §9) landed the attrition half: when
+    /// <paramref name="tuning"/> is supplied, one transaction also decides and applies every member's
+    /// Retire/Recover/Roster outcome, credits contract loyalty once, persists cross-delve pools, and
+    /// decrements every OTHER delve-recovering actor this player owns. <paramref name="tuning"/> is
+    /// <c>null</c> for the pre-D2.23 caller shape (attrition settlement skipped, byte-identical to
+    /// before this task).
     /// </summary>
-    public bool CloseDelve(long delveId, string finalState, bool archiveNow)
+    public bool CloseDelve(long delveId, string finalState, bool archiveNow, FusionRpg.Core.Dungeon.Tuning.DungeonTuning? tuning = null)
     {
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
             var now = DateTime.UtcNow.ToString("o");
+
+            if (tuning is not null)
+            {
+                var delve = ReadDelveUnlocked(db, delveId);
+                if (delve is not null)
+                    SettleExtractionUnlocked(db, delve, finalState, tuning, now);
+            }
+
             using (var cmd = Prepared(db, tx,
                 "UPDATE rpg_delves SET state = $s, closed_utc = $now, revision = revision + 1 WHERE delve_id = $id;",
                 "$s", "$now", "$id"))
@@ -272,6 +294,169 @@ public sealed partial class RpgStore
             var rows = DelveRowExistsUnlocked(db, tx, delveId);
             tx.Commit();
             return rows;
+        }
+    }
+
+    /// <summary>
+    /// D2.23's own settlement pass, one call per member across every party of the raid. Spirit's
+    /// resolved value for the affliction check is read straight off <c>DelveMemberState.Pools["spirit"]</c>
+    /// — the same value `NerveLadder.StageFor` itself would read at the last room this member fought
+    /// in, since nothing DRAINS spirit between the last room and extraction.
+    /// </summary>
+    void SettleExtractionUnlocked(
+        SqliteConnection db, DelveRow delve, string finalState, FusionRpg.Core.Dungeon.Tuning.DungeonTuning tuning, string now)
+    {
+        var wiped = string.Equals(finalState, DelveStates.Wiped, StringComparison.Ordinal);
+        var extracted = string.Equals(finalState, DelveStates.Extracted, StringComparison.Ordinal);
+        var rooms = ReadDelveRoomsUnlocked(db, delve.DelveId).ToDictionary(r => r.SectorId, StringComparer.Ordinal);
+        var thresholds = tuning.AttritionNerve.StageThresholds;
+
+        // R6 (spec-delve-attrition.md §7): every OTHER recovering actor this player owns also ages one
+        // delve, in this SAME transaction — regardless of which demons this particular delve carried.
+        DecrementAllRecoveringForPlayerUnlocked(db, delve.PlayerId, now);
+
+        // No domain-catalog exists yet (Phase 4, unbuilt) to supply a real per-domain permadeath
+        // override -- an explicit "no override" placeholder, not a silent default (SoulSinkPolicy.
+        // VanillaPvzTheta's own precedent): PermadeathFromRungOverride stays null, so
+        // PermadeathGate.Applies falls back to dungeon.Domain.PermadeathFromRung, which is correct
+        // today because no domain has ever been able to raise the gate.
+        var domainInputs = new FusionRpg.Core.Delve.Difficulty.DomainThetaInputs(EntranceBand: 0, IsOnceEntry: false);
+        var permadeathApplies = FusionRpg.Core.Delve.Difficulty.PermadeathGate.Applies(tuning, domainInputs, delve.RungId);
+
+        var wonMembers = new List<string>();
+        var lostMembers = new List<string>();
+
+        foreach (var party in delve.Parties)
+        {
+            if (party.Members is not { Count: > 0 } members) continue;
+
+            var (bossKilled, routeHalf) = RouteFacts(party.Route, rooms);
+
+            foreach (var member in members)
+            {
+                if (!member.Pools.TryGetValue("spirit", out var spirit))
+                    throw new ArgumentException($"member '{member.InstanceId}' has no 'spirit' pool.", nameof(delve));
+                var stage = FusionRpg.Core.Delve.Attrition.NerveLadder.StageFor(member.NerveStacks, spirit, thresholds);
+                var afflicted = stage == thresholds.Count - 1;
+
+                var settlement = FusionRpg.Core.Delve.Attrition.ExtractionSettlement.Decide(
+                    downedOnce: member.DownedOnce || wiped,
+                    permadeathApplies: permadeathApplies,
+                    downedRecoveryDelves: tuning.RiskDownedRecoveryDelves,
+                    afflicted: afflicted,
+                    extracted: extracted,
+                    bossKilled: bossKilled,
+                    routeAtLeastHalfCleared: routeHalf);
+
+                switch (settlement.Outcome)
+                {
+                    case FusionRpg.Core.Delve.Attrition.SettlementOutcome.Retire:
+                        RetireUniqueActorUnlocked(db, member.InstanceId);
+                        break;
+                    case FusionRpg.Core.Delve.Attrition.SettlementOutcome.Recover:
+                        BeginUniqueRecoveryUnlocked(db, delve.PlayerId, member.InstanceId, settlement.RecoverDelves, delve.DelveId, delve.ThetaRun);
+                        break;
+                    case FusionRpg.Core.Delve.Attrition.SettlementOutcome.Roster:
+                        break; // already a live roster member -- nothing to transition
+                }
+
+                // S2-7: only the tuning-declared subset persists across delves -- every other id
+                // starts fresh at resource.max next time, per HungerCharge's own established contract.
+                var persisted = tuning.AttritionPersistAcrossDelves
+                    .Where(member.Pools.ContainsKey)
+                    .ToDictionary(id => id, id => member.Pools[id], StringComparer.Ordinal);
+                WritePersistedPoolsUnlocked(db, member.InstanceId, persisted);
+
+                (settlement.Won ? wonMembers : lostMembers).Add(member.InstanceId);
+            }
+        }
+
+        // §9: loyalty applied once per delve, here -- grouped by `won` since ApplyContractResults
+        // takes one verdict for its whole instanceIds list, and two members of the SAME delve can
+        // legitimately disagree (one afflicted, one not).
+        if (wonMembers.Count > 0) ApplyContractResultsUnlocked(db, delve.PlayerId, wonMembers, won: true, DateTimeOffset.Parse(now));
+        if (lostMembers.Count > 0) ApplyContractResultsUnlocked(db, delve.PlayerId, lostMembers, won: false, DateTimeOffset.Parse(now));
+    }
+
+    /// <summary>"The party cleared at least half the rooms on its route" (spec §9) and "the boss was
+    /// killed" — both read directly off `rpg_delve_rooms.cleared`, since clearing a `boss`-kind room
+    /// IS defeating its encounter. A route naming a sector this delve has no room for is skipped, not
+    /// thrown on — a room can be added mid-delve by content this module does not need to know about.</summary>
+    static (bool BossKilled, bool RouteAtLeastHalfCleared) RouteFacts(
+        IReadOnlyList<string> route, IReadOnlyDictionary<string, DelveRoomRow> roomsBySector)
+    {
+        if (route.Count == 0) return (false, false);
+        var clearedCount = 0;
+        var bossKilled = false;
+        foreach (var sectorId in route)
+        {
+            if (!roomsBySector.TryGetValue(sectorId, out var room) || !room.Cleared) continue;
+            clearedCount++;
+            if (string.Equals(room.Kind, "boss", StringComparison.Ordinal)) bossKilled = true;
+        }
+        return (bossKilled, clearedCount * 2 >= route.Count);
+    }
+
+    /// <summary>
+    /// party-dungeon D2.23 (spec-delve-attrition.md §1, §7) — the `members[]` writer: replaces one
+    /// party's member list wholesale (the room loop's own per-room `DelveMemberState` update, never a
+    /// partial merge here). The only writer of `DelvePartyState.Members`. An upsert, not an update-
+    /// only: `CreateDelve` seeds `parties_json` at `'[]'` (spec-delve-scope.md's own "parties written
+    /// in one transaction with the delve" is about the WORLD entities, not this JSON array), so the
+    /// FIRST room a party ever fights is genuinely the first time its own row exists here.
+    /// </summary>
+    public DelveRow? WritePartyMembers(long delveId, long partyEntityId, IReadOnlyList<FusionRpg.Core.Delve.Attrition.DelveMemberState> members)
+    {
+        if (members is null) throw new ArgumentNullException(nameof(members));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var current = ReadDelveJsonColumnUnlocked(db, tx, delveId, "parties_json");
+            var parties = DelveRow.ParsePartiesJson(current ?? "[]");
+
+            var updated = parties.Any(p => p.EntityId == partyEntityId)
+                ? parties.Select(p => p.EntityId == partyEntityId ? p with { Members = members } : p).ToList()
+                : parties.Append(new DelvePartyState(partyEntityId, Array.Empty<string>(), new Dictionary<string, int>(), Array.Empty<string>(), members)).ToList();
+            var json = JsonSerializer.Serialize(updated);
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;",
+                "$j", "$id"))
+                ExecuteWith(cmd, json, delveId);
+
+            tx.Commit();
+            return ReadDelveUnlocked(db, delveId);
+        }
+    }
+
+    /// <summary>
+    /// The `DelvePartyState.Route` writer — `delve-graph-roll`'s own future caller records each
+    /// room a party actually walks here, the same upsert shape as <see cref="WritePartyMembers"/>
+    /// (and the same "first room, first row" reason). Route is what §9's "at least half the rooms on
+    /// its route" reads at extraction; this module reads it, and — since nothing else in the tree
+    /// writes it yet — also exposes the one writer.
+    /// </summary>
+    public DelveRow? WritePartyRoute(long delveId, long partyEntityId, IReadOnlyList<string> route)
+    {
+        if (route is null) throw new ArgumentNullException(nameof(route));
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            using var tx = db.BeginTransaction();
+            var current = ReadDelveJsonColumnUnlocked(db, tx, delveId, "parties_json");
+            var parties = DelveRow.ParsePartiesJson(current ?? "[]");
+
+            var updated = parties.Any(p => p.EntityId == partyEntityId)
+                ? parties.Select(p => p.EntityId == partyEntityId ? p with { Route = route } : p).ToList()
+                : parties.Append(new DelvePartyState(partyEntityId, route, new Dictionary<string, int>(), Array.Empty<string>())).ToList();
+            var json = JsonSerializer.Serialize(updated);
+            using (var cmd = Prepared(db, tx,
+                "UPDATE rpg_delves SET parties_json = $j, revision = revision + 1 WHERE delve_id = $id;",
+                "$j", "$id"))
+                ExecuteWith(cmd, json, delveId);
+
+            tx.Commit();
+            return ReadDelveUnlocked(db, delveId);
         }
     }
 

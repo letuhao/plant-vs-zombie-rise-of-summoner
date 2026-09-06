@@ -81,10 +81,17 @@ public class AffixFiltersTests
     }
 
     [Fact]
-    public void A_stat_derived_affix_is_refused_for_a_sim_target()
+    public void A_stat_derived_affix_is_now_allowed_for_a_sim_target_via_the_partial_fold()
     {
-        // Sim is still None -- the half of the D6 quarantine that did NOT lift.
-        Assert.False(AffixFilters.RuntimeAllows("stat.derived", RuntimeId.Sim));
+        // Moved with the registry cell (mechanism-wiring E5, 2026-09-06). Was `Assert.False` when the
+        // Sim cell was `RuntimeState.None` (the half of the D6 quarantine that had not lifted yet).
+        // `AffixFilters.RuntimeAllows` is "anything but None" (AffixFilters.cs), and the Sim cell moved
+        // to `RuntimeState.Partial` once ActorDerivedLookup's contribution fold gave it a real (if
+        // partial -- Flat/Increased only, see EffectOfflineKitTests.
+        // The_four_derived_ops_decide_Full_versus_Partial) consumer. So this is now legal content, not
+        // a refusal -- an affix author may name `stat.derived` for a Sim target, and it will compose
+        // correctly as long as it sticks to Flat/Increased.
+        Assert.True(AffixFilters.RuntimeAllows("stat.derived", RuntimeId.Sim));
     }
 
     [Fact]

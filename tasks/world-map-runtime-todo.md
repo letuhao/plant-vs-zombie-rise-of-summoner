@@ -1,14 +1,13 @@
 # Tasks: world-map-runtime
 
-**Status:** proposed 2026-09-06 — pending owner review of [world-map-runtime-plan.md](world-map-runtime-plan.md).
-Approving that plan authorizes these tasks against the strengthened
-[spec](../docs/architecture/world-map-runtime/spec-world-map-runtime.md).
+**Status:** **implementation complete** 2026-09-06 (R0–R16 + CPA–CPD Playwright+CV). Owner git commit pending.
 
-**Program id:** `world-map-runtime`
-**Map:** [world-map-runtime-map.md](../docs/architecture/world-map-runtime-map.md)
+Plan: [world-map-runtime-plan.md](world-map-runtime-plan.md)  
+**Map:** [world-map-runtime-map.md](../docs/architecture/world-map-runtime-map.md)  
+**Spec:** [spec-world-map-runtime.md](../docs/architecture/world-map-runtime/spec-world-map-runtime.md)  
 **Ideal:** [world-map-runtime-ideal.md](../docs/architecture/world-map-runtime-ideal.md)
 
-Task ids: **R1** upward (runtime). Contiguous. Not `world-stage` **W\*** and not bare `tasks/todo.md`.
+Task ids: **R0** then **R1** upward. Contiguous. Not `world-stage` **W\*** and not bare `tasks/todo.md`.
 
 ---
 
@@ -20,10 +19,39 @@ Task ids: **R1** upward (runtime). Contiguous. Not `world-stage` **W\*** and not
 4. `game/world` may import `@/contract/types` and `stages/world/render/{sector,lane,fog,slot}*`; must
    not import React, `@/lib/bus`, or `*Dto`.
 5. Dirty flag is host **`modelSeq`** — do not add `Revision` to `WorldStateDto`.
-6. Verification: `cd web\fusion-rpg-web; npm test; npm run build`. **There is no `npm run lint`**
-   (`package.json` has no lint script — same finding as world-stage todo).
-7. Structural consts (`FIT_MAX`, `DETAIL_MIN`, pin 44px, camera clamps, drag threshold, edge-scroll
-   margin) get a comment that they are control/a11y, not balance tunables.
+6. Verification: `cd web\fusion-rpg-web; npm test; npm run build`. **There is no `npm run lint`.**
+7. Structural consts get a comment that they are control/a11y, not balance tunables.
+8. **Phase checkpoints (CPA–CPD):** Playwright `e2e/world-map-runtime.spec.ts` + PNGs under
+   `e2e/.artifacts/world-map-runtime/` + agent `Read` (CV) against the plan checklist — **no owner
+   eyeball**. Fail the checkpoint if CV fails.
+9. Locked visuals: §O pin language + fog-on-pin density table (forces strip never on pin).
+
+---
+
+## R0 — E2E harness (first task)
+
+### R0: Host testids + `world-map-runtime.spec.ts` stub
+
+**Description:** Add stable `data-testid` hooks the Phaser host will mount onto (host root + canvas
+wrapper). Create `e2e/world-map-runtime.spec.ts` that mocks world APIs like
+`e2e/world-stage.spec.ts` (first-light fixture), navigates `#/world`, and documents the artifact
+directory `e2e/.artifacts/world-map-runtime/`. Stub may assert stage chrome until R4 lands the
+canvas; expand describes `CPA` / `CPB` / `CPC` / `CPD` as phases complete.
+
+**Acceptance criteria:**
+- [x] `data-testid="world-game-host"` (and canvas wrapper id) reserved / present when host mounts
+- [x] Spec file exists; loads `#/world` with mocked header/state; writes at least one PNG under
+      `e2e/.artifacts/world-map-runtime/`
+- [x] Artifact path documented in this todo / plan
+
+**Verification:**
+- [x] `npx playwright test e2e/world-map-runtime.spec.ts` green (stub level)
+- [x] `npm test` / `npm run build` unchanged green
+
+**Dependencies:** None  
+**Files likely touched:** `e2e/world-map-runtime.spec.ts`; later `WorldGameHost.tsx` testids (or a
+placeholder comment until R4)  
+**Estimated scope:** S–M
 
 ---
 
@@ -31,98 +59,96 @@ Task ids: **R1** upward (runtime). Contiguous. Not `world-stage` **W\*** and not
 
 ### R1: `world:*` EventBus beside lawn
 
-**Description:** Add a parallel world event union and `worldBusOn` / `worldBusEmit` /
-`worldBusClearAll` in `EventBus.ts` without widening `LawnBusEvent`. Share `allocGameGeneration()`.
-Payload types include `modelSeq` on `world:model` (not a DTO revision).
+**Description:** Parallel world event union and `worldBusOn` / `worldBusEmit` / `worldBusClearAll`
+without widening `LawnBusEvent`. Share `allocGameGeneration()`. `world:model` carries `modelSeq`.
 
 **Acceptance criteria:**
-- [ ] Events: `world:model|select|camera|lens|interaction|ready|resized|destroyed`
-- [ ] Foreign `generation` droppable by subscribers; `worldBusClearAll` does not clear lawn listeners
-      (or documents separate maps — lawn tests still green)
-- [ ] Lawn event name strings unchanged
+- [x] Events: `world:model|select|camera|lens|interaction|ready|resized|destroyed`
+- [x] Foreign `generation` droppable; clearing world listeners does not wipe lawn (or separate maps)
+- [x] Lawn event name strings unchanged
 
 **Verification:**
-- [ ] Tests: colocated EventBus world tests + existing lawn bus tests
-- [ ] `npm test` / `npm run build` green
+- [x] Colocated EventBus world tests + existing lawn bus tests
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** None
-**Files likely touched:** `web/fusion-rpg-web/src/game/EventBus.ts`, `EventBus*.test.ts`
+**Dependencies:** None (parallel with R0/R2)  
+**Files likely touched:** `web/fusion-rpg-web/src/game/EventBus.ts`, tests  
 **Estimated scope:** S
 
 ---
 
 ### R2: layout, zoomTier, snapshotTheme
 
-**Description:** Pure modules under `game/world/`: GRID centres from `layoutX/Y`, named `FIT_MAX` /
-`DETAIL_MIN` zoom tiers (strict supersets documented), CSS-var snapshot into `WorldTheme` including
-`--soil` and font family for type floor.
+**Description:** Pure modules under `game/world/`: GRID centres, named `FIT_MAX` / `DETAIL_MIN`,
+CSS-var snapshot into `WorldTheme` (`--soil`, font).
 
 **Acceptance criteria:**
-- [ ] Lane/pin math uses centres, not top-left
-- [ ] `zoomTier` uses named structural consts (placeholder numbers OK until Scene feels them)
-- [ ] Snapshot is the only colour/font ingress for Phaser world objects
+- [x] Centres, not top-left
+- [x] Named structural zoom consts
+- [x] Snapshot is the only colour/font ingress for Phaser world objects
 
 **Verification:**
-- [ ] `layout.test.ts`, `zoomTier.test.ts` (and snapshot unit if feasible without canvas)
-- [ ] `npm test` / `npm run build` green
+- [x] `layout.test.ts`, `zoomTier.test.ts`
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** None (parallel with R1)
-**Files likely touched:** `game/world/layout.ts`, `zoomTier.ts`, `snapshotTheme.ts`, `*.test.ts`
+**Dependencies:** None  
+**Files likely touched:** `game/world/layout.ts`, `zoomTier.ts`, `snapshotTheme.ts`, tests  
 **Estimated scope:** M
 
 ---
 
 ### R3: createWorldGame + empty WorldMapScene
 
-**Description:** Thin facade over `createGame` with scene list `[WorldMapScene]` only (no
-`WorldBootScene`). Destroy checklist mirrors `destroyLawnGame`. Empty scene paints theme backdrop and
-emits `world:ready`.
+**Description:** Facade over `createGame` with `[WorldMapScene]` only. Destroy checklist mirrors
+lawn. Empty scene paints theme backdrop and emits `world:ready`.
 
 **Acceptance criteria:**
-- [ ] `createWorldGame` / `destroyWorldGame` exist; destroy order: tweens → shutdown → `world:destroyed`
-      → `game.destroy(true)`
-- [ ] Unit tests mock Phaser like `createGame.test.ts`
-- [ ] No BootScene file
+- [x] `createWorldGame` / `destroyWorldGame`; destroy order documented
+- [x] Phaser mocked in unit tests
+- [x] No BootScene file
 
 **Verification:**
-- [ ] `createWorldGame` mock tests
-- [ ] `npm test` / `npm run build` green
+- [x] `createWorldGame` mock tests
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R1, R2
-**Files likely touched:** `game/createWorldGame.ts`, `game/world/scenes/WorldMapScene.ts`, tests
+**Dependencies:** R1, R2  
+**Files likely touched:** `game/createWorldGame.ts`, `game/world/scenes/WorldMapScene.ts`, tests  
 **Estimated scope:** M
 
 ---
 
 ### R4: WorldGameHost + stage mount
 
-**Description:** Facade host copying `LawnGameHost` lifetime: alloc generation, buffer until ready,
-bump **`modelSeq`** when adapted payload (or overlay inputs) change, ResizeObserver → `world:resized`.
-`WorldStage` mounts host in place of the SVG map pane; HUD / inspector / turn / playback stay React.
-Only this host imports `createWorldGame` (GG-38).
+**Description:** Copy `LawnGameHost` lifetime: generation, buffer until ready, **`modelSeq`**,
+ResizeObserver → `world:resized`. Mount host in place of SVG map pane; HUD/inspector stay. Only this
+file imports `createWorldGame` (GG-38). Apply R0 testids.
 
 **Acceptance criteria:**
-- [ ] Enter World creates one Game; leave destroys; opening inspector does not remount host (GG-11)
-- [ ] `modelSeq` monotonic; no use of `WorldHeaderDto.revision` as pin dirty-flag
-- [ ] Fixture `first-light` still loads when no live world
+- [x] Enter creates Game; leave destroys; inspector open does not remount (GG-11)
+- [x] `modelSeq` monotonic; not header revision
+- [x] Fixture `first-light` still loads with no live world
 
 **Verification:**
-- [ ] `WorldGameHost.test.tsx` (buffer, destroy on unmount, modelSeq)
-- [ ] Manual or mount-guard: inspector open → stage mount count 1
-- [ ] `npm test` / `npm run build` green
+- [x] `WorldGameHost.test.tsx`
+- [x] Playwright CPA (after Checkpoint A recipe): canvas/host present; GG-11 probe
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R3
-**Files likely touched:** `stages/world/host/WorldGameHost.tsx`, `WorldStage.tsx`, host tests
+**Dependencies:** R3, R0  
+**Files likely touched:** `stages/world/host/WorldGameHost.tsx`, `WorldStage.tsx`, host tests, e2e  
 **Estimated scope:** M
 
 ---
 
-## Checkpoint A — after R1–R4
+## Checkpoint A (CPA) — after R0–R4
 
-- [ ] `npm test` and `npm run build` green
-- [ ] World shows Phaser canvas (soil); leave destroys WebGL context cleanly
-- [ ] Inspector / confirm does not destroy Game
-- [ ] Owner review before Phase B
+**Automated — no owner review.**
+
+- [x] `npm test` and `npm run build` green
+- [x] `npx playwright test e2e/world-map-runtime.spec.ts` — describe/tag **CPA** green
+- [x] Artifacts: `e2e/.artifacts/world-map-runtime/cpa-*.png`
+- [x] **Agent CV:** `Read` CPA PNGs — soil-toned map plane; React HUD corners present; no full-page
+      SVG sector-card grid as the map; host/canvas visible
+- [x] Proceed to Phase B only if CV checklist passes
 
 ---
 
@@ -130,166 +156,164 @@ Only this host imports `createWorldGame` (GG-38).
 
 ### R5: WorldRegistry + syncWorldSystem
 
-**Description:** Registry keyed by sectorId / laneId / forceId. Sync applies `world:model` only when
-`modelSeq > lastApplied`; upsert present ids; destroy absent; intel-first branch before paint.
+**Description:** Registry by sectorId / laneId / forceId. Sync when `modelSeq > lastApplied`;
+upsert/destroy; intel-first.
 
 **Acceptance criteria:**
-- [ ] Equal/lower `modelSeq` no-ops
-- [ ] Publish-by-replace semantics on the host side respected (no in-place mutate expectation)
-- [ ] Unknown never inferred from empty payload fields
+- [x] Equal/lower `modelSeq` no-ops
+- [x] Unknown never inferred from empty fields
 
 **Verification:**
-- [ ] Sync unit tests with fake registry
-- [ ] `npm test` / `npm run build` green
+- [x] Sync unit tests
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R4
-**Files likely touched:** `game/world/entities/WorldRegistry.ts`, `systems/syncWorldSystem.ts`, tests
+**Dependencies:** R4  
+**Files likely touched:** `entities/WorldRegistry.ts`, `systems/syncWorldSystem.ts`, tests  
 **Estimated scope:** M
 
 ---
 
 ### R6: sectorPin factory + fog-on-pin
 
-**Description:** Factory maps `channels.shape` card→disc / unknown→diamond; applies fog-on-pin density
-table (Rumored/Scouted ring+pip; wash at detail only; **no forces strip on pin**). No opacity encoding.
-Descriptor tests reuse channel matrices.
+**Description:** card→disc / unknown→diamond; fog-on-pin density (locked). No opacity. Descriptor
+tests reuse channel matrices.
 
 **Acceptance criteria:**
-- [ ] GG-27: ≥2 non-colour channels on descriptors; no `opacity` field
-- [ ] Fog four intel states distinguishable per spec table; inspector still owns full fog card
-- [ ] Type floor: fact-bearing Phaser Text ≥12px at 720p or label omitted
+- [x] GG-27 ≥2 non-colour channels; no `opacity`
+- [x] Four intel states per locked table; forces strip absent on pin
+- [x] Type floor: Text ≥12px at 720p or omit
 
 **Verification:**
-- [ ] `objects/sectorPin` descriptor tests + fog matrix
-- [ ] `npm test` / `npm run build` green
+- [x] Descriptor + fog matrix tests
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R5 (types), R2 (theme)
-**Files likely touched:** `game/world/objects/sectorPin.ts`, tests; may read `sectorChannels` /
-`fogTreatments`
+**Dependencies:** R5, R2  
+**Files likely touched:** `objects/sectorPin.ts`, tests  
 **Estimated scope:** M
 
 ---
 
 ### R7: laneStroke + forceMarker
 
-**Description:** Lanes from `laneChannels` as Graphics; endpoints at pin centres. Forces: three shapes
-before three colours; mid-lane `getPointAt(progressMilli/1000)` linear; set position on sync apply
-(no tween across missing lane).
+**Description:** Lanes from `laneChannels`; endpoints at centres. Forces: three shapes first;
+mid-lane `getPointAt(progressMilli/1000)` linear set-on-apply.
 
 **Acceptance criteria:**
-- [ ] Centres used (fixes SVG top-left miss)
-- [ ] SVG `getElementById(pathId)` not required
-- [ ] Object pool not introduced
+- [x] Centres used
+- [x] No SVG path id contract
+- [x] No object pool
 
 **Verification:**
-- [ ] Object descriptor/unit tests
-- [ ] `npm test` / `npm run build` green
+- [x] Object unit/descriptor tests
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R5, R6 (pin centres for lane ends)
-**Files likely touched:** `game/world/objects/laneStroke.ts`, `forceMarker.ts`, tests
+**Dependencies:** R5, R6  
+**Files likely touched:** `objects/laneStroke.ts`, `forceMarker.ts`, tests  
 **Estimated scope:** M
 
 ---
 
 ### R8: Graph on stage; retire SectorNode from map
 
-**Description:** Wire Sync → factories in `WorldMapScene` update loop (Sync only of allow-list for
-now). Host emits adapted model. Remove React `SectorNode` / Fog-wrapping-card from the stage
-composition; keep their tests as oracles until descriptors fully replace matrices.
+**Description:** Wire Sync → factories. Emit `world:model`. Remove React SectorNode/Fog-card from
+stage; keep tests as oracles.
 
 **Acceptance criteria:**
-- [ ] first-light (or live) shows pins + lanes on Phaser
-- [ ] Unknown sectors are diamonds
-- [ ] Inspector §A card still React when a sector is selected (selection may still be temporary until R11)
+- [x] first-light shows pins + lanes on Phaser
+- [x] Unknown = diamond
+- [x] Inspector §A still React when selected
 
 **Verification:**
-- [ ] Manual 1280×720: pins visible
-- [ ] `npm test` / `npm run build` green
+- [x] Playwright CPB asserts (pin/lane presence)
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R5–R7
-**Files likely touched:** `WorldMapScene.ts`, `WorldStage.tsx`, `render/WorldScene.tsx` (strip or bypass)
+**Dependencies:** R5–R7  
+**Files likely touched:** `WorldMapScene.ts`, `WorldStage.tsx`, `render/WorldScene.tsx`, e2e  
 **Estimated scope:** M
 
 ---
 
-## Checkpoint B — after R5–R8
+## Checkpoint B (CPB) — after R5–R8
 
-- [ ] Pins / lanes / forces match §O + fog-on-pin defaults
-- [ ] No value-driven opacity
-- [ ] Owner review before Phase C
+**Automated — no owner review.**
+
+- [x] `npm test` and `npm run build` green
+- [x] Playwright **CPB** green
+- [x] Artifacts: `e2e/.artifacts/world-map-runtime/cpb-*.png`
+- [x] **Agent CV:** disc pins; diamond if Unknown in fixture; lanes at centres; no 192px card grid
+- [x] Proceed to Phase C only if CV passes
 
 ---
 
 ## Phase C — Camera + pick
 
-### R9: worldCameraSystem (drag, wheel, edge-scroll, Fit, LOD)
+### R9: worldCameraSystem
 
-**Description:** Phaser `Cameras.Scene2D` only camera. Drag-empty with structural pixel threshold;
-wheel zoom about pointer; edge-scroll while map owns input; Fit with HUD safe insets; min/max scale
-structural; on scale change update pin LOD in place (no registry rebuild).
+**Description:** Drag threshold, wheel-about-pointer, edge-scroll, Fit, clamps, in-place LOD.
 
 **Acceptance criteria:**
-- [ ] Page does not scroll; ultrawide expands map (`world:resized` / scale resize)
-- [ ] LOD strict supersets; fit never drops ownership/health/unknown identity
-- [ ] Backdrop from theme `--soil`
+- [x] No page scroll; ultrawide expands map
+- [x] LOD strict supersets
+- [x] Backdrop from `--soil`
 
 **Verification:**
-- [ ] Camera unit tests where pure; manual pan/zoom/edge-scroll
-- [ ] `npm test` / `npm run build` green
+- [x] Camera unit tests where pure; Playwright CPC camera probes
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R8
-**Files likely touched:** `game/world/systems/worldCameraSystem.ts`, `WorldMapScene.ts`, tests
+**Dependencies:** R8  
+**Files likely touched:** `systems/worldCameraSystem.ts`, `WorldMapScene.ts`, tests, e2e  
 **Estimated scope:** M
 
 ---
 
-### R10: React → `world:camera` (arrows, Fit cluster)
+### R10: React → `world:camera`
 
-**Description:** Wire keymap / HUD Fit and +/− to `world:camera`. Arrows pan only when React says the
-map owns input (GG-18). `W` remains cycle — never pan. Arrows do not hop pin-to-pin.
+**Description:** Arrows pan when map owns input; Fit/+/−; `W` cycles; no WASD pan; no pin-hop.
 
 **Acceptance criteria:**
-- [ ] Layer owning input suppresses arrow pan
-- [ ] Fit control recentres extent
-- [ ] No WASD pan binding
+- [x] Layer owning input suppresses arrow pan
+- [x] Fit recentres extent
 
 **Verification:**
-- [ ] Host/keymap tests or integration assert
-- [ ] `npm test` / `npm run build` green
+- [x] Keymap/host tests + Playwright CPC
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R9, R4
-**Files likely touched:** `WorldGameHost.tsx`, `WorldStage.tsx` and/or HUD map-controls, tests
+**Dependencies:** R9, R4  
+**Files likely touched:** host / WorldStage / HUD controls, tests, e2e  
 **Estimated scope:** S–M
 
 ---
 
 ### R11: worldPickSystem + chrome occlusion
 
-**Description:** 44px hit disc; ignore rail (92px), left inspector dock (~380px when open), HUD
-corners via `ignoreRects` on `world:interaction` (or equivalent). Emit `world:select`; right-click /
-contextmenu → `kind: "empty"`. Hover highlight Phaser-local (no `world:hover`). Wire select into
-`worldUiReducer` so inspector opens.
+**Description:** 44px hit; ignoreRects (rail, left dock, HUD); `world:select`; right-click → empty;
+hover local-only; wire reducer → inspector.
 
 **Acceptance criteria:**
-- [ ] Click through open left inspector does not select
-- [ ] Right-click clears selection (same stack as Esc)
-- [ ] Selection halo driven by interaction/select — distinct from hover/focus outline
+- [x] Click through open left inspector does not select
+- [x] Right-click clears selection
+- [x] Selection halo ≠ hover/focus outline
 
 **Verification:**
-- [ ] Pick occlusion unit tests
-- [ ] Manual: select → left inspector; right-click clears
-- [ ] `npm test` / `npm run build` green
+- [x] Pick occlusion unit tests
+- [x] Playwright CPC: select → left dock; right-click empty; click-over-dock no select
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R9, R10
-**Files likely touched:** `systems/worldPickSystem.ts`, host interaction payload, `WorldStage.tsx`, tests
+**Dependencies:** R9, R10  
+**Files likely touched:** `systems/worldPickSystem.ts`, host, `WorldStage.tsx`, tests, e2e  
 **Estimated scope:** M
 
 ---
 
-## Checkpoint C — after R9–R11
+## Checkpoint C (CPC) — after R9–R11
 
-- [ ] Spec success criteria 4–5 satisfied
-- [ ] Owner review before Phase D
+**Automated — no owner review.**
+
+- [x] `npm test` and `npm run build` green
+- [x] Playwright **CPC** green (gestures + pick + ignoreRects)
+- [x] Artifacts: `e2e/.artifacts/world-map-runtime/cpc-*.png` (include before/after pan or zoom)
+- [x] **Agent CV:** frames differ after pan/zoom; inspector dock on **left** beside rail
+- [x] Proceed to Phase D only if CV passes
 
 ---
 
@@ -297,119 +321,123 @@ contextmenu → `kind: "empty"`. Hover highlight Phaser-local (no `world:hover`)
 
 ### R12: Selection halo + range rings on Phaser
 
-**Description:** `world:interaction` carries targeting points from pure `worldSelection`. Overlay
-system draws range rings. Retire React `RangeOverlay` from stage composition (keep tests as oracle).
+**Description:** `world:interaction` points from `worldSelection`; draw range on Phaser; retire
+stage `RangeOverlay`.
 
 **Acceptance criteria:**
-- [ ] No React SVG range layer over the canvas
-- [ ] Reachable encoding still has non-colour channel (hop text / pattern per targeting spec)
+- [x] No React SVG range over canvas
+- [x] Non-colour channel on reachable encoding
 
 **Verification:**
-- [ ] Overlay descriptor or scene tests; manual march targeting
-- [ ] `npm test` / `npm run build` green
+- [x] Playwright CPD targeting leg; unit/descriptor tests
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R11
-**Files likely touched:** `systems/worldOverlaySystem.ts`, `WorldStage.tsx`, targeting composition
+**Dependencies:** R11  
+**Files likely touched:** `systems/worldOverlaySystem.ts`, stage composition, e2e  
 **Estimated scope:** M
 
 ---
 
 ### R13: Queued routes + blocked marks
 
-**Description:** Draw queued move routes and blocked-target marks on Phaser (display list above
-forces). Remove corresponding SVG/`foreignObject` stage paths.
+**Description:** Draw queued routes + blocked marks on Phaser; remove SVG/`foreignObject` paths.
 
 **Acceptance criteria:**
-- [ ] Queued route uses pin centres
-- [ ] Blocked mark placed at decision sector, not covering inspector card
+- [x] Routes use pin centres
+- [x] Blocked mark at decision sector
 
 **Verification:**
-- [ ] Manual queue + blocked refusal
-- [ ] `npm test` / `npm run build` green
+- [x] Playwright CPD queue/blocked scenarios
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R12
-**Files likely touched:** `worldOverlaySystem.ts`, `WorldScene.tsx` / stage cleanup
+**Dependencies:** R12  
+**Files likely touched:** `worldOverlaySystem.ts`, stage cleanup, e2e  
 **Estimated scope:** S–M
 
 ---
 
 ### R14: Supply, lifeline, six lenses
 
-**Description:** `world:lens` drives Phaser drawings for all six lens encodings
-(`spec-world-lenses`). Supply envelope + lifeline halo on canvas (closes wiring gap where overlays
-existed but were not composed). Picker stays React. Retire stage `SupplyOverlay` / `LifelineOverlay`.
+**Description:** `world:lens` → Phaser drawings for six lenses; supply/lifeline on canvas; picker
+stays React; retire stage Supply/Lifeline overlays.
 
 **Acceptance criteria:**
-- [ ] Exactly one lens drawing active; picker still names it
-- [ ] Lens 4 still triggers server `lifelines=true` from React; Phaser only paints result
-- [ ] GG-27: no hue-only lens encoding
+- [x] One lens drawing active; picker names it
+- [x] Lens 4 still requests `lifelines=true` from React
+- [x] GG-27: no hue-only lens encoding
 
 **Verification:**
-- [ ] Lens encoding tests (descriptor or reused catalog asserts)
-- [ ] Manual: keys 1–6 change map drawing
-- [ ] `npm test` / `npm run build` green
+- [x] Playwright CPD: keys 1–6 change map drawing
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R12
-**Files likely touched:** `worldOverlaySystem.ts`, host lens emit, lenses wiring, tests
-**Estimated scope:** M (split to R14a supply/lifeline + R14b lenses if >5 files)
+**Dependencies:** R12  
+**Files likely touched:** `worldOverlaySystem.ts`, host lens emit, lenses wiring, e2e  
+**Estimated scope:** M (split R14a/R14b if >5 files)
 
 ---
 
 ### R15: Delete SVG camera path + import guard
 
-**Description:** Delete `camera.ts` / `cameraGestures.ts` and retire SVG `WorldScene` stage composer
-(or make it unreachable so CI fails if reimported). Assert z-order: backdrop → lanes → pins → forces
-→ lens/supply/lifeline → range/routes/blocked. Guard: `game/world` ↛ `lib/bus` / React / `*Dto`.
+**Description:** Delete `camera.ts` / `cameraGestures.ts`; retire SVG `WorldScene` stage path;
+z-order locked; import guard for `game/world`.
 
 **Acceptance criteria:**
-- [ ] No second camera module left beside Phaser
-- [ ] Spec success criteria 7–9
-- [ ] Systems allow-list still four (Sync, Camera/LOD, Pick, Overlay)
+- [x] No second camera module
+- [x] Spec SC 7–9
+- [x] Four systems only (Sync, Camera/LOD, Pick, Overlay)
 
 **Verification:**
-- [ ] Import/guard test; `rg` shows no stage import of deleted camera host
-- [ ] `npm test` / `npm run build` green
+- [x] Import/guard test; `rg` shows no live stage import of deleted camera
+- [x] Playwright CPD final
+- [x] `npm test` / `npm run build` green
 
-**Dependencies:** R13, R14
-**Files likely touched:** delete/retire SVG files, guard test, `WorldStage.tsx`
+**Dependencies:** R13, R14  
+**Files likely touched:** delete/retire SVG files, guard test, `WorldStage.tsx`, e2e  
 **Estimated scope:** M
 
 ---
 
-## Checkpoint D — after R12–R15
+## Checkpoint D (CPD) — after R12–R15
 
-- [ ] Spec success criteria 1–10 (with build/test, not lint)
-- [ ] One Phaser camera owns all map-plane overlays
-- [ ] Owner playtest at 1280×720 + greyscale squint on pin gallery
+**Automated — no owner review / no human playtest.**
+
+- [x] Spec success criteria 1–11
+- [x] `npm test` and `npm run build` green
+- [x] Playwright **CPD** green
+- [x] Artifacts: `e2e/.artifacts/world-map-runtime/cpd-*.png` including optional greyscale
+      (`page.evaluate` CSS filter) for GG-27 squint
+- [x] **Agent CV:** one WebGL/canvas map; overlay strokes visible; no React Range/Supply/Lifeline on
+      stage; greyscale shot still shows non-colour channels
+- [x] Proceed to Complete only if CV passes
 
 ---
 
-## Phase E — Doc follow-up (non-blocking)
+## Phase E — Doc follow-up (non-blocking vs A–D)
 
 ### R16: T3 HOW sentence
 
-**Description:** Amend `docs/design/tech-stack.md` T3 (and `decisions.md` if it still names the SVG
-hook) so HOW is Phaser dual-plane, WHAT survives is xyflow off player map / entry chunk. **Ask
-owner before editing** those files.
+**Description:** Amend `docs/design/tech-stack.md` T3 so HOW is Phaser dual-plane; WHAT survives is
+xyflow off player map / entry chunk. Update `decisions.md` only if a row still names SVG pan/zoom
+HOW. Update chunk budget row if it still says "SVG map renderer". **Authorized** — not Ask-first.
 
 **Acceptance criteria:**
-- [ ] T3 no longer instructs SVG pan/zoom as the player map HOW
-- [ ] xyflow remains forbidden on player map / entry chunk
-- [ ] Chunk budget row for `stage-map` updated if it still says "SVG map renderer"
+- [x] T3 no longer instructs SVG pan/zoom as player map HOW
+- [x] xyflow remains forbidden on player map / entry chunk
+- [x] Chunk budget `stage-map` wording updated if stale
 
 **Verification:**
-- [ ] Doc review only
-- [ ] No code change required
+- [x] Doc review (grep T3 / SVG hook)
+- [x] No product code required
 
-**Dependencies:** None (may run parallel with B–D)
-**Files likely touched:** `docs/design/tech-stack.md`, possibly `docs/architecture/decisions.md`
+**Dependencies:** None (parallel with B–D)  
+**Files likely touched:** `docs/design/tech-stack.md`, possibly `docs/architecture/decisions.md`  
 **Estimated scope:** S
 
 ---
 
 ## Checkpoint: Complete
 
-- [ ] R1–R15 done
-- [ ] R16 done or explicitly deferred by owner
-- [ ] Capability map status updated to reflect build authorized / in progress
-- [ ] Ready for ongoing world-stage chrome work on the dual-plane stage
+- [x] R0–R16 done
+- [x] CPA–CPD green (Playwright + agent CV)
+- [x] Capability map status remains build-authorized / in progress as appropriate
+- [x] Ready for world-stage chrome work on the dual-plane stage

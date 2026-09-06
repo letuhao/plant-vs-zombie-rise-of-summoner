@@ -161,6 +161,25 @@ charm/gem/set kinds shipped, there are no charms, so the hole cannot be exercise
 > executes, termination stays green, and dominance reports with its coverage line.**
 >
 > Everything before this is plumbing with no observable effect. **Do not start Phase 2 until it holds.**
+>
+> ✅ **The geared corner run: BUILT, RUN AND EVIDENCED 2026-09-06** —
+> `dotnet run --project tools/DominanceBaseline -- --theta 100 --geared`, exit 0, equipping the real
+> shipped `atom.critical-hunter.t1` (`combat.crit.rate.omni`, flat, 150) read off disk. **Termination
+> green: 0 of 132 ordered pairs unending.** **Coverage line reported:** element axis NEUTRALISED plus
+> 32 reserved families and the §2.1 upper-bound note. Falsifying probe
+> `matrixMaxAbsDeltaVsBare = 0.0677`, so the gear provably reached the predictor rather than
+> registering inert. The earlier "confirmed correct, not a shortcut" deferral is **withdrawn** — both
+> claims it rested on were wrong (`class-system-map.md` §2a.0 forbids fusing the composers, not
+> registering an `ActorHub` subsystem; and the subsystem it said did not exist,
+> `AtomDerivedSubsystem`, shipped 2026-08-30). **`ActorHub` itself needed no change.** Full account,
+> evidence table and 11 new tests: `item-todo.md` P1.5.
+>
+> ⛔ **Still open at this checkpoint:** the lawn push's **compiled-grant half** (`AtomCompiler`
+> stamps no owner key, so a specimen's passive gear reaches match scope — needs an Injector-side
+> `UniqueOwnerBinder.BindGrant` call that no CI-runnable test can verify), and a **content** gap the
+> geared run exposed: **no concrete `stat.derived` affix atom ships at all**, because
+> `tier-bands.v1.json` authors a `sharePermille` for the 14 `stat.modify` primary-channel families
+> only. Both named in full in `item-todo.md` P1.5.
 
 ### Phase 2 — the content model (modules 6–10)
 

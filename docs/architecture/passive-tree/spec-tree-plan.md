@@ -1,7 +1,13 @@
 # Spec: `tree-plan`
 
 **Status:** spec, 2026-09-05, with owner decisions **D37–D41 folded in** the same day. Module of
-[passive-tree](../passive-tree-map.md). No build authorized.
+[passive-tree](../passive-tree-map.md). **Task B1 built and verified 2026-09-06** — one tree
+(`might`, `broad-and-flat`) emitted end to end: topology, tier ladder, budget column, mechanism
+ramp, R-A1's reward-spread refusal, the §6 property vocabulary, and node id minting (R3). 55 tests,
+all passing against the spec's own worked tables. The remaining tasks (C1 and later — corpus-wide
+invariants, the 39-tree/1,560-node generic corpus, and the real `tree-language` model-calling run)
+are still unbuilt; this module makes zero model calls itself and none of its own work is gated on
+those later, expensive, real-cost steps.
 
 **Module id:** `tree-plan` · **Wave:** 0 · **Depends on:** nothing · **Model calls:** none.
 **Wave-0 siblings:** `squad-harness`, `mechanism-wiring`, `gate-counters` (D37).
@@ -1371,6 +1377,7 @@ section so nobody copies one up here.
 
 | Key | Unit |
 |---|---|
+| `quotas.aptitude.weightsMilli` | ‰ over the 12-aptitude roster. **Added 2026-09-06** — §4.3's own "no axis lists its own members" clause names aptitude in the same breath as element/status, both of which already had a row here; this table omitted the axis it was describing. Ships as `weightScheme: "uniform"`, same shape as the other registry-driven axes below |
 | `quotas.nodeClass.weightsMilli` | ‰ over `{mechanism, magnitude}`, Σ = 1000 |
 | `quotas.trigger.weightsMilli` | ‰ over the **11 authorable** triggers |
 | `quotas.element.weightsMilli` | ‰ over `omni` + the roster elements |

@@ -6,6 +6,24 @@ namespace FusionRpg.Core.Match;
 /// <summary>
 /// Stub item_id → grant template map for W8-A Cold equip (not a gear shop).
 /// EffectIds align with offline effect fixtures where possible.
+///
+/// <para><b>⚠ Deliberately still live after the 2026-09-06 relic row migration — stated, not an
+/// oversight.</b> `decision-d1-durable-ownership.md` §10 retires this class's <see cref="Items"/>
+/// dictionary at <b>M4</b>: *"for `ref_kind = 'rolled'`, read `effect_instance` and take compiled
+/// grants from E7 rather than `UniqueEquipmentCatalog.Items`. Then drop `rpg_unique_equipment` and
+/// `UniqueEquipmentCatalog.Items`."* That precondition is genuinely absent: no concrete unique
+/// container has been minted (module 17's own top-listed deferral — the seed→concrete generator is
+/// the runtime generator's under a binding repo rule), so there is no rolled grant path to replace
+/// the stub template with. Retiring it today would leave equipping with no grant source at all.</para>
+///
+/// <para><b>What DID move (M1/M2):</b> the per-actor equipped-slot rows, from
+/// <c>rpg_unique_equipment</c> to module 4's <c>rpg_item_assignment</c>. This class keeps exactly
+/// four live jobs — the item-id allowlist (<see cref="IsKnownItem"/>,
+/// <see cref="SlotMatchesItem"/>), the legacy slot validator (<see cref="NormalizeSlot"/>,
+/// <see cref="IsAllowedSlot"/>), the atom-backed container map
+/// (<see cref="TryGetAtomBackedContainerId"/>), and the legacy grant blob
+/// (<see cref="BuildModsJson"/>). None of them reads or writes the retired table.
+/// <c>LegacyEquipTableRetirementTests</c> pins that.</para>
 /// </summary>
 public static class UniqueEquipmentCatalog
 {

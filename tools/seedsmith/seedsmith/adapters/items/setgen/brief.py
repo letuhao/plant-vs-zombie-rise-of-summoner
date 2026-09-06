@@ -15,10 +15,12 @@ Two things this brief deliberately does NOT contain, each because putting it the
 """
 from __future__ import annotations
 
+from .distribute import threshold_ladder
 from .roles import HYBRID_CORE_ROLES
 from .themes import Theme
 from .tuning import SetCharmGenTuning
 from .vocab import FamilyPick, Vocabulary
+from ..charmgen.rules import charm_pool
 
 PROMPT_VERSION = "set-charm-gen/1"
 
@@ -45,12 +47,47 @@ def _pick_lines(picks: "tuple[FamilyPick, ...]", limit: int) -> str:
     return "\n".join(lines)
 
 
+def _charm_pick_lines(picks: "tuple[FamilyPick, ...]") -> str:
+    """The charm pool, whole and unannotated.
+
+    **No truncation.** A truncated pool is what produced the collapse this brief was rebuilt to
+    fix: the old charm brief printed the first 60 of 242 stat picks, and the distributor accepted
+    56 picks that were mostly outside that window. An offered list the author cannot see is the
+    same defect as an offered list the distributor refuses.
+
+    **No roles either.** A charm occupies no role and is frame-blind (ssot-charms §3.7), so a
+    family's role legality is not something a charm author can act on — printing it invites the
+    model to reason about a slot the container does not have.
+    """
+    return "\n".join(f"  - {p.pick_id}" for p in picks)
+
+
+def _and_list(values: "tuple[int, ...]") -> str:
+    if len(values) == 1:
+        return str(values[0])
+    return f"{', '.join(str(v) for v in values[:-1])} and {values[-1]}"
+
+
+def _higher_sentence(higher: "tuple[int, ...]") -> str:
+    """What the thresholds above the lowest carry — or that there are none.
+
+    A one-threshold ladder is real (a two-member set), and a brief that assumed at least two is
+    half of why a five-member set could not be authored at all.
+    """
+    if not higher:
+        return "This set has no threshold above the lowest."
+    return (f"Each of the others ({_and_list(higher)}) takes one to three stat families from the "
+            f"second list.")
+
+
 def build_set_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary, *,
                     member_count: "int | None" = None, capability_limit: int = 40,
                     stat_limit: int = 60) -> str:
     """One set, one theme. `member_count` defaults to the typical size; a grand set is the exception,
     not the pattern (ssot-sets §3.4), so it is always an explicit ask."""
     members = member_count or tuning.typical_members
+    ladder = threshold_ladder(tuning, members)
+    higher = ladder[1:]
     capability_pool = vocabulary.capability
     stat_pool = vocabulary.stat
     identity = (f"the demon species '{theme.display_name}'" if theme.population == "species"
@@ -67,8 +104,9 @@ Choose, and nothing else:
    item cannot roll.
 2. `members` — {members} entries, each a (role, frame) pair. The role list below is closed and
    complete; at most one of armament-primary / armament-secondary, and no role twice.
-3. `thresholds` — the piece counts, and for every threshold ABOVE the lowest, one to three stat
-   families from the second list. The lowest threshold takes no families; it carries the capability.
+3. `thresholds` — exactly {len(ladder)} entries, at {_and_list(ladder)} pieces. The piece counts are
+   FIXED by the {members}-member size and are not yours to choose; give one entry for each, in that
+   order. The lowest ({ladder[0]}) takes no families — it carries the capability. {_higher_sentence(higher)}
 4. `name`, `nameKey`, `flavor`.
 
 Never choose a number, a strength, a duration or a tier. Those are resolved after you answer.
@@ -85,12 +123,19 @@ Stat families ({len(stat_pool)} picks):
 If this theme cannot carry a set you would be happy to ship, set `blocked` and say why."""
 
 
-def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary, *,
-                      stat_limit: int = 60) -> str:
-    """One charm, one theme. Charms are the always-on, side-wide layer — the family split against
-    `jewel-minor` (ssot-charms §3.6) is stated as a rule, not left to be inferred from examples."""
+def build_charm_brief(theme: Theme, tuning: SetCharmGenTuning, vocabulary: Vocabulary) -> str:
+    """One charm, one theme. Charms are the always-on, side-wide layer.
+
+    ⭐ **The pool is `charmgen.rules.charm_pool`, and that is the whole of defects 1 and 2.** This
+    brief used to print `vocabulary.stat` — the SET's stat bucket, truncated to 60 of 242 picks —
+    against a distributor that accepted 56 picks across 14 families, every one armour or shield.
+    An `offense`, `control`, `utility` or `economy` charm was unauthorable from it, though those are
+    four of the five shipped axes and 48 of the 70 shipped rows. The pool is now the same expression
+    the distributor refuses against, drawn from both buckets, and printed whole.
+    """
     anti = (f"\nAvoid entirely: {', '.join(theme.anti_motifs)}." if theme.anti_motifs else "")
     classes = ", ".join(c.id for c in tuning.charm_classes)
+    pool = charm_pool(tuning, vocabulary.all_picks)
     return f"""Author ONE charm for the demon species '{theme.display_name}'.
 
 Motifs to express: {', '.join(theme.motifs)}.{anti}
@@ -102,13 +147,17 @@ percentage, never a multiplier.
 
 Choose, and nothing else:
 1. `charmClass` — one of: {classes}. A signet is named, carries a drawback, and rolls nothing.
-2. `axis` — one of offense, survivability, control, utility, economy.
+2. `axis` — one of offense, survivability, control, utility, economy. Pick the one this species
+   actually leans into; the population is judged on spread across all five, not on any one of them.
 3. `frameHint`, `families` (one or two always-on families from the list below), `name`, `nameKey`,
    `flavor`. A signet also names its `drawback` family.
 
 Never choose a number, a cost, a strength or a tier. Those are resolved after you answer.
 
-Always-on families ({len(vocabulary.stat)} picks):
-{_pick_lines(vocabulary.stat, stat_limit)}
+The list below is the WHOLE legal pool — every id in it is accepted, and nothing outside it is.
+Copy an id exactly as printed, including the element suffix where one is shown.
+
+Always-on families ({len(pool)} picks):
+{_charm_pick_lines(pool)}
 
 If this theme cannot carry a charm you would be happy to ship, set `blocked` and say why."""

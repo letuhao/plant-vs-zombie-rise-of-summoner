@@ -312,10 +312,11 @@ public class DropVolumeCorpusTests
     [Fact]
     public void An_insert_or_charm_entry_is_refused_by_name_until_x7_lands()
     {
-        // Verified against shipped code rather than asserted: ContainerKind has six values and none
-        // of D27's four, so X7 has not landed.
+        // Verified against shipped code rather than asserted: ContainerKind has none of D27's four
+        // (X7 has not landed) -- the total itself is 7, not 6, since party-dungeon D2.6 added
+        // ContainerKind.Enemy as its own reviewed, unrelated seventh kind.
         var kinds = Enum.GetNames(typeof(ContainerKind));
-        Assert.Equal(6, kinds.Length);
+        Assert.Equal(7, kinds.Length);
         Assert.DoesNotContain("Gem", kinds);
         Assert.DoesNotContain("Charm", kinds);
 

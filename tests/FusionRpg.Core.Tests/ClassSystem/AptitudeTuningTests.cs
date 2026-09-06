@@ -25,7 +25,9 @@ public class AptitudeTuningTests
     }
 
     static string ShippedJson() =>
-        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v5.json"));
+        // passive-tree C6 (2026-09-06): v5 -> v6, hosts moved with it (RpgHost.cs/Program.cs) --
+        // kept in sync so "the shipped file" here stays the one actually loaded in production.
+        File.ReadAllText(Path.Combine(FindRepoRoot(), "data", "tuning", "aptitudes.v6.json"));
 
     // ── six-resource coverage (resource-hub-ssot.md, Phase 0 2026-09-02) ─────────────────────────
 
@@ -85,9 +87,10 @@ public class AptitudeTuningTests
         var tuning = AptitudeTuningLoader.Parse(ShippedJson());
 
         Assert.Equal(1, tuning.SchemaVersion);
-        Assert.Equal(5, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor
+        Assert.Equal(6, tuning.Version); // Phase 0, all 2026-09-02: v3 six-resource coverage, v4 resource.restore generalisation, v5 rename + Fortitude anchor; v6 (passive-tree C6, 2026-09-06) added pointEconomy.skillPointsPerThetaMilliByScope
         Assert.Equal(3, tuning.Grant.AptitudePointsPerThetaMilli);
         Assert.Equal(1, tuning.Grant.SkillPointsPerThetaMilli);
+        Assert.Equal(11, tuning.PointEconomy.SkillPointsPerThetaMilliByScope[AllocationScope.Commander]); // D38: 10.40 corner-share, rounded up
         Assert.Equal(100_000, tuning.Read.Contest.SpanPointsMilli); // 100.0 spanPoints * 1000
         Assert.Equal(1000, tuning.Read.Contest.ShareExponentMilli); // gamma = 1.0
         Assert.Equal(1000, tuning.Read.Magnitude.ShareExponentMilli); // gamma = 1.0
@@ -108,7 +111,8 @@ public class AptitudeTuningTests
         // no `channel` key. class-system P1.5/P1.6's reader census counted 486 real edges in v2;
         // v3 added 32 for six-resource coverage (Phase 0, 2026-09-02 -- 12 max.poise + 12 regen.poise
         // + 8 efficiency), so 518; v4 added 7 more for resource.restore's five non-hp members, so 525; v5 added Fortitude as hp's restoration anchor, so 526. The literal is deliberate: it is what makes an accidental edge
-        // addition visible, which is the same reason the census pinned it in the first place.
+        // addition visible, which is the same reason the census pinned it in the first place. v6
+        // (passive-tree C6) touched only pointEconomy, not edges, so the count is unchanged.
         var tuning = AptitudeTuningLoader.Parse(ShippedJson());
         Assert.Equal(526, tuning.Edges.Count);
     }
@@ -196,6 +200,31 @@ public class AptitudeTuningTests
         byScope.Remove("aspect");
         var ex = Assert.Throws<AptitudeTuningRejection>(() => AptitudeTuningLoader.Parse(Serialize(doc)));
         Assert.Contains("aspect", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void MissingSkillPointsPerThetaScope_rejectsNamingIt()
+    {
+        // C6, spec-tree-state.md §3 (D34) -- once skillPointsPerThetaMilliByScope IS present, it is
+        // exactly as strict as its aptitude-point sibling above: a half-authored table is a rejection,
+        // never four rates with one silently missing.
+        var doc = MinimalValidDoc();
+        ((Dictionary<string, object>)doc["pointEconomy"])["skillPointsPerThetaMilliByScope"] =
+            new Dictionary<string, object> { ["commander"] = 11, ["demonType"] = 4, ["uniqueDemon"] = 6 }; // aspect missing
+        var ex = Assert.Throws<AptitudeTuningRejection>(() => AptitudeTuningLoader.Parse(Serialize(doc)));
+        Assert.Contains("aspect", ex.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void AbsentSkillPointsPerThetaScope_parsesToAnEmptyTable_notARejection()
+    {
+        // C6's own deliberate divergence from the sibling: a tuning file that never carries the key at
+        // all (every fixture in this test class, and aptitudes.v1-v5.json) still parses -- the empty
+        // table is not a guessed rate, and PointBudget.SkillPointsFor is what rejects a lookup against
+        // it, naming the scope, rather than the parser inventing four numbers nobody authored.
+        var doc = MinimalValidDoc(); // no skillPointsPerThetaMilliByScope key
+        var tuning = AptitudeTuningLoader.Parse(Serialize(doc));
+        Assert.Empty(tuning.PointEconomy.SkillPointsPerThetaMilliByScope);
     }
 
     [Fact]

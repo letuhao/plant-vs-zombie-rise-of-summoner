@@ -67,6 +67,16 @@ public enum RollPolicy
 /// is set</b> (enforced in <see cref="AtomJson.TryReadValueSpec"/>, never silently defaulted);
 /// unused and ignored otherwise.
 /// </param>
+/// <param name="PowerLadderKMicro">
+/// task B3 (spec-tree-binder.md §3.5, §7): a per-million sibling of <paramref name="PowerLadderKMilli"/>,
+/// for the one caller a per-mille coefficient is too coarse for — `tree-binder`'s `kMicro`
+/// (spec-tree-catalog.md §2.3). At per-mille, `gated-deep` stores `kMilli = 0` for 12 of 40 nodes
+/// (silently inert, in the shallow tiers every build buys first); at per-million the same worst
+/// case is 0.04% error. Constructed programmatically by `tree-binder`, never authored as JSON
+/// (`AtomJson.TryReadValueSpec` is untouched — this field has no grammar branch there), so
+/// <see cref="PowerLadderKMilli"/>'s existing authored-content consumers are completely unaffected.
+/// Non-zero selects this field over <see cref="PowerLadderKMilli"/> in <c>AtomCompiler</c>.
+/// </param>
 /// <param name="ClampedLevelScale">
 /// T6.2's own second gap, found while resuming it: `AuraMilli`'s flat part is
 /// <c>clamp(base + level, 0, cap)</c> — a clamp has no home in the closed FA1 op vocabulary
@@ -89,7 +99,7 @@ public enum RollPolicy
 public readonly record struct ValueSpec(
     int Min, int Max, RollPolicy Roll, string? CurveId = null,
     string? EventField = null, int MultiplierMilli = 1000,
-    bool PowerLadder = false, int PowerLadderKMilli = 0,
+    bool PowerLadder = false, int PowerLadderKMilli = 0, long PowerLadderKMicro = 0,
     bool ClampedLevelScale = false, int ClampedLevelScaleBaseMilli = 0, int ClampedLevelScaleCapMilli = 0)
 {
     /// <summary>The closed set of fields an event-linked spec may read. One member today.</summary>

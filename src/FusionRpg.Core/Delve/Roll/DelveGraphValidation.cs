@@ -120,8 +120,11 @@ public static class DelveGraphValidation
         if (g.Doors.Any(d => d.FromSectorId == boss.SectorId))
             throw new InvalidOperationException("Rule7Boss: the boss has an outbound door.");
 
+        // A secret room can attach to a rest room (§2 step 9), landing it on row N-1 too -- but a
+        // secret is a leaf (rule 14) and was never on any walk, so it is excluded from the fan-in.
+        var secretIds = g.Facts.Where(f => f.IsSecret).Select(f => f.SectorId).ToHashSet(StringComparer.Ordinal);
         var lastCorridorRow = maxRow - 1;
-        var lastCorridorRooms = g.Rooms.Where(r => r.LayoutY == lastCorridorRow).Select(r => r.SectorId).ToHashSet();
+        var lastCorridorRooms = g.Rooms.Where(r => r.LayoutY == lastCorridorRow && !secretIds.Contains(r.SectorId)).Select(r => r.SectorId).ToHashSet();
         var inbound = g.Doors.Where(d => d.ToSectorId == boss.SectorId).Select(d => d.FromSectorId).ToHashSet();
         foreach (var room in lastCorridorRooms)
             if (!inbound.Contains(room))
@@ -130,13 +133,17 @@ public static class DelveGraphValidation
 
     static void Rule8FixedRows(DelveGraph g)
     {
+        // A secret room can attach to a row-0 or a rest (row N-1) anchor (§2 step 9) and lands on
+        // the SAME row as its anchor with its own eligible kind -- excluded here for the same
+        // reason Rule7Boss excludes it: a secret was never part of the fixed-row assignment.
+        var secretIds = g.Facts.Where(f => f.IsSecret).Select(f => f.SectorId).ToHashSet(StringComparer.Ordinal);
         var maxRow = g.Rooms.Max(r => r.LayoutY);
-        foreach (var room in g.Rooms.Where(r => r.LayoutY == 0))
+        foreach (var room in g.Rooms.Where(r => r.LayoutY == 0 && !secretIds.Contains(r.SectorId)))
             if (room.TypeId != "fight") throw new InvalidOperationException($"Rule8FixedRows: row 0 room '{room.SectorId}' is '{room.TypeId}', not fight.");
-        foreach (var room in g.Rooms.Where(r => r.LayoutY == maxRow - 1))
+        foreach (var room in g.Rooms.Where(r => r.LayoutY == maxRow - 1 && !secretIds.Contains(r.SectorId)))
             if (room.TypeId != "rest") throw new InvalidOperationException($"Rule8FixedRows: row-(N-1) room '{room.SectorId}' is '{room.TypeId}', not rest.");
 
-        var cacheRowCandidates = g.Rooms.Where(r => r.TypeId == "cache").Select(r => r.LayoutY).Distinct().ToList();
+        var cacheRowCandidates = g.Rooms.Where(r => r.TypeId == "cache" && !secretIds.Contains(r.SectorId)).Select(r => r.LayoutY).Distinct().ToList();
         if (cacheRowCandidates.Count > 1)
             throw new InvalidOperationException("Rule8FixedRows: cache rooms span more than one row.");
     }
@@ -168,6 +175,10 @@ public static class DelveGraphValidation
         }
     }
 
+    // Fixed-row kinds (§2 step 4) are UNIFORM by construction -- every fight/cache/rest/boss row
+    // shares its kind by design, so "siblings differ" only ever constrains the drawn (step 5) rows.
+    static readonly HashSet<string> FixedRowKinds = new(StringComparer.Ordinal) { "fight", "cache", "rest", "boss" };
+
     static void Rule11SiblingsDiffer(DelveGraph g)
     {
         var kindById = g.Rooms.ToDictionary(r => r.SectorId, r => r.TypeId, StringComparer.Ordinal);
@@ -175,6 +186,7 @@ public static class DelveGraphValidation
         foreach (var (_, children) in childrenByParent)
         {
             var kinds = children.Select(c => kindById[c]).ToList();
+            if (kinds.All(FixedRowKinds.Contains)) continue;
             if (kinds.Count != kinds.Distinct().Count())
                 throw new InvalidOperationException($"Rule11SiblingsDiffer: children [{string.Join(", ", children)}] are not pairwise distinct in kind.");
         }
@@ -233,7 +245,14 @@ public static class DelveGraphValidation
     static void Rule15DeadEnds(DelveGraph g, DungeonTuning tuning)
     {
         var maxRow = g.Rooms.Max(r => r.LayoutY);
-        var outboundCount = g.Rooms.ToDictionary(r => r.SectorId, r => g.Doors.Count(d => d.FromSectorId == r.SectorId), StringComparer.Ordinal);
+        // "No outbound door OTHER THAN the boss and secrets" (§3 rule 15): a room whose only
+        // outbound lanes go to the boss (every row-(N-1) room, by rule 7's fan-in) or to an
+        // attached secret does not lose its dead-end status because of those two exceptions.
+        var boss = g.Rooms.Single(r => r.TypeId == "boss").SectorId;
+        var outboundCount = g.Rooms.ToDictionary(
+            r => r.SectorId,
+            r => g.Doors.Count(d => d.FromSectorId == r.SectorId && d.TypeId != "secret" && d.ToSectorId != boss),
+            StringComparer.Ordinal);
         var deadEnds = g.Rooms.Count(r => r.LayoutY != maxRow && r.TypeId != "boss" && !g.Facts.First(f => f.SectorId == r.SectorId).IsSecret && outboundCount[r.SectorId] == 0);
         if (deadEnds < tuning.GraphMinDeadEnds)
             throw new InvalidOperationException($"Rule15DeadEnds: {deadEnds} dead ends, below the required {tuning.GraphMinDeadEnds}.");

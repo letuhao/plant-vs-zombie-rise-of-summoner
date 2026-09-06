@@ -104,14 +104,23 @@ def threshold_ladder(tuning: SetCharmGenTuning, member_count: int) -> "tuple[int
     """The piece counts a set of this size must carry.
 
     Always 2 (§3.4, no exceptions). A grand set additionally carries 4 so a partial grand set is
-    playable and the last two pieces are a chase rather than a cliff. Then the top threshold equals
-    the member count when that is itself a legal piece count.
+    playable and the last two pieces are a chase rather than a cliff. Then the top threshold is the
+    **highest legal piece count the set can actually reach** — §3.4's own rule is *"the top
+    threshold must be ≤ the member count"*, not *"= the member count"*.
+
+    ⚠ **That last sentence used to read `if member_count in legal_threshold_pieces`, and it made a
+    five-member set unauthorable** (module 13 defect 4, 2026-09-06). 5 is not in the closed
+    `{2,3,4,6}` vocabulary, so the ladder came back `(2,)` — a single threshold, against a schema
+    that required two — and nothing refused the member count either, so the state was simply
+    unreachable. Taking the highest legal count *at or below* the member count gives `(2, 4)` and
+    changes no other size: 2 → `(2,)`, 3 → `(2,3)`, 4 → `(2,4)`, 6 → `(2,4,6)`.
     """
     wanted = {tuning.mandatory_threshold_pieces}
     if member_count >= tuning.grand_members:
         wanted.update(tuning.grand_required_threshold_pieces)
-    if member_count in tuning.legal_threshold_pieces:
-        wanted.add(member_count)
+    reachable = [p for p in tuning.legal_threshold_pieces if p <= member_count]
+    if reachable:
+        wanted.add(max(reachable))
     return tuple(sorted(p for p in wanted if p <= member_count))
 
 

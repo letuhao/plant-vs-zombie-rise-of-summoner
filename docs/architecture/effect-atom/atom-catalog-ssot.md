@@ -62,7 +62,7 @@ Sixteen kinds cover everything that has a working consumer today. Eleven map to 
 | # | Kind | Attach point | Maps to | Runtime support |
 |---|---|---|---|---|
 | 1 | `stat.modify` | stat | FA1 `ModifyStat` | lawn ✅ · battle ✖ (sink ignores FA1) · sim plan-only |
-| 2 | `stat.derived` | stat | *(no opcode — direct channel mods)* | **✖ everywhere — quarantined** (D6): no opcode, no bag branch, no sink arm, and battle reads ChannelMods only from `TraitBattleCatalog`, never from a grant. Re-opens per runtime as consumers ship — **battle re-opens in E12**, which wires `BattleStatComposer` to read bound `stat.derived` atoms at squad build. E12 cannot bind `critical-hunter` until it does, so the re-open is part of that module, not a later favour |
+| 2 | `stat.derived` | stat | *(no opcode — direct channel mods)* | Originally **✖ everywhere — quarantined** (D6): no opcode, no bag branch, no sink arm, and battle read ChannelMods only from `TraitBattleCatalog`, never from a grant. Re-opened per runtime as consumers shipped: **battle** re-opened in E12 (`BattleStatComposer` reads bound atoms at squad build, unblocking `critical-hunter`); **lawn** re-opened 2026-08-30 (`AtomDerivedSubsystem`, decisions.md "Derived-write lawn executor") — both **Full**. **Sim** re-opened 2026-09-06 (mechanism-wiring E5): `RuntimeState.Partial`, not `Full` — `ActorDerivedLookup`'s contribution fold (a plain sum) honours `Flat`/`Increased` but silently miscomposes `Replace`/`Flag` as if `Flat` (`BoundDerivedAtom` carries no `Priority` field), proven by `EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`. Current: lawn ✅ Full · battle ✅ Full · sim 🟡 Partial |
 | 3 | `resource.delta` | resource | FA10 `ApplyResourceDelta` | lawn ✅ · battle ✖ (D6) — battle's sink *does* consume FA10, but no **atom** can reach it: `BattleEngine` never grants and never calls `OnEvent` · sim plan-only |
 | 4 | `resource.economy` | resource | FA9 `Economy` | lawn ✅ · battle ✖ · sim plan-only |
 | 5 | `status.apply` | status | FA2 `ApplyStatus` | lawn ✅ · battle partial *(no FA2 path; setup only)* · sim plan-only |
@@ -170,7 +170,19 @@ Derived ops are a **different set**: `Flat` · `Increased` · `Replace` · `Flag
 
 ---
 
-## 5. Status catalog — 21 declared, 21 functional in at least one runtime
+## 5. Status catalog — 24 declared, 24 functional in at least one runtime
+
+> ### ✅ GREW 2026-09-06 — party-dungeon `delve-attrition` D2.19 added `nerve.{unsettled,shaken,afflicted}`
+>
+> **Status catalog — 24 declared** (21 → 24, `StatusCatalogBootstrap.cs` `9.5 Nerve` block,
+> `status-ssot.md` §9.6). All three are `Debuff`/`ModifyStat`/`Replace`, family `nerve`, and are
+> functional the moment they are applied: `NervePolicy.Sync` calls the SAME `StatusRuntime.Apply` every
+> other status uses, with a real, non-empty `StatMods` payload from
+> `data/seed/dungeon/_containers/nerve.v1.json` — there is no battle/lawn split for them the way
+> `rally`/`expose`/`command`/`shatter` had before this doc's 2026-09-02 correction, because nothing
+> about `ModifyStat`'s consumer changed; only a new caller (`NervePolicy`, not an `EffectRow`) exists now.
+> The tables below are the pre-nerve sweep (2026-08-22, corrected 2026-09-02) and are kept for the
+> reasoning trail — they do not cover `nerve.*`, which this note is the whole record of.
 
 | Provenance | Statuses | Note |
 |---|---|---|

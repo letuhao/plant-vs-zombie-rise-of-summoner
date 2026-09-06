@@ -1,0 +1,192 @@
+import Phaser from "phaser";
+import type { WorldCameraPayload } from "../../EventBus";
+import {
+  DRAG_THRESHOLD_PX,
+  EDGE_SCROLL_MARGIN_PX,
+  MAX_SCALE,
+  MIN_SCALE
+} from "../objects/pinConstants";
+
+const STATE_KEY = "worldCamera";
+
+type CameraWireState = {
+  dragging: boolean;
+  dragStartX: number;
+  dragStartY: number;
+  camStartX: number;
+  camStartY: number;
+  pointerX: number;
+  pointerY: number;
+  onLod?: () => void;
+  offs: Array<() => void>;
+};
+
+const WHEEL_ZOOM_STEP = 1.15;
+/** Edge-scroll speed — structural until a feel pass promotes it. */
+const EDGE_SCROLL_SPEED = 0.35;
+
+function state(scene: Phaser.Scene): CameraWireState {
+  let s = scene.data.get(STATE_KEY) as CameraWireState | undefined;
+  if (!s) {
+    s = {
+      dragging: false,
+      dragStartX: 0,
+      dragStartY: 0,
+      camStartX: 0,
+      camStartY: 0,
+      pointerX: 0,
+      pointerY: 0,
+      offs: []
+    };
+    scene.data.set(STATE_KEY, s);
+  }
+  return s;
+}
+
+function clampZoom(z: number): number {
+  return Phaser.Math.Clamp(z, MIN_SCALE, MAX_SCALE);
+}
+
+function applyPan(scene: Phaser.Scene, dx: number, dy: number): void {
+  const cam = scene.cameras.main;
+  cam.scrollX -= dx / cam.zoom;
+  cam.scrollY -= dy / cam.zoom;
+}
+
+function applyZoomAboutPointer(scene: Phaser.Scene, pointer: Phaser.Input.Pointer, factor: number): void {
+  const cam = scene.cameras.main;
+  const prevZoom = cam.zoom;
+  const nextZoom = clampZoom(prevZoom * factor);
+  if (nextZoom === prevZoom) return;
+
+  const worldBefore = cam.getWorldPoint(pointer.x, pointer.y);
+  cam.setZoom(nextZoom);
+  const worldAfter = cam.getWorldPoint(pointer.x, pointer.y);
+  cam.scrollX += worldBefore.x - worldAfter.x;
+  cam.scrollY += worldBefore.y - worldAfter.y;
+}
+
+function applyFit(scene: Phaser.Scene, payload: WorldCameraPayload): void {
+  const cam = scene.cameras.main;
+  const padL = payload.padLeft ?? 0;
+  const padR = payload.padRight ?? 0;
+  const padT = payload.padTop ?? 0;
+  const padB = payload.padBottom ?? 0;
+  const viewW = scene.scale.width - padL - padR;
+  const viewH = scene.scale.height - padT - padB;
+  if (viewW <= 0 || viewH <= 0) return;
+
+  // Default authored grid extent — host may later pass explicit bounds.
+  const extentW = 220 * 4;
+  const extentH = 190 * 3;
+  const zoom = clampZoom(Math.min(viewW / extentW, viewH / extentH));
+  cam.setZoom(zoom);
+  cam.centerOn(extentW / 2, extentH / 2);
+  cam.scrollX += padL / zoom;
+  cam.scrollY += padT / zoom;
+}
+
+function applyCommand(scene: Phaser.Scene, payload: WorldCameraPayload): void {
+  const cam = scene.cameras.main;
+  switch (payload.op) {
+    case "pan":
+      applyPan(scene, payload.dx ?? 0, payload.dy ?? 0);
+      break;
+    case "zoom": {
+      const target = payload.scale ?? cam.zoom;
+      cam.setZoom(clampZoom(target));
+      break;
+    }
+    case "fit":
+      applyFit(scene, payload);
+      break;
+    default:
+      break;
+  }
+}
+
+function wirePointer(scene: Phaser.Scene, onLod: () => void): void {
+  const s = state(scene);
+  s.onLod = onLod;
+
+  const onDown = (pointer: Phaser.Input.Pointer) => {
+    if (pointer.rightButtonDown()) return;
+    s.dragging = false;
+    s.dragStartX = pointer.x;
+    s.dragStartY = pointer.y;
+    s.camStartX = scene.cameras.main.scrollX;
+    s.camStartY = scene.cameras.main.scrollY;
+    s.pointerX = pointer.x;
+    s.pointerY = pointer.y;
+  };
+
+  const onMove = (pointer: Phaser.Input.Pointer) => {
+    s.pointerX = pointer.x;
+    s.pointerY = pointer.y;
+    if (!pointer.isDown || pointer.rightButtonDown()) return;
+    const dx = pointer.x - s.dragStartX;
+    const dy = pointer.y - s.dragStartY;
+    if (!s.dragging) {
+      if (Math.hypot(dx, dy) < DRAG_THRESHOLD_PX) return;
+      s.dragging = true;
+    }
+    scene.cameras.main.scrollX = s.camStartX - dx / scene.cameras.main.zoom;
+    scene.cameras.main.scrollY = s.camStartY - dy / scene.cameras.main.zoom;
+  };
+
+  const onUp = () => {
+    s.dragging = false;
+  };
+
+  const onWheel = (_pointer: Phaser.Input.Pointer, _gos: unknown, _dx: number, dy: number) => {
+    const factor = dy < 0 ? WHEEL_ZOOM_STEP : 1 / WHEEL_ZOOM_STEP;
+    applyZoomAboutPointer(scene, scene.input.activePointer, factor);
+    s.onLod?.();
+  };
+
+  scene.input.on("pointerdown", onDown);
+  scene.input.on("pointermove", onMove);
+  scene.input.on("pointerup", onUp);
+  scene.input.on("wheel", onWheel);
+
+  s.offs.push(
+    () => scene.input.off("pointerdown", onDown),
+    () => scene.input.off("pointermove", onMove),
+    () => scene.input.off("pointerup", onUp),
+    () => scene.input.off("wheel", onWheel)
+  );
+}
+
+function unwire(scene: Phaser.Scene): void {
+  const s = scene.data.get(STATE_KEY) as CameraWireState | undefined;
+  if (!s) return;
+  for (const off of s.offs) off();
+  s.offs = [];
+  scene.data.remove(STATE_KEY);
+}
+
+function tickEdgeScroll(scene: Phaser.Scene, delta: number): void {
+  const s = scene.data.get(STATE_KEY) as CameraWireState | undefined;
+  if (!s) return;
+  const w = scene.scale.width;
+  const h = scene.scale.height;
+  const m = EDGE_SCROLL_MARGIN_PX;
+  let dx = 0;
+  let dy = 0;
+  if (s.pointerX < m) dx = 1;
+  else if (s.pointerX > w - m) dx = -1;
+  if (s.pointerY < m) dy = 1;
+  else if (s.pointerY > h - m) dy = -1;
+  if (dx === 0 && dy === 0) return;
+  const cam = scene.cameras.main;
+  const speed = (EDGE_SCROLL_SPEED * delta) / cam.zoom;
+  cam.scrollX -= dx * speed;
+  cam.scrollY -= dy * speed;
+}
+
+export const worldCameraSystem = {
+  applyCommand,
+  wirePointer,
+  unwire,
+  tickEdgeScroll
+};

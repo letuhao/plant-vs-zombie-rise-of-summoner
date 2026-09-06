@@ -461,37 +461,53 @@ public sealed partial class RpgStore
     {
         if (instanceIds.Count == 0) return 0;
         var now = utcNow ?? DateTimeOffset.UtcNow;
-        var day = now.UtcDateTime.ToString("yyyy-MM-dd");
 
         lock (_gate)
         {
             using var db = OpenUnlocked();
             using var tx = db.BeginTransaction();
-            var changed = 0;
-            foreach (var instanceId in instanceIds.Distinct(StringComparer.Ordinal))
-            {
-                var row = ReadContractUnlocked(db, instanceId);
-                if (row is null || !row.Bound || row.PlayerId != playerId) continue;
-
-                if (won)
-                {
-                    var gainToday = string.Equals(row.GainDay, day, StringComparison.Ordinal) ? row.GainToday : 0;
-                    var (loyalty, spent) = ContractPolicy.ApplyGain(
-                        row.Loyalty, gainToday, ContractPolicy.WinGain, row.Personality);
-                    WriteLoyaltyUnlocked(db, instanceId, loyalty, day, spent);
-                }
-                else
-                {
-                    WriteLoyaltyUnlocked(db, instanceId, ContractPolicy.ApplyLoss(row.Loyalty),
-                        row.GainDay, row.GainToday);
-                }
-
-                changed++;
-            }
-
+            var changed = ApplyContractResultsUnlocked(db, playerId, instanceIds, won, now);
             tx.Commit();
             return changed;
         }
+    }
+
+    /// <summary>
+    /// The core of <see cref="ApplyContractResults"/>, reusable from a caller that already holds an
+    /// open connection+transaction — party-dungeon D2.23's extraction settlement needs loyalty
+    /// credited on the SAME transaction its own writes are in (spec-delve-attrition.md §9: "called
+    /// once per delve at CloseDelve"), the identical reason <c>SettleContractsUnlocked</c> already
+    /// exists beside the locking <c>SettleContracts</c>. Calling the PUBLIC method from inside another
+    /// open transaction would open a second connection and block on the WAL writer lock until the
+    /// outer transaction commits — a real deadlock, not a style preference.
+    /// </summary>
+    int ApplyContractResultsUnlocked(
+        SqliteConnection db, long playerId, IReadOnlyList<string> instanceIds, bool won, DateTimeOffset now)
+    {
+        var day = now.UtcDateTime.ToString("yyyy-MM-dd");
+        var changed = 0;
+        foreach (var instanceId in instanceIds.Distinct(StringComparer.Ordinal))
+        {
+            var row = ReadContractUnlocked(db, instanceId);
+            if (row is null || !row.Bound || row.PlayerId != playerId) continue;
+
+            if (won)
+            {
+                var gainToday = string.Equals(row.GainDay, day, StringComparison.Ordinal) ? row.GainToday : 0;
+                var (loyalty, spent) = ContractPolicy.ApplyGain(
+                    row.Loyalty, gainToday, ContractPolicy.WinGain, row.Personality);
+                WriteLoyaltyUnlocked(db, instanceId, loyalty, day, spent);
+            }
+            else
+            {
+                WriteLoyaltyUnlocked(db, instanceId, ContractPolicy.ApplyLoss(row.Loyalty),
+                    row.GainDay, row.GainToday);
+            }
+
+            changed++;
+        }
+
+        return changed;
     }
 
     /// <summary>Consumption (fusion) frees the slot in the same transaction that retires the specimen —

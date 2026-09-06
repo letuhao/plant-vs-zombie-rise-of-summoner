@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import { useAptitudes, usePlayers, useSaveAptitudes } from "@/lib/bus";
+import { useAllocationDraft } from "@/hooks/useAllocationDraft";
 import { Page } from "@/layouts/Page";
 import { Banner, Button, EmptyState, Field, NumberInput, Panel, StatBar } from "@/ui";
 
@@ -8,6 +8,9 @@ import { Banner, Button, EmptyState, Field, NumberInput, Panel, StatBar } from "
  * Commander scope only (applies to every demon fielded); the twelve ids come straight off the
  * server's own response, never a separately-hardcoded catalog mirror. Free respec today (POST a
  * different body any time) — pricing it is a named follow-up, not built here.
+ *
+ * The draft/dirty/budget/save flow itself is `useAllocationDraft` (passive-tree-todo.md I2) — this
+ * page and `ProgressionTab.tsx` are its two callers, never two copies of the same logic.
  */
 export function AptitudesPage() {
   const players = usePlayers();
@@ -15,16 +18,14 @@ export function AptitudesPage() {
   const aptitudes = useAptitudes(playerId);
   const save = useSaveAptitudes();
 
-  const [draft, setDraft] = useState<Record<string, number> | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const allocation = useAllocationDraft({
+    serverValues: aptitudes.data?.shares,
+    budget: aptitudes.data?.budget ?? 0,
+    isSaving: save.isPending,
+    onSave: (draft) => save.mutateAsync({ playerId, shares: draft })
+  });
 
-  // Re-seed the draft whenever the server state changes (initial load, or after a successful save
-  // elsewhere) -- never while the player is actively editing an unsaved draft.
-  useEffect(() => {
-    if (aptitudes.data && draft === null) setDraft(aptitudes.data.shares);
-  }, [aptitudes.data, draft]);
-
-  if (aptitudes.isLoading || !aptitudes.data || draft === null) {
+  if (aptitudes.isLoading || !aptitudes.data || allocation.draft === null) {
     return (
       <Page title="Primary stats" testId="aptitudes-page">
         <EmptyState title="Loading aptitudes…" testId="aptitudes-loading" />
@@ -32,19 +33,8 @@ export function AptitudesPage() {
     );
   }
 
-  const spent = Object.values(draft).reduce((sum, v) => sum + (Number.isFinite(v) ? v : 0), 0);
+  const { draft, spent, withinBudget, dirty, error } = allocation;
   const budget = aptitudes.data.budget;
-  const withinBudget = spent <= budget;
-  const dirty = JSON.stringify(draft) !== JSON.stringify(aptitudes.data.shares);
-
-  async function onSave() {
-    setError(null);
-    try {
-      await save.mutateAsync({ playerId, shares: draft! });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
-    }
-  }
 
   return (
     <Page
@@ -66,7 +56,7 @@ export function AptitudesPage() {
                 min={0}
                 value={value}
                 data-testid={`aptitude-input-${id}`}
-                onChange={(next) => setDraft((d) => ({ ...(d ?? {}), [id]: Math.max(0, Math.trunc(next)) }))}
+                onChange={(next) => allocation.setValue(id, next)}
               />
             </Field>
           ))}
@@ -74,7 +64,7 @@ export function AptitudesPage() {
       </Panel>
 
       <Button
-        onClick={onSave}
+        onClick={allocation.save}
         disabled={!dirty || !withinBudget || save.isPending}
         title={!withinBudget ? `Over budget by ${spent - budget}` : !dirty ? "No changes to save" : undefined}
         data-testid="aptitudes-save"

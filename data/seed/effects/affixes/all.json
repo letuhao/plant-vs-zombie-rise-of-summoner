@@ -10,21 +10,27 @@
       "name": "Frostbite Venom",
       "class": "suffix",
       "refs": [
-        { "atom": "atom.fx-cold-on-hit.t1", "seq": 0 },
-        { "atom": "atom.fx-poison-on-hit.t1", "seq": 1 }
+        {
+          "atom": "atom.fx-cold-on-hit.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-poison-on-hit.t1",
+          "seq": 1
+        }
       ],
       "_provenance": {
         "pipeline": "affix-authoring",
         "model": "google/gemma-4-26b-a4b-qat",
         "promptVersion": "affix-authoring/1",
-        "generatedUtc": "2026-09-04T18:39:25+00:00",
+        "generatedUtc": "2026-09-06T02:52:48+00:00",
         "voteConfidence": {
           "name": "split",
           "refs": "split"
         },
         "voteMinority": {
-          "name": "Butter-Spreading Bloom",
-          "refs": "atom.fx-butter-on-hit.t1,atom.fx-spawn-butter.t1,atom.fx-spawn-plant-bullet.a.t1"
+          "name": "Frostbite Sentinel",
+          "refs": "atom.fx-freeze-on-hit.t1,atom.fx-shield-grant.a.t1"
         }
       }
     },
@@ -33,8 +39,14 @@
       "name": "Botanical Spore Burst",
       "class": "suffix",
       "refs": [
-        { "atom": "atom.fx-poison-on-hit.t1", "seq": 0 },
-        { "atom": "atom.fx-spawn-plant-bullet.a.t1", "seq": 1 }
+        {
+          "atom": "atom.fx-poison-on-hit.t1",
+          "seq": 0
+        },
+        {
+          "atom": "atom.fx-spawn-plant-bullet.a.t1",
+          "seq": 1
+        }
       ],
       "_provenance": {
         "pipeline": "affix-authoring",

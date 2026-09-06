@@ -20,27 +20,40 @@ export function LensPicker({ active, onSelect, isLensFourLoading = false }: Lens
   useLensHotkeys(onSelect);
 
   return (
-    <div role="radiogroup" aria-label="Map lens" data-testid="lens-picker">
-      <p data-testid="lens-picker-readout">
+    <div
+      role="radiogroup"
+      aria-label="Map lens"
+      data-testid="lens-picker"
+      className="flex max-w-[min(28rem,calc(100vw-8rem))] flex-col gap-1 rounded border border-border bg-panel/95 p-2 text-sm text-ink shadow-sm"
+    >
+      <p data-testid="lens-picker-readout" className="text-xs text-muted">
         {LENSES.findIndex((l) => l.id === active) + 1} / {LENSES.length} · {lensLabel(active)}
       </p>
-      {LENSES.map((lens) => {
-        const pending = lens.id === "supply" && isLensFourLoading;
-        return (
-          <button
-            key={lens.id}
-            type="button"
-            role="radio"
-            aria-checked={active === lens.id}
-            aria-busy={pending}
-            data-testid={`lens-picker-${lens.id}`}
-            onClick={() => onSelect(lens.id)}
-          >
-            {lens.label}
-            {pending ? <span data-testid="lens-picker-supply-pending">(loading)</span> : null}
-          </button>
-        );
-      })}
+      <div className="flex flex-wrap gap-1">
+        {LENSES.map((lens) => {
+          const pending = lens.id === "supply" && isLensFourLoading;
+          const selected = active === lens.id;
+          return (
+            <button
+              key={lens.id}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              aria-busy={pending}
+              data-testid={`lens-picker-${lens.id}`}
+              className={
+                selected
+                  ? "rounded border border-sun bg-soil-raised px-2 py-0.5 text-ink"
+                  : "rounded border border-border bg-transparent px-2 py-0.5 text-muted hover:text-ink"
+              }
+              onClick={() => onSelect(lens.id)}
+            >
+              {lens.label}
+              {pending ? <span data-testid="lens-picker-supply-pending">(loading)</span> : null}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

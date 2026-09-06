@@ -15,6 +15,15 @@ namespace FusionRpg.Core.Effects.Atoms;
 /// Core reads no store, so whoever evaluates the tree loads the quantities from `rpg_item_stock`
 /// and hands them in, the same way `IAffordabilityCheck`/`IStanceCheck` are supplied elsewhere in
 /// this codebase.</para>
+///
+/// <para><b>Four more approved 2026-09-06</b> (`event-deck` D3.7, spec-event-deck.md §6: "Real gaps —
+/// four leaves, each a reviewed code change"): <see cref="BandIs"/>, <see cref="HaulAtLeast"/>,
+/// <see cref="RoomKindIs"/>, <see cref="PartyDownedCount"/> — all plain `Value` leaves, no `Text`/
+/// `Values` arg. Each reads a raw, caller-resolved ordinal/count exactly the way `TypeIdIs`/`RowIs`
+/// already do: this generic module never imports a domain registry (`RoomKindCatalog`, the dangerBand
+/// ladder) to validate what a value MEANS — only that it is structurally sane (non-negative) —
+/// resolving a named value (`"shallow"`, a room kind id) to its ordinal is the IMPORTER's job, same as
+/// `TypeIdIs`'s own game-type ordinal today.</para>
 /// </summary>
 public enum LeafId
 {
@@ -30,6 +39,10 @@ public enum LeafId
     ColIs,
     IsMindControlled,
     HoldsStock,
+    BandIs,
+    HaulAtLeast,
+    RoomKindIs,
+    PartyDownedCount,
 }
 
 /// <summary>

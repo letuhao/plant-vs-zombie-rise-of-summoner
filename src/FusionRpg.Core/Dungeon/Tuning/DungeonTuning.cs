@@ -151,6 +151,18 @@ public static class DungeonTuningLoader
         // already configured, so the reverse dependency here would be circular).
         IReadOnlyList<string> Members(string band) => registries.Bands[band].Members;
 
+        // delve-attrition (spec-delve-attrition.md's own Tunables table): `attrition.persistAcrossDelves[]`
+        // and `rest.healsPools[]` are both documented as "resource ids subset of ResourceIds,
+        // loader-checked" -- checked here, at the one place every other closed-set id in this file is
+        // checked, rather than left to whichever consumer reads the list first.
+        void RequireResourceIdSubset(IReadOnlyList<string> ids, string path)
+        {
+            foreach (var id in ids)
+                if (!FusionRpg.Core.Stats.Derived.DerivedStatChannels.ResourceIds.Contains(id, StringComparer.Ordinal))
+                    throw new DungeonTuningRejection(
+                        $"{File}: {path} names '{id}', which is not one of the six resource ids.");
+        }
+
         var raidModesEl = Obj(root, "raid", "$");
         var raidModesObj = Obj(raidModesEl, "modes", "raid");
         var raidModes = new Dictionary<string, RaidModeTuning>(StringComparer.Ordinal);
@@ -248,9 +260,11 @@ public static class DungeonTuningLoader
         var revive = Obj(attrition, "revive", "attrition");
         var attritionReviveHpMilli = Long(revive, "hpMilli", "attrition.revive");
         var attritionPersistAcrossDelves = StringArray(attrition, "persistAcrossDelves", "attrition");
+        RequireResourceIdSubset(attritionPersistAcrossDelves, "attrition.persistAcrossDelves");
 
         var rest = Obj(root, "rest", "$");
         var restHealsPools = StringArray(rest, "healsPools", "rest");
+        RequireResourceIdSubset(restHealsPools, "rest.healsPools");
         var restActivations = Int(rest, "activations", "rest");
         var restAmbushMilli = Long(rest, "ambushMilli", "rest");
 

@@ -34,6 +34,8 @@ public sealed class InteractiveIntentSource : IIntentSource
     readonly Func<string, ActionEnvelope?> _envelopeOf;
     readonly DecisionTrace _trace;
     readonly bool _replaying;
+    readonly bool _replayThenLive;
+    bool _wentLive;
 
     /// <summary>Live: ask the player, fall back to the default action when the window elapses.</summary>
     public InteractiveIntentSource(
@@ -41,12 +43,9 @@ public sealed class InteractiveIntentSource : IIntentSource
         Func<string, long, PlayerChoice> ask,
         Func<string, ActionEnvelope?> envelopeOf,
         DecisionTrace trace)
+        : this(fallback, ask ?? throw new ArgumentNullException(nameof(ask)), envelopeOf, trace,
+            replaying: false, replayThenLive: false)
     {
-        _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
-        _ask = ask ?? throw new ArgumentNullException(nameof(ask));
-        _envelopeOf = envelopeOf ?? throw new ArgumentNullException(nameof(envelopeOf));
-        _trace = trace ?? throw new ArgumentNullException(nameof(trace));
-        _replaying = false;
     }
 
     /// <summary>Replay: read the trace, never the player. The battle is reproduced, not replayed live.</summary>
@@ -54,17 +53,63 @@ public sealed class InteractiveIntentSource : IIntentSource
         IIntentSource fallback,
         Func<string, ActionEnvelope?> envelopeOf,
         DecisionTrace recorded)
+        : this(fallback, null, envelopeOf, recorded, replaying: true, replayThenLive: false)
+    {
+    }
+
+    InteractiveIntentSource(
+        IIntentSource fallback,
+        Func<string, long, PlayerChoice>? ask,
+        Func<string, ActionEnvelope?> envelopeOf,
+        DecisionTrace trace,
+        bool replaying,
+        bool replayThenLive)
     {
         _fallback = fallback ?? throw new ArgumentNullException(nameof(fallback));
+        _ask = ask;
         _envelopeOf = envelopeOf ?? throw new ArgumentNullException(nameof(envelopeOf));
-        _trace = recorded ?? throw new ArgumentNullException(nameof(recorded));
-        _ask = null;
-        _replaying = true;
+        _trace = trace ?? throw new ArgumentNullException(nameof(trace));
+        _replaying = replaying;
+        _replayThenLive = replayThenLive;
     }
+
+    /// <summary>
+    /// D2.16 (spec-delve-battle-profile.md §4b) — resume after a freeze: replay <paramref
+    /// name="recorded"/>'s prefix byte for byte, then go live once it is exhausted. <paramref
+    /// name="recorded"/> is both the replay source and the trace new live decisions get appended to,
+    /// so what the caller reads back after this session ends (or freezes again) is the complete
+    /// history, not just the newly-recorded suffix.
+    ///
+    /// <para><b>Why a factory and not a third <c>(fallback, ask, envelopeOf, trace)</c> constructor.</b>
+    /// That signature is byte-for-byte identical to the live constructor's overload — the only
+    /// difference is whether <c>trace</c> arrives pre-populated, which the type system cannot see. A
+    /// named factory says so instead of colliding with it.</para>
+    ///
+    /// <para><b><c>_wentLive</c> is a sticky latch, never a re-check of
+    /// <see cref="DecisionTrace.ReplayExhausted"/>.</b> <see cref="DecisionTrace.Record"/> appends to
+    /// the very list <c>ReplayExhausted</c> counts against, so the instant a live decision is recorded,
+    /// <c>_replayCursor &gt;= _decisions.Count</c> would go false again — a naive re-check on the next
+    /// call would try to "replay" the decision that was just live-recorded instead of asking anew.
+    /// Latching the moment exhaustion is first observed means <c>ReplayExhausted</c> is read at most
+    /// once per session.</para>
+    /// </summary>
+    public static InteractiveIntentSource ResumeReplayThenLive(
+        IIntentSource fallback,
+        Func<string, long, PlayerChoice> ask,
+        Func<string, ActionEnvelope?> envelopeOf,
+        DecisionTrace recorded)
+        => new(fallback, ask ?? throw new ArgumentNullException(nameof(ask)), envelopeOf, recorded,
+            replaying: false, replayThenLive: true);
 
     public ActionIntent TryDeclare(string actorKey, long nowTick)
     {
         if (_replaying) return Replay(actorKey);
+
+        if (_replayThenLive && !_wentLive)
+        {
+            if (!_trace.ReplayExhausted) return Replay(actorKey);
+            _wentLive = true;
+        }
 
         var choice = _ask!(actorKey, nowTick);
         if (!choice.IsNone && _envelopeOf(choice.ActionId) is { } envelope)

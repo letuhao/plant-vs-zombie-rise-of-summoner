@@ -716,6 +716,7 @@ Chaos level/realm curves are **reference for future `UpdatePower`** — not the 
 | `rpg.progression` | 100 | no-op | Sets **`progression.power = Θ`** via `IPowerIndexProvider` (0 if un-hydrated) and **`progression.realm = 1.0`** permanently (§3B) |
 | `pvz.stats` | 250 | existing plugin | rows on catalog channels when present |
 | `foundation.effect` | 350 | session bag | future timed derived |
+| `status.timed` | 400 | session bag | timed derived from live statuses |
 | `cheat.*` | 900+ | existing | debug derived optional |
 
 Multi-progression: **`IProgressionSubsystem`** hook reserved; v1 registers **RpgProgression only**.

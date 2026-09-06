@@ -4,9 +4,11 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Stats.Aptitudes;
 
 /// <summary>`species-build` T2.1 (module 5, `demon-type-allocation`) — the pure baseline math.
-/// Uses the real shipped `aptitudes.v5.json` (same convention as `SpeciesCatalogDiffTests`' own
+/// Uses the real shipped `aptitudes.v6.json` (same convention as `SpeciesCatalogDiffTests`' own
 /// `RepoRoot()` helper) rather than constructing the whole `AptitudeTuning` record inline — only
-/// `PointEconomy.AptitudePointsPerThetaMilliByScope[DemonType]` is actually read by this code path.</summary>
+/// `PointEconomy.AptitudePointsPerThetaMilliByScope[DemonType]` is actually read by this code path.
+/// v5 -> v6 (passive-tree C6, 2026-09-06) tracks RpgHost.cs/Program.cs so "the real shipped tuning"
+/// stays true.</summary>
 public class SpeciesAllocationTests
 {
     static string RepoRoot()
@@ -21,7 +23,7 @@ public class SpeciesAllocationTests
     }
 
     static readonly AptitudeTuning RealTuning = AptitudeTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v5.json")));
+        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v6.json")));
 
     static long DemonTypeRate => RealTuning.PointEconomy.AptitudePointsPerThetaMilliByScope[AllocationScope.DemonType];
 

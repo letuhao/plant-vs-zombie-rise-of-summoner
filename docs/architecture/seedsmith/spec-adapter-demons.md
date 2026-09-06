@@ -190,6 +190,15 @@ one does, §1's claim is false and that is the finding.
 full account and why the other two options (a demons-local dict, or abusing `registries()`) were
 rejected.
 
+**Amended 2026-09-06, same shape, second field:** `adapters/base.py` also gained
+`KindSpec.dedup_fields: frozenset[str] = frozenset()` — additive, defaulted, untouched by every
+existing kind — so `SemanticDedup` (`spec-analytics.md` §6.2) can run its near-duplicate pipeline
+over a kind's own free-text field, not just `name`. `commander-effect`'s `KindSpec` sets
+`dedup_fields=frozenset({"doctrine"})`, closing a gap found auditing seedsmith's corpus-wide
+coverage discipline: the sealed spec had no check at all on `doctrine`, and the real 84-entry corpus
+already had two near-duplicate pairs. Full account: `spec-commander-effect.md` §6/§8,
+`spec-analytics.md` §6.2.
+
 ---
 
 ## 5. Testing strategy

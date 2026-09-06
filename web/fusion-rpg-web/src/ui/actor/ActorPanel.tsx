@@ -199,7 +199,7 @@ export function ActorPanel({
         {tab === "progression" ? <ProgressionTab data={data} /> : null}
         {tab === "derived-stats" ? <DerivedStatsTab data={data} /> : null}
         {tab === "actions" ? <ActionsTab data={data} /> : null}
-        {tab === "passives" ? <PassivesTab /> : null}
+        {tab === "passives" ? <PassivesTab elementTyping={data.elementTyping} /> : null}
         {tab === "gear" ? <GearTab data={data} /> : null}
       </div>
     </PanelShell>

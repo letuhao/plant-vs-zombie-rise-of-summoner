@@ -23,6 +23,10 @@ const StoragePage = lazy(() => import("@/features/storage/StoragePage").then((m)
 // went with it). `#/world-stage` keeps working too, as an alias to the same lazy chunk, so nothing
 // that already links there needs to change.
 const WorldStage = lazy(() => import("@/stages/world/WorldStage").then((m) => ({ default: m.WorldStage })));
+// base-defense's fifth-stage amendment (decisions.md, approved 2026-09-04). Lazy like every other
+// non-entry stage (spec-siege-stage.md's own "lazy-load the stage" boundary) — it will carry the
+// same Phaser weight as Lawn once `board-render` is wired in (a later `stages/siege/` task).
+const SiegeStage = lazy(() => import("@/stages/siege/SiegeStage").then((m) => ({ default: m.SiegeStage })));
 
 /** T12: these nine now live in the developer tree, reached via `` ` `` or `?dev=<id>` — never a route of their own. */
 const DEV_ROUTE_REDIRECTS: Record<string, string> = {
@@ -103,6 +107,14 @@ export function AppRoutes() {
           element={
             <Suspense fallback={<ChunkFallback testId="chunk-fallback-world-stage" />}>
               <WorldStage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="siege/:siegeId"
+          element={
+            <Suspense fallback={<ChunkFallback testId="chunk-fallback-siege" />}>
+              <SiegeStage />
             </Suspense>
           }
         />

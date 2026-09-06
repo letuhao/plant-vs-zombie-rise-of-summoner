@@ -94,6 +94,17 @@ class Vocabulary:
     def stat_count(self) -> int:
         return len(self.stat)
 
+    @property
+    def all_picks(self) -> "tuple[FamilyPick, ...]":
+        """Both buckets, in load order.
+
+        ⚠ The capability/stat split is **ssot-sets §3.2's** cut — one capability atom at a set's
+        lowest threshold, stats above. A charm has no such structure, so a charm resolves a family
+        id against this, never against `stat` alone; `charmgen.rules.charm_pool` then narrows it to
+        what §3.6 and §3.4 leave legal.
+        """
+        return self.capability + self.stat
+
     def capability_for_roles(self, roles: "list[str] | tuple[str, ...]") -> "tuple[FamilyPick, ...]":
         """The capability picks legal on at least one of `roles`.
 

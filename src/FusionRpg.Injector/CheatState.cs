@@ -56,7 +56,12 @@ public static class CheatState
         // D6's "binds accepted, nothing applied" state.
         // Fully qualified on purpose: a bare `Stats.` here is ambiguous with this class's own
         // `Stats` StatSystem property.
-        boundDerivedAtoms: FusionRpg.Injector.Stats.GrantedDerivedAtoms.For);
+        boundDerivedAtoms: FusionRpg.Injector.Stats.GrantedDerivedAtoms.For,
+        // mechanism-wiring G1's injector half (spec-mechanism-wiring.md §4.1): registers the fourth
+        // IActorStatSubsystem so a status's own `stat.<combat.*|status.*>.<op>` writes reach the
+        // composed value instead of landing in the primary bag no subsystem reads. Additive next to
+        // boundDerivedAtoms above — same opt-in shape, same fully-qualified-on-purpose reason.
+        statusDerivedMods: FusionRpg.Injector.Stats.StatusDerivedMods.For);
 
     /// <summary>aura-skill T5 (W1): cached commander-scope allocation — <see cref="ActorHub"/>'s
     /// hot-path <c>aptitudeAllocation</c> delegate reads only this cache, never the server

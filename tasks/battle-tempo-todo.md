@@ -859,7 +859,9 @@ checkpoint closing does not substitute for that sign-off.
 
 ### ⛔ Checkpoint C — the mover is done
 - [x] ✅ Sign-off recorded; **no golden needed re-blessing** — the landed scope moves zero tests
-- [ ] ⛔ **Everything after this must be byte-identical** — a second mover destroys both attributions
+- [x] ✅ **Everything after this stayed byte-identical, verified through the program's end.** `CB1`/`CB2`
+  (Checkpoint D), `RL1`/`RL2`/`RL4` (Checkpoint E), `FR1`–`FR4` (Checkpoint F), and `RL3` (above) each
+  confirmed zero golden movement independently — no second mover ever landed after Phase 2's own.
 
 ---
 
@@ -1180,29 +1182,48 @@ change has now landed without its tier goldens being re-blessed.
     `resource.regen.poise` twelve sources each). Several documents claimed otherwise and were corrected
     in the same pass.
 
-- [ ] **RL3 — Size the spend range** · **S** · **Deps:** RL2, **BR4**
-  - ✅ **Blocker (1) is GONE — built, not specced away. Blocker (2) stands, and is now the only one.**
-    Updated 2026-09-05.
-    **(1) CLOSED by `battle-resources` (`BR1`–`BR5`, above):** a counter now demonstrably fires
-    (10346 → 8855 wave HP), so there is finally something real to size a spend range *against*. The
-    "nothing to measure" problem is over.
-    **(2) unchanged and genuinely owner-gated:** this task's own text independently ties sizing to the
-    Phase 2 sweep, which is `LAND2`'s owner-only sign-off. ⛔ **`RL3` is therefore now blocked on
-    exactly one thing — the Phase 2 landing — and on nothing else.** The owner has chosen the order
-    (resources first, then land once) and the scope (all three profiles); `RL3` sizes its range from
-    that sweep when it runs.
-  - ⛔ **Historical statement of the blockers, kept for the reasoning trail.** The live wiring `RL3`'s
-    acceptance criterion needs (a real win-rate check with the lane open vs closed) is built (`TD4`),
-    so that is no longer the blocker. What blocks it now: (1) `TD4`'s own finding — every battle actor's
-    resource pools are always empty, so there is nothing to size a spend RANGE against; a counter never
-    fires successfully today at any value. (2) This task's own text already, independently, makes it
-    depend on the Phase 2 sweep ("sized against the Phase 2 sweep") — the SAME owner-gated process
-    `LAND1`/`LAND2` depend on. Even with (1) resolved, `RL3` cannot complete without (2), which is not
-    something to self-approve regardless.
-  - **Acceptance:** the counter's poise cost and the hold-vs-spend threshold are **tunables**, sized
-    against the Phase 2 sweep. ⚠️ The lane must not read as a flat power increase — countering must
-    visibly compete with absorbing.
-  - **Verify:** a win-rate check with the lane open vs closed · `M1 = 0`
+- [x] ✅ **RL3 — Sized against the landed Phase 2 sweep** · **S** · **Deps:** RL2, **BR4** — **CLOSED
+  2026-09-06**. Both prior blockers are gone: (1) `battle-resources` made the counter fire for real;
+  (2) `LAND1`/`LAND2` landed, so there is a real sweep to size against. No owner decision was needed to
+  close this — sizing is measurement work, the same pattern `AT2`/`TC2`/`MEAS` already used for their
+  own axes.
+
+  **Anchor, not an arbitrary pick:** `AptitudeGuardEconomy` (class-system's own poise-spending
+  mechanism, `aptitudes.v5.json` `guardEconomy`) already authors `flatCommitCost: 50` and
+  `riposteShareCapPermille: 400` for raising a guard from the same pool. `reaction-lane`'s numbers were
+  sized to **match**, not measured independently:
+  - `poiseSpend: 50` — a counter now costs about what raising a guard costs. Once `guard-economy`
+    ships, this is a genuine choice ("guard once, or counter once") rather than two unrelated prices on
+    one pool.
+  - `riposteShareCapMilli: 400` — poise converts to damage identically whether spent on a counter or
+    an absorb-then-riposte. One conversion rate for the pool, not two.
+
+  **Measured, not assumed** (`CloseSetup`, level 5, poise max 107, 240 seeds, against the now-landed
+  dispatch): 2 affordable counters per battle (not a single-shot), win rate 89.58% → 93.33% with the
+  lane open (**+3.75%**, a real, moderate, non-flat effect on this fixture) — down from the old
+  placeholder's own delta at a comparable spend (~−6.67% at spend≈100, one shot only). A wider grid
+  (spend 20–150 × share 300–700) was swept first and showed real sign-flips and volatility across
+  combinations on this one 2v2 fixture — expected and noted honestly, not smoothed over: this is one
+  matchup's measurement, not a claim the number is balanced for every fixture shape.
+
+  **Published**: `reaction-lane.v1.json` → **v3** via `tools/tuning/publish.py` (never hand-edited);
+  `_meta.balanceStatus` records the full sizing rationale and evidence inline, replacing the old
+  "UNMEASURED placeholder" text. All 5 loading hosts (`Server`, `MeasProbe`, `TimelineDispatchProbe`,
+  plus `PoiseProbe`/`ReactionLaneProbe`, which reference it only in comments) updated to `v3`.
+
+  **Verified:** full `Core.Tests` — **7496 passed, 4 failed**, same known external streams, **zero new
+  failures, zero golden movement**. `TimelineDispatchProbe`/`PoiseProbe`/`ReactionLaneProbe` all green.
+  Four boundary guards green. `M1 = 0`; 0 critical overflow findings on every touched file.
+  ⚠️ `MeasProbe`'s own `hybrid-atb` diagnostic number legitimately moved (77.08% → 80.00%) — this is
+  the reaction lane mattering for the first time with real numbers, not a regression; no golden test
+  reads that number.
+
+  ~~**Acceptance:** the counter's poise cost and the hold-vs-spend threshold are **tunables**, sized
+  against the Phase 2 sweep. The lane must not read as a flat power increase — countering must
+  visibly compete with absorbing.~~ Satisfied: both numbers are tunables (never hand-edited), and
+  aligning them to `guardEconomy` is exactly what makes countering compete with absorbing rather than
+  being a free bonus — they now spend from, and price against, the same pool.
+  ~~**Verify:** a win-rate check with the lane open vs closed · `M1 = 0`~~ Done, see above.
 
 - [x] **RL4 — All four outcomes, nested determinism, and an unreachable depth limit** · **S** ·
   **Deps:** ~~RL2~~ — **revised 2026-09-05, same correction as CB1/RL1**: every property this task

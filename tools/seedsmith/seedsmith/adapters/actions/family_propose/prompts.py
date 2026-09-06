@@ -255,7 +255,8 @@ def _rung_band_label(rung_band: Any) -> str:
 
 def build_context(brief: Mapping[str, Any], *, sample_index: int,
                   pairing_table: "Mapping[str, Sequence[str]] | None" = None,
-                  family_glossary: "Mapping[str, str] | None" = None) -> "dict[str, Any]":
+                  family_glossary: "Mapping[str, str] | None" = None,
+                  usage_weights: "Mapping[str, int] | None" = None) -> "dict[str, Any]":
     """Read-only inputs `build_brief` renders from and the validators check against -- exactly as
     `general_propose/prompts.py:220-269` does, so a validator always reads the SAME object the
     brief was rendered from. Raises per `_require_family_anchor`/`_require_slot` (acceptance #5)
@@ -268,7 +269,11 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
 
     `family_glossary` (SMOKE BATCH criterion-2 fix, 2026-09-05): optional `id -> one-line gloss`
     mapping, identical contract to `general_propose/prompts.py:222-...`'s own parameter of the same
-    name -- see that docstring for the full real-call evidence."""
+    name -- see that docstring for the full real-call evidence.
+
+    `usage_weights` (roster-balance FC3, 2026-09-06): optional `id -> per-mille weight` mapping,
+    identical contract to `general_propose/prompts.py`'s own parameter of the same name -- omitted
+    or empty, output is byte-identical to before this parameter existed."""
     anchor = _require_family_anchor(brief)
     slot = _require_slot(brief)
 
@@ -306,6 +311,7 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
         "allowedAtomFamilies": permuted_allowed,
         "forbiddenAtomFamilies": forbidden,
         "atomFamilyGlossary": dict(family_glossary) if family_glossary else {},
+        "atomFamilyUsageWeights": dict(usage_weights) if usage_weights else {},
         "familyAntiMotifs": family_anti_motifs,
         "motifsExpressedEnum": motifs_enum,
         "pairingRole": role,
@@ -362,11 +368,15 @@ def build_brief(context: Mapping[str, Any]) -> str:
         "",
     ]
     glossary = context.get("atomFamilyGlossary") or {}
-    if glossary:
+    usage_weights = context.get("atomFamilyUsageWeights") or {}
+    if glossary or usage_weights:
         # SMOKE BATCH criterion-2 fix, 2026-09-05 -- identical technique to
         # `general_propose/prompts.py`'s own `_render_eligible_family_lines`, kept local per this
         # program's own self-containment discipline (see `derive.py`'s `canonical_family_key`
         # docstring for the identical reasoning applied elsewhere in this pipeline family).
+        # `usage_weights` (roster-balance FC3, 2026-09-06): same local-inlining discipline, the
+        # cue never affects `allowedAtomFamilies` itself -- only how a member is described.
+        from ..usage_direction.weights import render_cue
         lines.append(
             "Eligible atom families -- choose one or more from this list, in this order. Each is "
             "shown as `id: name [tag] -- what it does`, given only so you can judge which ids "
@@ -375,7 +385,12 @@ def build_brief(context: Mapping[str, Any]) -> str:
         )
         for family_id in context["allowedAtomFamilies"]:
             gloss = glossary.get(family_id)
-            lines.append(f"  - {family_id}: {gloss}" if gloss else f"  - {family_id}")
+            line = f"  - {family_id}: {gloss}" if gloss else f"  - {family_id}"
+            if usage_weights:
+                cue = render_cue(family_id, usage_weights)
+                if cue:
+                    line += f" ({cue})"
+            lines.append(line)
     else:
         lines.append(
             "Eligible atom families -- choose one or more from this list, in this order: "

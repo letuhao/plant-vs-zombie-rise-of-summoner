@@ -5,7 +5,11 @@
 [passive-tree-ideal.md](../docs/architecture/passive-tree-ideal.md) — 45 owner decisions.
 Task list: [passive-tree-todo.md](passive-tree-todo.md).
 
-**Status:** plan, rewritten 2026-09-05. Awaiting owner review. No build authorized.
+**Status:** plan, rewritten 2026-09-05. **Completeness-audited 2026-09-06** against all twelve module
+specs (four parallel audit passes, one per dependency wave) — every finding either closed with a task,
+folded into an existing task's acceptance criteria, or tracked in the non-blocking-asks table with a
+named default. Zero open gaps against the specs as they stand today. Awaiting owner review before any
+build starts — no phase is authorized yet.
 
 **Why it was rewritten.** Three coverage audits read the twelve module specs against the previous
 27-task plan and found **149 requirements with no delivering task** and **16 acceptance criteria that
@@ -212,12 +216,17 @@ Tasks J1–J10. **Checkpoint J: full corpus reviewed and ready to ship — the o
 
 ## Open questions
 
-None block phase A, and none blocks any task. Ten are tracked in the todo's non-blocking-asks table,
-each with a named default and a resolver — the 17th atom kind, three scope point rates, `legitimateSkew`
-rows, player-facing naming, the L2b resist path, `aura-skill` T13's scope, the transfer verdict's
-opponent, D15's rule after S4, respec's soul counter, and the `DemonsPage` volume defect the Codex route
-hangs off. Two need the owner specifically and change shipped behaviour: the L2b resist question and the
-transfer verdict.
+None block phase A, and none blocks any task. **Twelve** are tracked in the todo's non-blocking-asks
+table (recount 2026-09-06, after a completeness audit closed one and added three), each with a named
+default and a resolver — the 17th atom kind, three scope point rates, `legitimateSkew` rows,
+player-facing naming, `aura-skill` T13's scope, the transfer verdict's opponent, D15's rule after S4,
+respec's soul counter, the `DemonsPage` volume defect the Codex route hangs off, what "the tier below
+is unlocked" means for the skill-wallet calibration, auto-drafting a species starter plan, and
+shareable build codes as a marketed feature. One needs the owner specifically and changes shipped
+behaviour: the transfer verdict.
+
+**Closed since the table was first written:** the L2b resist path question — the owner answered
+*contribute everything*, shipped as task E1b. Removed from the table, not left stale.
 
 One item is neither a task nor an ask because nobody owns it: **A10b's prerequisite** — a Battle status →
 `BattleDerivedModifierLedger` producer that no module's modified-files table contains. Recorded at the

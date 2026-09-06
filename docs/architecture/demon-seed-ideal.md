@@ -1212,3 +1212,250 @@ the rarity work already done is directly reusable rather than parallel.
 No spec. No plan. No schema. No code. **§7 closes the one honest gap this document previously
 carried**; the aspect *decomposition* is settled, but aspect generation remains out of scope and
 blocked on the two unbuilt programs §5 Q9 names.
+
+---
+
+## 9. Fusion trait/action inheritance + soul-cost choice, and why species effects stop rolling per player (added 2026-09-06)
+
+**Owner's own framing:** *"the fusion should be unique that allow user sacrifice they strong demon to
+make stronger demon like get rare trait/specific action from parent or special bonus from roll but
+they cannot get everything, only pick some of them with the cost and some other will be random, so
+this is roll with fixed version and cost soul, other stats will random."* Inspired explicitly by SMT's
+fusion skill inheritance and PoE/Last Epoch style crafting. A second, connected owner decision landed
+the same session: **demon species base stats AND base effects/traits must be identical for every
+player** (a Pokémon-species-compendium model), with individual variance moved to wherever a specific
+summon/gacha/capture/fusion result can be special — this section is that "wherever."
+
+### 9.0 Principles restated (Step 0, this repo's own discipline)
+
+Every mechanism below is server-side RPG-layer data (`FusionRpg.Core`/`FusionRpg.Data`) — souls, traits,
+fusion recipes, rolls. None of it needs PvZ/Unity to represent anything; the lawn never has to "know"
+what a demon inherited. **Read before propose** governs everything that follows: every claim below is
+checked against the running code or a primary spec, not recalled from summary, with `file:line` for
+what already exists.
+
+### 9.1 Built — a real fusion trait roll already ships, further along than either the owner or this
+session's own earlier read assumed
+
+`FusionRoller.Roll` (`src/FusionRpg.Core/Demons/Fusion/FusionRoller.cs:18-50`) is live, tested, and
+wired into the real `/api/fusion/execute` path (`RpgStore.Fusion.cs:217`) **today**:
+
+1. The player supplies exactly **one** `pickedTraitId` (`RpgStore.Fusion.cs:21`, `FusionRequest`
+   record) — it must be a real `DemonTraitCatalog` id and must appear on one of the two sacrificed
+   (input) demons' own trait lists (`RpgStore.Fusion.cs:204-206`, refuses `trait.missing`/not-on-inputs
+   otherwise). **This is player agency, already shipped** — the class doc's own words: *"Pick-one is
+   player agency."*
+2. The remaining slots — `SlotsFor(resultRarity)`, i.e. `StarPolicy.Tuning.SlotsByRarity[rarity]`,
+   already a real tunable in `data/tuning/fusion.v1.json` (`slotsByRarity`: 1 for Chaff/Sprout/Grafted,
+   2 for Cultivated/Fused/Chimeric/Heirloom, 3 for Firstseed/Sunwoven/Almanac) — are filled **randomly**
+   from the combined remaining input-demon trait pool, via a **named, seeded RNG stream**
+   (`SeededRng.DeriveStream(seed, "fusion:traits")`, already following `definitions.md` §4a's "one
+   stream per layer" law). An exhausted pool yields fewer traits, never padding from elsewhere — the
+   class doc's own words again: *"the rest comes from the combined INPUT pool."*
+3. A separate `"fusion:variant"` stream rolls a rare cosmetic **shiny** variant (odds shared with
+   `SummonRoller.ShinyOneIn` so the two can never drift apart) — this is the existing, adjacent
+   "special bonus from roll" the owner's message also named, already built, orthogonal to trait
+   inheritance and not something this section needs to touch.
+4. A **separate, already-shipped, simpler mechanic** exists for **promotion** (star growth within the
+   same species, not fusion): `FusionRoller.RollPromotionTraits` (`FusionRoller.cs:52-74`) keeps
+   existing traits **in order** and rolls only the NEW slots from the species' own `TraitPool` (not the
+   fusion inputs) — *"the demon grows into its kind, not its fuel."* No player choice, no soul cost,
+   today. §9.6 below asks whether that should change too, rather than assuming it should.
+
+**Net effect: roughly 80% of "the mechanism" the owner asked for already exists and is already tested.**
+What's missing is narrower than "design a new feature" — see §9.2-§9.4.
+
+### 9.2 The one real reason this mechanism does nothing today — a wiring gap, not a design gap
+
+`combinedInputTraits` and every sacrificed demon's own `TraitIds` are **always empty**, for every one
+of the 829 real species, unconditionally — `RpgStore.Species.cs` (`BuildDemonSpeciesSnapshot()`,
+~line 246) hardcodes `TraitPool = Array.Empty<string>()`, never `s.TraitPool`, confirmed by a direct
+DB-edit-and-remint test this session (editing `trait_pool_json` had no effect — the hardcode never
+reads the column at all). This is already documented as a deliberate, deferred 2026-09-02
+`catalog-runtime` decision (`SpeciesCatalogDiffTests` already caught and reverted one attempt to wire
+the anchor's own OPEN flavor-text `traits` field directly into this CLOSED gameplay vocabulary — the
+two are genuinely different vocabularies sharing one field name, not the same data under two names).
+
+**Consequence: `FusionRoller.Roll` cannot select or roll a single trait for any real species today**
+— not because the mechanism is unbuilt, but because every input to it is `[]`. Assigning real
+`DemonTraitCatalog` ids to all 829 species (§9.5) is a **prerequisite that activates already-shipped
+code**, not new plumbing.
+
+**One real, small request-shape change is also needed, not a redesign:** `FusionRequest.PickedTraitId`
+(`RpgStore.Fusion.cs:21`) is a single `string?`. Supporting more than one guaranteed pick (§9.3) needs
+this to become a list (`PickedTraitIds: IReadOnlyList<string>`), with `FusionRoller.Roll`'s own
+pick-one branch generalised to pick-N-then-random-rest — mechanical, bounded, the same shape the
+method already has.
+
+### 9.3 Real gap 1 — soul-gated, tunable pick count (the owner's actual new ask)
+
+Nothing charges souls for a trait pick today, and the pick count is hardcoded at exactly one. The
+owner's ask — "pick some with a cost, cost soul, other stats random" — needs:
+
+- **A tunable extra-pick count**, capped by `slotsByRarity[resultRarity] - 1` (cannot guarantee more
+  picks than the result has slots for) — the same shape `slotsByRarity` already has, extended, not
+  replaced.
+- **A soul cost per extra pick**, shaped like the two costs `fusion.v1.json` already carries side by
+  side — `recipeCost` (150→1000 souls, scaling with output rarity) and `promotionCostByRarity`
+  (150→1000 souls, same shape) — so a new `inheritCostByRarity` (or per-pick cost scaled by the
+  **picked trait's own rarity/source**, an open question, §9.6) slots in as a third row of the same
+  established table, not a new mechanism.
+- **The spend itself** is `TrySpendSouls(playerId, amount, reason, correlationId)` — already the one
+  real primitive (`spec-soul-economy.md`), already idempotent via `(playerId, correlationId)` replay,
+  already required to run in the SAME transaction as the fusion's own writes
+  (`spec-soul-economy.md`'s own rule for "feature flows that pair a spend with further writes"). **A
+  new spend sink is `spec-soul-economy.md`'s own explicit "Ask first" boundary** — this section is
+  that ask, not a decision made here.
+
+### 9.4 Real gap 2 — is "action" inheritance the same mechanism as trait inheritance, or a second one?
+
+The owner's message names two inheritable categories: "rare trait" (§9.1-§9.3 above, already
+mechanism-complete) and "**specific action** from parent." No `DemonAction` concept exists on
+`DemonSpeciesDef` today (grepped — absent); the closest real analogue is `species-passive.{speciesId}`
+— the per-species effect **container** T5.3 (`species-effects`) already designs against
+(`docs/architecture/demon-seed/spec-species-effects.md`), built on the SAME closed
+`slots → affixes → atoms → tiers → values` resolution order `definitions.md` §4a already normalises,
+with its own named RNG streams (`affix.slot`, `affix.draw`, `affix.tier`, `atom.value`). **Real, open
+question, not decided here:** does "inherit a specific action" mean the fusion result can pick a
+**specific affix** off a sacrificed parent's own already-rolled `species-passive` instance (the exact
+same shape as picking a trait, just at the affix layer instead of the trait layer, reusing
+`affix.draw`'s own stream family) — or is this asking for something genuinely new (an action distinct
+from an atom-backed affix)? §9.1's mechanism is a strong template either way, but which concrete rows
+it operates over is unresolved.
+
+### 9.5 The connected, binding-principle-level change: species effects stop rolling per player
+
+`docs/DESIGN-GATE.md` §1 (row "Demon species generation") is explicit and **currently binding**:
+*"Species stats are deterministic and shared; only effects roll, per player, at runtime — never assume
+a species table is finished content once generated."* `tasks/seed-to-concrete-plan.md`'s own
+architecture decisions restate it (*"Species stats are deterministic and shared; only effects roll. This
+is what keeps `WaveCatalog`, `DemonRecipeCatalog`, `DemonMaterialCatalog` and `LaneCost` free of player
+context."*), and it is built exactly that way: `SpeciesMaterialiser.Materialise` (T5.5) reproduces a
+**different** roster per `(worldSeed, catalog_revision)` by design — two players' "Peashooter demon"
+base effects differ today, on purpose. **A third program already cites this exact sentence as a
+general principle**, not a demon-only detail: `docs/architecture/passive-tree/spec-tree-catalog.md:50`.
+
+**The owner's ask directly narrows this principle, and does not violate its own stated reason.** The
+reason given — keeping the four listed catalogs "free of player context" — is satisfied *more*
+strongly by a fixed, shared value than a per-player-rolled one (a constant needs no player context to
+read at all). The original "roll per player" choice for species-base effects was a **product/variety**
+decision (every player's collection should feel individually theirs), not a technical necessity — and
+the owner's own counter-argument (a shared community/wiki understanding of "what a Peashooter demon
+does" is real player-facing value that per-player rolling destroys) is a legitimate, competing product
+reason, not a mistake in the original one.
+
+**What actually needs to change, precisely, and what does not:**
+
+| | Before (current binding text) | After (this section's proposal) |
+|---|---|---|
+| Species **stats** | Deterministic, shared | **Unchanged** |
+| Species **base effects** (fixed core + eligible pool, T5.3) | Rolled per `(worldSeed, catalog_revision)` via `SpeciesMaterialiser` | **Fixed, shared** — resolved once at seed time (LLM decides identity, deterministic code resolves magnitude — the same split every other generator in this program already uses), committed like `_fusion-recipes.json` |
+| **Individual-instance variance** (a specific fusion result, capture, or gacha pull) | Does not exist as a concept | **This is where rolling still happens** — §9.1-§9.4 above |
+| `passive-tree/spec-tree-catalog.md`'s own citation of the same principle | Cites the demon rule as precedent | **Out of scope here** — this section narrows the DEMON application only; passive-tree's own model is untouched unless that program separately decides to revisit it |
+
+This is a real, cross-cutting, currently-binding architecture principle being narrowed — exactly
+AGENTS.md's *"architecture changes that lock behavior need `decisions.md` first"* boundary, and exactly
+why this stays an idea-phase document rather than code: the spec phase should record this as its own
+reviewed decision (with the table above as the starting proposal), not silently redefine what "seed →
+concrete → per-player" means wherever it's already cited.
+
+**What this means for already-shipped T5.3/T5.5/T5.6/T5.7 work, named plainly rather than glossed
+over:** `SpeciesMaterialiser.Materialise`'s own reproduce-per-seed guarantee, `RpgStore.PlayerSpecies.cs`'s
+own per-player `player_species` table, and the dev-reforge endpoint's own "re-derive against the
+current catalog" behavior were all built and tested against the CURRENT (per-player-roll) principle —
+none of it is wrong or wasted (the pure roll mechanism, the transactional write, the idempotent
+reforge, the RNG-stream discipline all stay directly reusable), but a spec closing this section needs
+to decide explicitly: does the base-species roll collapse to "roll once, at seed time, with no player
+context at all" (removing the per-player table's own reason to exist for the BASE layer), while the
+SAME materialiser/transaction shape gets reused one layer down for individual-instance variance
+(fusion results, captures) where per-player-and-per-instance rolling is exactly what's wanted? That
+reuse-not-discard framing is this section's own recommendation, not a decision.
+
+### 9.6 Genre research — concrete numbers and formulas, with sources
+
+**SMT fusion skill inheritance** — the precedent the owner named directly:
+
+- *Nocturne*: normal two-demon fusion inherits up to **4** skills; Sacrifice fusion (three demons) up
+  to **5-6**, bounded by the result's own skill-slot count.
+- Across the series generally: *"demons may have from zero to three inheritable spells"* per source
+  demon, and **signature skills cannot be inherited under any circumstances** — a closed exclusion
+  set, the same shape as this repo's own `DemonAcquisition.CaptureOnly` or `AffixValidator`'s closed
+  refusal categories (some things are structurally excluded, not merely unlikely).
+- **The series' own evolution validates the owner's exact ask**: *"many older Megami Tensei titles
+  feature randomized skill inheritance with weighted results... newer Megami Tensei titles give the
+  player more control by allowing them to directly choose which skills are passed on."* Player choice
+  over randomness is the modern, preferred direction in the series this owner is drawing from — not a
+  design risk relative to its own genre.
+- [Skill Inheritance — Megami Tensei Wiki](https://megamitensei.fandom.com/wiki/Skill_Inheritance),
+  [How many skills can a demon inherit? — GameFAQs](https://gamefaqs.gamespot.com/switch/296161-shin-megami-tensei-iii-nocturne-hd-remaster/answers/592032-how-many-skills-can-a-demon-inherit)
+
+**Path of Exile — Harvest crafting** (the "targeted category, random within it" half of the ask):
+
+- A **Reforge** guarantees a modifier of a specific **tag** (a category, e.g. "life" or "attack") —
+  not the exact modifier, not its roll — matching the owner's own "pick some of them" (the category)
+  vs. "other stats will random" (the specific value) split closely.
+- **Add-then-Remove** is the series' own answer to "I want ONE exact thing, deterministically, without
+  the randomness a Reforge still carries" — a two-step combo, not a single "guarantee anything" button.
+  Worth naming as a possible SECOND, more expensive tier above a plain guaranteed pick (§9.6 open
+  question below), not assumed necessary.
+- Crafts themselves are a stored, spendable resource (a cap of 15 at a time) — i.e. even the
+  "deterministic" side of this genre's own crafting is still resource-gated, matching the soul-cost
+  framing already chosen here independently.
+- [Harvest crafting — PoE Wiki](https://pathofexile.fandom.com/wiki/Harvest_crafting),
+  [Harvest Crafting Guide — Maxroll.gg](https://maxroll.gg/poe/crafting/harvest-crafting-guide)
+
+**Last Epoch — Forging Potential, runes, glyphs** (the "limited budget, not a hard action-count" half):
+
+- **Forging Potential** is a per-item budget that depletes by a random amount per craft action (0 up
+  to roughly the full remaining cost) — a resource ceiling on total modification, not a fixed count of
+  actions. A closer analogue to "how many souls you're willing to spend" than to `slotsByRarity`'s own
+  fixed slot count.
+- **Glyph of Order** removes randomness from a specific step (preserves roll range on an upgrade);
+  **Glyph of Chaos** trades a random affix change for a tier upgrade; **Glyph of Despair** can *lock*
+  (seal) a chosen affix outright, moving it out of further risk — i.e. the genre's own precedent for
+  "spend more to convert a probability into a certainty" on ONE specific slot, which is exactly the
+  shape "pick this trait for a soul cost, or leave it to the random pool" already has.
+- **Critical Success** grants a small chance of a fully free extra action — an interesting, optional
+  parallel to `FusionRoller`'s own existing "shiny" bonus-roll, if the owner ever wants inheritance
+  itself to have a rare "free extra pick" chance layered on top of the paid picks (not proposed here,
+  named as a real option for the spec phase).
+- [Crafting — Last Epoch Wiki](https://lastepoch.fandom.com/wiki/Crafting),
+  [Crafting Basics Guide — Maxroll.gg](https://maxroll.gg/last-epoch/resources/beginner-crafting-guide)
+
+**The common shape across all three, and why it fits what's already built here:** a hard or
+resource-gated CEILING on total control (SMT's slot count / Last Epoch's Forging Potential /
+`slotsByRarity` itself), player choice over a CATEGORY or specific target within that ceiling (SMT's
+direct pick / PoE's tag-targeted reforge), a COST for exercising that choice (Last Epoch's FP spend /
+souls here), and RANDOMNESS filling whatever the player didn't or couldn't afford to control
+(`fusion:traits`'s own existing pool-draw, unchanged). Every one of these four already has a real,
+named analogue in this codebase today — the ask is a genuine, well-precedented feature, assembled from
+pieces that mostly already exist.
+
+### 9.7 Open questions for the spec phase — named, not answered here
+
+Per this document's own §8 boundary (no spec, no plan, no schema, no code), the following are real
+open questions this idea phase surfaces rather than resolves:
+
+1. **What counts as "inheritable," precisely** — traits only (mechanism-complete, §9.1-§9.3), or also
+   affixes off a rolled `species-passive` instance once real content exists (§9.4)? Can both be
+   inherited in the same fusion, or is a fusion result's inheritance budget shared across categories?
+2. **Is any trait/affix ever exclusion-listed from inheritance**, mirroring SMT's signature-skill
+   exclusion — e.g. should a species' own rarest, most identity-defining trait be un-inheritable, so
+   players cannot farm it purely through a common fusion partner rather than earning that species
+   directly? A real balance question, not a wiring one.
+3. **Does the soul cost scale by the OUTPUT's rarity (matching `recipeCost`/`promotionCostByRarity`'s
+   existing shape) or by the INHERITED TRAIT's own source rarity** (a rarer parent's trait costs more
+   to guarantee, independent of what the fusion produces)? Both are real, precedented options above.
+4. **Does `RollPromotionTraits` (§9.1 point 4, star growth within a species) gain the same
+   choice-plus-cost treatment**, or does it deliberately stay simple/free, on the reasoning that
+   growing *into your own kind* is a different, lower-stakes moment than fusing two different demons
+   away? Not assumed either way here.
+5. **What is the actual pick-count ceiling formula** — reuse `slotsByRarity` as-is (so a max-rarity
+   fusion could in principle guarantee all 3 slots, at rising soul cost per pick), or a separate,
+   smaller cap so randomness is never fully eliminated even at the top rarity? PoE's own Reforge (a
+   tag, not the exact roll) suggests never fully removing all randomness is a deliberate genre choice,
+   not an oversight to fix.
+6. **Does this apply to every fusion recipe indiscriminately, including the Phase 8 cross-rung
+   gap-fill recipes** (`crossRungGapFill: true`, 14 of 709 today) — those already sit slightly outside
+   the ladder's normal shape; whether inheritance treats them identically or needs its own note is
+   open.

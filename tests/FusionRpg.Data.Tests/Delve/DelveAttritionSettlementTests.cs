@@ -1,0 +1,486 @@
+using FusionRpg.Contracts;
+using FusionRpg.Core.Delve;
+using FusionRpg.Core.Delve.Attrition;
+using FusionRpg.Core.Demons;
+using FusionRpg.Core.Demons.Contracts;
+using FusionRpg.Core.Dungeon.Registry;
+using FusionRpg.Core.Dungeon.Tuning;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.World;
+using FusionRpg.Data;
+using Xunit;
+
+namespace FusionRpg.Data.Tests.Delve;
+
+/// <summary>D2.23 (spec-delve-attrition.md §1, §7, §9) — `CloseDelve`'s attrition settlement, the
+/// `members[]` writer, cross-delve pool persistence, the recovery counter (including every OTHER
+/// delve this player owns), and the recovery ritual. Reads the real, shipped dungeon tuning/registry
+/// files — a fixture copy could drift from what ships.</summary>
+public class DelveAttritionSettlementTests : IDisposable
+{
+    readonly string _dir;
+    readonly RpgStore _store;
+    readonly RoomTypeCatalog _rooms;
+    readonly DoorTypeCatalog _doors;
+    readonly DungeonTuning _tuning;
+    int _worldSeq;
+
+    public DelveAttritionSettlementTests()
+    {
+        _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-delve-attrition-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(_dir);
+        _store = new RpgStore(_dir);
+        _store.Init();
+        _store.AwardSouls(1, 1_000_000, "seed", "attrition-bank");
+
+        var repoRoot = FindRepoRoot();
+        var registries = DungeonRegistryLoader.LoadAll(Path.Combine(repoRoot, "data", "seed", "dungeon", "_registry"));
+        _rooms = new RoomTypeCatalog(registries.RoomKinds);
+        _doors = new DoorTypeCatalog(registries.DoorKinds);
+        _tuning = DungeonTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "dungeon.v1.json")), registries);
+    }
+
+    public void Dispose()
+    {
+        try { Directory.Delete(_dir, true); } catch { /* temp */ }
+    }
+
+    static string FindRepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir is not null)
+        {
+            if (Directory.Exists(Path.Combine(dir.FullName, "data", "seed", "dungeon"))) return dir.FullName;
+            dir = dir.Parent;
+        }
+        throw new DirectoryNotFoundException("could not locate repo root above " + AppContext.BaseDirectory);
+    }
+
+    // ---- fixtures ----
+
+    static WorldState BuildGraph(string worldId) => new()
+    {
+        WorldId = worldId, TemplateId = "layout.short-narrow-linear-001", Seed = 42UL, CurrentTurn = 0,
+        Factions = new[]
+        {
+            new WorldFaction { FactionId = "dave", Kind = WorldFactionKind.Player, Name = "Dave" },
+            new WorldFaction { FactionId = "wild", Kind = WorldFactionKind.Wild, Name = "Wild", PolicyId = null },
+        },
+        Sectors = new[]
+        {
+            new WorldSector { SectorId = "r0c0", TypeId = "fight", Climate = null, OwnerFactionId = "dave" },
+            new WorldSector { SectorId = "r1c0", TypeId = "cache", Climate = null },
+            new WorldSector { SectorId = "r2c0", TypeId = "boss", Climate = null },
+        },
+        Lanes = new[]
+        {
+            new WorldLane { LaneId = "l0", FromSectorId = "r0c0", ToSectorId = "r1c0", TypeId = "passage" },
+            new WorldLane { LaneId = "l1", FromSectorId = "r1c0", ToSectorId = "r2c0", TypeId = "passage" },
+        },
+        Entities = new[]
+        {
+            new WorldEntity { EntityId = "party-0", Kind = WorldEntityKind.Warband, OwnerFactionId = "dave", AtSectorId = "r0c0" },
+        },
+    };
+
+    static IReadOnlyList<DelveRoomRow> BuildRooms() => new[]
+    {
+        new DelveRoomRow("r0c0", 0, 0, "fight", "room.fight-none-001", true, false, null, null, null, null, "[]", 0),
+        new DelveRoomRow("r1c0", 1, 0, "cache", "room.cache-none-001", false, false, null, null, null, null, "[]", 0),
+        new DelveRoomRow("r2c0", 2, 0, "boss", "room.boss-none-001", false, false, null, null, null, null, "[]", 0),
+    };
+
+    /// <summary>One fresh three-room delve for player 1 — a unique world id per call so parallel
+    /// tests in this class never collide on `rpg_delves.world_id`'s own UNIQUE constraint.</summary>
+    DelveRow CreateDelve(string rungId = "hard", long playerId = 1)
+    {
+        var worldId = $"delve-attr-{Interlocked.Increment(ref _worldSeq)}";
+        var (ok, _, delve) = _store.CreateDelve(
+            playerId, "domain.fire-shallow-001", "solo", rungId, "corr-" + worldId, null,
+            worldId, "layout.short-narrow-linear-001", 1UL, BuildGraph(worldId), BuildRooms(), _rooms, _doors);
+        Assert.True(ok);
+        return delve!;
+    }
+
+    static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
+        .First(s => s.Acquisition != DemonAcquisition.CaptureOnly && s.TraitPool.Count > 0);
+
+    /// <summary>A real, minted, bound-contract demon for player 1 — so loyalty crediting has a real
+    /// row to observe changing.</summary>
+    string MintBoundDemon()
+    {
+        var (specimen, _) = _store.MintDemon(1, new DemonMintSpec
+        {
+            SpeciesId = Species.SpeciesId, Side = Species.Side, GameTypeId = Species.GameTypeId,
+            Rarity = Species.BaseRarity.ToId(), Variant = "normal",
+            ElementPrimary = Species.ElementPrimary.ToElementId(), ElementSecondary = Species.ElementSecondary?.ToElementId(),
+            TraitIds = new List<string> { Species.TraitPool[0] }, Origin = "summon"
+        });
+        var id = specimen.Actor.InstanceId;
+        Assert.True(_store.BindContract(1, id).Ok);
+        return id;
+    }
+
+    static readonly Dictionary<string, long> FullPools = new(StringComparer.Ordinal)
+    {
+        ["hp"] = 1000, ["stamina"] = 1000, ["hunger"] = 700, ["spirit"] = 1000, ["qi"] = 1000, ["poise"] = 1000,
+    };
+
+    static DelveMemberState Member(string instanceId, bool downed = false, bool downedOnce = false, int nerveStacks = 0, long spirit = 1000, long hunger = 700) =>
+        new(instanceId, new Dictionary<string, long>(FullPools, StringComparer.Ordinal) { ["spirit"] = spirit, ["hunger"] = hunger },
+            Array.Empty<Core.Battle.BattleStatusSpec>(), null, nerveStacks, downed, downedOnce);
+
+    // ---- backward compatibility: no tuning supplied ----
+
+    [Fact]
+    public void CloseDelve_without_tuning_is_byte_identical_to_before_this_task()
+    {
+        var delve = CreateDelve();
+        var closed = _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false);
+        Assert.True(closed);
+        var reloaded = _store.LoadDelve(delve.DelveId);
+        Assert.Equal(DelveStates.Extracted, reloaded!.State);
+    }
+
+    // ---- WritePartyMembers ----
+
+    [Fact]
+    public void WritePartyMembers_round_trips_through_the_real_store()
+    {
+        var delve = CreateDelve();
+        var members = new[] { Member("demon-a"), Member("demon-b", downed: true, downedOnce: true, nerveStacks: 5) };
+
+        var updated = _store.WritePartyMembers(delve.DelveId, partyEntityId: 0, members);
+
+        var party = updated!.Parties.Single(p => p.EntityId == 0);
+        Assert.Equal(2, party.Members!.Count);
+        var b = party.Members!.Single(m => m.InstanceId == "demon-b");
+        Assert.True(b.Downed);
+        Assert.True(b.DownedOnce);
+        Assert.Equal(5, b.NerveStacks);
+        Assert.Equal(1000L, b.Pools["spirit"]);
+    }
+
+    [Fact]
+    public void WritePartyMembers_creates_the_party_row_the_first_time_a_delve_has_none_yet()
+    {
+        // CreateDelve seeds parties_json = '[]' -- no party rows exist for ANY entity id yet, so the
+        // first room a party ever fights must be able to create its own row, not require one already
+        // exist (an upsert, matching the "first room, first row" shape).
+        var delve = CreateDelve();
+        var updated = _store.WritePartyMembers(delve.DelveId, partyEntityId: 7, new[] { Member("fresh-party-demon") });
+        var party = updated!.Parties.Single(p => p.EntityId == 7);
+        Assert.Equal("fresh-party-demon", party.Members!.Single().InstanceId);
+    }
+
+    [Fact]
+    public void A_party_written_before_this_field_existed_deserializes_members_to_null_not_empty()
+    {
+        // CreateDelve seeds parties_json = '[]' -- no party rows at all yet, matching a real delve
+        // that has not called WritePartyMembers. Simulate the "existing party, no members[] key"
+        // shape directly through the same JSON round trip DelveRow.ParsePartiesJson uses.
+        var json = """[{"EntityId":0,"Route":["r0c0"],"Pity":{},"Haul":[]}]""";
+        var parsed = DelveRow.ParsePartiesJson(json);
+        Assert.Null(parsed[0].Members);
+    }
+
+    // ---- CloseDelve settlement: Outcome ----
+
+    [Fact]
+    public void A_never_downed_member_settles_to_Roster_untouched()
+    {
+        var delve = CreateDelve();
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon) });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var actor = _store.GetUniqueActor(demon)!;
+        // BindContract binds the CONTRACT, a separate axis from roster/deploy phase -- a minted,
+        // bound-but-never-deployed demon starts and stays Roster. The claim this test makes is
+        // narrower and still real: settlement never MOVED it to Recovering/Retired.
+        Assert.Equal(UniqueActorPhases.Roster, actor.Phase);
+    }
+
+    [Fact]
+    public void A_downedOnce_member_below_the_permadeath_gate_Recovers_with_the_real_tunable_count()
+    {
+        var delve = CreateDelve(rungId: "hard"); // "hard" sits below domain.permadeathFromRung
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var actor = _store.GetUniqueActor(demon)!;
+        Assert.Equal(UniqueActorPhases.Recovering, actor.Phase);
+        var recovery = _store.GetUniqueActorRecovery(demon)!.Value;
+        Assert.Equal(_tuning.RiskDownedRecoveryDelves, recovery.RecoveryDelvesLeft);
+        Assert.Equal(delve.DelveId, recovery.WoundedDelveId);
+        Assert.Equal(delve.ThetaRun, recovery.ThetaRun);
+    }
+
+    [Fact]
+    public void A_downedOnce_member_on_a_permadeath_rung_Retires()
+    {
+        var permadeathRung = _tuning.Domain.PermadeathFromRung;
+        var delve = CreateDelve(rungId: permadeathRung);
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        Assert.Equal(UniqueActorPhases.Retired, _store.GetUniqueActor(demon)!.Phase);
+        Assert.Null(_store.GetUniqueActorRecovery(demon));
+    }
+
+    [Fact]
+    public void A_wipe_forces_downedOnce_for_every_member_even_one_never_actually_downed()
+    {
+        var delve = CreateDelve(rungId: "hard");
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: false) }); // never downed
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Wiped, archiveNow: false, _tuning);
+
+        // A wipe treats every member as downedOnce=true (spec §8: "on a wipe, all of them") -- below
+        // the permadeath gate, that means Recovering, never Roster.
+        Assert.Equal(UniqueActorPhases.Recovering, _store.GetUniqueActor(demon)!.Phase);
+    }
+
+    // ---- CloseDelve settlement: won / loyalty ----
+
+    [Fact]
+    public void A_member_who_extracted_after_killing_the_boss_wins_and_is_credited()
+    {
+        var delve = CreateDelve();
+        _store.MarkRoom(delve.DelveId, "r2c0", cleared: true); // the boss room, per BuildRooms/BuildGraph
+        var demon = MintBoundDemon();
+        var before = _store.GetContract(demon)!.Loyalty;
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon) });
+        SetRoute(delve.DelveId, 0, new[] { "r0c0", "r1c0", "r2c0" });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        Assert.True(_store.GetContract(demon)!.Loyalty > before);
+    }
+
+    [Fact]
+    public void An_afflicted_member_never_wins_even_after_killing_the_boss()
+    {
+        var delve = CreateDelve();
+        _store.MarkRoom(delve.DelveId, "r2c0", cleared: true);
+        var demon = MintBoundDemon();
+        var before = _store.GetContract(demon)!.Loyalty;
+        var topStage = _tuning.AttritionNerve.StageThresholds[^1];
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, nerveStacks: topStage) });
+        SetRoute(delve.DelveId, 0, new[] { "r0c0", "r1c0", "r2c0" });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        Assert.True(_store.GetContract(demon)!.Loyalty < before); // afflicted -> not won -> ApplyLoss
+    }
+
+    void SetRoute(long delveId, long partyEntityId, IReadOnlyList<string> route) =>
+        _store.WritePartyRoute(delveId, partyEntityId, route);
+
+    // ---- cross-delve pool persistence ----
+
+    [Fact]
+    public void Hunger_persists_across_delves_other_pools_do_not()
+    {
+        var delve = CreateDelve();
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, hunger: 430) });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var persisted = _store.GetUniqueActorPersistedPools(demon);
+        Assert.Equal(new[] { "hunger" }, persisted.Keys); // the real shipped attrition.persistAcrossDelves shape
+        Assert.Equal(430, persisted["hunger"]);
+    }
+
+    [Fact]
+    public void A_second_delve_closing_overwrites_the_first_delves_persisted_value()
+    {
+        var demon = MintBoundDemon();
+        var delve1 = CreateDelve();
+        _store.WritePartyMembers(delve1.DelveId, 0, new[] { Member(demon, hunger: 900) });
+        _store.CloseDelve(delve1.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        Assert.Equal(900, _store.GetUniqueActorPersistedPools(demon)["hunger"]);
+
+        var delve2 = CreateDelve();
+        _store.WritePartyMembers(delve2.DelveId, 0, new[] { Member(demon, hunger: 200) });
+        _store.CloseDelve(delve2.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        Assert.Equal(200, _store.GetUniqueActorPersistedPools(demon)["hunger"]);
+    }
+
+    // ---- the recovery counter: R6, virtual time, every OTHER delve too ----
+
+    [Fact]
+    public void Closing_an_unrelated_delve_decrements_every_other_recovering_actor_this_player_owns()
+    {
+        var woundDelve = CreateDelve(rungId: "hard");
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(woundDelve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.CloseDelve(woundDelve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        var left0 = _store.GetUniqueActorRecovery(demon)!.Value.RecoveryDelvesLeft;
+        Assert.True(left0 >= 1);
+
+        // A completely unrelated later delve, no shared members at all.
+        var otherDelve = CreateDelve();
+        _store.CloseDelve(otherDelve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var afterOne = _store.GetUniqueActorRecovery(demon);
+        if (left0 - 1 <= 0)
+            Assert.Null(afterOne); // flipped straight to Roster in the same write
+        else
+            Assert.Equal(left0 - 1, afterOne!.Value.RecoveryDelvesLeft);
+    }
+
+    [Fact]
+    public void The_recovery_counter_reaching_zero_flips_the_demon_back_to_Roster_in_the_same_write()
+    {
+        var delve = CreateDelve(rungId: "hard");
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        var left = _store.GetUniqueActorRecovery(demon)!.Value.RecoveryDelvesLeft;
+
+        for (var i = 0; i < left; i++)
+        {
+            var closer = CreateDelve();
+            _store.CloseDelve(closer.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        }
+
+        Assert.Equal(UniqueActorPhases.Roster, _store.GetUniqueActor(demon)!.Phase);
+        Assert.Null(_store.GetUniqueActorRecovery(demon));
+    }
+
+    // ---- the recovery ritual ----
+
+    [Fact]
+    public void The_recovery_ritual_prices_at_the_wounding_rungs_souls_and_writes_Roster()
+    {
+        var delve = CreateDelve(rungId: "hard");
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        Assert.Equal(UniqueActorPhases.Recovering, _store.GetUniqueActor(demon)!.Phase);
+
+        var before = _store.GetSoulBalance(1).Balance;
+        var (ok, reason, actor) = _store.TryPerformRecoveryRitual(1, demon, "ritual-corr-1", _tuning);
+
+        Assert.True(ok, reason);
+        Assert.Equal(UniqueActorPhases.Roster, actor!.Phase);
+        Assert.Null(_store.GetUniqueActorRecovery(demon));
+        Assert.True(_store.GetSoulBalance(1).Balance < before);
+    }
+
+    [Fact]
+    public void The_recovery_ritual_price_is_never_a_literal_it_scales_with_the_wounding_rung()
+    {
+        // "the ritual price is never a literal" (D2.23's own verify line) -- proven by varying the
+        // ONE real, tunable input this test can directly control (the wounding rung) and observing
+        // the SoulSinkPolicy.Price(risk.recoveryRitualSouls.{rung}, theta_run, tuning) call actually
+        // charge two different amounts, against the real shipped tuning (medium: 800, hard: 1600).
+        var mediumDelve = CreateDelve(rungId: "medium");
+        var mediumDemon = MintBoundDemon();
+        _store.WritePartyMembers(mediumDelve.DelveId, 0, new[] { Member(mediumDemon, downedOnce: true) });
+        _store.CloseDelve(mediumDelve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        var balanceBeforeMedium = _store.GetSoulBalance(1).Balance;
+        Assert.True(_store.TryPerformRecoveryRitual(1, mediumDemon, "ritual-corr-medium", _tuning).Ok);
+        var mediumPrice = balanceBeforeMedium - _store.GetSoulBalance(1).Balance;
+
+        var hardDelve = CreateDelve(rungId: "hard");
+        var hardDemon = MintBoundDemon();
+        _store.WritePartyMembers(hardDelve.DelveId, 0, new[] { Member(hardDemon, downedOnce: true) });
+        _store.CloseDelve(hardDelve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+        var balanceBeforeHard = _store.GetSoulBalance(1).Balance;
+        Assert.True(_store.TryPerformRecoveryRitual(1, hardDemon, "ritual-corr-hard", _tuning).Ok);
+        var hardPrice = balanceBeforeHard - _store.GetSoulBalance(1).Balance;
+
+        Assert.True(mediumPrice > 0);
+        Assert.True(hardPrice > mediumPrice); // 1600 base > 800 base, at the same theta_run (0)
+    }
+
+    [Fact]
+    public void The_recovery_ritual_refuses_a_row_that_is_not_Recovering()
+    {
+        var demon = MintBoundDemon(); // ActiveBound, never wounded
+        var (ok, reason, _) = _store.TryPerformRecoveryRitual(1, demon, "ritual-corr-2", _tuning);
+        Assert.False(ok);
+        Assert.StartsWith("phase.", reason);
+    }
+
+    [Fact]
+    public void The_recovery_ritual_is_correlation_idempotent_a_replay_never_charges_twice()
+    {
+        var delve = CreateDelve(rungId: "hard");
+        var demon = MintBoundDemon();
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var first = _store.TryPerformRecoveryRitual(1, demon, "ritual-corr-3", _tuning);
+        Assert.True(first.Ok, first.Reason);
+        var balanceAfterFirst = _store.GetSoulBalance(1).Balance;
+
+        var second = _store.TryPerformRecoveryRitual(1, demon, "ritual-corr-3", _tuning);
+        Assert.True(second.Ok);
+        Assert.Equal("replay", second.Reason);
+        Assert.Equal(balanceAfterFirst, _store.GetSoulBalance(1).Balance); // never charged twice
+    }
+
+    [Fact]
+    public void The_recovery_ritual_refuses_insufficient_souls()
+    {
+        var poor = _store.CreatePlayer("poor").Id; // a fresh player, no soul bank seeded
+        var delve = CreateDelve(rungId: "hard", playerId: poor);
+        var (specimen, _) = _store.MintDemon(poor, new DemonMintSpec
+        {
+            SpeciesId = Species.SpeciesId, Side = Species.Side, GameTypeId = Species.GameTypeId,
+            Rarity = Species.BaseRarity.ToId(), Variant = "normal",
+            ElementPrimary = Species.ElementPrimary.ToElementId(), ElementSecondary = Species.ElementSecondary?.ToElementId(),
+            TraitIds = new List<string> { Species.TraitPool[0] }, Origin = "summon"
+        });
+        var demon = specimen.Actor.InstanceId;
+        Assert.True(_store.BindContract(poor, demon).Ok);
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon, downedOnce: true) });
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        var (ok, reason, _) = _store.TryPerformRecoveryRitual(poor, demon, "ritual-corr-poor", _tuning);
+        Assert.False(ok);
+        Assert.Equal("souls.insufficient", reason);
+    }
+
+    // ---- route facts: real room data, not a fixture guess ----
+
+    [Fact]
+    public void A_route_that_clears_the_boss_room_registers_bossKilled_even_without_half_the_route()
+    {
+        var delve = CreateDelve();
+        _store.MarkRoom(delve.DelveId, "r2c0", cleared: true); // only the boss room
+        var demon = MintBoundDemon();
+        var before = _store.GetContract(demon)!.Loyalty;
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon) });
+        // A three-room route, only one cleared -- fails "half the route" but bossKilled alone still wins.
+        SetRoute(delve.DelveId, 0, new[] { "r0c0", "r1c0", "r2c0" });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        Assert.True(_store.GetContract(demon)!.Loyalty > before);
+    }
+
+    [Fact]
+    public void An_uncleared_route_with_no_boss_kill_never_wins()
+    {
+        var delve = CreateDelve(); // no rooms marked cleared at all
+        var demon = MintBoundDemon();
+        var before = _store.GetContract(demon)!.Loyalty;
+        _store.WritePartyMembers(delve.DelveId, 0, new[] { Member(demon) });
+        SetRoute(delve.DelveId, 0, new[] { "r0c0", "r1c0", "r2c0" });
+
+        _store.CloseDelve(delve.DelveId, DelveStates.Extracted, archiveNow: false, _tuning);
+
+        Assert.True(_store.GetContract(demon)!.Loyalty < before);
+    }
+}

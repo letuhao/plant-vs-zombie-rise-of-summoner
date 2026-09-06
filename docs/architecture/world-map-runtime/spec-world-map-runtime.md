@@ -1,8 +1,8 @@
 # Spec: world-map-runtime
 
-**Status: Draft — Phase 1 (Specify), strengthened 2026-09-06 after coverage audit — awaiting
-owner review.** Module id `world-map-runtime` in the
-[world-map-runtime capability map](../world-map-runtime-map.md).
+**Status: Specify complete 2026-09-06 — open questions locked; build authorized at R0/R1
+([world-map-runtime-plan.md](../../../tasks/world-map-runtime-plan.md)).** Module id
+`world-map-runtime` in the [world-map-runtime capability map](../world-map-runtime-map.md).
 
 **Ideal:** [world-map-runtime-ideal.md](../world-map-runtime-ideal.md).
 **Catalog:** [design/11-world-stage.html](../../design/11-world-stage.html) §O (pin, LOD, dual-plane);
@@ -440,7 +440,8 @@ D10: designed placeholders (grid/starfield, framed pins). Art swaps textures on 
 cd web\fusion-rpg-web
 npm test
 npm run build
-npm run lint
+# No npm run lint — package.json has no lint script (same as world-stage).
+npx playwright test e2e/world-map-runtime.spec.ts
 ```
 
 Guards (repo root, same as CI):
@@ -450,6 +451,8 @@ Guards (repo root, same as CI):
 # hex: game/ stays skipped; snapshotTheme must be the only colour ingress
 rg -n "SKIPPED_PATH_PREFIXES" web\fusion-rpg-web\src\theme\hexGuard.ts
 ```
+
+Phase checkpoints also require agent CV on PNGs under `e2e/.artifacts/world-map-runtime/` (plan CPA–CPD).
 
 No `dotnet` work. No injector work. No wire-shape change (`WorldStateDto.Revision` not added).
 
@@ -530,8 +533,10 @@ test so the matrix does not need a Scene at all:
 6. **modelSeq** — equal or lower seq ignored; higher applies.
 7. **Import guard** — `game/world` ↛ `lib/bus` / React / `*Dto` (channels from `stages/world/render` OK).
 8. **Pick occlusion** — pointer over left dock / rail does not select.
-9. **Manual** — 1280×720: pan/zoom/edge-scroll, open left inspector, confirm Game still alive (GG-11);
-   greyscale squint (GG-27) on a pin gallery screenshot; no dual-camera SVG overlay.
+9. **E2E + agent CV** — Playwright `e2e/world-map-runtime.spec.ts` at 1280×720: pan/zoom/edge-scroll,
+   open left inspector, GG-11 mount probe; greyscale CSS-filter shot for GG-27 squint; artifacts under
+   `e2e/.artifacts/world-map-runtime/`; agent `Read`s PNGs against the plan's CV checklist (no owner
+   eyeball). No dual-camera SVG overlay.
 
 `SectorNode.test.tsx` and overlay tests remain until the React map/overlays are deleted; then the
 matrix lives on the descriptor tests. Do not keep two matrices that can drift.
@@ -565,14 +570,16 @@ Magnitudes on the pin (net loam) stay `long` via `world-numbers`. This module do
   owns all map overlays; host `modelSeq` dirty-flag; delete SVG camera once Phaser camera is live;
   pick ignores left dock + rail; Phaser only from World lazy chunk.
 - **Ask first:** a twelfth pattern or fifth system; a Phaser UIScene; bringing xyflow back for the
-  **player** map; minimap; changing fog *rules*; promoting `GRID_*` into tuning; amending T3 in
-  `decisions.md` / `tech-stack.md` (doc follow-up, expected); drawing the §A card on the canvas
-  "just for zoom"; adding `Revision` to `WorldStateDto`; moving channels to `src/lib/world-view/`.
+  **player** map; minimap; changing fog *rules*; promoting `GRID_*` into tuning; drawing the §A card
+  on the canvas "just for zoom"; adding `Revision` to `WorldStateDto`; moving channels to
+  `src/lib/world-view/` (out of v1 — locked).
+- **Authorized in-program (R16):** amend T3 HOW in `tech-stack.md` (and `decisions.md` only if a row
+  still names SVG pan/zoom HOW). xyflow stays off player map / entry chunk.
 - **Never:** Phaser `fetch` / SignalR / DTO imports; React GameObject refs; encode health as opacity;
   infer unknown from emptiness; two `Phaser.Game`s at once; nest Phaser under `stages/`; put world
   events on `LawnBusEvent`; React SVG overlays fighting Phaser camera; new npm renderer; injector /
   PvZ field writes; hard progression cap; private `f(level)`; invent a second paint-descriptor
-  matrix for v1.
+  matrix for v1; require owner eyeball for phase checkpoints.
 
 ---
 
@@ -593,10 +600,12 @@ Magnitudes on the pin (net loam) stay `long` via `world-numbers`. This module do
    Phaser draws them.
 9. SVG `WorldScene` composer and unused `camera.ts` host are gone (or unreachable behind a dead
    export that CI fails).
-10. `npm test`, `npm run build`, `npm run lint` green.
-11. Doc follow-up listed (not blocking Phaser build): T3 HOW sentence in `tech-stack.md` (and
-    `decisions.md` if that row still names the SVG hook). Banners on `world-stage-map` /
-    `spec-world-shell` / `spec-world-render` already landed 2026-09-06 — not open work.
+10. `npm test` and `npm run build` green. (**No `npm run lint`** — `web/fusion-rpg-web/package.json`
+    has no lint script.)
+11. Phase checkpoints CPA–CPD green: Playwright `e2e/world-map-runtime.spec.ts` + PNG artifacts +
+    agent CV checklist (no owner eyeball / human playtest gate).
+12. **R16** amends T3 HOW in `tech-stack.md` (and `decisions.md` if needed). Banners on
+    `world-stage-map` / `spec-world-shell` / `spec-world-render` already landed 2026-09-06.
 
 ---
 
@@ -614,17 +623,15 @@ HUD, inspector, commands, playback specs are unchanged (dock side stays left per
 
 ---
 
-## Open questions
+## Locked decisions (cleared 2026-09-06)
 
-1. **Plate §O three drawing calls** (circle pin + ownership ring, unknown = diamond, strict-superset
-   LOD) are assumed approved with this spec. Overturn them on the plate, then amend this file.
-2. **T3 HOW sentence** in `tech-stack.md` / `decisions.md` — doc follow-up, not blocking this
-   spec's text (still Ask-first before editing those files).
-3. **Later slice:** move channel files to `src/lib/world-view/` so `game/` truly never imports
-   `stages/` — not v1. Import law above is the v1 lock.
-
-Fog-on-pin density (this revision's table) is a **proposed visual lock** for owner sign-off with
-this review — not previously signed as a table.
+1. **Plate §O drawing calls:** circle pin + ownership ring; unknown = diamond; LOD strict supersets.
+2. **Fog-on-pin density table** (Visual contract above): forces strip never on the pin; Scouted/Rumored
+   ring+pip at map+, wash at detail only.
+3. **T3 HOW:** amended by task **R16** in-program (not Ask-first). xyflow remains off player map /
+   entry chunk.
+4. **Channels** stay under `stages/world/render/` for v1; `game/world` may import them. No move to
+   `src/lib/world-view/` in this program.
 
 ---
 
@@ -633,25 +640,21 @@ this review — not previously signed as a table.
 ```
 [x] Subsystems: world map plane, FE game foundation, Game GUI, world-stage
     render/shell/inspector/lenses/targeting.
-[x] Read this session (strengthen pass): DESIGN-GATE world-map row, capability map, prior draft of
-    this spec, world-map-runtime-ideal (gestures / W), fe-game-foundation RT table,
-    spec-world-render fog+overlays+type floor, spec-world-inspector left dock, spec-world-lenses
-    encodings, spec-world-targeting range, plate §O.3–O.6, adaptWorldState / WorldStateDto /
-    WorldHeaderDto / header revision bump site, lawn game/ → features/lawn imports,
-    WorldScene.tsx overlay composition, routes.tsx lazy World.
-[x] decisions.md: Game GUI D2 (world is a stage; Phaser lifetime); T3 HOW still to amend in
-    tech-stack (listed open).
-[x] Claims cite file:line (WorldStage, adapt.ts, WorldDtos, WorldTurns revision bump,
-    LawnWorldScene imports, fogTreatments, Rail 92px, routes lazy).
+[x] Read this session (strengthen + lock pass): DESIGN-GATE world-map row, capability map, this
+    spec, world-map-runtime-ideal, fe-game-foundation RT table, spec-world-render/shell/inspector/
+    lenses/targeting, plate §O.3–O.6, adaptWorldState / WorldStateDto / WorldHeaderDto, lawn
+    game/ → features/lawn imports, WorldScene overlay composition, routes.tsx lazy World,
+    e2e/world-stage.spec.ts artifact pattern.
+[x] decisions.md: Game GUI D2; T3 HOW authorized as R16 (locked, not open).
+[x] Claims cite file:line (WorldStage, adapt.ts, WorldDtos, fogTreatments, Rail 92px, routes lazy).
 [x] Verified against code: AdaptedWorldState has no revision; WorldStateDto has no Revision;
-    header revision bumps on turn advance only; Supply/Lifeline exist but not composed in
-    WorldScene; lawn imports features/lawn from game/.
-[x] Quoted GG-11 from stage lifetime (layers must not destroy Game); inspector dock from §8e.1.
-[ ] Constraint tests not re-run this session (specify-only; no production code). Honest gap.
+    Supply/Lifeline not composed in WorldScene; no npm lint script.
+[x] Quoted GG-11 from stage lifetime; inspector dock from §8e.1.
+[ ] Constraint / Playwright suites not re-run this doc-only lock pass. Honest gap until R0+.
 [x] No §2 invariant contradicted. Gameless-first: web Phaser, Fusion closed, still plays.
-[x] Stale "Open questions: none" and SC9 banner follow-ups corrected in this revision.
+[x] Open questions cleared → Locked decisions; human visual gates → Playwright + agent CV.
 ```
 
-**Honest gaps:** `software-architecture.md` was not re-read end-to-end this pass.
-`information-architecture.md` §2.2 was not re-opened. No suite run. Fog-on-pin table is new —
-owner must accept or amend before build.
+**Honest gaps:** `software-architecture.md` / `information-architecture.md` §2.2 not re-read
+end-to-end this pass. No suite run until R0 lands. Fog-on-pin + §O are **locked**, not pending
+sign-off.

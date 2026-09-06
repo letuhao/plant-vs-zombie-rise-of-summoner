@@ -44,7 +44,13 @@ public class SpecChannelClaimTests
     /// (alongside `effect.timer`) to the `OnTimer` atom trigger — the same category as `combat.hit`
     /// directly above, added 2026-09-03 when Wave 8's trigger-vocabulary audit named it in prose.
     /// `progression.tierPower` is a locked, shipped FORMULA name (`progression.power ×
-    /// progression.realm`, actor-hub-ssot.md:121) computed where needed, not itself a stored channel.</summary>
+    /// progression.realm`, actor-hub-ssot.md:121) computed where needed, not itself a stored channel.
+    /// `status.timed` is actor-hub-ssot.md §6's own descriptive label for the `StatusDerivedSubsystem`
+    /// registry row (mechanism-wiring E6, 2026-09-06) — the table's "Subsystem" column already uses
+    /// human-readable dotted labels distinct from the real `SubsystemId` string
+    /// (`foundation.effect`/order 350 names `AtomDerivedSubsystem`, whose actual `SubsystemId` is
+    /// `"atom.derived"`; `status.timed`/order 400 names `StatusDerivedSubsystem`, whose actual
+    /// `SubsystemId` is `"l2b.derived"` — verified in code, neither label is a stat channel).</summary>
     static readonly HashSet<string> KnownNonChannelTokens = new(StringComparer.Ordinal)
     {
         "combat.hit", "combat.hitland", "combat.something", "combat.timer",
@@ -52,6 +58,7 @@ public class SpecChannelClaimTests
         "resource.delta", "resource.economy",
         "status.apply", "status.apply.duration", "status.apply.target", "status.clear", "status.spread",
         "status.v2.json", "status.WithdrawEntity", "status.resistance", "status.probability",
+        "status.timed",
         "progression.tierPower"
     };
 

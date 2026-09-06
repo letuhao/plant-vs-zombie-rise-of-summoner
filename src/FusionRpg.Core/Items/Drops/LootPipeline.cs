@@ -78,6 +78,12 @@ public sealed record LootContentView(
     Func<string, string, string?>? RecordedManifestFor = null,
     Func<string, int, int, int>? DrawableAffixGroups = null,
     Func<LootGrant, LootMintResult>? Mint = null,
+    /// <summary>D3.11 (spec-dungeon-loot.md §3): resolves an `Equipment` entry's own optional `RefId`
+    /// to a domain-only base-type subset — the runtime counterpart to
+    /// <see cref="DropContentLookups.BaseTypeSetExists"/>'s import-time check of the same `RefId`.
+    /// `null` (the default) keeps step 6's existing, unrestricted `BaseTypesFor` path byte-identical —
+    /// this delegate only ever NARROWS it, never replaces it on its own.</summary>
+    Func<string, IReadOnlyList<string>>? BaseTypeSetFor = null,
     /// <summary>⭐ Step 10, live as of module 16. The base type's own <c>socketMax</c>, by id.</summary>
     Func<string, int>? SocketMaxFor = null,
     /// <summary>⭐ Step 10, live as of module 16. Both this and <see cref="SocketMaxFor"/> must be
@@ -94,6 +100,21 @@ public static class LootCorrelation
         "expedition-tier" => $"loot:exp:{sourceId}",
         "world-sector" => $"loot:sector:{sourceId}",
         DropTableValidator.UndesignedSourceKind => $"loot:pvz:{sourceId}",
+        // D3.10 (spec-dungeon-loot.md §1, :108-109; party-dungeon-ideal.md :1490-1491): `dungeon-room`'s
+        // own sourceId already arrives pre-joined as "{delveId}:{r}:{c}" (LootPipeline.cs:102's own
+        // literal construction, cited in spec) -- Derive only prepends the "loot:delve:" prefix, the
+        // exact same shape every other arm above already uses (prefix, then sourceId verbatim).
+        "dungeon-room" => $"loot:delve:{sourceId}",
+        // `dungeon-quest`'s own sourceId is likewise pre-joined as "{delveId}:quest:{questId}" (the
+        // ideal's own literal example: "loot:delve:{delveId}:quest:{questId}") -- same prepend-only shape.
+        "dungeon-quest" => $"loot:delve:{sourceId}",
+        // `dungeon-clear`'s own sourceId is JUST the domain id (spec, verbatim: "for dungeon-clear the
+        // source id is the domain"), not pre-joined -- ASSUMED to append ":clear" after it, per the
+        // ideal's own literal example ("loot:delve:{delveId}:clear") read as a template whose own
+        // "{delveId}" slot is filled by whatever sourceId this call receives (the domain id here, not
+        // literally a delve id) -- the one arm below that departs from "prefix only" above, stated
+        // explicitly since the departure is not self-evident from the other three.
+        "dungeon-clear" => $"loot:delve:{sourceId}:clear",
         _ => throw new ArgumentException($"no correlation shape for source kind '{sourceKind}'", nameof(sourceKind)),
     };
 }
@@ -304,6 +325,13 @@ public static class LootPipeline
             // the two get tuned against each other later, from opposite sides.
             // Trigger to revisit: X1 built AND X4 landed, whichever is later. Owner: this module.
             var legal = view.BaseTypesFor(entry.Frame!, entry.Role!);
+            // D3.11: RefId ∩ legal when authored AND the host supplies a resolver -- null host delegate
+            // or an empty RefId both keep this byte-identical to the pre-D3.11 path (spec, verbatim).
+            if (entry.RefId is { Length: > 0 } refId && view.BaseTypeSetFor is { } baseTypeSetFor)
+            {
+                var domainSet = new HashSet<string>(baseTypeSetFor(refId), StringComparer.Ordinal);
+                legal = legal.Where(domainSet.Contains).ToList();
+            }
             if (legal.Count == 0)
             {
                 rejected = AtomRejection.ContentRule("drop.no-legal-base-type",

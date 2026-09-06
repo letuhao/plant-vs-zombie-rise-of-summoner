@@ -71,6 +71,42 @@ public class ModeProfileCapabilityTests
         Assert.DoesNotContain(setupFields, p => p.Name.Contains("Profile", StringComparison.OrdinalIgnoreCase));
     }
 
+    // --- party-dungeon D2.9: the delve profile row -------------------------------------------------
+
+    [Fact]
+    public void DownedOnDeplete_is_false_on_every_shipped_row_except_delve()
+    {
+        Assert.False(BattleModeProfileCatalog.ClassicRound.DownedOnDeplete);
+        Assert.False(BattleModeProfileCatalog.GalaxySync.DownedOnDeplete);
+        Assert.False(BattleModeProfileCatalog.HybridAtb.DownedOnDeplete);
+        Assert.False(BattleModeProfileCatalog.Siege.DownedOnDeplete);
+        Assert.True(BattleModeProfileCatalog.Delve.DownedOnDeplete);
+    }
+
+    [Fact]
+    public void The_ruleset_version_is_unchanged_by_adding_a_fifth_profile()
+    {
+        Assert.Equal(4, BattleRuleset.RulesetVersion);
+    }
+
+    [Fact]
+    public void Delve_is_hybrid_atb_shaped_but_PerSide_and_interactive()
+    {
+        var delve = BattleModeProfileCatalog.Delve;
+        var hybrid = BattleModeProfileCatalog.HybridAtb;
+
+        Assert.Equal(hybrid.AdvancePolicy, delve.AdvancePolicy);
+        Assert.Equal(hybrid.DefaultCommitment, delve.DefaultCommitment);
+        Assert.Equal(hybrid.ForecastExactness, delve.ForecastExactness);
+        Assert.Equal(hybrid.OrdersBySpeed, delve.OrdersBySpeed);
+        Assert.Equal(hybrid.WReact, delve.WReact); // inherited through the shared tuning row, and inert here
+
+        Assert.Equal(WScope.PerSide, delve.WScope); // the one structural difference from hybrid-atb's Global
+        Assert.True(delve.RequiresLiveInput);
+        Assert.True(delve.DownedOnDeplete);
+        Assert.False(delve.UsesTimelineDispatch); // not wired in this task, same status as every row but classic/galaxy/hybrid
+    }
+
     // --- W proven by contrast, WScope=PerSide covered --------------------------------------------
 
     [Fact]

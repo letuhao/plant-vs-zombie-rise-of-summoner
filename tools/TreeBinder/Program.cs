@@ -1,0 +1,158 @@
+using FusionRpg.Core.Effects.Atoms;
+using FusionRpg.Core.PassiveTree.Binding;
+using FusionRpg.Core.PassiveTree.State;
+using FusionRpg.Core.Power;
+using FusionRpg.Tools.TreeBinder;
+
+// tools/TreeBinder (task D2, spec-tree-binder.md §Commands):
+//   dotnet run --project tools/TreeBinder -- --seed data/seed/passive-tree --out data/generated/passive-tree
+//   dotnet run --project tools/TreeBinder -- --check
+//   dotnet run --project tools/TreeBinder -- --explain <nodeId>
+//
+// A thin wrapper: every load-bearing rule lives in src/FusionRpg.Core/PassiveTree/Binding/
+// (TreeBinderRun, TreeBinderExplain) or this project's own PlanReader/ReportWriter, both unit-tested
+// directly in tests/FusionRpg.TreeBinder.Tests. This file's only job is argument parsing, real-content
+// wiring, and printing the report.
+//
+// Honest scope note: `tree-language` (the module that authors `affixIds[]` per node) has not shipped
+// yet, so `data/seed/passive-tree/plan/*.v1.json`'s nodes carry no `affixIds` today. A real run
+// against that content refuses every node ("a node's affixIds must be 1..3, got 0") -- which is the
+// truthful state of the pipeline, not a bug in this tool. `--explain` and `--check` are proven
+// against worked-example-shaped fixtures in the test project; this CLI reads whatever content exists
+// and reports it as-is, never fabricating tree-language's job.
+//
+// Exit codes: 0 clean/Pass, 1 Fail/stale/mismatch, 2 could not start.
+
+var mode = "run";
+string? explainNodeId = null;
+string? seedRoot = null;
+string? outRoot = null;
+
+for (var i = 0; i < args.Length; i++)
+{
+    switch (args[i])
+    {
+        case "--check": mode = "check"; break;
+        case "--explain" when i + 1 < args.Length: mode = "explain"; explainNodeId = args[++i]; break;
+        case "--seed" when i + 1 < args.Length: seedRoot = args[++i]; break;
+        case "--out" when i + 1 < args.Length: outRoot = args[++i]; break;
+    }
+}
+
+var repoRoot = FindUp("AGENTS.md");
+if (repoRoot is null)
+{
+    Console.Error.WriteLine("could not locate the repo root (AGENTS.md not found upward)");
+    return 2;
+}
+
+seedRoot ??= Path.Combine(repoRoot, "data", "seed", "passive-tree");
+outRoot ??= Path.Combine(repoRoot, "data", "generated", "passive-tree");
+
+PowerTuning powerTuning;
+PassiveTreeTuning treeTuning;
+IReadOnlyDictionary<string, AffixRow> affixesById;
+IReadOnlyDictionary<string, AtomRow> atomsById;
+try
+{
+    powerTuning = PowerTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "power-scale.v2.json")));
+    treeTuning = PassiveTreeTuningLoader.Parse(File.ReadAllText(Path.Combine(repoRoot, "data", "tuning", "passive-tree.v1.json")));
+    (affixesById, atomsById) = LoadSeedContent(repoRoot);
+}
+catch (Exception ex)
+{
+    Console.Error.WriteLine($"EXIT_CANNOT_RUN: {ex.Message}");
+    return 2;
+}
+
+var planDir = Path.Combine(seedRoot, "plan");
+var planFiles = Directory.Exists(planDir) ? Directory.GetFiles(planDir, "*.v*.json") : Array.Empty<string>();
+
+if (planFiles.Length == 0)
+{
+    Console.Error.WriteLine($"EXIT_CANNOT_RUN: no plan files under {planDir}");
+    return 2;
+}
+
+var allNodesByTree = new Dictionary<string, List<BindInputNode>>(StringComparer.Ordinal);
+foreach (var planFile in planFiles)
+{
+    var treeId = Path.GetFileNameWithoutExtension(planFile).Split('.')[0];
+    allNodesByTree[treeId] = PlanReader.ReadPlanNodes(File.ReadAllText(planFile), treeTuning);
+}
+
+if (mode == "explain")
+{
+    foreach (var (_, nodes) in allNodesByTree)
+    {
+        var node = nodes.FirstOrDefault(n => n.NodeId == explainNodeId);
+        if (node is null) continue;
+        Console.WriteLine(TreeBinderExplain.Explain(node, affixesById, atomsById, powerTuning));
+        return 0;
+    }
+    Console.Error.WriteLine($"node '{explainNodeId}' was not found in any plan under {seedRoot}");
+    return 2;
+}
+
+var anyFail = false;
+var anyStale = false;
+foreach (var (treeId, nodes) in allNodesByTree)
+{
+    var report = TreeBinderRun.BindTree(nodes, affixesById, atomsById, powerTuning);
+    var json = ReportWriter.Serialize(treeId, report);
+
+    Console.WriteLine($"tree-binder: {treeId}  verdict={report.Verdict}  bound={report.Bound.Count} " +
+                       $"refused={report.Refused.Count} unspentBudgetShareMilli={report.TotalUnspentBudgetShareMilli}");
+    foreach (var r in report.Refused)
+        Console.WriteLine($"  REFUSED  {r.NodeId}  unspent={r.UnspentBudgetShareMilli}‰" +
+                           $"{(r.DeliberateHole ? " (deliberate hole)" : "")}  {r.Reason}");
+
+    if (report.Verdict == RunVerdict.Fail) anyFail = true;
+
+    var outPath = Path.Combine(outRoot, $"{treeId}.json");
+    if (mode == "check")
+    {
+        if (!File.Exists(outPath) || File.ReadAllText(outPath) != json)
+        {
+            Console.Error.WriteLine($"STALE  {outPath} does not match a fresh regeneration from {seedRoot}");
+            anyStale = true;
+        }
+        continue;
+    }
+
+    Directory.CreateDirectory(outRoot);
+    File.WriteAllText(outPath, json);
+    Console.WriteLine($"wrote {outPath}");
+}
+
+if (mode == "check") return anyStale ? 1 : 0;
+return anyFail ? 1 : 0;
+
+static (IReadOnlyDictionary<string, AffixRow>, IReadOnlyDictionary<string, AtomRow>) LoadSeedContent(string repoRoot)
+{
+    var files = new[]
+    {
+        Path.Combine(repoRoot, "data", "seed", "effects", "affixes", "all.json"),
+        Path.Combine(repoRoot, "data", "seed", "atoms", "fx-board.json"),
+        Path.Combine(repoRoot, "data", "seed", "atoms", "fx-core.json"),
+        Path.Combine(repoRoot, "data", "seed", "atoms", "fx-status.json"),
+    }.Where(File.Exists).Select(f => (f, File.ReadAllText(f))).ToArray();
+
+    var collected = AtomSeedFile.Collect(files);
+    if (!collected.IsOk)
+        throw new InvalidOperationException("seed content did not parse: " + string.Join("; ", collected.Errors));
+
+    return (collected.Content.Affixes.ToDictionary(a => a.AffixId),
+            collected.Content.Atoms.ToDictionary(a => a.AtomId));
+}
+
+static string? FindUp(string markerFile)
+{
+    var dir = new DirectoryInfo(Directory.GetCurrentDirectory());
+    while (dir is not null)
+    {
+        if (File.Exists(Path.Combine(dir.FullName, markerFile))) return dir.FullName;
+        dir = dir.Parent;
+    }
+    return null;
+}

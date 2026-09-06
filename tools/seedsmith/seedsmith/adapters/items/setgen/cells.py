@@ -25,6 +25,29 @@ import statistics
 from collections import Counter
 from dataclasses import dataclass
 
+def atom_id(atom: dict) -> "str | None":
+    """One atom row's cell identity: its family, plus the element that narrows it.
+
+    ⛔ **The element used to be dropped, and that under-counted distinctness on the exact axis this
+    gate exists to measure** (module 13 defect 5, 2026-09-06). The corpus writes an element-narrowed
+    atom as `{"family": …, "powerBand": …, "params": {"element": "ice"}}` — measured on
+    `set.frostbitten-vanguard-002` and `-003` and `set.sunwoven-almanac-003` — while this module read
+    a `variant` key, which is the GENERATOR's internal spelling and appears nowhere in the corpus.
+    `atom.deathblast.fire` and `atom.deathblast.ice` therefore collapsed into one cell.
+
+    Both spellings are read, for the same reason `threshold_families` reads two shapes: a metric
+    that only understands the shape it emitted itself stops working the moment the corpus is real.
+    """
+    family = atom.get("family")
+    if not family:
+        return None
+    params = atom.get("params")
+    element = params.get("element") if isinstance(params, dict) else None
+    if not element:
+        element = atom.get("variant")
+    return f"{family}.{element}" if element else str(family)
+
+
 #: A threshold row's stat families, whatever shape the corpus wrote them in. The shipped sets use
 #: `atoms: [{family, powerBand}]`; a freshly generated draft uses `families: [id]`. Both are read
 #: rather than one being normalised at the corpus boundary, because a metric that only understands
@@ -32,9 +55,10 @@ from dataclasses import dataclass
 def threshold_families(threshold: dict) -> "tuple[str, ...]":
     atoms = threshold.get("atoms")
     if isinstance(atoms, list):
-        out = [a.get("family") for a in atoms if isinstance(a, dict) and a.get("family")]
-        if out:
-            return tuple(out)
+        out = [atom_id(a) for a in atoms if isinstance(a, dict)]
+        kept = tuple(a for a in out if a)
+        if kept:
+            return kept
     families = threshold.get("families")
     if isinstance(families, list):
         return tuple(f for f in families if isinstance(f, str))
@@ -44,10 +68,7 @@ def threshold_families(threshold: dict) -> "tuple[str, ...]":
 def threshold_capability(threshold: dict) -> "str | None":
     cap = threshold.get("capability")
     if isinstance(cap, dict):
-        family = cap.get("family")
-        variant = cap.get("variant")
-        if family:
-            return f"{family}.{variant}" if variant else family
+        return atom_id(cap)
     if isinstance(cap, str):
         return cap
     return None

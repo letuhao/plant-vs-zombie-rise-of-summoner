@@ -59,6 +59,18 @@ internal static class ContractTuningTestBootstrap
         // T4.7 step 2 / T4.8 (catalog-runtime) — behaviour-preserving; see the Core.Tests bootstrap's
         // own identical comment.
         DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        // T8.4/T8.5 (ds 18, fusion-recipe-runtime) — behaviour-preserving; see the Core.Tests
+        // bootstrap's own identical comment. Reading the REAL committed seed here (matching
+        // Program.cs's own T8.5 flip) is the WRONG fix, tried and reverted the same session: the
+        // real seed's recipes reference the real ~829-species corpus, but this assembly's own
+        // DemonSpeciesCatalog above is the small compiled default (~84 species) — Configure's own
+        // cross-check against DemonSpeciesCatalog correctly refused nearly every real recipe for
+        // referencing a species this roster does not have. BuildDeterministicOnly() against
+        // WHATEVER species roster is actually configured is what keeps the two in sync.
+        // InternalsVisibleTo for this assembly lives as a C# attribute in
+        // FusionRpg.Core/InternalsVisibleTo.Fusion.cs, not in FusionRpg.Core.csproj — the Core/data
+        // separation guard substring-scans that one file for this very project's own name.
+        DemonRecipeCatalog.Configure(DemonRecipeCatalog.BuildDeterministicOnly());
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -444,6 +456,8 @@ internal static class ContractTuningTestBootstrap
             // tunables table); MaxRounds/RoundDurationMs stay null (unset) so siege inherits
             // the ruleset horizon until a real board exists to measure one on.
             ["siege"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            // party-dungeon D2.9: hybrid-atb-shaped magnitudes, copied verbatim.
+            ["delve"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
         },
         // Wave E3: 0 = the shipped default, secondary contributes nothing, goldens unmoved.
         HybridSecondaryWeightMilli: 0,

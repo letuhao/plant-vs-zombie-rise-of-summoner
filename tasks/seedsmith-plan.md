@@ -10,9 +10,14 @@ Audit: [seedsmith/review/](../docs/architecture/seedsmith/review/) — 66 findin
 > all three waves (W1/W2/W3) rather than forking into per-wave files, so the W1 defect trail below
 > stays attached to the plan that cites it (S9's mutation tests, S10's CI cutover).
 
-**Status (2026-08-23): Part 1 (W1) complete.** Part 2 (W2) and Part 3 (W3) below are planned, not
-built — see [seedsmith-todo.md](seedsmith-todo.md) for the live per-task checklist across all
-three parts.
+**Status (corrected 2026-09-06): Parts 1-5 are ALL built.** This line said "Part 1 complete, Parts 2-3
+planned, not built" from 2026-08-23 until today — stale since 2026-08-31/09-01, when Part 4 (demons,
+D1-D4) and Part 5 (generation runtime, G0-G4) both reached their final checkpoints with real evidence
+(committed corpora, passing suites) recorded in their own sections below. Corrected here rather than
+left to mislead the next reader — see `seedsmith-map.md`'s matching correction, found the same way.
+G4.4 (prose near-duplicate check, closing a real gap found in the shipped `commander-effect` corpus)
+was added and built 2026-09-06. See [seedsmith-todo.md](seedsmith-todo.md) for the live per-task
+checklist across all five parts.
 
 ---
 
@@ -794,6 +799,47 @@ every motif in the corpus. Neither needs LangGraph.
 - [x] Re-run produces zero new writes — ⛔ **was unmet, now built.** Generator had no skip logic and rewrote all 84 stochastically. Added `_provenance.motifs` + `stale_ids()` + skip-existing; a plain re-run leaves `all.json` **byte-identical** (md5 `00b74afd…` before and after)
 - [x] Quality reported from a read sample, **separately** from the pass rate — the 9 regenerated effects read individually; `normalzombie` 「随处可见的消耗」 → 「无名之辈」
 - [x] Full suite green; four guard scripts green — 480 passed (both venvs); all four `guard-*.ps1` PASS
+
+### G4.4 — corpus-wide near-duplicate check on `doctrine` (added 2026-09-06)
+
+Found auditing whether every seedsmith generator — not only `adapter-items`/`tree-plan` — has a
+deterministic pre-generation coverage/distribution check. `commander-effect` did not: `quality-gates`
+validates per-item only (`motif_coverage`, `field_echo`); nothing watches convergence across the
+84-and-growing corpus, despite the module's own §9 feasibility probe already reproducing the failure
+(3 generations for one demon, Jaccard mean 0.52).
+
+**Verified real before fixing:** ran a direct Jaccard check against the live, already-committed
+`data/seed/demons/commander-effect/all.json` (84 entries) — it already has **two near-duplicate
+doctrine pairs**, the clearest at Jaccard 0.52 (`doublecherry` / `doubleshooter`, both describing the
+same split-shot mechanic in near-identical sentences), unnoticed since the 2026-09-01 run.
+
+**Built:**
+- `KindSpec.dedup_fields: frozenset[str] = frozenset()` (`adapters/base.py`) — additive, same shape
+  as `motif_expression`; every kind before this is untouched.
+- `commander-effect`'s `KindSpec` sets `dedup_fields=frozenset({"doctrine"})`
+  (`adapters/demons/kinds.py`).
+- `SemanticDedup` (`seedsmith/metrics/dedup.py`) gained an exact-duplicate check (6.1c) and a
+  near-duplicate check (6.2b) over every kind's declared prose field(s), reusing the existing
+  shingle machinery.
+- **6.2b compares directly (all-pairs exact Jaccard), not via MinHash+LSH** — verified live that
+  8-band/4-row LSH has real recall loss at prose-scale similarity (~0.5), missing the corpus's own
+  clearest pair entirely on a first run. A prose-dedup kind is bounded in the low thousands
+  (`commander-effect`'s ceiling ~900 demons), where direct comparison is cheap and exact. Full
+  account: `spec-analytics.md` §6.2b.
+
+**Acceptance — ✅ both met, BUILT 2026-09-06**
+- [x] `ProseDedupTests` (7 tests, `test_constraint_exemplar_dedup.py`) — additive-no-regression, the
+      known real pair caught, a verb-only-shared pair correctly NOT flagged, exact-duplicate
+      reported separately from near-duplicate, and a known-answer test pinned against the live
+      corpus (`test_real_commander_effect_corpus_reports_exactly_the_known_pair`)
+- [x] Full seedsmith suite: **1,777 passed, 1 skipped, 1 pre-existing unrelated failure**
+      (`test_general_propose.py::DryRunEntrypointTests::test_real_run_writes_provenance_with_model_prompt_version_brief_hash_and_candidate_set_hash`
+      — a hash-determinism issue in the unrelated actions/general-propose pipeline; confirmed
+      untouched by this change and not newly introduced)
+
+**Not fixed here, left as an accepted finding:** the real `doublecherry`/`doubleshooter` pair itself.
+Re-generating or hand-editing either doctrine is a content decision, not part of closing the coverage
+gap — the check now exists and reports it; whether to act on this specific pair is the owner's call.
 
 ## Task summary
 

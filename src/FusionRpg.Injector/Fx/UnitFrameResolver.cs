@@ -155,8 +155,10 @@ public static class UnitFrameResolver
     }
 
     /// <summary>
-    /// Union of enabled SpriteRenderer bounds under <paramref name="follow"/>. Rejects decoy/tiny
-    /// sprites (&lt; 35% of cell span on both axes). Skips FusionRpg overlay objects.
+    /// Largest enabled SpriteRenderer under <paramref name="follow"/> (by world area).
+    /// First-child Renderer / full-tree encapsulate both failed LIVE: tiny FX → mid-body HUD;
+    /// union with shadows/FX → inflated Span. Skips FusionRpg overlays and decoys
+    /// (&lt; 35% cell on both axes, or taller than 2.5× cell).
     /// </summary>
     static bool TryCollectSpriteBounds(
         Transform follow, float cellSpan,
@@ -169,9 +171,13 @@ public static class UnitFrameResolver
             var sprites = follow.GetComponentsInChildren<SpriteRenderer>(true);
             if (sprites == null) return false;
 
-            var hasAcc = false;
-            var acc = default(Bounds);
-            var bestOrder = int.MinValue;
+            var minAxis = cellSpan * 0.35f;
+            var maxH = cellSpan * 2.5f;
+            var bestArea = 0f;
+            var best = default(Bounds);
+            var bestOrder = 0;
+            var found = false;
+
             foreach (var sr in sprites)
             {
                 if (sr == null) continue;
@@ -187,33 +193,24 @@ public static class UnitFrameResolver
                 try { b = sr.bounds; }
                 catch { continue; }
                 if (b.size.sqrMagnitude < 1e-6f) continue;
+                if (b.size.y < minAxis && b.size.x < minAxis) continue;
+                if (b.size.y > maxH) continue;
 
-                if (!hasAcc)
-                {
-                    acc = b;
-                    hasAcc = true;
-                }
-                else
-                    acc.Encapsulate(b);
-
-                try
-                {
-                    if (sr.sortingOrder > bestOrder) bestOrder = sr.sortingOrder;
-                }
-                catch { }
+                var area = b.size.x * b.size.y;
+                if (area <= bestArea) continue;
+                bestArea = area;
+                best = b;
+                found = true;
+                try { bestOrder = sr.sortingOrder; } catch { bestOrder = 0; }
             }
 
-            if (!hasAcc) return false;
-            var box = acc;
-            var minAxis = cellSpan * 0.35f;
-            if (box.size.y < minAxis && box.size.x < minAxis)
-                return false;
+            if (!found) return false;
 
-            centerX = box.center.x;
-            centerY = box.center.y;
-            width = box.size.x;
-            height = box.size.y;
-            sortingOrder = bestOrder == int.MinValue ? 0 : bestOrder;
+            centerX = best.center.x;
+            centerY = best.center.y;
+            width = best.size.x;
+            height = best.size.y;
+            sortingOrder = bestOrder;
             return true;
         }
         catch

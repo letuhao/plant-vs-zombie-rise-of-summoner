@@ -77,6 +77,12 @@ const COLLECTION_SURFACES: CollectionEntry[] = [
     surface: "World sector inspector — force rows",
     strategy: "render-all",
     reason: "Single-digit rows; enemy forces render as bands (ForceView's exact:false case), never per-unit rows, so there is no unbounded count to render at all (spec-world-inspector.md)"
+  },
+  {
+    surface: "Passives — Level 1 path browse (PathBrowse)",
+    strategy: "virtualize",
+    reason:
+      "39 real shared paths today (spec-tree-surface.md §9.1: 12 primary + 6 elemental + 21 status), already above CreaturesLayer's own render-all threshold and the surface's own I4 acceptance names windowing explicitly -- proven at 10/100/1000 via e2e/fixtures/passive-tree-volume.ts's passiveTreePathBrowseFixture, the same generator I1 built ahead of this task"
   }
 ];
 
@@ -93,7 +99,7 @@ describe("volume matrix (GG-50)", () => {
   });
 
   it("declares the full known set", () => {
-    expect(COLLECTION_SURFACES).toHaveLength(13);
+    expect(COLLECTION_SURFACES).toHaveLength(14);
   });
 
   it("the world stage adds no virtualize entry — every one of its five collections is structurally bounded", () => {
@@ -104,9 +110,12 @@ describe("volume matrix (GG-50)", () => {
     }
   });
 
-  it("virtualize is still exactly one entry (Creatures) — the world stage did not add a second", () => {
+  it("virtualize is exactly Creatures and Passives' path browse — the world stage added neither", () => {
     const virtualized = COLLECTION_SURFACES.filter((e) => e.strategy === "virtualize");
-    expect(virtualized).toHaveLength(1);
-    expect(virtualized[0]?.surface).toContain("Creatures");
+    expect(virtualized).toHaveLength(2);
+    expect(virtualized.map((e) => e.surface)).toEqual([
+      expect.stringContaining("Creatures"),
+      expect.stringContaining("Passives")
+    ]);
   });
 });

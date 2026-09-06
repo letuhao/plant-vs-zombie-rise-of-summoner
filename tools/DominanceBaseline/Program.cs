@@ -1,12 +1,15 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using FusionRpg.Core.Balance.Guards;
+using FusionRpg.Core.Battle;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Shield;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using FusionRpg.Core.Status;
 
 // class-system-todo.md Checkpoint 8's own remaining gap: _baseline-dominance.json's dominanceMatrix and
@@ -30,6 +33,14 @@ using FusionRpg.Core.Status;
 //
 // spec-residual-fit.md §5: "this module ships no src/ code... measures and publishes numbers." This
 // tool lives in tools/, calling FusionRpg.Core's shipped DominanceGuard/TerminationGuard as black boxes.
+
+// item-todo.md P1.5 / item-plan.md Checkpoint 1 — "the first geared corner run". Opt-in: WITHOUT
+// --geared this tool emits byte-for-byte what it always has (DominanceBaselineTests.Run_isDeterministic
+// and scripts/regen-class-system-baselines.ps1 both depend on that), and every corner resolves through
+// an ActorHub carrying no equipment subsystem at all. WITH it, each corner is additionally equipped
+// with the real shipped stat.derived atom corpus and the run is reported alongside the bare one, so
+// the delta between them is the evidence that equipment reached the derived snapshot.
+var wantGeared = args.Contains("--geared");
 
 var theta = long.Parse(ArgOrDefault(args, "--theta", "100"));
 var outPath = ArgOrDefault(args, "--out", "");
@@ -85,42 +96,141 @@ static int CornerIndex(string name) => int.Parse(name["corner".Length..]);
 
 // wins[i][j]: attacker i's win share against defender j; diagonal 0.5, matching the existing checked-in
 // baseline's own convention (self-vs-self placeholder, never read).
-var wins = new double[roster.Length][];
-for (var i = 0; i < roster.Length; i++)
+double[][] WinsOf(DominanceReport r)
 {
-    wins[i] = new double[roster.Length];
-    for (var j = 0; j < roster.Length; j++) wins[i][j] = 0.5;
-}
-foreach (var arrow in report.Matrix)
-{
-    var i = CornerIndex(arrow.AttackerName);
-    var j = CornerIndex(arrow.DefenderName);
-    wins[i][j] = arrow.WinShareAttacker;
+    var w = new double[roster.Length][];
+    for (var i = 0; i < roster.Length; i++)
+    {
+        w[i] = new double[roster.Length];
+        for (var j = 0; j < roster.Length; j++) w[i][j] = 0.5;
+    }
+    foreach (var arrow in r.Matrix)
+        w[CornerIndex(arrow.AttackerName)][CornerIndex(arrow.DefenderName)] = arrow.WinShareAttacker;
+    return w;
 }
 
 // unending[i][j]: the termination invariant per ordered pair, via the SAME public entry point
 // (TerminationGuard.Assert) tools/ResidualFitLoop already uses for this exact sweep (P8.6/P8.7) --
 // a 2-build array per call, try/catch on TerminationViolation, never a re-derivation of the net-
 // attrition condition itself.
-var unending = new bool[roster.Length][];
-for (var i = 0; i < roster.Length; i++)
+bool[][] UnendingOf(IReadOnlyList<IReadOnlyList<BoundDerivedAtom>>? gear)
 {
-    unending[i] = new bool[roster.Length];
-    for (var j = 0; j < roster.Length; j++)
+    var u = new bool[roster.Length][];
+    for (var i = 0; i < roster.Length; i++)
     {
-        if (i == j) continue;
-        try { TerminationGuard.Assert(new[] { builds[i], builds[j] }, theta); }
-        catch (TerminationViolation) { unending[i][j] = true; }
+        u[i] = new bool[roster.Length];
+        for (var j = 0; j < roster.Length; j++)
+        {
+            if (i == j) continue;
+            // The 2-build slice needs its gear sliced the same way -- Assert requires positional
+            // alignment, and passing the full 12-entry gear against a 2-build array would throw.
+            var pairGear = gear is null ? null : new[] { gear[i], gear[j] };
+            try { TerminationGuard.Assert(new[] { builds[i], builds[j] }, theta, pairGear); }
+            catch (TerminationViolation) { u[i][j] = true; }
+        }
     }
+    return u;
 }
 
-var payload = new
+var wins = WinsOf(report);
+var unending = UnendingOf(null);
+var dominantCorners = report.DominantBuildNames.Select(n => roster[CornerIndex(n)]).ToArray();
+
+const string model = "data/tuning/aptitudes (live, via FusionRpg.Core.DominanceGuard/TerminationGuard — not tools/CombatSim)";
+
+object payload = new
 {
-    model = "data/tuning/aptitudes (live, via FusionRpg.Core.DominanceGuard/TerminationGuard — not tools/CombatSim)",
+    model,
     theta,
     dominanceMatrix = new { names = roster, wins, unending },
-    dominantCorners = report.DominantBuildNames.Select(n => roster[CornerIndex(n)]).ToArray(),
+    dominantCorners,
 };
+
+if (wantGeared)
+{
+    // The equipped payload is REAL SHIPPED CONTENT, read off disk -- never a literal in this file.
+    // Everything under data/seed/atoms is collected through the shipped Core-side reader
+    // (AtomSeedFile, the same one the importer uses) and filtered to the one kind equipment
+    // contributes through, exactly as EquipAtomSource itself filters.
+    var atomsRoot = Path.Combine(repoRoot, "data", "seed", "atoms");
+    var seedFiles = Directory.Exists(atomsRoot)
+        ? Directory.GetFiles(atomsRoot, "*.json", SearchOption.AllDirectories)
+            .OrderBy(f => f, StringComparer.Ordinal)
+            .Select(f => (Path: f, Json: File.ReadAllText(f)))
+            .ToArray()
+        : Array.Empty<(string Path, string Json)>();
+
+    var collected = AtomSeedFile.Collect(seedFiles);
+    var equippedRows = collected.Content.Atoms
+        .Where(a => string.Equals(a.KindId, "stat.derived", StringComparison.Ordinal))
+        .OrderBy(a => a.AtomId, StringComparer.Ordinal)
+        .ToArray();
+
+    // Production shape, verbatim: EquipAtomSource.FromResolver's own documented contract is
+    // `specimenId => store.ResolveBindings(OwnerScope.UniqueActor(specimenId), ctx).AtomsByBinding`
+    // flattened. This tool substitutes the store with the shipped corpus and keeps everything else --
+    // the specimen keying, the kind filter, the param parse, the op parse -- as module 5 built it.
+    var specimenOf = Enumerable.Range(0, roster.Length)
+        .ToDictionary(i => $"specimen-corner-{i}", i => i, StringComparer.Ordinal);
+    var equip = EquipAtomSource.FromResolver(specimenId =>
+        specimenOf.ContainsKey(specimenId) ? equippedRows : Array.Empty<AtomRow>());
+
+    var gear = Enumerable.Range(0, roster.Length)
+        .Select(i => equip.DerivedAtomsFor($"specimen-corner-{i}"))
+        .ToArray();
+
+    var gearedReport = DominanceGuard.Measure(builds, theta, gear);
+    var gearedWins = WinsOf(gearedReport);
+    var gearedUnending = UnendingOf(gear);
+
+    // The falsifying probe. If equipment never reached a channel the predictor reads, every geared
+    // win share equals its bare twin and this is exactly 0 -- which would mean the run "executed"
+    // while proving nothing. Reported as a number rather than asserted, so the evidence is the
+    // output, not a claim about it.
+    var maxAbsDelta = 0.0;
+    for (var i = 0; i < roster.Length; i++)
+    for (var j = 0; j < roster.Length; j++)
+        maxAbsDelta = Math.Max(maxAbsDelta, Math.Abs(gearedWins[i][j] - wins[i][j]));
+
+    var terminationGreen = true;
+    for (var i = 0; i < roster.Length && terminationGreen; i++)
+    for (var j = 0; j < roster.Length; j++)
+        if (gearedUnending[i][j]) { terminationGreen = false; break; }
+
+    payload = new
+    {
+        model,
+        theta,
+        dominanceMatrix = new { names = roster, wins, unending },
+        dominantCorners,
+        geared = new
+        {
+            equippedAtoms = equippedRows.Select(a => new
+            {
+                atomId = a.AtomId, family = a.FamilyId, tier = a.Tier, @params = a.ParamsJson,
+            }).ToArray(),
+            equippedAtomCount = equippedRows.Length,
+            seedFilesRead = seedFiles.Length,
+            seedFilesRefused = collected.Errors.Count,
+            // Named, not hidden: every stat.derived AFFIX family is refused by E43 today because
+            // tier-bands.v1.json authors a sharePermille for the 14 stat.modify primary-channel
+            // families only, so data/seed/atoms/generated/ carries no stat.derived row at all. The
+            // corpus below is what genuinely ships. When that gap closes, this run gets richer with
+            // no code change here.
+            corpusNote = "data/seed/items/_tuning/tier-bands.v1.json authors sharePermille for the 14 stat.modify primary-channel families only, so FamilyExpansion (E43) refuses every stat.derived affix family and data/seed/atoms/generated/ holds no stat.derived row. The atoms above are the whole shipped stat.derived corpus.",
+            dominanceMatrix = new { names = roster, wins = gearedWins, unending = gearedUnending },
+            dominantCorners = gearedReport.DominantBuildNames.Select(n => roster[CornerIndex(n)]).ToArray(),
+            terminationGreen,
+            matrixMaxAbsDeltaVsBare = maxAbsDelta,
+            coverage = new
+            {
+                elementAxis = gearedReport.Coverage.ElementAxis,
+                reservedFamilies = gearedReport.Coverage.ReservedFamilies,
+                note = CoverageReport.UpperBoundNote,
+            },
+        },
+    };
+}
 
 var json = JsonSerializer.Serialize(payload, new JsonSerializerOptions { WriteIndented = true });
 if (string.IsNullOrEmpty(outPath)) Console.WriteLine(json);

@@ -16,6 +16,7 @@ public static class InjectorLoop
     static float _cheatPush;
     static float _startDelay;
     static float _perf;
+    static float _gateCounters;
     static bool _started;
 
     /// <summary>Reset timers (e.g. after host reload). Normally not needed.</summary>
@@ -27,6 +28,7 @@ public static class InjectorLoop
         _cheatPush = 0;
         _startDelay = 0;
         _perf = 0;
+        _gateCounters = 0;
         _started = false;
     }
 
@@ -124,6 +126,17 @@ public static class InjectorLoop
         {
             _perf = 0;
             try { PerfReporter.Flush(client); } catch { }
+        }
+        // passive-tree-todo.md G6 (spec-gate-counters.md §4.3) -- the timer half of the flush contract.
+        // Rides PerfReporter's OWN already-configured cadence rather than a second tuning load: §4.3
+        // names `gateCounters.flushIntervalMs` (default 5000ms) as "the window PerfProbe already uses"
+        // by design, and PassiveTreeTuningHub is never configured in this process (server-only) --
+        // reusing PerfReporter.IntervalSeconds gets the same number without adding one.
+        _gateCounters += unscaledDeltaTime;
+        if (_gateCounters >= PerfReporter.IntervalSeconds)
+        {
+            _gateCounters = 0;
+            try { GateCounterHost.Flush(client); } catch { }
         }
         _cheatPush += unscaledDeltaTime;
         if (_cheatPush >= 3f)

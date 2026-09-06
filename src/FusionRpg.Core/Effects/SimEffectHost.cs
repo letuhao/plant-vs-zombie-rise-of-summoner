@@ -3,6 +3,7 @@ using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 
 namespace FusionRpg.Core.Effects;
 
@@ -146,6 +147,31 @@ public sealed class SimEffectHost
 
     public void PinDerived(string ptr, ActorDerivedSnapshot snapshot) =>
         _derived.Pin(ptr, snapshot);
+
+    /// <summary>Resolves <paramref name="ptr"/>'s current derived snapshot — the pinned base folded
+    /// with any <see cref="ContributeDerived"/> contributions. The read-side complement to
+    /// <see cref="PinDerived"/>/<see cref="ContributeDerived"/>, so a caller can observe the fold
+    /// directly rather than only through a combat/status side effect.</summary>
+    public ActorDerivedSnapshot ResolveDerived(string ptr) => _derived.Resolve(ptr, attackerLess: false);
+
+    /// <summary>
+    /// Folds one bound `stat.derived` contribution onto <paramref name="ptr"/>'s pinned snapshot —
+    /// mechanism-wiring.md §4.3 step 1/2, the SIM-side analog of
+    /// <see cref="Stats.Derived.Subsystems.AtomDerivedSubsystem"/> on the lawn. Delegates entirely to
+    /// <see cref="ActorDerivedLookup.AddContribution"/> so this host and
+    /// <see cref="FoundationHarness"/> fold through the exact same logic — one function, two hosts.
+    /// </summary>
+    public void ContributeDerived(string ptr, BoundDerivedAtom atom) =>
+        _derived.AddContribution(ptr, atom);
+
+    /// <summary>
+    /// Attempts a real `stat.derived` bind with <c>BindContext(RuntimeId.Sim)</c> — §4.3 step 3. See
+    /// <see cref="ActorDerivedLookup.TryBind"/> for why this refuses every row until E5 flips the Sim
+    /// cell off <see cref="RuntimeState.None"/>.
+    /// </summary>
+    public AtomRejection TryBindDerivedAtoms(
+        IReadOnlyList<AtomRow> atoms, OwnerScope owner, IReadOnlyCollection<string>? overlayKeys = null) =>
+        _derived.TryBind(atoms, owner, overlayKeys);
 
     public IntentPlanDto OnEvent(EffectEventDto ev)
     {

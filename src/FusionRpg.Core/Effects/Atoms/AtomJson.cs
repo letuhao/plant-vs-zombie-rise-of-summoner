@@ -63,9 +63,29 @@ public static class AtomJson
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
                     "'powerLadder': false is not a value spec — omit the key entirely instead");
 
+            // B3 (spec-tree-binder.md §3.5, §7): 'kMicro' is the per-million sibling — mutually
+            // exclusive with 'kMilli' in one atom, since each names a different, non-comparable
+            // scale of the same coefficient. tree-binder is the first (and, today, only) author of
+            // this branch; every hand-authored atom keeps using 'kMilli' exactly as shipped.
+            var hasKMilli = el.TryGetProperty("kMilli", out _);
+            var hasKMicro = el.TryGetProperty("kMicro", out _);
+            if (hasKMilli && hasKMicro)
+                return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                    "powerLadder may carry 'kMilli' or 'kMicro', never both — they are different scales " +
+                    "of the same coefficient and combining them is a content error, not a value to reconcile");
+
+            if (hasKMicro)
+            {
+                if (!TryLong(el, "kMicro", out var kMicro))
+                    return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
+                        "powerLadder's 'kMicro' must be an explicit integer — the balance number is never defaulted");
+                spec = new ValueSpec(0, 0, RollPolicy.Fixed, PowerLadder: true, PowerLadderKMicro: kMicro);
+                return spec.Validate();
+            }
+
             if (!TryInt(el, "kMilli", out var kMilli))
                 return AtomRejection.Fail(AtomRejectionReason.BadValueSpec,
-                    "powerLadder requires an explicit integer 'kMilli' — the balance number is never defaulted");
+                    "powerLadder requires an explicit integer 'kMilli' or 'kMicro' — the balance number is never defaulted");
 
             spec = new ValueSpec(0, 0, RollPolicy.Fixed, PowerLadder: true, PowerLadderKMilli: kMilli);
             return spec.Validate();
@@ -134,6 +154,17 @@ public static class AtomJson
         return obj.TryGetProperty(name, out var el)
                && el.ValueKind == JsonValueKind.Number
                && el.TryGetInt32(out value);
+    }
+
+    /// <summary>B3: 'kMicro' needs `long` range (per-million coefficients reach past `int` at the
+    /// same Θ the whole overflow discipline is about), so it gets its own reader rather than
+    /// widening <see cref="TryInt"/> and risking a silent narrowing somewhere else that calls it.</summary>
+    static bool TryLong(JsonElement obj, string name, out long value)
+    {
+        value = 0;
+        return obj.TryGetProperty(name, out var el)
+               && el.ValueKind == JsonValueKind.Number
+               && el.TryGetInt64(out value);
     }
 
     // ---- predicates ----------------------------------------------------------------------------

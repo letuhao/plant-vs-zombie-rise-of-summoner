@@ -65,7 +65,8 @@ public class SpeciesExpanderTests
         IReadOnlyList<string> variants) =>
         new(speciesId, rarity, threatBand, aptitudePrimary, aptitudeSecondary, pure, attackTempo, reach,
             variants, Side: "plant", GameTypeId: 0, ElementPrimary: "earth", ElementSecondary: null,
-            DeployMode: "PlantAvatar", Acquisition: new[] { "Summonable" }, Traits: Array.Empty<string>());
+            DeployMode: "PlantAvatar", Acquisition: new[] { "Summonable" }, Traits: Array.Empty<string>(),
+            TargetPreference: "frontline");
 
     // ---- over the real shipped anchors -------------------------------------------------------------
 

@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 1,
+  "kind": "set",
+  "population": "build",
+  "promptVersion": "set-charm-gen/1",
+  "answers": {
+    "set-build-build.might-offense": [
+      {
+        "name": "Fallweight of the Sledgevine",
+        "nameKey": "set.fallweight-sledgevine",
+        "flavor": "The sledgevine does not strike so much as arrive. Whatever the soil takes from that arrival, it hands along to everything still standing.",
+        "capability": {
+          "family": "atom.deathblast",
+          "variant": "earth"
+        },
+        "members": [
+          {
+            "role": "armament-primary",
+            "frame": "plant"
+          },
+          {
+            "role": "manipulator",
+            "frame": "humanoid"
+          },
+          {
+            "role": "footing",
+            "frame": "plant"
+          },
+          {
+            "role": "jewel-major",
+            "frame": "plant"
+          }
+        ],
+        "thresholds": [
+          {
+            "pieces": 2
+          },
+          {
+            "pieces": 3,
+            "families": [
+              "atom.might",
+              "atom.ferocity"
+            ]
+          },
+          {
+            "pieces": 4,
+            "families": [
+              "atom.savagery",
+              "atom.elpw-pierce.earth",
+              "atom.elpw-overflow.earth"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Fallweight of the Sledgevine",
+        "nameKey": "set.fallweight-sledgevine",
+        "flavor": "The sledgevine does not strike so much as arrive. Whatever the soil takes from that arrival, it hands along to everything still standing.",
+        "capability": {
+          "family": "atom.deathblast",
+          "variant": "earth"
+        },
+        "members": [
+          {
+            "role": "armament-primary",
+            "frame": "plant"
+          },
+          {
+            "role": "manipulator",
+            "frame": "humanoid"
+          },
+          {
+            "role": "footing",
+            "frame": "plant"
+          },
+          {
+            "role": "jewel-major",
+            "frame": "plant"
+          }
+        ],
+        "thresholds": [
+          {
+            "pieces": 2
+          },
+          {
+            "pieces": 4,
+            "families": [
+              "atom.might",
+              "atom.ferocity",
+              "atom.elpw-pierce.earth"
+            ]
+          }
+        ]
+      }
+    ],
+    "set-build-build.might-defense": [
+      {
+        "name": "Ramparts of the Turned Earth",
+        "nameKey": "set.ramparts-of-the-turned-earth",
+        "flavor": "She never swung at anything. She only kept heaving the furrow upward until it stood as a bank, and the bank was hers, and everything that came for the house arrived out of breath.",
+        "capability": {
+          "family": "atom.terraforming"
+        },
+        "members": [
+          {
+            "role": "retinue",
+            "frame": "plant"
+          },
+          {
+            "role": "core-guard",
+            "frame": "plant"
+          },
+          {
+            "role": "manipulator",
+            "frame": "plant"
+          },
+          {
+            "role": "footing",
+            "frame": "plant"
+          }
+        ],
+        "thresholds": [
+          {
+            "pieces": 2
+          },
+          {
+            "pieces": 3,
+            "families": [
+              "atom.might",
+              "atom.plating"
+            ]
+          },
+          {
+            "pieces": 4,
+            "families": [
+              "atom.carapace",
+              "atom.resilience",
+              "atom.warding"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Ramparts of the Turned Earth",
+        "nameKey": "set.ramparts-of-the-turned-earth",
+        "flavor": "She never swung at anything. She only kept heaving the furrow upward until it stood as a bank, and the bank was hers, and everything that came for the house arrived out of breath.",
+        "capability": {
+          "family": "atom.terraforming"
+        },
+        "members": [
+          {
+            "role": "retinue",
+            "frame": "plant"
+          },
+          {
+            "role": "core-guard",
+            "frame": "plant"
+          },
+          {
+            "role": "manipulator",
+            "frame": "plant"
+          },
+          {
+            "role": "footing",
+            "frame": "plant"
+          }
+        ],
+        "thresholds": [
+          {
+            "pieces": 2
+          },
+          {
+            "pieces": 4,
+            "families": [
+              "atom.might",
+              "atom.plating",
+              "atom.carapace"
+            ]
+          }
+        ]
+      }
+    ],
+    "set-build-build.might-balance": [
+      {
+        "name": "Plumb and Ballast",
+        "nameKey": "set.plumb-and-ballast",
+        "flavor": "Hang the plumb before you lift the ram: a blow that is not level moves only the arm that swings it. Load the line evenly, and the ground yields before your footing does.",
+        "capability": {
+          "family": "atom.terraforming"
+        },
+        "members": [
+          {
+            "role": "armament-primary",
+            "frame": "humanoid"
+          },
+          {
+            "role": "girdle",
+            "frame": "humanoid"
+          },
+          {
+            "role": "footing",
+            "frame": "plant"
+          },
+          {
+            "role": "jewel-major",
+            "frame": "plant"
+          }
+        ],
+        "thresholds": [
+          {
+            "pieces": 2
+          },
+          {
+            "pieces": 3,
+            "families": [
+              "atom.might",
+              "atom.plating"
+            ]
+          },
+          {
+            "pieces": 4,
+            "families": [
+              "atom.elpw-pierce.earth",
+              "atom.elpw-focus.earth",
+              "atom.resilience"
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Plumb and Ballast",
+        "nameKey": "set.plumb-and-ballast",
+        "flavor": "Hang the plumb before you lift the ram: a blow that is not level moves only the arm that swings it. Load the line evenly, and the ground yields before your footing does.",
+        "capability": {
+          "family": "atom.terraforming"
+        },
+        "members": [
+          {
+            "role": "armament-primary",
+            "frame": "humanoid"
+          },
+          {
+            "role": "girdle",
+            "frame": "humanoid"
+          },
+          {
+            "role": "footing",
+            "frame": "plant"
+          },
+          {
+            "role": "jewel-major",
+            "frame": "plant"
+          }
+        ],
+        "thresholds": [
+          {
+            "pieces": 2
+          },
+          {
+            "pieces": 4,
+            "families": [
+              "atom.might",
+              "atom.plating",
+              "atom.elpw-pierce.earth"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

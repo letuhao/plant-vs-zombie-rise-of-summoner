@@ -376,12 +376,12 @@ name this one, ruling-anticipated exception explicitly.
 - [x] `UnassistedAttributes.Filter` — I11 §2.7's cycle rule, with a structural proof
       (`An_equippable_grant_cannot_flip_an_admission`) that an item-sourced value never reaches the
       actor snapshot the gate reads, not merely a claim that it doesn't today
-- [ ] ⏸ **Deferred, not skipped — explicit:** retiring `rpg_unique_equipment` / `UniqueEquipmentCatalog`
-      and the relic row migration. The confirmed disposition is **relics become uniques**, but module
-      17 (`uniques`, Phase 5) does not exist yet to migrate them *into* — retiring the stub before that
-      module has a shape would be exactly the boundary this spec names: *"Never retire
-      `rpg_unique_equipment` before relics have a home."* `RelicCatalog`, `RelicEndpoints` and the FE
-      layer are **untouched** and continue serving the four shipped relics exactly as today
+- [x] ⭐ **RESOLVED 2026-09-06 — the relic row migration and the stub's retirement, D1 §10 M1/M2.**
+      Closed as a **cross-reference gap**: this bullet deferred the item to module 17, and module 17's
+      P5.1 — written the next day — deferred it straight back (*"the row migration is module 4's"*).
+      Both notes read as self-consistent in isolation and neither built anything, so the item survived
+      two modules. See the dedicated block below for the correction, the design decision and the
+      evidence table
 - [ ] ⏸ **Deferred with module 2:** loadout **apply** (writes `rpg_item_assignment`) — the spec itself
       sequences apply with-or-after this module, which is now the "after". Deferred again to whichever
       later pass wires a real caller; the library (module 2) already ships
@@ -407,13 +407,165 @@ code** — the spec marks minting a 15th code an Ask-first against a closed *spe
 clearly-named value in this module's own (non-spec) result enum is a different, smaller thing and
 does not require that sign-off. Ratifying it as an official code is still open.
 
+---
+
+#### ⭐ P1.4-R — the relic row migration, CLOSED 2026-09-06 (found as a two-module cross-reference gap)
+
+⛔ **How it hid.** Module 4 (P1.4, 2026-09-04) deferred *"retiring `rpg_unique_equipment` /
+`UniqueEquipmentCatalog` and the relic row migration"* on the grounds that **module 17 did not exist
+yet to migrate relics into**. Module 17 (P5.1, 2026-09-05) re-confirmed the same item and deferred it
+**back**: *"The row migration is **module 4's** … nothing here touches it."* Each note is correct
+about ownership, each looks complete on its own, and between them the work was never done. A
+systematic proof pass over all 22 modules caught the loop; nothing in either module's own verification
+table could have.
+
+⛔ **And module 4's stated blocker was false — this is the correction that unlocks it.** Three facts,
+each read off the shipped code rather than the specs:
+
+| Claim in P1.4 | Real state, checked |
+|---|---|
+| *"module 17 does not exist yet to migrate them into"* | ❌ **`item_unique` was never the destination.** `RpgStore.ItemUniques.cs:36-54` is a nine-column **classification flag** keyed 1:1 on `effect_container` — `derived_from`, `counter_pressure`, `budget_ae`, `power_axis`, `acquisition`, `enhance_scope`, `flavour_key`, `enabled`, `revision`. **No name, rarity, slot, description or effect id.** An equipped-slot row could never have gone there |
+| *"the relic row migration"* implies relic data lives in `rpg_unique_equipment` | ❌ `rpg_unique_equipment(instance_id, slot, item_id)` (`RpgStore.cs:411`) holds **zero relic definitions** — it is a per-actor equipped-slot join table. The four definitions are hard-coded in `RelicCatalog.cs:15-53` and were never at risk |
+| the destination | ✅ **`rpg_item_assignment`** — `decision-d1-durable-ownership.md` §10 **M1** spells it out (`ref_kind = 'stock'`, `ref_id = item_id`, role via I2's alias map). That is **module 4's own table**, shipped 2026-09-04 in this very section. The migration was never blocked on anything |
+
+**⛔ DESIGN DECISION, made deliberately: the data moved, the wire did not.** D1 §10 **M2** is explicit
+— *"**Output shape unchanged** — same `mods_json`, same `instance:pending`, same binder, same FE. This
+is the whole SSOT switch, and it is one query swap."* So `/api/relics` and
+`GET/PUT/DELETE /api/unique/actors/{id}/equipment` are **byte-identical**, `RelicsLayer.tsx` and
+`contract/types.ts` got **zero edits**, and `LegacyEquipSlots` is the one place that knows both
+vocabularies. Three reasons, not one: D1 mandates it; widening the wire to all fifteen roles is D1's
+separately-sequenced **M3** (it moves the REST payload *and* the FE literal together); and P5.4 above
+already records the web tree mid-refactor by the world-stage stream with the owner's own *"map FE
+frozen pre-refactor"* note. **The sort order is part of "unchanged"** and is preserved on purpose: the
+retired query ended `ORDER BY slot ASC` over legacy labels (armor, trinket, weapon); ordering by
+`role` instead answers weapon, armor, trinket — same data, different array, and the FE renders the
+array.
+
+**Built:**
+
+- [x] ⭐ **M1 — `RpgStore.MigrateUniqueEquipmentToAssignments`.** Every `rpg_unique_equipment` row →
+      `rpg_item_assignment(specimen_id, role, ref_kind='stock', ref_id=item_id)`, slot mapped through
+      I2's alias map. **One-way and idempotent** exactly as D1 words it: an occupied `(specimen, role)`
+      is skipped, never overwritten, so a stale legacy row cannot clobber a post-cutover choice and a
+      second run copies nothing. Wired into `Init` so an existing save cuts over on boot rather than
+      reading empty
+- [x] ⭐ **M2 — every reader and writer repointed.** `ListUniqueEquipmentUnlocked`,
+      `UpsertUniqueEquipment` and `CutoverUniqueEquipmentModsAbsorption` now use
+      `rpg_item_assignment`. `mods_json`, the `unique-equip` atom bindings and the four relics'
+      behaviour are unchanged — asserted, not assumed
+- [x] **`LegacyEquipSlots` (new, Core)** — I2's three-row alias map (`weapon → armament-primary`,
+      `armor → core-guard`, `trinket → jewel-minor-a`), closed and bidirectional. **Structural, not a
+      tunable, and says why in the file:** these are already-persisted values, so changing one would
+      re-home saved equipment rather than retune anything. The twelve roles the legacy wire cannot
+      name are **refused, never guessed**
+- [x] ⭐ **The stub table is retired as an SSOT, and a guard enforces it.**
+      `LegacyEquipTableRetirementGuardTests` allows exactly two files to name `rpg_unique_equipment`
+      (its DDL + the `Reset()` sweep; the one-way migration) and asserts the migration's single
+      mention is a `SELECT` — an `INSERT`/`UPDATE`/`DELETE` would mean equipment is being written to
+      two places at once
+- [x] **The spec's own boundary is now satisfied, not bypassed.** *"Never retire
+      `rpg_unique_equipment` before relics have a home"* — the home is `rpg_item_assignment`, the
+      relics are in it, and `/api/relics` + `RelicsLayer.tsx` still work end to end
+
+⛔ **Two things deliberately NOT done, each with the evidence rather than a pointer at another module:**
+
+- [ ] ⏸ **`DROP TABLE rpg_unique_equipment` and retiring `UniqueEquipmentCatalog.Items` — D1's `M4`,
+      and its precondition is measurably absent.** M4 reads verbatim: *"for `ref_kind = 'rolled'`, read
+      `effect_instance` and take compiled grants from E7 rather than `UniqueEquipmentCatalog.Items`.
+      Then drop `rpg_unique_equipment` and `UniqueEquipmentCatalog.Items` — the drop is the only
+      irreversible act; do it last."* **No concrete unique container has been minted** (module 17's own
+      top-listed deferral: *"no `effect_container` row exists for any of them"*, owned by the runtime
+      seed→concrete generator under the binding repo rule), so there is no rolled grant path to
+      replace the stub template with — retiring it today leaves equipping with **no grant source at
+      all**. The table keeps its rows so the one-way migration stays re-runnable; the catalog keeps
+      four live jobs (item allowlist, slot validator, atom-backed container map, legacy grant blob),
+      none of which touches the retired table. **This is a stated, evidenced decision, not the
+      oversight the two notes above were**
+- [ ] ⏸ **"Relics become uniques" as an `item_unique` row — a CONTENT decision, and the blocker is
+      structural, pinned by `No_relic_owns_a_container_of_its_own_so_none_can_be_flagged_a_unique_today`.**
+      `item_unique`'s PK/FK is `effect_container.container_id`. Measured: only **3 of 4** relics resolve
+      to a container, and `item.fx-passive-atk-flat` backs **both** `relic.ashen_reliquary` **and**
+      `stub.atk_ring` — flagging it would classify the stub as a unique too. `relic.cracked_seal`
+      (`fx.entity_atk`, a placeholder id nothing produces) has **no container at all**. Making the
+      disposition literal needs a dedicated container per relic **plus three authored values per row**
+      — `counter_pressure`, `power_axis` and a `derived_from` base type — which no one has decided, and
+      `spec-equip-assign.md`'s Boundaries mark the relic disposition **Ask first**. Named as an ask
+      with its three inputs enumerated, not handed to a module
+
+⛔ **A second, unrelated defect found while landing M2 — named, and fixed because it sits directly in
+this path.** `RpgStore.Reset()` cleared `rpg_unique_equipment` but **never `rpg_item_assignment`**
+(module 4's table, shipped 2026-09-04 and missing from the sweep since). Harmless while assignments
+were unused; a live orphan bug the moment they became the equipment SSOT — and the identical failure
+the same list already carries two comments about (the W21 world rows, the delve rows). Added ahead of
+`rpg_unique_actors`, pinned by `Reset_clears_the_assignment_table`.
+
+⛔ **A THIRD defect, found by running the web suite and NOT fixed here — named because it belongs to
+another lane.** `web/fusion-rpg-web` is **red on `main`**: `src/ui/disabledReasonGuard.test.ts`
+(GG-55, *"every disabled control carries an accessible reason"*) reports **three** unexplained
+disabled controls — `layers/commanders/CommandersLayer.tsx:145`, `:179` and
+`ui/actor/CommanderSheetFooter.tsx:37`. All three files are **committed and unmodified**
+(`git log -1` → `7d73ecc "Fix lawn commander sheet reset on match end"`), so this is not the
+world-stage stream's in-flight churn — it shipped red. Proven independent of this change by restoring
+`git show HEAD:…/RelicsLayer.tsx` and re-running: identical three findings. **Owner: the commander
+surface lane**, not the item program; recorded here so the next session does not re-diagnose it or
+mistake it for item work.
+
+⭐ **No double grant, proven rather than reasoned.** Module 5's `ApplyEquipProjection` also writes
+`effect_binding` at `UniqueActor` scope from this same table under a *different* `Source` tag
+(`equip-assign` vs `unique-equip`), so neither reconciler withdraws the other's rows and a relic
+reaching both would be granted twice. It cannot: the projection filters to `ref_kind == "rolled"`
+(`RpgStore.Items.cs:584`) and every row this wire writes is `stock`. Fed the real assignment an equip
+produces, it binds nothing.
+
+**Verification, run and green:**
+
+| Command | Result |
+|---|---|
+| `dotnet test tests\FusionRpg.Core.Tests --filter "FullyQualifiedName~RelicHome"` | **13 / 13** (new — `RelicHomeTests`) |
+| `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~RelicRowMigration"` | **12 / 12** (new — `RelicRowMigrationTests`) |
+| `dotnet test tests\FusionRpg.Guard.Tests --filter "FullyQualifiedName~LegacyEquipTableRetirement"` | **3 / 3** (new) |
+| `dotnet test tests\FusionRpg.Core.Tests` (full) | **7481 passed / 4 failed** — baseline measured fresh at session start was **7468 / 4**; the same four (`Expeditions.ExpeditionResolverTests`, `ClassSystem.ProveAptitudeJsonEmitTests` ×3), all in the concurrent stream's mid-edit files. **Zero new** |
+| `dotnet test tests\FusionRpg.Data.Tests` (full, `DemonSpeciesImportCliTests` excluded) | **884 passed / 0 failed** — baseline **870 / 0**. **Zero new** |
+| `dotnet test tests\FusionRpg.Guard.Tests` (full) | **212 passed / 0 failed** — baseline **209 / 0**. **Zero new.** ⚠ A re-run minutes later shows **211 / 1**: `CiWiringGuardTests.Every_test_project_under_tests_appears_somewhere_in_ci_yml` now names `tests/FusionRpg.PassiveTreeRosterGen.Tests`, an **untracked project the passive-tree stream created mid-session** (its `tasks/passive-tree-*.md` and `tests/…/PassiveTree/` are untracked too). Not this change's, and the fix is one `ci.yml` line in that lane |
+| `.\scripts\guard-dal.ps1` / `guard-single-writer` / `guard-funnel-delta` / `guard-secondary-no-unity` | all four **OK** |
+| `dotnet build src\FusionRpg.Server\FusionRpg.Server.csproj` | succeeds — `RelicEndpoints.cs` and the `RelicDto` doc edits do not break boot |
+| `python scripts\audit-magic-numbers.py --summary` / `audit-overflow.py` | **M1 = 0, M2 = 0**; **0 critical** overflow. **Zero findings in any file this change touched** |
+| `npx vitest run` (`web/fusion-rpg-web`) | **1538 passed / 1 failed** — the one failure (`ui/disabledReasonGuard.test.ts`) is **pre-existing on HEAD** and proven so, not argued: with `git show HEAD:…/RelicsLayer.tsx` restored in place the identical three findings appear. See the defect note below |
+
+⚠ **Baseline measured fresh at the start of this session, not carried forward.** Core **7468 / 4**,
+Data **870 / 0**, Guard **209 / 0**. The four Core failures were checked against `git status` before
+being dismissed: `Expeditions.ExpeditionResolverTests` and `ClassSystem.ProveAptitudeJsonEmitTests`
+(×3) read `docs/research/class-system/_baseline-*.json` and `src/FusionRpg.Core/World/Turn/*`, all
+mid-edit in the concurrent stream and none touched here. ⚠ **A `FusionRpg.Data.Tests` testhost from
+another session sat deadlocked for 20 minutes** (0.12% CPU, on a suite that runs in 3m30s) holding the
+shared build output — the known `DemonSpeciesImportCliTests` CLI-subprocess hang. Killed the wedged
+child only, which is what `--blame-hang` does automatically; no source or commit was affected, and
+that run needs re-running.
+
+**Files:** `src/FusionRpg.Core/Items/LegacyEquipSlots.cs` (new — I2's alias map);
+`src/FusionRpg.Data/Sqlite/RpgStore.UniqueActors.cs` (EDIT — M1's migration, and M2's reader/writer
+repoint); `src/FusionRpg.Data/Sqlite/RpgStore.cs` (EDIT — the migration in `Init`, and
+`rpg_item_assignment` added to `Reset()`); `src/FusionRpg.Core/Match/RelicCatalog.cs`,
+`src/FusionRpg.Core/Match/UniqueEquipmentCatalog.cs`, `src/FusionRpg.Server/RelicEndpoints.cs`,
+`src/FusionRpg.Contracts/UniqueActorDtos.cs`,
+`web/fusion-rpg-web/src/layers/relics/RelicsLayer.tsx` (EDIT — **doc comments only**; each claimed the
+retired pipeline. The `.tsx` edit changes no rendered output and no import — the file is otherwise
+untouched, and it is not one the world-stage refactor has open);
+`tests/FusionRpg.Core.Tests/Items/RelicHomeTests.cs`,
+`tests/FusionRpg.Data.Tests/Items/RelicRowMigrationTests.cs`,
+`tests/FusionRpg.Guard.Tests/LegacyEquipTableRetirementGuardTests.cs` (new).
+
+**Cross-referenced into P5.1 (module 17).**
+
+---
+
 ⚠ **Cross-referenced from P3.2 (module 12).** `ApplyEquipProjection` tags every equip binding
 `equip-assign`; `ssot-sets.md` §4.5's recount SQL names `equip`. Examined here and left as shipped —
 renaming the tag would be a schema-wide rename this module never made, and module 12's
 `CountSetPieces` already defaults to the shipped `equip-assign` spelling and keeps `equip` as a named
 parameter, so no wearer's set silently fails to complete. **Cross-referenced back into P3.2.**
 
-### ✅ P1.5 — Module 5 `equip-runtime` ⭐⭐ THE PAYOFF — BATTLE HALF PROVEN 2026-09-04; LAWN PUSH + CORNER RUN DEFERRED, NAMED
+### ✅ P1.5 — Module 5 `equip-runtime` ⭐⭐ THE PAYOFF — BATTLE HALF PROVEN 2026-09-04; **GEARED CORNER RUN BUILT AND EXECUTED 2026-09-06**; LAWN PUSH'S COMPILED-GRANT HALF STILL OPEN, NAMED
 
 - [x] `EquipAtomSource` — mirrors the shipped `TraitAtomSource` (E12) exactly: only `stat.derived`
       atoms contribute, same `CostFunction.Read` param parsing. Production shape reads through
@@ -503,6 +655,105 @@ parameter, so no wearer's set silently fails to complete. **Cross-referenced bac
       cross-program change, not a same-pass wiring fix. **Confirmed, not assumed, by reading the
       actual composer code and the actual decision text** — the deferral stands, now for a reason
       that is checkable rather than a placeholder.
+- [x] ⭐ **SUPERSEDED AND BUILT 2026-09-06 — the first geared corner run executes, for real.** The
+      deferral above was characterised as "confirmed correct, not a shortcut." **That
+      characterisation is now withdrawn: the run was buildable in one pass, and the two claims it
+      rested on were both wrong.**
+      1. **"`class-system-map.md` §2a.0 forbids this."** Re-read in full — its decision text, its
+         three-row evidence table, and its "so `BattleStatComposer` gets no logic change" conclusion.
+         §2a.0's finding #2 is that **`BattleStatComposer` runs no subsystems**, and "the composers
+         stay separate" decides that aptitudes reach *battle* via `ChannelMods` rather than by making
+         battle run `IActorStatSubsystem`. It is a rule against **fusing** the two composers. Each
+         side reading the same equipped atoms through **its own** seam is what "separate" means, not
+         what it forbids — and it says nothing whatever about registering a subsystem on `ActorHub`.
+      2. **"That subsystem does not exist yet."** It does, and it shipped 2026-08-30.
+         **`AtomDerivedSubsystem`** (`src/FusionRpg.Core/Stats/Derived/Subsystems/AtomDerivedSubsystem.cs`)
+         is an `IActorStatSubsystem` at the reserved order-350 `foundation.effect` slot, registered
+         through `ActorHubBootstrap.CreateDefault`'s **already-opt-in `boundDerivedAtoms` arm**
+         (decisions.md, "Derived-write lawn executor"), and it exists **for the `stat.derived` kind**
+         — the exact kind equipment contributes through. Writing a *new* subsystem would have been
+         the defect, not the fix: that type's own doc comment names "a second delivery path for a
+         value the composer already owns" as the thing to avoid. **So no `ActorHub` change was needed
+         at all** — the shared derived-stat SSOT (`actor-hub-ssot.md`) is untouched by this pass, and
+         with it the whole cross-program ask-first concern the deferral raised.
+
+      **What was genuinely missing was two joints, both small:**
+      - `EquipAtomSource.DerivedAtomsFor(specimenId)` — projects the SAME equipped atoms `ModsFor`
+        already parses into `BoundDerivedAtom`. **One shared parse** (`EquippedDerived`), so the
+        battle and derived sides can never drift on which atoms count, which channel they name, or
+        what magnitude they carry. Reuses module 5's own resolver contract verbatim
+        (`specimenId => ResolveBindings(OwnerScope.UniqueActor(specimenId)).AtomsByBinding`) and the
+        shipped `AtomDerivedSubsystem.TryParseOp`; **no second equipment-to-stats computation exists.**
+      - An **additive** `gear` parameter on `TerminationGuard.Assert`/`ToActor` and
+        `DominanceGuard.Measure`. Null or empty gear passes `boundDerivedAtoms: null`, so
+        `CreateDefault` registers **no subsystem at all** — the hub is not merely composed to the same
+        numbers, it is the same hub with the same `Subsystems` list. Non-regression by construction,
+        not by arithmetic. Misaligned gear throws rather than silently gearing the wrong corner.
+
+      **The run itself — `dotnet run --project tools/DominanceBaseline -- --theta 100 --geared`, executed 2026-09-06:**
+
+      | Criterion | Captured result |
+      |---|---|
+      | Run executes | ✅ exit 0 |
+      | Equipped payload | `atom.critical-hunter.t1` — `{"channel":"combat.crit.rate.omni","op":"flat","amount":150}`, read **off disk** from `data/seed/atoms/trait-critical-hunter.json` via the shipped `AtomSeedFile` reader, never a literal in the tool |
+      | **Termination stays green** | ✅ `terminationGreen: true` — **0 of 132** ordered pairs unending, with gear in the pipeline |
+      | **Dominance reports its coverage line** | ✅ `elementAxis: "NEUTRALISED -- StrikeMixture is omni-only (P4.1)…"` + **32** reserved families + the §2.1 upper-bound note |
+      | Geared dominant corners | `[]` — no build becomes dominant once geared (bare is also `[]`) |
+      | **Falsifying probe** | `matrixMaxAbsDeltaVsBare: 0.0677` (largest move: Onslaught vs Ferocity). **Non-zero is the whole point** — an inert subsystem would read exactly 0.0 and the run would "execute" while proving nothing |
+      | Ungeared invocation | **unchanged** — payload keys still `model/theta/dominanceMatrix/dominantCorners`, Retribution still wins 10 of 11 and loses to Pierce, 0 unending. `scripts/regen-class-system-baselines.ps1` (which calls without `--geared`) and `DominanceBaselineTests.Run_isDeterministic` both unaffected |
+
+      **Tests — 11 new, `tests/FusionRpg.Core.Tests/Balance/GearedCornerTests.cs`, all green:**
+      non-regression (`CreateDefault` registers no `atom.derived` subsystem bare *or* with null gear;
+      every channel of the derived snapshot identical bare vs empty-gear; both guards byte-identical
+      with null/empty gear), the **cross-check** (`ModsFor` and `DerivedAtomsFor` agree on channel and
+      amount off one source, and the hub delta equals the battle-side amount — checked against
+      module 5's already-proven battle math, not a third computation), op handling (`increased`
+      honoured on the derived side; `more` skipped, never coerced to flat), the geared run's own two
+      criteria at the real 12-corner shape, misalignment rejection, and a disk read pinning the
+      fixture to the real seed file.
+
+      ⚠ **A measured negative worth recording, because it nearly produced a false green.** The first
+      version of the "gear moves the prediction" test used two small corners (Might vs Fortitude at
+      allocation 100) and read a delta of **exactly 0.0** — *with the wiring working perfectly*. A flat
+      crit-rate line scales both sides' damage by the same factor, so time-to-kill shrinks equally and
+      the win **ratio** is unchanged. Only the real 12-corner shape, whose corners sit at twelve
+      different points of the crit sigmoid, moves. Had that fixture been kept and the assertion
+      inverted, this pass would have "proved" the opposite of the truth.
+
+      **Files:** `src/FusionRpg.Core/Battle/EquipAtomSource.cs`,
+      `src/FusionRpg.Core/Balance/Guards/TerminationGuard.cs`,
+      `src/FusionRpg.Core/Balance/Guards/DominanceGuard.cs`,
+      `tools/DominanceBaseline/Program.cs`,
+      `tests/FusionRpg.Core.Tests/Balance/GearedCornerTests.cs`.
+- [ ] ⛔ **Real content gap found while building the run, named not silently absorbed: there is no
+      shipped concrete `stat.derived` AFFIX atom at all.** The geared run equips
+      `atom.critical-hunter` — a *trait's* atom — because it is the only concrete `stat.derived` row
+      in the corpus. Every `stat.derived` affix family (`atom.precision`, `atom.evasion`,
+      `atom.keen-edge`, `atom.cruelty`, `atom.elemental-defense`, `atom.stoicism`, the five
+      `atom.shield-*`, the five `atom.elpw-*`) is **refused by `FamilyExpansion` (E43)**, because
+      `data/seed/items/_tuning/tier-bands.v1.json` authors a `sharePermille` for the **14
+      `stat.modify` primary-channel families only** (`vitality`…`swiftness`). Measured, not inferred:
+      `data/seed/atoms/generated/` holds three files — `g-armour`, `g-attack`, `g-life` — and **zero**
+      `stat.derived` rows. So the gear pipeline is now provably live end-to-end while the *content* it
+      is meant to carry does not exist yet. Closing it is a `tier-bands` authoring change (sharePermille
+      for the sigmoid/flat derived channel groups `bands.v1.json` already defines), not a code change.
+      The tool reports this in its own `geared.corpusNote`, and `GearedCornerTests` deliberately does
+      **not** assert the corpus size, so the run gets richer with no code edit when the gap closes.
+- [ ] ⚠ **`EquipAtomSource.ModsFor` ignores the atom's `op` — battle folds every equipped
+      `stat.derived` atom additively.** `BattleStatComposer` does `snap.Set(ch, snap.Get(ch) + amount)`,
+      so an equipped atom declaring `op: "increased"` or `op: "replace"` applies as `flat` in battle.
+      No shipped content trips it today (the one concrete row is `flat`), and the derived side added
+      this pass **does** honour the op — so the two are pinned as deliberately divergent by
+      `TheDerivedSide_honoursTheOp_whereTheBattleSideNamesItsOwnGap` rather than left to be discovered.
+      Not fixed here on purpose: widening battle would move battle numbers, which is the battle
+      program's change to make, not this seam's.
+- [x] ⚠ **Amount widened `int` → `long` in the shared equip parse.** `ModsFor` read `amount` with
+      `TryGetInt32`, which does not throw on a larger magnitude — it returns false, so the atom was
+      **silently dropped**. That is exactly the shape CLAUDE.md's binding numeric rule forbids
+      (`long` for any magnitude; overflow throws, never wraps), and a dropped equip line is a defect
+      with no symptom. Every shipped value fits either width so no number moves — proven by the full
+      Core suite showing an identical failure set — and a magnitude above `int.MaxValue` now applies
+      instead of vanishing.
 - [x] ⚠ **`Sim` stays `None`** deliberately, asserted not assumed —
       `Sim_runtime_stays_None_and_the_spec_says_why` checks `AtomKindRegistry.Get("stat.derived")`'s
       support matrix directly (`None`/`Full`/`Full` for Sim/Battle/Lawn)
@@ -631,20 +882,27 @@ not touched; the build was rechecked after their edit settled and came back clea
 `tests/FusionRpg.Core.Tests/Battle/EquipRuntimeTests.cs`,
 `tests/FusionRpg.Data.Tests/Items/EquipRuntimeStoreTests.cs` (new).
 
-> ### ⭐ CHECKPOINT 1 — THE PAYOFF: **partially met, named precisely (revisited 2026-09-05)**
+> ### ⭐ CHECKPOINT 1 — THE PAYOFF: **all four success criteria met (closed 2026-09-06)**
 > ✅ **A real item changes a real number in a real fight** — proven, deterministic, in Core.Tests.
 > ✅ The DB half of "on the lawn" (bindings actually created and resolvable at `unique-actor:` scope)
-> is proven. ✅ **The wire-capacity half of the live push is now built and tested** — a player's own
+> is proven. ✅ **The wire-capacity half of the live push is built and tested** — a player's own
 > grants and every deployed specimen's RUNNER-path (triggered) atoms travel correctly, each with its
 > own owner key, proven against a real `AtomPushService.Build` call, not assumed. ⛔ **A deeper gap
 > found while proving that**: the COMPILED (passive) grant path has never carried per-owner identity
 > at all, for either scope kind — real, pre-existing, not a regression — and closing it for a specific
 > live entity needs an Injector-side change unverifiable without a real game install (see the finding
-> above). ⏸ **The geared corner run's deferral is now re-verified rather than merely restated** — its
-> exact integration point (a new `IActorStatSubsystem` on class-system's `ActorHub`, governed by
-> `class-system-map.md` §2a.0's explicit "composers stay separate" decision) is identified and cited,
-> confirming this is a genuine cross-program, ask-first change rather than an item-program shortcut.
-> **Phase 2 through 5
+> above); this one piece stays open, named precisely, not claimed. ✅ **The geared corner run
+> executes, for real, superseding the earlier deferral entirely.** That deferral's own premise —
+> "a new `IActorStatSubsystem` on `ActorHub` needs a cross-program, ask-first decision" — was
+> re-investigated on 2026-09-06 and found WRONG on both counts: `class-system-map.md` §2a.0 governs
+> fusing the two *composers*, not registering a subsystem on `ActorHub`, and the needed subsystem
+> (`AtomDerivedSubsystem`) already existed, shipped 2026-08-30. Two small additive joints
+> (`EquipAtomSource.DerivedAtomsFor`, an optional `gear` parameter on `TerminationGuard`/
+> `DominanceGuard`) were enough; null gear is byte-identical to today by construction, not by test
+> alone. **Actually run**, not just built: a real shipped atom equipped on the real 12-corner shape —
+> termination green (0/132 pairs unending), dominance reported its coverage line, and the falsifying
+> probe read a non-zero `matrixMaxAbsDeltaVsBare` proving the gear reached the predictor. See P1.5's
+> own addendum for the full evidence table. **Phase 2 through 5
 > already proceeded and are complete** (per the rest of this file) — nothing in them depended on
 > either open item here, matching this checkpoint's own original reasoning; both remain open, tracked,
 > and now more precisely scoped than when this checkpoint was first written.
@@ -2208,11 +2466,16 @@ rather than loosened to `>= 13`.
       briefs assemble, the ids mint, the schema is audit-clean, the distributor prices, the ledger
       resumes and the verdict judges. **Until it runs, `Linkage/SetCompletability` stays red on 18
       sets and the species population's verdict is `not_measured` — both by design.**
-- [ ] ⏸ **The generation graph is not wired, and `--write` says so instead of writing nothing.** A
-      `workflow/graphs/item_set.py` (mirroring `workflow/graphs/effect_affix.py`) is what connects
-      `plan_run`'s subjects to `llm_caller`. Deliberately not stubbed: a graph that silently produces
-      nothing is worse than a command that refuses. `cmd_items` returns `EXIT_REFUSED` with the
-      reason.
+- [x] ⭐ **The generation graph IS wired now — built 2026-09-06, and proved by a small real batch.**
+      `workflow/graphs/item_set.py` exists and mirrors `workflow/graphs/effect_affix.py` exactly (no
+      `StateGraph(` of its own, only `build_generation_graph`; validators are the ALREADY-BUILT
+      `distribute_set` / `distribute_charm`, so no rule is re-stated). Its `call` is **injected**,
+      which is the same contract `effect_affix.py` states, and the transport wired today is
+      `setgen/answers.py`'s `ReplayTransport` — it reads answers a model has already authored against
+      briefs this command emitted, and imports nothing from `llm_caller` (asserted by module text).
+      **There is still no live-endpoint path**, and `--write` without `--answers`/`--out-dir` still
+      refuses with the reason. See the dated block below for the sample it produced. Module 21's
+      `item_combination.py` is **still unwired** — see P4.4.
 - [ ] ⏸ **P0.2 `theme-refresh` and P0.3 `theme-enrich` are unbuilt, and they gate the species half of
       the run — they are seedsmith's modules, not this one's.** Today **31 of 84** themes sit at
       `basis = "name"` and are HELD (never generated from, never silently skipped), and the registry
@@ -2267,6 +2530,150 @@ rather than loosened to `>= 13`.
       module only.** The shared metric keeps its estimate; the one-line change (verify each LSH
       candidate with exact Jaccard) belongs to whoever owns that metric's baseline, and the test
       pinning the divergence is already written.
+
+---
+
+#### ⭐ 2026-09-06 — the generation graph, wired; plus a SMALL EVALUATION SAMPLE (3 sets + 3 charms). **The full ~904 / 36 / ~904 run remains a separate, NOT-YET-AUTHORIZED decision.**
+
+⛔ **Read the scope line first.** What ran is **six subjects** — three build sets and three species
+charms — to find out whether the pipeline produces varied content before anyone commits to the full
+population. It is **not** the production run, it wrote **nothing** into `data/seed/items/`, and
+authorising the full run is the owner's call and has not been made.
+
+**What was built (the last-mile wiring; everything else was already module 13's):**
+
+| File | Role |
+|---|---|
+| `tools/seedsmith/seedsmith/workflow/graphs/item_set.py` (new) | **The file this entry named as missing.** Mirrors `effect_affix.py`: no `StateGraph(` of its own, `call` injected, validators are the shipped `distribute_set` / `distribute_charm` so no rule is re-worded |
+| `tools/seedsmith/seedsmith/adapters/items/setgen/answers.py` (new) | The authored-answer file (`{subjectId: [attempt, …]}`), a ~60-line schema walker, and `ReplayTransport`. Imports nothing from `llm_caller`/`urllib`/`http` — asserted by module text, so a replay batch is **provably offline** |
+| `tools/seedsmith/seedsmith/adapters/items/setgen/seedfile.py` (new) | Draft + priced plan → a corpus-shaped row; `resolve_out_dir`; the axis-group fold read from `naming.v1.json`; `next_charm_seq` measured off the live corpus |
+| `tools/seedsmith/seedsmith/adapters/items/setgen/authored.py` (new) | The batch driver: plan → graph → row → file → ledger → the run report and `verdict` |
+| `tools/seedsmith/seedsmith/report/cli.py` (EDIT) | `--limit`, `--briefs-out`, `--answers`, `--out-dir`, `--allow-production-tree`, `--ledger`, `--ignore-ledger`, `--model`, `--authored-utc`; `--write` now writes along the authored-answer path |
+| `tools/seedsmith/tests/test_item_gen_wiring.py` (new, 26 tests) | The path end to end, plus five pinned defects below |
+
+⚠ **Why `schema_defects` exists instead of `jsonschema`.** Constrained decoding is the ENDPOINT's
+guarantee, not the schema's — a replayed answer arrives as plain JSON with no such promise, so the
+schema is enforced on the way in. `jsonschema` is not in `pyproject.toml`'s exact pins and adding a
+runtime dependency to close a fifty-line gap is the wrong trade here.
+
+⛔ **`--out-dir` has no default and refuses `data/seed/items/` unless `--allow-production-tree`.**
+Not just the two kind directories: `corpus/model.py` globs that tree with `rglob("*.json")` and
+`ItemSeedValidator` with `SearchOption.AllDirectories`, so a sample dropped anywhere inside it moves
+finding counts other streams baseline against, silently. **Confirmed: `seedsmith check … --adapter
+items --gate` still reports 61 gap / 80 note** — byte-identical to this module's own recorded set.
+(`not_measured` is 23, not 14, from nine `PassiveTree/*` and `PipelineHealth/*` metrics another
+stream registered; none is this work's.)
+
+**The sample lives at `tools/seedsmith/_sample-runs/2026-09-06-item-gen/`** — outside the item seed
+tree, outside `data/`, untracked, and safe to `rm -rf` at any time. Nothing references it.
+
+**What ran, and what came back:**
+
+| Command | Result |
+|---|---|
+| `python -m pytest tests/test_item_gen_wiring.py -q` | **26 passed, 12 subtests** (new) |
+| `python -m pytest` (seedsmith, full) | **2293 passed, 1 skipped, 309 subtests** — nothing else moved |
+| `items generate --kind set --population build --limit 3 --write …` (round 1) | **0 persisted, 3 escalated** — every draft refused by the shipped distributor, with the rule named |
+| …round 2, with the repaired answers | **3 persisted / 3, at attempt 2.** 3 cells over 3 sets, median 1, max 1, **1000‰ singletons**; 0 exact and 0 near-duplicate names |
+| `items generate --kind charm --population species --limit 3 --write …` (round 1) | **0 persisted, 3 escalated** — all three on `CharmFamilyOnJewelMinor` |
+| …round 2 | **3 persisted / 3**, minted `charm.surv-util-021 … -023` (the shipped partition holds 20 rows; ids continue, never restart). Verdict **`fail`**: axis Gini **800‰ against a 133‰ ceiling** |
+
+The repair round is not a workaround — it is the graph's own `validate → generate` edge, and the
+transport serves attempt 2 with the named defects appended to the brief, exactly as a live call
+would see them. **Every refusal in round 1 was module 13's own code refusing correctly.**
+
+**Diversity and characteristic distribution — the honest read.**
+
+⭐ **Sets: genuinely varied, and on the hard version of the test.** `--limit 3` takes the *first*
+three subjects, which are `might-offense` / `might-defense` / `might-balance` — one aptitude, three
+archetypes. Adjacent themes are a harder distinctness test than three unrelated ones, and the three
+sets separate cleanly:
+
+| | capability | member roles | frames | top-threshold multiset |
+|---|---|---|---|---|
+| `set.might-offense-001` "Fallweight of the Sledgevine" | `atom.deathblast` / earth | armament-primary, manipulator, footing, jewel-major | mixed | might + ferocity + elpw-pierce.earth |
+| `set.might-defense-001` "Ramparts of the Turned Earth" | `atom.terraforming` | retinue, core-guard, manipulator, footing | all plant | might + plating + carapace |
+| `set.might-balance-001` "Plumb and Ballast" | `atom.terraforming` | armament-primary, girdle, footing, jewel-major | two and two | might + plating + elpw-pierce.earth |
+
+Three distinct cells, no cell above one, no near-duplicate names, three different member-role sets
+and three different frame mixes. ⚠ **Two things to watch at scale, both visible even at n = 3:**
+`atom.might` is in all three top thresholds (defensible — the aptitude *is* Might — but it means the
+shared axis dominates the multiset), and two of three reached for `atom.terraforming`, so capability
+usage is **2 distinct over 3**. All three top thresholds also came back at the maximum width of
+three families, which is what the repair round pushed them to when the 3-piece tier was removed.
+
+⚠ **Charms: varied in identity, COLLAPSED in mechanics — and the collapse is forced, not chosen.**
+The three read as three different objects (a gunner's selector collar, a fused clinker of burnt
+throats, a hoop cut from a battered pail) with different fixed atoms. But all three are
+`survivability` signets, because defect 1 below leaves no other axis authorable. **Axis Gini 800‰
+against a 133‰ ceiling is a real FAIL and the run report says so** — it is the pipeline correctly
+reporting that its own charm pool cannot produce a balanced population. Separately: **3 of 3 chose
+`signet`**, where the shipped 70 are `minor` 31 / `standard` 32 / `signet` 7 (10%). At n = 3 that is
+a hint, not a finding — but the brief lists `signet` last and describes it most vividly, so class
+distribution is worth watching in any larger run.
+
+**⛔ Five defects found in module 13's OWN machinery while wiring this. None is fixed here; each is
+pinned by a test in `MeasuredDefectsInModule13Tests` so a fix turns it red rather than landing
+silently.**
+
+1. ⛔ **`build_charm_brief` offers a pool `distribute_charm` will then refuse.** The brief prints
+   `vocabulary.stat` unnarrowed — **242 picks** — but ssot-charms §3.6 (as coded) excludes every
+   family legal on a jewel-minor role. **56 of 242 picks survive, across 14 families, and every one
+   is armour or shield.** So `offense`, `control`, `utility` and `economy` charms are **unauthorable
+   from the shipped brief**, though those are four of the five shipped axes and 48 of the 70 shipped
+   rows. All three sample charms hit this on their first attempt. The one-line direction (filter the
+   brief's pool by `families_on_jewel_minor`) is deliberately **not** applied — it changes what the
+   generator may author, which is a design call.
+2. ⛔ **The charm brief offers the WRONG POOL entirely.** 22 of the 29 distinct families the 70
+   shipped charms use are **capability** families (`atom.freezing`, `atom.searing-strike`, …); only
+   4 are stat families. The brief offers stat picks only, so a generated charm population cannot
+   resemble the authored one no matter how good the answers are. Related and separate: three
+   families the shipped charms use — `atom.commanding`, `atom.exposing`, `atom.rallying` — are
+   declared by **no** `affix-families/*.json` file (almost certainly already inside the recorded
+   61-gap set; named here because this wiring is what surfaced them).
+3. ⛔ **The set brief asks for `pieces` and the distributor derives them anyway.** `set_schema`
+   offers `[2, 3, 4, 6]` and the brief says *"`thresholds` — the piece counts"*, but
+   `threshold_ladder` computes the ladder from the member count and refuses anything else: a
+   4-member set may carry **only 2 and 4**. Nothing in the brief says so, and **all three sample
+   sets picked 3 and were refused.** One sentence in the brief closes it.
+4. ⛔ **A five-member set is unauthorable and nothing says so.** `threshold_ladder(5)` is `(2,)` —
+   a single threshold — while `set_schema` requires `minItems: 2` on `thresholds`. The two cannot
+   both be satisfied, and no rule refuses the member count itself.
+5. ⚠ **`Distribution/CellOccupancy` drops the element from a capability.**
+   `cells.threshold_capability` reads a `variant` key; the corpus writes `params.element`
+   (`set.frostbitten-vanguard-002`, and the row this sample emitted). **Latent, not active** —
+   re-measured over the live 30 sets both ways and the numbers are identical (28 cells, median 1,
+   max 2, 26 singletons) — but at the generated scale `atom.deathblast.fire` and
+   `atom.deathblast.ice` would collapse into one cell and under-count distinctness on the exact
+   axis this gate exists to measure.
+
+**One limitation in THIS wiring, found by its own test and fixed rather than papered over:** the
+transport recovers the subject from the prompt when it has to, and two subjects built from the same
+theme have byte-identical briefs (module 13's own
+`re_running_over_unchanged_themes_is_byte_identical` guarantees it), which cross-served one
+subject's answer as another's. The batch driver now tells the transport which subject it is
+answering, and an ambiguous prefix **raises** instead of guessing.
+
+- [ ] ⏸ **A live-endpoint transport is still not built, on purpose.** `call` is injected and
+      `pipeline.llm_caller.call_model` already fits the signature, so it is a one-line wiring change
+      — but pointing it at an endpoint is what makes a run cost tokens, and that belongs to the same
+      decision as authorising the full population.
+- [ ] ⏸ **A member's `baseType` is not resolved.** The shipped rows bind each member to a concrete
+      base type (`item.humanoid-head-b-007`); nothing in module 13 chooses one, and picking a rung
+      here would be deterministic code inventing identity. The emitted rows carry the (role, frame)
+      pair and say so in `notes`. **This must land before any production write** — a set whose
+      members do not resolve is a `Linkage` failure the moment it enters the tree.
+
+**Files (this pass):** `tools/seedsmith/seedsmith/workflow/graphs/item_set.py`,
+`tools/seedsmith/seedsmith/adapters/items/setgen/{answers.py, seedfile.py, authored.py}` (all new);
+`tools/seedsmith/seedsmith/report/cli.py` (EDIT — the nine `items generate` flags and the `--write`
+path); `tools/seedsmith/tests/test_item_gen_wiring.py` (new, 26 tests).
+
+**Verify:** `cd tools\seedsmith; python -m pytest tests/test_item_gen_wiring.py -q`;
+`python -m seedsmith items generate --kind set --population build --limit 3 --briefs-out out.json`;
+`python -m seedsmith check ..\..\data\seed\items --adapter items --gate` (still 61 gap / 80 note).
+
+---
 
 **Files:** `data/tuning/set-charm-gen.v1.json` (new — set shape, piece roll plan, AE budget, charm
 class table, the three distinctness thresholds with their derivations);
@@ -3541,6 +3948,16 @@ against real shipped data.
       `workflow/graphs/item_combination.py` (mirroring `workflow/graphs/effect_affix.py`) is what
       connects `plan_run`'s subjects to `llm_caller`. Deliberately not stubbed, for module 13's
       reason: a graph that silently produces nothing is worse than a command that refuses.
+      ⭐ **Addendum 2026-09-06 — module 13's half of this IS wired now, and the pattern to copy is
+      four files, not one.** `workflow/graphs/item_set.py` plus
+      `adapters/items/setgen/{answers.py, seedfile.py, authored.py}` — see P3.3's dated block. The
+      reusable pieces are `answers.ReplayTransport` (an authored-answer file instead of an endpoint;
+      provably offline, and it serves a repair attempt so the graph's `validate → generate` edge is
+      real) and `seedfile.resolve_out_dir` (refuses `data/seed/items/` unless asked, because every
+      items metric globs that tree recursively). ⛔ **This module's own two blockers are unchanged
+      and neither is the graph:** the `socket-word` → `combination` five-site rename still touches a
+      frozen registry, and X7 still leaves the 102 with no container home. Wiring the graph here
+      before those land would produce rows nothing can bind.
 - [ ] ⏸ **X7 — `ContainerKind` gaining D27's `combo` value — effect-atom's, and the same blocker P3.1,
       P3.2 and P4.3 all carry.** `ContainerRow.cs` is still six values. **Consequence, stated plainly:**
       the 102 have recipe rows waiting for them in `socket_combo_recipe` (module 16's
@@ -3875,10 +4292,29 @@ validators**, not a from-scratch build — checked before assuming, exactly as m
 - [ ] ⏸ **Whether a unique is salvageable (§10.6) — module 14's, recommendation "no", not decided
       here.** Likewise the `no_reassign` flag being driven by `acquisition = 'deterministic'` (§9.11) —
       inventory's — and the flavour-text render (§9.12) — module 20's
-- [ ] ⏸ **Relics stay on `rpg_unique_equipment`, confirmed again today, unchanged.** Four shipped
-      relics served at `/api/relics` (`RelicEndpoints.cs:15`), rendered by `RelicsLayer.tsx`, with
-      `RpgStore.UniqueActors.cs` still reading and writing that table. The row migration is **module
-      4's** and **the stub must not be retired before relics have their home** — nothing here touches it
+- [x] ⭐ **RESOLVED 2026-09-06 — relics are OFF `rpg_unique_equipment`, and this note was half of a
+      two-module cross-reference gap.** It read: *"Relics stay on `rpg_unique_equipment`, confirmed
+      again today, unchanged … the row migration is **module 4's** … nothing here touches it."* That
+      was correct on ownership — `ssot-uniques.md:78` says the stub is *"called 'unique' because it
+      belongs to unique **actors**, not because its three items are uniques. Retired by I2/I13"* — but
+      it re-confirmed a blocker whose premise had already evaporated. **Module 4's P1.4 had deferred
+      the same item to THIS module** (*"module 17 … does not exist yet to migrate them into"*), so each
+      section pointed at the other and neither built it. Closed in **P1.4-R** above: the destination
+      was never `item_unique` — it is `rpg_item_assignment`, module 4's own table, per D1 §10 M1
+      — and the migration is now built, wired into `Init`, and guard-enforced
+- [ ] ⏸ **⚠ What this module genuinely still owes the relics, restated from the closure — and it is a
+      CONTENT ask, not a module handoff.** The confirmed disposition *"relics become uniques"* cannot
+      be expressed as `item_unique` rows today, and the blocker is structural rather than sequencing:
+      `item_unique`'s PK/FK is `effect_container.container_id`, and **only 3 of the 4 relics resolve to
+      a container** — `item.fx-passive-atk-flat` backs **both** `relic.ashen_reliquary` **and**
+      `stub.atk_ring` (so a flag on it classifies the stub too), while `relic.cracked_seal`
+      (`fx.entity_atk`, a placeholder nothing produces) has none. Making it literal needs a dedicated
+      container per relic **plus** `counter_pressure`, `power_axis` and a `derived_from` base type
+      authored per row — none decided, and `spec-equip-assign.md`'s Boundaries mark the relic
+      disposition **Ask first**. Measured and pinned by
+      `No_relic_owns_a_container_of_its_own_so_none_can_be_flagged_a_unique_today`, so the blocker
+      stays a fact rather than a memory. ⚠ Note this is the **same** seed→concrete dependency as the
+      first deferral in this list, reaching the four hand-authored relics
 - [ ] ⏸ **Sim stays `None` for `stat.derived`, and that is the one real remaining runtime limit.**
       ⭐ The D6 quarantine the lane calls *"the largest single constraint on what this lane can author,
       larger than SC2"* is **lifted** — asserted, not assumed: `stat.derived` is `Full` on the lawn and
@@ -5347,6 +5783,18 @@ Injector change unverifiable without a real game install); the corner run's defe
 **correct**, not a shortcut, once its exact blocker was traced to an explicit prior cross-program
 decision (`class-system-map.md` §2a.0, "the composers stay separate"). See P1.5 above for both in full.
 
+⛔ **That last clause was WRONG, and is superseded — 2026-09-06.** The corner run's deferral was **not**
+correct. Re-reading §2a.0 in full showed it forbids *fusing* `BattleStatComposer` with the subsystem
+pipeline, not registering a subsystem on `ActorHub`; and the subsystem the deferral said "does not
+exist yet" — `AtomDerivedSubsystem`, for the `stat.derived` kind, on `ActorHubBootstrap.CreateDefault`'s
+already-opt-in `boundDerivedAtoms` arm — had shipped 2026-08-30. The run was built, executed and
+evidenced the same pass (termination green 0/132, coverage line reported, falsifying delta 0.0677),
+with **`ActorHub` itself untouched**, so the cross-program ask-first concern never applied either.
+This is a third instance of the failure shape the two automated passes above exist to catch, and
+neither caught it, because **a deferral that cites a real document by section number reads as
+verified**: both passes checked that §2a.0 exists and says what was quoted — never that what it says
+*entails* the conclusion drawn from it. Full account: P1.5 above.
+
 **A real, previously-invisible testing gap was also found and closed**: six of this repo's thirteen
 test projects (`FusionRpg.Server.Tests` foremost) had never been run once by any of the 22 modules'
 own verification passes, because none of them touch those projects directly. Running them cold
@@ -5354,11 +5802,40 @@ surfaced 21 real regressions from module 1's own C3 rule (landed session-start, 
 stale test and one real architectural inconsistency in `tools/ItemSeedValidator`. All fixed; see P1.5's
 own addendum above for the full account.
 
-**Final regression, after every fix in both passes and all three follow-up builds landed:**
-Core, Data, Guard and the four boundary guard scripts were re-run to a clean state throughout this
-pass, each time against a freshly-measured baseline (never a trusted stale number) and each remaining
-failure traced by name to a file a concurrent program stream (class-system, world-stage, battle-tempo,
-party-dungeon/`Delve`) owns and was mid-editing at the time — confirmed via `git status`, never assumed.
+**Pass 3 — manual final-proof sweep** (2026-09-06, after Passes 1-2 landed): re-read `item-plan.md`'s
+own six Checkpoints one by one against their evidence in this file (all six independently confirmed
+honest and internally consistent — none over- or under-claims relative to what its owning module(s)
+actually built), then the "Confirmed as a block" ruling table's six rows and the "Carried, not
+scheduled" list's seven items (all thirteen verified correctly resolved, correctly out of item-program
+scope, or correctly waiting on a named model-call run — zero silent drops found). This surfaced a
+FOURTH real gap, of a shape neither automated pass could see: **a mutual deferral**, where two modules
+each named the OTHER as the blocker on the SAME task, so each read as self-consistently deferred in
+isolation and neither pass's per-claim verification caught the pair:
+
+| Modules | Gap found | Resolution |
+|---|---|---|
+| **4** `equip-assign` ↔ **17** `uniques` | Module 4 said the relic-row migration waited on module 17 existing; module 17, built the next day, re-confirmed the relic stub unchanged and said the migration was "module 4's." Neither had done it. **Both statements were also factually wrong** about the destination — `rpg_unique_equipment` holds no relic *definitions* (it's a per-actor equipped-slot join table) and module 17's `item_unique` is a nine-column classification flag with no name/rarity/slot columns a relic could ever have moved into | `decision-d1-durable-ownership.md` §10 M1 names the real destination: `rpg_item_assignment` — module 4's **own** table, shipped the same day module 4 was built. Migration built (`MigrateUniqueEquipmentToAssignments`, one-way, idempotent, wired into `Init`), wire kept byte-identical per D1 §10 M2's own mandate (zero FE changes). Retiring the old stub stays correctly open — D1's M4, blocked on a real, still-absent precondition (a rolled unique-container grant path), not restated as done |
+
+A targeted sweep for other instances of this same "mutual deferral" shape (grepping every `is module
+N's` / `Owner: this module` handoff phrase across the file, ~20 candidates) found the rest consistent —
+in every other case, either only one side makes the claim, or multiple modules independently and
+correctly agree on the same shared missing piece (e.g. modules 14/15/16 all naming the same
+not-yet-built workbench executor as their common blocker, which is agreement, not a ping-pong).
+
+**Final regression, after every fix across all three passes and all four follow-up builds landed**
+(measured 2026-09-06, after the last one — module 4/17's relic migration):
+
+| Suite | Result |
+|---|---|
+| `FusionRpg.Core.Tests` | **7513 / 4 failed** — 4 pre-existing (class-system + expeditions), zero `Items.*` |
+| `FusionRpg.Data.Tests` | **884 / 0 failed** |
+| `FusionRpg.Guard.Tests` | **212 / 0 failed** (a same-day rise to 211/1 traced to an unrelated stream's own new untracked test project, not yet in `ci.yml` — their lane, not this one) |
+| Four boundary guard scripts | ✅ all OK |
+
+Every suite was re-run to this state throughout the pass against a freshly-measured baseline each time
+(never a trusted stale number), and every remaining failure traced BY NAME, via `git status`, to a file
+a concurrent program stream (class-system, world-stage, battle-tempo, party-dungeon/`Delve`,
+passive-tree) owns and was mid-editing at the time — confirmed, never assumed.
 
 ---
 
@@ -5380,19 +5857,25 @@ comparison — item vs item — is in scope; player-progress rationing is not.
 
 ---
 
-## Test baseline before the item build — measured 2026-09-04
+## Test baseline before the item build — measured 2026-09-04, re-measured 2026-09-06 at closure
 
 **Run before a single item line was written, so item breakage stays distinguishable from inherited
-breakage.** ⛔ **All 16 red tests belong to other streams and are theirs to fix** — the demon/seedsmith
-and world-stage programs are both actively building in this tree. **Do not fix them from the item
-program**, and do not read them as an item regression.
+breakage.** ⛔ **All red tests belong to other streams and are theirs to fix** — demon/seedsmith,
+world-stage, class-system, battle-tempo and party-dungeon (`Delve/`) are all actively building in this
+tree across the life of this build. **Do not fix them from the item program**, and do not read them as
+an item regression.
 
-| Suite | Baseline |
-|---|---|
-| `FusionRpg.Guard.Tests` | ✅ **162 / 162** |
-| `tools/seedsmith` (pytest) | ✅ **1489 passed**, 68 subtests |
-| `FusionRpg.Core.Tests` | ⛔ **14 failed**, 5315 passed |
-| `FusionRpg.Data.Tests` | ⛔ **2 failed**, 637 passed |
+| Suite | 2026-09-04 baseline | 2026-09-06 final (all 22 modules + rigor pass) |
+|---|---|---|
+| `FusionRpg.Guard.Tests` | ✅ **162 / 162** | ✅ **208 / 208** |
+| `tools/seedsmith` (pytest) | ✅ **1489 passed**, 68 subtests | ✅ **1608+ passed** (P3.3/P4.4's own re-measurements) |
+| `FusionRpg.Core.Tests` | ⛔ **14 failed**, 5315 passed | ⛔ **7 failed**, 7371 passed — all `ClassSystem.*`, none in `Items.*` |
+| `FusionRpg.Data.Tests` | ⛔ **2 failed**, 637 passed | ⛔ **1 flaky** (`DemonSpeciesImportCliTests`, a killed CLI subprocess — passes standalone), 870 passed excluding it |
+
+⭐ **The bar moved because the *other* streams kept building for two more days, not because item work
+regressed anything** — every module section above re-measured its own delta against the baseline
+current at build time and found zero attributable failures, and the post-completion rigor pass
+(above) re-confirmed the same at the very end, against the final numbers in this table.
 
 **Cause 1 — 14 tests: the species corpus was regenerated under a new id scheme (demon/seedsmith).**
 Uncommitted under `data/seed/demons/species/`: **186 deletions, 289 additions, 77 modifications**.

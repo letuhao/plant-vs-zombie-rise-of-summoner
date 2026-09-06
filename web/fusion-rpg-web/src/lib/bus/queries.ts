@@ -32,7 +32,8 @@ import type {
   RelicCatalogListDto,
   AptitudesState,
   SpeciesAptitudesState,
-  SpeciesRespecPrice
+  SpeciesRespecPrice,
+  PassiveTreeState
 } from "./types";
 
 function hubConnected(status: string): boolean {
@@ -98,6 +99,20 @@ export function useAptitudes(playerId: number | null | undefined) {
   return useQuery({
     queryKey: queryKeys.aptitudes(playerId ?? 0),
     queryFn: () => getJson<AptitudesState>(`/api/aptitudes/${playerId}`),
+    enabled: playerId != null && playerId > 0,
+    refetchInterval: hubConnected(hub) ? false : 8000
+  });
+}
+
+/** passive-tree-todo.md I2/I3 — GET /api/passive-tree/{playerId}, the shared-corpus resolve report
+ * (spec-tree-surface.md §10). The hub's `PassiveTreeUpdated` broadcast (`RpgHub`) invalidates this
+ * same key on both a web-driven allocate and an injector-side event, matching `useAptitudes`' own
+ * poll-vs-hub tradeoff. */
+export function usePassiveTree(playerId: number | null | undefined) {
+  const hub = useHubStatus();
+  return useQuery({
+    queryKey: queryKeys.passiveTree(playerId ?? 0),
+    queryFn: () => getJson<PassiveTreeState>(`/api/passive-tree/${playerId}`),
     enabled: playerId != null && playerId > 0,
     refetchInterval: hubConnected(hub) ? false : 8000
   });

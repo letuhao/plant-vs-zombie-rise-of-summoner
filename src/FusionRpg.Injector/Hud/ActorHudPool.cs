@@ -10,7 +10,7 @@ namespace FusionRpg.Injector.Hud;
 
 /// <summary>
 /// World-space Band B HUD — reads <see cref="ActorHudCache"/> snapshots only (actor-hud-unity spec).
-/// Placement via UnitFrame sprite-bottom (Feet / bounds) + worldYOffset.
+/// Placement via UnitFrame Body + actor-hud worldYOffset (not VfxUnitFrame.World — that adds VFX lift).
 /// </summary>
 public static class ActorHudPool
 {
@@ -174,13 +174,17 @@ public static class ActorHudPool
         try { frame = UnitFrameResolver.Resolve(follow); }
         catch { return; }
 
-        // Foot plate = Feet lane Y (lane ground line). UnitFrame Body is bounds *center*
-        // and put bars on faces; use bounds only for X centering when HasBounds.
-        var world = frame.World(VfxAnchorKind.Feet);
-        if (frame.HasBounds)
-            world.x = frame.BoundsCenterX;
-        world.y += (float)tuning.WorldYOffset;
-        var span = frame.Span();
+        // Spec SSOT: Body (bounds center / lane+half-cell) + actor-hud worldYOffset (−0.35).
+        // Avoid VfxUnitFrame.World — that injects sustainedWorldYOffset for auras.
+        // Avoid VfxUnitFrame.Span for row layout — sustained.spanScale floats identity mid-sprite
+        // (LIVE 2026-09-06 regression).
+        var x = frame.HasBounds ? frame.BoundsCenterX : frame.PivotX;
+        var y = frame.HasBounds
+            ? frame.BoundsCenterY
+            : frame.LaneY + frame.CellSpan * 0.5f;
+        y += (float)tuning.WorldYOffset;
+        var world = new Vector3(x, y, frame.DepthZ);
+        var span = Mathf.Max(VfxSpanMath.MinSpan, frame.CellSpan);
         var barW = (float)tuning.BarWorldWidth;
         var barH = (float)tuning.BarWorldHeight;
 

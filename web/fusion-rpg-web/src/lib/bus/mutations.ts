@@ -14,7 +14,8 @@ import type {
   UniqueActorDto,
   UniqueEquipmentListDto,
   AptitudesState,
-  SpeciesRespecResult
+  SpeciesRespecResult,
+  PassiveTreeState
 } from "./types";
 
 /**
@@ -251,6 +252,21 @@ export function useSaveAptitudes() {
       sendJson<AptitudesState>("/api/aptitudes/allocate", "POST", body),
     onSuccess: (_data, vars) => {
       void qc.invalidateQueries({ queryKey: queryKeys.aptitudes(vars.playerId) });
+    }
+  });
+}
+
+/** passive-tree-todo.md I3 — POST /api/passive-tree/allocate. One WHOLE allocation (node id -> soul
+ * level), the same "the step edits the draft, not the server" shape `useAllocationDraft` expects of
+ * every `onSave` it is handed (spec-tree-surface.md §4 rule 3). */
+export function useSaveTreeNodes() {
+  const qc = useQueryClient();
+  return useMutation({
+    meta: { entity: "PassiveTree" },
+    mutationFn: (body: { playerId: number; nodes: Record<string, number> }) =>
+      sendJson<PassiveTreeState>("/api/passive-tree/allocate", "POST", body),
+    onSuccess: (_data, vars) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.passiveTree(vars.playerId) });
     }
   });
 }

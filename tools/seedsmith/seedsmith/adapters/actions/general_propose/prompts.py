@@ -225,7 +225,8 @@ def _rung_band_label(rung_band: Any) -> str:
 def build_context(brief: Mapping[str, Any], *, sample_index: int,
                   pairing_table: "Mapping[str, Sequence[str]] | None" = None,
                   family_glossary: "Mapping[str, str] | None" = None,
-                  worked_example: "str | None" = None) -> "dict[str, Any]":
+                  worked_example: "str | None" = None,
+                  usage_weights: "Mapping[str, int] | None" = None) -> "dict[str, Any]":
     """Read-only inputs `build_brief` renders from and the validators check against -- exactly as
     `affix/prompts.py:49-56` does, so a validator always reads the SAME object the brief was
     rendered from. Raises per `_assert_no_anchor`/`_require_slot` (acceptance #4) before reading
@@ -250,7 +251,17 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
     of a brief, per the probe's own bound: "the worked example itself does not need permutation").
     Omitted or empty (the default for every existing test and every pre-probe call site), the
     rendered brief is byte-identical to before this probe -- same additive discipline as
-    `family_glossary` above."""
+    `family_glossary` above.
+
+    `usage_weights` (roster-balance FC3, 2026-09-06): an optional `id -> per-mille weight` mapping
+    (`usage_direction.weights.weights_for()`), read-only and never required -- omitted or empty, the
+    rendered brief is byte-identical to today (same additive discipline as `family_glossary` and
+    `worked_example` above). When given, `build_brief` appends a legible cue
+    (`usage_direction.weights.CUE_LABEL`) to families the weighting judges underused -- never a raw
+    number, and never a change to `allowedAtomFamilies`/`permuted_allowed` themselves: this
+    parameter can only affect how an already-eligible family is DESCRIBED, which is what keeps
+    `spec-distribution-planner.md` constraint 4 (the C1 tier-widening gate) structurally out of
+    reach rather than merely respected by convention."""
     _assert_no_anchor(brief)
     slot = _require_slot(brief)
 
@@ -279,6 +290,7 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
         "allowedAtomFamilies": permuted_allowed,
         "forbiddenAtomFamilies": forbidden,
         "atomFamilyGlossary": dict(family_glossary) if family_glossary else {},
+        "atomFamilyUsageWeights": dict(usage_weights) if usage_weights else {},
         "workedExample": worked_example or "",
         "pairingRole": role,
         "pairedPayoffFamily": paired_payoff_family,
@@ -295,16 +307,29 @@ def build_context(brief: Mapping[str, Any], *, sample_index: int,
     return context
 
 
-def _render_eligible_family_lines(family_ids: Sequence[str], glossary: Mapping[str, str]) -> "list[str]":
+def _render_eligible_family_lines(family_ids: Sequence[str], glossary: Mapping[str, str],
+                                  usage_weights: "Mapping[str, int] | None" = None) -> "list[str]":
     """SMOKE BATCH criterion-2 fix, 2026-09-05: one bullet per eligible family, `id: gloss` when
     the glossary has an entry for it (the real, 98-family production case) or a bare `id` when it
     does not (every existing test's own fake-id fixture pool, e.g. `atom.a`/`atom.b`/`atom.c`,
     which carries no real glossary entry and falls back safely here). Never raises on a miss -- a
-    glossary gap is "nothing extra to show", not a defect."""
+    glossary gap is "nothing extra to show", not a defect.
+
+    `usage_weights` (roster-balance FC3, 2026-09-06): optional, appends
+    `usage_direction.weights.render_cue`'s legible text in parentheses for a family the real usage
+    history judges underused -- never a number, and never present at all when `usage_weights` is
+    omitted (the default), which is what keeps this function's own output byte-identical to before
+    this parameter existed on every existing call site."""
+    from ..usage_direction.weights import render_cue
     lines: "list[str]" = []
     for family_id in family_ids:
         gloss = glossary.get(family_id)
-        lines.append(f"  - {family_id}: {gloss}" if gloss else f"  - {family_id}")
+        line = f"  - {family_id}: {gloss}" if gloss else f"  - {family_id}"
+        if usage_weights:
+            cue = render_cue(family_id, usage_weights)
+            if cue:
+                line += f" ({cue})"
+        lines.append(line)
     return lines
 
 
@@ -332,14 +357,16 @@ def build_brief(context: Mapping[str, Any]) -> str:
         "",
     ])
     glossary = context.get("atomFamilyGlossary") or {}
-    if glossary:
+    usage_weights = context.get("atomFamilyUsageWeights") or {}
+    if glossary or usage_weights:
         lines.append(
             "Eligible atom families -- choose one or more from this list, in this order. Each is "
             "shown as `id: name [tag] -- what it does`, given only so you can judge which ids "
             "actually fit this role; you must still answer with the id alone, never the name or "
             "the description text:"
         )
-        lines.extend(_render_eligible_family_lines(context["allowedAtomFamilies"], glossary))
+        lines.extend(_render_eligible_family_lines(context["allowedAtomFamilies"], glossary,
+                                                    usage_weights))
     else:
         lines.append(
             "Eligible atom families -- choose one or more from this list, in this order: "

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using FusionRpg.Contracts;
+using FusionRpg.Core.Demons;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Progression;
 using Microsoft.Data.Sqlite;
@@ -193,31 +194,312 @@ public sealed partial class RpgStore
         lock (_gate)
         {
             using var db = OpenUnlocked();
-            var row = ReadUniqueActorUnlocked(db, id);
-            if (row is null) return (false, "not_found", null);
-            if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
-                return (true, "", row);
-            if (string.Equals(row.Phase, UniqueActorPhases.Deploying, StringComparison.Ordinal) ||
-                string.Equals(row.Phase, UniqueActorPhases.Recovering, StringComparison.Ordinal))
-                return (false, "phase." + row.Phase.ToLowerInvariant(), row);
+            var (ok, reason) = RetireUniqueActorUnlocked(db, id);
+            return (ok, reason, ReadUniqueActorUnlocked(db, id));
+        }
+    }
 
-            var now = DateTime.UtcNow.ToString("o");
-            using var cmd = db.CreateCommand();
+    /// <summary>The core of <see cref="TryRetireUniqueActor"/>, reusable from a caller that already
+    /// holds an open connection (party-dungeon D2.23 — extraction settlement needs this on the SAME
+    /// connection/transaction its own writes are in, exactly like <see cref="AwardUniqueActorXpUnlocked"/>
+    /// already is for the expedition reward apply). Idempotent on an already-`Retired` row.</summary>
+    (bool Ok, string Reason) RetireUniqueActorUnlocked(SqliteConnection db, string instanceId)
+    {
+        var row = ReadUniqueActorUnlocked(db, instanceId);
+        if (row is null) return (false, "not_found");
+        if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal))
+            return (true, "");
+        if (string.Equals(row.Phase, UniqueActorPhases.Deploying, StringComparison.Ordinal) ||
+            string.Equals(row.Phase, UniqueActorPhases.Recovering, StringComparison.Ordinal))
+            return (false, "phase." + row.Phase.ToLowerInvariant());
+
+        var now = DateTime.UtcNow.ToString("o");
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = """
+            UPDATE rpg_unique_actors SET
+              phase = $phase,
+              match_key = NULL,
+              last_ptr = NULL,
+              deploy_correlation_id = NULL,
+              revision = revision + 1,
+              updated_utc = $now
+            WHERE instance_id = $id;
+            """;
+        cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.Retired);
+        cmd.Parameters.AddWithValue("$now", now);
+        cmd.Parameters.AddWithValue("$id", instanceId);
+        cmd.ExecuteNonQuery();
+        return (true, "");
+    }
+
+    /// <summary>
+    /// party-dungeon D2.23 (spec-delve-attrition.md §7) — the FIRST real, persisted `Recovering`
+    /// (unlike W4's lawn-death pass-through, `RecoverToRosterUnlocked`, which never actually writes
+    /// this phase). Same-connection, called from `CloseDelve`'s own open transaction. Refuses a
+    /// `Retired`/`Deploying` row for the identical reason <see cref="RetireUniqueActorUnlocked"/>
+    /// refuses those two — neither state is a live roster member a delve wound can touch.
+    /// </summary>
+    (bool Ok, string Reason) BeginUniqueRecoveryUnlocked(
+        SqliteConnection db, long playerId, string instanceId, int recoveryDelvesLeft, long woundedDelveId, int thetaRun)
+    {
+        if (recoveryDelvesLeft <= 0)
+            throw new ArgumentOutOfRangeException(nameof(recoveryDelvesLeft), recoveryDelvesLeft, "a recovery count is never zero or negative");
+
+        var row = ReadUniqueActorUnlocked(db, instanceId);
+        if (row is null) return (false, "not_found");
+        if (string.Equals(row.Phase, UniqueActorPhases.Retired, StringComparison.Ordinal) ||
+            string.Equals(row.Phase, UniqueActorPhases.Deploying, StringComparison.Ordinal))
+            return (false, "phase." + row.Phase.ToLowerInvariant());
+
+        var now = DateTime.UtcNow.ToString("o");
+        using (var cmd = db.CreateCommand())
+        {
             cmd.CommandText = """
                 UPDATE rpg_unique_actors SET
-                  phase = $phase,
-                  match_key = NULL,
-                  last_ptr = NULL,
-                  deploy_correlation_id = NULL,
-                  revision = revision + 1,
-                  updated_utc = $now
+                  phase = $phase, match_key = NULL, last_ptr = NULL, deploy_correlation_id = NULL,
+                  revision = revision + 1, updated_utc = $now
                 WHERE instance_id = $id;
                 """;
-            cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.Retired);
+            cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.Recovering);
             cmd.Parameters.AddWithValue("$now", now);
-            cmd.Parameters.AddWithValue("$id", id);
+            cmd.Parameters.AddWithValue("$id", instanceId);
             cmd.ExecuteNonQuery();
+        }
+
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = """
+                INSERT INTO rpg_unique_actor_recovery(instance_id, player_id, recovery_delves_left, wounded_delve_id, theta_run)
+                VALUES($id, $pid, $left, $delve, $theta)
+                ON CONFLICT(instance_id) DO UPDATE SET
+                  recovery_delves_left = $left, wounded_delve_id = $delve, theta_run = $theta;
+                """;
+            cmd.Parameters.AddWithValue("$id", instanceId);
+            cmd.Parameters.AddWithValue("$pid", playerId);
+            cmd.Parameters.AddWithValue("$left", recoveryDelvesLeft);
+            cmd.Parameters.AddWithValue("$delve", woundedDelveId);
+            cmd.Parameters.AddWithValue("$theta", thetaRun);
+            cmd.ExecuteNonQuery();
+        }
+
+        return (true, "");
+    }
+
+    /// <summary>
+    /// R6 — virtual time, no clock: every `CloseDelve` (any delve, Extracted or Wiped) decrements
+    /// EVERY `Recovering` row this player owns by one delve, in the same transaction. A row that
+    /// reaches zero flips straight back to `Roster` and its recovery row is deleted in the same
+    /// write — "0 flips the demon to Roster in the same write" (spec §7), never a separate sweep.
+    /// </summary>
+    void DecrementAllRecoveringForPlayerUnlocked(SqliteConnection db, long playerId, string now)
+    {
+        var ids = new List<(string InstanceId, int Left)>();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "SELECT instance_id, recovery_delves_left FROM rpg_unique_actor_recovery WHERE player_id = $pid;";
+            cmd.Parameters.AddWithValue("$pid", playerId);
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) ids.Add((r.GetString(0), r.GetInt32(1)));
+        }
+
+        foreach (var (id, left) in ids)
+        {
+            var next = left - 1;
+            if (next > 0)
+            {
+                using var cmd = db.CreateCommand();
+                cmd.CommandText = "UPDATE rpg_unique_actor_recovery SET recovery_delves_left = $left WHERE instance_id = $id;";
+                cmd.Parameters.AddWithValue("$left", next);
+                cmd.Parameters.AddWithValue("$id", id);
+                cmd.ExecuteNonQuery();
+                continue;
+            }
+
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = "DELETE FROM rpg_unique_actor_recovery WHERE instance_id = $id;";
+                cmd.Parameters.AddWithValue("$id", id);
+                cmd.ExecuteNonQuery();
+            }
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.CommandText = """
+                    UPDATE rpg_unique_actors SET phase = $phase, revision = revision + 1, updated_utc = $now
+                    WHERE instance_id = $id;
+                    """;
+                cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.Roster);
+                cmd.Parameters.AddWithValue("$now", now);
+                cmd.Parameters.AddWithValue("$id", id);
+                cmd.ExecuteNonQuery();
+            }
+        }
+    }
+
+    /// <summary>The one row of `rpg_unique_actor_recovery` a caller (the recovery-ritual endpoint, a
+    /// roster read) needs — null when the actor is not `Recovering` (or was never wounded).</summary>
+    public (int RecoveryDelvesLeft, long WoundedDelveId, int ThetaRun)? GetUniqueActorRecovery(string instanceId)
+    {
+        if (string.IsNullOrWhiteSpace(instanceId)) return null;
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            return ReadUniqueActorRecoveryUnlocked(db, instanceId.Trim());
+        }
+    }
+
+    static (int RecoveryDelvesLeft, long WoundedDelveId, int ThetaRun)? ReadUniqueActorRecoveryUnlocked(SqliteConnection db, string instanceId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT recovery_delves_left, wounded_delve_id, theta_run FROM rpg_unique_actor_recovery WHERE instance_id = $id;";
+        cmd.Parameters.AddWithValue("$id", instanceId);
+        using var r = cmd.ExecuteReader();
+        return r.Read() ? (r.GetInt32(0), r.GetInt64(1), r.GetInt32(2)) : null;
+    }
+
+    /// <summary>
+    /// party-dungeon D2.23 (spec-delve-attrition.md §7) — "the priced escape": spends
+    /// <c>SoulSinkPolicy.Price(risk.recoveryRitualSouls.{rung}, theta_run, tuning)</c> souls, priced
+    /// at the WOUNDING delve's own rung and `theta_run` (never the current delve, if any — the row
+    /// remembers both since the wounding delve may since have been archived), clears the recovery
+    /// row, and writes `Roster` — one transaction, correlation-idempotent exactly like
+    /// <see cref="RpgStore.Contracts.PerformRitual"/> (a retry of the same correlation is a replay,
+    /// never a second charge). <paramref name="tuning"/> is an explicit parameter, matching
+    /// <see cref="CloseDelve"/>'s own shape in this same module — never a static hub read here.
+    /// </summary>
+    public (bool Ok, string Reason, UniqueActorDto? Actor) TryPerformRecoveryRitual(
+        long playerId, string instanceId, string correlationId,
+        FusionRpg.Core.Dungeon.Tuning.DungeonTuning tuning, DateTimeOffset? utcNow = null)
+    {
+        var id = (instanceId ?? "").Trim();
+        var corr = (correlationId ?? "").Trim();
+        if (id.Length == 0) return (false, "specimen.missing", null);
+        if (corr.Length == 0) return (false, "correlation.missing", null);
+        var now = utcNow ?? DateTimeOffset.UtcNow;
+
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            var row = ReadUniqueActorUnlocked(db, id);
+            if (row is null || row.PlayerId != playerId) return (false, "not_found", null);
+
+            // Checked BEFORE the phase guard, on purpose: a SUCCESSFUL ritual moves the actor out of
+            // Recovering, so a replay of the same correlation arrives with a row that would otherwise
+            // fail "must be Recovering" -- the opposite of PerformRitual's own contract-ritual replay,
+            // whose state (bound, still ready to re-ritual) never disqualifies itself this way.
+            if (HasSoulLedgerEntryUnlocked(db, playerId, SoulEarnPolicy.Reasons.DelveRecoveryRitual, corr))
+                return (true, "replay", row);
+
+            if (!string.Equals(row.Phase, UniqueActorPhases.Recovering, StringComparison.Ordinal))
+                return (false, "phase." + row.Phase.ToLowerInvariant(), row);
+
+            var recovery = ReadUniqueActorRecoveryUnlocked(db, id);
+            if (recovery is null) return (false, "recovery.missing", row); // Recovering with no row is a data defect, not a valid state to price
+
+            var woundedRungId = ReadDelveRungIdUnlocked(db, recovery.Value.WoundedDelveId);
+            if (woundedRungId is null || !tuning.RiskRecoveryRitualSouls.TryGetValue(woundedRungId, out var basePriceSouls))
+                return (false, "rung.unknown", row);
+
+            using var tx = db.BeginTransaction();
+            var price = SoulSinkPolicy.Price(basePriceSouls, recovery.Value.ThetaRun, Core.Power.PowerTuningHub.Tuning);
+            if (ReadSoulBalanceUnlocked(db, playerId).Balance < price)
+                return (false, "souls.insufficient", row);
+
+            var stamp = now.UtcDateTime.ToString("o");
+            if (!AppendSoulLedgerUnlocked(db, playerId, 0, -price, SoulEarnPolicy.Reasons.DelveRecoveryRitual,
+                    "unique_actor", id, corr, stamp))
+            {
+                tx.Commit(); // the correlation already bought this ritual -- a replay, not a second purchase
+                return (true, "replay", ReadUniqueActorUnlocked(db, id));
+            }
+
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.Transaction = tx;
+                cmd.CommandText = "DELETE FROM rpg_unique_actor_recovery WHERE instance_id = $id;";
+                cmd.Parameters.AddWithValue("$id", id);
+                cmd.ExecuteNonQuery();
+            }
+            using (var cmd = db.CreateCommand())
+            {
+                cmd.Transaction = tx;
+                cmd.CommandText = """
+                    UPDATE rpg_unique_actors SET phase = $phase, revision = revision + 1, updated_utc = $now
+                    WHERE instance_id = $id;
+                    """;
+                cmd.Parameters.AddWithValue("$phase", UniqueActorPhases.Roster);
+                cmd.Parameters.AddWithValue("$now", stamp);
+                cmd.Parameters.AddWithValue("$id", id);
+                cmd.ExecuteNonQuery();
+            }
+
+            tx.Commit();
             return (true, "", ReadUniqueActorUnlocked(db, id));
+        }
+    }
+
+    /// <summary>Peeks `rpg_soul_ledger`'s own `UNIQUE(player_id, reason, dedupe_key)` without
+    /// inserting — the read half of the check <see cref="AppendSoulLedgerUnlocked"/>'s `INSERT OR
+    /// IGNORE` makes atomically for a caller that only finds out about the collision from inside its
+    /// own state-mutating write.</summary>
+    static bool HasSoulLedgerEntryUnlocked(SqliteConnection db, long playerId, string reason, string dedupeKey)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT 1 FROM rpg_soul_ledger WHERE player_id = $p AND reason = $r AND dedupe_key = $dk LIMIT 1;";
+        cmd.Parameters.AddWithValue("$p", playerId);
+        cmd.Parameters.AddWithValue("$r", reason);
+        cmd.Parameters.AddWithValue("$dk", dedupeKey);
+        return cmd.ExecuteScalar() is not null and not DBNull;
+    }
+
+    static string? ReadDelveRungIdUnlocked(SqliteConnection db, long delveId)
+    {
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT rung_id FROM rpg_delves WHERE delve_id = $id;";
+        cmd.Parameters.AddWithValue("$id", delveId);
+        return cmd.ExecuteScalar() as string;
+    }
+
+    /// <summary>Reads the cross-delve-persisted subset of a member's pools (spec §1, S2-7 —
+    /// `attrition.persistAcrossDelves[]`, `["hunger"]` today). Empty when the actor has never closed
+    /// a delve before — the caller (party assembly) fills every other id from `resource.max`.</summary>
+    public IReadOnlyDictionary<string, long> GetUniqueActorPersistedPools(string instanceId)
+    {
+        if (string.IsNullOrWhiteSpace(instanceId)) return new Dictionary<string, long>();
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            return ReadPersistedPoolsUnlocked(db, instanceId.Trim());
+        }
+    }
+
+    static IReadOnlyDictionary<string, long> ReadPersistedPoolsUnlocked(SqliteConnection db, string instanceId)
+    {
+        var result = new Dictionary<string, long>(StringComparer.Ordinal);
+        using var cmd = db.CreateCommand();
+        cmd.CommandText = "SELECT resource_id, stored FROM rpg_unique_actor_pools WHERE instance_id = $id;";
+        cmd.Parameters.AddWithValue("$id", instanceId);
+        using var r = cmd.ExecuteReader();
+        while (r.Read()) result[r.GetString(0)] = r.GetInt64(1);
+        return result;
+    }
+
+    /// <summary>Writes exactly the ids named by <paramref name="subsetPools"/> — the caller (`CloseDelve`)
+    /// has already filtered to `attrition.persistAcrossDelves[]`; this method trusts that filter rather
+    /// than re-deriving it, matching this whole module's "read model owned elsewhere" shape. One row
+    /// per resource id (spec's own normalized shape), never a JSON blob.</summary>
+    static void WritePersistedPoolsUnlocked(SqliteConnection db, string instanceId, IReadOnlyDictionary<string, long> subsetPools)
+    {
+        foreach (var (resourceId, stored) in subsetPools)
+        {
+            using var cmd = db.CreateCommand();
+            cmd.CommandText = """
+                INSERT INTO rpg_unique_actor_pools(instance_id, resource_id, stored) VALUES($id, $rid, $stored)
+                ON CONFLICT(instance_id, resource_id) DO UPDATE SET stored = $stored;
+                """;
+            cmd.Parameters.AddWithValue("$id", instanceId);
+            cmd.Parameters.AddWithValue("$rid", resourceId);
+            cmd.Parameters.AddWithValue("$stored", stored);
+            cmd.ExecuteNonQuery();
         }
     }
 
@@ -599,33 +881,163 @@ public sealed partial class RpgStore
         }
     }
 
+    /// <summary>
+    /// ⭐ <b>The SSOT is <c>rpg_item_assignment</c>, not <c>rpg_unique_equipment</c></b> —
+    /// `decision-d1-durable-ownership.md` §10 <b>M2</b>, landed 2026-09-06 alongside
+    /// <see cref="MigrateUniqueEquipmentToAssignments"/> (M1). D1's own wording for this step:
+    /// *"Repoint … to read assignments instead of `rpg_unique_equipment`. **Output shape unchanged**
+    /// — same `mods_json`, same `instance:pending`, same binder, same FE."*
+    ///
+    /// <para><b>Legacy labels on the wire, canonical roles in the table.</b> The row carries an
+    /// <see cref="FusionRpg.Core.Items.ItemRole"/> id; this projects it back through
+    /// <see cref="FusionRpg.Core.Items.LegacyEquipSlots"/> so
+    /// <c>GET /api/unique/actors/{id}/equipment</c> still answers <c>weapon|armor|trinket</c> and
+    /// <c>RelicsLayer.tsx</c> needs no change. Widening the wire to all fifteen roles is D1's
+    /// <b>M3</b>, a separate step that moves the REST payload and the FE literal together.</para>
+    ///
+    /// <para><b>The sort is preserved deliberately, not incidentally.</b> The old query ended
+    /// <c>ORDER BY slot ASC</c> over the legacy labels (armor, trinket, weapon); ordering by
+    /// <c>role</c> instead would answer armament-primary, core-guard, jewel-minor-a — i.e. weapon,
+    /// armor, trinket — a different array on the same data. Sorted here by the projected legacy
+    /// label with <see cref="string.CompareOrdinal(string?,string?)"/>, which is what SQLite's
+    /// default BINARY collation on a TEXT column already did.</para>
+    ///
+    /// <para><b>Every <c>ref_kind</c> is surfaced, not just <c>stock</c>.</b> An assignment is what
+    /// the specimen wears; filtering the view to the kind this wire happens to write would make the
+    /// endpoint lie the day a rolled item lands in one of the three roles. No rolled assignment can
+    /// exist today (no concrete item container is minted yet — module 17's own seed→concrete
+    /// deferral), so this is a correctness property rather than a behaviour change.</para>
+    /// </summary>
     static List<UniqueEquipmentSlotDto> ListUniqueEquipmentUnlocked(SqliteConnection db, string instanceId)
     {
         var items = new List<UniqueEquipmentSlotDto>();
-        using var cmd = db.CreateCommand();
-        cmd.CommandText = """
-            SELECT slot, item_id FROM rpg_unique_equipment
-            WHERE instance_id = $id ORDER BY slot ASC;
-            """;
-        cmd.Parameters.AddWithValue("$id", instanceId);
-        using var r = cmd.ExecuteReader();
-        while (r.Read())
+        using (var cmd = db.CreateCommand())
         {
-            items.Add(new UniqueEquipmentSlotDto
+            cmd.CommandText = "SELECT role, ref_id FROM rpg_item_assignment WHERE specimen_id = $id;";
+            cmd.Parameters.AddWithValue("$id", instanceId);
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
             {
-                Slot = r.GetString(0),
-                ItemId = r.IsDBNull(1) ? "" : r.GetString(1)
-            });
+                if (!FusionRpg.Core.Items.ItemRoles.TryParse(r.GetString(0), out var role)) continue;
+                if (!FusionRpg.Core.Items.LegacyEquipSlots.TryToLegacy(role, out var slot)) continue;
+                items.Add(new UniqueEquipmentSlotDto
+                {
+                    Slot = slot,
+                    ItemId = r.IsDBNull(1) ? "" : r.GetString(1)
+                });
+            }
         }
+        items.Sort((a, b) => string.CompareOrdinal(a.Slot, b.Slot));
         return items;
     }
 
-    /// <summary>Upsert slot. Empty itemId deletes the slot row. Non-empty must be a known stub.</summary>
+    /// <summary>Source marker on every assignment this legacy wire writes. <c>stock</c> is I13
+    /// §4.4's kind for "identified by a catalog id, not by a rolled instance" — exactly what a
+    /// relic or stub item is, and exactly what D1 §10 M1 specifies for the migrated rows.</summary>
+    const string LegacyEquipRefKind = "stock";
+
+    static void WriteLegacyEquipAssignmentUnlocked(
+        SqliteConnection db, string instanceId, FusionRpg.Core.Items.ItemRole role, string itemId) =>
+        ExecParams(db, """
+            INSERT INTO rpg_item_assignment (specimen_id, role, ref_kind, ref_id, assigned_utc)
+            VALUES ($sid, $role, $rk, $rid, $utc)
+            ON CONFLICT(specimen_id, role) DO UPDATE SET
+              ref_kind = excluded.ref_kind, ref_id = excluded.ref_id, assigned_utc = excluded.assigned_utc;
+            """,
+            ("$sid", instanceId), ("$role", FusionRpg.Core.Items.ItemRoles.Id(role)),
+            ("$rk", LegacyEquipRefKind), ("$rid", itemId),
+            ("$utc", DateTime.UtcNow.ToString("O")));
+
+    static void ClearLegacyEquipAssignmentUnlocked(
+        SqliteConnection db, string instanceId, FusionRpg.Core.Items.ItemRole role) =>
+        ExecParams(db, "DELETE FROM rpg_item_assignment WHERE specimen_id = $sid AND role = $role;",
+            ("$sid", instanceId), ("$role", FusionRpg.Core.Items.ItemRoles.Id(role)));
+
+    /// <summary>
+    /// ⭐ <b>D1 §10 <c>M1</c> — the relic row migration, closed 2026-09-06.</b> Copies every
+    /// <c>rpg_unique_equipment(instance_id, slot, item_id)</c> row into
+    /// <c>rpg_item_assignment(specimen_id, role, ref_kind='stock', ref_id=item_id)</c>, mapping the
+    /// slot through I2's alias map (<see cref="FusionRpg.Core.Items.LegacyEquipSlots"/>).
+    ///
+    /// <para><b>Why this was stuck, and why it was never actually blocked.</b> `item-todo.md`
+    /// module 4 (P1.4) deferred this to module 17 (`uniques`) on the grounds that relics had
+    /// "no home to migrate into"; module 17 (P5.1) then deferred it back, correctly, as module 4's.
+    /// Both notes were self-consistent and the item sat unbuilt. The premise of the first was
+    /// wrong: module 17's <c>item_unique</c> is a nine-column <b>classification flag</b> keyed 1:1
+    /// on an <c>effect_container</c> — no name, rarity, slot, description or effect column — so it
+    /// never could have received an equipped-slot row. The home these rows needed is
+    /// <c>rpg_item_assignment</c>, which is module 4's own table and shipped 2026-09-04.</para>
+    ///
+    /// <para><b>One-way and idempotent</b>, exactly as D1 words it. A specimen+role that already
+    /// carries an assignment is left alone — never overwritten — so a second call writes nothing,
+    /// and a row equipped through the post-M2 path can never be clobbered by a stale legacy row.
+    /// The old table keeps its rows and stops being written; dropping it is D1's <b>M4</b>, gated on
+    /// a <c>ref_kind='rolled'</c> grant path that does not exist yet, and D1 calls that drop
+    /// *"the only irreversible act; do it last."*</para>
+    ///
+    /// <para>Returns the number of rows actually copied.</para>
+    /// </summary>
+    public int MigrateUniqueEquipmentToAssignments()
+    {
+        lock (_gate)
+        {
+            using var db = OpenUnlocked();
+            return MigrateUniqueEquipmentToAssignmentsUnlocked(db);
+        }
+    }
+
+    internal static int MigrateUniqueEquipmentToAssignmentsUnlocked(SqliteConnection db)
+    {
+        var legacy = new List<(string InstanceId, string Slot, string ItemId)>();
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "SELECT instance_id, slot, item_id FROM rpg_unique_equipment;";
+            using var r = cmd.ExecuteReader();
+            while (r.Read())
+                legacy.Add((r.GetString(0), r.GetString(1), r.IsDBNull(2) ? "" : r.GetString(2)));
+        }
+        if (legacy.Count == 0) return 0;
+
+        var taken = new HashSet<string>(StringComparer.Ordinal);
+        using (var cmd = db.CreateCommand())
+        {
+            cmd.CommandText = "SELECT specimen_id, role FROM rpg_item_assignment;";
+            using var r = cmd.ExecuteReader();
+            while (r.Read()) taken.Add($"{r.GetString(0)} {r.GetString(1)}");
+        }
+
+        var now = DateTime.UtcNow.ToString("O");
+        var copied = 0;
+        foreach (var (instanceId, slot, itemId) in legacy)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) continue;
+            if (!FusionRpg.Core.Items.LegacyEquipSlots.TryFromLegacy(slot, out var role)) continue;
+            var roleId = FusionRpg.Core.Items.ItemRoles.Id(role);
+            if (!taken.Add($"{instanceId} {roleId}")) continue; // already assigned — never overwrite
+            ExecParams(db, """
+                INSERT INTO rpg_item_assignment (specimen_id, role, ref_kind, ref_id, assigned_utc)
+                VALUES ($sid, $role, $rk, $rid, $utc);
+                """,
+                ("$sid", instanceId), ("$role", roleId),
+                ("$rk", LegacyEquipRefKind), ("$rid", itemId), ("$utc", now));
+            copied++;
+        }
+        return copied;
+    }
+
+    /// <summary>Upsert slot. Empty itemId deletes the slot row. Non-empty must be a known stub.
+    ///
+    /// <para><b>Writes <c>rpg_item_assignment</c></b> (D1 §10 M2) — the legacy slot label is validated
+    /// exactly as before, then mapped to its canonical role. The request, the response and every
+    /// downstream effect (<c>mods_json</c>, the <c>unique-equip</c> atom bindings) are unchanged;
+    /// only the table underneath moved. See <see cref="ListUniqueEquipmentUnlocked"/>.</para></summary>
     public UniqueEquipmentListDto UpsertUniqueEquipment(string instanceId, string slot, string? itemId)
     {
         if (string.IsNullOrWhiteSpace(instanceId)) throw new ArgumentException("instanceId");
         var id = instanceId.Trim();
         var s = FusionRpg.Core.Match.UniqueEquipmentCatalog.NormalizeSlot(slot);
+        if (!FusionRpg.Core.Items.LegacyEquipSlots.TryFromLegacy(s, out var role))
+            throw new ArgumentException("slot required", nameof(slot));
         var item = (itemId ?? "").Trim();
         if (!string.IsNullOrEmpty(item))
         {
@@ -641,25 +1053,9 @@ public sealed partial class RpgStore
                 throw new InvalidOperationException("not_found");
 
             if (string.IsNullOrEmpty(item))
-            {
-                using var del = db.CreateCommand();
-                del.CommandText = "DELETE FROM rpg_unique_equipment WHERE instance_id = $id AND slot = $slot;";
-                del.Parameters.AddWithValue("$id", id);
-                del.Parameters.AddWithValue("$slot", s);
-                del.ExecuteNonQuery();
-            }
+                ClearLegacyEquipAssignmentUnlocked(db, id, role);
             else
-            {
-                using var ups = db.CreateCommand();
-                ups.CommandText = """
-                    INSERT INTO rpg_unique_equipment(instance_id, slot, item_id) VALUES($id, $slot, $item)
-                    ON CONFLICT(instance_id, slot) DO UPDATE SET item_id = excluded.item_id;
-                    """;
-                ups.Parameters.AddWithValue("$id", id);
-                ups.Parameters.AddWithValue("$slot", s);
-                ups.Parameters.AddWithValue("$item", item);
-                ups.ExecuteNonQuery();
-            }
+                WriteLegacyEquipAssignmentUnlocked(db, id, role, item);
 
             RebuildUniqueModsFromEquipmentUnlocked(db, id);
             ReconcileUniqueEquipmentAtomBindingsUnlocked(db, id);
@@ -786,7 +1182,11 @@ public sealed partial class RpgStore
         {
             using var db = OpenUnlocked();
             using var cmd = db.CreateCommand();
-            cmd.CommandText = "SELECT DISTINCT instance_id FROM rpg_unique_equipment;";
+            // Repointed to the post-M2 SSOT alongside every other reader (D1 §10 M2). The legacy
+            // table is migrated into this one at Init, so "every specimen that ever equipped
+            // something" is the same set either way -- and after M2 it is the only correct one,
+            // because a specimen that equipped for the first time post-cutover has no legacy row.
+            cmd.CommandText = "SELECT DISTINCT specimen_id FROM rpg_item_assignment;";
             using var r = cmd.ExecuteReader();
             ids = new List<string>();
             while (r.Read()) ids.Add(r.GetString(0));

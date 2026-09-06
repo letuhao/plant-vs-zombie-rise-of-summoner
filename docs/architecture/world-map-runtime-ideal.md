@@ -1,8 +1,9 @@
 # World map runtime — the ideal
 
-**Status:** idea phase, 2026-09-05. Spec drafted 2026-09-06:
-[world-map-runtime/spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md)
-(pending owner review). **No build authorized** until that spec is approved.
+**Status:** idea phase, 2026-09-05. Spec strengthened + decisions locked 2026-09-06:
+[world-map-runtime/spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md).
+**Build authorized** — [tasks/world-map-runtime-plan.md](../tasks/world-map-runtime-plan.md)
+starts at R0/R1.
 
 **Program id:** `world-map-runtime`.
 
@@ -337,9 +338,9 @@ No new power curve. No new stock.
 
 ## Open questions
 
-None. The owner pick is the shape above. Spec:
-[world-map-runtime/spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md).
-Build waits on that review.
+None at ideal level. Spec locked decisions (§O, fog-on-pin, T3 HOW via R16, channels stay under
+`stages/world/render/` for v1) live in the module spec and capability map. Build:
+[tasks/world-map-runtime-plan.md](../tasks/world-map-runtime-plan.md).
 
 ---
 

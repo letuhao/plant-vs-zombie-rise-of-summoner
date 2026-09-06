@@ -160,18 +160,21 @@ public class AtomCompilerTests
     }
 
     [Fact]
-    public void A_quarantined_kind_is_rejected_in_the_runtime_that_still_lacks_a_consumer()
+    public void A_kind_with_a_partial_consumer_compiles_rather_than_being_rejected()
     {
         var atom = Atom("atom.power", "stat.derived",
             "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
 
-        // SIM has no derived consumer, so a bind there is still the silent no-op the quarantine
-        // exists to refuse. This is the assertion that carries the rule.
-        Assert.Equal(AtomPath.Rejected, Compilability.Classify(atom, RuntimeId.Sim).Path);
+        // SIM moved None -> Partial (mechanism-wiring E5, 2026-09-06): ActorDerivedLookup's
+        // contribution fold gave it a real, if partial (Flat/Increased only), consumer. Compilability
+        // only rejects RuntimeState.None outright (and PlanOnly on a non-planner host) -- Partial
+        // compiles exactly like Full does. Renamed from
+        // "A_quarantined_kind_is_rejected_in_the_runtime_that_still_lacks_a_consumer", which is no
+        // longer an accurate description of Sim's state for this kind.
+        Assert.Equal(AtomPath.Compiled, Compilability.Classify(atom, RuntimeId.Sim).Path);
 
         // LAWN opened 2026-08-30 (decisions.md "Derived-write lawn executor") because it gained a real
-        // consumer -- `AtomDerivedSubsystem`. The rule did not change: a runtime opens only where a
-        // consumer exists, which is why the Sim assertion above still holds in the same test.
+        // consumer -- `AtomDerivedSubsystem`.
         //
         // COMPILED, not Runner, as of the same day (aura-skill-todo.md Phase 5 / TC2). This assertion
         // read `Runner` for a few hours, which was correct only while `stat.derived` had no opcode:

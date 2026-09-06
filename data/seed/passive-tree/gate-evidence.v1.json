@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "_meta": {
+    "owner": "docs/architecture/passive-tree/spec-tree-plan.md §7.1",
+    "note": "R-G1's checked-in evidence row, one per gateIndexKind -- never per-tree, never per-gateQuantity instance (spec-tree-plan.md §7's own table). The planner reads this file and never resolves a quantity's production-carrier state itself: `gates.resolve_gate_state` is the ONLY function allowed to turn a gateIndexKind into a gateState, and it only ever reads this file. Flip a row's gateState from pending to carrier only once a real production reader exists in src/ -- name the line in that row's own 'evidence' field -- never ahead of the code (D37).",
+    "rebalance": "Hand-edit only to flip a state once the named carrier actually ships, or to add a row for a new gateIndexKind. Never delete a row a live tree still names."
+  },
+  "rows": [
+    {
+      "gateIndexKind": "aptitudePoints",
+      "gateState": "carrier",
+      "evidence": "PointBudget.PointsFor(AllocationScope.Commander, ...) -- shipped (spec-tree-plan.md §7 table, primary category, 12 trees)"
+    },
+    {
+      "gateIndexKind": "elementMastery",
+      "gateState": "pending",
+      "evidence": "AllocationScope.Aspect exists (AptitudeAllocation.cs:8) but no production reader for element_mastery.<id>@Aspect exists yet -- owed by gate-counters wave 0 (D37); PointBudget.cs:15 records the old, now-superseded ownership comment"
+    },
+    {
+      "gateIndexKind": "statusApplied",
+      "gateState": "pending",
+      "evidence": "D35 correctly removed the AllocationScope dependency for status_applied.<id> and nothing has replaced it yet -- owed by gate-counters wave 0 (D37)"
+    },
+    {
+      "gateIndexKind": "demonTypeLevel",
+      "gateState": "carrier",
+      "evidence": "PointBudget.DemonTypeSourceFromLevel -- shipped (spec-tree-plan.md §7 table, family category)"
+    }
+  ]
+}

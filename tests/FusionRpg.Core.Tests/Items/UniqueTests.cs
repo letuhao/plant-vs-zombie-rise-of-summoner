@@ -570,7 +570,10 @@ public class UniqueTests
     [Fact]
     public void This_module_adds_no_container_kind_and_no_atom_kind()
     {
-        Assert.Equal(6, Enum.GetNames<ContainerKind>().Length);
+        // 7, not 6, since party-dungeon D2.6 (spec-encounter-generator.md §6) added ContainerKind.Enemy
+        // as its own reviewed seventh kind -- this test's own claim is "the UNIQUES module adds
+        // neither," which still holds; the total just moved for an unrelated, reviewed reason.
+        Assert.Equal(7, Enum.GetNames<ContainerKind>().Length);
         Assert.Equal(AtomKindRegistry.KindCount, AtomKindRegistry.All.Count);
         Assert.Null(AtomKindRegistry.Get("damage.convert"));
         Assert.DoesNotContain(AtomKindRegistry.All, k => k.KindId.Contains("convert", StringComparison.Ordinal));
@@ -582,18 +585,24 @@ public class UniqueTests
     /// <b>lifted</b>: <c>stat.derived</c> is Full on the lawn AND in battle. Asserted rather than
     /// assumed, because the lane doc still says otherwise and a builder reading only the lane would
     /// author around a wall that is gone.
+    ///
+    /// <para>Sim moved too, mechanism-wiring E5 (2026-09-06): `None → Partial`, not `Full` — the fold
+    /// (`ActorDerivedLookup`) honours `Flat`/`Increased` and not `Replace`/`Flag`
+    /// (`EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`). Renamed from
+    /// `..._is_still_refused_for_sim`, which is no longer true.</para>
     /// </summary>
     [Fact]
-    public void A_stat_derived_identity_atom_binds_on_lawn_and_battle_and_is_still_refused_for_sim()
+    public void A_stat_derived_identity_atom_binds_on_lawn_and_battle_and_partially_in_sim()
     {
         var derived = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(derived);
         Assert.Equal(RuntimeState.Full, derived!.SupportIn(RuntimeId.Lawn));
         Assert.Equal(RuntimeState.Full, derived.SupportIn(RuntimeId.Battle));
 
-        // Sim is still None -- I8's promotion of the runtime check from bind time to import time for
-        // container_kind = 'item' still bites there, and that is a real remaining limit, not a lift.
-        Assert.Equal(RuntimeState.None, derived.SupportIn(RuntimeId.Sim));
+        // Sim opened to Partial (mechanism-wiring E5, 2026-09-06) once ActorDerivedLookup's
+        // contribution fold gave it a real, if partial, consumer -- Full is reachable only by routing
+        // that fold through the real DerivedComposer rather than a plain OverlayAdd sum.
+        Assert.Equal(RuntimeState.Partial, derived.SupportIn(RuntimeId.Sim));
     }
 
     /// <summary>

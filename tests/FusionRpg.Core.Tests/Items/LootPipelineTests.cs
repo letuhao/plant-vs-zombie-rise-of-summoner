@@ -50,8 +50,49 @@ public class LootPipelineTests
         Assert.Equal("loot:exp:warpath-20h", LootCorrelation.Derive("expedition-tier", "warpath-20h"));
         Assert.Throws<ArgumentException>(() => LootCorrelation.Derive("made-up", "x"));
 
+        // D3.10 (spec-dungeon-loot.md §1): the three delve source kinds, added the same day.
+        Assert.Equal("loot:delve:d42:3:5", LootCorrelation.Derive("dungeon-room", "d42:3:5"));
+        Assert.Equal("loot:delve:domain.fire-shallow-001:clear", LootCorrelation.Derive("dungeon-clear", "domain.fire-shallow-001"));
+        Assert.Equal("loot:delve:d42:quest:q7", LootCorrelation.Derive("dungeon-quest", "d42:quest:q7"));
+
         Assert.True(LootPipeline.Resolve(Request(), View(), Tuning(), LootPityState.Empty, out var m).IsOk);
         Assert.Equal("loot:rift-warband", m!.CorrelationId);
+    }
+
+    // ---- D3.10: the three new delve source kinds ---------------------------------------------------
+
+    [Theory]
+    [InlineData("dungeon-room", "d1:0:0", "loot:delve:d1:0:0")]
+    [InlineData("dungeon-room", "d1:5:9", "loot:delve:d1:5:9")]
+    [InlineData("dungeon-clear", "domain.a", "loot:delve:domain.a:clear")]
+    [InlineData("dungeon-clear", "domain.b", "loot:delve:domain.b:clear")]
+    [InlineData("dungeon-quest", "d1:quest:q1", "loot:delve:d1:quest:q1")]
+    [InlineData("dungeon-quest", "d2:quest:q9", "loot:delve:d2:quest:q9")]
+    public void Each_delve_source_kind_round_trips_its_own_correlation_shape(string kind, string sourceId, string expected)
+    {
+        Assert.Equal(expected, LootCorrelation.Derive(kind, sourceId));
+        // Same (kind, sourceId) twice reproduces the identical correlation -- deterministic, not just
+        // formatted correctly once (spec §9: "server-derived correlation" implies reproducibility).
+        Assert.Equal(LootCorrelation.Derive(kind, sourceId), LootCorrelation.Derive(kind, sourceId));
+    }
+
+    [Fact]
+    public void All_three_delve_source_kinds_are_now_known_to_the_validator()
+    {
+        Assert.Contains("dungeon-room", DropTableValidator.KnownSourceKinds);
+        Assert.Contains("dungeon-clear", DropTableValidator.KnownSourceKinds);
+        Assert.Contains("dungeon-quest", DropTableValidator.KnownSourceKinds);
+    }
+
+    [Fact]
+    public void Distinct_rooms_in_the_same_delve_never_collide_on_correlation()
+    {
+        var a = LootCorrelation.Derive("dungeon-room", "d1:2:3");
+        var b = LootCorrelation.Derive("dungeon-room", "d1:2:4");
+        var c = LootCorrelation.Derive("dungeon-room", "d1:3:3");
+        Assert.NotEqual(a, b);
+        Assert.NotEqual(a, c);
+        Assert.NotEqual(b, c);
     }
 
     [Fact]
@@ -242,6 +283,82 @@ public class LootPipelineTests
         Assert.True(LootPipeline.Resolve(Request(), view, t, LootPityState.Empty, out var one).IsOk);
         using var ctx = JsonDocument.Parse(one!.ContextJson);
         Assert.False(ctx.RootElement.GetProperty("smartLoot").GetBoolean());
+    }
+
+    // ---- D3.11: LootPipeline's own RefId/BaseTypeSetFor arm (spec-dungeon-loot.md §3) --------------
+
+    static LootContentView MinimalEquipmentView(string refId, Func<string, IReadOnlyList<string>>? baseTypeSetFor)
+    {
+        var entry = new DropTableEntryRow(Seq: 0, Kind: DropEntryKind.Equipment, RefId: refId, Weight: 1000, Frame: "light", Role: "helm");
+        var table = new DropTableRow(
+            TableId: "t1", SourceAllow: Array.Empty<string>(), MinIlvl: null, MaxIlvl: null,
+            Enabled: true, Revision: 1,
+            Groups: new[] { new DropTableGroupRow("g1", Seq: 0, Rolls: 1, Entries: new[] { entry }) });
+        var source = new LootSourceRow("web-wave", "s1", "t1", ContentLevel: 20);
+
+        IReadOnlyList<string> baseTypesFor(string frame, string role) =>
+            frame == "light" && role == "helm" ? new[] { "helm-a", "helm-b", "helm-c" } : Array.Empty<string>();
+
+        return new LootContentView(
+            new Dictionary<string, LootSourceRow> { [source.Key] = source },
+            new Dictionary<string, DropTableRow> { [table.TableId] = table },
+            DropVolumeCorpusTests.Ladder(),
+            baseTypesFor,
+            BaseTypeSetFor: baseTypeSetFor);
+    }
+
+    static LootGrant ResolveOneEquipmentGrant(LootContentView view, ulong seed = 1)
+    {
+        Assert.True(LootPipeline.Resolve(
+            new LootRequest("p", "web-wave", "s1", seed, ThetaActor: 20), view, Tuning(),
+            LootPityState.Empty, out var m).IsOk);
+        return Assert.Single(m!.Grants);
+    }
+
+    [Fact]
+    public void A_null_BaseTypeSetFor_leaves_the_frame_role_set_untouched_even_with_a_RefId_authored()
+    {
+        var view = MinimalEquipmentView(refId: "helm-set-a", baseTypeSetFor: null);
+        for (ulong seed = 0; seed < 10; seed++)
+            Assert.Contains(ResolveOneEquipmentGrant(view, seed).BaseTypeId, new[] { "helm-a", "helm-b", "helm-c" });
+    }
+
+    [Fact]
+    public void An_empty_RefId_ignores_a_supplied_BaseTypeSetFor()
+    {
+        var view = MinimalEquipmentView(refId: "", baseTypeSetFor: _ => new[] { "helm-b" });
+        for (ulong seed = 0; seed < 10; seed++)
+            Assert.Contains(ResolveOneEquipmentGrant(view, seed).BaseTypeId, new[] { "helm-a", "helm-b", "helm-c" });
+    }
+
+    [Fact]
+    public void A_populated_RefId_with_a_resolver_narrows_the_draw_to_the_domain_set()
+    {
+        var view = MinimalEquipmentView(refId: "helm-set-a", baseTypeSetFor: refId =>
+            refId == "helm-set-a" ? new[] { "helm-b" } : Array.Empty<string>());
+        for (ulong seed = 0; seed < 20; seed++)
+            Assert.Equal("helm-b", ResolveOneEquipmentGrant(view, seed).BaseTypeId);
+    }
+
+    [Fact]
+    public void The_intersection_is_a_real_intersection_not_a_replacement()
+    {
+        // The domain set includes an id that is NOT in the frame/role's own legal set -- it must never
+        // be drawn, proving this narrows `legal`, it does not just substitute the resolver's own list.
+        var view = MinimalEquipmentView(refId: "helm-set-a", baseTypeSetFor: _ => new[] { "helm-b", "not-a-real-helm" });
+        for (ulong seed = 0; seed < 20; seed++)
+            Assert.Equal("helm-b", ResolveOneEquipmentGrant(view, seed).BaseTypeId);
+    }
+
+    [Fact]
+    public void A_RefId_whose_domain_set_shares_nothing_with_the_frame_role_set_refuses()
+    {
+        var view = MinimalEquipmentView(refId: "helm-set-a", baseTypeSetFor: _ => new[] { "totally-unrelated" });
+        var r = LootPipeline.Resolve(
+            new LootRequest("p", "web-wave", "s1", SourceSeed: 1, ThetaActor: 20), view, Tuning(),
+            LootPityState.Empty, out _);
+        Assert.False(r.IsOk);
+        Assert.Contains("no-legal-base-type", r.Detail);
     }
 
     [Fact]

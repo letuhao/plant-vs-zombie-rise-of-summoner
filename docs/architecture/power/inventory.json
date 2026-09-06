@@ -4,7 +4,7 @@
     "owner": "docs/architecture/power/ssot-power-scale.md §10",
     "note": "Machine-readable mirror of SSOT §10.1 (level curves — collapse into Θ) and §10.2 (non-level scales — legitimate, stay). Generated from the table, reviewed with it (spec-power-guard.md §2.3, T4.1, 2026-08-24). guard-power.ps1's G3 check diffs power-shaped code against the `location` values here — a match at a location not listed here is a new, unreviewed curve.",
     "rebalance": "Adding a row is a reviewed change to ssot-power-scale.md §10 first, this file second — never the other way around.",
-    "resync": "Resynced 2026-09-05 to ssot-power-scale.md §10 after the effort-power reconciliation audit found the two lists diverged in BOTH directions. Rows 18 and 19 existed in §10 and had never been mirrored (added here). Rows 20-23 and 25 existed only here and were promoted into §10, which is the authority. Rows 3 and 4 pointed at deleted files and were repointed (see each row's locationNote). Rows 27 and 28 are new in both. Both lists carry 27 rows; row 17 is retired and its id is not reassigned."
+    "resync": "Resynced 2026-09-05 to ssot-power-scale.md §10 after the effort-power reconciliation audit found the two lists diverged in BOTH directions. Rows 18 and 19 existed in §10 and had never been mirrored (added here). Rows 20-23 and 25 existed only here and were promoted into §10, which is the authority. Rows 3 and 4 pointed at deleted files and were repointed (see each row's locationNote). Rows 27 and 28 are new in both. Rows 29-32 added 2026-09-06 (task D8, owed since task A1) mirror ssot-power-scale.md §10.2's new req(t)/W(T)/unlockCost/soulTrack rows in the same change. Rows 33-34 added 2026-09-06 (task G4, owed by spec-gate-counters.md §6) mirror §10.2's new gate-counter mastery-ladder and count-to-equivalents rows in the same change -- ssot-power-scale.md first, this file second, per this file's own rebalance note. Both lists carry 33 rows; row 17 is retired and its id is not reassigned."
   },
   "scales": [
     {
@@ -139,7 +139,8 @@
       "id": 20,
       "scale": "PowerLadder P(Theta) = C + A*Theta + B*Theta(Theta-1)/2",
       "shape": "triangular, integer-exact",
-      "location": "src/FusionRpg.Core/Power/PowerLadder.cs",
+      "location": "src/FusionRpg.Core/Power/PowerLadder.cs, src/FusionRpg.Core/Delve/Encounter/BossShieldPool.cs",
+      "locationNote": "party-dungeon D2.5 (2026-09-06): BossShieldPool.cs is a reviewed READ of this SAME ladder, not a second curve — PS-2, read once, for the boss shield pool's own P(Theta_room) term (bossShieldPerPartyMilli * P(Theta_room) * (N-1) / 1000). No new §10 row: this is an additional caller of an already-registered scale, exactly as spec-encounter-generator.md §5's own Registration note asks for.",
       "verdict": "the-one-ladder-T1.2"
     },
     {
@@ -198,6 +199,48 @@
       "shape": "linear in Theta, floored, no ceiling",
       "location": "src/FusionRpg.Core/Items/Drops/DropVolume.cs",
       "verdict": "linear-in-theta-deliberately-count-is-a-rate-D18"
+    },
+    {
+      "id": 29,
+      "scale": "TierGate.Reached: req(t) = k*t(t+1)/2, ascending-loop threshold on aptitude points",
+      "shape": "arithmetic threshold, identical shape to row 6",
+      "location": "src/FusionRpg.Core/PassiveTree/Resolve/TierGate.cs",
+      "verdict": "cost-threshold-not-power-ladder-catalog-depth-bounded-D8"
+    },
+    {
+      "id": 30,
+      "scale": "W(T) = b*T(T+1)/2, the tier reward function reward_per_skill_point walks",
+      "shape": "arithmetic, triangular in tier (never Theta)",
+      "location": "tools/seedsmith/seedsmith/adapters/trees/plan/archetypes.py",
+      "verdict": "tier-indexed-exact-ratio-never-a-standalone-magnitude-D8"
+    },
+    {
+      "id": 31,
+      "scale": "TreeUnlockCost: cost(N) = first + (N-1)*step, cumulative(N) = N*first + step*N*(N-1)/2",
+      "shape": "arithmetic ladder, identical shape to row 6",
+      "location": "src/FusionRpg.Core/PassiveTree/State/TreeUnlockCost.cs",
+      "verdict": "cost-ladder-across-all-trees-never-per-tree-D36-D8"
+    },
+    {
+      "id": 32,
+      "scale": "SoulTrack.ThetaNode: Theta_node = Theta_actor + (Ws*soulLevel)/1000",
+      "shape": "linear offset added to Theta before P(Theta) runs",
+      "location": "src/FusionRpg.Core/PassiveTree/Resolve/SoulTrack.cs",
+      "verdict": "theta-offset-coefficient-never-moves-D3-D8"
+    },
+    {
+      "id": 33,
+      "scale": "MasteryIndex.CountToReach/.Index: count(m) = c*n(n+1)/2, n = m-1",
+      "shape": "arithmetic ladder, triangular in its own index, identical shape to row 6",
+      "location": "src/FusionRpg.Core/PassiveTree/GateCounters/MasteryIndex.cs",
+      "verdict": "cost-ladder-not-power-ladder-gate-counter-mastery-G4"
+    },
+    {
+      "id": 34,
+      "scale": "MasteryIndex.Equivalents: (index-1)*ratePoints, via StatusAppliedSource/ElementMasterySource",
+      "shape": "linear read of row 33's index",
+      "location": "src/FusionRpg.Core/PassiveTree/GateCounters/MasteryIndex.cs, src/FusionRpg.Core/PassiveTree/GateCounters/StatusAppliedSource.cs, src/FusionRpg.Core/PassiveTree/GateCounters/ElementMasterySource.cs",
+      "verdict": "index-to-equivalents-read-never-a-second-ladder-G4"
     }
   ]
 }

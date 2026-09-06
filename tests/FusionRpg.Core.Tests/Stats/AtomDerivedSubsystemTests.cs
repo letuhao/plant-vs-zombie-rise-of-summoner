@@ -133,14 +133,18 @@ public class AtomDerivedSubsystemTests
         Assert.False(AtomDerivedSubsystem.TryParseOp(op, out _));
     }
 
-    [Fact] // A8 — the lawn opened; sim did NOT
-    public void Lawn_is_now_supported_battle_stays_supported_and_sim_stays_refused()
+    [Fact] // A8 — the lawn opened; E5 (2026-09-06) opened sim too, but only PARTIALLY
+    public void Lawn_is_now_supported_battle_stays_supported_and_sim_opens_partially()
     {
+        // Sim's fold (ActorDerivedLookup, reached by SimEffectHost/FoundationHarness) is a plain sum
+        // that honours Flat/Increased and not Replace/Flag -- proven empirically by
+        // EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial -- so the cell reads
+        // Partial, not Full. Renamed from "..._and_sim_stays_refused", which is no longer true.
         var kind = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(kind);
         Assert.Equal(RuntimeState.Full, kind!.Support.Lawn);
         Assert.Equal(RuntimeState.Full, kind.Support.Battle);
-        Assert.Equal(RuntimeState.None, kind.Support.Sim);
+        Assert.Equal(RuntimeState.Partial, kind.Support.Sim);
     }
 
     [Fact] // A8 — and the scope table agrees with the kind matrix on both hosts

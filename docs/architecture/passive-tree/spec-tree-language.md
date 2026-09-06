@@ -136,6 +136,12 @@ at all, because it never names one (§2's table: `channel` is DERIVED).
 container; a tree node is static shared content and has no roll. A rarity field on a node would be a
 second progression ladder, which is what `ssot-power-scale.md` §10 exists to refuse.
 
+**A node authoring a status whose `stat` payload writes `status.resist.*` makes application order
+significant** (E1b, spec-mechanism-wiring.md §12 q1, closed 2026-09-05): the status contributes
+everything it writes, so a host already carrying it resists the *next* status applied measurably more —
+an author sequencing a resist-granting status ahead of a DoT on the same node gets a different, stronger
+result than the reverse order, and that is a property of the authoring, not a bug.
+
 ### 4. The quota mechanism — how D32 becomes an enum
 
 #### 4.1 What it exists to prevent, measured

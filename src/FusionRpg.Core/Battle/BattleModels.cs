@@ -117,7 +117,77 @@ public sealed record BattleActorSetup
     /// </summary>
     [JsonIgnore]
     public string? GarrisonedBy { get; init; }
+
+    // party-dungeon D2.8 (delve-battle-profile) — seven additive fields for a multi-room, multi-party
+    // raid. Every one follows EquippedActionIds' own precedent above to the letter:
+    // [JsonIgnore(Condition = WhenWritingDefault)], an init-only tail property (this record has no
+    // positional constructor to break), and null for every existing caller (WaveCatalog,
+    // WebMatchService, DistrictAssaultResolver, every test fixture) since none of them sets these —
+    // so every existing serialized shape (all four battle hashes, the 32-seed sweep, all four
+    // expedition tier hashes) stays byte-identical. Consumption (carry-in wiring, the delve profile,
+    // the phase-grant trigger) is later delve-battle-profile tasks (D2.9-D2.14+); this task is shape
+    // only.
+
+    /// <summary>Carried HP from a previous room in the same delve. <c>null</c> means "no carry-in" —
+    /// the consumer's own rule (D2.11) is <c>Hp = CurrentHp ?? MaxHp</c>, never a magic sentinel.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public long? CurrentHp { get; init; }
+
+    /// <summary>Which raid party (0-based) this actor belongs to — null for a non-raid setup (every
+    /// shipped expedition/web-match/siege caller). Feeds the per-party economy key
+    /// (<c>side:squad:p{PartyIndex}</c>, D2.11) and the route/route-mask bookkeeping upstream in
+    /// `delve-graph-roll`'s own <c>DelveRoomFact.PartyRouteMask</c>.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int? PartyIndex { get; init; }
+
+    /// <summary>How many ranks this actor occupies (a wide boss) — null means 1, matching every
+    /// existing 1-wide actor exactly. Semantics (span <c>k</c> at rank <c>i</c> occupies
+    /// <c>[i, i+k-1]</c>) and the engine read are `delve-battle-profile`'s; `encounter-generator`
+    /// writes this only for the `boss` role, from `formation.boss.rankSpan`.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int? RankSpan { get; init; }
+
+    /// <summary>
+    /// An explicit `Θ_actor` for the contest side, independent of <see cref="Level"/>/<see cref="Index"/>
+    /// (spec-difficulty-ladder.md §7's own named wiring gap: "`Index` is a read-only alias of `Level`,
+    /// so `delve-battle-profile` and `power-index` hydration decide whether that is `Level` or a new
+    /// init-able field" — this is that field). Null means "no override, read `Index`/`Level` as every
+    /// existing caller already does" — <see cref="ActorThetaSeam"/>'s own contest math takes a raw
+    /// `int actorTheta` parameter today and does not yet read this field; wiring it in is
+    /// `delve-battle-profile`'s job, not this shape-only task's.
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int? ThetaActor { get; init; }
+
+    /// <summary>Non-HP resource pools (stamina, spirit, ...) carried in from a previous room, keyed by
+    /// pool name. Null means "no carry-in" — same shape and reasoning as <see cref="CurrentHp"/>, kept
+    /// as its own field rather than folded in because HP has its own carry rule (`??MaxHp`) while pools
+    /// seed a party-scoped store (D2.11's `FromStored`).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyDictionary<string, long>? CarryInPools { get; init; }
+
+    /// <summary>Boss HP-threshold grants (`{HpThresholdMilli, ContainerInstanceId}`,
+    /// spec-delve-battle-profile.md §5/spec-encounter-generator.md §5) — a phase changes stats, never
+    /// actions (the ideal's own stated boundary). Null for every non-boss actor and every existing
+    /// caller. The threshold check itself (`hp * 1000 < threshold * maxHp`, `long`) and the grant
+    /// trigger are `delve-battle-profile`'s engine read; `encounter-generator` only writes the list.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<PhaseGrant>? PhaseGrants { get; init; }
+
+    /// <summary>Instance ids of `enemy.*` containers (`ContainerKind.Enemy`, D2.6) rolled for this
+    /// actor's affixes at setup — an elite's roll, or a boss phase's grant. Null for every actor with
+    /// no affix roll (every existing caller, and any elite drawn against an empty affix pool, which
+    /// degrades to "no affix" rather than inventing one).</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public IReadOnlyList<string>? GrantedContainerIds { get; init; }
 }
+
+/// <summary>One boss phase's HP-threshold grant (spec-delve-battle-profile.md §5): when the boss first
+/// satisfies `hp * 1000 &lt; HpThresholdMilli * maxHp` (`long`), the engine grants
+/// `ContainerInstanceId`'s effect ids through the same grant block `BindContainers` already uses. A
+/// phase **is** this threshold-triggered grant — the `berserker` trait's own precedent (a per-hit read
+/// against staged thresholds), never a kit change (a phase changes stats, never actions).</summary>
+public sealed record PhaseGrant(long HpThresholdMilli, string ContainerInstanceId);
 
 /// <summary>
 /// base-defense `combatant-kind`: does this actor take a turn. Two values, not a richer taxonomy —
@@ -418,6 +488,48 @@ public sealed record BattleActorResult(
     /// </summary>
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public IReadOnlyList<string>? EquippedActionIds { get; init; }
+
+    /// <summary>Carried straight from <see cref="BattleActorSetup.PartyIndex"/> — same reasoning as
+    /// <see cref="EquippedActionIds"/> above: an init-only tail property (never positional, this
+    /// record's 11-parameter primary constructor is otherwise untouched), <c>null</c> for every
+    /// existing caller, so all four battle hashes/the 32-seed sweep/all four expedition hashes stay
+    /// byte-identical.</summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public int? PartyIndex { get; init; }
+
+    /// <summary>
+    /// D2.14 — <c>Delve.Battle.DelveCarryOut? { Statuses, Shield, Retreated }</c>
+    /// (spec-delve-battle-profile.md §5's golden-argument table). Same tail-property/
+    /// `WhenWritingDefault` treatment as <see cref="PartyIndex"/> immediately above, for the
+    /// identical reason: null for every existing caller, so no hash moves.
+    ///
+    /// <para><b>Population is deliberately NOT wired here yet.</b> Building a real
+    /// <c>DelveCarryOut</c> at battle end needs converting the actor's live
+    /// <c>StatusInstance</c>s (<c>StatusRuntime.ForHost</c>) back into declarative
+    /// <see cref="BattleStatusSpec"/>s — a genuinely new conversion this task's own file list
+    /// (`DelveCarry.cs`, `DelveDecision.cs` only, no `BattleEngine.cs`) does not include. The type
+    /// exists and is fully wired for JSON safety; a later task assigns it a real, non-null value
+    /// for a `PartyIndex`-carrying actor.</para>
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public FusionRpg.Core.Delve.Battle.DelveCarryOut? CarryOut { get; init; }
+
+    /// <summary>
+    /// party-dungeon D2.21: true when this actor's `ActorState.WentDowned` was ever set this battle —
+    /// the timeline FSM's `TurnState.Downed` transition, gated on `DownedOnDeplete` and a non-null
+    /// `PartyIndex` (spec-delve-attrition.md §6). Sticky for the whole battle, so a mid-battle revive
+    /// does not erase the signal.
+    ///
+    /// <para>Same tail-property/`WhenWritingDefault` treatment as <see cref="PartyIndex"/>/
+    /// <see cref="CarryOut"/> above: `false` (the default) for every existing caller — nothing except
+    /// the `delve` profile ever sets `ActorState.WentDowned` — so this field never serializes for any
+    /// shipped battle and all four hashes/the 32-seed sweep/all four expedition hashes stay
+    /// byte-identical. A later task (party state / extraction settlement) reads this once per room to
+    /// fold into `DelveMemberState.DownedOnce`, which persists across rooms; this field itself does
+    /// not — it is this ONE room's own report.</para>
+    /// </summary>
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+    public bool WentDowned { get; init; }
 }
 
 /// <summary>

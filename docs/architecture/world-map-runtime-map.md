@@ -1,10 +1,10 @@
 # Capability map: world map runtime
 
-**Status:** Map + module spec drafted 2026-09-06, **strengthened same day after coverage audit** —
-**pending owner review**. Implementation plan drafted same day:
+**Status:** Map + module spec strengthened 2026-09-06. Open questions **locked** same day; human
+visual gates replaced by Playwright + agent CV checkpoints.
 [tasks/world-map-runtime-plan.md](../../tasks/world-map-runtime-plan.md) ·
 [tasks/world-map-runtime-todo.md](../../tasks/world-map-runtime-todo.md).
-**No build until the plan (and the spec defaults it implements) are approved.**
+**Build authorized** — start at **R0** / **R1**.
 
 **Program id:** `world-map-runtime`.
 
@@ -48,7 +48,7 @@ not a product.
 | **Objects** | Sector pin / lane / force factories from `sectorChannels` / `laneChannels` / `fogTreatments` (fog-on-pin density); registry | Host types; channel modules (stay Phaser-free; `game/` may import them) |
 | **Scene** | `WorldMapScene`, Phaser camera (incl. edge-scroll), zoom LOD, pick with chrome occlusion, **all** lens/route/range/supply/lifeline/blocked drawing | Host + objects |
 
-**Build order:** Host → Objects → Scene.
+**Build order:** Host → Objects → Scene (plus **R0** e2e harness before / with Host).
 
 **Module spec:** [world-map-runtime/spec-world-map-runtime.md](world-map-runtime/spec-world-map-runtime.md).
 
@@ -76,37 +76,42 @@ not a product.
 - Minimap on `small` / `medium`.
 - Turn-engine or wire-shape changes (including adding `Revision` to `WorldStateDto`).
 - A new GG-50 collection-surface row (outliner already covers volume).
+- Owner eyeball / human visual playtest gates (checkpoints are Playwright + agent CV).
 
 ---
 
-## Assumptions — correct these now
+## Locked decisions (cleared 2026-09-06)
 
-1. Plate 11 **§O** (circle pin + ownership ring, unknown = diamond, strict-superset LOD) is the visual
-   contract this spec implements. If §O's three drawing calls are rejected, stop and revise the plate
-   before code.
+1. **Plate §O drawing calls:** circle pin + ownership ring; unknown = diamond; LOD strict supersets.
+2. **Fog-on-pin density:** Unknown diamond; Rumored disc + ragged ring + hearsay pip (map+), wash at
+   detail; Scouted disc + doubled ring + dated pip (map+), parchment wash at detail; Watched
+   ownership/health only; **forces strip never on the pin**.
+3. **T3 HOW:** task **R16** amends `tech-stack.md` T3 (and `decisions.md` only if a row still names
+   SVG pan/zoom HOW). xyflow stays off the player map and entry chunk. Not a Phase A blocker.
+4. **Channels location:** stay under `stages/world/render/` for v1; `game/world` may import them.
+   No move to `src/lib/world-view/` in this program.
+
+---
+
+## Assumptions (implementation contract)
+
+1. Plate 11 **§O** (locked above) is the visual contract.
 2. Phaser **4.2.1** in this repo is **Scenes + GameObjects + lite systems**, matching
    `LawnWorldScene.ts` — not a greenfield ECS framework.
 3. `world:*` events live beside `lawn:*` in `game/EventBus.ts`; they do not join the `LawnBusEvent`
    union.
 4. Arrow-key pan is **React → bus → Phaser** so GG-18 still holds when a layer owns input. Pointer
    drag, edge-scroll, wheel, and pin click are Phaser. `W` is not pan.
-5. T3's *xyflow off the entry chunk* survives; T3's *therefore SVG hook* is amended in `decisions.md`
-   / `tech-stack.md` as a follow-up doc task, not a silent rewrite.
+5. T3's *xyflow off the entry chunk* survives; T3's *therefore SVG hook* is amended by **R16**.
 6. **Import law copies the lawn:** `game/world` may import Phaser-free channel modules under
    `stages/world/render/`; it must not import React, `lib/bus`, or `*Dto`.
 7. **Dirty flag is host `modelSeq`**, not `WorldHeaderDto.revision` and not a new wire field.
 8. **One Phaser camera** owns pins, lanes, forces, fog-on-pin, and every map-plane overlay.
 9. **Inspector docks left** (`spec-world-inspector` §8e.1); pick ignores that rectangle + the 92px
    rail. Plate §O's right-side composed mock does not override the dock.
-10. **Fog-on-pin** drops density (no forces strip on the disc); identity of the four intel states
-    survives. Owner sign-off on that table is part of this review.
-
----
-
-## Open questions
-
-1. Plate §O three drawing calls — assumed; overturn on the plate first.
-2. T3 HOW sentence in `tech-stack.md` / `decisions.md` — doc follow-up, Ask-first before editing.
-3. Later slice: move channels to `src/lib/world-view/` so `game/` never imports `stages/` — not v1.
+10. **Fog-on-pin** density table is locked (see Locked decisions).
+11. **Checkpoint verification** is automated: `npm test` + `npm run build` + Playwright
+    `e2e/world-map-runtime.spec.ts` + PNG artifacts under `e2e/.artifacts/world-map-runtime/` +
+    agent `Read` (computer vision) against the written CV checklist — no owner eyeball.
 
 Detail and locks live in the [module spec](world-map-runtime/spec-world-map-runtime.md).

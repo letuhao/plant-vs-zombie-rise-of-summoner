@@ -97,6 +97,12 @@ public sealed record StatusApplyOutcome(
     StatusInstance? Instance,
     StatusApplyResult EvalResult);
 
+/// <summary>P2's payload (spec-gate-counters.md §7) — wraps the SAME `StatusInstance` `OnApplied`
+/// already carries (HostPtr, AttackerPtr, StatusId, GrantId, …) rather than inventing new fields; a
+/// future `status_applied` counter (task G2, not built here) reads `Instance` for §2.1's own rules
+/// (outbound/landed/fresh/distinct-host).</summary>
+public readonly record struct StatusAppliedEvent(StatusInstance Instance);
+
 /// <summary>
 /// combat-unification Wave E1 — the element payload a status pulse carries.
 ///
@@ -144,6 +150,14 @@ public sealed class StatusRuntime
 
     /// <summary>Fires on every definitive apply (spread hops included) — VFX cue producer seam (SPEC W5).</summary>
     public Action<StatusInstance>? OnApplied { get; set; }
+
+    /// <summary>P2 (spec-gate-counters.md §7, §2.1c): fires ONLY when `UpsertInstance` ADDED a new
+    /// instance — never on a `Refresh`/`Replace` that matched an existing one. A NEW property, not a
+    /// widened `OnApplied` payload: `OnApplied` is a single-assignment `Action&lt;StatusInstance&gt;?`
+    /// with three assigning sites, one of which chains by hand (`ActorHudInvalidator.cs` saves
+    /// `prevApplied` first) — widening its payload breaks all three; a separate property breaks
+    /// none.</summary>
+    public Action<StatusAppliedEvent>? OnFreshApplication { get; set; }
 
     /// <summary>
     /// Fires when an instance definitively ENDS mid-life: expiry prune, ClearGrant, family mutex.
@@ -261,12 +275,17 @@ public sealed class StatusRuntime
             LastSpread = DateTimeOffset.MinValue
         };
 
-        UpsertInstance(input.HostPtr, instance, def.Stacking);
+        var isFresh = UpsertInstance(input.HostPtr, instance, def.Stacking);
         OnApplied?.Invoke(instance);
+        if (isFresh)
+            OnFreshApplication?.Invoke(new StatusAppliedEvent(instance));
         return new StatusApplyOutcome(true, null, instance, eval);
     }
 
-    void UpsertInstance(string hostPtr, StatusInstance instance, StatusStacking stacking)
+    /// <summary>Returns whether this upsert ADDED a new instance (P2) — `Refresh`/`Replace` report
+    /// fresh only when NO existing instance matched (this actor's first application under that key);
+    /// `Coexist` (the fallthrough) is always fresh, since it never replaces anything.</summary>
+    bool UpsertInstance(string hostPtr, StatusInstance instance, StatusStacking stacking)
     {
         if (!_byHost.TryGetValue(hostPtr, out var list))
         {
@@ -280,21 +299,24 @@ public sealed class StatusRuntime
                 string.Equals(i.StatusId, instance.StatusId, StringComparison.OrdinalIgnoreCase)
                 && string.Equals(i.GrantId, instance.GrantId, StringComparison.OrdinalIgnoreCase));
             if (idx >= 0)
+            {
                 list[idx] = instance;
-            else
-                list.Add(instance);
-            return;
+                return false;
+            }
+            list.Add(instance);
+            return true;
         }
 
         if (stacking == StatusStacking.Replace)
         {
-            list.RemoveAll(i =>
+            var removed = list.RemoveAll(i =>
                 string.Equals(i.StatusId, instance.StatusId, StringComparison.OrdinalIgnoreCase));
             list.Add(instance);
-            return;
+            return removed == 0;
         }
 
         list.Add(instance);
+        return true;
     }
 
     void ApplyFamilyMutex(string hostPtr, StatusDef def, DateTimeOffset now)

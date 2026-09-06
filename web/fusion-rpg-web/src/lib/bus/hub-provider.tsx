@@ -149,6 +149,17 @@ export function HubProvider({ children }: { children: ReactNode }) {
       void qc.invalidateQueries({ queryKey: ["speciesAptitudes"] });
     };
 
+    // passive-tree-todo.md I3 — PassiveTreeEndpoints.cs already broadcasts "PassiveTreeUpdated" to
+    // both groups (I2), but T5.1's exact gap (a broadcast with no web subscriber, relying entirely
+    // on the disabled-while-connected refetchInterval) repeats for every new endpoint that skips this
+    // wiring. Same shape as `onAptitudesUpdated`.
+    const onPassiveTreeUpdated = (msg: { playerId?: number } | null) => {
+      if (msg?.playerId != null) {
+        void qc.invalidateQueries({ queryKey: queryKeys.passiveTree(msg.playerId) });
+      }
+      void qc.invalidateQueries({ queryKey: ["passiveTree"] });
+    };
+
     c.on("Event", onEvent);
     c.on("EventBatch", onBatch);
     c.on("Health", onHealth);
@@ -162,6 +173,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
     c.on("AlmanacTextUpdated", onAlmanacTextUpdated);
     c.on("CommandersUpdated", onCommandersUpdated);
     c.on("AptitudesUpdated", onAptitudesUpdated);
+    c.on("PassiveTreeUpdated", onPassiveTreeUpdated);
 
     c.onreconnecting(() => setStatus("off"));
     c.onreconnected(() => {
@@ -196,6 +208,7 @@ export function HubProvider({ children }: { children: ReactNode }) {
       c.off("SoulsUpdated", onSoulsUpdated);
       c.off("CommandersUpdated", onCommandersUpdated);
       c.off("AptitudesUpdated", onAptitudesUpdated);
+      c.off("PassiveTreeUpdated", onPassiveTreeUpdated);
       void c.stop();
     };
   }, [qc]);

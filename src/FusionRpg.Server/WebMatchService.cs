@@ -22,16 +22,34 @@ public sealed class WebMatchService
 {
 
     /// <summary>
-    /// B21 — whether this logged match ran under a profile that expects a live human. Read from the
-    /// wave the setup names, not stored on the row: the profile is content's choice and is looked up
-    /// at resolve time, exactly as `WaveDef.Profile`'s own doc requires (a field on `BattleSetup`
-    /// would move all four expedition hashes).
+    /// B21 — whether this logged match ran under a profile that expects a live human.
+    ///
+    /// <para>party-dungeon D2.16: a row that carries its own <see cref="WebMatchLogEntry.ProfileId"/>
+    /// (D2.15) answers directly from it via <see cref="BattleModeProfileCatalog.Resolve"/> — the SSOT
+    /// for "which profile is this id", the same lookup <c>DelveBattle.Run</c> pins against. This is
+    /// the path a delve row actually needs: its own <c>WaveId</c> is an encounter-anchor id
+    /// <see cref="WaveCatalog"/> has never heard of, so the wave-lookup fallback below can never see
+    /// it as interactive on its own. An unrecognised id (a hand-edited or foreign row) fails toward
+    /// refusing rather than toward silently auto-resolving — the same loud-over-silent stance
+    /// <see cref="BattleModeProfileCatalog.Resolve"/> itself takes for an unknown id, just caught here
+    /// so one bad row cannot abort the whole sweep.</para>
+    ///
+    /// <para>Every other row (every match logged today — no production caller stamps <c>profile_id</c>
+    /// yet) falls through to the ORIGINAL check: the profile is content's choice, read from the wave
+    /// the setup names, exactly as `WaveDef.Profile`'s own doc requires (a field on `BattleSetup`
+    /// would move all four expedition hashes).</para>
     ///
     /// <para>A row whose setup will not parse is NOT treated as interactive — it has its own refusal
     /// further down, and guessing here would refuse it for the wrong stated reason.</para>
     /// </summary>
     static bool IsInteractive(WebMatchLogEntry entry)
     {
+        if (entry.ProfileId is { } pid)
+        {
+            try { return BattleModeProfileCatalog.Resolve(pid).RequiresLiveInput; }
+            catch (ArgumentException) { return true; } // unrecognised id: refuse, never silently auto-resolve
+        }
+
         BattleSetup? setup;
         try { setup = JsonSerializer.Deserialize<BattleSetup>(entry.SetupJson); }
         catch (JsonException) { return false; }
@@ -218,13 +236,22 @@ public sealed class WebMatchService
 
             // B21 (spec-interactive-turns.md §4): an INTERACTIVE match is only reproducible from its
             // decision trace, because with real input `(setup, seed)` stops describing the battle.
-            // A missing or unparseable trace is refused TERMINALLY and never healed — re-resolving it
-            // would substitute AI decisions for a player's and silently overwrite a real result, which
-            // is the exact hole the trace exists to close. Inert today: no shipped profile sets
-            // RequiresLiveInput, so no match reaches this branch.
-            if (IsInteractive(entry) && FusionRpg.Core.Battle.Timeline.DecisionTrace.FromJson(entry.DecisionsJson) is null)
+            // Refused UNCONDITIONALLY, trace or no trace (party-dungeon D2.16, found while wiring the
+            // delve profile through this check): even WITH a trace, `ResolveAndIngest` below has no
+            // path to replay it or to pick the row's own profile — it always resolves through
+            // `ProfileForWave`, which can never name a delve room's synthetic wave id — nor is there
+            // any signal in THIS row distinguishing "the trace covers a completed battle, the crash
+            // was only in the ingest gap" from "the session was frozen mid-battle" (that distinction
+            // lives only in the in-memory `BattleSessionRegistry`, never persisted here). Re-resolving
+            // either shape would substitute AI decisions for a player's and risk silently finishing a
+            // steered party on autopilot across a restart, which is the exact hole the trace exists to
+            // close. Reachable only once a real caller starts stamping `profile_id` (still none in
+            // `src/` today — every `AppendWebMatchLog` call site omits it); replaying a recorded prefix
+            // and handing off to a live session is `DelveBattleEndpoints`'s own job when it exists,
+            // never the boot sweep's.
+            if (IsInteractive(entry))
             {
-                const string why = "interactive match with no decision trace — refused rather than re-resolved with AI decisions";
+                const string why = "interactive match — refused rather than re-resolved with AI decisions or a stale trace";
                 Console.Error.WriteLine($"[web-match] sweep refused {entry.MatchKey}: {why}");
                 _store.MarkWebMatchSweepRefused(entry.Id, why);
                 continue;

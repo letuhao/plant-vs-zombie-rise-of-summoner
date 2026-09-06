@@ -196,17 +196,19 @@ public class TraitMigrationParityTests
     }
 
     [Fact]
-    public void Stat_derived_stays_closed_where_it_still_has_no_consumer()
+    public void Stat_derived_opens_partially_in_sim_where_the_fold_is_incomplete()
     {
-        // The half that matters more, and the rule is unchanged: a runtime opens only where a
-        // consumer exists. LAWN opened 2026-08-30 (decisions.md "Derived-write lawn executor") on the
-        // strength of its OWN consumer -- `AtomDerivedSubsystem` on the injector's ActorHub -- never on
-        // the strength of battle's. SIM has no derived consumer, so it stays closed, which is what
-        // this test now guards.
+        // The rule is unchanged: a runtime opens only where a consumer exists. LAWN opened 2026-08-30
+        // (decisions.md "Derived-write lawn executor") on the strength of its OWN consumer --
+        // `AtomDerivedSubsystem` on the injector's ActorHub -- never on the strength of battle's. SIM
+        // opened 2026-09-06 (mechanism-wiring E5) to Partial, not Full, once ActorDerivedLookup's
+        // contribution fold gave it a real consumer that honours Flat/Increased and not Replace/Flag
+        // (EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial). Renamed from
+        // "..._stays_closed_where_it_still_has_no_consumer", which is no longer true.
         var kind = AtomKindRegistry.Get("stat.derived")!;
 
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
-        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Sim));
+        Assert.Equal(RuntimeState.Partial, kind.SupportIn(RuntimeId.Sim));
     }
 
     [Fact]

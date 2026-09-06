@@ -271,6 +271,40 @@ public class DungeonTuningTests
         Assert.Throws<DungeonTuningRejection>(() => DungeonTuningLoader.Parse(root.ToJsonString(), Registries()));
     }
 
+    // delve-attrition (spec-delve-attrition.md's Tunables table): both lists are documented as
+    // "resource ids subset of ResourceIds, loader-checked" -- found unchecked while building
+    // RestResolver (D2.20), fixed in DungeonTuning.cs's own Parse alongside every other closed-set
+    // id it already validates.
+
+    [Fact]
+    public void A_non_resource_id_in_rest_healsPools_rejects()
+    {
+        var root = JsonNode.Parse(RealJson())!;
+        root["rest"]!["healsPools"]!.AsArray().Add("not-a-real-resource");
+        var ex = Assert.Throws<DungeonTuningRejection>(() => DungeonTuningLoader.Parse(root.ToJsonString(), Registries()));
+        Assert.Contains("not-a-real-resource", ex.Message);
+    }
+
+    [Fact]
+    public void A_non_resource_id_in_attrition_persistAcrossDelves_rejects()
+    {
+        var root = JsonNode.Parse(RealJson())!;
+        root["attrition"]!["persistAcrossDelves"]!.AsArray().Add("not-a-real-resource");
+        var ex = Assert.Throws<DungeonTuningRejection>(() => DungeonTuningLoader.Parse(root.ToJsonString(), Registries()));
+        Assert.Contains("not-a-real-resource", ex.Message);
+    }
+
+    [Fact]
+    public void The_real_shipped_healsPools_and_persistAcrossDelves_are_both_real_resource_ids()
+    {
+        // The positive case: the real file already passes (proven independently by
+        // The_real_dungeon_tuning_file_parses_against_the_real_registries), but pin the actual
+        // content too so a future edit that widens either list to a bad id fails here by name.
+        var tuning = DungeonTuningLoader.Parse(RealJson(), Registries());
+        Assert.Equal(new[] { "hp", "hunger", "spirit" }, tuning.RestHealsPools);
+        Assert.Equal(new[] { "hunger" }, tuning.AttritionPersistAcrossDelves);
+    }
+
     [Fact]
     public void Wild_outcome_rows_must_sum_to_1000()
     {

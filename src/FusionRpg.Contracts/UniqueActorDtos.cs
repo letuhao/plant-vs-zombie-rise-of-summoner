@@ -90,8 +90,10 @@ public sealed class AwardUniqueActorXpRequest
     [JsonPropertyName("reason")] public string? Reason { get; set; }
 }
 
-/// <summary>A real, seeded relic definition (T14). Equipping goes through the existing
-/// per-actor `rpg_unique_equipment` pipeline — see <see cref="UniqueEquipmentSlotDto"/>.</summary>
+/// <summary>A real, seeded relic definition (T14). Equipping persists as a module 4
+/// <c>rpg_item_assignment</c> row (`decision-d1-durable-ownership.md` §10 M1/M2, 2026-09-06);
+/// <see cref="Slot"/> stays a legacy <c>weapon|armor|trinket</c> label on the wire and is mapped to
+/// its canonical role in the store — see <see cref="UniqueEquipmentSlotDto"/>.</summary>
 public sealed class RelicDto
 {
     [JsonPropertyName("id")] public string Id { get; set; } = "";

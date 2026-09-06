@@ -38,6 +38,16 @@ public enum DamageApplyOutcome
     FullyAbsorbed
 }
 
+/// <summary>P1 (spec-gate-counters.md §7): the discriminator `DamageApplyPipeline.Apply` could not
+/// tell before this — a direct hit from a DoT pulse. `element_mastery`'s own rule (§2.2d) needs it:
+/// crediting a pulse would let one applied status earn an elemental credit every tick for its whole
+/// duration, double-paying for the one application `status_applied` already credited.</summary>
+public enum DamageOrigin
+{
+    DirectHit,
+    StatusPulse,
+}
+
 public readonly record struct DamageApplyResult(
     DamageApplyOutcome Outcome, long AppliedAmount, long AbsorbedAmount);
 
@@ -64,7 +74,8 @@ public static class DamageApplyPipeline
         string? grantId = null,
         List<ElementPayloadComponentDto>? elementsDto = null,
         string? attackerPtr = null,
-        Action<long>? onHpDamageApplied = null)
+        Action<long>? onHpDamageApplied = null,
+        DamageOrigin origin = DamageOrigin.DirectHit)
     {
         if (string.IsNullOrWhiteSpace(ptr))
             throw new ArgumentException("ptr is required", nameof(ptr));
@@ -107,7 +118,8 @@ public static class DamageApplyPipeline
         int hitCount,
         Shield.ShieldGate? shieldGate,
         EffectFunnel funnel,
-        EffectEventDto? ev)
+        EffectEventDto? ev,
+        DamageOrigin origin = DamageOrigin.DirectHit)
     {
         if (funnel == null) throw new ArgumentNullException(nameof(funnel));
         var amount = finalizedSignedAmount;

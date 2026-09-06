@@ -8,8 +8,10 @@ number — and that is enforced mechanically, by `pipeline.model.audit_schema`, 
 
 ⚠ `pieces` is the one place a number is legal, and only as a closed enum. Written as a bare
 `{"type": "integer"}` the schema is rejected before the first call. Said in the schema, not in a
-comment — which is why `THRESHOLD_PIECES` reads its enum from the tuning file rather than repeating
-it: the legal piece counts are one fact, and a second copy here would be the place it goes stale.
+comment — which is why `threshold_pieces` reads its enum from `distribute.threshold_ladder` rather
+than repeating it: which piece counts a set may carry is one fact, and a second copy here is where
+it goes stale. It did: the enum offered `{2,3,4,6}` while the ladder derived `(2,4)`, and the first
+real batch lost all three sets to it.
 
 ⚠ Two field names the deny-list would refuse, and how this schema avoids them rather than
 allow-listing its way past them: `tier` (a magnitude by convention) never appears — tiers come from
@@ -19,13 +21,24 @@ from __future__ import annotations
 
 from typing import Any
 
+from .distribute import threshold_ladder
 from .roles import HYBRID_CORE_ROLES
 from .tuning import SetCharmGenTuning
 
 #: The exact spelling `audit_schema` allows: an enum of numbers is a vocabulary, not an invention.
 #: Built from tuning so the schema and the distributor cannot disagree about what is legal.
-def threshold_pieces(tuning: SetCharmGenTuning) -> "dict[str, Any]":
-    return {"type": "integer", "enum": list(tuning.legal_threshold_pieces)}
+def threshold_pieces(tuning: SetCharmGenTuning,
+                     ladder: "tuple[int, ...] | None" = None) -> "dict[str, Any]":
+    """The `pieces` node. `ladder` narrows the enum to the counts THIS set can carry.
+
+    ⚠ **Offering the whole `legalThresholdPieces` vocabulary was a real defect** (module 13
+    defect 3, 2026-09-06): the enum said `{2,3,4,6}` and the brief said *"the piece counts"*, while
+    `distribute.threshold_ladder` derived `(2, 4)` from the member count and refused everything
+    else. All three sets in the first real batch picked 3 and were refused. The ladder is the
+    single fact; the enum reads it.
+    """
+    return {"type": "integer", "enum": list(ladder if ladder is not None
+                                            else tuning.legal_threshold_pieces)}
 
 
 def _identity_fields() -> "dict[str, Any]":
@@ -46,14 +59,21 @@ def _blocked() -> "dict[str, Any]":
 
 
 def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("humanoid", "plant"),
-               ) -> "dict[str, Any]":
+               member_count: "int | None" = None) -> "dict[str, Any]":
     """The `set` output schema. Identity only — every magnitude is resolved afterwards.
 
     `members[].role` is the twelve-role cap **inside the schema**, not a validation afterthought:
     the model is never offered `head-guard`, so `SetRoleNotUniversal` cannot be produced by a
     well-formed response at all. That is the whole reason the cap is a generator input
     (ssot-sets §3.7 fires at LOAD, so ~1,000 sets checked after the fact is a re-run).
+
+    ⭐ **`thresholds` is sized from the ladder for the same reason.** `member_count` defaults to the
+    typical size, which is what `run.plan_run` briefs; the ladder it produces fixes both the legal
+    `pieces` values and how many threshold rows there are. Before this, `minItems` was a flat 2 and
+    a five-member set (ladder `(2,)`) could not satisfy the schema at all — nor could a two-member
+    one, at the other end.
     """
+    ladder = threshold_ladder(tuning, member_count or tuning.typical_members)
     return {
         "type": "object",
         "additionalProperties": False,
@@ -90,14 +110,14 @@ def set_schema(tuning: SetCharmGenTuning, *, frames: "tuple[str, ...]" = ("human
             },
             "thresholds": {
                 "type": "array",
-                "minItems": 2,
-                "maxItems": len(tuning.legal_threshold_pieces),
+                "minItems": len(ladder),
+                "maxItems": len(ladder),
                 "items": {
                     "type": "object",
                     "additionalProperties": False,
                     "required": ["pieces"],
                     "properties": {
-                        "pieces": threshold_pieces(tuning),
+                        "pieces": threshold_pieces(tuning, ladder),
                         "families": {
                             "type": "array",
                             "minItems": 1,

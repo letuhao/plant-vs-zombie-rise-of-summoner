@@ -20,6 +20,27 @@ public sealed class AtomPushService
 {
     readonly RpgStore _store;
 
+    /// <summary>
+    /// `mods-absorption` (T6.1, item-ideal.md equip-runtime module 5) — the owner list one player's
+    /// live atom push actually needs: the player's own scope plus every currently-<see
+    /// cref="UniqueActorPhases.ActiveBound"/> specimen (deployed AND bound, not merely rostered).
+    /// Extracted 2026-09-06 from <c>RpgHub.BuildApplyCommand</c>'s own inline loop (Hello) so a
+    /// SECOND real call site — a mid-session re-push triggered by a unique actor's own phase
+    /// transition, not a fresh connection — builds the identical union rather than a hand-rolled
+    /// copy that could silently drift from the Hello path's own rule.
+    /// </summary>
+    public static List<OwnerScope> OwnersForPlayer(RpgStore store, long playerId)
+    {
+        var owners = new List<OwnerScope>
+        {
+            new(OwnerKind.Player, playerId.ToString(System.Globalization.CultureInfo.InvariantCulture)),
+        };
+        foreach (var specimen in store.ListUniqueActors(playerId).Items)
+            if (string.Equals(specimen.Phase, UniqueActorPhases.ActiveBound, StringComparison.Ordinal))
+                owners.Add(new OwnerScope(OwnerKind.UniqueActor, specimen.InstanceId));
+        return owners;
+    }
+
     public AtomPushService(RpgStore store) => _store = store ?? throw new ArgumentNullException(nameof(store));
 
     /// <summary>

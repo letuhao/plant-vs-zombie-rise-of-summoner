@@ -59,6 +59,14 @@ internal static class ContractTuningTestBootstrap
         // Configure. Every existing test (element distribution, id uniqueness, etc. across the
         // real 84 species) keeps reading identical data.
         DemonSpeciesCatalog.ConfigureFromCompiledDefault();
+        // T8.4 (ds 18, fusion-recipe-runtime) — the SAME transitional shape: every test in this
+        // assembly already read DemonRecipeCatalog.All via its own old lazy `_all ??= Build()`
+        // cache, computed against the compiled species roster just configured above. Configure
+        // with a fresh BuildDeterministicOnly() call reproduces that exact same data (the compiled
+        // 84-ish roster has zero shortfall, so the deterministic pass alone already covers every
+        // eligible output) — every existing DemonRecipeCatalogTests case keeps reading identical
+        // data, zero test-body changes needed beyond the BuildForTest -> BuildDeterministicOnly rename.
+        DemonRecipeCatalog.Configure(DemonRecipeCatalog.BuildDeterministicOnly());
         OverlayTuningHub.Configure(DefaultOverlay);
         StatsTuningHub.Configure(DefaultStats);
         ExpeditionTuningHub.Configure(DefaultExpeditions);
@@ -449,6 +457,10 @@ internal static class ContractTuningTestBootstrap
             // tunables table); MaxRounds/RoundDurationMs stay null (unset) so siege inherits
             // the ruleset horizon until a real board exists to measure one on.
             ["siege"] = new(W: 2, WReact: 0, PassQuantum: 1, MaxPoints: null),
+            // party-dungeon D2.9: hybrid-atb-shaped magnitudes, copied verbatim (matches this
+            // fixture's own hybrid-atb row above, not the real battle.v4.json's WReact=1 -- this
+            // inline fixture predates reaction-lane RL1 and this task does not reconcile that).
+            ["delve"] = new(W: 4, WReact: 0, PassQuantum: 1, MaxPoints: 2),
         },
         // Wave E3: 0 = the shipped default, secondary contributes nothing, goldens unmoved.
         HybridSecondaryWeightMilli: 0,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { Magnitude } from "@/contract/types";
+import type { Magnitude, UnitClass } from "@/contract/types";
 import { formatMagnitude, formatSigmoidContext } from "./magnitude";
 
 function mag(unit: Magnitude["unit"], value: number, extra?: Partial<Magnitude>): Magnitude {
@@ -136,5 +136,45 @@ describe("formatSigmoidContext — the corrected two-part-line shape", () => {
     expect(text).not.toContain("%");
     expect(text).not.toContain("->");
     expect(text).not.toContain("→");
+  });
+});
+
+/**
+ * Task I9 (spec-tree-surface.md §6, §14 test 15) -- "Focus_renders_as_prose_and_creates_no_unit_class:
+ * the UnitClass union is byte-identical before and after this module." The Passives Focus line (`1/H`,
+ * "about N paths") deliberately renders as plain prose in `passivesYours.ts`'s own `focusReading`/
+ * `draftFocusPreview` and `PassivesTab.tsx`/`PlanPanel.tsx`'s own JSX -- never through
+ * `formatMagnitude`, never a `Magnitude` -- so no fourteenth `UnitClass` is needed or added.
+ *
+ * `ALL_UNIT_CLASSES` below is a `Record<UnitClass, true>` object literal assigned directly to that
+ * type, which makes BOTH directions of drift a real `tsc` compile error at `npm run build`'s
+ * `--noEmit` step, not just a runtime count:
+ *  - adding a 14th member to `UnitClass` makes this object literal miss a required key (a
+ *    "Property '...' is missing" error) until this file is updated to acknowledge it;
+ *  - removing a member from `UnitClass` makes this object literal carry an EXCESS key TypeScript's
+ *    own excess-property check on a directly-assigned object literal flags.
+ * The runtime assertion below is the same guarantee restated as something `vitest run` can also see
+ * (vitest's transform strips types without checking them, so the compile-time half above only fires
+ * under `tsc --noEmit`; this count is the fast, always-on half of the same proof).
+ */
+describe("UnitClass union — byte-identical guard (task I9)", () => {
+  const ALL_UNIT_CLASSES: Record<UnitClass, true> = {
+    gameUnits: true,
+    gameUnitsPerSecond: true,
+    sigmoidPoints: true,
+    sigmoidMultiplierPoints: true,
+    statusPotencyPoints: true,
+    perMilleRatio: true,
+    milliseconds: true,
+    count: true,
+    flag: true,
+    ladderIndex: true,
+    aptitudePoints: true,
+    reciprocalPoints: true,
+    loamUnits: true
+  };
+
+  it("still has exactly thirteen members -- spec-tree-surface.md §6: 'thirteen and none of them has to grow'", () => {
+    expect(Object.keys(ALL_UNIT_CLASSES)).toHaveLength(13);
   });
 });

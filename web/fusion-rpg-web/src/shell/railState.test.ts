@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { deriveRailEntries, type RailUnlockInputs } from "./railState";
+import { deriveRailEntries, STAGE_IDS, type RailUnlockInputs } from "./railState";
+
+describe("STAGE_IDS — spec-siege-stage.md §2 cost 1: the count assertion becomes 5", () => {
+  it("is exactly five stages, siege included", () => {
+    expect(STAGE_IDS).toEqual(["sanctum", "world", "lawn", "battle", "siege"]);
+    expect(STAGE_IDS.length).toBe(5);
+  });
+});
 
 const allLocked: RailUnlockInputs = {
   currentStageId: "sanctum",

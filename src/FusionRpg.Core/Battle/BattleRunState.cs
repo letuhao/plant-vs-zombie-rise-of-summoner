@@ -659,6 +659,20 @@ public static partial class BattleEngine
                 Host.Flush();
         }
 
+        /// <summary>
+        /// party-dungeon D2.10 — lifted out of <see cref="CheckRetreats"/> with **no behaviour
+        /// change** (the coward-retreat call site below is byte-identical to what it inlined
+        /// before), so it can gain producers beyond the coward trait: a capture (`wild-room`) and a
+        /// player-issued retreat (`delve-attrition`) both leave a battle the same way a coward
+        /// does — alive, no die event, shields released.
+        /// </summary>
+        public void Withdraw(ActorState actor)
+        {
+            actor.Retreated = true;
+            Status.WithdrawEntity(actor.Setup.Key);
+            Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(actor.Setup.Key));
+        }
+
         /// <summary>Coward retreat: below the threshold the actor leaves the battle alive (no die event).</summary>
         public void CheckRetreats()
         {
@@ -667,11 +681,7 @@ public static partial class BattleEngine
                 if (!a.Active || !a.Has("coward")) continue;
                 var def = TraitBattleCatalog.Get("coward");
                 if ((long)a.Hp * 1000 < (long)a.MaxHp * def.RetreatBelowMilli)
-                {
-                    a.Retreated = true;
-                    Status.WithdrawEntity(a.Setup.Key);
-                    Shields.RemoveAll(Contracts.EffectOwnerKeys.Entity(a.Setup.Key));
-                }
+                    Withdraw(a);
             }
         }
 

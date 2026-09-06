@@ -49,9 +49,15 @@ function RelicRow({
 /**
  * T14 — held/equipped comparison over the real, small, seeded relic catalog
  * (`RelicCatalog.cs`). No acquisition system exists yet, so every player
- * holds the full catalog; equipping persists through the existing per-actor
- * `rpg_unique_equipment` pipeline. "Storage" (plate 02 §B's third tab) has no
+ * holds the full catalog. "Storage" (plate 02 §B's third tab) has no
  * server concept yet — shown as an honest pending state, not faked.
+ *
+ * Equipping persists as a `rpg_item_assignment` row (item module 4), since the
+ * 2026-09-06 relic row migration — `decision-d1-durable-ownership.md` §10 M1/M2.
+ * Nothing in this file changed with it, deliberately: M2 requires the output
+ * shape to stay unchanged, so `slot` is still `weapon|armor|trinket` on the wire
+ * and the server maps it to a canonical role. Widening this to the full fifteen
+ * roles is D1's M3, which moves the REST payload and this literal together.
  */
 export function RelicsLayer({
   open,

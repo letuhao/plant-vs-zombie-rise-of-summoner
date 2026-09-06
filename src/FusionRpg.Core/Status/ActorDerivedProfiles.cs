@@ -1,5 +1,7 @@
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 
 namespace FusionRpg.Core.Status;
 
@@ -131,10 +133,41 @@ public static class ActorDerivedProfiles
         });
 }
 
-/// <summary>Ptr-keyed derived lookup for offline harness / scenario runner.</summary>
+/// <summary>
+/// Ptr-keyed derived lookup for offline harness / scenario runner — <see cref="SimEffectHost"/> and
+/// <see cref="Effects.FoundationHarness"/> each own one instance and both resolve derived stats
+/// through it, so this class IS the "one fold, two hosts" seam spec-mechanism-wiring.md §4.3 asks
+/// for: fold the logic once here and both hosts pick it up for free, rather than each host growing
+/// its own copy that could drift.
+///
+/// <para><b>The contribution fold (§4.3 step 1).</b> Before this, <see cref="Resolve"/> returned the
+/// pinned snapshot untouched — there was nothing for a bound <c>stat.derived</c> atom to contribute
+/// to, which is exactly why <c>AtomKindRegistry</c>'s Sim cell has stayed <c>None</c>
+/// (decisions.md:106: <i>"Sim stays None — it still has no consumer"</i>). <see cref="AddContribution"/>
+/// registers a <see cref="BoundDerivedAtom"/> per ptr, and <see cref="Resolve"/> folds them onto the
+/// pinned base via <see cref="ActorDerivedSnapshot.OverlayAdd"/> — the same "plain sum is what
+/// FlatSum composing IS" reasoning <c>BattleDerivedModifierLedger</c> already established. A plain
+/// sum honours <c>Flat</c>/<c>Increased</c> and not <c>Replace</c>/<c>Flag</c>, so this fold is
+/// <c>Partial</c>, not <c>Full</c> — deciding which, and moving the registry cell, is E5's job, not
+/// this one's (§4.3 step 4).</para>
+///
+/// <para><b>Deliberately reachable without a bind (§4.3 Verification).</b>
+/// <see cref="AddContribution"/> never asks <see cref="BindGate"/> anything — a caller (a test, or a
+/// future producer) hands it an already-resolved <see cref="BoundDerivedAtom"/> directly, the same
+/// shape <see cref="Subsystems.AtomDerivedSubsystem"/> reads on the lawn. That is what proves the fold
+/// and the registry cell are independent: the fold works today, with the cell still <c>None</c>.
+/// <see cref="TryBind"/> is the SEPARATE, gated path (§4.3 step 3) — it constructs a real
+/// <see cref="BindContext"/> for <see cref="RuntimeId.Sim"/> and asks <see cref="BindGate"/>, so a
+/// bind is genuinely ATTEMPTED rather than a test manufacturing a context no production code path
+/// ever builds. It refuses every row today (<c>RuntimeUnsupported</c>, because the cell is
+/// <c>None</c>) — that is the correct outcome until E5 exercises the four derived ops and flips it.</para>
+/// </summary>
 public sealed class ActorDerivedLookup
 {
     readonly Dictionary<string, ActorDerivedSnapshot> _byPtr = new(StringComparer.Ordinal);
+
+    /// <summary>Bound `stat.derived` contributions, per ptr — the fold's only state.</summary>
+    readonly Dictionary<string, List<BoundDerivedAtom>> _contributions = new(StringComparer.Ordinal);
 
     public void Pin(string? ptr, ActorDerivedSnapshot snapshot)
     {
@@ -143,15 +176,52 @@ public sealed class ActorDerivedLookup
         _byPtr[key] = snapshot;
     }
 
-    public void Clear() => _byPtr.Clear();
+    public void Clear()
+    {
+        _byPtr.Clear();
+        _contributions.Clear();
+    }
+
+    /// <summary>
+    /// Registers one bound `stat.derived` contribution for <paramref name="ptr"/> — the SIM-side
+    /// analog of <see cref="Subsystems.AtomDerivedSubsystem.ContributeDerived"/>. Folded onto the
+    /// pinned snapshot at the next <see cref="Resolve"/>; never applied twice, because it is stored
+    /// once here rather than re-derived per call.
+    /// </summary>
+    public void AddContribution(string? ptr, BoundDerivedAtom atom)
+    {
+        if (string.IsNullOrWhiteSpace(atom.Channel)) return;
+        var key = CombatPtr.Normalize(ptr);
+        if (string.IsNullOrEmpty(key)) return;
+        if (!_contributions.TryGetValue(key, out var list))
+            _contributions[key] = list = new List<BoundDerivedAtom>();
+        list.Add(atom);
+    }
+
+    /// <summary>
+    /// Attempts a real `stat.derived` bind through <see cref="BindGate"/> with
+    /// <c>BindContext(RuntimeId.Sim)</c> — §4.3 step 3. Returns the gate's verdict; a caller that gets
+    /// <see cref="AtomRejection.IsOk"/> back is expected to translate the accepted rows into
+    /// <see cref="BoundDerivedAtom"/>s and fold them via <see cref="AddContribution"/>, exactly as
+    /// <c>GrantedDerivedAtomReader</c> does for the lawn — but that translation has no reachable
+    /// caller today, because the Sim cell for `stat.derived` is <see cref="RuntimeState.None"/> until
+    /// E5 flips it, so every row is refused here first.
+    /// </summary>
+    public AtomRejection TryBind(
+        IReadOnlyList<AtomRow> atoms, OwnerScope owner, IReadOnlyCollection<string>? overlayKeys = null) =>
+        BindGate.Check(atoms, owner, new BindContext(RuntimeId.Sim), overlayKeys: overlayKeys);
 
     public ActorDerivedSnapshot Resolve(string? ptr, bool attackerLess)
     {
         if (attackerLess)
             return ActorDerivedSnapshot.AttackerLess();
         var key = CombatPtr.Normalize(ptr);
-        if (!string.IsNullOrEmpty(key) && _byPtr.TryGetValue(key, out var snap))
-            return snap;
-        return ActorDerivedSnapshot.StubNeutral();
+        var baseSnapshot = !string.IsNullOrEmpty(key) && _byPtr.TryGetValue(key, out var snap)
+            ? snap
+            : ActorDerivedSnapshot.StubNeutral();
+        if (string.IsNullOrEmpty(key) || !_contributions.TryGetValue(key, out var contribs) || contribs.Count == 0)
+            return baseSnapshot;
+        return baseSnapshot.OverlayAdd(
+            contribs.Select(c => new KeyValuePair<string, double>(c.Channel, c.Amount)));
     }
 }

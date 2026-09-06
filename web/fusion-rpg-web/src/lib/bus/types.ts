@@ -495,3 +495,96 @@ export type SpeciesRespecResult = {
   replay: boolean;
   shares: Record<string, number>;
 };
+
+/** passive-tree-todo.md I2/I3, spec-tree-surface.md §10/§12 — the wire twin of
+ * `FusionRpg.Contracts.ExcludedNodeDto` (D14/D40's printed exclusion: a nullified trait is never
+ * un-unlocked, it renders inert and names the winner). Named without the `Dto` suffix here on
+ * purpose (`AptitudesState`'s own precedent) — `contractGuard.test.ts` forbids `stages/`, `layers/`
+ * and `ui/` from binding to a `*Dto`-suffixed wire type; only `contract/` may. */
+export type ExcludedNode = {
+  nodeId: string;
+  form: string;
+  winnerNodeId: string;
+  isInert: boolean;
+};
+
+/** I6 (spec-tree-surface.md §2.3/§9) — the wire twin of `FusionRpg.Contracts.TreeNodeSummaryDto`:
+ * the catalog's own STRUCTURAL (branch, tier) slot for one node, never its authored copy. No node in
+ * the corpus has a player-facing name or effect sentence yet (`tree-language`, H1-H2, hasn't run for
+ * any shared tree) -- this is what lets Level 2's lattice mount a real cell for a trait nobody has
+ * bought, which `TreeResolveReport`'s own owned-only node lists (below) cannot describe. */
+export type TreeNodeSummary = {
+  nodeId: string;
+  branch: string;
+  tier: number;
+  nodeClass: string;
+};
+
+/** The wire twin of `FusionRpg.Contracts.TreeResolveReportDto` — one per shared-corpus tree.
+ * `gateState` is read as a field ("wired" | "unproduced"), never re-derived from a zero
+ * (spec-tree-surface.md §9.1 rule 5). `nodes` is optional so every fixture written before I6 (Level
+ * 0/1 never reads it) keeps compiling unchanged -- a real wire payload always sends it. */
+export type TreeResolveReport = {
+  treeId: string;
+  category: string;
+  gateState: "wired" | "unproduced";
+  tierReached: number;
+  tiers: number;
+  aptitudePoints: number;
+  /** I8 (spec-tree-surface.md §7.2 part 2) -- this tree's OWN base allocation, before any stance-mate's
+   * credit (D28). `aptitudePoints - ownAptitudePoints` is the credited (lent) amount, meaningful only
+   * when `lenderTreeId` is set. Optional for the same reason `nodes`/`lenderTreeId` are: pre-I8
+   * fixtures never set it, and a caller with no real value should render no attribution line rather
+   * than a fabricated one (never default it to `aptitudePoints`, which would silently claim "no
+   * lending" when the split is simply unknown). */
+  ownAptitudePoints?: number;
+  contributingNodeIds: string[];
+  invalidNodeIds: string[];
+  lenderTreeId: string | null;
+  herfindahlMilli: number;
+  focusMilli: number;
+  excludedNodes: ExcludedNode[];
+  nodes?: TreeNodeSummary[];
+};
+
+/** GET /api/passive-tree/{playerId} — the wire twin of `FusionRpg.Contracts.PassiveTreeStateDto`.
+ * `skillPoints*` is the "buy a trait" wallet (D25/D34, §4.1's second currency) — a Level 0 first
+ * caller of math that already shipped and tested but had no wire shape before task I3. Aptitude
+ * points' own unspent total is `AptitudesState`'s `budget - spent` (the SAME wallet primary stats
+ * spend from, §4.1's whole point); souls are `SoulBalanceDto.balance` — neither is duplicated here. */
+export type PassiveTreeState = {
+  playerId: number;
+  catalogRevision: number;
+  soulLevelByNodeId: Record<string, number>;
+  trees: TreeResolveReport[];
+  skillPointsBudget: number;
+  skillPointsSpent: number;
+  skillPointsAvailable: number;
+  /** I6 — `req(t) = tierReqScalePoints * t*(t+1)/2` (`TierGate.Reached`'s own formula, mirrored
+   * rather than re-derived: "one power ladder, no private curves"). Optional for the same reason
+   * `nodes` above is: pre-I6 fixtures never read it. */
+  tierReqScalePoints?: number;
+  /** I8 (spec-tree-surface.md §5.2) -- `TreeUnlockCost`'s own `(first, step)` pair, mirrored so a Plan
+   * preview can reproduce `Cumulative` exactly for a hypothetical owned count ("one power ladder, no
+   * private curves") -- the two already-wired skill-point totals above are one `(count, cumulative)`
+   * sample and cannot be inverted back into `(first, step)`. Optional for the same pre-I8-fixture
+   * reason `tierReqScalePoints` is. */
+  unlockCostFirstPoints?: number;
+  unlockCostStepPoints?: number;
+  /** I9 (spec-tree-surface.md §6) -- `PassiveTreeTuning.Concentration`'s own two dial values, so a
+   * DRAFT preview (an uncommitted Plan) can mirror `Concentration.HerfindahlMilli`/`BlendMilli`/
+   * `FmaxAppliedMilli` exactly for a hypothetical allocation ("one power ladder, no private curves" --
+   * the same reason `tierReqScalePoints`/`unlockCostFirstPoints` are on the wire rather than hand-
+   * typed). The COMMITTED Focus line never reads these: every `TreeResolveReport` already carries its
+   * own already-resolved `herfindahlMilli`/`focusMilli`, and `focusReading` below only ever reads
+   * those. Optional for the same pre-I9-fixture reason `tierReqScalePoints` is. */
+  concentrationFmaxMilli?: number;
+  concentrationWMilli?: number;
+};
+
+/** POST /api/passive-tree/allocate body — one WHOLE allocation (node id -> soul level), never a
+ * per-node call (spec-tree-surface.md §4 rule 3). */
+export type AllocateTreeNodesRequest = {
+  playerId?: number;
+  nodes: Record<string, number>;
+};

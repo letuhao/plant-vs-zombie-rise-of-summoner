@@ -1,0 +1,189 @@
+"""Tests for the task-H2 CLI wiring in seedsmith.report.cli: `check --family PassiveTree --gate`
+and `trees generate --dry-run` (spec-tree-language.md §Commands).
+
+    python -m pytest tools/seedsmith/tests/adapters/trees/test_nodegen_cli.py -v
+
+Every dry-run/refusal path here is asserted to make ZERO model calls by patching
+`seedsmith.pipeline.llm_caller.call_model` with the same offline-transport stub every other test
+file in this directory shares.
+"""
+from __future__ import annotations
+
+import contextlib
+import io
+import itertools
+import json
+import sys
+import tempfile
+import unittest
+from pathlib import Path
+from unittest.mock import patch
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from _nodegen_fixtures import raising_call  # noqa: E402
+
+from seedsmith.adapters.trees.nodegen import run as run_mod  # noqa: E402
+from seedsmith.report.cli import EXIT_CANNOT_RUN, EXIT_CLEAN, EXIT_GAP, EXIT_REFUSED, main  # noqa: E402
+
+
+def _run_captured(argv: "list[str]") -> "tuple[int, str]":
+    buf = io.StringIO()
+    with patch("seedsmith.pipeline.llm_caller.call_model", raising_call):
+        with contextlib.redirect_stdout(buf):
+            code = main(argv)
+    return code, buf.getvalue()
+
+
+class CallsForArithmeticTests(unittest.TestCase):
+    """The ~4,680-call figure §Commands cites, PROVEN computed rather than hardcoded: §6.1's own
+    cited corpus is 39 trees x 40 nodes = 1,560 subjects, 1 voted field, 3 samples."""
+
+    def test_the_generic_corpus_figure_is_exactly_4680(self) -> None:
+        result = run_mod.calls_for(1560)
+        self.assertEqual(result, {"baseCalls": 1560, "voteCalls": 3120, "totalCalls": 4680})
+
+    def test_zero_subjects_costs_zero_calls(self) -> None:
+        self.assertEqual(run_mod.calls_for(0), {"baseCalls": 0, "voteCalls": 0, "totalCalls": 0})
+
+
+class CheckFamilyExitCodeTests(unittest.TestCase):
+    def test_an_unknown_family_exits_cannot_run(self) -> None:
+        code, _ = _run_captured(["check", "--family", "NotARealFamily", "--gate"])
+        self.assertEqual(code, EXIT_CANNOT_RUN)
+
+    def test_no_committed_plan_exits_cannot_run(self) -> None:
+        empty_root = Path(tempfile.mkdtemp())
+        code, _ = _run_captured(["check", "--family", "PassiveTree", "--gate",
+                                 "--plan-root", str(empty_root)])
+        self.assertEqual(code, EXIT_CANNOT_RUN)
+
+    def test_gate_against_the_real_committed_plan_runs_now_that_h4_and_the_registry_wiring_both_landed(self) -> None:
+        """§7.1: "exactly one gate is promoted to hard-fail first." Before this test's own name
+        changed (task H4 built `PassiveTree/UnresolvedCount` with `gates=True`, but `build_registry()`
+        never carried it, so `assert_exactly_one_hard_gate` always found zero and `--gate` correctly
+        refused rather than silently passing over a contract that was never wired — H9 §6.4 rule 1:
+        "an absent check is never a pass"). Both gaps are closed now: the registry carries exactly one
+        `gates=True` `PassiveTree/*` metric, so `--gate` runs for real instead of refusing —
+        today's real committed `might` plan has no generated nodes yet, so every metric needing them
+        reports `NOT_MEASURED` rather than FAIL, the same `(EXIT_CLEAN, EXIT_GAP)` shape the
+        non-gated sibling test below already accepts for the identical reason."""
+        code, _ = _run_captured(["check", "--family", "PassiveTree", "--gate"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+
+    def test_without_gate_the_real_committed_plan_reports_and_exits_clean_or_gap(self) -> None:
+        """No --gate: every registered PassiveTree finding is reported (today, just
+        `PassiveTree/TreeEqualValue`, C1's own already-shipped invariant) — this must reach a real
+        verdict rather than EXIT_CANNOT_RUN/EXIT_REFUSED, proving the family dispatch actually runs
+        the metric over the real committed plan."""
+        code, _ = _run_captured(["check", "--family", "PassiveTree"])
+        self.assertIn(code, (EXIT_CLEAN, EXIT_GAP))
+
+    def test_check_with_neither_corpus_root_nor_family_exits_cannot_run(self) -> None:
+        code, _ = _run_captured(["check"])
+        self.assertEqual(code, EXIT_CANNOT_RUN)
+
+
+class TreesGenerateDryRunTests(unittest.TestCase):
+    def test_neither_tree_nor_all_exits_cannot_run(self) -> None:
+        code, _ = _run_captured(["trees", "generate"])
+        self.assertEqual(code, EXIT_CANNOT_RUN)
+
+    def test_dry_run_against_the_real_committed_might_tree_prints_the_gate_report_before_any_call(self) -> None:
+        code, out = _run_captured(["trees", "generate", "--tree", "might", "--dry-run"])
+        self.assertEqual(code, EXIT_CLEAN)
+        summary = json.loads(out)
+        self.assertIn("gatingMetrics", summary)
+        self.assertIn("gatesMissingAThreshold", summary)
+        self.assertIn("totalCalls", summary)
+        self.assertGreater(summary["totalSubjects"], 0)
+        self.assertEqual(summary["totalCalls"],
+                         summary["baseCalls"] + summary["voteCalls"])
+
+    def test_write_reaches_the_real_pipeline_now_that_the_hard_gate_and_its_registry_wiring_both_landed(self) -> None:
+        """H3 wires the quota stage for real (`resolvedSubjects` below proves it). `--write` used
+        to be refused for §7.1's own reason (no `PassiveTree/*` metric was `gates=True` in the live
+        registry) — that gap is closed (task H4 built `PassiveTree/UnresolvedCount`; this module's
+        own `build_registry()` now registers all eight `PassiveTree/*` metrics). `--write` now
+        reaches the REAL `run_language_stage` pipeline for every one of `might`'s 40 real nodes —
+        proven here against a schema-driven fake `call_model` (never the real network: every call
+        is answered by inspecting the SCHEMA it was actually called with and returning the first
+        legal enum choice for every field, so this stays correct regardless of which node/branch a
+        given call is for) rather than the simpler `raising_call`/canned-payload fixtures this file
+        uses elsewhere, since a single canned response cannot satisfy 40 different real per-node
+        schemas (each with its own `affixIds` enum).
+
+        `--plan-root`/`--ledger-path` both point at a fresh temp directory carrying a COPY of the
+        real committed `might.v1.json` plan, never the real one — `write_seed_document`'s own
+        `seed_root` shares `--plan-root`'s root (both default to `data/seed`), so a test that left
+        `--plan-root` at its default would overwrite the real, committed
+        `data/seed/passive-tree/nodes/might.json` with fake test content. This is exactly the class
+        of accidental-real-write this test exists to prevent while still exercising the real
+        CLI-to-pipeline wiring end to end."""
+        from seedsmith.adapters.trees.nodegen import plan_read as plan_read_mod
+
+        def _run_with_fake_model(argv: "list[str]", fake) -> "tuple[int, str]":
+            # Deliberately NOT `_run_captured`: that helper hard-wires `raising_call` as an inner
+            # patch that always wins over an outer one, by design, for every OTHER test in this file
+            # (§7 gate 24's offline guarantee). This is the one test in the suite that legitimately
+            # needs a real (faked) model response, so it applies its own patch directly around
+            # `main(argv)` rather than fighting `_run_captured`'s own safety net.
+            buf = io.StringIO()
+            with patch("seedsmith.pipeline.llm_caller.call_model", side_effect=fake):
+                with contextlib.redirect_stdout(buf):
+                    code = main(argv)
+            return code, buf.getvalue()
+
+        call_counter = itertools.count()
+
+        def fake_call_model(_system, _user, *, config=None, temperature=0.2, schema=None):
+            # A unique name/nameKey per CALL (not per node) is deliberately wasteful but simple and
+            # always correct: `generate_node` only ever persists the base call's (sample_index=0)
+            # name/nameKey into the final record, so the vote calls' own throwaway uniqueness costs
+            # nothing and this fake never has to parse the brief text to recover which node a given
+            # call is for.
+            n = next(call_counter)
+            props = schema["properties"]
+            affix_ids = props["affixIds"]["items"]["enum"][:1]
+            return json.dumps({
+                "affixIds": affix_ids,
+                "affinity": ["core"] * len(affix_ids),
+                "exclusion": {"form": "none", "propertyKeys": []},
+                "name": f"Test Node {n}", "nameKey": f"tree.node.test-node-{n}",
+                "flavor": "A steady line.", "rationale": "", "blocked": "",
+            })
+
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp_root = Path(tmp)
+            real_plan_path = plan_read_mod.plan_path("might")
+            tmp_plan_path = plan_read_mod.plan_path("might", tmp_root)
+            tmp_plan_path.parent.mkdir(parents=True, exist_ok=True)
+            tmp_plan_path.write_bytes(real_plan_path.read_bytes())
+            ledger_path = tmp_root / "ledger.json"
+
+            code, out = _run_with_fake_model([
+                "trees", "generate", "--tree", "might", "--write",
+                "--plan-root", str(tmp_root), "--ledger-path", str(ledger_path),
+            ], fake_call_model)
+
+            # The write landed under the temp root, never the real committed seed document.
+            written_path = tmp_root / "passive-tree" / "nodes" / "might.json"
+            self.assertTrue(written_path.exists())
+            real_committed_path = plan_read_mod.REPO_ROOT / "data" / "seed" / "passive-tree" / "nodes" / "might.json"
+            self.assertFalse(real_committed_path.exists(),
+                            "the real committed seed document must never be touched by this test")
+
+        # The dry-run-shaped summary prints first (unchanged), then the real per-tree write report
+        # as a second, separately-printed JSON document — both land in the same captured stdout.
+        self.assertIn("gatingMetrics", out)
+        self.assertIn('"outcomeTotals"', out)
+        self.assertIn('"accepted": 40', out)  # every one of might's 40 real nodes, unanimous vote
+        self.assertEqual(code, EXIT_CLEAN)
+
+    def test_an_unplanned_tree_id_exits_cannot_run(self) -> None:
+        code, _ = _run_captured(["trees", "generate", "--tree", "no-such-tree", "--dry-run"])
+        self.assertEqual(code, EXIT_CANNOT_RUN)
+
+
+if __name__ == "__main__":
+    unittest.main()

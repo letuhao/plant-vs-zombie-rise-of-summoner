@@ -38,7 +38,7 @@ BattleTuningHub.Configure(BattleTuningLoader.Parse(Load("battle.v4.json")));
 // every host must remember, exactly like ActionTimingPolicy already needs.
 BattleRuleset.ConfigureResources(BattleResourceTuningLoader.Parse(Load("battle-resources.v1.json")));
 FusionRpg.Core.Actions.ActionTimingPolicy.Configure(FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(Load("action-timing.v1.json")));
-ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json")));
+ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v3.json")));
 
 // ---- §2.1 UPDATED 2026-09-05: the flag LANDED on two profiles, and the invariant inverted ----
 //
@@ -341,7 +341,7 @@ Check("OptingOutDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.Clas
     ReactionLanePolicy.Configure(new ReactionLaneTuning(1, 1, PoiseSpend: 1_000_000_000, RiposteShareCapMilli: 500));
     var waveHpUnaffordable = SideHpRemaining(reactingProfile, reactingSetup, "wave");
     Check("AnEvenLargerUnaffordableSpendStillDeclines", waveHpUnaffordable == waveHpNoLane);
-    ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json"))); // restore
+    ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v3.json"))); // restore
 
     // Falsifier: WReact=0 on the ATOMIC path (flag off entirely) is unaffected either way -- the whole
     // reaction mechanism is unreachable outside RunTimelineActionPhase.
@@ -349,7 +349,9 @@ Check("OptingOutDoesNotMutateTheCachedCatalogRow", BattleModeProfileCatalog.Clas
     var atomicNoLane = noLaneProfile with { UsesTimelineDispatch = false };
     Check("FalsifierReactionLaneDeltaIsZeroWhenTheFlagIsOff",
         SideHpRemaining(atomicReacting, reactingSetup, "wave") == SideHpRemaining(atomicNoLane, reactingSetup, "wave"));
+
 }
+
 
 Console.WriteLine();
 Console.WriteLine(failures == 0 ? "ALL PROBES PASSED" : $"{failures} PROBE(S) FAILED");

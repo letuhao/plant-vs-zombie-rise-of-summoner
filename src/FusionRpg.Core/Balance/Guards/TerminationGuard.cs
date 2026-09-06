@@ -5,6 +5,7 @@ using FusionRpg.Core.Power;
 using FusionRpg.Core.Stats;
 using FusionRpg.Core.Stats.Aptitudes;
 using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 
 namespace FusionRpg.Core.Balance.Guards;
 
@@ -64,15 +65,21 @@ public static class TerminationGuard
     /// <param name="builds">Every build to cross-check, all ordered pairs.</param>
     /// <param name="theta">The single Θ this guard checks at — the guard is a snapshot at one power
     /// level, not a Θ-sweep (Θ-invariance is `deterministic-core`'s own proven property, P4.6).</param>
-    public static TerminationVerdict Assert(IReadOnlyList<AptitudeAllocation> builds, long theta)
+    /// <param name="gear">Optional equipped `stat.derived` atoms, one list per build, positionally
+    /// aligned with <paramref name="builds"/>. See <see cref="ToActor"/> for why this is additive:
+    /// omitting it, or passing an empty list for a build, resolves that build EXACTLY as before.</param>
+    public static TerminationVerdict Assert(IReadOnlyList<AptitudeAllocation> builds, long theta,
+        IReadOnlyList<IReadOnlyList<BoundDerivedAtom>>? gear = null)
     {
         if (builds is null) throw new ArgumentNullException(nameof(builds));
         if (builds.Count == 0) throw new ArgumentException("must contain at least one build", nameof(builds));
         if (theta <= 0) throw new ArgumentOutOfRangeException(nameof(theta), theta, "must be positive");
+        if (gear is not null && gear.Count != builds.Count)
+            throw new ArgumentException($"gear must be positionally aligned with builds ({gear.Count} vs {builds.Count})", nameof(gear));
 
         var actors = new Predictor.Actor[builds.Count];
         for (var i = 0; i < builds.Count; i++)
-            actors[i] = ToActor($"build{i}", builds[i], theta);
+            actors[i] = ToActor($"build{i}", builds[i], theta, gear?[i]);
 
         var minNetAttrition = double.PositiveInfinity;
         var pairsChecked = 0;
@@ -107,14 +114,35 @@ public static class TerminationGuard
     /// <summary>Resolves one <see cref="AptitudeAllocation"/> through the real derived-stat pipeline at
     /// <paramref name="theta"/> — the same <see cref="ActorHub"/>/<see cref="AptitudeSubsystem"/>/
     /// <see cref="FixedPowerIndexProvider"/> composition <c>ActorHubTests.cs</c>'s own established
-    /// pattern uses, not a shortcut around it.</summary>
-    internal static Predictor.Actor ToActor(string name, AptitudeAllocation allocation, long theta)
+    /// pattern uses, not a shortcut around it.
+    ///
+    /// <para><b><paramref name="gear"/> — item-todo.md P1.5, the geared corner run.</b> A build's
+    /// equipped `stat.derived` atoms, reaching this pipeline through the SHIPPED
+    /// <see cref="AtomDerivedSubsystem"/> at its reserved order-350 slot — the same
+    /// <c>boundDerivedAtoms</c> opt-in arm <c>ActorHubBootstrap.CreateDefault</c> has carried since
+    /// 2026-08-30. Deliberately NOT a new subsystem: that subsystem's own doc comment names "a second
+    /// delivery path for a value the composer already owns" as the thing to avoid, and equipment is
+    /// the same `stat.derived` kind it was built for.</para>
+    ///
+    /// <para><b>Additive by construction, not by arithmetic.</b> Null or empty gear passes
+    /// <c>boundDerivedAtoms: null</c>, so <c>CreateDefault</c> registers no subsystem at all — the hub
+    /// is not merely composed to the same numbers, it is the same hub, with the same
+    /// <c>Subsystems</c> list, that every existing caller has always built. This matters because
+    /// <see cref="ActorHub"/> is the shared derived-stat SSOT (`actor-hub-ssot.md`), not
+    /// class-system's private property, and its test suite asserts on that list.</para>
+    ///
+    /// <para><b>Equipment does not feed Θ.</b> <paramref name="theta"/> stays the caller's, so a
+    /// geared run compares gear at a FIXED power level rather than letting gear move the ladder — the
+    /// same reason this guard is "a snapshot at one power level, not a Θ-sweep".</para></summary>
+    internal static Predictor.Actor ToActor(string name, AptitudeAllocation allocation, long theta,
+        IReadOnlyList<BoundDerivedAtom>? gear = null)
     {
         var powerIndex = new FixedPowerIndexProvider((int)theta);
         var hub = ActorHubBootstrap.CreateDefault(
             powerIndex: powerIndex,
             aptitudeTuning: AptitudeTuningHub.Tuning,
-            aptitudeAllocation: _ => allocation);
+            aptitudeAllocation: _ => allocation,
+            boundDerivedAtoms: gear is null || gear.Count == 0 ? null : _ => gear);
         var ctx = hub.Stats.Contexts.ForPlant(name, new EntityBaseline());
         var derived = hub.ResolveDerived(ctx);
         var snapshot = new CombatActorSnapshot(derived, ActorElementTypes.Neutral);

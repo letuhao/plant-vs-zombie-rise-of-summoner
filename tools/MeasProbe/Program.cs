@@ -35,7 +35,7 @@ FusionRpg.Core.Actions.ActionTimingPolicy.Configure(FusionRpg.Core.Actions.Actio
 // `LAND1` staged sweep (2026-09-05): shipped `hybrid-atb` now runs through `RunTimelineActionPhase`,
 // which reads this whenever `WReact > 0` (hybrid-atb's own shipped value) -- needed here for the
 // first time because this is the first probe to exercise the SHIPPED catalog row with the flag on.
-ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v1.json")));
+ReactionLanePolicy.Configure(ReactionLaneTuningLoader.Parse(Load("reaction-lane.v3.json")));
 
 // Mirrors BattleGoldenTests.Actor()/CloseSetup() exactly (tests/FusionRpg.Core.Tests/Battle/BattleGoldenTests.cs).
 BattleActorSetup Actor(string key, string side, int level, ElementTypeId? elem = null, long attackIntervalMs = 0, params string[] traits) => new()

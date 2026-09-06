@@ -105,7 +105,13 @@ public static class BattleStatComposer
         // not a new source (no real power-index composition is wired through BattleActorSetup yet;
         // that is a later wave's job). Named here so the read is honest about what it means now, per
         // spec-battle-rates.md §2.3's "pass Theta" framing.
-        int theta = setup.Index;
+        //
+        // party-dungeon D2.11: `ThetaActor` overrides Index when a caller sets one -- null for every
+        // existing setup, so this is byte-identical to the old `setup.Index` read for all of them.
+        // This is the seam `ActorThetaSeam`'s own doc comment named as the wiring gap it was closing:
+        // "delve-battle-profile and power-index hydration decide whether that is Level or a new
+        // init-able field" -- ThetaActor is that field.
+        int theta = setup.ThetaActor ?? setup.Index;
 
         // battle-adoption mapping table: Atk is the resolver's BaseOverlayDamage — it must
         // NOT also sit in power.omni (double count). Defense stays: the defense channel is

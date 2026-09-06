@@ -61,6 +61,11 @@ const DATA_SURFACES: SurfaceEntry[] = [
     surface: "Sanctum stage itself (SanctumStage/SanctumHud/FocusCard)",
     hasFourStates: false,
     reason: "Renders honestly-Pending fields (T4's contract, not a query loading/error state) and a real locked-rail derivation (railState.ts) rather than a single query with four states of its own — the pattern doesn't map onto this stage the same way it does a single-collection layer"
+  },
+  {
+    surface: "Passives (PassivesTab, Level 0 'Yours')",
+    hasFourStates: true,
+    provenBy: "PassivesTab.test.tsx: loading/error (real retry, calling refetch on all three source queries) / empty (real content naming the aptitude budget, GG-17) / ready cases"
   }
 ];
 
@@ -86,6 +91,6 @@ describe("four-states matrix (GG-17)", () => {
   });
 
   it("declares the full known set", () => {
-    expect(DATA_SURFACES).toHaveLength(10);
+    expect(DATA_SURFACES).toHaveLength(11);
   });
 });

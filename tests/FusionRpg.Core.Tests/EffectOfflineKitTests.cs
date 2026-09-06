@@ -1,6 +1,10 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects.Plugins;
+using FusionRpg.Core.Status;
+using FusionRpg.Core.Stats.Derived;
+using FusionRpg.Core.Stats.Derived.Subsystems;
 using Xunit;
 
 namespace FusionRpg.Core.Tests;
@@ -492,5 +496,200 @@ public class EffectOfflineKitTests
         Assert.NotNull(plan);
         Assert.Single(plan!.Actions);
         Assert.Equal(EffectTriggers.OnDamageDealt, plan.Trigger);
+    }
+
+    /// <summary>
+    /// task E4, spec-mechanism-wiring.md §4.3 steps 1-2. Before this fold, both hosts' `ActorDerivedLookup`
+    /// returned the pinned snapshot untouched — nothing for a bound `stat.derived` atom to contribute
+    /// to. <see cref="SimEffectHost.ContributeDerived"/>/<see cref="FoundationHarness.ContributeDerived"/>
+    /// both delegate to <c>ActorDerivedLookup.AddContribution</c>, so this proves the SAME fold logic
+    /// reaches both hosts rather than two independently-written copies that could drift.
+    ///
+    /// <para>§4.3 Verification: the fold worked with <c>AtomKindRegistry</c>'s Sim cell for
+    /// `stat.derived` still at <see cref="RuntimeState.None"/> — asserted first, so this test failed
+    /// loudly (not silently passed for the wrong reason) the day E5 flipped it without updating this
+    /// assertion, which is exactly what happened: E5 (2026-09-06) moved the cell to
+    /// <see cref="RuntimeState.Partial"/>, and this guard is updated in the same change, not left
+    /// stale. <c>AddContribution</c> never asks <see cref="BindGate"/> anything, which is exactly what
+    /// makes the fold and the registry cell independent — this test still runs unmodified in
+    /// substance, it just no longer needs Sim's cell to sit at `None` to prove that independence.</para>
+    /// </summary>
+    [Fact]
+    public void Sim_folds_bound_derived_contributions_onto_the_pinned_snapshot()
+    {
+        Assert.Equal(RuntimeState.Partial,
+            AtomKindRegistry.Get("stat.derived")!.SupportIn(RuntimeId.Sim));
+
+        var flat = new BoundDerivedAtom(
+            DerivedStatChannels.CombatDefenseOmni, DerivedModifierOp.Flat, 25, SourceId: "test-aura");
+
+        var sim = new SimEffectHost();
+        sim.PinDerived("0xA", ActorDerivedSnapshot.StubNeutral());
+        sim.ContributeDerived("0xA", flat);
+        Assert.Equal(25, sim.ResolveDerived("0xA").Get(DerivedStatChannels.CombatDefenseOmni));
+
+        // Two contributions to the same channel sum, matching "plain sum is what FlatSum composing
+        // IS" (ActorDerivedSnapshot.OverlayAdd's own doc).
+        sim.ContributeDerived("0xA", flat with { Amount = 5, SourceId = "test-aura-2" });
+        Assert.Equal(30, sim.ResolveDerived("0xA").Get(DerivedStatChannels.CombatDefenseOmni));
+
+        // A ptr with no contribution is untouched -- the fold must not leak across actors.
+        sim.PinDerived("0xB", ActorDerivedSnapshot.StubNeutral());
+        Assert.Equal(0, sim.ResolveDerived("0xB").Get(DerivedStatChannels.CombatDefenseOmni));
+
+        var harness = new FoundationHarness();
+        harness.PinDerived("0xC", ActorDerivedSnapshot.StubNeutral());
+        harness.ContributeDerived("0xC", flat);
+        Assert.Equal(25, harness.ResolveDerived("0xC").Get(DerivedStatChannels.CombatDefenseOmni));
+    }
+
+    /// <summary>
+    /// task E4, spec-mechanism-wiring.md §4.3 step 3. Before this, "no host constructs a
+    /// `BindContext(RuntimeId.Sim)` today" -- the only production `BindContext` was `RpgHub.cs`'s
+    /// `RuntimeId.Lawn` one, so flipping the registry cell on its own would authorize nothing.
+    /// <see cref="SimEffectHost.TryBindDerivedAtoms"/>/<see cref="FoundationHarness.TryBindDerivedAtoms"/>
+    /// are that call site: both run the row through the REAL <see cref="BindGate"/>, and both are
+    /// exercised here.
+    ///
+    /// <para><b>E5 (§11 A5):</b> now that the Sim cell for `stat.derived` is
+    /// <see cref="RuntimeState.Partial"/> (not <see cref="RuntimeState.None"/> — see
+    /// <see cref="The_four_derived_ops_decide_Full_versus_Partial"/> for why it landed there and not
+    /// `Full`), the same row is genuinely ACCEPTED here — <see cref="BindGate.Check"/> only rejects
+    /// <see cref="RuntimeState.None"/> and a non-planner host on <see cref="RuntimeState.PlanOnly"/>;
+    /// `Partial` binds like `Full` does. This test used to assert the opposite (`RuntimeUnsupported`)
+    /// before E5 flipped the cell — updated here, not left to rot, per this test's own original doc
+    /// comment ("that is E5's cell to flip, not this test's to fake past").</para>
+    /// </summary>
+    [Fact]
+    public void A_stat_derived_bind_in_Sim_is_accepted()
+    {
+        var row = new AtomRow
+        {
+            AtomId = "test.derived.t1",
+            KindId = "stat.derived",
+            FamilyId = "test.derived",
+            Tier = 1,
+            ParamsJson = "{\"channel\":\"combat.defense.omni\",\"op\":\"flat\",\"amount\":25}"
+        };
+
+        var sim = new SimEffectHost();
+        var simRejection = sim.TryBindDerivedAtoms(new[] { row }, OwnerScope.Match);
+        Assert.True(simRejection.IsOk);
+
+        var harness = new FoundationHarness();
+        var harnessRejection = harness.TryBindDerivedAtoms(new[] { row }, OwnerScope.Match);
+        Assert.True(harnessRejection.IsOk);
+    }
+
+    /// <summary>
+    /// E5, spec-mechanism-wiring.md §4.3 step 4 / §11 A6: whether the Sim cell reads `Full` or
+    /// `Partial` is decided FROM the built fold, never asserted up front (decisions.md, "Derived-write
+    /// lawn executor", owner decision 2). <see cref="ActorDerivedLookup.Resolve"/>'s fold folds bound
+    /// `stat.derived` contributions onto the pinned base via
+    /// <see cref="ActorDerivedSnapshot.OverlayAdd"/> -- a PLAIN SUM that reads only
+    /// <see cref="BoundDerivedAtom.Amount"/>, never <see cref="BoundDerivedAtom.Op"/> (and
+    /// <see cref="BoundDerivedAtom"/> carries no `Priority` field at all, so it could not implement
+    /// `Replace`'s priority-ordering even if the fold tried to read `Op`). This test proves, against
+    /// the REAL <see cref="DerivedComposer"/> every other runtime composes through, which of the four
+    /// <see cref="DerivedModifierOp"/> values that plain sum happens to reproduce and which it does not.
+    ///
+    /// <para><b>Flat</b> (a <c>FlatSum</c> channel) and <b>Increased</b> (a <c>SumIncreased</c>
+    /// channel) are BOTH implemented by <c>DerivedComposer.ComposeChannel</c> as
+    /// <c>default + Σ(matching-op values)</c> -- exactly what a plain sum against the pinned base
+    /// already computes. The fold's answer matches the composer's exactly for both: HONOURED.</para>
+    ///
+    /// <para><b>Replace</b> (a <c>FlatReplace</c> channel) and <b>Flag</b> (a <c>MaxPriorityFlag</c>
+    /// channel) are NOT sums in the real composer -- <c>ComposeFlatReplace</c> returns the
+    /// highest-priority `Replace` value OUTRIGHT, discarding the baseline and every other
+    /// contribution; <c>ComposeMaxFlag</c> returns the MAX of the flag-ish contributions. A plain-sum
+    /// fold instead adds every contribution on top of the base, so it diverges from the composer's
+    /// real answer for both: NOT HONOURED. A bound `stat.derived` atom using `Replace` or `Flag` in
+    /// Sim therefore composes as if it had used `Flat` instead -- silently, not rejected.</para>
+    ///
+    /// <para>Two of four honoured is the empirical basis for <see cref="RuntimeState.Partial"/>, not
+    /// <see cref="RuntimeState.Full"/> -- <c>AtomKindRegistry</c>'s own comment on the `stat.derived`
+    /// Sim cell says so, citing this test.</para>
+    /// </summary>
+    [Fact]
+    public void The_four_derived_ops_decide_Full_versus_Partial()
+    {
+        var composer = new DerivedComposer();
+        var lookup = new ActorDerivedLookup();
+
+        // ---- Flat: progression.bonus.atk is a FlatSum channel, default 0. ----
+        const string flatChannel = DerivedStatChannels.ProgressionBonusAtk;
+        var flatReal = composer.Compose(new[]
+        {
+            new DerivedModifier(flatChannel, DerivedModifierOp.Flat, 10)
+        }).Get(flatChannel);
+
+        lookup.Pin("0xFlat", ActorDerivedSnapshot.FromValues(new[]
+        {
+            new KeyValuePair<string, double>(flatChannel, 0)
+        }));
+        lookup.AddContribution("0xFlat", new BoundDerivedAtom(flatChannel, DerivedModifierOp.Flat, 10, "t"));
+        var flatFold = lookup.Resolve("0xFlat", attackerLess: false).Get(flatChannel);
+
+        Assert.Equal(10, flatReal);
+        Assert.Equal(flatReal, flatFold); // HONOURED
+
+        // ---- Increased: status.power.omni is a SumIncreased channel, default 0, uncapped. ----
+        const string incChannel = DerivedStatChannels.StatusPowerOmni;
+        var incReal = composer.Compose(new[]
+        {
+            new DerivedModifier(incChannel, DerivedModifierOp.Increased, 10)
+        }).Get(incChannel);
+
+        lookup.Pin("0xInc", ActorDerivedSnapshot.FromValues(new[]
+        {
+            new KeyValuePair<string, double>(incChannel, 0)
+        }));
+        lookup.AddContribution("0xInc", new BoundDerivedAtom(incChannel, DerivedModifierOp.Increased, 10, "t"));
+        var incFold = lookup.Resolve("0xInc", attackerLess: false).Get(incChannel);
+
+        Assert.Equal(10, incReal);
+        Assert.Equal(incReal, incFold); // HONOURED
+
+        // ---- Replace: progression.power is a FlatReplace channel, default 1.0. ----
+        const string replaceChannel = DerivedStatChannels.ProgressionPower;
+        var replaceReal = composer.Compose(new[]
+        {
+            new DerivedModifier(replaceChannel, DerivedModifierOp.Replace, 5, Priority: 1),
+            new DerivedModifier(replaceChannel, DerivedModifierOp.Replace, 50, Priority: 2)
+        }).Get(replaceChannel);
+        Assert.Equal(50, replaceReal); // highest priority wins outright; baseline (1.0) discarded
+
+        lookup.Pin("0xReplace", ActorDerivedSnapshot.FromValues(new[]
+        {
+            new KeyValuePair<string, double>(replaceChannel, 1.0)
+        }));
+        lookup.AddContribution("0xReplace",
+            new BoundDerivedAtom(replaceChannel, DerivedModifierOp.Replace, 5, "t1"));
+        lookup.AddContribution("0xReplace",
+            new BoundDerivedAtom(replaceChannel, DerivedModifierOp.Replace, 50, "t2"));
+        var replaceFold = lookup.Resolve("0xReplace", attackerLess: false).Get(replaceChannel);
+
+        Assert.NotEqual(replaceReal, replaceFold); // NOT HONOURED
+        Assert.Equal(1.0 + 5 + 50, replaceFold); // the fold sums instead of overriding
+
+        // ---- Flag: status.immune.poison is a MaxPriorityFlag channel, default 0. ----
+        var flagChannel = DerivedStatChannels.StatusImmune("poison");
+        var flagReal = composer.Compose(new[]
+        {
+            new DerivedModifier(flagChannel, DerivedModifierOp.Flag, 1),
+            new DerivedModifier(flagChannel, DerivedModifierOp.Flag, 1)
+        }).Get(flagChannel);
+        Assert.Equal(1, flagReal); // max of the flags, never a sum
+
+        lookup.Pin("0xFlag", ActorDerivedSnapshot.FromValues(new[]
+        {
+            new KeyValuePair<string, double>(flagChannel, 0)
+        }));
+        lookup.AddContribution("0xFlag", new BoundDerivedAtom(flagChannel, DerivedModifierOp.Flag, 1, "t1"));
+        lookup.AddContribution("0xFlag", new BoundDerivedAtom(flagChannel, DerivedModifierOp.Flag, 1, "t2"));
+        var flagFold = lookup.Resolve("0xFlag", attackerLess: false).Get(flagChannel);
+
+        Assert.NotEqual(flagReal, flagFold); // NOT HONOURED
+        Assert.Equal(2, flagFold); // the fold sums instead of taking the max
     }
 }

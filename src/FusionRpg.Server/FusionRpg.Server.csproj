@@ -32,11 +32,28 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- party-dungeon D1.x: Program.cs (8a82cf0) already loads this tree unconditionally at startup
+         via DungeonRegistryLoader.LoadAll/dungeon-tuning's own readers, but no content rule ever
+         copied it next to the exe, which silently breaks EVERY test that boots the real host
+         (WebApplicationFactory-backed E2E tests), not just a dungeon-specific one. Same copy pattern
+         as data\tuning\ above, one directory over. -->
+    <Content Include="..\..\data\seed\dungeon\**\*.json">
+      <Link>data\seed\dungeon\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
     <!-- species-build T2.1: `demon-type-allocation`'s runtime plan reader (SpeciesBuildPlanCatalog)
          needs the committed, generated plan next to the exe — the same copy pattern as data/tuning/
          above, but for one specific generated file rather than a whole authored tree. -->
     <Content Include="..\..\data\generated\demons\_species-build-plan.json">
       <Link>data\generated\demons\_species-build-plan.json</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <!-- ds 18 fusion-recipe-runtime (T8.5): the committed recipe seed fusion-recipe-reconcile owns
+         writing — same copy pattern as _species-build-plan.json just above. -->
+    <Content Include="..\..\data\generated\demons\_fusion-recipes.json">
+      <Link>data\generated\demons\_fusion-recipes.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>

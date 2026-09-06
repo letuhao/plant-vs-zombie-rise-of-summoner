@@ -1,8 +1,10 @@
 namespace FusionRpg.Core.Effects.Atoms;
 
 /// <summary>
-/// The six container kinds. Closed: adding one is a reviewed change, because each implies a spec
-/// that owns its authoring and its lifecycle.
+/// The seven container kinds. Closed: adding one is a reviewed change, because each implies a spec
+/// that owns its authoring and its lifecycle. <see cref="Enemy"/> is party-dungeon D2.6's own
+/// reviewed addition (spec-encounter-generator.md §6) — an elite/boss affix roll, owned by
+/// `encounter-generator`, never authored outside a delve encounter.
 /// </summary>
 public enum ContainerKind
 {
@@ -12,6 +14,7 @@ public enum ContainerKind
     SpeciesPassive,
     Patron,
     WorldBuff,
+    Enemy,
 }
 
 /// <summary>One atom in a container's <b>fixed core</b> — always present, in <c>seq</c> order.</summary>
@@ -147,6 +150,7 @@ public sealed record ContainerRow
         ContainerKind.SpeciesPassive => "species-passive",
         ContainerKind.Patron => "patron",
         ContainerKind.WorldBuff => "world-buff",
+        ContainerKind.Enemy => "enemy",
         _ => "",
     };
 }

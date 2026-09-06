@@ -55,6 +55,8 @@ class SetCharmGenTuning:
     charm_max_tier_bands_below_equip: int
     charm_legal_ops: "tuple[str, ...]"
     charm_forbidden_ops: "tuple[str, ...]"
+    charm_ring_layer_families: "frozenset[str]"
+    charm_ring_layer_kinds: "frozenset[str]"
     charm_classes: "tuple[CharmClassRule, ...]"
 
     median_cell_occupancy_max: int
@@ -135,6 +137,8 @@ def load(path: "Path | None" = None) -> SetCharmGenTuning:
         charm_max_tier_bands_below_equip=int(_require(doc, "charm", "maxTierBandsBelowEquip")),
         charm_legal_ops=tuple(_require(doc, "charm", "legalOps")),
         charm_forbidden_ops=tuple(_require(doc, "charm", "forbiddenOps")),
+        charm_ring_layer_families=frozenset(_require(doc, "charm", "ringLayerFamilies")),
+        charm_ring_layer_kinds=frozenset(_require(doc, "charm", "ringLayerKinds")),
         charm_classes=classes,
         median_cell_occupancy_max=int(_require(doc, "distinctness", "medianCellOccupancyMax")),
         near_duplicate_rate_max_permille=int(
@@ -187,6 +191,11 @@ def _validate(t: SetCharmGenTuning) -> None:
         if op in t.charm_forbidden_ops:
             raise SetCharmTuningError(
                 f"charm op {op!r} is both legal and forbidden — ssot-charms §3.4 allows Flat only")
+    if not t.charm_ring_layer_families and not t.charm_ring_layer_kinds:
+        raise SetCharmTuningError(
+            "charm.ringLayerFamilies and charm.ringLayerKinds are both empty — ssot-charms §3.6 "
+            "splits the ring layer from the charm layer by FAMILY, and an empty split lets a "
+            "conditional per-actor rider be authored as an always-on side-wide charm")
     ids = [c.id for c in t.charm_classes]
     if len(set(ids)) != len(ids):
         raise SetCharmTuningError(f"duplicate charm class id in {ids}")

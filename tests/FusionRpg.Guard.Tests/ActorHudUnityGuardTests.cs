@@ -20,12 +20,14 @@ public sealed class ActorHudUnityGuardTests
     };
 
     [Fact]
-    public void ActorHudPool_uses_Feet_lane_Y_and_bounds_X()
+    public void ActorHudPool_uses_Body_fields_and_worldYOffset_not_VfxWorld()
     {
         var text = ReadInjector(Path.Combine("Hud", "ActorHudPool.cs"));
-        Assert.Contains("VfxAnchorKind.Feet", text, StringComparison.Ordinal);
-        Assert.Contains("BoundsCenterX", text, StringComparison.Ordinal);
+        Assert.Contains("BoundsCenterY", text, StringComparison.Ordinal);
         Assert.Contains("WorldYOffset", text, StringComparison.Ordinal);
+        Assert.Contains("CellSpan", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("frame.World(", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("frame.Span(", text, StringComparison.Ordinal);
         Assert.DoesNotContain("VfxAnchorKind.Crown", text, StringComparison.Ordinal);
     }
 
@@ -35,7 +37,7 @@ public sealed class ActorHudUnityGuardTests
         var text = ReadInjector(Path.Combine("Fx", "UnitFrameResolver.cs"));
         Assert.Contains("TryCollectSpriteBounds", text, StringComparison.Ordinal);
         Assert.Contains("GetComponentsInChildren<SpriteRenderer>", text, StringComparison.Ordinal);
-        Assert.DoesNotContain("GetComponentInChildren<Renderer>()", text, StringComparison.Ordinal);
+        Assert.Contains("bestArea", text, StringComparison.Ordinal);
     }
 
     [Fact]

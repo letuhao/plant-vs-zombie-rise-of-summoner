@@ -1,5 +1,6 @@
 using FusionRpg.Contracts;
 using FusionRpg.Core.Combat;
+using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Effects;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.Stats.Derived;
@@ -20,6 +21,7 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
     readonly string? _pluginId;
     readonly Combat.Shield.ShieldGate? _shieldGate;
     readonly CombatActorResolve? _actorResolve;
+    readonly Action<DamageApplyResult, DamageOrigin, IReadOnlyList<ElementPayloadComponent>, string?>? _onDamageApplied;
 
     public StatusFunnelPulseSink(
         BoardSnapshot board,
@@ -32,7 +34,8 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
         string? effectId,
         string? pluginId,
         Combat.Shield.ShieldGate? shieldGate = null,
-        CombatActorResolve? actorResolve = null)
+        CombatActorResolve? actorResolve = null,
+        Action<DamageApplyResult, DamageOrigin, IReadOnlyList<ElementPayloadComponent>, string?>? onDamageApplied = null)
     {
         _shieldGate = shieldGate;
         _actorResolve = actorResolve;
@@ -45,6 +48,7 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
         _skipped = skipped;
         _effectId = effectId;
         _pluginId = pluginId;
+        _onDamageApplied = onDamageApplied;
     }
 
     public void PulseHp(StatusInstance instance, double amount)
@@ -83,8 +87,17 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
             ChainDepth = packet.ChainDepth
         };
 
+        // spec-gate-counters.md §2.2d / §7 P1 -- the discriminator ElementMasteryCounter needs:
+        // a DoT tick reaches the SAME apply tail a direct hit does, and until this line the pipeline
+        // had no way to tell them apart (every caller defaulted to DirectHit). Crediting a pulse would
+        // let one applied status earn an elemental credit every tick for its whole duration, double-
+        // paying for the one application `status_applied` already credited -- this is the live-lawn
+        // half of that fix (the battle/sim engine's OWN separate pulse sink, `BattleEngine.cs`'s
+        // `BattlePulseSink`, calls `DamageApplyPipeline.Apply` directly rather than through this
+        // dispatcher, and is untouched here -- it is under concurrent edit by another session, R9).
         CombatDamageDispatcher.DispatchInstant(
-            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate, _actorResolve);
+            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate, _actorResolve,
+            origin: DamageOrigin.StatusPulse, onDamageApplied: _onDamageApplied);
     }
 
     /// <summary>
@@ -126,8 +139,11 @@ public sealed class StatusFunnelPulseSink : IStatusPulseSink
             ChainDepth = packet.ChainDepth
         };
 
+        // No ElementPayload on this packet (see the class doc above) -- `origin` is passed for the
+        // same reason it is on PulseHp, not because this call site currently produces any credit.
         CombatDamageDispatcher.DispatchInstant(
-            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate, _actorResolve);
+            packet, _board, ev, _funnel, _policy, _rng, _math, _skipped, _shieldGate, _actorResolve,
+            origin: DamageOrigin.StatusPulse, onDamageApplied: _onDamageApplied);
     }
 }
 

@@ -137,6 +137,94 @@ public class InteractiveTurnsTests
         Assert.True(trace.ReplayExhausted);
     }
 
+    // ---- resume: replay-the-recorded-prefix-then-go-live (D2.16) ----
+
+    [Fact]
+    public void ResumeReplaysTheRecordedPrefixByteForByte()
+    {
+        var recorded = new DecisionTrace();
+        recorded.Record(100, "squad:0", "act.attack", "wave:0", DecisionSource.Player);
+        recorded.Record(200, "squad:0", "act.guard", null, DecisionSource.Timeout);
+
+        // A live ask/fallback that would REFUSE if consulted during the replayed prefix -- so if
+        // resume fell through to live instead of reading the trace, this would come back wrong.
+        var resumed = InteractiveIntentSource.ResumeReplayThenLive(
+            new NeverActs(), (_, _) => throw new InvalidOperationException("must not ask during replay"), EnvelopeOf, recorded);
+
+        Assert.Equal("act.attack", resumed.TryDeclare("squad:0", 999_999).ActionId);
+        Assert.Equal("act.guard", resumed.TryDeclare("squad:0", 999_999).ActionId);
+    }
+
+    [Fact]
+    public void ResumeGoesLiveOnceThePrefixIsExhausted()
+    {
+        var recorded = new DecisionTrace();
+        recorded.Record(100, "squad:0", "act.attack", "wave:0", DecisionSource.Player);
+
+        var resumed = InteractiveIntentSource.ResumeReplayThenLive(
+            new AlwaysAttacks(), (_, _) => new PlayerChoice("act.guard", "enemy:9"), EnvelopeOf, recorded);
+
+        Assert.Equal("act.attack", resumed.TryDeclare("squad:0", 1).ActionId);  // replayed
+        var live = resumed.TryDeclare("squad:0", 2);                            // prefix exhausted -> live
+        Assert.Equal("act.guard", live.ActionId);
+        Assert.Equal("enemy:9", live.TargetKey);
+    }
+
+    /// <summary>⛔ Found while building this: `Record` appends to the SAME list `ReplayExhausted`
+    /// counts against, so a naive re-check of `ReplayExhausted` on every call would see it flip back
+    /// to false the instant a live decision is recorded, and try to "replay" that very decision on the
+    /// actor's next turn instead of asking again. Proves the sticky latch instead.</summary>
+    [Fact]
+    public void OnceLiveARecordedLiveDecisionIsNeverReplayedBack()
+    {
+        var recorded = new DecisionTrace();
+        recorded.Record(100, "squad:0", "act.attack", "wave:0", DecisionSource.Player);
+
+        var asked = 0;
+        var resumed = InteractiveIntentSource.ResumeReplayThenLive(
+            new AlwaysAttacks(),
+            (_, _) => { asked++; return new PlayerChoice("act.guard", null); },
+            EnvelopeOf, recorded);
+
+        Assert.Equal("act.attack", resumed.TryDeclare("squad:0", 1).ActionId);  // replayed prefix
+        Assert.Equal("act.guard", resumed.TryDeclare("squad:0", 2).ActionId);   // goes live, asks once
+        Assert.Equal("act.guard", resumed.TryDeclare("squad:0", 3).ActionId);   // asks again, not replayed
+        Assert.Equal(2, asked);
+    }
+
+    [Fact]
+    public void ResumeWithAnAlreadyExhaustedTraceGoesLiveImmediately()
+    {
+        var resumed = InteractiveIntentSource.ResumeReplayThenLive(
+            new AlwaysAttacks(), (_, _) => new PlayerChoice("act.guard", null), EnvelopeOf, new DecisionTrace());
+
+        Assert.Equal("act.guard", resumed.TryDeclare("squad:0", 1).ActionId);
+    }
+
+    [Fact]
+    public void ResumeStillRecordsATimeoutOnceLive()
+    {
+        var recorded = new DecisionTrace();
+        recorded.Record(100, "squad:0", "act.attack", "wave:0", DecisionSource.Player);
+
+        var resumed = InteractiveIntentSource.ResumeReplayThenLive(
+            new AlwaysAttacks(), (_, _) => PlayerChoice.None, EnvelopeOf, recorded);
+
+        Assert.Equal("act.attack", resumed.TryDeclare("squad:0", 1).ActionId);   // replayed
+        var timedOut = resumed.TryDeclare("squad:0", 2);                         // live, times out
+        Assert.Equal("act.attack", timedOut.ActionId);                           // AlwaysAttacks fallback
+
+        Assert.Equal(2, recorded.Decisions.Count);
+        Assert.Equal(DecisionSource.Timeout, recorded.Decisions[1].Source);
+    }
+
+    [Fact]
+    public void ResumeRejectsANullAsk()
+    {
+        Assert.Throws<ArgumentNullException>(() =>
+            InteractiveIntentSource.ResumeReplayThenLive(new AlwaysAttacks(), null!, EnvelopeOf, new DecisionTrace()));
+    }
+
     // ---- persistence ----
 
     [Fact]

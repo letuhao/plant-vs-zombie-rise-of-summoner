@@ -4,11 +4,16 @@ Program `battle-tempo` — [capability map](../docs/architecture/battle-tempo-ma
 specs under [docs/architecture/battle-tempo/](../docs/architecture/battle-tempo/).
 Task list: [battle-tempo-todo.md](battle-tempo-todo.md).
 
-**Task count, corrected 2026-09-05:** **31 tasks across eight modules** — 23 complete, 1 partial
-(`RL2`), 3 open (`LAND1`, `LAND2`, `RL3`), 4 newly added (`BR1`–`BR4`, below). ⚠️ This header
-previously read *"27 of 28 tasks complete or correctly partial; 2 blocked; 1 owner-only"* — arithmetic
-that summed to 30 against a real total of 27, and a module count that called `timeline-dispatch` an
-"8th module" when it was the 7th. Both corrected by counting.
+**Status, 2026-09-06: PROGRAM COMPLETE — 33 of 33 tasks done, verified, and evidenced.** `LAND1`/`LAND2`
+landed (all three profiles), the `W=1` starvation defect they surfaced is fixed, `battle-resources`
+(`BR1`–`BR5`) closed the resource-seeding gap, and `RL3` sized the reaction lane's numbers against the
+landed sweep — the last open task. No task remains unchecked in `battle-tempo-todo.md` except a
+standing byte-identical invariant, itself now confirmed held through the program's end.
+
+⚠️ **Corrected twice on the way here, both by counting rather than trusting a prior header:** first
+*"27 of 28… 2 blocked; 1 owner-only"* (arithmetic summing to 30 against a real 27, and
+`timeline-dispatch` miscounted as an "8th module"); then *"31 tasks across eight modules — 23 complete,
+1 partial, 3 open"* once `battle-resources` was added but before it, `LAND1`/`LAND2`, and `RL3` closed.
 
 **New module, 2026-09-05: `battle-resources`**
 ([spec-battle-resources.md](../docs/architecture/battle-tempo/spec-battle-resources.md)) — the module

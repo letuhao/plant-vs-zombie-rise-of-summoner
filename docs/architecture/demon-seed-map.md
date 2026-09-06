@@ -121,7 +121,7 @@ inventory, and §10 says adding one is a reviewed change to that document. Owed;
 | 14 | `roster-metrics` | Distribution guard over element pair x aptitude x threat band x rarity. **The D2-Hammerdin control** | — | 8 |
 | 15 | `species-effects` | **The container.** Anchor -> a `species-passive.{speciesId}` seed: fixed core, affix pool, affinity ordinals, eligibility tags. Without it a generated demon has a stat block and no effects | **yes** | 8, 10, **effect-pipeline** |
 | 16 | `player-materialise` | **Runtime, per player.** At profile creation, roll every species container against that player's world seed and write it to their tables. Frozen for the save; append-only afterwards | — | 12, 15 |
-| 17 | `fusion-recipe-generator` | Distribution index over the real concrete roster finds rarity rungs whose input pool cannot support a unique pair per output (found real, 2026-09-05: 21 `Almanac` outputs vs. 4 `Sunwoven` inputs); an LLM proposes a cross-rung pairing only for those deficits; a deterministic reconciler validates and writes the committed recipe seed | **yes, bounded to shortfall rungs only** | 11 |
+| 17 | `fusion-recipe-generator` | Distribution index over the real concrete roster finds rarity rungs whose input pool cannot support a unique pair per output (found real, 2026-09-05, confirmed by the built `tools/DemonRecipeDistributionIndex`: 20 eligible `Almanac` outputs vs. 4 `Sunwoven` inputs); an LLM proposes a cross-rung pairing only for those deficits; a deterministic reconciler validates and writes the committed recipe seed | **yes, bounded to shortfall rungs only** | 11 |
 | 18 | `fusion-recipe-runtime` | `DemonRecipeCatalog` moves from live in-process computation to a `Configure`d read of the committed seed — the same seam `catalog-runtime` already proved for the species catalog, applied to its sibling | — | 17 |
 
 ### Dependency graph
@@ -214,9 +214,12 @@ roster finally loaded, the FIRST downstream consumer to break was not species-re
 recipe assignment, shipped 2026-08-21 — threw `InvalidOperationException: No unused input pair
 available for 'jacksonzombie'`.
 
-**Root cause, found by direct query against the real database, not assumed:** 21 `Almanac`-rarity
-(top-rung) species need a unique fusion input pair each; the nearest populated rung below,
-`Sunwoven`, has only 4 species, and 4 elements support at most `C(4,2)=6` distinct unordered pairs.
+**Root cause, found by direct query against the real database, not assumed:** the `Almanac` (top) rung
+has 21 species, but only 20 are eligible fusion OUTPUTS (`Acquisition != CaptureOnly` — one,
+`UltimatePaperZombie`, is `CaptureOnly` and is correctly excluded by the same owner-lock-6 rule the
+whole pipeline already respects; a first count that misses this filter overstates by one). Each of
+those 20 needs a unique fusion input pair; the nearest populated rung below, `Sunwoven`, has only 4
+species, and 4 elements support at most `C(4,2)=6` distinct unordered pairs.
 This is the exact same defect class `roster-metrics` (module 10) already declares a target for —
 *"rarity distribution: monotone decreasing across the ten rungs"* — but that module runs on anchors,
 before rarity is assigned during expansion, so it could not have caught this specific case even fully
@@ -245,7 +248,9 @@ Closed by two modules, mirroring §3a's own split between generation-time and a 
 - **17 `fusion-recipe-generator`** — dev-time. Distribution index (deterministic) finds shortfall
   rungs; an LLM proposes a pairing ONLY for the specific deficits the deterministic pass cannot close;
   a deterministic reconciler is the sole write authority over the committed seed. Bounded scope: for
-  the real corpus this is 21 deficit outputs, not a re-derivation of all 829 recipes.
+  the real corpus this is 20 eligible outputs at the one shortfall rung, of which the deterministic
+  pass itself already fills 6 (its own `C(4,2)=6`) — 14 deficits reach the model, not a re-derivation
+  of all 829 recipes. (Verified live via the built `tools/DemonRecipeDistributionIndex`, 2026-09-06.)
 - **18 `fusion-recipe-runtime`** — the same `Configure`/`UseScoped` seam `catalog-runtime` already
   proved for `DemonSpeciesCatalog`, applied to `DemonRecipeCatalog`'s much smaller shape (a single
   committed JSON file, `SpeciesBuildPlanCatalog`'s pattern, not a SQLite import).

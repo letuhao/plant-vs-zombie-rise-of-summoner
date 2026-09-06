@@ -526,7 +526,9 @@ public class ConsumableTests
         // ⛔ Neither the enum value nor the documented `item` fallback is chosen here.
         // spec-consumables.md's §Open puts the fifth ask at the owner's level, batched with D27.
         Assert.False(ConsumableLimits.ConsumableContainerKindAvailable);
-        Assert.Equal(6, Enum.GetValues<ContainerKind>().Length);
+        // 7, not 6, since party-dungeon D2.6 added ContainerKind.Enemy as its own reviewed seventh
+        // kind -- unrelated to "Consumable" (still unminted, the assertion right below still holds).
+        Assert.Equal(7, Enum.GetValues<ContainerKind>().Length);
         Assert.DoesNotContain("Consumable",
             Enum.GetNames<ContainerKind>(), StringComparer.Ordinal);
 

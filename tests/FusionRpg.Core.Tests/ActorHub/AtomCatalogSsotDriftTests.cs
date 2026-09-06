@@ -101,7 +101,7 @@ public class AtomCatalogSsotDriftTests
         var text = ReadSsot();
         var declared = StatusCatalogBootstrap.CreateDefault().All().Count;
 
-        Assert.Equal(21, declared); // sanity anchor: today's generated value
+        Assert.Equal(24, declared); // sanity anchor: today's generated value (21 -> 24, delve-attrition D2.19's nerve.* block)
         Assert.Contains($"Status catalog — {declared} declared", text);
     }
 

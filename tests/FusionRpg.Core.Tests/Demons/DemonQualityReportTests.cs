@@ -43,7 +43,7 @@ public class DemonQualityReportTests
               "attackTempo": "steady", "reach": "melee", "variants": ["normal"],
               "side": "{{side}}", "gameTypeId": 1, "elementPrimary": "earth", "elementSecondary": "none",
               "deployMode": "{{(side == "plant" ? "PlantAvatar" : "HypnoAlly")}}",
-              "acquisition": ["Summonable"], "traits": [] }
+              "acquisition": ["Summonable"], "traits": [], "targetPreference": "frontline" }
             """;
 
         File.WriteAllText(Path.Combine(speciesDir, "plant", "clean.json"),
@@ -151,7 +151,7 @@ public class DemonQualityReportTests
               "attackTempo": "steady", "reach": "melee", "variants": ["normal"],
               "side": "{{side}}", "gameTypeId": 1, "elementPrimary": "earth", "elementSecondary": "none",
               "deployMode": "{{(side == "plant" ? "PlantAvatar" : "HypnoAlly")}}",
-              "acquisition": ["Summonable"], "traits": [] }
+              "acquisition": ["Summonable"], "traits": [], "targetPreference": "frontline" }
             """;
 
         File.WriteAllText(Path.Combine(speciesDir, "plant", "p.json"),

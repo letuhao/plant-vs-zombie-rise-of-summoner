@@ -25,12 +25,19 @@ namespace FusionRpg.Core.Demons.Generation;
 /// kept as strings here, parsed into the real <c>[Flags] DemonAcquisition</c> enum by the caller
 /// (mirrors how <see cref="Rarity"/> stays a raw string here and <c>SpeciesExpander</c> parses it),
 /// so this reader stays a pure JSON-shape mirror with no enum-parsing failure mode of its own.</param>
+/// <param name="TargetPreference">party-dungeon `encounter-generator` (D2.1) — required, unlike
+/// <see cref="ThreatBand"/>: a corpus-wide scan (2026-09-06, all 841 real anchors under
+/// `data/seed/demons/species/`) found zero missing, against six real values (`frontline 221 ·
+/// backline 344 · swarm 193 · elite 17 · structure 50 · indiscriminate 16`) — so this stays a plain
+/// required string, matching <see cref="Reach"/>/<see cref="AttackTempo"/>'s own treatment, not
+/// <see cref="ThreatBand"/>'s nullable one.</param>
 public sealed record AnchorRow(
     string SpeciesId, string Rarity, string? ThreatBand,
     string AptitudePrimary, string? AptitudeSecondary, bool Pure,
     string AttackTempo, string Reach, IReadOnlyList<string> Variants,
     string Side, int GameTypeId, string ElementPrimary, string? ElementSecondary,
-    string DeployMode, IReadOnlyList<string> Acquisition, IReadOnlyList<string> Traits);
+    string DeployMode, IReadOnlyList<string> Acquisition, IReadOnlyList<string> Traits,
+    string TargetPreference);
 
 public sealed class AnchorRowRejection : Exception
 {
@@ -81,7 +88,8 @@ public static class AnchorRowReader
             ElementSecondary: string.Equals(elSecondary, "none", StringComparison.OrdinalIgnoreCase) ? null : elSecondary,
             DeployMode: Str(el, "deployMode"),
             Acquisition: StrArray(el, "acquisition"),
-            Traits: StrArray(el, "traits"));
+            Traits: StrArray(el, "traits"),
+            TargetPreference: Str(el, "targetPreference"));
     }
 
     static string Str(JsonElement el, string key) =>

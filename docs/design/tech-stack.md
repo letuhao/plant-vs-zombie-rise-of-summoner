@@ -261,7 +261,7 @@ The design covers every surface. These are the things a build will hit that no p
 | `layer-world` — sector inspector, Expeditions, Pacts | First open | ≤ 30 KB |
 | `layer-reference` — Almanac, Chronicle, chart primitives | First open | ≤ 30 KB |
 | `stage-lawn` — Phaser + the projector | Entering the lawn | ≤ 400 KB |
-| `stage-map` — SVG map renderer + pan/zoom | Entering the world | ≤ 25 KB |
+| `stage-map` — Phaser dual-plane world map (lazy; not in entry) | Entering the world | ≤ 400 KB (shares Phaser with lawn; xyflow forbidden) |
 | `dev` — the whole developer tree | Developer mode on | unbudgeted |
 
 Measured baseline: **712.9 KB gz, one chunk.** Target entry: **≤ 180 KB gz** — a 4× reduction on the
@@ -330,21 +330,21 @@ problem can be asked to turn developer mode on and screenshot the status page.
 
 It costs nothing on the entry path because it is its own chunk (§6).
 
-### T3 — Drop `@xyflow/react`
+### T3 — Drop `@xyflow/react` (player map HOW = Phaser dual-plane)
 
-**Decision.** Render the world map as SVG with a small pan/zoom hook.
+**Decision.** The **player** world map is a **Phaser dual-plane** island under `web/fusion-rpg-web/src/game/world/`
+(same lifetime pattern as the lawn: React HUD + Phaser canvas). Do **not** put `@xyflow/react` on the
+player map or in the **entry** chunk. Do **not** treat SVG `viewBox` pan/zoom as the player map HOW
+(that path was the interim sketch; `world-map-runtime` retires it from `#/world`).
 
-`@xyflow/react` is a **node-editor** library. Our map is authored, read-only content: the player never
-drags a sector, never draws an edge, never needs routing — the lanes are straight lines between fixed
-positions. We would be paying 41.4 KB gz for roughly 15% of a library, and there is already evidence
-of the cost of adopting its idioms: `LaneEdge.tsx:12-17` and `LegionMarker.tsx:73` carry a foreign
-framework palette into the newest surface, against the token law.
+`@xyflow/react` remains a **node-editor** library. Our authored player map never needs graph editing
+idioms on the live stage. Paying for xyflow on entry or on `#/world` is still forbidden.
 
-Plate 03 draws the entire map — nodes, lanes, ownership, fog, legions, legend — in plain SVG.
-
-**Where it may legitimately return:** a sector-graph *authoring* tool is a genuine node editor, and
+**Where xyflow may legitimately return:** a sector-graph *authoring* tool is a genuine node editor, and
 that is a developer surface, where the bundle is unbudgeted. If we ever build one, xyflow belongs in
-the `dev` chunk.
+the `dev` chunk — never the player map / entry chunk.
+
+Catalog plate references that still show SVG are historical visuals; the runtime HOW is Phaser.
 
 ### T4 — Preferences are device-scoped; view state is session-scoped. Nothing is server-side
 
@@ -379,7 +379,7 @@ second.
 | **0** | **Foundations** | Tokens regenerated from `_kit`, fonts self-hosted, Lingui + pseudolocale, the `Magnitude` formatter, code splitting + budget, Radix + the layer stack + bands | Nothing ships visibly and everything depends on it. **Prove the layer stack over the *existing* pages first** — wrap a current page in a panel shell and assert the stage never unmounts. That de-risks GG-1/GG-11 before a single screen is redesigned |
 | **1** | **Shell + the sweep** | Title, save select, Sanctum, rail, HUD — and move the nine diagnostic routes behind the developer gate | The sweep is nearly free and it is what makes the navigation stop reading as `AUDIT`. Old routes stay reachable inside the dev tree, so nothing is lost during migration |
 | **2** | **Collection** | Creatures, Relics, Fusion, comparison, virtualization | Highest player value, and it exercises the entity ladder hardest — if the ladder is wrong, it is wrong here and cheap to fix before four more layers depend on it |
-| **3** | **Stages** | Lawn re-hosted under the stage model with Phaser lazy-loaded; world map rewritten as SVG | Depends on phase 0's stage/layer split being real |
+| **3** | **Stages** | Lawn re-hosted under the stage model with Phaser lazy-loaded; world map as Phaser dual-plane (xyflow off player map) | Depends on phase 0's stage/layer split being real |
 | **4** | **Reference** | Almanac, Chronicle, the four chart shapes, recharts removed | Lower risk, and the chart primitives are small once the tokens exist |
 | **5** | **System + flows** | Settings, keymap, rebinding, loadout, deploy targeting, the offer, the first-run script | The first-run script is last on purpose — it should be authored against the game as it actually plays, not against a design |
 

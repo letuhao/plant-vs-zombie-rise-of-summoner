@@ -193,9 +193,14 @@ decision rather than a binary one — which is what BASTION's whole economy was 
 (*"a guard that costs nothing when it stops nothing would also produce nothing"*). Reading A would
 charge for a counter while leaving `Riposte` inert, which is the worst of both.
 
-⚠️ **The spend range is now a balance number, and it is this module's to size** — how much poise a
-counter may commit, and the threshold at which a policy holds instead. Tunables, not design; neither
-blocks the build.
+✅ **Sized 2026-09-06 (`RL3`), against the landed Phase 2 sweep.** `poiseSpend: 50` /
+`riposteShareCapMilli: 400` (`reaction-lane.v3.json`) — matched to `AptitudeGuardEconomy`'s own
+`flatCommitCost`/`riposteShareCapPermille` (`aptitudes.v5.json` `guardEconomy`), rather than sized in
+isolation: a counter costs about what raising a guard costs from the same pool, and poise converts to
+damage at the same rate through either path. Measured on `CloseSetup` (level 5, 240 seeds): 2
+affordable counters per battle, +3.75% win rate with the lane open — a real, moderate, non-flat effect
+on that fixture, not a claim the number holds for every matchup shape. See `battle-tempo-todo.md`'s
+`RL3` entry for the full sweep evidence, including the wider grid that preceded this choice.
 
 ### 2.3 The depth limit is a structural cap, and must say so
 

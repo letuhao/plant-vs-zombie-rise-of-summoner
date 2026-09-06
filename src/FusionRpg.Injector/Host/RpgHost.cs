@@ -131,8 +131,8 @@ public static class RpgHost
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "power-scale.v2.json"))));
         FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
             FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json.
-                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v5.json"))));
+                // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk.
+                System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "aptitudes.v6.json"))));
         FusionRpg.Core.Hud.ActorHudTuningHub.Configure(
             FusionRpg.Core.Hud.ActorHudTuningLoader.Parse(
                 System.IO.File.ReadAllText(System.IO.Path.Combine(tuningDir, "actor-hud.v1.json"))));

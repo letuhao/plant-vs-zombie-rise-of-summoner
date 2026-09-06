@@ -23,7 +23,8 @@ public class SpeciesBuildPlannerTests
         AptitudePrimary: primary, AptitudeSecondary: secondary, Pure: pure,
         AttackTempo: "steady", Reach: "melee", Variants: Array.Empty<string>(),
         Side: side, GameTypeId: gameTypeId, ElementPrimary: "fire", ElementSecondary: null,
-        DeployMode: "PlantAvatar", Acquisition: new[] { "Summonable" }, Traits: Array.Empty<string>());
+        DeployMode: "PlantAvatar", Acquisition: new[] { "Summonable" }, Traits: Array.Empty<string>(),
+        TargetPreference: "frontline");
 
     /// <summary>A small synthetic corpus with the SAME shape of imbalance the spec's own audit finding
     /// A7 describes: one aptitude ("Onslaught") massively over-represented, four barely present at

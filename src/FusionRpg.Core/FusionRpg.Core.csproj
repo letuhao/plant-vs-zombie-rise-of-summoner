@@ -16,5 +16,15 @@
          NOTE: keep the other project's literal name out of this file - the Core/data separation
          guard substring-scans this csproj and cannot tell a comment from a reference. -->
     <InternalsVisibleTo Include="FusionRpg.Core.Tests" />
+    <!-- T8.5 (ds 18, fusion-recipe-runtime §3 success criteria): DemonRecipeCatalog.BuildDeterministicOnly()
+         is the generator's own dependency, not a player-facing surface any more - these two CLI
+         tools are fusion-recipe-generator's (module 17) own seam and the only callers left. -->
+    <InternalsVisibleTo Include="DemonRecipeDistributionIndex" />
+    <InternalsVisibleTo Include="DemonRecipeReconcileInput" />
+    <!-- No further grants for the sibling test assemblies (data-layer/e2e) that also configure
+         DemonRecipeCatalog - the Core/data separation guard above substring-scans this csproj and
+         cannot tell a comment from a reference, so their own bootstraps read the real committed
+         seed through the PUBLIC FusionRecipeSeedReader/Configure api instead, exactly like
+         Program.cs itself does, needing no internal access at all. -->
   </ItemGroup>
 </Project>

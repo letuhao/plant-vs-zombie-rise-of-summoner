@@ -6,6 +6,7 @@ using FusionRpg.Core.Effects;
 using FusionRpg.Core.Effects.Plugins;
 using FusionRpg.Core.Status;
 using FusionRpg.Injector.Fx;
+using FusionRpg.Injector.Host;
 using FusionRpg.Injector.Stats;
 
 namespace FusionRpg.Injector.Effects;
@@ -66,6 +67,12 @@ public static class EffectRuntime
                 ["delta"] = ev.Delta,
                 ["at"] = ev.At.ToString("o")
             });
+            // passive-tree-todo.md G6 (spec-gate-counters.md §2.1, §7 P2) -- the FIRST production
+            // caller `OnFreshApplication` has had since G1 shipped it. Wired beside `OnApplied` rather
+            // than folded into it: `OnApplied` is single-assignment with three OTHER assigning sites
+            // (StatusRuntime.cs's own doc comment), and `OnFreshApplication` exists specifically so
+            // this counter never has to touch that shared, already-fragile delegate.
+            _status.OnFreshApplication = GateCounterHost.StatusCounter.Handle;
             _status.OnApplied = inst =>
             {
                 try { VfxDirector.Play(Core.Vfx.StatusVfxCues.Cue(inst)); } catch { }
@@ -141,6 +148,11 @@ public static class EffectRuntime
     public static void NotifyMatchEnd(string? matchKey)
     {
         Ensure();
+        // passive-tree-todo.md G6 (spec-gate-counters.md §4.3) -- the "unconditionally at match end"
+        // half of the flush contract, alongside InjectorLoop's timer-driven half. Best-effort, same as
+        // every other periodic reporter this loop drives (PerfReporter.Flush): a lost window costs a
+        // little progress, never correctness.
+        try { GateCounterHost.Flush(RpgHost.Client); } catch { }
         _plugins!.NotifyRemoved(matchKey ?? "");
 
         // E35 (spec-match-modify.md §2.6): restore ONLY the E-* ids a live match.modify grant wrote
@@ -494,6 +506,12 @@ public static class EffectRuntime
         // parameter so Retribution/reflect actually fires — it shipped with the math but no
         // production caller ever passed this argument.
         bag.ActorResolve = InjectorCombatBridge.ResolveActor;
+        // passive-tree-todo.md G6 (spec-gate-counters.md §2.2, §7 P1) -- ElementMasteryCounter's real
+        // production caller. Fires for every DispatchInstant call this bag makes, direct hit AND DoT
+        // pulse alike (EffectBag.OnDamageApplied's own doc comment), correctly tagged by DamageOrigin
+        // in each case so a DoT tick never double-credits the one application status_applied already
+        // credited.
+        bag.OnDamageApplied = GateCounterHost.HandleDamageApplied;
     }
 
     // ---- Shield tick host — 100 ms grid, own guard (NOT TickDots' status guard) ----

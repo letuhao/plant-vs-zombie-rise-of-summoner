@@ -86,6 +86,12 @@ FusionRpg.Core.SimDefaults.Configure(
 FusionRpg.Core.Progression.ProgressionTuningHub.Configure(
     FusionRpg.Core.Progression.ProgressionTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "progression.v1.json"))));
+// passive-tree A1: server-only for now — no consumer reads PassiveTreeTuningHub.Tuning yet (B1+
+// build the first ones). Wired here ahead of need so every later task finds it already configured,
+// matching AptitudeTuningHub's own precedent.
+FusionRpg.Core.PassiveTree.State.PassiveTreeTuningHub.Configure(
+    FusionRpg.Core.PassiveTree.State.PassiveTreeTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "passive-tree.v1.json"))));
 // species-build T1.1: server-only, mirroring AptitudeTuningHub's own shape — the injector never
 // computes a species level, so it never loads this file.
 FusionRpg.Core.Progression.SpeciesProgressionTuningHub.Configure(
@@ -153,8 +159,8 @@ FusionRpg.Core.Power.PowerTuningHub.Configure(
         File.ReadAllText(Path.Combine(tuningDir, "power-scale.v2.json"))));
 FusionRpg.Core.Stats.Aptitudes.AptitudeTuningHub.Configure(
     FusionRpg.Core.Stats.Aptitudes.AptitudeTuningLoader.Parse(
-        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json.
-        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v5.json"))));
+        // class-system-todo.md P8.2/P8.3 (2026-08-27): v1 -> v2. Phase 0 six-resource coverage (2026-09-02): v2 -> v3, then v3 -> v4 (0.8: combat.heal.power generalised to resource.restore.{resource}) -- 32 edges added so every (family x resource) cell is fed, closing P7.2's poise gap. v2 stays on disk -- reverting is pointing this back at aptitudes.v2.json. passive-tree C6 (2026-09-06): v5 -> v6, pointEconomy gains skillPointsPerThetaMilliByScope (D34) -- v5 stays on disk.
+        File.ReadAllText(Path.Combine(tuningDir, "aptitudes.v6.json"))));
 // Server-side only (spec-action-catalog.md, T30): actions are battle-mode and the injector never
 // sees one, so the rung ladder has no reason to load there.
 FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
@@ -165,12 +171,16 @@ FusionRpg.Core.Actions.Rungs.RungPolicy.Configure(
 FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
     FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "action-timing.v1.json"))));
-// battle-tempo reaction-lane RL2 (2026-09-05): the counter's poise spend and riposte share --
-// UNMEASURED placeholders (RL3 sizes them against the Phase 2 sweep), loaded regardless so
-// ReactionCounter.TryCounter has a real, non-hardcoded number wherever a caller reaches it.
+// battle-tempo reaction-lane RL2/RL3 (2026-09-05/06): the counter's poise spend and riposte
+// share. v1 -> v2/v3 (RL3, 2026-09-06): sized against the landed Phase 2 sweep -- poiseSpend=50
+// matches AptitudeGuardEconomy.flatCommitCost, riposteShareCapMilli=400 matches its
+// riposteShareCapPermille, so a counter costs about what a guard costs from the same pool
+// (spec-reaction-lane.md's own "the spend range is this module's to size"). Loaded regardless
+// so ReactionCounter.TryCounter always has a real, non-hardcoded number wherever a caller
+// reaches it.
 FusionRpg.Core.Battle.Timeline.ReactionLanePolicy.Configure(
     FusionRpg.Core.Battle.Timeline.ReactionLaneTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(tuningDir, "reaction-lane.v1.json"))));
+        File.ReadAllText(Path.Combine(tuningDir, "reaction-lane.v3.json"))));
 // item-ideal.md, rarity-bands (module 7): no Hub needed today -- SeedRarityLadder consumes this
 // parse once, at boot, to populate rarity_budget rows. A future consumer (drop-volume/enhance-reroll)
 // reads those rows back through RpgStore.GetRarityBudget, not this parsed value directly.
@@ -523,13 +533,24 @@ store.LoadContentIntoRuntime();
 // first request would permanently poison WaveCatalog's static initializer (review I6).
 _ = FusionRpg.Core.Demons.DemonSpeciesCatalog.All;
 _ = FusionRpg.Core.Battle.WaveCatalog.All;
-// Recipe graph normally fails fast (not poison lazily). Almanac-band pair capacity can exhaust
-// on the current roster (e.g. jacksonzombie) — log and continue so debug/HUD live sessions still boot;
-// fusion endpoints that touch DemonRecipeCatalog.All will surface the same error on first use.
-try { _ = FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.All; }
-catch (Exception ex)
+// ds 18 fusion-recipe-runtime §3 step 4 — THE FLIP, 2026-09-06: recipes now load from the committed
+// seed fusion-recipe-reconcile owns writing, not a live BuildDeterministicOnly() recomputation
+// (T8.4's own transitional call). Today's committed file carries 695 real deterministic recipes
+// plus 14 real crossRungGapFill entries for every Almanac deficit — Checkpoint 8a's own propose
+// pass, performed 2026-09-06 by reasoning directly (this environment cannot reach a live LM
+// Studio endpoint), run through the unmodified reconcile()/vote/validate pipeline exactly like any
+// other proposal source. A missing/unparseable file fails loudly here rather than falling back to
+// the old live algorithm, matching spec-catalog-runtime.md's own binding rule for the sibling
+// catalog.
 {
-    Console.WriteLine("[demons] DemonRecipeCatalog.Build failed at boot — fusion recipes unavailable: " + ex.Message);
+    var fusionRecipesPath = Path.Combine(AppContext.BaseDirectory, "data", "generated", "demons", "_fusion-recipes.json");
+    if (!File.Exists(fusionRecipesPath))
+        throw new InvalidOperationException(
+            $"Fusion recipe seed not found at '{fusionRecipesPath}'. Run 'python tools/seedsmith/seedsmith/" +
+            "adapters/demons/fusion/reconcile.py' (add --deterministic-only for a model-free pass) against " +
+            "the data directory this host points at.");
+    var fusionRecipes = FusionRpg.Core.Demons.Fusion.FusionRecipeSeedReader.Parse(File.ReadAllText(fusionRecipesPath));
+    FusionRpg.Core.Demons.Fusion.DemonRecipeCatalog.Configure(fusionRecipes);
 }
 // Boot sweep: web matches logged but never ingested (crash window) re-resolve deterministically.
 var sweptMatches = app.Services.GetRequiredService<WebMatchService>().SweepUnresolved();
@@ -563,9 +584,12 @@ app.MapFusion();
 app.MapPatron();
 app.MapCommanders();
 app.MapContracts();
+app.MapDelve();
 app.MapWorld();
 app.MapWorldWarden();
 app.MapAptitudes();
+app.MapPassiveTree();
+app.MapGateCounters();
 app.MapSpeciesBuild();
 app.MapLoadout();
 app.MapAuraDerived();

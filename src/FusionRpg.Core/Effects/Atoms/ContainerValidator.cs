@@ -20,7 +20,7 @@ public static class ContainerValidator
     static ContainerValidator() => ContentRuleNamespaces.Register("rarity");
 
     static readonly Regex ContainerIdRe =
-        new(@"^(item|trait|skill|species-passive|patron|world-buff)\.[a-z0-9-]+$", RegexOptions.Compiled);
+        new(@"^(item|trait|skill|species-passive|patron|world-buff|enemy)\.[a-z0-9-]+$", RegexOptions.Compiled);
 
     /// <summary>
     /// Validate. <paramref name="lookupAtom"/> resolves an atom id against the loaded catalog —

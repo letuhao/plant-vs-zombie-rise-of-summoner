@@ -156,6 +156,20 @@ public sealed record BattleModeProfile
     /// (`maxBattleTick` multiplies them), so splitting their resolution would let a profile carry
     /// half a horizon. Same no-literal-default status.</summary>
     public int RoundDurationMs { get; init; }
+
+    /// <summary>
+    /// party-dungeon D2.9 — whether HP depleting to zero transitions an actor to
+    /// <see cref="Timeline.TurnState.Downed"/> (recoverable, `delve-attrition`'s own rule for what
+    /// happens next) rather than straight to a terminal/dead state. Declared per row, never a branch
+    /// on <see cref="AdvancePolicyKind"/> or <see cref="ProfileId"/> — the same discipline
+    /// <see cref="OrdersBySpeed"/>/<see cref="RequiresLiveInput"/> already established.
+    ///
+    /// <para><b>False on every shipped row.</b> `classic-round`/`galaxy-sync`/`hybrid-atb`/`siege`
+    /// battles have no "downed, not dead" concept — depletion ends the actor's part in the fight the
+    /// same way it always has, so this field defaults to today's exact behaviour everywhere except
+    /// the one profile that turns it on.</para>
+    /// </summary>
+    public bool DownedOnDeplete { get; init; }
 }
 
 /// <summary>
@@ -172,6 +186,7 @@ public static class BattleModeProfileCatalog
     public const string GalaxySyncId = "galaxy-sync";
     public const string HybridAtbId = "hybrid-atb";
     public const string SiegeId = "siege";
+    public const string DelveId = "delve";
 
     // T14/B29 — the STRUCTURE of each row is here; its MAGNITUDES (W, WReact, PassQuantum, and
     // hybrid-atb's maxPoints) come from data/tuning/battle.v{n}.json's timeline.profiles.
@@ -183,7 +198,7 @@ public static class BattleModeProfileCatalog
     // on directly (`Assert.Same(BattleModeProfileCatalog.ClassicRound, ...)`).
 
     static BattleTuning? _tuning;
-    static BattleModeProfile? _classicRound, _galaxySync, _hybridAtb, _siege;
+    static BattleModeProfile? _classicRound, _galaxySync, _hybridAtb, _siege, _delve;
 
     /// <summary>Called by <see cref="BattleTuningHub.Configure"/>, never directly by game code.
     /// Resets the cached rows so a reconfigure (CombatSim's `compare`, a scoped test) is honoured
@@ -191,7 +206,7 @@ public static class BattleModeProfileCatalog
     public static void Configure(BattleTuning tuning)
     {
         _tuning = tuning ?? throw new ArgumentNullException(nameof(tuning));
-        _classicRound = _galaxySync = _hybridAtb = _siege = null;
+        _classicRound = _galaxySync = _hybridAtb = _siege = _delve = null;
     }
 
     static BattleTuning Tuning => _tuning ?? throw new InvalidOperationException(
@@ -267,9 +282,27 @@ public static class BattleModeProfileCatalog
         ordersBySpeed: true,
         requiresLiveInput: true);
 
+    /// <summary>
+    /// party-dungeon D2.9 — a `hybrid-atb`-shaped row (`AdvancePolicy`, `Commitment`, the
+    /// ActionPoints economy and `ForecastExactness` all copied verbatim; `wReact` inherited through
+    /// the shared tuning row and inert here since the reaction lane's own gate is unrelated to this
+    /// task) with two differences: <see cref="WScope.PerSide"/> (a raid's own parties act
+    /// concurrently, `siege`'s own reasoning applies identically here) and
+    /// <see cref="BattleModeProfile.RequiresLiveInput"/>/<see cref="BattleModeProfile.DownedOnDeplete"/>
+    /// both `true` — a delve is played by a live party, and depletion downs rather than kills
+    /// (`delve-attrition`'s own rule for what happens next, this profile only flips the switch).
+    /// </summary>
+    public static BattleModeProfile Delve => _delve ??= Build(
+        DelveId, AdvancePolicyKind.FixedIncrement, WScope.PerSide, Commitment.EarlyBoundWithFallback, points: true,
+        forecast: ForecastExactness.SoftBounded,
+        ordersBySpeed: true,
+        requiresLiveInput: true,
+        downedOnDeplete: true);
+
     static BattleModeProfile Build(
         string id, AdvancePolicyKind advance, WScope wScope, Commitment commitment, bool points,
-        ForecastExactness forecast, bool ordersBySpeed = false, bool requiresLiveInput = false)
+        ForecastExactness forecast, bool ordersBySpeed = false, bool requiresLiveInput = false,
+        bool downedOnDeplete = false)
     {
         var t = Tuning.ProfileOf(id);
         if (points && t.MaxPoints is null)
@@ -310,6 +343,7 @@ public static class BattleModeProfileCatalog
             ForecastExactness = forecast,
             OrdersBySpeed = ordersBySpeed,
             RequiresLiveInput = requiresLiveInput,
+            DownedOnDeplete = downedOnDeplete,
             MaxRounds = maxRounds,
             RoundDurationMs = roundDurationMs
         };
@@ -330,6 +364,7 @@ public static class BattleModeProfileCatalog
         GalaxySyncId => GalaxySync,
         HybridAtbId => HybridAtb,
         SiegeId => Siege,
+        DelveId => Delve,
         _ => throw new ArgumentException($"Unknown battle mode profile id '{profileId}'.", nameof(profileId))
     };
 }

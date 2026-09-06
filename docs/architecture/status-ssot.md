@@ -224,12 +224,14 @@ Status **pulses** never bypass Funnel for HP.
 
 ---
 
-## 9. Locked status catalog (21 named ids)
+## 9. Locked status catalog (24 named ids)
 
-> **Growth queued 2026-09-05** (ADR: `decisions.md` row "Status SSOT + Resource model — nerve"): the party-dungeon
-> `delve-attrition` module adds `nerve.unsettled`, `nerve.shaken`, `nerve.afflicted` (Debuff, family `nerve`,
-> `Replace`, `ModifyStat`) — 21 → 24 when it lands. The stack counter lives in party state; the status is its
-> projection. Spec: `party-dungeon/spec-delve-attrition.md` §4.
+> **Landed 2026-09-06** (ADR: `decisions.md` row "Status SSOT + Resource model — nerve"; D2.19,
+> `StatusCatalogBootstrap.cs` `9.5 Nerve` block): the party-dungeon `delve-attrition` module added
+> `nerve.unsettled`, `nerve.shaken`, `nerve.afflicted` (Debuff, family `nerve`, `Replace`, `ModifyStat`)
+> — 21 → 24. The stack counter lives in party state (`DelveMemberState.NerveStacks`); the status is its
+> projection via `NerveLadder.StageFor` / `NervePolicy.Sync`. See §9.6. Spec:
+> `party-dungeon/spec-delve-attrition.md` §4.
 
 Magnitudes stay in grant overlay. This table is id + kind + host + notes only.
 
@@ -291,7 +293,7 @@ ResistanceEvaluator uses **`status.power.{category}`** / **`status.resist.{categ
 
 | statusId | Primary L2b category | Notes |
 |---|---|---|
-| `wither`, `poison`, `leech`, `bond`, `rally`, `expose`, `command`, `shatter` | `dot` | overlay DoT, counters, buffs, debuff tags |
+| `wither`, `poison`, `leech`, `bond`, `rally`, `expose`, `command`, `shatter`, `nerve.unsettled`, `nerve.shaken`, `nerve.afflicted` | `dot` | overlay DoT, counters, buffs, debuff tags; nerve stages (§9.6) despite none being literal damage over time — matching `expose`/`shatter`'s own precedent |
 | `butter`, `freeze`, `cold`, `hypno`, `ember`, `jala`, `kelp`, `charm_pulse` | `cc` | Unity CC + overlay CC pulse |
 | `blight`, `rot`, `spark`, `pact_mark`, `spore` | `contagion` | spread re-Apply |
 
@@ -300,6 +302,21 @@ ResistanceEvaluator uses **`status.power.{category}`** / **`status.resist.{categ
 **Immunity tags:** StatusDef `tags[]` match `status.immune.{tag}` / `status.immuneReduction.{tag}` — separate from resist category.
 
 Examples: [examples/status/](examples/status/).
+
+### 9.6 Nerve (party-dungeon `delve-attrition` D2.19)
+
+| Id | Kind | Host | Role |
+|---|---|---|---|
+| `nerve.unsettled` | Debuff ModifyStat | Actor (party demon) | Stage 0 of 3 — `nerveStage` registry order |
+| `nerve.shaken` | Debuff ModifyStat | Actor (party demon) | Stage 1 of 3 |
+| `nerve.afflicted` | Debuff ModifyStat | Actor (party demon) | Stage 2 of 3 — also forced whenever spirit is exhausted, regardless of stack count |
+
+Family `nerve`, stacking `Replace` — at most one of the three is ever live per demon, matching the
+single stack counter (`DelveMemberState.NerveStacks`) it projects. Never re-applied by `Refresh`: a
+stage change is a different `statusId` entirely (`Replace` removes the old id, adds the new one), so
+two different stages are never simultaneously live even transiently. Each stage's `stat` payload is a
+fixed container (`data/seed/dungeon/_containers/nerve.v1.json`), loaded once, never rolled — no seed,
+no rarity, no tier, unlike an item/skill/patron container.
 
 ---
 

@@ -15,6 +15,17 @@ export type RailLayerId =
   | "almanac"
   | "chronicle";
 
+/**
+ * The one runtime list of every stage id, so "how many stages exist" is never re-derived or
+ * hand-counted elsewhere (base-defense's `spec-siege-stage.md` §2 cost 1: "the count assertion
+ * becomes 5"). `battle` is declared here but has no stage behind it yet (`spec-battle-stage.md`'s
+ * own job to fill in); `RailUnlockInputs.currentStageId` below is typed from this array, not a
+ * second hand-written union, so the two can never drift apart.
+ */
+export const STAGE_IDS = ["sanctum", "world", "lawn", "battle", "siege"] as const;
+
+export type StageId = (typeof STAGE_IDS)[number];
+
 export type RailEntryState = "active" | "available" | "badged" | "locked";
 
 export type RailEntry = {
@@ -28,7 +39,7 @@ export type RailEntry = {
 };
 
 export type RailUnlockInputs = {
-  currentStageId: "sanctum" | "world" | "lawn" | "battle";
+  currentStageId: StageId;
   hasCompletedARun: boolean;
   /** T15: fusion is real demon fusion (spec-demon-fusion.md), not creature fusion — star merge
    * and promotion both need at least one demon in the roster (recipe fusion needs two, but the

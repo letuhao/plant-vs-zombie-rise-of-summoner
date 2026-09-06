@@ -529,9 +529,36 @@ public static class AtomKindRegistry
                 // executor existed would have re-created D6's exact state (binds accepted, nothing
                 // applied) inside the change meant to end it.
                 //
-                // SIM stays None — `SimEffectHost` still has no consumer, and flipping it on the
-                // strength of the other two would re-create the quarantine's cause.
-                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.None),
+                // SIM re-opened 2026-09-06 (mechanism-wiring E5, decisions.md "Derived-write lawn
+                // executor" owner decision 2) — the flip is the LAST step of that change, after the
+                // fold and the bind site both existed and were exercised, exactly the order the lawn
+                // cell itself moved in:
+                //   1. ActorDerivedLookup (ActorDerivedProfiles.cs) gained a contribution fold —
+                //      AddContribution/Resolve, folding bound stat.derived atoms onto the pinned base
+                //      via ActorDerivedSnapshot.OverlayAdd (E4).
+                //   2. SimEffectHost and FoundationHarness both wired it (ContributeDerived/
+                //      ResolveDerived, E4).
+                //   3. ActorDerivedLookup.TryBind constructs a real BindContext(RuntimeId.Sim) and
+                //      calls BindGate.Check, so a bind is genuinely attempted (E4).
+                //   4. THIS flip, decided from the built fold rather than up front: Partial, not Full.
+                //      OverlayAdd is a plain sum with no notion of DerivedModifierOp at all — it reads
+                //      only BoundDerivedAtom.Amount, never .Op (and BoundDerivedAtom carries no
+                //      Priority field either, so it could not implement Replace's priority-ordering
+                //      even if it tried). The_four_derived_ops_decide_Full_versus_Partial
+                //      (EffectOfflineKitTests.cs) proves, against the real DerivedComposer, that a
+                //      plain sum reproduces Flat (FlatSum: default + Σflat) and Increased (SumIncreased:
+                //      default + Σincreased) exactly, because both of those channel-compose kinds ARE
+                //      sums in the real composer too — but it diverges for Replace (FlatReplace: the
+                //      real composer picks the highest-priority Replace OUTRIGHT, discarding the
+                //      baseline and every other contribution; the fold sums all of them on top of the
+                //      baseline instead) and Flag (MaxPriorityFlag: the real composer takes the MAX of
+                //      the flag-ish contributions; the fold sums them). So a bound stat.derived atom
+                //      using Replace or Flag in Sim composes as if it had used Flat instead — silently
+                //      wrong, not rejected — which is exactly the "named side path" definitions.md §9
+                //      requires Partial to name: content authored for Sim on this kind should stick to
+                //      Flat/Increased until the fold is routed through the real DerivedComposer
+                //      (Full's own bar, per the same owner decision).
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.Partial),
                 AtomTriggers.None,
                 PowerCategory.Offense | PowerCategory.Survivability | PowerCategory.Control,
                 "No opcode — direct derived-channel mods. Derived ops are Flat|Increased|Replace|Flag; " +

@@ -145,8 +145,10 @@ public static class DelveGraphRoll
                 steps.Add((row, col, nextCol));
                 AddChild((row, col), (row + 1, nextCol));
 
+                // Register the node's EXISTENCE unconditionally -- a generic row's kind is null
+                // until step 5 draws it, but the room must exist now so a lane can target it.
                 var kindHere = row + 1 == cacheRow ? "cache" : row + 1 == n - 1 ? "rest" : null;
-                if (kindHere != null) nodeKind.TryAdd((row + 1, nextCol), kindHere);
+                nodeKind.TryAdd((row + 1, nextCol), kindHere);
                 sectorIds.Add(DelveStreams.SectorId(row + 1, nextCol));
                 col = nextCol;
             }
@@ -167,6 +169,7 @@ public static class DelveGraphRoll
             throw new DelveGraphRollRejection($"Only {hangPoints.Count} hang points for {tuning.GraphMinDeadEnds} required dead ends.");
 
         var spurLanes = new List<(string From, string To)>();
+        var spurPositions = new List<(int Row, int Col)>(); // the spur ROOMS themselves -- secret attach points read this, never usedHangPoints (that holds the PARENT, a different room)
         var usedHangPoints = new HashSet<(int Row, int Col)>();
         var nextExtraCol = c; // dead-end spurs and secrets both live at col >= C, in disjoint bands
         for (var i = 0; i < tuning.GraphMinDeadEnds; i++)
@@ -177,8 +180,13 @@ public static class DelveGraphRoll
             usedHangPoints.Add(hang);
 
             var spur = (Row: hang.Row + 1, Col: nextExtraCol++);
-            nodeKind[spur] = null; // decided by step 5 below, like any other unassigned node
+            // A spur can coincidentally hang at the cache row (hang.Row in 0..N-3 can put spur.Row
+            // on the same row cacheRow lands on) -- it then shares that row's fixed kind exactly
+            // like a normal walk node would, rather than being independently drawn (its row can
+            // never be 0 or N-1, since spur.Row >= 1 and <= N-2).
+            nodeKind[spur] = spur.Row == cacheRow ? "cache" : null;
             AddChild(hang, spur);
+            spurPositions.Add(spur);
             spurLanes.Add((DelveStreams.SectorId(hang.Row, hang.Col), DelveStreams.SectorId(spur.Row, spur.Col)));
         }
 
@@ -247,7 +255,10 @@ public static class DelveGraphRoll
         // ---- Step 7: gates (stream "dungeon:gate:{r}:{c}" per candidate lane, rows 1..N-3) -----
         var gateKeyByLane = new Dictionary<string, string>(StringComparer.Ordinal);
         var keyForLaneByRoom = new Dictionary<(int Row, int Col), string>();
-        foreach (var (row, fromCol, toCol) in steps.Where(s => s.Row is >= 1 && s.ToCol >= 0).Where(s => s.Row <= n - 3))
+        // Explicit (row, fromCol) order, never HashSet enumeration order (§8): this loop's key-room
+        // claiming is stateful (keyForLaneByRoom), so which gate wins a contested key room must not
+        // depend on an incidental, unguaranteed iteration order.
+        foreach (var (row, fromCol, toCol) in steps.Where(s => s.Row is >= 1 && s.ToCol >= 0).Where(s => s.Row <= n - 3).OrderBy(s => s.Row).ThenBy(s => s.FromCol).ThenBy(s => s.ToCol))
         {
             var laneId = DelveStreams.LaneId(DelveStreams.SectorId(row, fromCol), DelveStreams.SectorId(row + 1, toCol));
             var gateRng = SeededRng.DeriveStream(seed, DelveStreams.Gate(row, fromCol));
@@ -256,7 +267,9 @@ public static class DelveGraphRoll
             var stepsWithoutThisLane = steps.Where(s => s != (row, fromCol, toCol));
             var reachableWithoutGate = ReachableFrom(allNodes.Where(x => x.Row == 0), stepsWithoutThisLane);
             var keyCandidates = allNodes
-                .Where(rc => nodeKind[rc] is "cache" or "elite" && rc.Row < row && reachableWithoutGate.Contains(DelveStreams.SectorId(rc.Row, rc.Col)))
+                .Where(rc => nodeKind[rc] is "cache" or "elite" && rc.Row < row
+                    && !keyForLaneByRoom.ContainsKey(rc) // never double-book a room as two gates' key (first gate to claim it keeps it)
+                    && reachableWithoutGate.Contains(DelveStreams.SectorId(rc.Row, rc.Col)))
                 .OrderBy(rc => rc.Row).ThenBy(rc => rc.Col)
                 .ToList();
             if (keyCandidates.Count == 0) continue; // a placement rule, not a fallback (§2 step 7)
@@ -286,7 +299,7 @@ public static class DelveGraphRoll
         var appearRng = SeededRng.DeriveStream(seed, DelveStreams.Secret(0, 0));
         if (appearRng.NextPerMille() < tuning.GraphSecretAppearMilli)
         {
-            var attachPoints = usedHangPoints.Select(h => (Row: h.Row + 1, Col: h.Col))
+            var attachPoints = spurPositions
                 .Concat(nodeKind.Where(kv => kv.Value == "rest").Select(kv => kv.Key))
                 .Distinct()
                 .OrderBy(a => a.Row).ThenBy(a => a.Col)
@@ -300,7 +313,13 @@ public static class DelveGraphRoll
                 var secretRng = SeededRng.DeriveStream(seed, streamName);
                 if (secretRng.NextPerMille() >= secretDensityMilli) continue;
 
-                var eligible = RoomKindCatalog.All.Where(kd => kd.SecretEligible).ToList();
+                // Same [earliest, latest] row window as step 5's regular draw (rule 9 applies to
+                // every room regardless of how it entered the graph) -- an attach row with no
+                // eligible kind in its window places no secret here rather than violating the ban.
+                var eligible = RoomKindCatalog.All.Where(kd => kd.SecretEligible
+                    && attach.Row >= checked(tuning.Nodes[kd.RoomKindId].EarliestRowMilli * n / 1000)
+                    && attach.Row <= checked(tuning.Nodes[kd.RoomKindId].LatestRowMilli * n / 1000)).ToList();
+                if (eligible.Count == 0) continue;
                 var options = eligible.Select(kd => new WeightedOption<string>(kd.RoomKindId, checked((int)tuning.Nodes[kd.RoomKindId].WeightMilli))).ToList();
                 var rollSeed = unchecked((long)secretRng.NextULong());
                 var kind = WeightedChoice.Pick(options, rollSeed, streamName);

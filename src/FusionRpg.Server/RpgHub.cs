@@ -1,4 +1,3 @@
-using System.Globalization;
 using FusionRpg.Contracts;
 using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Effects;
@@ -105,13 +104,10 @@ public sealed class RpgHub : Hub
             // OwnerKind.UniqueActor(instanceId), the same scope ResolveBindings already resolves in
             // Data.Tests. GrantedDerivedAtomReader (the injector's read side) is already
             // scope-generic, so no Injector change is needed for this half — verified in P1.5.
-            var owners = new List<OwnerScope>
-            {
-                new(OwnerKind.Player, playerId.ToString(CultureInfo.InvariantCulture)),
-            };
-            foreach (var specimen in _store.ListUniqueActors(playerId).Items)
-                if (string.Equals(specimen.Phase, UniqueActorPhases.ActiveBound, StringComparison.Ordinal))
-                    owners.Add(new OwnerScope(OwnerKind.UniqueActor, specimen.InstanceId));
+            // T6.1 (2026-09-06): the union itself now lives in AtomPushService.OwnersForPlayer, so
+            // the mid-session re-push UniqueActorService triggers on bind/unbind builds the identical
+            // list rather than a second, hand-rolled copy of this same loop.
+            var owners = AtomPushService.OwnersForPlayer(_store, playerId);
 
             // No seed at Hello: the lawn match key is born in the injector's board.start capture,
             // so the server has none here. The receiver derives the seed itself from that key with

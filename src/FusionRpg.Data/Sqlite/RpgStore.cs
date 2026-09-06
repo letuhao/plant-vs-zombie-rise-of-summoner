@@ -81,6 +81,16 @@ public sealed partial class RpgStore : IRpgDb
             var swept = SweepStaleActiveBoundUnlocked(db);
             if (swept > 0)
                 Console.WriteLine($"[unique] swept {swept} stale ActiveBound → Roster");
+
+            // D1 §10 M1 — copy any pre-cutover rpg_unique_equipment rows into rpg_item_assignment,
+            // which every equipment reader and writer now uses instead (M2). One-way and idempotent:
+            // a specimen+role that already carries an assignment is never overwritten, so this is a
+            // no-op on every boot after the first. Runs here, after EnsureHotSchema has created both
+            // tables and after the ActiveBound sweep, so a save written before 2026-09-06 keeps its
+            // equipment across the switch instead of silently reading empty.
+            var migrated = MigrateUniqueEquipmentToAssignmentsUnlocked(db);
+            if (migrated > 0)
+                Console.WriteLine($"[items] migrated {migrated} rpg_unique_equipment row(s) → rpg_item_assignment");
         }
     }
 
@@ -408,6 +418,17 @@ public sealed partial class RpgStore : IRpgDb
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_corr ON rpg_unique_actors(deploy_correlation_id);
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_ptr ON rpg_unique_actors(last_ptr);
             CREATE INDEX IF NOT EXISTS ix_rpg_unique_actors_match ON rpg_unique_actors(match_key);
+            -- party-dungeon D2.23 (spec-delve-attrition.md §1, verbatim SQL): cross-delve pool
+            -- persistence (attrition.persistAcrossDelves[], "hunger" today) and the Recovering
+            -- counter. Neither carries a *_utc column -- "recovery is counted, never timed" (§7).
+            CREATE TABLE IF NOT EXISTS rpg_unique_actor_pools (
+              instance_id TEXT NOT NULL, resource_id TEXT NOT NULL, stored INTEGER NOT NULL,
+              PRIMARY KEY (instance_id, resource_id)
+            );
+            CREATE TABLE IF NOT EXISTS rpg_unique_actor_recovery (
+              instance_id TEXT PRIMARY KEY, player_id INTEGER NOT NULL,
+              recovery_delves_left INTEGER NOT NULL, wounded_delve_id INTEGER NOT NULL, theta_run INTEGER NOT NULL
+            );
             CREATE TABLE IF NOT EXISTS rpg_unique_equipment (
               instance_id TEXT NOT NULL,
               slot TEXT NOT NULL,
@@ -608,6 +629,13 @@ public sealed partial class RpgStore : IRpgDb
         // match today; an interactive match with a NULL or partial trace is REFUSED by the sweep
         // rather than re-resolved, because re-resolving substitutes AI decisions for a player's.
         EnsureColumn(db, "rpg_web_match_log", "decisions_json", "TEXT");
+        // party-dungeon D2.15 (spec-delve-battle-profile.md §4b): which BattleModeProfile a match
+        // resolved under, so the boot sweep can re-resolve a delve fight with the SAME profile
+        // (`BattleModeProfileCatalog.Resolve(profileId)`) instead of guessing from `WaveId` the way
+        // every non-delve match already can (`WaveCatalog.Get(waveId).Profile`). NULL means "content
+        // did not record one" — every match before this column existed, and every non-delve match
+        // today, which resolves its profile from its wave the existing way.
+        EnsureColumn(db, "rpg_web_match_log", "profile_id", "TEXT");
         // World map (spec-world-model.md) — its DDL lives beside its store partial.
         EnsureWorldSchemaUnlocked(db);
         // Atom effect curves (spec-value-spec-and-curve.md, E2) — Core cannot hold SQL, so the
@@ -666,6 +694,24 @@ public sealed partial class RpgStore : IRpgDb
         // rpg_aptitude_allocation — class-system P6.2, spec-point-economy.md. Inputs only, one row
         // per (scope, scopeKey, aptitude) with a nonzero spend.
         EnsureAptitudeAllocationSchemaUnlocked(db);
+        // rpg_tree_node_state — passive-tree B5, spec-tree-state.md §1.1. Inputs only, one row per
+        // (scope, scopeKey, node) owned; soul_level = 0 is a real, persisted state.
+        EnsureTreeNodeStateSchemaUnlocked(db);
+        // rpg_tree_respec_count — passive-tree C10, spec-tree-state.md §5. The tree's OWN respec
+        // counter, never the species respec counter (C10's stated default).
+        EnsureTreeRespecSchemaUnlocked(db);
+        // rpg_tree_catalog_* — passive-tree C4, spec-tree-catalog.md §6. The boot-time importer's own
+        // tables: tree/node/atom rows, the revision counter, and the accumulated known-id set R5
+        // checks existing allocations against.
+        EnsureTreeCatalogSchemaUnlocked(db);
+        // rpg_gate_counter — passive-tree G2, spec-gate-counters.md §4.1. Raw, sparse, uncapped inputs
+        // for the two counter-backed gate quantities (status_applied, element_mastery) — never the
+        // derived index or equivalents.
+        EnsureGateCounterSchemaUnlocked(db);
+        // rpg_gate_counter_seed — passive-tree G5, spec-gate-counters.md §16 OQ1 / D43. The one-time
+        // seed stamp for an existing save — checked/written in the same transaction as the seeded
+        // rpg_gate_counter rows it accompanies.
+        EnsureGateCounterSeedSchemaUnlocked(db);
         // rpg_action + cost/scope/grant/species-basics (spec-action-model.md, A1).
         EnsureActionSchemaUnlocked(db);
         // item_granted_action — ssot-granted-actions.md §5.2, granted-actions (module 19). Must run
@@ -745,6 +791,12 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM pvz_activity_facts;", "DELETE FROM pvz_activity_rollups;",
                              "DELETE FROM pvz_activity_revisions;",
                              "DELETE FROM rpg_xp_ledger;", "DELETE FROM rpg_actor_progression;",
+                             // ⛔ rpg_item_assignment was MISSING here until 2026-09-06 — found while
+                             // landing D1 §10 M1/M2. It is module 4's durable equip record and, since
+                             // M2, the SSOT this same list already clears the legacy half of; leaving
+                             // it behind is the identical orphan bug the W21 world rows and the delve
+                             // rows below both carry a comment about. Ahead of rpg_unique_actors.
+                             "DELETE FROM rpg_item_assignment;",
                              "DELETE FROM rpg_unique_equipment;", "DELETE FROM rpg_unique_stat_mods;",
                              "DELETE FROM rpg_demon_profiles;", "DELETE FROM rpg_demon_codex;",
                              "DELETE FROM rpg_soul_ledger;", "DELETE FROM rpg_soul_balances;",
@@ -758,6 +810,15 @@ public sealed partial class RpgStore : IRpgDb
                              "DELETE FROM rpg_demon_contracts;", "DELETE FROM rpg_contract_state;",
                              "DELETE FROM rpg_unique_actors;",
                              "DELETE FROM rpg_aptitude_allocation;",
+                             "DELETE FROM rpg_tree_node_state;",
+                             "DELETE FROM rpg_tree_respec_count;",
+                             "DELETE FROM rpg_tree_catalog_atom;",
+                             "DELETE FROM rpg_tree_catalog_node;",
+                             "DELETE FROM rpg_tree_catalog_tree;",
+                             "DELETE FROM rpg_tree_catalog_known_node_id;",
+                             "UPDATE rpg_tree_catalog_meta SET revision = 0 WHERE id = 1;",
+                             "DELETE FROM rpg_gate_counter;",
+                             "DELETE FROM rpg_gate_counter_seed;",
                              "DELETE FROM rpg_species_respec;",
                              "DELETE FROM rpg_zomboss_state;", "DELETE FROM rpg_zomboss_pattern_log;",
                              "DELETE FROM archive_catalog;",

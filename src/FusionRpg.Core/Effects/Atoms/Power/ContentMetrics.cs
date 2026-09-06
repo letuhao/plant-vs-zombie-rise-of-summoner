@@ -26,11 +26,20 @@ public sealed record ContainerFillRate(
 /// mirroring `ContentValidation.Lint`'s own shape exactly (explicit lists in, a report out) — the
 /// SAME reason that module stays testable without a database applies here.
 ///
-/// <para><b>Deliberately does not "register with declared targets."</b> A target (how many affixes
-/// SHOULD exist per family, what fill rate is acceptable) is a balance judgement this module cannot
-/// make for itself — the same class of decision T6.2's own curve-input boundary and T4.8's own
-/// `OwnerKind` boundary already named this session. This computes the real numbers; comparing them
-/// against a target file is a follow-on task once someone with balance authority sets one.</para>
+/// <para><b>"Register with declared targets" (2026-09-06):</b> a RICHER numeric target — how many
+/// affixes SHOULD exist per family, what fill rate is "healthy" beyond merely meeting its own
+/// budget — is still a balance judgement this module cannot make for itself, the same class of
+/// decision T6.2's own curve-input boundary and T4.8's own `OwnerKind` boundary already named this
+/// session. But a NARROWER floor needs no balance authority at all — it falls straight out of the
+/// two shapes above: a family with atoms but zero affixes referencing it is unreachable content,
+/// full stop (<see cref="FamilyCoverage.AffixCount"/> `== 0`), and a container that cannot fill its
+/// own declared roll budget is starved regardless of what "healthy" means (<see
+/// cref="ContainerFillRate.MeetsBudget"/> `== false`). <see cref="AffixMetricsGateEvaluator"/> below
+/// registers exactly that floor against <c>data/tuning/affix-metrics.v1.json</c>, shipped with both
+/// gates `false` (measure-only) — matching seedsmith's own established "new metrics are measure-only
+/// until calibrated" rule for its W1 registry — so promoting either gate to `true` is the real,
+/// separate balance decision, deferred exactly like every other one this session named rather than
+/// invented.</para>
 /// </summary>
 public static class ContentMetrics
 {
@@ -105,4 +114,58 @@ public static class ContentMetrics
 
         return rows.OrderBy(r => r.ContainerId, StringComparer.Ordinal).ToList();
     }
+}
+
+/// <summary>The two structural gates <see cref="AffixMetricsGateEvaluator"/> knows about, loaded from
+/// <c>data/tuning/affix-metrics.v{n}.json</c>. `false` means measure-only: the finding is still
+/// reported, it just never fails a `--gate` run.</summary>
+public sealed record AffixMetricsTargets(bool FamilyCoverageGates, bool ContainerFillRateGates)
+{
+    /// <summary>The shipped v1 default — both gates off, per this file's own class doc.</summary>
+    public static readonly AffixMetricsTargets MeasureOnly = new(false, false);
+}
+
+/// <summary>One structural finding: an unreachable family or a starved pool, told whether ITS OWN
+/// gate is armed today.</summary>
+public sealed record AffixMetricsFinding(string Kind, string Id, string Detail, bool Gates);
+
+/// <summary>
+/// `affix-metrics`'s own "register with declared targets" half (see the class doc above for why the
+/// two checks here are structural floors, not invented balance numbers). Pure — takes the reports
+/// <see cref="ContentMetrics.FamilyCoverageOf"/>/<see cref="ContentMetrics.ContainerFillRatesOf"/>
+/// already computed, never re-derives them, mirroring every other "measure, then gate" split in this
+/// program (`seedsmith`'s own metric registry, `demons metrics --gate`).
+/// </summary>
+public static class AffixMetricsGateEvaluator
+{
+    public static IReadOnlyList<AffixMetricsFinding> Evaluate(
+        IReadOnlyList<FamilyCoverage> familyCoverage,
+        IReadOnlyList<ContainerFillRate> fillRates,
+        AffixMetricsTargets targets)
+    {
+        var findings = new List<AffixMetricsFinding>();
+
+        foreach (var f in familyCoverage)
+            if (f.AffixCount == 0)
+                findings.Add(new AffixMetricsFinding(
+                    "Coverage/UnreachableFamily", f.FamilyId,
+                    $"{f.AtomCount} atom(s) in family '{f.FamilyId}', zero affixes reference it",
+                    targets.FamilyCoverageGates));
+
+        foreach (var r in fillRates)
+            if (!r.MeetsBudget)
+                findings.Add(new AffixMetricsFinding(
+                    "Distribution/StarvedPool", r.ContainerId,
+                    $"prefix {r.PrefixEligibleAffixes}/{r.PrefixRollsNeeded} eligible, " +
+                    $"suffix {r.SuffixEligibleAffixes}/{r.SuffixRollsNeeded} eligible",
+                    targets.ContainerFillRateGates));
+
+        return findings;
+    }
+
+    /// <summary>True only when a finding whose OWN gate is armed exists — the exact `--gate`
+    /// semantics `demons metrics --gate` already established (filter to `gates=True`, not "any
+    /// finding at all").</summary>
+    public static bool AnyGatingFinding(IReadOnlyList<AffixMetricsFinding> findings) =>
+        findings.Any(f => f.Gates);
 }

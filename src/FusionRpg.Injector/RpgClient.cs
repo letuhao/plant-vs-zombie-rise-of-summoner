@@ -554,6 +554,28 @@ public sealed class RpgClient
         }
     }
 
+    /// <summary>
+    /// passive-tree-todo.md G6 (spec-gate-counters.md §4.3) — ship one batched gate-counter flush.
+    /// Best-effort, matching <see cref="PostPerfAsync"/> exactly: a lost window costs a little
+    /// progress, never correctness (§4.3), so a failed POST here is swallowed rather than retried or
+    /// requeued — the accumulator has already cleared its own copy by the time this call is made
+    /// (<c>GateCounterAccumulator.DrainAndClear</c>'s contract), and the next window's credits are
+    /// unaffected either way.
+    /// </summary>
+    public async Task PostGateCounterCreditAsync(object body)
+    {
+        try
+        {
+            var json = JsonSerializer.Serialize(body, Json);
+            using var content = new StringContent(json, Encoding.UTF8, "application/json");
+            await Http().PostAsync(_base + "/api/gate-counters/credit", content).ConfigureAwait(false);
+        }
+        catch
+        {
+            /* gate-counter credit is background progress, never allowed to fail loudly (§4.3) */
+        }
+    }
+
     private async Task SendBatch(List<EventEnvelope> batch)
     {
         try

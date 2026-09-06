@@ -209,4 +209,25 @@ public class DamageApplyPipelineFunnelTests
 
         Assert.Equal(ApplyVia(packetEntry: true), ApplyVia(packetEntry: false));
     }
+
+    [Fact] // "the origin defaults, so every existing call site is zero lines changed" -- ApplyPacketToFunnel's
+    // half of P1 (spec-gate-counters.md §7): only DamageApplyPipeline.Apply got the origin parameter
+    // originally; ApplyPacketToFunnel (the dispatcher hot path CombatDamageDispatcher.cs calls) had none
+    // at all, so the live-lawn/overlay pulse path had no way to ever signal DamageOrigin.StatusPulse.
+    // Closed 2026-09-06 (found while verifying G3), additively, matching the exact P1 shape.
+    public void ApplyPacketToFunnel_origin_defaults_to_DirectHit_and_accepts_StatusPulse_explicitly()
+    {
+        var (h, _) = FunnelHost();
+        // The exact pre-existing call shape (no origin argument at all) still compiles and behaves
+        // identically -- proof this is an additive parameter, not a breaking signature change.
+        var result = DamageApplyPipeline.ApplyPacketToFunnel(
+            new DamagePacket { PluginId = "test" }, "z1", -10, 1, null, h.Funnel, null);
+        Assert.Equal(DamageApplyOutcome.Applied, result.Outcome);
+
+        var (h2, _) = FunnelHost();
+        var withOrigin = DamageApplyPipeline.ApplyPacketToFunnel(
+            new DamagePacket { PluginId = "test" }, "z1", -10, 1, null, h2.Funnel, null,
+            origin: DamageOrigin.StatusPulse);
+        Assert.Equal(DamageApplyOutcome.Applied, withOrigin.Outcome);
+    }
 }

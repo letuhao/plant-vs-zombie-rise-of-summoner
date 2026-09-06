@@ -110,13 +110,18 @@ public class EquipRuntimeTests : IDisposable
     }
 
     [Fact]
-    public void Sim_runtime_stays_None_and_the_spec_says_why()
+    public void Sim_runtime_opens_partially_and_the_spec_says_why()
     {
-        // SimEffectHost has no consumer; flipping it on would recreate D6's original cause (a bind
-        // accepted and then doing nothing forever). Item balance therefore cannot be simulated in
-        // CombatSim until stat.derived gets a real Sim consumer -- a deliberate gap, asserted not assumed.
+        // mechanism-wiring E5 (2026-09-06): SimEffectHost gained a real consumer -- ActorDerivedLookup's
+        // contribution fold, reached via SimEffectHost/FoundationHarness.ContributeDerived. `Partial`,
+        // not `Full`: the fold is a plain sum (ActorDerivedSnapshot.OverlayAdd) that honours
+        // Flat/Increased and not Replace/Flag (EffectOfflineKitTests.
+        // The_four_derived_ops_decide_Full_versus_Partial). `tools/CombatSim` (which drives
+        // FoundationHarness, not this class) can therefore simulate an item's Flat/Increased channels
+        // today; a Replace/Flag-authored item still composes wrong there until the fold routes through
+        // the real DerivedComposer. Renamed from "..._stays_None_...", which is no longer true.
         var kind = AtomKindRegistry.Get("stat.derived")!;
-        Assert.Equal(RuntimeState.None, kind.SupportIn(RuntimeId.Sim));
+        Assert.Equal(RuntimeState.Partial, kind.SupportIn(RuntimeId.Sim));
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Battle));
         Assert.Equal(RuntimeState.Full, kind.SupportIn(RuntimeId.Lawn));
     }

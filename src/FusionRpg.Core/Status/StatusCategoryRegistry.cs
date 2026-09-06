@@ -25,7 +25,13 @@ public static class StatusCategoryRegistry
         ["rot"] = StatusL2bCategory.Contagion,
         ["spark"] = StatusL2bCategory.Contagion,
         ["pact_mark"] = StatusL2bCategory.Contagion,
-        ["spore"] = StatusL2bCategory.Contagion
+        ["spore"] = StatusL2bCategory.Contagion,
+
+        // 9.5 Nerve (P3, delve-attrition D2.19) -- 21 -> 24, same Dot category expose/shatter/command
+        // already use despite none of the four being literal damage over time.
+        ["nerve.unsettled"] = StatusL2bCategory.Dot,
+        ["nerve.shaken"] = StatusL2bCategory.Dot,
+        ["nerve.afflicted"] = StatusL2bCategory.Dot,
     };
 
     public static IReadOnlyCollection<string> AllStatusIds => Map.Keys.ToList();

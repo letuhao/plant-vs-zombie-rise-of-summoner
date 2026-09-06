@@ -170,9 +170,100 @@ is fixed.
 
 ---
 
+## Decision 3 — `AtomPushInstaller` becoming multi-owner-aware (blocks the rest of T6.1)
+
+**Added 2026-09-06**, under the `seed-to-concrete` scope-expansion pass — Decision 1 above closed the
+`OwnerKind.UniqueActor` question, but T6.1's own todo entry records a SECOND, later, deeper wall found
+2026-09-03 while actually wiring the write path Decision 1 unblocked. That wall was never drafted here
+as its own decision; this section does that now, matching this file's own stated purpose.
+
+**Where:** `src/FusionRpg.Core/Effects/AtomPushInstaller.cs` (via `AtomPushReceiver`'s own static
+`_installer` field). `Install(payload)`'s own body is `_bindings = AtomPushCodec.DecodeBindings(payload)`
+— a **replacement**, not an accumulation. There is exactly one `Runner`, one `CatalogRevision`, one
+`_bindings` list **per injector process**, scoped to whichever owner pushed last.
+
+**Why it matters:** `mods-absorption`'s remaining half needs an equipped unique actor's atom-backed
+item bonus to reach `AtomRunner` alongside the player's own existing atom-backed content — both
+present on the actor at once. The one real precedent (`RpgHub.cs`'s `BuildApplyCommand`, for
+`OwnerKind.Player`) sends one `effects.grants.apply` at Hello. Sending a SECOND one for
+`OwnerScope(OwnerKind.UniqueActor, instanceId)` at deploy time — the mechanically obvious next
+step — does not add the equipped item's bonus alongside the player's own bindings. It **replaces**
+them: every other atom-backed effect already on the player goes dark the moment a unique actor
+deploys, for as long as it stays deployed. This is not a missing step; it is `AtomPushInstaller`'s own
+single-owner design (E19) doing exactly what it was built to do, applied to a case E19 never
+anticipated (two owners' bindings live on one actor at once).
+
+**Two real options**, matching this file's own established shape:
+
+1. **Make `AtomPushInstaller` multi-owner-aware.** Accumulate bindings keyed by owner scope instead of
+   replacing wholesale; union the trigger index across owners; decide what `Clear()` and a mid-match
+   re-push mean **per-owner** rather than globally (a player logging out should not clear a still-
+   deployed unique actor's own bindings, and vice versa). This is a real, reviewed change to E19's own
+   compiled-push contract — every existing owner in the system (today, only `OwnerKind.Player`) relies
+   on its current single-owner shape, so the change needs to be proven behaviour-preserving for that
+   case before a second owner is added, not just additive in principle.
+2. **Route equipped-item bonuses through a different mechanism entirely for `OwnerKind.UniqueActor`**,
+   closer to how `PatronSecondaryPlugin` grants a match-scoped marker rather than a full runner-binding
+   push (see Decision 2's own T6.2 finding on `patron.aura` for the sibling case of "a real mechanism
+   already exists for a narrower purpose, and reusing the WRONG one would be worse than building
+   something new"). Concretely: a smaller, dedicated grant path for equipped-item bonuses that never
+   goes through the shared compiled push at all, sidestepping the single-owner constraint by never
+   competing with the player's own runner-binding install. Costs a second effect-delivery mechanism
+   living alongside the first; avoids touching a system every other owner already depends on.
+
+**Recommendation:** option 1, conditionally — this program has consistently found "the generic
+mechanism, extended" cheaper in the long run than "a second bespoke mechanism next to the first" (the
+`ValueSpec` marker precedent in Decision 2 is itself an example of extending rather than duplicating).
+But option 1's blast radius is real (a live, shared, process-global runtime component every connected
+player already depends on for their own atom-backed content), so it should not ship without: (a) a
+behaviour-preserving proof for the existing single-owner (`OwnerKind.Player`) case specifically, the
+same discipline `catalog-runtime`'s own diff tests already established for a different shared catalog,
+and (b) an explicit answer for what `Clear()`/re-push mean per-owner, not just "it compiles." Option 2
+is the safer, smaller first step if the owner would rather not touch E19 at all right now — it is more
+work in total (a second delivery path to build and maintain) but zero risk to the one path every
+player already uses.
+
+**What changes if option 1 is approved:** `AtomPushInstaller`'s internal `_bindings`/`Runner`/
+`CatalogRevision` state becomes owner-keyed; `AtomPushReceiver.Install` takes an owner-scope argument
+instead of assuming "the" owner; every call site that currently reads the single global state (grepped,
+not assumed — this needs its own pass before coding) is updated to read its own owner's slice. The
+double-grant filter on `RebuildUniqueModsFromEquipmentUnlocked`'s `pairs` (already scoped and ready,
+per T6.1's own evidence) ships in the SAME change, not before it — shipping the filter alone would
+leave an atom-backed actor granting neither the legacy nor the atom-backed bonus, a regression named
+already in T6.1's own todo entry.
+
+**Not decided here** — recorded so the owner can approve a direction "in minutes," per this file's own
+stated purpose, not built ahead of that approval. Once decided, promote the choice into
+`docs/architecture/decisions.md` the same way Decision 1 was.
+
+---
+
+## Decision 2 postscript — the marker mechanism shipped, but T6.2 hit a further, decisive wall anyway
+
+**Added 2026-09-06.** Option 2's own marker mechanism (`ValueSpec.PowerLadder`/`ClampedLevelScale`)
+was built and tested exactly as scoped above — that part of this decision is closed, not just chosen.
+But actually attempting to fill `patron.json` with it surfaced a FOURTH, separate finding this file
+never anticipated: `patron.aura`'s container is a **locked, test-enforced, zero-atom marker** by
+design (`MigrationParityTests.The_patron_aura_marker_is_a_container_with_no_atoms`) — the aura's real
+combat math is a pure server-side read overlay (`PatronPolicy.Aura` → `PatronRuntimeState.MatchAura`),
+never resolved through `EffectBag`'s atom/action path at all, and no OTHER `IEffectGrantPlugin` in the
+codebase has ever been migrated onto a generic, data-driven, marker-only-grant container either —
+there is no precedent to build toward. Authoring atoms into `patron.json` using the new markers would
+break the locked test, never actually reach combat, and create a second, atom-authored copy of
+`AuraMilli`'s formula that silently drifts from the real one on the next rebalance — the exact
+"byte-identical or SIM is invalidated" failure this task's own acceptance line already warns against.
+**This is a fifth option, decisively worse than 1-3 above, not a variant of option 2**: T6.2's own
+acceptance line ("the plugin becomes a container") itself has no legal path to completion as written,
+independent of the marker mechanism's own success. Left as found (`patron.json` stays the committed
+empty-atoms stub, `PatronSecondaryPlugin.cs` stays in place) — per the locked test's own words, this is
+"the patron spec's own call," a genuine descope-or-redesign decision for `T6.2`'s OWN acceptance line,
+not a mechanism this file's Decision 2 can resolve by picking harder. See `tasks/seed-to-concrete-
+todo.md` T6.2's own fourth finding for the full trace.
+
 ## What this file does NOT cover
 
-`T3.8`'s remaining half (declared metric targets) and `T2.11` (the real classification run) are not
-architecture decisions — they are content/balance calls and an owner-run action respectively, already
-recorded with that framing in `tasks/seed-to-concrete-todo.md`. Nothing to propose here; they need a
-number and a terminal session, not a design choice.
+`T3.8`'s remaining half (declared metric targets — **closed 2026-09-06**, see its own todo entry) and
+`T2.11` (the real classification run) are not architecture decisions — they were a content/balance
+call and remain an owner-run action respectively, already recorded with that framing in
+`tasks/seed-to-concrete-todo.md`. Nothing to propose here for either; one needed a number (now shipped,
+measure-only), the other needs a terminal session, not a design choice.

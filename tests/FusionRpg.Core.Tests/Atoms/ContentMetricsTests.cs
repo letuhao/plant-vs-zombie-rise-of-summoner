@@ -7,9 +7,9 @@ namespace FusionRpg.Core.Tests.Atoms;
 /// <summary>
 /// T3.8 (`affix-metrics`) — the metrics half this module's own acceptance line names: family
 /// coverage and container fill rate. Pure, mirrors `ContentValidationTests.cs`'s own fixture style.
-/// "Register with declared targets" (the other half of the acceptance line) stays open — a target is
-/// a balance judgement, not something this module invents; see the class doc comment on
-/// `ContentMetrics` for why.
+/// "Register with declared targets" (the other half of the acceptance line) — see
+/// <see cref="AffixMetricsGateEvaluatorTests"/> below, and the `ContentMetrics` class doc comment for
+/// why the gate is a structural floor rather than an invented balance number.
 /// </summary>
 public class ContentMetricsTests
 {
@@ -175,5 +175,105 @@ public class ContentMetricsTests
 
         Assert.Equal(2, coverage.Count);
         Assert.Single(fillRates); // item.b has no pool budget, correctly excluded
+    }
+}
+
+/// <summary>
+/// `AffixMetricsGateEvaluator` — T3.8's "register with declared targets" half, closed 2026-09-06.
+/// Structural-floor findings only (see the `ContentMetrics` class doc for why no numeric balance
+/// target is invented here), gated by <c>data/tuning/affix-metrics.v1.json</c>'s own two booleans.
+/// </summary>
+public class AffixMetricsGateEvaluatorTests
+{
+    static FamilyCoverage Covered(string family, int atoms, int affixes) => new(family, atoms, affixes);
+    static ContainerFillRate Filled(string id, int prefixNeeded, int prefixHave, int suffixNeeded, int suffixHave) =>
+        new(id, prefixNeeded, prefixHave, suffixNeeded, suffixHave);
+
+    [Fact]
+    public void A_family_with_zero_affix_count_is_flagged_as_an_unreachable_family()
+    {
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            new[] { Covered("atom.orphan", atoms: 3, affixes: 0) },
+            Array.Empty<ContainerFillRate>(),
+            AffixMetricsTargets.MeasureOnly);
+
+        var f = Assert.Single(findings);
+        Assert.Equal("Coverage/UnreachableFamily", f.Kind);
+        Assert.Equal("atom.orphan", f.Id);
+    }
+
+    [Fact]
+    public void A_family_with_at_least_one_referencing_affix_is_never_flagged()
+    {
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            new[] { Covered("atom.reachable", atoms: 1, affixes: 1) },
+            Array.Empty<ContainerFillRate>(),
+            AffixMetricsTargets.MeasureOnly);
+
+        Assert.Empty(findings);
+    }
+
+    [Fact]
+    public void A_container_that_does_not_meet_its_own_budget_is_flagged_as_a_starved_pool()
+    {
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            Array.Empty<FamilyCoverage>(),
+            new[] { Filled("item.starved", prefixNeeded: 3, prefixHave: 1, suffixNeeded: 0, suffixHave: 0) },
+            AffixMetricsTargets.MeasureOnly);
+
+        var f = Assert.Single(findings);
+        Assert.Equal("Distribution/StarvedPool", f.Kind);
+        Assert.Equal("item.starved", f.Id);
+    }
+
+    [Fact]
+    public void A_container_that_meets_its_own_budget_is_never_flagged()
+    {
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            Array.Empty<FamilyCoverage>(),
+            new[] { Filled("item.stocked", prefixNeeded: 2, prefixHave: 2, suffixNeeded: 0, suffixHave: 0) },
+            AffixMetricsTargets.MeasureOnly);
+
+        Assert.Empty(findings);
+    }
+
+    [Fact]
+    public void MeasureOnly_targets_carry_findings_but_never_arm_the_gate()
+    {
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            new[] { Covered("atom.orphan", atoms: 1, affixes: 0) },
+            new[] { Filled("item.starved", prefixNeeded: 1, prefixHave: 0, suffixNeeded: 0, suffixHave: 0) },
+            AffixMetricsTargets.MeasureOnly);
+
+        Assert.Equal(2, findings.Count);
+        Assert.All(findings, f => Assert.False(f.Gates));
+        Assert.False(AffixMetricsGateEvaluator.AnyGatingFinding(findings));
+    }
+
+    [Fact]
+    public void Arming_family_coverage_only_gates_on_that_finding_and_not_the_pool_finding()
+    {
+        var armed = new AffixMetricsTargets(FamilyCoverageGates: true, ContainerFillRateGates: false);
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            new[] { Covered("atom.orphan", atoms: 1, affixes: 0) },
+            new[] { Filled("item.starved", prefixNeeded: 1, prefixHave: 0, suffixNeeded: 0, suffixHave: 0) },
+            armed);
+
+        Assert.True(AffixMetricsGateEvaluator.AnyGatingFinding(findings));
+        Assert.True(findings.Single(f => f.Kind == "Coverage/UnreachableFamily").Gates);
+        Assert.False(findings.Single(f => f.Kind == "Distribution/StarvedPool").Gates);
+    }
+
+    [Fact]
+    public void A_clean_catalog_with_both_gates_armed_still_produces_zero_findings()
+    {
+        var armed = new AffixMetricsTargets(FamilyCoverageGates: true, ContainerFillRateGates: true);
+        var findings = AffixMetricsGateEvaluator.Evaluate(
+            new[] { Covered("atom.reachable", atoms: 1, affixes: 1) },
+            new[] { Filled("item.stocked", prefixNeeded: 1, prefixHave: 1, suffixNeeded: 0, suffixHave: 0) },
+            armed);
+
+        Assert.Empty(findings);
+        Assert.False(AffixMetricsGateEvaluator.AnyGatingFinding(findings));
     }
 }

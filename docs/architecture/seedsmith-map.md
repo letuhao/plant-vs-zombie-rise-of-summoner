@@ -1,6 +1,13 @@
 # Seedsmith — capability map
 
-**Status (2026-09-01):** Map approved 2026-08-23. **Feature 1 (core, W1-W3) BUILT** — 395 tests green, `seed_graph` absorbed and deleted. **Feature 2 (demons, D1-D4) BUILT** — 84-species corpus emitted, families/motifs/themes generated from a real model run. **Feature 3 (generation runtime, G0-G4) SPECCED AND SEALED**, not built — see §3d.
+**Status (2026-09-06, corrected):** Map approved 2026-08-23. **Feature 1 (core, W1-W3) BUILT** —
+395 tests green, `seed_graph` absorbed and deleted. **Feature 2 (demons, D1-D4) BUILT** —
+84-species corpus emitted, families/motifs/themes generated from a real model run. **Feature 3
+(generation runtime, G0-G4) BUILT 2026-09-01** — see §3d; this header previously said "SPECCED AND
+SEALED, not built," which was stale by the time it was next read (2026-09-06): `tasks/seedsmith-plan.md`
+Part 5 shows CP-G0 through CP-G4 all reached with real evidence, and
+`data/seed/demons/commander-effect/all.json` (84 entries) is committed. Corrected here rather than
+left to mislead the next reader.
 
 A Python application that owns the health of every seed corpus in the repo: it validates what is
 there, measures what is missing or lopsided, and emits a **deterministically-planned** work order
@@ -292,12 +299,18 @@ to branch/retry/resume"* (workflow definition). That is what `workflow-runtime` 
 
 **Module specs** (written 2026-09-01, audited, **SEALED — approved by the owner 2026-09-01,
 authorized to build**; audit: [review/audit-generation-runtime-specs.md](seedsmith/review/audit-generation-runtime-specs.md),
-10 findings all applied, **zero open questions remain**). **Amended 2026-09-06:**
+10 findings all applied, **zero open questions remain**). **BUILT 2026-09-01** (see Part 5 of
+`tasks/seedsmith-plan.md`, CP-G0 through CP-G4). **Amended and built 2026-09-06:**
 `spec-commander-effect.md` gained a corpus-wide near-duplicate check on `doctrine` — the sealed
 version measured per-item quality only, with no distribution/diversity gate at corpus scale, despite
 its own §9 probe already reproducing the thesaurus-collision failure at single-demon scale (Jaccard
 mean 0.52 across 3 generations for one demon). Found while auditing whether every seedsmith
-generator, not only `adapter-items`/`tree-plan`, has a deterministic pre-generation coverage check.
+generator, not only `adapter-items`/`tree-plan`, has a deterministic pre-generation coverage check —
+and confirmed real: the already-committed 84-entry corpus had two near-duplicate doctrine pairs with
+nothing watching it. Closed by `KindSpec.dedup_fields` + `SemanticDedup`'s prose extension
+(`spec-analytics.md` §6.2b, `spec-adapter-demons.md` §2.7's amendment); 7 new tests, full suite
+1,777 passed / 1 pre-existing unrelated failure (`test_general_propose.py`, a hash-determinism issue
+in the actions pipeline, untouched by this change).
 [dependency-baseline](seedsmith/spec-dependency-baseline.md) ·
 [motif-prose-filter](seedsmith/spec-motif-prose-filter.md) ·
 [workflow-runtime](seedsmith/spec-workflow-runtime.md) ·

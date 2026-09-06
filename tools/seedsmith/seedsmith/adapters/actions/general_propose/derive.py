@@ -133,6 +133,7 @@ def sample_draft(brief: Mapping[str, Any], *, sample_index: int,
                  pairing_table: "Mapping[str, Sequence[str]] | None" = None,
                  family_glossary: "Mapping[str, str] | None" = None,
                  worked_example: "str | None" = None,
+                 usage_weights: "Mapping[str, int] | None" = None,
                  config: "LlmCallerConfig | None" = None) -> "tuple[dict, dict]":
     """The ONE function in this module that calls a model -- one of `SAMPLE_COUNT` samples for one
     brief. `max_heal=MAX_HEAL` is passed EXPLICITLY (acceptance #9). Returns `(out, soft)`; `soft`
@@ -144,9 +145,16 @@ def sample_draft(brief: Mapping[str, Any], *, sample_index: int,
     `worked_example` (SMOKE BATCH criterion-2 PROBE, 2026-09-05): threaded straight to
     `build_context`, optional and defaulted to `None` -- the SAME rendered text for every one of
     `SAMPLE_COUNT` calls this brief makes (a caller passes one already-rendered string computed
-    once per run, never per sample -- see `prompts.render_worked_example`)."""
+    once per run, never per sample -- see `prompts.render_worked_example`).
+
+    `usage_weights` (roster-balance FC3, 2026-09-06): threaded straight to `build_context`,
+    optional and defaulted to `None` -- see that function's own docstring. The SAME weight table
+    for every one of `SAMPLE_COUNT` calls this brief makes, computed once per round from FC1's real
+    usage report, never recomputed per sample (recomputing mid-round from partial results would
+    make sample order matter, which this program's own determinism discipline forbids)."""
     context = build_context(brief, sample_index=sample_index, pairing_table=pairing_table,
-                            family_glossary=family_glossary, worked_example=worked_example)
+                            family_glossary=family_glossary, worked_example=worked_example,
+                            usage_weights=usage_weights)
     brief_text = build_brief(context)
     out, soft = call_with_self_heal(
         dict(context), SYSTEM_PROMPT, lambda _items: brief_text, build_verify_fn(context),
@@ -233,6 +241,7 @@ def propose_general_action(brief: Mapping[str, Any], *, candidate_id: str,
                            pairing_table: "Mapping[str, Sequence[str]] | None" = None,
                            family_glossary: "Mapping[str, str] | None" = None,
                            worked_example: "str | None" = None,
+                           usage_weights: "Mapping[str, int] | None" = None,
                            config: "LlmCallerConfig | None" = None,
                            provenance: "Mapping[str, Any] | None" = None) -> Candidate:
     """The live, one-brief-in-one-candidate-out entry point (spec SS3: "Never carry state between
@@ -247,13 +256,18 @@ def propose_general_action(brief: Mapping[str, Any], *, candidate_id: str,
     `worked_example` (SMOKE BATCH criterion-2 PROBE, 2026-09-05): threaded straight to
     `sample_draft` for every one of the `SAMPLE_COUNT` samples -- the identical rendered text each
     time (spec: "the worked example itself does not need permutation"), optional, defaults to
-    `None`."""
+    `None`.
+
+    `usage_weights` (roster-balance FC3, 2026-09-06): threaded straight to `sample_draft` for every
+    one of the `SAMPLE_COUNT` samples -- the identical weight table each time, same reason as
+    `worked_example` above (recomputing mid-round would make sample order matter). Optional,
+    defaults to `None`."""
     drafts: "list[dict]" = []
     heal_notes: "list[dict]" = []
     for sample_index in range(SAMPLE_COUNT):
         draft, soft = sample_draft(brief, sample_index=sample_index, pairing_table=pairing_table,
                                    family_glossary=family_glossary, worked_example=worked_example,
-                                   config=config)
+                                   usage_weights=usage_weights, config=config)
         drafts.append(draft)
         heal_notes.append(soft)
 

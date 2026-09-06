@@ -1,29 +1,20 @@
-import { useEffect, useState } from "react";
 import { useAptitudes, usePlayers, useSaveAptitudes } from "@/lib/bus";
 import type { ActorView } from "@/contract/types";
+import { useAllocationDraft } from "@/hooks/useAllocationDraft";
 import { Banner, Button, EmptyState, Field, NumberInput, StatBar } from "@/ui";
 import { PendingNote } from "./shared";
 
 /**
  * actor-sheet program, progression-tab — level/XP (typed on ActorView, never rendered anywhere until
- * now) plus primary-stat distribution. The aptitude half is AptitudesPage.tsx's own draft/dirty/
- * budget/save logic, copied verbatim rather than reimplemented with different edge cases — two
- * allocation UIs with subtly different bugs would be worse than one component used from two places.
- * If this drifts, the fix is extracting a shared useAptitudeAllocation() hook, not maintaining two
- * copies by hand.
+ * now) plus primary-stat distribution. The aptitude half now shares `useAllocationDraft`
+ * (passive-tree-todo.md I2) with `AptitudesPage.tsx` rather than duplicating its draft/dirty/budget/
+ * save logic — the extraction this file's own comment named before this task landed.
  */
 export function ProgressionTab({ data }: { data: ActorView }) {
   const players = usePlayers();
   const playerId = players.data?.currentPlayerId ?? 0;
   const aptitudes = useAptitudes(playerId);
   const save = useSaveAptitudes();
-
-  const [draft, setDraft] = useState<Record<string, number> | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (aptitudes.data && draft === null) setDraft(aptitudes.data.shares);
-  }, [aptitudes.data, draft]);
 
   return (
     <div className="mt-4" data-testid="progression-tab">
@@ -42,19 +33,15 @@ export function ProgressionTab({ data }: { data: ActorView }) {
 
       <section className="mt-4" data-testid="progression-aptitudes">
         <p className="text-2xs font-bold uppercase tracking-wide text-muted">Primary stats — commander scope</p>
-        {aptitudes.isLoading || !aptitudes.data || draft === null ? (
+        {aptitudes.isLoading || !aptitudes.data ? (
           <EmptyState title="Loading aptitudes…" testId="progression-aptitudes-loading" />
         ) : (
           <ProgressionAptitudes
             playerId={playerId}
-            draft={draft}
-            setDraft={setDraft}
             budget={aptitudes.data.budget}
             theta={aptitudes.data.theta}
             serverShares={aptitudes.data.shares}
             save={save}
-            error={error}
-            setError={setError}
           />
         )}
       </section>
@@ -64,37 +51,27 @@ export function ProgressionTab({ data }: { data: ActorView }) {
 
 function ProgressionAptitudes({
   playerId,
-  draft,
-  setDraft,
   budget,
   theta,
   serverShares,
-  save,
-  error,
-  setError
+  save
 }: {
   playerId: number;
-  draft: Record<string, number>;
-  setDraft: (updater: (d: Record<string, number> | null) => Record<string, number>) => void;
   budget: number;
   theta: number;
   serverShares: Record<string, number>;
   save: ReturnType<typeof useSaveAptitudes>;
-  error: string | null;
-  setError: (e: string | null) => void;
 }) {
-  const spent = Object.values(draft).reduce((sum, v) => sum + (Number.isFinite(v) ? v : 0), 0);
-  const withinBudget = spent <= budget;
-  const dirty = JSON.stringify(draft) !== JSON.stringify(serverShares);
+  const allocation = useAllocationDraft({
+    serverValues: serverShares,
+    budget,
+    isSaving: save.isPending,
+    onSave: (draft) => save.mutateAsync({ playerId, shares: draft })
+  });
 
-  async function onSave() {
-    setError(null);
-    try {
-      await save.mutateAsync({ playerId, shares: draft });
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Save failed");
-    }
-  }
+  if (allocation.draft === null) return <EmptyState title="Loading aptitudes…" testId="progression-aptitudes-loading" />;
+
+  const { draft, spent, withinBudget, dirty, error } = allocation;
 
   return (
     <>
@@ -109,14 +86,14 @@ function ProgressionAptitudes({
               min={0}
               value={value}
               data-testid={`aptitude-input-${id}`}
-              onChange={(next) => setDraft((d) => ({ ...(d ?? {}), [id]: Math.max(0, Math.trunc(next)) }))}
+              onChange={(next) => allocation.setValue(id, next)}
             />
           </Field>
         ))}
       </div>
       <Button
         className="mt-3"
-        onClick={onSave}
+        onClick={allocation.save}
         disabled={!dirty || !withinBudget || save.isPending}
         title={!withinBudget ? `Over budget by ${spent - budget}` : !dirty ? "No changes to save" : undefined}
         data-testid="aptitudes-save"

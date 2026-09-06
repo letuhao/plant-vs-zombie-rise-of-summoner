@@ -14,11 +14,10 @@ import { sectorLabel } from "@/stages/world/labels";
 import { usePlayers } from "@/lib/bus";
 import { useWorldHeader, useWorldState } from "@/lib/bus/world";
 import { adaptWorldState, adaptWorldLegion } from "@/contract/adapt";
-import type { SectorView } from "@/contract/types";
 import { pendingWithReason } from "@/contract/pending";
 import firstLight from "@/stages/world/fixtures/first-light.json";
-import { fitToExtent, type Extent } from "./camera";
-import { WorldScene, GRID_X, GRID_Y } from "./render/WorldScene";
+import { WorldGameHost } from "@/stages/world/host/WorldGameHost";
+import { useWorldVerbs, type WorldVerb } from "@/stages/world/turn/worldVerbs";
 import { SectorInspector } from "./inspector/SectorInspector";
 import { CEDE_ORDER_AVAILABLE } from "./inspector/cedeCapability";
 import { QueuedOrders } from "./targeting/QueuedOrders";
@@ -27,36 +26,15 @@ import { TopStrip } from "./hud/TopStrip";
 import { TurnCluster } from "./turn/TurnCluster";
 import { UnresolvedCount } from "./turn/UnresolvedCount";
 import { PlaybackPanel } from "./playback/PlaybackPanel";
-
-/** Before any real world state has loaded — an empty, centred extent `fitToExtent` still resolves
- * sanely against, so the very first render has a valid `viewBox` rather than a `NaN` one. */
-const EMPTY_EXTENT: Extent = { minX: 0, minY: 0, maxX: 0, maxY: 0 };
-
-function extentOf(sectors: readonly SectorView[]): Extent {
-  if (sectors.length === 0) return EMPTY_EXTENT;
-  const xs = sectors.map((s) => s.layoutX * GRID_X);
-  const ys = sectors.map((s) => s.layoutY * GRID_Y);
-  return { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) };
-}
+import { worldBusEmit, type WorldIgnoreRect, type WorldSelectPayload } from "@/game/EventBus";
+import { LensPicker } from "./lenses/LensPicker";
+import { initialLensState, lensReducer } from "./lenses/lensState";
+import { useLensData } from "./lenses/useLensData";
 
 /**
- * The map stage (world-stage W33/W35). `StageHost` + the GG-11 mount guard + one `<svg>` whose
- * `viewBox` is the camera, now filled by `WorldScene` (the scene-composition wiring closed
- * 2026-09-04 — the gap W50/W57/W65/W71 each named). Falls back to the checked-in `first-light`
- * fixture with no live world, matching the old `#/world` page's own established convention, so the
- * stage is still worth opening against a server with nothing in it yet.
- *
- * **Never imports a `*Dto` type** (`contractGuard.ts` bans it for every `stages/` file) —
- * `adaptWorldState` (`contract/adapt.ts`) is the one place the raw wire shape is touched; this
- * module and `WorldScene` only ever see `SectorView`/`LaneView`/`SlotView`.
- *
- * The stage claims the dismissal gestures the layers above it will depend on (W35): it is a real
- * entry on the escape stack for its whole mounted lifetime, so `Esc` reaches it and dispatches
- * `select-sector: null` whenever nothing else is open — closing the live dead end where a selected
- * sector could never be deselected at all. Right-click on the map pane calls the exact same
- * `handleEscape()` the global `Esc` key already does — one gesture set, no second path, no
- * exceptions (§4.4) — so a band-2 layer open above the stage takes right-click too, never the
- * stage's own selection.
+ * World stage — Phaser map plane + React HUD/inspector (world-map-runtime).
+ * Falls back to first-light fixture when no live world.
+ * Does not import SVG WorldScene / camera / cameraGestures (R15).
  */
 export function WorldStage() {
   useStageMountGuard("world");
@@ -67,14 +45,31 @@ export function WorldStage() {
   const worldId = header.data?.worldId ?? null;
   const live = useWorldState(worldId);
 
+  const [lens, dispatchLens] = useReducer(lensReducer, initialLensState);
+  const lensData = useLensData(worldId, lens.active);
+
   const dto = live.data ?? (firstLight as Parameters<typeof adaptWorldState>[0]);
-  const world = useMemo(() => adaptWorldState(dto), [dto]);
+  const fixtureWorld = useMemo(
+    () => adaptWorldState(dto, { lifelinesRequested: lens.active === "supply" }),
+    [dto, lens.active]
+  );
+  /** Prefer lens-4 adapted fetch when it has resolved; otherwise fixture/plain adapt. */
+  const world = lensData.displayed ?? fixtureWorld;
   const playerFactionId = useMemo(
     () => dto.factions.find((f) => f.kind === "Player")?.factionId ?? null,
     [dto]
   );
 
-  const camera = useMemo(() => fitToExtent(extentOf(world.sectors), 1280, 720), [world.sectors]);
+  const phaserModel = useMemo(
+    () => ({ ...world, playerFactionId }),
+    [world, playerFactionId]
+  );
+
+  const [overlayEpoch, setOverlayEpoch] = useState(0);
+  useEffect(() => {
+    setOverlayEpoch((n) => n + 1);
+  }, [lens.active, lensData.displayed, lensData.isLensFourLoading]);
+
   const [ui, dispatch] = useReducer(worldUiReducer, initialWorldUi);
 
   useEffect(
@@ -82,17 +77,29 @@ export function WorldStage() {
     []
   );
 
+  /** Arrow pan when map owns input. W is not pan (world-stage arbitration). */
+  const panVerbs = useMemo((): WorldVerb[] => {
+    const step = 48;
+    const pan = (dx: number, dy: number) => {
+      const gen =
+        (typeof window !== "undefined" &&
+          (window as unknown as { __fusionRpgWorldGen?: number }).__fusionRpgWorldGen) ||
+        0;
+      if (!gen) return;
+      worldBusEmit("world:camera", { generation: gen, op: "pan", dx, dy });
+    };
+    return [
+      { key: "ArrowLeft", id: "world-pan-left", handler: () => pan(-step, 0) },
+      { key: "ArrowRight", id: "world-pan-right", handler: () => pan(step, 0) },
+      { key: "ArrowUp", id: "world-pan-up", handler: () => pan(0, -step) },
+      { key: "ArrowDown", id: "world-pan-down", handler: () => pan(0, step) }
+    ];
+  }, []);
+  useWorldVerbs(panVerbs);
+
   const selectedSector = world.sectors.find((s) => s.sectorId === ui.selectedSectorId) ?? null;
   const prospectedSectorIds: string[] = dto.prospectedSectorIds ?? [];
 
-  /**
-   * The targeting wiring (world-stage W71). `toGraph`/`dto.entities` touch the raw wire shape
-   * directly — the same already-sanctioned exception `dto.factions.find(...)` above already takes,
-   * for exactly the same reason: nothing has adapted a legion's route-relevant fields (`atSectorId`/
-   * `onLaneId`/`onLaneTowardSectorId`) into the view contract yet, and `routeForLegion` needs them
-   * as they actually are on the wire, not summarised. `WorldScene` itself never sees any of this —
-   * only the already-adapted `AdaptedWorldState` and the plain sector-id/hop-count pairs below.
-   */
   const graph = useMemo(() => toGraph(dto), [dto]);
   const loamSummary = useMemo(() => summarizeLoam(graph.nodes.map((n) => n.data)), [graph]);
   const myLegions = useMemo(
@@ -115,19 +122,29 @@ export function WorldStage() {
     return Array.from(reachableFromLegion(graph, selectedLegion), ([sectorId, hops]) => ({ sectorId, hops }));
   }, [graph, selectedLegion]);
 
-  /** The one sector a click was just refused against, and why — cleared the moment the targeted
-   * legion itself changes (a different legion, or none), so a stale refusal never survives past the
-   * selection it was about. */
   const [blockedTarget, setBlockedTarget] = useState<{ sectorId: string; reason: string } | null>(null);
   useEffect(() => setBlockedTarget(null), [ui.selectedEntityId]);
 
-  /**
-   * A sector click means two different things depending on whether a legion is under targeting:
-   * with nothing selected it is the plain W57/W65 sector-select gesture, unchanged; with a legion
-   * selected it is a march decision — queue the order if a route exists, or show why not,
-   * **never** both, and never falling through to also opening the inspector (which would cover the
-   * very sectors targeting mode needs clickable — the real overlap W65's own notes already found).
-   */
+  const ignoreRects = useMemo((): WorldIgnoreRect[] => {
+    // Phaser pointer coords are relative to the map canvas (already beside the shell rail).
+    // Do not re-subtract the 92px rail — that wrongly ate the left of the map (homeworld).
+    const rects: WorldIgnoreRect[] = [];
+    if (selectedSector) {
+      // DockShell is fixed at left-[92px] w-[380px]; canvas sits under the stage so the dock
+      // covers roughly the left 380px of the canvas.
+      rects.push({ left: 0, top: 0, width: 380, height: 10000 });
+    }
+    return rects;
+  }, [selectedSector]);
+
+  const targeting = useMemo(
+    () =>
+      reachableSectors || blockedTarget || ui.pending.length > 0
+        ? { reachable: reachableSectors, blocked: blockedTarget, pending: ui.pending }
+        : null,
+    [reachableSectors, blockedTarget, ui.pending]
+  );
+
   function handleSelectSector(sectorId: string) {
     if (selectedLegion) {
       const path = routeForLegion(graph, selectedLegion, sectorId);
@@ -150,12 +167,22 @@ export function WorldStage() {
     dispatch({ type: "select-sector", sectorId });
   }
 
-  /** A force's own marker toggles selection the same way W65 already made sector re-selection work
-   * — clicking the same one again clears it, clicking a different one simply switches. Closing
-   * whatever sector inspector was open keeps the two selection modes from fighting over the map. */
-  function handleSelectEntity(entityId: string) {
-    dispatch({ type: "select-entity", entityId: ui.selectedEntityId === entityId ? null : entityId });
-    if (ui.selectedSectorId != null) dispatch({ type: "select-sector", sectorId: null });
+  function handleWorldSelect(payload: WorldSelectPayload) {
+    if (payload.kind === "empty") {
+      handleEscape();
+      return;
+    }
+    if (payload.kind === "sector" && payload.id) {
+      handleSelectSector(payload.id);
+      return;
+    }
+    if (payload.kind === "force" && payload.id) {
+      dispatch({
+        type: "select-entity",
+        entityId: ui.selectedEntityId === payload.id ? null : payload.id
+      });
+      if (ui.selectedSectorId != null) dispatch({ type: "select-sector", sectorId: null });
+    }
   }
 
   return (
@@ -193,35 +220,49 @@ export function WorldStage() {
           ) : null
         }
         bottomLeft={
-          <QueuedOrders orders={ui.pending} onTakeBack={(commandId) => dispatch({ type: "unqueue", commandId })} />
+          <div className="pointer-events-auto flex flex-col items-start gap-2">
+            <button
+              type="button"
+              data-testid="world-map-fit"
+              className="rounded border border-border bg-panel px-2 py-1 text-sm text-ink"
+              onClick={() => {
+                const gen =
+                  (typeof window !== "undefined" &&
+                    (window as unknown as { __fusionRpgWorldGen?: number }).__fusionRpgWorldGen) ||
+                  0;
+                if (gen) {
+                  worldBusEmit("world:camera", {
+                    generation: gen,
+                    op: "fit",
+                    padLeft: 100,
+                    padRight: 40,
+                    padTop: 56,
+                    padBottom: 80
+                  });
+                }
+              }}
+            >
+              Fit
+            </button>
+            <LensPicker
+              active={lens.active}
+              onSelect={(id) => dispatchLens({ type: "select", id })}
+              isLensFourLoading={lensData.isLensFourLoading}
+            />
+            <QueuedOrders orders={ui.pending} onTakeBack={(commandId) => dispatch({ type: "unqueue", commandId })} />
+          </div>
         }
         rightEdge={worldId ? <PlaybackPanel worldId={worldId} turn={dto.currentTurn - 1} /> : null}
       >
-        <svg
-          data-testid="world-stage-svg"
-          data-selected-sector={ui.selectedSectorId ?? ""}
-          viewBox={`${camera.x} ${camera.y} ${camera.w} ${camera.h}`}
-          className="h-full w-full"
-          role="img"
-          aria-label="World map"
-          onContextMenu={(event) => {
-            event.preventDefault();
-            handleEscape();
-          }}
-        >
-          <WorldScene
-            world={world}
-            playerFactionId={playerFactionId}
-            selectedSectorId={ui.selectedSectorId}
-            onSelectSector={handleSelectSector}
-            zoom="map"
-            selectedEntityId={ui.selectedEntityId}
-            onSelectEntity={handleSelectEntity}
-            reachableSectors={reachableSectors}
-            pendingOrders={ui.pending}
-            blockedTarget={blockedTarget}
-          />
-        </svg>
+        <WorldGameHost
+          model={phaserModel}
+          overlayEpoch={overlayEpoch}
+          selectedSectorId={ui.selectedSectorId}
+          ignoreRects={ignoreRects}
+          targeting={targeting}
+          lens={lens.active}
+          onSelect={handleWorldSelect}
+        />
       </WorldHud>
 
       {selectedSector ? (

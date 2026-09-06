@@ -3,8 +3,11 @@
 Plan: [seedsmith-plan.md](seedsmith-plan.md) · Map: [../docs/architecture/seedsmith-map.md](../docs/architecture/seedsmith-map.md)
 Evidence map: [seedsmith-evidence-map.md](seedsmith-evidence-map.md) — every requirement line in this file, with the executed result of the `Verify` command covering it
 
-Status: **Part 1 (W1) DONE.** Part 2 (W2 — planner + briefkit) and Part 3 (W3 — pipeline) are
-planned below (P1–P6, G1–G3), not started.
+Status (corrected 2026-09-06): **Parts 1-5 are ALL DONE.** This line claimed Parts 2-3 were merely
+planned from 2026-08-23 until today — stale since 2026-08-31, when P1-P6 and G1-G3 all reached their
+checkpoints (see Part 2/3's own CP-F1/F2/F3/G marks below), and further stale since 2026-09-01 when
+Part 4 (demons) and Part 5 (generation runtime, G0-G4) both closed. G4.4 (prose near-duplicate check)
+added and built 2026-09-06.
 
 ---
 
@@ -1907,6 +1910,35 @@ full suite → **455 passed**
 
 **Final real run: 84/84 persisted, 0 escalated, 119s** (`--workers 3`, local gemma-4-26b-a4b-qat).
 Every entry carries `_provenance`, a namespaced id, a `demonId`, and **no numeric field**.
+
+- [x] **G4.4 — corpus-wide near-duplicate check on `doctrine`** · **S** ✅ **BUILT + VERIFIED 2026-09-06**
+  Found auditing whether every seedsmith generator has a deterministic pre-generation
+  coverage/distribution check, not only `adapter-items`/`tree-plan`. `commander-effect` did not —
+  `quality-gates` validates per-item only, nothing watched convergence across the corpus, despite
+  the module's own §9 probe already reproducing the failure (3 generations for one demon, Jaccard
+  mean 0.52).
+  - Acceptance:
+    - [x] Verified real first: a direct Jaccard check against the already-committed 84-entry corpus
+          found **two near-duplicate `doctrine` pairs**, clearest at Jaccard 0.52
+          (`doublecherry`/`doubleshooter`), unnoticed since the 2026-09-01 run
+    - [x] `KindSpec.dedup_fields: frozenset[str] = frozenset()` added (`adapters/base.py`), additive,
+          same shape as `motif_expression` — every kind before this untouched
+    - [x] `commander-effect`'s `KindSpec` sets `dedup_fields=frozenset({"doctrine"})`
+    - [x] `SemanticDedup` gained exact (6.1c) and near-duplicate (6.2b) checks over any kind's
+          declared prose field(s)
+    - [x] 6.2b compares **directly** (all-pairs exact Jaccard), not via MinHash+LSH — verified live
+          that 8-band/4-row LSH missed the corpus's own clearest pair entirely; a prose-dedup kind
+          is bounded in the low thousands (`commander-effect`'s ceiling ~900), where direct
+          comparison is cheap and exact
+    - [x] 7 new tests (`ProseDedupTests`), including a known-answer test pinned against the live
+          corpus
+  - Verify: `python -m pytest tools/seedsmith/tests/test_constraint_exemplar_dedup.py -v` (19
+    passed); full suite **1,777 passed, 1 skipped, 1 pre-existing unrelated failure**
+    (`test_general_propose.py`'s hash-determinism issue in the actions pipeline — confirmed
+    untouched by this change)
+  - **Not fixed here:** the real `doublecherry`/`doubleshooter` pair. Re-generating or editing
+    either doctrine is a content decision for the owner; this task closes the coverage gap, not the
+    specific finding it now reports.
 
 ### ⛔ Two defects that a 100% pass rate completely hid
 

@@ -98,8 +98,9 @@ the new path is proven, because two risks in one change is how a proof becomes a
 **Phase 8 was not planned up front — it exists because Phase 4's own `catalog-runtime` flip found a
 real defect the original 26-module scope never anticipated.** `DemonRecipeCatalog.Build()`'s
 deterministic, same-rung-below fusion assignment held at the old compiled 84-species roster (no rarity
-rung ever had more outputs than its input rung's pairing capacity) and stopped holding at 829: 21
-top-rarity species need unique pairs from just 4 candidates one rung down, a hard `C(4,2)=6` ceiling.
+rung ever had more outputs than its input rung's pairing capacity) and stopped holding at 829: 20
+eligible top-rarity outputs need unique pairs from just 4 candidates one rung down, a hard `C(4,2)=6`
+ceiling.
 Two narrower fixes were tried and rejected (one didn't solve the math; one solved it but silently broke
 a tested game-design invariant) before the owner directed a proper seedsmith pipeline — the same
 deterministic-first, LLM-for-the-gap, deterministic-reconciler shape every other module in this program
@@ -156,7 +157,7 @@ input drawn from more than one rarity rung below its output, only possible for t
 `Almanac` deficits) need its own cost-table adjustment, or does the existing fixed per-rarity price
 stand as-is? `spec-fusion-recipe-generator.md` §4a names this "Ask first: game balance" per
 `spec-demon-fusion.md`'s own boundaries, and ships with "no change, exposure accepted as negligible
-(≤15 recipes)" as its default — tracked here so it is decided once, not discovered by a player finding
+(14 recipes)" as its default — tracked here so it is decided once, not discovered by a player finding
 the cheapest gap-fill recipe first. Not a gate on T8.3 or Checkpoint 8.
 
 Everything else: **none.** Sixteen were raised across the two ideal docs and this plan's audit; all
@@ -178,6 +179,6 @@ message. Two further steps are the owner's alone:
 - **The full classification run** (T2.11) — it is ~14 h against the local model on the owner's machine.
 - **The live lawn check** (CP4) — `deploy-play.ps1 -RestartServer` from the owner's own terminal, per
   the server-lifetime rule.
-- **The real `fusion-recipe-propose` run** (Checkpoint 8a) — a local-model call against the ≤15 real
+- **The real `fusion-recipe-propose` run** (Checkpoint 8a) — a local-model call against the 14 real
   `Almanac` deficits, the same class of step as T2.11.
 - **The live-lawn fusion check** (T8.5) — a real server restart, per the same server-lifetime rule.

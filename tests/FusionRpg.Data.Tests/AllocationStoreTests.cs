@@ -174,7 +174,9 @@ public class AllocationStoreTests : IDisposable
     }
 
     static readonly AptitudeTuning RealTuning = AptitudeTuningLoader.Parse(
-        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v5.json")));
+        // passive-tree C6 (2026-09-06): v5 -> v6, hosts moved with it; kept in sync so "the real
+        // shipped tuning" stays true rather than quietly drifting behind RpgHost.cs/Program.cs.
+        File.ReadAllText(Path.Combine(RepoRoot(), "data", "tuning", "aptitudes.v6.json")));
 
     static AllocationStoreTests()
     {

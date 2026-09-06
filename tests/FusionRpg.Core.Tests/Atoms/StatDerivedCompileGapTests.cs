@@ -115,14 +115,18 @@ public class StatDerivedCompileGapTests
     }
 
     /// <summary><b>Link 4 — `Lawn = Full` is now true end to end, not just "a consumer exists".</b>
-    /// Sim stays closed: no consumer there, and D6's quarantine still holds for it.</summary>
+    /// Sim moved too (mechanism-wiring E5, 2026-09-06): `ActorDerivedLookup`'s contribution fold gave
+    /// it a real, if partial, consumer -- `Partial`, not `Full`, because the fold is a plain sum that
+    /// honours `Flat`/`Increased` and not `Replace`/`Flag`
+    /// (`EffectOfflineKitTests.The_four_derived_ops_decide_Full_versus_Partial`). Renamed from
+    /// "...and_sim_remains_quarantined", which is no longer true.</summary>
     [Fact]
-    public void Link4_lawn_is_served_end_to_end_and_sim_remains_quarantined()
+    public void Link4_lawn_is_served_end_to_end_and_sim_opens_partially()
     {
         var kind = AtomKindRegistry.Get("stat.derived");
         Assert.NotNull(kind);
 
         Assert.Equal(RuntimeState.Full, kind!.Support.Lawn);
-        Assert.Equal(RuntimeState.None, kind.Support.Sim);
+        Assert.Equal(RuntimeState.Partial, kind.Support.Sim);
     }
 }

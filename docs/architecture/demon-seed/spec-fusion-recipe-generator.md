@@ -29,24 +29,31 @@ catalog for the first time, `DemonRecipeCatalog.Build()` threw `InvalidOperation
 input pair available for 'jacksonzombie'`. The real distribution, queried directly from
 `dist/FusionRpg.Server/data/rpg-hot.sqlite`:
 
-| Rarity (ladder order) | Count | Nearest populated rung below | Below count | Max distinct pairs `C(n,2)` |
+| Rarity (ladder order) | Eligible outputs | Nearest populated rung below | Below count | Max distinct pairs `C(n,2)` |
 |---|---|---|---|---|
 | Sunwoven | 4 | Firstseed | 37 | 666 |
-| **Almanac** (top rung) | **21** | **Sunwoven** | **4** | **6** |
+| **Almanac** (top rung) | **20** | **Sunwoven** | **4** | **6** |
 
-21 top-rung outputs need 21 unique input pairs; 4 candidate inputs support at most 6. **This is a
-genuine capacity ceiling, not a search-order defect** — verified by first fixing the search order
-(backtracking across every `a` candidate before giving up) and confirming the same output still fails,
-for the reason the numbers above already show: no ordering of 4 elements produces more than 6 pairs.
+`Almanac` has 21 species, but only 20 are eligible fusion OUTPUTS — one, `UltimatePaperZombie`, is
+`Acquisition: CaptureOnly` and is correctly excluded by the same owner-lock-6 rule that already governs
+every recipe input (a raw per-rarity count that skips this filter overstates by one). 20 top-rung
+outputs need 20 unique input pairs; 4 candidate inputs support at most 6, so the deterministic pass
+fills 6 and 14 remain a genuine deficit. **This is a genuine capacity ceiling, not a search-order
+defect** — verified by first fixing the search order (backtracking across every `a` candidate before
+giving up) and confirming the same output still fails, for the reason the numbers above already show:
+no ordering of 4 elements produces more than 6 pairs. (Numbers confirmed live 2026-09-06 by the built
+`tools/DemonRecipeDistributionIndex`, §1 below — a first pass here misread the live database's raw
+rarity count as the eligible-output count and said "21"; the tool's own `Acquisition`-filtered count is
+the corrected, authoritative one.)
 
 **This is also the exact defect class `roster-metrics` (module 10) already exists to catch** — its own
 declared target is *"rarity distribution: monotone decreasing across the ten rungs"* (§2 of that spec).
-`Almanac (21) > Sunwoven (4)` is a non-monotone rung, the same shape as that spec's own worked example
-("rung 7 commoner than rung 4"). `roster-metrics` runs on **anchors**, before rarity is assigned by
-expansion, so it could not have caught this specific case even if it had been run and gated — rarity is
-computed during `species-generator`, not stated on the anchor. **This module's own distribution index
-(§1 below) is the same check, moved to run where the information the check needs actually exists: after
-expansion, not before it.**
+`Almanac (21 species, 20 eligible) > Sunwoven (4)` is a non-monotone rung, the same shape as that
+spec's own worked example ("rung 7 commoner than rung 4"). `roster-metrics` runs on **anchors**, before
+rarity is assigned by expansion, so it could not have caught this specific case even if it had been run
+and gated — rarity is computed during `species-generator`, not stated on the anchor. **This module's
+own distribution index (§1 below) is the same check, moved to run where the information the check
+needs actually exists: after expansion, not before it.**
 
 ## Design
 
@@ -133,9 +140,10 @@ smaller scale:
 1. Runs the EXISTING `DemonRecipeCatalog.Build()` algorithm exactly as shipped (`TryFindPair`'s
    per-`a`-candidate backtracking, already fixed this session) to assign every recipe the deterministic
    pass can support. This handles all but the shortfall rungs' deficits — for the real corpus, **at
-   least 808 of 829** eligible outputs (Almanac's own `C(4,2)=6` pairs land inside this same
-   deterministic pass, since `Build()` fills every pair a pool's capacity allows before giving up — the
-   remaining ≤15 Almanac outputs are what reach the model). **Which specific outputs end up in that
+   least 815 of 829** eligible outputs (Almanac's own 6 deterministic pairs, confirmed live by
+   `tools/DemonRecipeDistributionIndex`, land inside this same deterministic pass, since `Build()` fills
+   every pair a pool's capacity allows before giving up — the remaining 14 Almanac outputs are what
+   reach the model). **Which specific outputs end up in that
    remainder is a pinned fact of `Build()`'s own existing iteration order (rarity, then `SpeciesId`
    ordinal) — reusing the real method, unmodified, is what makes this deterministic rather than an
    accident; a reimplementation that iterated in a different order would resolve a different subset
@@ -235,11 +243,11 @@ to the nearest 2–3 rungs (§2) keeps a `crossRungGapFill` recipe's real input 
 neighborhood as a normal one, but does not make them identical — an Almanac recipe drawing from
 Heirloom (two rungs down) still consumes measurably cheaper specimens than one drawing from Sunwoven
 (one rung down) at the same Souls/shard/essence price. This is a real, if narrow, economy question
-(the exposure is bounded to ≤15 recipes on the real corpus, all at the single top rung), not something
+(the exposure is bounded to 14 recipes on the real corpus, all at the single top rung), not something
 this module's own reconciler can resolve on its own authority — `spec-demon-fusion.md`'s own Boundaries
 already name cost-table tuning as "Ask first: game balance." **Named here so it is decided once, not
 discovered by a player finding the cheapest gap-fill recipe first:** either the fixed per-rarity price
-stands as-is (the ≤15-recipe exposure is accepted as negligible), or `crossRungGapFill` recipes get a
+stands as-is (the 14-recipe exposure is accepted as negligible), or `crossRungGapFill` recipes get a
 rung-distance cost multiplier mirroring the promotion cost bump `spec-demon-fusion.md`'s own "Costs"
 table already uses when a band jumps. Not this module's call; recorded so the call gets made.
 

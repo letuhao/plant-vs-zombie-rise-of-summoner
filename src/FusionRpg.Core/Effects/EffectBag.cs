@@ -183,6 +183,18 @@ public sealed class EffectBag
     /// never ran outside the offline test harness. Null keeps combat byte-identical (no reflect),
     /// matching every other optional collaborator on this class.</summary>
     public FusionRpg.Core.Combat.CombatActorResolve? ActorResolve { get; set; }
+
+    /// <summary>
+    /// passive-tree-todo.md G6 (spec-gate-counters.md §2.2/§7): the seam <c>ElementMasteryCounter</c>
+    /// wires into. Threaded to every <see cref="Combat.CombatDamageDispatcher.DispatchInstant"/> call
+    /// site this bag owns -- both the direct-hit dispatch inside <see cref="FireGrant"/> and the
+    /// DoT-pulse dispatch inside <see cref="TickDots"/> (via <see cref="StatusFunnelPulseSink"/>) -- so
+    /// a host that sets this ONE property gets a credit callback for every landed hit and every DoT
+    /// pulse alike, correctly tagged by <see cref="Combat.DamageOrigin"/> in each case. Null keeps
+    /// combat byte-identical (no credits), the same optional-collaborator shape every other hook on
+    /// this class already uses.
+    /// </summary>
+    public Action<Combat.DamageApplyResult, Combat.DamageOrigin, IReadOnlyList<Combat.Element.ElementPayloadComponent>, string?>? OnDamageApplied { get; set; }
     public StatusRuntime? Status { get; set; }
     public IStatusRng StatusRng { get; set; } = new FixedStatusRng(0.0);
 
@@ -541,7 +553,8 @@ public sealed class EffectBag
                     CombatMath,
                     _lastSkipped,
                     ShieldGate,
-                    ActorResolve);
+                    ActorResolve,
+                    onDamageApplied: OnDamageApplied);
                 continue;
             }
 
@@ -610,7 +623,8 @@ public sealed class EffectBag
             CombatMath,
             _lastSkipped,
             ShieldGate,
-            ActorResolve);
+            ActorResolve,
+            onDamageApplied: OnDamageApplied);
     }
 
     /// <summary>
@@ -802,7 +816,8 @@ public sealed class EffectBag
                 effectId: null,
                 pluginId: null,
                 shieldGate: ShieldGate,
-                actorResolve: ActorResolve);
+                actorResolve: ActorResolve,
+                onDamageApplied: OnDamageApplied);
             n = Status.Tick(now, sink, BoardSnapshot, StatusRng);
         }
 

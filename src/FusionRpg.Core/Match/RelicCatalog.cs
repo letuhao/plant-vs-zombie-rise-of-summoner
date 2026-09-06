@@ -4,11 +4,28 @@ namespace FusionRpg.Core.Match;
 
 /// <summary>
 /// A small, real, seeded relic catalog (T14 — no acquisition system exists yet, so every
-/// player holds the full catalog; see game-gui-todo.md's honest scoping note). Equipping
-/// reuses the existing per-actor `rpg_unique_equipment` pipeline via
-/// <see cref="UniqueEquipmentCatalog.IsKnownItem"/> / <see cref="UniqueEquipmentCatalog.TryGetGrant"/>,
-/// which check this catalog after their own stub items. Effect ids are drawn from the
-/// existing, already-shipped effect vocabulary — nothing new is added to Foundation here.
+/// player holds the full catalog; see game-gui-todo.md's honest scoping note). Effect ids are
+/// drawn from the existing, already-shipped effect vocabulary — nothing new is added to
+/// Foundation here.
+///
+/// <para><b>⭐ Relics now have a durable home: <c>rpg_item_assignment</c></b>
+/// (`decision-d1-durable-ownership.md` §10 M1/M2, landed 2026-09-06). Equipping a relic no longer
+/// touches <c>rpg_unique_equipment</c> — <c>RpgStore.UpsertUniqueEquipment</c> writes module 4's
+/// assignment row with <c>ref_kind = 'stock'</c> and <c>ref_id</c> = the relic id below, and every
+/// reader projects it back through <see cref="FusionRpg.Core.Items.LegacyEquipSlots"/>. The wire is
+/// byte-identical, so <c>/api/relics</c> and <c>RelicsLayer.tsx</c> are unchanged. This class stays
+/// the <b>definition</b> source (name, rarity, slot, description, effect id) and the item-id
+/// allowlist; only the per-actor equipped-slot rows moved.</para>
+///
+/// <para><b>⚠ Why these four are not <c>item_unique</c> rows.</b> Module 17's <c>item_unique</c> is
+/// a nine-column classification flag keyed 1:1 on an <c>effect_container</c> — it has no name,
+/// rarity, slot, description or effect column, so it cannot hold a relic definition. Making
+/// "relics become uniques" literal needs a dedicated container per relic
+/// (<c>item.fx-passive-atk-flat</c> today backs <b>both</b> <c>relic.ashen_reliquary</c> and
+/// <c>stub.atk_ring</c>, so flagging it would flag the stub too, and <c>relic.cracked_seal</c> has
+/// no container at all) plus three authored content values per row — <c>counter_pressure</c>,
+/// <c>power_axis</c> and a <c>derived_from</c> base type. `spec-equip-assign.md`'s Boundaries mark
+/// the relic disposition **Ask first**; that half is a content decision, not this migration.</para>
 /// </summary>
 public static class RelicCatalog
 {

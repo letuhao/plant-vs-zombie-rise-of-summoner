@@ -24,7 +24,14 @@ param(
     #    (ssot-power-scale.md §10.1 row 26, same verdict as row 6: "cost ladder, not a power
     #    ladder"), just for a demon SPECIES' own per-player level on its own separate tunable pair.
     #    Already in inventory.json, so G3 passes on its own separate check.
-    [string[]]$G2AllowlistFiles = @("PatronPolicy.cs", "RpgProgression.cs", "EnhancePolicy.cs", "SpeciesProgression.cs")
+    # 5. MasteryIndex.cs (task G4, spec-gate-counters.md §3.2/§9) - CountToReach/Reached take a
+    #    parameter literally named `index` (the gate-counter's own mastery INDEX, never Theta or a
+    #    character/content level), so the class-level `public` on `MasteryIndex` and this heuristic's
+    #    multi-line span reach it. Row 6's precedent again: a cost ladder in its own index, own
+    #    tunable pair (gateCounters.masteryCurveFirstCount/StepCount), never RpgXpCurve's or the
+    #    Theta/P(Theta) ladder. ssot-power-scale.md §10.2 rows 33-34 + inventory.json, so G3 passes
+    #    on its own separate check.
+    [string[]]$G2AllowlistFiles = @("PatronPolicy.cs", "RpgProgression.cs", "EnhancePolicy.cs", "SpeciesProgression.cs", "MasteryIndex.cs")
 )
 
 $ErrorActionPreference = "Stop"

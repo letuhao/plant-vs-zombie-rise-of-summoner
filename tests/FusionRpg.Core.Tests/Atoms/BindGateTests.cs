@@ -155,14 +155,15 @@ public class BindGateTests
         // strength of its OWN consumer, never a sibling's — which is the rule this test exists to pin:
         //   battle  — E12 (2026-08-23), `BattleStatComposer` reads bound atoms at squad build
         //   lawn    — decisions.md "Derived-write lawn executor" (2026-08-30), `AtomDerivedSubsystem`
-        //   sim     — still nothing reads it, so it still refuses
+        //   sim     — mechanism-wiring E5 (2026-09-06), `ActorDerivedLookup`'s contribution fold —
+        //             Partial, not Full (the fold is a plain sum: Flat/Increased compose correctly,
+        //             Replace/Flag do not — EffectOfflineKitTests.
+        //             The_four_derived_ops_decide_Full_versus_Partial). BindGate accepts Partial like
+        //             Full — it only rejects None outright and PlanOnly on a non-planner host.
         var atom = Atom("stat.derived", "{\"channel\":\"combat.power.fire\",\"op\":\"flat\",\"amount\":5}");
 
-        foreach (var runtime in new[] { RuntimeId.Battle, RuntimeId.Lawn })
+        foreach (var runtime in new[] { RuntimeId.Battle, RuntimeId.Lawn, RuntimeId.Sim })
             Assert.True(Bind(atom, OwnerScope.Match, new BindContext(runtime, IsPlanner: true)).IsOk);
-
-        Assert.Equal(AtomRejectionReason.RuntimeUnsupported,
-            Bind(atom, OwnerScope.Match, new BindContext(RuntimeId.Sim, IsPlanner: true)).Reason);
     }
 
     // ---- world scopes, level, staleness ---------------------------------------------------------------

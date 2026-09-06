@@ -6,7 +6,7 @@ Same shape as `setgen.distribute`, different rules. Four of them, all from `ssot
 |---|---|
 | **`Flat` only** — never `Increased`, never `More` | §3.4 |
 | `max_tier` at most **one band below** an equip container of the same rarity | §3.4 |
-| A family may not appear on both a `jewel-minor` base type and a charm — **at all**, not at a different tier | §3.6 |
+| A family may not appear on both a `jewel-minor` base type and a charm — **at all**, not at a different tier | §3.6 (the ring layer is a DECLARED family list — see `ring_layer_families`) |
 | A signet: `pool_rolls = 0`, `unique_carry = 1`, and it carries a **drawback** | §3.4 |
 
 ⭐ Module 12 already turned the last row from an observation into a refusal at the DAL
@@ -43,6 +43,11 @@ NON_FLAT_FAMILIES: "frozenset[str]" = frozenset({
 JEWEL_MINOR_ROLES: "frozenset[str]" = frozenset({"jewel-minor-a", "jewel-minor-b"})
 
 
+class CharmPoolError(ValueError):
+    """The declared ring layer and the shipped family corpus disagree. Raised at pool time so the
+    drift lands before a brief is rendered, never as a mystery refusal mid-run."""
+
+
 @dataclass
 class CharmPlan:
     charm_class: str
@@ -66,10 +71,79 @@ class CharmPlan:
 
 def families_on_jewel_minor(all_picks: "list[FamilyPick] | tuple[FamilyPick, ...]",
                             ) -> "frozenset[str]":
-    """Every family the corpus makes legal on a `jewel-minor` role — the closed set a charm may not
-    draw from. Computed from the real family rows, never hand-listed: §3.6's rule is about the
-    corpus's own legality table, so a hand-list would go stale the first time a family moved."""
+    """Every family the corpus's role table makes legal on a `jewel-minor` role.
+
+    ⛔ **This is a DIAGNOSTIC, not §3.6's rule, and reading it as the rule was a real defect**
+    (module 13, found 2026-09-06). A family row's `roles` list is a role × **GROUP** matrix, not a
+    per-family one — `g-on-hit.json`'s own note says so: *"every entry in this file shares this
+    identical roles list — the matrix has one row per role per GROUP, not per family."* A ring is a
+    generic slot, so **84 of the 98 shipped families** carry a jewel-minor role, **including all
+    seven §3.6 itself names as the CHARM set** (`vitality`, `might`, `mending`, `regeneration`,
+    `sunbloom`, `midas`, `cleansing`). Used as the exclusion it left the charm brief with 14
+    families, every one armour or shield, and no authorable offense / control / utility / economy
+    charm at all.
+
+    Kept because it is still the honest answer to *"what can a ring roll?"*, and because
+    `ring_layer_families` cross-checks its own declaration against it. The rule is that function.
+    """
     return frozenset(p.family for p in all_picks if JEWEL_MINOR_ROLES & set(p.roles))
+
+
+def ring_layer_families(tuning: SetCharmGenTuning,
+                        all_picks: "list[FamilyPick] | tuple[FamilyPick, ...]",
+                        ) -> "frozenset[str]":
+    """ssot-charms §3.6's jewel-minor family set — the closed list a charm may not draw from.
+
+    Two halves, matching §3.6's own sentence. The named riders (`searing_strike`, `lifesteal`,
+    `retribution`, `keen_edge`, `cruelty`, `warded`) are declared in `set-charm-gen.v1.json`, which
+    is where this module's other design cuts already live (`capabilityKinds` / `statKinds`). The
+    *"on-hit `status.apply`"* half is read off the corpus by kind, so a new affliction family joins
+    the ring layer without an edit here.
+
+    The declaration is **verified, not trusted**: a declared id that the corpus no longer ships, or
+    that no longer carries a jewel-minor role, raises. That keeps the hand-list honest without
+    letting the per-group role matrix become the rule again.
+    """
+    known = {p.family for p in all_picks}
+    on_ring = families_on_jewel_minor(all_picks)
+    missing = sorted(f for f in tuning.charm_ring_layer_families if f not in known)
+    if missing:
+        raise CharmPoolError(
+            f"charm.ringLayerFamilies names {missing}, which no affix-family file ships — the "
+            f"ssot-charms §3.6 declaration has drifted from the corpus")
+    moved = sorted(f for f in tuning.charm_ring_layer_families if f not in on_ring)
+    if moved:
+        raise CharmPoolError(
+            f"charm.ringLayerFamilies names {moved}, which the corpus no longer makes legal on a "
+            f"jewel-minor role — a family that left the ring layer is not this module's to keep "
+            f"excluding")
+    by_kind = frozenset(p.family for p in all_picks
+                        if p.kind_id in tuning.charm_ring_layer_kinds)
+    return frozenset(tuning.charm_ring_layer_families) | by_kind
+
+
+def charm_pool(tuning: SetCharmGenTuning,
+               all_picks: "list[FamilyPick] | tuple[FamilyPick, ...]",
+               ) -> "tuple[FamilyPick, ...]":
+    """Every pick a charm may actually carry — **the one list the brief prints and the distributor
+    accepts.**
+
+    ⛔ The brief and the distributor drawing their pool from two different expressions is how a
+    generator offers what it will then refuse; module 13 shipped exactly that (the brief printed
+    `vocabulary.stat`, 242 picks, of which the distributor accepted 56). They read this function now,
+    so they cannot disagree.
+
+    ⚠ **`all_picks` is capability ∪ stat, not stat alone.** The capability/stat split is *ssot-sets
+    §3.2*'s cut — one capability atom at a set's lowest threshold, stat families above — and charms
+    have no such structure. §3.6's own charm family list spans four kinds (`stat.modify` for
+    `vitality`/`might`/`mending`, `resource.delta` for `regeneration`, `resource.economy` for
+    `sunbloom`/`midas`, `status.clear` for `cleansing`), and 22 of the 29 families the shipped 70
+    charms use are capability-kind. Filtering a charm pool by `statKinds` applies the set's design
+    cut to a container that does not have it.
+    """
+    excluded = ring_layer_families(tuning, all_picks)
+    return tuple(p for p in all_picks
+                 if p.family not in excluded and p.family not in NON_FLAT_FAMILIES)
 
 
 def distribute_charm(*, charm_class: str, axis: str,

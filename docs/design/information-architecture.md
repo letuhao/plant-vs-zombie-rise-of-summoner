@@ -19,8 +19,11 @@ off by default.**
 > decisions 8/9) and `delve` (`#/delve/{id}`) as the sixth on 2026-09-05 (decisions.md row *"Game GUI — sixth
 > stage `delve`"*; [party-dungeon-map.md](../architecture/party-dungeon-map.md)). Both pass GG-4's test — a place
 > the player acts in, not looks at — which is why each is a stage and not a layer. The four-stage wording
-> above and the §2 catalog are kept as written; §2.4a is the `delve` stub, and the `siege` stub is owed by the
-> base-defense program. The rail still renders from state (GG-44), so neither stage adds a rail entry.
+> above and the §2 catalog are kept as written; §2.4a is the `delve` stub (not yet routed).
+> **§2.4b is the `siege` stub — landed 2026-09-06** (`spec-siege-stage.md` task 21.1): `#/siege/:siegeId`
+> is a real, routed, lazy-loaded stage (`railState.ts`'s `STAGE_IDS` — the one runtime list of every
+> stage id — now names five; `delve` isn't in it yet, since it has no route). The rail still renders
+> from state (GG-44), so neither stage adds a rail entry.
 
 ```text
                     ┌─────────── SHELL (band −1) ───────────┐
@@ -120,6 +123,23 @@ matches the approved stages; the surface itself is specified in
 [party-dungeon/spec-delve-stage.md](../architecture/party-dungeon/spec-delve-stage.md) (drafted 2026-09-05) — §4 for the
 route and the six shell rows, §7 for the band of every surface, §8 for the player vocabulary.
 
+### 2.4b Siege — `#/siege/{siegeId}` (stub, 2026-09-06)
+
+The fifth stage, approved 2026-09-04. **Not designed here** — the board, HUD, structure/unit
+inspector, targeting and playback are specified in
+[base-defense/spec-siege-stage.md](../architecture/base-defense/spec-siege-stage.md); the decisions.md
+Game GUI row amendment fixes the five-stage count and the two costs (§7 there) beyond this catalog
+entry. Unlike 2.4a, the route is real today — `SiegeStage.tsx` mounts, claims `?layer=` per GG-1's URL
+grammar, and dismisses via the existing layer stack — but the board itself is a later task in that
+spec's own list.
+
+| | |
+|---|---|
+| **Contains** | *(later pass)* the siege board (`board-render`'s generic layer), turn/round HUD, structure and unit inspector, targeting, playback |
+| **Time** | **One world turn**, however many battle rounds it takes internally — the map-step/battle-step boundary decision 24 already drew for World/Battle applies here unconditionally (§9) |
+| **Enter** | From the world stage, on a sector with an assault available. World stays mounted underneath (GG-1) |
+| **Leave** | The siege resolves → `BattleOutcome` → the world turn advances → back to `#/world`. Leaving mid-siege **pauses** (decisions 41/46) — it is not a withdrawal, and closing the tab must not surrender |
+
 ### 2.5 Shell — band −1
 
 Boot, title, save select, fatal error. The only surfaces that replace a stage without being travel.
@@ -184,7 +204,7 @@ Declared once. No surface reassigns a global verb (GG-20).
 | `F10` | Toggle the overlay window | **Reserved** — owned by launcher/injector, never handled by the app |
 | `C` `K` `R` `F` `P` `E` `A` `H` | Open Creatures / Commanders / Relics / Fusion / Pacts / Expeditions / Almanac / Chronicle | Pressing an open layer's key closes it |
 | `M` | Travel to the world map | A stage change, so it confirms if something would be abandoned |
-| `Space` | Stage transport pause/resume | Lawn and battle only; inert elsewhere — and **deliberately inert on `delve`**, which has no clock to pause (`party-dungeon-map.md`: no stamina, no daily limit, no real-time recovery) |
+| `Space` | Stage transport pause/resume | Lawn, battle and siege only; inert elsewhere — and **deliberately inert on `delve`**, which has no clock to pause (`party-dungeon-map.md`: no stamina, no daily limit, no real-time recovery). Siege's own pause (decision 41) is a persisted decision log, not a held session (decision 46) — see `spec-siege-stage.md`'s own "Open questions" section |
 | `Tab` | Cycle focus within the top layer | Never escapes it (GG-19) |
 | `` ` `` | Developer tree | Only when developer mode is on |
 | `1`–`9` | Stage-specific hotbar | Owned by the current stage |

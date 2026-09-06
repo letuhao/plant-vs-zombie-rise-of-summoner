@@ -69,6 +69,8 @@ public sealed class ActorHudLabel
 
             try
             {
+                // Steal a live TMP font — AddComponent alone often has no default asset on Melon.
+                TryAssignSceneFont(tmp);
                 tmp.alignment = TextAlignmentOptions.Center;
                 tmp.enableWordWrapping = false;
                 tmp.overflowMode = TextOverflowModes.Overflow;
@@ -120,6 +122,13 @@ public sealed class ActorHudLabel
     public bool TryPlace(float localX, float localY, string text, float charSize, Color color)
     {
         if (!IsReady) return false;
+#if FUSIONRPG_MELON
+        if (_tmp!.font == null)
+        {
+            TryAssignSceneFont(_tmp);
+            if (_tmp.font == null) return false;
+        }
+#endif
         try
         {
             _go.SetActive(true);
@@ -153,4 +162,51 @@ public sealed class ActorHudLabel
     {
         try { _go.SetActive(false); } catch { }
     }
+
+#if FUSIONRPG_MELON
+    static TMP_FontAsset? _cachedFont;
+
+    static void TryAssignSceneFont(TextMeshPro tmp)
+    {
+        if (tmp == null) return;
+        if (tmp.font != null) return;
+        if (_cachedFont != null)
+        {
+            tmp.font = _cachedFont;
+            return;
+        }
+
+        try
+        {
+            var ugui = UnityEngine.Object.FindObjectsOfType<TextMeshProUGUI>();
+            if (ugui != null)
+            {
+                foreach (var t in ugui)
+                {
+                    if (t == null || t.font == null) continue;
+                    _cachedFont = t.font;
+                    tmp.font = _cachedFont;
+                    return;
+                }
+            }
+        }
+        catch { }
+
+        try
+        {
+            var world = UnityEngine.Object.FindObjectsOfType<TextMeshPro>();
+            if (world != null)
+            {
+                foreach (var t in world)
+                {
+                    if (t == null || t == tmp || t.font == null) continue;
+                    _cachedFont = t.font;
+                    tmp.font = _cachedFont;
+                    return;
+                }
+            }
+        }
+        catch { }
+    }
+#endif
 }

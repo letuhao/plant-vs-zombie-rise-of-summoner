@@ -26,7 +26,15 @@ import {
   type LawnModelPayload,
   type LawnViewModePayload
 } from "../EventBus";
-import { CELL_H, CELL_W, ORIGIN_X, ORIGIN_Y, lawnCameraZoom } from "../gridMath";
+import {
+  CELL_H,
+  CELL_W,
+  LAWN_CAMERA_MARGIN,
+  LAWN_MIN_CAMERA_ZOOM,
+  ORIGIN_X,
+  ORIGIN_Y
+} from "../gridMath";
+import { bindCamera, type CameraBridge } from "../camera/bindCamera";
 import { layoutGrid } from "../systems/LayoutGridSystem";
 import { wirePickSystem } from "../systems/PickSystem";
 import { tickStatusFx } from "../systems/StatusFxSystem";
@@ -81,6 +89,7 @@ export class LawnWorldScene extends Phaser.Scene {
   private lastCanvasKey = "";
   private unsubs: Array<() => void> = [];
   private pickUnsub?: () => void;
+  private cameraBridge?: CameraBridge;
   private gridGfx?: Phaser.GameObjects.Graphics;
   private gridRows = 0;
   private gridCols = 0;
@@ -148,7 +157,6 @@ export class LawnWorldScene extends Phaser.Scene {
       })
     );
 
-    this.scale.on("resize", this.onScaleResize, this);
     this.unsubs.push(wireLawnIconLoadErrors(this));
     this.unsubs.push(subscribeIconEpoch(() => {
       bustLawnIconTextures(this);
@@ -156,7 +164,18 @@ export class LawnWorldScene extends Phaser.Scene {
       this.applyModel();
     }));
 
-    this.fitCamera();
+    this.cameraBridge = bindCamera({
+      scale: this.scale,
+      camera: this.cameras.main,
+      getModel: () => ({
+        rows: this.gridRows || DEFAULT_ROWS,
+        cols: this.gridCols || DEFAULT_COLS
+      }),
+      geometry: { cellWidth: CELL_W, cellHeight: CELL_H, originX: ORIGIN_X, originY: ORIGIN_Y },
+      margin: LAWN_CAMERA_MARGIN,
+      minZoom: LAWN_MIN_CAMERA_ZOOM
+    });
+    this.cameraBridge.refresh();
     if (typeof window !== "undefined") {
       window.__fusionRpgHasHudChild = (ptr, name) => {
         const rec = this.ptrRegistry.get(ptr);
@@ -165,25 +184,6 @@ export class LawnWorldScene extends Phaser.Scene {
       };
     }
     lawnBusEmit("lawn:ready", { generation: this.generation });
-  }
-
-  private onScaleResize(gameSize: { width: number; height: number }): void {
-    this.fitCamera(gameSize.width, gameSize.height);
-  }
-
-  private fitCamera(viewW?: number, viewH?: number): void {
-    const w = viewW ?? this.scale.gameSize.width;
-    const h = viewH ?? this.scale.gameSize.height;
-    const z = lawnCameraZoom(
-      w,
-      h,
-      this.gridRows || DEFAULT_ROWS,
-      this.gridCols || DEFAULT_COLS
-    );
-    this.cameras.main.setZoom(Math.max(0.2, z));
-    const cx = ORIGIN_X + (this.gridCols * CELL_W) / 2;
-    const cy = ORIGIN_Y + (this.gridRows * CELL_H) / 2;
-    this.cameras.main.centerOn(cx, cy);
   }
 
   private syncCtx(canvasPtrs?: Set<string>): SyncContext {
@@ -259,7 +259,7 @@ export class LawnWorldScene extends Phaser.Scene {
     }
     this.lastCanvasKey = canvasKey;
     this.lastViewMode = this.viewMode;
-    if (sync || modeChanged) this.fitCamera();
+    if (sync || modeChanged) this.cameraBridge?.refresh();
   }
 
   private showGhost(row: number, col: number): void {
@@ -285,7 +285,7 @@ export class LawnWorldScene extends Phaser.Scene {
     if (typeof window !== "undefined") {
       delete window.__fusionRpgHasHudChild;
     }
-    this.scale.off("resize", this.onScaleResize, this);
+    this.cameraBridge?.unbind();
     this.pickUnsub?.();
     this.pickUnsub = undefined;
     for (const u of this.unsubs) u();
