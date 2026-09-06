@@ -40,7 +40,12 @@ export function CellOccupancyDock({
   }, [cellFingerprint]);
 
   useEffect(() => {
-    if (open) logLawnInteractive("dock.open", { cellLabel, count: occupants.length });
+    if (!open) return;
+    logLawnInteractive("dock.open", { cellLabel, count: occupants.length });
+    // T13: focus lands on the dock title (then first collection row via Tab).
+    const title = document.querySelector<HTMLElement>('[data-testid="cell-occupancy-dock-title"]');
+    title?.setAttribute("tabindex", "-1");
+    title?.focus({ preventScroll: true });
   }, [open, cellLabel, occupants.length]);
 
   const rows = useMemo(() => adaptOccupants(occupants), [occupants]);
@@ -63,10 +68,12 @@ export function CellOccupancyDock({
       data-testid="cell-occupancy-dock"
       data-dock-width={LAWN_DOCK_WIDTH_PX}
       className={cn(
-        "band-panel flex shrink-0 flex-col gap-2 border-r border-border bg-soil-raised p-3",
+        "band-panel motion-safe:transition-[width,opacity] motion-safe:duration-150 flex shrink-0 flex-col gap-2 border-r border-border bg-soil-raised p-3",
+        "motion-reduce:transition-none",
         className
       )}
       style={{ width: LAWN_DOCK_WIDTH_PX }}
+      data-reduced-motion="respect"
     >
       <div className="flex items-center gap-2">
         <h2 className="min-w-0 flex-1 font-display text-lg text-text" data-testid="cell-occupancy-dock-title">

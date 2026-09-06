@@ -127,7 +127,38 @@ describe("PanelShell — the scrim sits below the HUD, not at the panel's own ti
     expect(overlay.className).toContain("band-system");
     expect(overlay.className).not.toContain("band-scrim");
   });
+});
 
+describe("PanelShell size variant (actor-sheet-shell)", () => {
+  beforeEach(() => {
+    useLayerStack.setState({ layers: [] });
+    resetKeymapForTests();
+  });
+
+  it("default size keeps the compact GG-61 bound", () => {
+    render(
+      <PanelShell open onOpenChange={() => {}} title="Roster" testId="t">
+        Body
+      </PanelShell>
+    );
+    const el = screen.getByTestId("t");
+    expect(el.className).toContain("max-h-[min(720px,82vh)]");
+    expect(el.className).toContain("w-[min(640px,92vw)]");
+  });
+
+  it("actorSheet size uses the near-fullscreen bound without changing other panels", () => {
+    render(
+      <PanelShell open onOpenChange={() => {}} title="Actor" testId="t" size="actorSheet">
+        Body
+      </PanelShell>
+    );
+    const el = screen.getByTestId("t");
+    expect(el.className).toContain("h-[min(960px,92vh)]");
+    expect(el.className).toContain("w-[min(1800px,96vw)]");
+  });
+});
+
+describe("PanelShell — token ordering for scrim (continued)", () => {
   it("--band-scrim sits strictly between --band-stage and --band-hud in the shipped tokens — the ordering the visual/interactive guarantee depends on", () => {
     // jsdom never loads the real Tailwind-generated stylesheet, so a class-name assertion (above)
     // is this repo's own established proof for GG-5 stacking (`Toasts.test.tsx`'s "is band-toast,

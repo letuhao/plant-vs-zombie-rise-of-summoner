@@ -1951,6 +1951,36 @@ not touched; the build was rechecked after their edit settled and came back clea
 > either open item here, matching this checkpoint's own original reasoning; both remain open, tracked,
 > and now more precisely scoped than when this checkpoint was first written.
 
+#### ⭐ P1.5-B — the Battle half, real content, CLOSED 2026-09-07
+
+- [x] `RpgStore.MaterializeRolledEquipRuntime` — module 4/5's own "deploy" moment (squad build), calling
+      `ApplyEquipProjection` + `ApplyEquippedGrants` from `WebMatchService.BuildSquad`. Two more real
+      bugs found and fixed in the process: `EquippedActionIdsFor`'s grant scope orphaning (a same-day
+      concurrent fix moved it `Entity`→`UniqueActor` for durable grants, which would have silently
+      dropped item-conditional ones), and `ApplyEquippedGrants` having no way to withdraw a source that
+      dropped out of the current assignment list (added the missing diff-against-stored-state step).
+- [x] `spec-equip-runtime.md` amended — a second delivery path for `stat.modify` atoms (virtually all
+      real equip content, including an `op: "more"` no `stat.derived` consumer can parse), reusing
+      `ActionContainerEffectResolverFactory`'s already-proven compile/register pattern. Spec amendment
+      written; the actual `ActionContainerEffectResolverFactory`/`WebMatchService.cs` code changes it
+      describes are the next concrete build task here, not yet built as of this entry.
+- [ ] Build the `stat.modify` compiler path itself, per the amendment's own "New/edited files" list —
+      **the one piece of the Battle half that's specced but not yet built.**
+
+#### ⛔ P1.5-L — the Lawn half, found 2026-09-07, genuinely open, environment-blocked
+
+- [ ] Extend `UniqueBoundLoadout.TryApply` (`src/FusionRpg.Injector/Match/UniqueBoundLoadout.cs:14-39`)
+      to also resolve `effect_binding` at `UniqueActor` scope (module 4/5's own projection), compile and
+      enqueue it into the same `EffectRuntime.Bag.Funnel`, additive alongside the existing `mods_json`
+      resolution. Full trace, exact file list, and the two new tests: `spec-equip-runtime.md`'s
+      "Amendment 2026-09-07 (second)" section.
+- [ ] Core-layer test (`a_rolled_items_equip_binding_reaches_the_lawns_live_funnel_on_bind`) — buildable
+      and testable now, no game install needed.
+- [ ] ⛔ **Owner-run, live**: equip a rolled item, deploy on the real lawn, confirm the number changes —
+      needs `$env:FUSIONRPG_GAME_DIR` + a real attached match. The one item in this whole module that a
+      coding session cannot close alone, for a reason unrelated to `BindGrant` (a different, already-
+      correctly-wired mechanism this session confirmed is not the cause).
+
 ---
 
 ## Phase 2 — the content model
@@ -9298,6 +9328,21 @@ reproduced directly, that would hit any real deploy running `--validate` today.
     the owner has already made an explicit, separate, dated decision about it (phased rollout,
     small-batch-then-playtest before the full run) — a decision this program did not make and has no
     standing to revisit.
+5. ⭐ **NEW, found 2026-09-07 while closing the Battle-half of module 5 — the Lawn half, genuinely
+   open, PART of this program's own scope (unlike 4a above).** Module 5's own original Success Criteria
+   always named two runtimes: *"in battle and on the lawn."* The Battle half is now closed
+   (`RpgStore.MaterializeRolledEquipRuntime` + `spec-equip-runtime.md`'s two 2026-09-07 amendments). The
+   Lawn half is a real, separate, precisely-traced gap: `UniqueBoundLoadout.TryApply`
+   (`src/FusionRpg.Injector/Match/UniqueBoundLoadout.cs:14-39`) only ever resolves a specimen's
+   `rpg_unique_stat_mods.mods_json` blob into the live `EffectRuntime.Bag.Funnel` — it never reaches
+   `effect_binding`, the table module 4/5's own projection (and the Battle fix) actually write to. See
+   `spec-equip-runtime.md`'s own "Amendment 2026-09-07 (second)" section for the full trace and the
+   precisely-scoped fix. Genuinely, differently constrained from everything else in this list:
+   `UniqueBoundLoadout.cs` references `UnityEngine.Object`/`Plant`/`Zombie` directly, so the code CAN be
+   written now, but compiling the Injector needs the game's BepInEx/interop DLLs
+   (`$env:FUSIONRPG_GAME_DIR`) and proving it live needs a real attached match — the one piece of this
+   program that is legitimately environment-blocked, for a reason that has nothing to do with
+   `BindGrant`'s own (unrelated) mechanism.
 
 **Closed since this section was first written:**
 0. ✅ **The `vocabulary.json`/`AtomImporter` production defect (2026-09-07).** Root cause was NOT a

@@ -490,8 +490,20 @@ public sealed class RpgClient
                 return;
             }
 
+            // demon-lawn-deploy live-check (2026-09-07): a HypnoAlly-mode species has no deploy path
+            // yet (T1.4's own refusal, `DeployAsync` returns `deploy.hypno-ally-not-implemented`) —
+            // caught live by actually clicking a real fired prompt's own accept button, not guessed.
+            // `DemonSpeciesCatalog` is already `Configure`d on this process at mod load
+            // (`RpgHost.Initialize`), so this is an in-process lookup against the same 829-species
+            // roster the frontend's own species index resolves display info from — no new REST call.
+            // Unknown-species and not-yet-configured both fail CLOSED (excluded), matching this
+            // method's own patron-read-failure branch above: fewer options, never a guess.
             var eligible = roster.Items
                 .Where(it => !string.Equals(it.Actor.InstanceId, patronInstanceId, StringComparison.Ordinal))
+                .Where(it => FusionRpg.Core.Demons.DemonSpeciesCatalog.IsConfigured
+                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.IsKnown(it.Profile.SpeciesId)
+                    && FusionRpg.Core.Demons.DemonSpeciesCatalog.Get(it.Profile.SpeciesId).DeployMode
+                        != FusionRpg.Core.Demons.DemonDeployMode.HypnoAlly)
                 .Select(it => new FusionRpg.Core.Match.LawnDeployRosterEntry(it.Actor.InstanceId, it.Profile.SpeciesId))
                 .ToList();
             FusionRpg.Core.Match.LawnDeployRosterSessionCache.Apply(eligible);

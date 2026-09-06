@@ -1,4 +1,5 @@
 using System.Text.Json;
+using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.World;
 
 namespace FusionRpg.Core.Effects.Atoms;
@@ -21,7 +22,9 @@ public static class AtomKindRegistry
     // §2.1) — this module asserts only its own +1 delta, never the wave total.
     // base-defense `siege-construction` (decision 27, 2026-09-06): 7 -> 8 with AttachPoint.Siege, the
     // tactical-board counterpart to Board's Lawn-only reach (AttachPoint.Siege's own doc comment).
-    public const int AttachPointCount = 8;
+    // passive-tree `element-conversion` (D56, spec-element-conversion.md §2a, 2026-09-07): 8 -> 9 with
+    // AttachPoint.Element, the first (and, today, only) Element-attached kind.
+    public const int AttachPointCount = 9;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     // E35: 12 -> 13 with match.modify, the first Match-attached kind.
     // E36 (spec-wave-control.md §2.1): 13 -> 14 with wave.control, the second Match-attached kind.
@@ -33,7 +36,11 @@ public static class AtomKindRegistry
     // Ui-attached kind — AttachPointCount moves alongside it this time (see above).
     // base-defense `siege-construction` (decision 27, 2026-09-06): 16 -> 17 with structure.place, the
     // first (and, today, only) Siege-attached kind — AttachPointCount moves alongside it too.
-    public const int KindCount = 17;
+    // passive-tree `element-conversion` (D56, spec-element-conversion.md §2b, 2026-09-07): 17 -> 18
+    // with element.convert, the 18th kind — not "the 17th" (structure.place, unrelated, took that slot
+    // the day before this spec was written; see that spec's own §0) — AttachPointCount moves alongside
+    // it too.
+    public const int KindCount = 18;
     // Structural (tunables-ssot.md T2) — see AttachPointCount above.
     // E34 (spec-trigger-vocabulary.md §2.1): 8 -> 13 with OnWave/OnMatchStart/OnMatchEnd/
     // OnSunCollect/OnGridPlace. Verified live before editing, per this module's own caution about
@@ -964,6 +971,42 @@ public static class AtomKindRegistry
                 "back out through BattleOutcome.SlotResults[].StructurePlaced, the same seam " +
                 "structure-state's own HP damage already uses, applied only once the world layer " +
                 "receives the finished BattleOutcome."),
+
+            // ---- Element -------------------------------------------------------------------
+            // passive-tree `element-conversion` (D56, spec-element-conversion.md §2b): the first
+            // Element-attached kind. Redistributes weight WITHIN an already-elemental ElementPayload —
+            // never fabricates a component on a null payload, never invents a "Physical" element
+            // (neither exists in the real type, ElementPayload.cs / ActorElementTypes.cs). Permanent
+            // modifier: no trigger, matching stat.derived/bullet.modify's own shape.
+            new("element.convert", AttachPoint.Element, new ParamSchema(
+                    // Optional: omitted means "any component currently in the payload, largest first"
+                    // (spec §2c). Present, it must name a real element — never "omni", never the
+                    // nonexistent "Physical".
+                    new ParamDef("fromElement", ParamKind.String, Required: false,
+                        Vocabulary: () => ElementRoster.Concrete.Select(e => e.ToElementId()).ToArray()),
+                    new ParamDef("toElement", ParamKind.String, Required: true,
+                        Vocabulary: () => ElementRoster.Concrete.Select(e => e.ToElementId()).ToArray()),
+                    // Per-mille of the affected component's OWN weight, 1..1000 -- range enforced by
+                    // ElementConversion.Apply at resolve time (the same "structural check inside the
+                    // executor" pattern this codebase already uses for a business-rule bound that is not
+                    // a type/presence question). Flat Int, not a Value/ValueSpec -- spec-element-
+                    // conversion.md §5's own open question 2 (flat per-mille vs a Theta-scaled
+                    // coefficient) is a tree-plan/tree-binder PRICING question this kind's wire shape
+                    // does not need to pre-decide.
+                    new ParamDef("shareMilli", ParamKind.Int, Required: true)),
+                // Lawn: Full (real plants/zombies have real attacks to reweight, via
+                // DamagePacketBuilder's own ElementPayload seam). Battle: Full (BattleStatComposer
+                // already folds bound permanent atoms at squad build, the same stat.derived/
+                // bullet.modify precedent). Sim: None until the empirical fold test (spec §4's own
+                // "not Full/Partial until proven otherwise") actually runs -- never assumed from the
+                // Lawn/Battle result.
+                new RuntimeSupportMatrix(RuntimeState.Full, RuntimeState.Full, RuntimeState.None),
+                AtomTriggers.None,
+                PowerCategory.Offense,
+                "The only Element-attached kind. Redistributes shareMilli of fromElement's (or, if " +
+                "omitted, the largest remaining component's) own current weight to toElement, against " +
+                "the attacking actor's own ElementPayload. A null payload is a no-op, never an error " +
+                "and never a fabricated base (spec-element-conversion.md §2b/§3)."),
         };
 
         var map = new Dictionary<string, AtomKind>(StringComparer.OrdinalIgnoreCase);

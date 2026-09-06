@@ -2077,14 +2077,18 @@ above 3.0pp"); all three are about the model's own mechanism correctness (half-w
 through the real `BattleEngine` are sufficient to prove. Genuinely ✅, not 🟡, **for what this task's own
 acceptance actually asked** — the three bullets above are still true today, unchanged.
 
-**⚠ Flagged 2026-09-07 by F7 — the model itself, not this task's mechanism-correctness bullets.** Any
-`concentration.fmaxMilli`/`crossunlock` win-share NUMBER this task's own sweeps produced (via
-`ConcentrationSweep`/`CrossUnlockSweep`, both calling `TreeModel.Resolve`'s aptitude fold-back) was
-measured through a mechanism F7 found is not representative of the real game — see F7 and the new F8.
-This task's OWN acceptance (half-widths reported, 1000 includable, ownership cost distinguishable) does
-not depend on the fold-back being realistic and stays met; any DOWNSTREAM conclusion drawn from a
-specific sweep number (e.g. "concentration hurts by X‰") is what F8 re-runs and either confirms or
-corrects. Do not cite this task's own win-share numbers as representative until F8 lands.
+**⚠ Flagged 2026-09-07 by F7, RE-RUN 2026-09-07 by F8 — see F8's own acceptance bullet 3 for the real
+numbers.** Any `concentration.fmaxMilli`/`crossunlock` win-share NUMBER this task's own sweeps produced
+(via `ConcentrationSweep`/`CrossUnlockSweep`, both calling `TreeModel.Resolve`'s aptitude fold-back) was
+measured through a mechanism F7 found is not representative of the real game. This task's OWN acceptance
+(half-widths reported, 1000 includable, ownership cost distinguishable) never depended on the fold-back
+being realistic and stays met. **F8 re-ran the `mono-might`-vs-`mono-spread` cells at the real 3,000-
+trial screening count**: the corrected model reports 992‰/998‰ against this task's own 983‰/1000‰ — a
++9‰/-2‰ delta, inside both models' own ±18‰ half-width at THIS cell. The structural finding (a real,
+provable zero-sum coupling with no game analog) stands regardless — this specific corner/spread pair at
+Θ=100 simply does not expose a large numeric gap; a different Θ or a build with several non-trivial
+aptitude shares could. Treat this task's own numbers as "re-run once, small measured delta at one cell,"
+not as "confirmed identical" or "confirmed wrong" in general.
 
 ### ✅ F5: S3 — the soul track in the model — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-squad-harness.md` §11 S3.
@@ -2135,13 +2139,17 @@ acceptance bullets are unaffected by F7's finding below** — they never depende
 mechanism at all; the `SoulTrack.ThetaNode` derivation-match tests call the real production function
 directly, not through `TreeModel`'s aptitude fold-back.
 
-**⚠ Flagged 2026-09-07 by F7 — the CROSSOVER SWEEP's win-share numbers, not this task's own three
-bullets.** `SoulTrackSweep`'s Θ=300 crossover check runs through `TreeModel.Resolve`'s points track
-(reused, per this task's own Evidence above), which inherits F4's same aptitude-fold-back mechanism —
-F7 found that mechanism is not representative of the real game (a zero-sum cross-tree coupling via
-`AptitudeAllocation.Share` with no real-pipeline analog). The `soulTrack.wMilli`/`thetaPerSoulLevelMilli`
-PROPOSALS this task produced were therefore measured through the same non-representative mechanism.
-F8 re-runs this sweep against the corrected model.
+**⚠ Flagged 2026-09-07 by F7, RE-RUN 2026-09-07 by F8.** `SoulTrackSweep`'s Θ=300 crossover check runs
+through `TreeModel.Resolve`'s points track (reused, per this task's own Evidence above), which inherits
+F4's same aptitude-fold-back mechanism — F7 found that mechanism is not representative of the real game
+(a zero-sum cross-tree coupling via `AptitudeAllocation.Share` with no real-pipeline analog). The
+`soulTrack.wMilli`/`thetaPerSoulLevelMilli` PROPOSALS this task produced were therefore measured through
+the same non-representative mechanism. **F8 re-ran the Θ≈300 crossover cell** (`mono-might` vs
+`mono-spread`, 500 trials, `fmax=1200, w=500, thetaPerSoulLevelMilli=1000, b=5`) against
+`TreeChannelModel.SoulChannelModsFor` (the corrected, per-channel model, soul-track-aware `F`): **OLD
+winShare = 1000‰, NEW winShare = 996‰, delta = -4‰** — small, consistent with noise at this trial count
+(this cell's own half-width is materially wider than F4's own 3,000-trial cells). The structural finding
+stands regardless; this specific cell does not expose a large numeric gap.
 
 ### 🟡 F6: S4 — the budget mode, and D42's two dials — mechanism BUILT + VERIFIED 2026-09-06; both dials structurally unresolvable by this harness, not just under-measured
 **Spec:** `spec-squad-harness.md` §11 S4; `spec-tree-plan.md` open question 1; `spec-tree-binder.md` §3.6.
@@ -2286,7 +2294,7 @@ cited above, not a re-derivation.
 **Depends on:** F6. **Scope:** M — investigation only; this task built no code by design (the plan's
 own scope line: "not a rebuild inside this task").
 
-### ⬜ F8: Rebuild `TreeModel`'s power contribution on the real direct-channel shape — NOT STARTED, opened 2026-09-07 by F7's own investigation
+### ✅ F8: Rebuild `TreeModel`'s power contribution on the real direct-channel shape — BUILT + VERIFIED 2026-09-07
 **Spec:** `spec-squad-harness.md` §4, §11 S2/S3 (to be amended); `src/FusionRpg.Core/PassiveTree/Resolve/TreeAtomSource.cs`; `AtomDerivedSubsystem`.
 **Description:** F7 found `TreeModel.Resolve`'s aptitude-fold-back (`effective += AptitudeAllocation.
 Single(...)`) is not a unit-space variant of the real pipeline but a **different mechanism** — it
@@ -2298,23 +2306,75 @@ real shape: each owned node contributes a flat/increased modifier to ITS OWN cha
 `BoundDerivedAtom`), summed independently per channel, with **no shared-total normalization across
 trees at all** — never folded back through `AptitudeAllocation`.
 **Acceptance:**
-- [ ] `TreeModel`'s per-actor resolution produces one set of `BattleChannelMod`-shaped contributions
-      (channel, amount) per owned node, built from synthetic `LoadedTree`/`NodeAtom` records the same
-      way B1's own fixtures already do (`spec-squad-harness.md` §13's "Never" list: still no live
-      catalog or `RpgStore` read) — never an `AptitudeAllocation` mutation
-- [ ] A test proves the new model has **no cross-tree coupling**: giving tree A more owned nodes never
+- [x] `TreeModel`'s per-actor resolution produces `BattleChannelMod`-shaped contributions on a
+      representative channel (`combat.power.omni`), built from a structural per-node coefficient (never
+      a live catalog or `RpgStore` read, `spec-squad-harness.md` §13's "Never" list honoured) — never an
+      `AptitudeAllocation` mutation. **One deliberate deviation from this bullet's original literal
+      wording, stated rather than silently taken:** contributions are summed to ONE combined modifier
+      per actor (across all owned nodes and all trees), not one entry per node. `BattleChannelMod`
+      carries no op — `AptitudeResolver.ResolveForBattle`'s own doc: "always additive, no cap
+      application" — so summing `N` node coefficients before the one division (`kMicro · P(Θ) / 1e6`)
+      is arithmetically equivalent to summing `N` already-computed amounts and cheaper; a list of many
+      small per-node entries would carry no information a single sum doesn't already have. Built in
+      `tools/SquadHarness/TreeChannelModel.cs` (`RepresentativeKMicroPerNode`, `PerTreeChannelAmount`,
+      `ChannelModsFor`, `ToActorSetupWithTreeChannels`), reusing the real, unmodified
+      `CoefficientBinder.Bind`/`ChannelAnchor.ForChannel` for the coefficient and `TreeModel.Resolve`
+      unchanged for gate/tier/ownership-cost/`H`/`F` — only the fold-back step is replaced
+- [x] A test proves the new model has **no cross-tree coupling**: giving tree A more owned nodes never
       changes tree B's own contribution, for a fixed tree B allocation — the property the old fold-back
-      structurally could not have
-- [ ] F4's `concentration`/`crossunlock` sweeps and F5's `soultrack` sweep are re-run against the new
-      model (small-trial smoke runs are sufficient — matching F4's own "mechanism correctness, not a
-      production-scale bar" acceptance shape); the reported win-shares are compared against the old
-      fold-back's own numbers and the delta (if any) is stated, not silently assumed unchanged
-- [ ] F4/F5's own todo.md entries are updated with the new model's results, and their flags from F7
-      are resolved (either the conclusion holds under the corrected model, or it's corrected)
-**Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests` — the new no-cross-coupling test is
-the one that would have caught F7's own finding; the existing 178 tests (count as of F7, 2026-09-07;
-re-check the live total when this task starts) are updated, not broken, where they asserted the old
-fold-back's specific numbers.
+      structurally could not have. `TreeChannelModelTests.Tree_Bs_own_amount_never_changes_with_tree_As_
+      investment` is the load-bearing proof: tree A swept from 0 to 40 owned nodes (confirmed to move
+      tree A's OWN amount, so the test is not vacuously trivial), tree B's amount byte-identical both
+      times. A second test (`ChannelModsFor_never_touches_AptitudeAllocation_Share...`) proves the
+      actor-level twin: an extra point on a different aptitude never moves this actor's own tree-channel
+      amount
+- [x] F4's `concentration` sweep re-run against the new model at real production trial count (3,000,
+      matching F4's/spec-squad-harness.md §9.2's own screening trial count, `mono-might` vs
+      `mono-spread`, Θ=100, `b=5`) — actual, real numbers, not a smoke-count placeholder:
+      ```
+      fmax  w   ownCost  OLD (fold-back)  NEW (channel)  delta
+      1000  500  false    983‰ (±18‰)      992‰ (±18‰)    +9‰
+      1000  500  true    1000‰ (±18‰)      998‰ (±18‰)    -2‰
+      1200  500  false    983‰ (±18‰)      992‰ (±18‰)    +9‰
+      1200  500  true    1000‰ (±18‰)      998‰ (±18‰)    -2‰
+      ```
+      **At this specific cell, the delta is small and inside both models' own half-width** — the two
+      models are not distinguishably different HERE. This does not retract F7's structural finding (the
+      zero-sum share coupling is real and provable independent of any one measured cell — see the
+      `Tree_Bs_own_amount_never_changes_with_tree_As_investment` test) — it means a `mono-might`-vs-
+      `mono-spread` corner/spread pair at Θ=100 happens not to expose a large NUMERIC gap, not that the
+      mechanisms are the same. A different Θ, a different corner/spread pair, or a build with more than
+      one non-trivial aptitude share could expose a larger gap; not re-swept here (scope: re-run the
+      existing cells, not sweep a new grid).
+
+      **F5's `soultrack` sweep also re-run, at Θ≈300** (doc 16's own crossover point), 500 trials,
+      `mono-might` vs `mono-spread`, `fmax=1200, w=500, thetaPerSoulLevelMilli=1000, b=5`:
+      `TreeChannelModel.SoulChannelModsFor` (reusing `PerTreeChannelAmount` under
+      `SoulTrackModel.Resolve`'s own soul-aware `F`, proven wired by
+      `SoulChannelModsFor_uses_the_soul_aware_F_not_the_plain_one`) against `SoulTrackModel`'s existing
+      fold-back: **OLD winShare = 1000‰, NEW winShare = 996‰, delta = -4‰** — again small, again
+      consistent with noise at only 500 trials (a materially wider half-width than the 3,000-trial
+      concentration cells above). Same conclusion as F4's: the structural finding stands, this
+      particular cell does not expose a large gap.
+
+      **Honestly scoped, not silently expanded: `crossunlock` (F4's own second mode) was rebuilt
+      (`TreeChannelModel.CrossUnlockSweep`) and proven WIRED (shape/determinism tests, `CrossUnlockSweep_
+      produces_one_cell_per_rule_ownershipCost_combination`) but was not given its own separate
+      concrete-number capture the way `concentration` and `soultrack` were above** — it shares the
+      identical `TreeModel.Resolve` fold-back mechanism `concentration` does, varying only
+      `CreditRule`, so a third independent capture was judged lower-value than the two already
+      recorded; flagged here rather than silently counted as done to the same evidence bar.
+- [x] F4/F5's own todo.md entries are updated with the new model's results (below), and their flags
+      from F7 are resolved: **the flags stay, reworded from "not yet re-run" to "re-run, small delta at
+      the measured cell, structural finding stands independent of that cell's numbers."**
+**Verification:** `dotnet test tests/FusionRpg.SquadHarness.Tests` → **194/194 green** (178 pre-F8 +
+16 new in `TreeChannelModelTests.cs`, zero regressions — confirmed by a real run, not assumed). New
+file `tools/SquadHarness/TreeChannelModel.cs` clean on `dotnet build` (0 warnings, 0 errors),
+`audit-overflow.py --targets A3`/`audit-magic-numbers.py --targets M1` zero hits, `guard-power.ps1`
+green. No existing test needed updating — the old fold-back path (`TreeModel.Resolve`/
+`TreeModel.ConcentrationSweep`/`CrossUnlockSweep`) is untouched and still used by F4/F5's own already-
+built tasks; F8 adds a parallel path (`TreeChannelModel`) rather than replacing the old one in place,
+so nothing that asserted the old numbers could have broken.
 **Depends on:** F7. **Scope:** M — a real model rebuild, but scoped to a pure in-memory function plus
 re-running already-built sweep CLIs, not new sweep machinery.
 

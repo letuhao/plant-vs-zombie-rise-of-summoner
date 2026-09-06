@@ -69,9 +69,10 @@ export function CommanderActionBar({
             }}
             className={cn(
               "flex min-w-[4.5rem] flex-col items-center rounded-md border border-border bg-panel px-2 py-1 text-xs",
+              "min-h-[3.25rem]",
               armedId === s.id && "ring-2 ring-lawn-hot",
               s.unaffordable && "border-bad text-bad",
-              s.locked && "cursor-not-allowed opacity-70"
+              s.locked && "cursor-not-allowed opacity-80 border-dashed"
             )}
           >
             <span className="font-mono text-muted">{s.slot}</span>

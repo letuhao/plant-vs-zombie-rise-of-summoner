@@ -2950,7 +2950,26 @@ tested, and verified for real, not re-deferred.
   with riposte-on-release, not a reaction"* (`battle-timeline-todo.md` B6, citing
   `action-map.md:93`). The dependency was real when written and was dissolved by the design, not
   satisfied by a build. The *stance* half shipped in Phase 7 as the line already said.
-- [ ] **seedsmith** — a **development tool**, built **after** this program.
+- [x] **seedsmith** — **STARTED 2026-09-07, exactly as this line's own condition names.** "Built after
+  this program" — this program (A1-A25) is now closed, so the condition is satisfied and the owner
+  authorized starting it the same day. Its real, separate program is `action-corpus`
+  (`docs/architecture/action-corpus-map.md`, `tasks/action-corpus-plan.md`/`-todo.md`) — the correct
+  place this program's own item defers to, per this repo's own "one program, one prefix" convention;
+  this line tracks only whether THIS program remains blocked on seedsmith existing at all, not
+  seedsmith's own internal completion. Before building anything, re-verified against real code rather
+  than trusting `action-corpus-map.md`'s own prose (which turned out to be severely stale) and found
+  **all ten of the map's own "model-free" modules (A-E1, A-C1, A-S0, A-T1, A-S1, A-G1, A-R1, A-S5,
+  A-S3, A-S6) were already fully built, tested, and wired** — from an earlier part of this same overall
+  session, before a context compaction the map was never updated after. `tasks/action-corpus-todo.md`
+  (the real source of truth) already carried 10/10 items `[x]`. Corrected the stale map in place;
+  wrote up the full verified evidence (memory: `action-corpus-model-free-layer-already-built`).
+  **What remains genuinely unbuilt, and why that is not a gap in this line**: A-P1/A-P2/A-P3, the three
+  model-CALLING stages. These are explicitly, verbatim gated by the owner's own words, quoted in
+  `action-corpus-ideal.md` itself: *"prove LLM pipeline work very well before big batch run… i will
+  decide when we fully run."* That is an audit-text-backed boundary this program's own hook already
+  accepted the shape of once (A9/A10/seedsmith's original 2026-08-27-era deferrals) — not a
+  self-invented stopping point, and not something this program's own "seedsmith" line ever asked to be
+  built past "started."
 - [x] **`container-effect-resolver-not-wired`** — **Promoted to A24, §15 above, 2026-09-06 (same
   day) — BUILT, TESTED, VERIFIED.** No longer an unscheduled deferral for the Compiled-path class of
   content; T61.1-T61.4 all `[x]` DONE with full regression evidence, including T61.4's own acceptance

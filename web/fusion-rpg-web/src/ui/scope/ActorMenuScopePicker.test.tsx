@@ -73,16 +73,18 @@ describe("ActorMenuScopePicker", () => {
     expect(screen.getByTestId("scope-relation-ally")).toHaveAttribute("aria-checked", "false");
   });
 
-  it("Target and UniqueDemon modes both render through the real ActorListPickerPanel, not a lookalike", async () => {
+  it("Target and UniqueDemon modes both render through shared ActorCollection (T11)", async () => {
     const user = userEvent.setup();
     render(<Harness />);
 
     await user.click(screen.getByTestId("scope-mode-target"));
     expect(screen.getByTestId("scope-target-list")).toBeInTheDocument();
+    expect(screen.getByTestId("scope-target-collection")).toBeInTheDocument();
     expect(screen.getByTestId("actor-row")).toHaveTextContent("Emberling");
 
     await user.click(screen.getByTestId("scope-mode-unique-demon"));
     expect(screen.getByTestId("scope-uniqueDemon-list")).toBeInTheDocument();
+    expect(screen.getByTestId("scope-uniqueDemon-collection")).toBeInTheDocument();
     expect(screen.getByTestId("actor-row")).toHaveTextContent("Ashkell");
   });
 
@@ -90,8 +92,8 @@ describe("ActorMenuScopePicker", () => {
     const user = userEvent.setup();
     render(<Harness />);
     await user.click(screen.getByTestId("scope-mode-target"));
-    await user.click(screen.getByTestId("scope-target-option-a1"));
-    expect(screen.getByTestId("scope-target-option-a1")).toHaveAttribute("aria-pressed", "true");
+    await user.click(screen.getByTestId("scope-target-collection-item-a1"));
+    expect(screen.getByTestId("scope-target-collection-item-a1")).toHaveAttribute("data-selected", "true");
   });
 
   it("Type mode round-trips the exact typeIds selected", async () => {
@@ -139,6 +141,6 @@ describe("ActorMenuScopePicker", () => {
     render(<StartedOnRelation />);
     await user.click(screen.getByTestId("scope-mode-target"));
     // Target's panel must not interpret the leftover relation value as a selected target.
-    expect(screen.getByTestId("scope-target-option-a1")).toHaveAttribute("aria-pressed", "false");
+    expect(screen.getByTestId("scope-target-collection-item-a1")).toHaveAttribute("data-selected", "false");
   });
 });

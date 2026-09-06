@@ -1,15 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderWithProviders } from "@/test/render";
 import { PLAYER_PENDING, adaptCommanderSheet } from "@/contract/adapt";
 import { known, pendingWithReason } from "@/contract/pending";
 import type { ActorView } from "@/contract/types";
+import { actorSurfaceFixture } from "@/lib/bus/actorSurface";
 import type { ActorRungState } from "./actorRungState";
-import { ActorPanel } from "./ActorPanel";
+import { ActorPanel, ActorSheet } from "./ActorPanel";
+import { resetActorSheetObsForTests } from "./actorSheetObs";
 
-// Matches adaptActor's own real behavior: these four fields are unconditionally "pending" (a real
-// reason string), never "absent" — PendingNote only renders for the "pending" state.
 function readyState(): ActorRungState {
   const data: ActorView = {
     instanceId: "a1",
@@ -30,38 +30,79 @@ function readyState(): ActorRungState {
   return { kind: "ready", data };
 }
 
-describe("ActorPanel", () => {
+describe("ActorPanel (catalog-era)", () => {
+  beforeEach(() => {
+    window.__fusionRpgActorSurface = actorSurfaceFixture();
+    resetActorSheetObsForTests();
+  });
+
+  it("exports ActorSheet as an alias of ActorPanel", () => {
+    expect(ActorSheet).toBe(ActorPanel);
+  });
+
+  it("uses the near-fullscreen actorSheet size bound", () => {
+    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    const panel = screen.getByTestId("actor-panel");
+    expect(panel.className).toContain("h-[min(960px,92vh)]");
+    expect(panel.className).toContain("w-[min(1800px,96vw)]");
+  });
+
   it("still short-circuits non-ready states to RungStateFallback before any tab bar renders", () => {
     render(<ActorPanel state={{ kind: "loading" }} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("actor-panel-loading")).toBeInTheDocument();
     expect(screen.queryByTestId("actor-sheet-tabs")).not.toBeInTheDocument();
   });
 
-  it("renders all six real tabs for a ready actor", () => {
+  it("renders eight catalog tabs from actor-sheet.v1.json", () => {
     render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
-    expect(screen.getByTestId("actor-sheet-tab-overview")).toBeInTheDocument();
-    expect(screen.getByTestId("actor-sheet-tab-progression")).toBeInTheDocument();
-    expect(screen.getByTestId("actor-sheet-tab-derived-stats")).toBeInTheDocument();
-    expect(screen.getByTestId("actor-sheet-tab-actions")).toBeInTheDocument();
-    expect(screen.getByTestId("actor-sheet-tab-passives")).toBeInTheDocument();
-    expect(screen.getByTestId("actor-sheet-tab-gear")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-condition")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-aptitudes")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-derived")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-shield")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-status")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-elements")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-kit")).toBeInTheDocument();
+    expect(screen.getByTestId("actor-sheet-tab-paths")).toBeInTheDocument();
+    expect(screen.queryByTestId("actor-sheet-tab-overview")).not.toBeInTheDocument();
   });
 
-  it("defaults to Overview, showing today's real Standing and Element-typing content unchanged", () => {
+  it("defaults to Condition with honest Standing / xpToNext pending (never fabricated)", () => {
     render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
     expect(screen.getByTestId("actor-standing-pending")).toBeInTheDocument();
-    expect(screen.getByTestId("actor-element-pending")).toBeInTheDocument();
+    expect(screen.getByTestId("condition-xp-pending")).toBeInTheDocument();
+    expect(screen.getByTestId("condition-xp-count")).toHaveTextContent(/2[,.]?140|2140/);
+  });
+
+  it("Condition iterates every resource-catalog row including poise with plant Sun label", () => {
+    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    expect(screen.getByTestId("condition-resource-poise")).toBeInTheDocument();
+    expect(screen.getByTestId("condition-resource-hunger")).toHaveTextContent("Sun");
   });
 
   it("switching tabs shows only the active tab's own content", async () => {
     const user = userEvent.setup();
     render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
 
-    await user.click(screen.getByTestId("actor-sheet-tab-gear"));
+    await user.click(screen.getByTestId("actor-sheet-tab-kit"));
     expect(screen.queryByTestId("actor-standing-pending")).not.toBeInTheDocument();
+    expect(screen.getByTestId("kit-tab")).toBeInTheDocument();
+    expect(screen.getByTestId("kit-equip-pending")).toBeInTheDocument();
 
-    await user.click(screen.getByTestId("actor-sheet-tab-overview"));
+    await user.click(screen.getByTestId("actor-sheet-tab-condition"));
     expect(screen.getByTestId("actor-standing-pending")).toBeInTheDocument();
+  });
+
+  it("Shield tab stays honest pending and never says Ward", async () => {
+    const user = userEvent.setup();
+    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    await user.click(screen.getByTestId("actor-sheet-tab-shield"));
+    expect(screen.getByTestId("actor-shield-pending")).toBeInTheDocument();
+    expect(screen.getByTestId("shield-tab").textContent).not.toMatch(/Ward/i);
+  });
+
+  it("emits sheet open observability", () => {
+    render(<ActorPanel state={readyState()} open onOpenChange={vi.fn()} />);
+    expect(window.__fusionRpgActorSheetObs?.[0]?.channel).toBe("actor-sheet.open");
   });
 
   it("Release and Deploy each close the panel", async () => {
@@ -159,7 +200,7 @@ describe("ActorPanel", () => {
     expect(onDefendLawn).toHaveBeenCalledTimes(1);
   });
 
-  it("commander role can switch to Progression without Deploy or Release", async () => {
+  it("commander role can switch to Aptitudes without Deploy or Release", async () => {
     const user = userEvent.setup();
     const state: ActorRungState = {
       kind: "ready",
@@ -193,7 +234,7 @@ describe("ActorPanel", () => {
         onOpenCommandersList={vi.fn()}
       />
     );
-    await user.click(screen.getByTestId("actor-sheet-tab-progression"));
+    await user.click(screen.getByTestId("actor-sheet-tab-aptitudes"));
     expect(screen.getByTestId("actor-panel")).toBeInTheDocument();
     expect(screen.queryByTestId("actor-panel-deploy")).not.toBeInTheDocument();
     expect(screen.queryByTestId("actor-panel-release")).not.toBeInTheDocument();

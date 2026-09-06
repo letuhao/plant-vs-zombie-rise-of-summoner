@@ -126,6 +126,21 @@ QUEST_SYSTEM_PROMPT = (
 )
 
 
+#: `spec-delve-quests.md:79-82`'s own real, mechanical definition of scope -- WHICH FACT SOURCE the
+#: quest's completion predicate reads, never a difficulty or a narrative register on its own. Real
+#: finding, 2026-09-07: a first live batch measured a HIGH `name_collision` rate specifically
+#: between different scopes of the SAME template (`bring-demon-home-alive` at `delve` vs `domain`
+#: vs `roster` produced the identical name twice) -- the brief gave the model no reason to write a
+#: different name for the "same ask evaluated differently" shape scope actually is. This hint
+#: grounds a real, accurate distinction (never an invented one) so `name`/`flavor` can legitimately
+#: differ without pretending scope is a difficulty knob.
+_SCOPE_HINT = {
+    "delve": "Judged by what happens during this one descent alone -- an immediate task for this run.",
+    "domain": "Judged across every attempt the player has made at this same domain -- a standing task tied to the place, not one run.",
+    "roster": "Judged by what becomes of the party's own demons at extraction -- a task about who comes home, not where.",
+}
+
+
 def build_quest_brief(cell: Cell, template_id: str, scope: str, target_kind: str) -> str:
     """The user-facing brief -- names the cell's own fixed facts so the model writes `name`/
     `flavor` that actually fit the template, without repeating the schema's own enum lists (those
@@ -139,7 +154,9 @@ def build_quest_brief(cell: Cell, template_id: str, scope: str, target_kind: str
         "item-kind": "a kind of item the party must carry out of the domain",
     }[target_kind]
     return (
-        f"Objective template: {template_id}. Scope: {scope} (which record this quest's completion "
-        f"is checked against). Target: {kind_hint}. Write `name` (a short quest title) and "
-        f"`flavor` (one to two sentences) that fit this exact template and target -- nothing else."
+        f"Objective template: {template_id}. Target: {kind_hint}. "
+        f"{_SCOPE_HINT[scope]} Write a `name` (a short quest title) and `flavor` (one to two "
+        f"sentences) that fit this exact template, target and scope -- a quest at a different scope "
+        f"needs a genuinely different name and flavor, even for the same objective template, since "
+        f"what earns it and who it is about are different. Nothing else."
     )

@@ -1,13 +1,32 @@
 import Phaser from "phaser";
-import type { PtrEntityRegistry } from "../entities/PtrEntityRegistry";
+import type { PtrEntityRegistry, PtrViewRecord } from "../entities/PtrEntityRegistry";
 import { worldToCell } from "../gridMath";
 import { lawnBusEmit, type LawnSelectPayload } from "../EventBus";
 
 export { worldToCell };
 
+/** Walk GameObject → parentContainer chain to find a registered lawn entity (HUD children included). */
+export function findRegistryRecordForGameObject(
+  registry: PtrEntityRegistry,
+  go: Phaser.GameObjects.GameObject
+): PtrViewRecord | undefined {
+  let cur: Phaser.GameObjects.GameObject | null = go;
+  while (cur) {
+    for (const rec of registry.entries()) {
+      if (rec.go === cur) return rec;
+    }
+    const next: Phaser.GameObjects.GameObject | null =
+      ((cur as unknown as { parentContainer?: Phaser.GameObjects.GameObject | null }).parentContainer) ??
+      null;
+    cur = next;
+  }
+  return undefined;
+}
+
 /**
  * Wire pick handlers. Returns unsubscribe (RT-07 / pick leak fix).
  * Emits at most one lawn:select per pointer down.
+ * T12: Band B HUD / child hits resolve to the parent occupant container.
  */
 export function wirePickSystem(
   scene: Phaser.Scene,
@@ -22,25 +41,17 @@ export function wirePickSystem(
     go: Phaser.GameObjects.GameObject
   ) => {
     if (handledThisDown) return;
-    for (const rec of registry.entries()) {
-      if (go === rec.go) {
-        handledThisDown = true;
-        pointer.event?.stopPropagation?.();
-        lawnBusEmit("lawn:select", {
-          generation,
-          kind:
-            rec.side === "grid"
-              ? "tile"
-              : rec.side === "mower" || rec.side === "pet"
-                ? "occupant"
-                : "occupant",
-          ptr: rec.side === "grid" ? undefined : rec.ptr,
-          row: rec.row,
-          col: rec.col
-        } satisfies LawnSelectPayload);
-        return;
-      }
-    }
+    const rec = findRegistryRecordForGameObject(registry, go);
+    if (!rec) return;
+    handledThisDown = true;
+    pointer.event?.stopPropagation?.();
+    lawnBusEmit("lawn:select", {
+      generation,
+      kind: rec.side === "grid" ? "tile" : "occupant",
+      ptr: rec.side === "grid" ? undefined : rec.ptr,
+      row: rec.row,
+      col: rec.col
+    } satisfies LawnSelectPayload);
   };
 
   const onPointerDown = (pointer: Phaser.Input.Pointer) => {

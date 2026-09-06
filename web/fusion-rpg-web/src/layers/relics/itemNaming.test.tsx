@@ -5,6 +5,7 @@ import { adaptArmouryItem, adaptArmouryRow, adaptCombination } from "@/contract/
 import { known } from "@/contract/pending";
 import { renderWithProviders } from "@/test/render";
 import type { ContainerView } from "@/contract/types";
+import { actorSurfaceFixture } from "@/lib/bus/actorSurface";
 import { CompareView } from "./CompareView";
 import { Compendium } from "./Compendium";
 import { ItemCard } from "./ItemCard";
@@ -229,6 +230,7 @@ describe("T3 surface 1 — the equip-target option", () => {
 
 describe("T3 surface 2 — the comparison's delta labels", () => {
   it("labels a delta row with the channel's own words, not its registered id", () => {
+    window.__fusionRpgActorSurface = actorSurfaceFixture();
     renderWithProviders(
       <CompareView
         candidate={card()}
@@ -257,7 +259,7 @@ describe("T3 surface 2 — the comparison's delta labels", () => {
 
     const row = screen.getByTestId("compare-delta-combat.crit.rate.fire");
     expectNoRawId(row);
-    expect(row).toHaveTextContent("Combat crit rate fire");
+    expect(row).toHaveTextContent("Crit chance · Fire");
     // The id is still reachable for a debug read — as an attribute, which is not text content.
     expect(row.querySelector("[title]")).toHaveAttribute("title", "combat.crit.rate.fire");
   });

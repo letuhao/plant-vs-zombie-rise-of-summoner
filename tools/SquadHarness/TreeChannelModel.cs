@@ -192,6 +192,74 @@ public static class TreeChannelModel
         return ToPairResult(attacker.Id, defender.Id, victories, defeats, stalemates);
     }
 
+    // ---- S3 re-run: SoulTrackModel's own fold-back inherits the identical defect ---------------------
+
+    /// <summary>The soul-track twin of <see cref="ChannelModsFor"/> -- <see cref="SoulTrackModel.Resolve"/>
+    /// computes the SAME final two-line fold-back (`effectivePoints = p_i + F·W_i`,
+    /// <c>SoulTrackModel.cs:96-97</c>) as <see cref="TreeModel.Resolve"/>, just under an `F` recomputed
+    /// from BOTH tracks' `H`. This reuses <see cref="PerTreeChannelAmount"/> unchanged, swapping in
+    /// <see cref="SoulTrackModel.ActorSoulResult.FMilli"/> (the soul-aware `F`) for the plain one --
+    /// proving the channel fix transfers to F5's own extension, not just F4's.</summary>
+    public static IReadOnlyList<BattleChannelMod> SoulChannelModsFor(
+        AptitudeAllocation allocation, long theta, long fmaxMilli, long wMilli, long b,
+        bool includeOwnershipCost, TreeModel.CreditRule rule, long thetaPerSoulLevelMilli,
+        PassiveTreeTuning treeTuning, PowerTuning powerTuning)
+    {
+        var pointsOnly = TreeModel.Resolve(allocation, theta, fmaxMilli, wMilli, b, includeOwnershipCost, rule);
+        var soulResolved = SoulTrackModel.Resolve(allocation, theta, fmaxMilli, wMilli, b, includeOwnershipCost, rule, thetaPerSoulLevelMilli);
+
+        var kMicroPerNode = RepresentativeKMicroPerNode(treeTuning, powerTuning);
+        var ladder = new PowerLadder(powerTuning);
+        var fMultiplier = soulResolved.FMilli / 1000.0; // the soul-track-AWARE F, not TreeModel's plain one
+
+        long total = 0;
+        foreach (var tree in pointsOnly.Trees)
+            checked { total += PerTreeChannelAmount(tree, kMicroPerNode, ladder, theta, fMultiplier); }
+
+        return total == 0
+            ? Array.Empty<BattleChannelMod>()
+            : new[] { new BattleChannelMod(RepresentativeChannel, total) };
+    }
+
+    public static BattleActorSetup ToActorSetupWithSoulChannels(
+        string key, string side, AptitudeAllocation allocation, int theta,
+        long fmaxMilli, long wMilli, long b, bool includeOwnershipCost, TreeModel.CreditRule rule,
+        long thetaPerSoulLevelMilli, PassiveTreeTuning treeTuning, PowerTuning powerTuning)
+    {
+        var baseSetup = SquadMatch.ToActorSetup(key, side, allocation, theta);
+        var soulMods = SoulChannelModsFor(allocation, theta, fmaxMilli, wMilli, b, includeOwnershipCost, rule, thetaPerSoulLevelMilli, treeTuning, powerTuning);
+        return soulMods.Count == 0 ? baseSetup : baseSetup with { ChannelMods = baseSetup.ChannelMods.Concat(soulMods).ToList() };
+    }
+
+    /// <summary>One (attacker, defender) cell under the soul-aware channel model -- the soul-track
+    /// twin of <see cref="MeasurePairWithTreeChannels"/>.</summary>
+    public static PairResult MeasureSoulPairWithTreeChannels(
+        RosterEntry attacker, RosterEntry defender, RunSpec spec,
+        long fmaxMilli, long wMilli, long b, bool includeOwnershipCost, TreeModel.CreditRule rule,
+        long thetaPerSoulLevelMilli)
+    {
+        if (spec.Theta <= 0 || spec.Theta > int.MaxValue)
+            throw new ArgumentOutOfRangeException(nameof(spec), spec.Theta, "theta must be 1..int.MaxValue");
+        var theta = (int)spec.Theta;
+        var treeTuning = PassiveTreeTuningHub.Tuning;
+        var powerTuning = PowerTuningHub.Tuning;
+
+        long victories = 0, defeats = 0, stalemates = 0;
+        for (var k = 0L; k < spec.Trials; k++)
+        {
+            var seed = Seeds.Mix(spec.RunSeed, attacker.Id, defender.Id, k);
+            var squad = attacker.Actors
+                .Select((a, i) => ToActorSetupWithSoulChannels($"squad:{i}", "squad", a, theta, fmaxMilli, wMilli, b, includeOwnershipCost, rule, thetaPerSoulLevelMilli, treeTuning, powerTuning))
+                .ToList();
+            var wave = defender.Actors
+                .Select((a, i) => ToActorSetupWithSoulChannels($"wave:{i}", "wave", a, theta, fmaxMilli, wMilli, b, includeOwnershipCost, rule, thetaPerSoulLevelMilli, treeTuning, powerTuning))
+                .ToList();
+            var report = BattleEngine.Resolve(new BattleSetup { Squad = squad, Wave = wave }, seed);
+            Tally(report.Outcome, ref victories, ref defeats, ref stalemates);
+        }
+        return ToPairResult(attacker.Id, defender.Id, victories, defeats, stalemates);
+    }
+
     // ---- S2 re-run: same cell shape TreeModel.ConcentrationSweep/CrossUnlockSweep already report -----
 
     /// <summary>F8's own re-run of <see cref="TreeModel.ConcentrationSweep"/> against the corrected

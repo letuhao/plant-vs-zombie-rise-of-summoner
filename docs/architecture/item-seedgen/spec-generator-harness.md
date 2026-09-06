@@ -5,74 +5,132 @@
 
 ## Objective
 
-One shared resume/append/reconcile/selective-overwrite base every generator in this program builds on,
-so eight modules don't each invent their own ledger, and none of them defaults to a destructive
-full-corpus overwrite. Not a new pattern: `setgen` already proved this at ~1,800-entry scale
-(`adapters/items/setgen/run.py`: *"Resume is not optional... The ledger is a single JSON file keyed by
-subject id, written after each subject completes... reuses [the demon harness's] atomic file lock
-discipline"*). This module extracts that logic into a shared, reusable piece and adds the one thing it
-doesn't do yet: validate an existing entry's actual shape before trusting a ledger hit, so a corpus a
-hand edit broke out of band gets reconciled, not silently skipped.
+Two pieces every generator in this program builds on, so eight modules don't each invent their own
+resume logic and dependency checking:
 
-**Target users:** every other `item-seedgen` module's own generator command; indirectly, whoever runs
-those commands (the owner, or a future automated build pass).
+1. **`RunLedger`** — resume/append/reconcile/selective-overwrite for one corpus, generalizing `setgen`'s
+   already-proven pattern (`adapters/items/setgen/run.py`: *"Resume is not optional... The ledger is a
+   single JSON file keyed by subject id... reuses [the demon harness's] atomic file lock discipline"*).
+2. **`DependencyValidator`** — a deterministic, cross-corpus reference-resolution engine. **Amended
+   2026-09-07, before this module was ever built, after auditing the real content shapes**: a recipe's
+   `outputRef` names an exact container id that must exist before the recipe is meaningful
+   (`recipes.json:30`: `"outputKind": "container", "outputRef": "item.humanoid-torso-a-001"`); a set's
+   member references a `(role, frame)` CATEGORY, not a specific id (`setgen/schema.py:104-107`); a
+   combination's ingredients reference a gem FAMILY category (`combogen/schema.py:92-98`). One
+   corpus-local "is this entry's own shape valid" check (what the original draft of this spec described)
+   cannot catch any of these — a set can be perfectly well-formed and still name a `(role, frame)`
+   combination zero real base-types satisfy. This module closes that gap.
 
-## 2. Acceptance criteria
+**Target users:** every other `item-seedgen` module's own generator command.
 
-1. A shared `RunLedger` (or equivalently-named) component: given a list of subject ids and an
-   `is_valid(subject_id, entry) -> bool` check the caller supplies, returns exactly the subjects that
-   need work — never-attempted ones, and ones whose CURRENT on-disk entry fails `is_valid` (not just
-   ones missing a ledger row).
-2. The ledger file itself is written via temp-file-then-atomic-replace, matching the demon harness's
-   already-proven discipline — a killed process mid-run leaves the ledger in its last-good state, never
-   half-written.
-3. Default CLI shape, standardized across every module that uses this harness: `--write` runs
-   append+reconcile (the default, always). `--overwrite <id[,id...]>` explicitly regenerates named
-   subjects even if `is_valid` would have skipped them. `--overwrite all` regenerates the whole corpus —
-   present, but never the default, and requires the explicit literal `all`, not a bare `--overwrite`.
-4. Reconcile is demonstrably NOT "was there a ledger row" — a test corpus with a structurally invalid
-   entry AND a ledger row claiming it's done must still be re-queued.
-5. A dry-run mode (`--dry-run`) reports what WOULD be generated/reconciled/overwritten without writing,
-   matching `setgen`'s own existing dry-run convention (referenced in its module docstring).
+## Design — the two reference kinds, and why they need different resolution
 
-## 3. Commands / interfaces touched
+**Hard reference** — an entry names an EXACT id in another corpus. `recipes.json`'s `outputKind:
+"container"`/`"material"` entries. Resolution: does `outputRef` exist verbatim in the target corpus?
+Binary, no ambiguity.
 
-- New shared module, likely `tools/seedsmith/seedsmith/pipeline/run_ledger.py` (alongside the existing
-  cross-adapter `pipeline/llm_caller.py`, `pipeline/model.py`) — a library, not its own CLI entry point.
-- Every module 2-10 below imports and uses this rather than writing its own resume logic.
+**Categorical reference** — an entry names a SELECTOR (role+frame, a family enum) that some entry in
+another corpus must satisfy, but not a specific id — this is the seed-to-concrete model working exactly
+as intended (module 4's own principle: a set names a slot shape, the runtime binds a specific instance
+per player, per [[seed-to-concrete-generator-principle]]). Resolution: does AT LEAST ONE entry in the
+target corpus satisfy the selector? A set requiring `(role: weapon, frame: plant)` with zero base-types
+matching that combination is a real, silent coverage gap no per-entry validity check would ever surface.
 
-## 4. Project structure
+**No reference** — `recipes.json`'s `outputKind: "mutation"` entries (reroll/enhance/salvage/bore/socket)
+operate on a player's already-owned instance; there is no NEW target content to resolve. (Their
+`costLines[].material` entries are still hard references, into `materials-gen`'s corpus.)
 
-```text
-tools/seedsmith/seedsmith/pipeline/run_ledger.py    new — RunLedger class, atomic write, plan_run()
-tools/seedsmith/tests/test_run_ledger.py            new — the acceptance criteria above, as tests
+**One open question this module does not resolve unilaterally**: consumables' `family` field
+(`k1.json`: `atom.vitality`, `atom.fortitude`, `atom.mending`...) does not match ANY id shape this
+program's own `affix-families-gen` produces (`atom.ferocity`-style, from `g-attack`/`g-life`/
+`g-armour`) — these look like a DIFFERENT, likely effect-atom-owned vocabulary this program does not
+generate at all. **Ask-first, named explicitly in `consumables-gen`'s own spec**: confirm the real source
+of these ids (an existing, already-populated effect-atom corpus, most likely) before assuming this
+program owns generating it. Never guess a corpus into existence to make a reference resolve.
+
+## Acceptance criteria
+
+**RunLedger (as originally specced):**
+1. Given subject ids and an `is_valid(id, entry) -> bool` check, returns exactly the ids needing work —
+   never-attempted ones, and ones whose on-disk entry now fails `is_valid`.
+2. Atomic temp-file-then-replace writes; a killed process leaves the ledger in its last-good state.
+3. Standard CLI shape: `--write` (default, append+reconcile), `--overwrite <id[,id...]>`,
+   `--overwrite all` (the literal `all` required), `--dry-run`.
+
+**DependencyValidator (new):**
+4. Each module declares a **reference manifest**: for each field that references another corpus, its
+   kind (`hard` | `categorical`) and target module. A manifest entry is data (a small declared table),
+   never inferred by scanning field names.
+5. `validate(corpus, manifest, targets) -> ValidationReport` — for every entry, every declared
+   reference, reports `resolved: bool` and, for categorical refs, the resolved count (so "resolves, but
+   only barely — 1 match" is visible, not just pass/fail).
+6. `plan_backfill(report) -> BackfillPlan` — for each UNRESOLVED hard reference whose target id matches
+   the OWNING module's own naming convention (e.g. `item.<frame>-<slot>-<letter>-<seq>` for base-types),
+   emits a targeted generation request naming that EXACT id to the owning module's own generator — never
+   a generic "make something." For an unresolved categorical reference, emits a targeted request naming
+   the missing `(selector)` combination specifically (e.g. "generate at least one base-type with
+   `role=weapon, frame=plant`"), not an arbitrary new entry.
+7. **Determinism, proven not asserted**: `validate` and `plan_backfill` take no model/LLM call anywhere
+   in their own logic — running either twice against the same on-disk state produces byte-identical
+   output. Backfill's ACTUAL content generation (the targeted request handed to the owning module) still
+   goes through that module's own brief-and-answer authoring — the DECISION of what's missing and that
+   it must be generated is deterministic; the prose/identity of the generated fix is not, and was never
+   claimed to be.
+8. A missing reference that does not match any known owning module's naming/selector convention is
+   reported, never guessed at — `plan_backfill` names it as `unresolvable: true` with the raw reference
+   value, and the run refuses to proceed past it without an explicit `--ignore-unresolved <id>` override
+   (never a silent skip).
+
+## Commands / interfaces touched
+
+```
+python -m seedsmith items validate --deps            # runs DependencyValidator across every declared
+                                                       # manifest, reports resolved/unresolved/coverage
+python -m seedsmith items validate --deps --backfill  # also executes plan_backfill's targeted requests
+                                                       # against each gap's real owning generator
 ```
 
-## 5. Code style
+## Project structure
 
-Match `setgen/run.py`'s own established shape and docstring density — this is a direct generalization
-of code that already exists and already works, not a fresh design. Reuse the demon harness's atomic-lock
-primitive rather than re-implementing file locking a second time (grep `adapters/demons/run/` for the
-existing implementation before writing a new one).
+```text
+tools/seedsmith/seedsmith/pipeline/run_ledger.py         new — RunLedger, as originally specced
+tools/seedsmith/seedsmith/pipeline/dependency_validator.py   new — reference manifest, validate(),
+                                                              plan_backfill()
+tools/seedsmith/tests/test_run_ledger.py                 new
+tools/seedsmith/tests/test_dependency_validator.py       new
+```
 
-## 6. Testing strategy
+## Code style
 
-- Resume: seed a partial ledger, confirm `plan_run` returns only the unattempted subjects.
-- Reconcile: seed a full ledger claiming everything done, corrupt one on-disk entry, confirm that one
-  subject is returned by `plan_run` despite its ledger row.
-- Overwrite: `--overwrite one-id` touches only that id; every other valid entry is byte-unchanged.
-- Overwrite-all requires the literal `all`; any other value is refused, not silently treated as one id.
-- Kill-mid-run simulation (write ledger, `os._exit` or equivalent before completion) leaves the ledger
-  parseable and consistent with what was actually completed.
+`RunLedger`: match `setgen/run.py`'s own shape, reusing the demon harness's atomic-lock primitive.
+`DependencyValidator`: the reference manifest is a plain data structure (a list of
+`(field_path, kind, target_module)` tuples) that each module's own `run.py` supplies — this module never
+introspects another module's schema to guess references; guessing is exactly the ambiguity a declared
+manifest exists to remove.
 
-## 7. Boundaries
+## Testing strategy
 
-**Always:** use this harness for any generator producing more than one entry. Default every module's
-`--write` to append+reconcile.
+- RunLedger: resume, reconcile-detects-corruption, overwrite-by-id, overwrite-all-requires-literal,
+  kill-mid-run — as originally specced.
+- Hard-reference test: a recipe's `outputRef` pointing at a real base-type resolves; pointing at a
+  fabricated one does not, and is reported with the raw unresolved id.
+- Categorical-reference test: a set requiring `(role, frame)` with zero satisfying base-types is
+  reported unresolved with count `0`; with one satisfying base-type, resolved with count `1` (visible,
+  not just "pass").
+- Determinism test: run `validate` twice against identical on-disk state, assert byte-identical reports.
+- Backfill test: an unresolved hard reference matching a real naming convention produces a targeted
+  generation request naming that exact id — not a generic "generate one more entry" request.
+- Unresolvable test: a reference matching no known convention is reported `unresolvable: true` and the
+  run refuses without an explicit override — never silently skipped.
 
-**Ask first:** nothing structural here — this module's whole point is removing a class of destructive
-default, not introducing a new gate.
+## Boundaries
 
-**Never:** let append-mode silently accept a structurally invalid existing entry because a ledger row
-merely exists. Never make `--overwrite all` reachable by a bare flag with no value — the literal `all`
-is required, so a typo'd `--overwrite` (no argument) fails loudly rather than defaulting to "everything."
+**Always:** declare every cross-corpus reference in a module's manifest before that module ships;
+resolve categorical references by count, not by boolean presence, so "barely covered" stays visible.
+
+**Ask first:** consumables' real `family` vocabulary source, per the Design section above — do not
+assume this program owns generating it.
+
+**Never:** let `plan_backfill` invent an id or a selector value that doesn't already appear as a real,
+declared reference somewhere in the corpus being validated. Never let an unresolved reference pass
+silently — report or refuse, never both-are-fine-by-default.

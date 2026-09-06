@@ -115,11 +115,66 @@ why in a comment. Nothing computes a private `f(level)`: contests read `Θ`, mag
     `D`-deleted via `git status`, none touching a dungeon file), zero new failures.
   - Files (this update): `tools/seedsmith/seedsmith/adapters/dungeon/{registries,schema}.py`,
     `tools/seedsmith/tests/{test_dungeon_registries,test_dungeon_contract}.py`.
-  - Real remaining scope for D1.10 itself, unchanged in kind, smaller in size now that the vocabulary question
-    is settled: build `pipelines.py` + `briefs.py` (the actual permute/vote/self-heal AI-pipeline machinery,
-    mirroring `adapters/items/uniques/{briefs,pipelines}.py`'s own proven D4.29 shape) on top of the now-real
-    theme/motif input, then run a real first-ship content pass for quest/event/encounter/room/domain, in the
-    seed contract's own layer order.
+  - **Built, 2026-09-07 — `pipelines.py`/`briefs.py` now exist for real, proven against the live local
+    model, not just unit-tested.** `dungeon-quest` chosen as the first AUTHORED-field kind (layer 0,
+    structurally the most tractable: 9 objective templates × 3 scopes = 27 cells, 11 required fields).
+    **Real design finding, not in the spec's own looser prose**: `spec-dungeon-seed-contract.md` §1.5
+    marks THREE fields "AUTHORED, voted" (`name`, `countBand`, `rewardBand`), not one like uniques —
+    `countBand`/`rewardBand` are abstract mechanical parameters with no narrative coupling to `flavor`,
+    so voting each independently (unlike uniques' single-field vote) carries none of the "recombined,
+    incoherent flavor" risk `items/uniques/pipelines.py` documented for its own design; a 1-1-1 split on
+    ANY of the three makes the whole entry `unresolved`, never a partial guess. **A second real finding**:
+    `targetRef`'s own legal vocabulary is template-conditional and genuinely three different corpora,
+    resolved by reading the real C# consumers directly rather than the spec's vaguer "room kind, event
+    kind, species family": `room-kind` → the 11 real room kinds; `curio-kind` → `EVENT_KIND` (confirmed
+    via `QuestProgress.cs:39`'s own `e.Kind == quest.TargetRef` comparing against an EVENT's kind, not a
+    curio sub-type despite the template's name); `item-kind` → `ItemRole.cs`'s own 15 real roles (no
+    committed registry exists for these, cited directly per the `ELEMENTS`/`THREAT_BAND` precedent
+    already in `schema.py`) minus the reserved, never-generated 16th (`Standard`). `kill-boss`'s own
+    `targetKind: "boss"` does NOT need a targetRef (only one boss per domain) — confirmed against
+    `QuestCatalog.cs`'s own `needsTargetRef` check rather than assumed from the registry's naming.
+  - Built: `adapters/dungeon/briefs.py` (new) — `target_ref_candidates_for`, `build_quest_schema_for_cell`
+    (the REAL per-cell schema a live call uses; `schema.py`'s own `build_quest_schema()` stays the
+    unparameterized audit/documentation view), `build_quest_brief`/`QUEST_SYSTEM_PROMPT`.
+    `adapters/dungeon/pipelines.py` (new) — `run_quest_draws`, mirroring `items/uniques/pipelines.py`'s
+    own `_permute_schema_enums`/`_call_and_parse` shape (guarded against that module's own self-caught
+    mutate-the-input bug from the start, not re-discovered), extended with the real three-way vote.
+    33 new Python tests (`test_dungeon_quest_briefs.py` 19, `test_dungeon_quest_pipelines.py` 14),
+    mutation-tested (removing the `countBand` vote-unresolved check: caught by name, `cp`/`diff`-restored
+    byte-identical).
+  - **Proven against the real local model (`google/gemma-4-26b-a4b-qat`), not just stubbed**: a 3-cell
+    smoke test resolved 1/3 cleanly on the first attempt with genuinely coherent, schema-legal content
+    (`"The Purge of Hollow Echoes"`, `cleanse-fights`/`domain`, `targetRef: "fight"` — a real room kind);
+    the other two correctly came back `unresolved` (a real 1-1-1 split on `name` and on `rewardBand`
+    respectively) rather than guessing — proving the vote-refusal path fires for real, not just in a
+    stubbed test.
+  - **A real, live-discovered design gap, found and fixed mid-batch, not assumed:** a full 27-cell first
+    attempt (all 9 templates × 3 scopes) resolved 16/27 (59%) cleanly — a real, usable rate — but every
+    one of the 11 unresolved cells traced to the SAME root cause: `name_collision` between different
+    SCOPES of the identical template (`bring-demon-home-alive` at `delve`/`domain`/`roster` all drew the
+    model toward the SAME name, "The Unwilling Passenger," since the brief gave it no reason to write a
+    different one). Read `spec-delve-quests.md:79-82`'s own real, mechanical definition of scope
+    (`delve` = this run's report alone; `domain` = adds every past attempt at this same domain; `roster`
+    = adds the party's own member records at extraction — a fact-source axis, never a difficulty or a
+    narrative register on its own) and used it to write a grounded, accurate per-scope hint (`_SCOPE_HINT`
+    in `briefs.py`) rather than inventing an artificial distinction — "judged by what happens during this
+    one descent alone" vs. "judged across every attempt at this domain" vs. "judged by who comes home."
+    One new test (`test_every_scope_produces_a_genuinely_different_hint`) proves the three hints are
+    genuinely distinct text, not just parameterized copies. 34 Python tests total now (20 briefs + 14
+    pipelines), all green — confirmed by a real run, not counted by hand.
+  - A follow-up batch pass using the fixed brief for the 11 originally-unresolved cells is the natural
+    next step to raise the real first-ship count further; not yet run as of this entry — see the next
+    dated update for the actual final count and the C#-side validation result (`QuestCatalog.Load`
+    against the real registries, via the new `QuestSeedFile.LoadAll`/`QuestSeedContentTests.cs`).
+  - Files (this update): `tools/seedsmith/seedsmith/adapters/dungeon/{briefs,pipelines}.py` (new),
+    `tools/seedsmith/tests/test_dungeon_quest_{briefs,pipelines}.py` (new).
+  - Real remaining scope for D1.10 itself: repeat this SAME now-proven pattern (per-cell schema + brief +
+    vote pipeline) for the four other AUTHORED-field kinds (event, encounter, room, domain), each with its
+    own real field-shape design pass, then run a real first-ship content pass for all five, in the seed
+    contract's own layer order. `dungeon-layout` and `dungeon-supply-ext` (the two budget-exempt, model-
+    light kinds) are handled separately — layout is already fully shipped (this file, above); supply-ext
+    still needs its own real pass, likely reusing this SAME 3-vote machinery scaled down (no `name`/
+    `flavor` at all, so no free text and no narrative-coupling concern).
 - [x] **D1.11** Provenance, `stale_ids` and the byte-identical rerun
   - Acceptance: every emitted anchor carries `{planHash, briefHash, promptVersions, registryVersions, motifSubsetHash}`; `stale_ids()` names what a registry bump invalidates; a rerun with the same inputs is byte-identical, proven by hash; `--dry-run` prints the call budget before any run
   - Verify: `test_dungeon_idempotency.py`, `test_dungeon_budget.py`
@@ -899,6 +954,15 @@ task below names the members it adds so the seams stay clean.
   - Built: `src/FusionRpg.Core/Delve/Domains/DomainOfferDto.cs` (new) — `DomainResumeDto`, `DomainRungOfferDto`, `DomainTailOfferDto`, `ProvisionableOfferDto`, `DomainOfferDto` — every field spec §4's own JSON shape names, no more. `src/FusionRpg.Core/Delve/Domains/DomainOffers.cs` (new) — `DomainClearFact`/`DomainProgressFact` (Core's own progress shape, see DAL note above); `DomainOfferLive` (5 caller-supplied delegates: `ComposeRungs`, `RungLabelFor`, `BossDisplayNameFor`, `RaidModesForLayout`, `ProvisionableFor`, plus `KnownRungIds`/`StalenessFor`); `DomainOffers.For(progress, catalog, delves, live)` — matches the spec's own 4-argument citation exactly. Concretely built: staleness filtering (hidden, not locked); catalog-miss skipping (a found domain removed from the catalog since discovery); `sealedRow = isOnce && state == "Archived"` (a `many` domain is NEVER sealed, by construction); `resume` from an `"Active"` delve row, which REPLACES `Rungs`/`TailSteps` with empty lists rather than composing them (spec: "rungs replaced by resume"); `EntryKey` mapped from `entry` (`"once"`→`"single-descent"`, else `"standing"`) so the raw engine word never reaches a value; `OathOffered`/`Permadeath` derived from `RungOfferRow.IsPermadeath` alone (below the gate offers the opt-in oath, at/above it is mandatory permadeath with no oath option — the two are always exclusive, verified by a test); only `Offered:true` rung/tail rows survive into the DTO (`BandBelowFloor`/`NotUnlockedYet` refusals omitted, never greyed); `SplitClears` — a clear whose `RungIdOrTailLabel` matches a caller-supplied `KnownRungIds` set becomes a `PlayerClears.RungIds` entry, a bare-integer-parseable one becomes a `TailSteps` entry (this module's own new, explicit, documented convention — nothing else writes this column yet, `DelveStart.Run`/`CloseDelve`'s wiring is D4.20/D4.21's task, so nothing existing was contradicted); `Cleared` = only the known-rung-id clears, ordinal-sorted; output ordinal-sorted by `domainId`. `RpgStore.Delve.cs`'s own `DelveStates.{Active,Archived}` constants are NOT referenced directly (the DAL boundary runs one way) — the two literal strings are named in `DomainOffers.cs` with a comment citing that class as their source of truth.
   - Verify: `tests/FusionRpg.Core.Tests/Delve/Domains/DomainOfferDtoTests.cs` (new, 4 tests) — **the literal "a scan test for an engine word in the DTO"**, done twice: a property-name scan across all five DTO record types (the `QuestDto`/D4.14 idiom), AND a real populated instance serialized to JSON and scanned for the same words as VALUES (the spec's own stronger claim — a property-name scan alone would miss a leaked value); `EntryKey` constants pinned to the two exact spec strings; exact field-set pin. `tests/FusionRpg.Core.Tests/Delve/Domains/DomainOffersTests.cs` (new, 15 tests) — a fresh domain renders with only offered rungs; a stale domain is hidden; a catalog-miss is skipped; a `many` domain is never sealed even with an `Archived` row; a `once` domain with an `Archived` row IS sealed; `entryKey` mapped correctly both ways; an `Active` delve replaces rungs/tail-steps with `resume`; `oathOffered`/`permadeath` are mutually exclusive and correctly derived; raid modes/boss name/provisionable pass through the caller's own delegates verbatim; a known rung id vs. a bare-integer clear route to the correct half of a captured `PlayerClears`; `cleared` excludes tail-step numbers and sorts ordinally; output is domainId-ordinal; **"the six first-ship domains render"** (the todo's own literal Verify line, proven with a six-climate fixture since no real seed content exists yet, D4.16); null-arg guards on all four parameters. Mutation-tested 3 properties in `DomainOffers.cs`: dropped `isOnce &&` from the sealed check, removed the resume-replaces-rungs guard, and disabled the known-rung-id branch in `SplitClears` — all three caught by name, by exactly the test written for that property, `cp`/`diff`-confirmed byte-identical restore after each. Final clean run: 61/61 `Delve.Domains` (Core) — zero regressions. `scripts/guard-dal.ps1` → clean (confirms the caught-and-fixed boundary violation stays fixed). `audit-magic-numbers.py --targets M1/M2` → zero hits in either new file; `--summary` unchanged at 15. Ran the FULL `FusionRpg.Core.Tests` suite (12,377 tests): 8 failures, all traced to a concurrent session's own active, uncommitted edits (`ActionCostsCooldownsAdoptionTests`/`SyntheticLoadoutHarnessTests`/`TurnFsmActionEnvelopeTests` — directly observed one of these files mid-edit with a dangling syntax error that resolved itself moments later, matching this session's own established cross-session-interference pattern) plus the already-documented pre-existing drift cluster (`ProveAptitudeJsonEmitTests`, `ExpeditionResolverTests.Tier_goldens_are_locked` — traced in an earlier session window to the same concurrent session's uncommitted `SiegeAi.cs`/`ContractTuningTestBootstrap.cs` changes, both still shown modified in this session's own git status); none touch `Delve.*`.
   - **Honestly delegated, not built**: `RungOffer.For`'s own Θ-composition inputs (`PowerTuning`/`DungeonTuning`/`DomainThetaInputs`/`ParentWorldTerms`) are per-request context only a real caller has; rung display names and the boss almanac lookup have no source anywhere in the codebase (named explicitly above, not assumed); `provisionable[]` pricing is `delve-stage`'s own not-yet-specified concern (Phase 5). All four are caller-supplied delegates on `DomainOfferLive`, matching D4.17's own `DomainPreflightInputs` idiom.
+  - **`RaidModesForLayout` CLOSED 2026-09-07** (D4.30's real prerequisite chain): `LayoutTemplateCatalog`
+    now exists (D1.10's own entry has the full build/test detail) and `DelveEndpoints.cs`'s
+    `BuildDomainOfferLive`/`BuildDelveStartLive` both wire it for real
+    (`LayoutTemplateHub.Catalog.RaidModesFor(layoutId)`) — the one delegate of this task's own four no
+    longer delegated. Verified the Server project actually compiles with this wiring despite the
+    owner's own live `FusionRpg.Server.exe` (PID confirmed via `tasklist`) holding its normal `bin/`
+    output locked — built to a scratch `--output` directory instead (`dotnet build ... --output
+    /tmp/server-build-check`), a clean, zero-error build, without touching or restarting the live
+    process. The other three (Θ-composition, rung labels, boss almanac) remain genuinely delegated.
   - Files: `src/FusionRpg.Core/Delve/Domains/DomainOfferDto.cs` (new), `src/FusionRpg.Core/Delve/Domains/DomainOffers.cs` (new), `tests/FusionRpg.Core.Tests/Delve/Domains/DomainOfferDtoTests.cs` (new, 4 tests), `tests/FusionRpg.Core.Tests/Delve/Domains/DomainOffersTests.cs` (new, 15 tests).
 - [x] **D4.20** `DomainDiscovery` — **PARTIALLY BUILT 2026-09-06 (both pure §5b rules built and tested; the "provable with the game closed" half of the acceptance line is honestly out of reach today — it needs a real expedition tick kind that does not exist, an explicit ask on a sibling module, confirmed by reading that module's own file directly rather than assumed)**
   - Read first: `spec-domain-catalog.md` §5b in full, then `ExpeditionResolver.cs:1-14` directly (not the spec's own citation of it) to confirm its own claim: `ExpeditionTickKinds` today has exactly six members (`Battle`, `BossBattle`, `Quiet`, `FoundSouls`, `WildDemonMet`, `Injury`) — no `FoundDomain`, matching the spec's own "does NOT carry today" verbatim. The spec's own text calls the tick kind and its ceiling "**an ask on expeditions**" — an explicit acknowledgment that extending `ExpeditionTickKinds`/`ExpeditionResolver`'s own tick-selection logic/`ApplyExpeditionRewards`'s own reward-application switch is a cross-module decision, not something to make unilaterally from inside `domain-catalog`. Confirmed `WeightedChoice.Pick<T>(options, rollSeed, streamName)` (Actions/Seeding) is the right, already-real primitive — same one D4.10's `QuestOffer.Draw` already uses for its own "equal-weight" pick.

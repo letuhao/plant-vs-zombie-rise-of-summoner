@@ -11,6 +11,7 @@ type LawnInteractiveEvent =
   | "order.cancel"
   | "hud.field"
   | "hud.click_dock"
+  | "tile.dock"
   | "mode.change";
 
 const RING_MAX = 64;

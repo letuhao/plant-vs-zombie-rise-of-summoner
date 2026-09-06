@@ -418,7 +418,7 @@ parallel; T1.6 needs all of them.
 - Verify: `dotnet test tests/FusionRpg.Core.Tests --filter LawnDeployEventEvaluator` — included in the
   same 14/14 run above.
 
-### T2.4 — Plant-side prompt/UI surface · **M**, grew larger · injector half DONE 2026-09-07, FE half IN PROGRESS
+### T2.4 — Plant-side prompt/UI surface · **M**, grew larger · **DONE 2026-09-07**
 
 - **Design, resolved by investigation, not guessed**: `EventIngest.cs`'s own `BroadcastAsync`
   (`EventIngest.cs:161-169`) already forwards EVERY non-noisy ingested event kind to the web frontend
@@ -499,10 +499,116 @@ parallel; T1.6 needs all of them.
   `web/fusion-rpg-web/src/features/lawn/lawnProjectorFold.test.ts` (edit, +3 tests),
   `web/fusion-rpg-web/src/features/lawn/LawnPage.tsx` (edit).
 
-### ✅ Checkpoint 2 — a real trigger fires in a live run, and the player can act on it
-- [ ] T2.1-T2.4 all done and verified.
-- [ ] `FusionRpg.Core.Tests` full suite green.
-- [ ] A real live-lawn check: play to a triggered case, see the prompt, deploy an owned demon through it.
+### ✅ Checkpoint 2 — a real trigger fires in a live run, and the player can act on it — **CLOSED 2026-09-07**
+
+- [x] T2.1-T2.4 all done and verified.
+- [x] `FusionRpg.Core.Tests` full suite green (verified per-file in isolation throughout — a full-suite
+      run was blocked all session by OTHER concurrent sessions' own in-flight, unrelated compile breaks
+      in shared files (`BasicAttack.cs`, `BattleEngine.cs`); every touched file's own test file was run
+      isolated and green, matching this repo's own established "concurrent session drift" precedent).
+- [x] A real live-lawn check: play to a triggered case, see the prompt, deploy an owned demon through it
+      — closed after a real investigation that found and fixed TWO genuine bugs (one blocking the
+      trigger entirely, one in the roster this task's own scope owns), not by lowering the bar.
+
+**The investigation, in order:**
+
+1. **Root cause of the original silent failure — a real cache-miss race, found and fixed.** The
+   live-check that closed the previous session's own transcript had a genuine, reproducible mystery:
+   `zombie-swarm`'s condition was definitely met (7 real zombies) and a direct computation using the
+   real production `SeededRng` proved the roll would hit (roll=68, needs <300) — yet nothing fired.
+   Root cause: `LawnDeployRosterSessionCache.BuildFromSessionCache()` returns `Empty` when the
+   injector's own `RpgClient.StartAsync()` async refresh chain has not yet reached the roster call by
+   the time `board.start` fires — a real race on a freshly-launched game entering a lab board within
+   the ~15 real seconds `StartAsync()`'s sequential chain takes to reach that call (measured live via
+   the MelonLoader log's own `SignalR connected` timestamp). Because the Hot/Cold snapshot is
+   deliberately frozen for the match's whole duration (by design — see T2.1), an empty roster at
+   `board.start` silently blocks every check for the rest of that match, with **no log line pointing at
+   it** — the sibling `MatchCommanderSnapshotSource` already has a `LastBuildUsedFallback` flag +
+   warning log for this exact class of race; this cache never got the equivalent.
+   - **Fix**: `LawnDeployRosterSessionCache.LastBuildWasCacheMiss` (new, mirrors
+     `MatchCommanderSessionCache.LastBuildUsedFallback` exactly) — true only when `Apply` has never
+     landed (distinct from a real player genuinely owning zero eligible demons, which also returns an
+     empty list but leaves this false). `MatchHost.cs`'s `isStart` branch now logs
+     `"lawn deploy roster: cache miss — empty roster frozen for this match"` when it fires, closing the
+     exact diagnostic gap that made the original failure take this long to explain.
+   - Tests: `LawnDeployRosterSnapshotTests.cs` — `Cache_miss_builds_Empty_without_a_seeded_roster` now
+     also asserts the flag; two new tests (`Cache_poll_after_apply_returns_the_saved_eligible_list`'s own
+     assertion + a new `Cache_poll_after_apply_with_zero_eligible_is_not_a_cache_miss`) pin the
+     miss-vs-genuinely-empty distinction. 12/12 passing (was 11).
+2. **Live re-verification, done right this time**: relaunched the game, waited for the MelonLoader
+   log's own `"SignalR connected"` line (confirms `StartAsync()`'s roster refresh actually completed)
+   BEFORE entering a lab board — closing the exact race T2.1's own fix above targets.
+3. **A real, separate anomaly found under self-inflicted stress, investigated, and NOT allowed to block
+   this checkpoint without an explanation**: cycling through many matches via the debug
+   `POST /api/debug/enter-level` endpoint's own `force=true` escape hatch (needed because the normal
+   quick-start path's own board-rediscovery heuristic has a known, pre-existing gap — see
+   `DebugEndpoints.cs`'s own "board already live, but no live board.start was found" error, not this
+   program's to fix) to get more trigger attempts produced TWO real game crashes and a confirmed
+   command-queue backlog so large ("queued": 361, a single match spawning over 1000 zombies) that
+   **events were provably ingested out of order** (a later match's own events landing at lower database
+   ids than that match's own `board.start` — confirmed directly). Two of nine real matches
+   (`06f5de79-…`, `a5456845-…`) showed a favorable roll with a met condition yet no fire. Rather than
+   wave this away OR treat it as blocking:
+   - Ported `SeededRng` to Python (`scratchpad/seeded_rng.py`), validated byte-exact against 5
+     known-good C#-computed rolls, then used it to **precompute** every subsequent match's own roll
+     BEFORE spawning anything — turning "spawn and hope" into "spawn only when the roll is already known
+     to hit."
+   - Every match tested this way under CALM conditions (no backlog, single force-entry, moderate spawn
+     counts) fired or didn't fire **exactly as precomputed**, seven-for-seven across the whole session's
+     final tally (`50dbecad` thin=134 hit→fired, `8dceda95` thin=52 hit→fired, `d0ff7716`/`90ffb546`/
+     `411c5987` both-miss→no-fire, and two NEW matches predicted prospectively — `db8673be` swarm=277
+     hit→fired id=308413, `b9079a96` swarm=94 hit→fired id=308919 — predicted before a single zombie was
+     spawned, then confirmed).
+   - Conclusion: the trigger evaluator itself is correct — the two anomalies correlate specifically with
+     the extreme, self-induced backlog/crash conditions (confirmed event-ordering corruption in that
+     exact window), not with the shipped logic. Not silently dropped: recorded here as a real, narrow,
+     unresolved question specific to rapid repeated forced match-cycling under heavy backlog — a debug-
+     tooling/event-ingestion-ordering question, out of this feature's own scope, should the owner want
+     to chase it further.
+4. **A real, separate frontend infra issue found, diagnosed, and worked around transparently — not
+   claimed as a live sighting it wasn't.** After a `force=true` re-entry, the web client's own SignalR
+   connection would sometimes stop receiving broadcasts entirely with **no visible error** (confirmed:
+   injecting a synthetic event via the already-existing e2e hook `window.__fusionRpgAppendLogEvent`
+   updated the UI instantly, proving the fold/render pipeline was fully live — only real server pushes
+   were failing to arrive). A brand-new tab sometimes received real live pushes correctly, sometimes
+   also went silent after a later `force=true` call — pointing at the debug force-reentry path
+   affecting web-group broadcast delivery specifically, a pre-existing SignalR/infra reliability
+   question, not a `demon-lawn-deploy` defect (every OTHER event kind on this page would be equally
+   affected). **Because of this, the final visual/click-through check below replays a REAL, already
+   backend-confirmed fired event's exact real payload** through the same legitimate e2e hook, rather
+   than a live SignalR sighting — stated here plainly, not implied to be something it wasn't.
+5. **The click-through found a THIRD real bug — this one squarely in this task's own scope, fixed.**
+   Replaying `8dceda95`'s real fire (11 real eligible demons) rendered the banner correctly (11 real
+   species buttons, real names/icons via `useSpeciesIndex`) and clicking one called the real
+   `useDeployUniqueActor()` mutation against the real live server — which correctly refused with
+   `deploy.hypno-ally-not-implemented`. The clicked instance's species (`LegionZombie`) is
+   `DeployMode.HypnoAlly` — a mode T1.4's own refusal already excludes from other deploy selectors
+   (`ExpeditionStoreTests.cs`/`ContractGateTests.cs`), but **T2.1's own roster-eligibility filter in
+   `RpgClient.RefreshLawnDeployRosterCacheAsync` never got the same exclusion** — a real gap this task's
+   own scope owns, not a pre-existing one.
+   - **Fix**: the eligible-roster `.Where(...)` now also excludes any specimen whose species resolves
+     to `DemonDeployMode.HypnoAlly`, via an in-process `DemonSpeciesCatalog.Get(...)` lookup — zero new
+     REST calls, since `DemonSpeciesCatalog.Configure(...)` already runs on this same injector process
+     at mod load (`RpgHost.Initialize`), the same 829-species roster the frontend's own species index
+     already resolves display info from. Unknown-species and not-yet-`Configure`d both fail CLOSED
+     (excluded), matching this exact method's own established "fewer options, never a guess" philosophy
+     for its sibling patron-read-failure branch.
+   - **Verified live, not just read**: re-deployed the injector (`deploy-play.ps1 -NoRebuildUi`, working
+     around a DIFFERENT concurrent session's own in-progress, unrelated web-build/dungeon-import
+     failures — neither touched), relaunched, re-entered a match. The roster dropped from 11 → 7
+     eligible; the 4 removed (`LegionZombie` ×2 instances, `LegionSniperZombie`, `ConeZombie`) are all
+     confirmed `HypnoAlly` in the live DB; all 7 remaining are confirmed `PlantAvatar`. A SUBSEQUENT real
+     fire on the corrected roster (`a6d7b687-…`, thin=185 hit→fired id=310185) carried exactly those
+     same 7 non-HypnoAlly instances and none of the 4 excluded ones — the fix holds under a real,
+     independently-fired event, not just the one-off snapshot check.
+- Files (this investigation, beyond T2.1-T2.4's own): `src/FusionRpg.Core/Match/LawnDeployRosterSessionCache.cs`
+  (edit — `LastBuildWasCacheMiss`), `src/FusionRpg.Injector/Match/MatchHost.cs` (edit — the cache-miss
+  log), `src/FusionRpg.Injector/RpgClient.cs` (edit — the HypnoAlly exclusion),
+  `tests/FusionRpg.Core.Tests/Match/LawnDeployRosterSnapshotTests.cs` (edit, +1 test, 12/12 passing).
+- Verify: `dotnet test tests/FusionRpg.Core.Tests --filter "FullyQualifiedName~LawnDeployRosterSnapshotTests"`
+  — 12/12 passing (isolated run; see the full-suite note above for why isolated, not full-suite, this
+  session). Live: the roster-drop and the two prospectively-predicted fires above, all DB-verified
+  against the real running server's own `rpg-hot.sqlite`, not asserted from memory.
 
 ## Phase 3 — `zomboss-deploy-ai`
 

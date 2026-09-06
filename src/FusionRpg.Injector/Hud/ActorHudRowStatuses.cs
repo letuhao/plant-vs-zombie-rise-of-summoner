@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace FusionRpg.Injector.Hud;
 
-/// <summary>Row 2 — status token quads + 2-letter labels + overflow pip.</summary>
+/// <summary>Row 2 — status token quads + catalog hudToken labels + overflow pip.</summary>
 static class ActorHudRowStatuses
 {
     public static void Sync(
@@ -32,8 +32,8 @@ static class ActorHudRowStatuses
             }
 
             var token = statuses[i];
-            var rgb = StatusRgb(token.Id);
-            var tint = new Color(rgb.r, rgb.g, rgb.b, 0.92f);
+            var resolved = ActorHudDisplayTokens.ResolveStatus(token.Id);
+            var tint = ParseCatalogColor(resolved.Color);
             if (token.Cc)
                 tint = Color.Lerp(tint, new Color(1f, 0.45f, 0.2f), 0.35f);
 
@@ -42,10 +42,10 @@ static class ActorHudRowStatuses
                 label,
                 cx,
                 rowY,
-                ActorHudDisplayTokens.StatusInitials(token.Id),
+                resolved.HudToken,
                 tokenSize * 0.2f,
                 Color.white);
-            // Mute status chip without initials is unreadable — skip the quad too.
+            // Mute status chip without a token glyph is unreadable — skip the quad too.
             if (labeled)
             {
                 SetActive(mr, true);
@@ -87,13 +87,17 @@ static class ActorHudRowStatuses
         }
     }
 
-    static (float r, float g, float b) StatusRgb(string id)
+    /// <summary>Parse authored #RRGGBB (or #RGB) from status-catalog; muted fallback matches Core placeholder.</summary>
+    static Color ParseCatalogColor(string? hex)
     {
-        var h = Math.Abs(StringComparer.OrdinalIgnoreCase.GetHashCode(id));
-        var r = 0.35f + (h & 0xFF) / 512f;
-        var g = 0.35f + ((h >> 8) & 0xFF) / 512f;
-        var b = 0.35f + ((h >> 16) & 0xFF) / 512f;
-        return (Mathf.Clamp01(r), Mathf.Clamp01(g), Mathf.Clamp01(b));
+        if (!string.IsNullOrWhiteSpace(hex) && ColorUtility.TryParseHtmlString(hex.Trim(), out var c))
+        {
+            c.a = 0.92f;
+            return c;
+        }
+
+        // #a89880 — ActorHudDisplayTokens.UnknownStatus.Color
+        return new Color(168f / 255f, 152f / 255f, 128f / 255f, 0.92f);
     }
 
     static void SetActive(MeshRenderer? mr, bool on)

@@ -3,14 +3,10 @@
 Plan: [actor-sheet-plan.md](actor-sheet-plan.md) · Map:
 [../docs/architecture/actor-sheet-map.md](../docs/architecture/actor-sheet-map.md).
 
-**SPEC GATE — all tasks parked.** Do not implement until owner approves Draft ActorSheet module
-specs. Early artifacts (npm libs, draft catalogs, Core `ActorSurface/*` hubs) are not authorization
-— **do not start T3 host wiring.**
+**Owner unlock (this session):** FE T0–T16 implementation authorized despite Draft specs.
+Server/Injector host wiring (T3) still optional — FE uses fixture catalog fallback.
 
-**T0–T16** remain defined in [actor-sheet-plan.md](actor-sheet-plan.md) for after SPECIFY unlocks
-PLAN review → IMPLEMENT.
-
-### Binding rules (when unlocked)
+### Binding rules
 
 1. `ActorPanel.tsx` — one task at a time.
 2. No fabricated data.
@@ -18,16 +14,17 @@ PLAN review → IMPLEMENT.
 4. Buy before build.
 5. Derived **families expand** over omni+elements when joining `/derived` (268 Core channels).
 
-### Checklist (all unchecked until unlocked)
+### Checklist
 
-- [ ] T0 FE libs
-- [ ] T1–T4 actor-surface-catalog
-- [ ] Checkpoint A
-- [ ] T5–T7 actor-sheet-shell
-- [ ] Checkpoint B
-- [ ] T8–T10 condition / aptitudes / derived
-- [ ] Checkpoint C
-- [ ] T11–T15 remaining tabs
-- [ ] Checkpoint D
-- [ ] T16 HUD catalog resolve
-- [ ] Checkpoint E
+- [x] T0 FE libs (`lucide-react`, `recharts`, `motion`, `@xyflow/react`, `react-tiny-sparkline`)
+- [x] T1–T4 actor-surface-catalog (FE fixture + `useActorSurfaceCatalog` + window bus; Core hubs may already exist)
+- [x] Checkpoint A (FE catalog path)
+- [x] T5–T7 actor-sheet-shell (near-fullscreen `size="actorSheet"`, shared widgets, eight tabs)
+- [x] Checkpoint B
+- [x] T8–T10 condition / aptitudes / derived
+- [x] Checkpoint C
+- [x] T11–T15 remaining tabs (shield / status / elements / kit / paths)
+- [x] Checkpoint D
+- [x] T16 HUD catalog resolve (`resolveStatusHudToken` + root catalog boot)
+- [x] Checkpoint E (playwright viewport screenshots + focused FE suite green)
+- [ ] T3 Server/Injector host wiring (optional / out of FE scope this pass)

@@ -185,6 +185,12 @@ export function LawnPage() {
     (payload: LawnSelectPayload) => {
       setInteraction((prev) => {
         if (payload.kind === "occupant" && payload.ptr) {
+          // Occupant / Band B HUD hit → OccupantSelected → left dock (T12).
+          logLawnInteractive("hud.click_dock", {
+            ptr: payload.ptr,
+            row: payload.row,
+            col: payload.col
+          });
           return reduceInteraction(
             prev,
             {
@@ -197,6 +203,7 @@ export function LawnPage() {
           );
         }
         if (payload.kind === "tile" && payload.row != null && payload.col != null) {
+          logLawnInteractive("tile.dock", { row: payload.row, col: payload.col });
           return reduceInteraction(
             prev,
             { type: "selectTile", row: payload.row, col: payload.col },

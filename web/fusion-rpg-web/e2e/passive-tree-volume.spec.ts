@@ -59,7 +59,7 @@ async function mockPassiveTree(page: Page, count: number) {
 async function openPassivesAllPaths(page: Page) {
   await page.goto("/#/actor-ladder-demo?mock=1");
   await page.getByTestId("actor-ladder-open-panel").click();
-  await page.getByTestId("actor-sheet-tab-passives").click();
+  await page.getByTestId("actor-sheet-tab-paths").click();
   await page.getByTestId("passives-sub-tab-all").click();
 }
 

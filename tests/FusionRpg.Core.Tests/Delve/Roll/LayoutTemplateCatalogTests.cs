@@ -57,7 +57,9 @@ public class LayoutTemplateCatalogTests
 
         Assert.Single(result.Rejections);
         Assert.Contains(LayoutRules.DuplicateId, result.Rejections[0].ToString());
-        Assert.Equal(0, result.Catalog.Count);
+        // The FIRST occurrence is legitimately valid and stays -- only the second, duplicate
+        // attempt is refused (DomainCatalog.Load's own established per-row-duplicate-check shape).
+        Assert.Equal(1, result.Catalog.Count);
     }
 
     [Theory]

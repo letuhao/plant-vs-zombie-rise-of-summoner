@@ -122,6 +122,18 @@ public sealed class ActorHudUnityGuardTests
     }
 
     [Fact]
+    public void ActorHudRowStatuses_resolves_catalog_tokens_not_id_slice_or_hash()
+    {
+        var text = ReadInjector(Path.Combine("Hud", "ActorHudRowStatuses.cs"));
+        Assert.Contains("ActorHudDisplayTokens.ResolveStatus", text, StringComparison.Ordinal);
+        Assert.Contains("ParseCatalogColor", text, StringComparison.Ordinal);
+        Assert.Contains("ColorUtility.TryParseHtmlString", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("StatusInitials", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("StatusRgb", text, StringComparison.Ordinal);
+        Assert.DoesNotContain("GetHashCode(id)", text, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void ActorHudRowResources_uses_StackPips_and_maxStackPips()
     {
         var text = ReadInjector(Path.Combine("Hud", "ActorHudRowResources.cs"));

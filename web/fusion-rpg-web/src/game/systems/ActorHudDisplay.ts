@@ -68,6 +68,8 @@ export function setHudDisplay(
 
   const rows = layoutHudRows();
   const stack = scene.add.container(0, 0).setName("hudStack");
+  // HUD is paint-only — picks resolve via the parent occupant hit area (PickSystem / T12).
+  stack.setScrollFactor(1);
 
   const identityRow = scene.add.container(0, rows.identityY).setName("hudIdentity");
   const stroke = TIER_STROKE[hud.identity.tier] ?? TIER_STROKE.normal;

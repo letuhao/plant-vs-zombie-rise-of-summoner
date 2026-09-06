@@ -84,11 +84,11 @@ async function mockAuraSurface(page: Page, runtime = freshRuntimeState()) {
   );
 }
 
-async function openActionsTab(page: Page) {
+async function openKitAuraSurface(page: Page) {
   await page.goto("/#/actor-ladder-demo?mock=1");
   await page.getByTestId("actor-ladder-open-panel").click();
   await expect(page.getByTestId("actor-panel")).toBeVisible();
-  await page.getByTestId("actor-sheet-tab-actions").click();
+  await page.getByTestId("actor-sheet-tab-kit").click();
   await expect(page.getByTestId("actions-tab-auras")).toBeVisible();
 }
 
@@ -96,7 +96,7 @@ test.describe("Aura surface (aura-skill T18c)", () => {
   test("a real authored upkeep cost is visible before committing", async ({ page }) => {
     await mockShell(page);
     await mockAuraSurface(page);
-    await openActionsTab(page);
+    await openKitAuraSurface(page);
 
     await expect(page.getByTestId("aura-slot-Might-upkeep")).toContainText("5 stamina per tick");
     // Fortitude has no authored cost -- honestly nothing rendered, not a fabricated "Free".
@@ -106,7 +106,7 @@ test.describe("Aura surface (aura-skill T18c)", () => {
   test("enabling an equipped aura makes it active", async ({ page }) => {
     await mockShell(page);
     await mockAuraSurface(page);
-    await openActionsTab(page);
+    await openKitAuraSurface(page);
 
     await expect(page.getByTestId("aura-slot-Might-badge")).toHaveText("Equipped");
     await page.getByTestId("aura-slot-Might-toggle").click();
@@ -118,7 +118,7 @@ test.describe("Aura surface (aura-skill T18c)", () => {
   test("enabling a second aura at the cap names the one it switched off (GG-55)", async ({ page }) => {
     await mockShell(page);
     await mockAuraSurface(page);
-    await openActionsTab(page);
+    await openKitAuraSurface(page);
 
     await page.getByTestId("aura-slot-Might-toggle").click();
     await expect(page.getByTestId("aura-slot-Might-badge")).toHaveText("Active");
@@ -134,7 +134,7 @@ test.describe("Aura surface (aura-skill T18c)", () => {
   test("a real aura not in the loadout renders locked with its real reason", async ({ page }) => {
     await mockShell(page);
     await mockAuraSurface(page);
-    await openActionsTab(page);
+    await openKitAuraSurface(page);
 
     const slot = page.getByTestId("aura-slot-Vigor");
     await expect(slot).toBeVisible();
@@ -147,9 +147,11 @@ test.describe("Aura surface (aura-skill T18c)", () => {
     await mockAuraSurface(page);
     await page.goto("/#/actor-ladder-demo?mock=1");
     await page.getByTestId("actor-ladder-open-panel").click();
-    await page.getByTestId("actor-sheet-tab-derived-stats").click();
+    await page.getByTestId("actor-sheet-tab-derived").click();
 
-    const powerChannel = page.getByTestId("derived-live-channel-progression.power");
+    await page.getByRole("tab", { name: "progression" }).click();
+    await page.getByTestId("derived-family-progression.power").click();
+    const powerChannel = page.getByTestId("derived-channel-progression.power");
     await expect(powerChannel).toBeVisible();
     await expect(powerChannel.getByTestId("channel-contribution-rpg.progression")).toBeVisible();
   });
@@ -164,7 +166,7 @@ test.describe("Aura surface (aura-skill T18c)", () => {
       await page.setViewportSize({ width: vp.width, height: vp.height });
       await mockShell(page);
       await mockAuraSurface(page);
-      await openActionsTab(page);
+      await openKitAuraSurface(page);
 
       await page.getByTestId("aura-slot-Might-toggle").click();
       await expect(page.getByTestId("aura-slot-Might-badge")).toHaveAttribute("aria-selected", "true");

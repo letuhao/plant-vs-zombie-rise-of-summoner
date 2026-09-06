@@ -1,4 +1,5 @@
 import { HashRouter } from "react-router-dom";
+import { useActorSurfaceCatalog } from "@/lib/bus";
 import { Toasts } from "@/shell/Toasts";
 import { AppProviders } from "./providers";
 import { AppRoutes } from "./routes";
@@ -8,10 +9,16 @@ import { AppRoutes } from "./routes";
 export default function App() {
   return (
     <AppProviders>
+      <ActorSurfaceCatalogBootstrap />
       <HashRouter>
         <AppRoutes />
         <Toasts />
       </HashRouter>
     </AppProviders>
   );
+}
+
+function ActorSurfaceCatalogBootstrap() {
+  useActorSurfaceCatalog();
+  return null;
 }

@@ -117,6 +117,10 @@ declare global {
   }
 }
 
+if (typeof window !== "undefined" && !window.__fusionRpgActorSurface) {
+  window.__fusionRpgActorSurface = fixtureCatalog;
+}
+
 export function actorSurfaceFixture(): ActorSurfaceCatalog {
   return fixtureCatalog;
 }

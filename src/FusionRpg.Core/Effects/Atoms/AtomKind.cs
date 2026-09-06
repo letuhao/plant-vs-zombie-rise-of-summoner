@@ -40,6 +40,16 @@ public enum AttachPoint
     /// today, only) kind.
     /// </summary>
     Siege,
+
+    /// <summary>
+    /// passive-tree `element-conversion` (D56, spec-element-conversion.md §2a): writes a combat-math
+    /// INPUT STRUCTURE — a weighted <c>ElementPayload</c> component list — never a channel value
+    /// (<see cref="Stat"/>) and never a cell/entity action (<see cref="Board"/>, which every existing
+    /// kind on it acts against). A kind here reweights the ATTACKING ACTOR'S OWN in-flight payload,
+    /// naming no cell, the same "no cell" shape that already separated <see cref="Match"/> from
+    /// <see cref="Board"/>. `element.convert` is the first (and, today, only) kind.
+    /// </summary>
+    Element,
 }
 
 /// <summary>

@@ -153,7 +153,15 @@ class BuildQuestBriefTests(unittest.TestCase):
             self.assertIsInstance(brief, str)
             self.assertGreater(len(brief), 0)
             self.assertIn("explore-rooms", brief)
-            self.assertIn("delve", brief)
+            self.assertIn("this one descent alone", brief)  # the "delve" scope's own real hint text
+
+    def test_every_scope_produces_a_genuinely_different_hint(self) -> None:
+        # The real, 2026-09-07 fix for a measured live name-collision problem: each scope's own
+        # hint must actually differ, or the model has no signal to write a different name/flavor
+        # for "the same template, a different scope" -- proven directly rather than trusted.
+        cell = Cell("dungeon-quest", ("explore-rooms", "delve"), "explore-rooms-delve")
+        briefs = {scope: build_quest_brief(cell, "explore-rooms", scope, "none") for scope in ("delve", "domain", "roster")}
+        self.assertEqual(len(set(briefs.values())), 3, "all three scopes must produce distinct briefs")
 
 
 if __name__ == "__main__":

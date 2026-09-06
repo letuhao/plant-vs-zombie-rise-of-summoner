@@ -4,5 +4,5 @@ export { ActorRow } from "./ActorRow";
 export { ActorCard } from "./ActorCard";
 export { ActorCollection } from "./ActorCollection";
 export type { ActorCollectionItem, ActorCollectionQuery, ActorCollectionDensity } from "./ActorCollection";
-export { ActorPanel, type ActorPanelRole } from "./ActorPanel";
+export { ActorPanel, ActorSheet, type ActorPanelRole } from "./ActorPanel";
 export type { ActorRungState } from "./actorRungState";

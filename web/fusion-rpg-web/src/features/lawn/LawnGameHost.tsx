@@ -169,7 +169,8 @@ export function LawnGameHost({
       className={cn(
         "w-full overflow-hidden rounded-sm border border-border bg-soil",
         large
-          ? "min-h-[70vh] h-[calc(100vh-12rem)]"
+          ? // Keep Band-1 commander bar in the first viewport on phone/tablet (T13 / GG-36).
+            "min-h-[36vh] h-[min(52vh,calc(100dvh-14rem))] md:min-h-[70vh] md:h-[calc(100vh-12rem)]"
           : "w-full min-h-[280px]"
       )}
       style={

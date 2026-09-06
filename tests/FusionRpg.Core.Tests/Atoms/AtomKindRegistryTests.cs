@@ -17,7 +17,7 @@ public class AtomKindRegistryTests
     }
 
     [Fact]
-    public void Vocabulary_is_closed_at_seventeen_kinds_and_eight_attach_points()
+    public void Vocabulary_is_closed_at_eighteen_kinds_and_nine_attach_points()
     {
         // E35 (spec-match-modify.md §2.1), E36 (spec-wave-control.md §2.1), E37
         // (spec-projectile-control.md §2b), then E41 (spec-ui-attach-point.md §2a): each states only
@@ -31,6 +31,9 @@ public class AtomKindRegistryTests
         // base-defense `siege-construction` (decision 27, 2026-09-06): 16/7 -> 17/8 with
         // structure.place / AttachPoint.Siege — the tactical-siege-board mirror of Board's Lawn-only
         // reach (AttachPoint.Siege's own doc comment).
+        //
+        // passive-tree `element-conversion` (D56, spec-element-conversion.md §2a/§2b, 2026-09-07):
+        // 17/8 -> 18/9 with element.convert / AttachPoint.Element.
         Assert.Equal(AtomKindRegistry.KindCount, AtomKindRegistry.All.Count);
         Assert.Equal(AtomKindRegistry.AttachPointCount, Enum.GetValues<AttachPoint>().Length);
     }
@@ -74,7 +77,11 @@ public class AtomKindRegistryTests
         // same resolved-read shape stat.derived uses. It has no event to fire on, so giving it a
         // trigger just to keep this test green would be the status.expose.* defect this same spec
         // names -- a declared trigger nothing ever raises.
-        var permanentModifiers = new[] { "stat.derived", "bullet.modify" };
+        //
+        // passive-tree `element-conversion` (D56, spec-element-conversion.md §4): "element.convert"
+        // is the third member -- a permanent reweighting of the actor's own ElementPayload, present
+        // for as long as the node is owned, the same stat.derived/bullet.modify shape.
+        var permanentModifiers = new[] { "stat.derived", "bullet.modify", "element.convert" };
 
         // E41 (spec-ui-attach-point.md §2b.1): a SEPARATE exemption set from permanentModifiers above
         // — a different axis entirely. permanentModifiers is about TRIGGERS (a grant's presence is

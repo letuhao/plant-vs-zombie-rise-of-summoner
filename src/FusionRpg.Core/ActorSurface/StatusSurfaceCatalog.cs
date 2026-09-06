@@ -87,11 +87,36 @@ public static class StatusSurfaceCatalogLoader
 public static class StatusSurfaceCatalogHub
 {
     static StatusSurfaceCatalog? _catalog;
+    static Dictionary<string, StatusSurfaceEntry>? _byId;
 
-    public static void Configure(StatusSurfaceCatalog catalog) =>
+    public static void Configure(StatusSurfaceCatalog catalog)
+    {
         _catalog = catalog ?? throw new ArgumentNullException(nameof(catalog));
+        var map = new Dictionary<string, StatusSurfaceEntry>(StringComparer.OrdinalIgnoreCase);
+        foreach (var entry in catalog.Entries)
+            map[entry.Id] = entry;
+        _byId = map;
+    }
+
+    /// <summary>Clears inject (tests / host teardown). Resolve returns designed placeholders while unset.</summary>
+    public static void Clear()
+    {
+        _catalog = null;
+        _byId = null;
+    }
+
+    public static bool IsConfigured => _catalog is not null;
 
     public static StatusSurfaceCatalog Catalog => _catalog ?? throw new InvalidOperationException(
         "StatusSurfaceCatalogHub.Configure(...) has not run. Hosts read data/tuning/status-catalog.v{n}.json " +
         "(tunables-ssot.md T5) — there is no built-in default to fall back to.");
+
+    /// <summary>Lookup by status id (ordinal ignore case). False when hub unset or id unknown.</summary>
+    public static bool TryGet(string? id, out StatusSurfaceEntry entry)
+    {
+        entry = null!;
+        if (_byId is null || string.IsNullOrWhiteSpace(id))
+            return false;
+        return _byId.TryGetValue(id.Trim(), out entry!);
+    }
 }

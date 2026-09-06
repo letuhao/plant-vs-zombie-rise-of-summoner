@@ -256,8 +256,9 @@ function makeOccupantGo(
     .setName("occLabel");
   const container = scene.add.container(0, 0, [bg, label]);
   container.setSize(52, 60);
+  // Hit area includes Band B HUD above the body so HUD clicks open the dock (T12), not a dead zone.
   container.setInteractive(
-    new Phaser.Geom.Rectangle(-26, -30, 52, 60),
+    new Phaser.Geom.Rectangle(-26, -72, 52, 102),
     Phaser.Geom.Rectangle.Contains
   );
   setIconTexture(scene, container, occ.side, occ.typeId, onReady);
