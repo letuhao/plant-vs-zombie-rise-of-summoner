@@ -238,7 +238,9 @@ public static partial class BattleEngine
         public BattleRunState(BattleSetup setup, ulong seed, Timeline.BattleTrace? trace,
             Action<BattleEffectHost>? onEffectHostReady, ActionCatalog? actionCatalog = null,
             IContainerEffectResolver? containerResolver = null, BoardState? board = null,
-            Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null)
+            Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null,
+            IReadOnlyList<RunnerBinding>? runnerBindings = null,
+            IReadOnlySet<string>? containersWithRunnerCoverage = null)
         {
             Trace = trace;
             _board = board;
@@ -270,6 +272,16 @@ public static partial class BattleEngine
             // composed derived profiles; the clock is the synthetic round clock.
             Host = new BattleEffectHost(key => ByKey.TryGetValue(key, out var a) ? a : null, seed);
             T0 = Host.Clock.UtcNow;
+
+            // A25 (battle-runner-path-integration): built here, inside the constructor, rather than
+            // via `onEffectHostReady` -- that callback only receives `Host`, and the Secondary
+            // runner's own `nowMs` reader must close over THIS instance's own `NowTick` field (a
+            // frozen clock silently breaks every ICD gate, see UseRunner's own doc comment). `this` is
+            // valid throughout a constructor body, so the closure below is correct despite `NowTick`
+            // not yet having a meaningful value at construction time -- it is read lazily, per event,
+            // never at wiring time.
+            if (runnerBindings is { Count: > 0 })
+                Host.UseRunner(runnerBindings, seed, () => NowTick);
             Status = new StatusRuntime(StatusCatalogBootstrap.CreateDefault(),
                 (ptr, attackerLess) => attackerLess || ptr == null || !ByKey.TryGetValue(ptr, out var a)
                     ? ActorDerivedSnapshot.AttackerLess()
@@ -479,7 +491,7 @@ public static partial class BattleEngine
                 }
 
                 _heldActions[a.Setup.Key] = held;
-                BindContainers(a, held, containerResolver);
+                BindContainers(a, held, containerResolver, containersWithRunnerCoverage);
 
                 // A19 (T56.1): collect real cost rows for every action actually reachable in THIS
                 // battle -- ActionCatalog exposes no "all actions" enumerator (only Get(id)/Count),
@@ -537,20 +549,32 @@ public static partial class BattleEngine
         /// real, supplied resolver — loud failure on a missing container or an empty result, never a
         /// silent skip, matching this codebase's standing "loud validation over silent corruption"
         /// stance (the same shape the `ActionCatalog` check just above already uses).
+        ///
+        /// <para>A25 (battle-runner-path-integration): a container whose atoms are ENTIRELY
+        /// Runner-path has, correctly, zero Compiled-path effect ids — `IContainerEffectResolver`'s own
+        /// contract never covered the Runner path (A18a scoped it to Defs only). Found empirically, not
+        /// designed for up front: a real end-to-end test with a purely-Runner-path action threw here
+        /// even though `Host.Runner` was correctly wired, because this check could not tell "genuinely
+        /// unresolvable" apart from "resolved elsewhere, via the runner." <paramref
+        /// name="containersWithRunnerCoverage"/> (built the same pass as `runnerBindings`, from the
+        /// SAME per-container loop, never string-parsed back out of a binding id) is what makes that
+        /// distinction — a container in this set is real, known content, just not Compiled-path at
+        /// all, so the throw below no longer fires for it.</para>
         /// </summary>
-        void BindContainers(ActorState a, IReadOnlyList<CompiledAction> held, IContainerEffectResolver? containerResolver)
+        void BindContainers(ActorState a, IReadOnlyList<CompiledAction> held, IContainerEffectResolver? containerResolver,
+            IReadOnlySet<string>? containersWithRunnerCoverage)
         {
             foreach (var action in held)
             {
                 if (string.IsNullOrEmpty(action.ContainerId)) continue;
 
-                if (containerResolver is null)
+                if (containerResolver is null && containersWithRunnerCoverage?.Contains(action.ContainerId) != true)
                     throw new ArgumentException(
                         $"Actor '{a.Setup.Key}' holds action '{action.ActionId}' with container '{action.ContainerId}' but no IContainerEffectResolver was supplied to resolve it.",
                         nameof(containerResolver));
 
-                var effectIds = containerResolver.EffectIdsFor(action.ContainerId);
-                if (effectIds.Count == 0)
+                var effectIds = containerResolver?.EffectIdsFor(action.ContainerId) ?? Array.Empty<string>();
+                if (effectIds.Count == 0 && containersWithRunnerCoverage?.Contains(action.ContainerId) != true)
                     throw new ArgumentException(
                         $"Actor '{a.Setup.Key}' holds action '{action.ActionId}' with container '{action.ContainerId}', which the supplied IContainerEffectResolver could not resolve.",
                         nameof(containerResolver));
@@ -611,19 +635,43 @@ public static partial class BattleEngine
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey)
         {
             var own = _heldActions.TryGetValue(actorKey, out var held) ? held : Array.Empty<CompiledAction>();
+            var garrisonedStructureKey = FindGarrisonedStructureKey(actorKey);
+            if (garrisonedStructureKey is null) return own;
+
+            var lent = _heldActions.TryGetValue(garrisonedStructureKey, out var structureHeld)
+                ? structureHeld : Array.Empty<CompiledAction>();
+            if (lent.Count == 0) return own;
+            var union = new List<CompiledAction>(own.Count + lent.Count);
+            union.AddRange(own);
+            union.AddRange(lent);
+            return union;
+        }
+
+        /// <summary>
+        /// base-defense `siege-ai` 17.9 (spec-siege-ai.md §5.20 rule 5): the SAME "which structure names
+        /// this actor as its garrison" scan <see cref="HeldActionsOf"/> already performs, shared rather
+        /// than duplicated — <see cref="IBattleView.GarrisonedStructureKeyOf"/>'s own real implementation.
+        /// Returns the garrisoned structure's key, or `null` when `actorKey` garrisons nothing (every
+        /// existing battle: `GarrisonedBy` is null on every actor, so this always returns `null`).
+        /// </summary>
+        string? FindGarrisonedStructureKey(string actorKey)
+        {
             foreach (var a in Actors)
             {
                 if (a.Setup.Kind != CombatantKind.Structure || a.Setup.GarrisonedBy != actorKey) continue;
-                var lent = _heldActions.TryGetValue(a.Setup.Key, out var structureHeld)
-                    ? structureHeld : Array.Empty<CompiledAction>();
-                if (lent.Count == 0) return own;
-                var union = new List<CompiledAction>(own.Count + lent.Count);
-                union.AddRange(own);
-                union.AddRange(lent);
-                return union;
+                return a.Setup.Key;
             }
-            return own;
+            return null;
         }
+
+        public string? GarrisonedStructureKeyOf(string actorKey) => FindGarrisonedStructureKey(actorKey);
+
+        /// <summary>base-defense `siege-ai` (module 17): the SAME `Derived` snapshot `CostLedger`'s own
+        /// `poolsFor`/`derivedFor` callbacks already read from `ByKey[key].Derived` (`:500-501` above) —
+        /// exposed here, never recomputed, so a live scoring AI's hit-chance estimate reads the exact
+        /// stats every other system in this class already does.</summary>
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) =>
+            ByKey.TryGetValue(actorKey, out var a) ? a.Derived : null;
 
         public DamageApplyResult ApplyHp(
             ActorState owner, long amount, string effectId,

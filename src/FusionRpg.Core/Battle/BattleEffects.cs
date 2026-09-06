@@ -2,6 +2,7 @@ using FusionRpg.Contracts;
 using FusionRpg.Core.Actions;
 using FusionRpg.Core.Battle.Board;
 using FusionRpg.Core.Effects;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
 using FusionRpg.Core.World;
@@ -64,6 +65,37 @@ public sealed class BattleEffectHost
     public EffectBag Bag { get; }
     public FakeEffectClock Clock { get; }
     public EffectFunnel Funnel => _funnel;
+
+    /// <summary>
+    /// A25 (battle-runner-path-integration): the Secondary runner (E15), once bindings are installed —
+    /// null until <see cref="UseRunner"/>, matching <c>SimEffectHost.Runner</c>'s own "no runner atoms,
+    /// no runner state" shape exactly, not a new convention.
+    /// </summary>
+    public AtomRunner? Runner { get; private set; }
+
+    /// <summary>
+    /// Installs runner bindings and builds the trigger index — the same construction
+    /// <c>SimEffectHost.UseRunner</c> already uses (proc/apply streams derived from one run seed, so a
+    /// gate roll can never shift a magnitude roll, E2's named streams), generalized to battle. Called
+    /// from <c>onEffectHostReady</c> (the same seam A24's <c>ActionContainerEffectResolverFactory</c>
+    /// already uses to push compiled defs), so a battle with no runner-path atom carries no runner
+    /// state at all — byte-identical to every caller that never invokes this.
+    ///
+    /// <para><paramref name="nowMs"/> is the caller's own <c>state.NowTick</c> reader, deliberately NOT
+    /// this host's own <see cref="Clock"/> — verified by reading, not assumed: <see cref="Clock"/>'s
+    /// `UtcNow` is set once at construction and never advanced anywhere in `BattleRunState` (both its
+    /// own real call sites only READ it), so an ICD keyed off it would see a constant "now" forever —
+    /// ready exactly once, at proc time, then never again for the rest of the battle. `NowTick` is the
+    /// real, monotonically-advancing, millisecond-scaled clock every other timed battle mechanism
+    /// (windup/recovery/cooldown) already reads.</para>
+    /// </summary>
+    public AtomRunner UseRunner(IEnumerable<RunnerBinding> bindings, ulong runSeed, Func<long> nowMs, string matchKey = "") =>
+        Runner = new AtomRunner(
+            _funnel, TriggerIndex.Build(bindings),
+            new AtomRandom(runSeed, AtomStreams.Proc),
+            new AtomRandom(runSeed, AtomStreams.Apply),
+            nowMs,
+            matchKey);
 
     /// <summary>A18d: forwards to <see cref="BattleEffectSink"/>'s own settable property, the same
     /// "wire after the dependency exists" shape T14 already used for <c>Bag.ShieldGate</c> and A18c

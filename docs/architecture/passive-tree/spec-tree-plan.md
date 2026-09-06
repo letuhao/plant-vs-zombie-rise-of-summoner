@@ -482,11 +482,14 @@ MECHANISM node  ≔  anything else — a non-Stat attach point, or a declared tr
                    It changes WHEN or WHAT happens, not HOW MUCH.
 ```
 
-Both halves are checkable against the shipped vocabulary — **7 attach points, 16 kinds, 13 triggers**,
-counted this session from `AtomKind.cs:9-30` (the enum members), `AtomKindRegistry.cs:476-869` (the
-sixteen `new("…")` rows), and `AtomKind.cs:82-95` (`AtomTriggers`, of which **11 are authorable** —
-`OnGranted`/`OnRemoved` are runtime lifecycle states, not authorable triggers). D22 is satisfied for
-free: no passive-specific effect vocabulary is invented.
+Both halves are checkable against the shipped vocabulary — **7 attach points, 16 kinds, 13 triggers**
+at the time this was written, counted from `AtomKind.cs:9-30` (the enum members),
+`AtomKindRegistry.cs:476-869` (the sixteen `new("…")` rows), and `AtomKind.cs:82-95` (`AtomTriggers`,
+of which **11 are authorable** — `OnGranted`/`OnRemoved` are runtime lifecycle states, not authorable
+triggers). **Grown to 8/17/13 as of 2026-09-06** (base-defense `siege-construction`'s `Siege`/
+`structure.place`; see [`spec-element-conversion.md`](spec-element-conversion.md) §0 for the full
+correction and a proposed further growth to 9/18). D22 is satisfied for free either way: no
+passive-specific effect vocabulary is invented.
 
 **Per-tier mechanism share**, a monotone ramp with the deepest tier pinned:
 
@@ -746,11 +749,11 @@ subset. That is what makes D14's predicate `O(1)`.
   applied to rosters: a default is a value nobody chose that behaves like one somebody did.
 
 **`conversionState` is emitted; conversion nodes are not.** D16 needs an element-payload write and
-**no kind among the 16 does one**, with a silent failure mode
+**no kind among the 17 does one**, with a silent failure mode
 (`OverlayCombatCalculator.cs:128-172` loops the payload's own components). So the axis exists so an
 exclusion can key on it — D14's own example is *"no effect if the damage is converted"* — while
-`quotas` allocates **zero** nodes to conversion until a reviewed 17th kind lands. Vocabulary yes,
-budget no.
+`quotas` allocates **zero** nodes to conversion until `element.convert` (D56,
+[`spec-element-conversion.md`](spec-element-conversion.md)) lands. Vocabulary yes, budget no.
 
 **The predicate mechanism needs no new type.** `EligibilityRule` already carries `RequireTags` and
 `AnyOfTags` (`"key:value"` pairs) with `IsEligible` evaluating them. D14's example is exactly
@@ -1109,7 +1112,7 @@ graph invariant.
 | `absent_family_roster_emits_pending_not_silence` | `demonFamilies: []` **and** a `_pending` entry, so `F = 0` is visible |
 | `quota_marginals_are_exact` | Every axis's emitted counts sum to `N` and match an independent re-derivation |
 | `overridden_draws_return_to_the_pool` | §8 step 5 — force every elemental tree's element and assert the residual axis stays on target |
-| `no_conversion_node_carries_budget` | D16 stays at zero until a 17th kind lands |
+| `no_conversion_node_carries_budget` | D16 stays at zero until `element.convert` lands (D56, `spec-element-conversion.md`) |
 | `exclusion_predicates_only_key_on_named_properties` | A key outside `propertyVocabulary` is a refusal |
 | `no_float_in_the_planner` | AST scan of this module's source for float literals and `/` on ints |
 | `widen_before_multiply_is_used` | `_widen_mul` is the only multiply path in the ladder and quota modules |
@@ -1170,7 +1173,7 @@ this module is called done.
   `ContentValidation.cs:58-60` is explicit that the budget is *"**never** a generation input"*.
 - Write a hand-set `nodeClass` flag. It is derived from the bound atoms and re-derived at emit; a
   declared class the content contradicts is a refusal, never a silent repair.
-- Allocate budget to a conversion node before a reviewed 17th atom kind exists.
+- Allocate budget to a conversion node before `element.convert` exists (D56, `spec-element-conversion.md`).
 - Resolve a `gateQuantity`. The plan names it; `tree-resolve` reads it.
 - Add a private `f(level)`. `req(t)` is a **cost ladder** and owes `ssot-power-scale.md` §10 a row
   (§10 below); nothing else in this module is power-shaped.
@@ -1412,7 +1415,7 @@ section so nobody copies one up here.
 | Key | Unit | Value | Note |
 |---|---|---|---|
 | `tierLadder.reqScalePoints` | **aptitude points** per unit of `t(t+1)/2` | 5 | D26's `k`. Its pairing with linear per-tier power is what makes reward-per-point exactly `b/k`. The unit is in the key because the currency is the single most-confused thing in the program (§2, `R-G0`). ~~`ladder.kPoints`~~ superseded |
-| `budget.treeTotalPoints` | `PowerVector.Total` points per tree | **UNMEASURED** | Ship a guess and say so, per `aptitudes.v5.json`'s own posture: *"shipping a guess is fine; calling it balance is not"* |
+| `budget.treeTotalPoints` | `PowerVector.Total` points per tree | **UNMEASURED** | **D54 (2026-09-06): posture settled — ship a flagged guess now**, per `aptitudes.v5.json`'s own posture: *"shipping a guess is fine; calling it balance is not"*. Re-measure once `mechanism-wiring`/`squad-harness` land |
 | `budget.branchSplitMilli` | ‰ of `budget.treeTotalPoints` to the offensive branch | 500 | D6 symmetry; a pass could try 550/450 |
 | `potency.maxNodeShareMilli` | **‰ of ONE BRANCH budget** | **182** | Same denominator as `budgetShareMilli` (§5.1) — ~~91‰ of `budgetTotal`~~ was the same magnitude against the wrong denominator, a silent 2×. **A documentation constant** (§5.2): at the shipped topology it is the topology's own maximum, so it refuses nothing. `P-1` checks the derivation. **Bounded ratio — exempt under `ssot-power-scale.md` §11.6, and it refuses rather than clamps.** Lowering it below `2000/(tierCount+1)` makes it bite and is **Ask first** |
 | `potency.minTerminalWidth` | count | 1 | `P-1` recomputes the ceiling from this and `tierCount`, which is what keeps the derivation a one-place edit — doc 02's two-place hazard closed |
@@ -1492,7 +1495,7 @@ yields `F = 1.0012` and passes every test either spec currently writes.
 | D13 | Deterministic-first generation | The whole module. No RNG, no model call, holes for stage 2 |
 | D14 | Property-based exclusion | §6 — the plan **defines** the vocabulary; `exclusionForm` is a closed enum of three, **all three reachable under D40**, with the rung's weight small and non-zero |
 | D15 | Equal expected value, not equal shape | §3 — proved as an identity, asserted by `C1`, and its inverse guarded by `archetype_shapes_actually_differ` |
-| D16 | Conversion rewrites payload tags | §6 — axis emitted, **zero budget allocated** until a reviewed 17th kind |
+| D16 | Conversion rewrites payload tags | §6 — axis emitted, **zero budget allocated** until `element.convert` lands (D56, `spec-element-conversion.md`) |
 | D17 | Species build-favour triple | `species-tree`. The quota mechanism it needs is §8's |
 | D18 | Respec is a full reset | Not here. `tree-state` |
 | D19 | `status_mastery` as a fifth `AllocationScope` | **Superseded by D35.** No requirement in this module |
@@ -1587,15 +1590,17 @@ G2/G3 checks key on a parameter named `level`/`lvl`/`index` and `req(t)`'s param
 ## Open questions
 
 Only questions a **decision** can close. Everything else below the line is a task with an owner.
-**One is open.** The second is kept below with its answer, because a closed question that vanishes
+**Zero are open.** Both are kept below with their answers, because a closed question that vanishes
 gets re-asked.
 
-1. **`budget.treeTotalPoints` — the one number nobody can measure yet.** It is `PowerVector.Total`
-   points per tree, and no measurement can produce it until trees actually carry power in the
-   resolver (ideal §3.5: *"re-measure only worthwhile once mechanism nodes exist"*). The proposal is
-   to ship a flagged guess with the posture `aptitudes.v5.json` already established —
-   *"shipping a guess is fine; calling it balance is not"* — and re-measure once `mechanism-wiring`
-   and `squad-harness` land. **This needs an owner nod on the posture, not on the number.**
+1. ~~**`budget.treeTotalPoints` — the one number nobody can measure yet.**~~ **CLOSED 2026-09-06 by
+   D54: ship a flagged guess now.** It is `PowerVector.Total` points per tree, and no measurement can
+   produce it until trees actually carry power in the resolver (ideal §3.5: *"re-measure only
+   worthwhile once mechanism nodes exist"*). The owner confirmed the posture `aptitudes.v5.json`
+   already established — *"shipping a guess is fine; calling it balance is not"* — applies here too:
+   ship the guess now, re-measure once `mechanism-wiring` and `squad-harness` produce real data. The
+   number itself is still `UNMEASURED` in the tunables table above; only the *posture* was the open
+   question, and it is now settled.
 
 ### Closed 2026-09-05
 

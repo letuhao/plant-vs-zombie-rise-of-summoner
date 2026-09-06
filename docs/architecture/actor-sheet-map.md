@@ -1,9 +1,18 @@
 # Capability map: actor-sheet
 
+> **2026-09-07 — stale as intent.** [actor-sheet-ideal.md](actor-sheet-ideal.md) supersedes this
+> six-tab “Overview unchanged / derived doorway / locked Actions” shape. Plate 13 is eight tabs +
+> InspectSplit. Do not implement from this map. `/spec` rewrites it. Kept as the 2026-08-29 trail.
+
 Source: [docs/design/08-actor-sheet.html](../design/08-actor-sheet.html) (draft plate, reviewed
 2026-08-29 — reference sweep against Diablo IV / Path of Exile / Baldur's Gate 3 character-menu
 conventions, then grounded against this repo's own current code and locked design docs before
 drawing anything). **Status: proposed, pending owner approval.**
+
+**Draft successor (2026-09-06, not owner-approved):** [13-actor-sheet.html](../design/13-actor-sheet.html)
+is the complete inventory (eight tabs, AptitudeTile, shield layers, 24 statuses). Lawn composition:
+[spec-lawn-interactive.md](../design/spec-lawn-interactive.md). Keep `ActorPanel.tsx`; export alias
+`ActorSheet`. This map's six-tab "Overview unchanged" shell is **not** the layout to implement.
 
 ## What this program is
 

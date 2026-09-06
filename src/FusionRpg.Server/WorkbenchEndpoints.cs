@@ -36,9 +36,70 @@ public static class WorkbenchEndpoints
         long? PlayerId, string? InstanceId, string? RecipeId, int? SocketIndex, string? Element,
         string? CorrelationId);
 
+    /// <summary>
+    /// One recipe as a picker offers it — item-content <c>item-naming</c> T4.
+    /// </summary>
+    /// <param name="Name">The corpus's own authored English name (<c>"Forge: Cloth Armor"</c>), or
+    /// <c>""</c> for an entry that authors none. The client shows the recipe id ONLY in the row's
+    /// secondary line, never in the name slot.</param>
+    public sealed record WorkbenchRecipeDto(
+        string RecipeId, string Name, string Operation, string Frame, string OutputKind, string? OutputRef);
+
+    /// <summary>One insert the player actually holds, named — item-content <c>item-naming</c> T4.</summary>
+    /// <param name="Name">The gem corpus's authored name (<c>"Ember Shard"</c>), or <c>""</c> for a
+    /// container the corpus does not carry. `Element` is <c>""</c> for a genuinely element-free
+    /// insert, which is a legitimate value and not an absent read.</param>
+    public sealed record WorkbenchInsertDto(string ContainerId, string Name, string Element, long Qty);
+
     public static void MapWorkbench(this WebApplication app, ItemWorkbench bench)
     {
         if (bench is null) throw new ArgumentNullException(nameof(bench));
+
+        // The bench's OWN gem corpus — the same delegate it prices `socket-insert` against. Read off
+        // the bench rather than passed in again: a picker named by a different catalog than the one
+        // that prices filling the socket is how two surfaces come to disagree about what a gem is
+        // called. `null` serves the held list with empty names, which the client renders as
+        // "unnamed" rather than as the container id.
+        var lookupInsert = bench.LookupInsert;
+
+        // ⭐ The ONE read in this file, and it is why it is here rather than in the read-only surfaces
+        // file: the list a picker offers must be the list the executor below prices against, and
+        // `ItemWorkbench.Recipes` is that exact corpus. A recipe read from anywhere else could offer a
+        // row the very next POST would refuse with `material.recipe-unknown`.
+        //
+        // ⏸ Until item-content T4 (2026-09-06) NO route served these 30 rows at all, so the craft and
+        // socket benches asked the player to TYPE `recipe.014`. `GET /api/recipes` is the PvZ fusion
+        // table and a different thing entirely.
+        app.MapGet("/api/items/workbench/recipes", (string? operation) =>
+        {
+            var rows = bench.Recipes.Recipes.Values
+                .Where(r => operation is not { Length: > 0 } wanted ||
+                            string.Equals(CraftOperations.Id(r.Operation), wanted, StringComparison.Ordinal))
+                .OrderBy(r => CraftOperations.Id(r.Operation), StringComparer.Ordinal)
+                .ThenBy(r => r.RecipeId, StringComparer.Ordinal)
+                .Select(r => new WorkbenchRecipeDto(
+                    r.RecipeId, r.Name, CraftOperations.Id(r.Operation), r.Frame, r.OutputKind, r.OutputRef))
+                .ToList();
+            return Results.Ok(rows);
+        });
+
+        // The inserts the player actually holds, named — so "set an insert" is a pick, not a typed
+        // container id. The `gem.` prefix is the same filter the combinations route already applies to
+        // stock (ItemSurfaceEndpoints), not a new rule invented here.
+        app.MapGet("/api/items/workbench/inserts/{playerId}", (string playerId, RpgStore store) =>
+        {
+            var rows = store.ListStock(playerId)
+                .Where(s => s.ContainerId.StartsWith("gem.", StringComparison.Ordinal) && s.Qty > 0)
+                .OrderBy(s => s.ContainerId, StringComparer.Ordinal)
+                .Select(s =>
+                {
+                    var found = lookupInsert?.Invoke(s.ContainerId);
+                    return new WorkbenchInsertDto(
+                        s.ContainerId, found?.Name ?? "", found?.Def.Element ?? "", s.Qty);
+                })
+                .ToList();
+            return Results.Ok(rows);
+        });
 
         app.MapPost("/api/items/workbench/salvage", (SalvageRequest body, RpgStore store) =>
         {

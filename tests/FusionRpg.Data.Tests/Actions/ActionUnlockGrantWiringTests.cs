@@ -83,7 +83,7 @@ public class ActionUnlockGrantWiringTests : IDisposable
         Assert.True(ok, reason);
         Assert.True(updated!.Level > 1);
 
-        var grants = _store.ListGrants(new OwnerScope(OwnerKind.Entity, actor.InstanceId)); // matches WebMatchService.EquippedActionIdsFor's own real read scope
+        var grants = _store.ListGrants(new OwnerScope(OwnerKind.UniqueActor, actor.InstanceId)); // matches WebMatchService.EquippedActionIdsFor's own real read scope (action-grant-owner-kind-durability, fixed 2026-09-07)
         Assert.Contains(grants, g => g.ActionId == "action.wiring-test.only");
     }
 
@@ -103,7 +103,7 @@ public class ActionUnlockGrantWiringTests : IDisposable
         var levelsGained = updated!.Level - 1;
         Assert.True(levelsGained >= 3, $"expected a huge XP delta to cross at least 3 levels; got {levelsGained}");
 
-        var grants = _store.ListGrants(new OwnerScope(OwnerKind.Entity, actor.InstanceId)); // matches WebMatchService.EquippedActionIdsFor's own real read scope
+        var grants = _store.ListGrants(new OwnerScope(OwnerKind.UniqueActor, actor.InstanceId)); // matches WebMatchService.EquippedActionIdsFor's own real read scope (action-grant-owner-kind-durability, fixed 2026-09-07)
         Assert.Equal(3, grants.Count); // exactly the 3 available candidates, no more, no fewer
     }
 }

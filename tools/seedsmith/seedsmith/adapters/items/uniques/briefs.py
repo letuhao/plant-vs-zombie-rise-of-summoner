@@ -33,6 +33,51 @@ VARIANCE: "tuple[str, ...]" = ("narrow", "normal", "wide")
 #: the existing texture rather than exploring the tunable's own ceiling in the same batch.
 FIXED_ATOM_COUNT = 2
 
+#: `ssot-uniques.md §3.7`, enforced today by the ALREADY-SHIPPED
+#: `tools/ItemSeedValidator/Checks/UniqueRuleCheck.cs`: at most 8 of the 15 roles per frame may
+#: ever carry a unique, and this exact list is the owner's own 2026-08-23 decision (the four
+#: heaviest + four lightest eligible roles, `jewel-minor` excluded separately). A `baseType` drawn
+#: from any OTHER role fails real import with `UniqueRoleQuota` -- confirmed by reading the real
+#: checker's own source before generating a single anchor, not assumed from the spec's prose alone
+#: (the spec this task implements never names this constraint at all).
+ALLOWED_ROLES: "tuple[str, ...]" = (
+    "armament-primary", "core-guard", "ward-array", "jewel-major",
+    "sense", "footing", "infusion", "retinue",
+)
+
+
+def role_for_cell(cell: Cell) -> str:
+    """Which of the 8 allowed roles this cell's anchor is built on. `UniqueRuleCheck.cs`'s own
+    `UniqueAxisCollision` keys on `(band, role, axis)` -- NOT frame -- so a plant cell and a
+    humanoid cell shipping the SAME axis at the SAME band must pick DIFFERENT roles from each
+    other or they collide with one another, not just with the existing 144-corpus. Offsetting the
+    humanoid role by 4 (of 8) guarantees a plant/humanoid mismatch at every axis while every axis's
+    OWN pair of roles reuses across axes freely (axis is part of the key, so a role repeating at a
+    different axis is never a collision). Confirmed empirically 2026-09-06 against the real
+    144-corpus: bands 80 and 100 hold ZERO existing entries on any of these 8 roles at any axis, so
+    this assignment collides with nothing already shipped; band 90 is the opposite -- ALL 8 roles
+    are already taken at EVERY axis, which is why this batch does not attempt band 90 at all (see
+    the batch script's own skip, named in D4.29's evidence rather than forced through)."""
+    from .planner import AXES
+    i = AXES.index(cell.axis)
+    return ALLOWED_ROLES[i] if cell.frame == "plant" else ALLOWED_ROLES[(i + 4) % 8]
+
+
+def load_base_types_by_frame_and_role() -> "dict[tuple[str, str], frozenset[str]]":
+    """`unique.baseType`'s real VALIDATED vocabulary, keyed by (frame, role) -- read fresh from
+    `data/seed/items/base-types/**/*.json` (62 files), restricted to `ALLOWED_ROLES` (every OTHER
+    role is a real `UniqueRoleQuota` refusal at import, `UniqueRuleCheck.cs`) -- measured
+    2026-09-06: 24 real base types exist for every one of the 8 allowed roles, in both frames,
+    uniformly."""
+    by_key: "dict[tuple[str, str], set[str]]" = {}
+    for path in sorted(BASE_TYPES_DIR.rglob("*.json")):
+        doc = json.loads(path.read_text(encoding="utf-8"))
+        for entry in doc.get("entries") or ():
+            frame, role, entry_id = entry.get("frame"), entry.get("role"), entry.get("id")
+            if isinstance(frame, str) and isinstance(role, str) and isinstance(entry_id, str) and role in ALLOWED_ROLES:
+                by_key.setdefault((frame, role), set()).add(entry_id)
+    return {key: frozenset(ids) for key, ids in by_key.items()}
+
 
 def acquisition_for_band(band: str) -> str:
     """ssot-uniques.md §4.5: "ordinal >= 90 is never plain drop." `firstseed` (80) is the only
@@ -45,22 +90,6 @@ def acquisition_for_band(band: str) -> str:
     if band not in ("firstseed", "sunwoven", "almanac"):
         raise ValueError(f"unknown band {band!r}")
     return "drop" if band == "firstseed" else "deterministic"
-
-
-def load_base_types_by_frame() -> "dict[str, frozenset[str]]":
-    """`unique.baseType`'s real VALIDATED vocabulary, grouped by frame -- read fresh from
-    `data/seed/items/base-types/**/*.json` (62 files), never hand-transcribed (this registry is
-    large and grows independently of the uniques corpus). Only `plant`/`humanoid` are ever
-    populated -- the grid excludes `hybrid` (planner.py's own FRAMES) so a hybrid base type, if
-    any existed, would never be looked up."""
-    by_frame: "dict[str, set[str]]" = {}
-    for path in sorted(BASE_TYPES_DIR.rglob("*.json")):
-        doc = json.loads(path.read_text(encoding="utf-8"))
-        for entry in doc.get("entries") or ():
-            frame, entry_id = entry.get("frame"), entry.get("id")
-            if isinstance(frame, str) and isinstance(entry_id, str):
-                by_frame.setdefault(frame, set()).add(entry_id)
-    return {frame: frozenset(ids) for frame, ids in by_frame.items()}
 
 
 #: One line per field the model actually sees, each with a negative clause (AI-native contract:
@@ -82,7 +111,11 @@ DESCRIPTIONS: "dict[str, str]" = {
     "fixedAtoms": "One to three fixed effect atoms this unique always carries, each a real atom family plus a power band. NOT a magnitude -- power band is a named tier, never a number.",
     "varianceSlot": "The one optional rolled effect slot this unique carries, or omitted entirely. NOT a second fixed core -- at most one slot, and it may be absent.",
     "counterPressure": "The one weakness this unique's design leans on. NOT flavor text -- `kind` must be one of the listed real values.",
-    "tags": "Descriptive tags from the closed registry, at most one per exclusive axis (mass-class, material-nature, durability-class, combat-posture, origin, notability). NOT invented tags, and exactly one mass-class tag is required.",
+    "massClass": "How much physical mass or bulk this item reads as carrying. NOT a second free-text tag list -- exactly one value, never two.",
+    "materialNature": "What this item is physically made of. NOT a second free-text tag list -- exactly one value, never two.",
+    "combatPosture": "This item's primary tactical intent. NOT a second free-text tag list -- exactly one value, never two.",
+    "origin": "This item's biological or thematic origin, or 'none' if it has none. NOT required to have a real value -- 'none' is itself a legal answer.",
+    "durabilityClass": "How this item wears compared to its class and rarity, or 'none' if unremarkable. NOT required to have a real value -- 'none' is itself a legal answer.",
 }
 
 
@@ -98,22 +131,49 @@ def build_unique_schema(
     cell: Cell,
     planned_ids: "dict[str, str]",
     *,
-    base_types_by_frame: "dict[str, frozenset[str]] | None" = None,
+    role: "str | None" = None,
+    base_types_by_frame_and_role: "dict[tuple[str, str], frozenset[str]] | None" = None,
     atom_families: "frozenset[str] | None" = None,
-    mass_class_tags: "tuple[str, ...] | None" = None,
-    other_tags: "tuple[str, ...] | None" = None,
+    tag_axes: "dict[str, tuple[str, ...]] | None" = None,
 ) -> dict:
     """One call's schema for `cell` -- `planned_ids` supplies the four PLANNED-minted string
     values (`id`, `nameKey`, `iconKey`, `flavorKey`) from the planner's `IdMinter`. Every closed
     vocabulary defaults to a fresh registry read when the caller does not supply one (tests supply
-    a small fixture instead, so a schema test never depends on the live corpus's exact size)."""
-    base_types_by_frame = base_types_by_frame if base_types_by_frame is not None else load_base_types_by_frame()
+    a small fixture instead, so a schema test never depends on the live corpus's exact size).
+
+    `role` overrides `role_for_cell(cell)`'s own default grid assignment -- needed because that
+    default assumes a fresh, unoccupied (role, axis) space, and a REAL run measured 2026-09-06 that
+    no such space exists for rung 80/100 at all: `naming.v1.json idNamespaces.uniques.bandAssignment`
+    has rows only for ordinals 30/50/70/90, so a freshly-invented id prefix fails `IdOutsideNamespace`
+    on every entry, and ordinal 90 (the nearest real row) is separately saturated on every (role,
+    axis) pair. Shipping under a REAL registered ordinal (70, whose own real content already mixes
+    heirloom(70) and firstseed(80) rarities under one prefix -- confirmed from the real corpus, not
+    assumed) means the role per (frame, axis) must be picked from THAT ordinal's own actual free
+    slots, not the grid's default rotation -- hence the override.
+    `baseType`'s own candidates are restricted to `role_for_cell(cell)`'s own role, never the
+    cell's whole frame, because `UniqueRuleCheck.cs`'s real 8-role-per-frame quota makes every
+    other role an automatic `UniqueRoleQuota` refusal at import.
+
+    **Tags are five SEPARATE single-valued fields here, never one flat array.** A real batch run
+    (2026-09-06, `google/gemma-4-26b-a4b-qat`) measured a 15% (3/20) resolve rate against a flat
+    `tags: string[]` field with a "one per exclusive axis" rule stated only in prose -- the
+    overwhelming majority of failures were the model omitting a mass-class tag entirely or
+    picking two from the same axis, which JSON Schema's `enum` cannot forbid inside one array
+    (each individual string is legal; the CROSS-CUTTING one-per-axis rule is not expressible as a
+    per-item constraint). Splitting the exclusive axes into their own fields makes the violation
+    structurally unreachable: each field takes exactly one value from its own closed enum under
+    constrained decoding, and `assemble_tags` (this module) combines them into the real `tags[]`
+    array afterward -- code does the assembly, the model only ever answers one-of-N questions."""
+    role = role if role is not None else role_for_cell(cell)
+    base_types_by_frame_and_role = (base_types_by_frame_and_role if base_types_by_frame_and_role is not None
+                                    else load_base_types_by_frame_and_role())
     atom_families = atom_families if atom_families is not None else _reg.load_atom_families()
-    if mass_class_tags is None or other_tags is None:
-        axes = _reg.load_tag_axes(applies_to="unique")
-        mass_class_tags = mass_class_tags if mass_class_tags is not None else axes.get("mass-class", ())
-        other_tags = other_tags if other_tags is not None else tuple(
-            t for axis, ids in axes.items() if axis != "mass-class" for t in ids)
+    tag_axes = tag_axes if tag_axes is not None else _reg.load_tag_axes(applies_to="unique")
+    mass_class = tag_axes.get("mass-class", ())
+    material_nature = tag_axes.get("material-nature", ())
+    combat_posture = tag_axes.get("combat-posture", ())
+    origin = tag_axes.get("origin", ())
+    durability_class = tag_axes.get("durability-class", ())
 
     atom_item = {
         "type": "object",
@@ -152,13 +212,16 @@ def build_unique_schema(
         "acquisition": _planned_const("acquisition", acquisition_for_band(cell.band)),
         "name": {"type": "string", "description": DESCRIPTIONS["name"]},
         "flavor": {"type": "string", "description": DESCRIPTIONS["flavor"]},
-        "baseType": _enum("baseType", base_types_by_frame.get(cell.frame, frozenset())),
+        "baseType": _enum("baseType", base_types_by_frame_and_role.get((cell.frame, role), frozenset())),
         "fixedAtoms": {"type": "array", "items": atom_item, "minItems": 1, "maxItems": 3,
-                       "description": DESCRIPTIONS["fixedAtoms"]},
+                       "uniqueItems": True, "description": DESCRIPTIONS["fixedAtoms"]},
         "varianceSlot": variance_slot,
         "counterPressure": counter_pressure,
-        "tags": {"type": "array", "items": {"type": "string", "enum": sorted(set(mass_class_tags) | set(other_tags))},
-                 "minItems": 1, "description": DESCRIPTIONS["tags"]},
+        "massClass": _enum("massClass", mass_class),
+        "materialNature": _enum("materialNature", material_nature),
+        "combatPosture": _enum("combatPosture", combat_posture),
+        "origin": _enum("origin", tuple(origin) + ("none",)),
+        "durabilityClass": _enum("durabilityClass", tuple(durability_class) + ("none",)),
     }
     return {
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -166,32 +229,76 @@ def build_unique_schema(
         "type": "object",
         "properties": properties,
         "required": ["id", "nameKey", "iconKey", "flavorKey", "frame", "powerAxis", "rarity",
-                     "acquisition", "name", "flavor", "baseType", "fixedAtoms", "counterPressure", "tags"],
+                     "acquisition", "name", "flavor", "baseType", "fixedAtoms", "counterPressure",
+                     "massClass", "materialNature", "combatPosture", "origin", "durabilityClass"],
         "additionalProperties": False,
     }
 
 
+def assemble_tags(entry: "dict[str, Any]") -> "list[str]":
+    """The real `unique.tags[]` array, assembled from the five separately-authored single-value
+    fields `build_unique_schema` requests -- never authored as a flat list (see that function's
+    own docstring for why). `notability=signature` is never asked of the model at all: every
+    sampled real anchor in the 144-corpus already carries it, so this batch decides it in code
+    (one less field the model could get wrong) rather than spending a schema slot re-deriving a
+    near-constant. Pops the five intermediate fields off `entry` so the FINAL shipped JSON matches
+    the real corpus's own `tags[]`-only shape -- `entry` is mutated and returned for convenience."""
+    tags = [entry.pop("massClass"), entry.pop("materialNature"), entry.pop("combatPosture")]
+    origin = entry.pop("origin")
+    if origin != "none":
+        tags.append(origin)
+    durability = entry.pop("durabilityClass")
+    if durability != "none":
+        tags.append(durability)
+    tags.append("signature")
+    entry["tags"] = tags
+    return tags
+
+
+#: naming.v1.json's own three legal AUTHOR patterns for a `name` field (its own "why3": a 4th,
+#: "combined" shape is deliberately withheld from authors because the ENGINE assembles that exact
+#: shape for rolled magic-item names, and an author typing it by hand would collide un-detectably
+#: with an engine-generated name of the same shape). Confirmed live 2026-09-06: a real generated
+#: name, "Thorned Scepter of the Verdant Maw", is EXACTLY this forbidden 4th shape
+#: (`<Adjective> <Base> of <Concept>` -- patterns 1+2 concatenated) and failed real import with
+#: `GeneratedOnlyNamePattern`. A second real failure the same run, "Echo of the Deep Roots",
+#: violated the separate `pluralsPossessivesConnectives` rule (no plural noun in a `name` field).
 SYSTEM_PROMPT = (
     "You author identity for a Diablo-style unique item in a JSON object matching the given "
     "schema. Every PLANNED field (id, nameKey, iconKey, flavorKey, frame, powerAxis, rarity, "
     "acquisition) is already fixed -- copy its const value verbatim, never change it. Choose a "
     "real baseType from the closed list that fits the power axis and frame. Choose fixedAtoms "
     "and, optionally, a varianceSlot ONLY from the real atom-family list given -- never invent a "
-    "family. Write a short evocative name, one to two sentences of flavor text, and one sentence "
-    "of counterPressure.note describing the item's built-in weakness. Never write a number "
-    "anywhere in name, flavor, or counterPressure.note."
+    "family. massClass, materialNature and combatPosture each take EXACTLY ONE value from their "
+    "own list -- pick the single best fit, never think of these as a combined tag list. origin "
+    "and durabilityClass are 'none' unless a real value clearly fits. "
+    "The name field must use EXACTLY ONE of these three shapes, never a mix: "
+    "(1) compound: two words, '<Adjective> <Base>' (e.g. 'Heartbloom Crown'); "
+    "(2) of-construct: '<Base> of [the] <Concept>', where 'of' is the ONLY allowed connective and "
+    "<Concept> is one or two words (e.g. 'Fang of the Hollow Crown'); "
+    "(3) fusion: exactly two words joined with no space (e.g. 'Ashfang'). "
+    "NEVER combine an adjective with an 'of' phrase in the same name (e.g. never 'Thorned Scepter "
+    "of the Verdant Maw') -- that four-part shape is reserved for the game engine's own generated "
+    "names and is not legal for an authored name. NEVER use a plural noun, a possessive ('s), or "
+    "any connective other than 'of'/'the' in a name. Write one to two sentences of flavor text, "
+    "and one sentence of counterPressure.note describing the item's built-in weakness. Never "
+    "write a number anywhere in name, flavor, or counterPressure.note."
 )
 
 
-def build_brief(cell: Cell, schema: dict) -> str:
+def build_brief(cell: Cell, schema: dict, *, role: "str | None" = None) -> str:
     """The user-turn text -- the schema itself carries every closed vocabulary already (LM
     Studio's constrained decoding makes an out-of-enum value unsampleable, spec-pipeline.md's own
     "prove constrained decoding is on" rule), so the brief states only what a schema cannot: the
     axis's own flavor connotation, kept short because AUTHORED free text is the only thing the
-    model is actually deciding here."""
+    model is actually deciding here. `role` mirrors `build_unique_schema`'s own override -- must
+    match whatever role that schema's `baseType` enum was actually restricted to, or the brief
+    would name a role the model's own closed choices cannot legally build against."""
+    role = role if role is not None else role_for_cell(cell)
     return (
         f"Author one unique item.\n"
         f"Frame: {cell.frame}\n"
+        f"Equipment role: {role} (choose baseType from the given list for this role)\n"
         f"Power axis: {cell.axis} (this item's build should read as leaning into {cell.axis})\n"
         f"Rarity band: {cell.band}\n"
         f"Return ONLY the JSON object."

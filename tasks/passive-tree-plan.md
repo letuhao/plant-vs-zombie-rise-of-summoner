@@ -27,8 +27,8 @@ checkpoint asserting an output no task produced. Patching would have left the se
 Build a static, shared passive-tree catalog and the runtime that reads it: a deterministic planner
 emits a plan, a language stage fills vocabulary inside it, a binder turns budget shares into stored
 coefficients, and the resolver folds them into combat as ordinary channel contributions. Roughly
-35,160 nodes across 879 trees when complete — but the plan reaches a playable single tree long before
-that, deliberately.
+35,280 nodes across 882 trees when complete (D51, 2026-09-06: 24 statuses, not 21 — was 35,160/879)
+— but the plan reaches a playable single tree long before that, deliberately.
 
 **79 tasks across ten phases, 8 checkpoints.** Every task is S or M; nothing is L, and no task touches
 more than about five files. (E1b — the L2b resist feedback path — and F1b — squad-harness's own OQ2,
@@ -168,18 +168,21 @@ republished.**
 
 ### Phase G — the gate quantities
 
-Without these, 27 of 39 trees sit at tier 0 (§13.4). D37 put them in this program; D43 seeds existing
-saves. G1 lands the two shipped-code prerequisites (`DamageOrigin`, `OnFreshApplication`) that the
-counting rules are undeliverable without.
+Without these, 30 of 42 trees (D51, 2026-09-06: 24 statuses, not 21 — was 27 of 39) sit at tier 0
+(§13.4). D37 put them in this program; D43 seeds existing saves. G1 lands the two shipped-code
+prerequisites (`DamageOrigin`, `OnFreshApplication`) that the counting rules are undeliverable without.
 
-Tasks G1–G8. **Checkpoint G: all 39 trees reachable; an existing save shows non-zero counters.**
+Tasks G1–G8. **Checkpoint G: all 42 trees reachable; an existing save shows non-zero counters. ✅ Both
+gate quantities shipped and live-probed 2026-09-06 (G6) — this checkpoint's gate-side work is done; the
+remaining block on those 30 trees is `passive-tree-todo.md` task J1's missing plan-emission factory
+functions, not this phase.**
 
 ### Phase H — generation machinery and the primary corpus
 
 The 24 validation gates, the runner that executes them, the eight `PassiveTree/*` metrics and the two
 `tree-review` ones, the tree card, the corpus sheet, the review pilot — and then 12 trees (480 nodes)
-rather than 39. The pilot lands here because every hour estimate in the program rests on a rate nobody
-has measured.
+rather than 42 (D51, 2026-09-06: 24 statuses, not 21 — was 39). The pilot lands here because every
+hour estimate in the program rests on a rate nobody has measured.
 
 Tasks H1–H9. **Checkpoint H: 480 nodes generated, gated and reviewed; the gating metric measured.**
 

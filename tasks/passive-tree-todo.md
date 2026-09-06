@@ -444,7 +444,9 @@ UNCONDITIONALLY (including `soul_level = 0`), never the "skip zero" rule aptitud
 presence in the set already means owned here. `LoadTreeStateBatch` reads an entire squad in one
 query via an OR-chain over `(scope, scope_key)` pairs (SQLite has no tuple `IN`). `TreeUnlockCost`
 (pure function) reproduces the spec's own stated corpus figure exactly:
-`cumulative(35,160, 5, 2) = 1,236,366,240`. The order-independence lemma is a named test, not prose.
+`cumulative(35,160, 5, 2) = 1,236,366,240` at the time this was written — D51 (2026-09-06) grew this to
+`cumulative(35,280, 5, 2) = 1,244,819,520`; both the test and this figure were updated in the same
+pass. The order-independence lemma is a named test, not prose.
 21 new tests (11 `TreeUnlockCost` + 10 `RpgStore.PassiveTree`), all green. Wired into
 `EnsureHotSchema` and `Reset()`. Full `FusionRpg.Data.Tests`: 897 passed, 2 failed
 (`DemonSpeciesImportCliTests`) — confirmed via `git status` to be the SAME concurrent session's
@@ -3117,10 +3119,22 @@ of measurement, and it also yields the intra-tree defect correlation the samplin
 **Verification:** the recomputed census cost is in `passive-tree-plan.md` before J2 starts.
 **Depends on:** H7. **Scope:** S.
 
-### H9: Emit and generate the 12 primary trees — infrastructure gap CLOSED 2026-09-06; the real run itself still pending
+### H9: Emit and generate the 12 primary trees — infrastructure gap CLOSED 2026-09-06; generation partial, binding not started
 **Spec:** `spec-tree-plan.md`, `spec-tree-language.md`, `spec-tree-binder.md`, `spec-tree-catalog.md` §5.
+**Real progress, verified 2026-09-07 by reading `data/seed/passive-tree/nodes/*.json` directly (not
+assumed from an earlier claim): 379 of 480 nodes are language-stage GENERATED** — might 37/40,
+fortitude 32/40, vigor 35/40, onslaught 29/40, agility 39/40, composure 28/40, pierce 30/40, focus
+29/40, bulwark 27/40, retribution 32/40, precision 30/40, ferocity 31/40. **This is real content, not
+zero** — the acceptance box below stays unchecked because it gates the FINAL state (bound + committed
+catalog), not raw generation: `data/generated/passive-tree/` has no bound catalog for any tree yet
+(confirmed, directory empty/absent), so `tree-binder` has not run over any of this content. Two
+distinct, sequential gaps remain, not one: (a) finish generating the remaining 101 nodes across the 12
+trees, (b) run `tree-binder` over all 480 once generation completes, then commit the result. Neither
+has a further count grow expected — D51/D52's re-bake already landed on these same 12 primary trees'
+PLAN files (confirmed byte-stable via `--check`) before this generation work ran, so the node counts
+above are not stale relative to the corpus growth.
 **Acceptance:**
-- [ ] 480 nodes emitted, generated, bound and committed
+- [ ] 480 nodes emitted, generated, bound and committed (379/480 generated; 0/480 bound)
 - [ ] **Every gate green; the gating metric measured;** any `NOT_MEASURED` named and cited. For
       `PassiveTree/UnresolvedCount` — the one metric at `gates=True` — `NOT_MEASURED` **denies** a pass
       (§7 gate 23; `tree-review` §6.4 rule 1: an absent check is never a pass)
@@ -4142,8 +4156,9 @@ run` → 1612/1613 (the one failure, `disabledReasonGuard.test.ts` naming `Comma
 
 ### ✅ I4: Level 1 — *All paths* — BUILT + VERIFIED 2026-09-06
 **Spec:** `spec-tree-surface.md` §2.2 Level 1, §7.3, §9.1 rules 3–5.
-**Description:** The browse. §7.3 is explicit that *"ordering is the mitigation"* for 879 trees, so the
-five-bucket ordering is the design, not a nicety.
+**Description:** The browse. §7.3 is explicit that *"ordering is the mitigation"* for the 42 shared
+paths Level 1 holds (D51, 2026-09-06: 24 statuses, not 21 — was 39; species trees never enter this
+browse, so it was never really 879), so the five-bucket ordering is the design, not a nicety.
 **Acceptance:**
 - [x] Level 1 orders: invested → your own stance's other three → element/status match → everything else
       → the collapsed gate-less bucket
@@ -4592,7 +4607,7 @@ in one sitting rather than leaving them scattered across specs to be re-discover
 |---|---|---|---|
 | D44 | tree-state §OQ2 | "Tier below unlocked" = ? | **≥1 node, same branch** (preserves D10's two-branch identity, rewards a single-branch dive) |
 | D45 | tree-state §OQ1 | Tree respec shares species-respec counter, or its own? | **Its own, separate counter** |
-| D46 | tree-catalog §OQ3 | May a node author a bake-time-resolved (L2) slot? | **Yes, allowed** |
+| D59 | tree-catalog §OQ3 | May a node author a bake-time-resolved (L2) slot? | **Yes, allowed.** ⚠ Renumbered from D46 2026-09-07 — that number was already taken by `spec-squad-harness.md`'s own, older 2026-09-05 decision ("mirror squads decide"), a real ID collision this audit found; squad-harness's D46 is untouched and keeps its number |
 | D47 | squad-harness §OQ2 | Measure the shipped allocation shape too, not just D21's? | **Yes — measure both shapes** |
 | D48 | tree-review §OQ2 | Two-reviewer agreement pass wanted? | **No — single reviewer is enough** |
 | D49 | tree-review §OQ3 | Acceptable manual-correction rate? | **Higher tolerance, 2–3%** (not the demon corpus's unproven ~0.4% floor) |
@@ -4612,12 +4627,51 @@ equal-budget rule changes once S4 lands, `w`'s real value (needs the harness to 
 track), stance groups for elemental/status/demon-family trees.
 
 **Implementation status of this batch, tracked here rather than only in chat:** D44/D45/D46/D47/D48/
-D49/D50/D53/D54/D57 are pure spec-text confirmations or small, contained changes — landing them now.
-D51/D52 (the corpus-growth accept) is a real, moderate mechanical task (re-run generators, re-bake 12
-plans, sweep every numeric citation) — landing now. D56 (17th atom kind) and D58 (`CurveInput` 4th
-member) are both real, wider-blast-radius work — D58 touches the shared E2 curve system other
-consumers besides passive-tree read, D56 is a new capability spanning effect-atom's own kind registry
-— both get their own dedicated pass rather than a rushed inline edit.
+D49/D50/D53/D54/D57 are pure spec-text confirmations or small, contained changes — landed. D51/D52
+(the corpus-growth accept) BUILT + VERIFIED (line ~4622 above). D55 BUILT + VERIFIED (line ~4626
+above).
+
+**D58 — spec landed 2026-09-06, and it reverses its own owner-chosen framing on the evidence, the same
+way D56 did.** [`spec-soul-curve-resolution.md`](spec-soul-curve-resolution.md) — the "careful
+investigation of every `CurveInput` consumer" this decision was flagged as needing before its shape
+could be touched. **What it found:** the literal instruction ("add a 4th `CurveInput` member for soul
+level") was chosen from a menu written before that investigation happened, and the investigation
+reaches a different answer — soul-level scaling already ships and is tested as `tree-binder` §5.1's
+`Θ`-offset formula (`Θ_node = Θ_actor + thetaPerSoulLevelMilli·soulLevel/1000`, then `P(Θ_node)`
+through the one shared `PowerLadder`), which `passive-tree-ideal.md` §4 requires **by name** ("the
+bonus [souls buy]... must read `P(Θ)`"). `NodeAtom.SoulCurveId` — the field the original question
+assumed needed a `CurveInput` hookup — has **zero production readers anywhere** (verified: repo-wide
+`.SoulCurveId` grep, two hits, both test round-trips; `TreeBinderRun.cs:72` writes it as `null`
+unconditionally). Adding a `CurveInput` member for it would have built the exact "second private
+curve" CLAUDE.md's one-power-ladder hard rule exists to prevent, duplicating an already-shipped
+mechanism. A directly analogous case (`decision-d3-cost-rarity-rebase.md` §Q1.6) already rejected
+minting a `CurveInput` member for an unrelated item-program axis on the identical "the existing
+mechanism already covers this" reasoning — cited in the spec as precedent, not invented fresh.
+**Resolution: retire `SoulCurveId` and its validation/round-trip machinery; add nothing to
+`CurveInput`.** `spec-tree-catalog.md` §OQ1 closed with this spec; its §OQ3 (D46, bake-time L2
+slot authoring — already answered "yes" but never propagated into that file) closed in the same
+pass. **Not built** — this is a spec-only deliverable, same status as D56.
+
+**D56 — spec landed 2026-09-06** (owner's own words, honored literally: *"why don't we make spec to
+cover it?"*, not a priority call). [`spec-element-conversion.md`](spec-element-conversion.md) —
+`element-conversion` module, an `Element` attach point + `element.convert` kind so a passive-tree
+conversion node can actually write a weighted `ElementPayload`, closing the gap `tree-binder` §7.2's
+own refusal names. **A real, valuable correction surfaced while researching it, not assumed from the
+old framing:** the vocabulary is no longer 16 kinds/7 attach points as `tree-binder`'s own citations
+and `DESIGN-GATE.md` row 41 both still said — base-defense's `siege-construction` landed a 17th kind
+(`structure.place`) and 8th attach point (`Siege`) 2026-09-06, unrelated to this work, so this
+capability is really the **18th kind / 9th attach point**, not the 17th/8th. Verified directly against
+`AtomKindRegistry.cs:36` (`KindCount = 17`) and `atom-catalog-ssot.md` §2 ("The closed kind list —
+17"), not assumed from any spec's own prose. `DESIGN-GATE.md` row 41 corrected in the same pass (was
+already stale independent of this spec). **Not built** — the spec's own Open questions name the one
+real engineering decision left (the exact combat-dispatch call site that reweights `ElementPayload`)
+and the pricing question (`shareMilli` flat vs. `Θ`-scaled) that belongs to `tree-plan`/`tree-binder`,
+not to this vocabulary change. **A live collision risk named, not resolved:** `decisions.md`'s
+"extended action slots" row (2026-09-05) independently floats *"a reviewed seventeenth kind"* for
+`loadout.slots` — that row's own count is now stale too (17 was already taken when it was written), and
+if both proposals ever land, whichever lands second must reconcile `KindCount` to the combined total,
+exactly the collision `spec-ui-attach-point.md` §6 already documents for two OTHER modules that hit
+the same seam.
 
 **D55 — BUILT + VERIFIED 2026-09-06.** Published via
 `python tools/tuning/publish.py aptitudes --label "D55: skillPointsPerThetaMilliByScope proportional
@@ -4849,12 +4903,58 @@ days of machine time, not of authoring).
 **Spec:** `spec-tree-review.md` §2, §3; `spec-species-tree.md` §7.2.
 **Acceptance:**
 - [ ] Every tree judged, at the H8-measured rate, under J2's three-tier design
-- [ ] The 39 shared generic trees are their **own** census lot, with their own sheet and queue, in
-      category waves
+- [ ] The 42 shared generic trees (D51, 2026-09-06: 24 statuses, not 21 — was 39) are their **own**
+      census lot, with their own sheet and queue, in category waves
 - [ ] The acceptance record says **"every tree was judged"**, never "the catalog was reviewed"
 - [ ] Escalations resolve through J3's ladder; no lot ships under any of the nine unshippable conditions
 **Verification:** the census refuses any lot with no `sheetRead` row (H7).
 **Depends on:** J3, J9, G7. **Scope:** M.
+
+### J11: `element-conversion` — the atom-vocabulary gap `tree-binder` refuses on
+**Spec:** [`spec-element-conversion.md`](spec-element-conversion.md) (D56, 2026-09-06).
+**Description:** An `Element` attach point (9th) + `element.convert` kind (18th) so a passive-tree
+conversion node (D16) can write a weighted `ElementPayload` instead of being refused. The spec is
+written and grounded against real code (`ElementPayload.cs`, `AtomKindRegistry.cs:36`,
+`atom-catalog-ssot.md` §2); nothing here is built yet.
+**Acceptance:**
+- [ ] `AttachPointCount = 9`, `KindCount = 18`, self-consistency-guarded
+- [ ] `atom-catalog-ssot.md` §2, `decisions.md`'s "Atom attach points" row, `effect-atom-map.md`, and
+      `DESIGN-GATE.md` row 41 all move in the same change (spec §5's own "Always" rule)
+- [ ] The combat-dispatch read-point call site is decided and built (spec §2b/§6's own open question —
+      proposed default: before `DamageApplyPipeline.ApplyPacketToFunnel`, `CombatDamageDispatcher.cs:47-48`)
+- [ ] `tree-binder`'s §7.2 refusal, re-run against a fixture conversion node, clears with **zero code
+      change in `tree-binder` itself** (spec §2d)
+- [ ] Checked against `decisions.md`'s "extended action slots" row before landing — that row also
+      floats a possible new kind for `loadout.slots`; whichever lands second reconciles `KindCount`
+      (spec §6's own named collision)
+**Verification:** spec §4's own testing strategy — payload-exactness test, adversarial stacking test,
+trigger-rejection test, permanent-modifiers guard-set test, empirical `Sim`-fold test before claiming
+anything but `None` there.
+**Depends on:** none (spec-only prerequisite is done). **Scope:** M — a new attach point + kind
+following an established pattern (`ui.present`/`structure.place`), plus one new combat-dispatch read.
+
+### J12: Retire `NodeAtom.SoulCurveId`
+**Spec:** [`spec-soul-curve-resolution.md`](spec-soul-curve-resolution.md) (D58, 2026-09-06).
+**Description:** Remove a dead field rather than extend it. `NodeAtom.SoulCurveId` has zero consumers
+that act on its value (confirmed by repo-wide grep — three hits total, all round-trip writes/reads or
+test assertions, none computing anything from it); soul-level scaling is already `tree-binder` §5.1's
+shipped, tested `Θ`-offset formula, which `passive-tree-ideal.md` §4 requires by name. No `CurveInput`
+member is added — the spec's whole finding is that one should not be. **⚠ No SQLite migration** — this
+repo has no drop-column precedent (`RpgStore.cs`'s `EnsureColumn` is additive-only); the fix stops
+reading/writing the column and leaves it in the schema, harmless (spec §2b).
+**Acceptance:**
+- [ ] `NodeAtom.SoulCurveId` removed from the record; both real call sites (`TreeBinderRun.cs:72`,
+      `TreeBinderExplain.cs:102-103`) and `RpgStore.TreeCatalog.cs`'s `INSERT`/`SELECT`
+      (`:310-319`, `:419,429-435`) updated in the same change — no `soul_curve_id` column drop
+- [ ] `PassiveTreeCatalogLoader.cs`'s `SoulCurveIdPattern` validation removed with the field
+- [ ] `PassiveTreeCatalogLoaderTests.cs`/`CatalogHardeningTests.cs`'s now-pointless round-trip
+      assertions removed, not left asserting a field that no longer exists
+- [ ] `spec-tree-catalog.md` §1(a)'s layer table and §OQ1 (both already updated by this spec's own
+      landing) stay in sync — no further doc work once the code change ships
+**Verification:** spec §4's own testing strategy — build fails loudly on any missed reference (no
+`SoulCurveId` left uncompiled); a source-shape test confirms the SQL no longer names `soul_curve_id`.
+**Depends on:** none (spec-only prerequisite is done). **Scope:** S — a field removal touching four
+already-identified files, no schema migration required.
 
 ### ⬜ Checkpoint J — ship — NOT YET REACHED (label corrected 2026-09-06, was falsely ✅ with all bullets unchecked)
 - [ ] Full corpus reviewed; escalations resolved through the ladder, not by hand edits

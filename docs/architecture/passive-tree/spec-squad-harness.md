@@ -809,12 +809,13 @@ answerable from code and has been answered.
    may still be reported beside it as content telemetry, but nothing in this program blocks on
    `src/` work nobody scheduled.
 
-2. **Should the harness also measure the shipped allocation shape, not just D21's?** Today a squad
-   differentiates per *species*, not per *actor* (§1.1), and the commander allocation replicates
-   across the whole roster (`decisions.md:103`). D33's arbitrage needs per-actor build state, which
-   `tree-state` will add. Measuring both says whether the exploit exists **now** or only **after**
-   `tree-state` lands — which changes whether `tree-state` needs a mitigation designed in from the
-   start. Cost is one extra roster function.
+2. ~~**Should the harness also measure the shipped allocation shape, not just D21's?**~~ **CLOSED
+   2026-09-06 by D47: yes — measure both shapes.** Today a squad differentiates per *species*, not
+   per *actor* (§1.1), and the commander allocation replicates across the whole roster
+   (`decisions.md:103`). D33's arbitrage needs per-actor build state, which `tree-state` will add.
+   Measuring both says whether the exploit exists **now** or only **after** `tree-state` lands —
+   which changes whether `tree-state` needs a mitigation designed in from the start. Cost is one
+   extra roster function, now authorized rather than merely proposed.
 3. **Does D15's rule change once the budget measurement lands?** The measurement itself is settled —
    S4 is claimed by this module (§11), because doc 11 §6b's finding (`PowerVector.Total` is not value;
    the program's own artifact spans 0.3%–97.9% at identical budgets) is the evidence `tree-plan`'s

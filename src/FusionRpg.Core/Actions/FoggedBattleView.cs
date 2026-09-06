@@ -55,6 +55,16 @@ public sealed class FoggedBattleView : IBattleView
     public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) =>
         IsKnownToViewer(actorKey) ? _inner.HeldActionsOf(actorKey) : Array.Empty<CompiledAction>();
 
+    /// <summary>base-defense `siege-ai` (module 17, spec-siege-ai.md): same visibility gate as every
+    /// other per-actor read here — a live scoring AI reading through fog gets no derived-stat estimate
+    /// for a hidden actor, matching <see cref="FactsOf"/>'s own contract.</summary>
+    public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) =>
+        IsKnownToViewer(actorKey) ? _inner.DerivedOf(actorKey) : null;
+
+    /// <summary>Ungated, like <see cref="SideOf"/> — self-knowledge ("am I garrisoning something"),
+    /// never board visibility, so fog never applies here.</summary>
+    public string? GarrisonedStructureKeyOf(string actorKey) => _inner.GarrisonedStructureKeyOf(actorKey);
+
     /// <summary>The same "off-board" convention <see cref="EntityFacts"/>'s own `Row`/`Col` doc comment
     /// already establishes — no new sentinel invented for "unseen".</summary>
     static readonly EntityFacts UnknownFacts = new(Side: -1, TypeId: 0, HpMilli: 0, ElementId: -1, Row: -1, Col: -1,

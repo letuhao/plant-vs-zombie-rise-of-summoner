@@ -88,6 +88,15 @@ public class ItemWorkbenchEndpointsTests : IAsyncLifetime
             BaseTypeSocketMaxCorpus.From(new Dictionary<string, int>(StringComparer.Ordinal)
             {
                 [BaseTypeId] = SocketMax,
+            }),
+            // item-content `item-naming` T4: the gem corpus the bench resolves an insert's element AND
+            // name through, exactly as `Program.cs` hands it in. A tiny in-memory corpus rather than
+            // the shipped `gems/*.json`, because the fixture's own gem is not a shipped id.
+            GemInsertCorpus.From(new Dictionary<string, CardInsertLookup>(StringComparer.Ordinal)
+            {
+                ["gem.workbench-ember.t1"] = new CardInsertLookup(
+                    new InsertDef("gem.workbench-ember.t1", "atom.elemental-power", "fire", 1),
+                    "gem.ember-shard", "Ember Shard"),
             }));
 
         var port = GetFreeTcpPort();
@@ -726,5 +735,120 @@ public class ItemWorkbenchEndpointsTests : IAsyncLifetime
         foreach (var line in yieldBefore)
             Assert.Equal(before[line.MaterialId] + line.Qty, Balance(line.MaterialId));
         Assert.Equal("salvaged", _store.GetItem(_instanceId)!.Disposition);
+    }
+
+    // ---- item-content `item-naming` T4 — the two READ routes a picker needs -------------------------
+
+    /// <summary>
+    /// ⛔ <b>Until 2026-09-06 NO route served the recipe corpus.</b> Thirty rows shipped in
+    /// <c>material_recipe</c> and both benches asked the player to TYPE <c>recipe.014</c> —
+    /// <c>GET /api/recipes</c> is the PvZ fusion table and a different thing entirely.
+    ///
+    /// <para>Two claims, and the second is the one that makes the picker safe: every row carries the
+    /// corpus's own AUTHORED name (which <c>MaterialRecipeCatalog.Load</c> also dropped until today),
+    /// and the list is <see cref="ItemWorkbench.Recipes"/> itself — so a row a picker offers can never
+    /// be one the very next POST refuses with <c>material.recipe-unknown</c>.</para>
+    /// </summary>
+    [Fact]
+    public async Task Recipes_areServedWithTheirAuthoredNamesAndAreExactlyWhatTheBenchPricesAgainst()
+    {
+        var resp = await _http.GetAsync("/api/items/workbench/recipes");
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+        var rows = doc.RootElement.EnumerateArray().ToList();
+
+        // The route's list IS the executor's corpus — not a copy, not a subset.
+        Assert.Equal(_recipes.Recipes.Count, rows.Count);
+        Assert.Equal(
+            _recipes.Recipes.Keys.OrderBy(k => k, StringComparer.Ordinal).ToArray(),
+            rows.Select(r => r.GetProperty("recipeId").GetString()!).OrderBy(k => k, StringComparer.Ordinal).ToArray());
+
+        // Every shipped row authors a name, and no name is its own id wearing a different hat.
+        Assert.All(rows, r =>
+        {
+            var name = r.GetProperty("name").GetString()!;
+            Assert.NotEqual("", name);
+            Assert.DoesNotContain("recipe.", name, StringComparison.Ordinal);
+        });
+
+        var temper = rows.Single(r => r.GetProperty("recipeId").GetString() == "recipe.014");
+        Assert.Equal("Temper: Ultimate Enhancement", temper.GetProperty("name").GetString());
+        Assert.Equal("temper", temper.GetProperty("operation").GetString());
+    }
+
+    /// <summary>The verb filter, so a temper picker never offers a bore recipe the executor would
+    /// refuse for the control the player is actually looking at.</summary>
+    [Fact]
+    public async Task Recipes_narrowToOneVerbSoAPickerCannotOfferTheWrongOne()
+    {
+        var resp = await _http.GetAsync("/api/items/workbench/recipes?operation=bore");
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+        var rows = doc.RootElement.EnumerateArray().ToList();
+
+        Assert.NotEmpty(rows);
+        Assert.All(rows, r => Assert.Equal("bore", r.GetProperty("operation").GetString()));
+        Assert.Equal(
+            _recipes.Recipes.Values.Count(r => CraftOperations.Id(r.Operation) == "bore"),
+            rows.Count);
+    }
+
+    /// <summary>
+    /// The other half of T4: the socket bench's insert field was a free-text box asking for a
+    /// container id, so a player had to know <c>gem.workbench-ember.t1</c> existed before they could
+    /// socket it. This serves what they actually hold, named through the gem corpus.
+    /// </summary>
+    [Fact]
+    public async Task HeldInserts_areServedWithTheirAuthoredNamesAndOnlyWhatThePlayerHolds()
+    {
+        var empty = await _http.GetAsync($"/api/items/workbench/inserts/{_playerKey}");
+        Assert.Equal(HttpStatusCode.OK, empty.StatusCode);
+        using (var none = JsonDocument.Parse(await empty.Content.ReadAsStringAsync()))
+            Assert.Empty(none.RootElement.EnumerateArray());
+
+        _store.AdjustStock(_playerKey, "gem.workbench-ember.t1", 3);
+        // Not an insert: a material in the same stock table must not reach an insert picker.
+        _store.AdjustStock(_playerKey, "substrate.humanoid.crude", 9);
+
+        var resp = await _http.GetAsync($"/api/items/workbench/inserts/{_playerKey}");
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+        var row = Assert.Single(doc.RootElement.EnumerateArray().ToList());
+
+        Assert.Equal("gem.workbench-ember.t1", row.GetProperty("containerId").GetString());
+        Assert.Equal("Ember Shard", row.GetProperty("name").GetString());
+        Assert.Equal("fire", row.GetProperty("element").GetString());
+        Assert.Equal(3, row.GetProperty("qty").GetInt64());
+    }
+
+    /// <summary>
+    /// The socket cell in an operation's own reply carries the insert's authored name too, so the
+    /// bench never prints <c>gem.workbench-ember.t1</c> where a name belongs. Driven through the real
+    /// <c>socket-insert</c> verb rather than asserted on a hand-built DTO.
+    /// </summary>
+    [Fact]
+    public async Task SocketInsert_replyNamesTheInsertItSet()
+    {
+        Fund(_recipes.Resolve("recipe.019", ItemContext()));
+        Assert.Equal(HttpStatusCode.OK, (await Post("socket-add", new
+        {
+            playerId = _playerId, instanceId = _instanceId, recipeId = "recipe.019",
+            correlationId = "wb-bore-for-name",
+        })).Status);
+
+        const string gem = "gem.workbench-ember.t1";
+        _store.AdjustStock(_playerKey, gem, 1);
+        Fund(_recipes.Resolve("recipe.022", ItemContext()));
+
+        var (status, reply) = await Post("socket-insert", new
+        {
+            playerId = _playerId, instanceId = _instanceId, recipeId = "recipe.022",
+            insertContainerId = gem, correlationId = "wb-insert-named",
+        });
+        Assert.Equal(HttpStatusCode.OK, status);
+
+        var filled = reply.GetProperty("sockets").EnumerateArray()
+            .Single(sck => sck.GetProperty("insert").GetString() == gem);
+        Assert.Equal("Ember Shard", filled.GetProperty("insertName").GetString());
     }
 }

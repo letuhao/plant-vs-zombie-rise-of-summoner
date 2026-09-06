@@ -71,6 +71,13 @@ public class BuildSquadEquippedActionsTests : IDisposable
             FusionRpg.Core.Battle.BattleResourceTuningLoader.Parse(Read("battle-resources.v1.json")));
         FusionRpg.Core.Actions.ActionTimingPolicy.Configure(
             FusionRpg.Core.Actions.ActionTimingTuningLoader.Parse(Read("action-timing.v1.json")));
+        // A24: the new activation proof runs a real combat round past BindContainers for the first
+        // time in this file (every earlier test's own battle died at BindContainers before any round
+        // ran) -- OverlayCombatCalculator.Compute needs StatsTuningHub configured, not covered by this
+        // assembly's own [ModuleInitializer] bootstrap either, matching AptitudeChannelModsTests'
+        // own RealBattle test configuring the same tunable for the same reason.
+        FusionRpg.Core.Stats.Derived.StatsTuningHub.Configure(
+            FusionRpg.Core.Stats.Derived.StatsTuningLoader.Parse(Read("stats.v1.json")));
 
         _dir = Path.Combine(Path.GetTempPath(), "fusionrpg-buildsquad-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(_dir);
@@ -177,7 +184,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
         var actionId = SeedSkillAction("skill.buildsquad-fireball");
 
         var grantResult = _store.UpsertGrant(
-            new ActionGrantRow(OwnerKind.Entity, instanceId, actionId, Source: "test"));
+            new ActionGrantRow(OwnerKind.UniqueActor, instanceId, actionId, Source: "test"));
         Assert.True(grantResult.IsOk, grantResult.ToString());
 
         var (ok, reason, squad, _) = _service.BuildSquad(playerId, new[] { instanceId });
@@ -194,8 +201,11 @@ public class BuildSquadEquippedActionsTests : IDisposable
         var (playerId, instanceId) = SummonOneSpecimen(_store, "loadout-wins", rngSeed: 3);
         var granted = SeedSkillAction("skill.buildsquad-granted");
         var chosen = SeedSkillAction("skill.buildsquad-chosen");
-        _store.UpsertGrant(new ActionGrantRow(OwnerKind.Entity, instanceId, granted, Source: "test"));
-        _store.UpsertGrant(new ActionGrantRow(OwnerKind.Entity, instanceId, chosen, Source: "test"));
+        // Grants read under UniqueActor (action-grant-owner-kind-durability, fixed 2026-09-07);
+        // loadout stays under Entity -- the two scopes are deliberately different, matching
+        // EquippedActionIdsFor's own split.
+        _store.UpsertGrant(new ActionGrantRow(OwnerKind.UniqueActor, instanceId, granted, Source: "test"));
+        _store.UpsertGrant(new ActionGrantRow(OwnerKind.UniqueActor, instanceId, chosen, Source: "test"));
 
         var scope = new OwnerScope(OwnerKind.Entity, instanceId);
         var held = new HashSet<string> { granted, chosen };
@@ -220,7 +230,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
             playerId, SummonBannerCatalog.StandardRift, 1, "c-buildsquad-independent-b", rngSeed: 5, focusElementId: null);
         var b = Assert.Single(secondOutcome!.Specimens).Profile.InstanceId;
         var skillA = SeedSkillAction("skill.buildsquad-a");
-        _store.UpsertGrant(new ActionGrantRow(OwnerKind.Entity, a, skillA, Source: "test"));
+        _store.UpsertGrant(new ActionGrantRow(OwnerKind.UniqueActor, a, skillA, Source: "test"));
 
         var (ok, reason, squad, _) = _service.BuildSquad(playerId, new[] { a, b });
 
@@ -250,17 +260,23 @@ public class BuildSquadEquippedActionsTests : IDisposable
     /// `A_real_skill_grant_reaches_the_built_squads_EquippedActionIds` already proved, now for a
     /// GENERATED, IMPORTED action rather than a hand-authored one.
     ///
-    /// <para>⛔ The "can activate" half is proven FALSE, honestly, not silently skipped: attempting a
-    /// real `BattleEngine.Resolve` with this squad throws — no `IContainerEffectResolver` is wired
-    /// into any real production battle path today (`WebMatchService.cs`'s own 3 call sites all pass
-    /// none), and every real imported action has a non-empty container (T59.3's composer refuses to
-    /// draw zero atoms), so this is not a corner case, it is EVERY real imported action, every time.
-    /// A real, general, RpgStore-backed resolver is a genuinely separate module's worth of work
-    /// (integrating `AtomCompiler`'s whole-catalog compile pass with `BattleEffectHost`'s effect
-    /// registry) — named in `action-plan.md` §5's deferred table, not attempted unreviewed here.</para>
+    /// <para>A24 (spec-container-effect-resolver-production.md): the "can activate" half, PROVEN FALSE
+    /// by this exact test when it was first written (`WebMatchService`'s 3 real `BattleEngine.Resolve`
+    /// call sites supplied no `IContainerEffectResolver` at all), is now proven TRUE for this fixture —
+    /// `atom.e2e-test`'s bare `"amount":1` is `AtomJson.TryReadValueSpec`'s own documented
+    /// `42 -> Fixed(42)` shape (`Min == Max`), so `Compilability.Classify` routes it to
+    /// `AtomPath.Compiled`, never `Runner`. A real, `RpgStore`-backed resolver
+    /// (`ActionContainerEffectResolverFactory`) now compiles it and registers the result into the same
+    /// `Host.Bag.Catalog` `BindContainers` reads from, mirroring `WebMatchService`'s own new wiring
+    /// exactly. This does NOT mean every real imported action activates —
+    /// `ActionCorpusRealContentQualityTests.TheThreeRealImportedActionsCompileToZeroEffectDefsBecauseTheirAtomsAreRunnerPathOnly`
+    /// proves the real committed corpus (Fortitude/Vitality, both per-hit-roll) still cannot, precisely
+    /// because their atoms need the Runner path (`battle-runner-path-not-wired`, named but not fixed by
+    /// A24) — this fixture is deliberately Compiled-path-eligible, proving the class of content A24
+    /// actually closes the gap for.</para>
     /// </summary>
     [Fact]
-    public void A_generated_imported_unlock_ladder_grant_reaches_BuildSquad_but_a_real_battle_cannot_yet_activate_it()
+    public void A_generated_imported_unlock_ladder_grant_reaches_BuildSquad_and_a_real_battle_now_activates_it()
     {
         var atom = new AtomRow
         {
@@ -283,7 +299,7 @@ public class BuildSquadEquippedActionsTests : IDisposable
         Assert.True(awardOk, awardReason);
         Assert.True(actor!.Level > 1); // liveness -- the level gain that should have triggered a roll actually happened
 
-        var grants = _store.ListGrants(new OwnerScope(OwnerKind.Entity, instanceId));
+        var grants = _store.ListGrants(new OwnerScope(OwnerKind.UniqueActor, instanceId));
         Assert.Contains(grants, g => g.ActionId == "action.e2e.only"); // "equips" half of criterion 4
 
         var (squadOk, squadReason, squad, _) = _service.BuildSquad(playerId, new[] { instanceId });
@@ -291,28 +307,116 @@ public class BuildSquadEquippedActionsTests : IDisposable
         var mySetup = Assert.Single(squad!);
         Assert.Contains("action.e2e.only", mySetup.EquippedActionIds!);
 
-        // ⛔ Real, severe, NEWLY-discovered gap found here, not assumed -- the "can activate" half of
-        // criterion 4 is NOT true yet, for any real imported action, and this is proven directly
-        // below rather than silently worked around. `WebMatchService`'s own three real
-        // `BattleEngine.Resolve` call sites (`WebMatchService.cs:134,186,315`) supply NO
-        // `containerResolver` argument at all -- confirmed by direct read, not assumed. Every real
-        // action T59.3's own composer produces has a NON-EMPTY container (it refuses to draw zero
-        // atoms), so `BattleRunState.BindContainers` (`BattleRunState.cs:534-549`) throws for EVERY
-        // real imported action, immediately, at battle setup, before any round runs. The only real
-        // production resolver anywhere (`ConstructionActions.ContainerResolver`, siege-only, four
-        // hand-compiled containers) is not general-purpose and is not wired into `WebMatchService`.
-        // Building a real, general, RpgStore-backed resolver means integrating `AtomCompiler`'s
-        // whole-catalog compile pass with `BattleEffectHost`'s own effect registry for every
-        // action-holding actor -- a genuinely separate module's worth of work, never named anywhere
-        // in this reopening's own A21/A22/A23 scope, not something to improvise unreviewed here.
+        // A24: the same wiring WebMatchService's own 3 call sites now carry, built explicitly here
+        // rather than going through WebMatchService itself (this test's own job is BuildSquad's
+        // integration with the unlock ladder, not a second copy of WebMatchService's plumbing).
         var catalog = _store.BuildActionCatalog(RungPolicy.Table);
+        var (containerResolver, containerDefs, _, _) = ActionContainerEffectResolverFactory.Build(_store);
         var setup = new BattleSetup
         {
             Squad = new[] { mySetup with { Key = "squad:0" } },
             Wave = new[] { new BattleActorSetup { Key = "wave:0", Side = "wave", MaxHp = 1_000_000, Level = 1 } },
         };
 
-        var ex = Assert.Throws<ArgumentException>(() => BattleEngine.Resolve(setup, seed: 9001, actionCatalog: catalog));
-        Assert.Contains("no IContainerEffectResolver was supplied", ex.Message, StringComparison.Ordinal);
+        BattleEffectHost? capturedHost = null;
+        var report = BattleEngine.Resolve(setup, seed: 9001, actionCatalog: catalog,
+            containerResolver: containerResolver,
+            onEffectHostReady: host =>
+            {
+                capturedHost = host;
+                ActionContainerEffectResolverFactory.RegisterInto(host, containerDefs);
+            });
+
+        Assert.NotNull(report); // no throw -- the exact call this test used to prove threw, above
+        Assert.NotNull(capturedHost);
+        var containerId = _store.GetAction("action.e2e.only")!.ContainerId;
+        var effectId = Assert.Single(containerResolver.EffectIdsFor(containerId));
+        Assert.True(capturedHost!.Bag.HasGrantForEffect(effectId),
+            "BindContainers should have granted the resolved effect id into the same battle's Bag");
+    }
+
+    /// <summary>
+    /// A25 (battle-runner-path-integration): the decisive proof that `BasicAttack.cs`'s own two
+    /// `Bag.OnEvent` sites now ALSO reach `Host.Runner`, inside a real `BattleEngine.Resolve` call
+    /// driven by the real production seams (summon → grant → BuildSquad), not a synthetic
+    /// `BattleRunState` constructed by hand. `atom.e2e-runner-only` authors an explicit
+    /// `"when":{"trigger":"OnActivate"}` -- unlike `atom.fortitude`/`atom.vitality`, which author none
+    /// and are correctly excluded from `runnerBindings` (proven separately in
+    /// `ActionCorpusRealContentQualityTests`) -- and `OnActivate` fires once per resolved intent
+    /// independent of hit/miss (`BasicAttack.cs`'s own doc comment), making this deterministic: no
+    /// combat-roll luck needed for the trigger to fire at least once.
+    ///
+    /// <para>⛔ <b>Real, empirically-confirmed boundary, not assumed</b>: running this without a
+    /// registered def throws `InvalidOperationException: unknown effect_id: atom.e2e-runner-only.t1`
+    /// from `EffectBag.Grant`, reached via `EffectFunnel.DrainOnce` during `Host.Flush()` — proof that
+    /// the Runner correctly evaluated the trigger and successfully called `Funnel.EnqueueModifier`
+    /// (nothing would reach `Grant` with this exact atom id otherwise). The remaining requirement — a
+    /// registered `EffectDef` per runner entry — is `spec-atom-runner.md`'s own named, pre-existing,
+    /// separate scope ("nothing emits a def for a runner atom... until [E19] a host has to have the
+    /// def in its catalog already"), not something A25 needs to solve to prove ITS OWN mechanism
+    /// works. Asserted here as the exact expected exception, the same technique
+    /// `ActionCorpusRealContentQualityTests`'s own Layer-3 proof already uses for a different,
+    /// precisely-bounded failure.</para>
+    /// </summary>
+    [Fact]
+    public void A_well_formed_triggered_runner_path_action_reaches_the_real_AtomRunner_in_a_real_battle()
+    {
+        var atom = new AtomRow
+        {
+            AtomId = AtomRow.DeriveId("atom.e2e-runner-only", "", 1), KindId = "stat.modify",
+            FamilyId = "atom.e2e-runner-only", Variant = "", Tier = 1, Name = "e2e runner test",
+            WhenJson = "{\"trigger\":\"OnActivate\"}",
+            ParamsJson = "{\"channel\":\"maxHp\",\"op\":\"flat\",\"amount\":{\"min\":10,\"max\":20,\"roll\":\"onApply\"}}",
+        };
+        Assert.Empty(_store.UpsertAtoms(new[] { atom }).Rejected);
+
+        var brief = new ActionCorpusBrief(
+            Id: "action.e2e.runner-only", Name: "E2E Runner Only", Category: "attack", Scope: "general",
+            ScopeKey: null, RungFloor: 1, RungCeiling: 1, AtomFamilies: new[] { "atom.e2e-runner-only" },
+            TargetMode: "single", Relation: "enemy");
+        var importResult = ActionCorpusImporter.Import(_store, new[] { brief }, CostTemplate(), RungPolicy.Table);
+        Assert.Equal(1, importResult.ImportedCount);
+
+        var (playerId, instanceId) = SummonOneSpecimen(_store, "e2e-runner", rngSeed: 7);
+        var (awardOk, awardReason, actor) = _store.AwardUniqueActorXp(instanceId, delta: 1_000_000);
+        Assert.True(awardOk, awardReason);
+        Assert.True(actor!.Level > 1);
+
+        var grants = _store.ListGrants(new OwnerScope(OwnerKind.UniqueActor, instanceId));
+        Assert.Contains(grants, g => g.ActionId == "action.e2e.runner-only");
+
+        var (squadOk, squadReason, squad, _) = _service.BuildSquad(playerId, new[] { instanceId });
+        Assert.True(squadOk, squadReason);
+        var mySetup = Assert.Single(squad!);
+        Assert.Contains("action.e2e.runner-only", mySetup.EquippedActionIds!);
+
+        var catalog = _store.BuildActionCatalog(RungPolicy.Table);
+        var (containerResolver, containerDefs, runnerBindings, runnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
+        Assert.NotEmpty(runnerBindings); // liveness -- this atom must actually reach the runner seam
+        Assert.Contains(_store.GetAction("action.e2e.runner-only")!.ContainerId, runnerCoverage);
+
+        var setup = new BattleSetup
+        {
+            Squad = new[] { mySetup with { Key = "squad:0" } },
+            Wave = new[] { new BattleActorSetup { Key = "wave:0", Side = "wave", MaxHp = 1_000_000, Level = 1 } },
+        };
+
+        BattleEffectHost? capturedHost = null;
+        var ex = Assert.Throws<InvalidOperationException>(() => BattleEngine.Resolve(setup, seed: 9002, actionCatalog: catalog,
+            containerResolver: containerResolver,
+            onEffectHostReady: host =>
+            {
+                capturedHost = host;
+                ActionContainerEffectResolverFactory.RegisterInto(host, containerDefs);
+            },
+            runnerBindings: runnerBindings,
+            containersWithRunnerCoverage: runnerCoverage));
+
+        // The precise, expected boundary -- proves the Runner reached and dispatched this exact atom
+        // (only a successful Funnel.EnqueueModifier call reaches EffectBag.Grant with this id at all),
+        // not a generic or unrelated crash.
+        Assert.Contains("unknown effect_id: atom.e2e-runner-only.t1", ex.Message, StringComparison.Ordinal);
+        Assert.NotNull(capturedHost);
+        Assert.NotNull(capturedHost!.Runner); // A25's own wiring: a runner-path atom means a real Runner attached
     }
 }

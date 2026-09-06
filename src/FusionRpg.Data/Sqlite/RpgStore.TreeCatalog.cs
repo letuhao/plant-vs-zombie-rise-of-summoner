@@ -371,8 +371,9 @@ public sealed partial class RpgStore
     /// those ids (a `WHERE tree_id IN (...)` filter, never an OR-chain of ANDs — SQLite's expression
     /// tree stays flat regardless of how many ids are named). <c>null</c> or empty loads the WHOLE
     /// catalog — every tree, every node, every atom — which is the right call for tooling/tests and
-    /// the wrong one for a per-request read at species scale (35,160 nodes): a caller serving one
-    /// actor's shared-corpus resolve should pass the 39 shared tree ids it already knows from
+    /// the wrong one for a per-request read at species scale (35,280 nodes, D51 2026-09-06: 24
+    /// statuses not 21 — was 35,160): a caller serving one actor's shared-corpus resolve should pass
+    /// the 42 shared tree ids it already knows from
     /// <see cref="ListTreeCatalogTrees"/>, not the unfiltered form.</para>
     ///
     /// <para>Every node — enabled and retired alike — is included; retirement is a property on the
@@ -409,9 +410,9 @@ public sealed partial class RpgStore
         }
         if (trees.Count == 0) return Array.Empty<LoadedTree>();
 
-        // One atom pass, grouped by node id in memory -- never one query per node (35,160 nodes would
-        // be 35,160 round trips). Joined against rpg_tree_catalog_node so the SAME tree_id filter
-        // applies without a second parameter set.
+        // One atom pass, grouped by node id in memory -- never one query per node (35,280 nodes,
+        // D51 2026-09-06: was 35,160, would be that many round trips). Joined against
+        // rpg_tree_catalog_node so the SAME tree_id filter applies without a second parameter set.
         var atomsByNode = new Dictionary<string, List<NodeAtom>>(StringComparer.Ordinal);
         using (var cmd = db.CreateCommand())
         {

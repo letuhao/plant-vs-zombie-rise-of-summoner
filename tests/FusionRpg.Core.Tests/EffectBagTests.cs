@@ -252,3 +252,101 @@ public class EffectBagTests
         throw new FileNotFoundException("fixture " + name);
     }
 }
+
+/// <summary>
+/// Real, previously-undiscovered defect found running the full `FusionRpg.Core.Tests` suite (never in
+/// isolation): `InMemoryEffectCatalog.Upsert`/`ReplaceAll` used to call `def.Actions.Sort(...)` IN
+/// PLACE on the caller's own list. `ConstructionActions.CompiledEffects` is a `static { get; }`-cached
+/// list shared by every battle/test that references it, so every `Upsert` of one of its defs re-sorted
+/// (and version-bumped) that ONE shared list -- a concurrent `EffectBag.FireGrant` enumerating
+/// `def.Actions` on another thread then throws `InvalidOperationException: Collection was modified`.
+/// Reproduced as `ConstructionActionsTests.Firing_at_a_non_adjacent_cell_is_refused_by_the_shared_placement_gate`
+/// failing only under full-suite parallel execution. `EffectDef.Actions` is `init`-only, so the fix is
+/// a defensive copy (`WithSortedActions`), never a mutation of the caller's object.
+/// </summary>
+public class InMemoryEffectCatalogTests
+{
+    static EffectDef SharedDef(string id = "fx.shared-static-like") => new()
+    {
+        EffectId = id,
+        Actions = new List<EffectActionRow>
+        {
+            new() { Seq = 2, Action = EffectActions.ApplyStatus },
+            new() { Seq = 0, Action = EffectActions.ModifyStat },
+            new() { Seq = 1, Action = EffectActions.GrantShield },
+        }
+    };
+
+    [Fact]
+    public void Upsert_never_mutates_the_callers_own_Actions_list()
+    {
+        var def = SharedDef();
+        var originalList = def.Actions;
+        var originalOrder = originalList.Select(a => a.Seq).ToList();
+
+        new InMemoryEffectCatalog().Upsert(def);
+
+        Assert.Same(originalList, def.Actions); // same object -- never reassigned, never sorted in place
+        Assert.Equal(originalOrder, def.Actions.Select(a => a.Seq)); // still in the CALLER's original order
+    }
+
+    [Fact]
+    public void Two_catalogs_upserting_the_same_shared_def_each_read_back_sorted_and_independent()
+    {
+        var shared = SharedDef();
+
+        var catalogA = new InMemoryEffectCatalog();
+        var catalogB = new InMemoryEffectCatalog();
+        catalogA.Upsert(shared);
+        catalogB.Upsert(shared);
+
+        Assert.Equal(new[] { 0, 1, 2 }, catalogA.Get(shared.EffectId)!.Actions.Select(a => a.Seq));
+        Assert.Equal(new[] { 0, 1, 2 }, catalogB.Get(shared.EffectId)!.Actions.Select(a => a.Seq));
+        Assert.NotSame(catalogA.Get(shared.EffectId)!.Actions, catalogB.Get(shared.EffectId)!.Actions);
+    }
+
+    [Fact]
+    public void ReplaceAll_also_never_mutates_the_callers_own_Actions_lists()
+    {
+        var def = SharedDef();
+        var originalList = def.Actions;
+
+        new InMemoryEffectCatalog().ReplaceAll(new[] { def });
+
+        Assert.Same(originalList, def.Actions);
+        Assert.Equal(new[] { 2, 0, 1 }, def.Actions.Select(a => a.Seq)); // unchanged, still the authored order
+    }
+
+    [Fact]
+    public void Concurrent_upserts_of_a_shared_static_like_def_never_race_a_concurrent_reader()
+    {
+        // Deliberately amplified reproduction of the original crash: one thread continuously
+        // enumerates the shared def's own Actions list while several others repeatedly Upsert that
+        // SAME def into their own fresh catalog -- exactly ConstructionActions.CompiledEffects's own
+        // shape (one static list, many independent per-battle/per-test catalogs).
+        var shared = SharedDef();
+        Exception? seen = null;
+        var stop = 0;
+
+        var reader = Task.Run(() =>
+        {
+            while (Volatile.Read(ref stop) == 0)
+            {
+                try { foreach (var _ in shared.Actions) { } }
+                catch (Exception ex) { seen = ex; return; }
+            }
+        });
+
+        var writers = Enumerable.Range(0, 4).Select(_ => Task.Run(() =>
+        {
+            for (var i = 0; i < 2000; i++)
+                new InMemoryEffectCatalog().Upsert(shared);
+        })).ToArray();
+
+        Task.WaitAll(writers);
+        Interlocked.Exchange(ref stop, 1);
+        reader.Wait();
+
+        Assert.Null(seen);
+    }
+}

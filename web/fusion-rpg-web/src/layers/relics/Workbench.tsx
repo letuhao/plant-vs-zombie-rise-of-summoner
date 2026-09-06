@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { adaptWorkbenchOutcome } from "@/contract/adapt";
+import { adaptWorkbenchOutcome, idWords } from "@/contract/adapt";
 import type { WorkbenchOutcomeView } from "@/contract/types";
 import { formatMagnitude } from "@/i18n/magnitude";
 import { newCorrelationId } from "@/lib/bus/demons";
@@ -7,10 +7,11 @@ import {
   useEnhanceItem,
   useSalvageItem,
   useUpcycleMaterials,
+  useWorkbenchRecipes,
   type WorkbenchOutcomeDto
 } from "@/lib/bus/items";
 import { DialogShell } from "@/shell/DialogShell";
-import { Banner, Button, Checkbox, Field, TextInput } from "@/ui";
+import { Banner, Button, Checkbox, Field, Select } from "@/ui";
 
 /**
  * The craft bench — item modules 14 and 15's verbs, against the real
@@ -25,38 +26,98 @@ import { Banner, Button, Checkbox, Field, TextInput } from "@/ui";
  * (`item.locked`, `material.recipe-unknown`, `ContentRuleViolated{…}`) and this surface prints it
  * rather than translating it into something friendlier and less true.
  *
- * ⚠ **The recipe id is typed, and that is a named gap rather than a design choice.** The shipped
- * corpus is 30 rows in `material_recipe`, and **no read route serves them** — `GET /api/recipes` is
- * the PvZ fusion table, a different thing entirely. Until a craft-recipe read route exists, naming
- * the recipe is the player's job and the server's `material.recipe-unknown` is what corrects a
- * wrong one. Hard-coding the corpus here instead would put a second copy of it in the browser.
+ * ⭐ **The recipe is PICKED, by its real name** (item-content `item-naming` T4, 2026-09-06). It used
+ * to be typed, because the shipped 30-row corpus had no read route at all — `GET /api/recipes` is
+ * the PvZ fusion table, a different thing entirely. `GET /api/items/workbench/recipes` now serves
+ * it, reading `ItemWorkbench.Recipes` itself, so the list a player picks from is the same corpus the
+ * very next POST prices against and no offered row can come back `material.recipe-unknown`. Nothing
+ * is hard-coded here: a second copy of the corpus in the browser was the wrong fix then and now.
  */
 
-/** A verb that spends is only offered once the player has named the recipe that prices it. */
+/**
+ * A verb that spends is only offered once the player has picked the recipe that prices it.
+ *
+ * **One picker shape, not a second one.** `ArmouryList` establishes the pattern this reuses: the
+ * real name is the row's own line, the id is never the label, and the four honest states (loading,
+ * error, empty, ready) are four different sentences. A `Select` rather than that list's virtualised
+ * scroller because the corpus is 30 rows narrowed by `operation` to a handful — the same `Select`
+ * the equip-role and equip-target controls in this same layer already use.
+ */
 export function RecipeField({
   label,
   hint,
   value,
   onChange,
+  operation,
   testId
 }: {
   label: string;
   hint: string;
   value: string;
   onChange: (value: string) => void;
+  /** The verb this control runs, so the list never offers a recipe the executor would refuse. */
+  operation: string;
   testId: string;
 }) {
+  const recipes = useWorkbenchRecipes(operation);
+  const rows = recipes.data ?? [];
+
+  if (recipes.isLoading) {
+    return (
+      <Field label={label} hint={hint}>
+        <p className="text-sm text-muted" data-testid={`${testId}-loading`} aria-busy="true">
+          Reading the recipe book…
+        </p>
+      </Field>
+    );
+  }
+
+  if (recipes.isError) {
+    return (
+      <Field label={label} hint={hint}>
+        <Banner tone="error" data-testid={`${testId}-error`}>
+          Couldn't read the recipe book.
+          <Button size="sm" variant="ghost" className="ml-2" onClick={() => void recipes.refetch()}>
+            Retry
+          </Button>
+        </Banner>
+      </Field>
+    );
+  }
+
+  if (rows.length === 0) {
+    return (
+      <Field label={label} hint={hint}>
+        <p className="text-sm text-muted" data-testid={`${testId}-empty`}>
+          Nothing has been written for this yet.
+        </p>
+      </Field>
+    );
+  }
+
   return (
     <Field label={label} hint={hint}>
-      <TextInput
+      <Select
         data-testid={testId}
+        aria-label={label}
         value={value}
-        placeholder="recipe id"
         onChange={(e) => onChange(e.target.value)}
-      />
+      >
+        <option value="">Pick one…</option>
+        {rows.map((r) => (
+          // ⛔ The id is the option's VALUE, never its text. A recipe with no authored name says so
+          // rather than showing `recipe.014` where a name belongs.
+          <option key={r.recipeId} value={r.recipeId}>
+            {r.name.length > 0 ? r.name : UNNAMED_RECIPE}
+          </option>
+        ))}
+      </Select>
     </Field>
   );
 }
+
+/** A corpus row that authors no `name`. Every shipped one does; this is the honest shape if one stops. */
+const UNNAMED_RECIPE = "Unnamed recipe";
 
 function CostLines({
   title,
@@ -73,7 +134,14 @@ function CostLines({
       <p className="text-2xs font-bold uppercase tracking-wide text-muted">{title}</p>
       {lines.map((line) => (
         <p key={`${line.materialClass}-${line.materialId}`} className="flex items-baseline justify-between gap-3 text-sm">
-          <span className="truncate text-muted">{line.materialId}</span>
+          {/* item-content `item-naming` (T3/T4): the material's own words. The 27 material ids are
+            * STRUCTURALLY generated (`MaterialCatalog` builds them from the rarity ladder, the two
+            * frames × four grades, the element roster and the three catalyst verbs) and no corpus
+            * authors a name for one — so this is the same placement `channelLabel` documents, and
+            * nothing English is invented. Named gap, owner module 14. */}
+          <span className="truncate text-muted" title={line.materialId}>
+            {idWords(line.materialId)}
+          </span>
           <span className="font-mono text-text">{formatMagnitude(line.qty)}</span>
         </p>
       ))}
@@ -139,8 +207,16 @@ export function WorkbenchResult({
                       : "inline-flex min-w-[64px] flex-col items-center rounded-sm border border-dashed border-border px-2 py-1 text-xs text-muted"
                   }
                   data-testid={`${testId}-socket-${socket.index}`}
+                  title={socket.insertContainerId ?? undefined}
                 >
-                  <span>{socket.insertContainerId ?? "empty"}</span>
+                  {/* item-content T4: the gem corpus's own authored name, off the operation's reply.
+                    * A filled cell whose container the corpus does not carry says so rather than
+                    * showing `gem.g1-001` as if that were the insert's name. */}
+                  <span>
+                    {socket.insertContainerId === null
+                      ? "empty"
+                      : socket.insertName ?? "unknown insert"}
+                  </span>
                   {socket.affinity ? <span className="text-2xs text-muted">{socket.affinity}</span> : null}
                 </span>
               ))}
@@ -283,7 +359,8 @@ export function CraftBench({
           <p className="text-2xs font-bold uppercase tracking-wide text-muted">Strengthen</p>
           <RecipeField
             label="Temper recipe"
-            hint="No route lists craft recipes yet, so name the one you want — a wrong id comes back named."
+            hint="Pick the temper the bench should price this by."
+            operation="temper"
             value={enhanceRecipe}
             onChange={setEnhanceRecipe}
             testId="craft-enhance-recipe"
@@ -303,7 +380,7 @@ export function CraftBench({
                 busy
                   ? "The bench is busy"
                   : enhanceRecipe.trim().length === 0
-                    ? "Name a temper recipe first"
+                    ? "Pick a temper recipe first"
                     : undefined
               }
               onClick={() =>
@@ -330,6 +407,7 @@ export function CraftBench({
           <RecipeField
             label="Upcycle recipe"
             hint="Turns several of one grade into one of the next. It uses no item."
+            operation="upcycle"
             value={upcycleRecipe}
             onChange={setUpcycleRecipe}
             testId="craft-upcycle-recipe"
@@ -343,7 +421,7 @@ export function CraftBench({
                 busy
                   ? "The bench is busy"
                   : upcycleRecipe.trim().length === 0
-                    ? "Name an upcycle recipe first"
+                    ? "Pick an upcycle recipe first"
                     : undefined
               }
               onClick={() =>

@@ -34,6 +34,8 @@ public class ActionSelectionTests
         public EntityFacts FactsOf(string actorKey) => Facts[actorKey];
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) =>
             Held.TryGetValue(actorKey, out var list) ? list : Array.Empty<CompiledAction>();
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => null;
+        public string? GarrisonedStructureKeyOf(string actorKey) => null;
     }
 
     static CompiledAction Action(

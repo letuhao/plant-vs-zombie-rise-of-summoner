@@ -98,7 +98,19 @@ public class ItemEquipEndpointsTests : IAsyncLifetime
             FusionRpg.Core.Items.Surfaces.ItemSurfaceTuning.Parse(
                 File.ReadAllText(Path.Combine(tuningDir, "item-surfaces.v1.json"))),
             FusionRpg.Core.Items.Sockets.SocketTuning.Parse(
-                File.ReadAllText(Path.Combine(tuningDir, "sockets.v1.json"))));
+                File.ReadAllText(Path.Combine(tuningDir, "sockets.v1.json"))),
+            lookupInsert: null,
+            // item-content `item-naming` T3: the SAME base-type delegate the card route reads, handed
+            // in exactly as `Program.cs` hands it in. These three test containers are not in the
+            // shipped 740-entry corpus, so a real authored name is supplied for one of them here and
+            // the other two exercise the honest "" the route sends for an unknown container.
+            lookupBaseType: FusionRpg.Server.ItemBaseTypeCorpus.From(
+                new Dictionary<string, FusionRpg.Core.Items.Display.CardBaseType>(StringComparer.Ordinal)
+                {
+                    [BladeContainer] = new FusionRpg.Core.Items.Display.CardBaseType(
+                        "base.equip-blade", "class.blade", "humanoid", "role.armament-primary", null,
+                        "Honed Hatchet"),
+                }));
         await _app.StartAsync();
 
         _http = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -650,6 +662,39 @@ public class ItemEquipEndpointsTests : IAsyncLifetime
             .ToDictionary(r => r.GetProperty("instanceId").GetString()!,
                           r => r.GetProperty("battleOnly").GetBoolean(),
                           StringComparer.Ordinal);
+    }
+
+    /// <summary>instanceId → `containerName`, off the real module 20 route (item-content T3).</summary>
+    async Task<Dictionary<string, string>> ArmouryNames()
+    {
+        var resp = await _http.GetAsync($"/api/items/armoury/{_playerKey}");
+        Assert.Equal(HttpStatusCode.OK, resp.StatusCode);
+        using var doc = JsonDocument.Parse(await resp.Content.ReadAsStringAsync());
+        return doc.RootElement.GetProperty("rows").EnumerateArray()
+            .ToDictionary(r => r.GetProperty("instanceId").GetString()!,
+                          r => r.GetProperty("containerName").GetString()!,
+                          StringComparer.Ordinal);
+    }
+
+    /// <summary>
+    /// ⛔ <b>item-content `item-naming` T3.</b> The armoury row carried no name at all, so
+    /// `ArmouryList.tsx` fell back to `adapt.ts`'s `?? containerId` and printed
+    /// <c>item.equip-blade</c> where a name belongs. T2 had already carried the base type's authored
+    /// `name` through to the CARD; this puts the same string on the row.
+    ///
+    /// <para>⚠ And the absent case is asserted beside it: a container the corpus does not carry sends
+    /// <c>""</c>, never the id. The client turns that into a sentence — a shortened or prettified id
+    /// would still be an id.</para>
+    /// </summary>
+    [Fact]
+    public async Task Armoury_carriesTheBaseTypesAuthoredNameAndNeverTheContainerId()
+    {
+        var names = await ArmouryNames();
+        Assert.Equal(3, names.Count);
+        Assert.Equal("Honed Hatchet", names[_bladeId]);
+        Assert.Equal("", names[_helmId]);
+        Assert.Equal("", names[_lordlyId]);
+        Assert.DoesNotContain(names.Values, v => v.Contains('.', StringComparison.Ordinal));
     }
 
     /// <summary>instanceId → `assigned`, off the real module 20 route.</summary>

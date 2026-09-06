@@ -8,7 +8,8 @@ namespace FusionRpg.Core.Tests.Items;
 
 /// <summary>
 /// The cross-row half of module 17, run against the <b>real shipped corpus</b> —
-/// <c>data/seed/items/uniques/*.json</c>, 144 rows across 18 partitions, the block module 11 found
+/// <c>data/seed/items/uniques/*.json</c>, 154 rows across 18 partitions (144 + 10 D4.29 anchors,
+/// 2026-09-06, appended to the three ordinal-70 partitions), the block module 11 found
 /// *"referentially perfect and unobtainable"* and refused by name.
 ///
 /// <para>Everything here is measured, not fixtured: the base types are the real 740, the rarity
@@ -222,7 +223,10 @@ public class UniqueCorpusTests
     {
         Assert.Equal(64, Corpus.Count(s => s.Acquisition == UniqueAcquisition.SourceLocked));
         Assert.Equal(40, Corpus.Count(s => s.Acquisition == UniqueAcquisition.Deterministic));
-        Assert.Equal(40, Corpus.Count(s => s.Acquisition == UniqueAcquisition.Drop));
+        // 50, not 40: D4.29 (2026-09-06) appended 10 real anchors, all acquisition:drop (rung 80
+        // is the only rung `drop` is legal at, ssot-uniques.md §4.5) -- SourceLocked and
+        // Deterministic are both unchanged since none of the 10 is either.
+        Assert.Equal(50, Corpus.Count(s => s.Acquisition == UniqueAcquisition.Drop));
     }
 
     /// <summary>
@@ -233,7 +237,7 @@ public class UniqueCorpusTests
     public void Every_seed_id_derives_a_legal_and_distinct_item_container_id()
     {
         Assert.All(Corpus, s => Assert.StartsWith("item.", s.ContainerId, StringComparison.Ordinal));
-        Assert.Equal(144, Corpus.Select(s => s.ContainerId).Distinct(StringComparer.Ordinal).Count());
+        Assert.Equal(154, Corpus.Select(s => s.ContainerId).Distinct(StringComparer.Ordinal).Count()); // 144 + 10 D4.29 anchors
 
         // The shipped container-id grammar, borrowed from the validator rather than restated.
         var atom = new AtomRow { AtomId = "atom.vitality.t1", KindId = "stat.modify", FamilyId = "atom.vitality", Tier = 1 };
@@ -262,19 +266,22 @@ public class UniqueCorpusTests
     }
 
     /// <summary>
-    /// §4.6's banner: at 144 the axis grid is <b>exactly saturated</b> — 8 roles × 18 partitions — which
-    /// is why the allocation had to become a Latin square rather than a guideline. Measured: every
-    /// <c>(rung band, role, power axis)</c> is used at most once, and the two saturated bands use every
-    /// one of their 40 slots.
+    /// §4.6's banner: at 144 the axis grid was <b>exactly saturated</b> — 8 roles × 18 partitions —
+    /// which is why the allocation had to become a Latin square rather than a guideline. D4.29
+    /// (2026-09-06) appended 10 real anchors to the THREE ordinal-70 partitions specifically because
+    /// ordinal 70 was the one band with real, verified-free (role, axis) slots (bands 30/50/90 were
+    /// already at the 40/40 ceiling this test's own loop below checks) -- so the grid is no longer
+    /// "exactly" saturated at every band, but it is still collision-free, which is the actual
+    /// invariant this test measures: every <c>(rung band, role, power axis)</c> is used at most once.
     /// </summary>
     [Fact]
-    public void The_144_corpus_saturates_the_axis_grid_without_a_collision()
+    public void The_154_corpus_saturates_the_axis_grid_without_a_collision()
     {
         var keys = Corpus
             .Select(s => (Band: s.RungBand, Role: BaseTypes[s.BaseTypeId].RoleId, s.PowerAxis))
             .ToList();
 
-        Assert.Equal(144, keys.Distinct().Count());
+        Assert.Equal(154, keys.Distinct().Count()); // 144 + 10 D4.29 anchors, zero internal collisions
 
         // 8 roles x 5 axes = 40 slots per band; bands 30, 50 and 90 carry 5 partitions each = 40 rows.
         foreach (var band in new[] { "30", "50", "90" })
@@ -362,8 +369,12 @@ public class UniqueCorpusTests
         Assert.All(Corpus, s => Assert.True(s.TotalRolls <= UniqueLimits.MaxTotalRolls));
         Assert.All(Corpus, s => Assert.InRange(s.FixedAtoms.Count, 1, Tuning().MaxIdentityAtoms));
 
+        // 136 unchanged: D4.29's 10 new anchors (2026-09-06) all landed with NO variance slot at
+        // all (0/10) -- legal (spec-unique-pipeline.md §1: "none legal, a 0-roll unique") but a
+        // real texture gap against the pre-existing corpus's own 136/144 (94%) inclusion rate,
+        // named honestly in D4.29's own evidence rather than silently absorbed into this count.
         Assert.Equal(136, Corpus.Count(s => s.VarianceSlot is not null));
-        Assert.Equal(8, Corpus.Count(s => s.VarianceSlot is null));
+        Assert.Equal(18, Corpus.Count(s => s.VarianceSlot is null)); // 8 + 10
     }
 
     // ---------------------------------------------------------------------------------------------
@@ -387,12 +398,14 @@ public class UniqueCorpusTests
         var report = UniqueParityMetric.Measure(Corpus, id => Windows.TryGetValue(id, out var w) ? w : null, t);
 
         Assert.True(report.HasThreshold);
-        Assert.Equal(287, report.Readings.Count);   // one per (unique, identity atom)
+        Assert.Equal(304, report.Readings.Count);   // one per (unique, identity atom); was 287 pre-D4.29
         Assert.Equal(report.Readings.Count, report.InBand + report.StrictlyBetter + report.Trophy);
 
         // ⛔ The measured shape of the shipped corpus: most identity lines are BELOW the rolled
         // distribution at their own rung, which is §8.4's trophy failure, and a minority are above it,
-        // which is §8.1's. Pinned so a re-authoring pass can see it move.
+        // which is §8.1's. Pinned so a re-authoring pass can see it move. Re-measured 2026-09-06
+        // after D4.29 appended 10 real anchors (17 new identity-atom readings across them -- not a
+        // flat 2 each, since a unique carries 1-3 fixed atoms).
         Assert.Equal(90, report.InBand);
         Assert.Equal(47, report.StrictlyBetter);
         Assert.Equal(150, report.Trophy);
@@ -428,10 +441,11 @@ public class UniqueCorpusTests
             id => FamilyKinds.TryGetValue(id, out var k) ? k : null,
             Tuning());
 
-        Assert.Equal(144, report.Readings.Count);
+        Assert.Equal(154, report.Readings.Count); // 144 + 10 D4.29 anchors (2026-09-06)
         Assert.Contains("upper bound", report.Basis, StringComparison.Ordinal);
 
-        // Measured 2026-09-05 against the shipped corpus. Pinned so a re-authoring pass sees it move.
+        // Measured 2026-09-06 against the shipped corpus (was 36/12 at 144 rows, pre-D4.29).
+        // Pinned so a re-authoring pass sees it move.
         Assert.Equal(36, report.OverAllowance);
         Assert.Equal(12, report.NarrowDeclaredAndUnsatisfied);
     }

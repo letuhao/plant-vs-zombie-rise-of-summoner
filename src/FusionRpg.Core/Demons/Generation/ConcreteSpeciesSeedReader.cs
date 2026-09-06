@@ -102,5 +102,9 @@ public static class ConcreteSpeciesMapper
         // vocabulary mismatch — see trait-pool-hardcoded-empty.
         TraitPool = DemonTraitPoolCuration.PickFor(s.SpeciesId, s.Rarity, s.GameTypeId),
         AttackIntervalMs = s.AttackIntervalMs,
+        // demon-lawn-deploy T1.5: unlike TraitPool, a straight pass-through is correct here — Magnitudes
+        // is already the closed, channel-shaped gameplay vocabulary (DerivedStatChannels ids), not open
+        // anchor flavor text needing curation.
+        Magnitudes = s.Magnitudes,
     };
 }

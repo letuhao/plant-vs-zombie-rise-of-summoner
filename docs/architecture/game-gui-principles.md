@@ -562,7 +562,8 @@ with `Roster`, `World`, `Demons` and `Expeditions` at one flat level under a hea
 
 **Rule.** Inside developer mode, density beats polish: tables, raw JSON and engine vocabulary are
 correct there. The **player-experience** rules do not apply — GG-23 – GG-34, GG-43 – GG-49, GG-52,
-GG-53, GG-58, GG-60. The **structural** rules still do — GG-5, GG-6, GG-18 – GG-21, GG-50, GG-55 —
+GG-53, GG-58, GG-60, GG-62, GG-64. The **structural** rules still do — GG-5, GG-6, GG-18 – GG-21,
+GG-50, GG-55, GG-63 —
 so the two worlds behave the same way, and a developer surface is still keyboard-operable, still
 pops on Esc, still declares its behaviour at a thousand rows, and still says why a control is off.
 
@@ -819,6 +820,65 @@ item at the authored affix ceiling, a comparison at every channel family present
 shell's own `clientHeight` never exceeds its band-declared maximum and `scrollHeight > clientHeight`
 triggers the body's scrollbar, not the page's.
 
+### GG-62 — Player words are authored, never generated from ids
+
+**Rule.** Every player-facing name and one-line reading for a derived family, status, resource, or
+aptitude is an **authored lexicon row**. Title-casing a dotted id (`combat.crit.rate.fire` →
+`Combat crit rate fire`) is a developer fallback and is forbidden on a player surface.
+
+**Why.** GG-23 already bans engine vocabulary. This names the remaining failure: the vocabulary is
+banned, so the FE invented English from the id instead. That is still a schema, just with spaces.
+The gap is already recorded at `web/fusion-rpg-web/src/contract/adapt.ts` (`channelLabel`) and at
+`data/seed/derived-stats/catalog.json` (compose/unit/consumer, **no names**). The presentation
+sibling is [`data/seed/derived-stats/lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json)
+— not `data/tuning/`. A balance pass does not retitle Crit chance.
+
+**Forbids.** `idWords` / `channelLabel` on a player band. A sheet that prints `combat.power.fire`.
+Putting display copy in `data/tuning/derived-stats.v{n}.json` (that file holds caps and defaults).
+
+**Testable as.** A vocabulary guard: every rendered derived-family label on a player surface matches
+a lexicon `displayName`; unknown ids fall to the developer tree or a designed placeholder, never
+`idWords`.
+
+### GG-63 — Inspect in-pane; do not nest a dialog for reading
+
+**Rule.** When a band-2 panel already holds the selected entity, **details open as a sibling
+inspector** (list left, reading right; the reading column may scroll). A band-3 dialog is for a
+**decision** — confirm, spend, overwrite, destroy (GG-22) — not for "what does Might do."
+
+**Why.** GG-10 caps depth at three pushes from the stage. Cell → dock → sheet is already two. A
+character-sheet dialog on top of that is a fourth surface whose only job is to hold a paragraph the
+sheet had room for. It also fails GG-26: the default becomes a modal, not a glance.
+
+**Forbids.** AptitudeTile → DialogShell for a reading. Derived-stat `?` → a second dialog. Dialog
+inside dialog.
+
+**Testable as.** Opening any ActorSheet inspector does not push band 3. Confirming an allocation
+draft may.
+
+### GG-64 — Show the meter, not the paragraph
+
+**Rule.** A player surface leads with **icon, colour, and a gauge or number**. Body copy lives in
+the inspector after an explicit select. Pools fill current/max. Contests show a chip or a sigmoid
+spark. Magnitudes show the number plus an optional *relative* spark.
+
+**A gauge must not lie about a cap.** If the registry cap is null, the bar is relative to this
+actor's own siblings (or a sigmoid shoulder) and is never painted `CAP`. Painting an uncapped
+magnitude as "full" is a silent progression ceiling (PS-8 / §2 invariant 11). Bounded ratios
+(per-mille, 0–1) and real registry caps (`status.resist.dot` at 0.95) *do* fill against that bound,
+and at the bound they show the `CAP` marker from [spec-derived-stat-sheet.md](../design/spec-derived-stat-sheet.md)
+§3.
+
+**Why.** GG-25 already refuses a table of the thing. The 2026-09-06 ActorSheet draft still shipped
+as channel-id tables and locked-banner walls because "list every row" was read as "print every
+string." Completeness is the inventory beneath the mock, not the mock's first paint.
+
+**Forbids.** A live pane whose primary content is a `<table>` of ids. A shield tab that is three
+paragraphs and a channel dump. Six circular gauges that imply six caps that do not exist.
+
+**Testable as.** Design-review checklist on ActorSheet tabs: first paint has a gauge, chip, or icon
+grid; the lexicon paragraph is in the inspector.
+
 ---
 
 ## 15. Arbitration — when two rules pull apart
@@ -851,16 +911,21 @@ page is the point.
 | Client-side prediction to improve feel | Breaks the authority locks; feel is bought with acknowledgement and motion instead (GG-15) |
 | A second palette inside one feature | Two design systems in one product (GG-29) |
 | Debug pages in player navigation | The tool's feel contaminates the game (GG-40) |
+| Title-casing a dotted id as a player label | Still a schema (GG-62). `channelLabel` / `idWords` stay developer-only |
+| Nested inspect dialog on a character sheet | Burns GG-10's last push on a paragraph (GG-63) |
+| A gauge that paints `CAP` on an uncapped magnitude | A silent progression ceiling (GG-64, PS-8) |
+| Channel-id tables as the first paint of a player tab | Completeness belongs in the inventory, not the glance (GG-25, GG-64) |
 
 ---
 
-## 17. Priority — not all sixty-one rules are gates
+## 17. Priority — not all sixty-four rules are gates
 
-Sixty-one rules is a reference, not a checklist. Nobody runs a sixty-item gate, and a document that
+Sixty-four rules is a reference, not a checklist. Nobody runs a sixty-item gate, and a document that
 pretends otherwise gets skimmed instead of used. So the rules are tiered.
 
 **Tier 1 — hard gates.** Break one and the work does not merge. These are the rules that are
-expensive or impossible to retrofit, because they decide *structure*.
+expensive or impossible to retrofit, because they decide *structure*. Twelve gates as of 2026-09-07
+(GG-62 joined — a sheet that lists every channel as an id is unfixable in CSS).
 
 | Rule | Decides |
 |---|---|
@@ -875,14 +940,15 @@ expensive or impossible to retrofit, because they decide *structure*.
 | **GG-47** choosable is comparable | The shape of every collection component |
 | **GG-50** volume declared | Whether components are virtualization-ready |
 | **GG-61** dense entity scrolls internally | Whether a shell can hold real content without growing past the viewport |
+| **GG-62** authored lexicon | Whether derived names are a game or `idWords` |
 
 **Tier 2 — review findings.** Break one and it is a review comment with a fix, not a blocked merge:
 GG-2, 3, 6, 7, 8, 9, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 29, 30, 36, 38, 39, 41, 42, 48, 49, 51,
-54, 55, 56, 58, 59.
+54, 55, 56, 58, 59, 63.
 
 **Tier 3 — craft.** Judged, not gated. They make the difference between correct and good, and they
 are where taste legitimately operates: GG-4, 10, 24, 25, 26, 27, 28, 31, 32, 33, 34, 35, 37, 43, 45,
-52, 53, 57, 60.
+52, 53, 57, 60, 64.
 
 **GG-10's "at most three pushes" is a heuristic, not a measurement.** It is stated as a number so it
 can be argued with. If a surface has a good reason for a fourth, the reason goes in the review, not
@@ -947,6 +1013,8 @@ done.
 | Shell-height fixtures | GG-61 | A dense-entity fixture (max derived channels, max affixes) per shell; assert body scrolls, shell height never exceeds its band bound |
 | Bundle budget | GG-38 | Entry chunk ceiling; heavy deps must not be in the entry chunk |
 | Unit-family guard | GG-46 | Magnitude renderer refuses an unlabelled unit; golden per family |
+| Lexicon guard | GG-62 | Every player-band derived/status label matches `lexicon.v1.json`; `idWords` is developer-only |
+| Inspect-band | GG-63 | ActorSheet inspect does not push band 3; Confirm may |
 | Diff-state matrix | GG-47 | Every picker surface renders a comparison state in its tests |
 | Volume fixtures | GG-50 | Seeded 10 / 100 / 1000 per collection; assert rendered node count |
 | Band-3 lint | GG-53 | Only declared event classes may open a blocking layer unprompted |
@@ -1015,6 +1083,19 @@ stat sheet, one item's full affix list) outstripping its own panel's height. GG-
 entities; nothing covered *one entity, a lot of content*. Found auditing `PanelShell`'s own CSS: its
 body declares `overflow: auto` with no height on the shell to ever trigger it, and only one
 demonstration in the whole design set gives a shell a real height. Detail in GG-61.
+
+### 20.5 Lexicon, in-pane inspect, meters — added 2026-09-07
+
+Plate 13's first complete inventory listed every closed catalog and then painted those catalogs as
+channel-id tables, a nested aptitude dialog, and a shield text wall. Completeness is required;
+**first paint as a schema dump is not.** GG-62 / GG-63 / GG-64 lock the correction:
+
+| # | Question | Decision | Because |
+|---|---|---|---|
+| D11 | Where do derived/status display names live? | **`data/seed/derived-stats/lexicon.v1.json`**, sibling to `catalog.json`. Not `data/tuning/` | Tunables are numbers a balance pass changes (T1). Crit chance's English is copy. `channelLabel` already named this gap |
+| D12 | Aptitude extra info — dialog or split? | **InspectSplit** (tiles left, reading right). Leftover + Confirm in a sticky footer | GG-10/GG-63. Confirm is the dialog-shaped *decision*; the paragraph is not |
+| D13 | Combat tab | **Rename to Derived.** `StatRow` (icon, name, number, spark, `?`). Categories collapse with one group open | The tab *is* the derived-stat sheet. Six render states stay; a third classification is still refused |
+| D14 | May a spark fill to 100%? | **Only for pools, bounded ratios, and registry caps.** Uncapped GameUnits sparks are relative | PS-8 / GG-64. `status.resist.dot` at 0.95 is a real cap and must show `CAP` |
 
 ---
 

@@ -637,9 +637,10 @@ question is a task.
    unchanged. `tree-review` censuses every one and **may enforce**; the demotion to a warning is
    lifted. §5.2 carries the requirements, and the earlier recommendation (keep it out of the corpus,
    reachable only by hand-authored override) is superseded.
-2. **What goes in `legitimateSkew`?** The ideal's §7 item 2, still owed. This spec gives it a home and
-   a shape; it does not answer it. `earth` at roughly 1.5× uniform is D32's own worked example, not a
-   decided row.
+2. ~~**What goes in `legitimateSkew`?**~~ **CLOSED 2026-09-06 by D57: 1.5× uniform, on any
+   near-uniform axis.** The ideal's §7 item 2. `earth` at roughly 1.5× uniform was D32's own worked
+   example; the owner promoted that example to the actual rule rather than leaving it as illustration
+   only — the first real row `legitimateSkew` ships with, argued once in data per §'s own convention.
 
 **Blocked on other work, tracked not open:** the atom-tag registry (§5.1) — until it lands, exclusion
 predicates key on `posture` and nothing else, and gate `PassiveTree/ExclusionResolvable` reports

@@ -56,11 +56,11 @@ no *"the atom layer is unreachable"* caveat to carry into this module.
 
 | | Counted | Declaration | Guard |
 |---|---:|---|---|
-| Attach points | **7** | `AtomKind.cs:8-30`; `AtomKindRegistry.cs:21` | `AtomKindRegistryTests.cs:31` pins the const to `Enum.GetValues` |
-| Kinds | **16** | `AtomKindRegistry.cs:31`; 16 rows at `:476-869` | `AtomKindRegistryTests.cs:30` pins the const to `All.Count` |
-| Triggers | **13 declared, 11 authorable** | `AtomKind.cs:95-99`; `AtomKindRegistry.cs:36` | `AtomKindRegistryTests.cs:112` pins the const to `All.Length` |
+| Attach points | **8** (was 7) | `AtomKind.cs:8-43`; `AtomKindRegistry.cs:21` | `AtomKindRegistryTests.cs:31` pins the const to `Enum.GetValues` |
+| Kinds | **17** (was 16) | `AtomKindRegistry.cs:36`; 17 `new(` rows | `AtomKindRegistryTests.cs:30` pins the const to `All.Count` |
+| Triggers | **13 declared, 11 authorable** | `AtomKind.cs:95-99`; `AtomKindRegistry.cs:41` | `AtomKindRegistryTests.cs:112` pins the const to `All.Length` |
 | Elements | **6** (+ `omni` sentinel) | `ActorElementTypes.cs:3-11`, `:19-29` | |
-| Statuses | **21** | `StatusCatalogBootstrap.cs:16-58` | resolved fresh per `Validate` (`AtomKindRegistry.cs:87-91`) |
+| Statuses | **24** (D51, 2026-09-06: was 21) | `StatusCatalogBootstrap.cs:16-67` | resolved fresh per `Validate` (`AtomKindRegistry.cs:87-91`) |
 | Aptitudes / postures | **12 / 3** | `Aptitude.cs:38-51` / `:11` | the count is a product (`:30-35`), never typed |
 | Primary stat channels | **23** | `ModifierOp.cs:68-75` | `stat.modify`'s vocabulary (`AtomKindRegistry.cs:71`) |
 | Derived stat channels | **267 registered + 9 open prefix families** | `DerivedStatRegistry`; prefixes at `:318-388` | 267 asserted in four test files (`StatTaxonomyTests.cs:183`, `AtomCatalogSsotDriftTests.cs:46`, `ElementHubDocDriftTests.cs:73`, `SeedCatalogTests.cs:28`); resolved fresh per `Validate` (`AtomKindRegistry.cs:84-85`) so the vocabulary widens with no guard edit |
@@ -323,7 +323,7 @@ Per `tunables-ssot.md` and invariant 12: `data/tuning/passive-tree.v1.json`, wit
 
 | Key | Class | Why |
 |---|---|---|
-| `treeShareMilli` | **tunable** | The single biggest dial the tree layer has. Ideal §3.3 names it undecided: *"its leverage depends on what share of total power trees carry — currently unknown."* §3.4's `1000` is a placeholder chosen so the arithmetic runs |
+| `treeShareMilli` | **tunable** | The single biggest dial the tree layer has. **Settled 2026-09-06 (D53): `1000` (100%) is the real value** — trees are the full power budget today, not a placeholder pending a competing system. Still a tunable: `squad-harness` may move it on measurement without reopening this spec |
 | `channelAnchorMilli` (per channel family) | **derived, not authored** | computed from `power-scale.v{n}.json`'s own pins at bake time, so a dial change cannot leave it stale |
 | `soulTrack.thetaPerSoulLevelMilli` | tunable | §5. **Per-mille** `Θ` per soul level — the canonical name and unit (R2). Value unmeasured |
 | `budgetShareMilli` | **neither — an input** | `tree-plan` emits it and this module reads it. Not authored here, not tunable here, not re-derived here |
@@ -639,29 +639,33 @@ Applying CLAUDE.md's three-question ladder honestly:
    — `ElementPayload` is a weighted component list with a private constructor whose only entry is
    `From(components)`, validated to sum to 1 within `WeightSumEpsilon = 1e-6`
    (`ElementPayload.cs:7,16-37`) — but the **writer** does not.
-2. Is a path inert? **N/A** — there is no path. **No kind among the 16 writes an element payload**, and
-   there is no `Element` attach point among the 7. `resource.delta` has an `element` param
+2. Is a path inert? **N/A** — there is no path. **No kind among the 17 writes an element payload**, and
+   there is no `Element` attach point among the 8. `resource.delta` has an `element` param
    (`AtomKindRegistry.cs:552`), but that *names* an element on a delta; it does not rewrite a payload.
 3. Is this genuinely new? **Yes.**
 
 So the correct word is **new capability**, and the correct process is a reviewed change to
-`decisions.md`'s "Atom attach points" row (`decisions.md:112`, which says in terms that *"growing this
-list is a reviewed change to this row"*). The cheapest shape is a **17th kind on the existing `Board`
-or `Stat` attach point** rather than an eighth attach point — but that is a decision for whoever specs
-it, not for this module.
+`decisions.md`'s "Atom attach points" row (`decisions.md:113` — corrected from `:112`, which is now a
+different, unrelated 2026-09-03 decision; growing the list is a reviewed change to that row). The
+cheapest shape is a **new kind on the existing `Board` or `Stat` attach point** rather than a new
+attach point — but that is a decision for whoever specs it, not for this module. **Decided
+2026-09-06 by [`spec-element-conversion.md`](spec-element-conversion.md): a new `Element` attach
+point, not `Board`/`Stat`** (that spec's §2a explains why, engaging with this exact fork) — an 18th
+kind and 9th attach point, since a 17th (`structure.place`, unrelated) landed the same day.
 
 #### 7.2 What the refusal looks like
 
-**The binder allocates no budget to a conversion node until a 17th kind exists.** Concretely:
+**The binder allocates no budget to a conversion node until `element.convert` exists.** Concretely:
 
 ```text
 tree-binder: REFUSED  skill.element-fire-off-t7-b3
   reason        ConversionKindUnavailable
   requested     an atom writing ElementPayload components (source=fire, target=physical)
-  capability    no kind among the 16 writes an element payload; no Element attach point exists
-  authority     decisions.md:112 "Atom attach points" — growing the list is a reviewed change
+  capability    no kind among the 17 writes an element payload; no Element attach point exists
+  authority     decisions.md:113 "Atom attach points" — growing the list is a reviewed change
   consequence   this node's budgetShareMilli (64 permille of ONE BRANCH) was NOT priced, NOT emitted
-  remedy        land the 17th kind, or re-plan this slot as a non-conversion node
+  remedy        land `element.convert` (spec-element-conversion.md, D56), or re-plan this slot as a
+                non-conversion node
 ```
 
 Three properties this refusal must have, each for a stated reason:
@@ -725,8 +729,9 @@ reading the code, by the `DemonSpeciesGen --explain` precedent.
 ## Project structure
 
 **This module is C#, not Python, and the reason is a rule rather than a preference.** It must read
-`DerivedStatRegistry` for the 267 + 9 channel vocabulary, `AtomKindRegistry` for the 16 kinds and
-their param schemas, and `power-scale.v{n}.json`'s pins — all of which are C# SSOTs. The
+`DerivedStatRegistry` for the 267 + 9 channel vocabulary, `AtomKindRegistry` for the 17 kinds (as of
+2026-09-06; see [`spec-element-conversion.md`](spec-element-conversion.md) §0 for the current count)
+and their param schemas, and `power-scale.v{n}.json`'s pins — all of which are C# SSOTs. The
 `species-generator` precedent says it outright: *"Never … reimplement `Magnitude` in Python."*
 
 ```text
@@ -824,11 +829,9 @@ this spec set trace to exactly that. Name the type and the method — *"`BattleR
 which calls `DamageApplyPipeline.Apply`"* — and the citation survives the drift. This spec's own
 `AtomCompiler.cs:463-464` and `:456-466` were re-checked this session and are correct as written.
 
-**Ask first:** adding `ValueSpec.PowerLadderKMicro` and its `AtomCompiler` arm (§3.5 — it widens a
-shipped contract); widening `AtomCompiler.cs:464`'s result from `int` to `long` (§5.3 — it moves the
-first refusal by three orders of magnitude and is a `src/FusionRpg.Core` change); adding the one
-`ssot-power-scale.md` §10.2 row for `soulTrack.thetaPerSoulLevelMilli`; adding a second `ValueSpec`
-source for `ChannelLadder`.
+**Ask first:** ~~adding `ValueSpec.PowerLadderKMicro` and its `AtomCompiler` arm~~ **— done, BUILT +
+VERIFIED 2026-09-06 (todo B3)**; adding the one `ssot-power-scale.md` §10.2 row for
+`soulTrack.thetaPerSoulLevelMilli`; adding a second `ValueSpec` source for `ChannelLadder`.
 
 **Never:** write a private `f(level)` — every magnitude reads the one `PowerLadder`; **re-derive a
 node's budget share from a tier weight or a weight total** (R4 — the plan distributes, this module
@@ -836,8 +839,9 @@ reads); bake a magnitude into the catalog instead of a coefficient; cap or clamp
 bounded ratio must say in a comment that it is one); use `float` for a magnitude; scale a
 `PerMilleRatio`, `SigmoidPoints`, `SigmoidMultiplierPoints` or `StatusPotencyPoints` channel by
 `P(Θ)`; write `progression.power`, `progression.realm` or an aptitude id; allocate budget to a
-conversion node before a 17th kind is reviewed; widen the atom vocabulary (7/16/13 is a reviewed
-`decisions.md` change); invent a third channel classification beside `UnitClass` and the render
+conversion node before `element.convert` is reviewed and built (spec-element-conversion.md, D56);
+widen the atom vocabulary (8/17/13 is a reviewed `decisions.md` change); invent a third channel
+classification beside `UnitClass` and the render
 states; **refuse, unprice or discount a node because it carries an exclusion** — `nullification`
 included: that is a per-actor runtime no-op, not a bake-time capability gap, and treating it like §7's
 conversion refusal would let one player's build change a shared catalog (§7.3); let a model near this
@@ -851,7 +855,9 @@ module.
       else — no `tierWeight`, no `weightTotal`, proven by a source-shape test.
 - [ ] All three shipped archetypes bind from their own share vectors, and `gated-deep`'s capstone
       lands on the plan's 182‰ of a branch.
-- [ ] `PowerLadderKMicro` exists, this module owns it, and no node in any archetype stores `0`.
+- [x] `PowerLadderKMicro` exists, this module owns it, and no node in any archetype stores `0`.
+      **BUILT + VERIFIED 2026-09-06 (todo B3)** — `ValueSpec.cs:70,119` carries the field;
+      `AtomCompiler`'s result widened to `long` in the same change.
 - [ ] `scripts/audit-overflow.py` reports no critical finding in this module; `--targets A3` is clean
       for its files.
 - [ ] No `Math.Min` or `Math.Clamp` guards a magnitude anywhere in the derivation.
@@ -867,15 +873,21 @@ module.
 
 ## Open questions
 
-1. **`treeShareMilli`.** The single biggest dial the tree layer has, and the ideal §3.3 names it
+**Zero — the one question this section held is closed.**
+
+1. ~~**`treeShareMilli`.**~~ **CLOSED 2026-09-06 by D53: `1000` (100%) is the real, decided value, not
+   a placeholder.** The single biggest dial the tree layer has, and the ideal §3.3 had named it
    undecided: *"its leverage depends on what share of total power trees carry — currently unknown and
-   worth deciding deliberately."* §3.4's `1000` is a placeholder chosen so the arithmetic runs, not a
-   balance decision. It is a **tunable**, so this spec names the key and the unit and the value lands
-   later — but the *decision* is owed before the first catalog is reviewed, because it sets every
-   number a player reads.
-2. **The 17th kind (§7).** A genuinely new capability and a reviewed change to `decisions.md:112`.
-   Whether it lands on `Board` or `Stat` is that spec's call, not this one's. Until then this module
-   refuses, and `tree-plan` should suppress the slot rather than let the refusal fire per run.
+   worth deciding deliberately."* The owner's ruling: trees are the full power budget today, not a
+   placeholder pending a competing system. It stays a **tunable** — this spec names the key and the
+   unit, and `squad-harness` may move the value later on measurement without reopening this spec, the
+   same tunable contract every other settled rate in this program already has.
+2. ~~**The 17th kind (§7).**~~ **CLOSED 2026-09-06 by D56:**
+   [`spec-element-conversion.md`](spec-element-conversion.md) — a new `Element` attach point (9th) and
+   `element.convert` kind (18th, since a 17th landed the same day for an unrelated reason), a reviewed
+   change to `decisions.md:113`. Not `Board` or `Stat` — that spec's §2a explains why. **Not built
+   yet** — until it lands, this module refuses, and `tree-plan` should suppress the slot rather than
+   let the refusal fire per run.
 
 **Named, small, mechanical — and now scheduled, so it is not listed as open at all.** The sim consumer
 for `stat.derived` (`AtomKindRegistry.cs:534`'s Sim cell) is **`mechanism-wiring`'s G3**, in wave 0,
@@ -893,9 +905,9 @@ ships whether or not Sim can score it.
 | **D3** | §5 — the soul track adds `thetaPerSoulLevelMilli · soulLevel / 1000` to the ladder index and never touches the coefficient, which is the only shape that keeps power linear in effort |
 | **D13** | This *is* stage 3: deterministic, no model calls, running after the plan and the language stage |
 | **D15** | `treeBudgetMilli = 1000` for every tree, so equal expected value survives the bake regardless of archetype — the shape never enters the sum |
-| **D16** | §7 — the binder refuses to price a conversion node until a 17th kind is reviewed, names the unspent budget, and fails the run rather than substituting |
+| **D16** | §7 — the binder refuses to price a conversion node until a reviewed kind is added, names the unspent budget, and fails the run rather than substituting. **D56 (2026-09-06) answered "which kind": [`spec-element-conversion.md`](spec-element-conversion.md) — an 18th kind, not a 17th (the 17th, `structure.place`, landed for an unrelated reason the same day; see that spec's §0)** |
 | **D20 / D26** | Honoured by **deferring to `tree-plan`**, which is where the linear tier column is emitted and asserted. This module multiplies the emitted share by an anchor and does not re-derive the ladder — the old `tierWeight(t) = t` reconstruction was a second copy of that arithmetic and disagreed with the first (§3.3, R4) |
-| **D22** | Every node composes from the shipped 16 kinds and 13 triggers. No passive-specific effect vocabulary exists here |
+| **D22** | Every node composes from the shipped vocabulary (17 kinds, 13 triggers as of 2026-09-06 — see [`spec-element-conversion.md`](spec-element-conversion.md) §0). No passive-specific effect vocabulary exists here |
 | **D24** | The catalog stores a **coefficient, not a magnitude** — the single choice that makes one static, byte-identical, shared catalog correct for every player at every `Θ` |
 | **D40** | §7.3 — all three exclusion forms bind normally. Nullification is a per-actor runtime no-op that keeps its coefficient; the **form** is carried through to `NodeRecord` because the load path and the surface branch on it, and the *only* bake-time refusal in this module remains D16's conversion node |
 | **D29** | 10 tiers × 2 branches is why the denominator carries `branches = 2`. §3.5's re-derivation against the shipped archetypes' real shares shows the per-mille defect is not a rounding complaint at all: it stores `0` |

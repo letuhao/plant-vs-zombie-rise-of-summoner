@@ -44,7 +44,11 @@ function Row({ combo }: { combo: CombinationView }) {
       data-testid={`compendium-row-${combo.comboId}`}
       data-state={combo.state}
     >
-      <span className="min-w-0 flex-1 truncate font-semibold">{combo.comboId}</span>
+      {/* item-content `item-naming` (T3): the combination's own words. Its id stays on the row's
+        * test id and in the title attribute, so nothing debuggable is lost. */}
+      <span className="min-w-0 flex-1 truncate font-semibold" title={combo.comboId}>
+        {combo.title}
+      </span>
       <span className="text-2xs uppercase tracking-wide">{combo.shape}</span>
       {/* Only a one-away row names what it still needs. A known-inactive row is name only — the
        * atoms stay hidden until it is close enough to be a goal. */}

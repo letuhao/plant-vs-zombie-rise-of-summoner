@@ -45,10 +45,14 @@ else ships behind a reversible/tunable default, tracked as a non-blocking follow
 get a stated default below, and the build proceeds. If the owner later prefers a different answer, it's
 a follow-up task, not a rebuild — nothing about these defaults locks in an irreversible schema choice.
 
-- **`side`-column decision (spec-lawn-deploy-core Open Q4)**: default is **update the column at
-  `HypnoAlly` deploy time** (T1.4) — the more physically-true representation, matching what
-  `/api/actors/{id}/derived` already assumes elsewhere. Reversible: a later decision to make that
-  endpoint `DeployMode`-aware instead is a small, isolated change.
+- **`side`-column decision (spec-lawn-deploy-core Open Q3/Q4) — REVISED 2026-09-06, no longer a simple
+  default.** T1.3/investigation found the existing `"zombie.hypno"`/`SpecimenOwnershipOracle` precedent
+  keeps board-mechanical side and ownership as separate axes for exactly this kind of case, which makes
+  the original "just update the column" default look likely wrong, not just unconfirmed. This is now the
+  ONE genuinely gate-worthy-feeling item in this plan — but per this plan's own rule, it still isn't a
+  hard pre-work gate on the REST of Phase 1 (T1.1-T1.3, T1.5, T1.6 do not depend on it). It gates T1.4
+  specifically: do not write T1.4's code until this is actually answered, rather than shipping a guessed
+  default for a subtle PvZ-specific mechanic that ordinary review would struggle to catch if wrong.
 - **Zomboss's own demon roster (zomboss-deploy-ai Open Q1, elevated to the map's own deferred list)**:
   default is **the same summonable species pool the player draws from, filtered to the current level's
   own threat band** (T3.2) — no new content authoring, no new roster table. Reversible: a dedicated

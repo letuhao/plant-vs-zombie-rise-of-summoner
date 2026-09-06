@@ -1,4 +1,5 @@
 using FusionRpg.Core.Items;
+using FusionRpg.Core.Items.Display;
 using FusionRpg.Core.Items.Sockets;
 using FusionRpg.Core.Items.Surfaces;
 using FusionRpg.Data;
@@ -35,10 +36,22 @@ public static class ItemSurfaceEndpoints
     /// not have to open each item to learn that half of them are inert on the lawn". Derived by
     /// <c>RpgStore.GrantsBattleOnlyAction</c>, the same read card block 9 uses.
     /// </param>
+    /// <param name="ContainerName">
+    /// item-content `item-naming` (T3): the base type's own AUTHORED name for this container, read
+    /// through the same <see cref="ItemBaseTypeCorpus"/> delegate the card route uses (T2 carried the
+    /// `name` field through; nothing outside the card read it). Additive and defaulted to <c>""</c>,
+    /// which is the honest "this build has no corpus row for that container" — the client then says
+    /// so rather than printing the container id in a name slot.
+    ///
+    /// <para>⚠ <b>It is the BASE TYPE's name, not module 8's composed one.</b> Composing the affix
+    /// name needs the instance's frozen atoms and a full render per row, and the armoury page is up
+    /// to 50 rows of a collection that is deliberately unbounded. The compact line shows the noun the
+    /// composed name is built on; the card — one item, one render — shows the whole name.</para>
+    /// </param>
     public sealed record ArmouryRowDto(
         string InstanceId, string ContainerId, string Rarity, int RarityOrdinal,
         bool Assigned, bool Locked, bool Unseen, bool Stale, string AcquiredUtc,
-        bool BattleOnly = false);
+        bool BattleOnly = false, string ContainerName = "");
 
     public sealed record ArmouryPageDto(
         int Total, int Unseen, bool OverReviewPressure, string RenderStrategy, IReadOnlyList<ArmouryRowDto> Rows);
@@ -62,9 +75,17 @@ public static class ItemSurfaceEndpoints
     /// falls back to <c>""</c>, which is a LEGITIMATE value: an element-free insert
     /// (<c>SocketModel.cs:72</c>) contributes to no resonance shape at all.</para>
     /// </param>
+    /// <param name="lookupBaseType">
+    /// ⭐ <b>The base-type corpus, by container id</b> — the same <see cref="ItemBaseTypeCorpus"/>
+    /// delegate <see cref="ItemCardEndpoints"/> reads, handed in rather than loaded a second time for
+    /// the same reason <paramref name="lookupInsert"/> is: two loads are two chances to disagree about
+    /// what an item is called. <c>null</c> leaves every row's <c>ContainerName</c> empty, which is the
+    /// pre-2026-09-06 shape and still honest.
+    /// </param>
     public static void MapItemSurfaces(
         this WebApplication app, ItemSurfaceTuning surfaceTuning, SocketTuning socketTuning,
-        Func<string, CardInsertLookup?>? lookupInsert = null)
+        Func<string, CardInsertLookup?>? lookupInsert = null,
+        Func<string, CardBaseType?>? lookupBaseType = null)
     {
         if (surfaceTuning is null) throw new ArgumentNullException(nameof(surfaceTuning));
         if (socketTuning is null) throw new ArgumentNullException(nameof(socketTuning));
@@ -124,7 +145,13 @@ public static class ItemSurfaceEndpoints
                         isAssigned, item.Locked, Unseen: !item.Seen, item.Stale, item.AcquiredUtc,
                         // §9.14's compact-line tag. No container means no grants to read, so the
                         // honest answer is false rather than a lookup on an empty id.
-                        BattleOnly: instance is not null && store.GrantsBattleOnlyAction(instance.ContainerId)),
+                        BattleOnly: instance is not null && store.GrantsBattleOnlyAction(instance.ContainerId),
+                        // item-naming T3. `""` when the corpus has no row for this container — the
+                        // client says "unnamed" rather than falling back to the id, because a
+                        // container id in a name slot is the defect this task exists to remove.
+                        ContainerName: instance is null
+                            ? ""
+                            : lookupBaseType?.Invoke(instance.ContainerId)?.Name ?? ""),
                     Entry: new ArmouryEntry(
                         item.InstanceId, instance?.ContainerId ?? "", Role: "", Frame: "",
                         rarity.Length > 0 && ordinals.TryGetValue(rarity, out var o2) ? o2 : 0,

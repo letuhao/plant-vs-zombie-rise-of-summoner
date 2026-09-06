@@ -130,7 +130,9 @@ public class TreeUnlockCostTests
     [Fact]
     public void The_full_corpus_cumulative_matches_the_spec_own_stated_figure()
     {
-        // spec-tree-state.md §7: "the shipped corpus... cumulative is 35,160 * 35,164 = 1,236,366,240".
-        Assert.Equal(1_236_366_240L, TreeUnlockCost.Cumulative(35_160, first: 5, step: 2));
+        // spec-tree-state.md §7 (D51, 2026-09-06: 24 statuses, not 21): "the shipped corpus...
+        // cumulative is 35,280 * 35,284 = 1,244,819,520". Was 35,160 * 35,164 = 1,236,366,240
+        // before D51's corpus growth -- that figure is now struck through in the spec itself.
+        Assert.Equal(1_244_819_520L, TreeUnlockCost.Cumulative(35_280, first: 5, step: 2));
     }
 }

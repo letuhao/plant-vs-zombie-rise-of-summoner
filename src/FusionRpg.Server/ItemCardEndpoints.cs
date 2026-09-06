@@ -153,7 +153,11 @@ public static class GemInsertCorpus
                         new InsertDef(id, Str(entry, "family") ?? "", Str(entry, "element") ?? "",
                             UnauthoredInsertTier),
                         // §2.4: the CELL shows a display key, never the insert's container id.
-                        Str(entry, "nameKey") ?? id);
+                        Str(entry, "nameKey") ?? id,
+                        // item-content T4: the authored English name beside the key, never instead of
+                        // it. All 40 shipped gems carry one and the catalog has no `gem.*` row, so the
+                        // key alone is what a socket picker would have had to offer.
+                        Str(entry, "name") ?? "");
                 }
             }
         }

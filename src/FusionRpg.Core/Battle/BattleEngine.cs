@@ -3,6 +3,7 @@ using FusionRpg.Core.Actions.Unlock;
 using FusionRpg.Core.Combat;
 using FusionRpg.Core.Combat.Element;
 using FusionRpg.Core.Combat.Shield;
+using FusionRpg.Core.Effects.Atoms;
 using FusionRpg.Core.Stats.Derived;
 using FusionRpg.Core.Status;
 
@@ -214,7 +215,9 @@ public static partial class BattleEngine
         Action<BattleEffectHost>? onEffectHostReady = null, Timeline.BattleModeProfile? profile = null,
         ActionCatalog? actionCatalog = null, IContainerEffectResolver? containerResolver = null,
         Timeline.IIntentSource? intentSource = null, Board.BoardState? board = null,
-        Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null)
+        Func<string, UnlockState>? unlockStateFor = null, UnlockTuning? unlockTuning = null,
+        IReadOnlyList<RunnerBinding>? runnerBindings = null,
+        IReadOnlySet<string>? containersWithRunnerCoverage = null)
     {
         if (setup.Squad.Count == 0) throw new ArgumentException("Squad is empty.");
         if (setup.Wave.Count == 0) throw new ArgumentException("Wave is empty.");
@@ -238,7 +241,7 @@ public static partial class BattleEngine
         // change: every line below is the same statement sequence as before extraction, reading
         // through `state.` instead of a captured local.
         var state = new BattleRunState(setup, seed, trace, onEffectHostReady, actionCatalog, containerResolver, board,
-            unlockStateFor, unlockTuning);
+            unlockStateFor, unlockTuning, runnerBindings, containersWithRunnerCoverage);
 
         // B14: the round boundary runs on the kernel's own EventQueue/SimulationClock — the same
         // primitives every other Timeline module uses — instead of a raw integer counter. `Resolve`

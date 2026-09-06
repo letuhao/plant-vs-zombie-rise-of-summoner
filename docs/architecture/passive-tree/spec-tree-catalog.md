@@ -39,7 +39,7 @@ Three layers, and the third is empty by decision, not by omission
 
 | Layer | Holds | Decided | Same for every player? |
 |---|---|---|---|
-| **(a) Baked at build time, committed as data** | tree roster · tree shape and shape archetype · node ids · prerequisite links · tier gate ladder · which affix each node grants · each atom's **coefficient** and scale axis · the soul curve reference · exclusion properties · `enabled` | dev machine, before packaging | **yes — byte-identical** |
+| **(a) Baked at build time, committed as data** | tree roster · tree shape and shape archetype · node ids · prerequisite links · tier gate ladder · which affix each node grants · each atom's **coefficient** and scale axis · the soul-scaling tunable (`soulTrack.thetaPerSoulLevelMilli`, `tree-binder` §5.1 — **not** a per-node curve reference, see [`spec-soul-curve-resolution.md`](spec-soul-curve-resolution.md)) · exclusion properties · `enabled` | dev machine, before packaging | **yes — byte-identical** |
 | **(b) Per-actor state** — owned by [`tree-state`](spec-tree-state.md) | which nodes are owned · soul level per node | player's machine, as they play | no — this is the build |
 | **(c) Rolled per player at runtime** | **nothing** | — | — |
 
@@ -510,8 +510,9 @@ corpus is authored, because a reused or reshaped id repoints every reference tha
 **Never:** bake an absolute magnitude into the catalog; use a content hash or a positional ordinal as
 a node id; reuse or renumber an id; delete a content row (disable it); clamp a coefficient; write SQL
 outside `FusionRpg.Data`; write a private `f(level)` — magnitudes read `P(Θ)` through the shared
-`PowerLadder` and contests read `Θ`; allocate budget to a **conversion node** (D16) until a 17th atom
-kind lands, because no kind among the 16 writes an element payload and the failure is **silent**
+`PowerLadder` and contests read `Θ`; allocate budget to a **conversion node** (D16) until
+`element.convert` lands (D56, [`spec-element-conversion.md`](spec-element-conversion.md)), because no
+kind among the 17 writes an element payload and the failure is **silent**
 (`OverlayCombatCalculator.cs:128-172` loops the payload's own components, so an ice affix on a payload
 with no ice component contributes zero forever, with no error).
 
@@ -521,7 +522,8 @@ with no ice component contributes zero forever, with no error).
   reviewed change to the atom layer, ~3 lines at `AtomCompiler.cs:456-466`. Without it a tier-1 node
   rounds with ~~17%~~ **+63%** error at D29's ten tiers (`spec-tree-binder.md:189`). **A wiring gap,
   not a wall.**
-- **The 17th atom kind** for D16's element-payload conversion — a reviewed `decisions.md` change.
+- **`element.convert`** for D16's element-payload conversion — a reviewed `decisions.md` change,
+  specced 2026-09-06 (D56, [`spec-element-conversion.md`](spec-element-conversion.md)), not built.
 - **A derived-tag vocabulary** for D14. `AffixTags.cs` ships (124 lines, tested) but has no production
   call site, and the corpus carries **3** semantic tag values, so a property-keyed exclusion can key on
   posture and little else today. **Soft blocker:** the record can carry `excludeProps` before the
@@ -541,13 +543,19 @@ with no ice component contributes zero forever, with no error).
 
 ## Open questions
 
-Three, all genuine; none blocks the module's own structure.
+Three, all genuine, none blocking the module's own structure. **Two closed 2026-09-06** (D58, D59);
+one remains — species-tree sizing (#2), owned by that module, not this document.
 
-1. **Where does a soul level enter the curve?** `CurveInput` has exactly three members —
-   `Level`, `Rarity`, `Tier` (`CurveTable.cs:4-9`) — and its own comment says *"Adding one is a
-   reviewed change (E2 boundaries)"*. Does a node's soul track ride `Level`, or earn a fourth member?
-   That is an E2 decision, not one this module may make. It changes what `soulCurveId` means, not
-   whether the field exists.
+1. ~~**Where does a soul level enter the curve?**~~ **CLOSED 2026-09-06 by D58 —
+   [`spec-soul-curve-resolution.md`](spec-soul-curve-resolution.md): it doesn't, and it never needs
+   to.** `NodeAtom.SoulCurveId` was dead scaffolding with zero production readers (confirmed by a
+   repo-wide grep); the real, shipped, tested mechanism is `tree-binder` §5.1's `Θ`-offset formula,
+   which `passive-tree-ideal.md` §4 requires by name (*"must read `P(Θ)`"*) — routing soul level
+   through `CurveTable` instead would have been the second private curve CLAUDE.md's one-ladder rule
+   forbids. The owner's own first-pass answer to this question (add a 4th `CurveInput` member) is
+   superseded by that spec's own investigation, not silently followed — see its §0. `SoulCurveId` and
+   its validation/round-trip machinery are retired, not extended — the field itself goes away, not
+   just its meaning.
 2. **Does the species tree (D23/D30) ship as catalog data, or derive at import?** Both satisfy §1's
    freeze line. Shipping the data makes ~~~35,200~~ ~~35,160~~ **35,280** nodes across **882 trees**
    (D51, 2026-09-06: 24 statuses, not 21 — was 879/35,160) reviewable and diffable (840 species × 40 +
@@ -557,9 +565,12 @@ Three, all genuine; none blocks the module's own structure.
    (`demon-seed-map.md:41`), and map assumption 4 says species trees reuse this record — so the size
    is the owner's call, not this document's. Owned by `species-tree`; recorded here because it is this
    record's blast radius.
-3. **May a node author a slot resolved at bake time (L2)?** Allowing it lets one authored node fan out
-   across six elements at bake time and stay fully learnable; forbidding it keeps the record smaller.
-   Neither breaks the freeze line — only *player-time* slot resolution would.
+3. ~~**May a node author a slot resolved at bake time (L2)?**~~ **CLOSED 2026-09-06 by D59
+   (renumbered from an earlier D46 — that number collides with `spec-squad-harness.md`'s own,
+   older 2026-09-05 D46 "mirror squads decide," which has priority): yes, allowed.** Allowing it
+   lets one authored node fan out across six elements at bake time and stay
+   fully learnable; forbidding it keeps the record smaller. Neither breaks the freeze line — only
+   *player-time* slot resolution would, and this decision does not touch that boundary.
 
 ## Decisions implemented
 

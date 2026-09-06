@@ -37,4 +37,26 @@ public interface IBattleView
     /// discipline: "nothing parses JSON during battle" applies to the AI's reads too) — gate 1's
     /// "bound" set.</summary>
     IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey);
+
+    /// <summary>
+    /// base-defense `siege-ai` (spec-siege-ai.md, R1/R3): the full derived-stat snapshot behind an
+    /// actor's Omni combat channels — <see cref="EntityFacts"/> alone (Side/TypeId/HpMilli/ElementId/
+    /// Row/Col/IsMindControlled/IsKiller/StatusMask) has no accuracy/dodge/power/defense reader, so a
+    /// live scoring AI (<c>SiegeAiIntentSource</c>) cannot estimate a real hit chance through
+    /// `FactsOf` alone. `null` when unknown/hidden — the SAME absence convention <see cref="PositionOf"/>
+    /// already uses, so fog of war gates this exactly like every other per-actor read (a real, live
+    /// implementor need only forward its own already-held `Derived` snapshot; <c>FoggedBattleView</c>
+    /// returns `null` for anything outside the viewer's own visibility, matching its own `FactsOf`).
+    /// </summary>
+    FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey);
+
+    /// <summary>
+    /// base-defense `siege-ai` 17.9 (spec-siege-ai.md §5.20 rule 5): the one bit `combatant-kind`'s own
+    /// `CombatantKind` discriminator does not itself expose through this seam — whether `actorKey` is
+    /// CURRENTLY garrisoning a `CombatantKind.Structure` emplacement (`BattleActorSetup.GarrisonedBy`
+    /// naming it). Returns the structure's own key, or `null` when not garrisoning anything — the SAME
+    /// absence convention <see cref="PositionOf"/> already uses. This is self-knowledge, never gated by
+    /// fog the way <see cref="DerivedOf"/> gates OTHER actors: an actor always knows its own posting.
+    /// </summary>
+    string? GarrisonedStructureKeyOf(string actorKey);
 }

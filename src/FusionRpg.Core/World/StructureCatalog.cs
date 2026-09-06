@@ -207,9 +207,17 @@ public static class StructureCatalog
     /// base-defense `structure-catalog-import` (module 25, spec-structure-catalog-import.md §1).
     /// Called by the composition root, never by game code — resets the cached rows so a
     /// reconfigure is honoured, the same contract `BattleModeProfileCatalog.Configure` already
-    /// states for profiles. Pass `null` to revert to the pure C# <see cref="Seed"/> literal (the
-    /// same behaviour as never calling this at all — every existing test that never calls
-    /// `Configure` keeps seeing exactly what it always has).
+    /// states for profiles.
+    ///
+    /// <para><b>Task 25.4: the C# literal fallback is gone.</b> Byte-identity was proven first
+    /// (`StructureCatalogImportTests.The_eight_shipped_rows_are_byte_identical_through_the_corpus`),
+    /// per the spec's own "order matters" instruction — prove identity, then delete, never the
+    /// reverse. The real server wires this in `Program.cs` from the committed corpus on disk
+    /// (`data/seed/structures/`, with a matching `.csproj` copy rule so a published build finds it
+    /// next to the exe); every test project that reaches this catalog — directly or transitively —
+    /// wires the identical call in its own `StructureCatalogTestBootstrap.cs`. `Configure(null)` (or
+    /// never calling this at all) is a genuine startup error now, not a silent fallback — loud over
+    /// silent, matching every other catalog rule in this program.</para>
     /// </summary>
     public static void Configure(FusionRpg.Core.World.StructureSeed.StructureCorpus? corpus)
     {
@@ -220,31 +228,22 @@ public static class StructureCatalog
 
     public static IReadOnlyList<StructureDef> All => _all ??= Validate(BuildRows());
 
-    /// <summary>
-    /// The four C# <see cref="Seed"/> rows are the FALLBACK, not the source (spec §1): a row the
-    /// configured corpus does not cover (or no corpus configured at all) still comes from `Seed`.
-    /// Once every `Seed` id has a real, catalog-loadable corpus row — proven by the byte-identity
-    /// tests — the `Seed` literal itself is deleted (task 25.4), per the spec's own "order matters"
-    /// instruction (prove identity, then delete, never the reverse).
-    /// </summary>
     static IReadOnlyList<StructureDef> BuildRows()
     {
-        if (_corpus is null) return Seed;
+        if (_corpus is null)
+            throw new InvalidOperationException(
+                "StructureCatalog.Configure was never called — call it from the composition root " +
+                "(Program.cs) or a StructureCatalogTestBootstrap module initializer before reading " +
+                "StructureCatalog.All/Get/IsKnown.");
 
-        var fromCorpus = new List<StructureDef>();
-        var corpusIds = new HashSet<string>(StringComparer.Ordinal);
+        var rows = new List<StructureDef>();
         foreach (var row in _corpus.Rows)
         {
             if (!row.IsCatalogLoadable) continue; // identity-registered only — structure-planner's job
-            corpusIds.Add(row.StructureId);
-            fromCorpus.Add(ToStructureDef(row));
+            rows.Add(ToStructureDef(row));
         }
 
-        foreach (var seedRow in Seed)
-            if (!corpusIds.Contains(seedRow.StructureId))
-                fromCorpus.Add(seedRow);
-
-        return fromCorpus;
+        return rows;
     }
 
     /// <summary>The one place a corpus row's ordinals/magnitudes become a real `StructureDef` —
@@ -290,135 +289,6 @@ public static class StructureCatalog
         ByIdMap().TryGetValue(structureId, out var def)
             ? def
             : throw new ArgumentException($"Unknown structure id '{structureId}'.");
-
-    // base-defense `siege-obstacles` §7: every shipped row below predates the acquisition-path
-    // concept, so each is retrofitted with `Built` — the least controversial, most literal reading of
-    // "a legion action constructs this on the spot", which is exactly how every one of these seven
-    // structures has always come to exist in this repo's own shipped mechanics (no summon/laboured/
-    // assembled path exists anywhere for loam content today). This is what keeps `AcquisitionPaths`
-    // validated non-empty for EVERY structure, obstacle or not, without breaking startup.
-    static readonly IReadOnlyList<AcquisitionPath> BuiltOnly = new[] { AcquisitionPath.Built };
-
-    static readonly IReadOnlyList<StructureDef> Seed = new StructureDef[]
-    {
-        new()
-        {
-            StructureId = "loam-source-placeholder",
-            Name = "Loam Source (placeholder)",
-            Kind = StructureKind.LoamSource,
-            RequiredSlotKind = SlotKind.Rootbed,
-            Cost = 0,
-            YieldMultiplierMilli = 1000,
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            StructureId = "well",
-            Name = "Well",
-            Kind = StructureKind.LoamSource,
-            RequiredSlotKind = SlotKind.Rootbed,
-            Cost = Loam.LoamPolicy.WellCost,
-            YieldMultiplierMilli = Loam.LoamPolicy.WellYieldMultiplierMilli,
-            BuildTurns = Loam.LoamPolicy.WellBuildTurns,
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            StructureId = "waystation",
-            Name = "Waystation",
-            Kind = StructureKind.LoamSource,
-            RequiredSlotKind = SlotKind.Seat,
-            Cost = Loam.LoamPolicy.WaystationCost,
-            // A Seat's own base yield is already zero, so the multiplier is irrelevant here —
-            // 1000 (unchanged) rather than a special case in LoamProduction's formula.
-            YieldMultiplierMilli = 1000,
-            BuildTurns = Loam.LoamPolicy.WaystationBuildTurns,
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            StructureId = "granary",
-            Name = "Granary",
-            Kind = StructureKind.Storage,
-            RequiredSlotKind = SlotKind.Wildland,
-            Cost = Loam.LoamPolicy.GranaryCost,
-            // Unused for Storage-kind structures — a granary does not produce, it raises capacity.
-            YieldMultiplierMilli = 1000,
-            BuildTurns = Loam.LoamPolicy.GranaryBuildTurns,
-            CapacityBonus = Loam.LoamPolicy.GranaryCapacityBonus,
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            StructureId = "soul-conduit",
-            Name = "Soul Conduit",
-            Kind = StructureKind.Yield,
-            RequiredSlotKind = SlotKind.EssenceDeposit,
-            Cost = Loam.LoamPolicy.SoulConduitCost,
-            // Unused for Yield-kind structures — the flat field below is what this one produces.
-            YieldMultiplierMilli = 1000,
-            BuildTurns = Loam.LoamPolicy.SoulConduitBuildTurns,
-            FlatYieldPerTurn = Loam.LoamPolicy.SoulConduitFlatYieldPerTurn,
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            StructureId = "extractor",
-            Name = "Extractor",
-            Kind = StructureKind.Yield,
-            RequiredSlotKind = SlotKind.ShardVein,
-            Cost = Loam.LoamPolicy.ExtractorCost,
-            YieldMultiplierMilli = 1000,
-            BuildTurns = Loam.LoamPolicy.ExtractorBuildTurns,
-            FlatYieldPerTurn = Loam.LoamPolicy.ExtractorFlatYieldPerTurn,
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            StructureId = "hatchery",
-            Name = "Hatchery",
-            Kind = StructureKind.Yield,
-            RequiredSlotKind = SlotKind.Lair,
-            Cost = Loam.LoamPolicy.HatcheryCost,
-            // world-map W56: read by GrowthPhases as the sector's own lair multiplier, through
-            // RecruitPolicy.PulseFor's existing `lairMultiplierMilli` parameter — never a second
-            // formula. Unlike every other row here, this one's own YieldMultiplierMilli is real.
-            YieldMultiplierMilli = Loam.LoamPolicy.HatcheryYieldMultiplierMilli,
-            BuildTurns = Loam.LoamPolicy.HatcheryBuildTurns,
-            // FlatYieldPerTurn unset (0) — a hatchery produces more recruits, not more loam.
-            AcquisitionPaths = BuiltOnly
-        },
-        new()
-        {
-            // base-defense `siege-construction` §5 / `siege-obstacles` §5.18 (corrected 2026-09-06):
-            // dug, piled, felled — stamina and hunger, no stockpile (Laboured's own cost, authored on
-            // the ACTION that builds it, never here — see spec-siege-construction.md §5's own "the
-            // cost source differs, never the atom's/structure's concern"). Tier 1, the ladder's lowest
-            // rung: a dug ditch is the most basic obstacle a legion can raise, not a fortified wall.
-            // The FIRST obstacle row this catalog has ever shipped — `siege-obstacles`' own "closed"
-            // status was the mechanism (ObstacleKind, LineOfFire, cover math), not content.
-            //
-            // Deliberately buildable via ALL FOUR acquisition paths (15.3b, 2026-09-06): a fuller
-            // siege-content roster (Trench/Wire/Mine/Emplacement, and separate Assembled/Summoned/Built
-            // structures) is `structure-corpus`'s (module 24) own job, not this task's — inventing three
-            // more obstacle rows here would be unrequested content, not mechanism-proving. One real,
-            // shipped structure exercising every path proves the `structure.place` mechanism end to end
-            // without guessing at a roster nobody has designed yet.
-            StructureId = "moat",
-            Name = "Moat",
-            Kind = StructureKind.Obstacle,
-            RequiredSlotKind = SlotKind.Wildland,
-            Cost = 0, // never built peacetime; every siege-time path spends its own action cost, not loam
-            BuildTurns = SiegeTuningPolicy.Construction.LabourMoatTurns,
-            MaterialTier = 1,
-            BlocksMovement = true,
-            BlocksLineOfFire = true,
-            Obstacle = ObstacleKind.Rampart,
-            ConstructRubbleCost = SiegeTuningPolicy.Construction.RefineRubblePerIronwork, // a real, non-zero Built cost — reuses an already-tunable number rather than inventing a fresh one
-            ConstructIronworkCost = 1,
-            AcquisitionPaths = new[] { AcquisitionPath.Built, AcquisitionPath.Assembled, AcquisitionPath.Summoned, AcquisitionPath.Laboured }
-        }
-    };
 
     static Dictionary<string, StructureDef> ByIdMap()
     {

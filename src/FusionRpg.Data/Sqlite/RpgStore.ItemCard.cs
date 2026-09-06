@@ -16,7 +16,14 @@ namespace FusionRpg.Data;
 /// own evaluator input; <see cref="NameKey"/> is what §2.4 lets the cell show instead of the insert's
 /// container id.
 /// </summary>
-public readonly record struct CardInsertLookup(InsertDef Def, string NameKey);
+/// <param name="Name">
+/// item-content `item-naming` (T4): the gem corpus's own AUTHORED English name (<c>"Ember Shard"</c>),
+/// read and no longer dropped — the same class of defect T2 fixed in <c>ItemBaseTypeCorpus</c>.
+/// <c>content/display/en.json</c> carries no <c>gem.*</c> row, so the key alone left every insert
+/// showing a key fragment where a name belongs. Additive with a default, so no existing construction
+/// site changes.
+/// </param>
+public readonly record struct CardInsertLookup(InsertDef Def, string NameKey, string Name = "");
 
 /// <summary>
 /// The facts an item card needs that <b>no shipped table carries</b>, supplied by the caller.

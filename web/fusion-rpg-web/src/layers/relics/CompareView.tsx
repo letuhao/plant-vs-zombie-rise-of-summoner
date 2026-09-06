@@ -1,3 +1,4 @@
+import { channelLabel } from "@/contract/adapt";
 import type { Pending } from "@/contract/pending";
 import type {
   ChannelDeltaView,
@@ -56,7 +57,12 @@ function groupHeading(unit: UnitClass | null): string {
 function DeltaRow({ delta }: { delta: ChannelDeltaView }) {
   return (
     <p className="flex items-baseline gap-2 text-sm" data-testid={`compare-delta-${delta.channel}`}>
-      <span className="min-w-0 flex-1 truncate text-muted">{delta.channel}</span>
+      {/* item-content `item-naming` (T3): the channel's own words, not its registered id. The id is
+        * still on the row — as the test id and as the label's `title` — so a debug read loses
+        * nothing, but a player never reads `combat.crit.rate.fire` in a label slot. */}
+      <span className="min-w-0 flex-1 truncate text-muted" title={delta.channel}>
+        {channelLabel(delta.channel)}
+      </span>
       <span className="font-mono text-muted">{formatMagnitude(delta.incumbent)}</span>
       <span aria-hidden="true" className="text-muted">
         →

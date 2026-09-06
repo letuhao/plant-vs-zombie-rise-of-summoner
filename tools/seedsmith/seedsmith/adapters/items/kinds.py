@@ -56,8 +56,15 @@ KINDS: "tuple[KindSpec, ...]" = (
     _defined("unique", "uniques", "uniques",
             required={"frame", "baseType", "rarity", "fixedAtoms", "counterPressure", "tags",
                      "powerAxis"},
+            # D4.29 (spec-unique-pipeline.md §1): `reason` and `actionGrantRef` amend this
+            # KindSpec -- both are in the spec's own field-ownership table (AUTHORED and
+            # VALIDATED respectively) but were absent from every prior port of this KindSpec.
+            # Optional, not required: zero of the real 144-corpus's sampled entries use either
+            # field, and `actionGrantRef`'s own "none legal" reading (spec §1) means absence is
+            # itself a legal value, never a missing-field defect.
             extra={"frame", "baseType", "rarity", "fixedAtoms", "varianceSlot",
-                   "counterPressure", "theme", "themeKey", "acquisition", "powerAxis"},
+                   "counterPressure", "theme", "themeKey", "acquisition", "powerAxis",
+                   "reason", "actionGrantRef"},
             refs={"baseType"}),
     _defined("set", "sets", "sets",
             required={"themeKey", "members", "thresholds"},

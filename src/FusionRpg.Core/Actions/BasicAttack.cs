@@ -142,6 +142,16 @@ public static partial class BattleEngine
         if (bodyguard != null && !IsCcLocked(state.Status, bodyguard.Setup.Key, now))
             target = bodyguard;
 
+        // A25 (battle-runner-path-integration): the runner runs BEFORE the bag, not after --
+        // EffectBag.OnEvent calls Funnel.Flush() inside itself, so a dispatch enqueued afterwards
+        // would sit in the mailbox until the next event (spec-atom-runner.md's own documented trap,
+        // already avoided once by SimEffectHost.OnEvent, mirrored here). A no-op (`Runner` null) for
+        // every battle with no runner-path atom bound -- byte-identical to today.
+        state.Host.Runner?.OnEvent(new RunnerEvent(
+            TriggerIndex.Ordinal(AtomTriggers.OnActivate),
+            attacker.Setup.Key, target.Setup.Key,
+            state.FactsOf(attacker.Setup.Key), state.FactsOf(target.Setup.Key)));
+
         // A18b (spec-on-activate-trigger.md §2): fires once per resolved (non-Break) intent,
         // independent of hit/miss -- a cast succeeds even if the attack roll misses -- at the
         // post-redirect target. A no-op today for every actor without a bound OnActivate grant
@@ -212,6 +222,13 @@ public static partial class BattleEngine
 
         if (!breakdown.Hit) return new AttackStep(AttackStepOutcome.Continue, null, 0);
 
+        // A25 (battle-runner-path-integration): same "runner before the bag" ordering as the
+        // OnActivate site above.
+        state.Host.Runner?.OnEvent(new RunnerEvent(
+            TriggerIndex.Ordinal(AtomTriggers.OnDamageDealt),
+            attacker.Setup.Key, target.Setup.Key,
+            state.FactsOf(attacker.Setup.Key), state.FactsOf(target.Setup.Key)));
+
         // A18c (spec-battle-resource-shield-grants.md §2): resource.delta's existing shipped content
         // (fx.poison_on_hit, fx.freeze_on_hit, ...) is OnDamageDealt-triggered, not OnActivate -- a
         // skill's on-hit rider fires when the hit actually lands, mirroring existing content exactly.
@@ -234,8 +251,22 @@ public static partial class BattleEngine
         // arming site, because CooldownLedger stores an absolute tick. An envelope with no
         // CooldownChannel reads nothing and arms at base ticks; that is the neutral path and it stays
         // allocation-free. Inert for Class.None, as before.
-        state.Cooldowns.Start(attacker.Setup.Key, envelope, nowTick,
-            SkillCooldownReductionPm(attacker, envelope));
+        //
+        // Real, latent bug found and fixed 2026-09-07 (cooldown-arming-double-call, named 2026-09-06):
+        // this call was UNCONDITIONAL, with no `StartsAt` check at all -- independent of, and
+        // redundant with, ALL THREE of `ActionRunner`'s own StartsAt-gated arming sites
+        // (`ActionRunner.cs:236` Commit, `:361` Resolve, `:289` RecoveryEnd). Since
+        // `CooldownLedger.Start` is a plain overwrite, this call firing unconditionally after
+        // `ActionRunner.TryCommit`'s own `StartsAt==Commit` arm (or before `OnRecoveryDue`'s own
+        // `StartsAt==RecoveryEnd` arm) would silently re-arm at the WRONG tick the moment content ever
+        // authored `StartsAt: Commit`/`RecoveryEnd` -- latent only because no shipped content does yet.
+        // Gated behind `StartsAt == Resolve` (the enum's own declared default,
+        // `ActionEnvelope.cs:110`), matching `ActionRunner`'s own three-way split exactly and provably
+        // byte-identical for every envelope that does not override it, which is every one that exists
+        // today.
+        if (envelope.StartsAt == CooldownStart.Resolve)
+            state.Cooldowns.Start(attacker.Setup.Key, envelope, nowTick,
+                SkillCooldownReductionPm(attacker, envelope));
         return new AttackStep(AttackStepOutcome.Proceed, target, signedDelta);
     }
 
@@ -296,5 +327,7 @@ public static partial class BattleEngine
         public GridPos? PositionOf(string actorKey) => _inner.PositionOf(actorKey);
         public EntityFacts FactsOf(string actorKey) => _inner.FactsOf(actorKey);
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) => _inner.HeldActionsOf(actorKey);
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => _inner.DerivedOf(actorKey);
+        public string? GarrisonedStructureKeyOf(string actorKey) => _inner.GarrisonedStructureKeyOf(actorKey);
     }
 }

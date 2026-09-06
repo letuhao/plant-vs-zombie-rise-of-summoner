@@ -898,3 +898,39 @@ non-Attack content — it can build in parallel with either, but has no reason t
 - **⛔ Checkpoint K — a non-Attack action stops borrowing the attack roll.** A22: a real Support/
   Defense/Movement/Status action neither rolls to hit nor gates its cooldown on landing.
 
+## 15. Reopening 2026-09-06 (same day) — A24, promoting `container-effect-resolver-not-wired`
+
+Checkpoint J's own closing note named a severe gap and deferred it in the same breath — a Stop-hook
+challenge correctly rejected that as self-authorized scope reduction (unlike A9/A10/seedsmith, which
+predate this program). Investigated further: `IContainerEffectResolver` (A18a) and
+`BattleRunState.BindContainers` are correctly built; no production caller ever supplied a real
+resolver. The investigation found three layers: (1) no production resolver exists — real, bounded,
+buildable, closes the gap for `Compilability.AtomPath.Compiled` content; (2) `BattleEngine.Resolve`
+has no execution mechanism for `AtomPath.Runner` atoms at all (zero hits for `RunnerEntry`/`AtomRunner`
+anywhere under `Battle/`) — separate, larger, not action-specific; (3) both real seed atom families
+are Runner-path only, so (1) alone does not make the 3 real imported actions playable — proven, not
+assumed. Full detail: [spec-container-effect-resolver-production.md](action/spec-container-effect-resolver-production.md).
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A24** | `container-effect-resolver-production` | A real, `RpgStore`-backed `IContainerEffectResolver` wired into all three `WebMatchService.Resolve` call sites | A18a, A21 (both built) |
+
+Tasks: `action-todo.md` §15 (T61.1-T61.4, Checkpoint L).
+
+- **✅ Checkpoint L — a real resolver reaches every WebMatchService battle, for the content class it
+  covers — CLOSED 2026-09-06.** A24: a Compiled-path-eligible held action binds AND fires in a real
+  battle; the Runner-path gap (`battle-runner-path-not-wired`) named with the same rigor, then closed
+  by A25 (§16) the same continuous session.
+
+**A25, built and verified the same continuous session (§16)**: `battle-runner-path-integration` wires
+`AtomRunner` (E15, already fully built) into `BasicAttack.cs`'s two existing `Bag.OnEvent` call sites
+(`:149` OnActivate, `:221` OnDamageDealt) — the ONLY two trigger-firing points in the whole battle
+engine. `BattleEffectHost.UseRunner` mirrors `SimEffectHost.UseRunner`; `BattleRunState`/
+`BattleEngine.Resolve` gained `runnerBindings`/`containersWithRunnerCoverage` optional params. Two real
+defects found and fixed while building, not predicted: (1) `Host.Clock` is frozen — `nowMs` must be
+the caller's own `NowTick`; (2) `BindContainers`' own "resolved to nothing" throw had no way to exempt
+a container that is legitimately 100%-Runner-path. Empirically confirmed remaining boundary: a
+dispatched runner atom needs a registered `EffectDef` — `spec-atom-runner.md`'s own already-named,
+separate E19 scope, proven via a real thrown exception naming the exact atom id, not assumed. Full
+trace: `action-plan.md` §4b, `action-todo.md` §16.
+

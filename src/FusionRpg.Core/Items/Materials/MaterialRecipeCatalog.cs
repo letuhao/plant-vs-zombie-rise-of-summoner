@@ -39,6 +39,13 @@ public readonly record struct AuthoredCostLine(string MaterialId, string CostBan
 
 /// <summary>One recipe as authored. `outputRef` is absent on the twenty `mutation` recipes, whose
 /// output is the owning module's mutation rather than a new row.</summary>
+/// <param name="Name">
+/// item-content `item-naming` (T4): the recipe's AUTHORED English name (<c>"Forge: Cloth Armor"</c>),
+/// read and no longer dropped. All 30 shipped entries carry one, and until 2026-09-06 this loader
+/// discarded it — the same class of defect T2 fixed in <c>ItemBaseTypeCorpus</c> — which is why the
+/// craft bench could only ask the player to TYPE <c>recipe.014</c>. Last positional parameter with a
+/// default so every existing construction site is unchanged.
+/// </param>
 public sealed record MaterialRecipe(
     string RecipeId,
     CraftOperation Operation,
@@ -47,7 +54,8 @@ public sealed record MaterialRecipe(
     int OutputQty,
     string Frame,
     string? SoulsCostBand,
-    IReadOnlyList<AuthoredCostLine> CostLines);
+    IReadOnlyList<AuthoredCostLine> CostLines,
+    string Name = "");
 
 /// <summary>A recipe the corpus authors that this build cannot resolve, named rather than dropped.</summary>
 public sealed record RecipeRefusal(string RecipeId, string Rule, string Detail)
@@ -240,7 +248,12 @@ public sealed class MaterialRecipeCatalog
                     e.TryGetProperty("outputQty", out var oq) && oq.ValueKind == JsonValueKind.Number ? oq.GetInt32() : 1,
                     Str(e, "frame"),
                     soulsBand,
-                    lines);
+                    lines,
+                    // item-content T4. `""` for an entry with no authored name; the read route then
+                    // says so rather than offering the id as if it were the name.
+                    e.TryGetProperty("name", out var nm) && nm.ValueKind == JsonValueKind.String
+                        ? nm.GetString() ?? ""
+                        : "");
 
                 var leak = StrictLossLeak(recipe, tuning);
                 if (leak != null)

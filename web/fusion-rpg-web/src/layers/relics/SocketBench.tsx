@@ -2,10 +2,10 @@ import { useMemo, useState } from "react";
 import { adaptCombinations, adaptWorkbenchOutcome } from "@/contract/adapt";
 import type { CombinationView, SocketCellView } from "@/contract/types";
 import { newCorrelationId } from "@/lib/bus/demons";
-import { useItemCombinations, useSocketAdd, useSocketInsert } from "@/lib/bus/items";
+import { useHeldInserts, useItemCombinations, useSocketAdd, useSocketInsert } from "@/lib/bus/items";
 import { cn } from "@/lib/cn";
 import { DialogShell } from "@/shell/DialogShell";
-import { Banner, Button, TextInput } from "@/ui";
+import { Banner, Button, Field, Select } from "@/ui";
 import { EmptyState } from "@/ui/EmptyState";
 import { formatMagnitude } from "@/i18n/magnitude";
 import { RecipeField, WorkbenchRefusal, WorkbenchResult, useWorkbenchFeedback } from "./Workbench";
@@ -55,6 +55,14 @@ function remedy(combo: CombinationView): string {
   return `needs ${formatMagnitude({ unit: "count", value: count })} more: ${missing.join(", ")}`;
 }
 
+/** The four honest states of the held-insert list, as four different sentences. */
+function insertHint(loading: boolean, errored: boolean, count: number): string {
+  if (loading) return "Reading what you're holding…";
+  if (errored) return "Couldn't read what inserts you're holding.";
+  if (count === 0) return "You aren't holding any inserts yet.";
+  return "It goes in the first open socket. Which socket is not yours to pick yet.";
+}
+
 function ComboRow({ combo }: { combo: CombinationView }) {
   const active = combo.state === "active";
   return (
@@ -64,7 +72,10 @@ function ComboRow({ combo }: { combo: CombinationView }) {
       data-state={combo.state}
     >
       <span className="flex items-baseline justify-between gap-2">
-        <span className="truncate font-semibold">{combo.comboId}</span>
+        {/* item-content `item-naming` (T3) — the combination's own words, not its id. */}
+        <span className="truncate font-semibold" title={combo.comboId}>
+          {combo.title}
+        </span>
         <span className="text-2xs uppercase tracking-wide">{combo.shape}</span>
       </span>
       {active ? (
@@ -99,6 +110,9 @@ export function SocketBench({
 
   const active = combinations.filter((c) => c.state === "active");
   const oneAway = combinations.filter((c) => c.state === "one-away");
+
+  const held = useHeldInserts(playerId);
+  const inserts = held.data ?? [];
 
   const [boreRecipe, setBoreRecipe] = useState("");
   const [insertRecipe, setInsertRecipe] = useState("");
@@ -209,7 +223,8 @@ export function SocketBench({
             <p className="text-2xs font-bold uppercase tracking-wide text-muted">Open a socket</p>
             <RecipeField
               label="Bore recipe"
-              hint="No route lists craft recipes yet, so name the one you want — a wrong id comes back named."
+              hint="Pick the bore the bench should price this by."
+              operation="bore"
               value={boreRecipe}
               onChange={setBoreRecipe}
               testId="bench-bore-recipe"
@@ -223,7 +238,7 @@ export function SocketBench({
                   busy
                     ? "The bench is busy"
                     : boreRecipe.trim().length === 0
-                      ? "Name a bore recipe first"
+                      ? "Pick a bore recipe first"
                       : undefined
                 }
                 onClick={() =>
@@ -248,20 +263,36 @@ export function SocketBench({
             <RecipeField
               label="Socket recipe"
               hint="The insert has to be one you already hold — it leaves your stock in the same write."
+              operation="socket"
               value={insertRecipe}
               onChange={setInsertRecipe}
               testId="bench-insert-recipe"
             />
-            <TextInput
-              data-testid="bench-insert-container"
-              value={insertContainerId}
-              placeholder="insert you hold"
-              aria-label="Insert to set"
-              onChange={(e) => setInsertContainerId(e.target.value)}
-            />
-            <p className="text-2xs text-muted">
-              It goes in the first open socket. Which socket is not yours to pick yet.
-            </p>
+            {/* ⭐ item-content `item-naming` (T4): the inserts this player actually holds, by their
+              * authored names, over `GET /api/items/workbench/inserts/{playerId}`. It used to be a
+              * free-text box asking for a container id, which meant a player had to know
+              * `gem.g1-001` existed before they could socket it. */}
+            <Field label="Insert to set" hint={insertHint(held.isLoading, held.isError, inserts.length)}>
+              <Select
+                data-testid="bench-insert-container"
+                aria-label="Insert to set"
+                value={insertContainerId}
+                disabled={inserts.length === 0}
+                title={inserts.length === 0 ? insertHint(held.isLoading, held.isError, 0) : undefined}
+                onChange={(e) => setInsertContainerId(e.target.value)}
+              >
+                <option value="">Pick one…</option>
+                {inserts.map((i) => (
+                  // The container id is the VALUE; a gem the corpus does not carry says so rather
+                  // than showing `gem.g1-001` where its name belongs.
+                  <option key={i.containerId} value={i.containerId}>
+                    {(i.name.length > 0 ? i.name : "Unnamed insert") +
+                      (i.element.length > 0 ? ` · ${i.element}` : "") +
+                      ` · ${i.qty} held`}
+                  </option>
+                ))}
+              </Select>
+            </Field>
             <div>
               <Button
                 size="sm"
@@ -271,9 +302,9 @@ export function SocketBench({
                   busy
                     ? "The bench is busy"
                     : insertRecipe.trim().length === 0
-                      ? "Name a socket recipe first"
+                      ? "Pick a socket recipe first"
                       : insertContainerId.trim().length === 0
-                        ? "Name the insert you want to set"
+                        ? "Pick the insert you want to set"
                         : undefined
                 }
                 onClick={() =>

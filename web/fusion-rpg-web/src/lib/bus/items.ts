@@ -43,6 +43,17 @@ export type ArmouryRowDto = {
    * them are inert on the lawn."
    */
   battleOnly: boolean;
+  /**
+   * item-content `item-naming` (T3): the base type's own AUTHORED name for this container
+   * ("Card-Proof Charm"), read through the same corpus the card uses. `""` — or absent, on a server
+   * older than the field — means this build has no corpus row for the container, and the compact
+   * line says so rather than printing the container id where a name belongs.
+   *
+   * ⚠ It is the BASE TYPE's name, not module 8's composed one: composing the affix name needs a
+   * full card render per row and the armoury page is up to 200 of them. Open the item for the whole
+   * name.
+   */
+  containerName?: string;
 };
 
 export type ArmouryPageDto = {
@@ -210,8 +221,39 @@ export type ItemCompareDto = {
   incomparableReasonKey: string | null;
 };
 
+/**
+ * One craft recipe as the picker offers it — item-content `item-naming` (T4), over
+ * `GET /api/items/workbench/recipes`.
+ *
+ * ⛔ **The list a picker offers is the list the executor prices against.** The route reads
+ * `ItemWorkbench.Recipes` itself, so a row offered here can never be one the very next POST refuses
+ * with `material.recipe-unknown`.
+ */
+export type WorkbenchRecipeDto = {
+  recipeId: string;
+  /** The corpus's authored English name ("Forge: Cloth Armor"). `""` if the entry authors none. */
+  name: string;
+  /** `forge` | `upcycle` | `forge-gem` | `bore` | `imbue` | `socket` | `elevate` | `temper` | `reroll-one` | `reroll-all`. */
+  operation: string;
+  frame: string;
+  outputKind: string;
+  outputRef: string | null;
+};
+
+/** One insert the player actually holds, named — `GET /api/items/workbench/inserts/{playerId}`. */
+export type WorkbenchInsertDto = {
+  containerId: string;
+  /** The gem corpus's authored name ("Ember Shard"). `""` when the corpus has no row. */
+  name: string;
+  /** `""` is a genuinely element-free insert, not an absent read. */
+  element: string;
+  qty: number;
+};
+
 export const itemKeys = {
   surfaces: (playerId: string) => ["itemSurfaces", playerId] as const,
+  workbenchRecipes: (operation: string) => ["workbenchRecipes", operation || "all"] as const,
+  heldInserts: (playerId: string) => ["workbenchInserts", playerId] as const,
   armoury: (playerId: string, after: string | null) => ["itemArmoury", playerId, after ?? "head"] as const,
   combinations: (instanceId: string, playerId: string) => ["itemCombinations", instanceId, playerId] as const,
   assignments: (specimenId: string) => ["itemAssignments", specimenId] as const,
@@ -323,13 +365,56 @@ export function useItemCombinations(instanceId: string | null | undefined, playe
   });
 }
 
+/**
+ * ⭐ The craft recipes, by their real names — item-content `item-naming` T4.
+ *
+ * ⏸ Until 2026-09-06 no route served these 30 rows at all, so both benches asked the player to TYPE
+ * `recipe.014`. `operation` narrows the list to the verb the control actually runs, so a temper
+ * picker never offers a bore recipe the executor would refuse.
+ *
+ * The corpus is content that changes only on redeploy, so it is cached for the session rather than
+ * re-read per dialog open.
+ */
+export function useWorkbenchRecipes(operation?: string) {
+  const op = operation?.trim() || "";
+  return useQuery({
+    queryKey: itemKeys.workbenchRecipes(op),
+    queryFn: () =>
+      getJson<WorkbenchRecipeDto[]>(
+        `/api/items/workbench/recipes${op.length > 0 ? `?operation=${encodeURIComponent(op)}` : ""}`
+      ),
+    staleTime: Infinity,
+    retry: false
+  });
+}
+
+/** The inserts this player holds, named — so "set an insert" is a pick rather than a typed id. */
+export function useHeldInserts(playerId: number | string) {
+  const pid = String(playerId ?? "").trim();
+  return useQuery({
+    queryKey: itemKeys.heldInserts(pid),
+    queryFn: () =>
+      getJson<WorkbenchInsertDto[]>(`/api/items/workbench/inserts/${encodeURIComponent(pid)}`),
+    enabled: pid.length > 0 && pid !== "0",
+    staleTime: 5_000,
+    retry: false
+  });
+}
+
 // ---- The workbench (item modules 14/15/16 — `WorkbenchEndpoints.cs`) ---------------------------
 
 /** One resolved cost or yield line, as the server priced it. */
 export type WorkbenchCostDto = { class: string; materialId: string; qty: number };
 
 /** One socket after the operation. `insert` is `null` for an empty socket. */
-export type WorkbenchSocketDto = { index: number; affinity: string; crafted: boolean; insert: string | null };
+export type WorkbenchSocketDto = {
+  index: number;
+  affinity: string;
+  crafted: boolean;
+  insert: string | null;
+  /** item-content T4: the gem corpus's authored name for the insert. `""` when there is none. */
+  insertName?: string;
+};
 
 /**
  * `WorkbenchOutcomeDto` — what one operation did, in the one shape every verb returns.

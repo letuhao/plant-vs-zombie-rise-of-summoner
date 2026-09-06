@@ -11,6 +11,7 @@ import {
 } from "@/lib/bus/items";
 import {
   PLAYER_PENDING,
+  UNNAMED_ITEM,
   adaptArmouryItem,
   adaptArmouryPage,
   adaptCombinations,
@@ -19,6 +20,7 @@ import {
   adaptItemCompare,
   adaptRelic
 } from "@/contract/adapt";
+import { useSpeciesIndex } from "@/lib/bus/demons";
 import { absent, known, pendingWithReason } from "@/contract/pending";
 import type { ArmouryRowView, ItemRoleId, PieceSetDisclosureView } from "@/contract/types";
 
@@ -140,6 +142,27 @@ export function RelicsLayer({
 
   const actorsQuery = useUniqueActors(playerId);
   const actors = actorsQuery.data?.items ?? [];
+
+  /**
+   * ⛔ **The equip target is named, never a GUID** (item-content `item-naming` T3). A unique actor
+   * carries `side` + `typeId` and no name of its own (`adaptActor` marks `displayName` pending, and
+   * no route serves one), so the real name comes from the demon species catalog, which authors one
+   * per (side, gameTypeId) and is the same index the demons, fusion and expedition pages already
+   * read. React Query dedupes it — the catalog is fetched once per session.
+   *
+   * A type the catalog does not carry falls back to `plant #37`, the SAME shape
+   * `AlmanacDumpPage`/`IconDumpPage` already use for an unnamed type — a type number is not the
+   * instance GUID this task removes, and inventing an English name for an unknown type would be
+   * worse than saying which type it is.
+   */
+  const speciesIndex = useSpeciesIndex();
+  const speciesNameByType = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const entry of speciesIndex.values()) map.set(`${entry.side}:${entry.gameTypeId}`, entry.name);
+    return map;
+  }, [speciesIndex]);
+  const actorName = (side: string, typeId: number) =>
+    speciesNameByType.get(`${side}:${typeId}`) ?? `${side} #${typeId}`;
   useEffect(() => {
     if (!actorId && actors.length > 0) setActorId(actors[0]!.instanceId);
   }, [actorId, actors]);
@@ -164,10 +187,28 @@ export function RelicsLayer({
   // The armoury page, for instance → container so a worn item can be named. React Query dedupes
   // this against `ArmouryList`'s own call — same key, one request.
   const armouryQuery = useArmoury(playerId);
-  const containerOfInstance = useMemo(() => {
-    const page = armouryQuery.data ? adaptArmouryPage(armouryQuery.data) : null;
-    return new Map((page?.rows ?? []).map((r) => [r.instanceId, r.containerId]));
-  }, [armouryQuery.data]);
+  const armouryRows = useMemo(
+    () => (armouryQuery.data ? adaptArmouryPage(armouryQuery.data).rows : []),
+    [armouryQuery.data]
+  );
+  const containerOfInstance = useMemo(
+    () => new Map(armouryRows.map((r) => [r.instanceId, r.containerId])),
+    [armouryRows]
+  );
+  /**
+   * item-content `item-naming` (T3): the base type's own authored name per container, off the
+   * armoury row. The relic catalog covers only the four seeded relics; every real rolled item's
+   * noun comes from here, and neither map ever answers with the container id.
+   */
+  const baseNameOfContainer = useMemo(
+    () =>
+      new Map(
+        armouryRows
+          .filter((r): r is typeof r & { containerName: string } => r.containerName !== null)
+          .map((r) => [r.containerId, r.containerName])
+      ),
+    [armouryRows]
+  );
 
   useEffect(() => {
     if (!open) {
@@ -185,11 +226,17 @@ export function RelicsLayer({
 
   const selectedActor = actors.find((a) => a.instanceId === actorId);
 
-  /** The seeded catalog's own name where it knows the container; the id is the honest fallback. */
+  /**
+   * ⛔ **Never the container id** (item-content `item-naming` T3). Three real sources in order — the
+   * seeded relic catalog, then the base type's own authored name off the armoury row (T2's field),
+   * then a sentence saying this build has no name for it. `item.plate-helm.fused` in a name slot is
+   * the defect T3 removes, and a prettified id would still be one.
+   */
   const relicNames = useMemo(() => new Map(relics.map((r) => [r.id, r.name])), [relics]);
   const nameFor = useMemo(
-    () => (containerId: string) => relicNames.get(containerId) ?? containerId,
-    [relicNames]
+    () => (containerId: string) =>
+      relicNames.get(containerId) ?? baseNameOfContainer.get(containerId) ?? UNNAMED_ITEM,
+    [relicNames, baseNameOfContainer]
   );
 
   /**
@@ -216,7 +263,8 @@ export function RelicsLayer({
         return {
           slot: s.slot,
           instanceId: s.itemId,
-          itemName: view?.header.name ?? s.itemId,
+          // T3: a relic the catalog no longer carries says so; its id is not its name.
+          itemName: view?.header.name ?? UNNAMED_ITEM,
           rarity: view?.header.rarity ?? null,
           source: "relic" as const
         };
@@ -291,7 +339,9 @@ export function RelicsLayer({
         title="Relics"
         subtitle={
           selectedActor
-            ? `Equipping to #${selectedActor.instanceId.slice(0, 6)} · ${equippedSlots.length} of 3 slots used`
+            ? // Same rule as the dropdown: the species' own name, never a slice of the GUID. A
+              // shortened id is still an id (item-content `item-naming` T3).
+              `Equipping to ${actorName(selectedActor.side, selectedActor.typeId)} · ${equippedSlots.length} of 3 slots used`
             : "Held"
         }
         testId="relics-layer"
@@ -371,7 +421,7 @@ export function RelicsLayer({
               >
                 {actors.map((a) => (
                   <option key={a.instanceId} value={a.instanceId}>
-                    {a.side} · Lv {a.level} · {a.instanceId}
+                    {actorName(a.side, a.typeId)} · Lv {a.level}
                   </option>
                 ))}
               </Select>

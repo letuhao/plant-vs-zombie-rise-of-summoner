@@ -30,8 +30,12 @@ public class DemonLawnDeployCommanderRefusalTests : IDisposable
         try { Directory.Delete(_dir, true); } catch { /* temp */ }
     }
 
+    // DeployMode != HypnoAlly: this file tests Patron refusal (T1.1), a concern unrelated to
+    // DeployMode (T1.4) — excluding HypnoAlly keeps it robust to which species happens to sort first,
+    // rather than incidentally also exercising T1.4's own deploy.hypno-ally-not-implemented refusal.
     static readonly DemonSpeciesDef Species = DemonSpeciesCatalog.All
-        .First(s => s.Side == "zombie" && s.Acquisition != DemonAcquisition.CaptureOnly);
+        .First(s => s.Side == "zombie" && s.Acquisition != DemonAcquisition.CaptureOnly
+            && s.DeployMode != DemonDeployMode.HypnoAlly);
 
     string Mint()
     {

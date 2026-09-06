@@ -43,6 +43,9 @@ FusionRpg.Core.Demons.SoulEarnPolicy.Configure(
 FusionRpg.Core.Demons.Patron.PatronPolicy.Configure(
     FusionRpg.Core.Demons.Patron.PatronTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "patron.v1.json"))));
+FusionRpg.Core.Match.LawnDeployEventsTuningHub.Configure(
+    FusionRpg.Core.Match.LawnDeployEventsTuningLoader.Parse(
+        File.ReadAllText(Path.Combine(tuningDir, "lawn-deploy-events.v1.json"))));
 FusionRpg.Core.Combat.Shield.ShieldPolicy.Configure(
     FusionRpg.Core.Combat.Shield.ShieldTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "shield.v1.json"))));
@@ -139,6 +142,13 @@ FusionRpg.Core.Battle.BattleRuleset.ConfigureResources(
 FusionRpg.Core.Battle.Board.SiegeTuningPolicy.Configure(
     FusionRpg.Core.Battle.Board.SiegeTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "siege.v1.json"))));
+// base-defense-todo.md 25.4: structure-catalog-import reads the committed corpus instead of the C#
+// literal — the same AppContext.BaseDirectory-relative pattern the dungeon registry above already
+// uses (`dungeonRegistryDir`), with the matching .csproj copy rule (FusionRpg.Server.csproj) so a
+// published build finds it next to the exe, not just in a local dev checkout.
+FusionRpg.Core.World.StructureCatalog.Configure(
+    FusionRpg.Core.World.StructureSeed.StructureCorpus.Load(
+        Path.Combine(AppContext.BaseDirectory, "data", "seed", "structures")));
 FusionRpg.Core.Demons.SummoningTuningHub.Configure(
     FusionRpg.Core.Demons.SummoningTuningLoader.Parse(
         File.ReadAllText(Path.Combine(tuningDir, "summoning.v1.json"))));
@@ -436,6 +446,12 @@ FusionRpg.Core.Items.Materials.MaterialRecipeCatalog? recipeCatalog = null;
 // insert's real element, and three separate loads would be three chances to disagree about it.
 var gemInserts = FusionRpg.Server.GemInsertCorpus.Load(
     Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "gems"));
+// ⏸ The same boot-time stopgap, for the same missing table (module 6 shipped the 740-entry base-type
+// corpus as seed JSON and no `item_base_type`). Hoisted above `MapItemSurfaces` by item-content T3 so
+// the armoury row and the item card read ONE corpus: two loads are two chances to disagree about what
+// an item is called, which is exactly the class of defect T2 fixed inside the card.
+var itemBaseTypes = FusionRpg.Server.ItemBaseTypeCorpus.Load(
+    Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types"));
 
 FusionRpg.Server.ItemWorkbench? itemWorkbench = null;
 if (recipeCatalog is { } workbenchRecipes)
@@ -672,7 +688,7 @@ app.MapAuraCatalog();
 // item module 20 (`item-surfaces`) — READ-ONLY. No MapPost lives in that file: equipping, socketing
 // and salvaging already have owners (modules 4, 16, 14), and a second write path through the
 // presentation layer is the "second surface" this module exists to prevent.
-app.MapItemSurfaces(itemSurfaceTuning, socketTuning, gemInserts);
+app.MapItemSurfaces(itemSurfaceTuning, socketTuning, gemInserts, itemBaseTypes);
 // ⭐ item modules 14/15/16 — the WRITE half, and the production caller all three named as their
 // shared blocker. Mapped only when the recipe corpus loaded: a workbench with no prices could only
 // ever refuse, and a route that always refuses is worse than an absent one because it looks wired.
@@ -723,8 +739,7 @@ if (affixNameWords is null || rareNameDraw is null)
         "Both halves are required: the families' nameWords AND rare-names.json (a 3+ affix item has " +
         "no honest two-word name without the second).");
 var itemCardCorpus = new ItemCardCorpus(
-    FusionRpg.Server.ItemBaseTypeCorpus.Load(
-        Path.Combine(AppContext.BaseDirectory, "data", "seed", "items", "base-types")),
+    itemBaseTypes,
     gemInserts,
     socketTuning, itemSurfaceTuning, enhancementTuning,
     LookupString: displayStrings,

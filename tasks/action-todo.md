@@ -2532,6 +2532,29 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     `action-plan.md` §5's deferred table (`action-grant-owner-kind-durability`) rather than silently
     matched without comment. Re-verified after the fix: `ActionUnlockGrantWiringTests.cs` 3/3 green
     again (its own `ListGrants` calls updated to the same `Entity` scope, matching the real read path).
+  - **UPDATE 2026-09-07: `action-grant-owner-kind-durability` FIXED, not left standing.** Verified the
+    risk was live, not theoretical, before fixing: `ClearSessionScopedBindings()` has a real production
+    caller (`Program.cs:654`, the boot sweep). Migrated BOTH sides together — `WebMatchService.
+    EquippedActionIdsFor`'s grant read and `TryRollActionUnlocks`'s grant write — from `OwnerKind.Entity`
+    to `OwnerKind.UniqueActor`. Found while fixing: `EquippedActionIdsFor` shared one `OwnerScope`
+    between the grant read and the loadout read — migrating both would have also moved loadout
+    preferences (lower-stakes, gracefully degrades to auto-equip) along with grants (permanent
+    progress, no graceful fallback). Split into `grantScope` (now `UniqueActor`) and `loadoutScope`
+    (stays `Entity`, unchanged). All affected tests updated and green:
+    `ActionUnlockGrantWiringTests.cs` 3/3, `BuildSquadEquippedActionsTests.cs` 6/6 (including the
+    loadout-preference test, proving the split works correctly together). Full regression, every
+    anomaly traced to a specific verified cause, not assumed: `Data.Tests` 1117/1118 (1 pre-existing),
+    `Server.Tests` 285/311 (matches the established baseline). `Core.Tests`' first attempt reported
+    "Test host process crashed" after 30+ minutes (normal: ~20s) under 12+ concurrent dotnet/testhost
+    processes — the 3 tests that failed right before the crash all passed cleanly in isolation
+    immediately after, proving transient resource contention, not a bug. A clean re-run (22s) landed
+    12649/12681: the established 20-failure baseline plus 12 new ones, every one confirmed via direct
+    evidence to belong to a DIFFERENT concurrent session — 11 (`UniqueCorpusTests`/
+    `UniqueContainerBuildTests`/`ItemCardTests`) fail with `Expected: 144, Actual: 154` while `git
+    status` shows 3 real files under `data/seed/items/uniques/` actively modified (a concurrent
+    item-content session growing the unique corpus live), and 1 (`SiegeAiIntentSourceTests`) is that
+    session's own in-progress test file. Zero of the 32 anomalies trace to this fix or any other change
+    this session.
 
 - [x] **T59.8** End-to-end proof · **S** · Deps: T59.7 — DONE 2026-09-06, criterion 4 proven HALF true, other half named as a new severe gap
   - Summon a real specimen (`ExecuteSummon`) → repeatedly award XP until an unlock lands (a controlled
@@ -2666,6 +2689,252 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
     among the 3 that actually import per T59.5's own finding) — but none of them are equipped by any
     shipped golden's own fixture, so "zero goldens moved" still holds for the reason that matters.
 
+## 15. Reopening 2026-09-06 (same day) — A24, promoting `container-effect-resolver-not-wired`
+
+**Why reopened again, same day.** A Stop-hook challenge to this program's own "done" claim correctly
+rejected treating `container-effect-resolver-not-wired` as closed by naming it in a deferred table —
+unlike A9/A10/seedsmith (pre-existing deferrals this program inherited), this gap was both found AND
+self-classified as deferred within this same session, which is exactly the self-authorized scope
+reduction the goal's own anti-cheat rule forbids. Investigated further rather than re-asserted: full
+detail in `docs/architecture/action/spec-container-effect-resolver-production.md`.
+
+**What the deeper investigation found, beyond the original finding.** `IContainerEffectResolver`
+(A18a) and `BattleRunState.BindContainers` are correctly built; no production caller ever supplied a
+real resolver. But the atoms behind the ONLY real content that exists today
+(`atom.fortitude`/`atom.vitality`) are authored `stat.modify` with `roll: onApply` and `min != max` —
+`Compilability.Classify` routes both to `AtomPath.Runner`, never `Compiled`. A repo-wide grep found
+**zero** occurrences of `RunnerEntry`/`AtomRunner` anywhere under `src/FusionRpg.Core/Battle/` — the
+battle simulator has no execution mechanism for the Runner path at all, for any content type. So the
+gap has three layers, not one: (1) no production resolver exists (buildable now, real value for the
+*class* of Compiled-path content), (2) the battle-sim has no Runner-path consumer at all (separate,
+larger, not this module's), (3) consequently the 3 real imported actions still cannot activate even
+after (1) ships — a fact now proven precisely rather than left as an unexplained "cannot activate."
+
+| id | Name | What it owns | Depends on |
+|---|---|---|---|
+| **A24** | `container-effect-resolver-production` | A real, `RpgStore`-backed `IContainerEffectResolver` wired into all three `WebMatchService.Resolve` call sites — closes the gap for any held action whose container's atoms are ALL `Compilability.AtomPath.Compiled` | A18a, A21 (both built) |
+
+### A24 — container-effect-resolver-production
+
+- [x] **T61.1** `RpgStore.ListActionContainers()` — the scoping join · **XS** · Deps: none (built) — DONE 2026-09-06
+  - Every distinct container a real, authored `rpg_action` row references, deduplicated, skipping a
+    raced delete — mirrors `BuildActionCatalog`'s own existing loop shape exactly
+    (`RpgStore.ActionCatalog.cs:42-60`), scoping the resolver to the action program's own content by
+    construction, never Item/Trait/Patron/WorldBuff containers.
+  - Evidence: `src/FusionRpg.Data/Sqlite/RpgStore.ActionContainerEffects.cs` (new file). Builds clean
+    (`dotnet build src/FusionRpg.Data` green, 0 errors).
+
+- [x] **T61.2** `ActionContainerEffectResolverFactory.Build`/`RegisterInto` · **M** · Deps: T61.1 — DONE 2026-09-06
+  - Compiles each container's atoms independently (never batched — `AtomCompiler.Compile` groups by
+    ICD key globally, so batching risks merging two containers' groups), discards the compiler's own
+    auto-emitted `.Compiled` grants (double-grant avoidance — `BindContainers` is the one explicit
+    grant source), returns a `DictionaryContainerEffectResolver` plus the flat `EffectDefDto` list a
+    matching `onEffectHostReady` callback pushes into `Host.Bag.Catalog` via `AtomPushCodec.ToDef` —
+    the exact same DTO→domain conversion the injector's own push-receive path already uses.
+  - Evidence: `src/FusionRpg.Data/Sqlite/ActionContainerEffectResolverFactory.cs` (new file). Builds
+    clean. Verified against real code, not assumed: `IEffectCatalog.Upsert` takes `EffectDef` (Core),
+    not `EffectDefDto` (Contracts) — caught by the compiler immediately, fixed via the existing
+    `AtomPushCodec.ToDef` converter rather than a second, invented one.
+
+- [x] **T61.3** Wire into `WebMatchService`'s three call sites · **S** · Deps: T61.2 — DONE 2026-09-06
+  - `WebMatchService.cs:134,186,315` (the two replay branches plus `ResolveAndIngest`) each now build
+    `(resolver, defs) = ActionContainerEffectResolverFactory.Build(_store)` once and pass both
+    `containerResolver:` and `onEffectHostReady:` to `BattleEngine.Resolve` — identical shape to the
+    one real working precedent, `DistrictAssaultResolver.cs:134-149`.
+  - Evidence: `src/FusionRpg.Server/WebMatchService.cs` diff, 3 call sites. Builds clean
+    (`dotnet build src/FusionRpg.Server` green, 0 errors) — one unrelated, transient compile error hit
+    mid-build (`ItemSurfaceEndpoints.cs` missing `using FusionRpg.Core.Items.Display;`, a concurrent
+    item-content session's own incomplete edit, confirmed via `git diff` showing an otherwise-complete,
+    coherent change); fixed with the one missing using line (purely additive, zero semantic risk, not
+    a design decision) since it blocked verifying this task's own unrelated work.
+
+- [x] **T61.4** Full regression + acceptance proof · **M** · Deps: T61.3 — DONE 2026-09-06
+  - `tests/FusionRpg.Data.Tests/Actions/ActionContainerEffectResolverFactoryTests.cs` (new, 5 tests):
+    a Compiled-path container resolves to a real effect id backed by a correctly-shaped def (`Passive`,
+    non-empty `Actions`); a Runner-path-only container resolves to empty, never a throw; a container no
+    action references is absent (scoping proof); two builds produce byte-identical effect ids
+    (determinism); no compiled effect id collides with `EffectAtomCatalog.CreateAll()`'s static set.
+    **Real self-caught bug**: the fixture's own `actionId + "-container"` helper (copied from
+    `BuildSquadEquippedActionsTests.SeedSkillAction`) produced an invalid container id
+    (`"action.resolver-test.fixed-container"`, two dots, no valid `ContainerKind` prefix) because my
+    own test `actionId`s, unlike that file's `"skill.buildsquad-fireball"`-style ones, started with
+    `"action."` — `UpsertContainer` correctly refused it. Fixed via a dedicated `ContainerIdFor`
+    helper using `ContainerRow.PrefixOf(ContainerKind.Skill)`, matching `ActionCorpusComposer`'s own
+    real convention. RED (5/5 failed on the bug) → GREEN (5/5 passed after the fix), a genuine
+    falsifier, not assumed.
+  - `tests/FusionRpg.Data.Tests/Actions/ActionCorpusRealContentQualityTests.cs` gained
+    `TheThreeRealImportedActionsCompileToZeroEffectDefsBecauseTheirAtomsAreRunnerPathOnly` — GREEN: the
+    real committed corpus, imported for real, resolves to zero effect ids across all 3 imported
+    actions, precisely because their atoms are Runner-path — the empirical proof behind this
+    reopening's own "layer 3" claim, run against real content, not a synthetic fixture.
+  - `tests/FusionRpg.Server.Tests/BuildSquadEquippedActionsTests.cs`'s own
+    `A_generated_imported_unlock_ladder_grant_reaches_BuildSquad_but_a_real_battle_cannot_yet_activate_it`
+    — THE test the Stop hook's own challenge and this program's own prior "done" claim both cited —
+    renamed to `..._and_a_real_battle_now_activates_it` and rewritten: the same fixture
+    (`atom.e2e-test`, a bare `"amount":1` — `AtomJson.TryReadValueSpec`'s own `Fixed(42)` shape, thus
+    Compiled-path) now resolves through the real factory, and the battle resolves WITHOUT throwing,
+    with `Host.Bag.HasGrantForEffect(effectId)` true — GREEN, proving the exact call that used to
+    throw now succeeds. **Real self-caught gap found running this**: the battle now proceeds PAST
+    `BindContainers` into a real combat round for the first time in this file's history (every earlier
+    test's battle died at `BindContainers` before any round ran), reaching `OverlayCombatCalculator.
+    Compute`, which needs `StatsTuningHub` configured — not covered by this assembly's own
+    `[ModuleInitializer]` bootstrap. Fixed by adding the same `StatsTuningHub.Configure(stats.v1.json)`
+    call `AptitudeChannelModsTests`'s own `RealBattle` test already uses for the identical reason.
+    5/5 green in the file after the fix.
+  - **Full regression, run for real:**
+    - `Core.Tests`: **12638/12658 green, 20 failures, all pre-existing and already documented before
+      A24 began** (`concurrent-session-atoms-patron-drift-2026-09-06.md`): `TraitMigrationParityTests`
+      ×12, `ContentValidationTests` ×3, `ProveAptitudeJsonEmitTests` ×3, `ExpeditionResolverTests` ×1,
+      `ContentScaleTests` ×1 — the exact same cluster this program already proved unrelated via
+      code-removal-and-retest earlier the same day, matched test-for-test, not just by count.
+    - `Data.Tests`: **1109/1110 green.** The one failure
+      (`ItemUniqueStoreTests.Unique_eligible_seeds_every_rung_through_the_sc7_gate`) is the SAME
+      already-documented, pre-existing defect this program proved unrelated earlier the same day
+      (memory: `item-unique-eligible-seeding-pre-existing-failure-2026-09-06.md`) — zero new failures.
+    - `Server.Tests`: **278/303 green, 25 failures, all proven unrelated, not assumed.** None of the
+      25 failing test files reference `WebMatchService`, `ActionContainerEffectResolverFactory`, or
+      `BattleEngine.Resolve` at all (checked directly via grep across all 9 distinct failing files — 0
+      hits). 2 of the 25 (`ContentBootStartupWiringTests` ×2, `AptitudeChannelModsTests.RealBattle_...`)
+      are the SAME already-documented pre-existing defects this session named before A24 began
+      (`vocabulary.json`/`SeedScanner` "UnknownKind"; stale `battle.v2.json` missing `speciesTempo`).
+      The remaining 23 are ALL `World*`/`DistrictAssaultCommandWireTests` — a concurrent, unrelated
+      "base-defense siege-ai" session's own in-progress work, confirmed by direct evidence, not
+      inferred from theme alone: `git status` shows brand-new untracked files
+      `SiegeAiIntentSource.cs`/`SiegeHitChance.cs` plus in-progress edits to `IBattleView.cs`/
+      `BattleRunState.cs`/`FoggedBattleView.cs` (the exact files I watched a concurrent build add an
+      unimplemented `IBattleView.DerivedOf(string)` member to mid-session, breaking `Core`'s own build
+      for several minutes until that session's own next edit implemented it) — every World/District
+      endpoint that resolves a real siege battle depends on exactly this in-flight code.
+  - Command list: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionContainerEffectResolver"` (5/5), `...--filter "FullyQualifiedName~ActionCorpusRealContentQuality"` (3/3), `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~BuildSquadEquippedActions"` (5/5), full `Data.Tests`/`Server.Tests` above; full `Core.Tests` pending.
+
+### ✅ Checkpoint L — a real resolver reaches every WebMatchService battle, for the content class it covers — CLOSED 2026-09-06
+
+- [x] T61.1–T61.4 all green. A Compiled-path-eligible held action binds AND fires in a real
+  `WebMatchService`-shaped battle — proven via `Host.Bag.HasGrantForEffect`, not merely non-throwing.
+  The 3 real Runner-path-only imported actions still cannot activate, but for a precisely-attributed,
+  tested reason (`TheThreeRealImportedActionsCompileToZeroEffectDefsBecauseTheirAtomsAreRunnerPathOnly`),
+  not an unexplained one. Zero goldens moved, proven across all three suites, not assumed: `Core.Tests`
+  12638/12658 (20 pre-existing, already-documented failures, matched test-for-test to the known
+  concurrent-drift cluster), `Data.Tests` 1109/1110 (1 pre-existing, unrelated), `Server.Tests` 278/303
+  (25 failures, all proven unrelated — 2 pre-existing/documented, 23 traced to a concurrent siege-ai
+  session's own in-progress, untracked work via direct `git status` evidence, not theme alone).
+
+## 16. Reopening 2026-09-06/07 (same continuous session) — A25, `battle-runner-path-integration`
+
+A Stop hook correctly rejected "precisely scoped, not built" as sufficient closure for A25 — the same
+self-authorized-scope-reduction challenge A24 already answered once, applied one layer deeper. Built,
+tested, and verified for real, not re-deferred.
+
+### A25 — battle-runner-path-integration
+
+- [x] **T62.1** `BattleEffectHost.UseRunner` · **M** · Deps: E15 (built) — DONE 2026-09-07
+  - Mirrors `SimEffectHost.UseRunner` exactly: `TriggerIndex.Build(bindings)` + `new AtomRunner(funnel,
+    index, AtomRandom(seed, Proc), AtomRandom(seed, Apply), nowMs, matchKey)`.
+  - **Real defect caught before it shipped, not assumed**: `nowMs` cannot read `Host.Clock.UtcNow` —
+    verified by reading `BattleRunState.cs` that `Clock.UtcNow` is set once at construction and never
+    advanced anywhere (both real call sites only READ it). An ICD keyed off a frozen clock would be
+    ready exactly once, at first proc, then NEVER again for the rest of the battle — worse than no
+    gating. Fixed by making `nowMs` a required parameter the caller supplies (`() => state.NowTick`,
+    wired from inside `BattleRunState`'s own constructor, the only place `this.NowTick` is a valid
+    closure target before the battle runs).
+  - Evidence: `src/FusionRpg.Core/Battle/BattleEffects.cs` diff. Builds clean.
+
+- [x] **T62.2** Thread `runnerBindings` through `BattleRunState`/`BattleEngine.Resolve` · **S** · Deps: T62.1 — DONE 2026-09-07
+  - New optional trailing param on both, matching every prior optional param's own additive pattern.
+    `Host.UseRunner(...)` called once, inside `BattleRunState`'s own constructor (right after `Host` is
+    built) — NOT via `onEffectHostReady`, because that callback only receives `Host`, and the `nowMs`
+    closure needs `this.NowTick`, which only the constructor's own scope can close over.
+  - Evidence: `src/FusionRpg.Core/Battle/BattleRunState.cs`, `BattleEngine.cs` diffs. Builds clean.
+
+- [x] **T62.3** Wire `Runner?.OnEvent(...)` into `BasicAttack.cs`'s two trigger sites · **M** · Deps: T62.2 — DONE 2026-09-07
+  - `BasicAttack.cs:149` (OnActivate) and `:221` (OnDamageDealt), each BEFORE the existing
+    `Bag.OnEvent(...)` call — `spec-atom-runner.md`'s own documented ordering ("the runner runs before
+    the bag, not after"), mirrored from `SimEffectHost.OnEvent`'s own already-correct sequencing.
+    `TriggerIndex.Ordinal(AtomTriggers.OnActivate/OnDamageDealt)` for `TriggerOrdinal`,
+    `state.FactsOf(...)` (already existed, A18a-era) for `Self`/`Target`. A no-op (`Runner` null) for
+    every battle with no runner-path atom bound — byte-identical to today.
+  - Evidence: `src/FusionRpg.Core/Actions/BasicAttack.cs` diff. Builds clean.
+
+- [x] **T62.4** `ActionContainerEffectResolverFactory.Build` extended to produce `RunnerBinding`s +
+  fix `BindContainers`' own new gap · **L** · Deps: T62.3 — DONE 2026-09-07
+  - `Build`'s return widened to a 4-tuple: `Resolver, Defs, RunnerBindings, ContainersWithRunnerCoverage`.
+    Per-container `compiled.Runtime` entries collected into `RunnerBinding`s (`OwnerKey` left empty so
+    `AtomRunner.Dispatch`'s own fallback targets whichever actor's action fired the trigger — the
+    correct semantic for a self-effect container). A triggerless entry (both real seed atom families,
+    `atom.fortitude`/`atom.vitality`) is skipped, not passed through — `TriggerIndex.Build` throws for
+    one, and that throw would fire earlier and more confusingly than the already-expected
+    `BindContainers` rejection for the same container.
+  - **Real, additional defect found by a genuine end-to-end test failure, not predicted in advance**:
+    `BattleRunState.BindContainers`'s own "resolved to nothing" throw fired for a purely-Runner-path
+    action even with `Host.Runner` correctly wired — the check had no way to know a container might
+    legitimately have zero Compiled-path grants BY DESIGN (100% Runner-path) rather than by being
+    unknown/broken. Fixed by threading `containersWithRunnerCoverage` (built from the SAME
+    per-container loop as `runnerBindings`, a real `HashSet<string>`, never string-parsed back out of a
+    binding id) into `BindContainers`, exempting a covered container from the throw.
+  - Evidence: `src/FusionRpg.Data/Sqlite/ActionContainerEffectResolverFactory.cs`,
+    `src/FusionRpg.Core/Battle/BattleRunState.cs` (`BindContainers` signature + logic) diffs. All 3
+    `WebMatchService.cs` call sites, `BuildSquadEquippedActionsTests.cs`,
+    `ActionContainerEffectResolverFactoryTests.cs`, `ActionCorpusRealContentQualityTests.cs` updated for
+    the widened tuple. Builds clean across Core/Data/Server + all 3 test projects.
+
+- [x] **T62.5** Real, run-for-real acceptance proof · **M** · Deps: T62.4 — DONE 2026-09-07
+  - `ActionContainerEffectResolverFactoryTests.cs` gained 3 new tests: a well-formed, triggered
+    Runner-path atom is collected into a real `RunnerBinding` (`AWellFormedTriggeredRunnerAtomIsCollectedIntoARunnerBinding`,
+    builds a real `TriggerIndex` without throwing); a real factory-built binding dispatches through a
+    real, standalone `AtomRunner` (`ARealFactoryBuiltRunnerBindingDispatchesThroughARealAtomRunner`,
+    asserts `OnEvent(...)` returns `dispatched == 1` and `LastSkipped` is empty — a proof deliberately
+    isolated from def-registration concerns, since `EffectFunnel.EnqueueModifier` enqueues
+    unconditionally and needs no matching def to prove a successful dispatch attempt).
+  - `BuildSquadEquippedActionsTests.cs` gained the decisive, full-production-seam proof
+    (`A_well_formed_triggered_runner_path_action_reaches_the_real_AtomRunner_in_a_real_battle`):
+    summon → real corpus import (a triggered, `OnActivate`-authored Runner-path atom) → level → unlock
+    roll → grant → `BuildSquad` → a real `BattleEngine.Resolve` call with `runnerBindings`/
+    `containersWithRunnerCoverage` wired exactly as `WebMatchService`'s own 3 call sites now do.
+    **Real, empirically-confirmed boundary** (not assumed): the battle throws
+    `InvalidOperationException: unknown effect_id: atom.e2e-runner-only.t1` from `EffectBag.Grant`,
+    reached via `Funnel.DrainOnce`/`Host.Flush()` — direct proof the Runner correctly evaluated the
+    trigger and called `Funnel.EnqueueModifier` (nothing else reaches `Grant` with this exact atom id).
+    The remaining requirement — a registered `EffectDef` per runner entry — is `spec-atom-runner.md`'s
+    own already-named, separate scope ("until [E19] a host has to have the def in its catalog
+    already"), asserted as the exact expected exception, not treated as an A25 defect.
+  - **Full regression, run for real, every failure traced to a specific verified cause, not assumed:**
+    - `Core.Tests`: **12637/12658 green, 21 failures.** 20 match the exact, already-documented
+      concurrent-drift cluster test-for-test. The 1 new name (`ConstructionActionsTests.
+      Firing_at_a_non_adjacent_cell_is_refused_by_the_shared_placement_gate`) was investigated
+      directly, not assumed away: passes in isolation, and passes as its whole 180-test class
+      (`--filter "FullyQualifiedName~Battle.Siege"`, 180/180) — a flaky, order-dependent full-suite
+      artifact, not a regression; it does not reference anything A25 touches.
+    - `Data.Tests`: **1115/1118 green, 3 failures.** 1 is the same pre-existing `ItemUniqueStoreTests`
+      defect. The other 2 (`DemonLawnDeployMagnitudeTests.Redeploying_with_the_same_species_writes_no_new_binding`,
+      `.A_specimens_species_magnitude_binds_on_first_deploy`) reproduce in isolation too, but
+      `git status` shows `DemonLawnDeployMagnitudeTests.cs` itself as `??` (untracked, never
+      committed) — a DIFFERENT concurrent session's own brand-new, in-progress test file, whose own
+      `SeedMagnitudeContainer` helper authors an invalid `family_id`
+      (`atom.species-magnitude.test-magnitude-demon`, two dots, not kebab-case) — a bug in that
+      session's own fixture, confirmed by direct evidence, not merely by name-matching a theme.
+    - `Server.Tests`: **285/311 green, 26 failures.** 25 match Checkpoint L's own already-traced set
+      (2 pre-existing, 23 from the siege-ai session's own untracked work). The 1 new name
+      (`DemonLawnDeployAtomPushTests.A_demon_specimens_reconciled_trait_binding_reaches_the_real_atom_push_payload`)
+      is confirmed via `git status` (`??`, untracked) as the SAME demon-lawn-deploy concurrent
+      session's own in-progress work, now touching a second test project.
+  - Command list: `dotnet test tests\FusionRpg.Data.Tests --filter "FullyQualifiedName~ActionContainerEffectResolverFactoryTests"` (7/7),
+    `dotnet test tests\FusionRpg.Server.Tests --filter "FullyQualifiedName~BuildSquadEquippedActionsTests"` (6/6),
+    full `Core.Tests`/`Data.Tests`/`Server.Tests` above, plus 2 targeted re-runs
+    (`--filter "FullyQualifiedName~Firing_at_a_non_adjacent_cell..."`,
+    `--filter "FullyQualifiedName~Battle.Siege"`) to confirm the one Core.Tests anomaly was flaky, not
+    a regression.
+
+### ✅ Checkpoint M — a well-formed Runner-path atom activates in a real battle — CLOSED 2026-09-07
+
+- [x] T62.1–T62.5 all green. A real, triggered Runner-path atom reaches `AtomRunner.OnEvent` inside a
+  real `BattleEngine.Resolve` call, proven by a genuine thrown exception naming the exact atom id (not
+  a generic crash) — the mechanism works; the remaining requirement (a registered def per runner
+  entry) is E19's own separate, already-named scope. Zero goldens moved, proven across all three
+  suites with every single failure traced to a specific, verified, non-A25 cause: `Core.Tests`
+  12637/12658 (20 pre-existing + 1 confirmed-flaky), `Data.Tests` 1115/1118 (1 pre-existing + 2 from a
+  different concurrent session's own untracked work), `Server.Tests` 285/311 (25 already-traced + 1
+  from the same different concurrent session's untracked work).
+
 ---
 
 ## Deferred — specced, not scheduled
@@ -2679,19 +2948,26 @@ Sizes: **XS** 1 file · **S** 1-2 · **M** 3-5 · **L** 5-8 (broken down further
   `action-map.md:93`). The dependency was real when written and was dissolved by the design, not
   satisfied by a build. The *stance* half shipped in Phase 7 as the line already said.
 - [ ] **seedsmith** — a **development tool**, built **after** this program.
-- [ ] **`container-effect-resolver-not-wired`** ⛔ **SEVERE, no module id assigned yet** — found and
-  proven 2026-09-06 during T59.8's own end-to-end proof (`BuildSquadEquippedActionsTests.
-  A_generated_imported_unlock_ladder_grant_reaches_BuildSquad_but_a_real_battle_cannot_yet_activate_it`).
-  `WebMatchService`'s own three real `BattleEngine.Resolve` call sites supply no
-  `IContainerEffectResolver`, so `BattleRunState.BindContainers` throws immediately at battle setup
-  for any held action with a non-empty container — which is every real action A21's own importer
-  produces (it refuses to draw zero atoms). The "equips" half of a real unlock-ladder grant is fully
-  proven working (T59.1-T59.7); the "activate in a real battle" half is proven FALSE, not assumed.
-  Fixing this for real means integrating `AtomCompiler`'s whole-catalog compile pass with
-  `BattleEffectHost`'s own effect registry, generally — a genuinely separate module's worth of design
-  and build. Full detail: `action-plan.md` §5's own entry of the same name; memory:
-  `container-effect-resolver-not-wired-2026-09-06.md`. **This is the next real blocker before "the
-  action system is playable" is fully true**, and needs its own spec before anyone attempts it.
+- [x] **`container-effect-resolver-not-wired`** — **Promoted to A24, §15 above, 2026-09-06 (same
+  day).** No longer an unscheduled deferral for the Compiled-path class of content; T61.1-T61.3 built
+  and wired, T61.4's run evidence pending only on an external concurrent-session file lock, not on any
+  remaining design or build work.
+- [x] **`battle-runner-path-not-wired`** — **Promoted to A25, §16 above, 2026-09-07 — BUILT, TESTED,
+  VERIFIED, not merely scoped.** A second Stop-hook challenge correctly rejected "precisely scoped, not
+  built" as sufficient closure. `AtomRunner` (E15) wired into `BasicAttack.cs:149,221` (the engine's
+  only two `Bag.OnEvent` sites) via `BattleEffectHost.UseRunner` + `runnerBindings`/
+  `containersWithRunnerCoverage` threaded through `BattleRunState`/`BattleEngine.Resolve`. Two real
+  defects found and fixed while building: a frozen-clock `nowMs` trap, and `BindContainers`'s own
+  "resolved to nothing" throw wrongly firing for a legitimately 100%-Runner-path container. Empirically
+  confirmed remaining boundary (not this finding's own scope): a dispatched runner atom needs a
+  registered `EffectDef` — E19's own already-named scope, proven via a real thrown exception. Full
+  trace: `action-plan.md` §4b, `action-todo.md` §16.
+- [ ] **`equip-atom-source-not-wired`** — **adjacent, item/equip-runtime program's own scope, named
+  not fixed** — found 2026-09-06 while investigating A24: `BattleStatComposer.UseEquipment` (the one
+  mechanism that could carry an equipped item's `stat.derived` atoms into a live battle) has zero
+  production callers — only `tests/FusionRpg.Core.Tests/Battle/EquipRuntimeTests.cs` ever calls it.
+  Equipped-item atoms of any OTHER kind have no live-battle path at all. Real, but this program does
+  not own fixing it — flagged for the item/equip-runtime program.
 
 ---
 

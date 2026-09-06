@@ -130,6 +130,30 @@ function okFetch(body: unknown) {
   return vi.fn().mockResolvedValue({ ok: true, json: async () => body });
 }
 
+/**
+ * item-content `item-naming` T4: both benches now READ their recipe list (and the socket bench its
+ * held inserts) before they can offer a pick, so a stub that answers only the write route leaves
+ * every picker empty. These are the real shipped rows for the two verbs these tests drive.
+ */
+const BORE_RECIPES = [
+  { recipeId: "recipe.019", name: "Bore: Open Metal", operation: "bore", frame: "", outputKind: "mutation", outputRef: null }
+];
+
+/** `okFetch` for a write route, with the bench's own reads answered beside it. */
+function benchFetch(writeBody: unknown) {
+  return vi.fn().mockImplementation((url: string) => {
+    const path = String(url);
+    const body = path.includes("/workbench/recipes")
+      ? path.includes("operation=bore")
+        ? BORE_RECIPES
+        : []
+      : path.includes("/workbench/inserts/")
+        ? []
+        : writeBody;
+    return Promise.resolve({ ok: true, status: 200, json: async () => body });
+  });
+}
+
 function client() {
   return new QueryClient({ defaultOptions: { mutations: { retry: false } } });
 }
@@ -259,9 +283,11 @@ describe("adaptWorkbenchOutcome", () => {
   });
 
   it("an empty affinity and an empty insert are `null`, because absent is not a value", () => {
+    // `insertName` (item-content T4) follows the same rule: `""` on the wire and an absent field
+    // are both `null`, because an empty cell has no name any more than it has a container.
     expect(adaptWorkbenchOutcome(SOCKET_ADD_OK).sockets).toEqual([
-      { index: 0, affinity: null, crafted: true, insertContainerId: null },
-      { index: 1, affinity: null, crafted: true, insertContainerId: null }
+      { index: 0, affinity: null, crafted: true, insertContainerId: null, insertName: null },
+      { index: 1, affinity: null, crafted: true, insertContainerId: null, insertName: null }
     ]);
   });
 
@@ -279,7 +305,9 @@ describe("adaptWorkbenchOutcome", () => {
 describe("WorkbenchResult", () => {
   it("shows the spend and the yield the server reported, and nothing it did not", () => {
     renderWithProviders(<WorkbenchResult outcome={adaptWorkbenchOutcome(SALVAGE_OK)} />);
-    expect(screen.getByTestId("workbench-result-granted")).toHaveTextContent("shard.grafted");
+    // item-content T3/T4: a material line renders the id's own WORDS. The id itself is still on
+    // the row's `title`, which is an attribute and not text content.
+    expect(screen.getByTestId("workbench-result-granted")).toHaveTextContent("Shard grafted");
     expect(screen.getByTestId("workbench-result-granted")).toHaveTextContent("4");
     expect(screen.queryByTestId("workbench-result-spent")).not.toBeInTheDocument();
   });
@@ -322,25 +350,29 @@ describe("SocketBench writes", () => {
     );
   }
 
-  it("refuses to send a bore with no recipe named, and says why on the control", async () => {
-    vi.stubGlobal("fetch", okFetch([]));
+  it("refuses to send a bore with no recipe picked, and says why on the control", async () => {
+    vi.stubGlobal("fetch", benchFetch([]));
     open();
     const button = screen.getByTestId("bench-socket-add-btn");
     expect(button).toBeDisabled();
-    expect(button).toHaveAttribute("title", "Name a bore recipe first");
+    expect(button).toHaveAttribute("title", "Pick a bore recipe first");
   });
 
-  it("posts a real socket-add once a recipe is named, and renders the sockets the server returned", async () => {
-    const fetchMock = vi.fn().mockImplementation((url: string) =>
-      String(url).includes("/workbench/socket-add")
-        ? Promise.resolve({ ok: true, json: async () => SOCKET_ADD_OK })
-        : Promise.resolve({ ok: true, json: async () => [] })
-    );
+  it("posts a real socket-add once a recipe is picked, and renders the sockets the server returned", async () => {
+    const fetchMock = vi.fn().mockImplementation((url: string) => {
+      const path = String(url);
+      if (path.includes("/workbench/socket-add"))
+        return Promise.resolve({ ok: true, json: async () => SOCKET_ADD_OK });
+      if (path.includes("/workbench/recipes") && path.includes("operation=bore"))
+        return Promise.resolve({ ok: true, json: async () => BORE_RECIPES });
+      return Promise.resolve({ ok: true, json: async () => [] });
+    });
     vi.stubGlobal("fetch", fetchMock);
     const user = userEvent.setup();
     open();
 
-    await user.type(screen.getByTestId("bench-bore-recipe"), "recipe.019");
+    // item-content T4: picked by its real name, not typed as `recipe.019`.
+    await user.selectOptions(await screen.findByTestId("bench-bore-recipe"), "recipe.019");
     await user.click(screen.getByTestId("bench-socket-add-btn"));
 
     const posted = fetchMock.mock.calls.find((c) => String(c[0]).includes("/workbench/socket-add"))!;
@@ -357,7 +389,7 @@ describe("SocketBench writes", () => {
   });
 
   it("imbue is offered as unavailable with a real reason, never as a control that can only fail", () => {
-    vi.stubGlobal("fetch", okFetch([]));
+    vi.stubGlobal("fetch", benchFetch([]));
     open();
     const button = screen.getByTestId("bench-socket-imbue-btn");
     expect(button).toBeDisabled();
@@ -380,16 +412,17 @@ describe("CraftBench writes", () => {
   }
 
   it("breaks the item down through the real route and reports the yield the server sent", async () => {
-    const fetchMock = okFetch(SALVAGE_OK);
+    const fetchMock = benchFetch(SALVAGE_OK);
     vi.stubGlobal("fetch", fetchMock);
     const user = userEvent.setup();
     open();
 
     await user.click(screen.getByTestId("craft-salvage-btn"));
 
-    expect(String(fetchMock.mock.calls[0]![0])).toContain("/api/items/workbench/salvage");
+    // The bench reads its recipe list first (T4), so the write is found by name rather than by index.
+    expect(fetchMock.mock.calls.some((c) => String(c[0]).includes("/api/items/workbench/salvage"))).toBe(true);
     expect(await screen.findByTestId("craft-bench-result")).toHaveTextContent("salvaged");
-    expect(screen.getByTestId("craft-bench-result-granted")).toHaveTextContent("substrate.humanoid.crude");
+    expect(screen.getByTestId("craft-bench-result-granted")).toHaveTextContent("Substrate humanoid crude");
   });
 
   it("prints a refusal exactly as the server named it", async () => {
@@ -410,7 +443,7 @@ describe("CraftBench writes", () => {
   });
 
   it("names the three verbs no route serves, with the reason for each", () => {
-    vi.stubGlobal("fetch", okFetch({}));
+    vi.stubGlobal("fetch", benchFetch({}));
     open();
     expect(screen.getByTestId("workbench-unavailable-forge")).toHaveTextContent("nothing for a forge recipe to produce");
     expect(screen.getByTestId("workbench-unavailable-reroll")).toBeInTheDocument();

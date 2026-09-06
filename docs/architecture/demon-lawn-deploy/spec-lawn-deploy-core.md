@@ -176,19 +176,86 @@ method and `ModsAbsorptionTests.cs`'s own before/after-state assertion style for
    `RpgStore.UniqueActors.cs`'s `ReconcileUniqueEquipmentAtomBindingsUnlocked`. A demon specimen is a
    `rpg_unique_actors` row like any other, so it already qualifies as `OwnerKind.UniqueActor` — no new
    owner-kind variant needed.
-3. **`DeployMode` → spawn `side` precisely**: does `HypnoAlly` mean the specimen spawns as a real zombie
-   entity fighting *for* its plant-side owner (existing hypno-fold caveats the map already names), or
-   does deploy `side` follow whichever side currently owns the specimen regardless of mode? Not resolved
-   by anything read so far — `demon-system-map.md` line 7 says "hypno mode inherits the MatchRuntime
-   hypno-fold caveats" without spelling out which caveat governs this exact case.
-4. **The `side`-column mutation question (Correction 3)**: update the column at deploy, or make
-   `AuraDerivedEndpoints` `DeployMode`-aware? A real, owner-level design choice.
-5. **Species-magnitude delivery (Correction 4)**: what carries a specimen's own base stats (beyond
-   traits) into the deploy grant — a second `effect_binding` kind, a direct `Absolutes` write, something
-   else? Not designed yet.
-6. **Numeric type safety through the compiled-atom step**: `AtomCompiler.cs` (the compiled-atom stage
-   this pipeline routes through) is `int`-typed throughout, while a demon's own magnitudes are `long`
-   (`ConcreteSpecies.PTheta`). This module must verify — before implementation, not after — whether a
-   demon-scale magnitude can silently narrow from `long` to `int` anywhere in that path, and if so, fix
-   it before this module is considered built. Per this repo's own hard rule, overflow must throw, never
-   wrap or truncate silently.
+3. ~~`DeployMode` → spawn `side` precisely~~ — **resolved 2026-09-06, owner-confirmed after code
+   archaeology was exhausted.** Investigated the only hypno-adjacent mechanism in the tree
+   (`MatchRuntime.cs`'s `"zombie.hypno"` dispatch, PvZ's own native mind-control observation) and the
+   `SpecimenOwnershipOracle` precedent (ownership and board-mechanical side are already separate axes
+   elsewhere) — neither settled the question on its own, so it was asked directly rather than guessed:
+   **"pvz engine don't allow us spawn zombie in dave side without hypno, without hypno, spawn cause
+   zombie become enemy."** `side`/`typeId` pass through **unchanged** for both `DeployMode` values — a
+   spawned zombie-type entity is hostile to the plant side by construction, and only the game's native
+   hypnotize operation flips that. Confirms Option 1 from the question asked: no avatar-chassis remap,
+   no column mutation.
+4. ~~The `side`-column mutation question (Correction 3)~~ — **resolved as "no mutation, ever"** (see
+   point 3). `rpg_unique_actors.side` stays exactly what every other read path already assumes it is.
+5. **New finding from the same investigation: `HypnoAlly` deploy is a named refusal, not built.** Making
+   a spawned zombie-type entity fight FOR its owner needs PvZ's own native hypnotize operation — and
+   this codebase already investigated that operation once, for a different feature
+   (`tasks/content-stack-todo.md`, the `content-stack` program), and found real mind-control is "a
+   side-swap, not a flag," with no verified safe way to invoke or reverse it from the Injector today.
+   That program named it a refusal rather than ship a guess. **This module does the same**:
+   `TryBeginUniqueDeploy` refuses `HypnoAlly`-mode demons with `"deploy.hypno-ally-not-implemented"`.
+   `PlantAvatar`-mode demons (the common case — "most demons deploy as plant-side avatars") deploy
+   normally today. Unblocking `HypnoAlly` deploy is real, separate follow-up work gated on that harder,
+   pre-existing native-hypnotize problem, not on anything in this module's own scope.
+6. **A real regression this same change caused, found and fixed the same day**: `DemonLawnDeployCommanderRefusalTests.cs`/`DemonLawnDeployTests.cs` (T1.1/T1.2) picked their test
+   species via `.First(s => s.Side == "zombie" && ...)` with no `DeployMode` filter, and that pick landed
+   on a `HypnoAlly` species — breaking 5 of their own tests once the refusal above shipped. Fixed by
+   excluding `HypnoAlly` from both files' own species selection (their own subject is unrelated to
+   `DeployMode`).
+7. **Species-magnitude delivery (Correction 4) — resolved 2026-09-07, built as T1.5.** A 6-question
+   investigation (species-magnitude storage/reader, equipment's own `Absolutes` mechanism,
+   `BattleStatComposer`'s expedition-engine precedent, `PowerLadderKMicro`/`KMilli`'s real shape,
+   `thetaContent`'s type, per-species channel mapping) found:
+   - `ConcreteSpecies.Magnitudes` (`long`-typed, `PTheta`-derived, already channel-shaped matching
+     `DerivedStatChannels` exactly) is real and stored, but **dropped at the one shared
+     `ConcreteSpeciesSeedReader.ToDemonSpeciesDef` seam** — the same seam `TraitPool` already needed
+     curation at. `DemonSpeciesDef` (the LIVE catalog type `DemonSpeciesCatalog.Get` serves) had no
+     `Magnitudes` field at all, and `RpgStore.GetSpecies` (which DOES read it) had zero production
+     callers.
+   - **`Absolutes`/`UniqueLoadoutSpec`/`mods_json` is explicitly forbidden** by this spec's own
+     Boundaries ("never add a new dependent on the path being retired") — confirmed dead for every real
+     item today besides.
+   - **No existing precedent anywhere** (lawn or the expedition `BattleEngine`) turns a species'
+     magnitude into a stat effect — `BattleStatComposer`/`BattleRuleset.BaseHp/Atk/Defense` are
+     level-only, species-blind. This is genuinely new mechanism, not a wiring gap to a sibling engine.
+   - **`PowerLadderKMicro`/`KMilli`-scaled atom ops are unwired for reuse**: never supplied at the real
+     `AtomPushService.Build` call site (would throw), a single scalar Θ per push can't express multiple
+     specimens' own differing Θ in one compile, and the op's linear formula doesn't match
+     `AptitudeReadFunctions.Magnitude`'s own `share^γ` term anyway.
+   - `ProduceAndBind`'s `thetaContent` is `int` and architecturally Θ (the ladder INPUT), never `PTheta`
+     (the ladder OUTPUT, a `long`) — confirms a specimen's own `PTheta` was never a valid `thetaContent`
+     value in the first place.
+
+   **Design chosen**: magnitudes are pre-computed (already folded PTheta at species-generation time),
+   so they ride as **flat, pre-authored atom content** — the same shape T1.2's trait grants already use
+   — never a dynamically `PowerLadder`-scaled op. `DemonSpeciesDef.Magnitudes` now carries the value
+   forward (added to the ONE shared mapper seam). `RpgStore.UniqueActors.cs`'s new
+   `ReconcileDemonMagnitudeBindingsUnlocked` mirrors `ReconcileDemonTraitBindingsUnlocked`'s exact
+   diff-reconcile shape, wired into `TryBeginUniqueDeploy` right after it. One container per species
+   (`SpeciesMagnitudeContainerId`, holding every channel as an internal atom — a specimen's magnitude
+   package is all-or-nothing, unlike a trait set), filed under `ContainerKind.Trait` (id prefix
+   `trait.species-magnitude-{speciesId}`, a single kebab-case token after the `trait.` prefix — a
+   further embedded dot is refused) — deliberately **not** `ContainerKind.SpeciesPassive`, whose
+   `species-passive.` prefix already names a different, existing mechanism
+   (`species-effects`/roster-materialise's own per-player ROLLED content) that this would otherwise
+   collide with on the same speciesId. A genuinely new `ContainerKind` would be the cleaner semantic
+   fit but is real, separate, cross-cutting surface left out of this task's own scope.
+   **Full-corpus content generation (829+ species × N channels each) is real, separate follow-up
+   work** — not blocking this task, matching the program's own established phased-rollout precedent;
+   T1.5 proves the mechanism against a hand-authored fixture, mirroring exactly how T1.2 was proven
+   against one real trait before the full 68-trait corpus existed.
+8. ~~Numeric type safety through the compiled-atom step~~ — **T1.5's own re-run of this check, resolved
+   2026-09-07, named not fixed.** T1.5 chose the flat-atom path (point 7 above), not
+   `PowerLadderKMicro`/`KMilli` — so `AtomCompiler.cs:568,572`'s `checked(...)`-guarded arithmetic is
+   never reached, same as T1.2. But the flat path has its OWN, different int ceiling: `ValueSpec.Min`
+   (`ValueSpec.cs:117`) is `int`, and `AtomCompiler.cs:606`'s plain-flat resolution
+   (`CurveTable.ApplyMilli(spec.Min, ...)`, `CurveTable.cs:98`) returns `int`, **unwrapped in
+   `checked`** — a genuinely large species magnitude authored as a flat amount would silently wrap, not
+   throw. **Named, not fixed**: this is a repo-wide, structural fact of `ValueSpec` shared by EVERY flat
+   atom (the trait grant's own `150` included), not something T1.5 introduces — fixing it would mean
+   widening `ValueSpec.Min` for the entire atom vocabulary, real cross-cutting surface outside a single
+   deploy-mechanism task's scope. Currently far from load-bearing: real committed Θ values are tiny
+   (13, per `AbyssSwordStar.json`) against `int`'s own whole-units ceiling (Θ≈103,557 per CLAUDE.md's
+   table) — but a future balance pass pushing Θ that high would need `ValueSpec.Min` widened first, and
+   this is where that future work should look.

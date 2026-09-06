@@ -479,7 +479,7 @@ Named here so they are raised at task start rather than discovered mid-run.
 | **`provenance-supersede`** | seedsmith core backlog, **unbuilt**. `ProvenanceLedger.record` raises on a re-recorded row — *"a second write means idempotence failed"* (`pipeline/provenance.py:109-118`) | ⛔ **Hard.** A prompt-version bump cannot regenerate. §7.2 budgets 2–3 passes, and pass 2 cannot start without this |
 | **The theme registry** | `data/seed/demons/_registry/themes.v1.json` ships **84** themes against **840** species (counted). `theme-refresh` / `theme-enrich` are named as the fix and unbuilt | ⚠ The brief's motif source is 10× too coarse. Mitigable — the anchor's own `traits` and `reason` carry per-species motifs — but say so before the run |
 | **An atom-tag vocabulary** | `AffixTags.cs` ships (124 lines, tested) with no production call site; the affix corpus carries exactly **3** semantic tag values | ⚠ **Soft.** D14's property-keyed exclusion can key on posture and little else. Nodes may carry `excludeProps`; the vocabulary can be enriched later without regenerating |
-| **The 17th atom kind (D16)** | Real gap: no kind among the 16 writes an element payload, and the failure is silent | ⛔ **Allocate no budget to conversion nodes.** A conversion node would contribute zero forever, with no error |
+| **`element.convert` (D16)** | Real gap: no kind among the 17 writes an element payload, and the failure is silent. Specced 2026-09-06 (D56, [`spec-element-conversion.md`](spec-element-conversion.md)), not built | ⛔ **Allocate no budget to conversion nodes.** A conversion node would contribute zero forever, with no error |
 | **Coefficient resolution** | The shipped field is `PowerLadderKMilli`, an `int` in **per-mille** (`ValueSpec.cs:92`) | Owned by [`tree-binder`](spec-tree-binder.md), which re-derived the error at D29's ten tiers: **tier 1 is +63%, not the 17% this spec used to carry** (that figure was computed at seven tiers). `PowerLadderKMicro` is the fix it proposes. Not a blocker for authoring; a blocker for believing the numbers |
 | **A closed `family` roster** | 698 open tokens | §7.3 — this module ships with families excluded from the roster until one exists |
 
@@ -680,7 +680,8 @@ let the language stage pick a favour from an open enum — that is the measured 
 and permutation and voting do not fix aggregate shape; use the anchor's `elementPrimary` as the
 mechanical lock; re-classify anything the demon corpus already decided; write a number in any
 response schema; skip the rebalance after a forced override; allocate budget to a conversion node
-until a 17th atom kind lands; author a species tree that fails U1 or U2; ship a species without a
+until `element.convert` lands (D56, [`spec-element-conversion.md`](spec-element-conversion.md)); author
+a species tree that fails U1 or U2; ship a species without a
 Codex sentence; add 840 bloodlines to a browse — a species tree is not a choice, so it needs no
 chooser; leave an entry parked in a `_`-prefixed file.
 
@@ -705,10 +706,11 @@ chooser; leave an entry parked in a `_`-prefixed file.
 
 ## Open questions
 
-**One.** Everything else in this document is a recommendation nobody has disputed, which makes it a
-decision, or an answerable question, which makes it a task. Two of the three questions this spec
-carried were answered by the owner on 2026-09-05 and are recorded below with their answers, because a
-closed question that vanishes gets re-asked.
+**Zero remain open.** Everything else in this document is a recommendation nobody has disputed, which
+makes it a decision, or an answerable question, which makes it a task. Two of the three questions this
+spec carried were answered by the owner on 2026-09-05; the third (below) read as still open until task
+G7 closed it 2026-09-06. All three are recorded below with their answers, because a closed question
+that vanishes gets re-asked.
 
 1. ~~**Does a species tree gate on `UniqueDemon` specimen level, and does that satisfy D26's ladder?**~~
    **CLOSED 2026-09-06 by task G7: yes.** `PointBudget.UniqueDemonSourceFromLevel(specimenLevel) =>
@@ -771,7 +773,7 @@ closed question that vanishes gets re-asked.
 | §2, §6 — the catalog is static, shared and identical for every player | **D24** |
 | §6 — one Codex sentence per species; a bloodline is never in a browse | **D21** (every actor carries its own tree), doc 14 §3.3 |
 | §7.3 — the roster ships whole; families wait for a closed taxonomy | **D27**, **D9** |
-| §8 — no budget for conversion nodes until a 17th atom kind lands | **D16** |
+| §8 — no budget for conversion nodes until `element.convert` lands | **D16**, specced **D56** ([`spec-element-conversion.md`](spec-element-conversion.md)) |
 | §8 — property-keyed exclusion, keyed on properties the plan named | **D14** |
 | The open question above — the status axis of the favour triple is content, not a gate | **D35** (replacing D19/D31) |
 | §8.1 — the generic corpus's two missing gate quantities are owned and scheduled, and this module's own gap is a binding rather than a missing counter | **D37** |

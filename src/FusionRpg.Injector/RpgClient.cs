@@ -64,6 +64,7 @@ public sealed class RpgClient
         await RefreshPvzStatsAsync().ConfigureAwait(false);
         await RefreshCommanderAllocationAsync().ConfigureAwait(false);
         await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
+        await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
         await RefreshPowerIndexAsync().ConfigureAwait(false);
         try
         {
@@ -99,6 +100,13 @@ public sealed class RpgClient
             {
                 CheatCommandRunner.Enqueue(new CommandDto { Name = "commander.snapshot.reload" });
             });
+            // demon-lawn-deploy T2.1: DemonsUpdated previously reached only WebGroup — a new specimen
+            // (summon/fusion) changes the plant-side deploy roster, so the injector's own session cache
+            // needs to hear it too (DemonEndpoints.cs/FusionEndpoints.cs now also send to InjectorGroup).
+            _hub.On<object>("DemonsUpdated", _ =>
+            {
+                CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
+            });
             _hub.On<CommandDto>("Command", cmd =>
             {
                 try { RpgHost.Log.Info("[cheat-cmd] signalr " + (cmd?.Name ?? "?")); } catch { }
@@ -107,6 +115,9 @@ public sealed class RpgClient
                 if (string.Equals(cmd?.Name, "patron.aura", StringComparison.OrdinalIgnoreCase))
                 {
                     try { Effects.PatronCommand.Apply(cmd!); } catch (Exception ex) { RpgHost.Log.Warning("patron.aura: " + ex.Message); }
+                    // demon-lawn-deploy T2.1: a patron reassignment changes WHO is excluded from the
+                    // deploy roster — reuse this already-pushed signal instead of adding a second one.
+                    CheatCommandRunner.Enqueue(new CommandDto { Name = "lawn-deploy.roster.reload" });
                     return;
                 }
 
@@ -125,6 +136,7 @@ public sealed class RpgClient
                     // the next full injector process restart, not just the next reconnect.
                     await RefreshCommanderAllocationAsync().ConfigureAwait(false);
                     await RefreshCommanderSnapshotCacheAsync().ConfigureAwait(false);
+                    await RefreshLawnDeployRosterCacheAsync().ConfigureAwait(false);
                     await RefreshPowerIndexAsync().ConfigureAwait(false);
                     RpgHost.Log.Info("SignalR reconnected + re-joined + Hello (grant rehydrate)");
                 }
@@ -432,6 +444,57 @@ public sealed class RpgClient
                 row?.ActiveAuraId,
                 row?.ActiveAuraName,
                 CheatState.FetchedCommanderAllocation);
+        }
+        catch (Exception ex)
+        {
+            LastError = ex.Message;
+        }
+    }
+
+    /// <summary>demon-lawn-deploy T2.1: session cache for the plant-side deploy roster at
+    /// board.start — same cadence and same "caller resolves, cache stores" split as
+    /// <see cref="RefreshCommanderSnapshotCacheAsync"/>. Never called from MatchHost.Apply. A roster
+    /// or patron read failure leaves the PREVIOUS cache standing (matching this method's own sibling)
+    /// rather than clearing it to empty, so a transient hiccup doesn't wipe an otherwise-good cache the
+    /// moment before board.start reads it.</summary>
+    public async Task RefreshLawnDeployRosterCacheAsync()
+    {
+        try
+        {
+            var playerJson = await Http().GetStringAsync(_base + "/api/players/current").ConfigureAwait(false);
+            using var playerDoc = JsonDocument.Parse(playerJson);
+            var playerId = playerDoc.RootElement.TryGetProperty("id", out var idEl) && idEl.TryGetInt64(out var pid)
+                ? pid
+                : 0L;
+            if (playerId <= 0) return;
+
+            var rosterJson = await Http().GetStringAsync(_base + "/api/demons/" + playerId).ConfigureAwait(false);
+            var roster = JsonSerializer.Deserialize<DemonRosterDto>(rosterJson, Json);
+            if (roster == null) return;
+
+            string? patronInstanceId = null;
+            try
+            {
+                var patronJson = await Http().GetStringAsync(_base + "/api/patron/" + playerId).ConfigureAwait(false);
+                using var patronDoc = JsonDocument.Parse(patronJson);
+                if (patronDoc.RootElement.TryGetProperty("patron", out var p) && p.ValueKind == JsonValueKind.Object &&
+                    p.TryGetProperty("instanceId", out var pInst))
+                    patronInstanceId = pInst.GetString();
+            }
+            catch (Exception ex)
+            {
+                // A patron-read failure must not accidentally OFFER the active Patron as deployable —
+                // fail toward the safer (fewer options), not the more permissive, direction: if we
+                // cannot confirm who is NOT the Patron, keep the previous cache instead of guessing.
+                LastError = ex.Message;
+                return;
+            }
+
+            var eligible = roster.Items
+                .Where(it => !string.Equals(it.Actor.InstanceId, patronInstanceId, StringComparison.Ordinal))
+                .Select(it => new FusionRpg.Core.Match.LawnDeployRosterEntry(it.Actor.InstanceId, it.Profile.SpeciesId))
+                .ToList();
+            FusionRpg.Core.Match.LawnDeployRosterSessionCache.Apply(eligible);
         }
         catch (Exception ex)
         {

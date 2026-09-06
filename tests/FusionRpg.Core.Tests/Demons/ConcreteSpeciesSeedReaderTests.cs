@@ -67,6 +67,22 @@ public class ConcreteSpeciesSeedReaderTests
     }
 
     [Fact]
+    public void ToDemonSpeciesDef_carries_Magnitudes_through_not_just_the_reader_side()
+    {
+        // demon-lawn-deploy T1.5: unlike this file's own read-side round-trip above,
+        // ConcreteSpeciesMapper.ToDemonSpeciesDef is the SEPARATE step that turns a parsed
+        // ConcreteSpecies into the LIVE DemonSpeciesDef DemonSpeciesCatalog.Get actually serves —
+        // BuildDemonSpeciesSnapshot's own diff test compares two calls of this SAME method against each
+        // other, so it can never catch a bug in the method's own field-copy; this proves that directly.
+        var concrete = ConcreteSpeciesSeedReader.Parse(FullFixture);
+        var def = ConcreteSpeciesMapper.ToDemonSpeciesDef(concrete);
+
+        Assert.Equal(2712, def.Magnitudes["resource.max.hp"]);
+        Assert.Equal(136, def.Magnitudes["resource.regen.hp"]);
+        Assert.Equal(concrete.Magnitudes.Count, def.Magnitudes.Count);
+    }
+
+    [Fact]
     public void A_null_secondary_element_parses_to_null_not_an_exception()
     {
         var json = FullFixture.Replace("\"elementSecondary\": \"Fire\"", "\"elementSecondary\": null");

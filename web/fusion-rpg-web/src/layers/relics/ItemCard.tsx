@@ -317,8 +317,10 @@ export function ItemCard({
                     key={combo.comboId}
                     className={combo.state === "active" ? "text-text" : "text-muted"}
                     data-testid={`${testId}-combination-${combo.comboId}`}
+                    title={combo.comboId}
                   >
-                    {combo.comboId} · {combo.shape}
+                    {/* item-content `item-naming` (T3) — the combination's own words, not its id. */}
+                    {combo.title} · {combo.shape}
                     {combo.state === "one-away" && combo.distance !== null
                       ? ` — needs ${formatMagnitude({ unit: "count", value: combo.distance })} more: ${[
                           ...combo.missingFamilies,

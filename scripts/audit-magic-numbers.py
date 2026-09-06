@@ -152,6 +152,14 @@ EXEMPT_NAMES = {
     # value produces an identical game outcome (none), which is exactly what T1's own test ("would a
     # balance pass ever want to change this number?") answers no to.
     "InertCostMultiplierMilli",
+    # 2026-09-07, item-card gem inserts. `GemInsertCorpus.UnauthoredInsertTier` matches "tier" but is
+    # not a balance dial -- it is the IDENTITY of "the corpus authors no tier for this gem", not a
+    # number a pass would retune. Its own doc comment already says so: gems/*.json carries `powerBand`
+    # (a different axis), so every insert reports the ladder's own minimum, which is provably SAFE
+    # because `CombinationDistance` only ever UNDER-reports a resonance at the floor, never promises
+    # one the evaluator would refuse. The day the corpus authors a real tier, this constant is deleted,
+    # not retuned -- exactly T2's own "why this isn't tunable" test.
+    "UnauthoredInsertTier",
 }
 
 SKIP_DIRS = {"bin", "obj", "node_modules", ".git"}

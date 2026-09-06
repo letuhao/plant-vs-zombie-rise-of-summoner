@@ -23,9 +23,9 @@ public static class TreeUnlockCost
 
     /// <summary>The total cost of owning `count` nodes — `count*first + step*count*(count-1)/2`.
     /// Widened `long` throughout, `checked` so an overflow throws rather than wraps (CLAUDE.md rule
-    /// 5) — at the full 35,160-node corpus the cumulative reaches ~1.24e9, comfortably inside `long`
-    /// but the type this codebase's own overflow table names as "the default for everything here"
-    /// (spec-tree-state.md §7).</summary>
+    /// 5) — at the full 35,280-node corpus (D51, 2026-09-06: 24 statuses, not 21 — was 35,160) the
+    /// cumulative reaches ~1.24e9, comfortably inside `long` but the type this codebase's own
+    /// overflow table names as "the default for everything here" (spec-tree-state.md §7).</summary>
     public static long Cumulative(long count, long first, long step)
     {
         if (count < 0) throw new ArgumentOutOfRangeException(nameof(count), count, "count must be >= 0");

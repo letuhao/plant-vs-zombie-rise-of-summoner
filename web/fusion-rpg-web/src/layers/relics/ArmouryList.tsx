@@ -141,7 +141,13 @@ export function ArmouryList({
   selectedId: string | null;
   /** The whole row, so the detail pane never has to re-fetch or re-derive what the list already has. */
   onSelect: (row: ArmouryRowView | null) => void;
-  /** The seeded catalog's own display name where it knows this container; the id otherwise. */
+  /**
+   * A container's real name — the relic catalog's, else the base type's authored one.
+   *
+   * ⛔ **Never the container id** (item-content `item-naming` T3). The caller's own fallback is a
+   * sentence saying this build has no name for it; the row's `data-testid` still carries the
+   * instance id, so nothing debuggable moved.
+   */
   nameFor: (containerId: string) => string;
 }) {
   const [filter, setFilter] = useState<ArmouryFilterState>(EMPTY_ARMOURY_FILTER);

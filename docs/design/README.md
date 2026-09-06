@@ -9,7 +9,7 @@ anyone writes a component.
 behaviour. Plates are static. Interaction lives in the app.
 
 **Binding rules.** Every plate obeys [architecture/game-gui-principles.md](../architecture/game-gui-principles.md)
-(GG-1 … GG-61). A plate that violates a GG rule is wrong even if it looks good.
+(GG-1 … GG-64). A plate that violates a GG rule is wrong even if it looks good.
 
 ---
 
@@ -121,7 +121,7 @@ docs/design/
   _kit/tokens.css              the token layer: colour, type, space, radius, elevation, motion, bands
   _kit/kit.css                 foundation component styles
   _kit/screens.css             stage layouts and screen-level structures
-  00-foundation.html … 12-lawn-stage.html   the plates (numbered by design order)
+  00-foundation.html … 13-actor-sheet.html   the plates (numbered by design order)
 ```
 
 Plates are numbered by the order they are *designed*, not by navigation order.
@@ -131,7 +131,7 @@ Plates are numbered by the order they are *designed*, not by navigation order.
 ## 4. Plate index
 
 **The design is complete for player stages and layers; plate 10 is per-unit HUD; plate 12 is lawn
-interactive (shared collection + character sheet).** Every player-facing surface in the game is drawn
+interactive; plate 13 is the complete ActorSheet inventory.** Every player-facing surface in the game is drawn
 across these plates, and [information-architecture.md](information-architecture.md) is the map that
 connects them.
 
@@ -145,11 +145,12 @@ connects them.
 | [05-chronicle-almanac.html](05-chronicle-almanac.html) | The Almanac as a book · element and affliction reference · Chronicle · the attribution ledger | **Draft — for review** |
 | [06-system-dev.html](06-system-dev.html) | Run result · level-up · confirms · toasts · Settings · rebinding · Display and Sound · the keymap · the developer tree | **Draft — for review** |
 | [07-flows.html](07-flows.html) | Loadout · deploy targeting · the pact offer · the four first-session beats · focus order · the last ladder rungs | **Draft — for review** |
-| [08-actor-sheet.html](08-actor-sheet.html) | One Actor panel · six tabs · specimen and commander role extensions. **Landing contract superseded by plate 12 / spec-lawn-interactive.md** (tab inventory absorbed into character landing + depth) | **Draft — superseded landing** |
+| [08-actor-sheet.html](08-actor-sheet.html) | One Actor panel · six tabs over stubs. **Superseded by plate 13** (complete inventories + no-scroll tabs) | **Draft — superseded** |
 | [09-commander-list.html](09-commander-list.html) | Player-empire commander list · persisted default (Dave) · Set default / Defend the lawn · location &amp; legion map stubs · list → Actor sheet | **Draft — for review** |
 | [10-actor-hud.html](10-actor-hud.html) | Per-unit lawn HUD — identity / resource / status rows · dual render (Unity + Phaser) · legend · overflow · §H player scenarios (strengthened 2026-08-30) · ideal: [actor-hud-ideal.md](../architecture/actor-hud-ideal.md) · audit: [actor-hud-audit-2026-08-30.md](../research/actor-hud-audit-2026-08-30.md) | **Draft — for review** |
 | [11-world-stage.html](11-world-stage.html) | **The world map component catalog** — inspector sector **card** in every state · compact **map pin** (plate §O: pin ≠ card, zoom LOD, dual-plane, focus, safe-area) · lanes as a stroke legend · the four fog states · legions and supply · orders and targeting · lenses · the anchored HUD · turn cluster · outliner · bounded inspector · confirms · turn playback · unit families. **Supersedes plate 03's world sections**. HUD/commands ideal: [world-stage-ideal.md](../architecture/world-stage-ideal.md). Map plane ideal: [world-map-runtime-ideal.md](../architecture/world-map-runtime-ideal.md) | **Draft — for review** |
-| [12-lawn-stage.html](12-lawn-stage.html) | **Lawn interactive catalog** — shared **ActorCollection** + **ActorSheet** (character landing, not a stub tab bar) · cell overlap · occupancy dock · unique spawn tray · commander order bar (HoMM3 adventure; commander is not a tile) · match HUD with sun-bank vs actor-Sun split. Contract: [spec-lawn-interactive.md](spec-lawn-interactive.md). **Supersedes plate 04 lawn interactive chrome** (stage-vs-layer proof there still stands) | **Draft — for review** |
+| [12-lawn-stage.html](12-lawn-stage.html) | **Lawn interactive catalog** — ActorCollection, reserved-left dock, 12-col board, spawn tray, off-board combat book, match HUD. ActorSheet is composed here, catalogs live on plate 13. Contract: [spec-lawn-interactive.md](spec-lawn-interactive.md) | **Draft — audit-folded, for review** |
+| [13-actor-sheet.html](13-actor-sheet.html) | **Complete ActorSheet catalog** — InspectSplit, leftover + Confirm, StatRow, lexicon seed, visual shield/status, eight tabs, closed inventories underneath | **Draft — visual pass 2026-09-07, for review** |
 
 ### Coverage
 

@@ -16,7 +16,15 @@ namespace FusionRpg.Server;
 public sealed record WorkbenchCostDto(string Class, string MaterialId, long Qty);
 
 /// <summary>One socket after the operation.</summary>
-public sealed record WorkbenchSocketDto(int Index, string Affinity, bool Crafted, string? Insert);
+/// <param name="InsertName">
+/// item-content `item-naming` (T4): the gem corpus's authored name for whatever sits in this cell
+/// (<c>"Ember Shard"</c>), resolved through the same <c>GemInsertCorpus</c> delegate this bench
+/// prices <c>socket-insert</c> against. <c>""</c> for an empty cell or a container the corpus does
+/// not carry — the surface then says so rather than printing <c>gem.g1-001</c> as a name. Additive
+/// with a default, so no existing construction site changes.
+/// </param>
+public sealed record WorkbenchSocketDto(
+    int Index, string Affinity, bool Crafted, string? Insert, string InsertName = "");
 
 /// <summary>
 /// What one workbench operation did, in the shape a surface can draw without a second read: what was
@@ -125,6 +133,23 @@ public sealed class ItemWorkbench
         _baseTypeSocketMax = baseTypeSocketMax;
         _lookupInsert = lookupInsert;
     }
+
+    /// <summary>
+    /// The recipe corpus this bench prices against, for the READ route that lists it
+    /// (item-content T4). Exposed rather than loaded a second time in the endpoint file: a picker
+    /// offering a recipe the executor does not know would refuse on click, which is worse than not
+    /// offering it. Read-only — <see cref="MaterialRecipeCatalog.Recipes"/> is an
+    /// <c>IReadOnlyDictionary</c> and nothing here can mutate it.
+    /// </summary>
+    public MaterialRecipeCatalog Recipes => _recipes;
+
+    /// <summary>
+    /// The gem corpus this bench resolves an insert's element and name through, for the READ route
+    /// that lists what a player holds (item-content T4). Exposed rather than passed to the endpoint
+    /// file a second time: a picker named by a different catalog than the one that prices filling the
+    /// socket is exactly how two surfaces come to disagree about what a gem is called.
+    /// </summary>
+    public Func<string, CardInsertLookup?>? LookupInsert => _lookupInsert;
 
     // ---- module 14 `salvage-craft` -----------------------------------------------------------------
 
@@ -579,7 +604,14 @@ public sealed class ItemWorkbench
 
     IReadOnlyList<WorkbenchSocketDto> Sockets(string instanceId) =>
         _store.GetSockets(instanceId)
-            .Select(s => new WorkbenchSocketDto(s.Index, s.Affinity, s.Crafted, s.InsertContainerId))
+            .Select(s => new WorkbenchSocketDto(
+                s.Index, s.Affinity, s.Crafted, s.InsertContainerId,
+                // item-content T4. The same corpus `socket-insert` already resolves an insert's
+                // element from — one lookup, so a cell can never be named by a different catalog
+                // than the one that priced filling it.
+                s.InsertContainerId is { Length: > 0 } id
+                    ? _lookupInsert?.Invoke(id)?.Name ?? ""
+                    : ""))
             .ToList();
 
     static IReadOnlyList<WorkbenchCostDto> Lines(IReadOnlyList<MaterialCostLine> lines) =>

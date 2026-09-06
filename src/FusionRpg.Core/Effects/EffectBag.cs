@@ -32,8 +32,7 @@ public sealed class InMemoryEffectCatalog : IEffectCatalog
     public void Upsert(EffectDef def)
     {
         // Actions sorted once here so FireGrant can iterate without a per-fire OrderBy.
-        def.Actions.Sort((a, b) => a.Seq.CompareTo(b.Seq));
-        _defs[def.EffectId] = def;
+        _defs[def.EffectId] = WithSortedActions(def);
         _revision++;
     }
 
@@ -41,12 +40,34 @@ public sealed class InMemoryEffectCatalog : IEffectCatalog
     {
         _defs.Clear();
         foreach (var d in defs)
-        {
-            d.Actions.Sort((a, b) => a.Seq.CompareTo(b.Seq));
-            _defs[d.EffectId] = d;
-        }
+            _defs[d.EffectId] = WithSortedActions(d);
         _revision++;
     }
+
+    /// <summary>
+    /// Real, confirmed defect (found running the full suite, not theorized): the old code called
+    /// `def.Actions.Sort(...)` IN PLACE on the caller's own list. A caller that hands the SAME
+    /// `EffectDef` instance to more than one catalog -- e.g. `ConstructionActions.CompiledEffects`,
+    /// a `static { get; }`-cached list shared by every battle/test that references it -- had that
+    /// shared list re-sorted (and its `List&lt;T&gt;` version bumped) by every `Upsert`/`ReplaceAll`
+    /// call, including ones on a DIFFERENT catalog instance entirely. A concurrent `FireGrant`
+    /// enumerating `def.Actions` on another thread over the SAME shared list throws
+    /// "Collection was modified; enumeration operation may not execute" -- reproduced via
+    /// `ConstructionActionsTests` failing only under full-suite parallel execution, never in
+    /// isolation. `EffectDef.Actions` is `init`-only (cannot be reassigned post-construction), so the
+    /// fix is a defensive copy: this catalog gets its OWN `EffectDef` with a freshly-sorted `Actions`
+    /// list, and the caller's original object -- and its original list -- is never touched.
+    /// </summary>
+    static EffectDef WithSortedActions(EffectDef def) => new()
+    {
+        EffectId = def.EffectId,
+        EffectType = def.EffectType,
+        Name = def.Name,
+        Enabled = def.Enabled,
+        SourceTag = def.SourceTag,
+        Triggers = def.Triggers,
+        Actions = def.Actions.OrderBy(a => a.Seq).ToList(),
+    };
 
     /// <summary>Bump revision without changing defs (grant upsert/withdraw).</summary>
     public void TouchRevision() => _revision++;

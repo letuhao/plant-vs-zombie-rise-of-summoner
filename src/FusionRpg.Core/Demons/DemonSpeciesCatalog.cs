@@ -23,6 +23,17 @@ public sealed record DemonSpeciesDef
     public IReadOnlyList<string> TraitPool { get; init; } = Array.Empty<string>();
 
     /// <summary>
+    /// demon-lawn-deploy T1.5 — the species' own base-stat magnitudes (`ConcreteSpecies.Magnitudes`,
+    /// already `long`-typed, `PTheta`-derived channel values), carried forward so a deploy can bind
+    /// them the same way `TraitPool` already rides this record. Empty for any species with no
+    /// magnitude data imported yet (a compiled-default/fixture species, or one pending its own
+    /// generation pass) — a reconciler reading this must treat empty as "no magnitude bindings," never
+    /// a startup error, matching this catalog's own species-level "honest incompleteness" precedent.
+    /// </summary>
+    public IReadOnlyDictionary<string, long> Magnitudes { get; init; } =
+        new Dictionary<string, long>(StringComparer.Ordinal);
+
+    /// <summary>
     /// `battle-tempo` `tempo-content` (spec-tempo-content.md §1.1) — the species' own attack tempo,
     /// carried from `ConcreteSpecies.AttackIntervalMs` (already authored, already persisted; this
     /// field is a PROJECTION into the compiled roster, not a new column on the corpus). `0` (the

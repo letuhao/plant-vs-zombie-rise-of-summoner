@@ -51,6 +51,9 @@ public static class FusionEndpoints
                 {
                     await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("DemonsUpdated", new { playerId = pid });
                     await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("SoulsUpdated", new { playerId = pid });
+                    // demon-lawn-deploy T2.1: fusion changes roster membership (sacrifices consumed, a
+                    // new specimen created) — see DemonEndpoints.cs's own matching comment.
+                    await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("DemonsUpdated", new { playerId = pid });
                 }
                 catch
                 {

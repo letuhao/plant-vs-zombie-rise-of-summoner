@@ -784,18 +784,22 @@ property the machine already closes completely.
 
 ## Open questions
 
-**Three**, all genuine. A recommendation nobody has disputed is a decision, and an answerable question
-is a task — neither is listed here. The fourth was answerable and is answered below.
+**One genuinely open** (needs H8's pilot to answer, not an owner call). Two more were owner calls and
+are closed below, kept with their answers so a closed question that vanishes doesn't get re-asked. The
+fourth was answerable and is answered further below.
 
 1. **What is the real per-tree review rate?** Every hour figure above rests on 60–90 s and it is
    **unmeasured**. A 20-tree pilot answers it in half an hour and should gate the full run. The pilot
    also yields the first estimate of the intra-tree defect correlation §3.3 needs.
-2. **Is a two-reviewer agreement pass wanted on any tier?** The seeded sample is reproducible by
-   construction, so inter-reviewer agreement is measurable at **no extra sampling cost**. Whether it is
-   worth a second person's time is not this document's call.
-3. **What manual-correction rate is acceptable?** §6.1 makes hand correction legal and stamped; above
-   some rate it means the prompt is wrong. The demon corpus's rate was 3 entries in 840 — but that was
-   a floor set by how little was reviewed, not a ceiling set by quality.
+2. ~~**Is a two-reviewer agreement pass wanted on any tier?**~~ **CLOSED 2026-09-06 by D48: no —
+   single reviewer is enough.** The seeded sample is reproducible by construction, so inter-reviewer
+   agreement would have been measurable at no extra sampling cost, but the owner judged a second
+   person's time not worth spending on it.
+3. ~~**What manual-correction rate is acceptable?**~~ **CLOSED 2026-09-06 by D49: higher tolerance,
+   2–3%.** §6.1 makes hand correction legal and stamped; above some rate it means the prompt is wrong.
+   The demon corpus's rate was 3 entries in 840 (~0.4%) — but that was a floor set by how little was
+   reviewed, not a ceiling set by quality, and the owner chose not to hold this program to that
+   unproven floor.
 ### Closed 2026-09-05
 
 4. ~~**Does the shared corpus get a census too, or only the species lots?**~~ **Closed: yes, it gets a

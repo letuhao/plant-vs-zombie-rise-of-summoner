@@ -14,7 +14,7 @@ REGISTRY_DIR = REPO_ROOT / "data" / "seed" / "items" / "_registry"
 SNAPSHOT_PATH = Path(__file__).resolve().parent / "_registry_snapshot" / "allocated_partitions.json"
 
 _REGISTRY_FILES = ("bands.v1.json", "core.v1.json", "naming.v1.json", "tags.v1.json",
-                   "classes.v1.json", "themes.v1.json")
+                   "classes.v1.json", "themes.v1.json", "words.v1.json")
 
 
 def _load(name: str) -> dict:

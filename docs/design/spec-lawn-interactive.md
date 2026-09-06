@@ -1,7 +1,9 @@
 # Lawn interactive GUI — shared components and the character sheet
 
 **Status:** Design draft, 2026-09-06. **Not a spec to build against until owner review.** No code
-authorized.
+authorized. **Audit fold same day** — five perspectives (UX, DPLP, character-sheet systems, GG-9 FE,
+demon vocabulary). Findings that changed the draft are in §16; do not implement from the first
+pass of plate E aptitude names or the adventure-spell label.
 
 **Where it lives:** `docs/design/` on purpose. This is a *player surface* contract — same folder as
 `spec-derived-stat-sheet.md`, `spec-equip-and-paperdoll.md`, `spec-action-layer.md`. Visual
@@ -12,7 +14,8 @@ acceptance: [12-lawn-stage.html](12-lawn-stage.html). Architecture locks it must
 
 **Loop this extends:** [the-loops.md](../guide/the-loops.md) place **1. Lawn — first core**. It also
 surfaces spine A (power), B (demons on the board), C (gear on a unique). It does not invent a
-parallel pitch and it does not make the lawn the whole war.
+parallel pitch and it does not make the lawn the whole war. Multi-perspective audit:
+[lawn-interactive-audit-2026-09-06.md](../research/lawn-interactive-audit-2026-09-06.md).
 
 ---
 
@@ -32,7 +35,8 @@ parallel pitch and it does not make the lawn the whole war.
 [x] Factual claims cite file:line. Code beats plate 08 comments.
 [ ] Constraint tests not run — this pass is design only; "would break goldens" is not claimed.
 [x] No §2 invariant contradicted. Observe ≠ control, no FE prediction, deltas not absolutes.
-[ ] Propagation after owner review: README plate index, IA §2.3 HUD row, plate 04/08 supersede notes.
+[x] Propagation of *this draft*: README plate index, IA §2.3 HUD row, plate 04/08 supersede notes,
+    research audit log. Capability map `actor-sheet-map.md` carries a successor banner, not a retire.
 ```
 
 Honest gap: `actor-hub-ssot.md` and `action-ideal.md` were not read cover-to-cover this session.
@@ -51,10 +55,13 @@ A downstream session reads this file. These constrain every component below:
    paints a living occupant before Admit, never predicts procs (DPLP RT-04 / RT-15, GG-15).
 3. **RPG features live in the RPG layer.** Cell occupancy, resources, actions, trees, gear are RPG
    readouts and Intent chrome. They are not a rewrite of PvZ `Plant` fields.
-4. **Commander never fights.** Commander and Patron are off-board aura roles on a unique demon
-   (`demon-system-map.md` Vocabulary). The lawn action bar is the *summoner's / this-match
-   commander's* Intent list onto the board — HoMM3 *adventure* spellbook, not a combat hero on a
-   hex. Do not draw the commander as a lawn tile.
+4. **Commander never fights.** Commander and Patron are off-board aura roles
+   (`demon-system-map.md` Vocabulary). The lawn order bar is this-match Commander's
+   **combat book** — HoMM3 *combat* hero spells while stacks fight (hero is not a hex, one
+   portrait off-field). It is **not** the adventure-map book (View Air / Dimension Door); those
+   verbs belong to the world-map Orders loop. Do not draw the commander as a lawn tile.
+   **Today** the commander identity in code is Crazy Dave (`CommanderId`). Vocabulary 2026-09-06
+   says a unique demon; that promotion is an owner decision (§14), not two hotbars.
 5. **General vs unique is an identity axis, not a UI theme.** A cell can hold engine-spawned
    general demons (species stats only, no `instanceId`) and player unique demons (`UniqueActor`).
    One collection, one sheet; the sheet *locks* what a general cannot have (GG-17), it does not
@@ -75,7 +82,7 @@ A downstream session reads this file. These constrain every component below:
 Plate 04 drew a lawn *stage chrome* (sun, wave, commander chip, transport) and a panel-over-board
 proof. Plate 08 drew a six-tab Actor *door*. Plate 10 drew per-unit HUD. None of them is a
 **lawn monitor you can play**: click a stacked cell, page the occupants, open a real character
-sheet, spawn a unique onto a cell, cast off-board actions, read match resources.
+sheet, spawn a unique onto a cell, enqueue off-board orders, read match resources.
 
 The shipped `ActorPanel` is the defect the owner named. It is not a character sheet. Verified
 against code, not the plate:
@@ -93,13 +100,16 @@ against code, not the plate:
 
 Plate 08 said the Overview tab was "mostly already drawn" and later tabs would fill in. The
 implementation treated that as permission to ship a tab bar over stubs. **That cost is already
-spent and it is the wrong shape.** A character sheet's landing view *is* the character. Tabs are
-depth (GG-26), not the place the character is hiding.
+spent and it is the wrong shape.** Tabs partition a no-scroll floor. Each closed catalog has a
+tab that lists every row (plate 13). Number-box primaries and a packed landing are both refused.
 
-Creatures layer already has list/grid + paging (`CreaturesLayer.tsx:17-24`, GG-50 tiers 24 / 240).
-Lawn cell click and unique-spawn must **not** grow a third list. `ActorListPickerPanel` is a
-narrow scope-picker over `ActorRow` only — no grid, no paging, no sheet. LawnPage spawn is a
-**numeric `typeId` box** (`LawnPage.tsx:570-572`) — GG-23 / GG-24 fail.
+CreaturesLayer has the 24/240 *volume policy* and is **list-only UniqueActor** master-detail
+(`CreaturesLayer.tsx:17-24`). It is a *consumer* of the collection widget, not the widget to extract.
+Lawn cell click and unique-spawn must **not** grow a third list, and they cannot drop
+`VirtualCreatureList` onto occupants that have no `instanceId`. `ActorListPickerPanel` is a
+narrow scope-picker over `ActorRow` only — no grid, no paging, no sheet, and it treats
+`instanceId` as `targetPtr`. LawnPage spawn is a **numeric `typeId` box** (`LawnPage.tsx:570-572`)
+— GG-23 / GG-24 fail.
 
 ---
 
@@ -117,8 +127,8 @@ on the lawn is a cluster that *composes* them.
 
 | Id | Player name | Entity / density | Consumers (must stay one implementation) | Today |
 |---|---|---|---|---|
-| **`ActorCollection`** | Creature list | Actor **Row** and **Card**, with paging, list/grid toggle, GG-50 volume, GG-51 query state | Creatures layer · **cell occupancy dock** · **unique spawn tray** · scope picker (replace `ActorListPickerPanel`'s private list) · Fusion parents · Expedition dispatch | **Wiring gap** — CreaturesLayer has the volume policy; picker and lawn do not call it |
-| **`ActorSheet`** | Character sheet | Actor **Panel** — *landing is the sheet*, tabs are depth | Creatures inspect · Commanders inspect · **cell occupant drill-in** · Pact bound-demon · (later) Delve party, not this plate | **Real gap in shape** — `ActorPanel` exists as a tab shell over stubs; this document *replaces the landing*, it does not add a seventh tab |
+| **`ActorCollection`** | Creature list | Actor **Row** and **Card**, with density toggle, GG-50 volume, GG-51 query state | Creatures layer · **cell occupancy dock** · **unique spawn tray** · scope picker (replace `ActorListPickerPanel`'s private list) | **Real gap as a widget** — CreaturesLayer has the 24/240 *policy* and is list-only UniqueActor master-detail; it is a *consumer*, not the implementation to lift. Fusion/Expedition/Commanders lists are later consumers, not v1 |
+| **`ActorSheet`** | Character sheet | Actor **Panel** — no-scroll floor, eight tabs, complete catalogs on plate 13 | Creatures inspect · Commanders inspect · **cell occupant drill-in** | **Real gap in shape** — `ActorPanel` is a tab bar over stubs. Plate 13 is the inventory. Filename stays; export alias `ActorSheet` |
 
 ### 2.2 Lawn clusters (travel together on this stage; not new entities)
 
@@ -126,21 +136,28 @@ on the lawn is a cluster that *composes* them.
 |---|---|---|---|
 | **`LawnMatchHud`** | Match strip | 1 | Sun *bank*, wave/clock/phase, commander + aura chips, deployed uniques, connection. Extends plate 04 §A / `spec-lawn-hud-chip.md`. |
 | **`CellStack`** | Occupants on a tile | 0 (Phaser) | Draw every living occupant in the cell with a stable overlap offset so the player can *see* a stack without clicking. Per-unit HUD stays plate 10. |
-| **`CellOccupancyDock`** | This cell | 2 | Right dock: this cell's occupants through **`ActorCollection`**. Select a row → **`ActorSheet`**. Not a second list widget. |
+| **`CellOccupancyDock`** | This cell | 2 | **Reserved left column** (rail side), one width token. The Phaser camera **shrinks** so all **12** columns stay on screen — including spawn lanes 9–11. Do not overlay the right edge. Select a row → **`ActorSheet`**. Occupants adapt through §4.5 before they become `ActorRow` |
 | **`SpawnTray`** | Field a creature | 2 | Unique demons eligible to deploy, through **`ActorCollection`**. Confirm cell via existing `SpawnTargeting` ghost (DPLP InteractionMode). No `typeId` typing. |
-| **`CommanderActionBar`** | Orders | 1 | Off-board action hotbar (1–9). HoMM3 adventure-spell pattern: pick order → target on the board → Intent. Uses `spec-action-layer.md` action card / cost cluster / refusal. |
+| **`CommanderActionBar`** | Orders | 1 | Off-board **combat book** (1–9). HoMM3 combat-hero pattern: pick order → target on the board → **enqueue Intent**. Uses `spec-action-layer.md` action card / cost cluster / refusal. FE does not run A10 range math on the PvZ lawn |
 
 ### 2.3 Already specified — compose, do not redraw
 
 | Piece | Owner | Lawn use |
 |---|---|---|
 | Actor Token / Chip / Row / Card | `00-foundation.html` §G · `src/ui/actor/*` | Collection densities; HUD chips |
-| PanelShell / DialogShell | GG-5 / GG-61 | Sheet and docks scroll *inside* the shell |
-| Resource meter `(id, label, value, max, polarity)` | `00-foundation` · resource-hub | Sheet landing + HUD only for match-scoped stocks |
+| PanelShell / DialogShell | GG-5 / GG-61 | Sheet and docks: **no page scroll**; list regions only |
+| Resource meter `(id, label, value, max, polarity)` | `00-foundation` · resource-hub | Condition tab + HUD only for match-scoped stocks |
+| AptitudeTile | plate 13 | Twelve primary stats — name, share, Reading, +/−, inspector (no dialog) |
+| StatRow | plate 13 | Derived family: lexicon name, number, spark, `?` |
+| InspectSplit | plate 13 | Left dock / right reading. Not a stack push |
+| LeftoverBar | plate 13 | Unspent points + Reset + Confirm |
+| ShieldLayer | plate 13 · shield runtime | Up to 3 instances, not an aggregate bar |
+| StatusInstanceRow | plate 13 · StatusRuntime | Live bag / catalog / mastery segs |
+| ElementMasteryCell | plate 13 · gate-counters | Six concrete elements; omni not a slot |
 | Status token / chip | plate 10 + status-ssot | Cell stack glance + sheet live strip |
 | Action slot + cost cluster + refusal | `spec-action-layer.md` | Action bar *and* sheet equipped-action row |
-| Paper-doll, 15 roles, frame vocabulary | `spec-equip-and-paperdoll.md` | Sheet landing (read) + Gear depth (equip) |
-| Derived-stat sheet, 6 states, combat matrix | `spec-derived-stat-sheet.md` | Sheet **Combat** depth, not the landing |
+| Paper-doll, 15 roles, frame vocabulary | `spec-equip-and-paperdoll.md` | Kit → Gear |
+| Derived-stat sheet, 6 states, combat matrix | `spec-derived-stat-sheet.md` | Derived tab · StatRow · InspectSplit |
 | Per-unit lawn HUD | plate 10 · `actor-hud-ideal.md` | On-canvas glance; click opens dock, not a third HUD |
 | Commander HUD chips | `spec-lawn-hud-chip.md` | Match strip; tap may open **same** `ActorSheet` with "this match" banner |
 
@@ -154,40 +171,37 @@ on the lawn is a cluster that *composes* them.
 | Commander drawn on a lawn tile | Vocabulary: commander never fights |
 | Sun meter on the character sheet that reads the match bank | Wrong scope. Bank = HUD; `hunger` = actor |
 | Numeric `typeId` spawn | GG-23 / GG-24. Recognition from `ActorCollection` |
-| A new top-level `#/actor/:id` route | GG-1 / GG-8. Sheet is `?panel=…&sel=` over the current stage |
+| A new top-level `#/actor/:id` route | GG-1 / GG-8. Sheet is `?panel=…&sel=<instanceId>` over the current stage. Generals never enter `sel` |
 
 ---
 
 ## 3. `ActorSheet` — the character sheet
 
-### 3.1 The shape (landing *is* the character)
+### 3.1 Tabs partition a no-scroll floor (owner, 2026-09-06 evening)
 
-Classic sheets (Diablo character, BG3 overview, HoMM3 hero screen) put portrait, body, numbers,
-gear, and current condition on **one view**. Depth (spellbook, skill tree, full stat dump) sits
-behind that view. Plate 08 inverted this: six tabs, empty Overview. **This plate inverts it back.**
+Plate 12 §E packed doll + twelve + meters + standing + live combat onto one landing. That forced
+either a scene scrollbar or truncated catalogs (six invented names, one Shield bar). **Tabs are
+required.** Condition is the glance. Every closed list has a tab that enumerates it.
+
+Complete inventory (implement from this, not from memory):
+[13-actor-sheet.html](13-actor-sheet.html).
 
 ```
-┌ Header: portrait · name · species · rarity · side · level · element pips · live status chips · Esc ┐
-├──────────────┬─────────────────────────────┬─────────────────────────────┤
-│ Paper-doll   │ Primary + resources         │ Live combat                 │
-│ 15 slots     │ 12 named aptitudes          │ HP / shield (observe)       │
-│ frame vocab  │ 6 resource meters           │ statuses, cell, unique/gen  │
-│ read-only    │ 5-axis Standing             │ type progression (species)  │
-│ on landing   │                             │                             │
-├──────────────┴─────────────────────────────┴─────────────────────────────┤
-│ Equipped action slots (same ActionSlot grammar as the lawn bar)          │
-├──────────────────────────────────────────────────────────────────────────┤
-│ Depth tabs (not the character): Combat sheet · Paths · Loadout · History │
-└──────────────────────────────────────────────────────────────────────────┘
+┌ Header (flex:none): portrait · name · species · side · level · two concrete elements · Fielded/Wave · Esc ┐
+├ Tab strip (flex:none): Condition · Aptitudes · Derived · Shield · Status · Elements · Kit · Paths         ┤
+├ Pane (flex:1; min-height:0; overflow:hidden) — list-scroll OR inspector body may overflow-y               ┤
+├ Aptitudes leftover footer (flex:none): leftover count · Reset · Confirm                                  ┤
+└ Footer when commander-role: Set default / Defend the lawn                                                 ┘
 ```
 
-**GG-61:** the shell is height-bounded to the GG-36 floor (720 CSS px). The landing grid scrolls
-inside the body if 15 slots + six meters overflow. The depth tab that hosts ~385 derived channels
-*always* scrolls inside the sheet; the page behind never does.
+**No page scroll on the lawn stage or this shell.** GG-61 still owns *list* scroll inside a bounded
+region (derived channels, 24-status catalog, elemental dump, Paths lattice). HUD, dock chrome,
+AptitudeTile grid, 3 shield slots, 15 doll wells, 6 element cells, 6 resource meters do **not**
+scroll.
 
-**GG-10:** cell → dock (push 1) → sheet (push 2). Combat / Paths / Loadout are tabs, not a third
-push. Passive lattice *inside* Paths may push once more (already specified in `spec-tree-surface.md`)
-and that is the cap.
+**GG-10 / GG-63:** cell → dock (push 1) → sheet (push 2). AptitudeTile and StatRow fill an
+**in-pane inspector** — they do not push a dialog. Confirm on the leftover footer is the decision
+control. Paths lattice may push once more (`spec-tree-surface.md`) — that is the cap.
 
 ### 3.2 Who the sheet can bind
 
@@ -195,59 +209,57 @@ and that is the cap.
 |---|---|---|---|
 | **Unique, Cold** (roster, not on a board) | `instanceId`, species, rarity | Aptitudes (unique scope), gear, trees, action loadout | Live HP/status/cell — *"not on a board"* |
 | **Unique, Bound** (lawn `ptr` ↔ `instanceId`) | Same + this-cell | All of the above **plus** observe HP/shield/status/resources | Nothing extra. Observe may lag (RT-14); show *"binding catching up"* not a blank |
-| **General, living** (engine plant/zombie, no specimen) | Species, side, level-band from pinned `progression.power` | Observe HP/status; species primary / general tree **read-only** | Gear, unique tree, action loadout, rename, release — *"this is a wild [species], not one of yours"* |
+| **General, living** (engine plant/zombie, no specimen) | Species, side, level-band from pinned `progression.power` | Observe HP/status; species bloodline tree **read-only** | Gear, unique tree, action loadout, rename, release — *"this is a wave [species], not a fielded specimen"* |
 | **Commander role** | Same unique sheet | Aura slot + "leads this match / next run" banner | Combat participant chrome. Commander is not a tile. Footer: Set default / Defend the lawn (plate 09) |
 
-`ptr` is never a player-facing id (GG-23). Bound unique is titled by display name; general by
-species name + a "wild" / "wave" chip.
+`ptr` is never a player-facing id (GG-23). Bound unique is titled by display name + **Fielded**.
+General by species name + **Wave** (plant or zombie). Do not write **Wild** — that word is capture /
+wild-join (`demon-system-map.md`). Engine generals include plants the player sun-planted; they are
+still wave troops, not specimens.
 
-### 3.3 Landing blocks — required, not optional
+### 3.3 Tab inventory — every closed list has a home
 
-Each block names its data shape. Components bind to the shape, not to an enumerated list
-(`design/README.md` §2.3).
-
-| Block | Binds to | Render rule |
+| Tab | No-scroll chrome | List-scroll region |
 |---|---|---|
-| **Identity** | display name, species name, rarity rung, side, level, frame | Art contract GG-58. Missing art = designed placeholder with side + element, never a broken image |
-| **Element** | up to two concrete slots; never offer `omni` as a type | Tokens from the element ladder |
-| **Live status** | status chips from observe (Bound/general) or empty (Cold) | Same chips as plate 10. Empty Cold: omit the tray, do not write "no statuses" as if they were missing |
-| **Paper-doll** | 15 `role_id`s, labels from `(role, frame)` | `spec-equip-and-paperdoll.md`. Empty slot is a dashed well with the *player* slot word (muzzle, not `armament-primary`). Landing is inspect; equip is Loadout tab |
-| **Resources** | six meters, faction labels | Registry shape `(id, label, value, max, polarity)`. Include **`poise`**. ⚠ `ResourceView` in `types.ts:640` still lists five ids — that contract is stale vs resource-hub; the sheet must not ship the stale five |
-| **Primary stats** | twelve aptitudes, **display names**, unique-scope shares | Never print the aptitude *id* as the label. Commander-scope replica is a footnote ("includes commander spread"), not the only editor, and not on a general demon |
-| **Standing** | five-axis power vector | GG-48: scalar may sort a list; it is not the only number on the sheet |
-| **Live combat** | observe HP, shield stack, cell (row/col as *board words*, not `row`/`col` in copy) | Lawn-bound only. GG-46 on shield magnitudes |
-| **Equipped actions** | loadout slots | Same `ActionSlot` as the stage bar. Empty slot dashed + unlock reason (`loadout.slots`). Costs as resource chips with faction labels |
+| **Condition** | HP+shield radial · 6 coloured pool meters · 5-axis Standing radar+bars · status glyphs | none |
+| **Aptitudes** | 12 **AptitudeTile** with +/− · leftover footer · Confirm | inspector reading (right) |
+| **Derived** | StatRow list, one collapse group open, Show unchanged | inspector: unit, compose, cap or not, sources |
+| **Shield** | 3 coloured radials (instances). Empty well dashed | omni shield StatRows; full matrix lives on Derived |
+| **Status** | StatusGlyph grid · segs Live / Catalog / Mastery | inspector reading |
+| **Elements** | 6 mastery radials · lock-chips for omni/aspect/family | inspector + mastery StatRows |
+| **Kit** | segs Loadout (5+1 ActionSlot) / Gear (15 doll wells, locked≠empty) | none (15 wells flex) |
+| **Paths** | species bloodline + shared corpus panes | lattice when that surface is open |
 
-### 3.4 Depth tabs (behind the landing)
+**AptitudeTile** is a shared component (GG-9): name, share, `Reading`, +/− stepper, leftover footer,
+Confirm. Click fills InspectSplit. It is not `statgrid` number boxes and not a nested dialog.
 
-| Tab | Opens | Must not become |
-|---|---|---|
-| **Combat** | Full derived-stat sheet (`spec-derived-stat-sheet.md`) — combat *matrix* first, six states, GG-49 attribution | A dump of `channelId` strings |
-| **Paths** | Specimen (unique) or species (general) tree. Reuse the existing Passives surface **parameterized by actor**, not a second tree UI | Player-wallet trees with no specimen (today's `PassivesTab`) shown as if they were this demon's |
-| **Loadout** | Paper-doll **editor** + action slot assignment + comparison (GG-47) | A second gear page in Relics that does not deep-link here |
-| **History** | Specimen XP, runs this one fought, fusion lineage | A developer event log |
+**Shield** is layered instances (max 3, `shield.v1.json`). Aggregate-only “Shield 120/200” is a HUD
+glance, not the sheet. Noun is Shield, never Ward.
 
-Auras (commander) stay on the commander-role landing / Loadout, not mixed into a fake action grid
-of Strike/Firebolt (`ActionsTab.tsx` current mix).
+**Status stacks ≠ status mastery.** Live bag is `StatusRuntime` (no stack-count field; ember Coexist;
+elemental family mutex; nerve is party stacks). Mastery is player-lifetime `status_applied.<id>` gate
+counters over the same 24 ids.
 
-### 3.5 Four states (GG-17) — every sheet, including landing
+**Element mastery** is player-lifetime `element_mastery.<id>` over the six concrete elements. Built.
+**Aspect-scope is REVERTED** — show species `ElementPrimary`/`Secondary`, lock “six aspects” with that
+reason. **Demon family** has no canonical vocabulary in `src/` — lock, do not invent.
 
-| State | Landing shows |
+### 3.4 What this retires
+
+- Plate 08 Overview-as-PendingNotes.
+- Plate 12 §E “landing is the whole character” (truncated catalogs).
+- History / Promote tabs (`actor-sheet-map.md`).
+- Player-path KeyValue dumps (`LawnPage.tsx:754-767`). GG-41 may keep a developer inspector.
+- actor-sheet-shell “Overview unchanged + six tabs”. Filename `ActorPanel.tsx` stays; layout is plate 13.
+
+### 3.5 Four states (GG-17) — every tab
+
+| State | Shows |
 |---|---|
-| Loading | Shell chrome + pulse wells in the three columns; no fake Emberling |
-| Empty | Does not apply to a bound id; collection empty is the collection's problem |
+| Loading | Shell + pulse wells; no fake Emberling |
+| Empty | Collection empty is the collection; a tab with a closed list of zero live rows still shows the catalog / locked empty |
 | Error | What failed + Retry. Stage behind stays up (GG-14) |
-| Locked | General-demon locks as in §3.2, with the reason on the control (GG-55) |
-
-### 3.6 What this retires
-
-- Plate 08 §B "Overview is the landing, mostly already drawn" as the implementation contract.
-  Plate 08's *tab inventory* (progression, derived, actions, passives, gear) is absorbed into
-  landing + the four depth tabs above.
-- `ActorPanel` Overview-as-PendingNotes as the accepted actor surface.
-- Any lawn inspector KeyValue of `typeId` / `ptr` / `Cold phase` (`LawnPage.tsx:754-767`).
-
-`ActorPanel` the *module* may keep its filename; its **layout contract** is this section.
+| Locked | General-demon locks as in §3.2, reason on the control (GG-55) |
 
 ---
 
@@ -286,9 +298,24 @@ reopen.
 
 ### 4.4 Mixed general + unique in one cell
 
-Each row shows the actor rung **plus** a chip: **Yours** (unique Bound) vs **Wild** (general).
-Sorting default: uniques first, then plants, then zombies — overridable. The player came here to
-find *their* demon in a pile.
+Each row shows the actor rung **plus** a chip: **Fielded** (unique Bound) vs **Wave** (general plant
+or zombie). Sorting default: fielded first, then plants, then zombies — overridable. The player came
+here to find *their* specimen in a pile.
+
+Dock rows carry a thin **HP sliver** (observe). Collection rows on Creatures (Cold) omit it.
+
+### 4.5 Occupant → collection adapter (required before the dock)
+
+`ActorView` today requires `instanceId` (`types.ts:575-591`). Cell occupants include generals with
+none. **Do not** feed `LawnViewModel` rows straight into `ActorRow`.
+
+The adapter produces a collection row: display name, species, side, rarity-or-none, Fielded/Wave,
+observe HP fraction, optional `instanceId`. Unique Bound rows may open `ActorSheet` by `instanceId`.
+General rows open the same sheet bound to a **session-scoped observe handle** that dies with the
+occupant (generation ≠ ptr lifetime; do not invent a fourth durable id).
+
+`ActorCollection` is a **new widget**. CreaturesLayer, the dock, the spawn tray, and the scope picker
+**consume** it. Do not copy `VirtualCreatureList` and call GG-9 done.
 
 ---
 
@@ -302,7 +329,8 @@ find *their* demon in a pile.
 | Overlap | Stable offset (e.g. 6–8 px down-right per occupant after the first), depth = layout order already used by `layoutGrid` |
 | Cap visible | Structural cap on *drawn* extras (not a progression ceiling): show N sprites + a `+K` pip when over N. N is a tunable in presentation tokens, not a Core cap |
 | HUD | Plate 10 stack on the **topmost** occupant; others keep a thinner HP/status sliver if the unit HUD program turns slivers on — default off v1 (`actor-hud-ideal.md`) |
-| Pick | Click hits topmost occupant (existing `PickSystem`) **or** empty-ish cell chrome → dock with the full list. Keyboard confirm on a focused cell opens the dock, not only the top occupant (so overlap is not a mouse-only trap — GG-21) |
+| Bound pip | Fielded uniques carry plate 10's identity pip on the **sprite**, including under-stack — monitor without click |
+| Pick | Click hits topmost occupant (existing `PickSystem`) **or** empty-ish cell chrome → dock with the full list. Keyboard confirm on a focused cell opens the dock, not only the top occupant (so overlap is not a mouse-only trap — GG-21). Today's `LawnWorldScene` confirm emits an **occupant**; implementation retargets confirm to the **tile** when InteractionMode is inspect |
 | Selection chrome | Existing ring (`StatusFx` / FxPool). Dock open ⇔ cell selected |
 
 This is glance. Numbers stay in the sheet (GG-60, actor-hud v1: no full numeric readout on-canvas).
@@ -330,19 +358,25 @@ General-demon debug inject remains a developer surface.
 
 ---
 
-## 7. Commander action bar (HoMM3 adventure spells)
+## 7. Commander action bar (HoMM3 combat-hero book, off the hex)
 
 ### 7.1 What it is
 
-HoMM3 lets a **hero who is not a stack on the hex** spend spell points on the adventure map
-(View Air, Dimension Door) and, in combat, spend a separate book while stacks fight. Our Commander
-**never enters the lawn as a unit**. The bar is therefore the adventure-map analogue:
+HoMM3 combat lets a **hero who is not a stack on the hex** spend a spell book while stacks fight.
+Adventure-map spells (View Air, Dimension Door) are a different book; in this repo they belong to
+the **world-map Orders** loop. Our Commander **never enters the lawn as a unit**. The lawn bar is
+the combat-hero analogue, 1–9, no round lock:
 
-- Caster: this-match Commander (unique, off-board) — identity already on `LawnMatchHud`.
-- Verbs: actions whose membership is `spec-action-layer.md` / action-ideal (anything that costs
-  resource or time and needs a cooldown). Summon-to-cell is an action. A passive aura is not.
-- Target: cell, occupant, lane, side, or self-off-board, per the action's target rule. **With no
-  board, range checks pass** (A2 §4) — the lawn *has* a board, so range is real here.
+- Caster: **this-match Commander**. Today that identity in code is Crazy Dave (`CommanderId`).
+  Vocabulary 2026-09-06 wants a unique demon; until that promotion, do not draw a second hotbar.
+- Verbs: actions whose membership is `spec-action-layer.md` / action-ideal. Summon-to-cell is an
+  action. A passive aura is not. Example verbs (Sunfall, Lane bolt) are **combat orders onto the
+  lawn**, not adventure travel.
+- Target: cell, occupant, lane, side, or self-off-board, per the action's **declared target kind**.
+  **FE does not run battle A2 range.** Highlights of lagged observe are chrome only. Server /
+  injector re-resolves. Do not say the player "casts."
+- Payer: each slot's cost cluster names the **stock** — match `pvz.*` sun bank, or an actor pool
+  (`qi` / Yang, etc.) on the commander. Unlabeled `40` is a GG-46 fail.
 - Authority: enqueue Intent; paint outcome on observe (GG-15).
 
 ### 7.2 Layout
@@ -352,25 +386,27 @@ reserved for stage hotbar (`information-architecture.md` §5).
 
 Each slot = `ActionSlot`: icon, player name, cost cluster, cooldown veil, unaffordable / refused
 reason (GG-55). Selected slot + board targeting highlight (cell `is-range` / `is-target` from
-plate 04 grammar).
+plate 04 grammar) is **observe chrome**, not a FE legality oracle.
 
 Unaffordable is not silent opacity: cost chips go `bad`, reason on focus.
 
-### 7.3 Pause / GG-18
+### 7.3 Pause / GG-18 / targeting
 
-Picking an action that needs a board target: top layer is still the stage (bar is HUD, does not
-block). Keyboard: digits pick slots; arrows move cell focus (`wireKeyboardNav` + mute gate when a
-**panel** is open). Confirm casts. Esc cancels targeting, does not pop a panel that is not open.
+Opening the dock or sheet **does not pause Unity**. Overlay pause is F10 / `overlay-spec.md`
+§Pause while away. The match clock stays on the HUD; the wave still runs.
 
-When `CellOccupancyDock` or `ActorSheet` is open, GG-18: stage arrows are muted (already
-`isLawnKeyboardMuted`). The bar may remain visible (HUD above scrim, 2026-09-04 amendment) but
-slots do not steal keys until the panel pops — unless the action is explicitly "cast from the
-sheet" later. v1: no cast-from-sheet.
+When `CellOccupancyDock` or `ActorSheet` is open, GG-18 mutes **board arrows and board confirm**.
+Today `isLawnKeyboardMuted` is only the LawnStage GG-11 proof panel — dock and sheet must join that
+gate. Pointer clicks on the board still change the inspect cell (monitor), except in order /
+spawn targeting (table below).
+
+v1: no enqueue-from-sheet.
 
 ### 7.4 Empty / unbuilt corpus
 
 If the commander has no authored actions yet, the bar shows locked slots with *"Orders unlock with
 the action corpus"* — not fake Strike/Firebolt. Do not hide the bar; GG-44 locked-visible.
+Do not name a slot **Ward** — that word is aptitude `Bulwark`'s cousin and a paper-doll role.
 
 ---
 
@@ -384,8 +420,8 @@ and readouts that already have an observe path or an honest pending**.
 | **Sun bank** | Match `pvz.*` sun | Match | Actor `hunger` (Sun on plants) |
 | **Wave** | Wave index + next-in | Match | |
 | **Phase** | Starting / InMatch / Paused / Ending | Match | UniqueActor Cold phase |
-| **Commander** | This-match leader + aura | Snapshot at `board.start` | Changing default mid-run (`spec-lawn-hud-chip.md`) |
-| **Deployed** | Bound unique chips | Match bindings | The full roster |
+| **Commander** | This-match leader + aura **display name from the corpus** (chip spec uses Might-class auras; do not label a chip "Sun Blessing" if that reads as Patron) | Snapshot at `board.start` | Changing default mid-run (`spec-lawn-hud-chip.md`); Patron |
+| **Deployed** | Bound unique chips — **`ActorChip`**, not custom `#typeId` spans over every living plant | Match bindings | The full roster; engine generals |
 | **Souls (session)** | Souls earned *this run* if the ledger already attributes lawn kills | Run | Wallet on Sanctum HUD |
 | **Transport** | Pause / speed | Overlay pause contract | |
 | **Selection** | Focused cell coords in player words ("Lane 3 · Column 5") | UI | |
@@ -393,7 +429,8 @@ and readouts that already have an observe path or an honest pending**.
 If a stock cannot be collected yet, omit the cluster or show locked-with-reason. Do not invent a
 second sun.
 
-No ornament (GG-60). HUD stays interactive over a panel scrim (GG-5 amendment).
+No ornament (GG-60). HUD stays interactive over a panel scrim (GG-5 amendment). Sheet-over-Phaser
+is **not** overlay pause; Unity keeps running.
 
 ---
 
@@ -401,28 +438,28 @@ No ornament (GG-60). HUD stays interactive over a panel scrim (GG-5 amendment).
 
 ```
 Band 1  LawnMatchHud (top)     CommanderActionBar (bottom)     rail
-Band 0  Phaser lawn + CellStack
-Band 2  CellOccupancyDock (right, ~360px)  and/or  SpawnTray
+Band 0  Phaser lawn + CellStack  (camera inset by reserved dock width; 12 columns visible)
+Band 2  CellOccupancyDock (reserved LEFT column)  and/or  SpawnTray (same column)
         ActorSheet (PanelShell, bounded, over dock or replacing it)
 Band 3  confirm (release, lethal action opt-in)
 Band 4  Intent ack / reject toasts
 ```
 
 **Dock vs sheet:** dock is the list; sheet is the selected occupant. Opening the sheet does not
-destroy the dock's query (GG-12). Esc pops sheet then dock.
+destroy the dock's query (GG-12). Esc pops sheet then dock. **Esc while an order is armed cancels
+the order first**, then pops.
 
-URL (`GG-8`):
+URL (`GG-8`) — `sel` is **`instanceId` only**:
 
 ```
 #/lawn/{matchKey}
 #/lawn/{matchKey}?cell=3,5
-#/lawn/{matchKey}?cell=3,5&sel=<instanceId|occupant-key>
+#/lawn/{matchKey}?cell=3,5&sel=<instanceId>
 #/lawn/{matchKey}?panel=creatures          existing layer over lawn
 ```
 
-Occupant-key for a general demon cannot be `instanceId`. Use a generation-scoped observe key the
-player never sees; the URL may use a non-durable token that dies with the match (document in
-implementation). Do not put `ptr` in the address bar as a player-facing string.
+General-demon inspect is in-memory, dies with the occupant, **not in the address bar**. Do not
+invent a fourth durable id. Do not put `ptr` in the URL.
 
 ---
 
@@ -430,16 +467,31 @@ implementation). Do not put `ptr` in the address bar as a player-facing string.
 
 | Concern | Contract |
 |---|---|
-| Layout | HUD corners anchored; docks column; board is the remaining center. No absolute pixel stage chrome |
+| Layout | HUD corners anchored; **dock reserved, not overlaid**; board is the remaining center showing 12 columns. No absolute pixel stage chrome |
 | Scale | GG-36: 1280×720 floor, 1440×900 reference, 1920×1080 headroom. Height-scale HUD |
 | Safe area | Inset HUD and action bar; board may bleed |
-| Focus | Dock open → first collection row. Sheet open → declared landing stop (name / first meter). Action targeting → cell focus |
-| Keyboard | Arrows on board when no blocking panel; `1`–`9` bar; Enter confirm; Esc pop / cancel targeting |
+| Focus | Dock open → first collection row. Sheet open → declared landing stop (name / first meter). Order targeting → cell focus |
 | Mouse + focus | Coexist; hover does not clear keyboard focus |
 | Reduced motion | Instant docks; keep M9 press ack (GG-32) |
 
+### 10.1 InteractionMode — inspect vs spawn vs order
+
+`SpawnTargeting` already exists. Add **`ActionTargeting`**. Occupied-cell `selectOccupant` **must not
+clobber** an armed order.
+
+| Mode | Arrows | Enter | Space | Esc | Click occupied cell |
+|---|---|---|---|---|---|
+| **Inspect** (default) | Cell focus (muted if dock/sheet open — GG-18) | Open occupancy dock for the **tile** | **Pause** (`information-architecture.md` §5). Never confirm | Pop sheet, then dock | Open / retarget dock |
+| **SpawnTargeting** | Ghost cell (board arrows live; spawn tray is band 2 so GG-18 would mute — **exception:** spawn targeting keeps board arrows) | Enqueue spawn Intent | Pause | Cancel targeting | Confirm spawn on that cell, do not open dock |
+| **ActionTargeting** | Target cell / occupant per declared kind | Enqueue order Intent | Pause | Cancel armed order (**before** System / pop) | Select target; **do not** `selectOccupant` into inspect |
+
+`wireKeyboardNav` today treats Space as confirm. Implementation drops that. Confirm is Enter only.
+
+Band 2 spawn tray would mute board arrows under a naive GG-18. Spawn targeting is the exception in
+the table so the player can still walk the ghost.
+
 Playwright later: 1280×720 / 1440×900 / 1920×1080, `scrollWidth <= clientWidth`, sheet
-`clientHeight` cap (GG-61).
+`clientHeight` cap (GG-61), **12 cells visible** with dock reserved.
 
 ---
 
@@ -450,18 +502,20 @@ Playwright later: 1280×720 / 1440×900 / 1920×1080, `scrollWidth <= clientWidt
 | Lawn stage + Phaser island + GG-11 panel | Built | `LawnStage.tsx`, `createLawnGame`, kernel destroy |
 | Cell pick → `lawn:select` | Built | `PickSystem.ts`, keyboard nav + mute (audit fix) |
 | Occupant list in inspector (ad-hoc) | Wiring | `LawnPage.tsx` selection; not `ActorCollection` |
-| Unique bind inspect | Wiring | `useUniqueActor` + KeyValue engine fields (`LawnPage.tsx:754+`) |
+| Unique bind inspect | Wiring | `useUniqueActor` + KeyValue engine fields (`LawnPage.tsx:754+`) — player path retires; GG-41 dump may stay |
 | Spawn Intent + ghost | Wiring | FSM + Intent; player UI is `typeId` input |
 | Actor ladder Token…Panel | Wiring | `src/ui/actor/*`; Panel landing is stubs |
-| Creatures volume list/grid | Built | `CreaturesLayer.tsx` — must become `ActorCollection` |
-| `ActorListPickerPanel` | Wiring | Row-only; should compose `ActorCollection` |
+| Creatures volume list | Built (policy only) | `CreaturesLayer.tsx` — **consumes** `ActorCollection`; not a lift |
+| `ActorListPickerPanel` | Wiring | Row-only; compose `ActorCollection` after adapter + GG-50; do not pass `instanceId` as `targetPtr` |
 | Derived sheet / paper-doll / action corpus on sheet | Real / specified | specs exist; `ActorView` fields pending; gear empty |
 | Per-unit HUD | Specified + partial | plate 10 / actor-hud program |
 | Commander chips | Specified | `spec-lawn-hud-chip.md` |
-| Commander action bar | Real gap | No off-board action hotbar; battle plate 04 bar is the wrong stage |
-| Cell overlap draw | Wiring / real | Occupants exist; stack offset + `+K` pip not a specified cluster |
+| Commander action bar | Real gap | No off-board combat book; battle plate 04 bar is the wrong stage |
+| Cell overlap draw | Wiring / real | Occupants exist; stack offset + `+K` pip + unique pip not a specified cluster |
 | `ActorView` resources/status/actions | Real gap | `types.ts:575-591` |
 | `ResourceView` missing `poise` | Wiring (stale contract) | `types.ts:640` vs resource-hub six |
+| `ActionTargeting` | Real gap | Inspect and spawn only today; Space still confirms |
+| Occupant → `ActorRow` adapter | Real gap | `ActorView` requires `instanceId` |
 
 ---
 
@@ -471,7 +525,7 @@ Any number a balance pass would change for *feel of chrome* lives in FE tokens /
 `data`-adjacent presentation file — **not** Core Policy. Candidates:
 
 - Cell stack offset px, max sprites before `+K`
-- Dock width
+- Dock width (one token; reserved column)
 - Action bar slot count (structural 9 from keymap — comment if not tunable)
 - Collection page size inside the 25–240 window
 
@@ -486,28 +540,63 @@ not invent a power curve.
 - Pixel-golden for lawn paint (command-list oracle stays).
 - Whether commander tap on HUD opens `ActorSheet` v1 or waits (`spec-lawn-hud-chip.md` optional).
 - Capture / blessing / trophy chrome (WIP on `the-lawn.md`) — no fake clusters.
-- Making `PassivesTab` specimen-scoped (Paths tab *requires* it; that is actor-sheet work, called
-  out as a dependency, not designed twice here).
+- Making `PassivesTab` two-track (species bloodline + shared corpus) — Paths *requires* it; that is
+  actor-sheet work, called out as a dependency.
+- Commanders list private `CommanderRow` and Pacts opening AptitudesLayer — not v1 `ActorCollection`
+  consumers until they retire those rows.
+- Promoting `CommanderId` from Crazy Dave to a unique demon (Vocabulary 2026-09-06). Until then the
+  order bar is Dave's combat book; a unique Commander would be ineligible to spawn.
 
 ---
 
 ## 14. Open questions (owner)
 
-Answerable. Not manufactured.
+Already decided in this file (not re-asked):
 
-1. **Dock default on cell click:** always open the occupancy list, even for a single occupant, or
-   skip the list and open `ActorSheet` when count = 1? (Recommendation: **always list** — overlap
-   and "I thought I clicked the other one" are the failure; one extra click on a singleton is
-   cheap.)
-2. **Action bar caster:** this-match Commander only, vs summoner-Dave plus commander? (Recommendation:
-   **Commander only**, HUD already names them; Dave is the save, not a second hotbar.)
-3. **General-demon Paths:** show the species tree read-only on wild units, or hide Paths until
-   unique? (Recommendation: **read-only species tree** — Almanac teaching in place, GG-45.)
+- Cell click **always** opens the occupancy list, even for count = 1.
+- General Paths = **read-only species tree**; shared corpus locked.
+
+Still owner:
+
+1. **Commander identity.** Keep Crazy Dave as this-match commander (current `CommanderId`) until
+   unique-demon Commander ships, **or** promote now? Recommendation: **keep Dave for v1 lawn GUI**;
+   do not draw two bars. When a unique takes the role, they leave the spawn tray.
 
 ---
 
 ## 15. Next
 
-Owner review of this file + [12-lawn-stage.html](12-lawn-stage.html). Then `/spec` only if this
-graduates — capability map / module specs would be a `lawn-interactive` (or actor-sheet retarget)
-program, **not** `tasks/plan.md`.
+Owner review of this file + [12-lawn-stage.html](12-lawn-stage.html) + **[13-actor-sheet.html](13-actor-sheet.html)**
+(complete inventories). Then `/idea` only after the HTML lists are accepted. **Do not implement from
+number boxes or from the first-pass plate E.**
+
+---
+
+## 16. Audit fold (2026-09-06)
+
+Five perspectives: UX (game-ui-ux), DPLP observe≠control, character-sheet systems, GG-9 FE
+duplication, demon / HoMM3 vocabulary. Consensus: **architecture split is right; first-pass plate
+contradicted closed vocabularies. Do not graduate, do not implement from plate E as first drawn.**
+
+What this fold changed:
+
+| Finding | Correction in this file |
+|---|---|
+| Right overlay hid spawn columns on a 12-col lawn at 1280×720 | Reserved **left** column; camera shrinks; 12 columns stay visible |
+| Inspect / targeting / Space / Enter collided | §10.1 `ActionTargeting`; Space = pause; Enter confirms; Esc cancels order first |
+| `?sel=` for generals | `sel` = `instanceId` only |
+| "Range is real here" / "confirm casts" | Enqueue Intent; no FE A2; do not say cast |
+| Invented six aptitude names | Closed twelve (`spec-primary-stats.md`) |
+| Standing three bars / wrong labels | Five `definitions.md` axes; stale `PowerCategory` called out |
+| Adventure-spell label | Off-board **combat** book |
+| Yours / Wild | Fielded / Wave (Wild = capture) |
+| ActorCollection as Creatures extract | New widget; Creatures consumes; occupant adapter required |
+| Two ActorSheet programs | This landing **supersedes** actor-sheet-shell; map carries a banner |
+| KeyValue only named at `:754` | Player path vs GG-41 split |
+| Duplicate HP / Vitality | One HP pool; hub label HP |
+| Sheath filled at Lv 14 | Unlock ladder honest (sheath = 24) |
+| Sun Blessing / Ward slot name | Corpus aura name; no Ward order |
+| Overlay-pause vs sheet | Unity keeps running; F10 is overlay pause |
+
+Verdicts (research log): UX fix-before-review · DPLP revise before `/spec` · character sheet do not
+implement from first plate E · GG-9 does not hold as extract-and-wire · demon/HoMM3 do not graduate.

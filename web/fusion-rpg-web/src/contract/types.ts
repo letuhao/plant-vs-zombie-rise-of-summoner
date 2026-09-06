@@ -273,6 +273,13 @@ export type ArmouryRowView = {
    * A plain answer, not `Pending`: the grant rows are on the wire, unlike `role`/`frame` above.
    */
   battleOnly: boolean;
+  /**
+   * item-content `item-naming` (T3): the base type's own AUTHORED name for this container, straight
+   * off the wire. `null` is "this build's corpus has no row for it" — the compact line then says
+   * *unnamed* rather than falling back to the container id, because an id in a name slot is the
+   * defect T3 exists to remove.
+   */
+  containerName: string | null;
 };
 
 /** The inbox is counted over the WHOLE armoury, never the page. */
@@ -313,6 +320,17 @@ export type CombinationState = "active" | "one-away" | "known-inactive" | "undis
 
 export type CombinationView = {
   comboId: string;
+  /**
+   * item-content `item-naming` (T3): the row's own words, for the title where the raw `comboId` used
+   * to be printed.
+   *
+   * ⚠ **A placement, not a translation** — the same rule `keyTail` states for `class.*` / `rarity.*`.
+   * The 25 shipped combinations are GENERATED (`ResonanceGenerator`) from the element roster and no
+   * corpus authors a name for one, so this is the id's own tail in words and nothing English is
+   * invented. **Named gap:** a resonance name corpus, owner module 16/21 — the day one ships this
+   * field reads it instead, and no caller changes.
+   */
+  title: string;
   shape: CombinationShape;
   state: CombinationState;
   /** `null` is ∞ — unreachable on this item, which is `undiscovered` and never `one-away`. */
@@ -404,6 +422,12 @@ export type WorkbenchSocketView = {
   crafted: boolean;
   /** `null` is an empty socket — room, not an ingredient. */
   insertContainerId: string | null;
+  /**
+   * item-content `item-naming` (T4): the gem corpus's authored name for what sits here
+   * ("Ember Shard"). `null` for an empty cell, and for a container this build's corpus does not
+   * carry — the bench then says so rather than printing `gem.g1-001` as if it were a name.
+   */
+  insertName: string | null;
 };
 
 /**

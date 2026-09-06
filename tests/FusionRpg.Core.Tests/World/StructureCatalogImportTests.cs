@@ -7,9 +7,16 @@ namespace FusionRpg.Core.Tests.World;
 
 /// <summary>
 /// base-defense `structure-catalog-import` (module 25, spec-structure-catalog-import.md).
-/// `StructureCatalog.Configure` is static/shared, so every test that calls it MUST restore
-/// `Configure(null)` in a `finally` — the same discipline any test touching shared static catalog
-/// state in this codebase already follows.
+/// `StructureCatalog.Configure` is static/shared, so every test that calls it MUST restore the REAL
+/// corpus (never `null`) in a `finally` — task 25.4 deleted the C# `Seed` literal, so `Configure(null)`
+/// no longer means "revert to a working default," it means "break the catalog for every other test
+/// in this process from this point on" (confirmed the hard way: an earlier draft of this file left
+/// `Configure(null)` in every `finally`, which passed in isolation but threw
+/// `InvalidOperationException` inside unrelated `DistrictAssaultResolverTests` whenever the full
+/// suite ran these tests first — shared static state, ordering-dependent, exactly the failure mode
+/// this comment now exists to prevent a second time). Restoring the real corpus matches what
+/// `StructureCatalogTestBootstrap`'s own `[ModuleInitializer]` already configures at assembly load,
+/// so a test that restores it is simply putting back what was there before it ran.
 /// </summary>
 public class StructureCatalogImportTests
 {
@@ -25,6 +32,8 @@ public class StructureCatalogImportTests
 
         throw new DirectoryNotFoundException("could not locate repo root's data/seed/structures from the test host's own base directory");
     }
+
+    static void RestoreRealCorpus() => StructureCatalog.Configure(StructureCorpus.Load(RealCorpusRoot()));
 
     [Fact]
     public void The_eight_shipped_rows_are_byte_identical_through_the_corpus()
@@ -74,7 +83,7 @@ public class StructureCatalogImportTests
         }
         finally
         {
-            StructureCatalog.Configure(null);
+            RestoreRealCorpus();
         }
     }
 
@@ -94,7 +103,7 @@ public class StructureCatalogImportTests
         }
         finally
         {
-            StructureCatalog.Configure(null);
+            RestoreRealCorpus();
         }
     }
 
@@ -108,21 +117,24 @@ public class StructureCatalogImportTests
             var secondAll = StructureCatalog.All;
             Assert.NotSame(firstAll, secondAll); // a stale cached list would be the exact bug this guards
 
-            StructureCatalog.Configure(null);
+            RestoreRealCorpus();
             var thirdAll = StructureCatalog.All;
             Assert.NotSame(secondAll, thirdAll); // reverting also rebuilds, not just configuring forward
         }
         finally
         {
-            StructureCatalog.Configure(null);
+            RestoreRealCorpus();
         }
     }
 
     [Fact]
     public void An_unconfigured_catalog_is_unchanged_from_before_this_module()
     {
-        // Every existing test in this repo that never calls Configure must keep seeing exactly
-        // what it always has -- the "Configure(null) is a no-op vs. never calling it" contract.
+        // Every existing test in this repo that never calls Configure itself still sees a real,
+        // working catalog -- not because of a Seed literal any more (25.4 deleted it), but because
+        // StructureCatalogTestBootstrap's own [ModuleInitializer] already configured the real corpus
+        // before any test in this assembly runs. This test's own name predates that fix and is kept
+        // because the OUTWARD behavior it asserts is still exactly true, just for a different reason.
         Assert.Equal(8, StructureCatalog.All.Count);
     }
 
@@ -167,7 +179,7 @@ public class StructureCatalogImportTests
         }
         finally
         {
-            StructureCatalog.Configure(null);
+            RestoreRealCorpus();
             Directory.Delete(badPath, recursive: true);
         }
     }
@@ -220,7 +232,7 @@ public class StructureCatalogImportTests
         }
         finally
         {
-            StructureCatalog.Configure(null);
+            RestoreRealCorpus();
             Directory.Delete(tmp, recursive: true);
         }
     }

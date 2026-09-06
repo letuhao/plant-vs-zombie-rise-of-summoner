@@ -81,6 +81,12 @@ public static class CheatCommandRunner
                 _ = RpgHost.Client.RefreshCommanderSnapshotCacheAsync();
             return;
         }
+        if (name is "lawn-deploy.roster.reload")
+        {
+            if (RpgHost.Client != null)
+                _ = RpgHost.Client.RefreshLawnDeployRosterCacheAsync();
+            return;
+        }
         if (name is "power.index.reload")
         {
             if (RpgHost.Client != null)

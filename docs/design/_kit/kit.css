@@ -85,6 +85,7 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
        cursor: pointer; transition: background var(--dur-quick) var(--ease-out),
                                     border-color var(--dur-quick) var(--ease-out); }
 .btn:hover { background: var(--lawn-hot); color: var(--ink-dark); }
+.btn:active:not([disabled]) { transform: translateY(1px); filter: brightness(1.08); }
 .btn--ghost { background: transparent; color: var(--text); border-color: var(--border-control); }
 .btn--ghost:hover { background: var(--panel); color: var(--text); border-color: var(--border-strong); }
 .btn--danger { background: var(--bad-solid); color: var(--text); }
@@ -114,6 +115,8 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
        border-radius: var(--r-sm); overflow: hidden; background: var(--panel-inset); }
 .stepper button { width: 28px; background: var(--panel); color: var(--text); border: 0; cursor: pointer;
        font-size: var(--text-lg); font-weight: 700; }
+.stepper button:hover { background: var(--lawn); }
+.stepper button:active { background: var(--lawn-hot); }
 .stepper input { width: 64px; text-align: center; background: transparent; border: 0; color: var(--text);
        font: inherit; font-family: var(--font-mono); }
 .toggle { display: inline-flex; align-items: center; gap: var(--sp-2); cursor: pointer; font-size: var(--text-sm); }
@@ -820,3 +823,141 @@ table.t td { border-bottom: 1px solid var(--border); padding: var(--sp-2); verti
 .rangegrid .rc.in-range { background: rgb(127 168 201 / 0.25); border-color: rgb(127 168 201 / .6); }
 .rangegrid .rc.is-caster { background: var(--sun); border-color: var(--sun); }
 .rangegrid .rc.is-move { background: rgb(111 191 115 / 0.2); border-color: rgb(111 191 115 / .55); }
+
+/* --- actor-sheet inspect / derived row / leftover (plate 13, 2026-09-07) --
+   GG-62 lexicon · GG-63 in-pane inspect · GG-64 meter-not-paragraph.
+   Promote from plate-local CSS; plates may still carry layout that is unique. */
+.inspect-split {
+  flex: 1; min-height: 0; display: flex; gap: var(--sp-3); overflow: hidden;
+}
+.inspect-split > .dock {
+  flex: 0 0 58%; min-width: 0; display: flex; flex-direction: column; overflow: hidden; gap: 6px;
+}
+.inspect-split > .inspect {
+  flex: 1; min-width: 0; display: flex; flex-direction: column; overflow-x: hidden; overflow-y: auto;
+  border: 1px solid var(--border-control); border-radius: var(--r-md);
+  background: var(--panel-raised); padding: var(--sp-3); gap: var(--sp-2);
+}
+.inspect-split > .inspect .hd {
+  flex: none; display: flex; align-items: center; gap: var(--sp-2);
+}
+.inspect-split > .inspect .hd .nm {
+  font-family: var(--font-display); font-size: var(--text-xl); line-height: 1.1;
+}
+.inspect-split > .inspect .reading {
+  margin: 0; color: var(--muted); font-size: var(--text-sm);
+}
+.inspect .list-scroll { border: 0; background: transparent; }
+
+.stat-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto 72px 28px;
+  align-items: center; gap: 8px;
+  width: 100%; padding: 6px 8px;
+  border: 0; border-bottom: 1px solid var(--border);
+  background: transparent; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.stat-row:hover, .stat-row:focus-visible { background: var(--panel); }
+.stat-row.is-on { background: rgb(224 180 75 / 0.12); box-shadow: inset 3px 0 0 var(--sun); }
+.stat-row .ico {
+  width: 18px; height: 18px; border-radius: 4px;
+  background: var(--panel-inset); border: 1px solid var(--border-control);
+}
+.stat-row .lab { font-weight: 800; font-size: var(--text-sm); min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stat-row .val { font-family: var(--font-mono); font-weight: 800; font-size: var(--text-sm); }
+.stat-row .spark {
+  height: 6px; border-radius: var(--r-pill); background: var(--panel-inset);
+  border: 1px solid var(--border); overflow: hidden;
+}
+.stat-row .spark > i { display: block; height: 100%; background: var(--lawn-hot); }
+.stat-row.is-capped .spark > i { background: var(--warn); }
+.stat-row.is-capped .val { color: var(--warn); }
+.stat-row.is-default { opacity: .55; }
+.stat-row.is-stub .lab::after { content: " · placeholder"; color: var(--faint); font-weight: 700; font-size: 10px; }
+.help-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid var(--border-control); background: var(--panel);
+  color: var(--sun); font-weight: 800; font-size: 11px; cursor: pointer; line-height: 1;
+}
+.help-btn:hover, .help-btn:focus-visible { border-color: var(--sun); background: var(--soil-raised); }
+
+.leftover-bar {
+  flex: none; display: flex; align-items: center; gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3);
+  border-top: 1px solid var(--border); background: var(--soil-raised);
+}
+.leftover-bar .pts {
+  font-family: var(--font-display); font-size: var(--text-xl); color: var(--sun);
+}
+.leftover-bar .pts.is-zero { color: var(--muted); }
+.leftover-bar .why { flex: 1; font-size: var(--text-xs); color: var(--muted);
+  display: flex; align-items: center; gap: var(--sp-2); flex-wrap: wrap; }
+.leftover-bar .spent-track {
+  display: inline-block; width: 88px; height: 8px; border-radius: var(--r-pill);
+  background: var(--panel-inset); border: 1px solid var(--border); overflow: hidden;
+  vertical-align: middle;
+}
+.leftover-bar .spent-track > i {
+  display: block; height: 100%; width: 0; background: var(--lawn-hot);
+}
+
+.radial {
+  --p: 69; --c: var(--bad);
+  width: 88px; height: 88px; border-radius: 50%;
+  background:
+    conic-gradient(var(--c) calc(var(--p) * 1%), var(--panel-inset) 0);
+  display: grid; place-items: center;
+  box-shadow: var(--sh-inset);
+}
+.radial::after {
+  content: ""; width: 66%; height: 66%; border-radius: 50%;
+  background: var(--panel); border: 1px solid var(--border);
+}
+.radial-wrap .n {
+  position: absolute; z-index: 1; font-family: var(--font-mono); font-weight: 800; font-size: var(--text-xs);
+}
+.radial-wrap { position: relative; display: grid; place-items: center; }
+
+.shield-card {
+  position: relative; min-width: 0;
+  border: 1px solid var(--border-control); border-radius: var(--r-md);
+  background: var(--panel-raised); padding: var(--sp-3);
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.shield-card.empty { border-style: dashed; opacity: .55; }
+.shield-card .kind {
+  font-size: var(--text-2xs); font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--muted);
+}
+.shield-card .hp { font-family: var(--font-mono); font-weight: 800; }
+.el-pip { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.el-pip[data-el="fire"] { background: var(--el-fire); }
+.el-pip[data-el="ice"] { background: var(--el-ice); }
+.el-pip[data-el="air"] { background: var(--el-air); }
+.el-pip[data-el="earth"] { background: var(--el-earth); }
+.el-pip[data-el="light"] { background: var(--el-light); }
+.el-pip[data-el="dark"] { background: var(--el-dark); }
+.el-pip[data-el="none"] { background: var(--el-omni); }
+
+.status-glyph {
+  width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--border-control);
+  background: var(--panel-raised); color: var(--text); cursor: pointer;
+  display: grid; place-items: center; position: relative;
+  font-size: 11px; font-weight: 800;
+}
+.status-glyph .ring {
+  position: absolute; inset: 2px; border-radius: 8px; pointer-events: none;
+  background: conic-gradient(var(--ok) var(--t, 70%), transparent 0);
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
+}
+.status-glyph.is-on { border-color: var(--sun); box-shadow: var(--sh-glow); }
+
+.collapse-h {
+  display: flex; align-items: center; gap: var(--sp-2); width: 100%;
+  background: var(--panel-inset); color: var(--text); border: 0; border-bottom: 1px solid var(--border);
+  padding: 6px 8px; font: inherit; font-weight: 800; font-size: var(--text-xs);
+  text-transform: uppercase; letter-spacing: .06em; cursor: pointer;
+}
+.collapse-h::before { content: "▸"; color: var(--sun); }
+.collapse-h.is-open::before { content: "▾"; }

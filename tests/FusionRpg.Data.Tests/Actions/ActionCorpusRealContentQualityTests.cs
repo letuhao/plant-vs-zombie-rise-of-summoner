@@ -111,4 +111,41 @@ public class ActionCorpusRealContentQualityTests : IDisposable
             Assert.True(check.IsOk, $"{outcome.BriefId} (rung {row!.Rung}): {check.Detail}");
         }
     }
+
+    /// <summary>
+    /// A24 (spec-container-effect-resolver-production.md §Objective): the precise, empirical proof
+    /// that closing `container-effect-resolver-not-wired` for the Compiled-path class of content does
+    /// NOT make these 3 real, already-imported actions activate. Both real seed atom families
+    /// (`atom.fortitude`, `atom.vitality`) are authored `stat.modify` with `roll: onApply` and
+    /// `min != max` — `Compilability.Classify`'s Rule 3 routes both to `AtomPath.Runner`, never
+    /// `Compiled`, confirmed directly against the seed file. So the real resolver correctly reports
+    /// ZERO effect ids for every one of these 3 containers — not because the resolver is broken, but
+    /// because `BattleEngine.Resolve` has no execution mechanism for the Runner path at all
+    /// (`battle-runner-path-not-wired`, named in the same spec, not fixed by it).
+    /// </summary>
+    [Fact]
+    public void TheThreeRealImportedActionsCompileToZeroEffectDefsBecauseTheirAtomsAreRunnerPathOnly()
+    {
+        var result = ActionCorpusImporter.Import(_store, RealBriefs(), CostTemplate(), RungPolicy.Table);
+        var imported = result.Outcomes.Where(o => o.Imported).ToList();
+        Assert.Equal(3, imported.Count); // liveness, matching the test above
+
+        var (resolver, defs, runnerBindings, _) = ActionContainerEffectResolverFactory.Build(_store);
+        Assert.Empty(defs); // nothing at all compiled -- both real families are Runner-path only
+        // A25: also empty on the Runner-path seam -- both real families are triggerless (Compilability
+        // routes them to Runner, but neither authors a `when.trigger`), so they are skipped there too,
+        // not merely re-routed from one empty result to another.
+        Assert.Empty(runnerBindings);
+
+        foreach (var outcome in imported)
+        {
+            var row = _store.GetAction(outcome.BriefId);
+            Assert.NotNull(row);
+            Assert.NotEmpty(row!.ContainerId); // liveness -- the composer never draws zero atoms
+
+            // Empty, not a throw: BindContainers' own existing "resolved to nothing" rejection is what
+            // surfaces this at battle setup, precisely, not a new failure mode invented here.
+            Assert.Empty(resolver.EffectIdsFor(row.ContainerId));
+        }
+    }
 }

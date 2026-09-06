@@ -77,6 +77,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
     </Content>
+    <!-- base-defense-todo.md 25.4: structure-catalog-import reads this committed corpus at startup
+         (Program.cs) the same way dungeon's registry and item's seed tree do above — the identical
+         missing-copy-rule defect those two comments already name, caught here before it ever shipped
+         rather than after, since StructureCatalog.Configure is being wired in the same change that
+         deletes the C# literal fallback. -->
+    <Content Include="..\..\data\seed\structures\**\*.json">
+      <Link>data\seed\structures\%(RecursiveDir)%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <!-- aura-skill-todo.md Phase 5: DebugEndpoints.FindLatestLiveBoardStart carries the stale-board

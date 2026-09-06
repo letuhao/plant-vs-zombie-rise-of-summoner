@@ -130,8 +130,13 @@ public sealed class WebMatchService
                 return (false, "correlation.mismatch", null);
             // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
             var replayTrace = new BattleTrace();
+            var (replayContainerResolver, replayContainerDefs, replayRunnerBindings, replayRunnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
             var storedReport = ApplyZombossReveal(
-                BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)),
+                BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table),
+                    containerResolver: replayContainerResolver,
+                    onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, replayContainerDefs),
+                    runnerBindings: replayRunnerBindings,
+                    containersWithRunnerCoverage: replayRunnerCoverage),
                 playerId, storedSetup);
             // FR3: BattleTrace is a class -- `replayTrace` reflects the resolve that just ran, no
             // second return path needed.
@@ -182,8 +187,13 @@ public sealed class WebMatchService
                 return (false, "correlation.mismatch", null);
             // FR1: also a player-facing replay -- opts in, matching the fresh-resolve paths below.
             var replayTrace = new BattleTrace();
+            var (replayContainerResolver, replayContainerDefs, replayRunnerBindings, replayRunnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
             var storedReport = ApplyZombossReveal(
-                BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)),
+                BattleEngine.Resolve(storedSetup, entry.Seed, replayTrace, profile: ProfileForWave(storedSetup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table),
+                    containerResolver: replayContainerResolver,
+                    onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, replayContainerDefs),
+                    runnerBindings: replayRunnerBindings,
+                    containersWithRunnerCoverage: replayRunnerCoverage),
                 playerId, storedSetup);
             var replayTurnOrder = TurnOrderRecord.FromTrace(replayTrace, storedSetup);
             return (true, "replay", new WebMatchOutcome(true, entry.MatchKey, entry.RunId, storedReport, replayTurnOrder));
@@ -312,7 +322,12 @@ public sealed class WebMatchService
 
 
         // platform stamp is, or every added row would look like a determinism break.
-        var report = BattleEngine.Resolve(setup, seed, trace, profile: ProfileForWave(setup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table)) with
+        var (freshContainerResolver, freshContainerDefs, freshRunnerBindings, freshRunnerCoverage) = ActionContainerEffectResolverFactory.Build(_store);
+        var report = BattleEngine.Resolve(setup, seed, trace, profile: ProfileForWave(setup.WaveId), actionCatalog: _store.BuildActionCatalog(RungPolicy.Table),
+            containerResolver: freshContainerResolver,
+            onEffectHostReady: host => ActionContainerEffectResolverFactory.RegisterInto(host, freshContainerDefs),
+            runnerBindings: freshRunnerBindings,
+            containersWithRunnerCoverage: freshRunnerCoverage) with
         {
             ContentHash = _store.ComputeContentHash().ToCompact(),
         };
@@ -601,22 +616,33 @@ public sealed class WebMatchService
     /// later unlock/discard is reflected immediately with no stale cache to invalidate (the same
     /// contract `RpgStore.GetLoadoutOrAutoEquip`'s own doc comment states).
     ///
-    /// <para>Keyed on <see cref="OwnerKind.Entity"/> + the specimen's own instance id, matching
-    /// `LoadoutStoreTests.cs`'s own convention for "one demon's loadout, independent of who currently
-    /// owns it" — never the player id, since two specimens of the same species held by one player can
-    /// carry different loadouts.</para>
+    /// <para>Loadout stays keyed on <see cref="OwnerKind.Entity"/> + the specimen's own instance id,
+    /// matching `LoadoutStoreTests.cs`'s own convention for "one demon's loadout, independent of who
+    /// currently owns it" — unchanged, since a loadout PREFERENCE is not permanent progress: losing one
+    /// on a session boundary degrades gracefully to auto-equip, never to nothing.</para>
+    ///
+    /// <para><b>Grants read under <see cref="OwnerKind.UniqueActor"/>, fixed 2026-09-07
+    /// (`action-grant-owner-kind-durability`)</b>: a specimen's hard-earned unlock-ladder grant IS
+    /// permanent progress, and `OwnerKind.Entity` is session-scoped by design — `ClearSessionScopedBindings()`
+    /// (real production caller: `Program.cs:654`, the boot sweep) deletes every `entity:` binding on a
+    /// session boundary, which would silently wipe it. `OwnerKind.UniqueActor` was built 2026-09-01
+    /// specifically for a durable, never-reused specimen identity, and is already proven for equipment
+    /// — this is the second real caller, not a new mechanism. The write side
+    /// (`RpgStore.UniqueActors.cs`'s `TryRollActionUnlocks`) is fixed in the same pass; read and write
+    /// must always agree.</para>
     /// </summary>
     static IReadOnlyList<string> EquippedActionIdsFor(string instanceId, RpgStore store)
     {
-        var scope = new OwnerScope(OwnerKind.Entity, instanceId);
+        var grantScope = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+        var loadoutScope = new OwnerScope(OwnerKind.Entity, instanceId);
 
-        var candidates = store.ListGrants(scope)
+        var candidates = store.ListGrants(grantScope)
             .Select(g => store.GetAction(g.ActionId))
             .Where(a => a is { Kind: ActionKind.Skill })
             .Select(a => new AutoEquipCandidate(a!.ActionId, a.Rung))
             .ToList();
 
-        return store.GetLoadoutOrAutoEquip(scope, candidates);
+        return store.GetLoadoutOrAutoEquip(loadoutScope, candidates);
     }
 
     static BattleActorSetup Synthetic(int i) => new()

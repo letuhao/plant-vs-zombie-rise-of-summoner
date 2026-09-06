@@ -26,6 +26,17 @@ namespace FusionRpg.Core.Battle.Siege;
 /// </summary>
 public enum Stance { Hold, Guard, Engage }
 
+/// <summary>
+/// base-defense `siege-ai` 17.9, §5.20 rule 5: the garrisoned emplacement's OWN two-entry vocabulary,
+/// replacing R3's objective-fallback movement (meaningless for something that cannot move) rather than
+/// reusing <see cref="Stance"/>'s `Hold` value as a "close enough" stand-in — the spec's own §11 title
+/// is literally "a replacement vocabulary, not a degraded one." `SiegeAiIntentSource` resolves every
+/// garrisoned occupant to <see cref="FireAtWill"/> today (no content authors a `HoldFire` trigger yet);
+/// the vocabulary exists and is named ahead of that consumer, the same order 17.7's own `TargetFilter`
+/// already shipped in.
+/// </summary>
+public enum EmplacementFireMode { HoldFire, FireAtWill }
+
 /// <summary>base-defense `siege-ai` §8 (§5.20 rule 2): a named, player-visible validity filter. Named,
 /// because the whole thesis is that STATABILITY is the requirement — a filter the player cannot name
 /// produces a miss they read as a bug.</summary>

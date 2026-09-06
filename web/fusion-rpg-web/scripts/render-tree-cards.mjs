@@ -11,7 +11,9 @@
 // network"): every input is a local file this process reads with node:fs. No fetch, no XHR, no
 // WebSocket, anywhere in this file — `--fixtures`/`--anchor-dir` let a test point both loaders at a
 // synthetic corpus instead of the committed one, which is what makes that offline proof possible
-// before the real 35,160-node corpus exists (H9 is still unbuilt as of this writing).
+// before the real 35,280-node corpus exists (D51, 2026-09-06: 24 statuses, not 21 -- was 35,160;
+// H9's generation is partial -- 379/480 primary-tree nodes exist -- and its bind+commit step has
+// not run for any tree, as of this writing).
 //
 // Two documented extension points this script depends on but does not itself produce — named here
 // so they are not rediscovered as a surprise mid-build:

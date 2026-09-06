@@ -1,7 +1,7 @@
 # Information architecture — the whole game GUI
 
 **Status:** design complete, for review. Governed by
-[architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1 … GG-61);
+[architecture/game-gui-principles.md](../architecture/game-gui-principles.md) (GG-1 … GG-64);
 decisions D1–D8 recorded in its §20.1.
 
 This is the map: every stage, every layer, every key, and what happens to all twenty routes the
@@ -94,7 +94,7 @@ The PvZ board projection. Observe-and-intent only; the RPG never owns this simul
 | | |
 |---|---|
 | **Contains** | The Phaser canvas — the Dual-Plane Lawn Projector |
-| **HUD** | Sun **bank** (not actor Sun) · wave clock · match phase · commander + active aura · fielded uniques · status tray · transport · **order bar** (off-board, 1–9) · cell occupancy dock + **ActorSheet** over the live canvas — [spec-lawn-interactive.md](spec-lawn-interactive.md) · [12-lawn-stage.html](12-lawn-stage.html) |
+| **HUD** | Sun **bank** (not actor Sun) · wave clock · match phase · commander + active aura · fielded uniques · status tray · transport · **combat book** (off-board, 1–9, HoMM3 hero-off-hex) · reserved-left occupancy dock + **ActorSheet** over the live canvas — [spec-lawn-interactive.md](spec-lawn-interactive.md) · [12-lawn-stage.html](12-lawn-stage.html) |
 | **Time** | Owned by the game. Under a band-2 panel it follows `overlay-spec.md` §Pause while away |
 | **Canvas lifetime** | Created on **entering this stage**, destroyed on **leaving it**. Never on opening a panel (GG-11) |
 | **Enter** | Start a run from the sanctum, or the injector reporting a live board |

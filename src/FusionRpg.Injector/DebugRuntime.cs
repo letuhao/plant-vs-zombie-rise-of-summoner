@@ -122,6 +122,9 @@ public static class DebugRuntime
         var commanderFold = MatchCommanderSnapshotHolder.ObserveCommanderFold();
         if (commanderFold != null)
             matchDict["commander"] = commanderFold;
+        var lawnDeployRosterFold = FusionRpg.Core.Match.LawnDeployRosterSnapshotHolder.ObserveRosterFold();
+        if (lawnDeployRosterFold != null)
+            matchDict["lawnDeployRoster"] = lawnDeployRosterFold;
 
         var dump = new Dictionary<string, object>
         {

@@ -183,9 +183,38 @@ visible**, so suppression never reads as absence.
 and it is what stops `+150 crit rate` and `+12 fire power` being read as comparable. Guard 3 of that
 document tests exactly this.
 
+### 5.2a Player names — lexicon, not `idWords` (added 2026-09-07)
+
+The sheet in §5.2 already used English family names (*Power*, *Crit rate*). The FE did not:
+`channelLabel` in `web/fusion-rpg-web/src/contract/adapt.ts` title-cases the dotted id because
+`catalog.json` authors no `displayName`. That is a named gap, not a style miss.
+
+**Home:** [`data/seed/derived-stats/lexicon.v1.json`](../../data/seed/derived-stats/lexicon.v1.json).
+Sibling to `catalog.json` (compose / unit / consumer). **Not** `data/tuning/derived-stats.v{n}.json`
+— that file holds `categoryResistCap` and `turnDefaultSpeed`. Copy is not a tunable (T1).
+
+A player row binds `(displayName, reading, unitClass, gauge, cap)` from the lexicon plus the six
+render states from §3. `idWords` is developer-only (GG-62).
+
+### 5.2b StatRow + InspectSplit (added 2026-09-07)
+
+The combat block is still a **matrix** (28 × 7). The player does not meet it as 196 `<tr>` of ids.
+
+| Piece | Job |
+|---|---|
+| **StatRow** | icon · lexicon name · number · spark · `?`. One family per row; element occupancy as seven pips, not seven columns of text |
+| **Category collapse** | offense / defense / shield / guard / reflect / status / progression. **One group open** |
+| **InspectSplit** | clicking a row or `?` fills the **right inspector** (value, unit sentence, compose sentence from §4, cap or “no cap — more still counts”, contribution list). Not a nested dialog (GG-63) |
+
+**Spark policy** is the lexicon `gauge` field. Uncapped `GameUnits` sparks are *relative to this
+actor’s siblings* and never paint `CAP`. Registry caps (`status.resist.dot` at 0.95) fill against
+the cap and show the §3 marker. That is GG-64 / PS-8, not a third classification.
+
+The ActorSheet **Derived** tab *is* this sheet. Plate 13 is the visual catalog.
+
 ### 5.3 Channel detail — the "why"
 
-Opened from a cell. Shows: the value, its unit class, the compose sentence from §4, the cap and distance
+Opened from a StatRow into the inspector (same panel). Shows: the value, its unit class, the compose sentence from §4, the cap and distance
 to it, and **the contribution list — each source named in the fiction's words**, never `sourceId`.
 
 This is where the player answers *"where did this come from"*, and it is the only place the sheet can

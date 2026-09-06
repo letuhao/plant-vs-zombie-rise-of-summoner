@@ -7,24 +7,31 @@ using Xunit;
 namespace FusionRpg.Core.Tests.Items;
 
 /// <summary>D4.24 (spec-unique-pipeline.md §2) — `UniqueContainerBuild.From`: a build golden against
-/// the real shipped corpus, the roll count is exactly one (or zero, for the 8 of 144 anchors that
+/// the real shipped corpus, the roll count is exactly one (or zero, for 18 of the 154 anchors that
 /// author no variance slot), and the built container actually round-trips through the REAL
 /// `Instantiator.TryInstantiate` — proving compatibility with the real pipeline, not just a
 /// disconnected `ContainerRow` shape.
 ///
-/// <para><b>A major, previously-unexercised finding surfaced while writing these tests:</b> the 144
-/// unique anchors author 68 distinct atom families; the real shipped `data/seed/atoms/` catalog has
-/// only 28 families total, and just 7 of those (`bulwark, ferocity, fortitude, mending, might,
-/// savagery, vitality`) overlap with what the uniques corpus actually names (confirmed by extracting
-/// both family lists directly and diffing them). No existing code ever noticed, because nothing before
-/// this task resolved a unique's `family × powerBand` into a real atom id — `UniqueParityMetric`'s own
-/// pricing only ever needs the TIER NUMBER `TierOfPowerBand` derives, never the atom itself. Of the 144
-/// real anchors, only 4 (`rot-bloom-30-002`, `thorned-chassis-30-004`, `verdant-graft-90-005`,
+/// <para><b>A major, previously-unexercised finding surfaced while writing these tests (still true of
+/// the original 144):</b> the original 144 unique anchors author 68 distinct atom families; the real
+/// shipped `data/seed/atoms/` catalog had only 28 families total at the time, and just 7 of those
+/// (`bulwark, ferocity, fortitude, mending, might, savagery, vitality`) overlapped with what the
+/// uniques corpus actually names (confirmed by extracting both family lists directly and diffing
+/// them). No existing code ever noticed, because nothing before this task resolved a unique's
+/// `family × powerBand` into a real atom id — `UniqueParityMetric`'s own pricing only ever needs the
+/// TIER NUMBER `TierOfPowerBand` derives, never the atom itself. Of the original 144 real anchors,
+/// only 4 (`rot-bloom-30-002`, `thorned-chassis-30-004`, `verdant-graft-90-005`,
 /// `windswept-spore-50-001`) name EXCLUSIVELY real families and can be concretely built today — every
 /// other anchor correctly REFUSES with `unique.corpus-malformed`, naming the exact missing atom id,
 /// which is the honest, correct behaviour for a seed authored ahead of the atom catalog that backs it
 /// (the same "seed → concrete" law this whole session's own established discipline names explicitly),
-/// not a defect in this task's own build function.</para></summary>
+/// not a defect in this task's own build function.</para>
+///
+/// <para><b>D4.29 (2026-09-06) added 10 more real anchors, all buildable.</b> The seedsmith pipeline
+/// that authored them only ever offers the model the REAL, currently-shipped atom-family catalog
+/// (`load_atom_families()`, read fresh from `data/seed/atoms/`), so unlike the original 144 — authored
+/// ahead of any atom catalog at all — the 10 new anchors cannot name a family that does not exist. 14
+/// of 154 build today.</para></summary>
 public class UniqueContainerBuildTests
 {
     static string RepoRoot()
@@ -143,13 +150,16 @@ public class UniqueContainerBuildTests
 
     // ---- "the roll count is exactly one" (or zero) — over the WHOLE real corpus, honestly -----------
 
-    /// <summary>Pins the finding this file's own class doc comment names: of 144 real anchors, exactly
-    /// 4 name only real atom families and build; every other one correctly REFUSES rather than
-    /// silently producing a wrong or partial container. A number that goes DOWN over time (fewer
-    /// buildable anchors) would mean a regression; a number that goes UP means the atom catalog closed
-    /// part of the gap — either way this test forces the change to be seen and explained, not silent.</summary>
+    /// <summary>Pins the finding this file's own class doc comment names: of the original 144 real
+    /// anchors, exactly 4 named only real atom families and built; every other one correctly REFUSES
+    /// rather than silently producing a wrong or partial container. D4.29 (2026-09-06) appended 10
+    /// more real anchors that, BY CONSTRUCTION (the seedsmith pipeline only ever offers the model the
+    /// real, currently-shipped atom-family catalog), all build too — 14 of 154. A number that goes
+    /// DOWN relative to corpus size would mean a regression; UP means the atom catalog (or, as here,
+    /// new authored content) closed part of the gap — either way this test forces the change to be
+    /// seen and explained, not silent.</summary>
     [Fact]
-    public void Exactly_four_of_the_real_144_anchors_build_today_every_other_refuses_naming_the_missing_atom()
+    public void Fourteen_of_the_real_154_anchors_build_today_every_other_refuses_naming_the_missing_atom()
     {
         var built = 0;
         var refusedForMissingAtom = 0;
@@ -175,9 +185,9 @@ public class UniqueContainerBuildTests
             }
         }
 
-        Assert.Equal(144, Corpus.Count);
-        Assert.Equal(4, built);
-        Assert.Equal(140, refusedForMissingAtom);
+        Assert.Equal(154, Corpus.Count); // 144 + 10 D4.29 anchors (2026-09-06)
+        Assert.Equal(14, built); // 4 + all 10 new anchors (real-atom-only by construction)
+        Assert.Equal(140, refusedForMissingAtom); // unchanged -- none of the 10 new anchors is in this bucket
     }
 
     // ---- the built container is not just shaped right -- it actually instantiates -------------------

@@ -86,6 +86,8 @@ public class SiegeFogTests
             ElementId: -1, Row: Positions[actorKey].Row, Col: Positions[actorKey].Col,
             IsMindControlled: false, IsKiller: false, StatusMask: 0);
         public IReadOnlyList<CompiledAction> HeldActionsOf(string actorKey) => Array.Empty<CompiledAction>();
+        public FusionRpg.Core.Stats.Derived.ActorDerivedSnapshot? DerivedOf(string actorKey) => null;
+        public string? GarrisonedStructureKeyOf(string actorKey) => null;
 
         public FakeBattleView Add(string key, int side, GridPos pos)
         {

@@ -119,12 +119,40 @@ public sealed partial class RpgStore
 
             // Contract gate — demons only. A unique actor without a demon profile predates this
             // module entirely and deploys exactly as it always did.
-            if (ReadDemonProfileUnlocked(db, id) != null)
+            var demonProfile = ReadDemonProfileUnlocked(db, id);
+            if (demonProfile != null)
             {
                 var contract = ContractViewUnlocked(db, row.PlayerId, id);
                 if (!contract.Bound) return (false, "contract.unbound", row, false);
                 if (!contract.Deployable) return (false, "contract.insubordinate", row, false);
+
+                // demon-lawn-deploy T1.4: owner-confirmed 2026-09-06 — a demon's own species side/typeId
+                // pass through UNCHANGED for deploy (no override needed): PvZ's own engine makes any
+                // spawned zombie-type entity hostile to the plant side by construction, and only the
+                // game's native hypnotize operation flips that. `PlantAvatar` species need nothing extra
+                // (they are plant-side already, or "most demons deploy as plant-side avatars" per
+                // demon-system-map.md line 7 — this repo's own real anchor corpus is overwhelmingly
+                // plant-side content, matching that framing). `HypnoAlly` species are the harder case:
+                // making a spawned zombie fight FOR its owner needs that native hypnotize call, and this
+                // codebase ALREADY investigated it once (content-stack program,
+                // tasks/content-stack-todo.md: "no UnMindControl/ClearMindControl-shaped method... mind
+                // control is documented elsewhere as a side-swap, not a flag") and explicitly refused to
+                // guess at unverified gameplay-critical Unity state rather than ship an untested fix.
+                // Matching that same discipline here: HypnoAlly deploy is a NAMED refusal, not a silent
+                // gap or an unverified guess, until that native-hypnotize problem is solved for real.
+                if (DemonSpeciesCatalog.IsKnown(demonProfile.SpeciesId) &&
+                    DemonSpeciesCatalog.Get(demonProfile.SpeciesId).DeployMode == DemonDeployMode.HypnoAlly)
+                    return (false, "deploy.hypno-ally-not-implemented", row, false);
             }
+
+            // demon-lawn-deploy T1.2: reconcile trait bindings on every deploy that actually proceeds
+            // past every refusal check above — never at mint, so a specimen promoted between two
+            // deploys (RpgStore.Fusion.cs's PromotionUnlocked, same instanceId, appended traits) always
+            // gets its current traits bound, not a stale mint-time snapshot. A no-op for a unique
+            // actor with no demon profile (ReconcileDemonTraitBindingsUnlocked returns immediately).
+            ReconcileDemonTraitBindingsUnlocked(db, id);
+            // demon-lawn-deploy T1.5: same reasoning, for the specimen's own species magnitudes.
+            ReconcileDemonMagnitudeBindingsUnlocked(db, id);
 
             var now = DateTime.UtcNow.ToString("o");
             using (var cmd = db.CreateCommand())
@@ -1157,6 +1185,177 @@ public sealed partial class RpgStore
     /// bindings any other system placed on the same <see cref="OwnerKind.UniqueActor"/> owner.</summary>
     const string UniqueEquipAtomSource = "unique-equip";
 
+    /// <summary>demon-lawn-deploy T1.2's own source tag — a distinct name from
+    /// <see cref="UniqueEquipAtomSource"/> even though both bind through the same
+    /// <see cref="OwnerKind.UniqueActor"/> owner, so the two reconcilers can never withdraw or
+    /// mis-match each other's bindings on the same specimen.</summary>
+    const string DemonTraitAtomSource = "demon-trait";
+
+    /// <summary>Same flat, unscaled pin <see cref="UniqueEquipAtomPinTheta"/> uses, named separately
+    /// on purpose: a trait's own gameplay effect (e.g. `trait.critical-hunter`'s crit-chance bonus) is
+    /// pre-authored content, not a magnitude meant to scale with the specimen's own level/rarity within
+    /// THIS binding — mirrors the equipment precedent's own reasoning (AGENTS.md "one power ladder": no
+    /// private per-binding curve). If species-magnitude delivery (T1.5) later needs its own pin, it
+    /// gets to pick independently — this constant does not assume they must match.</summary>
+    const int DemonTraitAtomPinTheta = UniqueEquipAtomPinTheta;
+
+    /// <summary>
+    /// demon-lawn-deploy T1.2: reconcile a demon specimen's own rolled `TraitIds` against
+    /// `effect_binding`, through the SAME <see cref="OwnerKind.UniqueActor"/> owner equipment already
+    /// uses (a demon specimen is a `rpg_unique_actors` row like any other). Run on EVERY deploy, never
+    /// once at mint — `RpgStore.Fusion.cs`'s `PromotionUnlocked` can add traits to an EXISTING
+    /// `instanceId` after mint (fusion star-merge), and a mint-time-only binding would silently miss
+    /// that later trait forever (strengthen-pass Correction 2, spec-lawn-deploy-core.md).
+    ///
+    /// <para>Idempotent by construction, mirroring
+    /// <see cref="ReconcileUniqueEquipmentAtomBindingsUnlocked"/>'s own double-grant invariant: a trait
+    /// already correctly bound is left untouched; a bound trait no longer present in `TraitIds` is
+    /// withdrawn; a new trait not yet bound is produced and bound. Unlike equipment, there is no
+    /// "slot swap" case — one trait id always maps to exactly one container id
+    /// (<see cref="DemonTraitCatalog.GrantTemplateId"/>), so a trait's own binding either exists
+    /// correctly or does not exist at all.</para>
+    ///
+    /// <para>An unknown trait id (should not happen — `TraitIds` is populated from a species'
+    /// already-`DemonSpeciesCatalog.Validate`-checked `TraitPool` at mint/promotion time) or a missing
+    /// seeded container fails closed: skipped, nothing granted, never a throw — matching the equipment
+    /// reconciler's own "seeded container missing" behavior exactly.</para>
+    /// </summary>
+    void ReconcileDemonTraitBindingsUnlocked(SqliteConnection db, string instanceId)
+    {
+        var actor = ReadUniqueActorUnlocked(db, instanceId);
+        if (actor is null) return;
+        var player = GetPlayerUnlocked(db, actor.PlayerId);
+        if (player is null) return;
+        var profile = ReadDemonProfileUnlocked(db, instanceId);
+        if (profile is null) return; // not a demon specimen — nothing for this reconciler to do
+
+        var owner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+
+        var wanted = new Dictionary<string, string>(StringComparer.Ordinal); // traitId -> containerId
+        foreach (var traitId in profile.TraitIds.Distinct(StringComparer.Ordinal))
+        {
+            if (!DemonTraitCatalog.IsKnown(traitId)) continue; // fail closed, not a throw
+            wanted[traitId] = DemonTraitCatalog.Get(traitId).GrantTemplateId;
+        }
+
+        var existing = ListBindings(owner)
+            .Where(b => string.Equals(b.Source, DemonTraitAtomSource, StringComparison.Ordinal))
+            .ToDictionary(b => b.Slot ?? "", StringComparer.Ordinal);
+
+        foreach (var (traitId, binding) in existing)
+            if (!wanted.ContainsKey(traitId))
+                Withdraw(binding.BindingId);
+
+        var catalogRevision = GetCatalogRevision();
+        foreach (var (traitId, containerId) in wanted)
+        {
+            if (existing.ContainsKey(traitId)) continue; // already bound — double-grant invariant
+
+            var container = GetContainer(containerId);
+            if (container is null) continue; // seeded trait container missing; fail closed
+
+            var rollSeed = WorldSeed.DeriveRollSeed(
+                player.WorldSeed, DemonTraitAtomSource, $"{instanceId}:{traitId}");
+            ProduceAndBind(container, DomainMembers, rollSeed, DemonTraitAtomPinTheta,
+                FusionRpg.Core.Power.PowerTuningHub.Tuning, owner, traitId, priority: 0,
+                source: DemonTraitAtomSource, out _, out _,
+                origin: InstanceOrigin.Grant, catalogRevision: catalogRevision);
+        }
+    }
+
+    /// <summary>demon-lawn-deploy T1.5's own source tag — distinct from
+    /// <see cref="DemonTraitAtomSource"/>/<see cref="UniqueEquipAtomSource"/> so all three reconcilers
+    /// can share the same <see cref="OwnerKind.UniqueActor"/> owner without ever withdrawing or
+    /// mis-matching each other's bindings on the same specimen.</summary>
+    const string DemonMagnitudeAtomSource = "demon-magnitude";
+
+    /// <summary>Species-magnitude content is pre-computed (`SpeciesExpander`/`AptitudeReadFunctions`
+    /// already folded the specimen's species-level `PTheta` into each channel's own flat value at
+    /// generation time — see `ConcreteSpecies.Magnitudes`), so this binding never needs its own
+    /// PowerLadder-scaled arithmetic; a flat, unscaled pin picked independently of
+    /// <see cref="DemonTraitAtomPinTheta"/> per that constant's own comment.</summary>
+    const int DemonMagnitudeAtomPinTheta = UniqueEquipAtomPinTheta;
+
+    /// <summary>The one container id convention for a species' whole magnitude package — one container
+    /// per species (holding one atom per channel internally), never one container per channel: a
+    /// specimen's magnitude set is all-or-nothing (species is fixed for the specimen's whole
+    /// lifetime), unlike traits, which add/remove independently across promotions.
+    ///
+    /// <para>Filed under <see cref="ContainerKind.Trait"/> (id prefix <c>"trait"</c>, enforced by
+    /// <c>ContainerRowValidator</c>) deliberately, not <see cref="ContainerKind.SpeciesPassive"/>:
+    /// that kind's own <c>"species-passive."</c> prefix already names a DIFFERENT, existing mechanism
+    /// (`species-effects`/roster-materialise's own per-player ROLLED content, `RpgStore.PlayerSpecies.cs`'s
+    /// `ListSpeciesPassiveContainerIdsUnlocked`) — reusing it here would collide on the same speciesId
+    /// and conflate two unrelated shapes (rolled vs. this binding's fixed, pre-computed value). `Trait`
+    /// is the correct MECHANICAL fit (flat, non-rolled, single-value, `stat.derived`, bound via the same
+    /// `OwnerKind.UniqueActor` T1.2 already proved) even though the content isn't a trait; a genuinely
+    /// new `ContainerKind` for this is real, separate, cross-cutting surface (`PrefixOf` plus every
+    /// exhaustive switch over the enum) intentionally left out of this task's own scope. The id itself
+    /// is `trait.species-magnitude-{speciesId}` (a single kebab-case token after the `trait.` prefix —
+    /// `ContainerRowValidator` refuses a further embedded dot) so it stays unambiguous from a real
+    /// `DemonTraitCatalog` member like `trait.critical-hunter`.</para>
+    /// </summary>
+    internal static string SpeciesMagnitudeContainerId(string speciesId) => $"trait.species-magnitude-{speciesId}";
+
+    /// <summary>
+    /// demon-lawn-deploy T1.5: reconcile a demon specimen's own SPECIES magnitudes (base stats,
+    /// distinct from `TraitIds`) against `effect_binding`, through the SAME
+    /// <see cref="OwnerKind.UniqueActor"/> owner T1.2's trait reconciler already uses. Run on every
+    /// deploy for the same reason traits do — not because a specimen's own `SpeciesId` can ever change
+    /// post-mint (it cannot), but so a species' committed magnitude content can be revised and picked
+    /// up on the specimen's NEXT deploy via <see cref="GetCatalogRevision"/>, exactly like every other
+    /// atom-backed binding in this file, rather than this one binding alone needing a special
+    /// "immutable, bind once" carve-out.
+    ///
+    /// <para>Unlike the trait reconciler's per-trait wanted set, a specimen's magnitude package is a
+    /// SINGLETON: either its species has a magnitude container to bind, or it does not yet (empty
+    /// <see cref="DemonSpeciesDef.Magnitudes"/> — a species with no magnitude data imported, or no
+    /// seeded <see cref="SpeciesMagnitudeContainerId"/> content yet, fails closed exactly like an
+    /// unknown trait id: no binding, never a throw, matching this module's own "honest incompleteness"
+    /// rule for content that has not been generated yet.</para>
+    /// </summary>
+    void ReconcileDemonMagnitudeBindingsUnlocked(SqliteConnection db, string instanceId)
+    {
+        var actor = ReadUniqueActorUnlocked(db, instanceId);
+        if (actor is null) return;
+        var player = GetPlayerUnlocked(db, actor.PlayerId);
+        if (player is null) return;
+        var profile = ReadDemonProfileUnlocked(db, instanceId);
+        if (profile is null) return; // not a demon specimen — nothing for this reconciler to do
+
+        var owner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
+
+        string? wantedContainerId = null;
+        if (DemonSpeciesCatalog.IsKnown(profile.SpeciesId))
+        {
+            var species = DemonSpeciesCatalog.Get(profile.SpeciesId);
+            if (species.Magnitudes.Count > 0)
+                wantedContainerId = SpeciesMagnitudeContainerId(profile.SpeciesId);
+        }
+
+        var existing = ListBindings(owner)
+            .Where(b => string.Equals(b.Source, DemonMagnitudeAtomSource, StringComparison.Ordinal))
+            .ToList();
+
+        foreach (var binding in existing)
+            if (!string.Equals(binding.Slot, wantedContainerId, StringComparison.Ordinal))
+                Withdraw(binding.BindingId);
+
+        if (wantedContainerId is null) return;
+        if (existing.Any(b => string.Equals(b.Slot, wantedContainerId, StringComparison.Ordinal)))
+            return; // already bound — double-grant invariant
+
+        var container = GetContainer(wantedContainerId);
+        if (container is null) return; // seeded species-magnitude container missing; fail closed
+
+        var rollSeed = WorldSeed.DeriveRollSeed(
+            player.WorldSeed, DemonMagnitudeAtomSource, $"{instanceId}:{profile.SpeciesId}");
+        ProduceAndBind(container, DomainMembers, rollSeed, DemonMagnitudeAtomPinTheta,
+            FusionRpg.Core.Power.PowerTuningHub.Tuning, owner, wantedContainerId, priority: 0,
+            source: DemonMagnitudeAtomSource, out _, out _,
+            origin: InstanceOrigin.Grant, catalogRevision: GetCatalogRevision());
+    }
+
     /// <summary>
     /// contentScale's own pin (`ContentScale.cs`, `spec-content-scale.md` §2.1): Θc=20 is the anchor
     /// where `contentScale == 1.000` exactly, the same pin `AtomEndToEndTests.cs`'s own production-
@@ -1438,18 +1637,16 @@ public sealed partial class RpgStore
         try { speciesKey = DemonSpeciesCatalog.All.FirstOrDefault(s => s.GameTypeId == typeId)?.SpeciesId; }
         catch (InvalidOperationException) { /* not configured in this host -- no species */ }
 
-        // ⛔ Found during T59.8's own end-to-end investigation: the unlock RATCHET's own state
-        // (EarnCount/Held) is durable, so it belongs under OwnerKind.UniqueActor -- but the real,
-        // shipped read path a battle actually uses (WebMatchService.EquippedActionIdsFor, T22,
-        // 2026-08-28) reads GRANTS under OwnerKind.Entity, predating OwnerKind.UniqueActor's own
-        // 2026-09-01 introduction. Writing this grant under UniqueActor would make it invisible to
-        // every real battle -- BuildSquad would never see it. Matching the REAL read path here
-        // (Entity) is the correct choice for reachability today; OwnerKind.Entity's own session-scoped
-        // durability gap (a real, pre-existing, T22-era design smell, not something this module
-        // introduces or is scoped to fix) is named in action-plan.md §5's deferred table, not
-        // silently accepted.
+        // `action-grant-owner-kind-durability`, FIXED 2026-09-07: found during T59.8's own end-to-end
+        // investigation that the unlock RATCHET's own state (EarnCount/Held) is durable
+        // (OwnerKind.UniqueActor), but the grant itself was written under OwnerKind.Entity to match
+        // the then-real read path (WebMatchService.EquippedActionIdsFor, T22, 2026-08-28, predating
+        // UniqueActor's 2026-09-01 introduction) -- a real, session-scoped durability gap, since
+        // `ClearSessionScopedBindings()` (real caller: `Program.cs:654`) deletes every `entity:`
+        // binding on a session boundary. `EquippedActionIdsFor`'s own grant read is fixed to
+        // UniqueActor the same pass; both sides must always agree, so this write moves with it.
         var unlockStateOwner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
-        var grantOwner = new OwnerScope(OwnerKind.Entity, instanceId);
+        var grantOwner = new OwnerScope(OwnerKind.UniqueActor, instanceId);
         var service = new ActionUnlockGrantService(
             loadUnlockState: _ => GetUnlockState(unlockStateOwner),
             saveUnlockState: (_, state) => SaveUnlockState(unlockStateOwner, state),

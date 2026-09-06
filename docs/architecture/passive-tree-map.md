@@ -15,11 +15,13 @@ filename** — read this table.
 | `squad-harness` | Six-vs-wave balance measurement. Answers D33's scope mismatch: every existing number is a 1v1 duel, the game fields six | — |
 | `mechanism-wiring` | The four inert lines that make mechanism nodes executable and *scorable*. §3.5 proved these are the only node class that rescues a focus build | — |
 | `tree-plan` | Stage 1, deterministic. Topology (10 tiers × 2 branches, 40 nodes, **rootless**), tier ladder, budgets, shape archetypes, potency ceiling (**182‰ of one branch**, derived — corrected 2026-09-05, R5; the retired 91‰-of-total form silently double-counted), the property vocabulary, and the plan schema handed downstream | — |
-| `gate-counters` | **Added 2026-09-05 (D37).** The two gate quantities that did not exist: `status_applied.<id>` (owned by nobody) and `element_mastery` (owned by a module the demon program never scheduled). Counters, their persistence, and the `PointBudget` binding. **Unblocks 27 of 39 trees — 1,080 nodes that would otherwise ship at tier 0** | — |
+| `gate-counters` | **Added 2026-09-05 (D37), shipped 2026-09-06 (G6).** The two gate quantities that did not exist: `status_applied.<id>` (owned by nobody) and `element_mastery` (owned by a module the demon program never scheduled). Counters, their persistence, and the `PointBudget` binding. **Both now `carrier` — R-G1's own block is cleared; `passive-tree-todo.md` J1 tracks the separate plan-emission-CLI gap that still blocks 30 of 42 trees (D51: was 27 of 39), 1,200 nodes (was 1,080)** | — |
 | `tree-catalog` | The baked artifact. Node record shape, id stability, catalog versioning, the freeze line, the load path | `tree-plan` |
 | `tree-language` | Stage 2. What the language stage may choose, from which closed vocabularies, under which quotas, behind which validation gates | `tree-plan` |
 | `tree-binder` | Stage 3, deterministic. Budget share → stored coefficient, atom composition, channel legality, conversion refusal | `tree-plan`, `tree-language`, `tree-catalog` |
-| `tree-review` | Making ~35,160 nodes across 879 trees reviewable: sampling design, the tree-card artifact, escalation, incremental re-review | `tree-catalog` |
+| `element-conversion` | **Added 2026-09-06 (D56).** The atom-vocabulary gap `tree-binder`'s own conversion refusal names: an `Element` attach point + `element.convert` kind so a passive node can actually write a weighted `ElementPayload`. Spec only — not built | `tree-binder` |
+| `soul-curve-resolution` | **Added 2026-09-06 (D58).** Closes `tree-catalog`'s own open question the other way its owner-chosen answer expected: `NodeAtom.SoulCurveId` is dead scaffolding with zero readers, not a wiring gap — soul-level scaling already ships and is tested as `tree-binder` §5.1's `Θ`-offset formula, which `passive-tree-ideal.md` §4 requires by name. Retires the dead field; adds no `CurveInput` member | `tree-catalog`, `tree-binder` |
+| `tree-review` | Making ~35,280 nodes (D51: was 35,160) across 882 trees (D51: was 879) reviewable: sampling design, the tree-card artifact, escalation, incremental re-review | `tree-catalog` |
 | `tree-state` | Per-actor allocation and soul levels. Sparse storage, rising unlock cost, respec, the migration boundary | `tree-catalog` |
 | `tree-resolve` | How tree power reaches combat. Tier gates, cross-unlock, the concentration index, the soul→Θ read | `tree-state`, `mechanism-wiring` |
 | `tree-surface` | The player surface. Browse, plan-before-spend, printed exclusions, per-actor management | `tree-state`, `tree-catalog` |
@@ -46,10 +48,12 @@ wave 4   species-tree
 
 
 **A10 gates `tree-language --write`, not `tree-plan --emit`.** The plan is cheap and mints no ids, so
-being wrong there costs one regeneration. The irreversible step is the next one: ~4,680 model calls
-for the generic corpus, ~105,840 for species, and ~34 human hours per review pass. Committing that
-against an unmeasured premise is how the program buys 35,160 nodes and discovers in wave 3 that the
-deep tiers do nothing. **Corrected 2026-09-05 after `spec-mechanism-wiring.md` split A10 against code — "after G1 and G3" was wrong in both directions:**
+being wrong there costs one regeneration. The irreversible step is the next one: ~5,040 model calls
+for the generic corpus (D51, 2026-09-06: 24 statuses, not 21 — was ~4,680), ~105,840 for species, and
+~34 human hours per review pass. Committing that against an unmeasured premise is how the program buys
+35,280 nodes (D51: was 35,160) and discovers in wave 3 that the deep tiers do nothing. **Corrected
+2026-09-05 after `spec-mechanism-wiring.md` split A10 against code — "after G1 and G3" was wrong in
+both directions:**
 
 - **A10a**, the static-snapshot difference, needs **no wiring at all**. `BattleActorSetup.ChannelMods` already carries `(ChannelId, long)`, the composer folds it and **throws** on an unknown id, and the resolver reads all eight defensive families off the defender's snapshot. It runs over `BattleEngine` in **wave 0**.
 - **A10b**, the shipped vehicle, needs G1 **and G2** — which this map never named — **plus a Battle status→`DerivedLedger` producer that does not exist and is in no module's modified-files table.** `BattleStatusSpec` carries no `StatMods` at all, and `BattleDerivedModifierLedger.Add` has one caller: the construction-time aura loop.

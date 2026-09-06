@@ -261,3 +261,40 @@ correction does not touch or fix it, because nothing in the real import path cal
 Named here as its own, separate, deferred cleanup (its tests only check the dict's own internal
 consistency, not against real content, so they keep passing despite being disconnected from what
 actually ships) rather than silently left for a future session to rediscover as if new.
+
+## As-built (2026-09-06, session 5) — 25.4 closed, one deviation from its own original deferral
+
+Module CLOSED. 25.4 ("delete the C# literal") was first landed as **DELIBERATELY DEFERRED**, reasoned
+as a wide-blast-radius effort needing either a bootstrap in 5+ test assemblies or a Server copy-item
+rule, "genuinely separate" from what that pass could responsibly cover. Re-examined in a later pass
+rather than accepted at face value, both concerns resolved into a small, concrete, precedented plan:
+
+- Only **2** test assemblies (`Core.Tests`, `Data.Tests`) hold any real reference to
+  `StructureCatalog`, confirmed by a repo-wide grep, not assumed from the module's own file list.
+  `Guard.Tests`/`Launcher.Tests`/`CheatCore.Tests` were each run to completion to confirm zero
+  reachability, rather than reasoned about from their domain names alone.
+- `E2E.Tests` needs no bootstrap of its own at all — it boots the real `Program.cs`
+  (`WebApplicationFactory<Program>`), so the same startup wiring this task adds there covers it.
+- The Server's missing copy-item rule for `data/seed/structures` is the exact same bug class
+  `data/seed/dungeon`/`data/seed/items` already hit and fixed — one more `<Content Include>` block,
+  same shape.
+
+`StructureCatalog.Seed` (the ~120-line, 8-row literal) and `BuiltOnly` are deleted. `Configure` is now
+called from `Program.cs` (production) and two `[ModuleInitializer]`-based `StructureCatalogTestBootstrap.cs`
+files (Core.Tests, Data.Tests) — `BuildRows()` throws a named, actionable exception if neither ever ran,
+rather than silently returning nothing.
+
+**Two real, previously-undiscovered defects were found by the full-suite verification this closure's
+own termination gate required, and both were fixed in the same pass**: (1) this module's own
+`StructureCatalogImportTests.cs` left `Configure(null)` in `finally` blocks from before `Seed` existed
+as a fallback — with `Seed` gone, that call permanently broke the shared static catalog for every
+later test in the process; fixed with a `RestoreRealCorpus()` helper. (2) An unrelated, previously
+latent race in `FusionRpg.Core/Effects/EffectBag.cs`'s `InMemoryEffectCatalog.Upsert`/`ReplaceAll` —
+sorting a caller-supplied `EffectDef.Actions` list IN PLACE, which corrupts a `static`-cached, shared
+`EffectDef` list (`ConstructionActions.CompiledEffects`) under concurrent access — surfaced as an
+intermittent `ConstructionActionsTests` failure only under full-suite parallel execution. Not this
+module's own bug, but found running this module's own required verification and fixed rather than
+left as a known-flaky test; see `base-defense-todo.md`'s 25.4 entry for the full account.
+
+See `base-defense-todo.md`'s own 25.4 entry for the complete verification evidence (`CORE`/`DATA`/
+`Guard`/`Launcher`/`CheatCore`/`E2E`/`Server`/`BOUND`/`NUM`/magic-numbers).

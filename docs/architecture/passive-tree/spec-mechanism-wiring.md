@@ -37,9 +37,12 @@ the value, and the balance sweep can see it."* This module closes them.
 > that needs PvZ to have heard of dodge, erosion or retaliation.
 
 **This module adds no atom kind, no trigger, no attach point and no derived channel.** The closed
-vocabularies stay closed: **7 attach points, 16 kinds, 13 triggers**
+vocabularies stayed closed at the time this was written: **7 attach points, 16 kinds, 13 triggers**
 (`AtomKindRegistry.cs:21`, `:31`, `:36` — verified by reading the constants and the `AtomTriggers.All`
-array at `AtomKind.cs:97-101` this session). That is D22 stated as a build constraint.
+array at `AtomKind.cs:97-101` this session). **Grown to 8/17/13 since** (base-defense
+`siege-construction`, 2026-09-06 — unrelated to this module; see
+[`spec-element-conversion.md`](spec-element-conversion.md) §0). That is D22 stated as a build
+constraint either way: this module's own footprint adds none of the four, then or now.
 
 ---
 
@@ -74,9 +77,10 @@ nothing, and nobody finds out until `tree-resolve`.
 The 2026-09-05 audit round turned that from a risk into a **build gate, and this module owns its
 release condition.** `passive-tree-map.md:42-47`: **A10 gates `tree-language --write`, not
 `tree-plan --emit`.** The plan is cheap, mints no ids and costs one regeneration if it is wrong; the
-step after it costs **~4,680 model calls** for the generic corpus, **~105,840** for species, and ~34
-human hours per review pass. Committing that against an unmeasured premise is how a program buys
-35,160 nodes and discovers in wave 3 that the deep tiers do nothing.
+step after it costs **~5,040 model calls** for the generic corpus (D51, 2026-09-06: 24 statuses, not
+21 — was ~4,680), **~105,840** for species, and ~34 human hours per review pass. Committing that
+against an unmeasured premise is how a program buys 35,280 nodes (D51: was 35,160) and discovers in
+wave 3 that the deep tiers do nothing.
 
 **So A10 is not an internal acceptance test any more — it is what another module waits on**, and it
 has to be able to fail. §11.1 gives it an effect size, a direction and a half-width for exactly that
@@ -674,10 +678,16 @@ the same differential. Both belong in the harness's `coverage` block so they are
 
 ---
 
-## 9. Explicitly excluded: the 17th atom kind (D16)
+## 9. Explicitly excluded: the element-conversion kind (D16)
 
 **Out of scope for this module, and it is a REAL gap, not a wiring gap.** Saying so precisely matters
 more than the exclusion itself.
+
+**Specced 2026-09-06 (D56): [`spec-element-conversion.md`](spec-element-conversion.md).** The analysis
+below (written before that spec existed) is kept as the historical record — its facts about the gap
+are still accurate — but its own §1 numbered list at the end of this section is superseded by that
+spec's actual answer: a new `Element` attach point (9th) and `element.convert` kind (18th, since a
+17th landed for an unrelated reason the same day), not a reuse of `Board`.
 
 D16 requires *"conversion nodes rewrite element payload tags, not just magnitudes"*, because a
 conversion that changed only the number *"would silently create dead stats."* The resolver expresses
@@ -701,9 +711,11 @@ no log line. Nothing rejects it; the number on the sheet simply never moves.
    `PowerCategory`, and a `RuntimeSupportMatrix` justified per runtime from the built executor.
 2. A **reviewed `decisions.md` row.** *"Adding a kind is a reviewed code change because a kind without
    an executor is dead on arrival"* (`AtomKind.cs:153-157`), and the "Atom attach points" row
-   (`decisions.md:112`) says growing the attach-point list is an amendment to that row.
+   (`decisions.md:113` — corrected from a stale `:112`) says growing the attach-point list is an
+   amendment to that row.
 3. Propagation to `DESIGN-GATE.md` §1's atom row, which **wins over every spec** and has already gone
-   stale twice on these counts.
+   stale three times on these counts (most recently 2026-09-06, corrected the same day as
+   `spec-element-conversion.md` was written — see that spec's §0).
 4. `atom-catalog-ssot.md` §2's matrix and `AtomKindRegistryTests`' self-consistency assertions.
 
 Tracked as **B2** in [15-dependency-map.md](../../research/passive-tree/15-dependency-map.md), owned by
@@ -740,11 +752,13 @@ That costs no code at all, and it should be tried before a kind is proposed.
 - **Adding an atom KIND or a TRIGGER.** This is a **reviewed change to `decisions.md`, not a
   convenience** — stated explicitly because it is the exact shortcut this module is positioned to take
   and must not. It covers all of:
-  - the **17th kind** for D16's element-payload conversion (§9);
+  - `element.convert` for D16's element-payload conversion (§9) — specced 2026-09-06, D56, as an 18th
+    kind (a 17th, unrelated, landed the same day), not built yet;
   - **widening `stat.derived`'s trigger set** (G4) — which additionally contradicts
     `definitions.md` §14.2, the document that wins over this spec, so it needs that document amended
     too, and `AtomRowValidator.ValidateWhen`'s required-vs-allowed inference re-checked;
-  - any new **attach point** (`decisions.md:112` names itself as the place that is amended).
+  - any new **attach point** (`decisions.md:113` — corrected from a stale `:112` — names itself as the
+    place that is amended).
 - Moving the `stat.derived` **Sim cell** to `Full` rather than `Partial` — decided from the built
   executor per `decisions.md:106`'s owner decision (2), not chosen up front.
 - Taking `aura-skill` **T13**'s live-toggle scope rather than only the per-round recompose (§12 q2).
@@ -877,7 +891,8 @@ three-verdict table.
 
 ## 12. Open questions
 
-Two, both genuinely open. Neither is a template slot.
+**Zero remain open — both closed** (2026-09-05, then D50 on 2026-09-06). Kept below with their
+answers, because a closed question that vanishes gets re-asked.
 
 1. ~~**Does the L2b resist path get to read status-granted resist channels on the first landing?**~~
    ✅ **CLOSED 2026-09-05 by the owner: yes — a status contributes everything it writes, resist
@@ -919,7 +934,7 @@ Two, both genuinely open. Neither is a template slot.
 | **D13** — the plan must distinguish MECHANISM nodes from MAGNITUDE nodes, and deep tiers must carry mechanisms | **Makes the distinction real.** Without G1 the "mechanism" category is nominal: a mechanism node would compile, bind, and change no number. `tree-plan` reserving deep-tier budget depends on this — and on **A10 passing first**, which is why §11.1 states an effect size, a direction and a half-width rather than an outcome |
 | **D21** — every actor carries its own tree state | **Per-`StatContext`, never global.** The subsystem is instance-scoped with a per-context delegate and no static cache, so two actors on the same board resolve independently. Pinned by the "same channel for host Z2 is unchanged" arm of A1 |
 | **D33** — squad-scope measurement | **G3 is the coupling** (§8). The harness's balance numbers land as tunables later; what this module owes it is the ability to score a mechanism node at all. ⚠️ D33 was amended to *"not a gate"*; **A10 is a separate thing and it IS a gate** (`passive-tree-map.md:42-47`, §11.1). D33 asks whether the 1v1 ordering survives at six actors; A10 asks whether mechanism does what magnitude provably does not. Only the second one holds `tree-language --write` |
-| **D16** — conversion nodes rewrite element payload tags | ⛔ **EXPLICITLY EXCLUDED** (§9). A real gap, needing a 17th kind and a reviewed `decisions.md` change. Allocate no budget to conversion nodes until B2 lands |
+| **D16** — conversion nodes rewrite element payload tags | ⛔ **EXPLICITLY EXCLUDED** (§9). A real gap; **specced 2026-09-06 (D56, `spec-element-conversion.md`)** as an 18th kind + 9th attach point, not built. Allocate no budget to conversion nodes until it lands |
 
 ### Decisions this module could NOT place
 

@@ -65,7 +65,11 @@ class DeriveAllLiveTests(unittest.TestCase):
     def test_unique_row_shows_all_three_conflicting_documentary_counts(self) -> None:
         row = next(r for r in self.rows if r.dimension == "kind:unique")
         values = {p.value for p in row.provenance}
-        self.assertEqual(values, {20, 300, 144})
+        # 154, not 144: D4.29 (2026-09-06) appended 10 real, ItemSeedValidator-clean anchors to
+        # the three ordinal-70 partitions (charnel-bloom-70/gilded-porcelain-70/earthen-bastion-70)
+        # -- the live-corpus-scan provenance value tracks the real count, the two doc-stated values
+        # (20, 300) are unrelated static claims and unaffected by a content addition.
+        self.assertEqual(values, {20, 300, 154})
         self.assertEqual(row.derivation, Derivation.STATED)
         self.assertFalse(row.conflict)  # the corpus source IS marked authoritative
 

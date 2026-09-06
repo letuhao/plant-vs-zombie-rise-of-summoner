@@ -101,6 +101,11 @@ public static class DemonEndpoints
 
             await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("SoulsUpdated", new { playerId = pid });
             await hub.Clients.Group(RpgConstants.WebGroup).SendAsync("DemonsUpdated", new { playerId = pid });
+            // demon-lawn-deploy T2.1: a new specimen changes the plant-side deploy roster — mirrors
+            // CommanderEndpoints.cs's own WebGroup+InjectorGroup pair for CommandersUpdated, since
+            // DemonsUpdated previously reached only the web frontend and never the injector's own
+            // session cache (RpgClient.RefreshLawnDeployRosterCacheAsync).
+            await hub.Clients.Group(RpgConstants.InjectorGroup).SendAsync("DemonsUpdated", new { playerId = pid });
             return Results.Ok(new
             {
                 replayed = outcome!.Replayed,

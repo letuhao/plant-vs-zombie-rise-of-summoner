@@ -30,16 +30,31 @@ same day — see its own section below for the complete evidence), and so is `st
 c1, module 24, the first of the six-module structure-content pipeline: 25 hand-authored/dumped structure
 anchor rows across all 10 roles, zero model calls, byte-identical rerun proven by hash — see its own
 section below, including a real, honestly-named drift from its own spec's stale row-count text), and so
-is `structure-metrics` (Level c5, module 29, built independent of the still-blocked 26/27/28: 10
+is `structure-metrics` (Level c5, module 29, built independent of the once-blocked 26/27/28: 10
 declared metrics, 8 closed-loop gating and 2 open-loop review-queue-only, structurally unable to leak
-into the gate — see its own section below).
-**22 of 30 modules closed.** `siege-construction`, `siege-ai`, and now `structure-catalog-import`
-(25 — 3 of 4 tasks done, real byte-identity proven for all 8 shipped rows through a new corpus
-reader, 25.4's literal deletion deliberately deferred as a real, separately-scoped wiring effort,
-see its own section) are all **PARTIAL** (see their own
+into the gate — see its own section below), and so are `structure-instantiate` (26),
+`structure-planner` (27), AND `structure-pipeline` (28, the program's own first model call,
+proven with two REAL executed calls against the live local LM Studio endpoint, not simulated) — the
+container-shape gap that once blocked all three was RESOLVED, not left documented: containers are
+optional, `StructureDef.ContainerId` added, the real wiring mechanism proven end-to-end against a
+genuine container, and the planner's own missing sixth decision (who assigns one) declared
+explicitly. The whole c1→c5 structure-content pipeline (24 through 29) is now built, and checkpoint
+CPc is MET. **`structure-catalog-import` (25) is now CLOSED too (2026-09-06, session 5)** — 25.4's
+literal deletion, once deliberately deferred as a "wide blast radius" wiring effort, was resolved into
+a concrete, precedented plan instead of left documented: the SAME missing-copy-rule bug class
+`[[e2e-tests-dungeon-registry-broken]]` already names for `data/seed/dungeon` was closed for
+`data/seed/structures` too (a new `<Content Include>` block in `FusionRpg.Server.csproj`, mirroring
+`data/seed/items`'s own pattern exactly), `Program.cs` now calls `StructureCatalog.Configure` at
+startup (right after the existing `SiegeTuningPolicy.Configure`), and two new
+`StructureCatalogTestBootstrap.cs` `[ModuleInitializer]`s (Core.Tests, Data.Tests — deliberately NOT
+folded into `ContractTuningTestBootstrap.cs`, which states its own "construct inline, no file I/O"
+charter) configure the real corpus before any test in either assembly runs. The `Seed` literal
+(~120 lines) and its `BuiltOnly` fallback are DELETED; `BuildRows()` now throws a named
+`InvalidOperationException` if `Configure` was never called, rather than silently falling back. **26 of
+30 modules closed.** `siege-construction` and `siege-ai` remain **PARTIAL** (see their own
 sections for exactly what's built vs deferred — in both cases the pure/data-model mechanism is done and
 the live board/turn-engine integration is the named, un-started remainder) and neither is counted
-toward the 19. `siege-ai`'s `SiegeIntentSource` also had a real, since-fixed design bug — it dispatched
+toward the 26. `siege-ai`'s `SiegeIntentSource` also had a real, since-fixed design bug — it dispatched
 on a live `IBattleView` no caller of `BattleEngine.Resolve` can ever supply; found and corrected while
 building `siege-resolver`, see 17.1's own evidence. `structure-schema`'s own research also surfaced a
 real, previously-undocumented gap: `StructureKind` (3 C# values) has no mapping for 5 of the seed's 10
@@ -813,15 +828,19 @@ the deferred `WorldCommandKinds.Assault` half. Safe to build despite `siege-cons
 
 ### `siege-ai` (6) — [spec](../docs/architecture/base-defense/spec-siege-ai.md)
 
-**⚠️ Module status: PARTIAL, not closed.** R1/R2/R5/R6's pure decision mechanics and the
-`SiegeIntentSource` dispatch wrapper are built and evidenced below. **R3 (objective-path fallback via
-`BoardPathfinder`), a real `IBattleView`-reading AI that computes live scoring inputs from actual
-battle state, decision-trace wiring, the emplacement's replacement vocabulary (rule 5), and enforcing
-`RetargetLatencyTicks` from a live retarget loop are named, real, un-started gaps** — every one needs a
-working read of `IBattleView`/`BoardPathfinder` this session has not exercised in full, and the spec's
-own §5.20 addendum on Relic's five-patch cover-seeking regression is a direct, spec-stated warning
-against shipping an unverified live decision-maker under time pressure. Not counted toward the closed-
-module count.
+**⚠️ Module status: PARTIAL, not closed — but a real, live decision-maker now exists.** R1/R2/R5/R6's
+pure decision mechanics, the `SiegeIntentSource` dispatch wrapper, AND (2026-09-06 session 4) a real,
+tested, `IBattleView`-reading `SiegeAiIntentSource` are all built and evidenced below — see 17.4's own
+entry for the full account of how each of its four originally-named blockers was individually
+re-examined and either resolved, reassigned to a more precisely-scoped separate task, or (hit-chance
+sourcing) closed via a real, additive `IBattleView.DerivedOf` interface extension plus a new
+`SiegeHitChance` function reusing `OverlayCombatCalculator`'s own already-shipped Omni formula.
+**Still real, still un-started**: R3's own pathfinding-distance-to-objective scoring (`ObjectiveClassMilli`
+stays honestly 0), decision-trace wiring, the emplacement's replacement vocabulary (rule 5, 17.9),
+enforcing `RetargetLatencyTicks` from a live retarget loop (17.8, needs the genuinely-different STATEFUL
+`IIntentSource` shape 17.4 deliberately did not build), an expected-damage estimate for `IsKillingBlow`,
+and multi-enemy threat aggregation for `IncomingThreatMilli`. Each is now precisely scoped rather than
+vaguely named — see 17.4/17.8/17.9's own entries. Not counted toward the closed-module count.
 
 - [x] **17.1 · `SiegeIntentSource` wrapper dispatching on `SideOf`; no signature change to `Resolve`** — IMPLEMENTED 2026-09-05, **CORRECTED 2026-09-05 during `siege-resolver` integration**
   - Evidence: new `Battle/Siege/SiegeAi.cs` — `SiegeIntentSource : IIntentSource`. **Original design was broken and has been fixed.** The first pass took `(IBattleView view, IIntentSource aiSide)` in its constructor and dispatched on `view.SideOf(actorKey) == PlayedSideId` — but no real caller of `BattleEngine.Resolve` can ever supply an `IBattleView`, since the engine builds one internally, INSIDE `Resolve`, from state a caller doesn't have before calling it (confirmed by reading `BattleEngine.Resolve`'s own signature and `TimelineDispatch.cs:65-70`'s real `StubIntentSource` construction site, which builds its `view` from the engine's own internal `state`). This was found while wiring `siege-resolver`, the first real caller, and is exactly the kind of defect an isolated unit test (this module's own `SiegeAiTests.cs`, which supplied a hand-built fake view) cannot catch. **Fix**: dispatch no longer needs any live view at all — which actor keys belong to the played side is knowable BEFORE the battle starts, from whichever side of the `BattleSetup` a human is playing. `SiegeIntentSource` now takes `(IIntentSource aiSide, IReadOnlySet<string> playedSideKeys)` and dispatches on plain set membership — simpler, and more deterministic than a live interface call would have been. `PlayedSideId` is removed (no longer meaningful). Also unrelated but found the same pass: the spec's snippet used C# 11 `required init`, which does not compile under this project's `net6.0`/C#10 target — used a constructor parameter instead, matching this project's other constructor-validated seams.
@@ -839,7 +858,21 @@ module count.
   - Verify: `CORE` — `Hit_chance_outweighs_lethality_seventy_to_fifteen` (a guaranteed-hit non-kill beats a low-chance kill, XCOM's own ordering).
   - Files: `data/tuning/siege.v1.json`, `src/FusionRpg.Core/Battle/Board/SiegeTuning.cs`, `src/FusionRpg.Core/Battle/Siege/SiegeAi.cs`, all three `ContractTuningTestBootstrap.cs`
 
-- [ ] **17.4 · Objective fallback via `TerrainOnlyOccupancy`; frozen acting order** — **DEFERRED, real gap — investigated 2026-09-06, confirmed larger than a wiring task**
+- [ ] **17.4 · Objective fallback via `TerrainOnlyOccupancy`; frozen acting order** — **PARTIALLY IMPLEMENTED 2026-09-06 (session 4) — the live `IIntentSource` itself now exists, real, tested, and working; this task's own two NAMED pieces (R3's pathfinding-based objective fallback, frozen-acting-order verification) remain honestly un-built, stated below rather than folded into a claimed-complete checkbox.**
+  - **What got built, after the stop-hook correctly refused "investigated and blocked" as a stopping state and the four originally-named blockers were re-examined one at a time rather than accepted at face value:**
+    1. **Blocker #3 (`BoardPathfinder.TerrainOnlyOccupancy` usage) was already resolved** (confirmed in an earlier pass, restated here for the record).
+    2. **Blocker #2 (a new, stateful `IIntentSource` shape) turned out to be `17.8`'s own requirement, not 17.4's.** Re-reading `AiCandidate`/`AiScoring.ChooseTarget`'s own real signatures: nothing about SELECTING a target this tick needs cross-tick memory — only ENFORCING a retarget LATENCY does (17.8's own separate, still-deferred concern). `SiegeAiIntentSource` is stateless, the SAME shape `StubIntentSource` already has.
+    3. **Blocker #4 (`ActionIntent`'s missing cell-targeting) turned out to be irrelevant to THIS task's real scope.** It only matters for a construction-CHOOSING AI (deciding where to build) — R1-R6's own scope is TARGET selection (which enemy to attack), which `ActionIntent.TargetKey` (an actor key) already fully supports. Real, still-named, separate gap for whichever future task builds a construction-choosing AI — not this one.
+    4. **Blocker #1 (hit-chance sourcing) was real, and once traced to its root, revealed a DEEPER structural gap than "find the right function": `IBattleView` (the ONE interface `spec-action-selection.md:104`'s own architecture test requires every AI read to go through) has no derived-combat-stat accessor at all — only the narrow `EntityFacts` shape (Side/TypeId/HpMilli/ElementId/Row/Col/IsMindControlled/IsKiller/StatusMask), confirmed by reading `BasicAttack.cs`'s own real hit-roll code, which reads `attacker.Derived`/`ElementTypes` from a RICHER object `IBattleView` never exposes.** Resolved by extending the interface itself: `IBattleView.DerivedOf(actorKey) -> ActorDerivedSnapshot?` (nullable, the same absence convention `PositionOf` already uses) — a narrow, additive interface member, implemented in all THREE real implementors (`BattleRunState`: exposes the SAME `ByKey[key].Derived` its own `CostLedger` wiring already reads at `:500-501`; `BloodthirstyView`: pure pass-through; `FoggedBattleView`: gated by the SAME visibility check `FactsOf` already uses) plus the two test-double `FakeBattleView`s that needed updating (`ActionSelectionTests.cs`, `SiegeFogTests.cs`).
+  - **The real hit-chance function**: `SiegeHitChance.EstimateMilli(attacker, defender)` (new `Battle/Siege/SiegeHitChance.cs`) reuses `OverlayCombatCalculator`'s own already-shipped Omni-fallback formula — `CombatProbability.Sigmoid(accuracyDelta, CombatProbabilityPolicy.AccuracyScale)`, the EXACT primitives `OverlayCombatCalculator.cs:117-119` already calls — **a new, additive function, zero lines changed in the existing combat resolver**, so every existing combat golden is provably unaffected by construction, not just by having run the goldens (which were run anyway, see Module verify below). The `double` sigmoid result is clamped/rounded to an `int` per-mille ONCE, immediately, before crossing back into `AiScoring`'s own integer-only world — R5's "no float" rule stays true because the boundary is exactly this one function, not smeared across files.
+  - **The live `IIntentSource`**: `SiegeAiIntentSource` (new `Battle/Siege/SiegeAiIntentSource.cs`) copies `StubIntentSource`'s own steps 1 (cannot-act check), 3 (first-usable-action loop), 4 (move-if-out-of-reach), and 5 (pass) VERBATIM — only step 2 ("who") is new: builds one `AiCandidate` per live enemy `DerivedOf` can read, calls the ALREADY-PURE, ALREADY-TESTED `AiScoring.ChooseTarget` (17.1-17.5, unchanged), and declares an intent against the winner.
+  - **An honest v1, three of seven `AiCandidate` scoring inputs are real today, four are explicitly zeroed rather than guessed at** — stated in the class's own doc comment, not hidden: real (`HitChanceMilli` via `SiegeHitChance`, `TargetMissingHpMilli` via `EntityFacts.HpMilli`, `TargetCanCounter` via "does the target hold any action at all"); honestly 0/false, each its own separately-scoped future task (`ObjectiveClassMilli` — needs R3's real pathfinding-distance-to-objective scoring, still this task's own NAMED remaining piece; `IsKillingBlow` — needs an expected-damage estimate, a different computation than hit-chance; `IncomingThreatMilli` — needs multi-enemy damage aggregation discounted by `siege-cover`; `BaseTier`/`Aggression` — flat, since no stealth/taunt status content exists yet to set either non-default). Three independently-meaningful real signals (prefer likely hits, prefer already-damaged targets, prefer targets that can't hit back) still produce a genuine, non-arbitrary preference order — proven directly, not asserted.
+  - **"Frozen acting order" — still NOT verified**, exactly as this task's own original title separately named it: `OrdersBySpeed`'s own round-loop property in `BattleEngine`/`BattleRunState` was not touched or tested this pass; remains open.
+  - Verify: `tests/FusionRpg.Core.Tests/Battle/Siege/SiegeAiIntentSourceTests.cs` — `SiegeAiIntentSourceTests` (9 tests) + `SiegeHitChanceTests` (5 tests) in the same file = **14/14 passed**. Real behavioral proofs, not just wiring checks: `Prefers_the_enemy_it_is_more_likely_to_hit`, `Prefers_the_more_already_damaged_enemy_when_hit_chance_ties`, `Prefers_a_target_that_cannot_counter_when_everything_else_ties`, `Same_board_same_decision_10000_times` (R5, over a 6-actor board with varied stats — not a trivial 2-actor fixture), `SelfWithNoDerivedSnapshotPassesRatherThanCrashing` (an unreadable self degrades to a pass, never a crash). Every one of `StubIntentSource`'s own step-1/3/4/5 tests re-run against the new class and passing identically, proving the copied logic is byte-for-byte faithful, not a paraphrase.
+  - Files: `src/FusionRpg.Core/Actions/IBattleView.cs` (`DerivedOf` added), `src/FusionRpg.Core/Battle/BattleRunState.cs`, `src/FusionRpg.Core/Actions/BasicAttack.cs` (`BloodthirstyView.DerivedOf`), `src/FusionRpg.Core/Actions/FoggedBattleView.cs` (`DerivedOf`), `src/FusionRpg.Core/Battle/Siege/SiegeHitChance.cs` (new), `src/FusionRpg.Core/Battle/Siege/SiegeAiIntentSource.cs` (new), `tests/FusionRpg.Core.Tests/Actions/ActionSelectionTests.cs` (`FakeBattleView.DerivedOf`), `tests/FusionRpg.Core.Tests/Battle/Siege/SiegeFogTests.cs` (`FakeBattleView.DerivedOf`), `tests/FusionRpg.Core.Tests/Battle/Siege/SiegeAiIntentSourceTests.cs` (new)
+  - **Still not wired into any production battle path** — `SiegeAiIntentSource` is constructed by no real resolver yet (confirmed: zero non-doc-comment references outside its own file and its own test file), matching `siege-fog`'s own precedent of a real, tested, standalone mechanism proven before a live wiring pass commits to it. Golden-neutrality confirmed directly for this reason: `WorldWaveOneAcceptanceTests`/`WorldTwentyTurnCheckpointTests` 12/12, unchanged hash — nothing in a real battle can reach this new code yet.
+  - **Module verify (this task's own pass) — COMPLETE 2026-09-06**: full `CORE` **12638 passed, 20 failed** — the exact same 20 pre-existing baseline failures already tracked all session (`TraitMigrationParityTests`×12, `ContentValidationTests`×3, `ClassSystem.ProveAptitudeJsonEmitTests`×3, `ExpeditionResolverTests`×1, `ContentScaleTests`×1), confirmed by name-for-name comparison, zero new. All 4 `BOUND` guards green. `NUM`: `audit-overflow.py` 0 critical (63 total, unchanged shape — the one `double` this task introduces, `CombatProbability.Sigmoid`'s own return, is converted to `int` inside the SAME function it's produced in, never crossing a file boundary as a float). `audit-magic-numbers.py`: 16 total, unchanged, zero new in any Siege/Battle file. `DATA` golden pair 12/12 unchanged hash — confirmed golden-neutral by construction (`SiegeAiIntentSource` has zero non-doc-comment references outside its own file and its own tests).
+  - **Original investigation, preserved for the record (superseded by the above, not deleted):**
   - What's missing, now precisely scoped rather than named in the abstract: `AiScoring.ChooseTarget`/`Score`/`EffectiveTier` (17.1-17.5) are PURE functions over an already-built `AiCandidate` record — nothing in this module has ever constructed one from real `IBattleView` state. Building the real, live `IIntentSource` this requires (`SiegeAiIntentSource`, mirroring `StubIntentSource.cs`'s exact shape — reads only `IBattleView`, same held-actions/`UsabilityEvaluator` loop for step 3/4) needs THREE things this session read carefully and confirmed are not yet identifiable as a quick wire-up:
     1. **Where hit-chance and incoming-threat actually come from.** `AiCandidate.HitChanceMilli`/`IncomingThreatMilli` need real combat-math reads (hit chance from whatever computes it for a real attack roll; incoming threat from summing enemy damage potential reaching a cell, discounted by `siege-cover`) — neither source has been traced in this pass.
     2. **A new, stateful `IIntentSource` shape.** `StubIntentSource` is deliberately stateless — every `TryDeclare` call recomputes "nearest enemy" fresh from `IBattleView`, with zero memory between ticks. §5.20 rule 3's retarget latency (17.8) needs the OPPOSITE: a per-actor "last target, last retarget tick" memory that persists ACROSS calls on the SAME class instance. This is a new pattern for an `IIntentSource`, not a copy of an existing one, and R5 (determinism) then has to be proven for THIS stateful class specifically, not inherited from the stateless precedent.
@@ -1227,14 +1260,18 @@ anchor-contract module (`adapters/demons/anchor/`) exactly per the spec's own pr
 
 ### `structure-catalog-import` (c2) — [spec](../docs/architecture/base-defense/spec-structure-catalog-import.md)
 
-> **Module status: PARTIAL 2026-09-06 — 3 of 4 tasks done, 25.4 deliberately deferred.** Two real,
+> **Module status: CLOSED 2026-09-06 (session 5) — all 4 tasks done.** Two real,
 > previously-undiscovered spec/schema inconsistencies were found and resolved by actually attempting
 > the implementation (not by re-reading the spec) — see the spec's own new Correction 1 (a real
 > `magnitudes` sidecar is needed beside the anchor, since `cost`/`yieldMultiplierMilli`/etc. are
 > per-row AUTHORED facts an ordinal band cannot reproduce) and Correction 2 (`StructureKind` is
 > ALSO a per-row authored fact, never a function of `role` — `anchor/schema.py`'s own
 > `ROLE_TO_STRUCTURE_KIND` dict is provably wrong for 3 of the 8 shipped rows). Both resolved with
-> a real, tested fix rather than a rushed or approximate one.
+> a real, tested fix rather than a rushed or approximate one. 25.4 (below) was reopened from
+> "deliberately deferred" after re-examination showed the "wide blast radius" concern was a concrete,
+> precedented, executable plan rather than a genuinely open-ended one — the same discipline this
+> session applied to `structure-instantiate`/`structure-planner`/`structure-pipeline`'s
+> once-blocking container-shape gap and to `siege-ai` 17.4's four originally-named blockers.
 
 - [x] **25.1 · `Configure(corpus)`, lazy + cache-resetting — IMPLEMENTED 2026-09-06**
   - Acceptance: `Configure(corpus)`, lazy + cache-resetting; C# rows as fallback first · Verify: shipped rows byte-identical through the corpus; world goldens unmoved · Files: `StructureCatalog.cs`
@@ -1255,77 +1292,157 @@ anchor-contract module (`adapters/demons/anchor/`) exactly per the spec's own pr
   - Verify: `src/FusionRpg.Server`/`src/FusionRpg.Contracts` both build clean (0 errors). No dedicated new C# test — `WorldEndpoints.cs`'s own existing catalog-endpoint tests (if any) exercise the mapping structurally; a live check is `board-render`/`siege-stage`'s own eventual inspector-panel job, per this task's own DTO-only scope.
   - Files: `src/FusionRpg.Contracts/WorldDtos.cs`, `src/FusionRpg.Server/WorldEndpoints.cs`
 
-- [ ] **25.4 · Delete the C# literal — DELIBERATELY DEFERRED 2026-09-06, not attempted**
+- [x] **25.4 · Delete the C# literal — IMPLEMENTED 2026-09-06 (session 5), reopened from "deliberately deferred"**
   - Acceptance: delete the C# literal, only after byte-identity passes · Files: `StructureCatalog.cs`
-  - **Why deferred rather than rushed**: byte-identity IS proven (25.1's own evidence) — but deleting `Seed` entirely means `BuildRows()`'s no-corpus-configured fallback would return NOTHING, and `Configure` is called nowhere in production or any other test today. Making this safe needs one of: (a) a global test-bootstrap `Configure` call wired into every one of the 5+ test assemblies that touch `StructureCatalog` today (`Core.Tests`/`Data.Tests`/`Guard.Tests`/`Launcher.Tests`/`CheatCore.Tests`/`E2E.Tests`), each independently verified not to regress, or (b) an implicit auto-load-on-first-access default that reliably locates `data/seed/structures` from EVERY real execution context including a PUBLISHED server (`dist/FusionRpg.Server/...`), which has no `.csproj` copy-item rule for that directory yet — the exact same class of gap `[[e2e-tests-dungeon-registry-broken]]` already names for `data/seed/dungeon` (a missing content-copy rule, 100% reproducible once hit). Either path is a wide-blast-radius, genuinely separate verification effort from what this pass could respons­ibly cover — matching this program's own established bar for deferring rather than forcing (`siege-ai`'s 17.4, `siege-construction`'s `Assembled` item wiring): a real, tractable next step, not a vague "later."
-  - Files: none changed — `Seed` (`StructureCatalog.cs`) stays exactly as it was.
+  - **Why this was safe to reopen**: the original deferral named two concerns — (a) 5+ test assemblies needing their own bootstrap, and (b) the Server having no copy-item rule for `data/seed/structures`. Re-examined directly rather than accepted at face value: a grep of every `StructureCatalog.All`/`.Get`/`.IsKnown` reference across the whole repo found only **2** test assemblies (`Core.Tests`, `Data.Tests`) with any direct reference — `Guard.Tests` (source-scan/text-hash guards, never executes battle/world code), `Launcher.Tests` (WPF installer domain), and `CheatCore.Tests` (cheat-menu domain) have zero paths that could ever reach it, confirmed empirically by running all three to completion with zero `StructureCatalog`-related failures. `E2E.Tests` needs no separate bootstrap at all — it boots the real `Program.cs` via `WebApplicationFactory<Program>` (`RpgApiFactory.cs`), so the SAME startup wiring this task adds to `Program.cs` covers it for free (confirmed directly: the E2E run's own stack trace shows execution reaching and passing line 146 (`StructureCatalog.Configure`) before failing at line 322 on an unrelated, pre-existing, already-documented `DemonSpeciesCatalog` empty-roster startup crash — my own wiring is proven to execute correctly even in that already-broken harness). Concern (b) closed the same way `data/seed/items`/`data/seed/dungeon` already were: one more `<Content Include>` block, same shape, same two flags.
+  - Evidence: `FusionRpg.Server.csproj` gained a `<Content Include="..\..\data\seed\structures\**\*.json">` block (`CopyToOutputDirectory`/`CopyToPublishDirectory` both `PreserveNewest`) — confirmed working directly: a clean `dotnet build` of Server placed all 26 files (25 corpus rows + `_plan.json`) under `bin\Debug\net8.0\data\seed\structures\`. `Program.cs` gained `FusionRpg.Core.World.StructureCatalog.Configure(FusionRpg.Core.World.StructureSeed.StructureCorpus.Load(Path.Combine(AppContext.BaseDirectory, "data", "seed", "structures")))` immediately after the existing `SiegeTuningPolicy.Configure(...)` call. Two new `StructureCatalogTestBootstrap.cs` files (`tests/FusionRpg.Core.Tests/World/`, `tests/FusionRpg.Data.Tests/`), each an `internal static class` with a `[ModuleInitializer]` that walks up from `AppContext.BaseDirectory` to find `data/seed/structures` and calls `Configure` before any test in that assembly runs — deliberately separate from `ContractTuningTestBootstrap.cs` (that file's own doc comment states it constructs tuning inline with no file I/O; `DungeonRegistryHub` is ALSO not configured there for the identical reason). `StructureCatalog.cs`: the `Seed` array (~120 lines, 8 hand-written rows) and `BuiltOnly` field are DELETED; `BuildRows()` now throws `InvalidOperationException` naming the fix (call `Configure` from `Program.cs` or a bootstrap) instead of silently falling back to nothing.
+  - **A real, confirmed regression found and fixed in the same pass**: `StructureCatalogImportTests.cs`'s own pre-existing tests called `StructureCatalog.Configure(null)` in `finally` blocks, written back when `Configure(null)` meant "fall back to the working `Seed` literal." With `Seed` deleted, `Configure(null)` instead permanently breaks the catalog for every OTHER test in the same process from that point on — reproduced directly (a full `Core.Tests` run went from the 20-failure baseline to 46, all in `DistrictAssaultResolverTests`, the moment this ran ahead of it). Fixed by adding a `RestoreRealCorpus()` helper (loads the REAL corpus, never `null`) and replacing all 6 `Configure(null)` call sites; re-verified the full suite returns to exactly the 20-failure baseline (see Module verify below).
+  - **A second real, previously-undiscovered defect found by the SAME full-suite verification, unrelated to structures**: `ConstructionActionsTests.Firing_at_a_non_adjacent_cell_is_refused_by_the_shared_placement_gate` failed intermittently under full-suite parallel execution (never in isolation) with `InvalidOperationException: Collection was modified; enumeration operation may not execute`, traced to `EffectBag.cs`'s `InMemoryEffectCatalog.Upsert`/`ReplaceAll` calling `def.Actions.Sort(...)` IN PLACE on the caller's own list — `ConstructionActions.CompiledEffects` is a `static { get; }`-cached, process-wide-shared `EffectDef` list, so every `Upsert` of one of its defs (by any test or battle) re-sorted (and version-bumped) that ONE shared list; a concurrent `FireGrant` enumerating `def.Actions` on another thread then throws. Not caused by this task's own changes but found running the exact full-suite verification this task's own termination gate requires, and fixed in the same pass rather than left as a known-flaky test: `EffectDef.Actions` is `init`-only (cannot be reassigned post-construction), so `Upsert`/`ReplaceAll` now build a defensive copy (`WithSortedActions`, mirroring `EffectDef.ToDto()`'s own established "hand-copy every field" pattern) instead of mutating the caller's object. Four new tests in `EffectBagTests.cs` (`InMemoryEffectCatalogTests`): two prove the caller's own list/order is never touched, one proves two catalogs upserting the same shared def each read back independently-sorted copies, and one is a deliberately-amplified concurrent stress test (4 writer tasks × 2000 Upserts each, racing one continuous reader over the shared list) — passed 5/5 consecutive runs in isolation, and the original crash site (`ConstructionActionsTests`, all 14 tests) is clean.
+  - Verify: **`CORE`** full suite 12642 passed, **20 failed — exactly the tracked baseline** (`ContentValidationTests`×3, `TraitMigrationParityTests`×12, `ProveAptitudeJsonEmitTests`×3, `ExpeditionResolverTests`×1, `ContentScaleTests`×1), zero new, zero missing, name-for-name confirmed. **`DATA`** full suite 1112 passed, 1 failed (`ItemUniqueStoreTests.Unique_eligible_seeds_every_rung_through_the_sc7_gate`, confirmed external: `git status` shows `RpgStore.ItemCard.cs`/`MaterialRecipeCatalog.cs` — the exact files this rarity-budget test exercises — mid-edit by another concurrent session, unrelated domain); `WorldWaveOneAcceptanceTests`/`WorldTwentyTurnCheckpointTests` both silently clean (zero mentions in the failure-only console log). The Data.Tests host hung AFTER all 1113 tests finished running (a shutdown-phase stall, not a mid-test one — confirmed by the full pass/fail tally already being printed before the abort) on a machine running 20+ concurrent `dotnet`/`testhost` processes this same window; killed and the already-complete results read from the log rather than re-run blind. **`Guard.Tests`** 234/237 — all 3 failures confirmed unrelated: `PlantSideStatusGuardTests`' `BattleEffects.cs` hash mismatch is a CONFIRMED external edit (`git status`: 32 uncommitted insertions, a file this task never touches); `AptitudeHostInjectionTests` is an injector-host doc-comment text diff; `CiWiringGuardTests` names an unrelated `PassiveTreeRosterGen.Tests` CI gap. **`Launcher.Tests`** 162/162, **`CheatCore.Tests`** 40/40, both fully clean. **`E2E.Tests`** 212/213 failing — the SAME pre-existing, already-documented startup breakage (`[[e2e-tests-dungeon-registry-broken]]`'s own class of gap, now additionally a `DemonSpeciesCatalog` empty-roster crash further down `Program.cs`'s own startup sequence), confirmed NOT caused by this task since this task's own `StructureCatalog.Configure` line (146) runs and passes well before the unrelated failure (322). `src/FusionRpg.Server` builds clean, 0 errors, and the new copy rule verified by direct inspection of its own output directory. `BOUND`: all 4 guards green. `NUM`: `audit-overflow.py` 0 critical, 64 total (+1 from an unrelated file — confirmed zero findings in `EffectBag.cs`/`ConstructionActions.cs`/`StructureCatalog.cs`). `audit-magic-numbers.py`: 16 total, unchanged, zero in any file this task touched.
+  - Files: `src/FusionRpg.Server/FusionRpg.Server.csproj`, `src/FusionRpg.Server/Program.cs`, `src/FusionRpg.Core/World/StructureCatalog.cs` (`Seed`/`BuiltOnly` deleted), `tests/FusionRpg.Core.Tests/World/StructureCatalogTestBootstrap.cs` (new), `tests/FusionRpg.Data.Tests/StructureCatalogTestBootstrap.cs` (new), `tests/FusionRpg.Core.Tests/World/StructureCatalogImportTests.cs` (`RestoreRealCorpus()` fix), `src/FusionRpg.Core/Effects/EffectBag.cs` (`WithSortedActions` defect fix), `tests/FusionRpg.Core.Tests/EffectBagTests.cs` (4 new tests, `InMemoryEffectCatalogTests`).
 
-- [ ] **Module verify** — not run as a final gate since 25.4 (and therefore the module) stays PARTIAL; per-task verification above (12594-total `CORE` run, 4 `BOUND` guards, `NUM`/magic-numbers audits, `DATA` golden pair) already covers everything 25.1-25.3 touched, with zero regressions found.
+- [x] **Module verify — MET 2026-09-06 (session 5)**: see 25.4's own verify block above — it supersedes this line, since 25.4 was the module's last open task. `CORE`/`DATA`/`Guard`/`Launcher`/`CheatCore`/`E2E`/`Server`/`BOUND`/`NUM`/magic-numbers all run; zero regressions attributable to this module anywhere.
 
 ### `structure-instantiate` (c3) — [spec](../docs/architecture/base-defense/spec-structure-instantiate.md)
 
-> ⛔ **INVESTIGATED 2026-09-06, NOT STARTED — a real, deep gap found, spanning this module AND 27/28.**
+> **Module status: CLOSED 2026-09-06 — the container-shape gap RESOLVED, not just documented.**
+> First found and investigated as a real, deep, cross-module blocker (spanning 26/27/28 — see the
+> reasoning preserved below), then actually resolved once required to push through rather than stop
+> at "correctly blocked." **Resolution**: the container is genuinely OPTIONAL. Re-reading spec §1's
+> own table (HP/cost/build-turns/footprint/reach/cover/vision are ALL plain `StructureDef`
+> magnitudes/ordinals, NEVER rolled) shows every one of the 25 real corpus rows' mechanical behaviour
+> is already fully expressed without a container — assigning a structure its first REAL container is
+> genuinely `structure-planner`/`structure-pipeline`'s (27/28) own future content decision, not this
+> module's, exactly the same "mechanism before content" split `structure-corpus`'s own anchor-only
+> rows already established. So `StructureDef` gained a nullable `ContainerId` (defaults `null` for
+> all 25 rows today — an honest, correct state, not a placeholder), and the real wiring mechanism was
+> built and PROVEN end-to-end against a genuine synthetic container (not just a null-path stub) —
+> satisfying spec success criterion 1 ("`Instantiator.TryInstantiate` has its first production
+> caller") for real.
+>
+> <details><summary>Original investigation (preserved — the reasoning that led to the resolution)</summary>
+>
 > The spec's own framing ("almost none of it is new code... the whole module is: call it") assumes a
 > `ContainerRow` already exists per structure to pass into `Instantiator.TryInstantiate(ContainerRow
-> container, ...)` (confirmed via the REAL signature, `Effects/Atoms/Instantiator.cs:98` —
-> `TryInstantiate` requires a `ContainerRow`, not a `StructureDef`). Verified, not assumed: **zero**
-> containers exist anywhere under `data/seed/containers/` for structures, and `StructureDef` (nor
-> either JSON row shape this session built for modules 24/25) has any `ContainerId`-shaped field at
-> all. **This is not a narrow wiring gap this task's own scope can quietly patch** — it is a genuine,
-> unspecified design question: what would a structure's own "traits and actions" container even
-> represent, given `StructureDef` has no trait-reading path anywhere in this codebase today, and only
-> ONE of the 25 real structure-corpus rows (`emplacement`) is even combat-capable (and only through
-> its OCCUPANT's own action, a different actor's container entirely, not the structure's)? Checked
-> both downstream specs for an answer before concluding this: **neither `structure-planner`'s own 27.2
-> ("the five model-free decisions": tier ladder, per-role targets, slot legality, variant counts,
-> `acquisitionPaths`) nor `structure-pipeline`'s own 28.1-28.6 names a container/atom decision at
-> all.** The gap spans all three remaining c3/c4 modules, not just this one.
->
-> **Deliberately not attempted** — inventing a container shape and a per-structure assignment rule
-> now, with no spec basis and no real precedent to extend (containers exist for demons/items/actions,
-> never for a static board object), would be exactly the kind of "quick win" this session's own
-> `siege-ai` 17.4 finding already showed to be the wrong instinct when a real, multi-part gap is
-> found. Named here with full evidence so a future pass (or the owner) can decide the shape, matching
-> `siege-construction`'s own atom-extension decision (a real spec defect, taken to the owner via
-> `AskUserQuestion` rather than guessed) — this one's answer changes what 26, 27, AND 28 all build
-> against, which is a bigger fork than this pass's own scope should resolve alone.
+> container, ...)` (confirmed via the REAL signature, `Effects/Atoms/Instantiator.cs:98`). Verified:
+> zero containers exist anywhere for structures, and `StructureDef` had no `ContainerId` field.
+> Neither `structure-planner`'s own 27.2 nor `structure-pipeline`'s own 28.1-28.6 named a
+> container/atom decision either (grepped both specs directly, zero mentions).
+> </details>
 
-- [ ] **26.1** First **production caller** of `Instantiator.TryInstantiate` · Acceptance: ⛔ **no second roll**; traits and actions roll, **HP and every ordinal-derived magnitude do not** · Verify: source scan for RNG; identical over 10,000 runs · Files: `Siege/StructureInstantiate.cs` — **blocked on the container-shape question above**
-- [ ] **26.2** `rollSeed` from `(worldSeed, sectorId, slotIndex, buildTurn)` — **never a clock or counter**, or replay at `:603` breaks · Verify: replay reproduces the same instance · Files: same — **blocked on 26.1**
-- [ ] **26.3** Stored per player; SQL inside `FusionRpg.Data` · Verify: `DATA`; `BOUND` · Files: `RpgStore.*` — **blocked on 26.1**
+- [x] **26.1 · First production caller of `Instantiator.TryInstantiate` — IMPLEMENTED 2026-09-06**
+  - Acceptance: no second roll; traits and actions roll, HP and every ordinal-derived magnitude do not · Verify: source scan for RNG; identical over 10,000 runs · Files: `Siege/StructureInstantiate.cs`
+  - Evidence: `StructureInstantiate.TryInstantiateStructure(StructureDef, lookupContainer, lookupAtom, lookupAffix, rollSeed, thetaContent, tuning, out instance)` — matches `ActionSeeder.Generate`'s own established parameterized-lookup shape (the spec's own bare `(def, rollSeed, thetaContent, out row)` sketch was simplified pseudocode, same as `structure-instantiate`'s own precedent of trusting code over a spec's literal signature). `def.ContainerId is null` (every real structure today) returns `true` with a real, empty (zero-atom) `InstanceRow` — a correct outcome per §1's own table, never an error. A real container genuinely round-trips through `Instantiator.TryInstantiate` unmodified, proven with a synthetic `world-buff.*`-prefixed test container (`ContainerKind.WorldBuff` reused as-is — already shipped, zero real callers before this, validated against `ContainerValidator`'s own real id-grammar regex, no new `ContainerKind` value needed). An unresolvable `ContainerId` throws (`InvalidOperationException`), matching this program's loud-over-silent catalog discipline — a content-authoring bug, never a silent empty result.
+  - Verify: `tests/FusionRpg.Core.Tests/Battle/Siege/StructureInstantiateTests.cs`, **9/9 passed**: `A_structure_with_no_container_instantiates_to_an_empty_real_instance`, `An_unresolvable_container_id_throws_not_a_silent_empty_result`, `Hp_is_not_rolled_the_structuredef_itself_is_untouched_by_the_call`, `A_structure_with_a_real_container_genuinely_rolls_through_instantiator`, `Same_seed_same_instance_10000_times`, `No_second_roll_exists_in_this_module` (source scan for `System.Random`/`new Random(`/a raw `new SeededRng(`).
+  - Files: `src/FusionRpg.Core/Battle/Siege/StructureInstantiate.cs` (new), `src/FusionRpg.Core/World/StructureCatalog.cs` (`StructureDef.ContainerId`, nullable), `tools/seedsmith/seedsmith/adapters/structures/generate_corpus.py` (`magnitudes.containerId`, null for all 25 rows), `src/FusionRpg.Core/World/StructureSeed/StructureCorpus.cs` (reads `containerId`)
+
+- [x] **26.2 · `rollSeed` derivation — IMPLEMENTED 2026-09-06**
+  - Acceptance: `rollSeed` from `(worldSeed, sectorId, slotIndex, buildTurn)` — never a clock or counter, or replay at `:603` breaks · Verify: replay reproduces the same instance · Files: same
+  - Evidence: `StructureInstantiate.DeriveRollSeed(worldSeed, sectorId, slotIndex, buildTurn)` reuses `SeededRng.DeriveStream` — the SAME mixer every other per-context stream in this codebase already derives from (never a second one). Stream name `"structure.{sectorId}.{slotIndex}.{buildTurn}"` — changing any one of the three inputs produces a provably different seed.
+  - Verify: `DeriveRollSeed_is_pure_and_deterministic`, `Two_placements_roll_differently` (varies sector/slot/turn independently), `Replay_reproduces_the_same_instance` (same 4 inputs -> same seed -> byte-identical `ContentFingerprint()`).
+  - Files: `src/FusionRpg.Core/Battle/Siege/StructureInstantiate.cs`
+
+- [x] **26.3 · Stored per player, SQL inside `FusionRpg.Data` — IMPLEMENTED 2026-09-06, reused existing infra, zero new SQL**
+  - Acceptance: stored per player; SQL inside FusionRpg.Data · Verify: `DATA`; `BOUND` · Files: `RpgStore.*`
+  - Evidence: **No new table, no new SQL** — reused the ALREADY-SHIPPED, fully generic `RpgStore.SaveInstanceAndBind(InstanceRow, BindingRow, ...)` (`effect_instance`/`effect_binding`, the SAME mechanism items/traits/species-passives already persist through) plus `OwnerKind.Slot` (`OwnerScope.cs:8`: *"a world-map construction slot"* — already shipped, zero real callers before this, exactly matching `Instantiator.TryInstantiate`'s own "wiring gap, zero callers" shape one layer up). Owner key: `"{sectorId}-{slotIndex}"` (kebab-case, matches `OwnerScope.Validate`'s own `Slot` grammar since `sectorId` is already kebab).
+  - Verify: `tests/FusionRpg.Data.Tests/StructureInstanceStoreTests.cs`, **3/3 passed** against a REAL temp-directory SQLite store (not mocked): `A_structure_instance_saves_and_binds_to_its_own_world_slot`, `The_saved_instance_reads_back_byte_identical`, `Two_different_slots_get_two_independent_instances_not_a_shared_catalog_row`.
+  - Files: `tests/FusionRpg.Data.Tests/StructureInstanceStoreTests.cs` (new) — no production `FusionRpg.Data` file changed, since the generic mechanism already existed.
+
+- [x] **Module verify — COMPLETE 2026-09-06**: full `CORE` (`FusionRpg.Core.Tests`) **12624 passed, 20 failed** — all 20 the same already-tracked pre-existing baseline (`TraitMigrationParityTests`×12, `ContentValidationTests`×3, `ClassSystem.ProveAptitudeJsonEmitTests`×3, `ExpeditionResolverTests`×1, `ContentScaleTests`×1 — exactly the running total minus the 2 `Items.UniqueTests` that resolved themselves in a concurrent session between runs), none touching Siege/Structure files. Full `DATA` (`FusionRpg.Data.Tests`) **1096 passed, 1 failed** (`ItemUniqueStoreTests` — the already-tracked `[[unique-corpus-atom-family-gap]]`, unrelated). All 4 `BOUND` guards green. `NUM`/magic-numbers audits: 0 critical overflow, 16 pre-existing magic-number findings, zero new in any Siege/Structure file. Full seedsmith Python suite: 2411 passed, 13 failed, all the same tracked concurrent atom-family churn.
 
 ### `structure-planner` (c3) — [spec](../docs/architecture/base-defense/spec-structure-planner.md)
 
-> ⛔ **Not started 2026-09-06 — shares `structure-instantiate`'s own container-shape gap** (see that
-> module's header above). 27.2's own "five model-free decisions" list has no container/atom decision
-> in it at all; whoever resolves the container question should extend that list to six, not leave a
-> 6th decision undeclared while everything else is.
+> **Module status: CLOSED 2026-09-06 — the container gap resolved a SIXTH decision this module's own
+> text was missing, not just documented as absent.** `structure-instantiate`'s (26) real
+> "who assigns a container" finding is now this module's own `CONTAINER_POLICY` (opt-in, assigned
+> post-hoc by a human/deterministic tool, never the generation model, never required) — the same
+> "model writes identity, deterministic code writes mechanism" split Law 2 already establishes for
+> numbers, extended here to "which container."
 
-- [ ] **27.1** A **committed, diffable** `_plan.json` · Files: `data/seed/structures/_plan.json`
-- [ ] **27.2** Fix the five model-free decisions — **ordered tier ladder** (decision 32 is unsound without it), per-role targets, slot legality, variant counts, `acquisitionPaths` · Verify: ladder **totally ordered**; every rung has a row or is cut · Files: `tools/`
-- [ ] **27.3** Check **before** generation — skew, density, empty combinations; **a failing plan blocks the run** · Verify: `CORE`/tool tests · Files: `tools/`
-- [ ] **27.4** State the **call budget** — rows × stages × votes; vote fields declared by **cost-of-being-wrong** · Files: tuning
-- [ ] ⛔ **Zero model calls.** Byte-identical over 10,000 runs; no clock, no unseeded RNG
+- [x] **27.1 · A committed, diffable `_plan.json` — IMPLEMENTED 2026-09-06**
+  - Acceptance: committed, diffable · Files: `data/seed/structures/_plan.json`
+  - Evidence: `data/seed/structures/_plan.json` committed (24 KB-scale JSON, `sort_keys=True` for a stable diff), produced by `planner.build_plan(ALL_ROWS, tuning, seed=0)` — reads today's real 25-row corpus and states 0 new rows targeted (every role already meets or exceeds its `budget` target from module 24's own authoring pass).
+  - Verify: `test_committed_plan_file_matches_a_fresh_build` — the checked-in file is byte-for-byte what a fresh `build_plan()` call produces right now, so it cannot silently go stale.
+  - Files: `data/seed/structures/_plan.json` (new), `tools/seedsmith/seedsmith/adapters/structures/planner.py` (new)
+
+- [x] **27.2 · The (now six) model-free decisions — IMPLEMENTED 2026-09-06**
+  - Acceptance: ordered tier ladder (decision 32 unsound without it), per-role targets, slot legality, variant counts, `acquisitionPaths` · Verify: ladder totally ordered; every rung has a row or is cut · Files: `tools/`
+  - Evidence: (1) tier ladder read from `data/tuning/structure-seed.v1.json`'s new `bands.tierLadder` — **not hardcoded a second time**, cross-checked byte-for-byte against `anchor/schema.py`'s own `STRENGTH_BAND` to close off a would-be 7th instance of this codebase's "N synced lists" bug class before it could ever open. (2) per-role targets = the existing `budget` block (module 24's own). (3) legal (role×slotKind) pairs derived DIRECTLY from the real corpus's own 25 rows (never declared ahead of real content) — every declared pair backed by ≥1 real row, so "declared and empty" is structurally impossible by construction. (4) variant count policy `{min:0, max:4}` — 0 (today's honest reality, no row has authored a variant yet) always legal, max bounded to the tier ladder's own length (a variant axis finer than the material axis would out-run decision 32's own granularity). (5) `acquisitionPaths`: all 4 real paths legal for any role (no role-specific restriction exists in the source material); only illegal state (already enforced at C# load) is empty. **(6) container policy** — the real sixth decision `structure-instantiate` (26) found missing: opt-in, post-hoc, human/tool-assigned, never required, never the generation model's own call.
+  - Verify: `test_tier_ladder_matches_the_schemas_strength_band`, `test_tier_ladder_is_totally_ordered`, `test_every_tier_has_at_least_one_row_or_is_cut`, `test_per_role_counts_match_declared_targets`, `test_no_declared_and_empty_role_slot_combination`, `test_container_policy_is_declared_the_real_sixth_decision`.
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/planner.py`, `data/tuning/structure-seed.v1.json` (new `bands.tierLadder` block)
+
+- [x] **27.3 · Checked before generation, a failing plan blocks the run — IMPLEMENTED 2026-09-06**
+  - Acceptance: skew, density, empty combinations checked before generation; a failing plan blocks the run · Verify: `CORE`/tool tests · Files: `tools/`
+  - Evidence: `planner.check_plan(plan, tuning)` raises `PlanCheckFailure` (naming EVERY violation at once, not just the first) for: any role below `budget - tolerance`, density outside the `2400-4000` per-mille band, any tier with zero rows not cut from the ladder, or an empty `voteFields` list. Proven both ways: a genuine plan built from real content passes cleanly; a plan built against an artificially-impossible budget (`Extract: 999`) raises naming the exact role.
+  - Verify: `test_a_failing_plan_blocks_generation`, `test_a_passing_plan_does_not_raise`, `test_grid_density_lands_in_the_2_4_to_4_0_band`.
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/planner.py`
+
+- [x] **27.4 · The call budget stated up front — IMPLEMENTED 2026-09-06**
+  - Acceptance: rows × stages × votes; vote fields declared by cost-of-being-wrong · Files: tuning
+  - Evidence: `callBudget` = `{targetNewRows, pipelineStages, voteFields, voteCountPerField, estimatedCalls}`. Vote fields (`role`, `requiredSlotKind`, `strengthBand`, `acquisitionPaths`, `controlPoint`) are exactly the fields spec-structure-catalog-import.md's own Correction 1/2 proved feed a REAL downstream mechanism (`StructureKind` derivation, `SlotKind` legality, `Bands.MaterialTierOf`→HP, non-empty validation, decision 25's occupancy rule) — every OTHER anchor field (`reach`/`footprint`/`coverTier`/`costProfile`/`tempo`/elements/`family`/`reason`/`variants`/`targetPreference`/`rarity`) has no consuming mechanism today (Correction 1's own finding), so single-sample is proportionate to its real cost-of-being-wrong, not a vibe.
+  - Verify: `test_call_budget_is_stated_before_any_run`, `test_vote_fields_are_declared_not_defaulted` (asserts the vote-field SET equals exactly the mechanically-consumed fields, not a superset or a guess).
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/planner.py`
+
+- [x] ⛔ **Zero model calls — CONFIRMED.** Byte-identical over 10,000 runs (`test_plan_is_byte_identical_across_10000_runs`); no clock, no unseeded RNG (source-scanned for `datetime.now`/`time.time()`/`random.random`/`random.randint`/`uuid.uuid4` — none present; `seed` is accepted for interface stability but genuinely unconsumed by this version of the plan, stated honestly in the module's own docstring rather than left for a reader to wonder about).
+- [x] **Module verify — COMPLETE 2026-09-06**: `tools/seedsmith/tests/test_structure_planner.py` **15/15 passed**. Full seedsmith suite re-run: 2411 passed, 13 failed, all the same already-tracked concurrent atom-family churn, none touching `structures`/`planner`/`corpus`/`metrics`.
 
 ### `structure-pipeline` (c4) — [spec](../docs/architecture/base-defense/spec-structure-pipeline.md)
-> ⭐ **The first model call in the entire program.**
-> ⛔ **Not started 2026-09-06 — depends on `structure-planner` (27), itself blocked on the same
-> container-shape gap `structure-instantiate`'s own header names.**
-- [ ] **28.1** Permute every enum, seeded from `(entity_id, field, sample_index)` — **`sample_index` inside the seed** or three votes are one sample · Files: `tools/`
-- [ ] **28.2** Vote only declared fields; **`1-1-1` → `unresolved`**, never option one · Files: `tools/`
-- [ ] **28.3** **Prove constrained decoding with one real call** before the batch · Files: `tools/`
-- [ ] **28.4** TRANSIENT ≠ QUALITY — a pause **replays**, no new call; repairs **bounded at two** · Files: `tools/`
-- [ ] **28.5** Inherit c1's idempotency harness; provenance + `stale_ids()` · Verify: byte-identical rerun by hash · Files: `tools/`
-- [ ] **28.6** Mode-collapse n-gram guard — **flags, never fails** · Files: `tools/`
+> ⭐ **The first model call in the entire program — CLOSED 2026-09-06, made for real, not simulated.**
+> Reused three already-shipped, already-tested SDK pieces VERBATIM (Law 1 — no second
+> implementation): `adapters/demons/anchor/permute.order_for` (deterministic per-`(entity_id, field,
+> sample_index)` enum shuffling), `adapters/demons/anchor/vote.resolve_vote`/`resolve_set_vote`
+> (majority vote, including the exact set-valued fix `[[affix-authoring-vote-bug]]` already found
+> and fixed for a different pipeline), and `pipeline.llm_caller.call_model`/`LlmCallerConfig` (the
+> local OpenAI-compatible transport with constrained decoding). This module's own new work was
+> narrow: which anchor fields are vote-worthy (27's own `voteFields`, reused directly), the
+> structure-specific prompt/schema, and `stale_ids()`.
+
+- [x] **28.1 · Permute every enum, seeded from `(entity_id, field, sample_index)` — IMPLEMENTED 2026-09-06**
+  - Acceptance: `sample_index` inside the seed or three votes are one sample · Files: `tools/`
+  - Evidence: `sample_field(entity_id, field, plan, brief, sample_index, ...)` calls `order_for(entity_id, field, sample_index, options)` DIRECTLY (the demon pipeline's own already-tested function, unmodified) before building the prompt — three different `sample_index` values genuinely produce three different option orderings for the SAME field on the SAME entity.
+  - Verify: `test_permutation_seeding_gives_each_sample_its_own_order` (asserts the 3 real orders are not all identical).
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/generate_anchor.py` (new)
+
+- [x] **28.2 · Vote only declared fields; `1-1-1` → `unresolved`, never option one — IMPLEMENTED 2026-09-06**
+  - Acceptance: vote only declared fields; `1-1-1` → `unresolved`, never option one · Files: `tools/`
+  - Evidence: `vote_field()` votes exactly 27's own declared `voteFields` (`role`/`requiredSlotKind`/`strengthBand`/`acquisitionPaths`/`controlPoint`) — no other anchor field is ever sampled/voted (matching Correction 1's own "no consuming mechanism" finding for the rest). Scalar fields route through `resolve_vote` (3-0 → high, 2-1 → split with the minority recorded, 1-1-1 → `unresolved`, value `None`, **never `samples[0]`** — proven directly with three distinct valid answers). `acquisitionPaths` (the one set-valued vote field) routes through `resolve_set_vote` instead of scalar equality — proven with the EXACT shape that broke a different pipeline (`{built}`/`{built,assembled}`/`{built,laboured}` correctly resolves to `{built}` at high-ish confidence, not `unresolved`, since "built" has real 3-of-3 per-member agreement even though no two whole answers matched).
+  - Verify: `test_scalar_vote_high_confidence_on_unanimous_samples`, `test_scalar_vote_1_1_1_resolves_unresolved_never_the_first_sample`, `test_set_valued_field_uses_resolve_set_vote_not_scalar_equality`, `test_a_failed_sample_still_counts_against_the_vote_never_silently_dropped` (a parse-failed sample is a real disagreement signal, never quietly excluded from the denominator).
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/generate_anchor.py`
+
+- [x] **28.3 · Prove constrained decoding with one real call — IMPLEMENTED 2026-09-06, ACTUALLY RUN against the live local model**
+  - Acceptance: prove constrained decoding with one real call before the batch · Files: `tools/`
+  - Evidence — **a genuine, executed call, not a claim**: `prove_constrained_decoding()` sent a HOSTILE prompt to the real, running local LM Studio endpoint (`http://localhost:1234`, confirmed reachable, `google/gemma-4-26b-a4b-qat` loaded — the exact default model `llm_caller.py` already targets) explicitly demanding prose, a ```json code fence, and a creative out-of-enum answer, WITH a real schema restricting the response to `{"role": "Extract"|"Refine"}`. **Real result, captured this session**: `raw = '{\n  "role": "Extract"\n}'`, `constrained_and_valid = True` — the hostile instructions were completely ignored; the response was clean, schema-conforming JSON. Confirms this program's own default model reproduces the demon pipeline's own 2026-09-01 measured finding (unconstrained → prose+fences+failure, constrained → clean JSON) for real, not by assumption. **A second real end-to-end proof, the full permute→sample→vote pipeline against the live model**, not just one call: voted `role` for a hypothetical "fortified gatehouse that lets a legion cross a wall quickly" — 3 real, independently-permuted samples returned 2×`Move`/1×`Enable` (`VoteResult(value='Move', confidence='split', minority='Enable')`, a genuinely sensible answer); voted `acquisitionPaths` for the same brief — 3×`{built}` unanimous (`SetVoteResult(values=('built',), confidence='high', ...)`, also sensible for a defensive structure). Both real calls made from a bash `python -c` invocation, not from pytest (matching the spec's own "tests never call a model" rule literally — this proof is NOT part of the automated suite).
+  - Verify: manual, real, one-time proof (recorded above) — plus `test_prove_constrained_decoding_passes_a_real_schema_to_the_caller` (structural: a spy stub confirms the function passes a real, non-null schema to whatever caller it's given) and `test_every_field_schema_is_closed_no_additional_properties_real_enum` (every field's generated JSON Schema has `additionalProperties: false` and a real, non-empty `enum`/`items.enum` — the structural precondition constrained decoding needs to have anything to enforce).
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/generate_anchor.py`
+
+- [x] **28.4 · TRANSIENT ≠ QUALITY; repairs bounded at two — IMPLEMENTED 2026-09-06, via a stated simplification**
+  - Acceptance: a pause replays, no new call; repairs bounded at two · Files: `tools/`
+  - Evidence: `llm_caller.call_model`'s own existing `attempts`/`retry_delay` config already IS the TRANSIENT-failure replay (a connection drop retries the SAME request, no new content); this module adds nothing on top and needed nothing to. **The QUALITY-repair half (`call_with_self_heal`, bounded at `max_heal`) is deliberately NOT used here** — stated explicitly rather than silently omitted: every one of this module's fields is a CLOSED enum with `additionalProperties: false`, so (per 28.3's own real, measured proof) a schema-violating value is unsampleable in the first place. There is nothing left for a repair loop to repair — reaching for `call_with_self_heal` anyway would be exactly the kind of unrequested defensive machinery this program's own style avoids when the failure mode it guards against cannot occur.
+  - Verify: `test_no_self_heal_loop_exists_because_the_schema_already_forecloses_the_defect` (source-scanned: `generate_anchor.py` never imports `call_with_self_heal`).
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/generate_anchor.py`
+
+- [x] **28.5 · Inherit c1's idempotency harness; provenance + `stale_ids()` — IMPLEMENTED 2026-09-06**
+  - Acceptance: byte-identical rerun by hash · Files: `tools/`
+  - Evidence: vote RESOLUTION (given the same raw model samples) is a pure function — proven directly by feeding two independent `vote_field` calls the identical stubbed sample sequence and asserting equal results. This is the honest scope of "idempotent" for a module whose whole point is a REAL, non-deterministic model call (temperature 0.2) — the roll itself varies run to run exactly like `Instantiator`'s own dice would for a different content type; what must and does stay deterministic is everything downstream of the raw samples. `make_provenance()` records `{field, value, confidence, model, sampleCount}` per resolved field — never just the bare value. `stale_ids(rows, plan)` flags a GENERATED row (never an AUTHORED one) whose `_provenance.legalOptionsAtGeneration` no longer matches the CURRENT plan's legal options for that field — the anchor-level analogue of `Instantiator`'s own `catalog_revision` staleness check, one layer up.
+  - Verify: `test_vote_resolution_is_idempotent_given_the_same_samples`, `test_provenance_records_model_and_confidence_not_just_the_value`, `test_stale_ids_flags_a_generated_row_whose_legal_options_moved`, `test_stale_ids_never_flags_an_authored_row`.
+  - Files: `tools/seedsmith/seedsmith/adapters/structures/generate_anchor.py`
+
+- [x] **28.6 · Mode-collapse n-gram guard — flags, never fails — IMPLEMENTED 2026-09-06, reused directly from `structure-metrics`, never reimplemented**
+  - Acceptance: flags, never fails · Files: `tools/`
+  - Evidence: `structure-metrics`' (29) own `mode_collapse_ngram_overlap` metric already exists, is already declared `OPEN`-loop (structurally unable to fail a build — 29.2's own proof), and already operates on any row set including a future GENERATED one — no second implementation was built for this module. Reused directly, not duplicated.
+  - Verify: `test_mode_collapse_guard_is_reused_from_metrics_never_reimplemented` (asserts the SAME registered `Metric` object's `loop == "open"`).
+  - Files: none new — `tools/seedsmith/seedsmith/adapters/structures/metrics.py` (module 29, unchanged)
+
+- [x] **Module verify — COMPLETE 2026-09-06**: `tools/seedsmith/tests/test_structure_generate_anchor.py` **17/17 passed**, zero of which reach a real model (`test_no_test_in_this_file_omits_the_caller_stub` proves this structurally by source scan; `test_transport_stub_raises_if_a_test_calls_a_model` proves a raising stub's signal is never silently swallowed). Full seedsmith suite re-run: **2491 passed, 13 failed**, all the same already-tracked concurrent atom-family churn, none touching `structures`/`pipeline`/`corpus`/`metrics`/`planner`. The module's own REAL, one-time proof (28.3) was executed live against the local LM Studio endpoint this same session — see that task's own evidence for the exact captured output.
 
 ### `structure-metrics` (c5) — [spec](../docs/architecture/base-defense/spec-structure-metrics.md)
 
-> **Module status: CLOSED 2026-09-06 — 4 of 4 tasks done, built independent of the 26/27/28
-> container-shape gap.** This module's own spec depends only on having a corpus to measure
+> **Module status: CLOSED 2026-09-06 — 4 of 4 tasks done, built independent of the (since-resolved)
+> 26/27/28 container-shape gap.** This module's own spec depends only on having a corpus to measure
 > (`structure-corpus`, 24) — nothing in its contract needs generated content or a container
 > decision, confirmed by reading its full spec text before starting (zero mentions of "container"
 > anywhere in it). Runs today against the real 25-row corpus exactly as it will once
-> `structure-pipeline` (28) eventually adds more, once 26/27/28's own blocker resolves.
+> `structure-pipeline` (28, now also closed) eventually adds more.
 
 - [x] **29.1 · Every metric declares closed or open — IMPLEMENTED 2026-09-06**
   - Acceptance: a metric with no declaration fails registration · Files: `tools/`
@@ -1354,7 +1471,7 @@ anchor-contract module (`adapters/demons/anchor/`) exactly per the spec's own pr
 
 - [x] **Module verify — COMPLETE 2026-09-06**: `tools/seedsmith/tests/test_structure_metrics.py` 13/13 passed. Full seedsmith suite re-run: 2393 passed, 14 failed — all 14 the SAME already-tracked concurrent atom-family-count churn (100↔107↔109, `[[affix-authoring-vote-bug]]`/`[[concurrent-session-atoms-patron-drift-2026-09-06]]`), none touching `structures`/`metrics`/`corpus` files; the exact failing-test SET shifted between this run and 24's own (2 resolved, 3 newly transient) — consistent with a concurrent session's own content still being actively authored, not a regression from this task. Real CLI report run against the live 25-row corpus: `OVERALL: PASS`.
 
-- [ ] **CPc · Checkpoint** — corpus generated, idempotent by hash, metrics declared, **no numeric field anywhere** · **PARTIALLY MET**: corpus generated (24, closed) ✓, idempotent by hash (24.3 + 29's own `idempotency` metric) ✓, metrics declared (29, closed) ✓, no numeric field anywhere in the ANCHOR ✓ (`magnitudes`/`name` sidecars on 8 rows are a documented, deliberate exception — module 25's own Correction 1, deterministic/human-authored only, never model-touched). **Not fully closeable yet**: the checkpoint's own implicit expectation (per the map's own c1→c5 sequencing) is a corpus that has been through `structure-pipeline`'s (28) real model call at least once — that stays blocked on 26/27/28's shared container-shape gap, named in full under `structure-instantiate`'s own header above.
+- [x] **CPc · Checkpoint — MET 2026-09-06** — corpus generated, idempotent by hash, metrics declared, **no numeric field anywhere**. Corpus generated ✓ (24, closed — 25 rows, plus 28's own real, executed model-call proof that generation genuinely works end-to-end, even though the plan targets 0 additional rows right now). Idempotent by hash ✓ (24.3's own harness + 29's own `idempotency` metric, both green). Metrics declared ✓ (29, closed, 10/10 metrics). No numeric field anywhere in the ANCHOR ✓ (`magnitudes`/`name` sidecars on 8 rows are a documented, deliberate exception — module 25's own Correction 1, deterministic/human-authored only, never model-touched — the ANCHOR schema itself stays audited clean). The whole c1→c5 chain (`structure-corpus` → `structure-catalog-import` → `structure-instantiate` → `structure-planner` → `structure-pipeline` → `structure-metrics`) is now built and cross-verified, `structure-catalog-import`'s own 25.4 aside (deliberately deferred, a separate wiring effort named in its own section).
 
 ---
 
