@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "speciesId": "AshThreePeater",
+  "mechanicalFavour": {
+    "aptitude": "Composure",
+    "element": "earth",
+    "status": "charm_pulse"
+  },
+  "codexSummary": "By embracing this stillness, you will find yourself unshakable in the face of chaos and capable of lulling your enemies into a trance.",
+  "speciesUniqueNodeIds": [
+    "skill.ashthreepeater-def-t10-n0",
+    "skill.ashthreepeater-def-t10-n1",
+    "skill.ashthreepeater-def-t9-n0",
+    "skill.ashthreepeater-def-t9-n1",
+    "skill.ashthreepeater-off-t10-n1",
+    "skill.ashthreepeater-off-t8-n0",
+    "skill.ashthreepeater-off-t9-n0",
+    "skill.ashthreepeater-off-t9-n1"
+  ]
+}

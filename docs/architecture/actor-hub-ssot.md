@@ -727,15 +727,19 @@ The table above lists who is *supposed* to write derived channels. A repo sweep 
 
 That is the same failure mode §3 exists to prevent, arrived at from the producer side rather than the channel side: the catalog validates *which channel ids* are legal, but nothing validates *who may write them*. Four features grew their own path because there was no opcode to use.
 
-The effect-atom program's `stat.derived` kind exists specifically to give them one — it is the one kind with full runtime support (lawn ✅ battle ✅ sim ✅). When it lands, these four collapse into containers of atoms and become a single registered producer.
+The effect-atom program's `stat.derived` kind **landed** and is the one kind with full runtime support
+(lawn ✅ battle ✅ sim ✅ via Hub / battle equip / atom path). §6.1's four producers (patron, stars,
+injuries, contracts) still write outside a registered subsystem row — they must adopt `stat.derived`
+containers so contributions are attributed. Until they do, those magnitudes remain **unattributed**
+on the atom path (honest residual, not “kind missing”).
 
 | Producer | Writes | State |
 |---|---|---|
-| patron | derived channels, direct | **Unregistered** — adopts `stat.derived` |
-| stars | derived channels, direct | **Unregistered** — adopts `stat.derived` |
-| injuries | derived channels, direct | **Unregistered** — adopts `stat.derived` |
-| contracts (`ContractPolicy`) | rank bonuses, loyalty rates, personality modifiers | **Unregistered** — adopts `stat.derived` |
-| atom compiler | `stat.derived` atoms → derived mods | Designed — [effect-atom-map.md](effect-atom-map.md) E7 |
+| patron | derived channels, direct | **Unregistered** — adopt `stat.derived` |
+| stars | derived channels, direct | **Unregistered** — adopt `stat.derived` |
+| injuries | derived channels, direct | **Unregistered** — adopt `stat.derived` |
+| contracts (`ContractPolicy`) | rank bonuses, loyalty rates, personality modifiers | **Unregistered** — adopt `stat.derived` |
+| atom compiler | `stat.derived` atoms → derived mods | **Shipped** — AtomDerivedSubsystem / EquipAtomSource / grants |
 
 **Rule to adopt when that lands:** a derived write needs both a registered *channel* and a registered *producer*. Only half of that is enforced today.
 

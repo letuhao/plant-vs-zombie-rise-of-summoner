@@ -101,7 +101,7 @@ flowchart TD
   Sec["Secondary plugins / StatusRuntime pulses / OverlayCombatMath"] -->|only verb: Enqueue| Funnel["EffectFunnel — merge + Guard, flush at depth 0"]
   Bag --> Funnel
   Funnel --> FA["FA1 ModifyStat / FA2–FA9 / FA10 Add HP"]
-  FA --> Apply["EntityApply.Run* → ActorHub/StatSystem.Resolve"]
+  FA --> Apply["EntityApply.Run* → ActorHub.Resolve"]
   Apply --> Writer["EntityStatWriter → Unity fields"]
 ```
 

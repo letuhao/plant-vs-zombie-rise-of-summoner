@@ -614,8 +614,10 @@ carries no overlay, and the magnitude lives in process-global static state
 would add a fifth unattributed producer and put us further from GG-49 — *"'Why did my attack drop?' is
 answerable from the interface… **Forbids:** a stat readout with no path to its sources."*
 
-**The bucket is what makes GG-49 satisfiable.** Today it holds only vacuously, because no derived value
-is shown at all.
+**The bucket + Hub gate make GG-49 satisfiable on the server.** `/derived` and `/sheet` already ship
+named contributions for durable sources. FE InspectSplit is the remaining presentation follow-on.
+§6.1 producers (patron/stars/injuries/contracts) can still arrive unattributed until they adopt
+`stat.derived`.
 
 ### 4.5 The two halves are separate features
 

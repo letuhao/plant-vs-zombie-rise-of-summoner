@@ -94,16 +94,19 @@ verification steps.
 ### Phase 1: `tier-bands-coverage`
 - [x] Task 1: `channel_weight_backfill.py` — the pure formula + `missing_channel_weights`
 - [x] Task 2 (inserted mid-execution): fix `FamilyExpandGen`'s hardcoded `tier-bands.v1.json`
-- [ ] Task 3: `write_set_file` + CLI `main()` (dry-run wiring)
-- [ ] Task 4: Real-corpus run — publish + re-run `FamilyExpandGen` + verify
+- [x] Task 3: `write_set_file` + CLI `main()` (dry-run wiring)
+- [x] Task 4: Real-corpus run — publish + re-run `FamilyExpandGen` + verify
 
-### Checkpoint: Phase 1 complete
+### Checkpoint: Phase 1 complete — CLOSED 2026-09-08
 
 ### Phase 2: `battle-ruleset-curve-extension`
-- [ ] Task 5: Calibration data-gathering (named resolver + default, per spec §4)
-- [ ] Task 6: `BattleModels.cs` — 5 new `Base*` functions + `power-scale.v2.json` rows
-- [ ] Task 7: `FamilyExpandGen`'s `FlatReferenceBase` — 5 new arms
-- [ ] Task 8: `ssot-power-scale.md` §10 registration + `RulesetVersion` check + `decisions.md` entry
-- [ ] Task 9: Fix the stale "not bindable yet" doc-comment in the 5 affected family JSON files
+- [x] Task 5: Calibration data-gathering — fallback triggered, no source found for any of the 5 channels
+- [x] Task 6: `BattleModels.cs` — correctly a no-op (0 channels calibrated)
+- [x] Task 7: `FamilyExpandGen`'s `FlatReferenceBase` — correctly a no-op
+- [x] Task 8: `ssot-power-scale.md`/`RulesetVersion` — correctly a no-op, nothing to record
+- [x] Task 9: Fixed the stale "pending E16" doc-comment — real scope was 2 notes in 1 file, not 5 files
 
-### Checkpoint: Phase 2 complete — plan complete
+### Checkpoint: Phase 2 complete — plan complete — CLOSED 2026-09-08
+
+See `tasks/atom-family-expansion-todo.md`'s own "Plan complete — 2026-09-08" section for the full
+summary, evidence, and explicitly-named out-of-scope discoveries.

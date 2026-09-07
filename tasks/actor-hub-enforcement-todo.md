@@ -21,6 +21,14 @@
 - [x] HTTP prove equip `equip:` + multi-source FlatSum + sheet 404 (this pass)
 - [x] Unit: `FromResolver` → `equip:unknown:`; ResolveDerivedWithContributions asserts `aptitude.Might`
 
+## Stale sweep (2026-09-08)
+
+- [x] `StatusDerivedSubsystem` skips empty SourceId; §8.1 all-subsystems note
+- [x] `EmitActorDerived` → `ResolveDerivedWithContributions`; guard pins
+- [x] Stale code comments (Status/Battle/Equip/DominanceBaseline/BuildSquad)
+- [x] P0 docs: lawn-bridge, decisions, DESIGN-GATE, sheet-ideal, aura-surface, equip UseEquipment, item-ideal W2, enforcement-plan fan-in
+- [x] P1 docs: action/item todos, equip-runtime status, software-arch, sheet map/tab, §6.1 framing, historical banners
+
 ## Named follow-ons (not this gate)
 
 - [ ] Injector `PassiveTreeTuningHub` hydrate + tree into `CheatState.ActorHub`

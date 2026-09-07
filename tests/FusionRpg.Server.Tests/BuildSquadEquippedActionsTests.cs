@@ -423,20 +423,14 @@ public class BuildSquadEquippedActionsTests : IDisposable
     /// <summary>
     /// `equip-atom-source-not-wired` (action-plan.md §5, found 2026-09-06, fixed 2026-09-07):
     /// `BattleStatComposer.Equipment` defaulted to `EquipAtomSource.None` forever -- no production
-    /// caller ever called `UseEquipment`, so an equipped item's `stat.derived` atoms never reached a
-    /// live battle's derived stats (only `EquipRuntimeTests.cs`, a synthetic-resolver test, ever
-    /// exercised the compose-side logic). Re-investigated rather than left as "adjacent, another
-    /// program's scope" (this session's own earlier, unverified framing) -- `EquipAtomSource`/
-    /// `BattleStatComposer` live entirely in `Core/Battle/`, this program's own territory, and the
-    /// production resolver shape is already documented on `EquipAtomSource.FromResolver`'s own doc
-    /// comment. Fixed in `Program.cs` (wired once at boot, matching `RungPolicy.Configure`'s own
-    /// established pattern): `BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(instanceId
-    /// => store.ResolveBindings(...).AtomsByBinding` flattened`))`.
+    /// caller ever called `UseEquipment`. Closed in production by <c>Program.cs</c> →
+    /// <c>EquippedBoundAtoms.SourceFromStore</c> → <c>EquipAtomSource.FromEquippedResolver</c>
+    /// (<c>equip:{role}:{itemRef}</c>).
     ///
-    /// <para>This test proves the exact resolver construction `Program.cs` now uses, built against a
-    /// REAL `RpgStore` with a REAL specimen, reaches `BattleStatComposer.Compose` and changes a real
-    /// derived stat by exactly the bound atom's declared magnitude -- not merely that the wiring
-    /// compiles.</para>
+    /// <para>This fixture still drives <c>FromResolver</c> (legacy flatten →
+    /// <c>equip:unknown:{atomId}</c>) to prove battle compose accepts that shape; it is <b>not</b>
+    /// the Program.cs production contract. It proves an equipped atom reaches
+    /// <c>BattleStatComposer.Compose</c> and changes a derived channel by the declared magnitude.</para>
     ///
     /// <para><b>Why a synthetic atom+container, not a real catalogued item.</b> Every real, shipped
     /// item today (`data/seed/containers/unique-equip.json`) wraps a `stat.modify` atom, never
@@ -501,8 +495,8 @@ public class BuildSquadEquippedActionsTests : IDisposable
         var diagAtom = diagAtoms.Single(a => a.AtomId == "atom.equip-wiring-test.t1");
         Assert.Equal("stat.derived", diagAtom.KindId);
 
-        // The exact resolver shape Program.cs wires at boot -- EquipAtomSource.FromResolver's own
-        // documented production contract, built here against the same real _store.
+        // Legacy FromResolver flatten (equip:unknown:{atomId}) — not Program.cs production
+        // (EquippedBoundAtoms → FromEquippedResolver). Locks that battle still accepts this shape.
         BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(specimenId =>
         {
             var resolution = _store.ResolveBindings(

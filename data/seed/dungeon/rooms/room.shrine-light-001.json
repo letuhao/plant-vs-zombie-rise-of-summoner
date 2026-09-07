@@ -3,7 +3,16 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
-    "event.shrine-demon.allpeater-001"
+    "event.shrine-demon.allpeater-001",
+    "event.shrine-demon.allpeater-002",
+    "event.shrine-demon.ashthreepeater-001",
+    "event.shrine-demon.ashthreepeater-002",
+    "event.shrine-demon.bucketnutzombie-001",
+    "event.shrine-demon.bucketzombie-001",
+    "event.shrine-demon.cabbagepult-001",
+    "event.shrine-demon.cactus-001",
+    "event.shrine-demon.cherrypaperzombie-001",
+    "event.shrine-demon.dolldiamond-001"
   ],
   "flavor": "A single shaft of noon-day sun pierces the vaulted ceiling, striking a basin of polished quartz that hums with a low, golden vibration.",
   "hazardBand": "none",

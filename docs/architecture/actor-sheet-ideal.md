@@ -196,7 +196,7 @@ an unread seed is a **wiring gap**, never a wall.
 | Twelve aptitudes, postures Force/Finesse/Bastion as a **read** | `AptitudeCatalog.Count = 3×4` ([Aptitude.cs:30-36](../../src/FusionRpg.Core/Stats/Aptitudes/Aptitude.cs)); `Reading` already authored on the row (`"Hit harder."`) — **today still C#-first; target is `aptitude-catalog.v1.json`** |
 | Commander allocate GET/POST, refuse overspend (never clamp) | [AptitudeEndpoints.cs:24-57](../../src/FusionRpg.Server/AptitudeEndpoints.cs); 409 `aptitudes.overbudget` |
 | Same draft+save on the sheet Progression tab **and** the Aptitudes layer | [ProgressionTab.tsx:65-69](../../web/fusion-rpg-web/src/ui/actor/ProgressionTab.tsx); [useAllocationDraft.ts:61-67](../../web/fusion-rpg-web/src/hooks/useAllocationDraft.ts) |
-| `ActorHub.Resolve` + live `GET /api/actors/{id}/derived` with contributions | [ActorHub.cs:39-48](../../src/FusionRpg.Core/Stats/Derived/ActorHub.cs); [AuraDerivedEndpoints.cs:36-95](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs) |
+| `ActorHub.Resolve` + live `GET /api/actors/{id}/derived` and `GET /api/actors/{id}/sheet` with contributions, fiction labels, `composeKind` | [ActorHub.cs](../../src/FusionRpg.Core/Stats/Derived/ActorHub.cs); [AuraDerivedEndpoints.cs](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs); [UniqueActorHubCompose.cs](../../src/FusionRpg.Server/UniqueActorHubCompose.cs) |
 | DerivedStatsTab already consumes that feed (raw `channelId`) | [DerivedStatsTab.tsx:22-60](../../web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx) |
 | Six-tab `ActorPanel` shell already ships | [ActorPanel.tsx:16-26](../../web/fusion-rpg-web/src/ui/actor/ActorPanel.tsx) — **hardcoded; target is `actor-sheet.v1.json` kinds** |
 | UniqueActor identity + DemonProfile (two concrete elements, nickname) | [UniqueActorDtos.cs:15-29](../../src/FusionRpg.Contracts/UniqueActorDtos.cs); [DemonDtos.cs:6-21](../../src/FusionRpg.Contracts/DemonDtos.cs) |
@@ -226,7 +226,7 @@ already reads the derived channel.
 | `channelLabel` still `idWords` the dotted id | [adapt.ts:898-899](../../web/fusion-rpg-web/src/contract/adapt.ts) — catalog unread by `src/`, `web/`, `tests/` |
 | Live derived list prints `c.channelId` | [DerivedStatsTab.tsx:55](../../web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx) |
 | “Open full derived-stat sheet” is a disabled button | [DerivedStatsTab.tsx:65-71](../../web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx) |
-| `/derived` merge is Commander + DemonType only — UniqueDemon baseline omitted | [AuraDerivedEndpoints.cs](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs) |
+| `/derived` + `/sheet` Hub fan-in is Server durable sources (progression + aptitude + equip + tree); UniqueDemon baseline / species sheet wiring still thin | [UniqueActorHubCompose.cs](../../src/FusionRpg.Server/UniqueActorHubCompose.cs); [AuraDerivedEndpoints.cs](../../src/FusionRpg.Server/AuraDerivedEndpoints.cs) |
 | UniqueDemon allocate: store + `UniqueDemonAllocation.Baseline` exist; no player POST | [AptitudeEndpoints.cs:12-18](../../src/FusionRpg.Server/AptitudeEndpoints.cs) |
 | Species GET exists; sheet does not use it | [AptitudeEndpoints.cs:67-72](../../src/FusionRpg.Server/AptitudeEndpoints.cs) |
 | Shield layers live in Core; no player `GET /api/actors/{id}/shields` | debug/sim only |
@@ -250,7 +250,7 @@ already reads the derived channel.
 | Regular action slots | Action corpus + `ActionSlot` bind. Plate 13 Kit loadout is the **slot chrome**; [action-ideal.md](action-ideal.md) is sealed. Placeholder Strike/Firebolt stay forbidden (GG-23). |
 | Aspect-scope aptitude | **Reverted, not authorized.** Do not start. |
 | Promote | Owner: ignore. No placeholder. |
-| Unified ActorSheet DTO (identity + pools + live statuses + shield layers + derived + catalog names) | One server projection or a documented fan-in of existing GETs + the surface catalog. |
+| Unified ActorSheet DTO covering identity + pools + live statuses + shield layers (derived + primary already on `GET /api/actors/{id}/sheet`) | One server projection or a documented fan-in of existing GETs + the surface catalog. `/sheet` already ships Cold id + derived channels (composeKind, fiction labels, contributions) + primary bag. |
 
 **Not a real gap:** “the lawn cannot show defense / dodge.” Overlay combat already consumes those
 families. An inert FE row is a **wiring gap**.

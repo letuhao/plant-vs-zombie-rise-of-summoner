@@ -3,6 +3,15 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
+    "event.encounter-event-demon.allpeater-001",
+    "event.encounter-event-demon.allpeater-002",
+    "event.encounter-event-demon.ashthreepeater-001",
+    "event.encounter-event-demon.ashthreepeater-002",
+    "event.encounter-event-demon.bucketnutzombie-001",
+    "event.encounter-event-demon.bucketzombie-001",
+    "event.encounter-event-demon.cabbagepult-001",
+    "event.encounter-event-demon.cactus-001",
+    "event.encounter-event-demon.cherrypaperzombie-001",
     "event.encounter-event-demon.dolldiamond-001"
   ],
   "flavor": "A low-ceilinged chamber where the air hangs thick and warm, smelling faintly of dried herbs and old cedar. A single, unlit stone hearth sits in the center, surrounded by several worn, velvet-cushioned stools.",

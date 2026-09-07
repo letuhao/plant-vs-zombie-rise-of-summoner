@@ -3,6 +3,15 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
     "event.trap-demon.dolldiamond-001"
   ],
   "flavor": "The floor of this chamber is a seamless expanse of fine, grey dust that ripples like water under the torchlight. A single, unblemished stone pillar stands in the center, casting a long, lonely shadow across the featureless ground.",

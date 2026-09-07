@@ -137,25 +137,28 @@ it to:
 - **The zombie candidates are `float`** — `z.theArmor`, `z.takeDmgMultiplier`. Routing a `long`
   magnitude through them collides head-on with the repo's own rule (*"Never `float` for a magnitude"*),
   which fails at `Θ`=232, inside normal play.
-- **The live defense path never consults the hub anyway.** `GameHooks.EnsureDamageScaleCache`
-  (`:589-615`) resolves `CheatState.Stats.Resolve(...)` — the **primary `StatSystem`** — once per
-  cheat/pvz revision against a synthetic baseline, and stores a **global per-side** pct/flat pair
-  consumed in the `TakeDamage` prefixes. It never sees `ActorHub`'s merged `EntityFinal`. So writing
-  `DefenseFlat` in `WritePlant` would not reach the damage math even if a field existed.
+- **The live defense path consults ActorHub for AppliedCombat.** `GameHooks.EnsureDamageScaleCache`
+  resolves `CheatState.ActorHub.Resolve(...)` (not bare `Stats.Resolve`) and reads merged
+  `AppliedCombat` — guarded by `scripts/guard-actor-hub.ps1`. The cache is still a **global per-side**
+  pct/flat pair consumed in `TakeDamage` prefixes, so **per-actor** `DefenseFlat` still does not drive
+  lawn damage math until that cache becomes per-entity. That is a separate wiring program — not a
+  "Hub is missing" claim.
+- **SimEngine also goes through ActorHub.** Apply sites call `ActorHub.Resolve` → AppliedCombat
+  (`SimEngine.cs`); `progression.bonus.defense` can reach `StatMath.ScaleIncoming` when the Hub merge
+  contributes it. Remaining lawn gap is the global damage-scale cache shape, not "Sim is StatSystem-only."
 
-**The `DefenseFlat` *field* is live in Core/sim** (`SimEngine.cs:345,382` via
-`StatMath.ScaleIncoming`) — but ⚠️ **this family's contribution still does not reach it**, because
-`SimEngine.Stats` is a `StatSystem` (`SimEngine.cs:22`), not an `ActorHub`, so the sim never sees
-`MergeAppliedCombat`'s output either. The field has consumers; `progression.bonus.defense` has none.
+**Historical note (2026-08-30 audit):** an earlier draft claimed `EnsureDamageScaleCache` used only
+`CheatState.Stats.Resolve` and that `SimEngine.Stats` was a bare `StatSystem` with no Hub — **fixed
+2026-09-07** (ActorHub sole Hot compose gate). Do not re-cite those lines as current.
 
-**Decision for this module: do not attempt to wire it.** Instead, the concrete fixable defect is a
-**documentation lie**, and it is already fixed: `data/seed/derived-stats/catalog.json` claimed this
-family's consumer chain was `ActorHub.MergeAppliedCombat -> EntityStatWriter` — true for
-`maxHp`/`atk`/`arm1`/`arm2`, **false for `defense`**. Corrected 2026-08-30; see
+**Decision for this module: do not attempt to wire per-actor lawn defense.** Instead, the concrete
+fixable defect was a **documentation lie**, and it is already fixed: `data/seed/derived-stats/catalog.json`
+claimed this family's consumer chain was `ActorHub.MergeAppliedCombat -> EntityStatWriter` — true for
+`maxHp`/`atk`/`arm1`/`arm2`, **false for lawn defense field write**. Corrected 2026-08-30; see
 [derived-pipeline-audit-2026-08-30.md](../derived-pipeline-audit-2026-08-30.md).
 
-Making per-actor defense reach the live lawn is a real piece of work (the global cache would have to
-become per-entity) and belongs to whichever program wants it — **not this one.**
+Making per-actor defense reach the live lawn damage cache is a real piece of work (the global cache
+would have to become per-entity) and belongs to whichever program wants it — **not this one.**
 
 That narrowness is **fine and expected**: HoMM3's hero also contributed only Attack/Defense/HP-shaped
 numbers. The rest of the commander's identity arrives through auras.
@@ -220,7 +223,7 @@ change. Matches the `patron-demon` and `buff-debuff-scope` T11 precedent: an own
 
 1. **Where does the injector get the allocation — pull, or push over the existing SignalR hub?** Push
    fits the cold-loop model better (`overlay-control-loops.md`); pull is simpler. → resolve in build.
-2. ~~**W6**~~ **CLOSED 2026-08-30 — do not wire.** No plant-side defense field exists, the zombie
-   candidates are `float` (banned for magnitudes), and the live defense path reads the primary
-   `StatSystem`, never the hub. Making per-actor defense reach the lawn is a separate piece of work for
-   whichever program wants it. See §4.3.
+2. ~~**W6**~~ **CLOSED 2026-08-30 — do not wire Unity defense fields.** No plant-side defense field
+   exists; zombie candidates are `float` (banned for magnitudes). Hub/Sim apply paths use
+   `ActorHub.Resolve` (2026-09-07); remaining lawn gap is the **global** damage-scale cache, not
+   “reads StatSystem never the hub.” See §4.3.

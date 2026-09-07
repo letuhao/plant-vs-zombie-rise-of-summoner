@@ -1,7 +1,8 @@
 # 21 — Plan coverage against the four core specs
 
-**Status:** audit, 2026-09-05. Read-only. Nothing in `src/`, `tools/`, `tests/`, `data/`, the specs or
-the task files was touched.
+**Status:** audit, 2026-09-05 (**historical**). Read-only snapshot. R4 (`SourceId = tree.…`) is
+**shipped on Server** via `TreeAtomSource` / `TreeBoundAtoms` (2026-09-07/08); Injector tree hydrate
+remains an open follow-on. Do not treat MISSING rows below as current without re-measuring.
 
 **What was audited.** [`tasks/passive-tree-plan.md`](../../../tasks/passive-tree-plan.md) and
 [`tasks/passive-tree-todo.md`](../../../tasks/passive-tree-todo.md) (27 tasks, 6 checkpoints, phases

@@ -3,6 +3,15 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
+    "event.encounter-event-demon.allpeater-001",
+    "event.encounter-event-demon.allpeater-002",
+    "event.encounter-event-demon.ashthreepeater-001",
+    "event.encounter-event-demon.ashthreepeater-002",
+    "event.encounter-event-demon.bucketnutzombie-001",
+    "event.encounter-event-demon.bucketzombie-001",
+    "event.encounter-event-demon.cabbagepult-001",
+    "event.encounter-event-demon.cactus-001",
+    "event.encounter-event-demon.cherrypaperzombie-001",
     "event.encounter-event-demon.dolldiamond-001"
   ],
   "flavor": "Dust motes dance in shafts of pale light that fall from high, unseen apertures. The air is unnaturally still, carrying only the faint, rhythmic drip of water somewhere in the distance.",

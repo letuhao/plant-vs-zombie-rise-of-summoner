@@ -32,9 +32,10 @@ Two intertwined problems, one standard:
 
 1. **Completeness.** A seedsmith generator's own resumable run can leave real gaps — a field never
    generated, a stale record left behind after a prompt version changed, a name collision refused
-   and never retried. Right now, detecting this is either fully built (passive-tree's own ledger),
-   partially built (a domain-specific `stale_ids()` reimplemented independently, five times, across
-   five domains — see below), or entirely absent (items, actions). Nothing today says "resume this
+   and never retried. Right now, detecting "missing" is real for passive-tree (its own ledger) and
+   items (`Quality/FlavourMissing`); detecting "stale" is real, live code written independently five
+   times but only WIRED to an actual regeneration path in one domain (demons — see below, audit
+   correction 2026-09-08); actions has genuinely nothing at all. Nothing today says "resume this
    run and it will find and fill every real gap, in every domain, the same way."
 2. **Localization.** Every domain's generated text is English-only, with no locale dimension
    anywhere. `passive-tree-i18n-ideal.md`'s own finding generalizes without exception: this repo's
@@ -77,6 +78,26 @@ localization) that no domain has today, generalized once instead of five times.
   translation-ready key, on a SECOND domain beyond passive-tree's `nameKey` — proof the "stable key
   now, translated text later" shape has already been independently invented twice, unprompted, by
   two different generators. Nobody has connected either key to an actual second-language catalog.
+- **A real, working "detect stale, regenerate exactly that" loop exists — audit correction, found
+  2026-09-08.** `adapters/demons/generate_commander_effects.py:97-99` (`elif args.stale: wanted =
+  set(stale_ids(list(existing.values()), subjects))`) genuinely computes a staleness diff and
+  regenerates ONLY the stale subjects — a real precedent, stronger than passive-tree's own ledger
+  (which only ever detects "never attempted," never "attempted but now stale"). **Two real
+  qualifications this program must not gloss over**: this path is an EXPLICIT, OPT-IN CLI flag
+  (`--stale`), never the default (the default path, `else:` at line 102, only fills subjects with
+  NO existing entry at all) — and the file's own comment at line 85-87 states why: *"Generation is
+  stochastic, so regenerating an entry that is already correct DESTROYS good content and costs
+  model time for nothing."* This is the precedent the "Automatic-backfill scope" owner decision
+  below is built on — resolved by keeping this program's own automatic path missing-only and
+  putting existing-content regeneration behind an explicit, human-invoked `--overwrite` flag,
+  matching this file's own caution rather than overriding it.
+- **A real, working, general language-contamination validator already exists — audit correction,
+  found 2026-09-08.** `workflow/validators/language.py:26`'s `language_consistency` (added
+  2026-09-01 after a real incident: *"87% [of a real 84-draft run] were code-switched: English
+  prose with Chinese motif tokens spliced in"*) rejects a value mixing CJK and Latin prose. Its own
+  docstring states it is deliberately general, "not a demons-specific one" — confirmed: it is
+  wired into TWO real domains, `adapters/demons/commander_effect.py` and
+  `adapters/trees/nodegen/run.py` (grep-confirmed, no other adapter imports it).
 
 **Wiring gap** (the mechanism exists somewhere; it is not reaching every domain):
 - `Quality/FlavourMissing` structurally cannot fire outside items —
@@ -88,18 +109,39 @@ localization) that no domain has today, generalized once instead of five times.
   (`metrics/quality.py:28`), and CI's own `--gate` invocation for items
   (`.github/workflows/ci.yml:261`) only fails on `gates=True` findings — so even where the
   detector exists, nothing stops a missing flavor from shipping today.
-- The "detect stale, regenerate only that" mechanism is real in **at least five independently
-  written forms** — `adapters/demons/anchor/emit.py:47`, `adapters/demons/commander_effect.py:121`,
+- The "detect stale, regenerate only that" SHAPE (`stale_ids`: compare a recorded key against a
+  freshly-computed one) is written independently **five times** —
+  `adapters/demons/anchor/emit.py:47`, `adapters/demons/commander_effect.py:121`,
   `adapters/dungeon/provenance.py:50`, `adapters/items/uniques/audit.py:173`,
-  `adapters/structures/generate_anchor.py:201-206`, plus passive-tree's own ledger — all
-  "stale_ids"-shaped (compare a recorded key against a freshly-computed one), none sharing code,
-  despite `pipeline/run_ledger.py` already existing as shared infrastructure (consumed by items
-  only). This is the textbook wiring gap the owner's own "make it a standard" instruction is
-  aimed at: the mechanism is proven five times over; it was never generalized once.
+  `adapters/structures/generate_anchor.py:201-206` — but **audit correction, 2026-09-08: only TWO
+  of the five are real, LIVE code with actual callers, and both are in the SAME domain.**
+  `demons/anchor/emit.py:47` is called from `demons/run/selectors.py:10,73`;
+  `demons/commander_effect.py:121` is called from `generate_commander_effects.py:97-99` (the
+  `--stale` path). The other three — dungeon, items, structures — are confirmed DEAD: zero
+  production callers anywhere in the repo, only test imports or none at all. This sharpens, not
+  weakens, the owner's own "make it a standard" instruction: the mechanism is proven live exactly
+  ONCE (in one domain), reinvented as dead code THREE more times, and never generalized. Passive-
+  tree's own ledger is a real, live, SEPARATE mechanism (resumability for missing content), not a
+  sixth `stale_ids` — it never detects staleness in already-accepted content, only absence.
 - `adapters/dungeon/provenance.py`'s own `DungeonProvenance` dataclass (line 12) and `stale_ids`
-  (line 50) are real, written CODE — but the actual committed content never carries the field
-  (`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json` has no `_provenance` key at
-  all). The detector was built and never wired to the writer.
+  (line 50) are real, written CODE — but genuinely **dead**, not merely under-wired: audit
+  confirmed (2026-09-08) its only importer anywhere in the repo is its own test file
+  (`tests/test_dungeon_idempotency.py`); the real writer (`adapters/dungeon/emit.py`'s own
+  `write_entry`/`write_corpus`) never imports or calls it, so the committed content never carries
+  the field (`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json` has no `_provenance`
+  key at all). This is aspirational code with zero production callers, one step further gone than
+  "built but not wired."
+- **The live Chinese-fragment defect (below) is a WIRING gap, precisely root-caused 2026-09-08 —
+  correcting this doc's own earlier "real gap" framing.** `language_consistency` (above) already
+  exists, is proven, and is wired into 2 of 5 domains — dungeon/events is simply not one of them.
+  **A second, real defect in the validator itself, found tracing this precisely**: it only fires
+  when the SUBJECT'S OWN INPUT MOTIFS are Chinese (`language.py:32`: `if not motifs or not any(
+  _CJK.search(m) for m in motifs): return []`) — it has no check for the REVERSE direction (English
+  motifs, but the model's output unexpectedly contains CJK anyway), which is exactly the shape of
+  the real dungeon defect (an English-motif event whose `flavor` field contains stray Chinese
+  fragments). Wiring the EXISTING validator into dungeon unchanged would NOT have caught this
+  specific real defect — `core`'s own generalization must fix the directional asymmetry, not just
+  copy the validator as-is.
 
 **Real gap** (nothing exists yet, anywhere):
 - **Actions have no ledger, no provenance, and no missing-field metric at all.** Resumability is
@@ -110,15 +152,15 @@ localization) that no domain has today, generalized once instead of five times.
   again here for items (`flavorKey` mints an id, never a translation), demons, actions, and
   dungeon/events. Zero exceptions found across the whole repeat check.
 - **No cross-domain, generalized "gap detector + LLM backfill on resume" engine.** Five
-  domain-specific stale-id checks exist (above); a SHARED one, callable the same way regardless of
-  which generator owns the content, does not.
-- **A live, real, already-shipped example of exactly the defect class this standard exists to
-  catch**, found as a side effect of this same research, not manufactured: a real committed dungeon
-  event (`data/seed/dungeon/events/event.bargain-demon.allpeater-001.json`) carries a `flavor`
-  field with untranslated Chinese fragments mid-English-sentence — *"bolster your party's
-  offensive火力, turning your strikes... a permanent 分配 of your life force"* — because nothing
-  today scans generated text for language contamination. This is not a hypothetical risk this
-  standard would prevent; it is a defect already in the shipped corpus.
+  domain-specific stale-id checks exist; the one REAL, WORKING regeneration loop
+  (`generate_commander_effects.py`, above) is deliberately opt-in, for a stated, real reason
+  (destroying already-good content). **Resolved** (see "Automatic-backfill scope" under Owner
+  decisions): this program's own shared engine does not attempt to make stale-content
+  regeneration automatic either — it keeps the commander-effects precedent's own caution by never
+  touching existing content automatically, and exposes an explicit `--overwrite` parameter for a
+  person to trigger a full regeneration on demand.
+- **A bidirectional language-contamination check does not exist anywhere** — `language_consistency`
+  (above) covers one direction only; nothing checks the other. A general fix belongs in `core`.
 
 ## Prior art
 
@@ -184,7 +226,13 @@ Not decided here (see Open questions) — the real candidates, narrowed by the i
    staleness KEY (per the Bazel/Nx analogy above) would be a hash of `{briefHash, promptVersion,
    schemaVersion, modelVersion}` — `adapters/dungeon/provenance.py`'s own already-documented key
    shape (`briefHash + promptVersions + registryVersions + motifSubsetHash`) is the closest
-   existing real precedent and a strong candidate to generalize FROM, not invent fresh.
+   existing precedent for the KEY's own shape, even though that module is itself dead code (never
+   wired to a real writer, above) — a well-designed shape nobody ever connected, not a bad one. The
+   key is computed and used for **reporting** (a stale-count metric), not for triggering
+   regeneration — per the resolved "Automatic-backfill scope" decision, an automatic run only ever
+   fills MISSING records; regenerating existing (stale or not) records happens only through an
+   explicit `--overwrite` parameter, which regenerates everything it's pointed at rather than a
+   selectively-diffed stale subset.
 2. **One shared `Content/FieldMissing`-style metric family**, generalizing `Quality/FlavourMissing`
    the way `FLAVOR_EXPECTED_KINDS` already narrows it per-domain today — turning that same
    narrowing mechanism into a per-domain REGISTRY entry instead of a single hardcoded frozenset, so
@@ -218,34 +266,30 @@ standard, never a `const` — the same rule `spec-pipeline.md` §7 already state
   implementations incrementally, one domain at a time.
 - Whether actions (the domain with nothing built) gets its ledger/provenance/metric BEFORE or
   alongside the shared-engine generalization, or as its own separate, prior task.
-- Translation strategy (translate-the-English-output vs. regenerate-natively-per-locale) —
-  unresolved in `passive-tree-i18n-ideal.md`, still unresolved here, now a cross-domain question
-  rather than a passive-tree-only one.
 - Whether backfilled/translated content earns its own review-ladder pass (mirroring J2/J3's
   passive-tree census) before shipping, per domain or shared.
-- Which domain goes first if this is built incrementally rather than all at once.
 - The real, already-shipped Chinese-fragment defect named above is NOT fixed by this doc — it is
   evidence for why the standard is needed, named here so it is not lost, but fixing that one entry
-  is separate, smaller, and does not require this whole standard to exist first.
+  is separate, smaller, and does not require this whole standard to exist first (it is, however, a
+  real, named acceptance target in the plan's own Task 12).
 
-## Open questions
+## Owner decisions (settled since this doc was first written, kept here as the record)
 
-Each answerable by the owner, none blocking a future `/spec` pass on its own:
-
-1. **Scope for a first pass**: build the shared engine for ALL five-plus domains at once, or prove
-   it on the domain furthest behind (actions, which has nothing) or the domain with the most
-   existing partial infrastructure (items, which already has `run_ledger.py` + `flavorKey` +
-   `FlavourMissing`) first?
-2. **Gate severity**: does completeness detection stay report-only (today's `FlavourMissing`
-   status) once generalized, or does this standard's own creation include promoting it to
-   CI-enforced for at least one domain?
-3. **Translation strategy** (carried over from `passive-tree-i18n-ideal.md`, now asked at
-   repo-wide scope): translate English output, or regenerate natively per locale — and does the
-   answer need to be the SAME across all domains, or can it differ (e.g. short item names
-   regenerated natively, longer lore paragraphs translated)?
-4. **Does "deploy LLM engine to generate missing when run resume" mean fully automatic** (a
-   resumed run silently backfills every detected gap, no human step) **or human-gated** (a resumed
-   run reports gaps and a person approves the backfill batch before it spends real model calls) —
-   given `spec-pipeline.md` §6's own "open-loop pipelines... never report a pass, push a stratified
-   sample into a review queue" precedent already exists for exactly this kind of "a machine cannot
-   fully verify its own output" situation.
+- **Scope**: all five domains, built together, not staged. **Gate severity**: every new metric
+  stays `gates=False` (report-only), matching `FlavourMissing`'s own current status. **Translation
+  strategy**: this program generates and completes ENGLISH content only; the actual
+  translate/regenerate-per-locale question is explicitly deferred to a separate, later, DIFFERENT
+  pipeline this program does not build — only the storage shape needs to stay i18n-ready.
+- **Automatic-backfill scope (resolved 2026-09-08, after the audit above surfaced the
+  missing-vs-stale distinction)**: a resumed run is **fully automatic, no human gate — but only for
+  genuinely MISSING content**, on the first run or any later run. **Already-generated content is
+  never touched by an automatic run, regardless of whether its staleness key has changed** — a
+  resumed run treats "exists" as "done," full stop, matching the commander-effects precedent's own
+  caution rather than overriding it. Regenerating existing content (stale or not) is never
+  automatic: it happens only through an explicit `--overwrite` parameter a person invokes by hand,
+  which regenerates everything it's pointed at, not a selectively-diffed stale subset. This is
+  simpler than either the "fully automatic for both" or the "guarded/locked-record" shape
+  considered during the audit — there is no silent-regeneration risk to guard against, because
+  nothing existing ever regenerates without an explicit, human-invoked flag. The staleness-key
+  machinery (`stale_ids`-style hashing) is kept for **reporting** ("N records are stale, run with
+  `--overwrite` to refresh them") — a `gates=False` metric, never an auto-trigger.

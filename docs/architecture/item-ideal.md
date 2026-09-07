@@ -126,7 +126,7 @@ design decision. Each is a missing call.
 | # | Gap | Evidence | Why it is wiring, not architecture |
 |---|---|---|---|
 | ~~W1~~ ⛔ **FALSE — §2f.1 F1. `E46` is shipped; the server imports at every startup.** Original: *a player install never imports content; `ImportContent` has exactly one caller, a dev tool* | `tools/AtomImporter/Program.cs:107` — sole caller of `RpgStore.Import.cs:56` | The importer works and is CI-tested. **Every authored item seed today reaches a developer's SQLite and no player's.** Tracked as `E46 player-content-boot`, [content-stack-plan.md](../../tasks/content-stack-plan.md) gate G4 |
-| W2 | **Battle reads no equipment** — `ChannelMods` is still documented *"trait stat mods, equipment later"* | `Battle/BattleModels.cs:33` · `Battle/BattleStatComposer.cs:9` | The reader exists and folds at compose time; `TraitAtomSource` is a **working producer on that exact seam**. An equipment producer is the same shape, not a new path |
+| ~~W2~~ | ~~**Battle reads no equipment**~~ — **closed 2026-09-07/08.** Production: `EquippedBoundAtoms` → `FromEquippedResolver`. Residual: lawn `grant:` vs sheet `equip:`; content mostly `stat.modify` | `Program.cs` · `EquippedBoundAtoms.cs` · `EquipAtomSource.cs` | Was a wiring gap; do not re-open as architecture |
 | W3 | **`ActionSeeder.Generate` has zero callers** | grep, whole tree | Gates G4 [ssot-granted-actions.md](item/ssot-granted-actions.md) — an item that grants an action. The corpus is the missing input, not the mechanism |
 | W4 | **`stat.derived` Sim runtime stays `None`** | `AtomKindRegistry.cs:253` | Deliberate, and correctly so — `SimEffectHost` has no consumer, and flipping it would recreate D6's cause. Only matters if item balance wants to run through CombatSim |
 
@@ -1959,7 +1959,7 @@ twelve slots being a chore.
 | ~~**`stat.derived` is quarantined `None/None/None`** (D6)~~ ✅ **LIFTED — see §2a, B1** | Battle got its consumer 2026-08-23 (E12, `TraitAtomSource`); **the lawn got one 2026-08-30** (`AtomDerivedSubsystem`, ActorHub order-350). The matrix is now `Full/Full/None` (`AtomKindRegistry.cs:253`). An item made of `+fire power` affixes **binds and executes**. First-wave items are no longer restricted to five kinds — this row was the binding constraint on the whole affix library, and it is gone |
 | ~~**Power is open** (E9, build position 15)~~ ⚠ **Superseded — see §2a.1** | The power ladder shipped 2026-08-23/24. Every magnitude reads `P(Θ) = C + A·Θ + B·Θ(Θ−1)/2`, pinned at `P(20) = 680` so `B` retunes without re-resolving one item; contests read `Θ` linearly. Drop bands and authoring budgets now have a function behind them (`power/ssot-power-scale.md` §4). What §2a.5 adds is the question the ladder does *not* answer: the offense/defense ratio |
 | ~~**G8 — `warding` / `resilience` are match-scoped only**~~ ✅ **Obsolete — see §2a, B1** | The row's own escape hatch is now open: per-actor mitigation uses `combat.defense.*`, which is `stat.derived`, which **executes on battle and lawn**. *"+armour is the hardest common affix to ship"* was true for eight days and is now false |
-| **Battle reads no equipment** — **still true, and it is a *wiring gap*** (§2a, W2) | `ChannelMods` is still documented *"trait stat mods, equipment later"* (`BattleModels.cs:33`). But E12 shipped a **working producer on that exact seam** (`TraitAtomSource`), so an equipment producer is the same shape, not a new path. Not an architectural limit — a missing call |
+| **Battle equipment compose** — **shipped** via `EquippedBoundAtoms` / `FromEquippedResolver` (was W2). Residual: lawn `grant:` vs sheet `equip:`; catalog mostly `stat.modify` | Comments historically said *"equipment later"* — updated 2026-09-08. Not an architectural limit. |
 | **One economy** | Web and PvZ write the same ledgers through the same ingest, source-tagged, never forked |
 
 ---
@@ -2121,7 +2121,7 @@ this records what *six weeks of other programs shipping* changed. Full evidence 
 | The tier window needs a draw-time parameter that does not exist | ✅ **Exists.** `rarity(min_tier, max_tier)` is a column the resolver reads |
 | The pool's roll unit is a bare atom | ⚠ **Changed.** It is a named **affix bundle** — `effect_affix` + `effect_affix_ref`, with slot refs |
 | `pool_rolls` is one count | ⚠ **Split** into `prefix_rolls` / `suffix_rolls`; a mixed bundle consumes one of each |
-| Battle reads no equipment | **Held** — but it is a **wiring gap**, not a limit. E12 shipped a working producer on the same seam |
+| Battle equipment via EquipAtomSource | **Shipped** (Server `EquippedBoundAtoms`, 2026-09-07/08). Residual lawn SourceId + content gaps remain |
 | Two blocking amendments are cheap today because nothing calls that code | ⛔ **No longer cheap.** `ProduceAndBind` is in production. Unequip still deletes the instance; one import still disables every rolled item |
 | Primary attributes: five, or none | **Neither — twelve aptitudes**, shipped by the class-system program |
 | Rarity picks count and tier window, never magnitude | **Held, and now corroborated by prior art** — the genre's most reliable finding (§2a.5) |

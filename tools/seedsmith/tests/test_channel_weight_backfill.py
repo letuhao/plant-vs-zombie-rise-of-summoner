@@ -164,13 +164,53 @@ def test_missing_channel_weights_is_pure_never_mutates_the_input_tuning():
 # ---------------------------------------------------------------------------------------------
 
 
-def test_real_corpus_yields_exactly_98_missing_entries():
+def test_real_corpus_yields_exactly_98_missing_entries_against_the_original_v1_baseline():
+    """⛔ Corrected 2026-09-08: this module's own Task 4 has now REALLY published `tier-bands.v4.json`
+    for real, superseding the 98-family gap this test proves existed. `TierBands.load("latest")` now
+    correctly resolves 0 missing (everyone covered with real values) -- that is success, not a
+    regression, and re-asserting "98 missing against latest" would now be asserting the bug still
+    exists. Pinned to the immutable `v1.json` (version 1 specifically, never republished, per
+    `tier_bands_io.save`'s own "versions are immutable" rule) so this regression proof stays valid
+    forever, independent of how many versions get published after it."""
     families = mod.load_families(REAL_FAMILIES_DIR)
-    tuning = TierBands.load("latest")
+    tuning = TierBands.load(1)
 
     missing = mod.missing_channel_weights(families, tuning)
 
     assert len(missing) == 98
+
+
+def test_real_corpus_missing_against_latest_is_now_confined_to_the_medium_band_ambiguity():
+    """⛔ Corrected again 2026-09-08, after actually running this against the real post-publish
+    `latest` (v4): `missing_channel_weights` can NEVER report `{}` against latest for this corpus,
+    by design, not by any remaining defect. Its own placeholder-detection heuristic (module
+    docstring, `_UNREVIEWED_PLACEHOLDER_WEIGHT`) cannot distinguish "genuinely covered, correctly
+    computed to 1000 because the family's own `powerBand` is `medium`" from "still the unreviewed
+    placeholder" -- both are the literal integer 1000. So every `medium`-band, non-protected family
+    is permanently indistinguishable from "still missing" through this function, even after a real,
+    correct publish.
+
+    This is not a live gap: verified live (see this test's own assertions) that all 32 residual
+    entries are `medium`-band and that `WEIGHT_BY_BAND["medium"] == 1000` already equals the value
+    `tier-bands.v4.json` already publishes for every one of them -- so a set-file generated from
+    this residual and republished would be a byte-identical no-op, not a real change. Task 4's
+    98-entry publish (66 changed off-medium + 32 confirmed-at-medium) is proven complete by this
+    test, not contradicted by it."""
+    families = mod.load_families(REAL_FAMILIES_DIR)
+    tuning = TierBands.load("latest")
+    by_stem = {f.id.removeprefix("atom."): f for f in families}
+
+    missing = mod.missing_channel_weights(families, tuning)
+
+    assert len(missing) == 32
+    for stem, computed_weight in missing.items():
+        assert by_stem[stem].power_band == "medium", (
+            f"{stem!r} is flagged missing against latest but is NOT a medium-band ambiguity case "
+            f"-- this would be a real, unpublished gap, not the known heuristic limit")
+        assert computed_weight == mod.WEIGHT_BY_BAND["medium"] == 1000
+        assert tuning.channel_weight_permille[stem] == 1000, (
+            f"{stem!r} already published at a value other than 1000 -- republishing would NOT be "
+            f"a no-op, this needs real investigation")
 
 
 def test_real_corpus_missing_entries_exclude_the_five_curve_blocked_stems():

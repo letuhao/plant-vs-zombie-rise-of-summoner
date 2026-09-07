@@ -54,15 +54,12 @@ found the boundary the hard way:**
   files. `BattleEngine.Resolve` has no mechanism to execute a Runner-path atom at all, for ANY content
   type, not only actions. This is a separate, more foundational gap than A24's own scope — named below
   as `battle-runner-path-not-wired`, not attempted here.
-- **Does not touch equipped-item atom delivery.** The same investigation found `EquipAtomSource`
-  (`Battle/EquipAtomSource.cs`) — the one mechanism that could carry an equipped item's `stat.derived`
-  atoms into a live battle's stat composition — has its `BattleStatComposer.UseEquipment` setter called
-  **only** from `tests/FusionRpg.Core.Tests/Battle/EquipRuntimeTests.cs`; no production caller,
-  including `WebMatchService.BuildSquad`, ever calls it. Equipped items carrying any OTHER atom kind
-  (`resource.delta`, `status.apply`, `shield.grant`, ...) have no path to a live web-match battle at
-  all today. Real, and adjacent, but it is the item/equip-runtime program's own scope, not this one's —
-  named, not fixed, matching this program's own established boundary discipline (A18a §Boundaries:
-  "ask first" before widening a seam to solve a neighbouring problem).
+- **Equipped-item `stat.derived` delivery (errata 2026-09-08).** Historically this section said
+  `BattleStatComposer.UseEquipment` had **no** production caller — that was true at authoring time.
+  **Closed:** Server boot wires `BattleStatComposer.UseEquipment(EquippedBoundAtoms.SourceFromStore(...))`
+  → `FromEquippedResolver` (`equip:{role}:{itemRef}`). Residual gaps: lawn labels stay `grant:` until
+  equip-tagged push without double-count; most catalog equip atoms are still `stat.modify` (content),
+  not `stat.derived`.
 
 ## Assumptions I'm making — correct me now or I proceed with these
 
@@ -220,11 +217,8 @@ module this program has closed this way.
   own original `OnActivate` work, likely larger, since "the Secondary runner (E15)" this repo's own
   atom-path taxonomy names as the Runner path's intended home has never been checked for whether it has
   ANY battle-sim-compatible shape at all (open question, not answered by this investigation).
-- **`equip-atom-source-not-wired`** (adjacent, item/equip-runtime program's own scope): no production
-  caller of `BattleStatComposer.UseEquipment` exists; equipped-item atoms of any kind other than
-  `stat.derived` have no live-battle path at all. Named here because this investigation found it while
-  answering "does ANY compiled-def path reach a live `WebMatchService` battle today", not because this
-  program owns fixing it.
+- ~~**`equip-atom-source-not-wired`**~~ **CLOSED 2026-09-07/08** (Server `EquippedBoundAtoms` /
+  `FromEquippedResolver`). Residual: non-`stat.derived` equip kinds; lawn `grant:` labels.
 
 ## Tunables
 

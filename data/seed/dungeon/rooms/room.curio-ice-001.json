@@ -3,7 +3,16 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
-    "event.curio-demon.allpeater-001"
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
   ],
   "flavor": "A massive, translucent pillar of blue ice stands in the center of the chamber, preserving a colossal, multi-winged creature mid-flight. Tiny, frozen bubbles are suspended within the frost, catching the dim light like trapped stars.",
   "hazardBand": "light",

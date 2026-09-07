@@ -3,7 +3,16 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
-    "event.trap-demon.cherrypaperzombie-001"
+    "event.trap-demon.allpeater-001",
+    "event.trap-demon.allpeater-002",
+    "event.trap-demon.ashthreepeater-001",
+    "event.trap-demon.ashthreepeater-002",
+    "event.trap-demon.bucketnutzombie-001",
+    "event.trap-demon.bucketzombie-001",
+    "event.trap-demon.cabbagepult-001",
+    "event.trap-demon.cactus-001",
+    "event.trap-demon.cherrypaperzombie-001",
+    "event.trap-demon.dolldiamond-001"
   ],
   "flavor": "The floor is a mosaic of jagged, slate-colored tiles that tremble with a rhythmic, subterranean pulse. Dust falls from the ceiling in fine, grey curtains, coating the air in a dry, metallic haze.",
   "hazardBand": "heavy",

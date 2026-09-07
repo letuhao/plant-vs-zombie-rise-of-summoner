@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text.Json;
 using FusionRpg.Core.Battle;
 using FusionRpg.Core.Effects.Atoms;
@@ -66,6 +67,21 @@ public class FamilyExpansionTests
     {
         var (families, tierBands) = LoadReal();
         return FamilyExpansion.Expand(families, tierBands, FlatReferenceBase);
+    }
+
+    /// <summary>Real, already-shipped pool catalog (`data/seed/channel-pools/pools.v1.json`, E30) —
+    /// needed once the real corpus (via `LoadReal`'s own 2026-09-08 fix) started emitting real
+    /// pool-referencing `stat.derived` rows (`evd-flinch`/`evd-harden`/`evd-seal`/`shld-breach`),
+    /// which `CostFunction.Price` cannot price without a `lookupPool`. Mirrors
+    /// `ContentValidationTests.RealLookupPool` exactly (not shared across test classes — this
+    /// repo's own DAMP-over-DRY test convention).</summary>
+    static Func<string, ChannelPoolRow?> RealLookupPool()
+    {
+        var path = Path.Combine(FindDataDir(), "seed", "channel-pools", "pools.v1.json");
+        var rejection = ChannelPoolFile.TryParse(File.ReadAllText(path), out var pools);
+        Assert.True(rejection.IsOk, rejection.Detail);
+        var byId = pools.ToDictionary(p => p.PoolId, StringComparer.Ordinal);
+        return id => byId.TryGetValue(id, out var row) ? row : null;
     }
 
     // ---- test 1: deterministic --------------------------------------------------------------------
@@ -225,14 +241,18 @@ public class FamilyExpansionTests
         var result = ExpandReal();
         Assert.NotEmpty(result.Rows);
 
+        var lookupPool = RealLookupPool();
         foreach (var row in result.Rows)
         {
             var validated = AtomRowValidator.Validate(row);
             Assert.True(validated.IsOk, $"{row.AtomId}: {validated}");
 
-            var priced = CostFunction.Price(row, PowerTables.Authored());
+            var priced = CostFunction.Price(row, PowerTables.Authored(), lookupPool: lookupPool);
             Assert.True(priced.Ok, $"{row.AtomId}: {priced.Verdict.Reason}");
-            // Every emitted row is stat.modify — never a genuinely zero-power kind.
+            // ⛔ Corrected 2026-09-08: no longer true once the real corpus grew past the original
+            // 3-file, stat.modify-only baseline — `evd-flinch`/`evd-harden`/`evd-seal`/`shld-breach`
+            // are real `stat.derived` pool-referencing rows now. The real invariant is just "priced
+            // atoms carry real power," not "every atom is stat.modify."
             Assert.NotEqual(PowerVector.Zero, priced.Power);
         }
     }
@@ -242,12 +262,29 @@ public class FamilyExpansionTests
     [Fact]
     public void PlantedViolation_a_family_with_no_authored_share_is_refused_by_id()
     {
-        var result = ExpandReal();
+        // ⛔ Corrected 2026-09-08: this used to rely on `atom.elpw-override` being a REAL family the
+        // real corpus happened to leave uncovered — true when this test was written, false since
+        // atom-family-expansion's `tier-bands-coverage` module published real coverage for it (and
+        // 97 siblings). Relying on "some real family happens to have a real gap today" is exactly the
+        // kind of test this repo's own incident log (this session's own drift-detection discipline)
+        // warns against — switched to a genuinely synthetic family, matching the sibling planted-
+        // violation test immediately below, which never depended on the real corpus's own coverage.
+        var tierBands = new TierBandsInput(
+            BaseSharePermille: 35,
+            ChannelWeightPermille: new Dictionary<string, long>(), // deliberately empty -- no share for anyone
+            OpWeightPermille: new Dictionary<string, long> { ["Flat"] = 1000 });
 
-        var refusal = result.Refusals.SingleOrDefault(r => r.FamilyId == "atom.elpw-override");
+        var family = new FamilyEntryInput(
+            Id: "atom.planted-no-share", Name: "Planted", KindId: "stat.modify",
+            Channel: "atk", Op: "Flat", PowerBand: "medium", SourceFile: "synthetic.json",
+            Tags: Array.Empty<string>());
+
+        var result = FamilyExpansion.Expand(new[] { family }, tierBands, _ => 100);
+
+        var refusal = result.Refusals.SingleOrDefault(r => r.FamilyId == "atom.planted-no-share");
         Assert.NotNull(refusal);
         Assert.Contains("no authored sharePermille", refusal!.Reason, StringComparison.Ordinal);
-        Assert.DoesNotContain(result.Rows, r => r.FamilyId == "atom.elpw-override");
+        Assert.DoesNotContain(result.Rows, r => r.FamilyId == "atom.planted-no-share");
     }
 
     [Fact]

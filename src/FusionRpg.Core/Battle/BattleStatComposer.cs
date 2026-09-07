@@ -6,7 +6,8 @@ namespace FusionRpg.Core.Battle;
 /// <summary>
 /// Composes a per-actor derived snapshot for the battle engine — the web-mode analogue of the
 /// ActorHub compose path. Level formulas fill the omni halves, element affinity fills the actor's
-/// own element channels, and ChannelMods (trait stat mods, later equipment) overlay additively.
+/// own element channels, and ChannelMods (caller additive overlays) plus equipment via
+/// <see cref="EquipAtomSource"/> merge additively.
 /// Every value is an integer; reads go back out through CombatDerivedReader so channel semantics
 /// stay identical to the PvZ overlay.
 ///

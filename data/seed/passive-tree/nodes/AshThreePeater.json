@@ -1,0 +1,727 @@
+{
+  "_provenance": {
+    "confidence": {},
+    "minorityValues": {},
+    "model": "google/gemma-4-26b-a4b-qat",
+    "planHash": "",
+    "promptVersion": "tree-language/2"
+  },
+  "nodes": [
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.vitality"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while tier is active — tier wins.",
+        "propertyKeys": [
+          "tier"
+        ]
+      },
+      "flavor": "The strength of the trunk is found in the depth of the soil.",
+      "id": "skill.ashthreepeater-def-t1-n1",
+      "name": "Deep Rooting",
+      "nameKey": "tree.node.deep-rooting-13",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the shield dictates the rhythm of the soul.",
+      "id": "skill.ashthreepeater-def-t10-n0",
+      "name": "Cyclical Aegis",
+      "nameKey": "tree.node.cyclical-aegis-5",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of impact becomes the pulse of protection.",
+      "id": "skill.ashthreepeater-def-t10-n1",
+      "name": "Kinetic Reciprocity",
+      "nameKey": "tree.node.kinetic-reciprocity-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The more layers you stack, the harder it is to find the seam.",
+      "id": "skill.ashthreepeater-def-t2-n0",
+      "name": "Layered Bastion",
+      "nameKey": "tree.node.layered-bastion-12",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While branch holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "branch"
+        ]
+      },
+      "flavor": "Layers of hardened sap provide a secondary layer of defense against physical trauma.",
+      "id": "skill.ashthreepeater-def-t3-n1",
+      "name": "Thickened Bark",
+      "nameKey": "tree.node.thickened-bark-12",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the impact dictates the strength of the rebound.",
+      "id": "skill.ashthreepeater-def-t4-n0",
+      "name": "Kinetic Reciprocity",
+      "nameKey": "tree.node.kinetic-reciprocity",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shield-capacity",
+        "atom.shield-toughness"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Overlapping plates of reinforced metal and hardened bark provide a multi-layered defense against impact.",
+      "id": "skill.ashthreepeater-def-t4-n1",
+      "name": "Layered Carapace",
+      "nameKey": "tree.node.layered-carapace-5",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of impact dictates the rhythm of recovery.",
+      "id": "skill.ashthreepeater-def-t5-n0",
+      "name": "Kinetic Reciprocity",
+      "nameKey": "tree.node.kinetic-reciprocity-2",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.arm-hardening"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "Deeply anchored, the spirit draws strength from the very earth it treads.",
+      "id": "skill.ashthreepeater-def-t5-n1",
+      "name": "Rooted Resilience",
+      "nameKey": "tree.node.rooted-resilience-7",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.fortitude",
+        "atom.resilience"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The deeper the roots, the harder the spirit to break.",
+      "id": "skill.ashthreepeater-def-t7-n1",
+      "name": "Deep-Rooted Endurance",
+      "nameKey": "tree.node.deep-rooted-endurance",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The rhythm of the impact dictates the strength of the rebound.",
+      "id": "skill.ashthreepeater-def-t9-n0",
+      "name": "Kinetic Reciprocity",
+      "nameKey": "tree.node.kinetic-reciprocity-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.shld-cycle",
+        "atom.shld-surge"
+      ],
+      "branch": "defensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomAttachPoint"
+        ]
+      },
+      "flavor": "The very dust of the ash-lands settles into the cracks of your armor, turning every impact into a foundation for regrowth.",
+      "id": "skill.ashthreepeater-def-t9-n1",
+      "name": "Silt-Sealed Sieve",
+      "nameKey": "tree.node.silt-sealed-sieve",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while posture is active — posture wins.",
+        "propertyKeys": [
+          "posture"
+        ]
+      },
+      "flavor": "The rhythm of the strike dictates the clarity of the wound.",
+      "id": "skill.ashthreepeater-off-t1-n0",
+      "name": "Savage Accuracy",
+      "nameKey": "tree.node.savage-accuracy",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 1
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the falling ash dictates the timing of the final strike.",
+      "id": "skill.ashthreepeater-off-t10-n1",
+      "name": "Cinder-Pulse Cadence",
+      "nameKey": "tree.node.cinder-pulse-cadence",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 10
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while aptitude is active — aptitude wins.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The scent of blood sharpens the instinct, turning every strike into a calculated execution.",
+      "id": "skill.ashthreepeater-off-t2-n0",
+      "name": "Apex Predator",
+      "nameKey": "tree.node.apex-predator-13",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.ferocity"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while element is active — element wins.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The elements do not merely strike; they harmonize with the caster's intent.",
+      "id": "skill.ashthreepeater-off-t2-n1",
+      "name": "Resonant Attunement",
+      "nameKey": "tree.node.resonant-attunement-4",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 2
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The heat of the embers fuels the strength of the strike.",
+      "id": "skill.ashthreepeater-off-t3-n0",
+      "name": "Ashen Might",
+      "nameKey": "tree.node.ashen-might",
+      "nodeClass": "magnitude",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.elpw-attune"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While aptitude holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "aptitude"
+        ]
+      },
+      "flavor": "The very essence of the hunt flows through the veins, turning raw instinct into unstoppable momentum.",
+      "id": "skill.ashthreepeater-off-t3-n1",
+      "name": "Primal Surge",
+      "nameKey": "tree.node.primal-surge-11",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 3
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-attune",
+        "atom.elpw-overflow"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while element is active — element wins.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The air crackles as elemental energies refuse to remain contained, bleeding into one another.",
+      "id": "skill.ashthreepeater-off-t4-n0",
+      "name": "Elemental Overload",
+      "nameKey": "tree.node.elemental-overload-4",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "likely",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while atomKind is active — atomKind wins.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The eye finds the gap before the mind can process the strike.",
+      "id": "skill.ashthreepeater-off-t4-n1",
+      "name": "Focal Point",
+      "nameKey": "tree.node.focal-point-3",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 4
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-surge"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The cadence of the strike dictates the abundance of the harvest.",
+      "id": "skill.ashthreepeater-off-t5-n0",
+      "name": "Rhythmic Spore-Cycle",
+      "nameKey": "tree.node.rhythmic-spore-cycle",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The rhythm of the hunt is found in the precision of the strike and the ferocity of the kill.",
+      "id": "skill.ashthreepeater-off-t5-n1",
+      "name": "Sanguine Focus",
+      "nameKey": "tree.node.sanguine-focus",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 5
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The heat of the ash sharpens the eye and the strike alike.",
+      "id": "skill.ashthreepeater-off-t6-n1",
+      "name": "Ashen Precision",
+      "nameKey": "tree.node.ashen-precision",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 6
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.ferocity",
+        "atom.precision"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "nullification",
+        "printedText": "Inert while nodeClass is active — nodeClass wins.",
+        "propertyKeys": [
+          "nodeClass"
+        ]
+      },
+      "flavor": "The heat of the ash sharpens the strike and the intent alike.",
+      "id": "skill.ashthreepeater-off-t7-n1",
+      "name": "Cinder-Stained Edge",
+      "nameKey": "tree.node.cinder-stained-edge",
+      "nodeClass": "magnitude",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 7
+    },
+    {
+      "affinity": [
+        "likely"
+      ],
+      "affixIds": [
+        "atom.tempo-yield"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomTrigger"
+        ]
+      },
+      "flavor": "The ash settles not as dust, but as a rain of burning seeds that bloom upon impact.",
+      "id": "skill.ashthreepeater-off-t8-n0",
+      "name": "Cinder-Sown Volley",
+      "nameKey": "tree.node.cinder-sown-volley",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core"
+      ],
+      "affixIds": [
+        "atom.tempo-yield"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While atomKind holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "atomKind"
+        ]
+      },
+      "flavor": "The soil drinks the fallen, turning every expiration into a sudden, violent bloom.",
+      "id": "skill.ashthreepeater-off-t8-n1",
+      "name": "Ash-Sown Harvest",
+      "nameKey": "tree.node.ash-sown-harvest",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 8
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "When the essence spills, it refuses to be contained by a single form.",
+      "id": "skill.ashthreepeater-off-t9-n0",
+      "name": "Overgrowth Overflow",
+      "nameKey": "tree.node.overgrowth-overflow",
+      "nodeClass": "mechanism",
+      "nodeKey": "n0",
+      "rationale": "",
+      "tier": 9
+    },
+    {
+      "affinity": [
+        "core",
+        "core"
+      ],
+      "affixIds": [
+        "atom.elpw-overflow",
+        "atom.elpw-surfeit"
+      ],
+      "branch": "offensive",
+      "exclusion": {
+        "form": "reroute",
+        "printedText": "While element holds, this effect reroutes instead of applying normally.",
+        "propertyKeys": [
+          "element"
+        ]
+      },
+      "flavor": "The very air trembles as the elemental essence refuses to be contained, spilling from the cracks of reality.",
+      "id": "skill.ashthreepeater-off-t9-n1",
+      "name": "Primal Overload",
+      "nameKey": "tree.node.primal-overload-3",
+      "nodeClass": "mechanism",
+      "nodeKey": "n1",
+      "rationale": "",
+      "tier": 9
+    }
+  ],
+  "schemaVersion": 1,
+  "treeId": "AshThreePeater"
+}

@@ -2,6 +2,7 @@
 
 > **TRAIL — do not implement.** Catalog-era sheet uses `derived-tab` (full sheet, not a doorway).
 > Kept for history only. See [actor-sheet-map.md](../actor-sheet-map.md) Trail.
+> **Historical:** claims of “no server endpoint” predate `GET /api/actors/{id}/sheet` (2026-09-07/08).
 
 **Module id:** `derived-stats-tab` · **Program:** [actor-sheet-map.md](../actor-sheet-map.md) ·
 **Status:** Draft — pending owner review.

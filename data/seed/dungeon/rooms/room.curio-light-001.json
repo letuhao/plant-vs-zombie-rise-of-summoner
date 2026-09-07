@@ -3,7 +3,16 @@
   "dispositionBase": "none",
   "encounterRef": "none",
   "eventPool": [
-    "event.curio-demon.cactus-001"
+    "event.curio-demon.allpeater-001",
+    "event.curio-demon.allpeater-002",
+    "event.curio-demon.ashthreepeater-001",
+    "event.curio-demon.ashthreepeater-002",
+    "event.curio-demon.bucketnutzombie-001",
+    "event.curio-demon.bucketzombie-001",
+    "event.curio-demon.cabbagepult-001",
+    "event.curio-demon.cactus-001",
+    "event.curio-demon.cherrypaperzombie-001",
+    "event.curio-demon.dolldiamond-001"
   ],
   "flavor": "A single, massive crystal spire rises from the center of the chamber, catching a beam of pure radiance from a skylight above. As the light passes through the facets, it casts dancing, prismatic ghosts of the party across the white marble walls, each shadow trailing a second behind the person who cast it.",
   "hazardBand": "light",

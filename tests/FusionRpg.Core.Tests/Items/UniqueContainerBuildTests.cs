@@ -199,7 +199,7 @@ public class UniqueContainerBuildTests
     /// new authored content) closed part of the gap — either way this test forces the change to be
     /// seen and explained, not silent.</summary>
     [Fact]
-    public void Fourteen_of_the_real_154_anchors_build_today_every_other_refuses_naming_the_missing_atom()
+    public void Fifteen_of_the_real_154_anchors_build_today_every_other_refuses_naming_the_missing_atom()
     {
         var built = 0;
         var refusedForMissingAtom = 0;
@@ -226,8 +226,13 @@ public class UniqueContainerBuildTests
         }
 
         Assert.Equal(154, Corpus.Count); // 144 + 10 D4.29 anchors (2026-09-06)
-        Assert.Equal(14, built); // 4 + all 10 new anchors (real-atom-only by construction)
-        Assert.Equal(140, refusedForMissingAtom); // unchanged -- none of the 10 new anchors is in this bucket
+        // ⛔ Corrected 2026-09-08 (atom-family-expansion, tier-bands-coverage): 14 -> 15. Publishing
+        // real channelWeightPermille coverage for 98 previously-uniform-placeholder atom families and
+        // regenerating data/seed/atoms/generated/ (45 -> 130 rows, 3 -> 7 files) made exactly one more
+        // real anchor's full fixedAtoms set resolve. A real, positive, direct consequence of that
+        // module landing -- not test drift.
+        Assert.Equal(15, built);
+        Assert.Equal(139, refusedForMissingAtom); // 154 - 15, down from 140
     }
 
     // ---- the built container is not just shaped right -- it actually instantiates -------------------

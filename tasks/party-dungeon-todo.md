@@ -2995,7 +2995,7 @@ task below names the members it adds so the seams stay clean.
     (the real public surface round-trips correctly for all three pool kinds; an unknown domain/pool
     returns empty, never throws) — 9/9 green. `dotnet test --filter Delve` → Data 111/111 (up from 110).
     `audit-magic-numbers.py --domain dungeon` → 0. `audit-overflow.py` → 64/0-critical, unchanged.
-- [ ] **D4.17** `DomainPreflight` — the ten-row chain — **PARTIALLY BUILT 2026-09-06, rows 4/6/7 WIRED 2026-09-07, row 8 WIRED same day (later window) (rows 1/2/3/9 concrete logic; row 4 wired+CLOSED (wild-room fixed); row 6 wired, found a real unresolved threat-audit gap; row 7 wired for ALL THREE of its own reachable rules (pool-ref/kind-fit, cell-headroom, rest-needs-encounter), found a real unresolved event-authoring-depth gap; row 8 (`DomainQuestPreflight`) now real too, a stale "needs rows 5-7 first" citation corrected — zero production callers yet, the same honest posture as the other three rows; rows 5/10 remain delegated/unbuilt, each blocked on its own separately-named real gap — three real content-completeness findings now on record: wild-room [FIXED], threat-audit [external], event-pool-depth [content authoring])**
+- [ ] **D4.17** `DomainPreflight` — the ten-row chain — **PARTIALLY BUILT 2026-09-06, rows 4/6/7 WIRED 2026-09-07, row 8 WIRED same day (later window), row 7's cell-headroom rule PARTIALLY FIXED 2026-09-08 (rows 1/2/3/9 concrete logic; row 4 wired+CLOSED (wild-room fixed); row 6 wired, found a real unresolved threat-audit gap; row 7 wired for ALL THREE of its own reachable rules (pool-ref/kind-fit, cell-headroom, rest-needs-encounter) — cell-headroom's original finding (every `curio`/`shrine`/`trap`/`merchant`/`rest`/`unknown` archetype refusing) is FIXED by widening those six archetypes' own `eventPool` room content to the full already-shipped same-kind corpus (zero new events generated); a narrower `wild`-kind (event kind `story`) residual remains, genuinely blocked — only 2 distinct-theme `story` events exist in the whole corpus, structurally below the >3 floor, and closing it needs NEW content that D1.10's own entry already deferred pending an undecided "sequencing infrastructure" design question; row 8 (`DomainQuestPreflight`) now real too, a stale "needs rows 5-7 first" citation corrected — zero production callers yet, the same honest posture as the other three rows; rows 5/10 remain delegated/unbuilt, each blocked on its own separately-named real gap — four real content-completeness findings now on record: wild-room-KIND-draw [FIXED], threat-audit [external], event-pool-depth-for-five-of-six-kinds [FIXED 2026-09-08], event-pool-depth-for-wild/story [content authoring, blocked on sequencing-infra decision])**
   - Read first: `spec-domain-catalog.md` §2 in full, then the REAL signature of every module this row cites, not the spec's own pseudocode: `delve-graph-roll`'s `Roll`+validators, `supplies-and-objects`'s `ObjectPreflight.Run`, `encounter-generator`'s `EncounterPreflight.Run`, `event-deck`'s `EventDeckPreflight.Run`, `delve-quests`'s `QuestPreflight` (D4.13, this same session), and `unique-pipeline`'s `RungOffer.For`. Every one of the five differs from the spec's own two-parameter citation (`RungOffer.For(domain, noClears)` alone needs `PowerTuning`/`DungeonTuning`/`DomainThetaInputs`/`ParentWorldTerms`/`PlayerClears` — five real parameters). Rows 1 (schema — `DomainCatalog.Load`, D4.15, is this row, never a second copy of the same checks), 2 (layout/species refs known, boss threatBand ≥ bossFloorRung), 3 (every layout-demanded (kind, climate) cell has ≥1 palette archetype) and 9 (every bound loot kind names a real, known drop-table id) are self-contained enough to build directly against `DomainPreflightInputs`' own plain collections/delegates — no live store read anywhere in the file, by construction.
   - Built: `src/FusionRpg.Core/Delve/Domains/DomainPreflight.cs` — `DomainRefusal(DomainId, Rule, Detail)` (a plain record, not an exception, so every domain's own refusals collect in one pass rather than stopping at the first, matching §2's own "every domain is checked"); `DomainPreflightInputs` (16 fields covering every fact rows 1/2/3/9 need plus the five delegated `Func<DomainRow, IReadOnlyList<DomainRefusal>>`/`Func<DomainRow, int>` rows); `DomainPreflight.Run(domains, live)` iterates domains ordinal-sorted by id, running rows 1→2→3→(4-8 concatenated)→9→10 in order per domain, `continue`-ing to the next domain on the first refusal within a domain (matching the established `EventPreflight`/`QuestPreflight` short-circuit-per-row convention) while still visiting every domain in the input list.
   - Verify: `tests/FusionRpg.Core.Tests/Delve/Domains/DomainPreflightTests.cs` (17 tests: one fully-passing case, one red test per row 1/2a/2b/2c/3/4/5/6/7/8/9/10, "every domain is checked" with two independently-bad domains, null-arg guards, plus two boundary tests added below) — all green, structurally proves "a failing preflight leaves the database untouched" (the file references no store type anywhere, so there is nothing in it capable of writing). **Mutation-tested, and this is the material finding**: made two deliberate mutations (row 2c's `<` → `<=` on the boss-floor check; row 9's dropped `|| !live.KnownDropTableIds.Contains(tableId)` half of the loot-binding OR) and reran the then-15-test suite — **both mutations went undetected, 15/15 still green**. Root cause, confirmed by re-reading the fixtures: the row-2c red test used `ThreatBandOrdinalFor: _ => 1` against a floor of 3 (both `<` and `<=` agree at that point), and the row-9 red test used a completely EMPTY `LootBindingFor` dictionary (`TryGetValue` alone already fails, so `Contains` was never exercised) — neither test touched the exact value needed to tell the real operator from the mutated one. Fixed by adding `Row2c_a_boss_exactly_at_the_threat_floor_is_legal_not_below_it` (`ThreatBandOrdinalFor: _ => 3`, exactly equal to the floor, must NOT refuse) and `Row9b_a_loot_binding_naming_an_unknown_table_id_also_refuses_domain_loot_table_missing` (binding DOES contain `"cache"`, mapped to `"table.unknown-table"`, not in `KnownDropTableIds`). Reran both mutations individually against the strengthened 17-test file: each is now caught by name, by exactly the new test written for it, with the other 16 staying green. Restored `DomainPreflight.cs` from a `cp` backup after each mutation, `diff`-confirmed byte-identical both times. Final clean run: `dotnet test --filter Delve.Domains` → 30/30 (13 `DomainCatalogTests` + 17 `DomainPreflightTests`). `audit-magic-numbers.py --targets M1/M2` → zero hits under `Delve/Domains`.
@@ -3105,6 +3105,54 @@ task below names the members it adds so the seams stay clean.
     available here, unlike wild-room** — `threat-audit` (species classification) is a genuinely external
     dependency this program has named since its very first audit pass, not something resolvable by editing
     domain-catalog, room content, or a tunable.
+  - **Re-investigated 2026-09-08, prompted by an apparent tension with D4.30's own pre-read (23 real
+    boss-eligible species found across all six climates) — RE-CONFIRMED as the same real, external gap,
+    with sharper evidence, plus one wording imprecision fixed.** Captured the REAL live refusal string via
+    a temporary diagnostic added to `DomainEncounterPreflightBridgeTests.cs` (reverted immediately after,
+    `diff`-confirmed byte-identical, `dotnet test --filter Delve.Domains.DomainEncounterPreflightBridgeTests`
+    → 4/4 green after revert), run against today's corpus (906 species, 185 classified — F1's own updated
+    count). Exact captured text, all six real domains, unchanged in shape from the citation above:
+    `[domain.encounter:slot] slot[posture=Bastion, reach=Melee] has 0 candidate(s) ignoring element, 0
+    under climate {Air,Dark,Earth,Fire,Ice,Light} — window [9,10]`.
+    - **(b) confirmed — two genuinely separate mechanisms, not one.** D4.30's `load_boss_species_by_climate`
+      (Python, content-authoring time) selects `bossSpeciesRef` from `threatBand ∈ {tyrant, harbinger,
+      cataclysm, calamity}` alone — four bands, no posture/reach filter. `EncounterPreflight`/`SlotFilter`
+      (C#, this row, a different corpus join entirely) checks a real encounter's own `posture`+`reach`+
+      `ThreatWindow` tuple. Read all nine real shipped `encounter.boss-*.json` files directly: **every
+      single one** requires `reach: "melee"` at `threatWindow` `[cataclysm, calamity]` (rungs 9-10) —
+      `posture` varies (3× Bastion, 3× Finesse, 3× Force) but `reach: melee` is universal across every boss
+      variant. So a domain can correctly NAME a real top-band boss species while every one of its own boss
+      *encounters* still refuses, because naming needs only a threatBand, filling needs threatBand AND
+      reach AND posture together — (a)'s "wrong slot" theory is false (it genuinely is the boss's own slot,
+      not pack/party), and it is not a wiring gap between the two mechanisms — they were never the same
+      mechanism to begin with.
+    - **One wording imprecision fixed**: "the boss encounter's own retinue guard" overstates what the slot
+      is. All nine boss encounters ship `"retinue": 0` — there is no separate retinue role here; the single
+      `slots[0]` entry IS the boss unit itself (`countBand` `lone`/`several` copies of one archetype). Future
+      citations should read "the boss encounter's own slot," not "retinue guard."
+    - **Sharper quantitative evidence the gap is real, not a narrower-than-necessary filter.** Parsed all
+      904 real species anchors directly (`data/seed/demons/species/{plant,zombie}/*.json`): corpus-wide
+      `reach` distribution is `melee=74, short=646, long=184` — melee is the RARE reach value (8.2% of the
+      whole roster), not the common one. Of the 23 species at the four "boss-eligible" bands (tyrant/
+      harbinger/cataclysm/calamity), the full `(band, posture, reach)` cross-tab has **zero `melee` rows at
+      any posture** — every one of the 23 is `short` or `long` reach. Corpus-wide, only 41 anchors are
+      `Bastion`+`melee` at all, and of those, only 6 carry a `threatBand` today — all 6 at `nuisance`/`pest`
+      (rungs 1-2), the bottom of the ladder, not the top. This is consistent with a real archetype
+      correlation in the species roster (garlic/corn/cherry-decoy-shaped defensive fodder is `Bastion`+
+      `melee`; `Ultimate`/`Doom`/`Gold`-tier top-band units are ranged nukes), not a sampling artifact of
+      which 185 got classified first — though it cannot be proven closed either way without `threat-audit`
+      itself (35 of the 41 `Bastion`+`melee` anchors are still unclassified, a few with plausible top-tier
+      naming, e.g. `UltimateBamboo`/`IronGargantuar`/`ObsidianJalapeno`/`UltimateJalaPuff` — real
+      candidates `threat-audit` might yet promote to rung 9/10, not something this session classifies).
+    - **Verdict: genuinely external and unfixable in this program's own scope, confirmed precisely, not
+      merely re-asserted.** Unlike row 7, there is no already-shipped, already-valid alternative sitting
+      unused to widen into — checked all nine boss encounter variants directly and every one shares the
+      identical `reach: melee` requirement at the identical top-rung window, so no in-scope reshuffle of
+      which boss encounter a domain references can route around it. Closing this needs either `threat-audit`
+      (module 7, out of scope here) to classify a `melee`-reach species into rung 9 or 10, or an owner-level
+      content-design ruling to loosen the boss slot's own `reach`/window requirement (the same category of
+      gap as row 5's verb-derivation rule and row 10's `ParentWorldTerms` — a real decision, not a silent
+      invention). Files: none changed (investigation + a reverted temporary test only).
   - Verify: `tests/FusionRpg.Core.Tests/Delve/Encounter/EncounterCorpusBuilderTests.cs` (new, 4 tests —
     null-arg guards, missing-dir empty, joins the identical real corpus `RealAnchorCorpusFixture` already
     proves, matches its own classified-count finding exactly); `RoomEncounterRefSeedFileTests.cs` (new, 5
@@ -3166,6 +3214,71 @@ task below names the members it adds so the seams stay clean.
     `src/FusionRpg.Core/Delve/Domains/DomainEventPreflightBridge.cs` (new, rules 1/8/9),
     `tests/FusionRpg.Core.Tests/Delve/Events/RoomEventPoolSeedFileTests.cs` (new, 5 tests),
     `tests/FusionRpg.Core.Tests/Delve/Domains/DomainEventPreflightBridgeTests.cs` (new, 5 tests).
+  - **Dated update, 2026-09-08 — the cell-headroom finding above was RE-VERIFIED, then closed for five
+    of its six affected kinds, by content, not code.** Read `spec-event-deck.md` §2 rule 4 ("Recent
+    cells... > `events.noRepeatRooms` distinct cells") and §9's own preflight bullet again in full, and
+    read `data/tuning/dungeon.v1.json:313` directly (`events.noRepeatRooms: 3`, an already-locked,
+    already-shipped tunable — the ">3 distinct cells" target is not this session's own invention).
+    Re-read `DomainEventPreflightBridge.cs:82-86`'s own `CheckCellHeadroom` logic line by line: it
+    computes `distinctCells` from `EventFilters.EventCell(Kind, Theme)` over whatever event ids a ROOM's
+    own `eventPool` array names — **not** a property of the event corpus's total size. Cross-checked the
+    real corpus directly (`data/seed/dungeon/events/*.json`, 52 files): `curio`/`shrine`/`trap`/`bargain`/
+    `encounter-event` each already have **8 distinct themes** (10 entries, two themes doubled) — the
+    corpus was never thin for these five kinds. The actual defect was in room content, not event content:
+    every one of the 48 non-`wild`, non-empty-pool room files (`room.curio-*`, `room.shrine-*`,
+    `room.trap-*`, `room.merchant-*`, `room.rest-*`, `room.unknown-*`) had its own `eventPool` array
+    authored (D1.10's model batch) with only 1-2 entries — satisfying the schema's `minItems: 1`
+    (`briefs.py:590`, no `maxItems`) but never pushed toward diversity. Confirmed via `spec-event-deck.md`
+    §2's own weight section ("`climateAffinity`... it never gates") that kind-fit is the ONLY legality
+    rule on pool membership — climate/theme match is a draw-weight concern only — so any already-shipped,
+    already-validated same-kind event legally belongs in any same-kind room's pool regardless of climate.
+    **Fixed by widening, not generating**: every `curio`/`shrine`/`trap`/`merchant`/`rest` room's own
+    `eventPool` was set to the FULL sorted set of real same-kind events (10 each); `unknown` rooms
+    (kind-fit "any" per `EventFilters.cs:37`) were widened by UNION with the real `curio`-kind set,
+    keeping their own existing entry rather than dropping it. Every existing entry survives as a subset
+    of the new set — a monotonic add, zero removals, zero new anchors, zero model calls. Verified via
+    `python -m pytest tools/seedsmith/tests/test_dungeon_room_content.py` (13/13, unchanged assertions:
+    real-event membership, no duplicates) and the real C# suite: `DomainEventPreflightBridgeTests.cs`'s
+    own documentation test rewritten (`Every_real_shipped_domain_now_refuses_row7s_cell_headroom_on_
+    wild_not_curio`, proving every non-`wild` archetype now clears >3 distinct cells directly AND that
+    the real `DomainPreflight.Run` entry point no longer cites `curio` anywhere); `RoomEventPoolSeedFileTests.
+    cs`'s own exact-pin test relaxed to a membership + count-floor check (the pinned single-entry value
+    is stale by construction once the pool is intentionally widened). `dotnet test --filter Delve` →
+    Core 1693/1693, Data 163/163 (zero regressions in either project).
+  - **A narrower residual confirmed genuinely blocked, not fixed here — `wild`-kind rooms (event kind
+    `story`).** The whole shipped corpus has only 2 distinct-theme `story` events
+    (`event.story-demon.allpeater-001`/`ashthreepeater-001`, chained to each other) — structurally below
+    the >3 floor, and unlike the five kinds above there is nothing already-shipped left to widen with:
+    every real wild room already references every real story event that exists. Re-read `dungeon-event`'s
+    own D1.10 entry (this same file, above): it explicitly excludes `story`-kind generation from the
+    first-ship batch because "a real multi-chapter chain needs sequencing infrastructure this pass does
+    not build" — a real, pre-existing, undecided design/infra question (how a chained `story` event's
+    "later room of the same kind" is guaranteed reachable at runtime), not a volume gap the same
+    mechanical fix pattern used above can answer. Generating 2+ more `story` anchors would be mechanically
+    easy (the SAME pipeline, SAME schema, SAME auto-chaining code that produced the existing 2) but would
+    either re-decide that already-deferred infra question alone or ship content that clears this static
+    preflight check without the runtime chain-traversal guarantee the deferral was protecting — named
+    here, not forced. **`DomainRealPipelineTests.cs`'s own real, end-to-end proof (all six real domains
+    through `RpgStore.ImportDungeonDomains`) confirms the frontier moved exactly this far**: every domain
+    still refuses row 7's `domain.event:cell-headroom`, but every refusal now names `kind=wild`, never
+    `kind=curio` (strengthened assertion, `Assert.Contains("kind=wild", ...)` — 3/3 green, Data filter
+    163/163 clean). **Row 6 (threat-audit) still separately refuses all six domains too, unrelated and
+    unchanged** — a domain committing for real needs BOTH row 6's classified-species-corpus gap AND
+    this `wild`/`story` content gap resolved, neither touched by the other.
+  - Verified: `scripts/guard-dal.ps1` clean; `audit-magic-numbers.py --domain dungeon` → 0 findings;
+    `audit-overflow.py` → 65/0-critical (unchanged baseline — the 3 pre-existing `Delve` hits are the
+    same already-commented `EventFacts.HpMilliOf`/`ActorThetaSeam` findings, confirmed by diffing against
+    a stash of this update's own room-JSON changes); `python -m pytest tools/seedsmith/tests -k dungeon`
+    → 285/286 (the one failure, `AtomFamilyTests.test_grantable_matches_the_measured_nine_generic_stat_
+    families`, confirmed PRE-EXISTING and unrelated by re-running it against the tree with this update's
+    own room-JSON changes stashed out — fails identically either way, an atom-family registry drift this
+    update never touches).
+  - Files (this update): `data/seed/dungeon/rooms/room.{curio,shrine,trap,merchant,rest,unknown}-*.json`
+    (48 files, `eventPool` widened only — every other field byte-identical),
+    `tests/FusionRpg.Core.Tests/Delve/Domains/DomainEventPreflightBridgeTests.cs` (rewrote the stale
+    documentation test), `tests/FusionRpg.Core.Tests/Delve/Events/RoomEventPoolSeedFileTests.cs` (relaxed
+    one exact-pin assertion), `tests/FusionRpg.Data.Tests/Delve/Domains/DomainRealPipelineTests.cs`
+    (updated doc comments + strengthened the cell-headroom assertion to name `wild` explicitly).
 - [x] **D4.18** `DomainStaleness` and the three tables — **DONE 2026-09-06**
   - Read first: `spec-domain-catalog.md` §3 ("Provenance and staleness") and §5 ("Progress and the unlock write") in full. Confirmed `DomainRow` (D4.15) deliberately does NOT carry `provenance_json`/`validated_json`/`revision` — those are storage-only concerns D4.15's own doc comment never claimed to carry — so staleness gets its own small Core record (`DomainValidatedFacts`) rather than retrofitting D4.15's already-tested type. Confirmed via `grep` that none of `RpgStore.Domains.cs`, `DomainStaleness.cs`, or a `Staleness` enum existed anywhere yet — this is the first build of the "recorded vs. live, compare, never a clock" pattern in this codebase (the seed contract's own `stale_ids()` precedent is Python/seedsmith-side, not C#). Confirmed the exact schema-registration convention by reading `RpgStore.Loot.cs` (`EnsureLootSchemaUnlocked`, its own `Ensure*SchemaUnlocked` method per module, called once from a central chain) and `RpgStore.Delve.cs`'s own `EnsureDelveSchemaUnlocked` (called from `EnsureWorldSchemaUnlocked` in `RpgStore.World.cs`, "a delve world is a `rpg_worlds` row, so its own schema setup lives beside the world program's") — matched both exactly rather than inventing a third convention. Confirmed `RungOffer.cs`'s own `PlayerClears` record already carries the doc comment "Persistence is `domain-catalog`'s; this is the in-memory shape callers pass in" — direct, pre-existing confirmation that this module (not `difficulty-ladder`) owns exactly the persistence being built here.
   - Built: `src/FusionRpg.Core/Delve/Domains/DomainStaleness.cs` (new) — `Staleness{Fresh,Stale}`; `DomainValidatedFacts(RegistryVersions, DungeonTuningHash, EncounterTuningHash, CatalogRevision, DropTableRevision, SampleSeeds)` (the exact §3 shape, verbatim); `DomainStaleness.Of(recorded, live)` — a pure field-by-field comparison (no store, no clock anywhere in the file), unequal on any single field ⇒ `Stale`, registry-version dictionaries compared by content (count + per-key value) so re-serialized key order never causes a false stale. `src/FusionRpg.Data/Sqlite/RpgStore.Domains.cs` (new) — `DomainClearJsonRow(RungId, Oath, DelveId)`, `DomainProgressRow(PlayerId, DomainId, FoundVia, FoundRef, Clears, Revision)`; `EnsureDomainsSchemaUnlocked` creates all three tables (`dungeon_domain`, `dungeon_domain_pool` from §1; `rpg_domain_progress` from §5, exact column-for-column match), wired into `EnsureWorldSchemaUnlocked` right after `EnsureDelveSchemaUnlocked` (`RpgStore.World.cs`, one added line); `RecordFoundUnlocked`/`RecordDomainClearUnlocked` — `internal static (SqliteConnection db, SqliteTransaction tx, ...)`, the exact tx-scoped signature spec §5a cites verbatim for the clear writer, `internal` (this project's own pre-existing `InternalsVisibleTo("FusionRpg.Data.Tests")`, the same test-only seam `RpgStore.WorldGraphDiff.cs` already documents) so both are directly testable ahead of having a real composing caller; `RecordFound`/`RecordDomainClear` — public, self-contained-transaction wrappers over the same two primitives, for a standalone caller today. Discovery is first-via/first-ref-wins (`ON CONFLICT(player_id, domain_id) DO NOTHING`, the `item_first_clear` insert-once idiom applied to an upsert since this row also carries `clears_json`); a clear is exactly-once per `(player, domain, rung)` (read-modify-write, skips the append if `RungId` already present, matching `CloseDelve`'s own "replayed... appends nothing" correlation-idempotent posture). `RpgStore.cs`'s player-data reset list gains `"DELETE FROM rpg_domain_progress;"` immediately ahead of `rpg_delve_pack_lock`/`rpg_delves` (spec's own words: "gains the table ahead of `rpg_delves`"), with a comment naming why, matching this exact list's own established per-entry rationale convention (the `rpg_item_assignment`/W21/loot-pack D3.22 comments already there).
@@ -3458,6 +3571,22 @@ task below names the members it adds so the seams stay clean.
     now proven for the first time.
   - Files: `tests/FusionRpg.Data.Tests/Delve/Domains/DomainRealPipelineTests.cs` (new, 3 tests),
     `tests/FusionRpg.Data.Tests/Delve/DungeonRegistryHubTestBootstrap.cs` (extended to configure all three hubs).
+  - **Dated update, 2026-09-08 — row 7's own half of this task's double-refusal finding is narrowed,
+    not cleared: still honestly `[ ]`.** D4.17 row 7's own dated 2026-09-08 update (this same file, above)
+    fixed the "every curio archetype has only 1 pool entry" root cause by widening room content — full
+    trail, evidence and regression results are there, not repeated here. Re-ran this task's own real
+    end-to-end proof (`DomainRealPipelineTests.cs`) after that fix: all six real domains still refuse
+    through the real `ImportDungeonDomains` writer, still on BOTH row 6 and row 7 simultaneously, but
+    row 7's own `domain.event:cell-headroom` refusal now names `kind=wild` on every domain, never
+    `kind=curio` — asserted directly (`Assert.Contains("kind=wild", cellHeadroom.Detail)`), not assumed.
+    `wild`-kind content (event kind `story`) is a genuinely different, narrower, still-unfixed gap: the
+    whole shipped corpus has only 2 distinct-theme `story` events against the required >3, and closing it
+    needs new content blocked on an undecided "sequencing infrastructure" question `dungeon-event`'s own
+    D1.10 entry already named, not a mechanical widening this update's own fix pattern could reach. Row 6
+    (threat-audit) is unrelated and unchanged. **This task's own checkbox correctly stays `[ ]`**: a
+    correct, precise, narrowed refusal is real progress, not a commit — 3/3 `DomainRealPipelineTests`,
+    Data `Delve` filter 163/163, zero regressions.
+  - Files (this update): none beyond D4.17 row 7's own Files line (this task's checkbox/prose only).
 - [ ] **D4.31** Encounter coverage over the shipped domains — **BUILT 2026-09-07 (`DomainEncounterCoverage.Report`
   is real and tested, run for real over all six domains; the coverage metric does NOT pass today — a real,
   already-documented finding, not a defect in this task; sibling-collision reporting is a separate, unbuilt piece)**

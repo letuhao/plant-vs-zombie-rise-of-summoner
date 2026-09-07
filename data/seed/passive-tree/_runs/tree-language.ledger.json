@@ -48896,6 +48896,2742 @@
         "flavor": "The rhythmic pulse of the orchard ensures no drop of essence is wasted, cycling vitality back into the protective layers.",
         "rationale": ""
       }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t1-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-9",
+        "flavor": "The sheer weight of the blow leaves nothing but a tremor in its wake.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t1-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t1-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Primal Onslaught",
+        "nameKey": "tree.node.primal-onslaught",
+        "flavor": "The very air trembles with the weight of impending impact.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t1-n2": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t1-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-9",
+        "flavor": "The very air trembles with the weight of impending violence.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t1-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t1-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Layered Defenses",
+        "nameKey": "tree.node.layered-defenses-2",
+        "flavor": "Thick plates and reinforced seams turn the body into a walking fortress.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t1-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Ironclad Shell",
+        "nameKey": "tree.node.ironclad-shell-2",
+        "flavor": "A thick layer of calcified mineral reinforces the outer plating, making every impact feel like striking a mountain.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t1-n2": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t1-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Ironbark Shell",
+        "nameKey": "tree.node.ironbark-shell",
+        "flavor": "Layers of hardened sap and mineral deposits form a natural, impenetrable rind.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t2-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Fervor",
+        "nameKey": "tree.node.primal-fervor",
+        "flavor": "The very air trembles with the weight of a thousand strikes.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t2-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Primal Might",
+        "nameKey": "tree.node.primal-might",
+        "flavor": "The raw strength of the gargantua is amplified by sheer ferocity.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t2-n2": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t2-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Gargantuan Might",
+        "nameKey": "tree.node.gargantuan-might",
+        "flavor": "The sheer weight of the blow leaves nothing but ruin in its wake.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t2-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.plating"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Thickened Bark",
+        "nameKey": "tree.node.thickened-bark-11",
+        "flavor": "Layers of hardened skin and dense wood weave together to absorb the heaviest blows.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t2-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t2-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core",
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Gargantuan Constitution",
+        "nameKey": "tree.node.gargantuan-constitution",
+        "flavor": "The very marrow of the beast thickens, turning bone into an impenetrable foundation.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t2-n2": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t2-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Gargantuan Constitution",
+        "nameKey": "tree.node.gargantuan-constitution",
+        "flavor": "The sheer mass of the warrior's frame becomes a living fortress, absorbing the weight of existence itself.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t3-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge",
+          "atom.tempo-yield"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overgrowth Surge",
+        "nameKey": "tree.node.overgrowth-surge-5",
+        "flavor": "The sheer pressure of elemental excess forces the very essence of the world to reshape itself.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t3-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.ward-brace"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Graftplate Bastion",
+        "nameKey": "tree.node.graftplate-bastion-3",
+        "flavor": "Layered iron and living wood fuse into a reactive barrier.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t3-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Savage Onslaught",
+        "nameKey": "tree.node.savage-onslaught-2",
+        "flavor": "The sheer momentum of the strike leaves nothing but broken earth in its wake.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t3-n2": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t3-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Onslaught",
+        "nameKey": "tree.node.primal-onslaught-2",
+        "flavor": "The very air trembles with the weight of a thousand crushing blows.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t3-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.vitality"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Gargantuan Vitality",
+        "nameKey": "tree.node.gargantuan-vitality",
+        "flavor": "The very essence of the behemoth swells, hardening the spirit and the flesh alike.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t3-n2": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t3-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Bulwark of the Earth",
+        "nameKey": "tree.node.bulwark-of-the-earth",
+        "flavor": "The weight of the mountain settles into the marrow.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t4-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Carrion Harvest",
+        "nameKey": "tree.node.carrion-harvest-6",
+        "flavor": "The soil drinks deep from the fallen, turning death into sudden, violent growth.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t4-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Recoil",
+        "nameKey": "tree.node.kinetic-recoil-12",
+        "flavor": "The impact of a blow is not lost, but redirected into the structural integrity of the shell.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t4-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apex-predator-12",
+        "flavor": "The scent of blood only fuels the hunger of the great ones.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t4-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ironclad Grafting",
+        "nameKey": "tree.node.ironclad-grafting",
+        "flavor": "Layers of scrap and skin fused into an impenetrable shell.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t5-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Kinetic Capacitor",
+        "nameKey": "tree.node.kinetic-capacitor-3",
+        "flavor": "The impact of a blow is not lost, but converted into a rhythmic pulse of protective energy.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t5-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Bloodlust",
+        "nameKey": "tree.node.primal-bloodlust",
+        "flavor": "The scent of battle fuels a cycle of unending violence.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t5-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ironclad Reservoir",
+        "nameKey": "tree.node.ironclad-reservoir",
+        "flavor": "The weight of the plating becomes a secondary skin, thickening the barrier between life and the void.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t6-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Unstoppable Momentum",
+        "nameKey": "tree.node.unstoppable-momentum-2",
+        "flavor": "The weight of the giant renders the concept of hesitation obsolete.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t6-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "Inert while atomTrigger is active — atomTrigger wins."
+        },
+        "name": "Kinetic Recirculation",
+        "nameKey": "tree.node.kinetic-recirculation-9",
+        "flavor": "The impact of a blow is not lost, but redirected into the internal mechanisms of the plating.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t6-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Gargantuan Might",
+        "nameKey": "tree.node.gargantuan-might-2",
+        "flavor": "The sheer weight of the blow grows with the strength of the arm.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t6-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Gargantuan Reservoir",
+        "nameKey": "tree.node.gargantuan-reservoir",
+        "flavor": "The sheer mass of the beast acts as a living battery, holding more energy and replenishing it with every heavy step.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t7-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Grave-Tally Scavenger",
+        "nameKey": "tree.node.grave-tally-scavenger",
+        "flavor": "Every fallen foe leaves a debt that the gargantuan soul collects in kind.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t7-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t7-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shield-regen",
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Pulse of the Living Bastion",
+        "nameKey": "tree.node.pulse-of-the-living-bastion",
+        "flavor": "The rhythmic thrum of the gargantuan heart forces vitality through the protective shell.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t7-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Onslaught",
+        "nameKey": "tree.node.primal-onslaught-3",
+        "flavor": "The sheer weight of the blow leaves nothing but ruin in its wake.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t7-n1": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.arm-riveting",
+          "atom.arm-welding",
+          "atom.plating"
+        ],
+        "affinity": [
+          "occasional",
+          "core",
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Layered Carapace",
+        "nameKey": "tree.node.layered-carapace-4",
+        "flavor": "Thick, overlapping plates of hardened tissue and metal provide a layered defense against impact.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t8-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rooted Bastion",
+        "nameKey": "tree.node.rooted-bastion-3",
+        "flavor": "The weight of the earth settles into the marrow, turning every impact into a foundation.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t9-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Elemental Overload",
+        "nameKey": "tree.node.elemental-overload-3",
+        "flavor": "The sheer density of raw energy forces the essence to spill beyond its natural containment.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t9-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Osmotic Aegis",
+        "nameKey": "tree.node.osmotic-aegis",
+        "flavor": "The barrier drinks from the very wounds it prevents, turning impact into a surging tide of protection.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-off-t10-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-off-t10-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-override"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Resonance",
+        "nameKey": "tree.node.primal-resonance-2",
+        "flavor": "The very essence of the elements begins to vibrate in sympathy with the warrior's heartbeat.",
+        "rationale": ""
+      }
+    },
+    "ArmedGargantuar:skill.armedgargantuar-def-t10-n0": {
+      "record": {
+        "id": "skill.armedgargantuar-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Siphon",
+        "nameKey": "tree.node.kinetic-siphon-8",
+        "flavor": "Every impact fuels the next surge of protection.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t1-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "Inert while aptitude is active — aptitude wins."
+        },
+        "name": "Feral Might",
+        "nameKey": "tree.node.feral-might",
+        "flavor": "The impulse to strike is amplified by the raw strength of the undead.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t2-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Brute Force",
+        "nameKey": "tree.node.brute-force",
+        "flavor": "The sheer weight of the armored corpse crushes all resistance.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t3-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "Inert while branch is active — branch wins."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-10",
+        "flavor": "The very essence of the horde swells with every strike.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t3-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Unstoppable Onslaught",
+        "nameKey": "tree.node.unstoppable-onslaught",
+        "flavor": "The relentless momentum of the horde leaves no room for hesitation.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t3-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t3-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.plating"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Chitinous Reinforcement",
+        "nameKey": "tree.node.chitinous-reinforcement",
+        "flavor": "Layers of hardened shell and scrap metal fuse into a singular, impenetrable layer.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t3-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.plating"
+        ],
+        "affinity": [
+          "likely",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Chitinous Layering",
+        "nameKey": "tree.node.chitinous-layering-2",
+        "flavor": "Layers of hardened shell and thick plating fuse into a singular, impenetrable barrier.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t4-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Carrion Cascade",
+        "nameKey": "tree.node.carrion-cascade",
+        "flavor": "The fallen do not merely rest; they fuel the next onslaught.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t4-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Kinetic Capacitor",
+        "nameKey": "tree.node.kinetic-capacitor-4",
+        "flavor": "The impact of a blow is not lost, but recycled into a shimmering kinetic barrier.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t4-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.might",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Frenzied Carapace",
+        "nameKey": "tree.node.frenzied-carapace",
+        "flavor": "The armor thickens as the blood begins to boil.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t4-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.sust-grit"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calcified Marrow",
+        "nameKey": "tree.node.calcified-marrow-2",
+        "flavor": "The very bones of the undead thicken with every impact, turning trauma into structural integrity.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t5-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Carrion Echo",
+        "nameKey": "tree.node.carrion-echo-2",
+        "flavor": "The dead do not simply fall; they erupt in a final, desperate surge of life-stealing energy.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t5-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening",
+          "atom.plating"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Layered Exoskeleton",
+        "nameKey": "tree.node.layered-exoskeleton",
+        "flavor": "Thickened plates of chitin overlap to absorb the brunt of incoming strikes.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t6-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t6-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Carrion Resonance",
+        "nameKey": "tree.node.carrion-resonance",
+        "flavor": "The rhythm of the grave beats within the marrow, turning every death into a symphony of decay.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t6-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t6-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.ward-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ossified Bulwark",
+        "nameKey": "tree.node.ossified-bulwark-2",
+        "flavor": "A thick, calcified layer that absorbs impact before it reaches the soft tissue.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t6-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.might"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Feral Hunger",
+        "nameKey": "tree.node.feral-hunger",
+        "flavor": "The hunger of the swarm is never sated, only momentarily delayed by the feast.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t6-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t6-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Ironclad Husk",
+        "nameKey": "tree.node.ironclad-husk",
+        "flavor": "Layers of rusted scrap and calcified marrow fuse into a singular, unyielding shell.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t7-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t7-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Carrion Aftershock",
+        "nameKey": "tree.node.carrion-aftershock",
+        "flavor": "The impact of the fallen triggers a secondary surge of necrotic energy.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t7-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.savagery"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Hunger",
+        "nameKey": "tree.node.primal-hunger-5",
+        "flavor": "The instinct to rend flesh overrides the instinct to survive.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t7-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-riveting",
+          "atom.arm-welding",
+          "atom.carapace"
+        ],
+        "affinity": [
+          "likely",
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ossified Bulwark",
+        "nameKey": "tree.node.ossified-bulwark-3",
+        "flavor": "The very marrow of the fallen hardens into a secondary shell, turning every impact into a structural reinforcement.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t8-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo",
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cadaverous Detonation",
+        "nameKey": "tree.node.cadaverous-detonation",
+        "flavor": "The very act of expiration triggers a violent, explosive release of necrotic energy.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t8-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Post-Mortem Catalyst",
+        "nameKey": "tree.node.post-mortem-catalyst",
+        "flavor": "The very act of expiration fuels the next strike.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t8-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t8-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.mending"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Suture of the Unliving",
+        "nameKey": "tree.node.suture-of-the-unliving",
+        "flavor": "The flesh refuses to part, stitching itself back together with threads of necrotic intent.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t8-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t8-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Capacitor",
+        "nameKey": "tree.node.kinetic-capacitor-5",
+        "flavor": "The impact of a blow is not lost, but converted into a rhythmic surge of protective energy.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t9-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo",
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cadaverous Detonation",
+        "nameKey": "tree.node.cadaverous-detonation-2",
+        "flavor": "The sudden rupture of pressurized gases within a decaying vessel.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t9-n2": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t9-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.death-salvo"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "none",
+          "propertyKeys": [],
+          "printedText": ""
+        },
+        "name": "Carrion Scavenger",
+        "nameKey": "tree.node.carrion-scavenger",
+        "flavor": "The dead do not just fall; they provide.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t9-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Siphon",
+        "nameKey": "tree.node.kinetic-siphon-9",
+        "flavor": "The impact of a blow is not lost, but recycled into the very structure of the shell.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t9-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "While nodeClass holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Capacitor",
+        "nameKey": "tree.node.kinetic-capacitor-6",
+        "flavor": "The impact of a blow is not lost, but recycled into the next defensive posture.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t9-n2": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t9-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Graftplate Suture",
+        "nameKey": "tree.node.graftplate-suture",
+        "flavor": "The skin is stitched directly to the underlying plating, turning every impact into a structural reinforcement.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t10-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-glean",
+          "atom.econ-bounty"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Carrion Reaping",
+        "nameKey": "tree.node.carrion-reaping",
+        "flavor": "The dead do not merely fall; they provide the fuel for the next wave.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-off-t10-n2": {
+      "record": {
+        "id": "skill.armoredimpzombie-off-t10-n2",
+        "nodeKey": "n2",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.death-salvo",
+          "atom.deathblast"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Splintered Marrow",
+        "nameKey": "tree.node.splintered-marrow",
+        "flavor": "The very bones of the fallen act as shrapnel for the next wave.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t10-n0": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Ironclad Husk",
+        "nameKey": "tree.node.ironclad-husk-2",
+        "flavor": "Layers of calcified marrow and rusted scrap form a second, unyielding skin.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t10-n1": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Siphon",
+        "nameKey": "tree.node.kinetic-siphon-10",
+        "flavor": "The impact of a blow feeds the very barrier meant to deflect it.",
+        "rationale": ""
+      }
+    },
+    "ArmoredImpZombie:skill.armoredimpzombie-def-t10-n2": {
+      "record": {
+        "id": "skill.armoredimpzombie-def-t10-n2",
+        "nodeKey": "n2",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.evd-harden"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Calcified Marrow",
+        "nameKey": "tree.node.calcified-marrow-3",
+        "flavor": "The very structure of the bone hardens against the weight of the world.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t1-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t1-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "posture"
+          ],
+          "printedText": "Inert while posture is active — posture wins."
+        },
+        "name": "Savage Accuracy",
+        "nameKey": "tree.node.savage-accuracy",
+        "flavor": "The rhythm of the strike dictates the clarity of the wound.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t1-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t1-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 1,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.vitality"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "tier"
+          ],
+          "printedText": "Inert while tier is active — tier wins."
+        },
+        "name": "Deep Rooting",
+        "nameKey": "tree.node.deep-rooting-13",
+        "flavor": "The strength of the trunk is found in the depth of the soil.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t2-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t2-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "Inert while aptitude is active — aptitude wins."
+        },
+        "name": "Apex Predator",
+        "nameKey": "tree.node.apex-predator-13",
+        "flavor": "The scent of blood sharpens the instinct, turning every strike into a calculated execution.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t2-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t2-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Resonant Attunement",
+        "nameKey": "tree.node.resonant-attunement-4",
+        "flavor": "The elements do not merely strike; they harmonize with the caster's intent.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t2-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t2-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 2,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Layered Bastion",
+        "nameKey": "tree.node.layered-bastion-12",
+        "flavor": "The more layers you stack, the harder it is to find the seam.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t3-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t3-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ashen Might",
+        "nameKey": "tree.node.ashen-might",
+        "flavor": "The heat of the embers fuels the strength of the strike.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t3-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t3-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.elpw-attune"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "aptitude"
+          ],
+          "printedText": "While aptitude holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Surge",
+        "nameKey": "tree.node.primal-surge-11",
+        "flavor": "The very essence of the hunt flows through the veins, turning raw instinct into unstoppable momentum.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t3-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t3-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 3,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "branch"
+          ],
+          "printedText": "While branch holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Thickened Bark",
+        "nameKey": "tree.node.thickened-bark-12",
+        "flavor": "Layers of hardened sap provide a secondary layer of defense against physical trauma.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t4-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t4-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-attune",
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "Inert while element is active — element wins."
+        },
+        "name": "Elemental Overload",
+        "nameKey": "tree.node.elemental-overload-4",
+        "flavor": "The air crackles as elemental energies refuse to remain contained, bleeding into one another.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t4-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t4-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reciprocity",
+        "nameKey": "tree.node.kinetic-reciprocity",
+        "flavor": "The rhythm of the impact dictates the strength of the rebound.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t4-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t4-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "likely",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Focal Point",
+        "nameKey": "tree.node.focal-point-3",
+        "flavor": "The eye finds the gap before the mind can process the strike.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t4-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t4-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 4,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.shield-capacity",
+          "atom.shield-toughness"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Layered Carapace",
+        "nameKey": "tree.node.layered-carapace-5",
+        "flavor": "Overlapping plates of reinforced metal and hardened bark provide a multi-layered defense against impact.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t5-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t5-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-surge"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Rhythmic Spore-Cycle",
+        "nameKey": "tree.node.rhythmic-spore-cycle",
+        "flavor": "The cadence of the strike dictates the abundance of the harvest.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t5-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t5-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reciprocity",
+        "nameKey": "tree.node.kinetic-reciprocity-2",
+        "flavor": "The rhythm of impact dictates the rhythm of recovery.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t5-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t5-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Sanguine Focus",
+        "nameKey": "tree.node.sanguine-focus",
+        "flavor": "The rhythm of the hunt is found in the precision of the strike and the ferocity of the kill.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t5-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t5-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 5,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.arm-hardening"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Rooted Resilience",
+        "nameKey": "tree.node.rooted-resilience-7",
+        "flavor": "Deeply anchored, the spirit draws strength from the very earth it treads.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t6-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t6-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 6,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ashen Precision",
+        "nameKey": "tree.node.ashen-precision",
+        "flavor": "The heat of the ash sharpens the eye and the strike alike.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t7-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t7-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.ferocity",
+          "atom.precision"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "nodeClass"
+          ],
+          "printedText": "Inert while nodeClass is active — nodeClass wins."
+        },
+        "name": "Cinder-Stained Edge",
+        "nameKey": "tree.node.cinder-stained-edge",
+        "flavor": "The heat of the ash sharpens the strike and the intent alike.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t7-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t7-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 7,
+        "nodeClass": "magnitude",
+        "affixIds": [
+          "atom.fortitude",
+          "atom.resilience"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "nullification",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "Inert while atomKind is active — atomKind wins."
+        },
+        "name": "Deep-Rooted Endurance",
+        "nameKey": "tree.node.deep-rooted-endurance",
+        "flavor": "The deeper the roots, the harder the spirit to break.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t8-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t8-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-yield"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cinder-Sown Volley",
+        "nameKey": "tree.node.cinder-sown-volley",
+        "flavor": "The ash settles not as dust, but as a rain of burning seeds that bloom upon impact.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t8-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t8-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 8,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.tempo-yield"
+        ],
+        "affinity": [
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Ash-Sown Harvest",
+        "nameKey": "tree.node.ash-sown-harvest",
+        "flavor": "The soil drinks the fallen, turning every expiration into a sudden, violent bloom.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t9-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t9-n0",
+        "nodeKey": "n0",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Overgrowth Overflow",
+        "nameKey": "tree.node.overgrowth-overflow",
+        "flavor": "When the essence spills, it refuses to be contained by a single form.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t9-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t9-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow",
+          "atom.elpw-surfeit"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "element"
+          ],
+          "printedText": "While element holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Primal Overload",
+        "nameKey": "tree.node.primal-overload-3",
+        "flavor": "The very air trembles as the elemental essence refuses to be contained, spilling from the cracks of reality.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t9-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t9-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomTrigger"
+          ],
+          "printedText": "While atomTrigger holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reciprocity",
+        "nameKey": "tree.node.kinetic-reciprocity-3",
+        "flavor": "The rhythm of the impact dictates the strength of the rebound.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t9-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t9-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 9,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomAttachPoint"
+          ],
+          "printedText": "While atomAttachPoint holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Silt-Sealed Sieve",
+        "nameKey": "tree.node.silt-sealed-sieve",
+        "flavor": "The very dust of the ash-lands settles into the cracks of your armor, turning every impact into a foundation for regrowth.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-off-t10-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-off-t10-n1",
+        "nodeKey": "n1",
+        "branch": "offensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.elpw-overflow"
+        ],
+        "affinity": [
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cinder-Pulse Cadence",
+        "nameKey": "tree.node.cinder-pulse-cadence",
+        "flavor": "The rhythm of the falling ash dictates the timing of the final strike.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t10-n0": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t10-n0",
+        "nodeKey": "n0",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "core"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Cyclical Aegis",
+        "nameKey": "tree.node.cyclical-aegis-5",
+        "flavor": "The rhythm of the shield dictates the rhythm of the soul.",
+        "rationale": ""
+      }
+    },
+    "AshThreePeater:skill.ashthreepeater-def-t10-n1": {
+      "record": {
+        "id": "skill.ashthreepeater-def-t10-n1",
+        "nodeKey": "n1",
+        "branch": "defensive",
+        "tier": 10,
+        "nodeClass": "mechanism",
+        "affixIds": [
+          "atom.shld-cycle",
+          "atom.shld-surge"
+        ],
+        "affinity": [
+          "core",
+          "likely"
+        ],
+        "exclusion": {
+          "form": "reroute",
+          "propertyKeys": [
+            "atomKind"
+          ],
+          "printedText": "While atomKind holds, this effect reroutes instead of applying normally."
+        },
+        "name": "Kinetic Reciprocity",
+        "nameKey": "tree.node.kinetic-reciprocity-4",
+        "flavor": "The rhythm of impact becomes the pulse of protection.",
+        "rationale": ""
+      }
     }
   }
 }

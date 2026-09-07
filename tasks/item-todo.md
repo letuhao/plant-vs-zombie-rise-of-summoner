@@ -8559,7 +8559,10 @@ outstanding work to anyone scanning boxes.
 ⚠ **Baseline discipline.** The 12 `TraitMigrationParityTests` failures were checked against
 `git status` before being attributed: the failing input (`data/seed/atoms/vocabulary.json`) is
 committed and untouched by this pass, `EquipAtomSource` is not on its call path at all, and no file
-this pass edited is referenced by it. `BattleStatComposer.Equipment` defaults to `EquipAtomSource.None`
+this pass edited is referenced by it. **Errata 2026-09-08:** production now calls
+`BattleStatComposer.UseEquipment(EquippedBoundAtoms.SourceFromStore(...))` — the claim below that
+grep found **no** `UseEquipment` outside tests is **historical** (true at that pass, false now).
+`BattleStatComposer.Equipment` defaults to `EquipAtomSource.None`
 and a whole-repo grep finds **no** `UseEquipment` caller outside `EquipRuntimeTests`, so the blast
 radius of the fix is exactly the set that was re-run. The full `Core.Tests` suite was **not** re-run —
 22 concurrent `dotnet` processes were live on this machine and the file's own baseline table already

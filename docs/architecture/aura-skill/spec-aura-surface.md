@@ -39,42 +39,34 @@ not a toast-and-forget — the player made a choice and needs to see its consequ
 - Upkeep is visible **before** committing — which pool, how much per tick — and a projected
   "will run dry" state, the same shape `spec-action-layer.md` §2 specifies for `perTick` costs.
 
-### 2.2 GG-49 becomes satisfiable for the first time
+### 2.2 GG-49 contributions — server side shipped; FE InspectSplit remaining
 
 > *"'Why did my attack drop?' is answerable from the interface… **Forbids:** a stat readout with no
 > path to its sources."* (`game-gui-principles.md:644-651`)
 
-Today this holds only **vacuously** — no derived value is shown at all. `derived-modifier-bucket` makes
-contributions retainable, so a derived channel can finally show *"+40 from Might aura, +12 from
-patron"* instead of one opaque number.
+**Server (2026-09-07/08):** `GET /api/actors/{id}/derived` and `GET /api/actors/{id}/sheet` ship
+per-channel contributions + fiction labels + `composeKind` via `UniqueActorHubCompose` /
+`ResolveDerivedWithContributions`. Do not claim “no server producer.”
 
-**This is the module where the bucket pays off**, and it is why `aura-surface` depends on it directly
-rather than only through `aura-content`.
+**This module’s remaining job** is FE InspectSplit consuming those contributions (presentation only).
+Until the FE binds them, the surface may still show pending/opaque UI — that is a **consumer** gap,
+not a missing endpoint.
 
 ---
 
 ## 3. The contract gap that must be closed honestly
 
-`ActorChannelDetail.contributions` exists in the web contract but **has no server producer**.
-`web/fusion-rpg-web/src/contract/adapt.ts:37` is unconditional:
-
-```ts
-channelSummary: pendingWithReason("The derived-stat snapshot has no server endpoint yet (spec-derived-stat-sheet.md)")
-```
-
-Because it never returns `known`, no `ActorChannelDetail` is ever constructed outside two test helpers.
-So this module needs a **real server endpoint** exposing derived channels with their contributions —
-and until it exists, the surface must render the honest pending state, never a fabricated grid.
+`ActorChannelDetail.contributions` on the web contract must bind to `/derived` or `/sheet` — not to a
+fabricated grid. `adapt.ts` may still `pendingWithReason` for channelSummary until InspectSplit lands;
+do not invent rows client-side.
 
 ⚠️ **Do not bridge to `pvz_stat_contributions`.** That table is real
-(`RpgStore.cs:300-313`, served at `/api/pvz-stats/{playerId}/channels/{channel}`) but it is keyed by
+(`RpgStore.cs`, served at `/api/pvz-stats/{playerId}/channels/{channel}`) but it is keyed by
 **`player_id` with no actor column**, it is a rebuilt-on-every-mutate cache
-(*"Never re-apply from finals"*, `pvz-stats.md:40`), and its row shape is different. The contract header
-(`contract/types.ts:4-5`) forbids components binding to REST DTOs directly. **Two different things that
-share a word.**
+(*"Never re-apply from finals"*, `pvz-stats.md`), and its row shape is different. The contract header
+forbids components binding to REST DTOs directly. **Two different things that share a word.**
 
 ---
-
 ## 4. Commands
 
 ```powershell
@@ -96,9 +88,9 @@ Live review: `/review-web` (the `local-web-review` skill) — never an improvise
 | `web/fusion-rpg-web/src/ui/actor/AuraSlot.tsx` | **new** — one aura: state, upkeep, enable/disable |
 | `web/fusion-rpg-web/src/ui/actor/ChannelContributions.tsx` | **new** — the GG-49 readout |
 | `web/fusion-rpg-web/src/ui/actor/DerivedStatsTab.tsx` | edit — contributions when known |
-| `web/fusion-rpg-web/src/contract/adapt.ts` | edit — return `known` once the endpoint exists |
+| `web/fusion-rpg-web/src/contract/adapt.ts` | edit — return `known` once InspectSplit binds `/sheet` or `/derived` |
 | `web/fusion-rpg-web/src/lib/bus/*` | edit — the query + the enable/disable mutation |
-| `src/FusionRpg.Server/…` | **new** endpoint — derived channels + contributions for an actor |
+| `src/FusionRpg.Server/AuraDerivedEndpoints.cs` | **shipped** — `/derived` + `/sheet` with contributions |
 | `web/fusion-rpg-web/e2e/aura.spec.ts` | **new** |
 
 ---
@@ -174,7 +166,7 @@ exactly the kind of dense content that breaks at 375px.
 - [ ] Enabling at the cap names the aura that switched off.
 - [ ] Upkeep pool and rate are visible before committing.
 - [ ] Every locked aura states its real reason.
-- [ ] A derived channel shows its contributions — **GG-49 satisfied non-vacuously for the first time**.
+- [ ] A derived channel shows its contributions in FE — **GG-49 InspectSplit** (server already ships bags).
 - [ ] Pending states are honest; nothing fabricated.
 - [ ] `npm run test`, `npm run build`, `npx playwright test` green; mobile screenshots inspected.
 

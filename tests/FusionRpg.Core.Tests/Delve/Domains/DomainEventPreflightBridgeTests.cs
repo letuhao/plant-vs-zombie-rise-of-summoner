@@ -74,23 +74,38 @@ public class DomainEventPreflightBridgeTests
     }
 
     /// <summary>
-    /// The real end-to-end proof, through the actual `DomainPreflight.Run` entry point — and a THIRD
-    /// real, structural content gap found by actually running it (after row 4's wild-room gap [FIXED]
-    /// and row 6's threat-audit gap [external, unfixable]). Rule 1 (pool-ref/kind-fit) is clean; rules
-    /// 8/9 are NOT: all six real domains refuse `domain.event:cell-headroom` on the exact same shape —
-    /// their `curio`-kind archetype's own `eventPool` carries exactly 1 entry (1 distinct (kind,theme)
-    /// cell), but `events.noRepeatRooms` is 3, so the rule demands MORE than 3. This is a genuine
-    /// event-authoring-DEPTH gap (each archetype needs several distinct events, not one) — a content
-    /// scope question for whoever authors the next event batch, not a code defect: the check itself is
-    /// proven correct by the negative/positive controls elsewhere in this file, and rule 1 above already
-    /// proves the SAME real content is clean against a DIFFERENT rule. No fix attempted here — authoring
-    /// enough new distinct events per archetype is a real content-generation pass (seedsmith), not a
-    /// wiring fix, and forcing one unilaterally here risks exactly the kind of unreviewed content-policy
-    /// call this program has repeatedly declined to make alone (the CJK-motif finding, the wild-weight-
-    /// vs-content choice for row 4).
+    /// The real end-to-end proof, through the actual `DomainPreflight.Run` entry point.
+    ///
+    /// <para><b>Updated 2026-09-08 (party-dungeon-todo.md D4.17 row 7) — the ORIGINAL `curio`
+    /// cell-headroom finding this test used to pin is FIXED, by widening room content, not by
+    /// generating new events.</b> Investigation found the real 52-event corpus already has 8
+    /// distinct themes for every one of `curio`/`shrine`/`trap`/`bargain`/`encounter-event` — the
+    /// gap was never a content-VOLUME shortfall, it was that each individual room's own `eventPool`
+    /// array (model-authored, D1.10) referenced only 1-2 of those already-existing, already-valid
+    /// events, satisfying the schema's `minItems: 1` but nothing pushing for more. Since
+    /// `climateAffinity` never gates pool membership (spec-event-deck.md §2, only weights the draw)
+    /// and kind-fit is the only real legality rule, widening every non-`wild` archetype's own
+    /// `eventPool` to the full same-kind corpus is a content-completeness fix over ALREADY-SHIPPED,
+    /// ALREADY-VALIDATED content — zero new anchors generated, zero model calls, mechanically
+    /// reversible. See `data/seed/dungeon/rooms/*.json` (48 files touched, `wild`-kind rooms
+    /// untouched) and `tools/seedsmith/tests/test_dungeon_room_content.py` (still 13/13 green).</para>
+    ///
+    /// <para><b>A DIFFERENT, genuinely unfixed gap now surfaces in its place: `wild`-kind rooms
+    /// (event kind `story`).</b> The whole shipped corpus carries only 2 distinct-theme `story`
+    /// events (`event.story-demon.allpeater-001`/`ashthreepeater-001`, chained to each other) — below
+    /// the >3 floor `events.noRepeatRooms` sets, and unlike the five kinds above, there is NOTHING
+    /// already-shipped left to widen with: every wild room already references every real story event
+    /// its own pool can legally hold. Closing this needs NEW `story`-kind content, and `dungeon-event`'s
+    /// own D1.10 entry already named exactly why that was deliberately deferred rather than attempted
+    /// as a mechanical batch: "a real multi-chapter chain needs sequencing infrastructure this pass
+    /// does not build" — a real, pre-existing, unresolved design/infra question, not a volume gap this
+    /// test's own fix pattern (widen with existing content) can answer. Not attempted here for that
+    /// reason — forcing it would mean either re-deciding that already-deferred infra question alone,
+    /// or shipping content that clears this static check without the runtime chain-traversal guarantee
+    /// the deferred infra work was meant to provide.</para>
     /// </summary>
     [Fact]
-    public void Every_real_shipped_domain_refuses_row7s_own_cell_headroom_rule_on_the_identical_curio_archetype()
+    public void Every_real_shipped_domain_now_refuses_row7s_cell_headroom_on_wild_not_curio()
     {
         var domains = DomainSeedFile.LoadAll(DungeonTestFiles.DomainsDir());
         var palettes = DomainSeedFile.LoadRoomPalettes(DungeonTestFiles.DomainsDir());
@@ -99,6 +114,20 @@ public class DomainEventPreflightBridgeTests
         var catalog = RealCatalog();
 
         Assert.Equal(6, domains.Count);
+
+        // The fixed content directly: every non-wild kind's own real room pools now clear cell
+        // headroom on their own (no DomainPreflight plumbing needed for this half of the proof).
+        foreach (var (roomId, poolIds) in pools)
+        {
+            if (!rooms.TryGetValue(roomId, out var room) || room.Kind == "wild" || poolIds.Count == 0) continue;
+            var distinctCells = poolIds.Select(id => catalog.Resolve(id)!)
+                .Select(e => new EventFilters.EventCell(e.Kind, e.Theme)).Distinct().Count();
+            Assert.True(distinctCells > Tuning.EventsNoRepeatRooms,
+                $"{roomId} (kind={room.Kind}) only has {distinctCells} distinct cells after the widening fix");
+        }
+
+        // The real end-to-end run: still refuses, now on `wild` alone, never `curio`/`shrine`/`trap`/
+        // `merchant`/`rest`/`unknown` — the fix moved the frontier, it did not paper over it.
         var checkEvents = DomainEventPreflight.Build(palettes, rooms, pools, catalog, Tuning);
         var refusals = DomainPreflight.Run(domains, InputsIsolatingRow7(checkEvents));
 
@@ -108,8 +137,8 @@ public class DomainEventPreflightBridgeTests
         {
             Assert.Equal("domain.event:cell-headroom", r.Rule);
             Assert.Contains(r.DomainId, realDomainIds);
-            Assert.Contains("kind=curio", r.Detail);
-            Assert.Contains("1 distinct (kind,theme) cell(s)", r.Detail);
+            Assert.Contains("kind=wild", r.Detail);
+            Assert.DoesNotContain("kind=curio", r.Detail);
             Assert.Contains("events.noRepeatRooms (3)", r.Detail);
         }
     }

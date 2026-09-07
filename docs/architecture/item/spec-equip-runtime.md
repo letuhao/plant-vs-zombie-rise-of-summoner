@@ -3,6 +3,9 @@
 **Module id:** `equip-runtime` · **Program:** [item](../item-map.md) · **Build order:** 5 of 21 — ⭐ **the payoff**
 **Depends on:** `equip-assign` (4)
 **Rulings:** D29 · closes wiring gap **W2** and the consume half of **§2f.1 F2**
+**Status (2026-09-08):** Battle + sheet consume `stat.derived` equip via `EquippedBoundAtoms` /
+`FromEquippedResolver`. Lawn still uses grant bag labels (`grant:`) until equip-tagged push without
+double-count. Catalog content is still mostly `stat.modify`.
 
 ## Objective
 
@@ -23,20 +26,16 @@ effect; everything after it is content and depth.
 | Half | State |
 |---|---|
 | **Produce + bind** | ✅ live — `ProduceAndBind` at `RpgStore.UniqueActors.cs:756`, inside the equipment-binding sync |
-| **Consume** | ⛔ **`UniqueActor` bindings are write-only.** `RpgHub.cs:106` builds an `AtomPushService` push for `OwnerKind.Player` and nothing else, so no item binding ever reaches an actor — `decisions.md:106` states this outright: *"the binding is currently write-only … the legacy `mods_json`/`loadoutJson` grant remains the only path an actual spawned unique actor's stats take."* |
+| **Consume (battle/sheet)** | ✅ **Shipped 2026-09-07/08** — `EquippedBoundAtoms` / `FromEquippedResolver` on Server battle + `UniqueActorHubCompose`. Lawn still uses grant-bag labels until equip-tagged push. |
+| **Consume (lawn UniqueActor push)** | Residual — see actor-hub enforcement follow-ons; do not re-read bindings + grants |
 
 ⚠ **§2a's B6 claimed *"the atom runtime is not inert any more."* That was half true** and is corrected
-in §2f.1 F2. The produce half runs; this module is the consume half.
+in §2f.1 F2. The produce half runs; battle/sheet consume for `stat.derived` is now live.
 
-### Battle — the seam exists and has a working producer to copy
+### Battle — equipment producer shipped
 
-`BattleStatComposer` folds `ChannelMods` at squad build, and the field is documented *"trait stat
-mods, equipment later"* (`BattleModels.cs:33`, `BattleStatComposer.cs:9`).
-
-**`TraitAtomSource` is a working producer on that exact seam** — E12 shipped it so a trait's bound
-`stat.derived` atoms merge at compose time. An equipment producer is **the same shape**, reading the
-projection module 4 builds rather than a trait catalog. That is what makes W2 a wiring gap and not an
-architectural limit.
+`BattleStatComposer` folds equipment via `EquipAtomSource` (production: `EquippedBoundAtoms`).
+`ChannelMods` remains the caller's additive overlay list — not a substitute for equip.
 
 ### Lawn — the executor already exists
 

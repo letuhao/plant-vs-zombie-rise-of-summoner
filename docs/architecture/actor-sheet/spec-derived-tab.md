@@ -17,7 +17,8 @@
    because the catalog is ~30 families; that count is expected.
 3. **Expand × join is the contract.** Combat (and other expand) families expand over the injected
    element axis the same way the registry generator does (omni + concrete elements). The FE joins
-   expanded catalog channel ids to `GET /api/actors/{id}/derived` `snapshot.Channels`. Sparse /
+   expanded catalog channel ids to `GET /api/actors/{id}/sheet` (preferred for InspectSplit) or lean
+   `GET /api/actors/{id}/derived` — both ship contributions + `composeKind`. Sparse /
    missing live values use the six render states (`no-producer`, unchanged, …) — they do not invent
    magnitudes.
 4. Six render states only + closed `UnitClass` ledger — no third classification.

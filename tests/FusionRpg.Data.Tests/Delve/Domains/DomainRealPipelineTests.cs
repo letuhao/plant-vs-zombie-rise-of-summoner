@@ -200,9 +200,18 @@ public class DomainRealPipelineTests : IDisposable
         // ALL FIVE delegated rows (4-8) before checking the combined count, so a domain that fails
         // BOTH row 6 (encounter) and row 7 (event) reports both refusals in one pass, not just the
         // first — a real, independent DOUBLE confirmation of two previously-separately-proven content
-        // gaps (D4.17 row 6's threat-audit corpus thinness; row 7's event-pool-authoring-depth gap,
-        // "every curio archetype has only 1 pool entry against events.noRepeatRooms=3"), now shown
-        // together, through the real production writer, for the first time.
+        // gaps (D4.17 row 6's threat-audit corpus thinness; row 7's event-pool-authoring-depth gap).
+        //
+        // Row 7's OWN shape changed 2026-09-08 (D4.17 row 7's cell-headroom fix): `curio`/`shrine`/
+        // `trap`/`merchant`/`rest`/`unknown` archetypes were widened to the full already-shipped
+        // same-kind event corpus (8 distinct themes each, well clear of `events.noRepeatRooms=3`) --
+        // zero new content generated, a room-content completeness fix over content that already
+        // existed. The refusal now traces to `wild`-kind archetypes instead: the whole shipped corpus
+        // has only 2 distinct-theme `story`-kind events, structurally below the >3 floor, and nothing
+        // already-shipped is left to widen with -- closing it needs NEW `story` content, which
+        // `dungeon-event`'s own D1.10 entry already named as blocked on undecided multi-chapter
+        // "sequencing infrastructure," not attempted here for that reason (see
+        // `DomainEventPreflightBridgeTests.cs`'s own updated doc comment for the full trail).
         var refusedDomainIds = outcome.Refusals.Select(r => r.DomainId).Distinct(StringComparer.Ordinal).ToList();
         Assert.Equal(domains.Select(d => d.DomainId).OrderBy(x => x, StringComparer.Ordinal),
             refusedDomainIds.OrderBy(x => x, StringComparer.Ordinal));
@@ -213,9 +222,15 @@ public class DomainRealPipelineTests : IDisposable
         // this run actually produces, asserted exactly rather than loosely.
         foreach (var domainId in domains.Select(d => d.DomainId))
         {
-            var rulesForDomain = outcome.Refusals.Where(r => r.DomainId == domainId).Select(r => r.Rule).ToList();
-            Assert.Contains(rulesForDomain, r => r.StartsWith("domain.encounter:", StringComparison.Ordinal));
-            Assert.Contains(rulesForDomain, r => r == "domain.event:cell-headroom");
+            var domainRefusals = outcome.Refusals.Where(r => r.DomainId == domainId).ToList();
+            Assert.Contains(domainRefusals, r => r.Rule.StartsWith("domain.encounter:", StringComparison.Ordinal));
+            // Proves the fixed shape, not just the rule name: the cell-headroom refusal now names
+            // `wild` (never `curio`/`shrine`/`trap`/`merchant`/`rest`/`unknown` — all six widened
+            // 2026-09-08) -- if a future content change silently regresses the widening, this line
+            // catches it by naming the wrong kind, not just by losing the refusal entirely.
+            var cellHeadroom = domainRefusals.SingleOrDefault(r => r.Rule == "domain.event:cell-headroom");
+            Assert.NotNull(cellHeadroom);
+            Assert.Contains("kind=wild", cellHeadroom!.Detail);
         }
     }
 

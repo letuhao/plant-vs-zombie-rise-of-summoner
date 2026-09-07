@@ -226,8 +226,8 @@ honestly claim to explain a number.
 
 > **What it cannot show yet, and must say so.** Four producers write derived channels today with **no
 > registered subsystem row** — patron, stars, injuries, and contracts
-> ([actor-hub-ssot.md §6.1](../architecture/actor-hub-ssot.md)). Until `stat.derived` lands and they
-> adopt it, their contributions arrive **unattributed**. The detail view renders those as
+> ([actor-hub-ssot.md §6.1](../architecture/actor-hub-ssot.md)). The `stat.derived` kind **has landed**;
+> until those four producers adopt it, their contributions arrive **unattributed**. The detail view renders those as
 > *"from your pact"* / *"from an injury"* where the producer is knowable and **an explicit
 > `unattributed` row where it is not** — never silently folded into the total, which would make the
 > list not add up with no explanation.

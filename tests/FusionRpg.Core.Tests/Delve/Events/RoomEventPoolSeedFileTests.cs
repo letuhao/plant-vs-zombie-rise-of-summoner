@@ -28,8 +28,14 @@ public class RoomEventPoolSeedFileTests
     [Fact]
     public void A_real_rest_room_resolves_to_its_own_real_non_empty_eventPool()
     {
+        // D4.17 row 7's own cell-headroom fix (party-dungeon-todo.md, 2026-09-08) widened every
+        // real `rest` room's pool from its original single entry to the full 10-entry
+        // `encounter-event`-kind corpus (8 distinct themes) -- content-completeness, not a code
+        // change; `event.encounter-event-demon.dolldiamond-001` (this test's own original pin) is
+        // still a member, just no longer the sole one.
         var pools = RoomEventPoolSeedFile.LoadAll(DungeonTestFiles.RoomsDir());
-        Assert.Equal(new[] { "event.encounter-event-demon.dolldiamond-001" }, pools["room.rest-none-002"]);
+        Assert.Contains("event.encounter-event-demon.dolldiamond-001", pools["room.rest-none-002"]);
+        Assert.True(pools["room.rest-none-002"].Count > 3, "rest pool must clear events.noRepeatRooms (3)");
     }
 
     [Fact]

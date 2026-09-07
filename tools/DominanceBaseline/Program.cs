@@ -166,10 +166,10 @@ if (wantGeared)
         .OrderBy(a => a.AtomId, StringComparer.Ordinal)
         .ToArray();
 
-    // Production shape, verbatim: EquipAtomSource.FromResolver's own documented contract is
-    // `specimenId => store.ResolveBindings(OwnerScope.UniqueActor(specimenId), ctx).AtomsByBinding`
-    // flattened. This tool substitutes the store with the shipped corpus and keeps everything else --
-    // the specimen keying, the kind filter, the param parse, the op parse -- as module 5 built it.
+    // Legacy flatten via FromResolver (equip:unknown:{atomId}) — NOT the Server Program.cs path.
+    // Production battle uses EquippedBoundAtoms.SourceFromStore → FromEquippedResolver
+    // (equip:{role}:{itemRef}). This tool substitutes the store with the shipped corpus and keeps
+    // specimen keying / kind filter / param parse as module 5 built it.
     var specimenOf = Enumerable.Range(0, roster.Length)
         .ToDictionary(i => $"specimen-corner-{i}", i => i, StringComparer.Ordinal);
     var equip = EquipAtomSource.FromResolver(specimenId =>

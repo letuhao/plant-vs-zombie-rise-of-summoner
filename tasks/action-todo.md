@@ -2984,28 +2984,10 @@ tested, and verified for real, not re-deferred.
   confirmed remaining boundary (not this finding's own scope): a dispatched runner atom needs a
   registered `EffectDef` — E19's own already-named scope, proven via a real thrown exception. Full
   trace: `action-plan.md` §4b, `action-todo.md` §16.
-- [x] **`equip-atom-source-not-wired`** — **FIXED 2026-09-07.** Found 2026-09-06 while investigating
-  A24: `BattleStatComposer.UseEquipment` had zero production callers — only
-  `tests/FusionRpg.Core.Tests/Battle/EquipRuntimeTests.cs` ever called it, so an equipped item's
-  `stat.derived` atoms never reached a live battle. Originally deferred as "adjacent, item/equip-runtime
-  program's own scope" — that framing was this session's own unverified characterization, not audit
-  text, and was challenged and re-investigated rather than re-asserted: `EquipAtomSource`/
-  `BattleStatComposer` live entirely in `Core/Battle/`, this program's own territory, and the
-  production resolver shape was already spelled out on `EquipAtomSource.FromResolver`'s own doc
-  comment. Fixed in `Program.cs`, wired once at boot (matching `RungPolicy.Configure`'s established
-  pattern): `BattleStatComposer.UseEquipment(EquipAtomSource.FromResolver(instanceId =>
-  store.ResolveBindings(new OwnerScope(OwnerKind.UniqueActor, instanceId), ...).AtomsByBinding`
-  flattened`))`. Proven end-to-end in `BuildSquadEquippedActionsTests.cs`
-  (`A_real_equipped_items_atom_reaches_BattleStatComposer_through_the_real_production_resolver`) via
-  `RpgStore.ProduceAndBind` — the SAME primitive the real equip path
-  (`ReconcileUniqueEquipmentAtomBindingsUnlocked`) calls internally, confirmed by reading it directly
-  (`RpgStore.UniqueActors.cs:1432`) — binding a well-formed `stat.derived` atom to a real `UniqueActor`
-  owner scope and asserting exact arithmetic (`bare.Get(channel) + amount == geared.Get(channel)`).
-  **Named, separate, remaining content gap:** every real catalogued item today
-  (`data/seed/containers/unique-equip.json`) wraps a `stat.modify` atom, never `stat.derived` — no
-  shipped item exercises this seam through the full `UpsertUniqueEquipment` round trip yet, so the test
-  binds through `ProduceAndBind` directly, exactly as A25 authors a synthetic triggered atom because no
-  real seed atom is triggered yet. Full trace: `action-plan.md` §5.
+- [x] **`equip-atom-source-not-wired`** — **FIXED 2026-09-07; production path corrected 2026-09-08.**
+  Server boot: `EquippedBoundAtoms.SourceFromStore` → `FromEquippedResolver` (`equip:{role}:{itemRef}`).
+  Legacy `FromResolver` remains for tests/tools only. Content gap: catalog mostly `stat.modify`.
+  Full historical trace of the first wire: `action-plan.md` §5.
 
 ---
 

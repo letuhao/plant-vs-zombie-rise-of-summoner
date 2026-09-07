@@ -12,7 +12,7 @@ One Hot compose gate (`ActorHub`) for actor combat / derived / AppliedCombat. Ev
 
 0. Audit artifact (this session) — done in research + this pair.
 1. ADR + DESIGN-GATE + SPEC skill + SourceId grammar appendix.
-2. CI `guard-actor-hub.ps1` + GameHooks / SimEngine refactor onto Hub; Server fan-in = equip + tree + grants + aptitude + progression.
+2. CI `guard-actor-hub.ps1` + GameHooks / SimEngine refactor onto Hub; Server fan-in = equip + tree + aptitude + progression (grants stay Injector).
 3. `GET /api/actors/{id}/sheet` — Cold + Hub with contributions + fiction labels + composeKind.
 4. FE consumes sheet contributions as presentation only (follow-on; not blocking gate).
 
