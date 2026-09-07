@@ -6,18 +6,25 @@
  * literal quoted copy, reused here verbatim, not reworded) — and a resume that "replays the recorded
  * prefix, then goes live" again.
  *
- * **This module is deliberately NOT `Pending<T>`-shaped**, unlike every other real-but-unproduced field
- * in this program (`FightView`, `MemberView.nerveStage`, `DelveView.quests`, …). `Pending` means "a real
- * wire field with no adapter wired to it yet" — every one of those types is declared in
- * `contract/types.ts` because a concrete C# producer exists somewhere, even if no route serves it.
- * Connection state has no such producer anywhere in this codebase: `D2.16` (`tasks/party-dungeon-
- * todo.md`) found the concurrency primitive a live mid-battle pause/resume would need "has never been
- * built ANYWHERE in this codebase," not just unwired for party-dungeon, and `D5.11` (the SignalR client
- * itself) is correctly, honestly still blocked on that same finding. Modelling this as a wire-shaped
- * `Pending<ConnectionStateView>` would misstate the gap as "the server has this, nobody read it yet" —
- * it does not have it yet, at any layer. A plain, local, presentation-only status type is the honest
- * shape: a real, tested display component that any future live-session client can feed a value into,
- * with no contract-layer claim about a producer that does not exist.
+ * **This module is deliberately NOT `Pending<T>`-shaped** — unchanged by D5.11's 2026-09-08 live-push
+ * wave, but the REASON is now narrower, not "no producer exists yet." `Pending<T>` models a WIRE
+ * SNAPSHOT field with no adapter wired to it yet (`FightView`, `MemberView.nerveStage`,
+ * `DelveView.quests`, …) — every one of those types is declared in `contract/types.ts` because a
+ * concrete C# producer exists somewhere and the missing piece is a route or a mapping.
+ *
+ * A real producer for a live delve fight's session state now DOES exist end to end:
+ * `DelveBattleSession`'s own hooks (`onDeclared`/`onFrozen`/`onTurnStarted`,
+ * `src/FusionRpg.Server/DelveBattleSession.cs`) push real SignalR messages
+ * (`src/FusionRpg.Server/DelveLivePush.cs`'s `DelveLiveEventNames`), `stages/delve/liveSession.ts`
+ * subscribes to them, and `session.ts`'s `sessionReducer` folds them into exactly this status. But
+ * `DelveConnectionStatus` is the OUTPUT of that live reducer, not a field on any fetched DTO — there is
+ * no `GET` snapshot this value could ever be "pending" inside, because it only exists while a live
+ * session is actually running, computed by folding a stream of events rather than read from a document.
+ * Modelling it as `Pending<ConnectionStateView>` would still misstate the shape — not "the server has
+ * this, nobody read it yet" (true once, no longer) but "this is derived client state, not a snapshot
+ * field, regardless of whether a producer exists." A plain, local, presentation-only status type stays
+ * the honest shape: a real, tested display component fed by `sessionReducer`'s own output, with no
+ * contract-layer claim about a REST snapshot field that was never the right frame for it.
  */
 export type DelveConnectionStatus = "live" | "reconnecting" | "frozen" | "offline";
 

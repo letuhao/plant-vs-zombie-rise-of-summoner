@@ -22,7 +22,10 @@ def gem_answer_schema(*, elemental: bool = False) -> dict:
     properties: dict = {
         BLOCKED_FIELD: {"type": "string"},
         "name": {"type": "string", "minLength": 1, "maxLength": 40},
-        "nameKey": {"type": "string", "pattern": emit.NAME_KEY_RE.pattern},
+        # ⛔ maxLength added 2026-09-08: same class of gap as setgen/schema.py's nameKey (a real
+        # incident there) — `pattern` alone is not enforced at decode time, so without a length
+        # bound this field was unconstrained during generation.
+        "nameKey": {"type": "string", "pattern": emit.NAME_KEY_RE.pattern, "maxLength": 80},
     }
     if elemental:
         elements = sorted(registries.load_vocabularies()["element"])

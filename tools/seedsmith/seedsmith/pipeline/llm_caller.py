@@ -43,6 +43,15 @@ class LlmCallerConfig:
     attempts: int = 2               # hammering a wedged local queue with retries makes it worse
     retry_delay: float = 3.0
     max_heal: int = 3
+    #: ⛔ Real incident, 2026-09-08: a quantized local model degenerated into a repeated-token
+    #: loop inside a schema field whose only constraint was a `pattern` (JSON Schema `pattern` is
+    #: not supported by llama.cpp's grammar-from-schema converter, so it is unenforced at decode
+    #: time — see `call_model`'s own `schema` docstring) and no `maxLength` — every request before
+    #: this field existed had NO upper bound on response length at all, so the loop ran past 20K+
+    #: tokens with nothing to stop it short of the model's full context window. This is a second,
+    #: independent safety net at the transport layer — it bounds every call regardless of whether
+    #: a caller's own schema happens to cap every field.
+    max_tokens: int = 16384
 
 
 DEFAULT_CONFIG = LlmCallerConfig()
@@ -58,6 +67,7 @@ _ENV_KEYS: "dict[str, tuple[str, type]]" = {
     "SEEDSMITH_LLM_ATTEMPTS": ("attempts", int),
     "SEEDSMITH_LLM_RETRY_DELAY": ("retry_delay", float),
     "SEEDSMITH_LLM_MAX_HEAL": ("max_heal", int),
+    "SEEDSMITH_LLM_MAX_TOKENS": ("max_tokens", int),
 }
 
 
@@ -107,6 +117,7 @@ def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = Non
         "attempts": section.get("attempts", base.attempts),
         "retry_delay": section.get("retry_delay", base.retry_delay),
         "max_heal": section.get("max_heal", base.max_heal),
+        "max_tokens": section.get("max_tokens", base.max_tokens),
     }
 
     dotenv_path = dotenv_path or Path(".env")
@@ -122,6 +133,14 @@ def load_config(toml_path: Path | None = None, *, dotenv_path: Path | None = Non
 def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONFIG,
                temperature: float = 0.2, schema: "dict | None" = None) -> str:
     """Call a local OpenAI-compatible chat endpoint with reasoning disabled.
+
+    `max_tokens` (`config.max_tokens`, default 16384) is sent on every call. This is NOT the same
+    protection as `schema`'s `maxLength`/`pattern` constraints — those bound one FIELD; this bounds
+    the WHOLE response, and it is the only thing that stops a degenerate generation (a quantized
+    model stuck repeating a short token cycle) once it starts, since llama.cpp's grammar-from-schema
+    converter does not enforce `pattern` at decode time (a `type: string` field with only a
+    `pattern`, no `maxLength`, is otherwise completely unbounded — the real cause of a 2026-09-08
+    incident where a `nameKey` field ran past 20K tokens with no `max_tokens` sent at all).
 
     Two redundant fields are sent on every call because different servers/templates read
     different keys: `reasoning_effort` is the OpenAI-style field some servers honor directly;
@@ -145,6 +164,7 @@ def call_model(system: str, user: str, *, config: LlmCallerConfig = DEFAULT_CONF
     """
     payload = {
         "model": config.model, "temperature": temperature,
+        "max_tokens": config.max_tokens,
         "reasoning_effort": "none",
         "chat_template_kwargs": {"enable_thinking": False, "thinking": False},
         "messages": [{"role": "system", "content": system},

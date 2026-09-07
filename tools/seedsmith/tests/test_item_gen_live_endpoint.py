@@ -28,6 +28,7 @@ import tempfile
 import threading
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -233,13 +234,54 @@ class LiveEndToEndTests(unittest.TestCase):
 
     def test_no_model_flag_falls_back_to_llm_callers_own_default_not_the_metadata_sentinel(self):
         """`--model` defaults to `"unrecorded"` for the --answers metadata-only path; going live
-        without --model must not send that sentinel to the endpoint as a real model id."""
+        without --model must not send that sentinel to the endpoint as a real model id.
+
+        Isolated from this machine's own `tools/seedsmith/.env` (patches `load_config` to return
+        the plain built-in default) — otherwise this test's result would depend on whatever model
+        a developer happens to have configured locally, which is exactly the kind of ambient-state
+        leak `test_dot_env_model_reaches_the_wire_when_no_model_flag_is_passed` below exists to
+        prove is now respected rather than silently ignored."""
         self.server.queue(json.dumps(_clean_set_answer()))
         with tempfile.TemporaryDirectory() as tmp:
             plan = _set_plan()
             args = _write_args(endpoint=self.server.url, out_dir=str(Path(tmp) / "out"))
-            cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+            with patch("seedsmith.pipeline.llm_caller.load_config", return_value=DEFAULT_CONFIG):
+                cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
         self.assertEqual(self.server.requests[0]["model"], DEFAULT_CONFIG.model)
+
+    def test_dot_env_model_reaches_the_wire_when_no_model_flag_is_passed(self):
+        """⛔ Real bug, found 2026-09-08 from a live run: `_cmd_items_write` used to build
+        `LlmCallerConfig(endpoint=..., model=...)` directly, NEVER calling `load_config()` — a
+        real `.env` (`SEEDSMITH_LLM_MODEL=meta/muse-glimmer`) had zero effect on this path; the
+        live call always used `google/gemma-4-26b-a4b-qat` (`LlmCallerConfig`'s hardcoded
+        default) regardless. Proven fixed: a `load_config()` that returns a distinct model (and a
+        distinct `max_tokens`, the other field this same bug silently dropped) is honored end to
+        end through the real HTTP request, with no `--model` flag involved."""
+        self.server.queue(json.dumps(_clean_set_answer()))
+        configured = LlmCallerConfig(endpoint="http://unused-because-endpoint-overrides-it",
+                                      model="meta/muse-glimmer", max_tokens=777)
+        with tempfile.TemporaryDirectory() as tmp:
+            plan = _set_plan()
+            args = _write_args(endpoint=self.server.url, out_dir=str(Path(tmp) / "out"))
+            with patch("seedsmith.pipeline.llm_caller.load_config", return_value=configured):
+                exit_code = cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+        self.assertEqual(exit_code, cli_mod.EXIT_CLEAN)
+        self.assertEqual(self.server.requests[0]["model"], "meta/muse-glimmer")
+        self.assertEqual(self.server.requests[0]["max_tokens"], 777)
+
+    def test_explicit_model_flag_still_overrides_dot_env(self) -> None:
+        """`--model` is the more specific instruction and must win over whatever `load_config()`
+        returns — the fix must not make `.env` unconditionally override an operator's explicit
+        flag."""
+        self.server.queue(json.dumps(_clean_set_answer()))
+        configured = LlmCallerConfig(endpoint="http://unused", model="meta/muse-glimmer")
+        with tempfile.TemporaryDirectory() as tmp:
+            plan = _set_plan()
+            args = _write_args(endpoint=self.server.url, model="explicit/on-the-cli",
+                               out_dir=str(Path(tmp) / "out"))
+            with patch("seedsmith.pipeline.llm_caller.load_config", return_value=configured):
+                cli_mod._cmd_items_write(args, plan=plan, tuning=TUNING, vocabulary=VOCAB)
+        self.assertEqual(self.server.requests[0]["model"], "explicit/on-the-cli")
 
     def test_answers_file_still_works_unchanged_and_is_preferred_over_endpoint(self):
         """`ReplayTransport`/`--answers` must stay fully functional — the deterministic path this

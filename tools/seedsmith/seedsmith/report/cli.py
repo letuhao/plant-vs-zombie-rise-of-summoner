@@ -599,11 +599,13 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
     already use — and it makes `--answers` optional, not `--out-dir`: a write still needs somewhere
     to land. Only when NEITHER transport is named does this refuse, the same safety net as before.
     """
+    import dataclasses
+
     from ..adapters.items.setgen import authored as authored_mod
     from ..adapters.items.setgen import answers as answers_mod
     from ..adapters.items.setgen import run as run_mod
     from ..adapters.items.setgen import seedfile as seedfile_mod
-    from ..pipeline.llm_caller import DEFAULT_CONFIG, LlmCallerConfig
+    from ..pipeline.llm_caller import load_config
 
     if not args.out_dir:
         print("seedsmith: --write is refused — no --out-dir given; a write needs somewhere to "
@@ -644,9 +646,18 @@ def _cmd_items_write(args: argparse.Namespace, *, plan, tuning, vocabulary) -> i
         # an answer file exists.
         answers = answers_mod.AnswerFile(kind=args.kind, population=args.population,
                                          prompt_version=_prompt_version(), by_subject={})
+        # ⛔ Real bug, found 2026-09-08: this used to build `LlmCallerConfig(endpoint=..., model=...)`
+        # directly, which NEVER called `load_config()` — every `.env`/`seedsmith.toml` override
+        # (model, timeout, attempts, retry_delay, max_heal, max_tokens) was silently ignored on this,
+        # the actual live-generation path, no matter what was set. `--model unrecorded` (the CLI's own
+        # not-passed sentinel) fell back to `LlmCallerConfig`'s hardcoded dataclass default, not to
+        # `.env`. Fixed: `load_config()` is now the base, and only `--endpoint`/`--model` (when the
+        # operator actually passed them) override it — every other `.env`/toml-set field survives.
+        base_config = load_config()
         effective_model = (args.model if args.model and args.model != "unrecorded"
-                           else DEFAULT_CONFIG.model)
-        call = run_mod.live_caller(LlmCallerConfig(endpoint=args.endpoint, model=effective_model))
+                           else base_config.model)
+        config = dataclasses.replace(base_config, endpoint=args.endpoint, model=effective_model)
+        call = run_mod.live_caller(config)
 
     ledger_path = Path(args.ledger) if args.ledger else out_dir / "set-charm-gen.ledger.json"
     result = authored_mod.run_batch(

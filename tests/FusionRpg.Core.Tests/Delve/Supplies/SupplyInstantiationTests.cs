@@ -29,13 +29,16 @@ public class SupplyInstantiationTests
     static AtomRow? Lookup(string atomId) => Catalog.TryGetValue(atomId, out var a) ? a : null;
     static AffixRow? LookupAffix(string _) => null;
 
-    // D27 (ConsumableDef.cs:201, ConsumableContainerKindAvailable = false, spec's own "External,
-    // gating" citation): there is no dedicated ContainerKind.Consumable yet, so a real consumable
-    // container today stands in as ContainerKind.Item -- "item." is the prefix its own grammar requires.
+    // D27/F3 CLOSED 2026-09-08 (X7 "container-kind-expansion" landed 2026-09-07,
+    // ConsumableDef.cs:230 ConsumableContainerKindAvailable = true): ContainerKind.Consumable is now
+    // real, prefix "consumable" (ContainerRow.PrefixOf). SupplyInstantiation.Concrete itself never
+    // branched on Kind (confirmed by reading it -- a plain pass-through to Instantiator.TryInstantiate),
+    // so this fixture update is pure test-quality: proving the real, now-available kind works, rather
+    // than perpetually exercising the ContainerKind.Item stand-in this file used before the kind existed.
     static ContainerRow Container() => new()
     {
-        ContainerId = "item.ration",
-        Kind = ContainerKind.Item,
+        ContainerId = "consumable.ration",
+        Kind = ContainerKind.Consumable,
         PrefixRolls = 0,
         Atoms = new List<ContainerAtomRow> { new(1, AtomRow.DeriveId("atom.ration-restore", "", 1)) },
         Pool = new List<ContainerPoolRow>(),
@@ -64,7 +67,7 @@ public class SupplyInstantiationTests
             Container(), Lookup, LookupAffix, delveSeed: 12345, SupplyStreams.Drop(2, 0, 0), ThetaRoom, Tuning, 0, out var instance);
         Assert.True(r.IsOk, r.ToString());
         Assert.NotNull(instance);
-        Assert.Equal("item.ration", instance!.ContainerId);
+        Assert.Equal("consumable.ration", instance!.ContainerId);
         Assert.NotEqual(0L, instance.RollSeed);
     }
 

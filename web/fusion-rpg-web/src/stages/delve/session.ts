@@ -6,22 +6,20 @@ import type { DelveConnectionStatus } from "./hud/connectionState";
  * carries by name: `Three_timeouts_freeze_and_say_so`, `Reconnect_replays_then_goes_live`,
  * `Closing_the_fight_panel_is_not_a_retreat`, `Leaving_the_stage_resolves_nothing`).
  *
- * **What this file deliberately is NOT: a SignalR client.** `RpgHub.cs`'s own `steer` / `declare` /
- * `freeze` / `resume` hub methods (`spec-delve-battle-profile.md:296`) do not exist yet — confirmed by
- * reading `RpgHub.cs`, `DelveBattleEndpoints.cs` (absent) and `contract/types.ts`'s own `FightView` doc
- * comment ("no SignalR message shape for a live delve fight exists anywhere"). D2.16 (the server-side
- * primitive this client would connect to) is separately, honestly still blocked pending an owner
- * decision on the freeze mechanism (`tasks/party-dungeon-todo.md`'s own 2026-09-08 correction). Wiring
- * a transport against a wire contract that does not exist would be fabricating the contract, which this
- * task was explicitly told not to do.
+ * **What this file deliberately is NOT, and never was: a SignalR client.** This module is the pure
+ * reducer half only — no transport, no timers, no `Date.now()`. That split is now proven out, not just
+ * planned: `stages/delve/liveSession.ts` (built 2026-09-08, once D2.16's server-side session primitive
+ * and its own live-push wave landed — `RpgHub.cs`'s real `Steer`/`Declare` calls plus
+ * `DelveLiveEventNames`'s real SignalR pushes) is the actual transport, feeding this reducer real
+ * `SessionEvent`s via `dispatch` — and nothing in THIS file changed to receive that wiring, exactly as
+ * planned below.
  *
- * **What is safely buildable without that wire contract: the pure reducer.** Every real precedent in
- * this program splits "the state a UI renders from" (a reducer, tested with plain objects) from "the
- * transport that feeds it" (a hook wired later, untestable without a live server) —
- * `delveSelection.ts`/`delveSelectionReducer` is the closest sibling shape, and `lib/bus/delve.ts`'s own
- * hooks are the closest "transport is a separate concern" precedent. This module is that reducer half
- * for the live fight session; a future task feeds it real `SessionEvent`s from an actual SignalR
- * connection via `dispatch` calls — nothing here changes to receive that wiring.
+ * **What was safely buildable before that wire contract existed: this pure reducer.** Every real
+ * precedent in this program splits "the state a UI renders from" (a reducer, tested with plain objects)
+ * from "the transport that feeds it" (a hook wired separately) — `delveSelection.ts`/
+ * `delveSelectionReducer` is the closest sibling shape, and `lib/bus/delve.ts`'s own hooks are the
+ * closest "transport is a separate concern" precedent. `liveSession.ts` is that transport now; see its
+ * own doc comment for the exact wire-message-to-`SessionEvent` mapping.
  *
  * **Status is not reinvented.** `hud/connectionState.ts`'s `DelveConnectionStatus` (`"live" |
  * "reconnecting" | "frozen" | "offline"`) already exists, is already rendered by

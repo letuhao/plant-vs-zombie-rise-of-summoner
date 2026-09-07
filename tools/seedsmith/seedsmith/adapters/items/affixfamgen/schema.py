@@ -35,7 +35,10 @@ NAME_KEY_PATTERN = r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$"
 def _identity_fields() -> "dict[str, Any]":
     return {
         "name": {"type": "string", "minLength": 3, "maxLength": 48},
-        "nameKey": {"type": "string", "pattern": NAME_KEY_PATTERN},
+        # ⛔ maxLength added 2026-09-08: same class of gap as setgen/schema.py's nameKey (a
+        # real incident there) — `pattern` alone is not enforced at decode time, so without a
+        # length bound this field was unconstrained during generation.
+        "nameKey": {"type": "string", "pattern": NAME_KEY_PATTERN, "maxLength": 96},
         "displayTemplate": {"type": "string", "minLength": 3, "maxLength": 160},
     }
 

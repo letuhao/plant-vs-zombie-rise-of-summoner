@@ -74,7 +74,11 @@ def _identity_fields() -> "dict[str, Any]":
                            "sentence — no mechanics, no number.",
         },
         "nameKey": {
-            "type": "string", "pattern": NAME_KEY_PATTERN,
+            # ⛔ maxLength added 2026-09-08: same class of gap as setgen/schema.py's nameKey (a
+            # real incident there) — `pattern` alone is not enforced at decode time, so without a
+            # length bound this field was unconstrained during generation. `tree.node.` (10 chars)
+            # plus `name`'s own 64-char budget as a kebab slug, with headroom.
+            "type": "string", "pattern": NAME_KEY_PATTERN, "maxLength": 96,
             "description": "Lowercase-kebab key, `tree.node.<slug>`. It is NOT free text and it "
                            "is NOT the node id — the plan already minted that. Derive <slug> from "
                            "the `name` you just chose above (e.g. name \"Primal Surge\" -> slug "

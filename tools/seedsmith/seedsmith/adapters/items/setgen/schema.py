@@ -44,7 +44,13 @@ def threshold_pieces(tuning: SetCharmGenTuning,
 def _identity_fields() -> "dict[str, Any]":
     return {
         "name": {"type": "string", "minLength": 3, "maxLength": 48},
-        "nameKey": {"type": "string", "pattern": r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$"},
+        # ⛔ maxLength added 2026-09-08: `pattern` alone is NOT decode-time-enforced (llama.cpp's
+        # grammar-from-schema converter does not support it), so without a length bound this field
+        # was completely unconstrained at generation time — the real cause of an incident where a
+        # quantized model looped past 20K tokens inside it. `name`'s own 48 plus headroom for a
+        # dotted/kebab-cased id derived from it.
+        "nameKey": {"type": "string", "pattern": r"^[a-z][a-z0-9]*(\.[a-z0-9]+(-[a-z0-9]+)*)+$",
+                    "maxLength": 96},
         "flavor": {"type": "string", "minLength": 8, "maxLength": 400},
     }
 

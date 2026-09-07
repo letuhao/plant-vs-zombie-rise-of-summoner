@@ -102,6 +102,18 @@ class ReasoningDisabledTests(unittest.TestCase):
                 {"enable_thinking": False, "thinking": False},
             )
 
+    def test_max_tokens_sent_on_every_call_using_the_configured_value(self) -> None:
+        """⛔ Real incident, 2026-09-08: no `max_tokens` was ever sent, so a degenerate local-model
+        response (a quantized model stuck repeating a short token cycle inside an unconstrained
+        string field) had no upper bound short of the model's own context window — one real run
+        ran past 20K tokens. This is the transport-level safety net, independent of any per-field
+        schema constraint."""
+        self.server.queue('{"a": "1"}')
+        call_model("sys", "user", config=LlmCallerConfig(endpoint=self.server.url,
+                                                          attempts=1, retry_delay=0,
+                                                          max_tokens=777))
+        self.assertEqual(self.server.requests[0]["max_tokens"], 777)
+
     def test_call_model_returns_message_content(self) -> None:
         self.server.queue('{"hello": "world"}')
         result = call_model("sys", "user", config=self.config)
@@ -267,6 +279,17 @@ class LoadConfigTests(unittest.TestCase):
         # everything NOT set in the file falls back to the default, not to zero/None
         self.assertEqual(cfg.model, DEFAULT_CONFIG.model)
         self.assertEqual(cfg.attempts, DEFAULT_CONFIG.attempts)
+
+    def test_max_tokens_overridable_from_toml_and_dotenv(self) -> None:
+        toml_path = self.tmp / "seedsmith.toml"
+        toml_path.write_text('[pipeline.llm_caller]\nmax_tokens = 2048\n', encoding="utf-8")
+        cfg = load_config(toml_path, dotenv_path=self.no_dotenv)
+        self.assertEqual(cfg.max_tokens, 2048)
+
+        dotenv_path = self.tmp / ".env"
+        dotenv_path.write_text("SEEDSMITH_LLM_MAX_TOKENS=512\n", encoding="utf-8")
+        cfg = load_config(toml_path, dotenv_path=dotenv_path)
+        self.assertEqual(cfg.max_tokens, 512)  # .env wins over toml, same as every other key
 
     def test_malformed_toml_raises_rather_than_silently_defaulting(self) -> None:
         path = self.tmp / "seedsmith.toml"

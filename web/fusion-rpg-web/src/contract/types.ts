@@ -1256,14 +1256,28 @@ export type SupplyView = {
 };
 
 /**
- * **No adapter exists for this type.** Confirmed: no SignalR message shape for a live delve fight
- * exists anywhere (`RpgHub.cs`, the repo's only `Hub`-derived class, carries zero delve/battle-session
- * messages); no "strike feed" DTO exists (`BattleTrace` is a debug/golden-hash replay log, not a
- * structured live-UI feed); `dwell.inputWindowMs`/`afkTimeoutMs` are read nowhere in code (confirmed
- * by grep, and independently named as drift already in `spec-delve-battle-profile.md:256`). The real
- * primitives that exist (`BattleSession`, `DecisionTrace`, `ScheduledEvent`/`TurnOrderForecast`) are
- * low-level session/timeline plumbing, not a delve-fight view shape — assembling one here would be
- * inventing the missing session message this adapter layer cannot decide on its own.
+ * **No REST adapter exists for this type — still true after D5.11's 2026-09-08 live-push wave, though
+ * the reason is narrower now.** What changed and what did not, checked fresh against the working tree:
+ *
+ * - `RpgHub.cs` no longer "carries zero delve/battle-session messages" — it now has real CLIENT→SERVER
+ *   calls (`Steer`, `Declare`, built by D2.16) AND real SERVER→CLIENT pushes (`DelveDeclared`,
+ *   `DelveFightFrozen`, `DelveTurnStarted`, `DelveResumed`, `DelveReplayConsumed` — the wire vocabulary
+ *   `src/FusionRpg.Server/DelveLivePush.cs` names and `stages/delve/liveSession.ts` now consumes).
+ * - What is STILL true: this type is populated by `adaptDelve` from a single REST snapshot
+ *   (`GET /api/delve/{delveId}`, `DelveResponseDto`) that carries no delve-battle-session field and no
+ *   `matchKey` correlating a room to a live fight — `adaptDelve` has no way to know which room's live
+ *   session (if any) to read, let alone subscribe to. Wiring `dwellRemaining`/`frozen` to the real
+ *   pushes above would mean composing this one-shot REST snapshot with a live SignalR subscription keyed
+ *   by a `matchKey` this DTO does not carry — a UI-wiring task (the still-unbuilt live `FightInputPanel`
+ *   consumer that would actually hold a `matchKey`), not a one-line adapter fix, and out of this wave's
+ *   scope (`liveSession.ts`'s own doc comment: "transport layer only... does NOT wire a real UI
+ *   consumer").
+ * - `initiative`/`strikeFeed` remain genuinely unproduced, unchanged by this wave: no "strike feed" DTO
+ *   exists anywhere (`BattleTrace` is a debug/golden-hash replay log, not a structured live-UI feed).
+ *
+ * The real primitives this adapter would need (`DelveBattleSession`, `DecisionTrace`,
+ * `DelveBattleSessionManager`) are session/timeline plumbing one layer below a delve-fight VIEW shape —
+ * assembling one here would still be inventing the missing composition, not reading a field that exists.
  */
 export type FightView = {
   dwellRemaining: Pending<Magnitude>; // milliseconds
